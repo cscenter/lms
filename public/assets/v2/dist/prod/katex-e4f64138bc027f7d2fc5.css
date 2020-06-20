@@ -1,121 +1,121 @@
 /* stylelint-disable font-family-no-missing-generic-family-keyword */
 @font-face {
   font-family: 'KaTeX_AMS';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/d4531cf7ff335a5e1d2c2caa803e2592.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/b1489df1556f8c6612594025ccdca2b0.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/f80d9eaff7bad6dad7396a98fc016ce2.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/d4531cf7ff335a5e1d2c2caa803e2592.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/b1489df1556f8c6612594025ccdca2b0.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/f80d9eaff7bad6dad7396a98fc016ce2.ttf) format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Caligraphic';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/f046a374a80bb69ba397ad705f607490.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/7ce7636b90003f983253ab36004ed376.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/0c96bc8fe7861c576cfee97fd1af3b2d.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/f046a374a80bb69ba397ad705f607490.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/7ce7636b90003f983253ab36004ed376.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/0c96bc8fe7861c576cfee97fd1af3b2d.ttf) format('truetype');
   font-weight: bold;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Caligraphic';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/4519ba4c9ee4f9b689505e396b96d93c.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/4a559f36cc9a9ff50a2a5d8f8c7e5d07.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/35f3c951b5a1044753e0eb4183d55103.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/4519ba4c9ee4f9b689505e396b96d93c.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/4a559f36cc9a9ff50a2a5d8f8c7e5d07.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/35f3c951b5a1044753e0eb4183d55103.ttf) format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Fraktur';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/5b8749ee09f3aa84381365edac89c624.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/2ea3916b4309d29ba6938ff96202f3a8.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/069514d4061bbc045836eaec100359b9.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/5b8749ee09f3aa84381365edac89c624.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/2ea3916b4309d29ba6938ff96202f3a8.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/069514d4061bbc045836eaec100359b9.ttf) format('truetype');
   font-weight: bold;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Fraktur';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/2c629b06891ec24911f53781b38554fa.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/0d90113d64d307cfb9e44a81546e7608.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/96556db6d8effe29a581028d82c1ac04.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/2c629b06891ec24911f53781b38554fa.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/0d90113d64d307cfb9e44a81546e7608.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/96556db6d8effe29a581028d82c1ac04.ttf) format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Main';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/20b90c2076172b223ae564a9bb22e0fc.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/a9cdbc850d2f94b8887ccf38fc6d6d85.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/07e762d041b580e5d32ae14a9cb27450.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/20b90c2076172b223ae564a9bb22e0fc.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/a9cdbc850d2f94b8887ccf38fc6d6d85.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/07e762d041b580e5d32ae14a9cb27450.ttf) format('truetype');
   font-weight: bold;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Main';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/b345de5bd14864bcefbff8f92de7a1c8.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/7649d52f66dfd41d2cee9aaaa0019ccd.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/bc8d96e9689171ea65cb379f7967fb4a.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/b345de5bd14864bcefbff8f92de7a1c8.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/7649d52f66dfd41d2cee9aaaa0019ccd.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/bc8d96e9689171ea65cb379f7967fb4a.ttf) format('truetype');
   font-weight: bold;
   font-style: italic;
 }
 @font-face {
   font-family: 'KaTeX_Main';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/ab751a9e86a16f178b79f99db42d3ea2.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/e3954fe9b7efb3f438d218f6e8a8e049.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/44a32ae60521190623e30c98de29ef17.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/ab751a9e86a16f178b79f99db42d3ea2.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/e3954fe9b7efb3f438d218f6e8a8e049.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/44a32ae60521190623e30c98de29ef17.ttf) format('truetype');
   font-weight: normal;
   font-style: italic;
 }
 @font-face {
   font-family: 'KaTeX_Main';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/13b3f8528a571d1cb797eb520002dde9.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/9e75cd605a0f61540bc6894c330f1ef5.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/af7fc7b32dbf2a640c9c26b2a0a7d050.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/13b3f8528a571d1cb797eb520002dde9.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/9e75cd605a0f61540bc6894c330f1ef5.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/af7fc7b32dbf2a640c9c26b2a0a7d050.ttf) format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Math';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/d5d35e84b3ac1dbffd8fdc3dbea97849.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/94810ff68bb3c9cb6d3e9f3e73001b4e.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/4d6241be0cb599314b9ae4af29d68d38.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/d5d35e84b3ac1dbffd8fdc3dbea97849.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/94810ff68bb3c9cb6d3e9f3e73001b4e.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/4d6241be0cb599314b9ae4af29d68d38.ttf) format('truetype');
   font-weight: bold;
   font-style: italic;
 }
 @font-face {
   font-family: 'KaTeX_Math';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/ffda88030bb30ae4a0f437dd9f86add2.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/11278d3697e58b20e960ac9ee24ab338.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/cae7ea2682cff6985955cd2cf261504e.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/ffda88030bb30ae4a0f437dd9f86add2.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/11278d3697e58b20e960ac9ee24ab338.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/cae7ea2682cff6985955cd2cf261504e.ttf) format('truetype');
   font-weight: normal;
   font-style: italic;
 }
 @font-face {
   font-family: 'KaTeX_SansSerif';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/5a20a4753af7a150824ce63096b7acc3.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/2946bdb590f9bd4c7ba30978a7eafa68.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/f0ad0abc489e2942f9e185a885d31e0a.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/5a20a4753af7a150824ce63096b7acc3.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/2946bdb590f9bd4c7ba30978a7eafa68.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/f0ad0abc489e2942f9e185a885d31e0a.ttf) format('truetype');
   font-weight: bold;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_SansSerif';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/e5fc2aef496040d3f44502045a9fa7f6.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/c834ba6da13819f078ec34f212d081e3.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/c7feacd514ed1bf5669a9a4ee68fe99b.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/e5fc2aef496040d3f44502045a9fa7f6.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/c834ba6da13819f078ec34f212d081e3.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/c7feacd514ed1bf5669a9a4ee68fe99b.ttf) format('truetype');
   font-weight: normal;
   font-style: italic;
 }
 @font-face {
   font-family: 'KaTeX_SansSerif';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/5bf289005d5caccd361ab39e3a94f3b7.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/a4fd05630bcdec90cc1a744cc7462c35.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/5af9e1cfc966c7b16e7615fa66a29955.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/5bf289005d5caccd361ab39e3a94f3b7.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/a4fd05630bcdec90cc1a744cc7462c35.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/5af9e1cfc966c7b16e7615fa66a29955.ttf) format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Script';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/a1c15978d325f10dcb49f0f8bd7055dd.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/cd3b0634cbb3864a6105cbc61511f48c.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/dd0db7aef0e4e809b61410ce74227665.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/a1c15978d325f10dcb49f0f8bd7055dd.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/cd3b0634cbb3864a6105cbc61511f48c.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/dd0db7aef0e4e809b61410ce74227665.ttf) format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Size1';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/1876361fd46f2ba44d009dfd6fc09b83.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/c4ae0d259a8916db2002e0a18556c965.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/bbd9552cef932199b58e31fb907f8b18.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/1876361fd46f2ba44d009dfd6fc09b83.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/c4ae0d259a8916db2002e0a18556c965.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/bbd9552cef932199b58e31fb907f8b18.ttf) format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Size2';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/f516b73c4a7ccca3d1a761dee3133a87.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/635e9324cc2ad9bdbfb1d307c1c9c5b2.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/d1e8ff17527d885764046b575c601f0a.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/f516b73c4a7ccca3d1a761dee3133a87.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/635e9324cc2ad9bdbfb1d307c1c9c5b2.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/d1e8ff17527d885764046b575c601f0a.ttf) format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Size3';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/1ef7adae735724bab211320dddae3f21.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/f32a9fde642521722ca1d952e1aa1834.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/5d632274432b02a0edebbfe5810cc988.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/1ef7adae735724bab211320dddae3f21.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/f32a9fde642521722ca1d952e1aa1834.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/5d632274432b02a0edebbfe5810cc988.ttf) format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Size4';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/4f012d6a01b53cb21970a91e4ad0e314.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/f668d5666b59392e88c787e700b5728f.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/1d1325964eb3838aa3086bb34e36a1cf.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/4f012d6a01b53cb21970a91e4ad0e314.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/f668d5666b59392e88c787e700b5728f.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/1d1325964eb3838aa3086bb34e36a1cf.ttf) format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'KaTeX_Typewriter';
-  src: url(/static/v2/dist/js/assets/katex/dist/fonts/4f31d033d446bb37ed6054ae5d39bd22.woff2) format('woff2'), url(/static/v2/dist/js/assets/katex/dist/fonts/d3c8e68f425df650554fab73fd14628f.woff) format('woff'), url(/static/v2/dist/js/assets/katex/dist/fonts/b1d1af1a936d0174df3012bd14c56561.ttf) format('truetype');
+  src: url(/static/v2/dist/prod/assets/katex/dist/fonts/4f31d033d446bb37ed6054ae5d39bd22.woff2) format('woff2'), url(/static/v2/dist/prod/assets/katex/dist/fonts/d3c8e68f425df650554fab73fd14628f.woff) format('woff'), url(/static/v2/dist/prod/assets/katex/dist/fonts/b1d1af1a936d0174df3012bd14c56561.ttf) format('truetype');
   font-weight: normal;
   font-style: normal;
 }
