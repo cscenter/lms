@@ -1,20 +1,23 @@
 from .base import *
 
-MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware'
-] + MIDDLEWARE
 INTERNAL_IPS = ["127.0.0.1", "::1"]
+if DEBUG:
+    INSTALLED_APPS += [
+        'django_extensions',
+        # 'template_timings_panel',
+    ]
+    # Django debug toolbar support
+    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+    INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda request: not request.is_ajax()
+    }
 
-INSTALLED_APPS += [
-    'fixture_media',
-    'debug_toolbar',
-    'django_extensions',
-    'template_timings_panel',
-    'rosetta'
-]
+    # Translate .po files with UI
+    INSTALLED_APPS = INSTALLED_APPS + ['rosetta']
+    ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = 'ru'
+    ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'
 
-ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = 'ru'
-ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'
 
 EMAIL_PORT = 1025
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

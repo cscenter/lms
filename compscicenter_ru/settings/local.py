@@ -1,20 +1,31 @@
+import socket
 from .base import *
 
-MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware'
-] + MIDDLEWARE
-INTERNAL_IPS = ["127.0.0.1", "::1"]
+# XXX: js-reverse depends on ROOT_URLCONF and doesn't play well
+# with SUBDOMAIN_URLCONFS
+INSTALLED_APPS += ['django_js_reverse']
+JS_REVERSE_JS_VAR_NAME = 'URLS'
+JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['stats-api', 'admission-api']
+JS_REVERSE_OUTPUT_PATH = str(ASSETS_ROOT / "v1" / "js" / "vendor")
 
-INSTALLED_APPS += [
-    'debug_toolbar',
-    'django_extensions',
-    'django_js_reverse',
-    # 'template_timings_panel',
-    'rosetta'
-]
 
-ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = 'ru'
-ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'
+hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+INTERNAL_IPS = [ip[:-1] + '1' for ip in ips] + ["127.0.0.1", "::1"]
+
+if DEBUG:
+    INSTALLED_APPS += [
+        'django_extensions',
+        # 'template_timings_panel',
+    ]
+    # Django debug toolbar support
+    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+    INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
+
+    # Translate .po files with UI
+    INSTALLED_APPS = INSTALLED_APPS + ['rosetta']
+    ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = 'ru'
+    ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -124,24 +135,12 @@ FILE_UPLOAD_HANDLERS = [
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 26214400
 
-
-# Disable django-debug-toolbar jquery
-DEBUG_TOOLBAR_CONFIG = {
-    # 'SHOW_TOOLBAR_CALLBACK': lambda r: False,  # disables it
-}
-
 REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
     'rest_framework.renderers.JSONRenderer',
     'rest_framework.renderers.BrowsableAPIRenderer',
 )
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
-
-
-# django-js-reverse app settings
-JS_REVERSE_JS_VAR_NAME = 'URLS'
-JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['stats-api', 'admission-api']
-JS_REVERSE_OUTPUT_PATH = str(ASSETS_ROOT / "v1" / "js" / "vendor")
 
 
 WEBPACK_LOADER = {
