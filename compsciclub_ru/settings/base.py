@@ -1,6 +1,7 @@
 """
 Project settings
 """
+import logging
 import sys
 import django
 
@@ -83,7 +84,6 @@ THUMBNAIL_REDIS_PORT = REDIS_PORT
 THUMBNAIL_REDIS_HOST = REDIS_HOST
 THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
 
-
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
@@ -93,6 +93,10 @@ CACHES = {
 LOCALE_PATHS = [
     str(PROJECT_DIR / "locale"),
 ] + LOCALE_PATHS
+
+# Monitoring
+SENTRY_DSN = env("SENTRY_DSN")
+SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
 
 TEMPLATES = [
     {
@@ -111,6 +115,10 @@ TEMPLATES = [
                 "markdown": "core.jinja2.filters.markdown",
                 "pluralize": "core.jinja2.filters.pluralize",
                 "with_classes": "core.jinja2.filters.with_classes",
+            },
+            "constants": {
+                "CSRF_COOKIE_NAME": CSRF_COOKIE_NAME,
+                "SENTRY_DSN": SENTRY_DSN,
             },
             "globals": {
                 "messages": "core.jinja2.globals.messages",
@@ -167,6 +175,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'compsciclub_ru.context_processors.get_branches',
                 'core.context_processors.subdomain',
+                'core.context_processors.js_config',
             ),
             'debug': DEBUG
         }

@@ -124,6 +124,13 @@ SOCIAL_AUTH_YANDEXRU_SECRET = env.str('SOCIAL_AUTH_YANDEXRU_SECRET')
 # Prevent calling pipeline for this backend
 SOCIAL_AUTH_YANDEXRU_PIPELINE = []
 
+
+# Monitoring
+SENTRY_DSN = env("SENTRY_DSN")
+SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
+NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
+NEWRELIC_ENV = env.str('NEWRELIC_ENV', default='production')
+
 TEMPLATES = [
     {
         "BACKEND": "django_jinja.backend.Jinja2",
@@ -146,6 +153,10 @@ TEMPLATES = [
                 "with_classes": "core.jinja2.filters.with_classes",
                 "youtube_video_id": "core.jinja2.filters.youtube_video_id",
                 "as_survey": "surveys.jinja2_filters.render_form",
+            },
+            "constants": {
+                "CSRF_COOKIE_NAME": CSRF_COOKIE_NAME,
+                "SENTRY_DSN": SENTRY_DSN,
             },
             "globals": {
                 "messages": "core.jinja2.globals.messages",
@@ -205,6 +216,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
                 'core.context_processors.subdomain',
+                'core.context_processors.js_config',
             ),
             'debug': DEBUG
         }
@@ -299,8 +311,3 @@ ACCOUNT_ACTIVATION_DAYS = 1
 ACTIVATION_EMAIL_SUBJECT = 'emails/activation_email_subject.txt'
 ACTIVATION_EMAIL_BODY = 'emails/activation_email_body.txt'
 
-# Monitoring
-SENTRY_DSN = env("SENTRY_DSN")
-SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
-NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
-NEWRELIC_ENV = env.str('NEWRELIC_ENV', default='production')

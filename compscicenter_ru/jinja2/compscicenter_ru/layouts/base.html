@@ -16,6 +16,10 @@
     {%- block stylesheets %} {% endblock stylesheets %}
     <script type="text/javascript">
         window.__CSC__ = {
+            config: {
+                csrfCookieName: "{{ CSRF_COOKIE_NAME }}",
+                sentryDSN: "{{ SENTRY_DSN }}",
+            },
             notifications: {{ messages(request)|tojson }},
             sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
         };

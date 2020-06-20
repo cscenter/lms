@@ -23,8 +23,10 @@
     <![endif]-->
     <script>
       // Global Configuration
-      window.CSC = {
+      window.__CSC__ = {
           config: {
+              csrfCookieName: "{{ CSRF_COOKIE_NAME }}",
+              sentryDSN: "{{ SENTRY_DSN }}",
               JS_SRC: {
                 MATHJAX: "//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML",
                 HIGHLIGHTJS: "{{ static("v1/js/vendor/highlight.pack.js") }}",
