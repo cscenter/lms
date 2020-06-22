@@ -15,9 +15,6 @@ CDN_SOURCE_STATIC_URL = STATIC_URL
 # for webpack_config in WEBPACK_LOADER.values():
 #    webpack_config['LOADER_CLASS'] = 'core.webpack_loader.BundleDirectoryWebpackLoader'
 
-# Default scheme for `core.urls.reverse`
-DEFAULT_URL_SCHEME = "https"
-
 # Sentry
 sentry_logging = LoggingIntegration(
     level=logging.INFO,        # Capture info and above as breadcrumbs

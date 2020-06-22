@@ -107,7 +107,6 @@ CAN_LOGIN_AS = lambda request, target_user: request.user.is_superuser
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
-DEFAULT_URL_SCHEME = 'http'
 LOGINAS_FROM_USER_SESSION_FLAG = "loginas_from_user"
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'

@@ -2,9 +2,6 @@ from .base import *
 
 MEDIA_ROOT = str(Path('/shared', 'media'))
 
-# Default scheme for `core.urls.reverse`
-DEFAULT_URL_SCHEME = "https"
-
 CACHES['default'] = {
     'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
     'LOCATION': '/tmp/django_cache'
