@@ -7,8 +7,6 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 
 from .base import *
 
-DEFAULT_URL_SCHEME = 'https'  # default scheme for `core.urls.reverse`
-
 MEDIA_ROOT = str(Path('/shared', 'media'))
 
 # Sentry

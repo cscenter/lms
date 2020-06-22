@@ -34,6 +34,8 @@ RESTRICT_LOGIN_TO_LMS = True
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF
 }
+# Default scheme for `core.urls.reverse`
+DEFAULT_URL_SCHEME = env.str("REVERSE_URL_SCHEME", default="https")
 WSGI_APPLICATION = 'compsciclub_ru.wsgi.application'
 
 MIDDLEWARE = [

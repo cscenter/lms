@@ -31,6 +31,9 @@ SUBDOMAIN_URLCONFS = {
     LMS_SUBDOMAIN: 'lms.urls',
 }
 
+# Default scheme for `core.urls.reverse`
+DEFAULT_URL_SCHEME = env.str("REVERSE_URL_SCHEME", default="https")
+
 STATIC_ROOT = env.str('DJANGO_STATIC_ROOT', default=str(ROOT_DIR / "static"))
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS', default=0o755)
 FILE_UPLOAD_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_PERMISSIONS', default=0o664)
