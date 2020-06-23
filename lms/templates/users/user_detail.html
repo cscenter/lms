@@ -274,7 +274,7 @@
                                 <td>{% trans "Comment" %}:</td>
                                 <td>
                                     <div class="ubertext">
-                                        {% markdown 3600 "curator_note_about_student" student_profile.pk student_profile.modified %}
+                                        {% markdown 3600 "curator_note_about_student" student_profile.pk student_profile.comment_changed_at %}
                                             {{ student_profile.comment|default:"—" }}
                                         {% endmarkdown %}
                                     </div>

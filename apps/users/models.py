@@ -711,6 +711,7 @@ class StudentTypes(DjangoChoices):
             return Roles.INVITED
 
 
+# FIXME: add `created/modified` datetime
 class StudentProfile(models.Model):
     site = models.ForeignKey(Site,
                              verbose_name=_("Site"),
