@@ -7,6 +7,7 @@ from django.db.models import Prefetch, query, Q
 from learning.settings import GradeTypes
 
 
+# FIXME: return only queryset for all `get_*_progress` methods
 def get_enrollments_progress(lookup='enrollment_set',
                              filters: List[Q] = None,
                              to_attr='enrollments_progress') -> Prefetch:

@@ -42,7 +42,7 @@ from learning.settings import Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
 from projects.constants import ProjectTypes
 from projects.models import ProjectStudent
-from stats.views import StudentsDiplomasStats
+from stats.views import AlumniStats
 from study_programs.models import StudyProgram, AcademicDiscipline
 from study_programs.services import get_study_programs
 from users.models import User, SHADCourseRecord, StudentProfile
@@ -252,14 +252,15 @@ class AlumniHonorBoardView(TemplateView):
             "graduates": graduates,
             "testimonials": random_testimonials
         }
-        if graduation_year <= 2017:
-            is_curator = self.request.user.is_curator
-            cache_key = f'alumni_{graduation_year}_stats_{is_curator}'
+        if graduation_year <= 2017 or graduation_year >= 2020:
+            key_pattern = GraduateProfile.STATS_CACHE_KEY_PATTERN
+            cache_key = key_pattern.format(graduation_year=graduation_year,
+                                           site_id=self.request.site.pk)
             stats = cache.get(cache_key)
             if stats is None:
-                stats = StudentsDiplomasStats.as_view()(self.request,
-                                                        graduation_year,
-                                                        **kwargs).data
+                stats = AlumniStats.as_view()(self.request,
+                                              graduation_year,
+                                              **kwargs).data
                 cache.set(cache_key, stats, 3600 * 24 * 31)
             context["stats"] = stats
         return context

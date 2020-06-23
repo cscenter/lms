@@ -15,8 +15,9 @@ from courses.models import Course, Semester
 from courses.utils import get_term_index
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import Roles
+from users.managers import get_enrollments_progress, get_projects_progress
 from users.mixins import CuratorOnlyMixin
-from users.models import User
+from users.models import User, StudentProfile
 
 
 class StatsIndexView(CuratorOnlyMixin, generic.TemplateView):
@@ -151,21 +152,32 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
         return interviewers, selected_interviewer
 
 
-class StudentsDiplomasStats(APIView):
-    http_method_names = ['get']
-
+# TODO: move to learning or users app
+class AlumniStats(APIView):
     def get(self, request, graduation_year, format=None):
-        return Response({})
-        filters = (Q(group__role=Roles.GRADUATE) &
+        filters = (Q(status=StudentStatuses.GRADUATE) &
                    Q(graduate_profile__graduation_year=graduation_year))
         if graduation_year == now().year and self.request.user.is_curator:
             filters = filters | Q(status=StudentStatuses.WILL_GRADUATE)
-        students = (User.objects
-                    .student_progress(exclude_grades=[GradeTypes.UNSATISFACTORY,
-                                                      GradeTypes.NOT_GRADED])
-                    .filter(filters)
-                    .order_by('last_name', 'first_name', 'pk')
-                    .distinct('last_name', 'first_name', 'pk'))
+        exclude_grades = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
+        enrollments_prefetch = get_enrollments_progress(
+            lookup='user__enrollment_set',
+            filters=[~Q(grade__in=exclude_grades)]
+        )
+        projects_prefetch = get_projects_progress(
+            lookup='user__projectstudent_set',
+            filters=[~Q(final_grade__in=exclude_grades)])
+        student_profiles = (StudentProfile.objects
+                            .filter(filters)
+                            .select_related('user')
+                            .prefetch_related(projects_prefetch,
+                                              enrollments_prefetch)
+                            .order_by('user__last_name',
+                                      'user__first_name',
+                                      'pk')
+                            .distinct('user__last_name',
+                                      'user__first_name',
+                                      'pk'))
         unique_teachers = set()
         hours = 0
         enrollments_total = 0
@@ -173,21 +185,27 @@ class StudentsDiplomasStats(APIView):
         unique_courses = set()
         excellent_total = 0
         good_total = 0
-        for s in students:
-            for ps in s.projects_progress:
+        classes_total = {}
+        for student_profile in student_profiles:
+            user = student_profile.user
+            for ps in user.projects_progress:
                 unique_projects.add(ps.project_id)
-            for enrollment in s.enrollments_progress:
+            for enrollment in user.enrollments_progress:
                 enrollments_total += 1
                 if enrollment.grade == GradeTypes.EXCELLENT:
                     excellent_total += 1
                 elif enrollment.grade == GradeTypes.GOOD:
                     good_total += 1
-                unique_courses.add(enrollment.course.meta_course)
-                hours += enrollment.course.courseclass_set.count() * 1.5
-                for course_teacher in enrollment.course.course_teachers.all():
-                    unique_teachers.add(course_teacher.teacher_id)
+                course = enrollment.course
+                unique_courses.add(course.meta_course)
+                if course.pk not in classes_total:
+                    classes_total[course.pk] = course.courseclass_set.count()
+                    for course_teacher in course.course_teachers.all():
+                        unique_teachers.add(course_teacher.teacher_id)
+                course_classes_total = classes_total[course.pk]
+                hours += course_classes_total * 1.5
         stats = {
-            "total": len(students),
+            "total": len(student_profiles),
             "teachers_total": len(unique_teachers),
             "hours": int(hours),
             "courses": {
