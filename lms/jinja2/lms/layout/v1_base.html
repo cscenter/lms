@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=960">
     <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk" />
-    <title>{% block title %}Computer Science Center{% endblock title %}</title>
-    <link rel="shortcut icon" type="image/png" href="{{ static("v1/img/center/favicon.png") }}">
+    <title>{% block title %}{{ request.site.name }}{% endblock title %}</title>
+    <link rel="shortcut icon" type="image/png" href="{{ static(FAVICON_PATH) }}">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="{{ static("v1/dist/css/center/style.css") }}" rel="stylesheet">
     {% if request.user.is_curator %}
@@ -59,7 +59,7 @@
     <div class="footer">
       <div class="container">
         <div class="row">
-          <div class="col-xs-6">Computer Science Center, 2011–20</div>
+          <div class="col-xs-6">{{ request.site.name }}, 2011–20 {{ _("гг.") }}</div>
           <div class="col-xs-6 social">
             <a target="_blank" rel="noopener" href="mailto:info@compscicenter.ru"><i class="fa fa-envelope fa-2x"></i></a>
             <a target="_blank" rel="noopener" href="https://vk.com/compscicenter"><i class="fa fa-vk fa-2x"></i></a>

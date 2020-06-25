@@ -134,6 +134,12 @@ SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
 NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
 NEWRELIC_ENV = env.str('NEWRELIC_ENV', default='production')
 
+
+# Template customization
+LOGO_PATH = 'v1/img/center/logo.svg'
+FAVICON_PATH = 'v1/img/center/favicon.png'
+
+
 TEMPLATES = [
     {
         "BACKEND": "django_jinja.backend.Jinja2",
@@ -159,6 +165,8 @@ TEMPLATES = [
             },
             "constants": {
                 "CSRF_COOKIE_NAME": CSRF_COOKIE_NAME,
+                "FAVICON_PATH": FAVICON_PATH,
+                "LOGO_PATH": LOGO_PATH,
                 "SENTRY_DSN": SENTRY_DSN,
             },
             "globals": {
@@ -220,6 +228,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'core.context_processors.subdomain',
                 'core.context_processors.js_config',
+                'core.context_processors.common_context'
             ),
             'debug': DEBUG
         }
