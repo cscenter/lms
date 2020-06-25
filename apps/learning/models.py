@@ -142,7 +142,7 @@ class EnrollmentPeriod(TimeStampedModel):
         help_text=_("Leave blank to fill in with the date of the beginning "
                     "of the term"))
     ends_on = models.DateField(
-        _("Ends on"),
+        _("Closing Day"),
         blank=True,
         null=True,
         help_text=(_("Inclusive. Leave blank to calculate based on a default "

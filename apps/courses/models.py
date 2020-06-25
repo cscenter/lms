@@ -90,19 +90,6 @@ class Semester(models.Model):
         verbose_name=_("Semester|EndsAt"),
         help_text=_("Datetime in UTC and is predefined."),
         editable=False)
-    enrollment_start_at = models.DateField(
-        _("Enrollment start at"),
-        blank=True,
-        null=True,
-        help_text=_("Leave blank to fill in with the date of the beginning "
-                    "of the term"))
-    enrollment_end_at = models.DateField(
-        _("Enrollment end at"),
-        blank=True,
-        null=True,
-        help_text=_("Students can enroll on or leave the course "
-                    "before this date (inclusive)"))
-
     index = models.PositiveSmallIntegerField(
         verbose_name=_("Semester index"),
         help_text=_("System field. Used for sort order and filter."),
