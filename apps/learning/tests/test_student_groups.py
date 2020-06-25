@@ -71,7 +71,8 @@ def test_student_group_resolving_on_enrollment(client):
     student1 = StudentFactory()
     student2 = StudentFactory(branch=BranchFactory())
     today = now_local(student1.get_timezone()).date()
-    current_semester = SemesterFactory.create_current(enrollment_end_at=today)
+    current_semester = SemesterFactory.create_current(
+        enrollment_period__ends_on=today)
     course = CourseFactory(main_branch=student1.branch,
                            semester=current_semester)
     student_groups = StudentGroup.objects.filter(course=course).all()
@@ -101,7 +102,8 @@ def test_student_group_resolving_on_enrollment_admin(client, settings):
     """
     student, student2 = StudentFactory.create_batch(2, branch=BranchFactory())
     today = now_local(student.get_timezone()).date()
-    current_semester = SemesterFactory.create_current(enrollment_end_at=today)
+    current_semester = SemesterFactory.create_current(
+        enrollment_period__ends_on=today)
     course = CourseFactory(main_branch=BranchFactory(),
                            semester=current_semester)
     post_data = {
@@ -133,7 +135,7 @@ def test_student_group_resolving_enrollment_by_invitation(settings, client):
     branch_spb = BranchFactory(code=Branches.SPB)
     invited = InvitedStudentFactory(branch=branch_spb)
     today = now_local(invited.get_timezone()).date()
-    term = SemesterFactory.create_current(enrollment_end_at=today)
+    term = SemesterFactory.create_current(enrollment_period__ends_on=today)
     course = CourseFactory(main_branch=branch_spb, semester=term)
     student_groups = StudentGroup.objects.filter(course=course).all()
     assert len(student_groups) == 1

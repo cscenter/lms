@@ -14,7 +14,8 @@ from core.urls import reverse, branch_aware_reverse
 from courses.models import CourseBranch
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
-from learning.models import Enrollment, StudentAssignment, StudentGroup
+from learning.models import Enrollment, StudentAssignment, StudentGroup, \
+    EnrollmentPeriod
 from learning.services import EnrollmentService, CourseCapacityFull, \
     StudentGroupService, get_student_profile
 from learning.settings import StudentStatuses, Branches
@@ -75,10 +76,12 @@ def test_enrollment_capacity(settings):
 def test_enrollment_capacity_view(client):
     s = StudentFactory()
     client.login(s)
-    current_semester = SemesterFactory.create_current()
-    course = CourseFactory.create(main_branch=s.branch,
-                                  semester=current_semester,
-                                  is_open=True)
+    future = now() + datetime.timedelta(days=2)
+    current_semester = SemesterFactory.create_current(
+        enrollment_period__ends_on=future.date()
+    )
+    course = CourseFactory(main_branch=s.branch,
+                           semester=current_semester,)
     response = client.get(course.get_absolute_url())
     assert smart_bytes(_("Places available")) not in response.content
     course.capacity = 1
@@ -122,7 +125,7 @@ def test_enrollment_inactive_student(inactive_status, client, settings):
     client.login(student)
     tomorrow = now_local(student.get_timezone()) + datetime.timedelta(days=1)
     current_semester = SemesterFactory.create_current(
-        enrollment_end_at=tomorrow.date())
+        enrollment_period__ends_on=tomorrow.date())
     course = CourseFactory(semester=current_semester,
                            is_open=False)
     response = client.get(course.get_absolute_url())
@@ -140,8 +143,8 @@ def test_enrollment(client):
     student1, student2 = StudentFactory.create_batch(2)
     client.login(student1)
     today = now_local(student1.get_timezone())
-    current_semester = SemesterFactory.create_current()
-    current_semester.enrollment_end_at = today.date()
+    current_semester = SemesterFactory.create_current(
+        enrollment_period__ends_on=today.date())
     current_semester.save()
     course = CourseFactory(main_branch=student1.branch, semester=current_semester)
     url = course.get_enroll_url()
@@ -172,10 +175,9 @@ def test_enrollment_reason_entry(client):
     student = StudentFactory()
     client.login(student)
     today = now_local(student.get_timezone())
-    current_semester = SemesterFactory.create_current()
-    current_semester.enrollment_end_at = today.date()
-    current_semester.save()
-    course = CourseFactory(main_branch=student.branch, semester=current_semester)
+    current_term = SemesterFactory.create_current(
+        enrollment_period__ends_on=today.date())
+    course = CourseFactory(main_branch=student.branch, semester=current_term)
     form = {'course_pk': course.pk, 'reason': 'foo'}
     client.post(course.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
@@ -196,9 +198,8 @@ def test_enrollment_leave_reason(client):
     student = StudentFactory()
     client.login(student)
     today = now_local(student.get_timezone())
-    current_semester = SemesterFactory.create_current()
-    current_semester.enrollment_end_at = today.date()
-    current_semester.save()
+    current_semester = SemesterFactory.create_current(
+        enrollment_period__ends_on=today.date())
     co = CourseFactory(main_branch=student.branch, semester=current_semester)
     form = {'course_pk': co.pk}
     client.post(co.get_enroll_url(), form)
@@ -227,7 +228,7 @@ def test_enrollment_leave_reason(client):
 
 
 @pytest.mark.django_db
-def test_unenrollment(client, assert_redirect):
+def test_unenrollment(client, settings, assert_redirect):
     s = StudentFactory()
     client.login(s)
     current_semester = SemesterFactory.create_current()
@@ -235,13 +236,15 @@ def test_unenrollment(client, assert_redirect):
     as_ = AssignmentFactory.create_batch(3, course=course)
     form = {'course_pk': course.pk}
     # Enrollment already closed
+    ep = EnrollmentPeriod.objects.get(semester=current_semester,
+                                      site_id=settings.SITE_ID)
     today = timezone.now()
-    current_semester.enrollment_end_at = (today - datetime.timedelta(days=1)).date()
-    current_semester.save()
+    ep.ends_on = (today - datetime.timedelta(days=1)).date()
+    ep.save()
     response = client.post(course.get_enroll_url(), form)
     assert response.status_code == 403
-    current_semester.enrollment_end_at = (today + datetime.timedelta(days=1)).date()
-    current_semester.save()
+    ep.ends_on = (today + datetime.timedelta(days=1)).date()
+    ep.save()
     response = client.post(course.get_enroll_url(), form, follow=True)
     assert response.status_code == 200
     assert Enrollment.objects.count() == 1
@@ -293,7 +296,8 @@ def test_reenrollment(client):
     branch_other = BranchFactory()
     student = StudentFactory(branch=branch_spb)
     tomorrow = now_local(branch_spb.get_timezone()) + datetime.timedelta(days=1)
-    term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
+    term = SemesterFactory.create_current(
+        enrollment_period__ends_on=tomorrow.date())
     course = CourseFactory(main_branch=branch_spb, semester=term,
                            branches=[branch_other])
     assignment = AssignmentFactory(course=course)
@@ -322,7 +326,8 @@ def test_enrollment_in_other_branch(client):
     branch_spb = BranchFactory(code=Branches.SPB)
     today = now_local(branch_spb.get_timezone())
     tomorrow = today + datetime.timedelta(days=1)
-    term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
+    term = SemesterFactory.create_current(
+        enrollment_period__ends_on=tomorrow.date())
     course_spb = CourseFactory(semester=term, is_open=False,
                                main_branch__code=Branches.SPB)
     assert course_spb.enrollment_is_open
@@ -360,7 +365,8 @@ def test_view_course_additional_branches(client):
     branch_spb = BranchFactory(code=Branches.SPB)
     today = now_local(branch_spb.get_timezone())
     tomorrow = today + datetime.timedelta(days=1)
-    term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
+    term = SemesterFactory.create_current(
+        enrollment_period__ends_on=tomorrow.date())
     course_spb = CourseFactory(main_branch__code=Branches.SPB,
                                semester=term,
                                is_open=False)
@@ -383,12 +389,13 @@ def test_view_course_additional_branches(client):
 
 
 @pytest.mark.django_db
-def test_enrollment_is_enrollment_open(client):
+def test_course_enrollment_is_open(client, settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     today = now_local(branch_spb.get_timezone())
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
-    term = SemesterFactory.create_current(enrollment_end_at=today.date())
+    term = SemesterFactory.create_current(
+        enrollment_period__ends_on=today.date())
     co_spb = CourseFactory(semester=term, is_open=False,
                            completed_at=tomorrow.date())
     assert co_spb.enrollment_is_open
@@ -407,21 +414,19 @@ def test_enrollment_is_enrollment_open(client):
     co_spb.completed_at = default_completed_at
     co_spb.save()
     assert co_spb.enrollment_is_open
-    term.enrollment_start_at = today.date()
-    term.save()
-    assert co_spb.enrollment_is_open
     response = client.get(co_spb.get_absolute_url())
     assert smart_bytes("Enroll in") in response.content
     # What if enrollment not started yet
-    term.enrollment_start_at = tomorrow.date()
-    term.enrollment_end_at = tomorrow.date()
-    term.save()
+    ep = EnrollmentPeriod.objects.get(semester=term, site_id=settings.SITE_ID)
+    ep.starts_on = tomorrow.date()
+    ep.ends_on = tomorrow.date()
+    ep.save()
     response = client.get(co_spb.get_absolute_url())
     assert smart_bytes("Enroll in") not in response.content
     # Already completed
-    term.enrollment_start_at = yesterday.date()
-    term.enrollment_end_at = yesterday.date()
-    term.save()
+    ep.starts_on = yesterday.date()
+    ep.ends_on = yesterday.date()
+    ep.save()
     response = client.get(co_spb.get_absolute_url())
     assert smart_bytes("Enroll in") not in response.content
 
@@ -429,7 +434,8 @@ def test_enrollment_is_enrollment_open(client):
 @pytest.mark.django_db
 def test_enrollment_by_invitation(settings, client):
     future = now() + datetime.timedelta(days=3)
-    term = SemesterFactory.create_current(enrollment_end_at=future.date())
+    term = SemesterFactory.create_current(
+        enrollment_period__ends_on=future.date())
     course_invitation = CourseInvitationFactory(course__semester=term)
     course = course_invitation.course
     enroll_url = course_invitation.get_absolute_url()

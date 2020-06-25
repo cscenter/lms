@@ -1,11 +1,9 @@
 from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
-from dal_select2.widgets import ListSelect2, Select2Multiple
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
-from django.db.models import ForeignKey
 from django.forms import BaseInlineFormSet
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
@@ -20,15 +18,19 @@ from courses.models import CourseTeacher, Course, CourseClassAttachment, \
     Assignment, MetaCourse, Semester, CourseClass, CourseNews, \
     AssignmentAttachment, LearningSpace, CourseReview, CourseBranch
 from courses.services import CourseService
-from learning.models import AssignmentGroup, StudentGroup
+from learning.models import AssignmentGroup, StudentGroup, EnrollmentPeriod
 from learning.services import AssignmentService
-from users.constants import Roles
-from users.models import User
+
+
+class EnrollmentPeriodInline(admin.StackedInline):
+    model = EnrollmentPeriod
+    extra = 0
 
 
 class SemesterAdmin(admin.ModelAdmin):
     ordering = ('-index',)
     readonly_fields = ('starts_at', 'ends_at')
+    inlines = [EnrollmentPeriodInline]
 
 
 class MetaCourseAdmin(TranslationAdmin, admin.ModelAdmin):

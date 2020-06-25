@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-
+import datetime
 import logging
 import os
 import os.path
 from secrets import token_urlsafe
 
+import pytz
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
@@ -26,12 +27,13 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location, \
 from core.timezone import TimezoneAwareModel, now_local
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids
-from courses.models import Course, CourseNews, Assignment, StudentGroupTypes
+from courses.models import Course, CourseNews, Assignment, StudentGroupTypes, \
+    Semester
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
     GraduateProfileActiveManager, AssignmentCommentPublishedManager, GraduateProfileDefaultManager
-from learning.settings import GradingSystems, GradeTypes
+from learning.settings import GradingSystems, GradeTypes, ENROLLMENT_DURATION
 from users.constants import ThumbnailSizes
 from users.models import StudentProfile
 from users.thumbnails import UserThumbnailMixin, ThumbnailMixin, \
@@ -122,6 +124,72 @@ class CourseClassGroup(models.Model):
             models.UniqueConstraint(fields=('course_class', 'group'),
                                     name='unique_class_student_group'),
         ]
+
+
+class EnrollmentPeriod(TimeStampedModel):
+    site = models.ForeignKey(
+        Site,
+        verbose_name=_("Site"),
+        on_delete=models.CASCADE)
+    semester = models.ForeignKey(
+        Semester,
+        verbose_name=_("Semester"),
+        on_delete=models.CASCADE)
+    starts_on = models.DateField(
+        _("Starts on"),
+        blank=True,
+        null=True,
+        help_text=_("Leave blank to fill in with the date of the beginning "
+                    "of the term"))
+    ends_on = models.DateField(
+        _("Ends on"),
+        blank=True,
+        null=True,
+        help_text=(_("Inclusive. Leave blank to calculate based on a default "
+                     "duration ({} days)")).format(ENROLLMENT_DURATION))
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=('semester', 'site'),
+                name='unique_enrollment_period_per_semester_per_site'),
+        ]
+        verbose_name = _("Enrollment Period")
+        verbose_name_plural = _("Enrollment Periods")
+
+    def __str__(self):
+        return f"{self.semester} - {self.site}"
+
+    def save(self, *args, **kwargs):
+        term = self.semester
+        if not self.starts_on:
+            # Starts from the beginning of the term by default
+            self.starts_on = term.starts_at.date()
+        if not self.ends_on:
+            duration = datetime.timedelta(days=ENROLLMENT_DURATION)
+            self.ends_on = self.starts_on + duration
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        term_starts_on = self.semester.starts_at.date()
+        term_ends_on = self.semester.ends_at.date()
+        starts_on = self.starts_on or term_starts_on
+        if not (term_starts_on <= starts_on <= term_ends_on):
+            msg = _("Start of the enrollment period should be inside "
+                    "term boundaries")
+            raise ValidationError(msg)
+        if self.ends_on:
+            if starts_on > self.ends_on:
+                if not self.starts_on:
+                    msg = _("Deadline should be later than the expected "
+                            "term start ({})").format(starts_on)
+                else:
+                    msg = _("Deadline should be later than the start of "
+                            "the enrollment period")
+                raise ValidationError(msg)
+
+    def __contains__(self, date: datetime.date):
+        return self.starts_on <= date <= self.ends_on
 
 
 class Enrollment(TimezoneAwareModel, TimeStampedModel):
@@ -294,11 +362,15 @@ class Invitation(TimeStampedModel):
                        kwargs={"token": self.token},
                        subdomain=settings.LMS_SUBDOMAIN)
 
-    @property
+    @cached_property
     def is_active(self):
         today = now_local(self.branch.get_timezone()).date()
-        start_at = self.semester.enrollment_start_at
-        return start_at <= today <= self.semester.enrollment_end_at
+        return (EnrollmentPeriod.objects
+                .filter(semester=self.semester,
+                        site_id=settings.SITE_ID,
+                        starts_on__lte=today,
+                        ends_on__gte=today)
+                .exists())
 
 
 class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel):

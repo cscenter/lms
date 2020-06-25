@@ -6,13 +6,13 @@ import factory
 from django.conf import settings
 from django.utils import timezone
 
-from core.tests.factories import BranchFactory, LocationFactory
+from core.tests.factories import BranchFactory, LocationFactory, SiteFactory
 from courses.models import StudentGroupTypes
 from courses.tests.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     CourseNewsNotification, Event, GraduateProfile, Invitation, \
-    CourseInvitation, StudentGroup
+    CourseInvitation, StudentGroup, EnrollmentPeriod
 from learning.services import StudentGroupService
 from learning.settings import StudentStatuses
 from users.constants import Roles
@@ -21,11 +21,12 @@ from users.tests.factories import UserFactory, StudentFactory, \
     StudentProfileFactory
 
 __all__ = ('StudentGroupFactory', 'StudentAssignmentFactory',
-           'AssignmentCommentFactory', 'EnrollmentFactory', 'InvitationFactory',
+           'AssignmentCommentFactory', 'EnrollmentPeriodFactory',
+           'EnrollmentFactory', 'InvitationFactory',
            'CourseInvitationFactory', 'AssignmentNotificationFactory',
            'CourseNewsNotificationFactory', 'EventFactory',
-           'StudentAssignment', 'Enrollment', 'AssignmentComment',
-           'GraduateProfileFactory')
+           'StudentAssignment', 'EnrollmentPeriod', 'Enrollment',
+           'AssignmentComment', 'GraduateProfileFactory')
 
 
 class StudentGroupFactory(factory.DjangoModelFactory):
@@ -58,6 +59,15 @@ class AssignmentCommentFactory(factory.DjangoModelFactory):
     text = factory.Sequence(lambda n: "Test comment %03d" % n)
     author = factory.SubFactory(UserFactory)
     attached_file = factory.django.FileField()
+
+
+class EnrollmentPeriodFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = EnrollmentPeriod
+        django_get_or_create = ('semester', 'site')
+
+    site = factory.SubFactory(SiteFactory)
+    semester = factory.SubFactory(SemesterFactory)
 
 
 class EnrollmentFactory(factory.DjangoModelFactory):

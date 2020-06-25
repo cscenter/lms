@@ -7,18 +7,21 @@ from unittest import mock
 import pytest
 import pytz
 from django.core.exceptions import ValidationError
+
+from core.tests.factories import SiteFactory, BranchFactory
 from core.tests.utils import CSCTestCase
 from django.utils.encoding import smart_text
 
 from learning.settings import Branches
-from learning.tests.factories import StudentAssignmentFactory, AssignmentCommentFactory, \
+from learning.tests.factories import StudentAssignmentFactory, \
+    AssignmentCommentFactory, \
     EnrollmentFactory, AssignmentNotificationFactory, \
-    CourseNewsNotificationFactory
+    CourseNewsNotificationFactory, EnrollmentPeriodFactory
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFactory, \
     CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
     AssignmentFactory
 from learning.models import StudentAssignment, AssignmentNotification, \
-    AssignmentComment
+    AssignmentComment, EnrollmentPeriod
 from courses.models import Semester, CourseNews, CourseReview, \
     AssignmentSubmissionTypes
 from courses.constants import SemesterTypes
@@ -199,7 +202,7 @@ class AssignmentNotificationTests(CSCTestCase):
 
 
 @pytest.mark.django_db
-def test_semester_enrollment_period(mocker):
+def test_enrollment_period(mocker, settings):
     year = 2016
     term_type = SemesterTypes.AUTUMN
     # Fix year and term
@@ -208,47 +211,48 @@ def test_semester_enrollment_period(mocker):
     mocked_timezone.return_value = now_fixed
     # Default start is the beginning of the term
     term = SemesterFactory(year=year, type=term_type)
+    enrollment_period = EnrollmentPeriodFactory(semester=term)
     term_start_dt = term.starts_at
-    assert term.enrollment_start_at == term_start_dt.date()
+    assert enrollment_period.starts_on == term_start_dt.date()
     # Start/End of the enrollment period always non-empty value, even
     # without calling .clean() method
-    assert term.enrollment_end_at is not None
+    assert enrollment_period.ends_on is not None
+    EnrollmentPeriod.objects.all().delete()
     # When we have only one day to enroll in the course
-    Semester.objects.all().delete()
-    term = SemesterFactory.build(year=year, type=term_type,
-                                 enrollment_start_at=term_start_dt.date(),
-                                 enrollment_end_at=term_start_dt.date())
-    try:
-        term.clean()
-        term.save()
-    except ValidationError:
-        pytest.fail("Enrollment period should be valid")
+    site = SiteFactory(pk=settings.SITE_ID)
+    enrollment_period = EnrollmentPeriod(semester=term,
+                                         site=site,
+                                         starts_on=term_start_dt.date(),
+                                         ends_on=term_start_dt.date())
+    enrollment_period.clean()
+    enrollment_period.save()
+    EnrollmentPeriod.objects.all().delete()
     # Values didn't overridden
-    assert term.enrollment_start_at == term_start_dt.date()
-    assert term.enrollment_end_at == term_start_dt.date()
+    assert enrollment_period.starts_on == term_start_dt.date()
+    assert enrollment_period.ends_on == term_start_dt.date()
     # Validation error: end > start
-    Semester.objects.all().delete()
     with pytest.raises(ValidationError) as e:
         end_at = term_start_dt.date() - datetime.timedelta(days=1)
-        term = SemesterFactory.build(year=year, type=term_type,
-                                     enrollment_start_at=term_start_dt.date(),
-                                     enrollment_end_at=end_at)
-        term.clean()
+        ep = EnrollmentPeriod(semester=term,
+                              site=site,
+                              starts_on=term_start_dt.date(),
+                              ends_on=end_at)
+        ep.clean()
     # Empty start, none-empty end, but value < than `expected` start
     # enrollment period
-    Semester.objects.all().delete()
     with pytest.raises(ValidationError) as e:
         end_at = term_start_dt.date() - datetime.timedelta(days=1)
-        term = SemesterFactory.build(year=year, type=term_type,
-                                     enrollment_end_at=end_at)
-        term.clean()
-    # Do not validate that start/end inside term bounds
-    Semester.objects.all().delete()
-    start_at = term_start_dt.date() + datetime.timedelta(weeks=42)
-    term = SemesterFactory.build(year=year, type=term_type,
-                                 enrollment_start_at=start_at,
-                                 enrollment_end_at=start_at)
-    term.clean()
+        ep = EnrollmentPeriod(semester=term,
+                              site=site,
+                              ends_on=end_at)
+        ep.clean()
+    # Start should be inside semester
+    with pytest.raises(ValidationError) as e:
+        before_term_start = term_start_dt - datetime.timedelta(days=2)
+        ep = EnrollmentPeriod(semester=term,
+                              site=site,
+                              starts_on=before_term_start.date())
+        ep.clean()
 
 
 @pytest.mark.django_db
@@ -264,10 +268,9 @@ def test_course_enrollment_is_open(settings, mocker):
     term = SemesterFactory.create_current()
     assert term.type == term_type
     assert term.year == year
-    term_start_dt = get_term_starts_at(year, term_type, pytz.UTC)
-    assert term.enrollment_start_at == term_start_dt.date()
-    co_spb = CourseFactory(semester=term, main_branch__code=Branches.SPB,
-                           is_open=False)
+    main_branch = BranchFactory(code=Branches.SPB,
+                                site=SiteFactory(pk=settings.SITE_ID))
+    co_spb = CourseFactory(semester=term, main_branch=main_branch)
     # We are inside enrollment period right now
     assert co_spb.enrollment_is_open
     # `completed_at` has more priority than term settings
@@ -280,16 +283,17 @@ def test_course_enrollment_is_open(settings, mocker):
     co_spb.save()
     # Test boundaries
     assert co_spb.enrollment_is_open
-    term.enrollment_end_at = now_fixed.date()
-    term.save()
+    ep = EnrollmentPeriod.objects.get(site_id=settings.SITE_ID, semester=term)
+    ep.ends_on = now_fixed.date()
+    ep.save()
     assert co_spb.enrollment_is_open
-    term.enrollment_end_at = now_fixed.date() - datetime.timedelta(days=1)
-    term.save()
+    ep.ends_on = now_fixed.date() - datetime.timedelta(days=1)
+    ep.save()
     co_spb.refresh_from_db()
     assert not co_spb.enrollment_is_open
-    term.enrollment_start_at = now_fixed.date()
-    term.enrollment_end_at = now_fixed.date() + datetime.timedelta(days=1)
-    term.save()
+    ep.starts_on = now_fixed.date()
+    ep.ends_on = now_fixed.date() + datetime.timedelta(days=1)
+    ep.save()
     co_spb.refresh_from_db()
     assert co_spb.enrollment_is_open
 

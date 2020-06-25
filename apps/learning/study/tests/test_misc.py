@@ -5,6 +5,7 @@ import pytz
 from bs4 import BeautifulSoup
 from django.utils import timezone, formats
 from django.utils.encoding import smart_bytes
+from django.utils.timezone import now
 
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
@@ -335,9 +336,11 @@ def test_assignment_list_view_context_unenrolled_course(client):
     """
     url = reverse('study:assignment_list')
     student = StudentFactory()
-    s = SemesterFactory.create_current(for_branch=Branches.SPB)
+    future = now() + datetime.timedelta(days=2)
+    s = SemesterFactory.create_current(for_branch=Branches.SPB,
+                                       enrollment_period__ends_on=future)
     # Create open co to pass enrollment limit
-    course = CourseFactory(semester=s, is_open=True)
+    course = CourseFactory(semester=s)
     as1 = AssignmentFactory.create_batch(2, course=course)
     client.login(student)
     # Enroll in course
