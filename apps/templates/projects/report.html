@@ -16,7 +16,7 @@
 {% block javascripts %}
     {#    TODO: append instead of replace #}
     <script type="text/javascript">
-        CSC.config.localStorage.hashes = {{ clean_comments_json|safe }};
+        window.__CSC__.config.localStorage.hashes = {{ clean_comments_json|safe }};
     </script>
     {% render_bundle 'learning' 'js' 'V1' %}
 {% endblock javascripts %}

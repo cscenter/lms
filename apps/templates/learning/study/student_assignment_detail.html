@@ -13,7 +13,7 @@
 {% block javascripts %}
     {#    TODO: append instead of replace #}
     <script type="text/javascript">
-      CSC.config.localStorage.hashes = {{ hashes_json|safe }};
+      window.__CSC__.config.localStorage.hashes = {{ hashes_json|safe }};
     </script>
     {% if is_actual_teacher or request.user.is_curator %}
         <script type="text/javascript">
