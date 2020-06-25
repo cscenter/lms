@@ -3141,7 +3141,7 @@ msgid "Пересечения"
 msgstr ""
 
 #: lms/templates/base.html:59
-msgid "Computer Science Center, 2011–20 гг."
+msgid "гг."
 msgstr ""
 
 #: lms/templates/base.html:83

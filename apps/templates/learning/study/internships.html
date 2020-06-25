@@ -3,7 +3,7 @@
 {% load static %}
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
 {% load markdown from core_tags %}
-{% block title %}Проекты организаторов{% endblock title %}
+{% block title %}Проекты организаторов - {{ request.site.name }}{% endblock title %}
 
 {% block content %}
     <div class="container">
@@ -23,7 +23,7 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div class="alert alert-info text-center">Здесь появится информация об интересных стажировках и школах, которые рекомендуют организаторы CS центра.</div>
+            <div class="alert alert-info text-center">Здесь появится информация об интересных стажировках и школах, которые рекомендуют организаторы.</div>
         {% endif %}
     </div>
 {% endblock content %}
