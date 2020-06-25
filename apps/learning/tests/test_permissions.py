@@ -10,7 +10,7 @@ from courses.models import Course, CourseBranch
 from courses.services import CourseService
 from courses.tests.factories import CourseFactory, SemesterFactory, \
     AssignmentFactory
-from learning.models import StudentAssignment
+from learning.models import StudentAssignment, EnrollmentPeriod
 from learning.permissions import CreateAssignmentComment, \
     CreateAssignmentCommentTeacher, \
     CreateAssignmentCommentStudent, ViewRelatedStudentAssignment, \
@@ -126,8 +126,9 @@ def test_enroll_in_course(inactive_status, settings):
     today_local = now_local(branch_spb.get_timezone())
     yesterday = today_local - datetime.timedelta(days=1)
     tomorrow = today_local + datetime.timedelta(days=1)
-    term = SemesterFactory.create_current(for_branch=settings.DEFAULT_BRANCH_CODE,
-                                          enrollment_end_at=tomorrow.date())
+    term = SemesterFactory.create_current(
+        for_branch=settings.DEFAULT_BRANCH_CODE,
+        enrollment_period__ends_on=tomorrow.date())
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     course = CourseFactory(
@@ -140,9 +141,13 @@ def test_enroll_in_course(inactive_status, settings):
     perm_obj = EnrollPermissionObject(course, student_spb_profile)
     assert student_spb.has_perm(EnrollInCourse.name, perm_obj)
     # Enrollment is closed
-    course.semester.enrollment_end_at = yesterday.date()
+    ep = EnrollmentPeriod.objects.get(semester=course.semester,
+                                      site_id=settings.SITE_ID)
+    ep.ends_on = yesterday.date()
+    ep.save()
     assert not student_spb.has_perm(EnrollInCourse.name, perm_obj)
-    course.semester.enrollment_end_at = tomorrow.date()
+    ep.ends_on = tomorrow.date()
+    ep.save()
     assert student_spb.has_perm(EnrollInCourse.name, perm_obj)
     # Student with inactive status
     student_spb_profile.status = inactive_status
@@ -168,20 +173,24 @@ def test_enroll_in_course(inactive_status, settings):
 
 
 @pytest.mark.django_db
-def test_leave_course():
+def test_leave_course(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     today = now_local(branch_spb.get_timezone())
     yesterday = today - datetime.timedelta(days=1)
     future = today + datetime.timedelta(days=3)
-    term = SemesterFactory.create_current(enrollment_end_at=future.date())
+    term = SemesterFactory.create_current(
+        enrollment_period__ends_on=future.date())
     enrollment = EnrollmentFactory(course__semester=term, course__is_open=False)
     course = enrollment.course
     student = enrollment.student
     assert course.enrollment_is_open
     assert student.has_perm("learning.leave_course", course)
-    course.semester.enrollment_end_at = yesterday.date()
+    ep = EnrollmentPeriod.objects.get(semester=term, site_id=settings.SITE_ID)
+    ep.ends_on = yesterday.date()
+    ep.save()
     assert not student.has_perm("learning.leave_course", course)
-    course.semester.enrollment_end_at = future.date()
+    ep.ends_on = future.date()
+    ep.save()
     assert student.has_perm("learning.leave_course", course)
     # Student couldn't leave abandoned course
     enrollment.is_deleted = True
@@ -197,8 +206,9 @@ def test_enroll_in_course_by_invitation(settings):
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
     branch_spb = BranchFactory(code=Branches.SPB)
-    term = SemesterFactory.create_current(for_branch=branch_spb.code,
-                                          enrollment_end_at=tomorrow.date())
+    term = SemesterFactory.create_current(
+        for_branch=branch_spb.code,
+        enrollment_period__ends_on=tomorrow.date())
     course = CourseFactory(main_branch=branch_spb, semester=term, is_open=False,
                            capacity=0)
     assert course.enrollment_is_open
@@ -214,8 +224,10 @@ def test_enroll_in_course_by_invitation(settings):
     # Invitation activity depends on semester settings.
     # Also this condition checked internally in `learning.enroll_in_course`
     # predicate
-    course.semester.enrollment_end_at = yesterday.date()
-    course.semester.save()
+    ep = EnrollmentPeriod.objects.get(site_id=settings.SITE_ID,
+                                      semester=course.semester)
+    ep.ends_on = yesterday.date()
+    ep.save()
     assert not course.enrollment_is_open
     assert not student.has_perm("learning.enroll_in_course_by_invitation",
                                 perm_obj)

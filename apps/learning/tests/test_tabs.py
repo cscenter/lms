@@ -9,6 +9,7 @@ from courses.services import CourseService
 from courses.tests.factories import SemesterFactory, CourseNewsFactory, \
     CourseTeacherFactory, CourseFactory, MetaCourseFactory, AssignmentFactory, \
     CourseReviewFactory
+from learning.models import EnrollmentPeriod
 from learning.settings import GradeTypes, Branches
 from learning.tabs import CourseReviewsTab
 from learning.tests.factories import EnrollmentFactory
@@ -95,11 +96,12 @@ def test_course_assignments_tab_permissions(client):
 
 
 @pytest.mark.django_db
-def test_course_reviews_tab_permissions(client, curator):
+def test_course_reviews_tab_permissions(client, curator, settings):
     today = timezone.now()
     next_week = today + datetime.timedelta(weeks=1)
     yesterday = today - datetime.timedelta(days=1)
-    current_term = SemesterFactory.create_current(enrollment_end_at=next_week.date())
+    current_term = SemesterFactory.create_current(
+        enrollment_period__ends_on=next_week.date())
     prev_term = SemesterFactory.create_prev(current_term)
     course = CourseFactory(semester=current_term)
     prev_course = CourseFactory(semester=prev_term,
@@ -114,8 +116,10 @@ def test_course_reviews_tab_permissions(client, curator):
     volunteer = VolunteerFactory()
     assert CourseReviewsTab.is_enabled(course, volunteer)
     assert CourseReviewsTab.is_enabled(course, curator)
-    current_term.enrollment_end_at = yesterday.date()
-    current_term.save()
+    ep = EnrollmentPeriod.objects.get(semester=current_term,
+                                      site_id=settings.SITE_ID)
+    ep.ends_on = yesterday.date()
+    ep.save()
     assert not course.enrollment_is_open
     assert not CourseReviewsTab.is_enabled(course, curator)
 

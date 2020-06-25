@@ -25,7 +25,8 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, Location, Branch
 from core.timezone import now_local, Timezone, TimezoneAwareModel, \
     TimezoneAwareDateTimeField
 from core.urls import reverse, branch_aware_reverse
-from core.utils import hashids, get_youtube_video_id, instance_memoize
+from core.utils import hashids, get_youtube_video_id, instance_memoize, \
+    is_club_site
 from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles, \
     MaterialVisibilityTypes
 from courses.utils import get_current_term_pair, get_term_starts_at, \
@@ -126,14 +127,15 @@ class Semester(models.Model):
     def slug(self):
         return "{0}-{1}".format(self.year, self.type)
 
+    @property
+    def term_pair(self) -> TermPair:
+        return TermPair(self.year, self.type)
+
     @classmethod
     def get_current(cls, tz: Timezone = settings.DEFAULT_TIMEZONE):
         term_pair = get_current_term_pair(tz)
         obj, created = cls.objects.get_or_create(year=term_pair.year,
                                                  type=term_pair.type)
-        # FIXME: remove?
-        if created:
-            obj.save()
         return obj
 
     def is_current(self, tz: Timezone = settings.DEFAULT_TIMEZONE):
@@ -147,27 +149,7 @@ class Semester(models.Model):
         self.index = term_pair.index
         self.starts_at = term_pair.starts_at(tz)
         self.ends_at = next_term.starts_at(tz) - datetime.timedelta(days=1)
-        if not self.enrollment_start_at:
-            # Start enrollment period from the beginning of the term
-            self.enrollment_start_at = self.starts_at.date()
-        if not self.enrollment_end_at:
-            duration = datetime.timedelta(days=ENROLLMENT_DURATION)
-            self.enrollment_end_at = self.enrollment_start_at + duration
-        super(Semester, self).save(*args, **kwargs)
-
-    def clean(self):
-        if self.year and self.type and self.enrollment_end_at:
-            start_at = self.enrollment_start_at
-            if not start_at:
-                start_at = get_term_starts_at(self.year, self.type, pytz.UTC).date()
-            if start_at > self.enrollment_end_at:
-                if not self.enrollment_start_at:
-                    msg = _("Enrollment period end should be later "
-                            "than expected term start ({})").format(start_at)
-                else:
-                    msg = _("Enrollment period end should be later than "
-                            "the beginning")
-                raise ValidationError(msg)
+        super().save(*args, **kwargs)
 
     @property
     def academic_year(self):
@@ -533,13 +515,17 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
 
     @property
     def enrollment_is_open(self):
-        if self.is_open:
-            return True
         if self.is_completed:
             return False
+        from learning.models import EnrollmentPeriod
+        enrollment_period = (EnrollmentPeriod.objects
+                             .filter(site_id=settings.SITE_ID,
+                                     semester=self.semester)
+                             .first())
+        if not enrollment_period:
+            return is_club_site()
         today = now_local(self.get_timezone()).date()
-        start_at = self.semester.enrollment_start_at
-        return start_at <= today <= self.semester.enrollment_end_at
+        return today in enrollment_period
 
     @property
     def is_capacity_limited(self):

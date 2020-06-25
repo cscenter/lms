@@ -19,7 +19,8 @@ def test_enrollment(client, settings):
                                site__domain=settings.TEST_DOMAIN)
     today = now_local(branch_spb.get_timezone())
     tomorrow = today + datetime.timedelta(days=1)
-    term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
+    term = SemesterFactory.create_current(
+        enrollment_perids__ends_on=tomorrow.date())
     course = CourseFactory(semester=term)
     assert course.enrollment_is_open
     branch_center = BranchFactory(site_id=settings.CENTER_SITE_ID)

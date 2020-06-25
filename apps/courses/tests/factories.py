@@ -13,6 +13,7 @@ from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
 from courses.constants import MaterialVisibilityTypes
 from courses.services import CourseService
 from courses.utils import get_current_term_pair, get_term_by_index
+from learning.models import EnrollmentPeriod
 from learning.services import AssignmentService
 from users.tests.factories import TeacherFactory
 
@@ -40,6 +41,14 @@ class SemesterFactory(factory.DjangoModelFactory):
 
     year = 2015
     type = factory.Iterator(['spring', 'autumn'])
+
+    @factory.post_generation
+    def enrollment_period(self, create, extracted, **kwargs):
+        from learning.tests.factories import EnrollmentPeriodFactory
+        if not create:
+            return
+        kwargs.pop("semester", None)
+        EnrollmentPeriodFactory(semester=self, **kwargs)
 
     @classmethod
     def create_current(cls, **kwargs):
