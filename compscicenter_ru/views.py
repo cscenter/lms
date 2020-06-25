@@ -218,6 +218,19 @@ class TeachersView(TemplateView):
         return {"app_data": app_data}
 
 
+def get_alumni_bucket_key(graduate_profile):
+    branch = graduate_profile.student_profile.branch
+    return branch.order, branch.code, branch.name
+
+
+def get_alumni_tabs(grouped_alumni):
+    tabs = TabList()
+    for i, (order, code, name) in enumerate(grouped_alumni.keys()):
+        tabs.add(Tab(target=code, name=name, order=order, active=(i == 0)))
+    tabs.sort()
+    return tabs
+
+
 class AlumniHonorBoardView(TemplateView):
     def get_template_names(self):
         graduation_year = int(self.kwargs['year'])
@@ -248,11 +261,14 @@ class AlumniHonorBoardView(TemplateView):
         if random_testimonials:
             prefetch_related_objects(random_testimonials, 'academic_disciplines')
         context = {
+            "bucketize": bucketize,
+            "get_bucket_key": get_alumni_bucket_key,
+            "get_tabs": get_alumni_tabs,
             "graduation_year": graduation_year,
             "graduates": graduates,
             "testimonials": random_testimonials
         }
-        if graduation_year <= 2017 or graduation_year >= 2020:
+        if graduation_year <= 2017:
             key_pattern = GraduateProfile.STATS_CACHE_KEY_PATTERN
             cache_key = key_pattern.format(graduation_year=graduation_year,
                                            site_id=self.request.site.pk)

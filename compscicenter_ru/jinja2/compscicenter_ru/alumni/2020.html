@@ -1,0 +1,135 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% import "compscicenter_ru/alumni/_macros.jinja2" as macros_alumni %}
+{% import "compscicenter_ru/macros/_cards.jinja2" as macros_cards %}
+{% import "compscicenter_ru/macros/_nav.jinja2" as macros_nav %}
+
+{% block body_attrs %}class="mb-0" data-init-sections="tabs"{% endblock body_attrs %}
+
+{% block menu %}
+<div class="navbar-container">
+    <nav class="navbar navbar-main{% if theme_class %} {{ theme_class }}{% endif %}">
+        <div class="container">
+            <a class="navbar-logo" href="/">{{ macros.csc_logo() }}</a>
+            <div class="menu-desktop-wrapper">
+                <ul class="ui navbar-nav">
+                    <li class="nav-item"><a class="nav-link _active" href="/{{graduation_year}}/">Выпускники {{ graduation_year }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#stats">Статистика</a></li>
+                    {% if testimonials -%}
+                        <li class="nav-item"><a class="nav-link" href="#testimonials">Отзывы</a></li>
+                    {%- endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+{% endblock menu %}
+
+{% block content %}
+    <div class="container page-content">
+        <h1 class="text-center">Выпуск {{ graduation_year }} в лицах</h1>
+
+        {% set grouped_alumni = bucketize(graduates, key=get_bucket_key) %}
+        {% set tabs = get_tabs(grouped_alumni) %}
+        {% call macros.scrollable() %}{{ macros_nav.tabs(tabs) }}{% endcall %}
+        <div class="tab-content">
+            {% for (_, branch_code, _), graduates in grouped_alumni.items() -%}
+                {% with tab = tabs[branch_code] %}
+                    <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                        <div class="card-deck _users">
+                            {% for graduate_profile in graduates -%}
+                                {{ macros_cards.graduate_card_link(graduate_profile) }}
+                            {% endfor -%}
+                        </div>
+                    </div>
+                {% endwith  -%}
+            {% endfor -%}
+        </div>
+    </div>
+
+    <div class="_dark pt-4" id="stats">
+        <div class="container page-content">
+            <h1 class="text-center">Статистика</h1>
+            <div class="row">
+                <div class="col-lg-6 mt-10 mb-sm-5 text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="infographic-count">168</p>
+                            <p>Преподавателей</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="infographic-count">46</p>
+                            <p>Курсов</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="infographic-count">15 970</p>
+                            <p>Часов в аудиториях</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="infographic-count">120</p>
+                            <p>Уникальных проектов</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-8 mt-sm-0 mb-sm-5 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 588 467" width="90%" height="420">
+                        <g fill="none" fill-rule="evenodd">
+                            <g>
+                                <path fill="#c0c9ce"
+                                      d="M126 134a200 200 0 11347 201 200 200 0 01-347-201m57 33a134 134 0 10233 135 134 134 0 00-233-135"/>
+                                <path stroke="#282727"
+                                      d="M126 134a200 200 0 11347 201 200 200 0 01-347-201zm57 33a134 134 0 10233 135 134 134 0 00-233-135z"/>
+                                <path fill="#4C85A2"
+                                      d="M390 138c-19-18-43-29-68-34l5-34 4-36 1-2 2 1c38 6 74 23 103 49l3 3 2 2c60 58 79 147 47 225l-1 3-68-28 2-3c20-51 8-109-32-146z"/>
+                                <path stroke="#282727"
+                                      d="M390 138h0c-19-18-43-29-68-34l5-34 4-36 1-2 2 1c38 6 74 23 103 49h0l3 3 2 2h0c60 58 79 147 47 225l-1 3-68-28 2-3c20-51 8-109-32-146h0z"/>
+                                <path fill="#07c39f"
+                                      d="M107 107C156 38 239 1 322 15l16 3-16 98-16-3a118 118 0 00-81 217l14 9-51 84-15-8a217 217 0 01-82-279s9-20 16-29"/>
+                                <path stroke="#282727"
+                                      d="M107 107C156 38 239 1 322 15l16 3-16 98-16-3c-49-8-97 15-122 57h0c-32 56-14 127 41 160l14 9-51 84-15-8a217 217 0 01-82-279s9-20 16-29z"/>
+                            </g>
+                            <text fill="#1D1D1D" font-family="FiraSans-Regular, Fira Sans" font-size="14">
+                                <tspan x="242" y="277">оценок по курсам</tspan>
+                            </text>
+                            <text fill="#1D1D1D" font-family="FiraSans-Regular, Fira Sans" font-size="14">
+                                <tspan x="10" y="411">оценок отлично</tspan>
+                            </text>
+                            <text fill="#1D1D1D" font-family="FiraSans-Regular, Fira Sans" font-size="14">
+                                <tspan x="442" y="436">оценок</tspan>
+                                <tspan x="442" y="451">удовлетворительно</tspan>
+                            </text>
+                            <text fill="#1D1D1D" font-family="FiraSans-Regular, Fira Sans" font-size="14">
+                                <tspan x="465" y="65">оценок хорошо</tspan>
+                            </text>
+                            <text fill="#282727" font-family="FiraSans-Bold, Fira Sans" font-size="97"
+                                  font-weight="bold">
+                                <tspan x="225" y="254">599</tspan>
+                            </text>
+                            <text fill="#00C49F" font-family="FiraSans-Bold, Fira Sans" font-size="42"
+                                  font-weight="bold">
+                                <tspan x="44" y="395">280</tspan>
+                            </text>
+                            <text fill="#c0c9ce" font-family="FiraSans-Bold, Fira Sans" font-size="42"
+                                  font-weight="bold">
+                                <tspan x="442" y="415">145</tspan>
+                            </text>
+                            <text fill="#4D86A1" font-family="FiraSans-Bold, Fira Sans" font-size="42"
+                                  font-weight="bold">
+                                <tspan x="456" y="49">174</tspan>
+                            </text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if testimonials %}
+        {{ macros_alumni.testimonial_grid(testimonials) }}
+    {% endif %}
+
+{% endblock content %}
+
+{% block footer %}{% endblock footer %}
