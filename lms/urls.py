@@ -6,7 +6,6 @@ from django.urls import path
 from django.views.generic import TemplateView
 from loginas import urls as loginas_urls
 
-from announcements.views import AnnouncementTagAutocomplete
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from courses.views import TeacherDetailView
 from library.views import BookTagAutocomplete
@@ -52,7 +51,6 @@ urlpatterns = [
     path('', include('admission.urls')),
 
     # URLs for autocompletion of tags, available only for curators
-    path("narnia/announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="announcements_tags_autocomplete"),
     path("narnia/library/tags-autocomplete/", BookTagAutocomplete.as_view(), name="library_tags_autocomplete"),
     path("narnia/info_blocks/tags-autocomplete/", InfoBlockTagAutocomplete.as_view(), name="info_blocks_tags_autocomplete"),
 

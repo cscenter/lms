@@ -17,10 +17,3 @@ LMS_SUBDOMAIN = None
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,
 }
-
-INSTALLED_APPS += [
-    'announcements.apps.AnnouncementsConfig',
-    'application.apps.ApplicationConfig',
-    'online_courses.apps.Config',
-    'publications.apps.PublicationsConfig',
-]
