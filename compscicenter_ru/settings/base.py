@@ -1,9 +1,12 @@
 # Read project environment into os.environ before importing base configuration
 import environ
+import sys
 env = environ.Env()
 environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
 
 from lms.settings.base import *
+
+sys.path.append(str(ROOT_DIR / "compscicenter_ru" / "apps"))
 
 SITE_ID = 1
 
