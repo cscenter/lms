@@ -2,14 +2,15 @@
 Project settings
 """
 import logging
-
 import django
-
 import environ
 
 from core.settings.base import *
 
 env = environ.Env()
+environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
+
+SITE_ID = env.str('SITE_ID', default=None)
 
 DEBUG = MODELTRANSLATION_DEBUG = env.bool('DEBUG', default=False)
 
