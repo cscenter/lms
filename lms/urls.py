@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
@@ -50,7 +51,7 @@ urlpatterns = [
 
     path('', include('admission.urls')),
 
-    # URLs for autocompletion of tags, available only for curators
+    # URLs for tags autocomplete, available only for curators
     path("narnia/library/tags-autocomplete/", BookTagAutocomplete.as_view(), name="library_tags_autocomplete"),
     path("narnia/info_blocks/tags-autocomplete/", InfoBlockTagAutocomplete.as_view(), name="info_blocks_tags_autocomplete"),
 
@@ -72,3 +73,11 @@ if settings.DEBUG:
     ]
     if 'rosetta' in settings.INSTALLED_APPS:
         urlpatterns += [path('rosetta/', include('rosetta.urls'))]
+
+if apps.is_installed('announcements'):
+    from announcements.views import AnnouncementTagAutocomplete
+    # URLs for tags autocomplete for announcements, specific for CS Center site
+    urlpatterns += [
+        path("narnia/announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(),
+             name="announcements_tags_autocomplete"),
+    ]
