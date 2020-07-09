@@ -770,7 +770,8 @@ class InterviewAppointmentView(generic.TemplateView):
                 # Mark invitation as accepted
                 (InterviewInvitation.objects
                  .filter(pk=invitation.pk)
-                 .update(interview_id=interview.id))
+                 .update(interview_id=interview.id,
+                         modified=timezone.now()))
                 if not slot_has_taken:
                     transaction.savepoint_rollback(sid)
                     messages.error(
