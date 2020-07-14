@@ -51,6 +51,7 @@ class StudentStatuses(DjangoChoices):
 class GradingSystems(DjangoChoices):
     BASE = C(0, _("Default"), css_class="")
     BINARY = C(1, _("Binary"), css_class="__binary")
+    TEN_POINT = C(2, _("10-point"), css_class="")
 
 
 class GradeTypes(DjangoChoices):
@@ -59,18 +60,51 @@ class GradeTypes(DjangoChoices):
         * Enrollment
         * ProjectStudent
     """
-    NOT_GRADED = C('not_graded', _("Not graded"))
-    UNSATISFACTORY = C('unsatisfactory', _("Enrollment|Unsatisfactory"))
-    CREDIT = C('pass', _("Enrollment|Pass"))
-    GOOD = C('good', _("Good"))
-    EXCELLENT = C('excellent', _("Excellent"))
+    NOT_GRADED = C('not_graded', _("Not graded"), system='__all__')
+    UNSATISFACTORY = C('unsatisfactory', _("Enrollment|Unsatisfactory"),
+                       system=(GradingSystems.BASE, GradingSystems.BINARY))
+    CREDIT = C('pass', _("Enrollment|Pass"), system=(GradingSystems.BASE, GradingSystems.BINARY))
+    GOOD = C('good', _("Good"), system=(GradingSystems.BASE,))
+    EXCELLENT = C('excellent', _("Excellent"), system=(GradingSystems.BASE,))
 
-    satisfactory_grades = {CREDIT.value, GOOD.value, EXCELLENT.value}
+    ONE = C('one', '1', system=(GradingSystems.TEN_POINT,))
+    TWO = C('two', '2', system=(GradingSystems.TEN_POINT,))
+    THREE = C('three', '3', system=(GradingSystems.TEN_POINT,))
+    FOUR = C('four', '4', system=(GradingSystems.TEN_POINT,))
+    FIVE = C('five', '5', system=(GradingSystems.TEN_POINT,))
+    SIX = C('six', '6', system=(GradingSystems.TEN_POINT,))
+    SEVEN = C('seven', '7', system=(GradingSystems.TEN_POINT,))
+    EIGHT = C('eight', '8', system=(GradingSystems.TEN_POINT,))
+    NINE = C('nine', '9', system=(GradingSystems.TEN_POINT,))
+    TEN = C('ten', '10', system=(GradingSystems.TEN_POINT,))
+
+    satisfactory_grades = {CREDIT.value, GOOD.value, EXCELLENT.value,
+                           FIVE.value, SIX.value, SEVEN.value, EIGHT.value, NINE.value, TEN.value}
+
+    @classmethod
+    def suitable_for_grading_system(cls, choice, grading_system):
+        value, _ = choice
+        grade = GradeTypes.get_choice(value)
+        return grade.system == '__all__' or grading_system in grade.system
+
+    @classmethod
+    def get_choices_for_grading_system(cls, grading_system):
+        return list(filter(lambda c: GradeTypes.suitable_for_grading_system(c, grading_system), GradeTypes.choices))
 
     @classmethod
     def to_int_case_expr(cls):
         """Returns Case expression for comparing grades"""
         return Case(
+            When(grade=cls.TEN, then=Value(10)),
+            When(grade=cls.NINE, then=Value(9)),
+            When(grade=cls.EIGHT, then=Value(8)),
+            When(grade=cls.SEVEN, then=Value(7)),
+            When(grade=cls.SIX, then=Value(6)),
+            When(grade=cls.FIVE, then=Value(5)),
+            When(grade=cls.FOUR, then=Value(4)),
+            When(grade=cls.THREE, then=Value(3)),
+            When(grade=cls.TWO, then=Value(2)),
+            When(grade=cls.ONE, then=Value(1)),
             When(grade=cls.EXCELLENT, then=Value(4)),
             When(grade=cls.GOOD, then=Value(3)),
             When(grade=cls.CREDIT, then=Value(2)),

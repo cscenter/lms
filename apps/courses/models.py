@@ -32,7 +32,7 @@ from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles, \
 from courses.utils import get_current_term_pair, get_term_starts_at, \
     TermPair
 from files.storage import private_storage
-from learning.settings import GradingSystems, ENROLLMENT_DURATION
+from learning.settings import GradingSystems, ENROLLMENT_DURATION, GradeTypes
 from .constants import SemesterTypes, ClassTypes
 from .managers import CourseTeacherManager, AssignmentManager, \
     CourseClassManager, CourseDefaultManager
@@ -530,6 +530,10 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     @property
     def grading_type_choice(self):
         return GradingSystems.get_choice(self.grading_type)
+
+    @property
+    def grade_choices(self):
+        return GradeTypes.get_choices_for_grading_system(self.grading_type)
 
     @instance_memoize
     def is_actual_teacher(self, teacher_id):
