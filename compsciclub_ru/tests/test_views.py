@@ -9,6 +9,7 @@ from compsciclub_ru.views import ClubClassesFeed
 from core.middleware import BranchViewMiddleware
 from core.tests.factories import BranchFactory
 from core.urls import reverse
+from courses.models import Course
 from courses.tests.factories import CourseClassFactory, SemesterFactory, CourseFactory
 from learning.settings import Branches
 from users.tests.factories import TeacherFactory
@@ -19,8 +20,8 @@ def test_index_view_course_list(client, settings):
     """
     Only courses that were shared with CS Club in the current semester should be shown on the index page
     """
-    current_semester = SemesterFactory.create_current()
-    previous_semester = SemesterFactory.create_prev(current_semester)
+    current_semester = SemesterFactory.create(year=2020, type='autumn')
+    earlier_semester = SemesterFactory.create(year=2019, type='autumn')
 
     branch_spb_center = BranchFactory(code=Branches.SPB,
                                       site__domain=settings.ANOTHER_DOMAIN)
@@ -31,10 +32,10 @@ def test_index_view_course_list(client, settings):
                                           main_branch=branch_spb_center)
     course_center_public = CourseFactory(semester=current_semester,
                                          main_branch=branch_spb_center)
-    course_center_outdated = CourseFactory(semester=previous_semester,
+    course_center_outdated = CourseFactory(semester=earlier_semester,
                                            main_branch=branch_spb_center)
     course_club_actual = CourseFactory(semester=current_semester)
-    course_club_outdated = CourseFactory(semester=previous_semester)
+    course_club_outdated = CourseFactory(semester=earlier_semester)
 
     # Some of CS Courses were shared with CS Club
     course_center_public.branches.add(branch_spb_club)
@@ -42,6 +43,7 @@ def test_index_view_course_list(client, settings):
 
     response = client.get(reverse('index'))
     assert response.status_code == 200
+    print(response.content)
     assert smart_bytes(course_center_private.meta_course.name) not in response.content
     assert smart_bytes(course_center_public.meta_course.name) in response.content
     assert smart_bytes(course_center_outdated.meta_course.name) not in response.content
@@ -54,7 +56,7 @@ def test_course_list(client, settings):
     """
     Сlub students can see all Club or CS Center courses that have been shared with their branch
     """
-    current_semester = SemesterFactory.create_current()
+    current_semester = SemesterFactory.create(year=2020, type='spring')
     branch_spb_center = BranchFactory(code=Branches.SPB,
                                       site__domain=settings.ANOTHER_DOMAIN)
     branch_spb_club = BranchFactory(code=Branches.SPB,
@@ -84,7 +86,7 @@ def test_club_classes_feed(rf, client, settings, mocker):
       * are hosted by the current club branch
       * were shared with the current club branch
     """
-    current_semester = SemesterFactory.create_current()
+    current_semester = SemesterFactory.create(year=2020, type='spring')
     branch_center = BranchFactory(code=Branches.SPB,
                                   site__domain=settings.ANOTHER_DOMAIN)
     branch_club = BranchFactory(code=Branches.SPB)

@@ -3016,7 +3016,7 @@ msgstr "Профиль"
 
 #: lms/jinja2/lms/layout/_top_menu.html:40 lms/templates/_top_menu.html:45
 msgid "Logout"
-msgstr ""
+msgstr "Выйти"
 
 #: lms/menus.py:10
 msgctxt "menu"
@@ -3154,7 +3154,7 @@ msgstr ""
 
 #: lms/templates/base.html:85
 msgid "close all"
-msgstr ""
+msgstr "закрыть все"
 
 #: lms/templates/lms/course_offerings.html:15
 #: lms/templates/lms/course_offerings.html:76
@@ -3163,7 +3163,7 @@ msgstr "Курс CS клуба"
 
 #: lms/templates/users/user_detail.html:10
 msgid "on site"
-msgstr ""
+msgstr "на сайте"
 
 #: lms/templates/users/user_detail.html:49
 msgid "Change photo"
@@ -3174,11 +3174,9 @@ msgid "student"
 msgstr "студент"
 
 #: lms/templates/users/user_detail.html:70
-#, fuzzy
-#| msgid "Enroll in"
 msgctxt "user_detail"
 msgid "enrolled in"
-msgstr "Записаться"
+msgstr "года поступления"
 
 #: lms/templates/users/user_detail.html:74
 msgid "teacher"
@@ -3205,7 +3203,7 @@ msgstr "Год программы обучения"
 #: lms/templates/users/user_detail.html:374
 msgctxt "Project"
 msgid "Shifted"
-msgstr ""
+msgstr "Перенесён"
 
 #: lms/templates/users/user_detail.html:376
 msgctxt "Project"
@@ -3224,11 +3222,11 @@ msgstr "Календарь"
 
 #: lms/templates/users/user_detail.html:431
 msgid "Link"
-msgstr ""
+msgstr "Ссылка"
 
 #: lms/templates/users/user_detail.html:448
 msgid "Events"
-msgstr ""
+msgstr "События"
 
 #: lms/templates/users/user_detail.html:459
 msgid "Social accounts"
