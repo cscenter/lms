@@ -24,7 +24,7 @@ install:
   - pipenv sync --dev
   - pip3 list
 before_script:
-  - cp compscicenter_ru/settings/.env.example compscicenter_ru/settings/.env
+  - cp lms/settings/.env.example lms/settings/.env
   - cp compsciclub_ru/settings/.env.example compsciclub_ru/settings/.env
   - psql --version
   - psql -c 'CREATE DATABASE travis_ci_test;' -U postgres
