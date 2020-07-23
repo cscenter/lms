@@ -7,6 +7,7 @@ from typing import Optional
 from urllib import parse
 
 from braces.views import UserPassesTestMixin
+from django.conf import settings
 from django.contrib import messages
 from django.db import transaction, IntegrityError
 from django.db.models import Avg, Value, Prefetch
@@ -35,7 +36,6 @@ from admission.models import Interview, Comment, Contest, Applicant, Campaign, \
     InterviewInvitation, Test, Exam
 from admission.services import create_invitation, create_student_from_applicant, \
     EmailQueueService, UsernameError, get_meeting_time
-from core.settings.base import DEFAULT_BRANCH_CODE
 from core.timezone import now_local
 from core.urls import reverse
 from core.utils import render_markdown, bucketize
@@ -529,7 +529,7 @@ class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
                     .values_list("branch__code", flat=True))
         branch_code = self.request.user.branch.code
         if branch_code not in branches:
-            branch_code = next(branches.iterator(), DEFAULT_BRANCH_CODE)
+            branch_code = next(branches.iterator(), settings.DEFAULT_BRANCH_CODE)
         return reverse("admission:branch_interview_results", kwargs={
             "branch_code": branch_code,
         })
