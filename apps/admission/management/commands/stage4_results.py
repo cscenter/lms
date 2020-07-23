@@ -67,6 +67,7 @@ class Command(EmailTemplateMixin, CustomizeQueryMixin,
                         sender=email_from,
                         template=template,
                         render_on_delivery=True,
+                        context={},
                         backend='ses',
                     )
                     stats[a.status] += 1
