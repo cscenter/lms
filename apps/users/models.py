@@ -4,6 +4,7 @@ from random import choice
 from string import ascii_lowercase, digits
 from typing import Optional, Set
 
+import pytz
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser, PermissionsMixin, \
@@ -393,9 +394,11 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         self.groups.filter(user=self, role=role, site_id=sid).delete()
 
     def get_timezone(self) -> Timezone:
-        if not User.branch.is_cached(self):
-            self.branch = Branch.objects.get_by_pk(self.branch_id)
-        return self.branch.get_timezone()
+        return self._timezone
+
+    @cached_property
+    def _timezone(self):
+        return pytz.timezone(self.time_zone)
 
     @staticmethod
     def generate_random_username(length=30,

@@ -33,6 +33,7 @@ class UserFactory(factory.DjangoModelFactory):
     last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
     branch = factory.SubFactory('core.tests.factories.BranchFactory',
                                 code=settings.DEFAULT_BRANCH_CODE)
+    time_zone = factory.SelfAttribute('branch.time_zone')
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
@@ -123,7 +124,8 @@ class StudentProfileFactory(factory.DjangoModelFactory):
         django_get_or_create = ('user', 'branch', 'year_of_admission')
 
     type = StudentTypes.REGULAR
-    user = factory.SubFactory(UserFactory)
+    user = factory.SubFactory(UserFactory,
+                              time_zone=factory.SelfAttribute('..branch.time_zone'))
     branch = factory.SubFactory(BranchFactory)
     year_of_admission = factory.SelfAttribute('user.date_joined.year')
 

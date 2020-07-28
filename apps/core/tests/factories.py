@@ -29,7 +29,13 @@ class CityFactory(factory.DjangoModelFactory):
     code = factory.Sequence(lambda n: "%03d" % n)
     name = factory.Sequence(lambda n: "City name %03d" % n)
     abbr = factory.Sequence(lambda n: "%03d" % n)
-    time_zone = 'Europe/Moscow'
+
+    @factory.lazy_attribute
+    def time_zone(self):
+        if self.code == Branches.NSK:
+            return 'Asia/Novosibirsk'
+        else:
+            return 'Europe/Moscow'
 
 
 class EmailTemplateFactory(factory.DjangoModelFactory):
@@ -47,8 +53,14 @@ class BranchFactory(factory.DjangoModelFactory):
                               domain=factory.LazyAttribute(lambda o: settings.TEST_DOMAIN))
     city = factory.SubFactory(CityFactory)
     order = factory.Sequence(lambda n: n)
-    time_zone = 'Europe/Moscow'
     established = 2013
+
+    @factory.lazy_attribute
+    def time_zone(self):
+        if self.code != Branches.DISTANCE:
+            return self.city.time_zone
+        else:
+            return 'Europe/Moscow'
 
     class Meta:
         model = Branch
