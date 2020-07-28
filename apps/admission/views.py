@@ -648,7 +648,7 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
         return context
 
 
-class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
+class ApplicantCreateStudentView(CuratorOnlyMixin, generic.View):
     http_method_names = ['post']
 
     @atomic

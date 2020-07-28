@@ -26,7 +26,7 @@ from sorl.thumbnail import ImageField
 
 from auth.permissions import perm_registry
 from auth.tasks import update_password_in_gerrit
-from core.models import LATEX_MARKDOWN_ENABLED, Branch
+from core.models import LATEX_MARKDOWN_ENABLED, Branch, TIMEZONES
 from core.timezone import Timezone, TimezoneAwareModel
 from core.timezone.constants import DATETIME_FORMAT_RU
 from core.urls import reverse
@@ -260,7 +260,6 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
             'Unselect this instead of deleting accounts.'
         ),
     )
-    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     is_superuser = models.BooleanField(
         _('superuser status'),
         default=False,
@@ -275,8 +274,8 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         _("Phone"),
         max_length=40,
         blank=True)
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     modified = AutoLastModifiedField(_('modified'))
-
     photo = ImageField(
         _("CSCUser|photo"),
         upload_to="photos/",
@@ -285,16 +284,20 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         blank=True,
         null=True
     )
-    bio = models.TextField(
-        _("CSCUser|note"),
-        help_text=_("LaTeX+Markdown is enabled"),
-        blank=True)
     branch = models.ForeignKey(
         "core.Branch",
         verbose_name=_("Branch"),
         related_name="+",  # Disable backwards relation
         on_delete=models.PROTECT,
         null=True, blank=True)
+    time_zone = models.CharField(
+        verbose_name=_("Timezone"), max_length=63,
+        choices=tuple(zip(TIMEZONES, TIMEZONES)),
+        default=settings.DEFAULT_TIMEZONE.zone)
+    bio = models.TextField(
+        _("CSCUser|note"),
+        help_text=_("LaTeX+Markdown is enabled"),
+        blank=True)
     yandex_login = models.CharField(
         _("Yandex Login"),
         max_length=80,

@@ -74,6 +74,7 @@ def create_student_from_applicant(applicant):
     """
     Creates new model or override existent with data from application form.
     """
+    branch = applicant.campaign.branch
     try:
         user = User.objects.get(email=applicant.email)
     except User.DoesNotExist:
@@ -86,11 +87,12 @@ def create_student_from_applicant(applicant):
         random_password = User.objects.make_random_password()
         user = User.objects.create_user(username=username,
                                         email=applicant.email,
+                                        time_zone=branch.time_zone,
                                         password=random_password)
     StudentProfile.objects.update_or_create(
         type=StudentTypes.REGULAR,
         user=user,
-        branch=applicant.campaign.branch,
+        branch=branch,
         year_of_admission=applicant.campaign.year,
         defaults={
             "year_of_curriculum": applicant.campaign.year,

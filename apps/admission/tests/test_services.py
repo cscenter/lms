@@ -4,11 +4,12 @@ import pytest
 
 from admission.constants import ChallengeStatuses, InterviewFormats
 from admission.models import Exam, InterviewSlot
-from admission.services import EmailQueueService
+from admission.services import EmailQueueService, create_student_from_applicant
 from admission.tests.factories import CampaignFactory, ApplicantFactory, \
     ExamFactory, InterviewStreamFactory
 from core.tests.factories import EmailTemplateFactory, BranchFactory
 from learning.settings import Branches
+from users.models import StudentTypes
 
 
 @pytest.mark.django_db
@@ -39,3 +40,16 @@ def test_new_exam_invitation_email():
                                                             allow_duplicates=True)
     assert created
     assert email3.pk > email2.pk
+
+
+@pytest.mark.django_db
+def test_create_student_from_applicant(settings):
+    branch = BranchFactory(time_zone='Asia/Yekaterinburg')
+    campaign = CampaignFactory(branch=branch)
+    applicant = ApplicantFactory(campaign=campaign)
+    user = create_student_from_applicant(applicant)
+    student_profile = user.get_student_profile(settings.SITE_ID)
+    assert student_profile.branch == branch
+    assert student_profile.year_of_admission == applicant.campaign.year
+    assert student_profile.type == StudentTypes.REGULAR
+    assert user.time_zone == branch.time_zone

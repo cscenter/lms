@@ -42,7 +42,7 @@ class AsyncEmailRegistrationView(RegistrationView):
         # Since we calculate the RegistrationProfile expiration from this date,
         # we want to ensure that it is current
         new_user.date_joined = timezone.now()
-
+        new_user.time_zone = new_user.branch.time_zone
         with transaction.atomic():
             new_user.save()
             student_profile = StudentProfile(
