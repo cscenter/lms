@@ -9,12 +9,13 @@ from courses.utils import get_term_index, get_term_by_index, \
     get_start_of_week, get_end_of_week, MonthPeriod
 
 
-def test_get_term_index(settings):
-    established = settings.FOUNDATION_YEAR = 2011
+def test_get_term_index(mocker):
+    mocked_first_term_year = mocker.patch('courses.utils._FIRST_TERM_YEAR', 2011)
+    established = mocked_first_term_year
     cnt = len(SemesterTypes.choices)
     with pytest.raises(ValueError) as e:
         get_term_index(established - 1, SemesterTypes.SPRING)
-    assert "target year < FOUNDATION_YEAR" in str(e.value)
+    assert f"target year < {established}" in str(e.value)
     with pytest.raises(ValueError) as e:
         get_term_index(established, "sprEng")
     assert "unknown term type" in str(e.value)
@@ -26,8 +27,9 @@ def test_get_term_index(settings):
     assert get_term_index(established + 7, SemesterTypes.SPRING) == cnt * 7
 
 
-def test_get_term_by_index(settings):
-    established = settings.FOUNDATION_YEAR = 2011
+def test_get_term_by_index(mocker):
+    mocked_first_term_year = mocker.patch('courses.utils._FIRST_TERM_YEAR', 2011)
+    established = mocked_first_term_year
     with pytest.raises(TermIndexError) as excinfo:
         get_term_by_index(-1)
     term_pair = get_term_by_index(0)
