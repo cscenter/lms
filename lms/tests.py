@@ -14,7 +14,7 @@ def test_login_restrictions(client, settings):
     """
     Make sure users with any roles for compscicenter.ru could log in.
     """
-    settings.SITE_ID = settings.CENTER_SITE_ID
+    settings.SITE_ID = 1
     new_site = Site(domain='foo.bar.baz', name='foo_bar_baz')
     new_site.save()
     user_data = factory.build(dict, FACTORY_CLASS=UserFactory)

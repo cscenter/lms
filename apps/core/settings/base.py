@@ -1,8 +1,5 @@
 """
 Django settings shared between projects.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/2.2/topics/settings/
 """
 from pathlib import Path
 
@@ -19,9 +16,7 @@ DEFAULT_CITY_CODE = "spb"
 DEFAULT_BRANCH_CODE = "spb"
 DEFAULT_TIMEZONE = pytz.timezone("Europe/Moscow")
 
-CLUB_DOMAIN = 'compsciclub.ru'
 # FIXME: remove
-CENTER_SITE_ID = 1
 CLUB_SITE_ID = 2
 
 LMS_SUBDOMAIN = None

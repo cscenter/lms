@@ -23,7 +23,7 @@ def test_enrollment(client, settings):
         enrollment_perids__ends_on=tomorrow.date())
     course = CourseFactory(semester=term)
     assert course.enrollment_is_open
-    branch_center = BranchFactory(site_id=settings.CENTER_SITE_ID)
+    branch_center = BranchFactory(site_id=1)
     student_center = StudentFactory(
         student_profile__branch=branch_center,
         branch__code=Branches.SPB)

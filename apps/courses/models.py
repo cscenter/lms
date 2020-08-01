@@ -505,6 +505,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         if self.is_completed:
             return False
         from learning.models import EnrollmentPeriod
+        # TODO: cache enrollment periods to avoid additional db hits
         enrollment_period = (EnrollmentPeriod.objects
                              .filter(site_id=settings.SITE_ID,
                                      semester=self.semester)
