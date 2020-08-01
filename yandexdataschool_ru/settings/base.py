@@ -3,7 +3,7 @@ import environ
 env = environ.Env()
 environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
 
-from lms.settings.base import *
+from lms.settings.extended import *
 
 SITE_ID = 3
 

@@ -45,30 +45,10 @@ MIDDLEWARE = [
     'notifications.middleware.UnreadNotificationsCacheMiddleware',
     'core.middleware.RedirectMiddleware',
 ]
-INSTALLED_APPS += [
-    'dbbackup',
-    'lms',
-    'menu',
-    'post_office',
-    'django_jinja',
-    'projects.apps.ProjectsConfig',
-    'stats.apps.StatisticsConfig',
-    'admission.apps.AdmissionConfig',
-    'staff',
-    'surveys.apps.SurveysConfig',
-    'info_blocks.apps.InfoBlocksConfig',
-    'faq.apps.FAQConfig',
-    'ckeditor',
-    'ckeditor_uploader',
-]
 
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
-    },
-    'social_networks': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': str(ROOT_DIR / ".cache")
     }
 }
 
@@ -100,14 +80,6 @@ THUMBNAIL_REDIS_HOST = REDIS_HOST
 THUMBNAIL_REDIS_PORT = REDIS_PORT
 THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
 
-# Oauth settings for getting access to login from Yandex.Passport
-# Note: Application is managed by `contest@compscicenter.ru` yandex account
-SOCIAL_AUTH_YANDEXRU_KEY = env.str('SOCIAL_AUTH_YANDEXRU_KEY')
-SOCIAL_AUTH_YANDEXRU_SECRET = env.str('SOCIAL_AUTH_YANDEXRU_SECRET')
-# Prevent calling pipeline for this backend
-SOCIAL_AUTH_YANDEXRU_PIPELINE = []
-
-
 # Monitoring
 SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
@@ -119,9 +91,6 @@ TEMPLATES = [
         'DIRS': [
             django.__path__[0] + '/forms/jinja2',
             str(ROOT_DIR / "lms" / "jinja2"),
-            str(SHARED_APPS_DIR / "surveys" / "jinja2"),
-            # svg inline support
-            str(ASSETS_ROOT / "v2" / "dist" / "img"),
         ],
         "NAME": "jinja2",
         "OPTIONS": {
@@ -174,8 +143,6 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': False,
         'DIRS': [
-            str(SHARED_APPS_DIR / "admission" / "templates"),
-            str(SHARED_APPS_DIR / "staff" / "templates"),
             str(SHARED_APPS_DIR / "templates"),
             django.__path__[0] + '/forms/templates',
         ],
@@ -203,12 +170,6 @@ TEMPLATES = [
 ]
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
-LOCALE_PATHS += [
-    str(SHARED_APPS_DIR / "projects" / "locale"),
-    str(SHARED_APPS_DIR / "admission" / "locale"),
-    str(SHARED_APPS_DIR / "surveys" / "locale"),
-]
-
 SECRET_KEY = env('DJANGO_SECRET_KEY')
 
 # Email settings
@@ -224,42 +185,10 @@ HASHIDS_SALT = env.str('HASHIDS_SALT')
 
 YANDEX_DISK_USERNAME = env.str('YANDEX_DISK_USERNAME')
 YANDEX_DISK_PASSWORD = env.str('YANDEX_DISK_PASSWORD')
-
-YANDEX_DISK_CLIENT_ID = env.str('YANDEX_DISK_CLIENT_ID')
-YANDEX_DISK_CLIENT_SECRET = env.str('YANDEX_DISK_CLIENT_SECRET')
-YANDEX_DISK_ACCESS_TOKEN = env.str('YANDEX_DISK_ACCESS_TOKEN')
-YANDEX_DISK_REFRESH_TOKEN = env.str('YANDEX_DISK_REFRESH_TOKEN')
-
+YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/"
 
 # s3boto3.S3Boto3Storage: all files will inherit the bucket’s ACL
 AWS_DEFAULT_ACL = None
-
-AWS_SES_ACCESS_KEY_ID = env.str('AWS_SES_ACCESS_KEY_ID')
-AWS_SES_SECRET_ACCESS_KEY = env.str('AWS_SES_SECRET_ACCESS_KEY')
-AWS_SES_REGION_NAME = env.str('AWS_SES_REGION_NAME', default='eu-west-1')
-AWS_SES_REGION_ENDPOINT = env.str('AWS_SES_REGION_ENDPOINT', default='email.eu-west-1.amazonaws.com')
-POST_OFFICE = {
-    'BACKENDS': {
-        'ses': 'django.core.mail.backends.console.EmailBackend',
-        'BATCH_SIZE': 10,
-        'LOG_LEVEL': 1
-    }
-}
-
-
-# "ldap:///"
-LDAP_CLIENT_URI = env.str('LDAP_CLIENT_URI', default="ldap://review.compscicenter.ru:389")
-# Domain Component suffix for distinguished name (or DN)
-# FIXME: move to the SiteConfiguration
-LDAP_DB_SUFFIX = env.str('LDAP_DB_SUFFIX', default="dc=review,dc=compscicenter,dc=ru")
-LDAP_CLIENT_USERNAME = env.str('LDAP_CLIENT_USERNAME', default="admin")
-LDAP_CLIENT_PASSWORD = env.str('LDAP_CLIENT_PASSWORD')
-LDAP_SYNC_PASSWORD = env.bool('LDAP_SYNC_PASSWORD', default=True)
-
-
-GERRIT_API_URI = env.str('GERRIT_API_URI', default="https://review.compscicenter.ru/a/")
-GERRIT_CLIENT_USERNAME = env.str('GERRIT_CLIENT_USERNAME', default="admin")
-GERRIT_CLIENT_HTTP_PASSWORD = env.str('GERRIT_CLIENT_HTTP_PASSWORD')
 
 # Default keys are taken from https://developers.google.com/recaptcha/docs/faq
 RECAPTCHA_PUBLIC_KEY = env.str('RECAPTCHA_PUBLIC_KEY', default="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI")
@@ -270,18 +199,9 @@ RECAPTCHA_USE_SSL = True
 ADMIN_REORDER = []
 
 SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', default=True)
-SESSION_COOKIE_DOMAIN = env.str('DJANGO_SESSION_COOKIE_DOMAIN', default='.compscicenter.ru')
-SESSION_COOKIE_NAME = env.str('DJANGO_SESSION_COOKIE_NAME', default='cscsessionid')
+SESSION_COOKIE_DOMAIN = env.str('DJANGO_SESSION_COOKIE_DOMAIN', default=None)
+SESSION_COOKIE_NAME = env.str('DJANGO_SESSION_COOKIE_NAME', default='sessionid')
 SESSION_COOKIE_SAMESITE = env.str('DJANGO_SESSION_COOKIE_SAMESITE', default=None)
 CSRF_COOKIE_SECURE = env.bool('DJANGO_CSRF_COOKIE_SECURE', default=True)
-CSRF_COOKIE_DOMAIN = env.str('DJANGO_CSRF_COOKIE_DOMAIN', default='.compscicenter.ru')
+CSRF_COOKIE_DOMAIN = env.str('DJANGO_CSRF_COOKIE_DOMAIN', default=None)
 CSRF_COOKIE_NAME = env.str('DJANGO_CSRF_COOKIE_NAME', default='csrftoken')
-
-
-# Registration is partially used in `learning/invitation`
-INCLUDE_REGISTER_URL = False
-INCLUDE_AUTH_URLS = False
-ACCOUNT_ACTIVATION_DAYS = 1
-ACTIVATION_EMAIL_SUBJECT = 'emails/activation_email_subject.txt'
-ACTIVATION_EMAIL_BODY = 'emails/activation_email_body.txt'
-

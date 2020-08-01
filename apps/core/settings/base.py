@@ -106,8 +106,6 @@ LOGINAS_FROM_USER_SESSION_FLAG = "loginas_from_user"
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
-YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/"
-
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 STATIC_URL = '/static/'
 ASSETS_ROOT = ROOT_DIR / "assets"
