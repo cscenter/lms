@@ -19,9 +19,36 @@ REVERSE_TO_LMS_URL_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
 # Default scheme for `core.urls.reverse`
 DEFAULT_URL_SCHEME = env.str("REVERSE_URL_SCHEME", default="https")
 
-STATIC_ROOT = env.str('DJANGO_STATIC_ROOT', default=str(ROOT_DIR / "static"))
+SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', default=True)
+
+# Upload Settings
+USE_S3_FOR_UPLOAD = env.bool('UPLOAD_USE_S3', default=True)
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS', default=0o755)
 FILE_UPLOAD_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_PERMISSIONS', default=0o664)
+AWS_DEFAULT_ACL = None  # All files will inherit the bucket’s ACL
+if USE_S3_FOR_UPLOAD:
+    DEFAULT_FILE_STORAGE = 'core.storage.PublicMediaS3Storage'
+    AWS_S3_ACCESS_KEY_ID = env.str('AWS_S3_ACCESS_KEY_ID')
+    AWS_S3_SECRET_ACCESS_KEY = env.str('AWS_S3_SECRET_ACCESS_KEY')
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_STORAGE_BUCKET_NAME = env.str('AWS_STORAGE_BUCKET_NAME', default='lms-vault')
+    AWS_S3_REGION_NAME = 'eu-central-1'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_PUBLIC_MEDIA_LOCATION = 'media'
+    AWS_PRIVATE_MEDIA_LOCATION = 'private'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
+else:
+    MEDIA_ROOT = str(ROOT_DIR / "media")
+    MEDIA_URL = "/media/"
+
+# Static Files Settings
+STATIC_ROOT = env.str('DJANGO_STATIC_ROOT', default=str(ROOT_DIR / "static"))
+STATIC_URL = '/static/'
+STATICFILES_STORAGE = 'static_compress.storage.CompressedManifestStaticFilesStorage'
+STATIC_COMPRESS_FILE_EXTS = ['css', 'js', 'svg']
+STATIC_COMPRESS_METHODS = ['gz+zlib']
+STATIC_COMPRESS_KEEP_ORIGINAL = True
+STATIC_COMPRESS_MIN_SIZE_KB = 30
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {
@@ -187,8 +214,6 @@ YANDEX_DISK_USERNAME = env.str('YANDEX_DISK_USERNAME')
 YANDEX_DISK_PASSWORD = env.str('YANDEX_DISK_PASSWORD')
 YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/"
 
-# s3boto3.S3Boto3Storage: all files will inherit the bucket’s ACL
-AWS_DEFAULT_ACL = None
 
 # Default keys are taken from https://developers.google.com/recaptcha/docs/faq
 RECAPTCHA_PUBLIC_KEY = env.str('RECAPTCHA_PUBLIC_KEY', default="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI")
