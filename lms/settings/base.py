@@ -1,6 +1,3 @@
-"""
-Project settings
-"""
 import logging
 import django
 import environ

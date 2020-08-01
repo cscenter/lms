@@ -105,7 +105,7 @@ def get_club_domain(code=None):
         prefix = f"{code}."
     else:
         prefix = ""
-    return protocol + prefix + settings.CLUB_DOMAIN
+    return protocol + prefix + 'compsciclub.ru'
 
 
 class SQLFormatter(logging.Formatter):

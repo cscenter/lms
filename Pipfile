@@ -56,7 +56,7 @@ django-rosetta = "==0.9.4"
 django-modeltranslation = "==0.15"
 # AWS
 boto3 = "*"
-boto = "==2.49.0"
+boto = "*"
 # Mailing
 django-ses = "==0.8.14"
 django-post_office = "==3.4.1"
