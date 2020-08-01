@@ -1,10 +1,11 @@
 # Read project environment into os.environ before importing base configuration
 import environ
 import sys
+
 env = environ.Env()
 environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
 
-from lms.settings.base import *
+from lms.settings.extended import *
 
 sys.path.append(str(ROOT_DIR / "compscicenter_ru" / "apps"))
 
@@ -41,6 +42,11 @@ for template in TEMPLATES:
         template["DIRS"] = [str(PROJECT_DIR / "jinja2")] + template["DIRS"]
     elif "DjangoTemplates" in template["BACKEND"]:
         template["DIRS"] = [str(PROJECT_DIR / "templates")] + template["DIRS"]
+
+CACHES['social_networks'] = {
+    'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+    'LOCATION': str(ROOT_DIR / ".cache")
+}
 
 
 # Append project translation
