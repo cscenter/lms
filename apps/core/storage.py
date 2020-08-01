@@ -9,6 +9,12 @@ from django.contrib.staticfiles.apps import \
 from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
 
 
+# Static files storage implementations
+from django.core.files.storage import FileSystemStorage, get_storage_class
+from django.utils.functional import LazyObject
+from storages.backends.s3boto3 import S3Boto3Storage
+
+
 class StaticFilesConfig(_StaticFilesConfig):
     ignore_patterns = ['CVS', '.*', '*~', 'src', '*.map', '_builds']
 
@@ -21,12 +27,12 @@ class CloudFrontManifestStaticFilesStorage(ManifestStaticFilesStorage):
     Cloudfront is configured to work with alternate domain name
     (e.g. https://cdn.example.com/) and this is the actual value of
     `settings.STATIC_URL`. As a side-effect `collectstatic` post-processing
-    skips absolutely all `url(...)` patterns in *.css files started
-    from `/static/`.
+    skips (in *.css files) absolutely all `url(...)` patterns starting
+    with prefix `/static/`.
     This class should fix this problem by customizing `url_converter` -
     instead of checking `settings.STATIC_URL` (that points to the cdn
     subdomain) it checks `settings.CDN_SOURCE_STATIC_URL` that points to
-    the `/static/` value. Later all relative transformed urls starting from
+    the `/static/` value. As a result all urls starting with
     `settings.CDN_SOURCE_STATIC_URL` will be modified to point to the
     `settings.STATIC_URL` cdn domain.
     """
@@ -89,3 +95,18 @@ class CloudFrontManifestStaticFilesStorage(ManifestStaticFilesStorage):
             return template % unquote(transformed_url)
 
         return converter
+
+
+class PublicMediaS3Storage(S3Boto3Storage):
+    location = getattr(settings, 'AWS_PUBLIC_MEDIA_LOCATION', 'media')
+    file_overwrite = False
+    default_acl = 'public-read'
+    url_protocol = 'https:'
+
+
+class PrivateMediaS3Storage(S3Boto3Storage):
+    location = getattr(settings, 'AWS_PRIVATE_MEDIA_LOCATION', 'private')
+    file_overwrite = False
+    default_acl = 'private'
+    url_protocol = 'https:'
+    custom_domain = False

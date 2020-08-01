@@ -8,8 +8,6 @@ import pytz
 ROOT_DIR = Path(__file__).parents[3]
 SHARED_APPS_DIR = ROOT_DIR / "apps"
 
-MEDIA_ROOT = str(ROOT_DIR / "media")
-MEDIA_URL = "/media/"
 ADMIN_URL = '/narnia/'
 
 DEFAULT_CITY_CODE = "spb"
@@ -107,16 +105,10 @@ LOGINAS_FROM_USER_SESSION_FLAG = "loginas_from_user"
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-STATIC_URL = '/static/'
 ASSETS_ROOT = ROOT_DIR / "assets"
 STATICFILES_DIRS = [
     str(ASSETS_ROOT),
 ]
-STATICFILES_STORAGE = 'static_compress.storage.CompressedManifestStaticFilesStorage'
-STATIC_COMPRESS_FILE_EXTS = ['css', 'js', 'svg']
-STATIC_COMPRESS_METHODS = ['gz+zlib']
-STATIC_COMPRESS_KEEP_ORIGINAL = True
-STATIC_COMPRESS_MIN_SIZE_KB = 30
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
