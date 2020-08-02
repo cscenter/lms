@@ -23,7 +23,7 @@ module.exports = {
         new webpack.HotModuleReplacementPlugin(),
         new BundleTracker({
             path: __outputdir,
-            filename: `webpack-stats-${APP_VERSION}-dev.json`
+            filename: `webpack-stats-${APP_VERSION}.json`
         }),
     ],
 
