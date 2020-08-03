@@ -768,6 +768,7 @@ class StudentProfile(models.Model):
         help_text=_("Passport, consent for processing personal data, "
                     "diploma (optional)"),
         default=False)
+    # Fields required for the issuance of an official diploma
     diploma_number = models.CharField(
         verbose_name=_("Diploma Number"),
         max_length=64,

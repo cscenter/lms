@@ -105,7 +105,7 @@ class StudyProgramCourseGroup(models.Model):
         'StudyProgram',
         verbose_name=_("Study Program"),
         related_name='course_groups',
-        on_delete=models.PROTECT)
+        on_delete=models.CASCADE)
 
     class Meta:
         db_table = "study_programs_groups"
