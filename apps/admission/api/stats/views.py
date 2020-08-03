@@ -16,7 +16,7 @@ from .pandas_serializers import \
     CampaignResultsTimelineSerializer, \
     ScoreByUniversitiesSerializer, ScoreByCoursesSerializer, \
     CampaignResultsByUniversitiesSerializer, \
-    CampaignResultsByCoursesSerializer, ApplicationSubmissionPandasSerializer
+    CampaignResultsByEducationLevelSerializer, ApplicationSubmissionPandasSerializer
 from .serializers import StageByYearSerializer
 from stats.renderers import ListRenderersMixin
 
@@ -196,7 +196,7 @@ class CampaignResultsByUniversities(ListRenderersMixin, PandasView):
 class CampaignResultsByCourses(ListRenderersMixin, PandasView):
     permission_classes = [CuratorAccessPermission]
     serializer_class = SimpleSerializer
-    pandas_serializer_class = CampaignResultsByCoursesSerializer
+    pandas_serializer_class = CampaignResultsByEducationLevelSerializer
 
     def get_queryset(self):
         campaign_id = self.kwargs.get('campaign_id')
