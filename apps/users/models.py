@@ -807,6 +807,13 @@ class StudentProfile(TimeStampedModel):
         related_name='+',
         blank=True,
         null=True)
+    invitation = models.ForeignKey(
+        "learning.Invitation",
+        verbose_name=_("Invitation"),
+        editable=False,
+        blank=True, null=True,
+        related_name="student_profiles",
+        on_delete=models.PROTECT,)
 
     class Meta:
         db_table = 'student_profiles'
