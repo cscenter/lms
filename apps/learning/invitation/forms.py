@@ -48,7 +48,7 @@ class InvitationRegistrationForm(RegistrationFormUniqueEmail):
         return cleaned_data
 
 
-class CompleteProfileForm(forms.ModelForm):
+class CompleteAccountForm(forms.ModelForm):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.fields['first_name'].required = True

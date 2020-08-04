@@ -43,12 +43,28 @@ def get_student_profile(user: User, site,
     student_profile = (StudentProfile.objects
                        .filter(*filters, user=user, site=site)
                        .select_related('branch')
-                       .order_by('-year_of_admission', '-priority')
+                       .order_by('-year_of_admission', '-priority', '-pk')
                        .first())
     if student_profile is not None:
         # It helps to invalidate cache on user model if profile were changed
         student_profile.user = user
     return student_profile
+
+
+def create_student_profile(user: User, branch: Branch, profile_type,
+                           year_of_admission, **fields) -> StudentProfile:
+    fields = {
+        **fields,
+        "user": user,
+        "branch": branch,
+        "type": profile_type,
+        "year_of_admission": year_of_admission,
+    }
+    # FIXME: Prevent creating 2 profiles for invited student in the same
+    # term through admin interface
+    new_student_profile = StudentProfile(**fields)
+    new_student_profile.save()
+    return new_student_profile
 
 
 def populate_assignments_for_student(enrollment):
