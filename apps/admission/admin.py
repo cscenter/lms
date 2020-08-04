@@ -159,6 +159,7 @@ class ApplicantAdmin(admin.ModelAdmin):
     search_fields = ('yandex_login', 'yandex_login_q', 'stepic_id',
                      'first_name', 'surname', 'email', 'phone')
     readonly_fields = ['yandex_login_q']
+    raw_id_fields = ('user',)
 
     def created_local(self, obj):
         return admin_datetime(obj.created_local())

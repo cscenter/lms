@@ -13,7 +13,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.sites.models import Site
 from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
-from django.db.models import prefetch_related_objects
+from django.db.models import prefetch_related_objects, Q
 from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
@@ -717,8 +717,7 @@ class StudentTypes(DjangoChoices):
             return Roles.INVITED
 
 
-# FIXME: add `created/modified` datetime
-class StudentProfile(models.Model):
+class StudentProfile(TimeStampedModel):
     site = models.ForeignKey(Site,
                              verbose_name=_("Site"),
                              on_delete=models.PROTECT,
@@ -814,11 +813,11 @@ class StudentProfile(models.Model):
         verbose_name = _("Student Profile")
         verbose_name_plural = _("Student Profiles")
         constraints = [
-            # Case when student passed distance branch and continued
-            # learning on-campus
+            # User could pass distance branch and continue learning on-campus
             models.UniqueConstraint(
                 fields=('user', 'branch', 'year_of_admission'),
-                name='unique_student_per_branch_per_admission_campaign'),
+                name='unique_regular_student_per_admission_campaign',
+                condition=Q(type=StudentTypes.REGULAR))
         ]
 
     def save(self, **kwargs):
@@ -845,6 +844,7 @@ class StudentProfile(models.Model):
 
     @property
     def is_active(self):
+        # FIXME: make sure profile is not expired for invited student? Should be valid only in the term of invitation
         return not StudentStatuses.is_inactive(self.status)
 
     def get_comment_changed_at_display(self, default=''):

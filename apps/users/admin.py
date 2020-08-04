@@ -153,7 +153,32 @@ class StudentStatusLogAdminInline(admin.TabularInline):
         return term.label if term else '-'
 
 
+class StudentProfileForm(forms.ModelForm):
+    class Meta:
+        model = StudentProfile
+        fields = "__all__"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        profile_type = cleaned_data.get('type')
+        user = cleaned_data.get('user')
+        branch = cleaned_data.get('branch')
+        year_of_admission = cleaned_data.get('year_of_admission')
+        required_for_validation = [user, branch, year_of_admission]
+        if all(f for f in required_for_validation):
+            # Show user-friendly error if unique constraint is failed
+            if profile_type == StudentTypes.REGULAR:
+                profile = (StudentProfile.objects
+                           .filter(user=user, branch=branch,
+                                   year_of_admission=year_of_admission))
+                if profile.exists():
+                    msg = _('Regular student profile already exists for this '
+                            'admission campaign year.')
+                    self.add_error('year_of_admission', ValidationError(msg))
+
+
 class StudentProfileAdmin(BaseModelAdmin):
+    form = StudentProfileForm
     list_select_related = ['user', 'branch', 'branch__site']
     list_display = ('user', 'branch', 'type', 'year_of_admission', 'status')
     list_filter = ('type', 'site', 'branch', 'status',)
