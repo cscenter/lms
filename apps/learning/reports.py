@@ -940,7 +940,7 @@ class ProgressReportForInvitation(ProgressReportForSemester):
                             .values('student_id'))
         return [
             Q(type=StudentTypes.INVITED),
-            Q(pk__in=invited_students)
+            Q(user_id__in=invited_students)
         ]
 
 
