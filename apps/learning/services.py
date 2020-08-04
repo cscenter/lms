@@ -20,13 +20,17 @@ from courses.models import Course, Assignment, AssignmentAttachment, \
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, StudentGroup, Event
 from learning.settings import StudentStatuses
-from users.models import User, StudentProfile
+from users.models import User, StudentProfile, StudentTypes
+
+
+class StudentProfileError(Exception):
+    pass
 
 
 # FIXME: get profile for Invited students from the current term ONLY
 # FIXME: store term of registration or get date range for the term of registration
-def get_student_profile(user: User, site,
-                        profile_type=None) -> Optional[StudentProfile]:
+def get_student_profile(user: User, site, profile_type=None,
+                        filters: List[Q] = None) -> Optional[StudentProfile]:
     """
     Returns the most actual student profile on site for user.
 
@@ -37,7 +41,7 @@ def get_student_profile(user: User, site,
         semester but reapplied on general terms for the second time
     * Regular student "came back" as invited
     """
-    filters = []
+    filters = filters or []
     if profile_type is not None:
         filters.append(Q(type=profile_type))
     student_profile = (StudentProfile.objects
@@ -51,18 +55,22 @@ def get_student_profile(user: User, site,
     return student_profile
 
 
-def create_student_profile(user: User, branch: Branch, profile_type,
+def create_student_profile(*, user: User, branch: Branch, profile_type,
                            year_of_admission, **fields) -> StudentProfile:
-    fields = {
+    profile_fields = {
         **fields,
         "user": user,
         "branch": branch,
         "type": profile_type,
         "year_of_admission": year_of_admission,
     }
+    if profile_type == StudentTypes.REGULAR:
+        if "year_of_curriculum" not in profile_fields:
+            msg = "Year of curriculum is not set for the regular student"
+            raise StudentProfileError(msg)
     # FIXME: Prevent creating 2 profiles for invited student in the same
     # term through admin interface
-    new_student_profile = StudentProfile(**fields)
+    new_student_profile = StudentProfile(**profile_fields)
     new_student_profile.save()
     return new_student_profile
 

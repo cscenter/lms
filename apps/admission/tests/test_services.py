@@ -1,14 +1,11 @@
-import datetime
-
 import pytest
 
-from admission.constants import ChallengeStatuses, InterviewFormats
-from admission.models import Exam, InterviewSlot
+from admission.constants import ChallengeStatuses
+from admission.models import Exam
 from admission.services import EmailQueueService, create_student_from_applicant
 from admission.tests.factories import CampaignFactory, ApplicantFactory, \
-    ExamFactory, InterviewStreamFactory
+    ExamFactory
 from core.tests.factories import EmailTemplateFactory, BranchFactory
-from learning.settings import Branches
 from users.models import StudentTypes
 
 

@@ -4,6 +4,7 @@ from typing import List, Optional, Tuple
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone, formats, translation
 from django.utils.formats import date_format
 from post_office import mail
@@ -17,6 +18,7 @@ from admission.models import InterviewStream, InterviewInvitation, \
 from admission.utils import logger
 from api.providers.yandex_contest import YandexContestAPI
 from core.timezone.constants import DATE_FORMAT_RU
+from learning.services import create_student_profile, get_student_profile
 from users.models import User, StudentProfile, StudentTypes
 
 
@@ -89,17 +91,21 @@ def create_student_from_applicant(applicant):
                                         email=applicant.email,
                                         time_zone=branch.time_zone,
                                         password=random_password)
-    StudentProfile.objects.update_or_create(
-        type=StudentTypes.REGULAR,
-        user=user,
-        branch=branch,
-        year_of_admission=applicant.campaign.year,
-        defaults={
-            "year_of_curriculum": applicant.campaign.year,
-            "level_of_education_on_admission": applicant.level_of_education,
-            "university": applicant.university.name
-        }
-    )
+    campaign_year = applicant.campaign.year
+    student_profile = get_student_profile(
+        user=user, site=branch.site,
+        profile_type=StudentTypes.REGULAR,
+        filters=[Q(year_of_admission=campaign_year)])
+    # Don't override existing student profile for this campaign since it could
+    # be already changed
+    if student_profile is None:
+        create_student_profile(
+            user=user, branch=branch,
+            profile_type=StudentTypes.REGULAR,
+            year_of_admission=campaign_year,
+            year_of_curriculum=campaign_year,
+            level_of_education_on_admission=applicant.level_of_education,
+            university=applicant.university.name)
     user.first_name = applicant.first_name
     user.last_name = applicant.surname
     user.patronymic = applicant.patronymic if applicant.patronymic else ""

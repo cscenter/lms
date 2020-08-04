@@ -937,6 +937,7 @@ class ProgressReportForInvitation(ProgressReportForSemester):
     def get_queryset_filters(self):
         invited_students = (Enrollment.objects
                             .filter(invitation_id=self.invitation.pk)
+        # FIXME: mb it's safe now to use student profile ids
                             .values('student_id'))
         return [
             Q(type=StudentTypes.INVITED),

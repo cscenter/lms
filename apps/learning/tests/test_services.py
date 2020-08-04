@@ -6,11 +6,69 @@ from courses.tests.factories import CourseFactory, AssignmentFactory
 from learning.models import StudentGroup, StudentAssignment, \
     AssignmentNotification
 from learning.services import StudentGroupService, GroupEnrollmentKeyError, \
-    AssignmentService
+    AssignmentService, create_student_profile, StudentProfileError
 from learning.settings import Branches, StudentStatuses
 from learning.tests.factories import StudentGroupFactory, EnrollmentFactory, \
     AssignmentNotificationFactory
-from users.tests.factories import StudentFactory
+from users.models import StudentTypes, UserGroup
+from users.tests.factories import StudentFactory, UserFactory
+
+
+@pytest.mark.django_db
+def test_create_student_profile():
+    user = UserFactory()
+    branch = BranchFactory()
+    # Year of curriculum is required for the REGULAR student type
+    with pytest.raises(StudentProfileError):
+        create_student_profile(user=user, branch=branch,
+                               profile_type=StudentTypes.REGULAR,
+                               year_of_admission=2020)
+    student_profile = create_student_profile(user=user, branch=branch,
+                                             profile_type=StudentTypes.REGULAR,
+                                             year_of_admission=2020,
+                                             year_of_curriculum=2019)
+    assert student_profile.user == user
+    assert student_profile.site_id == branch.site_id
+    assert student_profile.type == StudentTypes.REGULAR
+    assert student_profile.year_of_admission == 2020
+    assert student_profile.year_of_curriculum == 2019
+    assert UserGroup.objects.filter(user=user)
+    assert UserGroup.objects.filter(user=user).count() == 1
+    permission_group = UserGroup.objects.get(user=user)
+    assert permission_group.role == StudentTypes.to_permission_role(StudentTypes.REGULAR)
+    profile = create_student_profile(user=user, branch=branch,
+                                     profile_type=StudentTypes.INVITED,
+                                     year_of_admission=2020)
+    assert profile.year_of_curriculum is None
+
+
+@pytest.mark.django_db
+def test_delete_student_profile():
+    """
+    Revoke student permissions on site only if no other student profiles of
+    the same type are exist after removing profile.
+    """
+    user = UserFactory()
+    branch = BranchFactory()
+    student_profile = create_student_profile(user=user, branch=branch,
+                                             profile_type=StudentTypes.INVITED,
+                                             year_of_admission=2020)
+    student_profile1 = create_student_profile(user=user, branch=branch,
+                                              profile_type=StudentTypes.REGULAR,
+                                              year_of_admission=2020,
+                                              year_of_curriculum=2019)
+    student_profile2 = create_student_profile(user=user, branch=branch,
+                                              profile_type=StudentTypes.REGULAR,
+                                              year_of_admission=2021,
+                                              year_of_curriculum=2019)
+    assert UserGroup.objects.filter(user=user).count() == 2
+    student_profile1.delete()
+    assert UserGroup.objects.filter(user=user).count() == 2
+    student_profile2.delete()
+    assert UserGroup.objects.filter(user=user).count() == 1
+    permission_group = UserGroup.objects.get(user=user)
+    assert permission_group.role == StudentTypes.to_permission_role(StudentTypes.INVITED)
+
 
 
 @pytest.mark.django_db
