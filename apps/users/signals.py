@@ -30,11 +30,20 @@ def post_delete_user_group(sender, instance: UserGroup, *args, **kwargs):
 
 @receiver(post_delete, sender=StudentProfile)
 def post_delete_student_profile(sender, instance: StudentProfile, **kwargs):
-    """Revoke student access rights in student's profile was deleted"""
-    # FIXME: могли удалить профиль вольного слушателя или приглашенного. А что если есть другие профили? Видимо, надо вызвать get_student_profile. Если что-то вернуло и тип совпал с типом удаляемого профиля, то ничего не удалять, иначе del
-    (UserGroup.objects
-     .filter(user=instance.user_id, site=instance.site_id, role=Roles.STUDENT)
-     .delete())
+    deleted_profile = instance
+    # Other student profiles on the same site of the same type
+    other_profiles = (StudentProfile.objects
+                      .filter(user_id=deleted_profile.user_id,
+                              type=deleted_profile.type,
+                              site_id=deleted_profile.site_id))
+    # It is safe to remove permission group if all other profiles are inactive
+    if all(not p.is_active for p in other_profiles):
+        permission_role = StudentTypes.to_permission_role(deleted_profile.type)
+        (UserGroup.objects
+         .filter(user_id=instance.user_id,
+                 site_id=instance.site_id,
+                 role=permission_role)
+         .delete())
 
 
 @receiver(post_save, sender=StudentProfile)
