@@ -22,7 +22,7 @@ DEFAULT_URL_SCHEME = env.str("REVERSE_URL_SCHEME", default="https")
 SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', default=True)
 
 # Upload Settings
-USE_S3_FOR_UPLOAD = env.bool('UPLOAD_USE_S3', default=True)
+USE_S3_FOR_UPLOAD = env.bool('UPLOAD_USE_S3', default=False)
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS', default=0o755)
 FILE_UPLOAD_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_PERMISSIONS', default=0o664)
 AWS_DEFAULT_ACL = None  # All files will inherit the bucket’s ACL
