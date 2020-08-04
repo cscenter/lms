@@ -109,7 +109,8 @@ class UserAdmin(_UserAdmin):
         (_('Personal info'), {
             'fields': ['gender', 'branch',
                        'last_name', 'first_name', 'patronymic', 'phone',
-                       'workplace', 'photo', 'bio', 'private_contacts', 'social_networks']}),
+                       'workplace', 'photo', 'bio', 'private_contacts',
+                       'social_networks', 'time_zone']}),
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        ]}),
         (_('External services'), {'fields': ['yandex_login', 'stepic_id',

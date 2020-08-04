@@ -3,11 +3,10 @@ from django.core.exceptions import ValidationError
 
 from core.tests.factories import BranchFactory
 from core.utils import instance_memoize
-from learning.tests.factories import EnrollmentFactory
 from courses.tests.factories import SemesterFactory, CourseFactory
-from learning.settings import StudentStatuses, GradeTypes
+from learning.settings import GradeTypes
+from learning.tests.factories import EnrollmentFactory
 from users.constants import Roles
-from users.models import User
 from users.tests.factories import StudentFactory, CuratorFactory, UserFactory, \
     UserGroupFactory
 

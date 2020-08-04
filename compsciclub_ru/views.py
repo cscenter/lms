@@ -48,7 +48,8 @@ class AsyncEmailRegistrationView(RegistrationView):
             create_student_profile(user=new_user,
                                    branch=new_user.branch,
                                    profile_type=StudentTypes.REGULAR,
-                                   year_of_admission=new_user.date_joined.year)
+                                   year_of_admission=new_user.date_joined.year,
+                                   year_of_curriculum=new_user.date_joined.year)
             self.registration_profile.objects.create_profile(new_user)
 
         signals.user_registered.send(sender=self.__class__,
