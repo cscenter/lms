@@ -10,6 +10,7 @@ app_environement:
   DATABASE_URL: "postgresql://{{ db_user }}:{{ db_user_password }}@127.0.0.1:5432/{{ db_name }}"
   REDIS_PASSWORD: "3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN"
   HASHIDS_SALT: "^TimUbi)AUwc>]B-`g2"
+  UPLOAD_USE_S3: "0"
   YANDEX_DISK_USERNAME: "csc-slides@yandex.ru"
   YANDEX_DISK_PASSWORD: "deelthisat"
   RECAPTCHA_PUBLIC_KEY: "6Lc_7AsTAAAAAOoC9MhVSoJ6O-vILaGgDEgtLBty"
