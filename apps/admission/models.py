@@ -444,7 +444,7 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         help_text=_("Unsubscribe from future notifications"))
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET(models.SET_NULL),
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
