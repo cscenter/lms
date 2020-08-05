@@ -2,14 +2,13 @@ from auth.permissions import Role
 from .errors import AlreadyRegistered, NotRegistered
 
 
-# TODO: в теории можно связывать роли, а не только permissions. Подумать о наследовании ролей по аналогии с add_relation
 class RolePermissionsRegistry:
     """
-    This registry helps to organize Role-based access control. Inheritance
-    between roles is not supported.
+    This registry helps to organize Role-based access control. Has a
+    predefined 'default' role to check object permissions for anonymous users.
 
-    Each record in the registry is a role (R) associated with
-    `rules.RuleSet` instance (P).
+    Each record in the registry is a role (R) associated with an
+    `rules.RuleSet` instance (P). Role inheritance is not supported.
     """
 
     DEFAULT_ROLE_CODE = '_default'
@@ -44,6 +43,7 @@ class RolePermissionsRegistry:
     def _register_default_role(self):
         self.register(Role(code=self.DEFAULT_ROLE_CODE,
                            name='Default Role',
+                           priority=1000,
                            permissions=[]))
 
     def __contains__(self, role):

@@ -27,36 +27,38 @@ class RBACPermissions:
     def has_perm(self, user, perm, obj=None):
         if not user.is_active and not user.is_anonymous:
             return False
-        default_role = role_registry.default_role.code
+        default_role = role_registry.default_role
         if user.is_anonymous:
             return self._has_perm(user, perm, {default_role}, obj)
         elif hasattr(user, 'roles'):
-            roles = set(user.roles)
-            roles.add(default_role)
+            roles = [default_role]
+            for role_code in user.roles:
+                if role_code not in role_registry:
+                    logger.warning(f'Role with a code {role_code} is not '
+                                   f'registered but assigned to the user {user}')
+                    continue
+                role = role_registry[role_code]
+                roles.append(role)
+            roles.sort(key=lambda r: r.priority)
             return self._has_perm(user, perm, roles, obj)
         return False
 
     def _has_perm(self, user, perm_name, roles, obj):
-        for role_code in roles:
-            if role_code in role_registry:
-                role = role_registry[role_code]
-                if role.permissions.rule_exists(perm_name):
-                    return role.permissions[perm_name].test(user, obj)
-                # Case when using base permission name, e.g.,
-                # `.has_perm('update_comment', obj)` and expecting
-                # .has_perm('update_own_comment', obj) will be in a call chain
-                # if relation exists
-                if perm_name in role.relations:
-                    # Related `Permission.rule` checks only object level
-                    # permission
-                    if obj is None:
-                        continue
-                    for rel_perm_name in role.relations[perm_name]:
-                        if self._has_perm(user, rel_perm_name, [role.code], obj):
-                            return True
-            else:
-                logger.warning(f'Role {role_code} is not registered '
-                               f'but assigned to the user {user}')
+        for role in roles:
+            if role.permissions.rule_exists(perm_name):
+                return role.permissions[perm_name].test(user, obj)
+            # Case when using base permission name, e.g.,
+            # `.has_perm('update_comment', obj)` and expecting
+            # .has_perm('update_own_comment', obj) will be in a call chain
+            # if relation exists
+            if perm_name in role.relations:
+                # Related `Permission.rule` checks only object level
+                # permission
+                if obj is None:
+                    continue
+                for rel_perm_name in role.relations[perm_name]:
+                    if self._has_perm(user, rel_perm_name, {role}, obj):
+                        return True
         return False
 
     def has_module_perms(self, user, app_label):

@@ -25,7 +25,7 @@ from info_blocks.permissions import ViewInternships
 
 # TODO: Add description of each role
 class Roles(DjangoChoices):
-    CURATOR = C(5, _('Curator'), permissions=(
+    CURATOR = C(5, _('Curator'), priority=0, permissions=(
         CreateCertificateOfParticipation,
         ViewCertificateOfParticipation,
         ChangeMetaCourse,
@@ -47,7 +47,7 @@ class Roles(DjangoChoices):
         ViewGradebook,
         CreateAssignmentComment,
     ))
-    STUDENT = C(1, _('Student'), permissions=(
+    STUDENT = C(1, _('Student'), priority=50, permissions=(
         ViewStudyMenu,
         ViewCourseContacts,
         ViewCourseAssignments,
@@ -68,7 +68,7 @@ class Roles(DjangoChoices):
         LeaveCourse,
     ))
     # FIXME: copy permissions from student role, there are identical
-    VOLUNTEER = C(4, _('Co-worker'), permissions=(
+    VOLUNTEER = C(4, _('Co-worker'), priority=50, permissions=(
         ViewStudyMenu,
         ViewCourseContacts,
         ViewCourseAssignments,
@@ -110,7 +110,7 @@ class Roles(DjangoChoices):
         ViewOwnEnrollments,
         ViewOwnStudentAssignment,
     ))
-    TEACHER = C(2, _('Teacher'), permissions=(
+    TEACHER = C(2, _('Teacher'), priority=30, permissions=(
         ViewTeachingMenu,
         ViewCourseContacts,
         ViewCourseNews,
@@ -130,8 +130,11 @@ class Roles(DjangoChoices):
 
 
 for code, name in Roles.choices:
-    role_registry.register(Role(code=code, name=name,
-                                permissions=Roles.get_choice(code).permissions))
+    choice = Roles.get_choice(code)
+    role = Role(code=code, name=name,
+                priority=getattr(choice, 'priority', 100),
+                permissions=choice.permissions)
+    role_registry.register(role)
 
 # Add relations
 teacher_role = role_registry[Roles.TEACHER]

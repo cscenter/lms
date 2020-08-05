@@ -10,6 +10,8 @@ from .errors import AlreadyRegistered, PermissionNotRegistered
 
 class Permission1(Permission):
     name = 'test_permission1'
+    VALID_VALUE = 42
+    INVALID_VALUE = 43
 
     @staticmethod
     @rules.predicate
@@ -17,17 +19,28 @@ class Permission1(Permission):
         return obj == 42
 
 
-class PermissionAlwaysTrue(Permission):
+class PermissionReturnsTrue(Permission):
     name = 'test_permission2'
 
 
-class Permission3(Permission):
+class PermissionReturnsFalse(Permission):
     name = 'test_permission3'
 
     @staticmethod
     @rules.predicate
     def rule(user, obj):
-        return obj == 11
+        return False
+
+
+class Permission3(Permission):
+    name = 'test_permission4'
+    VALID_VALUE = 11
+    INVALID_VALUE = 12
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, obj):
+        return obj == Permission3.VALID_VALUE
 
 
 def test_permission_registry(mocker):
@@ -47,12 +60,12 @@ def test_role(mocker):
     mocker.patch.dict(perm_registry._dict, clear=True)
     perm_registry.add_permission(Permission1)
     with pytest.raises(PermissionNotRegistered):
-        role = Role(code=1, name="TestRole", permissions=(PermissionAlwaysTrue,))
+        role = Role(code=1, name="TestRole", permissions=(PermissionReturnsTrue,))
     role = Role(code=1, name="TestRole", permissions=(Permission1,))
     assert role.has_permission(Permission1)
-    assert not role.has_permission(PermissionAlwaysTrue)
+    assert not role.has_permission(PermissionReturnsTrue)
     with pytest.raises(PermissionNotRegistered):
-        role.add_permission(PermissionAlwaysTrue)
+        role.add_permission(PermissionReturnsTrue)
 
 
 def test_role_relations(mocker):
@@ -61,15 +74,15 @@ def test_role_relations(mocker):
     role = Role(code=1, name="TestRole", permissions=(Permission1,))
     # TestPermission2 is not registered in global registry
     with pytest.raises(PermissionNotRegistered):
-        role.add_relation(Permission1, PermissionAlwaysTrue)
-    perm_registry.add_permission(PermissionAlwaysTrue)
+        role.add_relation(Permission1, PermissionReturnsTrue)
+    perm_registry.add_permission(PermissionReturnsTrue)
     # TestPermission2 is not a part of current role permissions set
     with pytest.raises(PermissionNotRegistered):
-        role.add_relation(Permission1, PermissionAlwaysTrue)
-    role.add_permission(PermissionAlwaysTrue)
-    role.add_relation(Permission1, PermissionAlwaysTrue)
-    assert role.has_relation(Permission1, PermissionAlwaysTrue)
-    assert not role.has_relation(PermissionAlwaysTrue, Permission1)
+        role.add_relation(Permission1, PermissionReturnsTrue)
+    role.add_permission(PermissionReturnsTrue)
+    role.add_relation(Permission1, PermissionReturnsTrue)
+    assert role.has_relation(Permission1, PermissionReturnsTrue)
+    assert not role.has_relation(PermissionReturnsTrue, Permission1)
 
 
 @pytest.mark.django_db
@@ -79,14 +92,14 @@ def test_backend(mocker):
     role_registry._register_default_role()
     backend = RBACModelBackend()
     user = UserFactory()
-    assert not backend.has_perm(user, PermissionAlwaysTrue.name)
-    perm_registry.add_permission(PermissionAlwaysTrue)
-    role1 = Role(code='role', name="TestRole1",
-                 permissions=(PermissionAlwaysTrue,))
+    assert not backend.has_perm(user, PermissionReturnsTrue.name)
+    perm_registry.add_permission(PermissionReturnsTrue)
+    role1 = Role(code='role', name="TestRole1", priority=10,
+                 permissions=(PermissionReturnsTrue,))
     role_registry.register(role1)
-    assert not user.has_perm(PermissionAlwaysTrue.name)
+    assert not user.has_perm(PermissionReturnsTrue.name)
     user.roles = ['role']
-    assert user.has_perm(PermissionAlwaysTrue.name)
+    assert user.has_perm(PermissionReturnsTrue.name)
 
 
 @pytest.mark.django_db
@@ -95,13 +108,13 @@ def test_rbac_backend_has_perm(mocker):
     mocker.patch.dict(perm_registry._dict, clear=True)
     role_registry._register_default_role()
     perm_registry.add_permission(Permission1)
-    perm_registry.add_permission(PermissionAlwaysTrue)
+    perm_registry.add_permission(PermissionReturnsTrue)
     perm_registry.add_permission(Permission3)
-    role1 = Role(code='role1', name="TestRole1",
+    role1 = Role(code='role1', name="TestRole1", priority=10,
                  permissions=(Permission1,))
     role_registry.register(role1)
-    role2 = Role(code='role2', name="TestRole2",
-                 permissions=(PermissionAlwaysTrue,))
+    role2 = Role(code='role2', name="TestRole2", priority=11,
+                 permissions=(PermissionReturnsTrue,))
     role_registry.register(role2)
     user = UserFactory()
     user.roles = {'role1', 'role2'}
@@ -110,9 +123,41 @@ def test_rbac_backend_has_perm(mocker):
     assert RBACPermissions().has_perm(user, 'test_permission2')
     # No need to pass an object since we didn't find a permission
     # binded to user roles
-    assert not RBACPermissions().has_perm(user, 'test_permission3')
+    assert not RBACPermissions().has_perm(user, Permission3.name)
     # Test relations
     role1.add_relation(Permission3, Permission1)
-    assert not RBACPermissions().has_perm(user, 'test_permission3', 11)
-    assert RBACPermissions().has_perm(user, 'test_permission3', 42)
-    # assert not RBACPermissions2().has_perm(user, 'test_permission3', 12)
+    assert not RBACPermissions().has_perm(user, Permission3.name, 11)
+    assert RBACPermissions().has_perm(user, Permission3.name, 42)
+
+
+@pytest.mark.django_db
+def test_rbac_backend_has_perm_role_priority(mocker):
+    mocker.patch.dict(role_registry._registry, clear=True)
+    mocker.patch.dict(perm_registry._dict, clear=True)
+    role_registry._register_default_role()
+    perm_registry.add_permission(Permission1)
+    perm_registry.add_permission(PermissionReturnsTrue)
+    perm_registry.add_permission(PermissionReturnsFalse)
+    perm_registry.add_permission(Permission3)
+    role1 = Role(code='role1', name="TestRole1", priority=30,
+                 permissions=[PermissionReturnsFalse])
+    role2 = Role(code='role2', name="TestRole2", priority=20,
+                 permissions=[PermissionReturnsTrue])
+    role1.add_relation(Permission1, PermissionReturnsFalse)
+    role1.add_relation(Permission3, PermissionReturnsFalse)
+    role2.add_relation(Permission1, PermissionReturnsTrue)
+    role_registry.register(role1)
+    role_registry.register(role2)
+    user = UserFactory()
+    user.roles = {'role1', 'role2'}
+    # role2 has higher priority than role1
+    assert RBACPermissions().has_perm(user, Permission1.name, Permission1.INVALID_VALUE)
+    role3 = Role(code='role3', name="TestRole3", priority=10,
+                 permissions=[Permission3])
+    role_registry.register(role3)
+    user.roles = {'role1', 'role2'}
+    # Check PermissionReturnsFalse predicate
+    assert not RBACPermissions().has_perm(user, Permission3.name, Permission3.VALID_VALUE)
+    user.roles = {'role1', 'role2', 'role3'}
+    # role3.priority > role1.priority => check Permission3 predicate
+    assert RBACPermissions().has_perm(user, Permission3.name, Permission3.VALID_VALUE)
