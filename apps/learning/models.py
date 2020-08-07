@@ -585,9 +585,8 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         return os.path.basename(self.attached_file.name)
 
     def attached_file_url(self):
-        return reverse("study:assignment_attachments_download", kwargs={
-            "sid": hashids.encode(learn_conf.ASSIGNMENT_COMMENT_ATTACHMENT,
-                                  self.pk),
+        return reverse("study:assignment_comment_attachments_download", kwargs={
+            "sid": hashids.encode(self.pk),
             "file_name": self.attached_file_name
         })
 

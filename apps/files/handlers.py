@@ -1,7 +1,6 @@
 """
-FIXME: What the heck is going on here? Handlers are look totally broken.
+FIXME: What the heck is going on here? Handler looks totally broken.
 """
-
 import logging
 
 from io import BytesIO
@@ -11,10 +10,6 @@ from django.core.files.uploadhandler import MemoryFileUploadHandler, \
     StopUpload, TemporaryFileUploadHandler
 
 logger = logging.getLogger(__name__)
-
-
-class FileSizeUploadHandlerMixin:
-    pass
 
 
 class MimeTypeUploadHandlerMixin:
@@ -61,7 +56,7 @@ class MimeTypeUploadHandlerMixin:
             im.close()
             return True
         except IOError as e:
-            logger.debug("PIL failed reading mime type from the first chunk")
+            logger.error("PIL failed detecting mime type from the first chunk")
         return False
 
 

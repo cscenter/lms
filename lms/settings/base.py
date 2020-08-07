@@ -22,20 +22,23 @@ DEFAULT_URL_SCHEME = env.str("REVERSE_URL_SCHEME", default="https")
 SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', default=True)
 
 # Upload Settings
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+PRIVATE_FILE_STORAGE = DEFAULT_FILE_STORAGE
 USE_S3_FOR_UPLOAD = env.bool('UPLOAD_USE_S3', default=False)
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS', default=0o755)
 FILE_UPLOAD_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_PERMISSIONS', default=0o664)
 AWS_DEFAULT_ACL = None  # All files will inherit the bucket’s ACL
 if USE_S3_FOR_UPLOAD:
-    DEFAULT_FILE_STORAGE = 'core.storage.PublicMediaS3Storage'
+    DEFAULT_FILE_STORAGE = 'files.storage.PublicMediaS3Storage'
+    AWS_PUBLIC_MEDIA_LOCATION = 'media'
+    PRIVATE_FILE_STORAGE = 'files.storage.PublicMediaS3Storage'
+    AWS_PRIVATE_MEDIA_LOCATION = 'private'
     AWS_S3_ACCESS_KEY_ID = env.str('AWS_S3_ACCESS_KEY_ID')
     AWS_S3_SECRET_ACCESS_KEY = env.str('AWS_S3_SECRET_ACCESS_KEY')
     AWS_S3_SIGNATURE_VERSION = 's3v4'
     AWS_STORAGE_BUCKET_NAME = env.str('AWS_STORAGE_BUCKET_NAME', default='lms-vault')
     AWS_S3_REGION_NAME = 'eu-central-1'
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    AWS_PUBLIC_MEDIA_LOCATION = 'media'
-    AWS_PRIVATE_MEDIA_LOCATION = 'private'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
 else:
     MEDIA_ROOT = str(ROOT_DIR / "media")
