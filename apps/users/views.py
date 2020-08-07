@@ -10,15 +10,13 @@ from django.contrib import auth
 from django.db import transaction
 from django.db.models import Prefetch, Count, prefetch_related_objects
 from django.http import HttpResponseBadRequest, \
-    JsonResponse
+    JsonResponse, HttpResponseForbidden
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
-from ajaxuploader.backends import ProfileImageUploadBackend
-from ajaxuploader.handlers import MemoryImageUploadHandler, \
+from files.handlers import MemoryImageUploadHandler, \
     TemporaryImageUploadHandler
-from ajaxuploader.signals import file_uploaded
 from auth.mixins import PermissionRequiredMixin
 from core.views import ProtectedFormMixin
 from courses.models import Course, Semester
@@ -30,7 +28,8 @@ from learning.settings import GradeTypes
 from study_programs.models import StudyProgram
 from users.compat import get_graduate_profile as get_graduate_profile_compat
 from users.models import SHADCourseRecord
-from users.thumbnails import get_user_thumbnail, photo_thumbnail_cropbox
+from users.thumbnails import get_user_thumbnail, photo_thumbnail_cropbox, \
+    CropboxData
 from .forms import UserProfileForm, CertificateOfParticipationCreateForm
 from .models import User, CertificateOfParticipation
 from .permissions import CreateCertificateOfParticipation, \
@@ -230,21 +229,18 @@ class CertificateOfParticipationDetailView(PermissionRequiredMixin,
 
 class ProfileImageUpdate(generic.base.View):
     """
-    This view validates mime type on uploading file.
+    This view saves new profile image or updates preview dimensions
+    (cropbox data) for the already uploaded image.
     """
-    backend = ProfileImageUploadBackend
-
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
         """
-        Modifying upload handlers before accessing `request.POST` or
-        `request.FILES`.
-
-        It doesn’t make sense to change upload handlers after upload handling
-        has already started. Since `request.POST` is accessed by
-        CsrfViewMiddleware, use `csrf_exempt` decorator to allow to
-        change the upload handlers and `csrf_protect` on further view function
-        to enable CSRF-protection.
+        Upload handlers will be triggered by accessing `request.POST` or
+        `request.FILES`. `CsrfViewMiddleware` internally use `request.POST`
+        but only if protection is enabled. So workaround is:
+            * delay CSRF protection using `csrf_exempt` decorator
+            * modify upload handlers of the request object
+            * enable CSRF-protection for the view with `csrf_protect` decorator
         """
         request.upload_handlers = [MemoryImageUploadHandler(request),
                                    TemporaryImageUploadHandler(request)]
@@ -259,13 +255,13 @@ class ProfileImageUpdate(generic.base.View):
             return HttpResponseBadRequest("Bad User")
 
         user_id = kwargs['pk']
-        if not request.user.is_curator and user_id != request.user.id:
-            return HttpResponseBadRequest("Bad User")
+        if user_id != request.user.id and not request.user.is_curator:
+            return HttpResponseForbidden()
 
         try:
             user = User.objects.get(pk=user_id)
         except User.DoesNotExist:
-            return HttpResponseBadRequest("Bad User")
+            return HttpResponseBadRequest("User not found")
 
         if "crop_data" in request.POST:
             return self._update_cropbox(request, user)
@@ -274,58 +270,40 @@ class ProfileImageUpdate(generic.base.View):
 
     @staticmethod
     def _update_cropbox(request, user):
-        # TODO: add validation for unbound coords and width=img.width
-        attrs = ("width", "height", "x", "y")
-        try:
-            data = {attr: int(float(request.POST.get(attr))) for attr in attrs}
-        except (KeyError, ValueError):
-            return False
-
+        crop_data_form = CropboxData(data=request.POST)
+        if not crop_data_form.is_valid():
+            return JsonResponse({
+                "success": False,
+                "reason": "Invalid cropbox data"
+            })
+        crop_data_str = photo_thumbnail_cropbox(crop_data_form.to_json())
         thumbnail = get_user_thumbnail(user, User.ThumbnailSize.BASE,
                                        crop='center', use_stub=False,
-                                       cropbox=photo_thumbnail_cropbox(data))
-        if not thumbnail:
-            ret_json = {"success": False, "reason": "Thumbnail generation error"}
-        else:
-            user.cropbox_data = data
+                                       cropbox=crop_data_str)
+        if thumbnail:
+            user.cropbox_data = crop_data_form.to_json()
             user.save(update_fields=['cropbox_data'])
             ret_json = {"success": True, "thumbnail": thumbnail.url}
+        else:
+            ret_json = {"success": False, "reason": "Thumbnail generation error"}
         return JsonResponse(ret_json)
 
     def _update_image(self, request, user):
         if len(request.FILES) > 1:
             return HttpResponseBadRequest("Multi upload is not supported")
-
-        if len(request.FILES) == 1:
-            upload = list(request.FILES.values())[0]
-        else:
+        elif len(request.FILES) != 1:
             return HttpResponseBadRequest("Bad file format or size")
 
-        try:
-            _, file_ext = os.path.splitext(request.POST['_photo'])
-            filename = f"{user.id}{file_ext}"
-        except KeyError:
-            return HttpResponseBadRequest("Photo not found")
-
-        backend = self.backend()
-        # custom filename handler
-        filename = (backend.update_filename(request, filename) or filename)
-        backend.setup(filename)  # save empty file
-        success = backend.upload(upload, filename, False)
-
-        if success:
-            user.photo.name = filename
-            user.cropbox_data = {}
-            user.save()
-            # Send signals
-            file_uploaded.send(sender=self.__class__, backend=backend,
-                               request=request)
-
-        extra_context = backend.upload_complete(request, filename)
+        image_file = list(request.FILES.values())[0]
+        user.photo = image_file
+        user.cropbox_data = {}
+        user.save(update_fields=['photo', 'cropbox_data'])
+        image_url = user.photo.url
 
         # TODO: generate default crop settings and return them
-        ret_json = {'success': success, 'filename': filename}
-        if extra_context is not None:
-            ret_json.update(extra_context)
-
-        return JsonResponse(ret_json)
+        payload = {
+            'success': True,
+            "url": image_url,
+            'filename': os.path.basename(user.photo.name)
+        }
+        return JsonResponse(payload)

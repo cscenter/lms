@@ -1,5 +1,6 @@
 import base64
 import logging
+import os
 from random import choice
 from string import ascii_lowercase, digits
 from typing import Optional, Set
@@ -220,6 +221,11 @@ class StudentProfileAbstract(models.Model):
         abstract = True
 
 
+def user_photo_upload_to(instance: "User", filename):
+    _, ext = os.path.splitext(filename)
+    return f"profiles/{instance.id}{ext}"
+
+
 class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
            UserThumbnailMixin, AbstractBaseUser):
     TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
@@ -279,7 +285,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
     modified = AutoLastModifiedField(_('modified'))
     photo = ImageField(
         _("CSCUser|photo"),
-        upload_to="photos/",
+        upload_to=user_photo_upload_to,
         blank=True)
     cropbox_data = JSONField(
         blank=True,
