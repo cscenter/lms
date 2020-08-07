@@ -5,12 +5,12 @@ import rules
 from django.conf import settings
 
 from auth.permissions import add_perm, Permission
-from courses.models import Course, CourseTeacher
+from courses.models import Course, CourseTeacher, Assignment
 from learning.models import StudentAssignment, CourseInvitation
 from learning.services import course_failed_by_student, CourseRole, \
     course_access_role
 from learning.settings import StudentStatuses
-from users.models import StudentProfile
+from users.models import StudentProfile, User
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +56,26 @@ def has_active_status(user):
     if not student_profile:
         return False
     return not StudentStatuses.is_inactive(student_profile.status)
+
+
+@rules.predicate
+def learner_has_access_to_the_assignment(user: User,
+                                         student_assignment: StudentAssignment):
+    if user.id != student_assignment.student_id:
+        return False
+    course = student_assignment.assignment.course
+    enrollment = user.get_enrollment(course.pk)
+    if not enrollment:
+        return False
+    student_profile = enrollment.student_profile
+    if student_profile.is_active and not course_failed_by_student(course, user):
+        return True
+    # If student failed the course or was expelled at all, deny
+    # access only when he has no submissions or positive
+    # grade on assignment
+    # XXX: Take into account only student comments since only
+    # they could be treated as `submission`.
+    return student_assignment.has_comments(user) or student_assignment.score
 
 
 @add_perm
@@ -147,9 +167,10 @@ class ViewRelatedStudentAssignment(Permission):
     @rules.predicate
     def rule(user, student_assignment: StudentAssignment):
         """
-        Teacher permits to view all assignments related to the meta course
-        where he participated in.
+        Teachers can view all assignments related to the meta course
+        they participated in.
         """
+        # FIXME: создать отдельный доступ на просмотр соседних прочтений и явно выдавать нуждающимся
         course = student_assignment.assignment.course
         all_teachers = (CourseTeacher.objects
                         .filter(course__meta_course_id=course.meta_course_id)
@@ -184,27 +205,7 @@ class ViewOwnStudentAssignments(Permission):
 @add_perm
 class ViewOwnStudentAssignment(Permission):
     name = "study.view_own_assignment"
-
-    @staticmethod
-    @rules.predicate
-    def rule(user, student_assignment: StudentAssignment):
-        if user.id != student_assignment.student_id:
-            return False
-        student = student_assignment.student
-        course = student_assignment.assignment.course
-        enrollment = student.get_enrollment(course.pk)
-        if not enrollment:
-            return False
-        student_profile = enrollment.student_profile
-        is_inactive = StudentStatuses.is_inactive(student_profile.status)
-        if not is_inactive and not course_failed_by_student(course, user):
-            return True
-        # If student failed the course or was expelled at all, deny
-        # access only when he has no submissions or positive
-        # grade on assignment
-        # XXX: Take into account only student comments since only
-        # they could be treated as `submission`.
-        return student_assignment.has_comments(user) or student_assignment.score
+    rule = learner_has_access_to_the_assignment
 
 
 @add_perm
@@ -240,13 +241,45 @@ class ViewOwnGradebook(Permission):
         return user in course.teachers.all()
 
 
+# TODO: move to the courses.permissions?
+@add_perm
+class ViewAssignmentAttachment(Permission):
+    name = "learning.view_assignment_attachment"
+
+
+@add_perm
+class ViewAssignmentAttachmentAsLearner(Permission):
+    name = "study.view_assignment_attachment"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, assignment: Assignment):
+        try:
+            student_assignment = (StudentAssignment.objects
+                                  .get(student=user,
+                                       assignment_id=assignment.pk))
+            return learner_has_access_to_the_assignment(user, student_assignment)
+        except StudentAssignment.DoesNotExist:
+            return False
+
+
+@add_perm
+class ViewAssignmentAttachmentAsTeacher(Permission):
+    name = "teaching.view_assignment_attachment"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, assignment: Assignment):
+        return user in assignment.course.teachers.all()
+
+
 @add_perm
 class CreateAssignmentComment(Permission):
     name = "learning.create_assignment_comment"
 
 
 @add_perm
-class CreateAssignmentCommentStudent(Permission):
+class CreateAssignmentCommentAsLearner(Permission):
     name = "study.create_assignment_comment"
 
     @staticmethod
@@ -258,13 +291,34 @@ class CreateAssignmentCommentStudent(Permission):
 
 
 @add_perm
-class CreateAssignmentCommentTeacher(Permission):
+class CreateAssignmentCommentAsTeacher(Permission):
     name = "teaching.create_assignment_comment"
 
     @staticmethod
     @rules.predicate
-    def rule(user, sa: StudentAssignment):
-        return user in sa.assignment.course.teachers.all()
+    def rule(user, student_assignment: StudentAssignment):
+        return user in student_assignment.assignment.course.teachers.all()
+
+
+@add_perm
+class ViewAssignmentCommentAttachment(Permission):
+    name = "learning.view_assignment_comment_attachment"
+
+
+@add_perm
+class ViewAssignmentCommentAttachmentAsLearner(Permission):
+    name = "study.view_assignment_comment_attachment"
+    rule = learner_has_access_to_the_assignment
+
+
+@add_perm
+class ViewAssignmentCommentAttachmentAsTeacher(Permission):
+    name = "teaching.view_assignment_comment_attachment"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_assignment: StudentAssignment):
+        return user in student_assignment.assignment.course.teachers.all()
 
 
 @add_perm

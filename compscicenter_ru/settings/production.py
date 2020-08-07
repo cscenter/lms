@@ -6,7 +6,7 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 from .base import *
 
 MEDIA_ROOT = str(Path('/shared', 'media'))
-# STATICFILES_STORAGE = 'core.storage.CloudFrontManifestStaticFilesStorage'
+# STATICFILES_STORAGE = 'files.storage.CloudFrontManifestStaticFilesStorage'
 CDN_SOURCE_STATIC_URL = STATIC_URL
 # CDN_STATIC_URL = 'https://resources.compscicenter.ru/'
 # STATIC_URL = CDN_STATIC_URL

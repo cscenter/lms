@@ -1164,7 +1164,7 @@ class AssignmentAttachment(TimeStampedModel):
         return ext
 
     def file_url(self):
-        sid = hashids.encode(ASSIGNMENT_TASK_ATTACHMENT, self.pk)
+        sid = hashids.encode(self.pk)
         return reverse("study:assignment_attachments_download",
                        kwargs={"sid": sid, "file_name": self.file_name})
 

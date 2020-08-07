@@ -547,10 +547,10 @@ def course_access_role(*, course, user) -> CourseRole:
         else:
             role = CourseRole.STUDENT_RESTRICT
     # Teachers from the same course permits to view the news/assignments/etc
-    all_course_teachers = (CourseTeacher.objects
+    all_meta_course_teachers = (CourseTeacher.objects
                            .for_meta_course(course.meta_course)
                            .values_list('teacher_id', flat=True))
-    if user.is_teacher and user.pk in all_course_teachers:
+    if user.is_teacher and user.pk in all_meta_course_teachers:
         # Overrides student role if a teacher enrolled in his own course
         role = CourseRole.TEACHER
     return role

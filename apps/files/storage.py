@@ -4,20 +4,13 @@ import re
 from urllib.parse import unquote, urldefrag
 
 from django.conf import settings
-from django.contrib.staticfiles.apps import \
-    StaticFilesConfig as _StaticFilesConfig
 from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
-
-
-# Static files storage implementations
-from django.core.files.storage import FileSystemStorage, get_storage_class
+from django.core.files.storage import get_storage_class
 from django.utils.functional import LazyObject
 from storages.backends.s3boto3 import S3Boto3Storage
 
 
-class StaticFilesConfig(_StaticFilesConfig):
-    ignore_patterns = ['CVS', '.*', '*~', 'src', '*.map', '_builds']
-
+# Static files
 
 class CloudFrontManifestStaticFilesStorage(ManifestStaticFilesStorage):
     """
@@ -97,6 +90,8 @@ class CloudFrontManifestStaticFilesStorage(ManifestStaticFilesStorage):
         return converter
 
 
+# Uploaded files
+
 class PublicMediaS3Storage(S3Boto3Storage):
     location = getattr(settings, 'AWS_PUBLIC_MEDIA_LOCATION', 'media')
     file_overwrite = False
@@ -110,3 +105,13 @@ class PrivateMediaS3Storage(S3Boto3Storage):
     default_acl = 'private'
     url_protocol = 'https:'
     custom_domain = False
+    querystring_expire = 10  # in seconds
+
+
+class PrivateFilesStorage(LazyObject):
+    def _setup(self):
+        import_path = settings.PRIVATE_FILE_STORAGE
+        self._wrapped = get_storage_class(import_path=import_path)()
+
+
+private_storage = PrivateFilesStorage()

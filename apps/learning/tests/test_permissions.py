@@ -12,8 +12,8 @@ from courses.tests.factories import CourseFactory, SemesterFactory, \
     AssignmentFactory
 from learning.models import StudentAssignment, EnrollmentPeriod
 from learning.permissions import CreateAssignmentComment, \
-    CreateAssignmentCommentTeacher, \
-    CreateAssignmentCommentStudent, ViewRelatedStudentAssignment, \
+    CreateAssignmentCommentAsTeacher, \
+    CreateAssignmentCommentAsLearner, ViewRelatedStudentAssignment, \
     ViewStudentAssignment, EditOwnStudentAssignment, \
     EditOwnAssignmentExecutionTime, EnrollInCourse, EnrollPermissionObject, \
     InvitationEnrollPermissionObject
@@ -242,17 +242,17 @@ def test_create_assignment_comment():
     student_other = StudentFactory()
     course = CourseFactory(teachers=[teacher])
     assert CreateAssignmentComment.name in perm_registry
-    assert CreateAssignmentCommentTeacher in perm_registry
-    assert CreateAssignmentCommentStudent in perm_registry
+    assert CreateAssignmentCommentAsTeacher in perm_registry
+    assert CreateAssignmentCommentAsLearner in perm_registry
     e = EnrollmentFactory(course=course)
     student = e.student
     AssignmentFactory(course=course)
     assert StudentAssignment.objects.count() == 1
     sa = StudentAssignment.objects.first()
-    assert teacher.has_perm(CreateAssignmentCommentTeacher.name, sa)
-    assert not teacher_other.has_perm(CreateAssignmentCommentTeacher.name, sa)
-    assert not curator.has_perm(CreateAssignmentCommentTeacher.name, sa)
-    assert not user.has_perm(CreateAssignmentCommentTeacher.name, sa)
+    assert teacher.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
+    assert not teacher_other.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
+    assert not curator.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
+    assert not user.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
     assert curator.has_perm(CreateAssignmentComment.name, sa)
     # Now check relation
     assert teacher.has_perm(CreateAssignmentComment.name, sa)
@@ -264,8 +264,8 @@ def test_create_assignment_comment():
     StudentProfileFactory(type=StudentTypes.VOLUNTEER, user=teacher)
     teacher.refresh_from_db()
     assert teacher.has_perm(CreateAssignmentComment.name, sa)
-    assert teacher.has_perm(CreateAssignmentCommentTeacher.name, sa)
-    assert not teacher.has_perm(CreateAssignmentCommentStudent.name, sa)
+    assert teacher.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
+    assert not teacher.has_perm(CreateAssignmentCommentAsLearner.name, sa)
 
 
 @pytest.mark.django_db

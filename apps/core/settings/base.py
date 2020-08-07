@@ -52,8 +52,8 @@ INSTALLED_APPS = [
     'captcha',
     'taggit',
 
-    # django.contrib.static with customized list of ignore patterns
-    'core.storage.StaticFilesConfig',
+    # django.contrib.static with a customized list of ignore patterns
+    'files.apps.StaticFilesConfig',
     'core.apps.CoreConfig',
     'auth.apps.AuthConfig',  # custom `User` model is defined in `users` app
     'users.apps.UsersConfig',

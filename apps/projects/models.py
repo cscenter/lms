@@ -931,9 +931,8 @@ class PracticeCriteria(CriteriaScoresMixin, models.Model):
 
 
 def report_comment_attachment_upload_to(self, filename):
-    return "projects/{}-{}/{}/attachments/{}".format(
-        self.report.project_student.project.semester.year,
-        self.report.project_student.project.semester.type,
+    return "projects/{}/{}/attachments/{}".format(
+        self.report.project_student.project.semester.slug,
         self.report.project_student.project.pk,
         filename
     )

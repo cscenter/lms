@@ -12,18 +12,22 @@ from courses.permissions import ChangeMetaCourse, ViewCourseContacts, \
 from users.permissions import CreateCertificateOfParticipation, \
     ViewCertificateOfParticipation
 from .permissions import CreateAssignmentComment, \
-    CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
+    CreateAssignmentCommentAsTeacher, CreateAssignmentCommentAsLearner, \
     ViewStudyMenu, ViewCourseNews, ViewCourseReviews, ViewOwnEnrollments, \
-    ViewOwnStudentAssignments, ViewOwnStudentAssignment, ViewCourses, ViewSchedule, ViewFAQ, \
+    ViewOwnStudentAssignments, ViewOwnStudentAssignment, ViewCourses, \
+    ViewSchedule, ViewFAQ, \
     ViewLibrary, EnrollInCourse, EnrollInCourseByInvitation, \
     LeaveCourse, ViewTeachingMenu, ViewOwnGradebook, ViewGradebook, \
     ViewStudentAssignment, ViewRelatedStudentAssignment, EditStudentAssignment, \
     EditOwnStudentAssignment, ViewEnrollments, ViewRelatedEnrollments, \
-    EditOwnAssignmentExecutionTime, ViewStudentAssignmentList
+    EditOwnAssignmentExecutionTime, ViewStudentAssignmentList, \
+    ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner, \
+    ViewAssignmentCommentAttachmentAsTeacher, ViewAssignmentAttachment, \
+    ViewAssignmentAttachmentAsLearner, ViewAssignmentAttachmentAsTeacher
 from info_blocks.permissions import ViewInternships
 
 
-# TODO: Add description of each role
+# TODO: Add description to each role
 class Roles(DjangoChoices):
     CURATOR = C(5, _('Curator'), priority=0, permissions=(
         CreateCertificateOfParticipation,
@@ -43,9 +47,11 @@ class Roles(DjangoChoices):
         ViewCourseReviews,
         ViewLibrary,
         ViewEnrollments,
-        CreateAssignmentCommentTeacher,
+        CreateAssignmentCommentAsTeacher,
         ViewGradebook,
         CreateAssignmentComment,
+        ViewAssignmentAttachment,
+        ViewAssignmentCommentAttachment,
     ))
     STUDENT = C(1, _('Student'), priority=50, permissions=(
         ViewStudyMenu,
@@ -56,7 +62,9 @@ class Roles(DjangoChoices):
         ViewOwnEnrollments,
         ViewOwnStudentAssignments,
         ViewOwnStudentAssignment,
-        CreateAssignmentCommentStudent,
+        ViewAssignmentAttachmentAsLearner,
+        CreateAssignmentCommentAsLearner,
+        ViewAssignmentCommentAttachmentAsLearner,
         EditOwnAssignmentExecutionTime,
         ViewCourses,
         ViewSchedule,
@@ -67,27 +75,8 @@ class Roles(DjangoChoices):
         EnrollInCourseByInvitation,
         LeaveCourse,
     ))
-    # FIXME: copy permissions from student role, there are identical
-    VOLUNTEER = C(4, _('Co-worker'), priority=50, permissions=(
-        ViewStudyMenu,
-        ViewCourseContacts,
-        ViewCourseAssignments,
-        ViewCourseNews,
-        ViewCourseReviews,
-        ViewOwnEnrollments,
-        ViewOwnStudentAssignments,
-        ViewOwnStudentAssignment,
-        CreateAssignmentCommentStudent,
-        EditOwnAssignmentExecutionTime,
-        ViewCourses,
-        ViewSchedule,
-        ViewFAQ,
-        ViewLibrary,
-        ViewInternships,
-        EnrollInCourse,
-        EnrollInCourseByInvitation,
-        LeaveCourse,
-    ))
+    VOLUNTEER = C(4, _('Co-worker'), priority=50,
+                  permissions=STUDENT.permissions)
     INVITED = C(11, _('Invited User'), permissions=(
         ViewStudyMenu,
         ViewCourseContacts,
@@ -97,7 +86,9 @@ class Roles(DjangoChoices):
         ViewOwnEnrollments,
         ViewOwnStudentAssignments,
         ViewOwnStudentAssignment,
-        CreateAssignmentCommentStudent,
+        ViewAssignmentAttachmentAsLearner,
+        CreateAssignmentCommentAsLearner,
+        ViewAssignmentCommentAttachmentAsLearner,
         ViewCourses,
         ViewSchedule,
         ViewFAQ,
@@ -109,6 +100,8 @@ class Roles(DjangoChoices):
     GRADUATE = C(3, _('Graduate'), permissions=(
         ViewOwnEnrollments,
         ViewOwnStudentAssignment,
+        ViewAssignmentAttachmentAsLearner,
+        ViewAssignmentCommentAttachmentAsLearner,
     ))
     TEACHER = C(2, _('Teacher'), priority=30, permissions=(
         ViewTeachingMenu,
@@ -124,7 +117,9 @@ class Roles(DjangoChoices):
         EditOwnCourseClass,
         DeleteOwnCourseClass,
         ViewRelatedEnrollments,
-        CreateAssignmentCommentTeacher,
+        ViewAssignmentAttachmentAsTeacher,
+        CreateAssignmentCommentAsTeacher,
+        ViewAssignmentCommentAttachmentAsTeacher,
         ViewOwnGradebook,
     ))
 
@@ -138,7 +133,12 @@ for code, name in Roles.choices:
 
 # Add relations
 teacher_role = role_registry[Roles.TEACHER]
-teacher_role.add_relation(CreateAssignmentComment, CreateAssignmentCommentTeacher)
+teacher_role.add_relation(ViewAssignmentAttachment,
+                          ViewAssignmentAttachmentAsTeacher)
+teacher_role.add_relation(CreateAssignmentComment,
+                          CreateAssignmentCommentAsTeacher)
+teacher_role.add_relation(ViewAssignmentCommentAttachment,
+                          ViewAssignmentCommentAttachmentAsTeacher)
 teacher_role.add_relation(ViewStudentAssignment, ViewRelatedStudentAssignment)
 teacher_role.add_relation(EditStudentAssignment, EditOwnStudentAssignment)
 teacher_role.add_relation(EditCourseClass, EditOwnCourseClass)
@@ -148,8 +148,14 @@ teacher_role.add_relation(EditAssignment, EditOwnAssignment)
 teacher_role.add_relation(ViewAssignment, ViewOwnAssignment)
 teacher_role.add_relation(ViewEnrollments, ViewRelatedEnrollments)
 
-student_role = role_registry[Roles.STUDENT]
-student_role.add_relation(CreateAssignmentComment, CreateAssignmentCommentStudent)
+for role in (Roles.STUDENT, Roles.VOLUNTEER):
+    student_role = role_registry[role]
+    student_role.add_relation(ViewAssignmentAttachment,
+                              ViewAssignmentAttachmentAsLearner)
+    student_role.add_relation(CreateAssignmentComment,
+                              CreateAssignmentCommentAsLearner)
+    student_role.add_relation(ViewAssignmentCommentAttachment,
+                              ViewAssignmentCommentAttachmentAsLearner)
 
 default_role = role_registry.default_role
 default_role.add_permission(ViewCourseClassMaterials)
