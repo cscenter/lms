@@ -84,10 +84,9 @@ class Role:
         # `User.has_perm(...)` iterates over permissions (grouped by role)
         # until the first successful match by name, eval the permission
         # callback and returns the result.
-        # It could lead to the false negative if 2 roles has the same permission
-        # name (see `Role.relations` description for the details)
-        # To avoid this auth backend should check permissions of the most
-        # priority roles first.
+        # Permission callback could make DB calls on access check. To avoid
+        # additional db hits check permissions of the highest priority roles
+        # first since they have a higher chance to return positive result.
         self.priority = priority  # The less value the higher priority
         self._permissions: RuleSet = RuleSet()
         for perm in permissions:

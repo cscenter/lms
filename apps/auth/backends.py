@@ -57,6 +57,9 @@ class RBACPermissions:
                 if obj is None:
                     continue
                 for rel_perm_name in role.relations[perm_name]:
+                    # Don't terminate access check here since less priority
+                    # role still could have a permission relation that returns
+                    # positive result
                     if self._has_perm(user, rel_perm_name, {role}, obj):
                         return True
         return False
