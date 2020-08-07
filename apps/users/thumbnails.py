@@ -1,11 +1,34 @@
+from django import forms
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core import checks
-from django.core.exceptions import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, ValidationError
 from django.db.models import ImageField
 from sorl.thumbnail import get_thumbnail
 from sorl.thumbnail.images import BaseImageFile, DummyImageFile
 
 from users.constants import ThumbnailSizes, GenderTypes
+
+
+# TODO: add validation for unbound coords and width=img.width
+class CropboxData(forms.Form):
+    width = forms.FloatField(required=True)
+    height = forms.FloatField(required=True)
+    x = forms.FloatField(required=True)
+    y = forms.FloatField(required=True)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        try:
+            for v in cleaned_data.values():
+                rounded = int(v)
+        except ValueError:
+            raise ValidationError("Can't round value to int")
+
+    def to_json(self):
+        xs = {}
+        for k, v in self.cleaned_data.items():
+            xs[k] = int(v)
+        return xs
 
 
 def photo_thumbnail_cropbox(data):
