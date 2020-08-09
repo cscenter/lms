@@ -16,7 +16,7 @@ from learning.permissions import CreateAssignmentComment, \
     CreateAssignmentCommentAsLearner, ViewRelatedStudentAssignment, \
     ViewStudentAssignment, EditOwnStudentAssignment, \
     EditOwnAssignmentExecutionTime, EnrollInCourse, EnrollPermissionObject, \
-    InvitationEnrollPermissionObject
+    InvitationEnrollPermissionObject, ViewAssignmentCommentAttachment
 from learning.services import get_student_profile, CourseRole, \
     course_access_role
 from learning.settings import StudentStatuses, GradeTypes, Branches
@@ -266,6 +266,37 @@ def test_create_assignment_comment():
     assert teacher.has_perm(CreateAssignmentComment.name, sa)
     assert teacher.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
     assert not teacher.has_perm(CreateAssignmentCommentAsLearner.name, sa)
+
+
+@pytest.mark.django_db
+def test_view_assignment_comment_attachment():
+    user = UserFactory()
+    assert not user.has_perm(ViewAssignmentCommentAttachment.name)
+    curator = CuratorFactory()
+    assert curator.has_perm(ViewAssignmentCommentAttachment.name)
+    teacher = TeacherFactory()
+    # Relation check permissions on object only
+    assert not teacher.has_perm(ViewAssignmentCommentAttachment.name)
+    comment = AssignmentCommentFactory(author=teacher)
+    comment.student_assignment.assignment.course.teachers.add(teacher)
+    assert teacher.has_perm(ViewAssignmentCommentAttachment.name,
+                            comment.student_assignment)
+    student = StudentFactory()
+    comment = AssignmentCommentFactory(author=student)
+    course = comment.student_assignment.assignment.course
+    course.semester = SemesterFactory.create_current()
+    course.save()
+    assert not student.has_perm(ViewAssignmentCommentAttachment.name,
+                                comment.student_assignment)
+    EnrollmentFactory(student=student, course=course)
+    # Wrong student assignment
+    assert not student.has_perm(ViewAssignmentCommentAttachment.name,
+                                comment.student_assignment)
+    comment.student_assignment = StudentAssignment.objects.get(
+        student=student, assignment=comment.student_assignment.assignment)
+    comment.save()
+    assert student.has_perm(ViewAssignmentCommentAttachment.name,
+                            comment.student_assignment)
 
 
 @pytest.mark.django_db

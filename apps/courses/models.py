@@ -1165,7 +1165,7 @@ class AssignmentAttachment(TimeStampedModel):
 
     def file_url(self):
         sid = hashids.encode(self.pk)
-        return reverse("study:assignment_attachments_download",
+        return reverse("files:download_assignment_attachment",
                        kwargs={"sid": sid, "file_name": self.file_name})
 
     def get_delete_url(self):

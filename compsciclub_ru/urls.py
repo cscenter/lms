@@ -52,9 +52,8 @@ urlpatterns += [
 
     path('teaching/', include('learning.teaching.urls')),
     path('learning/', include('learning.study.urls')),
+    path('attachments/', include('files.urls')),
     path("events/<int:pk>/", EventDetailView.as_view(), name="non_course_event_detail"),
-
-
 
     path("courses/", include([
         re_path(RE_COURSE_URI, include([

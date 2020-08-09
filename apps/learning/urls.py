@@ -18,6 +18,8 @@ urlpatterns = [
         ])),
     ])),
 
+    path('attachments/', include('files.urls')),
+
     path('teaching/', include('learning.teaching.urls')),
 
     path('learning/', include('learning.study.urls')),

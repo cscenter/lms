@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 
     # django.contrib.static with a customized list of ignore patterns
     'files.apps.StaticFilesConfig',
+    'files.apps.MediaFilesConfig',
     'core.apps.CoreConfig',
     'auth.apps.AuthConfig',  # custom `User` model is defined in `users` app
     'users.apps.UsersConfig',

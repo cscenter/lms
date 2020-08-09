@@ -29,6 +29,7 @@ from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Assignment, StudentGroupTypes, \
     Semester
+from files.storage import private_storage
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
@@ -555,6 +556,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
     attached_file = models.FileField(
         upload_to=task_comment_attachment_upload_to,
         max_length=150,
+        storage=private_storage,
         blank=True)
 
     published = AssignmentCommentPublishedManager()
@@ -585,7 +587,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         return os.path.basename(self.attached_file.name)
 
     def attached_file_url(self):
-        return reverse("study:assignment_comment_attachments_download", kwargs={
+        return reverse("files:download_assignment_comment_attachment", kwargs={
             "sid": hashids.encode(self.pk),
             "file_name": self.attached_file_name
         })

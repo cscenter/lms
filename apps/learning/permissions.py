@@ -241,7 +241,6 @@ class ViewOwnGradebook(Permission):
         return user in course.teachers.all()
 
 
-# TODO: move to the courses.permissions?
 @add_perm
 class ViewAssignmentAttachment(Permission):
     name = "learning.view_assignment_attachment"

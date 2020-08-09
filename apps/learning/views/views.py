@@ -149,7 +149,7 @@ class EventDetailView(generic.DetailView):
 
 class AssignmentAttachmentDownloadView(ProtectedFileDownloadView):
     permission_required = ViewAssignmentAttachment.name
-    FILE_FIELD_NAME = 'attachment'
+    file_field_name = 'attachment'
 
     def get_protected_object(self) -> Optional[AssignmentAttachment]:
         ids: tuple = hashids.decode(self.kwargs['sid'])
@@ -166,7 +166,7 @@ class AssignmentAttachmentDownloadView(ProtectedFileDownloadView):
 
 class AssignmentCommentAttachmentDownloadView(ProtectedFileDownloadView):
     permission_required = ViewAssignmentCommentAttachment.name
-    FILE_FIELD_NAME = 'attached_file'
+    file_field_name = 'attached_file'
 
     def get_protected_object(self) -> Optional[AssignmentComment]:
         ids: tuple = hashids.decode(self.kwargs['sid'])

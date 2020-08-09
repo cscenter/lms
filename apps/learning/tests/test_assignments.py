@@ -9,6 +9,7 @@ from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
+from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
@@ -17,6 +18,7 @@ from courses.models import Assignment, AssignmentAttachment, \
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory, AssignmentAttachmentFactory
 from learning.models import StudentAssignment
+from learning.permissions import ViewAssignmentAttachment
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, \
     AssignmentCommentFactory, \
@@ -248,3 +250,12 @@ def test_create_assignment_admin_form(client):
     response = client.post(reverse('admin:courses_assignment_add'), post_data)
     assert (Assignment.objects.count() == 1)
     assert StudentAssignment.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_download_assignment_attachment(lms_resolver):
+    url = reverse('files:download_assignment_attachment',
+                  kwargs={"sid": "wrongsid", "file_name": "filename.txt"})
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == ViewAssignmentAttachment.name
