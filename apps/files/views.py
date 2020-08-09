@@ -1,4 +1,5 @@
 import os
+from abc import abstractmethod, ABC
 
 from django.conf import settings
 from django.http import HttpResponseNotFound, HttpResponseBadRequest, \
@@ -11,7 +12,7 @@ from files.response import ProtectedLocalFileResponse
 from learning.utils import convert_ipynb_to_html
 
 
-class ProtectedFileDownloadView(PermissionRequiredMixin, generic.View):
+class ProtectedFileDownloadView(ABC, PermissionRequiredMixin, generic.View):
     """
     This view checks permissions of the authenticated user before
     downloading the protected file.
@@ -20,21 +21,26 @@ class ProtectedFileDownloadView(PermissionRequiredMixin, generic.View):
     the locally stored. Local files are distributed by nginx `X-Accel-Redirect`
     feature.
     """
-    FILE_FIELD_NAME = None  # of the protected object
+    @property
+    @abstractmethod
+    def file_field_name(self):
+        """Returns a file field name of the protected object"""
+        pass
+
+    @abstractmethod
+    def get_protected_object(self):
+        """Protected object contains a file stored in a private storage"""
+        raise NotImplementedError()
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.protected_object = self.get_protected_object()
 
-    def get_protected_object(self):
-        """Protected object contains a file stored in a private storage"""
-        raise NotImplementedError()
-
     def get_permission_object(self):
         return self.protected_object
 
     def get_file_field(self):
-        return getattr(self.protected_object, self.FILE_FIELD_NAME, None)
+        return getattr(self.protected_object, self.file_field_name, None)
 
     def get(self, request, *args, **kwargs):
         if self.protected_object is None:
