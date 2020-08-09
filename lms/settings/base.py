@@ -31,7 +31,7 @@ AWS_DEFAULT_ACL = None  # All files will inherit the bucket’s ACL
 if USE_S3_FOR_UPLOAD:
     DEFAULT_FILE_STORAGE = 'files.storage.PublicMediaS3Storage'
     AWS_PUBLIC_MEDIA_LOCATION = 'media'
-    PRIVATE_FILE_STORAGE = 'files.storage.PublicMediaS3Storage'
+    PRIVATE_FILE_STORAGE = 'files.storage.PrivateMediaS3Storage'
     AWS_PRIVATE_MEDIA_LOCATION = 'private'
     AWS_S3_ACCESS_KEY_ID = env.str('AWS_S3_ACCESS_KEY_ID')
     AWS_S3_SECRET_ACCESS_KEY = env.str('AWS_S3_SECRET_ACCESS_KEY')
