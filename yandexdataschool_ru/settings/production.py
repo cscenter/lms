@@ -4,7 +4,6 @@ from .base import *
 # FIXME: provide real keys
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
-MEDIA_ROOT = str(Path('/shared', 'media'))
 # STATICFILES_STORAGE = 'files.storage.CloudFrontManifestStaticFilesStorage'
 CDN_SOURCE_STATIC_URL = STATIC_URL
 # CDN_STATIC_URL = 'https://resources.compscicenter.ru/'

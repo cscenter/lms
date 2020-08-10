@@ -1,7 +1,5 @@
 from .base import *
 
-MEDIA_ROOT = str(Path('/shared', 'media'))
-
 CACHES['default'] = {
     'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
     'LOCATION': '/tmp/django_cache'
