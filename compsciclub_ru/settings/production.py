@@ -7,8 +7,6 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 
 from .base import *
 
-MEDIA_ROOT = str(Path('/shared', 'media'))
-
 # Sentry
 SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)

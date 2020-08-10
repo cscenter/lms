@@ -41,7 +41,10 @@ if USE_S3_FOR_UPLOAD:
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
 else:
-    MEDIA_ROOT = str(ROOT_DIR / "media")
+    MEDIA_ROOT = env.str('DJANGO_PUBLIC_MEDIA_ROOT', default=str(Path('/shared', 'media')))
+    # Resolve relative paths as relative to the ROOT_DIR
+    if MEDIA_ROOT.startswith('.'):
+        MEDIA_ROOT = ROOT_DIR.joinpath(MEDIA_ROOT).resolve()
     MEDIA_URL = "/media/"
 
 # Static Files Settings
