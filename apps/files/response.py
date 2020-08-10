@@ -3,7 +3,7 @@ import os
 from django.http import HttpResponse
 
 
-class ProtectedLocalFileResponse(HttpResponse):
+class XAccelRedirectFileResponse(HttpResponse):
     """
     Files under `media/assignments/` location are protected by nginx `internal`
     directive and could be returned by providing `X-Accel-Redirect`
