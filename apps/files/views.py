@@ -8,7 +8,7 @@ from django.views import generic
 from nbformat.validator import NotebookValidationError
 
 from auth.mixins import PermissionRequiredMixin
-from files.response import ProtectedLocalFileResponse
+from files.response import XAccelRedirectFileResponse
 from files.tasks import convert_ipynb_to_html
 
 
@@ -53,7 +53,16 @@ class ProtectedFileDownloadView(ABC, PermissionRequiredMixin, generic.View):
         # FIXME: preprocess ipynb files and save locally or in S3!
         if settings.USE_S3_FOR_UPLOAD:
             signed_url = file_field.url
-            return HttpResponseRedirect(redirect_to=signed_url)
+            if getattr(settings, "PROXYING_REMOTE_FILES", False):
+                from urllib.parse import urlparse
+                protocol = urlparse(signed_url).scheme
+                url = signed_url.replace(protocol + '://', '')
+                remote_file_location = f'/remote-files/{protocol}/{url}'
+                content_disposition = 'attachment'
+                return XAccelRedirectFileResponse(remote_file_location,
+                                                  content_disposition)
+            else:
+                return HttpResponseRedirect(redirect_to=signed_url)
         else:
             return self.get_local_private_file(file_field)
 
@@ -75,4 +84,4 @@ class ProtectedFileDownloadView(ABC, PermissionRequiredMixin, generic.View):
                 if exported:
                     media_file_uri = media_file_uri + html_ext
                     content_disposition = 'inline'
-        return ProtectedLocalFileResponse(media_file_uri, content_disposition)
+        return XAccelRedirectFileResponse(media_file_uri, content_disposition)
