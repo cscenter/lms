@@ -44,10 +44,10 @@ else:
     # Resolve relative paths as relative to the ROOT_DIR
     if MEDIA_ROOT.startswith('.'):
         MEDIA_ROOT = str(ROOT_DIR.joinpath(MEDIA_ROOT).resolve())
-    MEDIA_URL = "/media/"
-    PRIVATE_FILE_STORAGE = DEFAULT_FILE_STORAGE
-    PRIVATE_MEDIA_ROOT = MEDIA_ROOT
-    PRIVATE_MEDIA_URL = MEDIA_URL
+    MEDIA_URL = '/media/'
+    PRIVATE_FILE_STORAGE = 'files.storage.PrivateFileSystemStorage'
+    PRIVATE_MEDIA_ROOT = env.str('DJANGO_PRIVATE_MEDIA_ROOT')
+    PRIVATE_MEDIA_URL = '/media/'
 
 # Static Files Settings
 STATIC_ROOT = env.str('DJANGO_STATIC_ROOT', default=str(ROOT_DIR / "static"))
