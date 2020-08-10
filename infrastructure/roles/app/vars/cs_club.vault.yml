@@ -6,7 +6,7 @@ app_environement:
   DJANGO_SECRET_KEY: "chf0ao=9=ihflu_ln2&z+jke)*cx=k0e3mzuq+pc+x+6@vxrj9"
   DJANGO_EMAIL_ADDRESS: "noreply@compsciclub.ru"
   DJANGO_EMAIL_HOST_PASSWORD: "XgpWN4CzBGqCbNsb8"
-  DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS: "{{ '0o'|join(media_directory_permissions) | int(default=493, base=8) }}"
+  DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS: "{{ ('0o' + media_directory_permissions) | int(default=493, base=8) }}"
   DATABASE_URL: "postgresql://{{ db_user }}:{{ db_user_password }}@127.0.0.1:5432/{{ db_name }}"
   REDIS_PASSWORD: "3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN"
   HASHIDS_SALT: "^TimUbi)AUwc>]B-`g2"
