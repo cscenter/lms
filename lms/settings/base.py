@@ -22,8 +22,6 @@ DEFAULT_URL_SCHEME = env.str("REVERSE_URL_SCHEME", default="https")
 SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', default=True)
 
 # Upload Settings
-DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-PRIVATE_FILE_STORAGE = DEFAULT_FILE_STORAGE
 USE_S3_FOR_UPLOAD = env.bool('UPLOAD_USE_S3', default=False)
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS', default=0o755)
 FILE_UPLOAD_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_PERMISSIONS', default=0o664)
@@ -41,11 +39,15 @@ if USE_S3_FOR_UPLOAD:
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
 else:
-    MEDIA_ROOT = env.str('DJANGO_PUBLIC_MEDIA_ROOT', default=str(Path('/shared', 'media')))
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_ROOT = env.str('DJANGO_PUBLIC_MEDIA_ROOT')
     # Resolve relative paths as relative to the ROOT_DIR
     if MEDIA_ROOT.startswith('.'):
-        MEDIA_ROOT = ROOT_DIR.joinpath(MEDIA_ROOT).resolve()
+        MEDIA_ROOT = str(ROOT_DIR.joinpath(MEDIA_ROOT).resolve())
     MEDIA_URL = "/media/"
+    PRIVATE_FILE_STORAGE = DEFAULT_FILE_STORAGE
+    PRIVATE_MEDIA_ROOT = MEDIA_ROOT
+    PRIVATE_MEDIA_URL = MEDIA_URL
 
 # Static Files Settings
 STATIC_ROOT = env.str('DJANGO_STATIC_ROOT', default=str(ROOT_DIR / "static"))
