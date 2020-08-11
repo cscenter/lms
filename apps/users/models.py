@@ -1,6 +1,7 @@
 import base64
 import logging
 import os
+import uuid
 from random import choice
 from string import ascii_lowercase, digits
 from typing import Optional, Set
@@ -222,8 +223,10 @@ class StudentProfileAbstract(models.Model):
 
 
 def user_photo_upload_to(instance: "User", filename):
+    bucket = instance.pk // 1000
     _, ext = os.path.splitext(filename)
-    return f"profiles/{instance.id}{ext}"
+    file_name = uuid.uuid4().hex
+    return f"profiles/{bucket}/{file_name}{ext}"
 
 
 class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
