@@ -44,7 +44,7 @@
         {% if course_class.slides and can_view_course_class_materials %}
         <tr>
           <td>{% trans "Slides" %}:</td>
-          <td id="slides"><a href="{{ course_class.slides.url }}">{{ course_class.slides_file_name }}</a></td>
+          <td id="slides"><a href="{{ course_class.get_slides_download_url }}">{{ course_class.slides_file_name }}</a></td>
         </tr>
         {% endif %}
       </table>

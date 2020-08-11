@@ -5,7 +5,7 @@ from urllib.parse import unquote, urldefrag
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
-from django.core.files.storage import get_storage_class
+from django.core.files.storage import get_storage_class, FileSystemStorage
 from django.utils.functional import LazyObject
 from storages.backends.s3boto3 import S3Boto3Storage
 
@@ -91,6 +91,18 @@ class CloudFrontManifestStaticFilesStorage(ManifestStaticFilesStorage):
 
 
 # Uploaded files
+
+
+# XXX: Private files are stored under public directory and protected by
+# nginx `internal` directive.
+class PrivateFileSystemStorage(FileSystemStorage):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._location = self._value_or_setting(self._location,
+                                                settings.PRIVATE_MEDIA_ROOT)
+        self._base_url = self._value_or_setting(self._base_url,
+                                                settings.PRIVATE_MEDIA_URL)
+
 
 class PublicMediaS3Storage(S3Boto3Storage):
     location = getattr(settings, 'AWS_PUBLIC_MEDIA_LOCATION', 'media')
