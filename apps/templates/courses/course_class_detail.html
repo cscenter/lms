@@ -72,9 +72,7 @@
                     <li>
                         <span class="assignment-attachment">
                             <i class="fa fa-file"></i>
-                            <a href="{{ attachment.material.url }}">
-                              {{ attachment.material_file_name }}
-                            </a>
+                            <a href="{{ attachment.get_download_url }}">{{ attachment.material_file_name }}</a>
                         </span>
                     </li>
                 {% endfor %}

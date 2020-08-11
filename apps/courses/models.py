@@ -31,6 +31,7 @@ from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles, \
     MaterialVisibilityTypes
 from courses.utils import get_current_term_pair, get_term_starts_at, \
     TermPair
+from files.storage import private_storage
 from learning.settings import GradingSystems, ENROLLMENT_DURATION
 from .constants import SemesterTypes, ClassTypes
 from .managers import CourseTeacherManager, AssignmentManager, \
@@ -969,7 +970,8 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
         verbose_name=_("Class"),
         on_delete=models.CASCADE)
     material = models.FileField(max_length=200,
-                                upload_to=course_class_attachment_upload_to)
+                                upload_to=course_class_attachment_upload_to,
+                                storage=private_storage)
 
     class Meta:
         ordering = ["course_class", "-created"]
@@ -994,13 +996,9 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
         })
 
     def get_delete_url(self):
-        return branch_aware_reverse(
-            'courses:course_class_attachment_delete',
-            kwargs={
-                **self.course_class.course.url_kwargs,
-                "class_pk": self.course_class.pk,
-                "pk": self.pk
-            })
+        return reverse("courses:course_class_attachment_delete", kwargs={
+            "pk": self.pk
+        })
 
     @property
     def material_file_name(self):
