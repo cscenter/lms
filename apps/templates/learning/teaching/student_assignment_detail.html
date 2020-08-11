@@ -63,7 +63,7 @@
                   {% for aa in aas %}
                     <li>
                       <span class="assignment-attachment">
-                        <i class="fa fa-file"></i> <a href="{{ aa.file_url }}">{{ aa.file_name }}</a>
+                        <i class="fa fa-file"></i> <a href="{{ aa.get_download_url }}">{{ aa.file_name }}</a>
                       </span>
                     </li>
                   {% endfor %}
@@ -94,7 +94,7 @@
                       {% if comment.attached_file %}
                       <span class="assignment-attachment">
                         <i class="fa fa-file"></i>
-                        <a href="{{ comment.attached_file_url }}">
+                        <a href="{{ comment.get_attachment_download_url }}">
                           {{ comment.attached_file_name }}
                         </a>
                       </span>
