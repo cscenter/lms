@@ -72,7 +72,7 @@
             {% if can_view_course_class_materials and course_class.slides %}
                 <div class="slides mt-6">
                     <h3 class="mb-2">Слайды с лекции</h3>
-                    <a href="{{ course_class.slides.url }}" class="ui label _icon _big _no-wrap" target="_blank">{{ macros.svg_icon('slides') }}{{ course_class.slides_file_name }}</a>
+                    <a href="{{ course_class.get_slides_download_url() }}" class="ui label _icon _big _no-wrap" target="_blank">{{ macros.svg_icon('slides') }}{{ course_class.slides_file_name }}</a>
                 </div>
             {% endif %}
         </div>

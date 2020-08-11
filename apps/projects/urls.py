@@ -25,10 +25,10 @@ urlpatterns = [
         ])),
         path('prev/<int:project_id>/', views.ProjectPrevNextView.as_view(direction="prev"), name='project_detail_prev'),
         path('next/<int:project_id>/', views.ProjectPrevNextView.as_view(direction="next"), name='project_detail_next'),
-        path('attachments/', include([
-            path('<slug:sid>/<str:file_name>', views.ReportAttachmentDownloadView.as_view(), name='download_report_attachment'),
-            path('comments/<slug:sid>/<str:file_name>', views.ReportCommentAttachmentDownloadView.as_view(), name='download_report_comment_attachment'),
-        ])),
+    ])),
+    path('attachments/projects/', include([
+        path('<slug:sid>/<str:file_name>', views.ReportAttachmentDownloadView.as_view(), name='download_report_attachment'),
+        path('comments/<slug:sid>/<str:file_name>', views.ReportCommentAttachmentDownloadView.as_view(), name='download_report_comment_attachment'),
     ])),
     path('learning/projects/', include([
         path('', views.StudentProjectsView.as_view(), name='student_projects'),

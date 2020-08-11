@@ -16,7 +16,8 @@ from core.utils import hashids
 from core.views import ProtectedFormMixin
 from courses.forms import CourseClassForm
 from courses.models import CourseClass, CourseClassAttachment
-from courses.permissions import ViewCourseClassAttachment
+from courses.permissions import ViewCourseClassAttachment, \
+    ViewCourseClassMaterials
 from courses.views.mixins import CourseURLParamsMixin
 from files.views import ProtectedFileDownloadView
 from users.mixins import TeacherOnlyMixin
@@ -184,4 +185,18 @@ class CourseClassAttachmentDownloadView(ProtectedFileDownloadView):
         qs = (CourseClassAttachment.objects
               .filter(pk=ids[0])
               .select_related('course_class__course'))
+        return get_object_or_404(qs)
+
+
+class CourseClassSlidesDownloadView(ProtectedFileDownloadView):
+    permission_required = ViewCourseClassMaterials.name
+    file_field_name = 'slides'
+
+    def get_protected_object(self) -> Optional[CourseClass]:
+        ids: tuple = hashids.decode(self.kwargs['sid'])
+        if not ids:
+            raise Http404
+        qs = (CourseClass.objects
+              .filter(pk=ids[0])
+              .select_related('course'))
         return get_object_or_404(qs)

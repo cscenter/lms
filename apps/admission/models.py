@@ -20,11 +20,9 @@ from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
-from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
-from post_office.utils import get_email_template
+from post_office.models import EmailTemplate
 
-from admission.constants import ChallengeStatuses, INTERVIEW_FEEDBACK_TEMPLATE, \
-    InterviewFormats
+from admission.constants import ChallengeStatuses, InterviewFormats
 from admission.utils import slot_range, get_next_process
 from api.providers.yandex_contest import RegisterStatus, \
     Error as YandexContestError

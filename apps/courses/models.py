@@ -802,7 +802,8 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         _("Slides"),
         blank=True,
         max_length=200,
-        upload_to=course_class_slides_upload_to)
+        upload_to=course_class_slides_upload_to,
+        storage=private_storage)
     slides_url = models.URLField(_("SlideShare URL"), blank=True)
     video_url = models.URLField(
         verbose_name=_("Video Recording"),
@@ -877,6 +878,13 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         return branch_aware_reverse('courses:course_class_delete', kwargs={
             **self.course.url_kwargs,
             "pk": self.pk
+        })
+
+    def get_slides_download_url(self):
+        sid = hashids.encode(self.pk)
+        return reverse("courses:download_course_class_slides", kwargs={
+            "sid": sid,
+            "file_name": self.slides_file_name
         })
 
     @property
