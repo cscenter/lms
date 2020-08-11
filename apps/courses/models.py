@@ -986,6 +986,13 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
             course = self.course_class.course
             course.compute_fields('public_attachments_count')
 
+    def get_download_url(self):
+        sid = hashids.encode(self.pk)
+        return reverse("courses:download_course_class_attachment", kwargs={
+            "sid": sid,
+            "file_name": self.material_file_name
+        })
+
     def get_delete_url(self):
         return branch_aware_reverse(
             'courses:course_class_attachment_delete',
@@ -1163,7 +1170,7 @@ class AssignmentAttachment(TimeStampedModel):
         _, ext = os.path.splitext(self.attachment.name)
         return ext
 
-    def file_url(self):
+    def get_download_url(self):
         sid = hashids.encode(self.pk)
         return reverse("study:download_assignment_attachment",
                        kwargs={"sid": sid, "file_name": self.file_name})

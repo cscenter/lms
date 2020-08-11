@@ -170,7 +170,7 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     a_attachment = AssignmentAttachment.objects.first()
     assert a_attachment.attachment.read() == b"content"
     client.logout()
-    task_attachment_url = a_attachment.file_url()
+    task_attachment_url = a_attachment.get_download_url()
     response = client.get(task_attachment_url)
     assert response.status_code == 302  # redirect to login view
     student_spb = StudentFactory(branch__code=Branches.SPB)
@@ -215,7 +215,7 @@ def test_assignment_attachment_inactive_student(inactive_status, client,
     student_spb = StudentFactory(branch__code=Branches.SPB)
     a_attachment = AssignmentAttachmentFactory(assignment__course=course)
     EnrollmentFactory(course=course, student=student_spb)
-    task_attachment_url = a_attachment.file_url()
+    task_attachment_url = a_attachment.get_download_url()
     client.login(student_spb)
     response = client.get(task_attachment_url)
     assert response.status_code == 200

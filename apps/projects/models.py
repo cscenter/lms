@@ -975,7 +975,7 @@ class ReportComment(TimezoneAwareModel, TimeStampedModel):
     def attached_file_name(self):
         return os.path.basename(self.attached_file.name)
 
-    def attached_file_url(self):
+    def get_attachment_download_url(self):
         return reverse("projects:download_report_comment_attachment", kwargs={
             "sid": hashids.encode(self.pk),
             "file_name": self.attached_file_name,
