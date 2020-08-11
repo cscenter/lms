@@ -96,7 +96,7 @@
                         <h3>Приложенные файлы</h3>
                         <div class="ui labels mb-6">
                             {% for attachment in attachments %}
-                                <a href="{{ attachment.material.url }}" class="ui label _icon _big _no-wrap" target="_blank">{{ macros.svg_icon('files') }}{{ attachment.material_file_name }}</a>
+                                <a href="{{ attachment.get_download_url() }}" class="ui label _icon _big _no-wrap" target="_blank">{{ macros.svg_icon('files') }}{{ attachment.material_file_name }}</a>
                             {% endfor %}
                         </div>
                     {% endif %}

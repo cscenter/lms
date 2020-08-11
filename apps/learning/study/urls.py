@@ -17,10 +17,10 @@ urlpatterns = [
         path('<int:pk>/', StudentAssignmentDetailView.as_view(), name='student_assignment_detail'),
         path('<int:pk>/execution-time/', AssignmentExecutionTimeUpdateView.as_view(), name='student_assignment_execution_time_update'),
         path('<int:pk>/comments/', StudentAssignmentCommentCreateView.as_view(), name='assignment_comment_create'),
-    ])),
-    path('attachments/', include([
-        path('assignments/<slug:sid>/<str:file_name>', AssignmentAttachmentDownloadView.as_view(), name='download_assignment_attachment'),
-        path('assignments/comments/<slug:sid>/<str:file_name>', AssignmentCommentAttachmentDownloadView.as_view(), name='download_assignment_comment_attachment'),
+        path('attachments/', include([
+            path('<slug:sid>/<str:file_name>', AssignmentAttachmentDownloadView.as_view(), name='download_assignment_attachment'),
+            path('comments/<slug:sid>/<str:file_name>', AssignmentCommentAttachmentDownloadView.as_view(), name='download_assignment_comment_attachment'),
+        ])),
     ])),
     path('timetable/', TimetableView.as_view(), name='timetable'),
     path('calendar/', CalendarPersonalView.as_view(), name='calendar'),
