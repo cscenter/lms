@@ -52,7 +52,6 @@ urlpatterns += [
 
     path('teaching/', include('learning.teaching.urls')),
     path('learning/', include('learning.study.urls')),
-    path('attachments/', include('files.urls')),
     path("events/<int:pk>/", EventDetailView.as_view(), name="non_course_event_detail"),
 
     path("courses/", include([
@@ -60,7 +59,7 @@ urlpatterns += [
             path("enroll/", CourseEnrollView.as_view(), name="course_enroll"),
             path("unenroll/", CourseUnenrollView.as_view(), name="course_leave"),
             path("news/notifications/", CourseNewsNotificationUpdate.as_view(), name="course_news_notifications_read"),
-        ]))
+        ])),
     ])),
 
     path('narnia/', admin.site.urls),

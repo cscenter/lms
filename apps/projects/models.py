@@ -719,14 +719,10 @@ class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
             return os.path.basename(self.file.name)
 
     def file_url(self):
-        return reverse(
-            "projects:report_attachments_download",
-            args=[
-                hashids.encode(
-                    apps.get_app_config("projects").REPORT_ATTACHMENT,
-                    self.pk
-                )]
-        )
+        return reverse("projects:download_report_attachment", kwargs={
+            "sid": hashids.encode(self.pk),
+            "file_name": self.file_name,
+        })
 
     def __str__(self):
         return smart_text(self.project_student.student)
@@ -980,10 +976,7 @@ class ReportComment(TimezoneAwareModel, TimeStampedModel):
         return os.path.basename(self.attached_file.name)
 
     def attached_file_url(self):
-        return reverse(
-            "projects:report_attachments_download",
-            args=[hashids.encode(
-                apps.get_app_config("projects").REPORT_COMMENT_ATTACHMENT,
-                self.pk
-            )]
-        )
+        return reverse("projects:download_report_comment_attachment", kwargs={
+            "sid": hashids.encode(self.pk),
+            "file_name": self.attached_file_name,
+        })

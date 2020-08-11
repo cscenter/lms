@@ -9,6 +9,9 @@ from courses.permissions import ChangeMetaCourse, ViewCourseContacts, \
     EditCourseClass, EditOwnCourseClass, DeleteOwnCourseClass, \
     DeleteCourseClass, EditAssignment, EditOwnAssignment, \
     ViewCourseClassMaterials, ViewAssignment, ViewOwnAssignment
+from projects.permissions import ViewReportAttachment, \
+    ViewReportAttachmentAsLearner, ViewReportCommentAttachment, \
+    ViewReportCommentAttachmentAsLearner
 from users.permissions import CreateCertificateOfParticipation, \
     ViewCertificateOfParticipation
 from .permissions import CreateAssignmentComment, \
@@ -52,6 +55,8 @@ class Roles(DjangoChoices):
         CreateAssignmentComment,
         ViewAssignmentAttachment,
         ViewAssignmentCommentAttachment,
+        ViewReportAttachment,
+        ViewReportCommentAttachment,
     ))
     STUDENT = C(1, _('Student'), priority=50, permissions=(
         ViewStudyMenu,
@@ -74,6 +79,8 @@ class Roles(DjangoChoices):
         EnrollInCourse,
         EnrollInCourseByInvitation,
         LeaveCourse,
+        ViewReportAttachmentAsLearner,
+        ViewReportCommentAttachmentAsLearner,
     ))
     VOLUNTEER = C(4, _('Co-worker'), priority=50,
                   permissions=STUDENT.permissions)
@@ -156,6 +163,10 @@ for role in (Roles.STUDENT, Roles.VOLUNTEER):
                               CreateAssignmentCommentAsLearner)
     student_role.add_relation(ViewAssignmentCommentAttachment,
                               ViewAssignmentCommentAttachmentAsLearner)
+    student_role.add_relation(ViewReportAttachment,
+                              ViewReportAttachmentAsLearner)
+    student_role.add_relation(ViewReportCommentAttachment,
+                              ViewReportCommentAttachmentAsLearner)
 
 default_role = role_registry.default_role
 default_role.add_permission(ViewCourseClassMaterials)
