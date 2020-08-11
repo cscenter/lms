@@ -2,6 +2,7 @@
 
 import logging
 from itertools import groupby
+from typing import Optional
 
 from django.apps import apps
 from django.contrib import messages
@@ -30,6 +31,7 @@ from core.utils import hashids, render_markdown
 from core.views import LoginRequiredMixin
 from courses.models import Semester
 from courses.utils import get_current_term_pair
+from files.views import ProtectedFileDownloadView
 from notifications import NotificationTypes
 from notifications.signals import notify
 from projects.constants import ProjectTypes
@@ -40,7 +42,8 @@ from projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportCommentModalForm
 from projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review, ReportingPeriod, ReportingPeriodKey, PracticeCriteria
-from projects.permissions import UpdateReportComment
+from projects.permissions import UpdateReportComment, ViewReportAttachment, \
+    ViewReportCommentAttachment
 from projects.services import autocomplete_review_stage
 from users.constants import Roles, GenderTypes
 from users.mixins import ProjectReviewerGroupOnlyMixin, StudentOnlyMixin, \
@@ -842,40 +845,35 @@ class ReportCuratorSummarizeView(ReportUpdateViewMixin):
         )
 
 
-class ReportAttachmentDownloadView(LoginRequiredMixin, generic.View):
+class ReportAttachmentDownloadView(ProtectedFileDownloadView):
+    permission_required = ViewReportAttachment.name
+    file_field_name = 'file'
 
-    def get(self, request, *args, **kwargs):
-        try:
-            attachment_type, pk = hashids.decode(kwargs['sid'])
-        except (ValueError, IndexError):
+    def get_protected_object(self) -> Optional[Report]:
+        ids: tuple = hashids.decode(self.kwargs['sid'])
+        if not ids:
             raise Http404
-        projects_app = apps.get_app_config("projects")
-        user = request.user
-        if attachment_type == projects_app.REPORT_COMMENT_ATTACHMENT:
-            qs = ReportComment.objects.filter(pk=pk)
-            if not user.is_project_reviewer and not user.is_curator:
-                qs = qs.filter(report__project_student__student=user)
-            comment = get_object_or_404(qs)
-            if not comment.attached_file:
-                raise Http404
-            file_name = comment.attached_file_name
-            file_url = comment.attached_file.url
-        elif attachment_type == projects_app.REPORT_ATTACHMENT:
-            qs = Report.objects.filter(pk=pk)
-            if not user.is_project_reviewer and not user.is_curator:
-                qs = qs.filter(project_student__student=user)
-            report = get_object_or_404(qs)
-            if not report.file:
-                raise Http404
-            file_name = report.file_name
-            file_url = report.file.url
-        else:
+        qs = (Report.objects
+              .filter(pk=ids[0])
+              .select_related('project_student__project'))
+        return get_object_or_404(qs)
+
+    def get_permission_object(self):
+        return self.protected_object
+
+
+class ReportCommentAttachmentDownloadView(ProtectedFileDownloadView):
+    permission_required = ViewReportCommentAttachment.name
+    file_field_name = 'attached_file'
+
+    def get_protected_object(self) -> Optional[ReportComment]:
+        ids: tuple = hashids.decode(self.kwargs['sid'])
+        if not ids:
             raise Http404
+        qs = (ReportComment.objects
+              .filter(pk=ids[0])
+              .select_related('report__project_student__project'))
+        return get_object_or_404(qs)
 
-        response = HttpResponse()
-        del response['Content-Type']
-        response['Content-Disposition'] = "attachment; filename={}".format(
-            file_name)
-        response['X-Accel-Redirect'] = file_url
-        return response
-
+    def get_permission_object(self):
+        return self.protected_object

@@ -6,8 +6,6 @@ from django.db.models import Case, When, Value, IntegerField
 from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, C
 
-ASSIGNMENT_COMMENT_ATTACHMENT = 1
-
 # This setting helps calculate the last day of enrollment period if
 # a custom value wasn't provided on model saving.
 ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)

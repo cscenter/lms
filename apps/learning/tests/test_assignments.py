@@ -254,7 +254,7 @@ def test_create_assignment_admin_form(client):
 
 @pytest.mark.django_db
 def test_download_assignment_attachment(lms_resolver):
-    url = reverse('files:download_assignment_attachment',
+    url = reverse('study:download_assignment_attachment',
                   kwargs={"sid": "wrongsid", "file_name": "filename.txt"})
     resolver = lms_resolver(url)
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
