@@ -5,11 +5,11 @@ from typing import List, Iterable, Union, Optional
 from django.contrib.sites.models import Site
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction, router
-from django.db.models import Q, OuterRef, Value, F, TextField, QuerySet
-from django.db.models.functions import Concat
+from django.db.models import Q, OuterRef, Value, F, TextField, QuerySet, \
+    Subquery, Count
+from django.db.models.functions import Concat, Coalesce
 from django.utils.timezone import now
 
-from core.db.expressions import SubqueryCount
 from core.models import Branch
 from core.services import SoftDeleteService
 from core.timezone import now_local
@@ -80,12 +80,21 @@ def populate_assignments_for_student(enrollment):
         AssignmentService.create_student_assignment(a, enrollment)
 
 
-def update_course_learners_count(course_id):
+def get_learners_count_subquery(outer_ref: OuterRef):
     from learning.models import Enrollment
+    return Coalesce(Subquery(
+        (Enrollment.active
+         .filter(course_id=outer_ref)
+         .order_by()
+         .values('course')  # group by
+         .annotate(total=Count("*"))
+         .values("total"))
+    ), Value(0))
+
+
+def update_course_learners_count(course_id):
     Course.objects.filter(id=course_id).update(
-        learners_count=SubqueryCount(
-            Enrollment.active.filter(course_id=OuterRef('id'))
-        )
+        learners_count=get_learners_count_subquery(outer_ref=OuterRef('id'))
     )
 
 
@@ -390,9 +399,9 @@ class EnrollmentService:
             # Try to update enrollment to the `active` state
             filters = [Q(pk=enrollment.pk), Q(is_deleted=True)]
             if course.is_capacity_limited:
-                learners_count = SubqueryCount(
-                    Enrollment.active
-                    .filter(course_id=OuterRef('course_id')))
+                learners_count = get_learners_count_subquery(
+                    outer_ref=OuterRef('course_id')
+                )
                 filters.append(Q(course__capacity__gt=learners_count))
             attrs.update({
                 "is_deleted": False,

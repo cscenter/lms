@@ -5,7 +5,7 @@ from datetime import datetime
 
 from django.http import HttpResponse
 from django.utils import formats
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from xlsxwriter import Workbook
 
 
@@ -56,8 +56,8 @@ class ReportFileOutput(ABC):
         for row_index, raw_row in enumerate(self.data, start=1):
             row = self.export_row(raw_row)
             for col_index, value in enumerate(row):
-                value = "" if value is None else force_text(value)
-                worksheet.write(row_index, col_index, force_text(value), format)
+                value = "" if value is None else force_str(value)
+                worksheet.write(row_index, col_index, force_str(value), format)
 
         workbook.close()
         output.seek(0)

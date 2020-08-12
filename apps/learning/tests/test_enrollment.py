@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from core.tests.factories import BranchFactory
 from core.timezone import now_local

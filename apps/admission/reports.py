@@ -7,7 +7,7 @@ from copy import copy
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Prefetch
 from django.utils import formats
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.numberformat import format
 from pandas import DataFrame
 
@@ -50,7 +50,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
         }
         applicant_fields = [f for f in Applicant._meta.fields if
                             f.name not in exclude_applicant_fields]
-        self.headers = [force_text(f.verbose_name) for f in applicant_fields]
+        self.headers = [force_str(f.verbose_name) for f in applicant_fields]
         self.headers.extend([
             "Результаты теста",
             "Результаты экзамена",
@@ -116,7 +116,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 row.append("<нет интервью>")
                 row.append("")
 
-            self.data.append([force_text(x) if x is not None else "" for x in
+            self.data.append([force_str(x) if x is not None else "" for x in
                               row])
 
     def export_row(self, row):

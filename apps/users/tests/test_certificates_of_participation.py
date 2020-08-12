@@ -4,7 +4,7 @@ import factory
 import pytest
 from bs4 import BeautifulSoup
 from django.conf import settings
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from core.urls import reverse
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
