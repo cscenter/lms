@@ -165,7 +165,7 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         self.object.delete()
-        self.object.material.delete()
+        self.object.material.delete(save=False)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):

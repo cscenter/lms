@@ -210,8 +210,7 @@ def test_course_class_attachments(client, assert_redirect,
     form['attachments'] = [f1, f2]
     url = cc.get_update_url()
     response = client.post(url, form)
-    assert_redirect(response,
-                    cc.get_absolute_url())
+    assert_redirect(response, cc.get_absolute_url())
     # check that files are available from course class page
     response = client.get(cc.get_absolute_url())
     spans = (BeautifulSoup(response.content, "html.parser")
