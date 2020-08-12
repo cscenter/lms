@@ -2,7 +2,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 
-from django.utils.translation import ugettext_noop
+from django.utils.translation import gettext_noop
 
 from users.models import UserGroup, User
 
@@ -219,46 +219,46 @@ class ProjectRole(RoleBase):
 @register_access_role
 class Student(CourseRole):
     ROLE = "student"
-    verbose_name = ugettext_noop("Student")
+    verbose_name = gettext_noop("Student")
 
 
 @register_access_role
 class Teacher(CourseRole):
     ROLE = "teacher"
-    verbose_name = ugettext_noop("Teacher")
+    verbose_name = gettext_noop("Teacher")
 
 
 @register_access_role
 class Graduate(CourseRole):
     ROLE = "graduate"
-    verbose_name = ugettext_noop("Graduate")
+    verbose_name = gettext_noop("Graduate")
 
 
 @register_access_role
 class Volunteer(CourseRole):
     ROLE = "volunteer"
-    verbose_name = ugettext_noop("Volunteer")
+    verbose_name = gettext_noop("Volunteer")
 
 
 @register_access_role
 class Interviewer(AdmissionRole):
     ROLE = "interviewer"
-    verbose_name = ugettext_noop("Interviewer")
+    verbose_name = gettext_noop("Interviewer")
 
 
 # @register_access_role
 class BetaTester(CourseRole):
     ROLE = "beta_tester"
-    verbose_name = ugettext_noop("Beta Tester")
+    verbose_name = gettext_noop("Beta Tester")
 
 
 @register_access_role
 class Curator(ProjectRole):
     ROLE = "project_curator"
-    verbose_name = ugettext_noop("Curator of projects")
+    verbose_name = gettext_noop("Curator of projects")
 
 
 @register_access_role
 class Reviewer(ProjectRole):
     ROLE = "project_reviewer"
-    verbose_name = ugettext_noop("Project Reviewer")
+    verbose_name = gettext_noop("Project Reviewer")

@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin as _UserAdmin
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from import_export.admin import ImportMixin
 
 from core.admin import meta, BaseModelAdmin

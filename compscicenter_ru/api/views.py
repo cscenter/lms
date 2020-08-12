@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db.models import Prefetch, Q
 from django.http import HttpResponseBadRequest
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db.models import Count, DateTimeField
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from core.admin import meta
 from core.timezone import TimezoneAwareDateTimeField

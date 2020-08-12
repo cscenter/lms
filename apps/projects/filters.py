@@ -9,7 +9,7 @@ from django.conf import settings
 from django.db.models import Case, Count, F, When, Value, Sum, IntegerField
 from django.db.models import Q
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from core.models import Branch
 from projects.constants import ProjectTypes

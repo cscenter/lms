@@ -8,8 +8,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Optional, NamedTuple, Dict
 
 from django.db.models import Count
-from django.utils.translation import ugettext_noop, \
-    ugettext_lazy as _
+from django.utils.translation import gettext_noop, gettext_lazy as _
 
 from courses.services import CourseService
 from courses.tabs_registry import registry, register
@@ -85,7 +84,7 @@ class CourseTab:
         raise NotImplementedError
 
     # The title of the tab, which should be internationalized using
-    # ugettext_noop since the user won't be available in this context.
+    # gettext_noop since the user won't be available in this context.
     title = None
 
     # HTML class to add to the tab page's body, or None if no class it
@@ -300,7 +299,7 @@ class CourseInfoTab(CourseTab):
     The course info view.
     """
     type = 'about'
-    title = ugettext_noop("CourseTab|About")
+    title = gettext_noop("CourseTab|About")
     priority = 10
     is_default = True
 
@@ -312,7 +311,7 @@ class CourseInfoTab(CourseTab):
 @register
 class CourseClassesTab(CourseTab):
     type = 'classes'
-    title = ugettext_noop("CourseTab|Classes")
+    title = gettext_noop("CourseTab|Classes")
     priority = 40
 
     @classmethod
@@ -329,7 +328,7 @@ class CourseClassesTab(CourseTab):
 
 class CourseAssignmentsTab(CourseTab):
     type = 'assignments'
-    title = ugettext_noop("CourseTab|Assignments")
+    title = gettext_noop("CourseTab|Assignments")
     priority = 50
 
     @classmethod

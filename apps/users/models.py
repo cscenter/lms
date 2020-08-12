@@ -20,7 +20,7 @@ from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, C
 from jsonfield import JSONField
 from model_utils.fields import MonitorField, AutoLastModifiedField
@@ -29,7 +29,7 @@ from sorl.thumbnail import ImageField
 
 from auth.permissions import perm_registry
 from auth.tasks import update_password_in_gerrit
-from core.models import LATEX_MARKDOWN_ENABLED, Branch, TIMEZONES
+from core.models import TIMEZONES
 from core.timezone import Timezone, TimezoneAwareModel
 from core.timezone.constants import DATETIME_FORMAT_RU
 from core.urls import reverse
@@ -433,6 +433,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         except User.DoesNotExist:
             return username
 
+    # TODO: move to ldap module
     @property
     def password_hash_ldap(self) -> Optional[bytes]:
         """
@@ -454,6 +455,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         h = f"{ldap_hasher_code}{iterations}${ab64_salt.decode('utf-8')}${hash}"
         return h.encode("utf-8")
 
+    # TODO: move to ldap module
     @property
     def ldap_username(self):
         """

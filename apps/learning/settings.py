@@ -3,7 +3,7 @@ import pytz
 from django.conf import settings
 from django.db.models import Case, When, Value, IntegerField
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, C
 
 # This setting helps calculate the last day of enrollment period if

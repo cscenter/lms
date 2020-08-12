@@ -6,13 +6,10 @@ from django.conf import settings
 from django.forms import forms
 from django.template import Context, TemplateSyntaxError
 from django.template.loader import get_template
-from django.utils.lru_cache import lru_cache
-
 
 register = template.Library()
 
 
-#@lru_cache()
 def get_form_template(template_pack=None):
     if not template_pack:
         return get_template('surveys/forms/form.html')

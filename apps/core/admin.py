@@ -9,7 +9,7 @@ from django.db.models import Model
 from django.db.models.query import QuerySet
 from django.urls import reverse, NoReverseMatch
 from django.utils.encoding import force_text
-from django.utils.translation import ugettext_lazy as _, gettext_noop
+from django.utils.translation import gettext_lazy as _, gettext_noop
 from modeltranslation.admin import TranslationAdmin
 from taggit.models import Tag
 

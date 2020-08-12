@@ -14,7 +14,7 @@ from django.db.models import Q, Max, Prefetch, F, Count, \
     prefetch_related_objects, Min
 from django.http import Http404
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from djchoices import DjangoChoices, C
 from vanilla import TemplateView, DetailView

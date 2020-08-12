@@ -16,7 +16,7 @@ from django.utils import timezone, numberformat
 from django.utils.encoding import smart_text
 from django.utils.formats import date_format, time_format
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField

@@ -11,7 +11,7 @@ from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.http.response import HttpResponseForbidden, Http404
 from django.shortcuts import get_object_or_404, get_list_or_404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views import generic, View
 from django_filters.views import BaseFilterView
 from vanilla import TemplateView

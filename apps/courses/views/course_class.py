@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.shortcuts import redirect, get_object_or_404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from vanilla import CreateView, UpdateView, DeleteView
 

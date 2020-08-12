@@ -2,7 +2,7 @@ from collections import OrderedDict
 from decimal import Decimal
 
 import numpy as np
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from core.db.models import normalize_score
 from courses.models import Course, Assignment
