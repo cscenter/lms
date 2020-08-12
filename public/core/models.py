@@ -1,7 +1,7 @@
 import datetime
 import pytz
 from django.contrib.auth.models import AnonymousUser, AbstractUser
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from typing import Optional, NewType
 
 Timezone = NewType('Timezone', datetime.tzinfo)
@@ -71,5 +71,5 @@ class User(PermissionMixin, AbstractUser):
         return '/v2/pages/profile/'
 
     def get_short_name(self):
-        return (smart_text(" ".join([self.first_name, self.last_name]).strip())
+        return (smart_str(" ".join([self.first_name, self.last_name]).strip())
                 or self.username)

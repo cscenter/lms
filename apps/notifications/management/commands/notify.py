@@ -10,7 +10,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand
 from django.template.loader import render_to_string
 from django.utils import translation
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.html import strip_tags, linebreaks
 
 from core.urls import replace_hostname
@@ -77,7 +77,7 @@ def send_notification(notification, template, context, f):
     # XXX: Note that email is mandatory now
     if not notification.user.email:
         report(f, "User {0} doesn't have an email"
-               .format(smart_text(notification.user)))
+               .format(smart_str(notification.user)))
         notification.is_notified = True
         notification.save()
         return
@@ -92,8 +92,8 @@ def send_notification(notification, template, context, f):
                                  settings.DEFAULT_FROM_EMAIL,
                                  [notification.user.email])
     msg.attach_alternative(html_content, "text/html")
-    report(f, "sending {0} ({1})".format(smart_text(notification),
-                                         smart_text(template)))
+    report(f, "sending {0} ({1})".format(smart_str(notification),
+                                         smart_str(template)))
     msg.send()
     notification.is_notified = True
     notification.save()
@@ -127,11 +127,11 @@ def get_assignment_notification_context(notification: AssignmentNotification):
         # FIXME: rename
         'assignment_link': replace_hostname(a_s.assignment.get_teacher_url(), base_domain),
         'notification_created': notification.created_local(tz_override),
-        'assignment_name': smart_text(a_s.assignment),
-        'assignment_text': smart_text(a_s.assignment.text),
-        'student_name': smart_text(a_s.student),
+        'assignment_name': smart_str(a_s.assignment),
+        'assignment_text': smart_str(a_s.assignment.text),
+        'student_name': smart_str(a_s.student),
         'deadline_at': a_s.assignment.deadline_at_local(tz=tz_override),
-        'course_name': smart_text(a_s.assignment.course.meta_course)
+        'course_name': smart_str(a_s.assignment.course.meta_course)
     }
     return context
 
@@ -141,7 +141,7 @@ def get_course_news_notification_context(notification: CourseNewsNotification):
     course = notification.course_offering_news.course
     context = {
         'course_link': replace_hostname(course.get_absolute_url(), base_domain),
-        'course_name': smart_text(course.meta_course),
+        'course_name': smart_str(course.meta_course),
         'course_news_name': notification.course_offering_news.title,
         'course_news_text': notification.course_offering_news.text,
     }

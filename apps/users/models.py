@@ -17,7 +17,7 @@ from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
 from django.db.models import prefetch_related_objects, Q
 from django.utils import timezone
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
 from django.utils.translation import gettext_lazy as _
@@ -466,7 +466,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         return self.email.replace("@", ".")
 
     def __str__(self):
-        return smart_text(self.get_full_name(True))
+        return smart_str(self.get_full_name(True))
 
     def get_absolute_url(self):
         return reverse('user_detail', args=[self.pk],
@@ -509,16 +509,16 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
             parts = (self.last_name, self.first_name, self.patronymic)
         else:
             parts = (self.first_name, self.patronymic, self.last_name)
-        full_name = smart_text(" ".join(p for p in parts if p).strip())
+        full_name = smart_str(" ".join(p for p in parts if p).strip())
         return full_name or self.username
 
     def get_short_name(self):
-        return (smart_text(" ".join([self.first_name, self.last_name]).strip())
+        return (smart_str(" ".join([self.first_name, self.last_name]).strip())
                 or self.username)
 
     def get_abbreviated_name(self, delimiter=chr(160)):  # non-breaking space
         parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
-        name = smart_text(f".{delimiter}".join(p for p in parts if p).strip())
+        name = smart_str(f".{delimiter}".join(p for p in parts if p).strip())
         return name or self.username
 
     def get_abbreviated_short_name(self, last_name_first=True):
@@ -911,7 +911,7 @@ class OnlineCourseRecord(TimeStampedModel):
         verbose_name_plural = _("Online course records")
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
 
 class SHADCourseRecord(TimeStampedModel):
@@ -941,7 +941,7 @@ class SHADCourseRecord(TimeStampedModel):
         return SHADCourseGradeTypes.values[self.grade]
 
     def __str__(self):
-        return smart_text("{} [{}]".format(self.name, self.student_id))
+        return smart_str("{} [{}]".format(self.name, self.student_id))
 
 
 class CertificateOfParticipation(TimeStampedModel):
@@ -958,7 +958,7 @@ class CertificateOfParticipation(TimeStampedModel):
         verbose_name_plural = _("Student References")
 
     def __str__(self):
-        return smart_text(self.student_profile)
+        return smart_str(self.student_profile)
 
     def get_absolute_url(self):
         return reverse('student_reference_detail',

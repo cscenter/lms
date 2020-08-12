@@ -5,7 +5,7 @@ import pytest
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.forms.models import model_to_dict
-from django.utils.encoding import smart_text, smart_bytes
+from django.utils.encoding import smart_str, smart_bytes
 
 from core.admin import get_admin_url
 from core.models import Branch
@@ -58,7 +58,7 @@ def test_short_name(client):
 def test_to_string(client):
     user = User(first_name=u"Анна", last_name=u"Иванова",
                 patronymic=u"Васильевна")
-    assert smart_text(user) == user.get_full_name(True)
+    assert smart_str(user) == user.get_full_name(True)
 
 
 @pytest.mark.django_db
