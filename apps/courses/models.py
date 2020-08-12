@@ -761,12 +761,15 @@ def course_class_slides_upload_to(instance: "CourseClass", filename) -> str:
     course_slug = course.meta_course.slug
     # Generic filename
     class_date = instance.date.strftime("%d%m%y")
-    _, ext = os.path.splitext(filename)
     course_prefix = course_slug.replace("-", "_")
+    _, ext = os.path.splitext(filename)
     filename = f"{course_prefix}_{instance.type}_{class_date}{ext}".lower()
-    return os.path.join("courses", course.semester.slug,
-                        f"{course.main_branch.code}-{course_slug}",
-                        "slides", filename)
+    return "{}/courses/{}/{}-{}/slides/{}".format(
+        course.main_branch.site_id,
+        course.semester.slug,
+        course.main_branch.code,
+        course_slug,
+        filename)
 
 
 class ClassMaterial(NamedTuple):
@@ -953,21 +956,15 @@ def course_class_post_delete(sender, instance: CourseClass, *args, **kwargs):
     )
 
 
-def course_class_attachment_upload_to(instance: "CourseClassAttachment",
+def course_class_attachment_upload_to(self: "CourseClassAttachment",
                                       filename) -> str:
-    """
-    Format: courses/<term_slug>/<branch_code>-<course_slug>/materials/<filename>
-
-    Example:
-        courses/2018-autumn/spb-data-bases/materials/Лекция_1.pdf
-    """
-    course = instance.course_class.course
-    course_slug = course.meta_course.slug
-    filename = filename.replace(" ", "_")
-    # TODO: transliterate?
-    return os.path.join("courses", course.semester.slug,
-                        f"{course.main_branch.code}-{course_slug}",
-                        "materials", filename)
+    course = self.course_class.course
+    return "{}/courses/{}/{}-{}/materials/{}".format(
+        course.main_branch.site_id,
+        course.semester.slug,
+        course.main_branch.code,
+        course.meta_course.slug,
+        filename.replace(" ", "_"))
 
 
 class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
@@ -1147,8 +1144,12 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         return f'assignments/{bucket}/{self.pk}'
 
 
-def task_attachment_upload_to(instance: "AssignmentAttachment", filename):
-    return f"{instance.assignment.files_root}/attachments/{filename}"
+def assignment_attachment_upload_to(self: "AssignmentAttachment", filename):
+    return "{}/assignments/{}/{}/attachments/{}".format(
+        self.assignment.course.main_branch.site_id,
+        self.assignment.course.semester.slug,
+        self.assignment_id,
+        filename)
 
 
 class AssignmentAttachment(TimeStampedModel):
@@ -1156,7 +1157,8 @@ class AssignmentAttachment(TimeStampedModel):
         Assignment,
         verbose_name=_("Assignment"),
         on_delete=models.CASCADE)
-    attachment = models.FileField(upload_to=task_attachment_upload_to,
+    attachment = models.FileField(upload_to=assignment_attachment_upload_to,
+                                  storage=private_storage,
                                   max_length=150)
 
     class Meta:

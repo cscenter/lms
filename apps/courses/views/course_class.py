@@ -165,9 +165,7 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         self.object.delete()
-        # TODO: move to model method
-        # FIXME: remove with storage only
-        os.remove(self.object.material.path)
+        self.object.material.delete()
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):

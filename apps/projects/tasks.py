@@ -35,14 +35,14 @@ YANDEX_DISK_API_DATA = {
 @job('default')
 def download_presentation_from_yandex_disk_supervisor(project_id, retries=3):
     """Download supervisor presentation to local storage by public link"""
-    from projects.models import project_presentation_files
+    from projects.models import project_presentations_upload_to
     Project = apps.get_model('projects', 'Project')
     project = Project.objects.get(pk=project_id)
     file_path = _download_presentation(
         instance=project,
         public_link=project.supervisor_presentation_url,
         file_attribute_name="supervisor_presentation",
-        file_path_without_ext=project_presentation_files(project, "supervisor"),
+        file_path_without_ext=project_presentations_upload_to(project, "supervisor"),
         retries=retries
     )
     return file_path
@@ -51,14 +51,14 @@ def download_presentation_from_yandex_disk_supervisor(project_id, retries=3):
 @job('default')
 def download_presentation_from_yandex_disk_students(project_id, retries=3):
     """Download participants presentation to local storage by public link"""
-    from projects.models import project_presentation_files
+    from projects.models import project_presentations_upload_to
     Project = apps.get_model('projects', 'Project')
     project = Project.objects.get(pk=project_id)
     file_path = _download_presentation(
         instance=project,
         public_link=project.presentation_url,
         file_attribute_name="presentation",
-        file_path_without_ext=project_presentation_files(project,
+        file_path_without_ext=project_presentations_upload_to(project,
                                                          "participants"),
         retries=retries
     )

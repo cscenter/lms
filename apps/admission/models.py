@@ -30,6 +30,7 @@ from core.db.models import ScoreField
 from core.models import Branch, Location
 from core.timezone import TimezoneAwareModel, TimezoneAwareDateTimeField
 from core.urls import reverse
+from files.storage import private_storage
 from learning.settings import AcademicDegreeLevels
 from users.constants import Roles
 
@@ -582,7 +583,8 @@ class Contest(models.Model):
         blank=True,
         help_text=_("Make sure file does not include solutions due to "
                     "it visible with direct url link"),
-        upload_to=contest_assignments_upload_to)
+        upload_to=contest_assignments_upload_to,
+        storage=private_storage)
 
     class Meta:
         verbose_name = _("Contest")

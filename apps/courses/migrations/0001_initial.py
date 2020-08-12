@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
-                ('attachment', models.FileField(max_length=150, upload_to=courses.models.task_attachment_upload_to)),
+                ('attachment', models.FileField(max_length=150, upload_to=courses.models.assignment_attachment_upload_to)),
             ],
             options={
                 'verbose_name': 'Assignment attachment',

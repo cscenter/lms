@@ -532,9 +532,14 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
             return str(_("{} hrs {:02d} min")).format(hours, minutes)
 
 
-def task_comment_attachment_upload_to(instance: "AssignmentComment", filename):
-    sa = instance.student_assignment
-    return f"{sa.assignment.files_root}/user_{sa.student_id}/{filename}"
+def assignment_comment_attachment_upload_to(self: "AssignmentComment", filename):
+    sa = self.student_assignment
+    return "{}/assignments/{}/{}/user_{}/{}".format(
+        sa.assignment.course.main_branch.site_id,
+        sa.assignment.course.semester.slug,
+        sa.assignment_id,
+        sa.student_id,
+        filename)
 
 
 class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel):
@@ -554,8 +559,8 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
     attached_file = models.FileField(
-        upload_to=task_comment_attachment_upload_to,
         max_length=150,
+        upload_to=assignment_comment_attachment_upload_to,
         storage=private_storage,
         blank=True)
 

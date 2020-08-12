@@ -27,6 +27,7 @@ from core.utils import hashids
 from courses.constants import SemesterTypes
 from courses.models import Semester
 from courses.utils import get_current_term_pair
+from files.storage import private_storage
 from learning.settings import GradeTypes, Branches
 from notifications.signals import notify
 from projects.constants import ProjectTypes, EDITING_REPORT_COMMENT_AVAIL
@@ -396,12 +397,12 @@ class ProjectStudent(TimezoneAwareModel, models.Model):
         return label
 
 
-def project_presentation_files(self, filename):
-    return os.path.join('projects',
-                        '{}-{}'.format(self.semester.year, self.semester.type),
-                        '{}'.format(self.pk),
-                        'presentations',
-                        filename)
+def project_presentations_upload_to(self: "Project", filename):
+    return "{}/projects/{}/{}/presentations/{}".format(
+        self.branch.site_id,
+        self.semester.slug,
+        self.pk,
+        filename)
 
 
 class Supervisor(models.Model):
@@ -517,7 +518,7 @@ class Project(TimezoneAwareModel, TimeStampedModel):
     supervisor_presentation = models.FileField(
         _("Supervisor presentation"),
         blank=True,
-        upload_to=project_presentation_files)
+        upload_to=project_presentations_upload_to)
     supervisor_presentation_url = models.URLField(
         _("Link to supervisor presentation"),
         blank=True,
@@ -528,7 +529,7 @@ class Project(TimezoneAwareModel, TimeStampedModel):
     presentation = models.FileField(
         _("Participants presentation"),
         blank=True,
-        upload_to=project_presentation_files)
+        upload_to=project_presentations_upload_to)
     presentation_url = models.URLField(
         _("Link to participants presentation"),
         blank=True,
@@ -583,14 +584,13 @@ class Project(TimezoneAwareModel, TimeStampedModel):
         return not self.is_canceled and self.semester.index == term_index
 
 
-def report_file_name(self, filename):
-    return os.path.join('projects',
-                        '{}-{}'.format(
-                            self.project_student.project.semester.year,
-                            self.project_student.project.semester.type),
-                        '{}'.format(self.project_student.project.pk),
-                        'reports',
-                        filename)
+def report_file_upload_to(self: "Report", filename):
+    project = self.project_student.project
+    return "{}/projects/{}/{}/reports/{}".format(
+        project.branch.site_id,
+        project.semester.slug,
+        project.pk,
+        filename)
 
 
 class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
@@ -640,7 +640,8 @@ class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
         _("Report file"),
         blank=True,
         null=True,
-        upload_to=report_file_name)
+        upload_to=report_file_upload_to,
+        storage=private_storage)
     # curators criteria
     score_activity = models.PositiveSmallIntegerField(
         verbose_name=_("Student activity in cvs"),
@@ -926,8 +927,9 @@ class PracticeCriteria(CriteriaScoresMixin, models.Model):
         verbose_name_plural = _("Practice Criteria")
 
 
-def report_comment_attachment_upload_to(self, filename):
-    return "projects/{}/{}/attachments/{}".format(
+def report_comment_attachment_upload_to(self: "ReportComment", filename):
+    return "{}/projects/{}/{}/attachments/{}".format(
+        self.report.project_student.project.branch.site_id,
         self.report.project_student.project.semester.slug,
         self.report.project_student.project.pk,
         filename
@@ -948,6 +950,7 @@ class ReportComment(TimezoneAwareModel, TimeStampedModel):
         on_delete=models.CASCADE)
     attached_file = models.FileField(
         upload_to=report_comment_attachment_upload_to,
+        storage=private_storage,
         blank=True)
 
     class Meta:
