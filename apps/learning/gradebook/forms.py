@@ -5,7 +5,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.forms import BoundField
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 
 from core.forms import GradeField
 from learning.gradebook.utils import recalculate_course_grading_system
@@ -99,7 +99,7 @@ class CustomBoundField(BoundField):
         Returns a string of HTML for representing this as an <input type="hidden">.
         """
         widget = self.field.hidden_widget()
-        return force_text(widget.render(self.html_initial_name,
+        return force_str(widget.render(self.html_initial_name,
                                         self.field.hidden_initial_value,
                                         attrs=attrs))
 

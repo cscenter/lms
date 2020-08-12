@@ -7,7 +7,7 @@ import pytz
 from bs4 import BeautifulSoup
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory

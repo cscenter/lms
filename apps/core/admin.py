@@ -8,7 +8,7 @@ from django.contrib.sites.models import Site
 from django.db.models import Model
 from django.db.models.query import QuerySet
 from django.urls import reverse, NoReverseMatch
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.translation import gettext_lazy as _, gettext_noop
 from modeltranslation.admin import TranslationAdmin
 from taggit.models import Tag
@@ -67,10 +67,10 @@ def urlize(instance, text=None):
     Returns an edit link for a given object.
 
     :param instance: a model instance to urlize.
-    :param text: optional link text, :func:`force_text` is
+    :param text: optional link text, :func:`force_str` is
                  used if no text is given.
     """
-    text = text or force_text(instance)
+    text = text or force_str(instance)
     try:
         link = get_admin_url(instance)
     except (AttributeError, NoReverseMatch):
