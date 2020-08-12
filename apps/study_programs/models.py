@@ -1,7 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models import query, Prefetch
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
@@ -30,7 +30,7 @@ class AcademicDiscipline(models.Model):
         verbose_name_plural = _("Areas of study")
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
 
 class StudyProgramQuerySet(query.QuerySet):

@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 
 from core.tests.factories import SiteFactory, BranchFactory
 from core.tests.utils import CSCTestCase
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 from learning.settings import Branches
 from learning.tests.factories import StudentAssignmentFactory, \
@@ -34,43 +34,43 @@ class CommonTests(CSCTestCase):
     @mock.patch("courses.tasks.maybe_upload_slides_yandex.delay")
     def test_to_strings(self, _):
         meta_course = MetaCourseFactory.build()
-        self.assertEqual(smart_text(meta_course), meta_course.name)
+        self.assertEqual(smart_str(meta_course), meta_course.name)
         semester = Semester(year=2015, type='spring')
-        self.assertIn(smart_text(semester.year), smart_text(semester))
-        self.assertIn('spring', smart_text(semester))
+        self.assertIn(smart_str(semester.year), smart_str(semester))
+        self.assertIn('spring', smart_str(semester))
         co = CourseFactory.create()
-        self.assertIn(smart_text(co.meta_course), smart_text(co))
-        self.assertIn(smart_text(co.semester), smart_text(co))
+        self.assertIn(smart_str(co.meta_course), smart_str(co))
+        self.assertIn(smart_str(co.semester), smart_str(co))
         con: CourseNews = CourseNewsFactory.create()
-        self.assertIn(smart_text(con.title), smart_text(con))
-        self.assertIn(smart_text(con.course), smart_text(con))
+        self.assertIn(smart_str(con.title), smart_str(con))
+        self.assertIn(smart_str(con.course), smart_str(con))
         cc = CourseClassFactory.create()
-        self.assertIn(cc.name, smart_text(cc))
+        self.assertIn(cc.name, smart_str(cc))
         cca = (CourseClassAttachmentFactory
                .create(material__filename="foobar.pdf"))
-        self.assertIn("foobar", smart_text(cca))
-        self.assertIn("pdf", smart_text(cca))
+        self.assertIn("foobar", smart_str(cca))
+        self.assertIn("pdf", smart_str(cca))
         a = AssignmentFactory.create()
-        self.assertIn(a.title, smart_text(a))
-        self.assertIn(smart_text(a.course), smart_text(a))
+        self.assertIn(a.title, smart_str(a))
+        self.assertIn(smart_str(a.course), smart_str(a))
         as_ = StudentAssignmentFactory.create()
-        self.assertIn(smart_text(as_.student.get_full_name()), smart_text(as_))
-        self.assertIn(smart_text(as_.assignment), smart_text(as_))
+        self.assertIn(smart_str(as_.student.get_full_name()), smart_str(as_))
+        self.assertIn(smart_str(as_.assignment), smart_str(as_))
         ac = AssignmentCommentFactory.create()
-        self.assertIn(smart_text(ac.student_assignment.assignment),
-                      smart_text(ac))
-        self.assertIn(smart_text(ac.student_assignment
+        self.assertIn(smart_str(ac.student_assignment.assignment),
+                      smart_str(ac))
+        self.assertIn(smart_str(ac.student_assignment
                                  .student.get_full_name()),
-                      smart_text(ac))
+                      smart_str(ac))
         e = EnrollmentFactory.create()
-        self.assertIn(smart_text(e.course), smart_text(e))
-        self.assertIn(smart_text(e.student.get_full_name()), smart_text(e))
+        self.assertIn(smart_str(e.course), smart_str(e))
+        self.assertIn(smart_str(e.student.get_full_name()), smart_str(e))
         an = AssignmentNotificationFactory.create()
-        self.assertIn(smart_text(an.user.get_full_name()), smart_text(an))
-        self.assertIn(smart_text(an.student_assignment), smart_text(an))
+        self.assertIn(smart_str(an.user.get_full_name()), smart_str(an))
+        self.assertIn(smart_str(an.student_assignment), smart_str(an))
         conn = CourseNewsNotificationFactory.create()
-        self.assertIn(smart_text(conn.user.get_full_name()), smart_text(conn))
-        self.assertIn(smart_text(conn.course_offering_news), smart_text(conn))
+        self.assertIn(smart_str(conn.user.get_full_name()), smart_str(conn))
+        self.assertIn(smart_str(conn.course_offering_news), smart_str(conn))
 
 
 class StudentAssignmentTests(CSCTestCase):
@@ -165,8 +165,8 @@ class StudentAssignmentTests(CSCTestCase):
     def test_state_display(self):
         as_ = StudentAssignmentFactory(score=30,
                                        assignment__maximum_score=50)
-        self.assertIn(smart_text(as_.assignment.maximum_score), as_.state_display)
-        self.assertIn(smart_text(as_.score), as_.state_display)
+        self.assertIn(smart_str(as_.assignment.maximum_score), as_.state_display)
+        self.assertIn(smart_str(as_.score), as_.state_display)
         as_ = StudentAssignmentFactory(assignment__maximum_score=50)
         self.assertEqual(StudentAssignment.States.labels.NOT_SUBMITTED,
                          as_.state_display)
@@ -174,8 +174,8 @@ class StudentAssignmentTests(CSCTestCase):
     def test_state_short(self):
         as_ = StudentAssignmentFactory(score=30,
                                        assignment__maximum_score=50)
-        self.assertIn(smart_text(as_.assignment.maximum_score), as_.state_short)
-        self.assertIn(smart_text(as_.score), as_.state_short)
+        self.assertIn(smart_str(as_.assignment.maximum_score), as_.state_short)
+        self.assertIn(smart_str(as_.score), as_.state_short)
         as_ = StudentAssignmentFactory(assignment__maximum_score=50)
         state = StudentAssignment.States.get_choice(StudentAssignment.States.NOT_SUBMITTED)
         self.assertEqual(state.abbr, as_.state_short)
@@ -185,9 +185,9 @@ class AssignmentCommentTests(CSCTestCase):
     def test_attached_file(self):
         ac = AssignmentCommentFactory.create(
             attached_file__filename="foobar.pdf")
-        self.assertIn(smart_text(ac.student_assignment.assignment.pk),
+        self.assertIn(smart_str(ac.student_assignment.assignment.pk),
                       ac.attached_file.name)
-        self.assertIn(smart_text(ac.student_assignment.student.pk),
+        self.assertIn(smart_str(ac.student_assignment.student.pk),
                       ac.attached_file.name)
         self.assertRegex(ac.attached_file.name, "/foobar(_[0-9a-zA-Z]+)?.pdf$")
         self.assertRegex(ac.attached_file_name, "^foobar(_[0-9a-zA-Z]+)?.pdf$")

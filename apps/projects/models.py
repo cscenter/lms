@@ -13,7 +13,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models, transaction
 from django.db.models import Q, F
 from django.utils import timezone, formats
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, C
 from model_utils.models import TimeStampedModel
@@ -352,8 +352,8 @@ class ProjectStudent(TimezoneAwareModel, models.Model):
         unique_together = [['student', 'project']]
 
     def __str__(self):
-        return "{0} [{1}]".format(smart_text(self.project),
-                                  smart_text(self.student))
+        return "{0} [{1}]".format(smart_str(self.project),
+                                  smart_str(self.student))
 
     def get_report(self, reporting_period: ReportingPeriod):
         for report in self.reports.all():
@@ -441,7 +441,7 @@ class Supervisor(models.Model):
 
     def get_abbreviated_name(self, delimiter=chr(160)):  # non-breaking space
         parts = (self.first_name[:1], self.patronymic[:1], self.last_name)
-        return smart_text(f".{delimiter}".join(p for p in parts if p).strip())
+        return smart_str(f".{delimiter}".join(p for p in parts if p).strip())
 
 
 class ProjectQuerySet(models.QuerySet):
@@ -726,7 +726,7 @@ class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
         })
 
     def __str__(self):
-        return smart_text(self.project_student.student)
+        return smart_str(self.project_student.student)
 
     def created_local(self, tz=None):
         if not tz:
@@ -960,8 +960,8 @@ class ReportComment(TimezoneAwareModel, TimeStampedModel):
 
     def __str__(self):
         return ("Comment to {0} by {1}"
-                .format(smart_text(self.report),
-                        smart_text(self.author.get_full_name())))
+                .format(smart_str(self.report),
+                        smart_str(self.author.get_full_name())))
 
     def created_local(self, tz=None):
         if not tz:

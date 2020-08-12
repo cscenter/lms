@@ -12,7 +12,7 @@ from django.db import models
 from django.db.models import Prefetch, Case, When, IntegerField, Value, Count
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, C
@@ -192,7 +192,7 @@ class MetaCourse(TimeStampedModel):
         verbose_name_plural = _("Courses")
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
     def get_absolute_url(self):
         return reverse('courses:meta_course_detail', kwargs={
@@ -342,8 +342,8 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         ]
 
     def __str__(self):
-        return "{0}, {1}".format(smart_text(self.meta_course),
-                                 smart_text(self.semester))
+        return "{0}, {1}".format(smart_str(self.meta_course),
+                                 smart_str(self.semester))
 
     def _compute_youtube_video_id(self):
         youtube_video_id = ''
@@ -596,8 +596,8 @@ class CourseTeacher(models.Model):
     objects = CourseTeacherManager()
 
     def __str__(self):
-        return "{0} [{1}]".format(smart_text(self.teacher),
-                                  smart_text(self.course_id))
+        return "{0} [{1}]".format(smart_str(self.teacher),
+                                  smart_str(self.course_id))
 
     def get_absolute_url(self, subdomain=settings.LMS_SUBDOMAIN):
         return reverse('teacher_detail', args=[self.teacher_id],
@@ -717,8 +717,8 @@ class CourseNews(TimezoneAwareModel, TimeStampedModel):
         verbose_name_plural = _("Course news-plural")
 
     def __str__(self):
-        return "{0} ({1})".format(smart_text(self.title),
-                                  smart_text(self.course))
+        return "{0} ({1})".format(smart_str(self.title),
+                                  smart_str(self.course))
 
     def get_update_url(self):
         return branch_aware_reverse('courses:course_news_update', kwargs={
@@ -839,7 +839,7 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         self._update_track_fields()
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
     def clean(self):
         super(CourseClass, self).clean()
@@ -984,7 +984,7 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
         verbose_name_plural = _("Class attachments")
 
     def __str__(self):
-        return "{0}".format(smart_text(self.material_file_name))
+        return "{0}".format(smart_str(self.material_file_name))
 
     def save(self, *args, **kwargs):
         created = self.pk is None
@@ -1090,8 +1090,8 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
                                     "(or equal to) maximum one"))
 
     def __str__(self):
-        return "{0} ({1})".format(smart_text(self.title),
-                                  smart_text(self.course))
+        return "{0} ({1})".format(smart_str(self.title),
+                                  smart_str(self.course))
 
     def deadline_at_local(self, tz=None):
         if not tz:
@@ -1167,7 +1167,7 @@ class AssignmentAttachment(TimeStampedModel):
         verbose_name_plural = _("Assignment attachments")
 
     def __str__(self):
-        return "{0}".format(smart_text(self.file_name))
+        return "{0}".format(smart_str(self.file_name))
 
     @property
     def file_name(self):

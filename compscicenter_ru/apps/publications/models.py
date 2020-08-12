@@ -2,7 +2,7 @@ import os
 
 from django.conf import settings
 from django.db import models
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import TimeStampedModel
@@ -31,8 +31,8 @@ class ProjectPublicationAuthor(models.Model):
         unique_together = [('user', 'project_publication')]
 
     def __str__(self):
-        return "{0} [{1}]".format(smart_text(self.project_publication),
-                                  smart_text(self.user))
+        return "{0} [{1}]".format(smart_str(self.project_publication),
+                                  smart_str(self.user))
 
 
 def publication_photo_upload_to(instance: "ProjectPublication", filename):

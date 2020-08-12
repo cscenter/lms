@@ -11,7 +11,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import timezone
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -250,8 +250,8 @@ class Enrollment(TimezoneAwareModel, TimeStampedModel):
         verbose_name_plural = _("Enrollments")
 
     def __str__(self):
-        return "{0} - {1}".format(smart_text(self.course),
-                                  smart_text(self.student.get_full_name()))
+        return "{0} - {1}".format(smart_str(self.course),
+                                  smart_str(self.student.get_full_name()))
 
     def save(self, *args, **kwargs):
         from learning.services import populate_assignments_for_student
@@ -452,8 +452,8 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
                                   .format(self.assignment.maximum_score))
 
     def __str__(self):
-        return "{0} - {1}".format(smart_text(self.assignment),
-                                  smart_text(self.student.get_full_name()))
+        return "{0} - {1}".format(smart_str(self.assignment),
+                                  smart_str(self.student.get_full_name()))
 
     def get_teacher_url(self):
         return reverse('teaching:student_assignment_detail',
@@ -573,8 +573,8 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
 
     def __str__(self):
         return ("Comment to {0} by {1}".format(
-            smart_text(self.student_assignment.assignment),
-            smart_text(self.student_assignment.student.get_full_name())))
+            smart_str(self.student_assignment.assignment),
+            smart_str(self.student_assignment.student.get_full_name())))
 
     def created_local(self, tz=None):
         if not tz:
@@ -654,8 +654,8 @@ class AssignmentNotification(TimezoneAwareModel, TimeStampedModel):
 
     def __str__(self):
         return ("notification for {0} on {1}"
-                .format(smart_text(self.user.get_full_name()),
-                        smart_text(self.student_assignment)))
+                .format(smart_str(self.user.get_full_name()),
+                        smart_str(self.student_assignment)))
 
     def created_local(self, tz=None):
         if not tz:
@@ -687,8 +687,8 @@ class CourseNewsNotification(TimeStampedModel):
 
     def __str__(self):
         return ("notification for {0} on {1}"
-                .format(smart_text(self.user.get_full_name()),
-                        smart_text(self.course_offering_news)))
+                .format(smart_str(self.user.get_full_name()),
+                        smart_str(self.course_offering_news)))
 
 
 class Event(TimeStampedModel):
@@ -719,7 +719,7 @@ class Event(TimeStampedModel):
         verbose_name_plural = _("Non-course events")
 
     def __str__(self):
-        return "{}".format(smart_text(self.name))
+        return "{}".format(smart_str(self.name))
 
     def clean(self):
         super().clean()
@@ -805,7 +805,7 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
         verbose_name_plural = _("Graduate Profiles")
 
     def __str__(self):
-        return smart_text(self.student_profile)
+        return smart_str(self.student_profile)
 
     def save(self, **kwargs):
         created = self.pk is None
