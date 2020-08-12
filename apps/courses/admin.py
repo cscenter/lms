@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
 from django.forms import BaseInlineFormSet
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
 from core.models import Branch

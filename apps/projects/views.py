@@ -16,7 +16,7 @@ from django.http import Http404, HttpResponse, HttpResponseForbidden, \
     HttpResponseRedirect
 from django.http.response import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views import generic, View
 from django.views.generic.edit import FormMixin, BaseUpdateView, ModelFormMixin
 from django_filters.views import BaseFilterView, FilterMixin

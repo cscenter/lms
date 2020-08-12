@@ -3,7 +3,7 @@ from dal_select2.widgets import Select2Multiple
 from django.contrib import admin
 from django.db import models
 from django.db.models import Q
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from import_export.admin import ExportMixin
 
 from core.admin import meta

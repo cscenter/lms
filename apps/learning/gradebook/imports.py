@@ -3,7 +3,7 @@ import logging
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from learning.forms import AssignmentScoreForm
 from learning.models import Enrollment, StudentAssignment

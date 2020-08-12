@@ -2,7 +2,7 @@ from dal_select2_taggit.widgets import TaggitSelect2
 from django import forms
 from django.contrib import admin
 from django.db import models as db_models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from taggit.admin import TagAdmin, TaggedItemInline
 
 from core.admin import meta, BaseModelAdmin

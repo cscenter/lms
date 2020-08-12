@@ -2,7 +2,6 @@ from django import template
 from django.template import Library
 from django.template import TemplateSyntaxError
 from django.utils.encoding import smart_str
-from django.utils.six import text_type
 from sorl.thumbnail.images import DummyImageFile
 from sorl.thumbnail.templatetags.thumbnail import kw_pat, ThumbnailNodeBase
 
@@ -55,7 +54,7 @@ class UserThumbnailNode(ThumbnailNodeBase):
         options = {}
         for key, expr in self.options:
             noresolve = {'True': True, 'False': False, 'None': None}
-            value = noresolve.get(text_type(expr), expr.resolve(context))
+            value = noresolve.get(str(expr), expr.resolve(context))
             if key == 'options':
                 options.update(value)
             else:

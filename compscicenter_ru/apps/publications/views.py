@@ -1,6 +1,6 @@
 from django.core.cache import cache
 from django.db.models import Prefetch, prefetch_related_objects
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView
 from vanilla import TemplateView
 

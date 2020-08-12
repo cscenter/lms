@@ -7,7 +7,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.db import transaction
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from registration import signals
 from registration.backends.default.views import RegistrationView, ActivationView
 from vanilla import TemplateView, UpdateView

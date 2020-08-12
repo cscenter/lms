@@ -14,7 +14,7 @@ from django.db import models, transaction
 from django.db.models import Q, F
 from django.utils import timezone, formats
 from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, C
 from model_utils.models import TimeStampedModel
 

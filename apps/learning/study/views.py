@@ -4,7 +4,7 @@ from django.apps import apps
 from django.contrib import messages
 from django.db.models import Q, Prefetch
 from django.http import HttpResponseRedirect
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from isoweek import Week
 from vanilla import TemplateView, GenericModelView

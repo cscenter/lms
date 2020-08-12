@@ -1,4 +1,4 @@
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, C
 
 REPORTING_NOTIFY_BEFORE_START = 3  # days

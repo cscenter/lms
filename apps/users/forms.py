@@ -3,7 +3,7 @@ from crispy_forms.layout import Layout, Submit, Div
 from django import forms
 from django.contrib.auth.forms import UserCreationForm as _UserCreationForm, \
     UserChangeForm as _UserChangeForm
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.utils import is_club_site

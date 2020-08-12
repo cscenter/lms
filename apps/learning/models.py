@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, ChoiceItem
 from model_utils.fields import MonitorField
 from model_utils.managers import QueryManager
