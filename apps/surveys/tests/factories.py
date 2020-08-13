@@ -11,7 +11,7 @@ from surveys.models import CourseSurvey, Form, Field, FormSubmission, \
     FieldEntry, FieldChoice
 
 
-class FormFactory(factory.DjangoModelFactory):
+class FormFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Form
 
@@ -19,7 +19,7 @@ class FormFactory(factory.DjangoModelFactory):
     slug = factory.Sequence(lambda n: "form-slug-%03d" % n)
 
 
-class FieldFactory(factory.DjangoModelFactory):
+class FieldFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Field
 
@@ -42,7 +42,7 @@ class FieldFactory(factory.DjangoModelFactory):
                     FieldChoiceFactory(field=self)
 
 
-class FieldChoiceFactory(factory.DjangoModelFactory):
+class FieldChoiceFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = FieldChoice
 
@@ -51,7 +51,7 @@ class FieldChoiceFactory(factory.DjangoModelFactory):
     label = factory.Sequence(lambda n: "Choice %03d" % n)
 
 
-class CourseSurveyFactory(factory.DjangoModelFactory):
+class CourseSurveyFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = CourseSurvey
 
@@ -66,7 +66,7 @@ class CourseSurveyFactory(factory.DjangoModelFactory):
         name=factory.LazyAttribute(lambda o: f"survey-{o.factory_parent.type}"))
 
 
-class FormSubmissionFactory(factory.DjangoModelFactory):
+class FormSubmissionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = FormSubmission
 
@@ -96,7 +96,7 @@ class FormSubmissionFactory(factory.DjangoModelFactory):
                     FieldEntryFactory(**opts)
 
 
-class FieldEntryFactory(factory.DjangoModelFactory):
+class FieldEntryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = FieldEntry
 

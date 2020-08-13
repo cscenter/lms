@@ -29,7 +29,7 @@ __all__ = ('StudentGroupFactory', 'StudentAssignmentFactory',
            'AssignmentComment', 'GraduateProfileFactory')
 
 
-class StudentGroupFactory(factory.DjangoModelFactory):
+class StudentGroupFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = StudentGroup
 
@@ -39,7 +39,7 @@ class StudentGroupFactory(factory.DjangoModelFactory):
 
 
 # FIXME: create enrollment
-class StudentAssignmentFactory(factory.DjangoModelFactory):
+class StudentAssignmentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = StudentAssignment
 
@@ -47,7 +47,7 @@ class StudentAssignmentFactory(factory.DjangoModelFactory):
     student = factory.SubFactory(StudentFactory)
 
 
-class AssignmentCommentFactory(factory.DjangoModelFactory):
+class AssignmentCommentFactory(factory.django.DjangoModelFactory):
     """
     Make sure to call refresh_from_db if logic depends on
     `first_student_comment_at` or `last_comment_from`.
@@ -61,7 +61,7 @@ class AssignmentCommentFactory(factory.DjangoModelFactory):
     attached_file = factory.django.FileField()
 
 
-class EnrollmentPeriodFactory(factory.DjangoModelFactory):
+class EnrollmentPeriodFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = EnrollmentPeriod
         django_get_or_create = ('semester', 'site')
@@ -70,7 +70,7 @@ class EnrollmentPeriodFactory(factory.DjangoModelFactory):
     semester = factory.SubFactory(SemesterFactory)
 
 
-class EnrollmentFactory(factory.DjangoModelFactory):
+class EnrollmentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Enrollment
 
@@ -93,7 +93,7 @@ class EnrollmentFactory(factory.DjangoModelFactory):
                                                              settings.SITE_ID)
 
 
-class InvitationFactory(factory.DjangoModelFactory):
+class InvitationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Invitation
 
@@ -110,7 +110,7 @@ class InvitationFactory(factory.DjangoModelFactory):
                 self.courses.add(course)
 
 
-class CourseInvitationFactory(factory.DjangoModelFactory):
+class CourseInvitationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = CourseInvitation
 
@@ -120,7 +120,7 @@ class CourseInvitationFactory(factory.DjangoModelFactory):
         semester_id=factory.SelfAttribute('..course.semester_id'))
 
 
-class AssignmentNotificationFactory(factory.DjangoModelFactory):
+class AssignmentNotificationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AssignmentNotification
 
@@ -128,7 +128,7 @@ class AssignmentNotificationFactory(factory.DjangoModelFactory):
     student_assignment = factory.SubFactory(StudentAssignmentFactory)
 
 
-class CourseNewsNotificationFactory(factory.DjangoModelFactory):
+class CourseNewsNotificationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = CourseNewsNotification
 
@@ -136,7 +136,7 @@ class CourseNewsNotificationFactory(factory.DjangoModelFactory):
     course_offering_news = factory.SubFactory(CourseNewsFactory)
 
 
-class EventFactory(factory.DjangoModelFactory):
+class EventFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Event
 
@@ -175,7 +175,7 @@ class GraduateFactory(UserFactory):
         GraduateProfileFactory(student_profile_id=self.__student_profile_id)
 
 
-class GraduateProfileFactory(factory.DjangoModelFactory):
+class GraduateProfileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = GraduateProfile
 

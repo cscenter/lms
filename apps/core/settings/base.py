@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'crispy_forms',
     'formtools',
-    'bootstrap3',
     'micawber.contrib.mcdjango',
     'simple_history',
     'import_export',

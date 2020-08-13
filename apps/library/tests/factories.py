@@ -8,7 +8,7 @@ from library.models import Book, Stock, Borrow
 from users.tests.factories import UserFactory
 
 
-class BookFactory(factory.DjangoModelFactory):
+class BookFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Book
 
@@ -16,7 +16,7 @@ class BookFactory(factory.DjangoModelFactory):
     title = factory.Sequence(lambda n: "Book%03d" % n)
 
 
-class StockFactory(factory.DjangoModelFactory):
+class StockFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Stock
 
@@ -25,7 +25,7 @@ class StockFactory(factory.DjangoModelFactory):
     copies = FuzzyInteger(0, 42)
 
 
-class BorrowFactory(factory.DjangoModelFactory):
+class BorrowFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Borrow
 
