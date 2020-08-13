@@ -12,7 +12,7 @@ __all__ = ('CityFactory', 'EmailTemplateFactory', 'BranchFactory',
            'EmailTemplate', 'Branch',)
 
 
-class SiteFactory(factory.DjangoModelFactory):
+class SiteFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Site
         django_get_or_create = ('domain',)
@@ -21,7 +21,7 @@ class SiteFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Site Name %03d" % n)
 
 
-class CityFactory(factory.DjangoModelFactory):
+class CityFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = City
         django_get_or_create = ('code',)
@@ -38,7 +38,7 @@ class CityFactory(factory.DjangoModelFactory):
             return 'Europe/Moscow'
 
 
-class EmailTemplateFactory(factory.DjangoModelFactory):
+class EmailTemplateFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = EmailTemplate
         django_get_or_create = ["name"]
@@ -46,7 +46,7 @@ class EmailTemplateFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "email-template-%03d" % n)
 
 
-class BranchFactory(factory.DjangoModelFactory):
+class BranchFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Branch %03d" % n)
     code = factory.Sequence(lambda n: "b%03d" % n)
     site = factory.SubFactory(SiteFactory,
@@ -67,7 +67,7 @@ class BranchFactory(factory.DjangoModelFactory):
         django_get_or_create = ('code', 'site')
 
 
-class LocationFactory(factory.DjangoModelFactory):
+class LocationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Location
 

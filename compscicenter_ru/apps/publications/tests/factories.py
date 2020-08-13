@@ -4,7 +4,7 @@ from projects.constants import ProjectTypes
 from publications.models import ProjectPublication
 
 
-class ProjectPublicationFactory(factory.DjangoModelFactory):
+class ProjectPublicationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ProjectPublication
 

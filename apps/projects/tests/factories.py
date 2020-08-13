@@ -20,7 +20,7 @@ class ProjectReviewerFactory(UserFactory):
         add_user_groups(self, required_groups)
 
 
-class ReportingPeriodFactory(factory.DjangoModelFactory):
+class ReportingPeriodFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ReportingPeriod
 
@@ -30,7 +30,7 @@ class ReportingPeriodFactory(factory.DjangoModelFactory):
     end_on = factory.Faker('future_date', end_date="+10d", tzinfo=None)
 
 
-class SupervisorFactory(factory.DjangoModelFactory):
+class SupervisorFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Supervisor
 
@@ -41,7 +41,7 @@ class SupervisorFactory(factory.DjangoModelFactory):
     gender = factory.Iterator([GenderTypes.MALE, GenderTypes.FEMALE])
 
 
-class ProjectFactory(factory.DjangoModelFactory):
+class ProjectFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Project
 
@@ -69,7 +69,7 @@ class ProjectFactory(factory.DjangoModelFactory):
                 self.reviewers.add(reviewer)
 
 
-class ProjectStudentFactory(factory.DjangoModelFactory):
+class ProjectStudentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ProjectStudent
 
@@ -79,7 +79,7 @@ class ProjectStudentFactory(factory.DjangoModelFactory):
     presentation_grade = FuzzyInteger(0, 10)
 
 
-class ReportFactory(factory.DjangoModelFactory):
+class ReportFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Report
 
@@ -89,7 +89,7 @@ class ReportFactory(factory.DjangoModelFactory):
     score_quality = 0
 
 
-class ReportCommentFactory(factory.DjangoModelFactory):
+class ReportCommentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ReportComment
 
@@ -98,7 +98,7 @@ class ReportCommentFactory(factory.DjangoModelFactory):
     text = factory.Sequence(lambda n: "Comment %03d" % n)
 
 
-class ReviewFactory(factory.DjangoModelFactory):
+class ReviewFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Review
 
@@ -114,7 +114,7 @@ class ReviewFactory(factory.DjangoModelFactory):
             self.criteria = criteria
 
 
-class ReviewPracticeCriteriaFactory(factory.DjangoModelFactory):
+class ReviewPracticeCriteriaFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = PracticeCriteria
 

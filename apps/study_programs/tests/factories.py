@@ -5,7 +5,7 @@ from study_programs.models import AcademicDiscipline, StudyProgram, \
     StudyProgramCourseGroup
 
 
-class AcademicDisciplineFactory(factory.DjangoModelFactory):
+class AcademicDisciplineFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AcademicDiscipline
 
@@ -13,7 +13,7 @@ class AcademicDisciplineFactory(factory.DjangoModelFactory):
     code = factory.Sequence(lambda n: "p%01d" % n)
 
 
-class StudyProgramFactory(factory.DjangoModelFactory):
+class StudyProgramFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = StudyProgram
 
@@ -22,7 +22,7 @@ class StudyProgramFactory(factory.DjangoModelFactory):
     branch = factory.SubFactory(BranchFactory)
 
 
-class StudyProgramCourseGroupFactory(factory.DjangoModelFactory):
+class StudyProgramCourseGroupFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = StudyProgramCourseGroup
 

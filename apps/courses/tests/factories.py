@@ -25,7 +25,7 @@ __all__ = (
 )
 
 
-class MetaCourseFactory(factory.DjangoModelFactory):
+class MetaCourseFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = MetaCourse
 
@@ -34,7 +34,7 @@ class MetaCourseFactory(factory.DjangoModelFactory):
     description = "This a course for testing purposes"
 
 
-class SemesterFactory(factory.DjangoModelFactory):
+class SemesterFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Semester
         django_get_or_create = ('year', 'type')
@@ -73,7 +73,7 @@ class SemesterFactory(factory.DjangoModelFactory):
         return cls.create(year=term_pair.year, type=term_pair.type)
 
 
-class CourseFactory(factory.DjangoModelFactory):
+class CourseFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Course
 
@@ -112,7 +112,7 @@ class CourseFactory(factory.DjangoModelFactory):
         CourseService.sync_branches(self)
 
 
-class CourseTeacherFactory(factory.DjangoModelFactory):
+class CourseTeacherFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = CourseTeacher
 
@@ -120,7 +120,7 @@ class CourseTeacherFactory(factory.DjangoModelFactory):
     course = factory.SubFactory(CourseFactory)
 
 
-class CourseReviewFactory(factory.DjangoModelFactory):
+class CourseReviewFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = CourseReview
 
@@ -128,7 +128,7 @@ class CourseReviewFactory(factory.DjangoModelFactory):
     text = factory.Sequence(lambda n: ("Course Review %03d" % n))
 
 
-class CourseNewsFactory(factory.DjangoModelFactory):
+class CourseNewsFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = CourseNews
 
@@ -139,7 +139,7 @@ class CourseNewsFactory(factory.DjangoModelFactory):
                                        "(%03d) can be useful!" % n))
 
 
-class LearningSpaceFactory(factory.DjangoModelFactory):
+class LearningSpaceFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = LearningSpace
 
@@ -147,7 +147,7 @@ class LearningSpaceFactory(factory.DjangoModelFactory):
     branch = factory.SubFactory(BranchFactory)
 
 
-class CourseClassFactory(factory.DjangoModelFactory):
+class CourseClassFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = CourseClass
 
@@ -172,7 +172,7 @@ class CourseClassFactory(factory.DjangoModelFactory):
                 self.restricted_to.add(student_group)
 
 
-class CourseClassAttachmentFactory(factory.DjangoModelFactory):
+class CourseClassAttachmentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = CourseClassAttachment
 
@@ -180,7 +180,7 @@ class CourseClassAttachmentFactory(factory.DjangoModelFactory):
     material = factory.django.FileField()
 
 
-class AssignmentFactory(factory.DjangoModelFactory):
+class AssignmentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Assignment
 
@@ -218,7 +218,7 @@ class AssignmentFactory(factory.DjangoModelFactory):
             AssignmentService.setup_notification_settings(self)
 
 
-class AssignmentAttachmentFactory(factory.DjangoModelFactory):
+class AssignmentAttachmentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AssignmentAttachment
 
