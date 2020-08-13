@@ -58,9 +58,6 @@
             {% if has_curator_permissions and profile_user.studentinfo %}
                 <a href="{% url 'student_info_update' profile_user.studentinfo.pk %}" class="list-group-item">{% trans "Edit info record" %}</a>
             {% endif %}
-            {% if profile_user.pk == user.pk %}
-                <a href="{% url 'auth:password_change' %}" class="list-group-item">{% trans "Change password" %}</a>
-            {% endif %}
         {% endif %}
         </div>
     {% endif %}
