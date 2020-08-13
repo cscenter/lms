@@ -81,28 +81,14 @@ class CourseBranchInline(admin.TabularInline):
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
-class CourseAdminForm(forms.ModelForm):
-    class Meta:
-        model = Course
-        fields = '__all__'
-
-    def clean_is_open(self):
-        is_open = self.cleaned_data['is_open']
-        if is_club_site() and not is_open:
-            raise ValidationError(_("You can create only open courses "
-                                    "from CS club site"))
-        return is_open
-
-
 class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
-    form = CourseAdminForm
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
     exclude = ('additional_branches',)
     list_filter = ['main_branch', 'semester']
-    list_display = ['meta_course', 'semester', 'is_published_in_video',
-                    'is_open']
+    list_display = ['meta_course', 'semester', 'main_branch',
+                    'is_published_in_video']
     inlines = (CourseBranchInline, CourseTeacherInline,)
     raw_id_fields = ('meta_course',)
 

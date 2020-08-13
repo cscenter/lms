@@ -17,18 +17,18 @@ from study_programs.models import AcademicDiscipline
 from users.constants import Roles
 from users.models import User
 from .filters import CoursesPublicFilter
-from .serializers import TeacherCourseSerializer, TeacherSerializer, \
+from .serializers import SiteCourseSerializer, TeacherSerializer, \
     CourseVideoSerializer, AlumniSerializer, TestimonialCardSerializer, \
     CoursePublicSerializer
 
 
-class TeacherCourseList(ListAPIView):
+class SiteCourseList(ListAPIView):
     pagination_class = None
-    serializer_class = TeacherCourseSerializer
+    serializer_class = SiteCourseSerializer
 
     def get_queryset(self):
         return (Course.objects
-                .filter(is_open=False)
+                .filter(main_branch__site_id=settings.SITE_ID)
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related("meta_course")
                 .only("meta_course_id", "meta_course__name")
@@ -106,7 +106,7 @@ class CourseVideoList(ListAPIView):
                         # Could be incorrect within one day since it doesn't
                         # check timezone
                         completed_at__lte=now().date(),
-                        is_open=False)
+                        main_branch__site_id=settings.SITE_ID)
                 .order_by('-semester__year', 'semester__type')
                 .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(lecturers))
@@ -179,7 +179,7 @@ class CourseList(ListAPIView):
         return (Course.objects
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'main_branch')
-                .only("pk", "main_branch_id", "is_open", "grading_type",
+                .only("pk", "main_branch_id", "grading_type",
                       "public_videos_count", "public_slides_count",
                       "public_attachments_count",
                       "meta_course__name", "meta_course__slug",

@@ -105,7 +105,6 @@ class ProgressReport:
               .select_related('meta_course', 'semester')
               .only('semester_id',
                     'meta_course_id',
-                    'is_open',
                     'grading_type',
                     'meta_course__name',
                     'meta_course__name_ru',)
@@ -381,7 +380,6 @@ class FutureGraduateDiplomasReport(ProgressReport):
 
     @staticmethod
     def passed_courses_total(student, courses):
-        """Don't consider adjustment for club courses"""
         center = 0
         club = 0
         shad = 0
@@ -389,7 +387,7 @@ class FutureGraduateDiplomasReport(ProgressReport):
         for enrollment in student.unique_enrollments.values():
             if enrollment.grade in GradeTypes.satisfactory_grades:
                 course = courses[enrollment.course_id]
-                if course.is_open:
+                if course.is_club_course:
                     club += 1
                 else:
                     center += 1

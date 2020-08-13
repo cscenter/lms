@@ -73,7 +73,7 @@ class TeacherSerializer(serializers.ModelSerializer):
         return last
 
 
-class TeacherCourseSerializer(serializers.ModelSerializer):
+class SiteCourseSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="meta_course_id")
     name = serializers.SerializerMethodField()
 

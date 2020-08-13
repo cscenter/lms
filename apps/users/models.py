@@ -628,13 +628,12 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         in_current_term_passed = 0  # Center and club courses
         in_current_term_failed = 0  # Center and club courses
         in_current_term_in_progress = 0  # Center and club courses
-        # FIXME: add test for `is_deleted=False`. Check all incomings for `enrollment_set`
-        for e in self.enrollment_set.filter(is_deleted=False).all():
+        for e in self.enrollment_set(manager='active').all():
             in_current_term = e.course.semester_id == current_term.pk
             if in_current_term:
                 in_current_term_total += 1
                 in_current_term_courses.add(e.course.meta_course_id)
-            if e.course.is_open:
+            if e.course.is_club_course:
                 # FIXME: Something wrong with this approach.
                 # FIXME: Look for `classes_total` annotation and fix
                 if hasattr(e, "classes_total"):
