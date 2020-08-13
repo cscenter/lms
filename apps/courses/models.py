@@ -263,11 +263,6 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     is_published_in_video = models.BooleanField(
         _("Published in video section"),
         default=False)
-    is_open = models.BooleanField(
-        _("Open course offering"),
-        help_text=_("This course offering will be available on Computer"
-                    "Science Club website so anyone can join"),
-        default=False)
     main_branch = models.ForeignKey(Branch,
                                     verbose_name=_("Main Branch"),
                                     related_name="courses",
