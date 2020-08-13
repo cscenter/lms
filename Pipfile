@@ -21,7 +21,7 @@ djdt_flamegraph = "*"
 django-extensions = "*"
 # Fixtures
 testfixtures = "*"
-factory_boy = "==2.12.0"
+factory_boy = "==3.0.1"
 fakeredis = "*"
 # Test framework
 pytest = "==5.4.3"
@@ -46,8 +46,7 @@ sorl-thumbnail = "==12.6.3"
 python-magic = "==0.4.18"
 Pillow = "==7.2.0"
 # Forms
-django-crispy-forms = "==1.8.1"
-django-bootstrap3 = "==12.0.3"
+django-crispy-forms = "==1.9.2"
 django-formtools = "==2.2"
 # Parsing
 beautifulsoup4 = "==4.9.1"
@@ -67,7 +66,7 @@ sentry-sdk = "*"
 newrelic = "*"
 # Oauth2
 social-auth-core = "==3.3.3"
-social-auth-app-django = "==3.4.0"
+social-auth-app-django = "==4.0.0"
 # Oembed
 micawber = "==0.5.1"
 # Task manager
@@ -117,7 +116,7 @@ sqlparse = "==0.3.1"
 django-loginas = "==0.3.8"
 django-webpack-loader = "==0.7.0"
 XlsxWriter = "==1.3.2"
-jupyter_client = "==6.1.3"
+jupyter_client = "==6.1.6"
 webdavclient = "==1.0.8"
 isoweek = "*"
 django-subdomains = {git = "git://github.com/pacahon/django-subdomains.git",ref = "4096c2dc82f9f5e511e8c8f78d31e804ac028b5d"}
