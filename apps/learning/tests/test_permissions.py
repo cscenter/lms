@@ -89,8 +89,8 @@ def test_course_access_role_teacher():
 def test_course_access_role_student(inactive_status, settings):
     semester = SemesterFactory.create_current()
     prev_semester = SemesterFactory.create_prev(semester)
-    course = CourseFactory(semester=semester, is_open=False)
-    prev_course = CourseFactory(semester=prev_semester, is_open=False)
+    course = CourseFactory(semester=semester)
+    prev_course = CourseFactory(semester=prev_semester)
     student = StudentFactory(status='')  # not expelled
     role = course_access_role(course=course, user=student)
     assert role == CourseRole.NO_ROLE
@@ -132,7 +132,7 @@ def test_enroll_in_course(inactive_status, settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     course = CourseFactory(
-        semester=term, is_open=False,
+        semester=term,
         completed_at=(today_local + datetime.timedelta(days=10)).date(),
         capacity=0, main_branch=branch_spb)
     assert course.enrollment_is_open
@@ -180,7 +180,7 @@ def test_leave_course(settings):
     future = today + datetime.timedelta(days=3)
     term = SemesterFactory.create_current(
         enrollment_period__ends_on=future.date())
-    enrollment = EnrollmentFactory(course__semester=term, course__is_open=False)
+    enrollment = EnrollmentFactory(course__semester=term)
     course = enrollment.course
     student = enrollment.student
     assert course.enrollment_is_open
@@ -209,8 +209,7 @@ def test_enroll_in_course_by_invitation(settings):
     term = SemesterFactory.create_current(
         for_branch=branch_spb.code,
         enrollment_period__ends_on=tomorrow.date())
-    course = CourseFactory(main_branch=branch_spb, semester=term, is_open=False,
-                           capacity=0)
+    course = CourseFactory(main_branch=branch_spb, semester=term, capacity=0)
     assert course.enrollment_is_open
     student = StudentFactory(branch=course.main_branch)
     student_profile = student.get_student_profile(settings.SITE_ID)

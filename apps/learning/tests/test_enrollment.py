@@ -57,8 +57,7 @@ def test_enrollment_capacity(settings):
     current_semester = SemesterFactory.create_current()
     course = CourseFactory.create(main_branch=student.branch,
                                   semester=current_semester,
-                                  capacity=1,
-                                  is_open=True)
+                                  capacity=1)
     EnrollmentFactory(course=course)
     course.refresh_from_db()
     assert course.places_left == 0
@@ -126,8 +125,7 @@ def test_enrollment_inactive_student(inactive_status, client, settings):
     tomorrow = now_local(student.get_timezone()) + datetime.timedelta(days=1)
     current_semester = SemesterFactory.create_current(
         enrollment_period__ends_on=tomorrow.date())
-    course = CourseFactory(semester=current_semester,
-                           is_open=False)
+    course = CourseFactory(semester=current_semester)
     response = client.get(course.get_absolute_url())
     assert response.status_code == 200
     assert smart_bytes(_("Enroll in")) in response.content
@@ -328,8 +326,7 @@ def test_enrollment_in_other_branch(client):
     tomorrow = today + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(
         enrollment_period__ends_on=tomorrow.date())
-    course_spb = CourseFactory(semester=term, is_open=False,
-                               main_branch__code=Branches.SPB)
+    course_spb = CourseFactory(semester=term, main_branch__code=Branches.SPB)
     assert course_spb.enrollment_is_open
     student_spb = StudentFactory(branch__code=Branches.SPB)
     student_nsk = StudentFactory(branch__code=Branches.NSK)
@@ -368,8 +365,7 @@ def test_view_course_additional_branches(client):
     term = SemesterFactory.create_current(
         enrollment_period__ends_on=tomorrow.date())
     course_spb = CourseFactory(main_branch__code=Branches.SPB,
-                               semester=term,
-                               is_open=False)
+                               semester=term)
     assert course_spb.enrollment_is_open
     student_spb = StudentFactory(branch=course_spb.main_branch)
     branch_nsk = BranchFactory(code=Branches.NSK)
@@ -396,8 +392,7 @@ def test_course_enrollment_is_open(client, settings):
     tomorrow = today + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(
         enrollment_period__ends_on=today.date())
-    co_spb = CourseFactory(semester=term, is_open=False,
-                           completed_at=tomorrow.date())
+    co_spb = CourseFactory(semester=term, completed_at=tomorrow.date())
     assert co_spb.enrollment_is_open
     student_spb = StudentFactory(branch__code=Branches.SPB)
     client.login(student_spb)

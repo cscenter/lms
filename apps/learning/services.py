@@ -101,7 +101,7 @@ def update_course_learners_count(course_id):
 def course_failed_by_student(course: Course, student, enrollment=None) -> bool:
     """Checks that student didn't fail the completed course"""
     from learning.models import Enrollment
-    if course.is_open or not course.is_completed:
+    if course.is_club_course or not course.is_completed:
         return False
     bad_grades = (Enrollment.GRADES.UNSATISFACTORY,
                   Enrollment.GRADES.NOT_GRADED)

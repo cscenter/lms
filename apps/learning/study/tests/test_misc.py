@@ -460,13 +460,12 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     current_term_spb = SemesterFactory(year=current_term.year,
                                        type=current_term.type)
     cos = CourseFactory.create_batch(4, semester=current_term_spb,
-                                     main_branch=student_spb.branch,
-                                     is_open=False)
+                                     main_branch=student_spb.branch)
     cos_available = cos[:2]
     cos_enrolled = cos[2:]
     prev_year = current_term.year - 1
     cos_archived = CourseFactory.create_batch(
-        3, semester__year=prev_year, is_open=False)
+        3, semester__year=prev_year)
     for co in cos_enrolled:
         EnrollmentFactory.create(student=student_spb, course=co)
     for co in cos_archived:
@@ -481,7 +480,7 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     # Add courses from other branch
     current_term_nsk = SemesterFactory.create_current(for_branch=Branches.NSK)
     co_nsk = CourseFactory.create(semester=current_term_nsk,
-                                  main_branch__code=Branches.NSK, is_open=False)
+                                  main_branch__code=Branches.NSK)
     response = client.get(url)
     assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
     assert len(cos_available) == len(response.context['ongoing_rest'])
@@ -490,8 +489,7 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     student_nsk = StudentFactory(branch__code=Branches.NSK)
     client.login(student_nsk)
     CourseFactory.create(semester__year=prev_year,
-                         main_branch=student_nsk.branch,
-                         is_open=False)
+                         main_branch=student_nsk.branch)
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['ongoing_rest']) == 1
@@ -499,7 +497,7 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     assert len(response.context['archive_enrolled']) == 0
     # Add open reading, it should be available on compscicenter.ru
     co_open = CourseFactory.create(semester=current_term_nsk,
-                                   main_branch=student_nsk.branch, is_open=True)
+                                   main_branch=student_nsk.branch)
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['ongoing_rest']) == 2
