@@ -41,7 +41,7 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
         # на клиент и сразу не грузить весь список курсов
         # Courses grouped by term
         courses = (Course.objects
-                   .filter(is_open=False)
+                   .filter(main_branch__site_id=settings.SITE_ID)
                    .values("pk", "semester_id", "meta_course__name")
                    .order_by("-semester_id", "meta_course__name"))
         courses = bucketize(courses, key=lambda x: x["semester_id"])

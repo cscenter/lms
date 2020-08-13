@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.db.models import query
 from django.utils import timezone
@@ -30,7 +31,7 @@ class _StudentAssignmentDefaultManager(LiveManager):
     def get_queryset(self):
         qs = super().get_queryset()
         if is_club_site():
-            return qs.filter(assignment__course__is_open=True)
+            return qs.filter(assignment__course__main_branch__site_id=settings.CLUB_SITE_ID)
         return qs
 
 
@@ -46,18 +47,18 @@ class _EnrollmentDefaultManager(models.Manager):
     """On compsciclub.ru always restrict selection by open readings"""
     def get_queryset(self):
         if is_club_site():
-            return super().get_queryset().filter(course__is_open=True)
+            return (super().get_queryset()
+                    .filter(course__main_branch__site_id=settings.CLUB_SITE_ID))
         else:
             return super().get_queryset()
 
 
 class _EnrollmentActiveManager(models.Manager):
     def get_queryset(self):
+        qs = super().get_queryset().filter(is_deleted=False)
         if is_club_site():
-            return super().get_queryset().filter(course__is_open=True,
-                                                 is_deleted=False)
-        else:
-            return super().get_queryset().filter(is_deleted=False)
+            qs = qs.filter(course__main_branch__site_id=settings.CLUB_SITE_ID)
+        return qs
 
 
 class EnrollmentQuerySet(models.QuerySet):
