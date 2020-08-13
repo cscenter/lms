@@ -232,11 +232,12 @@ class AssignmentService:
             defaults={'deleted_at': None, 'score': None, 'execution_time': None})
 
     @classmethod
-    def _bulk_restore_student_assignments(cls, assignment: Assignment,
-                                          student_ids: Iterable[int]):
-        (StudentAssignment.trash
-         .filter(assignment=assignment, student_id__in=student_ids)
-         .update(deleted_at=None, score=None, execution_time=None))
+    def _restore_student_assignments(cls, assignment: Assignment,
+                                     student_ids: Iterable[int]):
+        qs = (StudentAssignment.trash
+              .filter(assignment=assignment, student_id__in=student_ids))
+        for student_assignment in qs:
+            student_assignment.restore()
 
     # TODO: send notification to teachers except assignment publisher
     @classmethod
@@ -274,14 +275,14 @@ class AssignmentService:
         pks = list(Enrollment.active
                    .filter(*filters)
                    .values_list("student_id", flat=True))
-        # Create/update records in separate steps to avoid tons of savepoints
-        trash = set(StudentAssignment.trash
-                    .filter(assignment=assignment, student_id__in=pks)
-                    .values_list('student_id', flat=True))
-        if trash:
-            cls._bulk_restore_student_assignments(assignment, trash)
+        # Create/update records in separate steps to avoid tons of save points
+        in_trash = set(StudentAssignment.trash
+                       .filter(assignment=assignment, student_id__in=pks)
+                       .values_list('student_id', flat=True))
+        if in_trash:
+            cls._restore_student_assignments(assignment, in_trash)
         batch_size = 100
-        to_create = (sid for sid in pks if sid not in trash)
+        to_create = (sid for sid in pks if sid not in in_trash)
         objs = (StudentAssignment(assignment=assignment, student_id=student_id)
                 for student_id in to_create)
         while True:
