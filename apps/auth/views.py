@@ -4,7 +4,7 @@ from django.contrib import auth
 from django.contrib.auth import views
 from django.http import HttpResponseRedirect
 from django.utils.decorators import method_decorator
-from django.utils.http import is_safe_url
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import generic
 from django.views.decorators.cache import never_cache
 from django.views.decorators.debug import sensitive_post_parameters
@@ -44,8 +44,8 @@ class LoginView(generic.FormView):
             elif user_roles == {Roles.TEACHER}:
                 redirect_to = reverse("teaching:assignment_list")
 
-        if not is_safe_url(redirect_to,
-                           allowed_hosts={self.request.get_host()}):
+        hosts = {self.request.get_host()}
+        if not url_has_allowed_host_and_scheme(redirect_to, allowed_hosts=hosts):
             redirect_to = settings.LOGOUT_REDIRECT_URL
 
         return redirect_to
@@ -80,8 +80,9 @@ class LogoutView(LoginRequiredMixin, generic.RedirectView):
 
         if self.redirect_field_name in self.request.GET:
             maybe_redirect_to = self.request.GET[self.redirect_field_name]
-            if is_safe_url(maybe_redirect_to,
-                           allowed_hosts={self.request.get_host()}):
+            hosts = {self.request.get_host()}
+            if url_has_allowed_host_and_scheme(maybe_redirect_to,
+                                               allowed_hosts=hosts):
                 redirect_to = maybe_redirect_to
 
         return redirect_to
