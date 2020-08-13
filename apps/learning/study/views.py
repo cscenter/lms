@@ -100,7 +100,7 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
                        .values_list("course", flat=True))
         in_progress, archive = utils.split_on_condition(
             assignment_list,
-            lambda sa: sa.assignment.is_open and
+            lambda sa: not sa.assignment.deadline_is_exceeded and
                        sa.assignment.course_id in enrolled_in)
         archive.reverse()
         # Map student projects in current term to related reporting periods

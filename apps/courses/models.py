@@ -1129,8 +1129,8 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         return self.id in cache.assignment_ids_set
 
     @property
-    def is_open(self):
-        return self.deadline_at > timezone.now()
+    def deadline_is_exceeded(self):
+        return self.deadline_at < timezone.now()
 
     @property
     def is_online(self):

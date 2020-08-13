@@ -208,13 +208,13 @@ def test_assignment_clean():
 
 
 @pytest.mark.django_db
-def test_assignment_is_open():
+def test_assignment_is_not_exceeded():
     import datetime
     from django.utils import timezone
     a = AssignmentFactory()
-    assert a.is_open
+    assert not a.deadline_is_exceeded
     a.deadline_at = timezone.now() - datetime.timedelta(days=2)
-    assert not a.is_open
+    assert a.deadline_is_exceeded
 
 
 @pytest.mark.django_db
