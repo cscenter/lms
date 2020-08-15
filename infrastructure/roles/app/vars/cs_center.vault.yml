@@ -11,7 +11,7 @@ app_environement:
   DJANGO_SESSION_COOKIE_NAME: "cscsessionid"
   DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS: "{{ ('0o' + media_directory_permissions) | int(default=493, base=8) }}"
   DJANGO_PUBLIC_MEDIA_ROOT: "/shared/media"
-  DJANGO_PRIVATE_MEDIA_ROOT: "/shared/media"
+  DJANGO_PRIVATE_MEDIA_ROOT: "/shared/media/private"
   DATABASE_URL: "postgresql://{{ db_user }}:{{ db_user_password }}@127.0.0.1:5432/{{ db_name }}"
   REDIS_PASSWORD: "3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN"
   SOCIAL_AUTH_YANDEXRU_KEY: "9990b75d62a541f88812b6ce8b39574f"

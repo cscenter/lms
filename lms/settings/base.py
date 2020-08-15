@@ -52,11 +52,7 @@ else:
 # Static Files Settings
 STATIC_ROOT = env.str('DJANGO_STATIC_ROOT', default=str(ROOT_DIR / "static"))
 STATIC_URL = '/static/'
-STATICFILES_STORAGE = 'static_compress.storage.CompressedManifestStaticFilesStorage'
-STATIC_COMPRESS_FILE_EXTS = ['css', 'js', 'svg']
-STATIC_COMPRESS_METHODS = ['gz+zlib']
-STATIC_COMPRESS_KEEP_ORIGINAL = True
-STATIC_COMPRESS_MIN_SIZE_KB = 30
+STATICFILES_STORAGE = 'files.storage.FixedCompressedManifestStaticFilesStorage'
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {
