@@ -7,10 +7,22 @@ from django.conf import settings
 from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
 from django.core.files.storage import get_storage_class, FileSystemStorage
 from django.utils.functional import LazyObject
+from static_compress import CompressedManifestStaticFilesStorage, compressors
 from storages.backends.s3boto3 import S3Boto3Storage
 
 
 # Static files
+class FixedCompressedManifestStaticFilesStorage(CompressedManifestStaticFilesStorage):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.allowed_extensions = ['css', 'js', 'svg']
+        self.keep_original = True
+        self.minimum_kb = 30
+        self.compressors = [compressors.ZlibCompressor()]
+
+    def _get_dest_path(self, path):
+        return self.stored_name(path)
+
 
 class CloudFrontManifestStaticFilesStorage(ManifestStaticFilesStorage):
     """

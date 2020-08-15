@@ -123,6 +123,7 @@ django-subdomains = {git = "git://github.com/pacahon/django-subdomains.git",ref 
 django-simple-menu = "*"
 django-ckeditor = "==5.9.0"
 django-simple-history = "*"
+# XXX: wrong implementation for Django >= 1.11 in ver 1.2.1
 django-static-compress = "==1.2.1"
 webdavclient3 = "*"
 
