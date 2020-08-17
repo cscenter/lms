@@ -2,7 +2,7 @@
 
 {% import "compscicenter_ru/macros/_nav.jinja2" as macros_nav %}
 
-{% block title %}Программы подготовки в {{ super() }}{% endblock title %}
+{% block title %}Направления обучения в {{ super() }}{% endblock title %}
 
 {% block body_attrs %}data-init-sections="tabs"{% endblock body_attrs %}
 
@@ -19,7 +19,7 @@
                     <div class="tab-pane {% if tab.active %} show active{% endif %}"
                             id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
                         <div class="mb-6">{{ branch.description }}</div>
-                        <h2>Программы обучения</h2>
+                        <h2>Направления обучения</h2>
                         {% for program in current_programs -%}
                             {% with academic_discipline=program.academic_discipline %}
                             <a class="card _program-card" href="{{ url('on_campus_program_detail', discipline_code=academic_discipline.code) }}" >
