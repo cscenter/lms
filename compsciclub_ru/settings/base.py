@@ -53,6 +53,7 @@ for template in TEMPLATES:
         template["OPTIONS"]["globals"]["get_branches"] = "compsciclub_ru.context_processors.get_branches"
     elif "DjangoTemplates" in template["BACKEND"]:
         template["DIRS"] = [str(PROJECT_DIR / "templates")] + template["DIRS"]
+        template["OPTIONS"]["context_processors"] += ("compsciclub_ru.context_processors.get_branches",)
 
 # FIXME: hz
 FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
