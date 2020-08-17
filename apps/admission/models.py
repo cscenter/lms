@@ -581,8 +581,6 @@ class Contest(models.Model):
     file = models.FileField(
         _("Assignments in pdf format"),
         blank=True,
-        help_text=_("Make sure file does not include solutions due to "
-                    "it visible with direct url link"),
         upload_to=contest_assignments_upload_to,
         storage=private_storage)
 
