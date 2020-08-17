@@ -6,6 +6,10 @@ environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
 from lms.settings.extended import *
 
 SITE_ID = 3
+if REDIS_DB_INDEX is None:
+    for queue_config in RQ_QUEUES.values():
+        queue_config['DB'] = SITE_ID
+    THUMBNAIL_REDIS_DB = SITE_ID
 
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["lk.yandexdataschool.ru"])
 
