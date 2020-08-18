@@ -30,6 +30,7 @@ from core.db.models import ScoreField
 from core.models import Branch, Location
 from core.timezone import TimezoneAwareModel, TimezoneAwareDateTimeField
 from core.urls import reverse
+from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
 from learning.settings import AcademicDegreeLevels
 from users.constants import Roles
@@ -578,7 +579,7 @@ class Contest(models.Model):
         blank=True,
         validators=[validate_json_container]
     )
-    file = models.FileField(
+    file = ConfigurableStorageFileField(
         _("Assignments in pdf format"),
         blank=True,
         upload_to=contest_assignments_upload_to,

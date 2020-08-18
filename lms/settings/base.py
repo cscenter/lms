@@ -23,8 +23,6 @@ SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', default=True)
 
 # Upload Settings
 USE_S3_FOR_UPLOAD = env.bool('UPLOAD_USE_S3', default=False)
-FILE_UPLOAD_DIRECTORY_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS', default=0o755)
-FILE_UPLOAD_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_PERMISSIONS', default=0o664)
 AWS_DEFAULT_ACL = None  # All files will inherit the bucket’s ACL
 if USE_S3_FOR_UPLOAD:
     DEFAULT_FILE_STORAGE = 'files.storage.PublicMediaS3Storage'
@@ -39,6 +37,8 @@ if USE_S3_FOR_UPLOAD:
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
 else:
+    FILE_UPLOAD_DIRECTORY_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS', default=0o755)
+    FILE_UPLOAD_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_PERMISSIONS', default=0o664)
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     MEDIA_ROOT = env.str('DJANGO_PUBLIC_MEDIA_ROOT')
     # Resolve relative paths as relative to the ROOT_DIR

@@ -31,6 +31,7 @@ from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles, \
     MaterialVisibilityTypes
 from courses.utils import get_current_term_pair, get_term_starts_at, \
     TermPair
+from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
 from learning.settings import GradingSystems, ENROLLMENT_DURATION
 from .constants import SemesterTypes, ClassTypes
@@ -801,7 +802,7 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         _("Description"),
         blank=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    slides = models.FileField(
+    slides = ConfigurableStorageFileField(
         _("Slides"),
         blank=True,
         max_length=200,
@@ -974,9 +975,10 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
         CourseClass,
         verbose_name=_("Class"),
         on_delete=models.CASCADE)
-    material = models.FileField(max_length=200,
-                                upload_to=course_class_attachment_upload_to,
-                                storage=private_storage)
+    material = ConfigurableStorageFileField(
+        max_length=200,
+        upload_to=course_class_attachment_upload_to,
+        storage=private_storage)
 
     class Meta:
         ordering = ["course_class", "-created"]
@@ -1157,9 +1159,10 @@ class AssignmentAttachment(TimeStampedModel):
         Assignment,
         verbose_name=_("Assignment"),
         on_delete=models.CASCADE)
-    attachment = models.FileField(upload_to=assignment_attachment_upload_to,
-                                  storage=private_storage,
-                                  max_length=150)
+    attachment = ConfigurableStorageFileField(
+        upload_to=assignment_attachment_upload_to,
+        storage=private_storage,
+        max_length=150)
 
     class Meta:
         ordering = ["assignment", "-created"]
