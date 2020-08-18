@@ -2,7 +2,7 @@
 
 import courses.models
 from django.db import migrations, models
-import files.storage
+import files.models
 
 
 class Migration(migrations.Migration):
@@ -28,16 +28,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='assignmentattachment',
             name='attachment',
-            field=models.FileField(max_length=150, storage=files.storage.PrivateFileSystemStorage(), upload_to=courses.models.assignment_attachment_upload_to),
+            field=files.models.ConfigurableStorageFileField(max_length=150, upload_to=courses.models.assignment_attachment_upload_to),
         ),
         migrations.AlterField(
             model_name='courseclass',
             name='slides',
-            field=models.FileField(blank=True, max_length=200, storage=files.storage.PrivateFileSystemStorage(), upload_to=courses.models.course_class_slides_upload_to, verbose_name='Slides'),
+            field=files.models.ConfigurableStorageFileField(blank=True, max_length=200, upload_to=courses.models.course_class_slides_upload_to, verbose_name='Slides'),
         ),
         migrations.AlterField(
             model_name='courseclassattachment',
             name='material',
-            field=models.FileField(max_length=200, storage=files.storage.PrivateFileSystemStorage(), upload_to=courses.models.course_class_attachment_upload_to),
+            field=files.models.ConfigurableStorageFileField(max_length=200, upload_to=courses.models.course_class_attachment_upload_to),
         ),
     ]

@@ -27,6 +27,7 @@ from core.utils import hashids
 from courses.constants import SemesterTypes
 from courses.models import Semester
 from courses.utils import get_current_term_pair
+from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
 from learning.settings import GradeTypes, Branches
 from notifications.signals import notify
@@ -636,7 +637,7 @@ class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
         _("Description"),
         blank=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    file = models.FileField(
+    file = ConfigurableStorageFileField(
         _("Report file"),
         blank=True,
         null=True,
@@ -948,7 +949,7 @@ class ReportComment(TimezoneAwareModel, TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
-    attached_file = models.FileField(
+    attached_file = ConfigurableStorageFileField(
         upload_to=report_comment_attachment_upload_to,
         storage=private_storage,
         blank=True)
