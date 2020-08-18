@@ -243,7 +243,7 @@ class FutureGraduateDiplomasReport(ProgressReport):
         self.branch = branch
 
     def get_queryset(self):
-        exclude_grades = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
+        exclude_grades = GradeTypes.unsatisfactory_grades
         enrollments_prefetch = get_enrollments_progress(
             lookup='user__enrollment_set',
             filters=[~Q(grade__in=exclude_grades)]
@@ -442,7 +442,7 @@ class OfficialDiplomasReport(ProgressReport):
         return DataFrame.from_records(columns=headers, data=data, index='ID')
 
     def get_queryset(self):
-        exclude_grades = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
+        exclude_grades = GradeTypes.unsatisfactory_grades
         enrollments_prefetch = get_enrollments_progress(
             lookup='user__enrollment_set',
             filters=[~Q(grade__in=exclude_grades)]

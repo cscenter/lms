@@ -159,7 +159,7 @@ class AlumniStats(APIView):
                    Q(graduate_profile__graduation_year=graduation_year))
         if graduation_year == now().year and self.request.user.is_curator:
             filters = filters | Q(status=StudentStatuses.WILL_GRADUATE)
-        exclude_grades = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
+        exclude_grades = GradeTypes.unsatisfactory_grades
         enrollments_prefetch = get_enrollments_progress(
             lookup='user__enrollment_set',
             filters=[~Q(grade__in=exclude_grades)]
@@ -192,9 +192,9 @@ class AlumniStats(APIView):
                 unique_projects.add(ps.project_id)
             for enrollment in user.enrollments_progress:
                 enrollments_total += 1
-                if enrollment.grade == GradeTypes.EXCELLENT:
+                if enrollment.grade in GradeTypes.excellent_grades:
                     excellent_total += 1
-                elif enrollment.grade == GradeTypes.GOOD:
+                elif enrollment.grade in GradeTypes.good_grades:
                     good_total += 1
                 course = enrollment.course
                 unique_courses.add(course.meta_course)

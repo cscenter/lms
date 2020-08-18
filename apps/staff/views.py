@@ -125,7 +125,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
 
 class FutureGraduateStatsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas_stats.html"
-    BAD_GRADES = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
+    BAD_GRADES = GradeTypes.unsatisfactory_grades
 
     def get_context_data(self, branch_id, **kwargs):
         student_profiles = (StudentProfile.objects
@@ -228,9 +228,9 @@ class FutureGraduateStatsView(CuratorOnlyMixin, generic.TemplateView):
                     continue
                 courses_by_term[enrollment.course.semester_id] += 1
                 total_passed_courses += 1
-                if enrollment.grade == GradeTypes.EXCELLENT:
+                if enrollment.grade in GradeTypes.excellent_grades:
                     excellent_total += 1
-                elif enrollment.grade == GradeTypes.GOOD:
+                elif enrollment.grade in GradeTypes.good_grades:
                     good_total += 1
                 unique_courses.add(enrollment.course.meta_course)
                 total_hours += enrollment.course.courseclass_set.count() * 1.5

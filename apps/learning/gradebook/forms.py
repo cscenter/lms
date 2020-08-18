@@ -11,7 +11,6 @@ from core.forms import GradeField
 from learning.gradebook.utils import recalculate_course_grading_system
 from learning.gradebook.data import GradeBookData
 from learning.models import StudentAssignment, Enrollment
-from learning.settings import GradeTypes
 
 __all__ = ('ConflictError', 'BaseGradebookForm', 'AssignmentScore',
            'EnrollmentFinalGrade', 'GradeBookFormFactory')
