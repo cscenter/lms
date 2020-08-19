@@ -87,18 +87,21 @@ REDIS_PASSWORD = env.str('REDIS_PASSWORD', default=None)
 REDIS_HOST = env.str('REDIS_HOST', default='127.0.0.1')
 REDIS_PORT = env.int('REDIS_PORT', default=6379)
 REDIS_DB_INDEX = env.int('REDIS_DB_INDEX', default=SITE_ID)
+REDIS_SSL = env.bool('REDIS_SSL', default=True)
 RQ_QUEUES = {
     'default': {
         'HOST': REDIS_HOST,
         'PORT': REDIS_PORT,
         'DB': REDIS_DB_INDEX,
         'PASSWORD': REDIS_PASSWORD,
+        'SSL': REDIS_SSL,
     },
     'high': {
         'HOST': REDIS_HOST,
         'PORT': REDIS_PORT,
         'DB': REDIS_DB_INDEX,
         'PASSWORD': REDIS_PASSWORD,
+        'SSL': REDIS_SSL
     },
 }
 
@@ -112,6 +115,7 @@ THUMBNAIL_REDIS_HOST = REDIS_HOST
 THUMBNAIL_REDIS_PORT = REDIS_PORT
 THUMBNAIL_REDIS_DB = REDIS_DB_INDEX
 THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
+THUMBNAIL_REDIS_SSL = REDIS_SSL
 
 # Monitoring
 SENTRY_DSN = env("SENTRY_DSN")
