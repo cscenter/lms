@@ -18,7 +18,6 @@ def get_enrollments_progress(lookup='enrollment_set',
                 .select_related('course',
                                 'course__meta_course',
                                 'course__semester')
-                .annotate(grade_weight=GradeTypes.get_order_expression('grade'))
                 .only('pk', 'created', 'student_id', 'course_id',
                       'grade')
                 .order_by('course__semester__index'))
