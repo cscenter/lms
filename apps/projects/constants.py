@@ -16,10 +16,10 @@ class ProjectGradeTypes(DjangoChoices):
     """
     Used as grade choices for the ProjectStudent model.
     """
-    NOT_GRADED = C('not_graded', _("Not graded"))
-    UNSATISFACTORY = C('unsatisfactory', _("Enrollment|Unsatisfactory"))
-    CREDIT = C('pass', _("Enrollment|Pass"))
-    GOOD = C('good', _("Good"))
-    EXCELLENT = C('excellent', _("Excellent"))
+    NOT_GRADED = C('not_graded', _("ProjectGradeTypes|Not graded"))
+    UNSATISFACTORY = C('unsatisfactory', _("ProjectGradeTypes|Unsatisfactory"))
+    CREDIT = C('pass', _("ProjectGradeTypes|Pass"))
+    GOOD = C('good', _("ProjectGradeTypes|Good"))
+    EXCELLENT = C('excellent', _("ProjectGradeTypes|Excellent"))
 
     satisfactory_grades = {CREDIT.value, GOOD.value, EXCELLENT.value}
