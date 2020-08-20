@@ -6,9 +6,9 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
+from projects.constants import ProjectGradeTypes
 from projects.models import ProjectStudent, Report, Project, Review, \
     ReportComment
-from learning.settings import GradeTypes
 from users.constants import Roles
 from notifications import NotificationTypes
 from notifications.signals import notify
@@ -45,7 +45,7 @@ def post_save_project_student(sender, instance, *args, **kwargs):
                         .prefetch_related("reports"))
     all_left_project = False
     for ps in project_students:
-        if ps.reports.exists() or ps.final_grade != GradeTypes.UNSATISFACTORY:
+        if ps.reports.exists() or ps.final_grade != ProjectGradeTypes.UNSATISFACTORY:
             break
     else:
         all_left_project = True

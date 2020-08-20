@@ -39,7 +39,6 @@ def get_student_progress(queryset,
                                      'course__semester',
                                      'course__main_branch')
                      .prefetch_related('course__course_teachers')
-                     .annotate(grade_weight=GradeTypes.to_int_case_expr())
                      .only('pk', 'created', 'student_id', 'course_id',
                            'grade'))
     if until_term:
