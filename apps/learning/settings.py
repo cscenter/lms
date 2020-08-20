@@ -56,9 +56,7 @@ class GradingSystems(DjangoChoices):
 
 class GradeTypes(DjangoChoices):
     """
-    Used as a grade choices for models:
-        * Enrollment
-        * ProjectStudent
+    Used as grade choices for the Enrollment model.
     """
     NOT_GRADED = C('not_graded', _("Not graded"), system='__all__', order=0)
     UNSATISFACTORY = C('unsatisfactory', _("Enrollment|Unsatisfactory"),

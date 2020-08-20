@@ -29,6 +29,7 @@ from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Assignment, StudentGroupTypes, \
     Semester
+from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
@@ -558,7 +559,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
-    attached_file = models.FileField(
+    attached_file = ConfigurableStorageFileField(
         max_length=150,
         upload_to=assignment_comment_attachment_upload_to,
         storage=private_storage,

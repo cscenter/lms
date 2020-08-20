@@ -10,6 +10,10 @@ from lms.settings.extended import *
 sys.path.append(str(ROOT_DIR / "compscicenter_ru" / "apps"))
 
 SITE_ID = 1
+if REDIS_DB_INDEX is None:
+    for queue_config in RQ_QUEUES.values():
+        queue_config['DB'] = SITE_ID
+    THUMBNAIL_REDIS_DB = SITE_ID
 
 PROJECT_DIR = Path(__file__).parents[1]
 

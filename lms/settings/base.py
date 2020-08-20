@@ -23,8 +23,6 @@ SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', default=True)
 
 # Upload Settings
 USE_S3_FOR_UPLOAD = env.bool('UPLOAD_USE_S3', default=False)
-FILE_UPLOAD_DIRECTORY_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS', default=0o755)
-FILE_UPLOAD_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_PERMISSIONS', default=0o664)
 AWS_DEFAULT_ACL = None  # All files will inherit the bucket’s ACL
 if USE_S3_FOR_UPLOAD:
     DEFAULT_FILE_STORAGE = 'files.storage.PublicMediaS3Storage'
@@ -39,6 +37,8 @@ if USE_S3_FOR_UPLOAD:
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
 else:
+    FILE_UPLOAD_DIRECTORY_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS', default=0o755)
+    FILE_UPLOAD_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_PERMISSIONS', default=0o664)
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     MEDIA_ROOT = env.str('DJANGO_PUBLIC_MEDIA_ROOT')
     # Resolve relative paths as relative to the ROOT_DIR
@@ -86,18 +86,22 @@ CACHES = {
 REDIS_PASSWORD = env.str('REDIS_PASSWORD', default=None)
 REDIS_HOST = env.str('REDIS_HOST', default='127.0.0.1')
 REDIS_PORT = env.int('REDIS_PORT', default=6379)
+REDIS_DB_INDEX = env.int('REDIS_DB_INDEX', default=SITE_ID)
+REDIS_SSL = env.bool('REDIS_SSL', default=True)
 RQ_QUEUES = {
     'default': {
         'HOST': REDIS_HOST,
         'PORT': REDIS_PORT,
-        'DB': 0,
+        'DB': REDIS_DB_INDEX,
         'PASSWORD': REDIS_PASSWORD,
+        'SSL': REDIS_SSL,
     },
     'high': {
         'HOST': REDIS_HOST,
         'PORT': REDIS_PORT,
-        'DB': 0,
+        'DB': REDIS_DB_INDEX,
         'PASSWORD': REDIS_PASSWORD,
+        'SSL': REDIS_SSL
     },
 }
 
@@ -109,7 +113,9 @@ THUMBNAIL_PRESERVE_FORMAT = True
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
 THUMBNAIL_REDIS_HOST = REDIS_HOST
 THUMBNAIL_REDIS_PORT = REDIS_PORT
+THUMBNAIL_REDIS_DB = REDIS_DB_INDEX
 THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
+THUMBNAIL_REDIS_SSL = REDIS_SSL
 
 # Monitoring
 SENTRY_DSN = env("SENTRY_DSN")

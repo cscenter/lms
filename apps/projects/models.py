@@ -27,10 +27,11 @@ from core.utils import hashids
 from courses.constants import SemesterTypes
 from courses.models import Semester
 from courses.utils import get_current_term_pair
+from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
-from learning.settings import GradeTypes, Branches
+from learning.settings import Branches
 from notifications.signals import notify
-from projects.constants import ProjectTypes, EDITING_REPORT_COMMENT_AVAIL
+from projects.constants import ProjectTypes, EDITING_REPORT_COMMENT_AVAIL, ProjectGradeTypes
 from users.constants import Roles, GenderTypes
 
 CURATOR_SCORE_FIELDS = [
@@ -251,16 +252,16 @@ class ReportingPeriod(models.Model):
 
     def score_to_grade(self, score, project):
         if score >= self.score_excellent:
-            final_grade = GradeTypes.EXCELLENT
+            final_grade = ProjectGradeTypes.EXCELLENT
         elif score >= self.score_good:
-            final_grade = GradeTypes.GOOD
+            final_grade = ProjectGradeTypes.GOOD
         elif score >= self.score_pass:
-            final_grade = GradeTypes.CREDIT
+            final_grade = ProjectGradeTypes.CREDIT
         else:
-            final_grade = GradeTypes.UNSATISFACTORY
+            final_grade = ProjectGradeTypes.UNSATISFACTORY
         # For external projects use binary grading policy
         if project.is_external and score >= self.score_pass:
-            final_grade = GradeTypes.CREDIT
+            final_grade = ProjectGradeTypes.CREDIT
         return final_grade
 
     def get_report_form(self, **kwargs):
@@ -295,7 +296,7 @@ class ReportingPeriod(models.Model):
                             .filter(project__semester=self.term,
                                     reports__isnull=True,
                                     **filters)
-                            .exclude(final_grade=GradeTypes.UNSATISFACTORY,
+                            .exclude(final_grade=ProjectGradeTypes.UNSATISFACTORY,
                                      project__status=Project.Statuses.CANCELED)
                             .select_related("student", "project")
                             .distinct()
@@ -320,8 +321,9 @@ class ReportingPeriod(models.Model):
 class ProjectStudent(TimezoneAwareModel, models.Model):
     """Intermediate model for project students"""
     TIMEZONE_AWARE_FIELD_NAME = 'project'
-    # TODO: переименовать `GRADES`, создать ProjectGradeTypes (в settings.py)
-    GRADES = GradeTypes
+    # TODO: переименовать `GRADES`
+    GRADES = ProjectGradeTypes
+
     student = models.ForeignKey(settings.AUTH_USER_MODEL,
                                 on_delete=models.CASCADE)
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
@@ -636,7 +638,7 @@ class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
         _("Description"),
         blank=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    file = models.FileField(
+    file = ConfigurableStorageFileField(
         _("Report file"),
         blank=True,
         null=True,
@@ -948,7 +950,7 @@ class ReportComment(TimezoneAwareModel, TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
-    attached_file = models.FileField(
+    attached_file = ConfigurableStorageFileField(
         upload_to=report_comment_attachment_upload_to,
         storage=private_storage,
         blank=True)
