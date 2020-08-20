@@ -133,10 +133,8 @@ msgid "Either text or file should be non-empty"
 msgstr "Должен быть указан текст комментария или приложен файл."
 
 #: apps/projects/forms.py:158
-#, fuzzy
-#| msgid "Either text or file should be non-empty"
 msgid "Text should be non-empty"
-msgstr "Должен быть указан текст комментария или приложен файл."
+msgstr "Должен быть указан текст комментария."
 
 #: apps/projects/forms.py:182
 msgid "Complete assessment"

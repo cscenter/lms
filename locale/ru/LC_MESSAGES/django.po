@@ -166,7 +166,8 @@ msgstr "Проверяющий [Отчеты по проектам]"
 msgid "Core"
 msgstr ""
 
-#: apps/core/forms.py:7 apps/templates/forms/simple_delete_confirmation.html:22
+#: apps/core/forms.py:7
+#: apps/templates/forms/simple_delete_confirmation.html:22
 #: apps/templates/learning/enrollment/enrollment_leave.html:25
 #: lms/jinja2/lms/courses/course_class_form.html:78
 msgid "Cancel"
@@ -180,20 +181,20 @@ msgstr "Сохранить"
 
 #: apps/core/models.py:30
 msgid ""
-"How to style text read <a href=\"/commenting-the-right-way/\" target=\"_blank"
-"\">here</a>. Partially HTML is enabled too."
+"How to style text read <a href=\"/commenting-the-right-way/\" "
+"target=\"_blank\">here</a>. Partially HTML is enabled too."
 msgstr ""
 "В вашем распоряжении Markdown, Latex для формул и HTML. Памятку по "
-"оформлению можно найти <a href=\"/commenting-the-right-way/\" target=\"_blank"
-"\">по ссылке</a>."
+"оформлению можно найти <a href=\"/commenting-the-right-way/\" "
+"target=\"_blank\">по ссылке</a>."
 
 #: apps/core/models.py:33
 msgid ""
-"How to style text read <a href=\"/commenting-the-right-way/\" target=\"_blank"
-"\">here</a>."
+"How to style text read <a href=\"/commenting-the-right-way/\" "
+"target=\"_blank\">here</a>."
 msgstr ""
-"Как правильно оформлять текст, читайте <a href=\"/commenting-the-right-way/"
-"\" target=\"_blank\">по ссылке</a>."
+"Как правильно оформлять текст, читайте <a href=\"/commenting-the-right-"
+"way/\" target=\"_blank\">по ссылке</a>."
 
 #: apps/core/models.py:93 apps/core/models.py:180
 msgid "Code"
@@ -312,8 +313,8 @@ msgstr ""
 #: apps/core/timezone/forms.py:39
 #, python-format
 msgid ""
-"%(datetime)s couldn't be interpreted in time zone %(instance_tz)s; it may be "
-"ambiguous or it may not exist."
+"%(datetime)s couldn't be interpreted in time zone %(instance_tz)s; it may be"
+" ambiguous or it may not exist."
 msgstr ""
 
 #: apps/core/validators.py:35
@@ -331,7 +332,8 @@ msgid ""
 "MIME type '%(mimetype)s' is not valid. Allowed types are: "
 "%(allowed_mimetypes)s."
 msgstr ""
-"Тип MIME '%(mimetype)s' не допустим. Разрешенные типы: %(allowed_mimetypes)s."
+"Тип MIME '%(mimetype)s' не допустим. Разрешенные типы: "
+"%(allowed_mimetypes)s."
 
 #: apps/core/validators.py:37
 #, python-format
@@ -347,7 +349,8 @@ msgid ""
 "The current file %(size)s, which is too large. The maximum file size is "
 "%(allowed_size)s."
 msgstr ""
-"Размер файла %(size)s недопустим. Максимальный размер файла %(allowed_size)s."
+"Размер файла %(size)s недопустим. Максимальный размер файла "
+"%(allowed_size)s."
 
 #: apps/courses/admin.py:146 apps/courses/admin.py:231 apps/users/models.py:875
 msgid "Created"
@@ -669,11 +672,11 @@ msgstr "Имя для URL"
 
 #: apps/courses/models.py:175
 msgid ""
-"Short dash-separated string for human-readable URLs, as in test.com/news/"
-"<b>some-news</b>/"
+"Short dash-separated string for human-readable URLs, as in "
+"test.com/news/<b>some-news</b>/"
 msgstr ""
-"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: test."
-"com/news/<b>some-news</b>/"
+"Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: "
+"test.com/news/<b>some-news</b>/"
 
 #: apps/courses/models.py:183
 msgid "Course|short_description"
@@ -730,8 +733,8 @@ msgstr ""
 
 #: apps/courses/models.py:251
 msgid ""
-"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course "
-"description"
+"LaTeX+Markdown+HTML is enabled; empty description will be replaced by course"
+" description"
 msgstr ""
 "доступны LaTeX для формул, Markdown и HTML; пустое описание будет заменено "
 "на описание курса"
@@ -845,9 +848,9 @@ msgstr "Автоматически подписывать на уведомле�
 #: apps/courses/models.py:593
 msgid "Add teacher to assignment notify settings by default"
 msgstr ""
-"При создании задания автоматически подписывать преподавателя на уведомления, "
-"связанные с ДЗ. Только те задания, на которые он подписан, будут видны ему в "
-"разделе Преподавание - Задания."
+"При создании задания автоматически подписывать преподавателя на уведомления,"
+" связанные с ДЗ. Только те задания, на которые он подписан, будут видны ему "
+"в разделе Преподавание - Задания."
 
 #: apps/courses/models.py:597
 msgid "Course Teacher"
@@ -2043,8 +2046,8 @@ msgstr "Направление обучения"
 
 #: apps/study_programs/models.py:64
 msgid ""
-"Show on syllabus page. Other activity flags for selected branch and academic "
-"discipline will be deactivated."
+"Show on syllabus page. Other activity flags for selected branch and academic"
+" discipline will be deactivated."
 msgstr ""
 "Активная программа будет показана на странице программы. Все другие записи "
 "для выбранного отделения и направления обучения будут деактивированы."
@@ -2159,19 +2162,14 @@ msgstr "Другие материалы"
 #: apps/templates/courses/course_detail.html:29
 msgid ""
 "\n"
-"                        Enroll in the course to get notifications and to be "
-"able to submit home assignments.<br>\n"
-"                        <a class=\"btn btn-success\" href=\"/register/"
-"\">Register to enroll now</a> <a class=\"btn btn-success\" href=\"/login/"
-"\">Login</a>\n"
+"                        Enroll in the course to get notifications and to be able to submit home assignments.<br>\n"
+"                        <a class=\"btn btn-success\" href=\"/register/\">Register to enroll now</a> <a class=\"btn btn-success\" href=\"/login/\">Login</a>\n"
 "                      "
 msgstr ""
 "\n"
 "Запишитесь на курс, чтобы получать уведомления и\n"
-"иметь возможность сдавать домашние задания. Для записи требуется регистрация "
-"на сайте.<br>\n"
-"<a class=\"btn btn-success\" href=\"/register/\">Перейти к регистрации</a> "
-"<a class=\"btn btn-success\" href=\"/login/\">Войти</a>"
+"иметь возможность сдавать домашние задания. Для записи требуется регистрация на сайте.<br>\n"
+"<a class=\"btn btn-success\" href=\"/register/\">Перейти к регистрации</a> <a class=\"btn btn-success\" href=\"/login/\">Войти</a>"
 
 #: apps/templates/courses/course_detail.html:105
 msgid "Date and time"
@@ -2268,8 +2266,7 @@ msgid ""
 "and your address will be removed from our records.\n"
 msgstr ""
 "\n"
-"Вы (или кто-то выдающий себя за вас) оставили заявку на регистрацию учетной "
-"записи на %(site_name)s. Если это были не вы, то проигнорируйте\n"
+"Вы (или кто-то выдающий себя за вас) оставили заявку на регистрацию учетной записи на %(site_name)s. Если это были не вы, то проигнорируйте\n"
 "это сообщение, и ваш почтовый адрес будет удален из наших записей.\n"
 
 #: apps/templates/emails/activation_email_body.txt:7
@@ -2303,18 +2300,13 @@ msgstr "Международные студенческие Computer Science ш�
 #: apps/templates/international_schools/international_schools.html:7
 msgid ""
 "\n"
-"        If you would like a school to be added to this list email the club "
-"coordinator: Alexander Kulikov, kulikov()logic.pdmi.ras.ru<br>\n"
-"        Subscribe: <a href=\"https://www.facebook.com/compscischools"
-"\">Facebook</a>\n"
+"        If you would like a school to be added to this list email the club coordinator: Alexander Kulikov, kulikov()logic.pdmi.ras.ru<br>\n"
+"        Subscribe: <a href=\"https://www.facebook.com/compscischools\">Facebook</a>\n"
 "    "
 msgstr ""
 "\n"
-"Список школ также поддерживается в <a href=\"https://vk.com/compscinews"
-"\">группе Вконтакте</a> и в группе <a href=\"https://www.facebook.com/"
-"compscischools\">в Фейсбуке</a>.<br>\n"
-"Для добавления анонса школы свяжитесь с координатором клуба: Александр "
-"Куликов, alexander.s.kulikov@gmail.com."
+"Список школ также поддерживается в <a href=\"https://vk.com/compscinews\">группе Вконтакте</a> и в группе <a href=\"https://www.facebook.com/compscischools\">в Фейсбуке</a>.<br>\n"
+"Для добавления анонса школы свяжитесь с координатором клуба: Александр Куликов, alexander.s.kulikov@gmail.com."
 
 #: apps/templates/international_schools/international_schools.html:15
 msgctxt "international schools"
