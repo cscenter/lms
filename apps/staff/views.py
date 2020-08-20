@@ -31,6 +31,7 @@ from learning.reports import FutureGraduateDiplomasReport, ProgressReportFull, \
     ProgressReportForInvitation, dataframe_to_response, OfficialDiplomasReport
 from learning.settings import AcademicDegreeLevels, StudentStatuses, \
     GradeTypes
+from projects.constants import ProjectGradeTypes
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import FacesQueryParams
@@ -126,6 +127,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
 class FutureGraduateStatsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas_stats.html"
     BAD_GRADES = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
+    BAD_PROJECT_GRADES = [ProjectGradeTypes.UNSATISFACTORY, ProjectGradeTypes.NOT_GRADED]
 
     def get_context_data(self, branch_id, **kwargs):
         student_profiles = (StudentProfile.objects
@@ -196,7 +198,7 @@ class FutureGraduateStatsView(CuratorOnlyMixin, generic.TemplateView):
                 student_profile.year_of_admission,
                 SemesterTypes.AUTUMN)
             for ps in projects:
-                if ps.final_grade in self.BAD_GRADES or ps.project.is_canceled:
+                if ps.final_grade in self.BAD_PROJECT_GRADES or ps.project.is_canceled:
                     continue
                 unique_projects.add(ps.project)
                 internal_projects_cnt += int(not ps.project.is_external)

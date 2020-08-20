@@ -3,7 +3,7 @@ from typing import NamedTuple, List
 
 from core.templatetags.core_tags import tex
 from learning.settings import GradeTypes
-from projects.constants import ProjectTypes
+from projects.constants import ProjectTypes, ProjectGradeTypes
 from study_programs.models import AcademicDiscipline
 
 
@@ -38,8 +38,8 @@ def is_active_project(ps):
     """
     return (not ps.project.is_external and
             not ps.project.is_canceled and
-            ps.final_grade != GradeTypes.NOT_GRADED and
-            ps.final_grade != GradeTypes.UNSATISFACTORY)
+            ps.final_grade != ProjectGradeTypes.NOT_GRADED and
+            ps.final_grade != ProjectGradeTypes.UNSATISFACTORY)
 
 
 def generate_tex_student_profile_for_diplomas(student_profile, courses, is_official=False):

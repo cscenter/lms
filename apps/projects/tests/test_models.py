@@ -5,13 +5,13 @@ import math
 import pytest
 
 from courses.tests.factories import SemesterFactory
-from projects.constants import ProjectTypes
+from projects.constants import ProjectTypes, ProjectGradeTypes
 from projects.models import ReportingPeriod, \
     ReportingPeriodKey, PracticeCriteria
 from projects.tests.factories import ReportFactory, ReviewFactory, \
     ReportingPeriodFactory, ProjectStudentFactory, ProjectFactory, \
     ProjectReviewerFactory
-from learning.settings import Branches, GradeTypes
+from learning.settings import Branches
 from core.tests.factories import BranchFactory
 
 
@@ -222,12 +222,12 @@ def test_reporting_period_score_to_grade():
                                supervisor_grade=1,
                                presentation_grade=2)
     assert ps.total_score == 3
-    assert rp.score_to_grade(ps.total_score, ps.project) == GradeTypes.CREDIT
+    assert rp.score_to_grade(ps.total_score, ps.project) == ProjectGradeTypes.CREDIT
     ps.presentation_grade = 5
     assert ps.total_score == 6
-    assert rp.score_to_grade(ps.total_score, ps.project) == GradeTypes.GOOD
+    assert rp.score_to_grade(ps.total_score, ps.project) == ProjectGradeTypes.GOOD
     ps.project.is_external = True
-    assert rp.score_to_grade(ps.total_score, ps.project) == GradeTypes.CREDIT
+    assert rp.score_to_grade(ps.total_score, ps.project) == ProjectGradeTypes.CREDIT
 
 
 @pytest.mark.django_db

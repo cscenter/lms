@@ -55,9 +55,7 @@ class GradingSystems(DjangoChoices):
 
 class GradeTypes(DjangoChoices):
     """
-    Used as a grade choices for models:
-        * Enrollment
-        * ProjectStudent
+    Used as grade choices for the Enrollment model.
     """
     NOT_GRADED = C('not_graded', _("Not graded"))
     UNSATISFACTORY = C('unsatisfactory', _("Enrollment|Unsatisfactory"))
@@ -66,15 +64,3 @@ class GradeTypes(DjangoChoices):
     EXCELLENT = C('excellent', _("Excellent"))
 
     satisfactory_grades = {CREDIT.value, GOOD.value, EXCELLENT.value}
-
-    @classmethod
-    def to_int_case_expr(cls):
-        """Returns Case expression for comparing grades"""
-        return Case(
-            When(grade=cls.EXCELLENT, then=Value(4)),
-            When(grade=cls.GOOD, then=Value(3)),
-            When(grade=cls.CREDIT, then=Value(2)),
-            When(grade=cls.UNSATISFACTORY, then=Value(1)),
-            default=Value(0),
-            output_field=IntegerField()
-        )
