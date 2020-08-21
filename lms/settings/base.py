@@ -170,6 +170,7 @@ TEMPLATES = [
                 "core.jinja2.ext.UrlExtension",
                 "core.jinja2.ext.SpacelessExtension"
             ],
+            "environment": "core.jinja2.env.environment",
             "bytecode_cache": {
                 "name": "default",
                 "backend": "django_jinja.cache.BytecodeCache",
