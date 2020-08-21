@@ -11,7 +11,6 @@ from core.forms import GradeField
 from learning.gradebook.utils import recalculate_course_grading_system
 from learning.gradebook.data import GradeBookData
 from learning.models import StudentAssignment, Enrollment
-from learning.settings import GradeTypes
 
 __all__ = ('ConflictError', 'BaseGradebookForm', 'AssignmentScore',
            'EnrollmentFinalGrade', 'GradeBookFormFactory')
@@ -131,11 +130,11 @@ class AssignmentScore(GradeField):
 
 
 class EnrollmentFinalGrade(forms.ChoiceField):
-    def __init__(self, student):
+    def __init__(self, student, course):
         widget = forms.Select(attrs={
             'initial': student.final_grade
         })
-        super().__init__(choices=GradeTypes.choices,
+        super().__init__(choices=course.grade_choices,
                          required=False,
                          show_hidden_initial=True,
                          widget=widget)
@@ -176,7 +175,7 @@ class GradeBookFormFactory:
 
         for s in gradebook.students.values():
             k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(s.enrollment_id)
-            fields[k] = EnrollmentFinalGrade(s)
+            fields[k] = EnrollmentFinalGrade(s, gradebook.course)
         cls_dict["_course"] = gradebook.course
         return type("GradebookForm", (BaseGradebookForm,), cls_dict)
 

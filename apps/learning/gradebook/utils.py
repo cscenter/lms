@@ -14,10 +14,15 @@ def recalculate_course_grading_system(course: Course) -> None:
     es = (Enrollment.active
           .filter(course_id=course.id)
           .values_list("grade", flat=True))
+    if all(g == GradeTypes.NOT_GRADED for g in es):
+        return
+    base_grades = GradeTypes.get_grades_for_grading_system(GradingSystems.BASE)
+    binary_grades = GradeTypes.get_grades_for_grading_system(GradingSystems.BINARY)
     grading_type = GradingSystems.BASE
-    if not any(g for g in es
-               if g in [GradeTypes.GOOD, GradeTypes.EXCELLENT]):
+    if all(g in binary_grades for g in es):
         grading_type = GradingSystems.BINARY
+    elif any(g not in base_grades for g in es):
+        grading_type = GradingSystems.TEN_POINT
     if course.grading_type != grading_type:
         course.grading_type = grading_type
         course.save(update_fields=['grading_type'])
