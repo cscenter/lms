@@ -90,6 +90,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin,
                         sender=email_from,
                         template=template,
                         scheduled_time=scheduled_time,
+                        context={},
                         # If emails rendered on delivery, they will store
                         # value of the template id. It makes `exists`
                         # method above works correctly.

@@ -1,8 +1,5 @@
 """
 Django settings shared between projects.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/2.2/topics/settings/
 """
 from pathlib import Path
 
@@ -11,17 +8,13 @@ import pytz
 ROOT_DIR = Path(__file__).parents[3]
 SHARED_APPS_DIR = ROOT_DIR / "apps"
 
-MEDIA_ROOT = str(ROOT_DIR / "media")
-MEDIA_URL = "/media/"
 ADMIN_URL = '/narnia/'
 
 DEFAULT_CITY_CODE = "spb"
 DEFAULT_BRANCH_CODE = "spb"
 DEFAULT_TIMEZONE = pytz.timezone("Europe/Moscow")
 
-CLUB_DOMAIN = 'compsciclub.ru'
 # FIXME: remove
-CENTER_SITE_ID = 1
 CLUB_SITE_ID = 2
 
 LMS_SUBDOMAIN = None
@@ -45,7 +38,6 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'crispy_forms',
     'formtools',
-    'bootstrap3',
     'micawber.contrib.mcdjango',
     'simple_history',
     'import_export',
@@ -59,8 +51,9 @@ INSTALLED_APPS = [
     'captcha',
     'taggit',
 
-    # django.contrib.static with customized list of ignore patterns
-    'core.storage.StaticFilesConfig',
+    # django.contrib.static with a customized list of ignore patterns
+    'files.apps.StaticFilesConfig',
+    'files.apps.MediaFilesConfig',
     'core.apps.CoreConfig',
     'auth.apps.AuthConfig',  # custom `User` model is defined in `users` app
     'users.apps.UsersConfig',
@@ -111,19 +104,11 @@ LOGINAS_FROM_USER_SESSION_FLAG = "loginas_from_user"
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
-YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/"
-
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
-STATIC_URL = '/static/'
 ASSETS_ROOT = ROOT_DIR / "assets"
 STATICFILES_DIRS = [
     str(ASSETS_ROOT),
 ]
-STATICFILES_STORAGE = 'static_compress.storage.CompressedManifestStaticFilesStorage'
-STATIC_COMPRESS_FILE_EXTS = ['css', 'js', 'svg']
-STATIC_COMPRESS_METHODS = ['gz+zlib']
-STATIC_COMPRESS_KEEP_ORIGINAL = True
-STATIC_COMPRESS_MIN_SIZE_KB = 30
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',

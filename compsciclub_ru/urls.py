@@ -54,18 +54,17 @@ urlpatterns += [
     path('learning/', include('learning.study.urls')),
     path("events/<int:pk>/", EventDetailView.as_view(), name="non_course_event_detail"),
 
-
-
     path("courses/", include([
         re_path(RE_COURSE_URI, include([
             path("enroll/", CourseEnrollView.as_view(), name="course_enroll"),
             path("unenroll/", CourseUnenrollView.as_view(), name="course_leave"),
             path("news/notifications/", CourseNewsNotificationUpdate.as_view(), name="course_news_notifications_read"),
-        ]))
+        ])),
     ])),
 
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),
+    path('narnia/django-rq/', include('django_rq.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

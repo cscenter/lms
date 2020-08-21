@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.admin import widgets
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from core.widgets import DateInputTextWidget, TimeInputTextWidget
 from .models import TimezoneAwareDateTimeField, TimezoneAwareModel

@@ -10,7 +10,7 @@ PUBLIC_DOMAIN = reverse('index')[:-1]  # remove trailing slash
 
 public_menu = [
     MenuItem(
-        pgettext_lazy("menu", "Programs"),
+        "Направления",
         reverse('on_campus_programs'),
         weight=10,
         selected_patterns=[

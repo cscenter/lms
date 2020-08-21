@@ -25,7 +25,7 @@ from courses.utils import get_current_term_pair, MonthPeriod, \
     extended_month_date_range
 from courses.views.calendar import MonthEventsCalendarView
 from learning.gallery.models import Image
-from learning.services import get_classes
+from learning.services import get_classes, create_student_profile
 from users.constants import Roles
 from users.models import User, StudentProfile, StudentTypes
 
@@ -42,15 +42,14 @@ class AsyncEmailRegistrationView(RegistrationView):
         # Since we calculate the RegistrationProfile expiration from this date,
         # we want to ensure that it is current
         new_user.date_joined = timezone.now()
-
+        new_user.time_zone = new_user.branch.time_zone
         with transaction.atomic():
             new_user.save()
-            student_profile = StudentProfile(
-                user=new_user,
-                type=StudentTypes.REGULAR,
-                branch=new_user.branch,
-                year_of_admission=new_user.date_joined.year)
-            student_profile.save()
+            create_student_profile(user=new_user,
+                                   branch=new_user.branch,
+                                   profile_type=StudentTypes.REGULAR,
+                                   year_of_admission=new_user.date_joined.year,
+                                   year_of_curriculum=new_user.date_joined.year)
             self.registration_profile.objects.create_profile(new_user)
 
         signals.user_registered.send(sender=self.__class__,

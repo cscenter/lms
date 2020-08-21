@@ -13,18 +13,16 @@ from django.core.validators import MinValueValidator, \
 from django.db import models, transaction
 from django.db.models import query, Q, FieldDoesNotExist
 from django.utils import timezone, numberformat
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.formats import date_format, time_format
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
-from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
-from post_office.utils import get_email_template
+from post_office.models import EmailTemplate
 
-from admission.constants import ChallengeStatuses, INTERVIEW_FEEDBACK_TEMPLATE, \
-    InterviewFormats
+from admission.constants import ChallengeStatuses, InterviewFormats
 from admission.utils import slot_range, get_next_process
 from api.providers.yandex_contest import RegisterStatus, \
     Error as YandexContestError
@@ -32,6 +30,8 @@ from core.db.models import ScoreField
 from core.models import Branch, Location
 from core.timezone import TimezoneAwareModel, TimezoneAwareDateTimeField
 from core.urls import reverse
+from files.models import ConfigurableStorageFileField
+from files.storage import private_storage
 from learning.settings import AcademicDegreeLevels
 from users.constants import Roles
 
@@ -113,7 +113,7 @@ class Campaign(TimezoneAwareModel, models.Model):
         verbose_name_plural = _("Campaigns")
 
     def __str__(self):
-        return smart_text(_("{}, {}").format(self.branch.name, self.year))
+        return smart_str(_("{}, {}").format(self.branch.name, self.year))
 
     def application_starts_at_local(self, tz=None):
         if not tz:
@@ -183,7 +183,7 @@ class University(models.Model):
         verbose_name_plural = _("Universities")
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
 
 class ApplicantQuerySet(models.QuerySet):
@@ -444,7 +444,7 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         help_text=_("Unsubscribe from future notifications"))
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.SET(models.SET_NULL),
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
@@ -485,7 +485,7 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
     @property
     def full_name(self):
         parts = [self.surname, self.first_name, self.patronymic]
-        return smart_text(" ".join(part for part in parts if part).strip())
+        return smart_str(" ".join(part for part in parts if part).strip())
 
     def clean(self):
         if self.yandex_login:
@@ -508,10 +508,10 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
 
     def __str__(self):
         if self.campaign_id:
-            return smart_text(
+            return smart_str(
                 "{} [{}]".format(self.full_name, self.campaign))
         else:
-            return smart_text(self.full_name)
+            return smart_str(self.full_name)
 
     def get_similar(self):
         conditions = [
@@ -579,12 +579,11 @@ class Contest(models.Model):
         blank=True,
         validators=[validate_json_container]
     )
-    file = models.FileField(
+    file = ConfigurableStorageFileField(
         _("Assignments in pdf format"),
         blank=True,
-        help_text=_("Make sure file does not include solutions due to "
-                    "it visible with direct url link"),
-        upload_to=contest_assignments_upload_to)
+        upload_to=contest_assignments_upload_to,
+        storage=private_storage)
 
     class Meta:
         verbose_name = _("Contest")
@@ -837,7 +836,7 @@ class Test(TimeStampedModel, YandexContestIntegration,
         if self.applicant_id:
             return self.applicant.full_name
         else:
-            return smart_text(self.score)
+            return smart_str(self.score)
 
     def score_display(self):
         return self.score if self.score is not None else "-"
@@ -891,7 +890,7 @@ class Exam(TimeStampedModel, YandexContestIntegration,
         if self.applicant_id:
             return self.applicant.full_name
         else:
-            return smart_text(self.score)
+            return smart_str(self.score)
 
     def score_display(self):
         return self.score if self.score is not None else "-"
@@ -918,7 +917,7 @@ class InterviewAssignment(models.Model):
         verbose_name_plural = _("Interview assignments")
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
 
 class InterviewFormat(models.Model):
@@ -1055,7 +1054,7 @@ class Interview(TimezoneAwareModel, TimeStampedModel):
         return numberformat.format(self.average_score, ".", decimal_pos)
 
     def __str__(self):
-        return smart_text(self.applicant)
+        return smart_str(self.applicant)
 
 
 class Comment(TimeStampedModel):
@@ -1087,7 +1086,7 @@ class Comment(TimeStampedModel):
         unique_together = ("interview", "interviewer")
 
     def __str__(self):
-        return smart_text("{} [{}]".format(self.interviewer.get_full_name(),
+        return smart_str("{} [{}]".format(self.interviewer.get_full_name(),
                                            self.interview.applicant.full_name))
 
 

@@ -12,7 +12,7 @@ __all__ = ('CityFactory', 'EmailTemplateFactory', 'BranchFactory',
            'EmailTemplate', 'Branch',)
 
 
-class SiteFactory(factory.DjangoModelFactory):
+class SiteFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Site
         django_get_or_create = ('domain',)
@@ -21,7 +21,7 @@ class SiteFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Site Name %03d" % n)
 
 
-class CityFactory(factory.DjangoModelFactory):
+class CityFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = City
         django_get_or_create = ('code',)
@@ -29,10 +29,16 @@ class CityFactory(factory.DjangoModelFactory):
     code = factory.Sequence(lambda n: "%03d" % n)
     name = factory.Sequence(lambda n: "City name %03d" % n)
     abbr = factory.Sequence(lambda n: "%03d" % n)
-    time_zone = 'Europe/Moscow'
+
+    @factory.lazy_attribute
+    def time_zone(self):
+        if self.code == Branches.NSK:
+            return 'Asia/Novosibirsk'
+        else:
+            return 'Europe/Moscow'
 
 
-class EmailTemplateFactory(factory.DjangoModelFactory):
+class EmailTemplateFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = EmailTemplate
         django_get_or_create = ["name"]
@@ -40,22 +46,28 @@ class EmailTemplateFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "email-template-%03d" % n)
 
 
-class BranchFactory(factory.DjangoModelFactory):
+class BranchFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Branch %03d" % n)
     code = factory.Sequence(lambda n: "b%03d" % n)
     site = factory.SubFactory(SiteFactory,
                               domain=factory.LazyAttribute(lambda o: settings.TEST_DOMAIN))
     city = factory.SubFactory(CityFactory)
     order = factory.Sequence(lambda n: n)
-    time_zone = 'Europe/Moscow'
     established = 2013
+
+    @factory.lazy_attribute
+    def time_zone(self):
+        if self.code != Branches.DISTANCE:
+            return self.city.time_zone
+        else:
+            return 'Europe/Moscow'
 
     class Meta:
         model = Branch
         django_get_or_create = ('code', 'site')
 
 
-class LocationFactory(factory.DjangoModelFactory):
+class LocationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Location
 

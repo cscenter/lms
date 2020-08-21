@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.forms import SelectMultiple
 from django.forms.models import ModelForm
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_filters.conf import settings as filters_settings
 
 from admission.models import Interview, Comment, Applicant, \

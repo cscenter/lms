@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth.forms import PasswordResetForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.utils import translation
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from auth.tasks import send_restore_password_email
 from core.urls import reverse

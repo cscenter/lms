@@ -5,11 +5,11 @@ from typing import List, Iterable, Union, Optional
 from django.contrib.sites.models import Site
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction, router
-from django.db.models import Q, OuterRef, Value, F, TextField, QuerySet
-from django.db.models.functions import Concat
+from django.db.models import Q, OuterRef, Value, F, TextField, QuerySet, \
+    Subquery, Count
+from django.db.models.functions import Concat, Coalesce
 from django.utils.timezone import now
 
-from core.db.expressions import SubqueryCount
 from core.models import Branch
 from core.services import SoftDeleteService
 from core.timezone import now_local
@@ -20,13 +20,17 @@ from courses.models import Course, Assignment, AssignmentAttachment, \
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, StudentGroup, Event
 from learning.settings import StudentStatuses
-from users.models import User, StudentProfile
+from users.models import User, StudentProfile, StudentTypes
+
+
+class StudentProfileError(Exception):
+    pass
 
 
 # FIXME: get profile for Invited students from the current term ONLY
 # FIXME: store term of registration or get date range for the term of registration
-def get_student_profile(user: User, site,
-                        profile_type=None) -> Optional[StudentProfile]:
+def get_student_profile(user: User, site, profile_type=None,
+                        filters: List[Q] = None) -> Optional[StudentProfile]:
     """
     Returns the most actual student profile on site for user.
 
@@ -37,13 +41,13 @@ def get_student_profile(user: User, site,
         semester but reapplied on general terms for the second time
     * Regular student "came back" as invited
     """
-    filters = []
+    filters = filters or []
     if profile_type is not None:
         filters.append(Q(type=profile_type))
     student_profile = (StudentProfile.objects
                        .filter(*filters, user=user, site=site)
                        .select_related('branch')
-                       .order_by('-year_of_admission', '-priority')
+                       .order_by('-year_of_admission', '-priority', '-pk')
                        .first())
     if student_profile is not None:
         # It helps to invalidate cache on user model if profile were changed
@@ -51,24 +55,53 @@ def get_student_profile(user: User, site,
     return student_profile
 
 
+def create_student_profile(*, user: User, branch: Branch, profile_type,
+                           year_of_admission, **fields) -> StudentProfile:
+    profile_fields = {
+        **fields,
+        "user": user,
+        "branch": branch,
+        "type": profile_type,
+        "year_of_admission": year_of_admission,
+    }
+    if profile_type == StudentTypes.REGULAR:
+        if "year_of_curriculum" not in profile_fields:
+            msg = "Year of curriculum is not set for the regular student"
+            raise StudentProfileError(msg)
+    # FIXME: Prevent creating 2 profiles for invited student in the same
+    # term through admin interface
+    new_student_profile = StudentProfile(**profile_fields)
+    new_student_profile.save()
+    return new_student_profile
+
+
 def populate_assignments_for_student(enrollment):
     for a in enrollment.course.assignment_set.all():
         AssignmentService.create_student_assignment(a, enrollment)
 
 
-def update_course_learners_count(course_id):
+def get_learners_count_subquery(outer_ref: OuterRef):
     from learning.models import Enrollment
+    return Coalesce(Subquery(
+        (Enrollment.active
+         .filter(course_id=outer_ref)
+         .order_by()
+         .values('course')  # group by
+         .annotate(total=Count("*"))
+         .values("total"))
+    ), Value(0))
+
+
+def update_course_learners_count(course_id):
     Course.objects.filter(id=course_id).update(
-        learners_count=SubqueryCount(
-            Enrollment.active.filter(course_id=OuterRef('id'))
-        )
+        learners_count=get_learners_count_subquery(outer_ref=OuterRef('id'))
     )
 
 
 def course_failed_by_student(course: Course, student, enrollment=None) -> bool:
     """Checks that student didn't fail the completed course"""
     from learning.models import Enrollment
-    if course.is_open or not course.is_completed:
+    if course.is_club_course or not course.is_completed:
         return False
     bad_grades = (Enrollment.GRADES.UNSATISFACTORY,
                   Enrollment.GRADES.NOT_GRADED)
@@ -199,11 +232,12 @@ class AssignmentService:
             defaults={'deleted_at': None, 'score': None, 'execution_time': None})
 
     @classmethod
-    def _bulk_restore_student_assignments(cls, assignment: Assignment,
-                                          student_ids: Iterable[int]):
-        (StudentAssignment.trash
-         .filter(assignment=assignment, student_id__in=student_ids)
-         .update(deleted_at=None, score=None, execution_time=None))
+    def _restore_student_assignments(cls, assignment: Assignment,
+                                     student_ids: Iterable[int]):
+        qs = (StudentAssignment.trash
+              .filter(assignment=assignment, student_id__in=student_ids))
+        for student_assignment in qs:
+            student_assignment.restore()
 
     # TODO: send notification to teachers except assignment publisher
     @classmethod
@@ -241,14 +275,14 @@ class AssignmentService:
         pks = list(Enrollment.active
                    .filter(*filters)
                    .values_list("student_id", flat=True))
-        # Create/update records in separate steps to avoid tons of savepoints
-        trash = set(StudentAssignment.trash
-                    .filter(assignment=assignment, student_id__in=pks)
-                    .values_list('student_id', flat=True))
-        if trash:
-            cls._bulk_restore_student_assignments(assignment, trash)
+        # Create/update records in separate steps to avoid tons of save points
+        in_trash = set(StudentAssignment.trash
+                       .filter(assignment=assignment, student_id__in=pks)
+                       .values_list('student_id', flat=True))
+        if in_trash:
+            cls._restore_student_assignments(assignment, in_trash)
         batch_size = 100
-        to_create = (sid for sid in pks if sid not in trash)
+        to_create = (sid for sid in pks if sid not in in_trash)
         objs = (StudentAssignment(assignment=assignment, student_id=student_id)
                 for student_id in to_create)
         while True:
@@ -366,9 +400,9 @@ class EnrollmentService:
             # Try to update enrollment to the `active` state
             filters = [Q(pk=enrollment.pk), Q(is_deleted=True)]
             if course.is_capacity_limited:
-                learners_count = SubqueryCount(
-                    Enrollment.active
-                    .filter(course_id=OuterRef('course_id')))
+                learners_count = get_learners_count_subquery(
+                    outer_ref=OuterRef('course_id')
+                )
                 filters.append(Q(course__capacity__gt=learners_count))
             attrs.update({
                 "is_deleted": False,
@@ -523,10 +557,10 @@ def course_access_role(*, course, user) -> CourseRole:
         else:
             role = CourseRole.STUDENT_RESTRICT
     # Teachers from the same course permits to view the news/assignments/etc
-    all_course_teachers = (CourseTeacher.objects
+    all_meta_course_teachers = (CourseTeacher.objects
                            .for_meta_course(course.meta_course)
                            .values_list('teacher_id', flat=True))
-    if user.is_teacher and user.pk in all_course_teachers:
+    if user.is_teacher and user.pk in all_meta_course_teachers:
         # Overrides student role if a teacher enrolled in his own course
         role = CourseRole.TEACHER
     return role

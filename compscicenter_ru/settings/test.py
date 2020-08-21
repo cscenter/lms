@@ -48,7 +48,10 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
 ]
 
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+PRIVATE_FILE_STORAGE = DEFAULT_FILE_STORAGE
 MEDIA_ROOT = '/tmp/django_test_media/'
+MEDIA_URL = "/media/"
 
 MIGRATION_MODULES = {}
 

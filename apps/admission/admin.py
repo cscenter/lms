@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.db import models
 from django.db.models import TextField
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from import_export.admin import ExportMixin, ImportExportMixin
 from import_export.formats.base_formats import CSV
 from jsonfield import JSONField
@@ -159,6 +159,7 @@ class ApplicantAdmin(admin.ModelAdmin):
     search_fields = ('yandex_login', 'yandex_login_q', 'stepic_id',
                      'first_name', 'surname', 'email', 'phone')
     readonly_fields = ['yandex_login_q']
+    raw_id_fields = ('user',)
 
     def created_local(self, obj):
         return admin_datetime(obj.created_local())

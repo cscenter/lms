@@ -27,7 +27,7 @@ class FuzzyTime(FuzzyNaiveDateTime):
         return dt.time()
 
 
-class UniversityFactory(factory.DjangoModelFactory):
+class UniversityFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = University
 
@@ -35,7 +35,7 @@ class UniversityFactory(factory.DjangoModelFactory):
     branch = factory.SubFactory(BranchFactory)
 
 
-class CampaignFactory(factory.DjangoModelFactory):
+class CampaignFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Campaign
 
@@ -54,7 +54,7 @@ class CampaignFactory(factory.DjangoModelFactory):
     template_appointment = APPOINTMENT_INVITATION_TEMPLATE
 
 
-class ApplicantFactory(factory.DjangoModelFactory):
+class ApplicantFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Applicant
 
@@ -73,7 +73,7 @@ class ApplicantFactory(factory.DjangoModelFactory):
                                                      WHERE_DID_YOU_LEARN])
 
 
-class ContestFactory(factory.DjangoModelFactory):
+class ContestFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Contest
 
@@ -82,7 +82,7 @@ class ContestFactory(factory.DjangoModelFactory):
     # file?
 
 
-class TestFactory(factory.DjangoModelFactory):
+class TestFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Test
 
@@ -90,7 +90,7 @@ class TestFactory(factory.DjangoModelFactory):
     score = factory.Sequence(lambda n: "%02d" % n)
 
 
-class ExamFactory(factory.DjangoModelFactory):
+class ExamFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Exam
 
@@ -98,7 +98,7 @@ class ExamFactory(factory.DjangoModelFactory):
     score = factory.Sequence(lambda n: "%02d" % n)
 
 
-class InterviewAssignmentFactory(factory.DjangoModelFactory):
+class InterviewAssignmentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = InterviewAssignment
 
@@ -116,7 +116,7 @@ class InterviewerFactory(UserFactory):
         add_user_groups(self, required_groups)
 
 
-class InterviewFormatFactory(factory.DjangoModelFactory):
+class InterviewFormatFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = InterviewFormat
         django_get_or_create = ('campaign', 'format')
@@ -127,7 +127,7 @@ class InterviewFormatFactory(factory.DjangoModelFactory):
     remind_before_start = '1 00:00:00'  # 1 day
 
 
-class InterviewFactory(factory.DjangoModelFactory):
+class InterviewFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Interview
 
@@ -156,7 +156,7 @@ class InterviewFactory(factory.DjangoModelFactory):
         post_save.connect(post_save_interview, Interview)
 
 
-class CommentFactory(factory.DjangoModelFactory):
+class CommentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Comment
 
@@ -165,7 +165,7 @@ class CommentFactory(factory.DjangoModelFactory):
     score = factory.Iterator(range(-2, 3))
 
 
-class InterviewStreamFactory(factory.DjangoModelFactory):
+class InterviewStreamFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = InterviewStream
 
@@ -197,7 +197,7 @@ class InterviewStreamFactory(factory.DjangoModelFactory):
                 self.interviewers.add(interviewer)
 
 
-class InterviewSlotFactory(factory.DjangoModelFactory):
+class InterviewSlotFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = InterviewSlot
 
@@ -205,7 +205,7 @@ class InterviewSlotFactory(factory.DjangoModelFactory):
     stream = factory.SubFactory(InterviewStreamFactory)
 
 
-class InterviewInvitationFactory(factory.DjangoModelFactory):
+class InterviewInvitationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = InterviewInvitation
 

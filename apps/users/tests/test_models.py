@@ -3,11 +3,10 @@ from django.core.exceptions import ValidationError
 
 from core.tests.factories import BranchFactory
 from core.utils import instance_memoize
-from learning.tests.factories import EnrollmentFactory
 from courses.tests.factories import SemesterFactory, CourseFactory
-from learning.settings import StudentStatuses, GradeTypes
+from learning.settings import GradeTypes
+from learning.tests.factories import EnrollmentFactory
 from users.constants import Roles
-from users.models import User
 from users.tests.factories import StudentFactory, CuratorFactory, UserFactory, \
     UserGroupFactory
 
@@ -99,8 +98,7 @@ def test_passed_courses():
                                     grade=GradeTypes.GOOD)
                   for co in (co1, co2, co3))
     next_term = SemesterFactory.create_next(co1.semester)
-    co4 = CourseFactory(meta_course=co1.meta_course, is_open=False,
-                        semester=next_term)
+    co4 = CourseFactory(meta_course=co1.meta_course, semester=next_term)
     e4 = EnrollmentFactory(course=co4, student=student, grade=GradeTypes.GOOD)
     stats = student.stats(next_term)
     assert stats['passed']['total'] == 3

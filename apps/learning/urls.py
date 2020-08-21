@@ -5,7 +5,8 @@ from courses.urls import RE_COURSE_URI
 from learning.views import CourseInvitationEnrollView, ICalEventsView
 from learning.study.views import UsefulListView, InternshipListView, HonorCodeView
 from .views import EventDetailView, CourseNewsNotificationUpdate, \
-    CourseStudentsView, CourseEnrollView, CourseUnenrollView
+    CourseStudentsView, CourseEnrollView, CourseUnenrollView, \
+    AssignmentAttachmentDownloadView, AssignmentCommentAttachmentDownloadView
 
 urlpatterns = [
     path("courses/", include([
@@ -17,6 +18,7 @@ urlpatterns = [
             path("news/notifications/", CourseNewsNotificationUpdate.as_view(), name="course_news_notifications_read"),
         ])),
     ])),
+
 
     path('teaching/', include('learning.teaching.urls')),
 

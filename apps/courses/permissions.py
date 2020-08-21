@@ -1,13 +1,15 @@
 from rules import predicate
 
 from auth.permissions import add_perm, Permission
-from courses.models import Course, CourseClass, CourseTeacher
+from courses.models import Course, CourseClass, CourseTeacher, \
+    CourseClassAttachment
 from learning.services import CourseRole, course_access_role
 
 
 def can_view_private_materials(role: CourseRole) -> bool:
-    # TODO: bad pattern for checking permissions! Reverse
-    return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
+    return role in {CourseRole.TEACHER,
+                    CourseRole.CURATOR,
+                    CourseRole.STUDENT_REGULAR}
 
 
 @add_perm
@@ -91,6 +93,38 @@ class ViewCourseClassMaterials(Permission):
     def rule(user, course_class: CourseClass):
         if course_class.materials_is_public:
             return True
+        role = course_access_role(course=course_class.course, user=user)
+        return can_view_private_materials(role)
+
+
+@add_perm
+class ViewCourseClassAttachment(Permission):
+    name = "courses.view_course_class_attachment"
+
+
+@add_perm
+class ViewPublicCourseClassAttachment(Permission):
+    name = "courses.view_public_course_class_attachment"
+
+    @staticmethod
+    @predicate
+    def rule(user, course_class_attachment: CourseClassAttachment):
+        course_class = course_class_attachment.course_class
+        return course_class.materials_is_public
+
+
+@add_perm
+class ViewPrivateCourseClassAttachment(Permission):
+    name = "courses.view_private_course_class_attachment"
+
+    @staticmethod
+    @predicate
+    def rule(user, course_class_attachment: CourseClassAttachment):
+        course_class = course_class_attachment.course_class
+        if course_class.materials_is_public:
+            # Skipping fallback to the default role
+            return True
+        # TODO: check access separately
         role = course_access_role(course=course_class.course, user=user)
         return can_view_private_materials(role)
 

@@ -5,11 +5,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
 from django.contrib.sites.shortcuts import get_current_site
 from django.db import transaction
-from django.http import HttpResponseRedirect, Http404, HttpResponseForbidden
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from django.utils.functional import lazy
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from registration import signals
 from registration.backends.default.views import RegistrationView, ActivationView
 from vanilla import TemplateView, UpdateView
@@ -17,24 +15,37 @@ from vanilla import TemplateView, UpdateView
 from auth.tasks import send_activation_email, ActivationEmailContext
 from auth.views import LoginView
 from core.urls import reverse
+from courses.utils import date_to_term_pair, get_current_term_pair
 from learning.invitation.forms import InvitationLoginForm, \
-    InvitationRegistrationForm, CompleteProfileForm
+    InvitationRegistrationForm, CompleteAccountForm
 from learning.models import Invitation
-from learning.roles import Roles
-from users.models import UserGroup, User, StudentTypes, StudentProfile
+from learning.services import create_student_profile
+from users.models import User, StudentTypes, StudentProfile
 
 
 def student_profile_is_valid(user: User, site: Site, invitation):
     profile = user.get_student_profile(site)
-    if not profile:
+    if not profile or not profile.is_active:
         return False
-    # TODO: pass in filters to .get_student_profile instead
-    invitation_year = invitation.semester.academic_year
-    profile_year = profile.year_of_admission
-    is_current_academic_year = (profile_year == invitation_year)
-    if profile.type == StudentTypes.INVITED and not is_current_academic_year:
-        return False
+    if profile.type == StudentTypes.INVITED:
+        created_on_term = date_to_term_pair(profile.created)
+        if created_on_term != get_current_term_pair():
+            return False
     return user.first_name and user.last_name
+
+
+def complete_student_profile(user: User, site: Site, invitation: Invitation):
+    update_fields = list(CompleteAccountForm.Meta.fields)
+    with transaction.atomic():
+        user.save(update_fields=update_fields)
+        invitation_year = invitation.semester.academic_year
+        # Account info should be valid at this point but the most recent
+        # profile still can be invalid due to inactive state
+        if not student_profile_is_valid(user, site, invitation):
+            create_student_profile(user=user,
+                                   branch=invitation.branch,
+                                   profile_type=StudentTypes.INVITED,
+                                   year_of_admission=invitation_year)
 
 
 class InvitationURLParamsMixin:
@@ -51,6 +62,7 @@ class InvitationURLParamsMixin:
 class InvitationView(InvitationURLParamsMixin, TemplateView):
     template_name = "learning/invitation/invitation_courses.html"
 
+    # FIXME: What if log in as an expelled student?
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             login_url = reverse("invitation:login",
@@ -165,25 +177,10 @@ class InvitationActivationView(InvitationURLParamsMixin, ActivationView):
         return self.invitation.get_absolute_url()
 
 
-def complete_student_profile(user: User, site: Site, invitation: Invitation):
-    update_fields = list(CompleteProfileForm.Meta.fields)
-    with transaction.atomic():
-        user.save(update_fields=update_fields)
-        invitation_year = invitation.semester.academic_year
-        profile = user.get_student_profile(site,
-                                           profile_type=StudentTypes.INVITED)
-        if not profile or profile.year_of_admission != invitation_year:
-            new_profile = StudentProfile(user=user,
-                                         branch=invitation.branch,
-                                         type=StudentTypes.INVITED,
-                                         year_of_admission=invitation_year)
-            new_profile.save()
-
-
 class InvitationCompleteProfileView(InvitationURLParamsMixin,
                                     LoginRequiredMixin,
                                     UpdateView):
-    form_class = CompleteProfileForm
+    form_class = CompleteAccountForm
     template_name = "learning/invitation/complete_profile.html"
 
     def dispatch(self, request, *args, **kwargs):

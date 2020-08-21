@@ -7,8 +7,9 @@ import pytz
 from bs4 import BeautifulSoup
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
+from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
@@ -17,6 +18,7 @@ from courses.models import Assignment, AssignmentAttachment, \
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory, AssignmentAttachmentFactory
 from learning.models import StudentAssignment
+from learning.permissions import ViewAssignmentAttachment
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, \
     AssignmentCommentFactory, \
@@ -149,33 +151,33 @@ def test_first_comment_after_deadline(client):
 @pytest.mark.django_db
 def test_assignment_attachment_permissions(curator, client, tmpdir):
     teacher = TeacherFactory()
+    client.login(teacher)
     term = SemesterFactory.create_current()
-    co = CourseFactory.create(semester=term, teachers=[teacher])
+    course = CourseFactory(semester=term, teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     tmp_file = tmpdir.mkdir("attachment").join("attachment.txt")
     tmp_file.write("content")
-    form.update({'course': co.pk,
+    form.update({'course': course.pk,
                  'attachments': tmp_file.open(),
                  'deadline_at_0': deadline_date,
                  'deadline_at_1': deadline_time})
-    url = co.get_create_assignment_url()
-    client.login(teacher)
+    url = course.get_create_assignment_url()
     client.post(url, form)
     assert Assignment.objects.count() == 1
     assert AssignmentAttachment.objects.count() == 1
     a_attachment = AssignmentAttachment.objects.first()
     assert a_attachment.attachment.read() == b"content"
     client.logout()
-    task_attachment_url = a_attachment.file_url()
+    task_attachment_url = a_attachment.get_download_url()
     response = client.get(task_attachment_url)
-    assert response.status_code == 302  # LoginRequiredMixin
+    assert response.status_code == 302  # redirect to login view
     student_spb = StudentFactory(branch__code=Branches.SPB)
     client.login(student_spb)
     response = client.get(task_attachment_url)
     assert response.status_code == 403  # not enrolled in
-    EnrollmentFactory(student=student_spb, course=co)
+    EnrollmentFactory(student=student_spb, course=course)
     response = client.get(task_attachment_url)
     assert response.status_code == 200
     # Should be the same for volunteer
@@ -183,7 +185,7 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     client.login(volunteer_spb)
     response = client.get(task_attachment_url)
     assert response.status_code == 403
-    EnrollmentFactory(student=volunteer_spb, course=co)
+    EnrollmentFactory(student=volunteer_spb, course=course)
     response = client.get(task_attachment_url)
     assert response.status_code == 200
     # Check not actual teacher access
@@ -213,7 +215,7 @@ def test_assignment_attachment_inactive_student(inactive_status, client,
     student_spb = StudentFactory(branch__code=Branches.SPB)
     a_attachment = AssignmentAttachmentFactory(assignment__course=course)
     EnrollmentFactory(course=course, student=student_spb)
-    task_attachment_url = a_attachment.file_url()
+    task_attachment_url = a_attachment.get_download_url()
     client.login(student_spb)
     response = client.get(task_attachment_url)
     assert response.status_code == 200
@@ -248,3 +250,12 @@ def test_create_assignment_admin_form(client):
     response = client.post(reverse('admin:courses_assignment_add'), post_data)
     assert (Assignment.objects.count() == 1)
     assert StudentAssignment.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_download_assignment_attachment(lms_resolver):
+    url = reverse('study:download_assignment_attachment',
+                  kwargs={"sid": "wrongsid", "file_name": "filename.txt"})
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == ViewAssignmentAttachment.name

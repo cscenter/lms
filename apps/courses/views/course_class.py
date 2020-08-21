@@ -1,20 +1,25 @@
 import datetime
 import os
+from typing import Optional
 
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.shortcuts import redirect, get_object_or_404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from vanilla import CreateView, UpdateView, DeleteView
 
 from core.exceptions import Redirect
 from core.urls import reverse, reverse_lazy
+from core.utils import hashids
 from core.views import ProtectedFormMixin
 from courses.forms import CourseClassForm
 from courses.models import CourseClass, CourseClassAttachment
+from courses.permissions import ViewCourseClassAttachment, \
+    ViewCourseClassMaterials
 from courses.views.mixins import CourseURLParamsMixin
+from files.views import ProtectedFileDownloadView
 from users.mixins import TeacherOnlyMixin
 
 __all__ = ('CourseClassDetailView', 'CourseClassCreateView',
@@ -160,9 +165,36 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         self.object.delete()
-        # TODO: move to model method
-        os.remove(self.object.material.path)
+        self.object.material.delete(save=False)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         return self.object.course_class.get_update_url()
+
+
+class CourseClassAttachmentDownloadView(ProtectedFileDownloadView):
+    permission_required = ViewCourseClassAttachment.name
+    file_field_name = 'material'
+
+    def get_protected_object(self) -> Optional[CourseClassAttachment]:
+        ids: tuple = hashids.decode(self.kwargs['sid'])
+        if not ids:
+            raise Http404
+        qs = (CourseClassAttachment.objects
+              .filter(pk=ids[0])
+              .select_related('course_class__course'))
+        return get_object_or_404(qs)
+
+
+class CourseClassSlidesDownloadView(ProtectedFileDownloadView):
+    permission_required = ViewCourseClassMaterials.name
+    file_field_name = 'slides'
+
+    def get_protected_object(self) -> Optional[CourseClass]:
+        ids: tuple = hashids.decode(self.kwargs['sid'])
+        if not ids:
+            raise Http404
+        qs = (CourseClass.objects
+              .filter(pk=ids[0])
+              .select_related('course'))
+        return get_object_or_404(qs)

@@ -1,4 +1,4 @@
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from rest_pandas import PandasSerializer
 
 from learning.settings import AcademicDegreeLevels
@@ -26,14 +26,15 @@ class CampaignResultsByUniversitiesSerializer(PandasSerializer):
                 .reset_index('university__name'))
 
 
-class CampaignResultsByCoursesSerializer(PandasSerializer):
+class CampaignResultsByEducationLevelSerializer(PandasSerializer):
     def transform_dataframe(self, dataframe):
         df = (dataframe
-              .pivot_table(index='course',
+              .pivot_table(index='level_of_education',
                            columns='status',
                            values='total',
                            fill_value=0))
         df.index = df.index.map(_index_to_name)
+        # Leave an old `course` name that used in js
         df.index.rename("course__name", inplace=True)
         df = df.reset_index('course__name')
         return df

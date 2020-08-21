@@ -11,10 +11,10 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils import timezone
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, ChoiceItem
 from model_utils.fields import MonitorField
 from model_utils.managers import QueryManager
@@ -29,6 +29,8 @@ from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Assignment, StudentGroupTypes, \
     Semester
+from files.models import ConfigurableStorageFileField
+from files.storage import private_storage
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
@@ -249,8 +251,8 @@ class Enrollment(TimezoneAwareModel, TimeStampedModel):
         verbose_name_plural = _("Enrollments")
 
     def __str__(self):
-        return "{0} - {1}".format(smart_text(self.course),
-                                  smart_text(self.student.get_full_name()))
+        return "{0} - {1}".format(smart_str(self.course),
+                                  smart_str(self.student.get_full_name()))
 
     def save(self, *args, **kwargs):
         from learning.services import populate_assignments_for_student
@@ -451,8 +453,8 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
                                   .format(self.assignment.maximum_score))
 
     def __str__(self):
-        return "{0} - {1}".format(smart_text(self.assignment),
-                                  smart_text(self.student.get_full_name()))
+        return "{0} - {1}".format(smart_str(self.assignment),
+                                  smart_str(self.student.get_full_name()))
 
     def get_teacher_url(self):
         return reverse('teaching:student_assignment_detail',
@@ -531,9 +533,14 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
             return str(_("{} hrs {:02d} min")).format(hours, minutes)
 
 
-def task_comment_attachment_upload_to(instance: "AssignmentComment", filename):
-    sa = instance.student_assignment
-    return f"{sa.assignment.files_root}/user_{sa.student_id}/{filename}"
+def assignment_comment_attachment_upload_to(self: "AssignmentComment", filename):
+    sa = self.student_assignment
+    return "{}/assignments/{}/{}/user_{}/{}".format(
+        sa.assignment.course.main_branch.site_id,
+        sa.assignment.course.semester.slug,
+        sa.assignment_id,
+        sa.student_id,
+        filename)
 
 
 class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel):
@@ -552,9 +559,10 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
-    attached_file = models.FileField(
-        upload_to=task_comment_attachment_upload_to,
+    attached_file = ConfigurableStorageFileField(
         max_length=150,
+        upload_to=assignment_comment_attachment_upload_to,
+        storage=private_storage,
         blank=True)
 
     published = AssignmentCommentPublishedManager()
@@ -566,8 +574,8 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
 
     def __str__(self):
         return ("Comment to {0} by {1}".format(
-            smart_text(self.student_assignment.assignment),
-            smart_text(self.student_assignment.student.get_full_name())))
+            smart_str(self.student_assignment.assignment),
+            smart_str(self.student_assignment.student.get_full_name())))
 
     def created_local(self, tz=None):
         if not tz:
@@ -584,10 +592,9 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
     def attached_file_name(self):
         return os.path.basename(self.attached_file.name)
 
-    def attached_file_url(self):
-        return reverse("study:assignment_attachments_download", kwargs={
-            "sid": hashids.encode(learn_conf.ASSIGNMENT_COMMENT_ATTACHMENT,
-                                  self.pk),
+    def get_attachment_download_url(self):
+        return reverse("study:download_assignment_comment_attachment", kwargs={
+            "sid": hashids.encode(self.pk),
             "file_name": self.attached_file_name
         })
 
@@ -648,8 +655,8 @@ class AssignmentNotification(TimezoneAwareModel, TimeStampedModel):
 
     def __str__(self):
         return ("notification for {0} on {1}"
-                .format(smart_text(self.user.get_full_name()),
-                        smart_text(self.student_assignment)))
+                .format(smart_str(self.user.get_full_name()),
+                        smart_str(self.student_assignment)))
 
     def created_local(self, tz=None):
         if not tz:
@@ -681,8 +688,8 @@ class CourseNewsNotification(TimeStampedModel):
 
     def __str__(self):
         return ("notification for {0} on {1}"
-                .format(smart_text(self.user.get_full_name()),
-                        smart_text(self.course_offering_news)))
+                .format(smart_str(self.user.get_full_name()),
+                        smart_str(self.course_offering_news)))
 
 
 class Event(TimeStampedModel):
@@ -713,7 +720,7 @@ class Event(TimeStampedModel):
         verbose_name_plural = _("Non-course events")
 
     def __str__(self):
-        return "{}".format(smart_text(self.name))
+        return "{}".format(smart_str(self.name))
 
     def clean(self):
         super().clean()
@@ -799,7 +806,7 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
         verbose_name_plural = _("Graduate Profiles")
 
     def __str__(self):
-        return smart_text(self.student_profile)
+        return smart_str(self.student_profile)
 
     def save(self, **kwargs):
         created = self.pk is None

@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import ImproperlyConfigured
 from django.http import JsonResponse
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.views import generic
 from vanilla import CreateView
 
@@ -96,7 +96,7 @@ class MarkdownRenderView(LoginRequiredMixin, generic.base.View):
     def post(self, request, *args, **kwargs):
         if 'text' not in request.POST:
             return JsonResponse({'status': 'ERROR', 'text': 'empty request'})
-        text = smart_text(request.POST['text'])
+        text = smart_str(request.POST['text'])
         rendered_text = render_markdown(text)
         return JsonResponse({'status': 'OK', 'text': rendered_text})
 

@@ -172,9 +172,9 @@ def test_course_class_attachment_links(client, assert_redirect):
         course_class=cc, material__filename="foobar2.zip")
     response = client.get(cc.get_absolute_url())
     assert response.status_code == 200
-    assert smart_bytes(cca1.material.url) in response.content
+    assert smart_bytes(cca1.get_download_url()) in response.content
     assert smart_bytes(cca1.material_file_name) in response.content
-    assert smart_bytes(cca2.material.url) in response.content
+    assert smart_bytes(cca2.get_download_url()) in response.content
     assert smart_bytes(cca2.material_file_name) in response.content
     client.login(teacher)
     class_update_url = cc.get_update_url()
@@ -210,8 +210,7 @@ def test_course_class_attachments(client, assert_redirect,
     form['attachments'] = [f1, f2]
     url = cc.get_update_url()
     response = client.post(url, form)
-    assert_redirect(response,
-                    cc.get_absolute_url())
+    assert_redirect(response, cc.get_absolute_url())
     # check that files are available from course class page
     response = client.get(cc.get_absolute_url())
     spans = (BeautifulSoup(response.content, "html.parser")
@@ -222,13 +221,9 @@ def test_course_class_attachments(client, assert_redirect,
     # we will delete attachment2.txt
     cca_to_delete = [a for a in response.context['attachments']
                      if a.material.path == cca_files[1]][0]
-    as_ = sorted((span.a.contents[0].strip(),
-                  b"".join(client.get(span.a['href']).streaming_content))
-                 for span in spans)
-    assert re.match("attachment1(_[0-9a-zA-Z]+)?.txt", as_[0][0])
-    assert re.match("attachment2(_[0-9a-zA-Z]+)?.txt", as_[1][0])
-    assert b"attachment1_content" == as_[0][1]
-    assert b"attachment2_content" == as_[1][1]
+    as_ = sorted(span.a.contents[0].strip() for span in spans)
+    assert re.match("attachment1(_[0-9a-zA-Z]+)?.txt", as_[0])
+    assert re.match("attachment2(_[0-9a-zA-Z]+)?.txt", as_[1])
     # delete one of the files, check that it's deleted and other isn't
     url = cca_to_delete.get_delete_url()
     # check security just in case

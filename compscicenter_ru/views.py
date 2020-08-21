@@ -14,7 +14,7 @@ from django.db.models import Q, Max, Prefetch, F, Count, \
     prefetch_related_objects, Min
 from django.http import Http404
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from djchoices import DjangoChoices, C
 from vanilla import TemplateView, DetailView
@@ -307,6 +307,12 @@ class AlumniView(TemplateView):
         if show_year not in years_range:
             show_year = latest_graduation
         year_option = next((y for y in years if y['value'] == show_year))
+        # Branches
+        site_branches = Branch.objects.for_site(self.request.site.pk)
+        branch_options = []
+        for branch in site_branches:
+            row = {"label": str(branch.name), "value": branch.code}
+            branch_options.append(row)
         # Area state and props
         areas = [{"label": a.name, "value": a.code} for a in
                  AcademicDiscipline.objects.all()]
@@ -316,11 +322,11 @@ class AlumniView(TemplateView):
             "state": {
                 "year": year_option,
                 "area": area_option,
-                "branch": self.kwargs.get("city", None),
+                "branch": self.kwargs.get("branch", None),
             },
             "props": {
                 "endpoint": reverse("public-api:v2:alumni"),
-                "branchOptions": _get_branch_choices(),
+                "branchOptions": branch_options,
                 "areaOptions": areas,
                 "yearOptions": years
             }

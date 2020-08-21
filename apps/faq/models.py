@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext_lazy as _
 
 
 class Category(models.Model):
@@ -17,7 +17,7 @@ class Category(models.Model):
         verbose_name_plural = _("Categories")
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
 
 class Question(models.Model):
@@ -38,4 +38,4 @@ class Question(models.Model):
         verbose_name_plural = _("Questions")
 
     def __str__(self):
-        return smart_text(self.question)
+        return smart_str(self.question)

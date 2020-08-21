@@ -11,7 +11,6 @@ default_app_config = 'learning.apps.LearningConfig'
 # TODO: managers
 # TODO: combine urls into groups and refactor club urls!
 # TODO: create Student Model???
-# TODO: isolate settings.CLUB_DOMAIN checker?
 # TODO: add dependency checker (django.conrib.sites and... ?)
 # TODO: mv templates?
 # TODO: /learning/assignments/xxx/ to learning/assignments/submissions/xxx/ ?

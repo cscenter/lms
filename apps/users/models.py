@@ -1,9 +1,12 @@
 import base64
 import logging
+import os
+import uuid
 from random import choice
 from string import ascii_lowercase, digits
 from typing import Optional, Set
 
+import pytz
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser, PermissionsMixin, \
@@ -12,12 +15,12 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.sites.models import Site
 from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
-from django.db.models import prefetch_related_objects
+from django.db.models import prefetch_related_objects, Q
 from django.utils import timezone
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, C
 from jsonfield import JSONField
 from model_utils.fields import MonitorField, AutoLastModifiedField
@@ -26,7 +29,7 @@ from sorl.thumbnail import ImageField
 
 from auth.permissions import perm_registry
 from auth.tasks import update_password_in_gerrit
-from core.models import LATEX_MARKDOWN_ENABLED, Branch
+from core.models import TIMEZONES
 from core.timezone import Timezone, TimezoneAwareModel
 from core.timezone.constants import DATETIME_FORMAT_RU
 from core.urls import reverse
@@ -219,6 +222,13 @@ class StudentProfileAbstract(models.Model):
         abstract = True
 
 
+def user_photo_upload_to(instance: "User", filename):
+    bucket = instance.pk // 1000
+    _, ext = os.path.splitext(filename)
+    file_name = uuid.uuid4().hex
+    return f"profiles/{bucket}/{file_name}{ext}"
+
+
 class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
            UserThumbnailMixin, AbstractBaseUser):
     TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
@@ -260,7 +270,6 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
             'Unselect this instead of deleting accounts.'
         ),
     )
-    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     is_superuser = models.BooleanField(
         _('superuser status'),
         default=False,
@@ -275,26 +284,30 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         _("Phone"),
         max_length=40,
         blank=True)
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     modified = AutoLastModifiedField(_('modified'))
-
     photo = ImageField(
         _("CSCUser|photo"),
-        upload_to="photos/",
+        upload_to=user_photo_upload_to,
         blank=True)
     cropbox_data = JSONField(
         blank=True,
         null=True
     )
-    bio = models.TextField(
-        _("CSCUser|note"),
-        help_text=_("LaTeX+Markdown is enabled"),
-        blank=True)
     branch = models.ForeignKey(
         "core.Branch",
         verbose_name=_("Branch"),
         related_name="+",  # Disable backwards relation
         on_delete=models.PROTECT,
         null=True, blank=True)
+    time_zone = models.CharField(
+        verbose_name=_("Timezone"), max_length=63,
+        choices=tuple(zip(TIMEZONES, TIMEZONES)),
+        default=settings.DEFAULT_TIMEZONE.zone)
+    bio = models.TextField(
+        _("CSCUser|note"),
+        help_text=_("LaTeX+Markdown is enabled"),
+        blank=True)
     yandex_login = models.CharField(
         _("Yandex Login"),
         max_length=80,
@@ -390,9 +403,11 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         self.groups.filter(user=self, role=role, site_id=sid).delete()
 
     def get_timezone(self) -> Timezone:
-        if not User.branch.is_cached(self):
-            self.branch = Branch.objects.get_by_pk(self.branch_id)
-        return self.branch.get_timezone()
+        return self._timezone
+
+    @cached_property
+    def _timezone(self):
+        return pytz.timezone(self.time_zone)
 
     @staticmethod
     def generate_random_username(length=30,
@@ -418,6 +433,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         except User.DoesNotExist:
             return username
 
+    # TODO: move to ldap module
     @property
     def password_hash_ldap(self) -> Optional[bytes]:
         """
@@ -439,6 +455,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         h = f"{ldap_hasher_code}{iterations}${ab64_salt.decode('utf-8')}${hash}"
         return h.encode("utf-8")
 
+    # TODO: move to ldap module
     @property
     def ldap_username(self):
         """
@@ -449,7 +466,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         return self.email.replace("@", ".")
 
     def __str__(self):
-        return smart_text(self.get_full_name(True))
+        return smart_str(self.get_full_name(True))
 
     def get_absolute_url(self):
         return reverse('user_detail', args=[self.pk],
@@ -492,16 +509,16 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
             parts = (self.last_name, self.first_name, self.patronymic)
         else:
             parts = (self.first_name, self.patronymic, self.last_name)
-        full_name = smart_text(" ".join(p for p in parts if p).strip())
+        full_name = smart_str(" ".join(p for p in parts if p).strip())
         return full_name or self.username
 
     def get_short_name(self):
-        return (smart_text(" ".join([self.first_name, self.last_name]).strip())
+        return (smart_str(" ".join([self.first_name, self.last_name]).strip())
                 or self.username)
 
     def get_abbreviated_name(self, delimiter=chr(160)):  # non-breaking space
         parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
-        name = smart_text(f".{delimiter}".join(p for p in parts if p).strip())
+        name = smart_str(f".{delimiter}".join(p for p in parts if p).strip())
         return name or self.username
 
     def get_abbreviated_short_name(self, last_name_first=True):
@@ -611,13 +628,12 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         in_current_term_passed = 0  # Center and club courses
         in_current_term_failed = 0  # Center and club courses
         in_current_term_in_progress = 0  # Center and club courses
-        # FIXME: add test for `is_deleted=False`. Check all incomings for `enrollment_set`
-        for e in self.enrollment_set.filter(is_deleted=False).all():
+        for e in self.enrollment_set(manager='active').all():
             in_current_term = e.course.semester_id == current_term.pk
             if in_current_term:
                 in_current_term_total += 1
                 in_current_term_courses.add(e.course.meta_course_id)
-            if e.course.is_open:
+            if e.course.is_club_course:
                 # FIXME: Something wrong with this approach.
                 # FIXME: Look for `classes_total` annotation and fix
                 if hasattr(e, "classes_total"):
@@ -711,8 +727,7 @@ class StudentTypes(DjangoChoices):
             return Roles.INVITED
 
 
-# FIXME: add `created/modified` datetime
-class StudentProfile(models.Model):
+class StudentProfile(TimeStampedModel):
     site = models.ForeignKey(Site,
                              verbose_name=_("Site"),
                              on_delete=models.PROTECT,
@@ -762,6 +777,7 @@ class StudentProfile(models.Model):
         help_text=_("Passport, consent for processing personal data, "
                     "diploma (optional)"),
         default=False)
+    # Fields required for the issuance of an official diploma
     diploma_number = models.CharField(
         verbose_name=_("Diploma Number"),
         max_length=64,
@@ -801,17 +817,24 @@ class StudentProfile(models.Model):
         related_name='+',
         blank=True,
         null=True)
+    invitation = models.ForeignKey(
+        "learning.Invitation",
+        verbose_name=_("Invitation"),
+        editable=False,
+        blank=True, null=True,
+        related_name="student_profiles",
+        on_delete=models.PROTECT,)
 
     class Meta:
         db_table = 'student_profiles'
         verbose_name = _("Student Profile")
         verbose_name_plural = _("Student Profiles")
         constraints = [
-            # Case when student passed distance branch and continued
-            # learning on-campus
+            # User could pass distance branch and continue learning on-campus
             models.UniqueConstraint(
                 fields=('user', 'branch', 'year_of_admission'),
-                name='unique_student_per_branch_per_admission_campaign'),
+                name='unique_regular_student_per_admission_campaign',
+                condition=Q(type=StudentTypes.REGULAR))
         ]
 
     def save(self, **kwargs):
@@ -838,6 +861,7 @@ class StudentProfile(models.Model):
 
     @property
     def is_active(self):
+        # FIXME: make sure profile is not expired for invited student? Should be valid only in the term of invitation
         return not StudentStatuses.is_inactive(self.status)
 
     def get_comment_changed_at_display(self, default=''):
@@ -886,7 +910,7 @@ class OnlineCourseRecord(TimeStampedModel):
         verbose_name_plural = _("Online course records")
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
 
 class SHADCourseRecord(TimeStampedModel):
@@ -916,7 +940,7 @@ class SHADCourseRecord(TimeStampedModel):
         return SHADCourseGradeTypes.values[self.grade]
 
     def __str__(self):
-        return smart_text("{} [{}]".format(self.name, self.student_id))
+        return smart_str("{} [{}]".format(self.name, self.student_id))
 
 
 class CertificateOfParticipation(TimeStampedModel):
@@ -933,7 +957,7 @@ class CertificateOfParticipation(TimeStampedModel):
         verbose_name_plural = _("Student References")
 
     def __str__(self):
-        return smart_text(self.student_profile)
+        return smart_str(self.student_profile)
 
     def get_absolute_url(self):
         return reverse('student_reference_detail',

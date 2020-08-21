@@ -19,7 +19,7 @@ from courses.models import Semester, Course, CourseTeacher, MetaCourse
 from courses.utils import get_term_index
 from learning.models import AssignmentComment, Enrollment, GraduateProfile
 from learning.settings import StudentStatuses, GradeTypes
-from projects.constants import ProjectTypes
+from projects.constants import ProjectTypes, ProjectGradeTypes
 from projects.models import ReportComment, ProjectStudent, Project
 from users.managers import get_enrollments_progress, get_shad_courses_progress, \
     get_projects_progress
@@ -105,7 +105,6 @@ class ProgressReport:
               .select_related('meta_course', 'semester')
               .only('semester_id',
                     'meta_course_id',
-                    'is_open',
                     'grading_type',
                     'meta_course__name',
                     'meta_course__name_ru',)
@@ -244,7 +243,7 @@ class FutureGraduateDiplomasReport(ProgressReport):
         self.branch = branch
 
     def get_queryset(self):
-        exclude_grades = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
+        exclude_grades = GradeTypes.unsatisfactory_grades
         enrollments_prefetch = get_enrollments_progress(
             lookup='user__enrollment_set',
             filters=[~Q(grade__in=exclude_grades)]
@@ -381,7 +380,6 @@ class FutureGraduateDiplomasReport(ProgressReport):
 
     @staticmethod
     def passed_courses_total(student, courses):
-        """Don't consider adjustment for club courses"""
         center = 0
         club = 0
         shad = 0
@@ -389,7 +387,7 @@ class FutureGraduateDiplomasReport(ProgressReport):
         for enrollment in student.unique_enrollments.values():
             if enrollment.grade in GradeTypes.satisfactory_grades:
                 course = courses[enrollment.course_id]
-                if course.is_open:
+                if course.is_club_course:
                     club += 1
                 else:
                     center += 1
@@ -444,7 +442,8 @@ class OfficialDiplomasReport(ProgressReport):
         return DataFrame.from_records(columns=headers, data=data, index='ID')
 
     def get_queryset(self):
-        exclude_grades = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
+        exclude_grades = GradeTypes.unsatisfactory_grades
+        exclude_project_grades = [ProjectGradeTypes.UNSATISFACTORY, ProjectGradeTypes.NOT_GRADED]
         enrollments_prefetch = get_enrollments_progress(
             lookup='user__enrollment_set',
             filters=[~Q(grade__in=exclude_grades)]
@@ -456,7 +455,7 @@ class OfficialDiplomasReport(ProgressReport):
         # Include all info about projects in CSV. Note: only successful projects are shown in the diplomas
         projects_prefetch = get_projects_progress(
             lookup='user__projectstudent_set',
-            filters=[~Q(final_grade__in=exclude_grades)])
+            filters=[~Q(final_grade__in=exclude_project_grades)])
         online_courses_prefetch = Prefetch('user__onlinecourserecord_set',
                                            to_attr='online_courses')
         return (StudentProfile.objects
@@ -582,7 +581,7 @@ class ProgressReportFull(ProgressReport):
                                        'user__first_name',
                                        'user__pk'))
         success_practice = Count(
-            Case(When(Q(user__projectstudent__final_grade__in=GradeTypes.satisfactory_grades) &
+            Case(When(Q(user__projectstudent__final_grade__in=ProjectGradeTypes.satisfactory_grades) &
                       Q(user__projectstudent__project__project_type=ProjectTypes.practice) &
                       ~Q(user__projectstudent__project__status=Project.Statuses.CANCELED),
                       then=F('user__projectstudent__id')),
@@ -590,7 +589,7 @@ class ProgressReportFull(ProgressReport):
             distinct=True
         )
         success_research = Count(
-            Case(When(Q(user__projectstudent__final_grade__in=GradeTypes.satisfactory_grades) &
+            Case(When(Q(user__projectstudent__final_grade__in=ProjectGradeTypes.satisfactory_grades) &
                       Q(user__projectstudent__project__project_type=ProjectTypes.research) &
                       ~Q(user__projectstudent__project__status=Project.Statuses.CANCELED),
                       then=F('user__projectstudent__id')),
@@ -791,7 +790,7 @@ class ProgressReportForSemester(ProgressReport):
         for ps in student.projects_progress:
             if ps.project.semester_id == self.target_semester.pk:
                 projects_eq_target_semester.append(ps.project.get_absolute_url())
-            elif ps.final_grade in GradeTypes.satisfactory_grades:
+            elif ps.final_grade in ProjectGradeTypes.satisfactory_grades:
                 is_ext = ps.project.is_external
                 success_inner_projects_lt_target_semester += int(not is_ext)
                 success_external_projects_lt_target_semester += int(is_ext)
@@ -937,10 +936,11 @@ class ProgressReportForInvitation(ProgressReportForSemester):
     def get_queryset_filters(self):
         invited_students = (Enrollment.objects
                             .filter(invitation_id=self.invitation.pk)
+        # FIXME: mb it's safe now to use student profile ids
                             .values('student_id'))
         return [
             Q(type=StudentTypes.INVITED),
-            Q(pk__in=invited_students)
+            Q(user_id__in=invited_students)
         ]
 
 
@@ -1024,7 +1024,7 @@ class WillGraduateStatsReport(ReportFileOutput):
                 projects_in_term_qs = ProjectStudent.objects.filter(
                     project__semester_id=semester_id,
                     student_id=student.pk).all()
-                in_term += sum(int(p.final_grade in GradeTypes.satisfactory_grades) for p in
+                in_term += sum(int(p.final_grade in ProjectGradeTypes.satisfactory_grades) for p in
                                projects_in_term_qs)
                 shad_courses_in_term_qs = SHADCourseRecord.objects.filter(
                     student_id=student.pk, semester_id=semester_id).all()
@@ -1037,12 +1037,12 @@ class WillGraduateStatsReport(ReportFileOutput):
             projects_qs = ProjectStudent.objects.filter(
                 project__semester__type="autumn", student_id=student.pk).all()
             projects_in_autumn = sum(
-                int(p.final_grade in GradeTypes.satisfactory_grades) for p in projects_qs)
+                int(p.final_grade in ProjectGradeTypes.satisfactory_grades) for p in projects_qs)
             # 7. Сколько проектов сдано весной?
             projects_qs = ProjectStudent.objects.filter(
                 project__semester__type="spring", student_id=student.pk).all()
             projects_in_spring = sum(
-                int(p.final_grade in GradeTypes.satisfactory_grades) for p in projects_qs)
+                int(p.final_grade in ProjectGradeTypes.satisfactory_grades) for p in projects_qs)
             row = [
                 student.branch.name,
                 student.get_abbreviated_short_name(),

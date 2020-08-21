@@ -12,11 +12,11 @@ from courses.tests.factories import CourseFactory, SemesterFactory, \
     AssignmentFactory
 from learning.models import StudentAssignment, EnrollmentPeriod
 from learning.permissions import CreateAssignmentComment, \
-    CreateAssignmentCommentTeacher, \
-    CreateAssignmentCommentStudent, ViewRelatedStudentAssignment, \
+    CreateAssignmentCommentAsTeacher, \
+    CreateAssignmentCommentAsLearner, ViewRelatedStudentAssignment, \
     ViewStudentAssignment, EditOwnStudentAssignment, \
     EditOwnAssignmentExecutionTime, EnrollInCourse, EnrollPermissionObject, \
-    InvitationEnrollPermissionObject
+    InvitationEnrollPermissionObject, ViewAssignmentCommentAttachment
 from learning.services import get_student_profile, CourseRole, \
     course_access_role
 from learning.settings import StudentStatuses, GradeTypes, Branches
@@ -89,8 +89,8 @@ def test_course_access_role_teacher():
 def test_course_access_role_student(inactive_status, settings):
     semester = SemesterFactory.create_current()
     prev_semester = SemesterFactory.create_prev(semester)
-    course = CourseFactory(semester=semester, is_open=False)
-    prev_course = CourseFactory(semester=prev_semester, is_open=False)
+    course = CourseFactory(semester=semester)
+    prev_course = CourseFactory(semester=prev_semester)
     student = StudentFactory(status='')  # not expelled
     role = course_access_role(course=course, user=student)
     assert role == CourseRole.NO_ROLE
@@ -132,7 +132,7 @@ def test_enroll_in_course(inactive_status, settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     course = CourseFactory(
-        semester=term, is_open=False,
+        semester=term,
         completed_at=(today_local + datetime.timedelta(days=10)).date(),
         capacity=0, main_branch=branch_spb)
     assert course.enrollment_is_open
@@ -180,7 +180,7 @@ def test_leave_course(settings):
     future = today + datetime.timedelta(days=3)
     term = SemesterFactory.create_current(
         enrollment_period__ends_on=future.date())
-    enrollment = EnrollmentFactory(course__semester=term, course__is_open=False)
+    enrollment = EnrollmentFactory(course__semester=term)
     course = enrollment.course
     student = enrollment.student
     assert course.enrollment_is_open
@@ -209,8 +209,7 @@ def test_enroll_in_course_by_invitation(settings):
     term = SemesterFactory.create_current(
         for_branch=branch_spb.code,
         enrollment_period__ends_on=tomorrow.date())
-    course = CourseFactory(main_branch=branch_spb, semester=term, is_open=False,
-                           capacity=0)
+    course = CourseFactory(main_branch=branch_spb, semester=term, capacity=0)
     assert course.enrollment_is_open
     student = StudentFactory(branch=course.main_branch)
     student_profile = student.get_student_profile(settings.SITE_ID)
@@ -242,17 +241,17 @@ def test_create_assignment_comment():
     student_other = StudentFactory()
     course = CourseFactory(teachers=[teacher])
     assert CreateAssignmentComment.name in perm_registry
-    assert CreateAssignmentCommentTeacher in perm_registry
-    assert CreateAssignmentCommentStudent in perm_registry
+    assert CreateAssignmentCommentAsTeacher in perm_registry
+    assert CreateAssignmentCommentAsLearner in perm_registry
     e = EnrollmentFactory(course=course)
     student = e.student
     AssignmentFactory(course=course)
     assert StudentAssignment.objects.count() == 1
     sa = StudentAssignment.objects.first()
-    assert teacher.has_perm(CreateAssignmentCommentTeacher.name, sa)
-    assert not teacher_other.has_perm(CreateAssignmentCommentTeacher.name, sa)
-    assert not curator.has_perm(CreateAssignmentCommentTeacher.name, sa)
-    assert not user.has_perm(CreateAssignmentCommentTeacher.name, sa)
+    assert teacher.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
+    assert not teacher_other.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
+    assert not curator.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
+    assert not user.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
     assert curator.has_perm(CreateAssignmentComment.name, sa)
     # Now check relation
     assert teacher.has_perm(CreateAssignmentComment.name, sa)
@@ -264,8 +263,39 @@ def test_create_assignment_comment():
     StudentProfileFactory(type=StudentTypes.VOLUNTEER, user=teacher)
     teacher.refresh_from_db()
     assert teacher.has_perm(CreateAssignmentComment.name, sa)
-    assert teacher.has_perm(CreateAssignmentCommentTeacher.name, sa)
-    assert not teacher.has_perm(CreateAssignmentCommentStudent.name, sa)
+    assert teacher.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
+    assert not teacher.has_perm(CreateAssignmentCommentAsLearner.name, sa)
+
+
+@pytest.mark.django_db
+def test_view_assignment_comment_attachment():
+    user = UserFactory()
+    assert not user.has_perm(ViewAssignmentCommentAttachment.name)
+    curator = CuratorFactory()
+    assert curator.has_perm(ViewAssignmentCommentAttachment.name)
+    teacher = TeacherFactory()
+    # Relation check permissions on object only
+    assert not teacher.has_perm(ViewAssignmentCommentAttachment.name)
+    comment = AssignmentCommentFactory(author=teacher)
+    comment.student_assignment.assignment.course.teachers.add(teacher)
+    assert teacher.has_perm(ViewAssignmentCommentAttachment.name,
+                            comment.student_assignment)
+    student = StudentFactory()
+    comment = AssignmentCommentFactory(author=student)
+    course = comment.student_assignment.assignment.course
+    course.semester = SemesterFactory.create_current()
+    course.save()
+    assert not student.has_perm(ViewAssignmentCommentAttachment.name,
+                                comment.student_assignment)
+    EnrollmentFactory(student=student, course=course)
+    # Wrong student assignment
+    assert not student.has_perm(ViewAssignmentCommentAttachment.name,
+                                comment.student_assignment)
+    comment.student_assignment = StudentAssignment.objects.get(
+        student=student, assignment=comment.student_assignment.assignment)
+    comment.save()
+    assert student.has_perm(ViewAssignmentCommentAttachment.name,
+                            comment.student_assignment)
 
 
 @pytest.mark.django_db

@@ -7,9 +7,9 @@ from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.urls import reverse_lazy, reverse
 from courses.tests.factories import SemesterFactory
-from learning.settings import GradeTypes, Branches
+from learning.settings import Branches
 from notifications.models import Notification
-from projects.constants import ProjectTypes
+from projects.constants import ProjectTypes, ProjectGradeTypes
 from projects.forms import ReportForm, PracticeCriteriaForm, \
     ReportReviewForm
 from projects.models import Report, ProjectStudent, Review, \
@@ -39,7 +39,7 @@ def test_user_detail(client):
                                semester=semester2,
                                description="")
     sp2 = p2.projectstudent_set.all()[0]
-    sp2.final_grade = GradeTypes.GOOD
+    sp2.final_grade = ProjectGradeTypes.GOOD
     sp2.save()
     resp = client.get(student.get_absolute_url())
     assert smart_bytes(p1.name) in resp.content

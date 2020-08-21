@@ -115,19 +115,21 @@ def get_term_starts_at(year, term_type, tz: Timezone) -> datetime.datetime:
     return convert_term_parts_to_datetime(year, term_start_str, tz)
 
 
+_FIRST_TERM_YEAR = 1980
+
+
 def get_term_index(term_year, term_type) -> int:
     """
     Returns 0-based term index.
 
-    Sequence starts from the `settings.FOUNDATION_YEAR` academic year.
     Term order inside academic year is defined by `SemesterTypes` class.
     """
-    if term_year < settings.FOUNDATION_YEAR:
-        raise ValueError("get_term_index: target year < FOUNDATION_YEAR")
+    if term_year < _FIRST_TERM_YEAR:
+        raise ValueError(f"get_term_index: target year < {_FIRST_TERM_YEAR}")
     if term_type not in SemesterTypes.values:
         raise ValueError("get_term_index: unknown term type %s" % term_type)
     terms_in_year = len(SemesterTypes.choices)
-    year_portion = (term_year - settings.FOUNDATION_YEAR) * terms_in_year
+    year_portion = (term_year - _FIRST_TERM_YEAR) * terms_in_year
     term_portion = 0
     for index, (t, _) in enumerate(SemesterTypes.choices):
         if t == term_type:
@@ -140,7 +142,7 @@ def get_term_by_index(term_index) -> TermPair:
     if term_index < 0:
         raise TermIndexError()
     terms_in_year = len(SemesterTypes.choices)
-    year = int(settings.FOUNDATION_YEAR + term_index / terms_in_year)
+    year = int(_FIRST_TERM_YEAR + term_index / terms_in_year)
     term = term_index % terms_in_year
     for index, (t, _) in enumerate(SemesterTypes.choices):
         if index == term:

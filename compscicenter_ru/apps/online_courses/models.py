@@ -2,8 +2,8 @@ from typing import NamedTuple
 
 from django.db import models
 from django.utils import timezone
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext_lazy as _
 from model_utils.models import TimeStampedModel, TimeFramedModel
 from sorl.thumbnail import ImageField
 
@@ -45,7 +45,7 @@ class OnlineCourse(TimeStampedModel, TimeFramedModel):
         verbose_name_plural = _("Online courses")
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
     def is_ongoing(self):
         return self.start and self.start <= timezone.now()

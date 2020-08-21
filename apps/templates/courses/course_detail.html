@@ -168,7 +168,7 @@
                                 <td>
                                     {% for attachment in assignment.assignmentattachment_set.all %}
                                         {% if assignment.magic_link %}
-                                            <a href="{{ attachment.file_url }}">{{ attachment.file_ext }}</a>{% if not forloop.last %}, {% endif %}
+                                            <a href="{{ attachment.get_download_url }}">{{ attachment.file_ext }}</a>{% if not forloop.last %}, {% endif %}
                                         {% else %}
                                             {{ attachment.file_ext }}{% if not forloop.last %}, {% endif %}
                                         {% endif %}
@@ -231,12 +231,24 @@
             {% else %}
                 {% can_enroll_in_course request.user course request.user.get_student_profile as can_enroll %}
                 {% if can_enroll %}
-                    <a href="{{ course.get_enroll_url }}" class="btn btn-primary btn-block">
-                        {% trans "Enroll in the course" %}
-                        {% if course.is_capacity_limited %}
-                            <br><small>{% trans "Places available" %}: {{ course.places_left }}</small>
-                        {% endif %}
-                    </a>
+                    {% if course.ask_enrollment_reason %}
+                        <a href="{{ course.get_enroll_url }}" class="btn btn-primary btn-block">
+                            {% trans "Enroll in the course" %}
+                            {% if course.is_capacity_limited %}
+                                <br><small>{% trans "Places available" %}: {{ course.places_left }}</small>
+                            {% endif %}
+                        </a>
+                    {% else %}
+                        <form action="{{ course.get_enroll_url }}" method="POST" class="mt-5">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-block">
+                                {% trans "Enroll in the course" %}
+                                {% if course.is_capacity_limited %}
+                                    <br><small>{% trans "Places available" %}: {{ course.places_left }}</small>
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% endif %}
                 {% endif %}
             {% endif %}
 

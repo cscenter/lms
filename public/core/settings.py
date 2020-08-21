@@ -22,10 +22,6 @@ STATICFILES_DIRS = [
     str(ASSETS_ROOT),
 ]
 
-MEDIA_ROOT = str(ROOT_DIR / "media")
-MEDIA_URL = "/media/"
-
-
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.auth',

@@ -21,7 +21,7 @@ def add_user_groups(user, groups):
         user.add_group(role=role)
 
 
-class UserFactory(factory.DjangoModelFactory):
+class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User
 
@@ -33,6 +33,7 @@ class UserFactory(factory.DjangoModelFactory):
     last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
     branch = factory.SubFactory('core.tests.factories.BranchFactory',
                                 code=settings.DEFAULT_BRANCH_CODE)
+    time_zone = factory.SelfAttribute('branch.time_zone')
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
@@ -53,7 +54,7 @@ class UserFactory(factory.DjangoModelFactory):
         self.raw_password = raw_password
 
 
-class UserGroupFactory(factory.DjangoModelFactory):
+class UserGroupFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = UserGroup
 
@@ -117,18 +118,19 @@ class TeacherFactory(UserFactory):
         self.add_group(role=Roles.TEACHER, site_id=site_id)
 
 
-class StudentProfileFactory(factory.DjangoModelFactory):
+class StudentProfileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = StudentProfile
         django_get_or_create = ('user', 'branch', 'year_of_admission')
 
     type = StudentTypes.REGULAR
-    user = factory.SubFactory(UserFactory)
+    user = factory.SubFactory(UserFactory,
+                              time_zone=factory.SelfAttribute('..branch.time_zone'))
     branch = factory.SubFactory(BranchFactory)
     year_of_admission = factory.SelfAttribute('user.date_joined.year')
 
 
-class OnlineCourseRecordFactory(factory.DjangoModelFactory):
+class OnlineCourseRecordFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = OnlineCourseRecord
 
@@ -136,7 +138,7 @@ class OnlineCourseRecordFactory(factory.DjangoModelFactory):
     student = factory.SubFactory(StudentFactory)
 
 
-class SHADCourseRecordFactory(factory.DjangoModelFactory):
+class SHADCourseRecordFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SHADCourseRecord
 
@@ -147,7 +149,7 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
     semester = factory.SubFactory('learning.tests.factories.SemesterFactory')
 
 
-class CertificateOfParticipationFactory(factory.DjangoModelFactory):
+class CertificateOfParticipationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = CertificateOfParticipation
 

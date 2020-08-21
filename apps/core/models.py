@@ -5,9 +5,9 @@ from bitfield import BitField
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models, router
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
@@ -35,7 +35,10 @@ LATEX_MARKDOWN_ENABLED = _(
 )
 
 TIMEZONES = (
+    'Europe/Kiev',
     'Europe/Moscow',
+    'Europe/Minsk',
+    'Asia/Yekaterinburg',
     'Asia/Novosibirsk',
 )
 
@@ -101,7 +104,7 @@ class City(TimezoneAwareModel, models.Model):
         verbose_name_plural = _("Cities")
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
     def get_timezone(self) -> Timezone:
         return self._timezone
@@ -261,7 +264,7 @@ class Location(TimezoneAwareModel, models.Model):
         verbose_name_plural = _("Locations")
 
     def __str__(self):
-        return "{0}".format(smart_text(self.name))
+        return "{0}".format(smart_str(self.name))
 
     def get_absolute_url(self):
         return reverse('courses:venue_detail', args=[self.pk])

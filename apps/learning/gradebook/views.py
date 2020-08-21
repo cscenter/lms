@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect, Http404, HttpResponse, \
     HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.utils.datastructures import MultiValueDictKeyError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from vanilla import FormView
 

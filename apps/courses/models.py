@@ -12,9 +12,9 @@ from django.db import models
 from django.db.models import Prefetch, Case, When, IntegerField, Value, Count
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, C
 from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
@@ -31,7 +31,9 @@ from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles, \
     MaterialVisibilityTypes
 from courses.utils import get_current_term_pair, get_term_starts_at, \
     TermPair
-from learning.settings import GradingSystems, ENROLLMENT_DURATION
+from files.models import ConfigurableStorageFileField
+from files.storage import private_storage
+from learning.settings import GradingSystems, ENROLLMENT_DURATION, GradeTypes
 from .constants import SemesterTypes, ClassTypes
 from .managers import CourseTeacherManager, AssignmentManager, \
     CourseClassManager, CourseDefaultManager
@@ -191,7 +193,7 @@ class MetaCourse(TimeStampedModel):
         verbose_name_plural = _("Courses")
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
     def get_absolute_url(self):
         return reverse('courses:meta_course_detail', kwargs={
@@ -254,13 +256,13 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         blank=True,
         help_text=_("Leave empty if you want to fetch survey url from DB"))
     online_course_url = models.URLField(_("Online Course URL"), blank=True)
+    ask_enrollment_reason = models.BooleanField(
+        _("Ask Enrollment Reason"),
+        help_text=_("Ask a student why they wants to enroll in the course "
+                    "when they clicks the 'Enroll' button."),
+        default=False)
     is_published_in_video = models.BooleanField(
         _("Published in video section"),
-        default=False)
-    is_open = models.BooleanField(
-        _("Open course offering"),
-        help_text=_("This course offering will be available on Computer"
-                    "Science Club website so anyone can join"),
         default=False)
     main_branch = models.ForeignKey(Branch,
                                     verbose_name=_("Main Branch"),
@@ -341,8 +343,8 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         ]
 
     def __str__(self):
-        return "{0}, {1}".format(smart_text(self.meta_course),
-                                 smart_text(self.semester))
+        return "{0}, {1}".format(smart_str(self.meta_course),
+                                 smart_str(self.semester))
 
     def _compute_youtube_video_id(self):
         youtube_video_id = ''
@@ -505,6 +507,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         if self.is_completed:
             return False
         from learning.models import EnrollmentPeriod
+        # TODO: cache enrollment periods to avoid additional db hits
         enrollment_period = (EnrollmentPeriod.objects
                              .filter(site_id=settings.SITE_ID,
                                      semester=self.semester)
@@ -528,6 +531,10 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     @property
     def grading_type_choice(self):
         return GradingSystems.get_choice(self.grading_type)
+
+    @property
+    def grade_choices(self):
+        return GradeTypes.get_choices_for_grading_system(self.grading_type)
 
     @instance_memoize
     def is_actual_teacher(self, teacher_id):
@@ -594,8 +601,8 @@ class CourseTeacher(models.Model):
     objects = CourseTeacherManager()
 
     def __str__(self):
-        return "{0} [{1}]".format(smart_text(self.teacher),
-                                  smart_text(self.course_id))
+        return "{0} [{1}]".format(smart_str(self.teacher),
+                                  smart_str(self.course_id))
 
     def get_absolute_url(self, subdomain=settings.LMS_SUBDOMAIN):
         return reverse('teacher_detail', args=[self.teacher_id],
@@ -715,8 +722,8 @@ class CourseNews(TimezoneAwareModel, TimeStampedModel):
         verbose_name_plural = _("Course news-plural")
 
     def __str__(self):
-        return "{0} ({1})".format(smart_text(self.title),
-                                  smart_text(self.course))
+        return "{0} ({1})".format(smart_str(self.title),
+                                  smart_str(self.course))
 
     def get_update_url(self):
         return branch_aware_reverse('courses:course_news_update', kwargs={
@@ -759,12 +766,15 @@ def course_class_slides_upload_to(instance: "CourseClass", filename) -> str:
     course_slug = course.meta_course.slug
     # Generic filename
     class_date = instance.date.strftime("%d%m%y")
-    _, ext = os.path.splitext(filename)
     course_prefix = course_slug.replace("-", "_")
+    _, ext = os.path.splitext(filename)
     filename = f"{course_prefix}_{instance.type}_{class_date}{ext}".lower()
-    return os.path.join("courses", course.semester.slug,
-                        f"{course.main_branch.code}-{course_slug}",
-                        "slides", filename)
+    return "{}/courses/{}/{}-{}/slides/{}".format(
+        course.main_branch.site_id,
+        course.semester.slug,
+        course.main_branch.code,
+        course_slug,
+        filename)
 
 
 class ClassMaterial(NamedTuple):
@@ -796,11 +806,12 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         _("Description"),
         blank=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    slides = models.FileField(
+    slides = ConfigurableStorageFileField(
         _("Slides"),
         blank=True,
         max_length=200,
-        upload_to=course_class_slides_upload_to)
+        upload_to=course_class_slides_upload_to,
+        storage=private_storage)
     slides_url = models.URLField(_("SlideShare URL"), blank=True)
     video_url = models.URLField(
         verbose_name=_("Video Recording"),
@@ -833,7 +844,7 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         self._update_track_fields()
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
     def clean(self):
         super(CourseClass, self).clean()
@@ -875,6 +886,13 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         return branch_aware_reverse('courses:course_class_delete', kwargs={
             **self.course.url_kwargs,
             "pk": self.pk
+        })
+
+    def get_slides_download_url(self):
+        sid = hashids.encode(self.pk)
+        return reverse("courses:download_course_class_slides", kwargs={
+            "sid": sid,
+            "file_name": self.slides_file_name
         })
 
     @property
@@ -943,21 +961,15 @@ def course_class_post_delete(sender, instance: CourseClass, *args, **kwargs):
     )
 
 
-def course_class_attachment_upload_to(instance: "CourseClassAttachment",
+def course_class_attachment_upload_to(self: "CourseClassAttachment",
                                       filename) -> str:
-    """
-    Format: courses/<term_slug>/<branch_code>-<course_slug>/materials/<filename>
-
-    Example:
-        courses/2018-autumn/spb-data-bases/materials/Лекция_1.pdf
-    """
-    course = instance.course_class.course
-    course_slug = course.meta_course.slug
-    filename = filename.replace(" ", "_")
-    # TODO: transliterate?
-    return os.path.join("courses", course.semester.slug,
-                        f"{course.main_branch.code}-{course_slug}",
-                        "materials", filename)
+    course = self.course_class.course
+    return "{}/courses/{}/{}-{}/materials/{}".format(
+        course.main_branch.site_id,
+        course.semester.slug,
+        course.main_branch.code,
+        course.meta_course.slug,
+        filename.replace(" ", "_"))
 
 
 class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
@@ -967,8 +979,10 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
         CourseClass,
         verbose_name=_("Class"),
         on_delete=models.CASCADE)
-    material = models.FileField(max_length=200,
-                                upload_to=course_class_attachment_upload_to)
+    material = ConfigurableStorageFileField(
+        max_length=200,
+        upload_to=course_class_attachment_upload_to,
+        storage=private_storage)
 
     class Meta:
         ordering = ["course_class", "-created"]
@@ -976,7 +990,7 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
         verbose_name_plural = _("Class attachments")
 
     def __str__(self):
-        return "{0}".format(smart_text(self.material_file_name))
+        return "{0}".format(smart_str(self.material_file_name))
 
     def save(self, *args, **kwargs):
         created = self.pk is None
@@ -985,14 +999,17 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
             course = self.course_class.course
             course.compute_fields('public_attachments_count')
 
+    def get_download_url(self):
+        sid = hashids.encode(self.pk)
+        return reverse("courses:download_course_class_attachment", kwargs={
+            "sid": sid,
+            "file_name": self.material_file_name
+        })
+
     def get_delete_url(self):
-        return branch_aware_reverse(
-            'courses:course_class_attachment_delete',
-            kwargs={
-                **self.course_class.course.url_kwargs,
-                "class_pk": self.course_class.pk,
-                "pk": self.pk
-            })
+        return reverse("courses:course_class_attachment_delete", kwargs={
+            "pk": self.pk
+        })
 
     @property
     def material_file_name(self):
@@ -1079,8 +1096,8 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
                                     "(or equal to) maximum one"))
 
     def __str__(self):
-        return "{0} ({1})".format(smart_text(self.title),
-                                  smart_text(self.course))
+        return "{0} ({1})".format(smart_str(self.title),
+                                  smart_str(self.course))
 
     def deadline_at_local(self, tz=None):
         if not tz:
@@ -1113,8 +1130,8 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         return self.id in cache.assignment_ids_set
 
     @property
-    def is_open(self):
-        return self.deadline_at > timezone.now()
+    def deadline_is_exceeded(self):
+        return self.deadline_at < timezone.now()
 
     @property
     def is_online(self):
@@ -1133,8 +1150,12 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         return f'assignments/{bucket}/{self.pk}'
 
 
-def task_attachment_upload_to(instance: "AssignmentAttachment", filename):
-    return f"{instance.assignment.files_root}/attachments/{filename}"
+def assignment_attachment_upload_to(self: "AssignmentAttachment", filename):
+    return "{}/assignments/{}/{}/attachments/{}".format(
+        self.assignment.course.main_branch.site_id,
+        self.assignment.course.semester.slug,
+        self.assignment_id,
+        filename)
 
 
 class AssignmentAttachment(TimeStampedModel):
@@ -1142,8 +1163,10 @@ class AssignmentAttachment(TimeStampedModel):
         Assignment,
         verbose_name=_("Assignment"),
         on_delete=models.CASCADE)
-    attachment = models.FileField(upload_to=task_attachment_upload_to,
-                                  max_length=150)
+    attachment = ConfigurableStorageFileField(
+        upload_to=assignment_attachment_upload_to,
+        storage=private_storage,
+        max_length=150)
 
     class Meta:
         ordering = ["assignment", "-created"]
@@ -1151,7 +1174,7 @@ class AssignmentAttachment(TimeStampedModel):
         verbose_name_plural = _("Assignment attachments")
 
     def __str__(self):
-        return "{0}".format(smart_text(self.file_name))
+        return "{0}".format(smart_str(self.file_name))
 
     @property
     def file_name(self):
@@ -1162,9 +1185,9 @@ class AssignmentAttachment(TimeStampedModel):
         _, ext = os.path.splitext(self.attachment.name)
         return ext
 
-    def file_url(self):
-        sid = hashids.encode(ASSIGNMENT_TASK_ATTACHMENT, self.pk)
-        return reverse("study:assignment_attachments_download",
+    def get_download_url(self):
+        sid = hashids.encode(self.pk)
+        return reverse("study:download_assignment_attachment",
                        kwargs={"sid": sid, "file_name": self.file_name})
 
     def get_delete_url(self):

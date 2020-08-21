@@ -315,7 +315,7 @@ def test_new_assignment_timezone(settings):
     assert dt_str in mail.outbox[0].body
     # If student is enrolled in the course, show assignments in the
     # timezone of the student.
-    student.branch = branch_nsk
+    student.time_zone = branch_nsk.time_zone
     student.save()
     AssignmentNotificationFactory(is_about_creation=True, user=student,
                                   student_assignment=sa)
@@ -363,7 +363,7 @@ def test_deadline_changed_timezone(settings):
     assert dt_str in mail.outbox[0].body
     # If student is enrolled in the course, show assignments in the
     # timezone of the student.
-    student.branch = branch_nsk
+    student.time_zone = branch_nsk.time_zone
     student.save()
     sa.assignment.course.main_branch = branch_nsk
     sa.assignment.course.save()

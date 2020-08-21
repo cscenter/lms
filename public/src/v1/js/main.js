@@ -44,6 +44,11 @@ $(document).ready(function () {
             .then(m => m.launch())
             .catch(error => showComponentError(error));
     }
+    if (sections.includes("gallery")) {
+        import(/* webpackChunkName: "courseGallery" */ 'club/gallery')
+            .then(m => m.launch())
+            .catch(error => showComponentError(error));
+    }
     // FIXME: combine into one peace `courses`?
     if (sections.includes("courseDetails")) {
         import(/* webpackChunkName: "courseDetails" */ 'courses/courseDetails')

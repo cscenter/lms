@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional
 
 from django.db.models import Prefetch
-from django.utils.translation import ugettext_noop
+from django.utils.translation import gettext_noop
 
 from courses.models import Assignment
 from courses.services import CourseService
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 @register
 class CourseContactsTab(CourseTab):
     type = 'contacts'
-    title = ugettext_noop("CourseTab|Contacts")
+    title = gettext_noop("CourseTab|Contacts")
     priority = 20
     is_hidden = False
 
@@ -33,7 +33,7 @@ class CourseContactsTab(CourseTab):
 @register
 class CourseNewsTab(CourseTab):
     type = 'news'
-    title = ugettext_noop("CourseTab|News")
+    title = gettext_noop("CourseTab|News")
     priority = 60
 
     @classmethod
@@ -47,7 +47,7 @@ class CourseNewsTab(CourseTab):
 @register
 class CourseReviewsTab(CourseTab):
     type = 'reviews'
-    title = ugettext_noop("CourseTab|Reviews")
+    title = gettext_noop("CourseTab|Reviews")
     priority = 30
     is_hidden = False
 
@@ -64,7 +64,7 @@ class CourseReviewsTab(CourseTab):
 @register
 class CourseAssignmentsTab(CourseTab):
     type = 'assignments'
-    title = ugettext_noop("CourseTab|Assignments")
+    title = gettext_noop("CourseTab|Assignments")
     priority = 50
 
     @classmethod

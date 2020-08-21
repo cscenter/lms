@@ -80,7 +80,7 @@
                 </div>
                 <div class="metainfo-holder">
                   {% if comment.attached_file %}
-                      <span class="assignment-attachment"><i class="fa fa-file"></i></span> <a href="{{ comment.attached_file_url }}">{{ comment.attached_file_name }}</a>
+                      <span class="assignment-attachment"><i class="fa fa-file"></i></span> <a href="{{ comment.get_attachment_download_url }}">{{ comment.attached_file_name }}</a>
 
                   {% endif %}
                   <span class="metainfo pull-right">{{ comment.created|timezone:project.get_timezone|date:"d.m.Y H:i" }}</span>

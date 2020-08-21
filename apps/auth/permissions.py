@@ -4,7 +4,7 @@ from typing import Type, Dict, Set, Optional, Iterable, Union, NewType
 from rest_framework.permissions import BasePermission
 from rules import RuleSet, Predicate, always_true
 
-from auth.errors import PermissionNotRegistered, AuthPermissionError
+from .errors import PermissionNotRegistered, AuthPermissionError
 
 PermissionId = str
 
@@ -77,9 +77,17 @@ def add_perm(cls: Type[Permission]) -> Type[Permission]:
 class Role:
     def __init__(self, *, code, name,
                  permissions: Iterable[Type[Permission]],
+                 priority: int = 100,
                  relations: Dict = None):
         self.code = code
         self.name = name
+        # `User.has_perm(...)` iterates over permissions (grouped by role)
+        # until the first successful match by name, eval the permission
+        # callback and returns the result.
+        # Permission callback could make DB calls on access check. To avoid
+        # additional db hits check permissions of the highest priority roles
+        # first since they have a higher chance to return positive result.
+        self.priority = priority  # The less value the higher priority
         self._permissions: RuleSet = RuleSet()
         for perm in permissions:
             if not issubclass(perm, Permission):
@@ -159,7 +167,7 @@ class Role:
         if parent == child:
             raise AuthPermissionError(f"Cannot add {specific_perm} as a child of itself")
         if child not in self._permissions:
-            raise PermissionNotRegistered(f"{specific_perm} is not registered in current role")
+            raise PermissionNotRegistered(f"{specific_perm} is not registered in a current role")
         # FIXME: child must be object level permission only!
         # FIXME: detect loop
         if parent in self._relations and child in self._relations[parent]:

@@ -8,8 +8,8 @@ from learning.permissions import EnrollInCourse, EnrollPermissionObject
 
 
 @rules.predicate
-def course_is_open(user, permission_object: EnrollPermissionObject):
-    return permission_object.course.is_open
+def is_club_course(user, permission_object: EnrollPermissionObject):
+    return permission_object.course.main_branch.site_id == settings.CLUB_SITE_ID
 
 
 @rules.predicate
@@ -38,7 +38,7 @@ class ClubCourseViewNews(Permission):
 
 
 class ClubEnrollInCourse(EnrollInCourse):
-    rule = enroll_in_course & course_is_open
+    rule = enroll_in_course & is_club_course
 
 
 override_perm(ClubCourseViewNews)

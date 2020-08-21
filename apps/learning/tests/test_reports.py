@@ -14,7 +14,7 @@ from learning.settings import GradingSystems, StudentStatuses, GradeTypes, \
     Branches
 from learning.tests.factories import SemesterFactory, CourseFactory, \
     EnrollmentFactory, GraduateProfileFactory
-from projects.constants import ProjectTypes
+from projects.constants import ProjectTypes, ProjectGradeTypes
 from projects.models import Project
 from projects.tests.factories import ProjectFactory, SupervisorFactory, \
     ProjectStudentFactory
@@ -44,7 +44,7 @@ def test_report_common():
     supervisor = SupervisorFactory()
     p.supervisors.add(supervisor.pk)
     ps = p.projectstudent_set.all()[0]  # 1 student attached
-    ps.final_grade = GradeTypes.EXCELLENT
+    ps.final_grade = ProjectGradeTypes.EXCELLENT
     ps.save()
     report_factory = ProgressReportFull(grade_getter="grade_honest")
     progress_report = report_factory.generate()
@@ -116,17 +116,17 @@ def test_report_full():
     practice_header = 'Пройдено семестров практики(закончили, успех)'
     research_header = 'Пройдено семестров НИР (закончили, успех)'
     ps = ProjectStudentFactory(student=student1,
-                               final_grade=GradeTypes.EXCELLENT,
+                               final_grade=ProjectGradeTypes.EXCELLENT,
                                project__project_type=ProjectTypes.research)
     ProjectStudentFactory(student=student2,
-                          final_grade=GradeTypes.NOT_GRADED,
+                          final_grade=ProjectGradeTypes.NOT_GRADED,
                           project__project_type=ProjectTypes.research)
     ProjectStudentFactory(student=student2,
-                          final_grade=GradeTypes.UNSATISFACTORY,
+                          final_grade=ProjectGradeTypes.UNSATISFACTORY,
                           project__project_type=ProjectTypes.practice)
     # Grade is mistakenly good, but project is canceled
     ProjectStudentFactory(student=student2,
-                          final_grade=GradeTypes.EXCELLENT,
+                          final_grade=ProjectGradeTypes.EXCELLENT,
                           project__status=Project.Statuses.CANCELED)
     progress_report = report_generator.generate()
     check_value_for_header(progress_report, practice_header, student1.pk,
@@ -273,7 +273,7 @@ def test_semester_report_projects_stats():
     # Project in current term
     ps = ProjectStudentFactory(student=student, project__is_external=True,
                                project__semester=current_term,
-                               final_grade=GradeTypes.NOT_GRADED)
+                               final_grade=ProjectGradeTypes.NOT_GRADED)
     progress_report = ProgressReportForSemester(current_term).generate()
     check_value_for_header(progress_report, get_header_inner(current_term),
                            student.pk, expected_value=0)
@@ -291,7 +291,7 @@ def test_semester_report_projects_stats():
     # External project with bad grade in prev term
     ps_prev = ProjectStudentFactory(student=student, project__is_external=True,
                                     project__semester=prev_term,
-                                    final_grade=GradeTypes.UNSATISFACTORY)
+                                    final_grade=ProjectGradeTypes.UNSATISFACTORY)
     progress_report = ProgressReportForSemester(current_term).generate()
     check_value_for_header(progress_report, get_header_inner(current_term),
                            student.pk, expected_value=0)
@@ -300,7 +300,7 @@ def test_semester_report_projects_stats():
     check_value_for_header(progress_report, 'Проекты за семестр "%s"' % current_term,
                            student.pk, expected_value=ps.project.get_absolute_url())
     # Update grade to positive
-    ps_prev.final_grade = GradeTypes.GOOD
+    ps_prev.final_grade = ProjectGradeTypes.GOOD
     ps_prev.save()
     progress_report = ProgressReportForSemester(current_term).generate()
     check_value_for_header(progress_report, get_header_inner(current_term),
@@ -312,7 +312,7 @@ def test_semester_report_projects_stats():
     # Student could pass more than 1 project in a term
     ps_prev2 = ProjectStudentFactory(student=student, project__is_external=True,
                                      project__semester=prev_term,
-                                     final_grade=GradeTypes.GOOD)
+                                     final_grade=ProjectGradeTypes.GOOD)
     progress_report = ProgressReportForSemester(current_term).generate()
     check_value_for_header(progress_report, get_header_inner(current_term),
                            student.pk, expected_value=0)
@@ -331,7 +331,7 @@ def test_semester_report_projects_stats():
     ps_prev_inner = ProjectStudentFactory(student=student,
                                           project__is_external=False,
                                           project__semester=prev_term,
-                                          final_grade=GradeTypes.GOOD)
+                                          final_grade=ProjectGradeTypes.GOOD)
     progress_report = ProgressReportForSemester(current_term).generate()
     check_value_for_header(progress_report, get_header_inner(current_term),
                            student.pk, expected_value=1)
@@ -515,9 +515,9 @@ def test_report_official_diplomas_csv(settings):
 
     # Only graded projects should be shown
     project1, project2, project3 = ProjectFactory.create_batch(3)
-    ProjectStudentFactory(project=project1, student=student1, final_grade=GradeTypes.NOT_GRADED)
-    ProjectStudentFactory(project=project2, student=student1, final_grade=GradeTypes.UNSATISFACTORY)
-    ProjectStudentFactory(project=project3, student=student2, final_grade=GradeTypes.GOOD)
+    ProjectStudentFactory(project=project1, student=student1, final_grade=ProjectGradeTypes.NOT_GRADED)
+    ProjectStudentFactory(project=project2, student=student1, final_grade=ProjectGradeTypes.UNSATISFACTORY)
+    ProjectStudentFactory(project=project3, student=student2, final_grade=ProjectGradeTypes.GOOD)
 
     progress_report = get_report()
     # +1 headers for one valid project

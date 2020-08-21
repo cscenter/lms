@@ -13,8 +13,8 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models, transaction
 from django.db.models import Q, F
 from django.utils import timezone, formats
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, C
 from model_utils.models import TimeStampedModel
 
@@ -27,9 +27,11 @@ from core.utils import hashids
 from courses.constants import SemesterTypes
 from courses.models import Semester
 from courses.utils import get_current_term_pair
-from learning.settings import GradeTypes, Branches
+from files.models import ConfigurableStorageFileField
+from files.storage import private_storage
+from learning.settings import Branches
 from notifications.signals import notify
-from projects.constants import ProjectTypes, EDITING_REPORT_COMMENT_AVAIL
+from projects.constants import ProjectTypes, EDITING_REPORT_COMMENT_AVAIL, ProjectGradeTypes
 from users.constants import Roles, GenderTypes
 
 CURATOR_SCORE_FIELDS = [
@@ -250,16 +252,16 @@ class ReportingPeriod(models.Model):
 
     def score_to_grade(self, score, project):
         if score >= self.score_excellent:
-            final_grade = GradeTypes.EXCELLENT
+            final_grade = ProjectGradeTypes.EXCELLENT
         elif score >= self.score_good:
-            final_grade = GradeTypes.GOOD
+            final_grade = ProjectGradeTypes.GOOD
         elif score >= self.score_pass:
-            final_grade = GradeTypes.CREDIT
+            final_grade = ProjectGradeTypes.CREDIT
         else:
-            final_grade = GradeTypes.UNSATISFACTORY
+            final_grade = ProjectGradeTypes.UNSATISFACTORY
         # For external projects use binary grading policy
         if project.is_external and score >= self.score_pass:
-            final_grade = GradeTypes.CREDIT
+            final_grade = ProjectGradeTypes.CREDIT
         return final_grade
 
     def get_report_form(self, **kwargs):
@@ -294,7 +296,7 @@ class ReportingPeriod(models.Model):
                             .filter(project__semester=self.term,
                                     reports__isnull=True,
                                     **filters)
-                            .exclude(final_grade=GradeTypes.UNSATISFACTORY,
+                            .exclude(final_grade=ProjectGradeTypes.UNSATISFACTORY,
                                      project__status=Project.Statuses.CANCELED)
                             .select_related("student", "project")
                             .distinct()
@@ -319,8 +321,9 @@ class ReportingPeriod(models.Model):
 class ProjectStudent(TimezoneAwareModel, models.Model):
     """Intermediate model for project students"""
     TIMEZONE_AWARE_FIELD_NAME = 'project'
-    # TODO: переименовать `GRADES`, создать ProjectGradeTypes (в settings.py)
-    GRADES = GradeTypes
+    # TODO: переименовать `GRADES`
+    GRADES = ProjectGradeTypes
+
     student = models.ForeignKey(settings.AUTH_USER_MODEL,
                                 on_delete=models.CASCADE)
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
@@ -351,8 +354,8 @@ class ProjectStudent(TimezoneAwareModel, models.Model):
         unique_together = [['student', 'project']]
 
     def __str__(self):
-        return "{0} [{1}]".format(smart_text(self.project),
-                                  smart_text(self.student))
+        return "{0} [{1}]".format(smart_str(self.project),
+                                  smart_str(self.student))
 
     def get_report(self, reporting_period: ReportingPeriod):
         for report in self.reports.all():
@@ -396,12 +399,12 @@ class ProjectStudent(TimezoneAwareModel, models.Model):
         return label
 
 
-def project_presentation_files(self, filename):
-    return os.path.join('projects',
-                        '{}-{}'.format(self.semester.year, self.semester.type),
-                        '{}'.format(self.pk),
-                        'presentations',
-                        filename)
+def project_presentations_upload_to(self: "Project", filename):
+    return "{}/projects/{}/{}/presentations/{}".format(
+        self.branch.site_id,
+        self.semester.slug,
+        self.pk,
+        filename)
 
 
 class Supervisor(models.Model):
@@ -440,7 +443,7 @@ class Supervisor(models.Model):
 
     def get_abbreviated_name(self, delimiter=chr(160)):  # non-breaking space
         parts = (self.first_name[:1], self.patronymic[:1], self.last_name)
-        return smart_text(f".{delimiter}".join(p for p in parts if p).strip())
+        return smart_str(f".{delimiter}".join(p for p in parts if p).strip())
 
 
 class ProjectQuerySet(models.QuerySet):
@@ -517,7 +520,7 @@ class Project(TimezoneAwareModel, TimeStampedModel):
     supervisor_presentation = models.FileField(
         _("Supervisor presentation"),
         blank=True,
-        upload_to=project_presentation_files)
+        upload_to=project_presentations_upload_to)
     supervisor_presentation_url = models.URLField(
         _("Link to supervisor presentation"),
         blank=True,
@@ -528,7 +531,7 @@ class Project(TimezoneAwareModel, TimeStampedModel):
     presentation = models.FileField(
         _("Participants presentation"),
         blank=True,
-        upload_to=project_presentation_files)
+        upload_to=project_presentations_upload_to)
     presentation_url = models.URLField(
         _("Link to participants presentation"),
         blank=True,
@@ -583,14 +586,13 @@ class Project(TimezoneAwareModel, TimeStampedModel):
         return not self.is_canceled and self.semester.index == term_index
 
 
-def report_file_name(self, filename):
-    return os.path.join('projects',
-                        '{}-{}'.format(
-                            self.project_student.project.semester.year,
-                            self.project_student.project.semester.type),
-                        '{}'.format(self.project_student.project.pk),
-                        'reports',
-                        filename)
+def report_file_upload_to(self: "Report", filename):
+    project = self.project_student.project
+    return "{}/projects/{}/{}/reports/{}".format(
+        project.branch.site_id,
+        project.semester.slug,
+        project.pk,
+        filename)
 
 
 class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
@@ -636,11 +638,12 @@ class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
         _("Description"),
         blank=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    file = models.FileField(
+    file = ConfigurableStorageFileField(
         _("Report file"),
         blank=True,
         null=True,
-        upload_to=report_file_name)
+        upload_to=report_file_upload_to,
+        storage=private_storage)
     # curators criteria
     score_activity = models.PositiveSmallIntegerField(
         verbose_name=_("Student activity in cvs"),
@@ -719,17 +722,13 @@ class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
             return os.path.basename(self.file.name)
 
     def file_url(self):
-        return reverse(
-            "projects:report_attachments_download",
-            args=[
-                hashids.encode(
-                    apps.get_app_config("projects").REPORT_ATTACHMENT,
-                    self.pk
-                )]
-        )
+        return reverse("projects:download_report_attachment", kwargs={
+            "sid": hashids.encode(self.pk),
+            "file_name": self.file_name,
+        })
 
     def __str__(self):
-        return smart_text(self.project_student.student)
+        return smart_str(self.project_student.student)
 
     def created_local(self, tz=None):
         if not tz:
@@ -930,10 +929,10 @@ class PracticeCriteria(CriteriaScoresMixin, models.Model):
         verbose_name_plural = _("Practice Criteria")
 
 
-def report_comment_attachment_upload_to(self, filename):
-    return "projects/{}-{}/{}/attachments/{}".format(
-        self.report.project_student.project.semester.year,
-        self.report.project_student.project.semester.type,
+def report_comment_attachment_upload_to(self: "ReportComment", filename):
+    return "{}/projects/{}/{}/attachments/{}".format(
+        self.report.project_student.project.branch.site_id,
+        self.report.project_student.project.semester.slug,
         self.report.project_student.project.pk,
         filename
     )
@@ -951,8 +950,9 @@ class ReportComment(TimezoneAwareModel, TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
-    attached_file = models.FileField(
+    attached_file = ConfigurableStorageFileField(
         upload_to=report_comment_attachment_upload_to,
+        storage=private_storage,
         blank=True)
 
     class Meta:
@@ -962,8 +962,8 @@ class ReportComment(TimezoneAwareModel, TimeStampedModel):
 
     def __str__(self):
         return ("Comment to {0} by {1}"
-                .format(smart_text(self.report),
-                        smart_text(self.author.get_full_name())))
+                .format(smart_str(self.report),
+                        smart_str(self.author.get_full_name())))
 
     def created_local(self, tz=None):
         if not tz:
@@ -980,11 +980,8 @@ class ReportComment(TimezoneAwareModel, TimeStampedModel):
     def attached_file_name(self):
         return os.path.basename(self.attached_file.name)
 
-    def attached_file_url(self):
-        return reverse(
-            "projects:report_attachments_download",
-            args=[hashids.encode(
-                apps.get_app_config("projects").REPORT_COMMENT_ATTACHMENT,
-                self.pk
-            )]
-        )
+    def get_attachment_download_url(self):
+        return reverse("projects:download_report_comment_attachment", kwargs={
+            "sid": hashids.encode(self.pk),
+            "file_name": self.attached_file_name,
+        })

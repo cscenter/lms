@@ -7,7 +7,7 @@ from crispy_forms.layout import Layout, Div, Submit, Row, Field
 from django import forms
 from django.forms import SelectMultiple
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 from core.widgets import DateTimeRangeWidget

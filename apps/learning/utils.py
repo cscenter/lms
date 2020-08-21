@@ -1,7 +1,3 @@
-import os
-
-from nbconvert import HTMLExporter
-
 from learning.settings import GradeTypes
 
 
@@ -13,19 +9,31 @@ def grade_to_mark(grade):
     """
     if grade == GradeTypes.NOT_GRADED:
         return 0
-    elif grade == GradeTypes.UNSATISFACTORY:
+    elif grade == GradeTypes.ONE:
         return 1
-    elif grade == GradeTypes.CREDIT:
+    elif grade == GradeTypes.UNSATISFACTORY or grade == GradeTypes.TWO:
         return 2
-    elif grade == GradeTypes.GOOD:
+    elif grade == GradeTypes.CREDIT or grade == GradeTypes.THREE:
         return 3
-    elif grade == GradeTypes.EXCELLENT:
+    elif grade == GradeTypes.GOOD or grade == GradeTypes.FOUR:
         return 4
+    elif grade == GradeTypes.EXCELLENT or grade == GradeTypes.FIVE:
+        return 5
+    elif grade == GradeTypes.SIX:
+        return 6
+    elif grade == GradeTypes.SEVEN:
+        return 7
+    elif grade == GradeTypes.EIGHT:
+        return 8
+    elif grade == GradeTypes.NINE:
+        return 9
+    elif grade == GradeTypes.TEN:
+        return 10
     raise ValueError("Unknown grade type")
 
 
 def is_negative_grade(grade):
-    return grade == GradeTypes.UNSATISFACTORY
+    return grade in GradeTypes.unsatisfactory_grades
 
 
 def split_on_condition(iterable, predicate):
@@ -36,20 +44,3 @@ def split_on_condition(iterable, predicate):
         else:
             false_lst.append(x)
     return true_lst, false_lst
-
-
-def convert_ipynb_to_html(ipynb_src_path, html_dest_path):
-    """
-    Converts *.ipynb to html and saves the new file in the same directory with
-    `html_ext` extension.
-    """
-    if not os.path.exists(html_dest_path):
-        try:
-            html_exporter = HTMLExporter()
-            nb_node, _ = html_exporter.from_filename(ipynb_src_path)
-            with open(html_dest_path, 'w') as f:
-                f.write(nb_node)
-            return True
-        except (FileNotFoundError, AttributeError):
-            return False
-    return True

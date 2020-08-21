@@ -73,8 +73,8 @@ let fn = {
             uploadContainer.one('shown.bs.modal', function () {
                 // Image dimensions is dynamic and we can't get them
                 // for cropper inside hidden div (w x h will be
-                // 0x0 px before display. Due to that, init cropper
-                // once only when modal visible.
+                // 0x0 px before display), init cropper
+                // after modal became visible.
                 if (imageData !== null) {
                     fn.thumbInit(imageData);
                 }
@@ -181,17 +181,13 @@ let fn = {
 
     thumbInit: function (data) {
         fn.enableLoadingState();
-        // prevent caching img
+        // Avoid img cache
         data.url = data.url + '?' + (new Date()).getTime();
-        // Now preload it before Cropper initialized. Cropper do xhr request
-        // and we want to use browser cache in that case.
-        var image = new Image();
-        image.onload = function () { fn.cropperInit(data); };
-        image.src = data.url;
+        fn.cropperInit(data);
     },
 
     cropperInit: function (data) {
-        // Calculate img dimensions based on modal body width
+        // Calculate img dimensions based on a modal body width
         const modalWidth = modalBody.width() - 40; // 40px for padding
         const propWidth = Math.min(data.width, modalWidth);
         const propHeight = Math.round((propWidth / data.width) * data.height);
@@ -201,40 +197,43 @@ let fn = {
             height: propHeight
         }));
         let image = modalBody.find(".uploaded-img")[0];
-        let cropper = new Cropper(image, {
-            viewMode: 1,
-            background: true,
-            responsive: false,
-            scalable: false,
-            autoCropArea: 1,
-// {#                        autoCrop: false,#}
-            aspectRatio: 5 / 7,
-            dragMode: 'move',
-            guides: false,
-            movable: false,
-            rotatable: false,
-            zoomable: false,
-            zoomOnTouch: false,
-            zoomOnWheel: false,
-            minContainerWidth: 250,
-            minContainerHeight: 250,
-            offsetWidth: 0,
-            offsetHeight: 0,
-            minCropBoxWidth: photoValidation.minThumbWidth,
-            minCropBoxHeight: photoValidation.minThumbHeight,
-            ready: function() {
-                // handlers
-                modalBody.find('.-prev').click(function () {
-                    fn.uploadInit();
-                });
-                modalBody.find('.save-crop-data').click(function () {
-                    fn.thumbDone(cropper);
-                });
-                fn.setCropBox(cropper);
-                fn.disableLoadingState();
-            }
-            //preview: '.thumbnail-img',
-        });
+        image.onload = () => {
+            let cropper = new Cropper(image, {
+                viewMode: 1,
+                background: true,
+                responsive: false,
+                autoCropArea: 1,
+    // {#                        autoCrop: false,#}
+                aspectRatio: 5 / 7,
+                dragMode: 'move',
+                guides: false,
+                movable: false,
+                scalable: false,
+                rotatable: false,
+                zoomable: false,
+                zoomOnTouch: false,
+                zoomOnWheel: false,
+                minContainerWidth: 250,
+                minContainerHeight: 250,
+                offsetWidth: 0,
+                offsetHeight: 0,
+                minCropBoxWidth: photoValidation.minThumbWidth,
+                minCropBoxHeight: photoValidation.minThumbHeight,
+                ready: function() {
+                    // handlers
+                    modalBody.find('.-prev').click(function () {
+                        fn.uploadInit();
+                    });
+                    modalBody.find('.save-crop-data').click(function () {
+                        fn.thumbDone(cropper);
+                    });
+                    fn.setCropBox(cropper);
+                    fn.disableLoadingState();
+                }
+                //preview: '.thumbnail-img',
+            });
+        };
+        image.src = data.url;
     },
 
     thumbDone: function (cropper) {

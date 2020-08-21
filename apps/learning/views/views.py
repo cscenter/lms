@@ -1,29 +1,26 @@
 import datetime
 import logging
-import posixpath
+from typing import Optional
 
 from django.contrib import messages
 from django.db.models import Prefetch
-from django.http import HttpResponseBadRequest, Http404, HttpResponseForbidden, HttpResponseNotFound, JsonResponse, \
+from django.http import Http404, JsonResponse, \
     HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views import generic
-from nbformat.validator import NotebookValidationError
 from vanilla import TemplateView, GenericModelView
 
 from core import comment_persistence
-from core.response import ProtectedMediaFileResponse
 from core.utils import hashids
 from core.views import LoginRequiredMixin
-from courses.constants import ASSIGNMENT_TASK_ATTACHMENT
 from courses.models import AssignmentAttachment
 from courses.views.mixins import CourseURLParamsMixin
+from files.views import ProtectedFileDownloadView
 from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, AssignmentComment, \
     AssignmentNotification, Event, CourseNewsNotification
-from learning.services import CourseRole, course_access_role
-from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT
-from learning.utils import convert_ipynb_to_html
+from learning.permissions import ViewAssignmentCommentAttachment, \
+    ViewAssignmentAttachment
 from users.mixins import TeacherOnlyMixin
 
 logger = logging.getLogger(__name__)
@@ -32,7 +29,7 @@ logger = logging.getLogger(__name__)
 __all__ = (
     'AssignmentSubmissionBaseView', 'EventDetailView',
     'AssignmentAttachmentDownloadView', 'CourseNewsNotificationUpdate',
-    'CourseStudentsView',
+    'CourseStudentsView', 'AssignmentCommentAttachmentDownloadView',
 )
 
 
@@ -150,62 +147,38 @@ class EventDetailView(generic.DetailView):
     template_name = "learning/event_detail.html"
 
 
-class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
-    def get(self, request, *args, **kwargs):
-        try:
-            attachment_type, pk = hashids.decode(kwargs['sid'])
-            if attachment_type not in (ASSIGNMENT_TASK_ATTACHMENT,
-                                       ASSIGNMENT_COMMENT_ATTACHMENT):
-                return HttpResponseBadRequest()
-        except (ValueError, IndexError):
+class AssignmentAttachmentDownloadView(ProtectedFileDownloadView):
+    permission_required = ViewAssignmentAttachment.name
+    file_field_name = 'attachment'
+
+    def get_protected_object(self) -> Optional[AssignmentAttachment]:
+        ids: tuple = hashids.decode(self.kwargs['sid'])
+        if not ids:
             raise Http404
+        qs = (AssignmentAttachment.objects
+              .filter(pk=ids[0])
+              .select_related("assignment__course"))
+        return get_object_or_404(qs)
 
-        user = request.user
-        file_field = None
-        course = None
-        if attachment_type == ASSIGNMENT_TASK_ATTACHMENT:
-            qs = (AssignmentAttachment.objects
-                  .filter(pk=pk)
-                  .select_related("assignment", "assignment__course"))
-            assignment_attachment = get_object_or_404(qs)
-            course = assignment_attachment.assignment.course
-            file_field = assignment_attachment.attachment
-        elif attachment_type == ASSIGNMENT_COMMENT_ATTACHMENT:
-            qs = (AssignmentComment.published
-                  .filter(pk=pk)
-                  .select_related("student_assignment__assignment__course"))
-            comment = get_object_or_404(qs)
-            file_field = comment.attached_file
-            course = comment.student_assignment.assignment.course
+    def get_permission_object(self):
+        return self.protected_object.assignment
 
-        if course is None or file_field is None:
-            return HttpResponseNotFound()
 
-        # Check that authenticated user has access to the attachments
-        role = course_access_role(course=course, user=user)
-        if role not in (CourseRole.STUDENT_REGULAR, CourseRole.TEACHER,
-                        CourseRole.CURATOR):
-            return HttpResponseForbidden()
+class AssignmentCommentAttachmentDownloadView(ProtectedFileDownloadView):
+    permission_required = ViewAssignmentCommentAttachment.name
+    file_field_name = 'attached_file'
 
-        media_file_uri = file_field.url
-        content_disposition = 'attachment'
-        # Convert *.ipynb to html
-        if self.request.GET.get("html", False):
-            _, ext = posixpath.splitext(media_file_uri)
-            if ext == ".ipynb":
-                ipynb_src_path = file_field.path
-                html_ext = ".html"
-                html_dest_path = ipynb_src_path + html_ext
-                try:
-                    exported = convert_ipynb_to_html(ipynb_src_path,
-                                                     html_dest_path)
-                except NotebookValidationError as e:
-                    return HttpResponseBadRequest(e.message)
-                if exported:
-                    media_file_uri = media_file_uri + html_ext
-                    content_disposition = 'inline'
+    def get_protected_object(self) -> Optional[AssignmentComment]:
+        ids: tuple = hashids.decode(self.kwargs['sid'])
+        if not ids:
+            raise Http404
+        qs = (AssignmentComment.published
+              .filter(pk=ids[0])
+              .select_related("student_assignment__assignment__course"))
+        return get_object_or_404(qs)
 
-        return ProtectedMediaFileResponse(media_file_uri, content_disposition)
+    def get_permission_object(self):
+        return self.protected_object.student_assignment
 
 
 class CourseNewsNotificationUpdate(LoginRequiredMixin, CourseURLParamsMixin,

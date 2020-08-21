@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from django.db import models
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext_lazy as _
 
 
 class Hint(models.Model):
@@ -17,4 +17,4 @@ class Hint(models.Model):
         verbose_name_plural = _("Warehouse")
 
     def __str__(self):
-        return smart_text(self.question)
+        return smart_str(self.question)

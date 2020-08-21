@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext_lazy as _
 from model_utils.models import TimeStampedModel
 from taggit.managers import TaggableManager
 from taggit.models import TagBase, TaggedItemBase
@@ -18,7 +18,7 @@ class InfoBlockTag(TagBase):
         verbose_name_plural = _("Infoblock Tags")
 
     def __str__(self):
-        return smart_text(self.name)
+        return smart_str(self.name)
 
     def slugify(self, tag, i=None):
         """Transliterates cyrillic symbols before slugify"""
@@ -53,4 +53,4 @@ class InfoBlock(TimeStampedModel):
         verbose_name_plural = _("Infoblocks")
 
     def __str__(self):
-        return smart_text(self.title)
+        return smart_str(self.title)

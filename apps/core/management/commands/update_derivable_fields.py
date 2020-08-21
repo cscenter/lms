@@ -24,7 +24,7 @@ class Command(AppCommand):
                             action='append',
                             help='Customize one or more filters for queryset. '
                                  'Usage examples: '
-                                 ' -f is_open=True -f id__in=[86]')
+                                 ' -f due_date__isnull=True -f id__in=[86]')
 
     def handle_app_config(self, app_config, **options):
         model_name = options['model_name']

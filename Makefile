@@ -19,6 +19,9 @@ run:
 club:
 	python manage.py runserver --settings=compsciclub_ru.settings.local 8002
 
+shad:
+	python manage.py runserver --settings=yandexdataschool_ru.settings.local 8003
+
 migrate:
 	python manage.py migrate $(DJANGO_POSTFIX)
 

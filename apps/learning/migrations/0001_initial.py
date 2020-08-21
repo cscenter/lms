@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
                 ('text', models.TextField(blank=True, help_text='LaTeX+Markdown is enabled', verbose_name='AssignmentComment|text')),
-                ('attached_file', models.FileField(blank=True, max_length=150, upload_to=learning.models.task_comment_attachment_upload_to)),
+                ('attached_file', models.FileField(blank=True, max_length=150, upload_to=learning.models.assignment_comment_attachment_upload_to)),
             ],
             options={
                 'verbose_name': 'Assignment-comment',

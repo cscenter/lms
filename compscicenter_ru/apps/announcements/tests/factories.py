@@ -8,7 +8,7 @@ __all__ = ('AnnouncementTagFactory', 'AnnouncementFactory',
            'AnnouncementEventDetailsFactory')
 
 
-class AnnouncementTagFactory(factory.DjangoModelFactory):
+class AnnouncementTagFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Tag %03d" % n)
     slug = factory.Sequence(lambda n: "slug-%03d" % n)
 
@@ -16,7 +16,7 @@ class AnnouncementTagFactory(factory.DjangoModelFactory):
         model = AnnouncementTag
 
 
-class AnnouncementFactory(factory.DjangoModelFactory):
+class AnnouncementFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Announcement %03d" % n)
     slug = factory.Sequence(lambda n: "slug-%03d" % n)
     short_description = factory.Sequence(lambda n: "Short description %03d" % n)
@@ -36,7 +36,7 @@ class AnnouncementFactory(factory.DjangoModelFactory):
                 self.tags.add(tag)
 
 
-class AnnouncementEventDetailsFactory(factory.DjangoModelFactory):
+class AnnouncementEventDetailsFactory(factory.django.DjangoModelFactory):
     announcement = factory.SubFactory(AnnouncementFactory)
     ends_on = factory.Faker('future_date', end_date="+30d")
 

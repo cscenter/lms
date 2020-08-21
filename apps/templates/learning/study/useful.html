@@ -13,6 +13,8 @@
                         <div class="panel-body">{{ qa.content|safe }}</div>
                     </div>
                 </div>
+            {% empty %}
+                <div class="alert alert-info text-center">Здесь появится полезная информация от кураторов.</div>
             {% endfor %}
         </div>
     </div>

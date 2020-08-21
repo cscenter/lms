@@ -2,7 +2,6 @@ from django.apps import apps
 from django.conf import settings
 from django.dispatch import Signal
 from django.utils import timezone
-from django.utils.six import text_type
 
 from notifications.registry import registry, NotRegistered
 
@@ -68,7 +67,7 @@ def notify_handler(type, **kwargs):
         new_notification = Notification(
             type_id=type_id,
             recipient=recipient,
-            verb=text_type(verb),
+            verb=str(verb),
             public=public,
             description=description,
             timestamp=timestamp,
