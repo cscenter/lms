@@ -23,7 +23,7 @@ def manage_student_group_for_course_root_branch(sender, instance, created,
 @receiver(post_save, sender=CourseBranch)
 def create_student_group_from_course_branch(sender, instance: CourseBranch,
                                             created, *args, **kwargs):
-    if created:
+    if created and instance.course.group_mode == StudentGroupTypes.BRANCH:
         StudentGroupService.add(instance.course, instance.branch)
 
 
