@@ -529,7 +529,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
             return float("inf")
 
     @property
-    def grading_type_choice(self):
+    def grading_system(self):
         return GradingSystems.get_choice(self.grading_type)
 
     @property

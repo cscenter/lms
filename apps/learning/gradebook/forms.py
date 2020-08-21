@@ -8,7 +8,6 @@ from django.forms import BoundField
 from django.utils.encoding import force_str
 
 from core.forms import GradeField
-from learning.gradebook.utils import recalculate_course_grading_system
 from learning.gradebook.data import GradeBookData
 from learning.models import StudentAssignment, Enrollment
 
@@ -79,8 +78,6 @@ class BaseGradebookForm(forms.Form):
                     errors.append(ce)
                 else:
                     final_grade_updated = True
-        if final_grade_updated:
-            recalculate_course_grading_system(self._course)
         self._conflicts = bool(errors)
         return errors
 
