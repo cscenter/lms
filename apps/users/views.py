@@ -203,9 +203,7 @@ class CertificateOfParticipationDetailView(PermissionRequiredMixin,
     def get_context_data(self, **kwargs):
         from learning.reports import ProgressReport
         student_info = (User.objects
-                        .student_progress(exclude_grades=[
-                            GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED
-                        ])
+                        .student_progress(exclude_grades=GradeTypes.unsatisfactory_grades)
                         .get(pk=self.object.student_profile.user_id))
         courses_qs = (ProgressReport().get_courses_queryset((student_info,)))
         courses = {c.pk: c for c in courses_qs}
