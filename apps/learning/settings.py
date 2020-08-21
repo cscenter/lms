@@ -49,9 +49,9 @@ class StudentStatuses(DjangoChoices):
 
 
 class GradingSystems(DjangoChoices):
-    BASE = C(0, _("Default"), css_class="")
-    BINARY = C(1, _("Binary"), css_class="__binary")
-    TEN_POINT = C(2, _("10-point"), css_class="")
+    BASE = C(0, _("5-point scale"), css_class="")
+    BINARY = C(1, _("Pass/Fail"), css_class="__binary")
+    TEN_POINT = C(2, _("10-point scale"), css_class="")
 
 
 class GradeTypes(DjangoChoices):
