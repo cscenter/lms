@@ -123,6 +123,7 @@ SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
 
 # Template customization
+ESTABLISHED = 2011
 FAVICON_PATH = 'v1/img/center/favicon.png'
 LOGO_PATH = 'v1/img/center/logo.svg'
 
@@ -147,6 +148,9 @@ TEMPLATES = [
             },
             "constants": {
                 "CSRF_COOKIE_NAME": CSRF_COOKIE_NAME,
+                "ESTABLISHED": ESTABLISHED,
+                "FAVICON_PATH": FAVICON_PATH,
+                "LOGO_PATH": LOGO_PATH,
                 "SENTRY_DSN": SENTRY_DSN,
             },
             "globals": {
@@ -170,7 +174,6 @@ TEMPLATES = [
                 "core.jinja2.ext.UrlExtension",
                 "core.jinja2.ext.SpacelessExtension"
             ],
-            "environment": "core.jinja2.env.environment",
             "bytecode_cache": {
                 "name": "default",
                 "backend": "django_jinja.cache.BytecodeCache",
