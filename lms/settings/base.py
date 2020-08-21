@@ -122,6 +122,10 @@ THUMBNAIL_REDIS_SSL = REDIS_SSL
 SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
 
+# Template customization
+FAVICON_PATH = 'v1/img/center/favicon.png'
+LOGO_PATH = 'v1/img/center/logo.svg'
+
 TEMPLATES = [
     {
         "BACKEND": "django_jinja.backend.Jinja2",
@@ -200,6 +204,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
                 'core.context_processors.subdomain',
+                'core.context_processors.common_context',
                 'core.context_processors.js_config',
             ),
             'debug': DEBUG
