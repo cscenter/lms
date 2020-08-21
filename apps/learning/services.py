@@ -237,6 +237,7 @@ class AssignmentService:
         qs = (StudentAssignment.trash
               .filter(assignment=assignment, student_id__in=student_ids))
         for student_assignment in qs:
+            # TODO: reset score? execution_time?
             student_assignment.restore()
 
     # TODO: send notification to teachers except assignment publisher

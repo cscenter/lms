@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-20 14:05+0000\n"
-"PO-Revision-Date: 2020-08-12 18:55+0000\n"
+"POT-Creation-Date: 2020-08-21 19:40+0000\n"
+"PO-Revision-Date: 2020-08-21 19:41+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -255,10 +255,11 @@ msgstr "Описание"
 msgid "Branch|Description"
 msgstr "Общее описание, правила обучения"
 
-#: apps/core/models.py:206 apps/courses/models.py:54 apps/courses/models.py:216
-#: apps/courses/models.py:548 apps/learning/models.py:69
-#: apps/learning/models.py:340 apps/learning/models.py:698
-#: apps/library/models.py:62 apps/study_programs/models.py:54
+#: apps/core/models.py:206 apps/courses/models.py:54
+#: apps/courses/models.py:216 apps/courses/models.py:548
+#: apps/learning/models.py:69 apps/learning/models.py:340
+#: apps/learning/models.py:698 apps/library/models.py:62
+#: apps/study_programs/models.py:54
 #: apps/templates/learning/invitation/complete_profile.html:23
 #: apps/users/models.py:162 apps/users/models.py:299 apps/users/models.py:750
 msgid "Branch"
@@ -352,7 +353,8 @@ msgstr ""
 "Размер файла %(size)s недопустим. Максимальный размер файла "
 "%(allowed_size)s."
 
-#: apps/courses/admin.py:146 apps/courses/admin.py:231 apps/users/models.py:875
+#: apps/courses/admin.py:146 apps/courses/admin.py:231
+#: apps/users/models.py:875
 msgid "Created"
 msgstr "Дата создания"
 
@@ -449,8 +451,8 @@ msgstr "Только студенты"
 msgid "All groups"
 msgstr "Все группы"
 
-#: apps/courses/forms.py:54 apps/courses/models.py:171 apps/users/models.py:904
-#: apps/users/models.py:921
+#: apps/courses/forms.py:54 apps/courses/models.py:171
+#: apps/users/models.py:904 apps/users/models.py:921
 msgid "Course|name"
 msgstr "Название"
 
@@ -707,7 +709,7 @@ msgstr ""
 
 #: apps/courses/models.py:227
 msgid "CourseOffering|grading_type"
-msgstr "Тип отображения оценки в профиле студента"
+msgstr "Система оценивания"
 
 #: apps/courses/models.py:231
 msgid "CourseOffering|capacity"
@@ -1719,16 +1721,16 @@ msgid "StudentInfo|Graduate"
 msgstr "Выпускник"
 
 #: apps/learning/settings.py:52
-msgid "Default"
-msgstr "По-умолчанию"
+msgid "5-point scale"
+msgstr "5-балльная шкала"
 
 #: apps/learning/settings.py:53
-msgid "Binary"
-msgstr "Зачет-Незачет"
+msgid "Pass/Fail"
+msgstr "Зачет/Незачет"
 
 #: apps/learning/settings.py:54
-msgid "10-point"
-msgstr "10-балльная"
+msgid "10-point scale"
+msgstr "10-балльная шкала"
 
 #: apps/learning/settings.py:61 apps/users/constants.py:59
 msgid "Not graded"
@@ -1858,7 +1860,8 @@ msgstr "Вы уже записаны на этот курс"
 msgid "Copies available"
 msgstr "Доступно"
 
-#: apps/library/admin.py:80 apps/library/models.py:27 apps/library/models.py:57
+#: apps/library/admin.py:80 apps/library/models.py:27
+#: apps/library/models.py:57
 msgid "Book"
 msgstr "Книга"
 
@@ -3234,6 +3237,12 @@ msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
 
+#~ msgid "Binary"
+#~ msgstr "Зачет-Незачет"
+
+#~ msgid "Default"
+#~ msgstr "По-умолчанию"
+
 #~ msgid "You can create only open courses from CS club site"
 #~ msgstr "Забыли сделать прочтение открытым?"
 
@@ -3244,16 +3253,16 @@ msgstr "весенний"
 #~ "This course offering will be available on ComputerScience Club website so "
 #~ "anyone can join"
 #~ msgstr ""
-#~ "Прочтение курса будет доступно на сайте Computer Science Клуба, кто "
-#~ "угодно сможет присоединиться"
+#~ "Прочтение курса будет доступно на сайте Computer Science Клуба, кто угодно "
+#~ "сможет присоединиться"
 
 #~ msgid "Reset password"
 #~ msgstr "Сменить пароль"
 
 #~ msgid "Note that some materials would be available by direct link"
 #~ msgstr ""
-#~ "В случае ограничения видимости некоторые материалы всё равно будут "
-#~ "доступны по прямой ссылке."
+#~ "В случае ограничения видимости некоторые материалы всё равно будут доступны "
+#~ "по прямой ссылке."
 
 #~ msgid "Enrollment start at"
 #~ msgstr "Начало записи на курсы"
@@ -3264,9 +3273,9 @@ msgstr "весенний"
 #~ msgid ""
 #~ "Students can enroll on or leave the course before this date (inclusive)"
 #~ msgstr ""
-#~ "Студент может записаться или покинуть курс до указанной даты "
-#~ "включительно. Если дата не указана, регистрация закрывается через 45 дней "
-#~ "после начала записи на курсы."
+#~ "Студент может записаться или покинуть курс до указанной даты включительно. "
+#~ "Если дата не указана, регистрация закрывается через 45 дней после начала "
+#~ "записи на курсы."
 
 #~ msgid "Ends on"
 #~ msgstr "Конец"
