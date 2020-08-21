@@ -9,6 +9,7 @@ from core.urls import reverse
 from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import GraduateProfileFactory, EnrollmentFactory
+from projects.constants import ProjectGradeTypes
 from projects.tests.factories import ProjectFactory
 from users.tests.factories import StudentFactory, CuratorFactory
 
@@ -19,7 +20,7 @@ def test_staff_diplomas_view(curator, client, settings):
     semester1 = SemesterFactory.create(year=2014, type='spring')
     p = ProjectFactory.create(students=[student], semester=semester1)
     sp = p.projectstudent_set.all()[0]
-    sp.final_grade = GradeTypes.GOOD
+    sp.final_grade = ProjectGradeTypes.GOOD
     sp.save()
     client.login(curator)
     response = client.get(reverse('staff:exports_future_graduates_diplomas_tex',
