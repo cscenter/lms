@@ -26,5 +26,5 @@ DEFAULT_CITY_CODE = "msk"
 DEFAULT_BRANCH_CODE = "msk"
 
 # Template customization
-FAVICON_PATH = 'v1/img/logo/yandexdataschool.png'
-LOGO_PATH = 'v1/img/logo/yandexdataschool.svg'
+FAVICON_PATH = 'v1/img/shad/favicon.ico'
+LOGO_PATH = 'v1/img/shad/logo.svg'
