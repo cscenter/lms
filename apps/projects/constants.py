@@ -18,7 +18,7 @@ class ProjectGradeTypes(DjangoChoices):
     """
     NOT_GRADED = C('not_graded', _("ProjectGradeTypes|Not graded"), order=0)
     UNSATISFACTORY = C('unsatisfactory', _("ProjectGradeTypes|Unsatisfactory"), order=1)
-    CREDIT = C('pass', _("ProjectGradeTypes|Pass"), order=2)
+    CREDIT = C('pass', _("ProjectGradeTypes|Pass"), order=1)
     GOOD = C('good', _("ProjectGradeTypes|Good"), order=3)
     EXCELLENT = C('excellent', _("ProjectGradeTypes|Excellent"), order=4)
 
