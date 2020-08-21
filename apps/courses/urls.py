@@ -11,8 +11,7 @@ _terms = r"|".join(slug for slug, _ in SemesterTypes.choices)
 semester_slug = r"(?P<semester_year>\d{4})-(?P<semester_type>" + _terms + r")"
 
 
-# FIXME: Do not hard-code branch_code_request
-RE_COURSE_URI = r"^(?P<course_slug>[-\w]+)/(?P<branch_code_request>nsk|kzn|spb|distance|)(?P<branch_trailing_slash>/?)" + semester_slug + r"/"
+RE_COURSE_URI = r"^(?P<course_slug>[-\w]+)/(?P<branch_code_request>\w*)(?P<branch_trailing_slash>/?)" + semester_slug + r"/"
 
 app_name = 'courses'
 
