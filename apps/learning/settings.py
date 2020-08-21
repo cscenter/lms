@@ -61,7 +61,7 @@ class GradeTypes(DjangoChoices):
     NOT_GRADED = C('not_graded', _("Not graded"), system='__all__', order=0)
     UNSATISFACTORY = C('unsatisfactory', _("Enrollment|Unsatisfactory"),
                        system=(GradingSystems.BASE, GradingSystems.BINARY), order=11)
-    CREDIT = C('pass', _("Enrollment|Pass"), system=(GradingSystems.BASE, GradingSystems.BINARY), order=11)
+    CREDIT = C('pass', _("Enrollment|Pass"), system=(GradingSystems.BASE, GradingSystems.BINARY), order=12)
     GOOD = C('good', _("Good"), system=(GradingSystems.BASE,), order=13)
     EXCELLENT = C('excellent', _("Excellent"), system=(GradingSystems.BASE,), order=14)
 
