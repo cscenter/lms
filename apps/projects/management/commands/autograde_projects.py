@@ -7,7 +7,7 @@ from django.core.management import CommandError
 from courses.models import Semester
 from projects.models import ProjectStudent, ReportingPeriod, \
     ReportingPeriodKey
-from learning.settings import GradeTypes
+from projects.constants import ProjectGradeTypes
 
 
 logger = logging.getLogger(__name__)
@@ -22,10 +22,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """
         Rules applied in order for converting final score to grade:
-            score >= ReportingPeriod.score_excellent -> `GradeTypes.excellent`
-            score >= ReportingPeriod.score_good -> `GradeTypes.good`
-            score >= ReportingPeriod.score_pass -> `GradeTypes.pass`
-            score < ReportingPeriod.score_pass -> `GradeTypes.unsatisfactory`
+            score >= ReportingPeriod.score_excellent -> `ProjectGradeTypes.excellent`
+            score >= ReportingPeriod.score_good -> `ProjectGradeTypes.good`
+            score >= ReportingPeriod.score_pass -> `ProjectGradeTypes.pass`
+            score < ReportingPeriod.score_pass -> `ProjectGradeTypes.unsatisfactory`
         """
         current_term = Semester.get_current()
         periods = ReportingPeriod.get_final_periods(current_term)
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         students = (ProjectStudent.objects
                     .select_related("student", "project")
                     .filter(project__semester_id=current_term.pk,
-                            final_grade=GradeTypes.NOT_GRADED))
+                            final_grade=ProjectGradeTypes.NOT_GRADED))
         processed = 0
         graded = 0
         for ps in students:
