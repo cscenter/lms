@@ -66,9 +66,8 @@ COURSE_FRIENDLY_URL_USE_SITE = False
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
-    # Don't try to determine the language based on Accept-Language http header
     # EN language is not supported at this moment anyway
-    # 'django.middleware.locale.LocaleMiddleware',
+    'core.middleware.HardCodedLocaleMiddleware',
     'core.middleware.BranchViewMiddleware',
     'subdomains.middleware.SubdomainURLRoutingMiddleware',
     'django.middleware.common.CommonMiddleware',
