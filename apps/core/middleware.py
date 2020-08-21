@@ -89,3 +89,24 @@ class BranchViewMiddleware:
                         branch_code, request.site.id)
                 except Branch.DoesNotExist:
                     return HttpResponseNotFound()
+
+
+class HardCodedLocaleMiddleware:
+    """
+    i18n is enabled on compsciclub.ru (language is determined by prefix,
+    prefix is not used for the default language)
+    LMS actually has no EN translations so we could disable i18n on it
+    or hard-code it by using `i18n_patterns(..., prefix_default_language=False)`
+    in the root URLCONF.
+    Since we share some functionality between LMS and compsciclub.ru the
+    first option is not valid. The second one looks like a workaround, we
+    abusing locale middleware logic to set request.LANGUAGE_CODE to the
+    settings.LANGUAGE_CODE value. So let's explicitly set language code
+    for the request.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request.LANGUAGE_CODE = settings.LANGUAGE_CODE
+        return self.get_response(request)
