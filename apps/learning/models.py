@@ -438,8 +438,8 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
 
     class Meta:
         ordering = ["assignment", "student"]
-        verbose_name = _("Assignment-student")
-        verbose_name_plural = _("Assignment-students")
+        verbose_name = _("Personal Assignment")
+        verbose_name_plural = _("Personal Assignments")
         unique_together = [['assignment', 'student']]
 
     def clean(self):
