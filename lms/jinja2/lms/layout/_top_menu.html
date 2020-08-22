@@ -10,7 +10,7 @@
     <div class="container">
         <div class="col-xs-9">
             <div class="logo-cell">
-                <a class="logo-container" href="{{ url('index', subdomain=None) }}"><img src="{{ static("v1/img/center/logo.svg") }}" alt="Computer Science Center"></a>
+                <a class="logo-container" href="{{ url('index', subdomain=None) }}"><img src="{{ static(LOGO_PATH) }}" alt="{{ request.site.name }}"></a>
             </div>
             <ul{% if menu|length > 8 %} class="__narrow"{% endif %}>
                 {% for menu_item in menu %}
