@@ -80,7 +80,7 @@ class StudentGroup(TimeStampedModel):
         verbose_name_plural = _("Student Groups")
 
     def __str__(self):
-        return self.name
+        return self.name if self.branch_id is None else str(self.branch)
 
     def save(self, **kwargs):
         created = self.pk is None
