@@ -57,3 +57,12 @@ CACHES['social_networks'] = {
 LOCALE_PATHS = [str(PROJECT_DIR / "locale")] + LOCALE_PATHS
 
 LDAP_TLS_TRUSTED_CA_CERT_FILE = env.str('LDAP_TLS_TRUSTED_CA_CERT_FILE', default=str(PROJECT_DIR / "LDAPTrustedCA.crt"))
+
+
+# Template customization
+FOOTER_EMAIL = 'info@compscicenter.ru'
+FOOTER_VK = 'https://vk.com/compscicenter'
+FOOTER_FACEBOOK = 'https://www.facebook.com/CSCenter'
+FOOTER_TWITTER = 'https://twitter.com/compscicenter'
+FOOTER_YOUTUBE = 'https://www.youtube.com/c/compscicenterru'
+FOOTER_INSTAGRAM = 'https://instagram.com/compscicenter'
