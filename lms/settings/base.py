@@ -126,12 +126,6 @@ SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
 ESTABLISHED = 2011
 FAVICON_PATH = 'v1/img/center/favicon.png'
 LOGO_PATH = 'v1/img/center/logo.svg'
-FOOTER_EMAIL = ''
-FOOTER_VK = ''
-FOOTER_FACEBOOK = ''
-FOOTER_TWITTER = ''
-FOOTER_YOUTUBE = ''
-FOOTER_INSTAGRAM = ''
 
 TEMPLATES = [
     {
