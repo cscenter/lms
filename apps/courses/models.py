@@ -223,6 +223,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         MetaCourse,
         verbose_name=_("Course"),
         on_delete=models.PROTECT)
+    # TODO: deny update grading system if any final grade exists
     grading_type = models.SmallIntegerField(
         verbose_name=_("CourseOffering|grading_type"),
         choices=GradingSystems.choices,
