@@ -3,9 +3,9 @@ from django.conf import settings
 
 def common_context(request):
     return {
-        "ESTABLISHED": getattr(settings, "ESTABLISHED", ""),
-        "FAVICON_PATH": getattr(settings, "FAVICON_PATH", ""),
-        "LOGO_PATH": getattr(settings, "LOGO_PATH", ""),
+        "ESTABLISHED": settings.ESTABLISHED,
+        "FAVICON_PATH": settings.FAVICON_PATH,
+        "LOGO_PATH": settings.LOGO_PATH,
     }
 
 

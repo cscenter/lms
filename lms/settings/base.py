@@ -147,10 +147,11 @@ TEMPLATES = [
                 "as_survey": "surveys.jinja2_filters.render_form",
             },
             "constants": {
-                "CSRF_COOKIE_NAME": CSRF_COOKIE_NAME,
                 "ESTABLISHED": ESTABLISHED,
                 "FAVICON_PATH": FAVICON_PATH,
                 "LOGO_PATH": LOGO_PATH,
+                # JS configuration
+                "CSRF_COOKIE_NAME": CSRF_COOKIE_NAME,
                 "SENTRY_DSN": SENTRY_DSN,
             },
             "globals": {
