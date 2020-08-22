@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Кодекс чести студента CS центра{% endblock title %}
+{% block title %}Кодекс чести студента - {{ request.site.name }}{% endblock title %}
 
 {% block content %}
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-        <h3 class="content-title">Кодекс чести студента CS центра</h3>
+        <h3 class="content-title">Кодекс чести студента</h3>
         {% if faq %}
-            Проходя курсы CS центра, я
+            Проходя курсы, я
             <br><br>
             <ul>
                 {% for qa in faq %}

@@ -24,3 +24,14 @@ SUBDOMAIN_URLCONFS = {
 
 DEFAULT_CITY_CODE = "msk"
 DEFAULT_BRANCH_CODE = "msk"
+
+# Template customization
+ESTABLISHED = 2007
+FAVICON_PATH = 'v1/img/shad/favicon.ico'
+LOGO_PATH = 'v1/img/shad/logo.svg'
+
+for template in TEMPLATES:
+    if "Jinja2" in template["BACKEND"]:
+        update_options = [("ESTABLISHED", ESTABLISHED), ("FAVICON_PATH", FAVICON_PATH), ("LOGO_PATH", LOGO_PATH)]
+        for option, value in update_options:
+            template["OPTIONS"]["constants"][option] = value
