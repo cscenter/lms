@@ -545,8 +545,8 @@ class Project(TimezoneAwareModel, TimeStampedModel):
     active = ProjectActiveManager()
 
     class Meta:
-        verbose_name = _("Student project")
-        verbose_name_plural = _("Student projects")
+        verbose_name = _("Project")
+        verbose_name_plural = _("Projects")
 
     @classmethod
     def from_db(cls, db, field_names, values):

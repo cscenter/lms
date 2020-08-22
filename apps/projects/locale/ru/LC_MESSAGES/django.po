@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-20 14:05+0000\n"
-"PO-Revision-Date: 2019-09-18 16:04+0000\n"
+"POT-Creation-Date: 2020-08-22 11:48+0000\n"
+"PO-Revision-Date: 2020-08-22 11:52+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -17,13 +17,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
-"X-Translated-Using: django-rosetta 0.9.3\n"
+"X-Translated-Using: django-rosetta 0.9.4\n"
 
 #: apps/projects/admin.py:104 apps/projects/filters.py:36
 msgid "Student"
 msgstr "Студент"
 
 #: apps/projects/admin.py:108 apps/projects/admin.py:126
+#: apps/projects/models.py:548
 msgid "Project"
 msgstr "Проект"
 
@@ -241,10 +242,9 @@ msgid "Project students"
 msgstr "Участники проекта"
 
 #: apps/projects/models.py:398
-#, fuzzy
 #| msgid "All assignments"
 msgid "Assignment|pass"
-msgstr "Все задания"
+msgstr "Удовлетворительно"
 
 #: apps/projects/models.py:414
 msgid "First Name"
@@ -336,13 +336,10 @@ msgstr "URL с презентацией участников"
 msgid "SlideShare URL for participants presentation"
 msgstr "Slideshare URL с презентацией участников"
 
-#: apps/projects/models.py:548
-msgid "Student project"
-msgstr "Студенческий проект"
-
 #: apps/projects/models.py:549
-msgid "Student projects"
-msgstr "Студенческие проекты"
+#| msgid "Project"
+msgid "Projects"
+msgstr "Проекты"
 
 #: apps/projects/models.py:577
 msgid "Yes"
@@ -656,6 +653,12 @@ msgstr "Баллы успешно обновлены"
 #: apps/projects/views.py:819
 msgid "The report results are summed up successfully."
 msgstr "Итоговый комментарий сохранён успешно."
+
+#~ msgid "Student project"
+#~ msgstr "Студенческий проект"
+
+#~ msgid "Student projects"
+#~ msgstr "Студенческие проекты"
 
 #~ msgid "StudentProject|Supervisor"
 #~ msgstr "Руководители"
