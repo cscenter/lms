@@ -114,7 +114,8 @@ class UserAdmin(_UserAdmin):
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        ]}),
         (_('External services'), {'fields': ['yandex_login', 'stepic_id',
-                                             'github_login', 'anytask_url']}),
+                                             'github_login', 'anytask_url',
+                                             'codeforces_login']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
 
     def get_formsets_with_inlines(self, request, obj=None):

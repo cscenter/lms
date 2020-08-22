@@ -317,6 +317,10 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         max_length=80,
         validators=[GITHUB_LOGIN_VALIDATOR],
         blank=True)
+    codeforces_login = models.CharField(
+        _("Codeforces Handle"),
+        max_length=80,
+        blank=True)
     stepic_id = models.PositiveIntegerField(
         _("stepik.org ID"),
         blank=True,
