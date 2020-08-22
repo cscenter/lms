@@ -302,7 +302,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         null=True, blank=True)
     time_zone = models.CharField(
         verbose_name=_("Timezone"), max_length=63,
-        choices=tuple(zip(TIMEZONES, TIMEZONES)),
+        choices=tuple(zip(pytz.all_timezones, pytz.all_timezones)),
         default=settings.DEFAULT_TIMEZONE.zone)
     bio = models.TextField(
         _("CSCUser|note"),
