@@ -35,11 +35,16 @@ LATEX_MARKDOWN_ENABLED = _(
 )
 
 TIMEZONES = (
-    'Europe/Kiev',
-    'Europe/Moscow',
-    'Europe/Minsk',
-    'Asia/Yekaterinburg',
+    'America/Los_Angeles',
     'Asia/Novosibirsk',
+    'Asia/Seoul',
+    'Asia/Yekaterinburg',
+    'Europe/Berlin',
+    'Europe/Kiev',
+    'Europe/London',
+    'Europe/Minsk',
+    'Europe/Moscow',
+    'Europe/Zurich',
 )
 
 
