@@ -28,7 +28,7 @@ class UserProfileForm(forms.ModelForm):
         self.helper = FormHelper()
         show_fields = ['phone', 'workplace', 'bio',
                        'yandex_login', 'github_login', 'stepic_id',
-                       'private_contacts']
+                       'codeforces_login', 'private_contacts']
 
         if is_club_site():
             club_fields = ['first_name', 'last_name', 'patronymic']
@@ -49,7 +49,8 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('phone', 'workplace', 'bio', 'yandex_login', 'github_login',
-                  'stepic_id', 'private_contacts', 'first_name', 'last_name',
+                  'stepic_id', 'codeforces_login',
+                  'private_contacts', 'first_name', 'last_name',
                   'patronymic', 'index_redirect', 'social_networks')
         widgets = {
             'bio': UbereditorWidget,
@@ -67,6 +68,7 @@ class UserProfileForm(forms.ModelForm):
             'yandex_login': _("<b>YANDEX.ID</b>@yandex.ru"),
             'github_login': "github.com/<b>GITHUB-ID</b>",
             'stepic_id': _("stepik.org/users/<b>USER_ID</b>"),
+            'codeforces_login': _("codeforces.com/profile/<b>HANDLE</b>"),
             'workplace': _("Specify one or more jobs (comma-separated)")
         }
 
