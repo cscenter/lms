@@ -61,16 +61,20 @@ urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+
 if settings.DEBUG:
-    import debug_toolbar
     from django.conf.urls import handler400, handler403, handler404, handler500
     urlpatterns += [
-        path('__debug__/', include(debug_toolbar.urls)),
         path('400/', handler400, kwargs={'exception': Exception("400")}),
         path('403/', handler403, kwargs={'exception': Exception("403")}),
         path('404/', handler404, kwargs={'exception': Exception("404")}),
         path('500/', handler500),
     ]
+    if 'debug_toolbar' in settings.INSTALLED_APPS:
+        import debug_toolbar
+        urlpatterns += [
+            path('__debug__/', include(debug_toolbar.urls)),
+        ]
     if 'rosetta' in settings.INSTALLED_APPS:
         urlpatterns += [path('rosetta/', include('rosetta.urls'))]
 
