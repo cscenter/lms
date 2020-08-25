@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
+import base64
 import io
+from typing import Optional
 
 import ldif
 from django.conf import settings
-from django.contrib.auth.hashers import make_password
 from django.utils.encoding import force_bytes
 
 from users.models import User
-from code_reviews.signals import GROUPS_IMPORT_TO_GERRIT
+from code_reviews.constants import GROUPS_IMPORT_TO_GERRIT
 
 
 def get_ldap_username(user: User):
@@ -19,12 +20,43 @@ def get_ldap_username(user: User):
     return user.email.replace("@", ".")
 
 
-def user_to_ldif(user: User, domain_component, redirect_to=None):
+def get_password_hash(user) -> Optional[bytes]:
+    """
+    Converts Django's password hash representation to LDAP compatible
+    hasher format. Supports pbkdf2 hasher only.
+    """
+    if not user.password:
+        return b''
+    # Could easily fail on tests since md5 hasher returns only 3 parameters
+    algorithm, iterations, salt, hash = user.password.split('$', 3)
+    if algorithm == "pbkdf2_sha256":
+        ldap_hasher_code = "{PBKDF2-SHA256}"
+    elif algorithm == "pbkdf2_sha512":
+        ldap_hasher_code = "{PBKDF2-SHA512}"
+    elif algorithm == "pbkdf2_sha1":
+        ldap_hasher_code = "{PBKDF2-SHA1}"
+    else:
+        return b''
+    # Works like `passlib.utils.binary.ab64_encode` except
+    # converting "+" to "."
+    ab64_salt = base64.b64encode(salt.encode("utf-8")).rstrip(b"=\n")
+    h = f"{ldap_hasher_code}{iterations}${ab64_salt.decode('utf-8')}${hash}"
+    return h.encode("utf-8")
+
+
+def user_to_ldap_entry(user: User, domain_component=settings.LDAP_DB_SUFFIX):
+    """
+    Converts user object into LDIF entry.
+    Notes:
+        Each added attribute needs to be added as a list.
+        Each value of this list should be forced to bytes except `dn`
+            since it's not used as a part of `modlist`
+    """
     uid = user.ldap_username
-    users_dn = f"uid={uid},ou=users,{domain_component}"
-    out = redirect_to or io.StringIO()
-    password_hash = user.password_hash_ldap or make_password(password=None)
-    entry = {
+    dn = f"uid={uid},ou=users,{domain_component}"
+    password_hash = get_password_hash(user)
+    return {
+        'dn': dn,
         'objectClass': [b'inetOrgPerson', b'simpleSecurityObject'],
         'uid': [force_bytes(uid)],
         'employeeNumber': [force_bytes(user.pk)],
@@ -35,21 +67,19 @@ def user_to_ldif(user: User, domain_component, redirect_to=None):
         'mail': [force_bytes(user.email)],
         'userPassword': [password_hash]
     }
-    ldif_writer = ldif.LDIFWriter(out)
-    ldif_writer.unparse(users_dn, entry)
-    if not redirect_to:
-        return out.getvalue()
 
 
-def export(file_path, domain_component=None):
+# FIXME: у некоторых пользователей нет пароля, надо их импортировать и посмотреть, создастся ли для них аккаунт и не будет ли там падать с 500й, если пробовать входить по пустому паролю или любому невалидному.
+def export(file_path):
     """
     Exports account data in a LDIF format for users having at least one
     of the **GROUPS_IMPORT_TO_GERRIT** groups.
     Example:
-        export("230320.ldif", domain_component="dc=example,dc=com")
-    Customize **domain_component** for the users distinguished name.
+        export("/path/to/dir/230320.ldif")
     """
-    dc = domain_component or settings.LDAP_DB_SUFFIX
     with open(file_path, 'w') as f:
-        for u in User.objects.has_role(*GROUPS_IMPORT_TO_GERRIT).distinct():
-            user_to_ldif(user=u, domain_component=dc, redirect_to=f)
+        for user in User.objects.has_role(*GROUPS_IMPORT_TO_GERRIT).distinct():
+            entry = user_to_ldap_entry(user)
+            user_dn = entry.pop('dn')
+            ldif_writer = ldif.LDIFWriter(f)
+            ldif_writer.unparse(user_dn, entry)

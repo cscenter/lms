@@ -2,11 +2,12 @@ import logging
 import platform
 import sys
 from contextlib import contextmanager
+from typing import List, Tuple, Dict
 
 import ldap
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-
+from ldap.modlist import addModlist
 
 logger = logging.getLogger(__name__)
 
@@ -30,30 +31,36 @@ ldapmodule_trace_level = 1
 ldapmodule_trace_file = sys.stderr
 # ldap.set_option(ldap.OPT_DEBUG_LEVEL, 255)
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_DEMAND)
-# XXX: On Mac OS add trusted CA to keychain.
+# XXX: On Mac OS add trusted CA to the keychain store.
 if platform.system() != 'Darwin':
     ldap.set_option(ldap.OPT_X_TLS_CACERTFILE,
                     settings.LDAP_TLS_TRUSTED_CA_CERT_FILE)
 
 
-class Connection:
+class LDAPClient:
     """
-    A connection to an LDAP server.
+    Client to the LDAP server.
     """
 
     def __init__(self, connection, suffix):
-        """
-        Creates the LDAP connection.
-        No need to call this manually, the `connection()` context
-        manager handles initialization.
-        """
-        self._connection = connection
+        self.connection = connection
         self._suffix = suffix
 
     def users(self):
-        res = self._connection.search_s(f'ou=users,{self._suffix}',
-                                        ldap.SCOPE_SUBTREE)
+        res = self.connection.search_s(f'ou=users,{self._suffix}',
+                                       ldap.SCOPE_SUBTREE)
         return res
+
+    def search_users(self, uid) -> List[Tuple[str, Dict]]:
+        return self.connection.search_s(f'ou=users,{self._suffix}',
+                                        ldap.SCOPE_ONELEVEL,
+                                        f'(uid={uid})',
+                                        ['displayName'])
+
+    def add_entry(self, entry) -> Tuple:
+        """Performs an LDAP synchronous add operation."""
+        dn = entry.pop('dn')
+        return self.connection.add_s(dn, addModlist(entry))
 
     def set_password(self, user, *, new_password, old_password=None) -> bool:
         """
@@ -62,7 +69,7 @@ class Connection:
         """
         try:
             dn = f'uid={user},ou=users,{self._suffix}'
-            self._connection.passwd_s(dn, old_password, new_password)
+            self.connection.passwd_s(dn, old_password, new_password)
             return True
         except ldap.LDAPError as e:
             logger.error(f"Unable to change password for {user}. {e}")
@@ -75,7 +82,7 @@ class Connection:
         try:
             dn = f'uid={uid},ou=users,{self._suffix}'
             mod_list = [(ldap.MOD_REPLACE, 'userPassword', password_hash)]
-            self._connection.modify_s(dn, modlist=mod_list)
+            self.connection.modify_s(dn, modlist=mod_list)
             return True
         except ldap.LDAPError as e:
             logger.error(f"Unable to change password for {uid}. {e}")
@@ -83,7 +90,7 @@ class Connection:
 
 
 @contextmanager
-def connection(**kwargs):
+def init_client(**kwargs):
     """
     Starts a new connection to the LDAP server over StartTLS.
     """
@@ -117,6 +124,6 @@ def connection(**kwargs):
         return
     logger.info("LDAP connect succeeded")
     try:
-        yield Connection(connect, suffix)
+        yield LDAPClient(connect, suffix)
     finally:
         connect.unbind_s()
