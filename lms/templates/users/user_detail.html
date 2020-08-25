@@ -483,6 +483,14 @@
                                 {% endif %}
                                 </td>
                             </tr>
+                            <tr>
+                                <td>Codeforces</td>
+                                <td>
+                                    {% if profile_user.codeforces_login %}
+                                    <a href="https://codeforces.com/profile/{{ profile_user.codeforces_login }}" target="_blank">{{ profile_user.codeforces_login }}</a>
+                                    {% else %}—{% endif %}
+                                </td>
+                            </tr>
                         </table>
                     </div>
                 {% endif %}
