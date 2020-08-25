@@ -13,6 +13,6 @@ urlpatterns = [
     # iCalendar
     path("events/<int:pk>/", EventDetailView.as_view(), name="non_course_event_detail"),
     re_path(r'^events.ics', ICalEventsView.as_view(), name='ical_events'),
-    path('users/<int:pk>/csc_classes.ics', ICalClassesView.as_view(), name='user_ical_classes'),
-    path('users/<int:pk>/csc_assignments.ics', ICalAssignmentsView.as_view(), name='user_ical_assignments'),
+    path('users/<int:pk>/classes.ics', ICalClassesView.as_view(), name='user_ical_classes'),
+    path('users/<int:pk>/assignments.ics', ICalAssignmentsView.as_view(), name='user_ical_assignments'),
 ]

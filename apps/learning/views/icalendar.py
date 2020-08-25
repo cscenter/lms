@@ -64,9 +64,9 @@ class ICalClassesView(UserICalendarView):
     @staticmethod
     def get_calendar_meta(user, site, url_builder, tz) -> ICalendarMeta:
         return ICalendarMeta(
-            name="Занятия CSC",
+            name=f"Занятия {site.name}",
             description=f"Календарь занятий {site.name} ({user.get_full_name()})",
-            file_name="csc_classes.ics"
+            file_name="classes.ics"
         )
 
     def get_calendar_events(self, user, site, url_builder, tz):
@@ -85,9 +85,9 @@ class ICalAssignmentsView(UserICalendarView):
         description = "Календарь сроков выполнения заданий {} ({})".format(
             site.name, user.get_full_name())
         return ICalendarMeta(
-            name="Задания CSC",
+            name=f"Задания {site.name}",
             description=description,
-            file_name="csc_assignments.ics")
+            file_name="assignments.ics")
 
     def get_calendar_events(self, user, site, url_builder, tz):
         builder = TeacherAssignmentICalendarEventBuilder(tz, url_builder, site)
