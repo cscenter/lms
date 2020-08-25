@@ -30,16 +30,17 @@ def test_smoke(client, curator, settings):
 
 
 @pytest.mark.django_db
-def test_course_classes(client):
+def test_course_classes(client, settings):
     user = StudentFactory(groups=[Roles.TEACHER])
     client.login(user)
-    fname = 'csc_classes.ics'
+    fname = 'classes.ics'
     # Empty calendar
     response = client.get(user.get_classes_icalendar_url())
     assert response['content-type'] == "text/calendar; charset=UTF-8"
     assert fname in response['content-disposition']
     cal = Calendar.from_ical(response.content)
-    assert "Занятия CSC" == cal['X-WR-CALNAME']
+    site = Site.objects.get(pk=settings.SITE_ID)
+    assert f"Занятия {site.name}" == cal['X-WR-CALNAME']
     # Create some content
     ccs_teaching = (CourseClassFactory
                     .create_batch(2, course__teachers=[user]))
@@ -59,17 +60,18 @@ def test_course_classes(client):
 
 
 @pytest.mark.django_db
-def test_assignments(client):
+def test_assignments(client, settings):
     user = StudentFactory(groups=[Roles.TEACHER],
                           branch__code=Branches.SPB)
     client.login(user)
-    fname = 'csc_assignments.ics'
+    fname = 'assignments.ics'
     # Empty calendar
     resp = client.get(user.get_assignments_icalendar_url())
     assert "text/calendar; charset=UTF-8" == resp['content-type']
     assert fname in resp['content-disposition']
     cal = Calendar.from_ical(resp.content)
-    assert "Задания CSC" == cal['X-WR-CALNAME']
+    site = Site.objects.get(pk=settings.SITE_ID)
+    assert f"Задания {site.name}" == cal['X-WR-CALNAME']
     # Create some content
     as_teaching = (AssignmentFactory
                    .create_batch(2, course__teachers=[user]))
