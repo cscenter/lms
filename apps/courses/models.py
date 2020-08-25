@@ -817,7 +817,8 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
     video_url = models.URLField(
         verbose_name=_("Video Recording"),
         blank=True,
-        help_text=_("Both YouTube and Yandex Video are supported"))
+        help_text=_("Both YouTube and Yandex Video are supported"),
+        max_length=512)
     other_materials = models.TextField(
         _("CourseClass|Other materials"),
         blank=True,
