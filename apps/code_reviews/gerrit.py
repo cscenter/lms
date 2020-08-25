@@ -4,7 +4,7 @@ import logging
 from django.conf import settings
 from django.db.models import prefetch_related_objects
 
-from api.providers.gerrit import Gerrit
+from code_reviews.api.gerrit import Gerrit
 from core.models import Branch
 from learning.models import Enrollment
 from courses.models import Course, CourseTeacher

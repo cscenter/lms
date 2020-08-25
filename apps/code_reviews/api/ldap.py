@@ -85,38 +85,38 @@ class Connection:
 @contextmanager
 def connection(**kwargs):
     """
-    Creates and returns a connection to the LDAP server over StartTLS.
+    Starts a new connection to the LDAP server over StartTLS.
     """
     client_uri = kwargs.pop("client_uri", settings.LDAP_CLIENT_URI)
     suffix = settings.LDAP_DB_SUFFIX
     username = kwargs.pop("username", settings.LDAP_CLIENT_USERNAME)
-    dn = f"cn={username},{suffix}"
+    login_dn = f"cn={username},{suffix}"
     password = kwargs.pop("password", settings.LDAP_CLIENT_PASSWORD)
 
     # Always check server certificate
     ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_DEMAND)
     try:
-        c = ldap.initialize(client_uri,
+        connect = ldap.initialize(client_uri,
                             # trace_level=ldapmodule_trace_level,
                             # trace_file=ldapmodule_trace_file
                             )
-        c.protocol_version = ldap.VERSION3
-        c.network_timeout = 5  # in seconds
+        connect.protocol_version = ldap.VERSION3
+        connect.network_timeout = 5  # in seconds
         # Fail if TLS is not available.
-        c.start_tls_s()
+        connect.start_tls_s()
     except ldap.LDAPError as e:
         logger.warning(f"LDAP connect failed: {e}")
         yield None
         return
 
     try:
-        c.simple_bind_s(dn, password)
+        connect.simple_bind_s(login_dn, password)
     except ldap.LDAPError as e:
         logger.warning(f"LDAP simple bind failed: {e}")
         yield None
         return
     logger.info("LDAP connect succeeded")
     try:
-        yield Connection(c, suffix)
+        yield Connection(connect, suffix)
     finally:
-        c.unbind_s()
+        connect.unbind_s()

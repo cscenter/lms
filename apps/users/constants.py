@@ -47,14 +47,6 @@ CSCENTER_ACCESS_ALLOWED = {
 }
 
 
-GROUPS_IMPORT_TO_GERRIT = [
-    Roles.STUDENT,
-    Roles.VOLUNTEER,
-    Roles.TEACHER,
-    Roles.GRADUATE
-]
-
-
 class SHADCourseGradeTypes(DjangoChoices):
     NOT_GRADED = C('not_graded', _("Not graded"))
     UNSATISFACTORY = C('unsatisfactory', _("SHADCourseGrade|Unsatisfactory"))

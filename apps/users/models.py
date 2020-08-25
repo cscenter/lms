@@ -28,8 +28,6 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from auth.permissions import perm_registry
-from auth.tasks import update_password_in_gerrit
-from core.models import TIMEZONES
 from core.timezone import Timezone, TimezoneAwareModel
 from core.timezone.constants import DATETIME_FORMAT_RU
 from core.urls import reverse
@@ -37,7 +35,7 @@ from core.utils import is_club_site, ru_en_mapping, instance_memoize
 from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeLevels
 from learning.utils import is_negative_grade
 from lms.utils import PublicRoute
-from users.constants import GROUPS_IMPORT_TO_GERRIT, Roles, \
+from users.constants import Roles, \
     SHADCourseGradeTypes, GenderTypes, Roles as UserRoles
 from users.thumbnails import UserThumbnailMixin
 from .managers import CustomUserManager
@@ -374,7 +372,6 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
 
     def save(self, **kwargs):
         created = self.pk is None
-        password_changed = self._password is not None
         self.email = self.__class__.objects.normalize_email(self.email)
         if self.email and not self.yandex_login:
             username, domain = self.email.split("@", 1)
@@ -387,15 +384,6 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
                 self.yandex_login = username
 
         super().save(**kwargs)
-        # Schedules redis queue task to update user password in gerrit's
-        # LDAP database if password was changed.
-        gerrit_sync_enabled = getattr(settings, "LDAP_SYNC_PASSWORD", False)
-        if not created and password_changed and gerrit_sync_enabled:
-            if self.roles.intersection(GROUPS_IMPORT_TO_GERRIT):
-                update_password_in_gerrit.delay(user_id=self.pk)
-        elif created and gerrit_sync_enabled:
-            # TODO: schedule task for creating LDAP account
-            pass
 
     def add_group(self, role, site_id: int = None):
         """Add new role associated with the current site by default"""

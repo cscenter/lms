@@ -16,6 +16,7 @@ INSTALLED_APPS += [
     'staff',
     'surveys.apps.SurveysConfig',
     'info_blocks.apps.InfoBlocksConfig',
+    'code_reviews.apps.CodeReviewsConfig',
     'faq.apps.FAQConfig',
     'ckeditor',
     'ckeditor_uploader',
