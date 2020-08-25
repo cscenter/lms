@@ -164,7 +164,7 @@
 
             <div class="row">
                 {% if instagram_posts %}
-                    <div class="col-lg-6">
+                    <div class="col-lg">
                         {% for post in instagram_posts %}
                             <a href="{{ post.post_url }}" target="_blank" rel="noopener" class="social-media social-media--instagram social-media--full-size" style="background-image:url('{{ post.thumbnail }}')">
                                 <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/instagram.svg') }}" width="34" alt="">
@@ -175,7 +175,7 @@
                     </div>
                 {% endif %}
 
-                <div class="col-lg-6">
+                <div class="col-lg">
                     {% if vk_news %}
                         {% for post in vk_news %}
                             <a href="{{ post.post_url }}" target="_blank" rel="noopener" class="social-media social-media--vk social-media--half-size">
