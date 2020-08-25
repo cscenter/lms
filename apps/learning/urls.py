@@ -27,7 +27,4 @@ urlpatterns = [
     path('learning/internships/', InternshipListView.as_view(), name='learning_internships'),
     path('learning/hc/', HonorCodeView.as_view(), name='honor_code'),
     path('learning/library/', include("library.urls")),
-
-    path("events/<int:pk>/", EventDetailView.as_view(), name="non_course_event_detail"),
-    re_path(r'^csc_events.ics', ICalEventsView.as_view(), name='ical_events'),
 ]
