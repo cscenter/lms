@@ -9,6 +9,7 @@ from typing import Optional, Set
 import pytz
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, PermissionsMixin, \
     _user_has_perm
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -424,28 +425,6 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
                 attempts=attempts - 1)
         except User.DoesNotExist:
             return username
-
-    # TODO: move to ldap module
-    @property
-    def password_hash_ldap(self) -> Optional[bytes]:
-        """
-        Converts Django's password hash representation to LDAP compatible
-        hasher format. Supports pbkdf2 hasher only.
-        """
-        algorithm, iterations, salt, hash = self.password.split('$', 3)
-        if algorithm == "pbkdf2_sha256":
-            ldap_hasher_code = "{PBKDF2-SHA256}"
-        elif algorithm == "pbkdf2_sha512":
-            ldap_hasher_code = "{PBKDF2-SHA512}"
-        elif algorithm == "pbkdf2_sha1":
-            ldap_hasher_code = "{PBKDF2-SHA1}"
-        else:
-            return None
-        # Works like `passlib.utils.binary.ab64_encode` except
-        # converting "+" to "."
-        ab64_salt = base64.b64encode(salt.encode("utf-8")).rstrip(b"=\n")
-        h = f"{ldap_hasher_code}{iterations}${ab64_salt.decode('utf-8')}${hash}"
-        return h.encode("utf-8")
 
     # TODO: move to ldap module
     @property
