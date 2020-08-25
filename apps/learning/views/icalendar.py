@@ -104,9 +104,9 @@ class ICalEventsView(UserICalendarView):
     @staticmethod
     def get_calendar_meta(user, site, url_builder, tz) -> ICalendarMeta:
         return ICalendarMeta(
-            name="События CSC",
+            name=f"События {site.name}",
             description="Календарь общих событий {}".format(site.name),
-            file_name="csc_events.ics")
+            file_name="events.ics")
 
     def get_calendar_events(self, user, site, url_builder, tz):
         event_builder = StudyEventICalendarEventBuilder(tz, url_builder, site)

@@ -423,7 +423,7 @@
                     {% endif %}
                 </ul>
 
-                {% if profile_user.pk == user.pk %}
+                {% if icalendars %}
                     <table class="table calc table-condensed table-striped">
                         <thead>
                         <tr>
@@ -432,24 +432,12 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <td>{% trans "Classes" %}:</td>
-                            <td>
-                                <input type="text" value="{% url 'user_ical_classes' pk=user.pk %}" disabled="disabled">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>{% trans "Assignments" %}:</td>
-                            <td>
-                                <input type="text" value="{% url 'user_ical_assignments' pk=user.pk %}" disabled="disabled">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>{% trans "Events" %}:</td>
-                            <td>
-                                <input type="text" value="{% url 'ical_events' subdomain=LMS_SUBDOMAIN %}" disabled="disabled">
-                            </td>
-                        </tr>
+                            {% for name, url in icalendars %}
+                                <tr>
+                                    <td>{{ name }}:</td>
+                                    <td><input type="text" value="{{ url }}" disabled="disabled" /></td>
+                                </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 {% endif %}

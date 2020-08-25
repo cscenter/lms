@@ -107,31 +107,27 @@
     {% endif %}
     </ul>
 
-    {% if profile_user.pk == user.pk %}
-    <table class="table calc table-condensed table-striped">
-        <thead>
-        <tr>
-            <th width="25%">{% trans ".iCal calendar" %}</th>
-            <th>{% trans "Link" %}</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-          <td>{% trans "Classes" %}:</td>
-          <td>
-            <input type="text" value="http://{{ request.get_host }}{% url 'user_ical_classes' user.pk %}"
-                   disabled="disabled">
-          </td>
-        </tr>
-        <tr>
-          <td>{% trans "Assignments" %}:</td>
-          <td>
-            <input type="text" value="http://{{ request.get_host }}{% url 'user_ical_assignments' user.pk %}"
-                   disabled="disabled">
-          </td>
-        </tr>
-        </tbody>
-      </table>
+
+    {% if icalendars %}
+        <table class="table calc table-condensed table-striped">
+            <thead>
+            <tr>
+                <th width="25%">{% trans ".iCal calendar" %}</th>
+                <th>{% trans "Link" %}</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for name, url in icalendars %}
+                    {# Don't show link with common events since it always empty #}
+                    {% if not url|endswith:"/events.ics" %}
+                        <tr>
+                            <td>{{ name }}:</td>
+                            <td><input type="text" value="{{ url }}" disabled="disabled" /></td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
     {% endif %}
 
     {% if user.is_authenticated %}

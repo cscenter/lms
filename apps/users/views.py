@@ -14,12 +14,14 @@ from django.http import HttpResponseBadRequest, \
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.utils.translation import gettext_lazy as _
 
-from files.handlers import MemoryImageUploadHandler, \
-    TemporaryImageUploadHandler
 from auth.mixins import PermissionRequiredMixin
+from core.urls import reverse
 from core.views import ProtectedFormMixin
 from courses.models import Course, Semester
+from files.handlers import MemoryImageUploadHandler, \
+    TemporaryImageUploadHandler
 from learning.forms import TestimonialForm
 from learning.models import StudentAssignment, \
     Enrollment
@@ -90,6 +92,23 @@ class UserDetailView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         u = self.request.user
         profile_user = context[self.context_object_name]
+        icalendars = []
+        if profile_user.pk == u.pk:
+            ics_url_classes = reverse('user_ical_classes',
+                                      subdomain=settings.LMS_SUBDOMAIN,
+                                      args=[u.pk])
+            ics_url_assignments = reverse('user_ical_assignments',
+                                          subdomain=settings.LMS_SUBDOMAIN,
+                                          args=[u.pk])
+            ics_url_events = reverse('ical_events',
+                                     subdomain=settings.LMS_SUBDOMAIN)
+            abs_uri = self.request.build_absolute_uri
+            icalendars = [
+                (_("Classes"), abs_uri(ics_url_classes)),
+                (_("Assignments"), abs_uri(ics_url_assignments)),
+                (_("Events"), abs_uri(ics_url_events)),
+            ]
+        context['icalendars'] = icalendars
         context['is_editing_allowed'] = (u == profile_user or u.is_curator)
         if apps.is_installed("projects"):
             from projects.models import ProjectStudent
