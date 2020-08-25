@@ -173,6 +173,8 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
         headers = [
             _("Last name"),
             _("First name"),
+            _("Yandex Login"),
+            _("Codeforces Handle"),
             _("Final grade"),
             _("Total"),
         ]
@@ -188,6 +190,8 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
                 itertools.chain(
                     [student.last_name,
                      student.first_name,
+                     student.yandex_login,
+                     student.codeforces_login,
                      student.final_grade_display,
                      student.total_score],
                     [(a.score if a and a.score is not None else '')
