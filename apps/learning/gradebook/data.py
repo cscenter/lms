@@ -57,6 +57,10 @@ class StudentMeta:
     def yandex_login(self):
         return self._enrollment.student.yandex_login
 
+    @property
+    def codeforces_login(self):
+        return self._enrollment.student.codeforces_login
+
     def get_absolute_url(self):
         return self._enrollment.student.get_absolute_url()
 
