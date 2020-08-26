@@ -56,4 +56,3 @@ CACHES['social_networks'] = {
 # Append project translation
 LOCALE_PATHS = [str(PROJECT_DIR / "locale")] + LOCALE_PATHS
 
-LDAP_TLS_TRUSTED_CA_CERT_FILE = env.str('LDAP_TLS_TRUSTED_CA_CERT_FILE', default=str(PROJECT_DIR / "LDAPTrustedCA.crt"))
