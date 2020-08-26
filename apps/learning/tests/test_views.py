@@ -43,7 +43,7 @@ def test_course_detail_view_basic_get(client):
         "course_slug": "space-odyssey",
         "semester_year": 2010,
         "semester_type": "autumn",
-        "branch_code_request": ""
+        "main_branch_code": ""
     })
     assert client.get(url).status_code == 404
 
