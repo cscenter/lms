@@ -44,51 +44,8 @@ class SubdomainBranchMiddleware:
     def __call__(self, request):
         # Allows adding a missing branch through the admin interface
         if not request.path.startswith(settings.ADMIN_URL):
-            # FIXME: handle case with wrong HTTP_HOST header. Now it raises 500 `Branch not found`
             request.branch = Branch.objects.get_current(request)
         return self.get_response(request)
-
-
-class BranchViewMiddleware:
-    """
-    Middleware that sets `branch` attribute to request object based on
-    `request.site` and `branch_code_request` view keyword argument.
-
-    Will override `request.branch` value set by `SubdomainBranchMiddleware`
-    if both are included (view middleware is called later in
-    the middleware chain)
-
-    Two named view arguments are required for the middleware to set
-    `branch` attribute to the request object:
-        branch_code_request: str - should be empty for the default branch code
-        branch_trailing_slash: str - "/" or empty in case of default branch code
-
-    """
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        return self.get_response(request)
-
-    def process_view(self, request, view_func, view_args, view_kwargs):
-        branch_code = view_kwargs.get("branch_code_request", None)
-        if branch_code is not None:
-            slash = view_kwargs.get("branch_trailing_slash", None)
-            if slash is not None:
-                # /aaa//bbb case
-                if not branch_code and slash:
-                    return HttpResponseNotFound()
-                # /aa/xxxbb or /aa/xxxcbb cases, where `xxx` is a branch code
-                # and `c` is invalid trailing slash value
-                elif branch_code and (not slash or slash != "/"):
-                    return HttpResponseNotFound()
-                elif not branch_code:
-                    branch_code = settings.DEFAULT_BRANCH_CODE
-                try:
-                    request.branch = Branch.objects.get_by_natural_key(
-                        branch_code, request.site.id)
-                except Branch.DoesNotExist:
-                    return HttpResponseNotFound()
 
 
 class HardCodedLocaleMiddleware:

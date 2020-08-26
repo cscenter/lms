@@ -28,9 +28,13 @@
                     <table class="table" width="100%">
                         <tr class="active">
                             <th>{% trans "Semester" %}</th>
+                            <th>{% trans "Branch" %}</th>
                         </tr>
                         {% for course in courses %}
-                            <tr><td><a href="{{ course.get_absolute_url }}">{{ course.semester }}</a></td></tr>
+                            <tr>
+                                <td><a href="{{ course.get_absolute_url }}">{{ course.semester }}</a></td>
+                                <td>{{ course.main_branch.name }}</td>
+                            </tr>
                         {% endfor %}
                     </table>
                 {% else %}

@@ -65,6 +65,7 @@ class UserDetailView(generic.DetailView):
         co_queryset = Course.objects.select_related('semester',
                                                     'meta_course',
                                                     'main_branch')
+        # Limit results on compsciclub.ru
         if hasattr(self.request, "branch"):
             co_queryset = co_queryset.filter(main_branch=self.request.branch)
         prefetch_list = [

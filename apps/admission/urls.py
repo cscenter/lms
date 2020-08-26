@@ -20,6 +20,6 @@ urlpatterns = [
         url(r'^interviews/(?P<pk>\d+)/$', InterviewDetailView.as_view(), name='interview_detail'),
         url(r'^interviews/(?P<pk>\d+)/comment$', InterviewCommentView.as_view(), name='interview_comment'),
         url(r'^results/$', InterviewResultsDispatchView.as_view(), name='interview_results_dispatch'),
-        url(r'^results/(?P<branch_code>nsk|kzn|spb|distance|)/$', InterviewResultsView.as_view(), name='branch_interview_results'),
+        url(r'^results/(?P<branch_code>\w+)/$', InterviewResultsView.as_view(), name='branch_interview_results'),
     ])),
 ]

@@ -14,17 +14,17 @@ from core.models import Branch
 from .utils import render_markdown
 
 
-class RequestBranchMixin:
+class BranchFromURLViewMixin:
     """
-    This view mixin sets `branch` attribute to request object based on
-    `request.site` and non-empty `branch_code` view keyword argument
+    This view mixin sets `branch` attribute to the request object based on
+    `request.site` and non-empty `branch_code` url named argument
     """
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         branch_code = kwargs.get("branch_code", None)
         if not branch_code:
             raise ImproperlyConfigured(
-                f"{self.__class__} is subclass of RequestBranchMixin but "
+                f"{self.__class__} is subclass of {self.__class__.__name__} but "
                 f"`branch_code` view keyword argument is not specified or empty")
         request.branch = Branch.objects.get_by_natural_key(branch_code,
                                                            request.site.id)
