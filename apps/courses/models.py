@@ -424,7 +424,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
             "course_slug": self.meta_course.slug,
             "semester_year": self.semester.year,
             "semester_type": self.semester.type,
-            "branch_code_request": self.main_branch.code
+            "main_branch_code": self.main_branch.code
         }
 
     def get_absolute_url(self, tab=None, **kwargs):
