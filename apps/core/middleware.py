@@ -33,9 +33,9 @@ class RedirectMiddleware:
         return HttpResponseRedirect(redirect_to, **exception.kwargs)
 
 
-class CurrentBranchMiddleware:
+class SubdomainBranchMiddleware:
     """
-    Middleware that sets `branch` attribute to request object based on
+    Middleware that sets `branch` attribute to the request object based on
     subdomain and `request.site` values.
     """
     def __init__(self, get_response):
@@ -54,7 +54,7 @@ class BranchViewMiddleware:
     Middleware that sets `branch` attribute to request object based on
     `request.site` and `branch_code_request` view keyword argument.
 
-    Will override `request.branch` value set by `CurrentBranchMiddleware`
+    Will override `request.branch` value set by `SubdomainBranchMiddleware`
     if both are included (view middleware is called later in
     the middleware chain)
 

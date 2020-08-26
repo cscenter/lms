@@ -37,7 +37,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'notifications.middleware.UnreadNotificationsCacheMiddleware',
-    'core.middleware.CurrentBranchMiddleware',
+    'core.middleware.SubdomainBranchMiddleware',
     'core.middleware.RedirectMiddleware',
 ]
 

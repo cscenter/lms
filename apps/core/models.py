@@ -162,6 +162,7 @@ class BranchManager(models.Manager):
         if request:
             return self._get_branch_by_request(request)
         else:
+            # FIXME: remove this logic? Not clear why we should use default branch code here
             return self.get_by_natural_key(settings.DEFAULT_BRANCH_CODE,
                                            site_id)
 
