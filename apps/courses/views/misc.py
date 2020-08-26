@@ -34,6 +34,7 @@ class VenueListView(generic.ListView):
 
     def get_queryset(self):
         qs = Location.objects.get_queryset()
+        # Limit results on compsciclub.ru
         if hasattr(self.request, "branch") and self.request.branch.city_id:
             qs = qs.filter(city_id=self.request.branch.city_id)
         return qs

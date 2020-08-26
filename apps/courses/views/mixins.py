@@ -2,9 +2,10 @@ import logging
 
 from django.conf import settings
 from django.db.models import Q
-from django.http import Http404
+from django.http import Http404, HttpResponseNotFound
 from django.shortcuts import get_object_or_404
 
+from core.models import Branch
 from courses.models import Course
 
 logger = logging.getLogger(__name__)
@@ -29,9 +30,7 @@ class CourseURLParamsMixin:
         * branch code + site domain (uniquely identifies branch)
 
     Assumes that `settings.RE_COURSE_URI` doesn't provide **site domain**
-    and **branch code** is optional. **branch code** should follow
-    `core.middleware.BranchViewMiddleware` conventions to set or override
-    `request.branch` value, this mixin doesn't use URL-param value directly.
+    and **branch code** is optional.
 
     if **branch code** is omitted course lookup relies on `request.branch` value
     set by `core.middleware.SubdomainBranchMiddleware`.
@@ -42,6 +41,38 @@ class CourseURLParamsMixin:
         * Attach request to the current site.
     """
     def setup(self, request, *args, **kwargs):
+        """
+        sets `branch` attribute to request object based on
+        `request.site` and `branch_code_request` view keyword argument.
+
+        Will override `request.branch` value set by `SubdomainBranchMiddleware`
+        if both are included (view middleware is called later in
+        the middleware chain)
+
+        Two named view arguments are required for the middleware to set
+        `branch` attribute to the request object:
+        branch_code_request: str - should be empty for the default branch code
+        branch_trailing_slash: str - "/" or empty in case of default branch code
+        """
+        branch_code = kwargs.get("branch_code_request", None)
+        if branch_code is not None:
+            slash = kwargs.get("branch_trailing_slash", None)
+            if slash is not None:
+                # /aaa//bbb case
+                if not branch_code and slash:
+                    raise Http404
+                # /aa/xxxbb or /aa/xxxcbb cases, where `xxx` is a branch code
+                # and `c` is invalid trailing slash value
+                elif branch_code and (not slash or slash != "/"):
+                    raise Http404
+                elif not branch_code:
+                    branch_code = settings.DEFAULT_BRANCH_CODE
+                try:
+                    request.branch = Branch.objects.get_by_natural_key(
+                        branch_code, request.site.id)
+                except Branch.DoesNotExist:
+                    raise Http404
+
         # TODO: move to RequestBranchRequired mixin?
         if not hasattr(request, "branch"):
             logger.error(f"{self.__class__} needs `request.branch` value")

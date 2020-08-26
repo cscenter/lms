@@ -39,7 +39,7 @@ from admission.services import create_invitation, create_student_from_applicant,
 from core.timezone import now_local
 from core.urls import reverse
 from core.utils import render_markdown, bucketize
-from core.views import RequestBranchMixin
+from core.views import BranchFromURLViewMixin
 from tasks.models import Task
 from users.mixins import CuratorOnlyMixin
 from users.models import User
@@ -536,7 +536,7 @@ class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
 
 
 class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
-                           RequestBranchMixin, TemplateResponseMixin,
+                           BranchFromURLViewMixin, TemplateResponseMixin,
                            BaseModelFormSetView):
     """
     We can have multiple interviews for applicant

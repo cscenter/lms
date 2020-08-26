@@ -6,7 +6,6 @@ from django.contrib.sites.models import Site
 from django.utils.encoding import smart_bytes
 
 from compsciclub_ru.views import ClubClassesFeed
-from core.middleware import BranchViewMiddleware
 from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.models import Course
@@ -102,12 +101,7 @@ def test_club_classes_feed(rf, client, settings, mocker):
     # Create mock request for ClubClassesFeed, url does not matter, only branch is used
     request = rf.request()
     request.site = Site.objects.get(id=settings.SITE_ID)
-    middleware = BranchViewMiddleware(mocker.stub(name='get_response'))
-    process_view = partial(middleware.process_view, view_func=lambda: "",
-                           view_args=[])
-    process_view(request, view_kwargs={"branch_code_request": branch_club.code,
-                                       "branch_trailing_slash": "/"})
-    assert request.branch == branch_club
+    request.branch = branch_club
     feed = ClubClassesFeed()
 
     classes = list(feed.items(request))
