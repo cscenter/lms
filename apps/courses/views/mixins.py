@@ -34,7 +34,7 @@ class CourseURLParamsMixin:
     `request.branch` value, this mixin doesn't use URL-param value directly.
 
     if **branch code** is omitted course lookup relies on `request.branch` value
-    set by `core.middleware.CurrentBranchMiddleware`.
+    set by `core.middleware.SubdomainBranchMiddleware`.
 
     If **branch code** is provided, two options are available:
         * get any course with **branch code** without guarantee that this course
