@@ -1,5 +1,6 @@
 import json
 import logging
+from enum import IntEnum
 from urllib.parse import urljoin, quote_plus
 
 import requests
@@ -20,6 +21,21 @@ for attr in REQUIRED_SETTINGS:
     if not hasattr(settings, attr):
         raise ImproperlyConfigured(
             "Please add {0!r} to your settings module".format(attr))
+
+
+class ResponseStatus(IntEnum):
+    """
+    Gerrit response codes: https://review.compscicenter.ru/Documentation/rest-api.html#response-codes
+    """
+    SUCCESS = 200
+    CREATED = 201
+    NO_CONTENT = 204  # Empty response
+    BAD_REQUEST = 400  # Bad Request
+    NO_ACCESS = 403  # You don't have enough permissions
+    NOT_FOUND = 404  # Resource (project, branch, change) not found
+    NOT_ALLOWED = 405  # Method Not Allowed
+    CONFLICT = 409  # Current state of the resource does not allow this operation
+    ALREADY_EXISTS = 412  # Precondition failed, resource already exists
 
 
 class Response:
@@ -69,18 +85,18 @@ class Response:
         if self._response.request.method not in ["PUT", "POST"]:
             raise AttributeError(f"Method is not supported "
                                  f"for {self._response.request.method}")
-        return self._response.status_code == 201
+        return self._response.status_code == ResponseStatus.CREATED
 
     @property
     def no_content(self):
-        return self._response.status_code == 204
+        return self._response.status_code == ResponseStatus.NO_CONTENT
 
     @property
     def already_exists(self):
         if self._response.request.method not in ["PUT", "POST"]:
             raise AttributeError(f"Method is not supported "
                                  f"for {self._response.request.method}")
-        return (self._response.status_code in [412, 409] and
+        return (self._response.status_code in [ResponseStatus.ALREADY_EXISTS, ResponseStatus.CONFLICT] and
                 "already exists" in self._response.text)
 
 
