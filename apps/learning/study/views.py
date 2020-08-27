@@ -44,8 +44,9 @@ class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
     permission_required = "study.view_schedule"
 
     def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
-        # FIXME: get student profile instead. User.branch_id model is optional for students
-        branches = [self.request.user.branch_id]
+        student = self.request.user
+        student_profile = student.get_student_profile(self.request.site)
+        branches = [student_profile.branch_id]
         start_date, end_date = extended_month_date_range(month_period)
         return get_calendar_events(branch_list=branches, start_date=start_date,
                                    end_date=end_date)
