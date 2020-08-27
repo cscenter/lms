@@ -11,7 +11,7 @@ from code_reviews.models import GerritChange
 from core.models import Branch
 from learning.models import Enrollment, StudentAssignment, AssignmentComment
 from courses.models import Course, CourseTeacher
-from users.models import User
+from users.models import User, StudentProfile
 
 logger = logging.getLogger(__name__)
 
@@ -183,7 +183,7 @@ def get_project_name(course):
 def get_branch_name(student, course):
     git_branch_name = student.get_abbreviated_name_in_latin()
     if len(course.branches.all()) > 1:
-        git_branch_name = f"{student.branch.code}/{git_branch_name}"
+        git_branch_name = f"{student.student_profile.branch.code}/{git_branch_name}"
     return git_branch_name
 
 
@@ -295,7 +295,7 @@ def init_project_for_course(course, skip_users=False):
     # For each enrolled student create separated branch
     enrollments = (Enrollment.active
                    .filter(course_id=course.pk)
-                   .select_related("student", "student__branch"))
+                   .select_related("student", "student_profile__branch"))
     for e in enrollments:
         add_student_to_project(client, e.student, course,
                                project_students_group_uuid)
@@ -338,8 +338,9 @@ def add_test_student_to_project(client: Gerrit, course: Course,
     """
     logger.debug("Add test student to the project")
     branch = Branch.objects.get_by_natural_key('spb', site_id=settings.SITE_ID)
-    student = User(username='student', branch=branch)
+    student = User(username='student')
     student.email = 'student'  # hack `.ldap_username`
+    student.student_profile = StudentProfile(branch=branch)
     add_student_to_project(client, student, course,
                            project_students_group_uuid)
 
@@ -378,7 +379,7 @@ def add_users_to_project_by_email(course: Course, emails):
     enrollments = (Enrollment.active
                    .filter(course_id=course.pk,
                            student__email__in=emails)
-                   .select_related("student", "student__branch"))
+                   .select_related("student", "student_profile__branch"))
     for e in enrollments:
         add_student_to_project(client, e.student, course,
                                project_students_group_uuid)
