@@ -297,12 +297,12 @@ def init_project_for_course(course, skip_users=False):
                    .filter(course_id=course.pk)
                    .select_related("student", "student_profile__branch"))
     for e in enrollments:
-        add_student_to_project(client, e.student, course,
+        add_student_to_project(client, e.student_profile, course,
                                project_students_group_uuid)
     # TODO: What to do with notifications?
 
 
-def add_student_to_project(client: Gerrit, student: User, course: Course,
+def add_student_to_project(client: Gerrit, student: StudentProfile, course: Course,
                            project_students_group_uuid=None):
     if project_students_group_uuid is None:
         students_group_name = get_students_group_name(course)
@@ -340,7 +340,7 @@ def add_test_student_to_project(client: Gerrit, course: Course,
     branch = Branch.objects.get_by_natural_key('spb', site_id=settings.SITE_ID)
     student = User(username='student')
     student.email = 'student'  # hack `.ldap_username`
-    student.student_profile = StudentProfile(branch=branch)
+    student.student_profile = StudentProfile(user=student, branch=branch)
     add_student_to_project(client, student, course,
                            project_students_group_uuid)
 
@@ -390,10 +390,10 @@ def get_gerrit_robot() -> User:
 
 
 def post_change_url_comment(student_assignment: StudentAssignment, change_url: str):
-    message = f'Solution was submitted for code review. Use this link to track progress: %(change_url)s.'
+    message = _('Solution was submitted for code review. Use this link to track progress: %(change_url)s.' %
+                {'change_url': change_url})
     AssignmentComment.objects.create(student_assignment=student_assignment,
-                                     text=_(message) % {'change_url': change_url},
-                                     author=get_gerrit_robot())
+                                     text=message, author=get_gerrit_robot())
 
 
 def create_change(client, student_assignment: StudentAssignment):
