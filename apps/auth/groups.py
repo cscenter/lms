@@ -216,6 +216,11 @@ class ProjectRole(RoleBase):
         super().__init__(self.ROLE, *args, **kwargs)
 
 
+class ServiceRole(RoleBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(self.ROLE, *args, **kwargs)
+
+
 @register_access_role
 class Student(CourseRole):
     ROLE = "student"
@@ -262,3 +267,9 @@ class Curator(ProjectRole):
 class Reviewer(ProjectRole):
     ROLE = "project_reviewer"
     verbose_name = gettext_noop("Project Reviewer")
+
+
+@register_access_role
+class ServiceUser(ServiceRole):
+    ROLE = "service_user"
+    verbose_name = gettext_noop("Service User")

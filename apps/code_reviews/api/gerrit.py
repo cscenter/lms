@@ -72,6 +72,10 @@ class Response:
         return self._response.status_code == 201
 
     @property
+    def no_content(self):
+        return self._response.status_code == 204
+
+    @property
     def already_exists(self):
         if self._response.request.method not in ["PUT", "POST"]:
             raise AttributeError(f"Method is not supported "
@@ -195,6 +199,10 @@ class Gerrit:
             **payload
         })
 
+    def get_branch(self, project_name, branch_name):
+        branch_uri = f"projects/{quote_plus(project_name)}/branches/{quote_plus(branch_name)}"
+        return self._request("GET", branch_uri)
+
     def get_account(self, account_id):
         account_uri = f"accounts/{quote_plus(account_id)}"
         return self._request("GET", account_uri)
@@ -209,3 +217,47 @@ class Gerrit:
         return self._request("PUT", account_uri, json={
             "name": new_name
         })
+
+    def set_reviewer(self, change_id, reviewer):
+        change_reviewers_uri = f'changes/{change_id}/reviewers'
+        return self._request('POST', change_reviewers_uri, json={
+            'reviewer': reviewer
+        })
+
+    def create_change(self, project_name, branch_name, subject):
+        changes_uri = 'changes/'
+        return self._request('POST', changes_uri, json={
+            'project': project_name,
+            'subject': subject,
+            'branch': branch_name,
+        })
+
+    def get_change(self, change_id):
+        changes_uri = f'changes/{change_id}'
+        return self._request('GET', changes_uri)
+
+    def list_files(self, change_id):
+        changes_uri = f'changes/{change_id}?o=CURRENT_REVISION&o=CURRENT_FILES'
+        return self._request('GET', changes_uri)
+
+    def delete_file(self, change_id, path_to_file):
+        change_edit_uri = f'changes/{change_id}/edit/{path_to_file}'
+        return self._request('DELETE', change_edit_uri)
+
+    def upload_file(self, change_id, path_to_file, binary_content):
+        change_edit_uri = f'changes/{change_id}/edit/{path_to_file}'
+        return self._request('PUT', change_edit_uri, json={
+            'binary_content': binary_content
+        })
+
+    def get_change_edit(self, change_id):
+        change_edit_uri = f'changes/{change_id}/edit'
+        return self._request('GET', change_edit_uri)
+
+    def publish_change_edit(self, change_id):
+        change_edit_uri = f'changes/{change_id}/edit:publish'
+        return self._request('POST', change_edit_uri)
+
+    def delete_change_edit(self, change_id):
+        change_edit_uri = f'changes/{change_id}/edit'
+        return self._request('DELETE', change_edit_uri)
