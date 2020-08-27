@@ -17,6 +17,8 @@ class GerritUpdateReviewGrade(APIView):
     def post(self, request, *args, **kwargs):
         queryset = (GerritChange.objects
                     .select_related('student_assignment'))
+        if 'change_id' not in request.data:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         change = get_object_or_404(queryset, change_id=request.data['change_id'])
         serializer = StudentAssignmentScoreSerializer(change.student_assignment, data=request.data)
         if serializer.is_valid():
