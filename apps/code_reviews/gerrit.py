@@ -1,4 +1,3 @@
-import base64
 import copy
 import logging
 
@@ -385,7 +384,7 @@ def add_users_to_project_by_email(course: Course, emails):
                                project_students_group_uuid)
 
 
-def get_gerrit_robot():
+def get_gerrit_robot() -> User:
     return User.objects.get(username=settings.GERRIT_ROBOT_USERNAME)
 
 
@@ -484,14 +483,12 @@ def upload_attachment_to_gerrit(assignment_comment_id):
             client.delete_file(change.change_id, file)
 
     # Upload new solution as a Change Edit
-    content = attached_file.read()
-    binary_content = f'data:text/plain;base64,{base64.b64encode(content).decode()}'
-    response = client.upload_file(change.change_id, solution_filename, binary_content)
+    response = client.upload_file(change.change_id, solution_filename, attached_file)
     if not response.no_content:
-        logger.info('Something wrong with file upload')
+        logger.info('Failed to upload the solution')
 
     # Publish Change Edit with all modifications
     response = client.publish_change_edit(change.change_id)
     if not response.no_content:
-        logger.info('Something wrong with change edit publish')
+        logger.info('Failed to publish change edit')
         return

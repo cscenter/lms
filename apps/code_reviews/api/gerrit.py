@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 from enum import IntEnum
@@ -260,8 +261,11 @@ class Gerrit:
         change_edit_uri = f'changes/{change_id}/edit/{path_to_file}'
         return self._request('DELETE', change_edit_uri)
 
-    def upload_file(self, change_id, path_to_file, binary_content):
+    def upload_file(self, change_id, path_to_file, file):
         change_edit_uri = f'changes/{change_id}/edit/{path_to_file}'
+
+        content = file.read()
+        binary_content = f'data:text/plain;base64,{base64.b64encode(content).decode()}'
         return self._request('PUT', change_edit_uri, json={
             'binary_content': binary_content
         })
