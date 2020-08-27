@@ -104,6 +104,7 @@ class LearningPermissionsMixin:
 
 class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
     index_redirect = None
+    branch_id = None
     roles = set()
 
     def __str__(self):

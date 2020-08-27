@@ -115,7 +115,6 @@ def test_passed_courses():
 @pytest.mark.django_db
 def test_github_login_validation():
     user = UserFactory.build()
-    user.branch = BranchFactory()
     with pytest.raises(ValidationError):
         user.github_login = "mikhail--m"
         user.clean_fields()

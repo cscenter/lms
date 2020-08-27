@@ -43,7 +43,7 @@ def enroll_in_course(user, permission_object: EnrollPermissionObject):
     if course.main_branch_id != student_profile.branch_id:  # avoid db hit
         if not any(b.pk == student_profile.branch_id for b in course.branches.all()):
             logger.debug("Student with branch %s could not enroll in the "
-                         "course %s", user.branch_id, course)
+                         "course %s", student_profile.branch_id, course)
             return False
     return True
 

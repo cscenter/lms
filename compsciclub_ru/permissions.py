@@ -20,7 +20,7 @@ def enroll_in_course(user, permission_object: EnrollPermissionObject):
         return False
     if not course.enrollment_is_open:
         return False
-    if course.main_branch_id != user.branch_id:
+    if course.main_branch_id != student_profile.branch_id:
         # Course have to be shared for any club branch to be available
         # on compsciclub.ru
         if course.main_branch.site_id != settings.SITE_ID:
