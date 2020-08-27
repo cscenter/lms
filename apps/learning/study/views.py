@@ -44,6 +44,7 @@ class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
     permission_required = "study.view_schedule"
 
     def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
+        # FIXME: get student profile instead. User.branch_id model is optional for students
         branches = [self.request.user.branch_id]
         start_date, end_date = extended_month_date_range(month_period)
         return get_calendar_events(branch_list=branches, start_date=start_date,
@@ -215,6 +216,7 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
             queryset=User.objects.only("id", "first_name", "last_name",
                                        "patronymic"))
         course_offerings = (Course.objects
+                            # FIXME: user.branch is optional
                             .available_in(self.request.user.branch_id)
                             .filter(in_current_term | enrolled_in)
                             .select_related('meta_course', 'semester',

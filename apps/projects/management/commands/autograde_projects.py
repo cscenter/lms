@@ -51,6 +51,7 @@ class Command(BaseCommand):
             # For external project `supervisor_grade` value is optional
             if not ps.project.is_external and ps.supervisor_grade is None:
                 continue
+            # FIXME: User.branch_id is optional for student!
             key = ReportingPeriodKey(branch_code=ps.student.branch.code,
                                      project_type=ps.project.project_type)
             if key not in periods:
