@@ -6,7 +6,7 @@ It exposes the WSGI callable as a module-level variable named ``application``.
 
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE",
-                      "yandexdataschool_ru.settings.production")
+                      "lk_yandexdataschool_ru.settings.production")
 
 from django.conf import settings
 

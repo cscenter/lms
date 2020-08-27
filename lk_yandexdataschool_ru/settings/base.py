@@ -13,7 +13,7 @@ if REDIS_DB_INDEX is None:
 
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["lk.yandexdataschool.ru"])
 
-WSGI_APPLICATION = 'yandexdataschool_ru.wsgi.application'
+WSGI_APPLICATION = 'lk_yandexdataschool_ru.wsgi.application'
 ROOT_URLCONF = 'lms.urls'
 # FIXME: move to the SiteConfiguration model
 LMS_SUBDOMAIN = None
