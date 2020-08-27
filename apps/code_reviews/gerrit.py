@@ -1,12 +1,16 @@
+import base64
 import copy
 import logging
 
 from django.conf import settings
 from django.db.models import prefetch_related_objects
+from django.utils.translation import ugettext_lazy as _
+from django_rq import job
 
 from code_reviews.api.gerrit import Gerrit
+from code_reviews.models import GerritChange
 from core.models import Branch
-from learning.models import Enrollment
+from learning.models import Enrollment, StudentAssignment, AssignmentComment
 from courses.models import Course, CourseTeacher
 from users.models import User
 
@@ -177,6 +181,13 @@ def get_project_name(course):
     return f"{branch_code}/{course_name}_{course.semester.year}"
 
 
+def get_branch_name(student, course):
+    git_branch_name = student.get_abbreviated_name_in_latin()
+    if len(course.branches.all()) > 1:
+        git_branch_name = f"{student.branch.code}/{git_branch_name}"
+    return git_branch_name
+
+
 def get_reviewers_group_name(course):
     project_name = get_project_name(course)
     return f"{project_name}-reviewers"
@@ -309,9 +320,7 @@ def add_student_to_project(client: Gerrit, student: User, course: Course,
     # Permits read master branch by adding to students group
     client.include_group(project_students_group_uuid, student_group_uuid)
     # Create personal branch
-    git_branch_name = student.get_abbreviated_name_in_latin()
-    if len(course.branches.all()) > 1:
-        git_branch_name = f"{student.branch.code}/{git_branch_name}"
+    git_branch_name = get_branch_name(student, course)
     client.create_git_branch(project_name, git_branch_name, {
         "revision": "master"
     })
@@ -374,3 +383,115 @@ def add_users_to_project_by_email(course: Course, emails):
     for e in enrollments:
         add_student_to_project(client, e.student, course,
                                project_students_group_uuid)
+
+
+def get_gerrit_robot():
+    return User.objects.get(username=settings.GERRIT_ROBOT_USERNAME)
+
+
+def post_change_url_comment(student_assignment: StudentAssignment, change_url: str):
+    message = f'Solution was submitted for code review. Use this link to track progress: %(change_url)s.'
+    AssignmentComment.objects.create(student_assignment=student_assignment,
+                                     text=_(message) % {'change_url': change_url},
+                                     author=get_gerrit_robot())
+
+
+def create_change(client, student_assignment: StudentAssignment):
+    """
+    Create new change in Gerrit and store info in GerritChange model.
+    """
+    course = student_assignment.assignment.course
+
+    # Check that project exists
+    project_name = get_project_name(course)
+    project_res = client.get_project(project_name)
+    if not project_res.ok:
+        logger.error(f"Project {project_name} not found")
+        return
+
+    # Check that student branch exists
+    branch_name = get_branch_name(student_assignment.student, course)
+    branch_res = client.get_branch(project_name, branch_name)
+    if not branch_res.ok:
+        logger.error(f"Branch {branch_name} of {project_name} not found")
+        return
+
+    change_subject = f'{student_assignment.assignment.title} ({student_assignment.student.get_full_name()})'
+
+    change_res = client.create_change(project_name, branch_name, subject=change_subject)
+    if not change_res.created:
+        return None
+    change_id = change_res.json['id']
+    change_number = change_res.json['_number']
+    change_url = f'{settings.GERRIT_API_URI.replace("/a/", "/c/")}{project_name}/+/{change_number}'
+    logger.info(f'Created change {change_id}')
+    change = GerritChange.objects.create(student_assignment=student_assignment, change_id=change_id,
+                                         site=student_assignment.assignment.course.main_branch.site)
+
+    post_change_url_comment(student_assignment, change_url)
+
+    return change
+
+
+def get_or_create_change(client: Gerrit, student_assignment: StudentAssignment):
+    change = GerritChange.objects.filter(student_assignment=student_assignment).first()
+    if not change:
+        change = create_change(client, student_assignment)
+        # TODO: set_reviewers_for_change(client, change)
+    return change
+
+
+def list_change_files(client: Gerrit, change: GerritChange):
+    response = client.list_files(change.change_id)
+    if not response.ok:
+        logger.info('Failed to retrieve change')
+    data = response.json
+    current_revision = data['current_revision']
+    files = data['revisions'][current_revision]['files']
+    return files
+
+
+@job('default')
+def upload_attachment_to_gerrit(assignment_comment_id):
+    assignment_comment = AssignmentComment.objects.select_related('student_assignment').get(pk=assignment_comment_id)
+    student_assignment = assignment_comment.student_assignment
+    attached_file = assignment_comment.attached_file
+
+    client = Gerrit(settings.GERRIT_API_URI,
+                    auth=(settings.GERRIT_CLIENT_USERNAME,
+                          settings.GERRIT_CLIENT_HTTP_PASSWORD))
+
+    change = get_or_create_change(client, student_assignment)
+    if not change:
+        logger.info('Failed to get or create a change')
+        return
+
+    response = client.get_change_edit(change.change_id)
+    if not response.no_content:
+        logger.info('Found previous change edit')
+        response = client.delete_change_edit(change.change_id)
+        if not response.no_content:
+            logger.error('Failed to delete previous change edit')
+
+    # Save extension to enable syntax highlighting in the UI
+    extension = attached_file.name.split('.')[-1]
+    solution_filename = f"solution.{extension}"
+
+    # Delete other existing files
+    change_files = list_change_files(client, change)
+    for file in change_files:
+        if file != solution_filename:
+            client.delete_file(change.change_id, file)
+
+    # Upload new solution as a Change Edit
+    content = attached_file.read()
+    binary_content = f'data:text/plain;base64,{base64.b64encode(content).decode()}'
+    response = client.upload_file(change.change_id, solution_filename, binary_content)
+    if not response.no_content:
+        logger.info('Something wrong with file upload')
+
+    # Publish Change Edit with all modifications
+    response = client.publish_change_edit(change.change_id)
+    if not response.no_content:
+        logger.info('Something wrong with change edit publish')
+        return

@@ -6,6 +6,9 @@ environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
 from lms.settings.extended import *
 
 SITE_ID = 3
+
+PROJECT_DIR = Path(__file__).parents[1]
+
 if REDIS_DB_INDEX is None:
     for queue_config in RQ_QUEUES.values():
         queue_config['DB'] = SITE_ID
@@ -35,3 +38,5 @@ for template in TEMPLATES:
         update_options = [("ESTABLISHED", ESTABLISHED), ("FAVICON_PATH", FAVICON_PATH), ("LOGO_PATH", LOGO_PATH)]
         for option, value in update_options:
             template["OPTIONS"]["constants"][option] = value
+
+LDAP_TLS_TRUSTED_CA_CERT_FILE = env.str('LDAP_TLS_TRUSTED_CA_CERT_FILE', default=str(PROJECT_DIR / "LDAPTrustedCA.crt"))
