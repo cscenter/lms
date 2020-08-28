@@ -420,10 +420,6 @@ class DistanceProgramView(generic.TemplateView):
     template_name = "compscicenter_ru/programs/distance.html"
 
 
-class OpenNskView(generic.TemplateView):
-    template_name = "open_nsk.html"
-
-
 class CourseVideoTypes(DjangoChoices):
     COURSE = C('course', _('Course'))
     LECTURE = C('lecture', _('Lecture'))
@@ -563,7 +559,7 @@ class MetaCourseDetailView(PublicURLMixin, generic.DetailView):
         branches = Branch.objects.for_site(site_id=self.request.site.pk)
         courses = (Course.objects
                    .filter(meta_course=self.object)
-                   .in_branches(branches)
+                   .made_by(branches)
                    .select_related("meta_course", "semester", "main_branch")
                    .prefetch_related(CourseTeacher.lecturers_prefetch())
                    .order_by('-semester__index'))
@@ -585,8 +581,9 @@ class MetaCourseDetailView(PublicURLMixin, generic.DetailView):
             tabs.sort()
         context['tabs'] = tabs
         context['grouped_courses'] = courses_by_branch
-        active_study_programs = get_study_programs(self.object.pk,
-                                                   filters=[Q(is_active=True)])
+        active_study_programs = get_study_programs(
+            self.object.pk,
+            filters=[Q(is_active=True), Q(branch__site=self.request.site)])
         context['study_programs'] = active_study_programs
         return context
 
