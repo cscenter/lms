@@ -60,9 +60,6 @@ DATABASES = {
 }
 
 
-# Don't bind course lookup with `request.site` in CourseURLParamsMixin
-COURSE_FRIENDLY_URL_USE_SITE = False
-
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
