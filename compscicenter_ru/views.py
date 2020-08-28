@@ -315,7 +315,7 @@ class AlumniView(TemplateView):
             branch_options.append(row)
         # Area state and props
         areas = [{"label": a.name, "value": a.code} for a in
-                 AcademicDiscipline.objects.all()]
+                 AcademicDiscipline.objects.filter(code__in=['cs', 'se', 'ds'])]
         area = self.kwargs.get("area", None)
         area_option = next((a for a in areas if a['value'] == area), None)
         app_data = {
