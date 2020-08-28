@@ -38,13 +38,14 @@ from faq.models import Question
 from learning.models import Enrollment, GraduateProfile
 from learning.services import course_access_role, get_student_profile
 from learning.roles import Roles
-from learning.settings import Branches
+from learning.settings import Branches, GradeTypes
 from online_courses.models import OnlineCourse, OnlineCourseTuple
-from projects.constants import ProjectTypes
+from projects.constants import ProjectTypes, ProjectGradeTypes
 from projects.models import ProjectStudent
 from stats.views import AlumniStats
 from study_programs.models import StudyProgram, AcademicDiscipline
 from study_programs.services import get_study_programs
+from users.constants import SHADCourseGradeTypes
 from users.models import User, SHADCourseRecord, StudentProfile
 
 # FIXME: remove?
@@ -510,11 +511,9 @@ class GraduateProfileView(generic.DetailView):
         student_profile = graduate_profile.student_profile
         timeline_elements = []
         # TODO: move to timeline queryset
-        exclude_grades = [Enrollment.GRADES.NOT_GRADED,
-                          Enrollment.GRADES.UNSATISFACTORY]
         enrollments = (Enrollment.active
-                       .filter(student_id=student_profile.user_id)
-                       .exclude(grade__in=exclude_grades)
+                       .filter(student_id=student_profile.user_id,
+                               grade__in=GradeTypes.satisfactory_grades)
                        .select_related('course',
                                        'course__semester',
                                        'course__main_branch',
@@ -524,15 +523,15 @@ class GraduateProfileView(generic.DetailView):
         for e in enrollments:
             timeline_elements.append(timeline_element_factory(e))
         shad_courses = (SHADCourseRecord.objects
-                        .filter(student_id=student_profile.user_id)
-                        .exclude(grade__in=exclude_grades)
+                        .filter(student_id=student_profile.user_id,
+                                grade__in=SHADCourseGradeTypes.satisfactory_grades)
                         .select_related("semester")
                         .order_by("semester__index", "name"))
         for c in shad_courses:
             timeline_elements.append(timeline_element_factory(c))
         projects = (ProjectStudent.objects
-                    .filter(student_id=student_profile.user_id)
-                    .exclude(final_grade__in=exclude_grades)
+                    .filter(student_id=student_profile.user_id,
+                            final_grade__in=ProjectGradeTypes.satisfactory_grades)
                     .select_related('project', 'project__semester')
                     .order_by('project__semester__index'))
         for c in projects:

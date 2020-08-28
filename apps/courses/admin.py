@@ -85,7 +85,6 @@ class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
-    exclude = ('additional_branches',)
     list_filter = ['main_branch', 'semester']
     list_display = ['meta_course', 'semester', 'main_branch',
                     'is_published_in_video']
