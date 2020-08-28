@@ -122,7 +122,7 @@ class UserThumbnailMixin(ThumbnailMixin):
 class BaseStubImage(BaseImageFile):
     @property
     def url(self):
-        return staticfiles_storage.url("v1/img/center/profile_no_photo.png")
+        return staticfiles_storage.url(f"v2/img/placeholder/user{self._suffix}.png")
 
     def __init__(self, **kwargs):
         geometry = kwargs.get("geometry", ThumbnailSizes.BASE)
