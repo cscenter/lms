@@ -28,7 +28,7 @@ from core.timezone import TimezoneAwareModel, now_local
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Assignment, StudentGroupTypes, \
-    Semester
+    Semester, AssignmentSubmissionTypes
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
 from learning import settings as learn_conf
@@ -607,6 +607,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         self.__original_is_published = self.is_published
 
     def save(self, **kwargs):
+        from code_reviews.gerrit import upload_attachment_to_gerrit
         from learning.services import notify_new_assignment_comment
         created = self.pk is None
         is_published_before = getattr(self, '__original_is_published', False)
@@ -616,6 +617,9 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         if self.is_published and (created or not is_published_before):
             notify_new_assignment_comment(self)
         self.__original_is_published = self.is_published
+        with_code_review = self.student_assignment.assignment.submission_type == AssignmentSubmissionTypes.CODE_REVIEW
+        if self.attached_file and with_code_review:
+            upload_attachment_to_gerrit.delay(self.pk)
 
 
 class AssignmentNotification(TimezoneAwareModel, TimeStampedModel):
