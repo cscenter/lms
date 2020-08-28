@@ -345,7 +345,8 @@ class OnCampusProgramsView(generic.TemplateView):
         context = super().get_context_data(**kwargs)
         # Active programs grouped by branch
         current_programs = (StudyProgram.objects
-                            .filter(is_active=True)
+                            .filter(is_active=True,
+                                    branch__site=self.request.site)
                             .exclude(branch__city=None)
                             .select_related("branch", "academic_discipline")
                             .order_by("branch",
@@ -375,10 +376,12 @@ class OnCampusProgramDetailView(PublicURLMixin, generic.TemplateView):
 
     def get_context_data(self, discipline_code, **kwargs):
         context = super().get_context_data(**kwargs)
-        selected_branch = self.request.GET.get('branch', Branches.SPB)
+        selected_branch = self.request.GET.get('branch',
+                                               settings.DEFAULT_BRANCH_CODE)
         study_program = (StudyProgram.objects
                          .filter(academic_discipline__code=discipline_code,
                                  branch__code=selected_branch,
+                                 branch__site=self.request.site,
                                  is_active=True)
                          .exclude(branch__city=None)
                          .prefetch_core_courses_groups()
@@ -391,7 +394,8 @@ class OnCampusProgramDetailView(PublicURLMixin, generic.TemplateView):
         tabs = TabList()
         branches = (Branch.objects
                     .filter(study_programs__academic_discipline__code=discipline_code,
-                            study_programs__is_active=True)
+                            study_programs__is_active=True,
+                            site=self.request.site)
                     .exclude(city=None))
         for branch in branches:
             tab = Tab(target=branch.code, name=branch.name,
