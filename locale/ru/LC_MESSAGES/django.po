@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-27 20:33+0000\n"
-"PO-Revision-Date: 2020-08-27 20:37+0000\n"
+"POT-Creation-Date: 2020-08-28 07:45+0000\n"
+"PO-Revision-Date: 2020-08-28 07:49+0000\n"
 "Last-Translator: b'  <nikolay.kapralov@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -168,21 +168,19 @@ msgid "Service User"
 msgstr "Служебный пользователь"
 
 #: apps/code_reviews/apps.py:7
-#| msgid "Course Review"
 msgid "Code Review"
 msgstr "Код-ревью"
 
-#: apps/code_reviews/gerrit.py:393
-#, python-format
+#: apps/code_reviews/gerrit.py:400
+#, python-brace-format
 msgid ""
 "Solution was submitted for code review. Use this link to track progress: "
-"%(change_url)s."
+"{link}."
 msgstr ""
 "Решение было отправлено на код-ревью. За ходом проверки Вы можете следить по"
-" ссылке: %(change_url)s."
+" ссылке: {link}."
 
 #: apps/code_reviews/models.py:11
-#| msgid "student_assignment"
 msgid "Student Assignment"
 msgstr "Персональное задание"
 
@@ -999,7 +997,6 @@ msgid "External Service"
 msgstr "Внешний сервис"
 
 #: apps/courses/models.py:1031
-#| msgid "No Submission"
 msgid "Code Review Submission"
 msgstr "Задача с код-ревью"
 
