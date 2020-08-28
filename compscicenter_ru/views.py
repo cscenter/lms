@@ -171,7 +171,11 @@ class TestimonialsListView(TemplateView):
     template_name = "compscicenter_ru/testimonials.html"
 
     def get_context_data(self, **kwargs):
-        total = GraduateProfile.active.with_testimonial().count()
+        site_branches = Branch.objects.for_site(settings.SITE_ID)
+        total = (GraduateProfile.active
+                 .filter(student_profile__branch__in=site_branches)
+                 .with_testimonial()
+                 .count())
         page_size = 16
         try:
             current_page = positive_integer(self.request.GET.get("page", 1))

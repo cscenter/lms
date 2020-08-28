@@ -146,7 +146,9 @@ class TestimonialList(ListAPIView):
     serializer_class = TestimonialCardSerializer
 
     def get_queryset(self):
+        site_branches = Branch.objects.for_site(settings.SITE_ID)
         return (GraduateProfile.active
+                .filter(student_profile__branch__in=site_branches)
                 .with_testimonial()
                 .get_only_required_fields()
                 .prefetch_related("academic_disciplines")
