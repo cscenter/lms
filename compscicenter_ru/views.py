@@ -171,7 +171,7 @@ class TestimonialsListView(TemplateView):
     template_name = "compscicenter_ru/testimonials.html"
 
     def get_context_data(self, **kwargs):
-        site_branches = Branch.objects.for_site(settings.SITE_ID)
+        site_branches = Branch.objects.for_site(self.request.site.pk)
         total = (GraduateProfile.active
                  .filter(student_profile__branch__in=site_branches)
                  .with_testimonial()
@@ -294,10 +294,11 @@ class AlumniView(TemplateView):
         cache_key = cache_key_pattern.format(site_id=self.request.site.pk)
         history = cache.get(cache_key)
         today = now().date()
+        site_branches = Branch.objects.for_site(self.request.site.pk)
         if history is None:
-            # TODO: filter by site (+ support site in API)
             history = (GraduateProfile.active
-                       .filter(graduated_on__lte=today)
+                       .filter(graduated_on__lte=today,
+                               student_profile__branch__in=site_branches)
                        .aggregate(latest_graduation=Max('graduation_year'),
                                   first_graduation=Min('graduation_year')))
             cache.set(cache_key, history, 86400)  # cache for 1 day
@@ -312,7 +313,6 @@ class AlumniView(TemplateView):
             show_year = latest_graduation
         year_option = next((y for y in years if y['value'] == show_year))
         # Branches
-        site_branches = Branch.objects.for_site(self.request.site.pk)
         branch_options = []
         for branch in site_branches:
             row = {"label": str(branch.name), "value": branch.code}
