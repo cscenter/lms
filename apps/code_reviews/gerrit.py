@@ -180,10 +180,10 @@ def get_project_name(course):
     return f"{branch_code}/{course_name}_{course.semester.year}"
 
 
-def get_branch_name(student, course):
-    git_branch_name = student.get_abbreviated_name_in_latin()
+def get_branch_name(student: StudentProfile, course):
+    git_branch_name = student.user.get_abbreviated_name_in_latin()
     if len(course.branches.all()) > 1:
-        git_branch_name = f"{student.student_profile.branch.code}/{git_branch_name}"
+        git_branch_name = f"{student.branch.code}/{git_branch_name}"
     return git_branch_name
 
 
@@ -295,7 +295,7 @@ def init_project_for_course(course, skip_users=False):
     # For each enrolled student create separated branch
     enrollments = (Enrollment.active
                    .filter(course_id=course.pk)
-                   .select_related("student", "student_profile__branch"))
+                   .select_related("student_profile__user", "student_profile__branch"))
     for e in enrollments:
         add_student_to_project(client, e.student_profile, course,
                                project_students_group_uuid)
@@ -313,7 +313,7 @@ def add_student_to_project(client: Gerrit, student: StudentProfile, course: Cour
         project_students_group_uuid = students_group_res.data['id']
     project_name = get_project_name(course)
     # Make sure student group exists
-    student_group_uuid = create_user_group(client, student)
+    student_group_uuid = create_user_group(client, student.user)
     if not student_group_uuid:
         return
     # Permits read master branch by adding to students group
@@ -337,11 +337,11 @@ def add_test_student_to_project(client: Gerrit, course: Course,
         Make sure LDAP account for test student exists.
     """
     logger.debug("Add test student to the project")
-    branch = Branch.objects.get_by_natural_key('spb', site_id=settings.SITE_ID)
+    branch = Branch.objects.get_by_natural_key(settings.DEFAULT_BRANCH_CODE, site_id=settings.SITE_ID)
     student = User(username='student')
     student.email = 'student'  # hack `.ldap_username`
-    student.student_profile = StudentProfile(user=student, branch=branch)
-    add_student_to_project(client, student, course,
+    student_profile = StudentProfile(user=student, branch=branch)
+    add_student_to_project(client, student_profile, course,
                            project_students_group_uuid)
 
 
@@ -379,7 +379,7 @@ def add_users_to_project_by_email(course: Course, emails):
     enrollments = (Enrollment.active
                    .filter(course_id=course.pk,
                            student__email__in=emails)
-                   .select_related("student", "student_profile__branch"))
+                   .select_related("student_profile__user", "student_profile__branch"))
     for e in enrollments:
         add_student_to_project(client, e.student, course,
                                project_students_group_uuid)
@@ -390,8 +390,7 @@ def get_gerrit_robot() -> User:
 
 
 def post_change_url_comment(student_assignment: StudentAssignment, change_url: str):
-    message = _('Solution was submitted for code review. Use this link to track progress: %(change_url)s.' %
-                {'change_url': change_url})
+    message = str(_('Solution was submitted for code review. Use this link to track progress: {}.')).format(change_url)
     AssignmentComment.objects.create(student_assignment=student_assignment,
                                      text=message, author=get_gerrit_robot())
 
@@ -401,6 +400,10 @@ def create_change(client, student_assignment: StudentAssignment):
     Create new change in Gerrit and store info in GerritChange model.
     """
     course = student_assignment.assignment.course
+    enrollment = Enrollment.objects.filter(course=course, student=student_assignment.student).first()
+    if not enrollment:
+        logger.error("Failed to find enrollment")
+    student_profile = enrollment.student_profile
 
     # Check that project exists
     project_name = get_project_name(course)
@@ -410,7 +413,7 @@ def create_change(client, student_assignment: StudentAssignment):
         return
 
     # Check that student branch exists
-    branch_name = get_branch_name(student_assignment.student, course)
+    branch_name = get_branch_name(student_profile, course)
     branch_res = client.get_branch(project_name, branch_name)
     if not branch_res.ok:
         logger.error(f"Branch {branch_name} of {project_name} not found")
