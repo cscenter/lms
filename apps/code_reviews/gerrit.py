@@ -4,7 +4,6 @@ import logging
 from django.conf import settings
 from django.db.models import prefetch_related_objects
 from django.utils import translation
-from django_rq import job
 
 from code_reviews.api.gerrit import Gerrit
 from code_reviews.constants import GerritRobotMessages
@@ -467,50 +466,3 @@ def list_change_files(client: Gerrit, change: GerritChange):
     current_revision = data['current_revision']
     files = data['revisions'][current_revision]['files']
     return files
-
-
-@job('default')
-def upload_attachment_to_gerrit(assignment_comment_id):
-    assignment_comment = (AssignmentComment.objects
-                          .select_related('student_assignment')
-                          .get(pk=assignment_comment_id))
-    student_assignment = assignment_comment.student_assignment
-    attached_file = assignment_comment.attached_file
-
-    client = Gerrit(settings.GERRIT_API_URI,
-                    auth=(settings.GERRIT_CLIENT_USERNAME,
-                          settings.GERRIT_CLIENT_HTTP_PASSWORD))
-
-    change = get_or_create_change(client, student_assignment)
-    if not change:
-        logger.info('Failed to get or create a change')
-        return
-
-    response = client.get_change_edit(change.change_id)
-    if not response.no_content:
-        logger.info('Found previous change edit')
-        response = client.delete_change_edit(change.change_id)
-        if not response.no_content:
-            logger.error('Failed to delete previous change edit')
-
-    # Save extension to enable syntax highlighting in the UI
-    extension = attached_file.name.split('.')[-1]
-    solution_filename = f"solution.{extension}"
-
-    # Delete other existing files
-    change_files = list_change_files(client, change)
-    for file in change_files:
-        if file != solution_filename:
-            client.delete_file(change.change_id, file)
-
-    # Upload new solution as a Change Edit
-    response = client.upload_file(change.change_id, solution_filename,
-                                  attached_file)
-    if not response.no_content:
-        logger.info('Failed to upload the solution')
-
-    # Publish Change Edit with all modifications
-    response = client.publish_change_edit(change.change_id)
-    if not response.no_content:
-        logger.info('Failed to publish change edit')
-        return

@@ -607,7 +607,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         self.__original_is_published = self.is_published
 
     def save(self, **kwargs):
-        from code_reviews.gerrit import upload_attachment_to_gerrit
+        from code_reviews.tasks import upload_attachment_to_gerrit
         from learning.services import notify_new_assignment_comment
         created = self.pk is None
         is_published_before = getattr(self, '__original_is_published', False)
@@ -618,6 +618,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
             notify_new_assignment_comment(self)
         self.__original_is_published = self.is_published
         with_code_review = self.student_assignment.assignment.submission_type == AssignmentSubmissionTypes.CODE_REVIEW
+        # FIXME: move to the signal in code_reviews
         if self.attached_file and with_code_review:
             upload_attachment_to_gerrit.delay(self.pk)
 
