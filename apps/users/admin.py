@@ -48,7 +48,8 @@ class UserGroupForm(forms.ModelForm):
                 student_profile = user.get_student_profile(
                     site, profile_type=profile_type)
                 if not student_profile:
-                    msg = _("Create Student Profile before assign student role")
+                    msg = _("Create Student Profile before adding student "
+                            "permissions")
                     self.add_error(None, ValidationError(msg))
                 elif branch and branch.pk != student_profile.branch_id:
                     # TODO: add link to the student profile
@@ -56,9 +57,10 @@ class UserGroupForm(forms.ModelForm):
                             "the student profile")
                     msg = msg.format(student_profile.branch)
                     self.add_error('branch', ValidationError(msg))
-            # For student branch will be populated from the student profile
-            if permission_role in {Roles.INVITED, Roles.VOLUNTEER} and not branch:
-                msg = _("You have to specify branch for this role")
+            # FIXME: Lame. Later you could remove user.branch value
+            if permission_role == Roles.TEACHER and not user.branch_id:
+                msg = _("You have to specify branch for user before "
+                        "adding teacher permissions")
                 self.add_error('branch', ValidationError(msg))
         if branch and branch.site_id != site.pk:
             msg = _("Assign branch relative to the selected site")

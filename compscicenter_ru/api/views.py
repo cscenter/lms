@@ -53,8 +53,8 @@ class TeacherList(ListAPIView):
                     .filter(any_role_except_reviewer)
                     .select_related('branch')
                     .only("pk", "first_name", "last_name", "patronymic",
-                          "cropbox_data", "photo", "branch__code", "gender",
-                          "workplace")
+                          "username", "cropbox_data", "photo", "branch__code",
+                          "gender", "workplace")
                     .distinct("last_name", "first_name", "pk")
                     .order_by("last_name", "first_name", "pk"))
         course = self.request.query_params.get("course", None)
