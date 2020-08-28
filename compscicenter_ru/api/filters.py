@@ -1,20 +1,34 @@
 from django import forms
 from django.conf import settings
 from django.db.models import Q
-from django.http import QueryDict
-from django_filters import FilterSet, Filter
+from django_filters import Filter, ChoiceFilter
 from django_filters.constants import EMPTY_VALUES
 
 from core.models import Branch
 from courses.constants import SemesterTypes
-from courses.models import Course
 from courses.utils import get_term_index
-from learning.settings import Branches
-from lms.filters import BranchCodeFilter, CoursesFilter
+from lms.filters import CoursesFilter
 
 
 class IntegerFilter(Filter):
     field_class = forms.IntegerField
+
+
+class BranchCodeFilter(ChoiceFilter):
+    def filter(self, qs, value):
+        """
+        Return courses made by compscicenter.ru that are available in the
+        target branch.
+        """
+        if value == self.null_value:
+            value = None
+        branch = next(b for b in self.parent.site_branches if b.code == value)
+        term_index = get_term_index(branch.established, SemesterTypes.AUTUMN)
+        qs = (qs
+              .available_in(branch.pk)
+              .filter(main_branch__site_id=settings.SITE_ID,
+                      semester__index__gte=term_index))
+        return qs
 
 
 class AcademicYearFilter(IntegerFilter):
@@ -29,9 +43,7 @@ class AcademicYearFilter(IntegerFilter):
 
 
 class CoursesPublicFilter(CoursesFilter):
-    branch = BranchCodeFilter(field_name="branch__code", empty_label=None,
-                              choices=Branch.objects.none())
-    # TODO: restrict max value
+    branch = BranchCodeFilter(empty_label=None, null_label=None)
     academic_year = AcademicYearFilter(label='Academic Year')
 
     class Meta(CoursesFilter.Meta):
