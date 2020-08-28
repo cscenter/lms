@@ -54,7 +54,7 @@ def test_alumni(client, settings):
     assert len(json_data['props']['yearOptions']) == 1
     assert json_data['props']['yearOptions'] == [{'label': '2015', 'value': 2015}]
     assert json_data['state']['year'] == json_data['props']['yearOptions'][0]
-    a = AcademicDisciplineFactory()
+    a = AcademicDisciplineFactory(code='ds')
     response = client.get(url_alumni_all)
     json_data = response.context_data['app_data']
     assert json_data['props']['areaOptions'] == [{'label': a.name, 'value': a.code}]

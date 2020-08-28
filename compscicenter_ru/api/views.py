@@ -16,7 +16,7 @@ from learning.models import GraduateProfile
 from study_programs.models import AcademicDiscipline
 from users.constants import Roles
 from users.models import User
-from .filters import CoursesPublicFilter
+from .filters import CoursesPublicFilter, AlumniFilter
 from .serializers import SiteCourseSerializer, TeacherSerializer, \
     CourseVideoSerializer, AlumniSerializer, TestimonialCardSerializer, \
     CoursePublicSerializer
@@ -116,6 +116,8 @@ class AlumniList(ListAPIView):
     """Retrieves data for alumni/ page"""
     pagination_class = None
     serializer_class = AlumniSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = AlumniFilter
 
     def get_queryset(self):
         return (GraduateProfile.active
@@ -127,7 +129,6 @@ class AlumniList(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        areas = {a.code: a.name for a in AcademicDiscipline.objects.all()}
         serializer = self.get_serializer(queryset, many=True)
         data = {
             "data": serializer.data,
@@ -135,7 +136,6 @@ class AlumniList(ListAPIView):
                 "spb": _("Saint Petersburg"),
                 "nsk": _("Novosibirsk")
             },
-            "areas": areas,
         }
         return Response(data)
 

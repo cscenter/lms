@@ -3,6 +3,7 @@ from django.conf import settings
 from django.db.models import Q
 from django_filters import Filter, ChoiceFilter
 from django_filters.constants import EMPTY_VALUES
+from django_filters.rest_framework import FilterSet
 
 from core.models import Branch
 from courses.constants import SemesterTypes
@@ -48,3 +49,17 @@ class CoursesPublicFilter(CoursesFilter):
 
     class Meta(CoursesFilter.Meta):
         fields = ('branch', 'academic_year')
+
+
+class AlumniFilter(FilterSet):
+    # TODO: We could avoid left join with `core_branch` table
+    #  by using `branch__in=Branch.objects.for_site()` on filtering by site
+    site = IntegerFilter(label='Site',
+                         field_name='student_profile__branch__site',
+                         min_value=1, max_value=1)
+
+    def __init__(self, data=None, *args, **kwargs):
+        if data is not None and 'site' not in data:
+            data = data.copy()
+            data['site'] = settings.SITE_ID
+        super().__init__(data, *args, **kwargs)
