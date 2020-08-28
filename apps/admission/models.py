@@ -24,7 +24,7 @@ from post_office.models import EmailTemplate
 
 from admission.constants import ChallengeStatuses, InterviewFormats
 from admission.utils import slot_range, get_next_process
-from api.providers.yandex_contest import RegisterStatus, \
+from contests.api.yandex_contest import RegisterStatus, \
     Error as YandexContestError
 from core.db.models import ScoreField
 from core.models import Branch, Location

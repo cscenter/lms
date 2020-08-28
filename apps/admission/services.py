@@ -16,7 +16,7 @@ from admission.constants import INVITATION_EXPIRED_IN_HOURS, \
 from admission.models import InterviewStream, InterviewInvitation, \
     Applicant, Campaign, Exam, Interview, InterviewSlot
 from admission.utils import logger
-from api.providers.yandex_contest import YandexContestAPI
+from contests.api.yandex_contest import YandexContestAPI
 from core.timezone.constants import DATE_FORMAT_RU
 from learning.services import create_student_profile, get_student_profile
 from users.models import User, StudentProfile, StudentTypes
