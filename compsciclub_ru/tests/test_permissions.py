@@ -36,7 +36,7 @@ def test_enrollment(client, settings):
     response = client.post(course.get_enroll_url(), form)
     assert response.status_code == 403
     assert Enrollment.objects.count() == 0
-    course.additional_branches.add(branch_spb)
+    course.branches.add(branch_spb)
     course.save()
     client.login(student_club)
     response = client.post(course.get_enroll_url(), form)

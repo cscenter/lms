@@ -1,6 +1,7 @@
 from typing import List
 
 import attr
+from django.conf import settings
 
 from core.urls import branch_aware_reverse
 
@@ -52,6 +53,9 @@ class TabList:
 
 
 def course_public_url(course: 'Course', tab=None):
+    # Hide links to all courses except compscicenter.ru
+    if course.main_branch.site_id != settings.SITE_ID:
+        return None
     if tab is None:
         route_name = 'course_detail'
         url_kwargs = course.url_kwargs

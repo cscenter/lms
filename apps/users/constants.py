@@ -54,3 +54,5 @@ class SHADCourseGradeTypes(DjangoChoices):
     CREDIT = C('pass', _("SHADCourseGrade|Pass"))
     GOOD = C('good', _("Good"))
     EXCELLENT = C('excellent', _("Excellent"))
+
+    satisfactory_grades = {CREDIT.value, GOOD.value, EXCELLENT.value}
