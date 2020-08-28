@@ -1028,6 +1028,7 @@ def course_class_attachment_post_delete(sender, instance, *args, **kwargs):
 class AssignmentSubmissionTypes(DjangoChoices):
     ONLINE = C("online", _("Online Submission"))  # file or text on site
     EXTERNAL = C("external", _("External Service"))
+    CODE_REVIEW = C("code_review", _("Code Review Submission"))
     OTHER = C("other", _("No Submission"))  # on paper, etc
 
 

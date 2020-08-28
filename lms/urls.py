@@ -26,6 +26,7 @@ urlpatterns = [
 
     # path('api/', include('api.urls')),
     path('api/', include('learning.api.urls')),
+    path('api/', include('code_reviews.api.urls')),
     path('api/', include('stats.api_urls')),
     path('api/', include('admission.api.urls')),
 
