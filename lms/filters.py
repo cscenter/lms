@@ -19,7 +19,7 @@ class BranchCodeFilter(ChoiceFilter):
         """
         if value == self.null_value:
             value = None
-        branch = next(b for b in self.parent.branches if b.code == value)
+        branch = next(b for b in self.parent.site_branches if b.code == value)
         term_index = get_term_index(branch.established, SemesterTypes.AUTUMN)
         qs = (qs
               .available_in(branch.pk)
@@ -41,7 +41,7 @@ class CoursesFilterForm(forms.Form):
         cleaned_data = super().clean()
         if cleaned_data.get('semester') and cleaned_data.get('branch'):
             branch_code = cleaned_data['branch']
-            branch = next(b for b in self.filter_set.branches
+            branch = next(b for b in self.filter_set.site_branches
                           if b.code == branch_code)
             semester_value = cleaned_data['semester']
             match = semester_slug_re.search(semester_value)
@@ -65,10 +65,9 @@ class CoursesFilterForm(forms.Form):
 
 class CoursesFilter(FilterSet):
     """
-    Returns courses available in target branch.
+    Returns courses available in a target branch.
     """
-    branch = BranchCodeFilter(field_name="branch__code", empty_label=None,
-                              choices=Branch.objects.none())
+    branch = BranchCodeFilter(empty_label=None, choices=Branch.objects.none())
     # FIXME: мб сначала валидировать request данные? зачем смешивать с фильтрацией? Тогда отсюда можно удалить semester, т.к. он не к месту
     semester = SemesterFilter()
 
@@ -88,10 +87,10 @@ class CoursesFilter(FilterSet):
             data = data.copy()  # get a mutable copy of the QueryDict
         else:
             data = QueryDict(mutable=True)
-        self.branches = Branch.objects.for_site(request.site.pk)
+        self.site_branches = Branch.objects.for_site(request.site.pk)
         branch_code = data.pop("branch", None)
         if not branch_code and hasattr(request.user, "branch_id"):
-            branch = next((b for b in self.branches
+            branch = next((b for b in self.site_branches
                            if b.id == request.user.branch_id), None)
             branch_code = [branch.code] if branch else None
         if not branch_code:
@@ -101,7 +100,7 @@ class CoursesFilter(FilterSet):
         super().__init__(data=data, queryset=queryset, request=request, **kwargs)
         # Branch code choices depend on current site
         self.form['branch'].field.choices = [(b.code, b.name) for b
-                                             in self.branches]
+                                             in self.site_branches]
 
     @property
     def form(self):
@@ -111,7 +110,7 @@ class CoursesFilter(FilterSet):
             if self.is_bound:
                 self._form = Form(self.data, prefix=self.form_prefix)
             else:
-                self._form = Form(branches=self.branches,
+                self._form = Form(branches=self.site_branches,
                                   prefix=self.form_prefix)
             self._form.filter_set = self
         return self._form

@@ -39,7 +39,6 @@ class StudyProgramQuerySet(query.QuerySet):
         Note that not all core courses are mandatory - student must complete
         only one in each group.
         """
-        from study_programs.models import StudyProgramCourseGroup
         return self.prefetch_related(
             Prefetch(
                 'course_groups',
