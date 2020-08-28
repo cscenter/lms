@@ -269,13 +269,6 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
                                     verbose_name=_("Main Branch"),
                                     related_name="courses",
                                     on_delete=models.PROTECT)
-    additional_branches = models.ManyToManyField(
-        Branch,
-        verbose_name=_("Additional Branches"),
-        related_name='additional_branches',
-        help_text=_("Branches where the course is also available for "
-                    "enrollment"),
-        blank=True)
     branches = models.ManyToManyField(
         Branch,
         verbose_name=_("Course Branches"),
