@@ -35,6 +35,7 @@ class Roles(DjangoChoices):
     PROJECT_REVIEWER = C(9, _('Project reviewer'))
     CURATOR_PROJECTS = C(10, _('Curator of projects'))
     INVITED = C(11, _('Invited User'))
+    SERVICE_USER = C(12, _("Service User"))
 
 
 CSCENTER_ACCESS_ALLOWED = {

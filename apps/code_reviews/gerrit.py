@@ -3,12 +3,16 @@ import logging
 
 from django.conf import settings
 from django.db.models import prefetch_related_objects
+from django.utils import translation
+from django_rq import job
 
 from code_reviews.api.gerrit import Gerrit
+from code_reviews.constants import GerritRobotMessages
+from code_reviews.models import GerritChange
 from core.models import Branch
-from learning.models import Enrollment
 from courses.models import Course, CourseTeacher
-from users.models import User
+from learning.models import Enrollment, StudentAssignment, AssignmentComment
+from users.models import User, StudentProfile
 
 logger = logging.getLogger(__name__)
 
@@ -177,6 +181,13 @@ def get_project_name(course):
     return f"{branch_code}/{course_name}_{course.semester.year}"
 
 
+def get_branch_name(student: StudentProfile, course):
+    git_branch_name = student.user.get_abbreviated_name_in_latin()
+    if len(course.branches.all()) > 1:
+        git_branch_name = f"{student.branch.code}/{git_branch_name}"
+    return git_branch_name
+
+
 def get_reviewers_group_name(course):
     project_name = get_project_name(course)
     return f"{project_name}-reviewers"
@@ -285,15 +296,16 @@ def init_project_for_course(course, skip_users=False):
     # For each enrolled student create separated branch
     enrollments = (Enrollment.active
                    .filter(course_id=course.pk)
-                   .select_related("student", "student__branch"))
+                   .select_related("student_profile__user",
+                                   "student_profile__branch"))
     for e in enrollments:
-        add_student_to_project(client, e.student, course,
+        add_student_to_project(client, e.student_profile, course,
                                project_students_group_uuid)
     # TODO: What to do with notifications?
 
 
-def add_student_to_project(client: Gerrit, student: User, course: Course,
-                           project_students_group_uuid=None):
+def add_student_to_project(client: Gerrit, student: StudentProfile,
+                           course: Course, project_students_group_uuid=None):
     if project_students_group_uuid is None:
         students_group_name = get_students_group_name(course)
         students_group_res = client.get_group(students_group_name)
@@ -303,15 +315,13 @@ def add_student_to_project(client: Gerrit, student: User, course: Course,
         project_students_group_uuid = students_group_res.data['id']
     project_name = get_project_name(course)
     # Make sure student group exists
-    student_group_uuid = create_user_group(client, student)
+    student_group_uuid = create_user_group(client, student.user)
     if not student_group_uuid:
         return
     # Permits read master branch by adding to students group
     client.include_group(project_students_group_uuid, student_group_uuid)
     # Create personal branch
-    git_branch_name = student.get_abbreviated_name_in_latin()
-    if len(course.branches.all()) > 1:
-        git_branch_name = f"{student.branch.code}/{git_branch_name}"
+    git_branch_name = get_branch_name(student, course)
     client.create_git_branch(project_name, git_branch_name, {
         "revision": "master"
     })
@@ -329,10 +339,12 @@ def add_test_student_to_project(client: Gerrit, course: Course,
         Make sure LDAP account for test student exists.
     """
     logger.debug("Add test student to the project")
-    branch = Branch.objects.get_by_natural_key('spb', site_id=settings.SITE_ID)
-    student = User(username='student', branch=branch)
+    branch = Branch.objects.get_by_natural_key(settings.DEFAULT_BRANCH_CODE,
+                                               site_id=settings.SITE_ID)
+    student = User(username='student')
     student.email = 'student'  # hack `.ldap_username`
-    add_student_to_project(client, student, course,
+    student_profile = StudentProfile(user=student, branch=branch)
+    add_student_to_project(client, student_profile, course,
                            project_students_group_uuid)
 
 
@@ -370,7 +382,135 @@ def add_users_to_project_by_email(course: Course, emails):
     enrollments = (Enrollment.active
                    .filter(course_id=course.pk,
                            student__email__in=emails)
-                   .select_related("student", "student__branch"))
+                   .select_related("student_profile__user",
+                                   "student_profile__branch"))
     for e in enrollments:
         add_student_to_project(client, e.student, course,
                                project_students_group_uuid)
+
+
+def get_gerrit_robot() -> User:
+    return User.objects.get(username=settings.GERRIT_ROBOT_USERNAME)
+
+
+def post_change_url_comment(student_assignment: StudentAssignment,
+                            change_url: str):
+    course = student_assignment.assignment.course
+    with translation.override(course.language):
+        message = GerritRobotMessages.CHANGE_CREATED.format(link=change_url)
+    AssignmentComment.objects.create(student_assignment=student_assignment,
+                                     text=message, author=get_gerrit_robot())
+
+
+def create_change(client, student_assignment: StudentAssignment):
+    """
+    Create new change in Gerrit and store info in GerritChange model.
+    """
+    course = student_assignment.assignment.course
+    enrollment = (Enrollment.objects
+                  .filter(course=course, student=student_assignment.student)
+                  .first())
+    if not enrollment:
+        logger.error("Failed to find enrollment")
+    student_profile = enrollment.student_profile
+
+    # Check that project exists
+    project_name = get_project_name(course)
+    project_res = client.get_project(project_name)
+    if not project_res.ok:
+        logger.error(f"Project {project_name} not found")
+        return
+
+    # Check that student branch exists
+    branch_name = get_branch_name(student_profile, course)
+    branch_res = client.get_branch(project_name, branch_name)
+    if not branch_res.ok:
+        logger.error(f"Branch {branch_name} of {project_name} not found")
+        return
+
+    change_subject = f'{student_assignment.assignment.title} ' \
+                     f'({student_assignment.student.get_full_name()})'
+
+    change_res = client.create_change(project_name, branch_name,
+                                      subject=change_subject)
+    if not change_res.created:
+        return None
+    change_id = change_res.json['id']
+    logger.info(f'Created change {change_id}')
+    site = student_assignment.assignment.course.main_branch.site
+    change = GerritChange.objects.create(student_assignment=student_assignment,
+                                         change_id=change_id, site=site)
+
+    change_number = change_res.json['_number']
+    gerrit_changes_uri = settings.GERRIT_API_URI.replace("/a/", "/c/")
+    change_url = f'{gerrit_changes_uri}{project_name}/+/{change_number}'
+    post_change_url_comment(student_assignment, change_url)
+
+    return change
+
+
+def get_or_create_change(client: Gerrit, student_assignment: StudentAssignment):
+    change = (GerritChange.objects
+              .filter(student_assignment=student_assignment)
+              .first())
+    if not change:
+        change = create_change(client, student_assignment)
+        # TODO: set_reviewers_for_change(client, change)
+    return change
+
+
+def list_change_files(client: Gerrit, change: GerritChange):
+    response = client.list_files(change.change_id)
+    if not response.ok:
+        logger.info('Failed to retrieve change')
+    data = response.json
+    current_revision = data['current_revision']
+    files = data['revisions'][current_revision]['files']
+    return files
+
+
+@job('default')
+def upload_attachment_to_gerrit(assignment_comment_id):
+    assignment_comment = (AssignmentComment.objects
+                          .select_related('student_assignment')
+                          .get(pk=assignment_comment_id))
+    student_assignment = assignment_comment.student_assignment
+    attached_file = assignment_comment.attached_file
+
+    client = Gerrit(settings.GERRIT_API_URI,
+                    auth=(settings.GERRIT_CLIENT_USERNAME,
+                          settings.GERRIT_CLIENT_HTTP_PASSWORD))
+
+    change = get_or_create_change(client, student_assignment)
+    if not change:
+        logger.info('Failed to get or create a change')
+        return
+
+    response = client.get_change_edit(change.change_id)
+    if not response.no_content:
+        logger.info('Found previous change edit')
+        response = client.delete_change_edit(change.change_id)
+        if not response.no_content:
+            logger.error('Failed to delete previous change edit')
+
+    # Save extension to enable syntax highlighting in the UI
+    extension = attached_file.name.split('.')[-1]
+    solution_filename = f"solution.{extension}"
+
+    # Delete other existing files
+    change_files = list_change_files(client, change)
+    for file in change_files:
+        if file != solution_filename:
+            client.delete_file(change.change_id, file)
+
+    # Upload new solution as a Change Edit
+    response = client.upload_file(change.change_id, solution_filename,
+                                  attached_file)
+    if not response.no_content:
+        logger.info('Failed to upload the solution')
+
+    # Publish Change Edit with all modifications
+    response = client.publish_change_edit(change.change_id)
+    if not response.no_content:
+        logger.info('Failed to publish change edit')
+        return
