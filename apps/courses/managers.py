@@ -104,6 +104,9 @@ class CourseQuerySet(models.QuerySet):
     def available_on_site(self, site):
         return self.filter(coursebranch__branch__site=site).distinct()
 
+    def made_by(self, branches: List):
+        return self.filter(main_branch__in=branches)
+
     def in_branches(self, branches: List[int]):
         return (self.filter(coursebranch__branch__in=branches)
                 .distinct('semester__index', 'meta_course__name', 'pk')

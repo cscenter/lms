@@ -592,15 +592,21 @@ class TeacherDetailView(PublicURLMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        branches = Branch.objects.for_site(site_id=self.request.site.pk)
-        min_established = min(b.established for b in branches)
+        site_branches = Branch.objects.for_site(site_id=self.request.site.pk)
+        min_established = min(b.established for b in site_branches)
+        site_branches_p = Prefetch(
+            'branches',
+            queryset=(Branch.objects
+                      .filter(site_id=self.request.site.pk)
+                      .order_by('order')))
         courses = (Course.objects
-                   .in_branches(branches)
+                   .made_by(site_branches)
+                   .in_branches(site_branches)
                    .filter(semester__year__gte=min_established,
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index')
-                   .prefetch_related('branches'))
+                   .prefetch_related(site_branches_p))
         context['courses'] = courses
         return context
 
