@@ -4,10 +4,10 @@ import logging
 from django.conf import settings
 from django.db.models import prefetch_related_objects
 from django.utils import translation
-from django.utils.translation import ugettext_lazy as _
 from django_rq import job
 
 from code_reviews.api.gerrit import Gerrit
+from code_reviews.constants import GerritRobotMessages
 from code_reviews.models import GerritChange
 from core.models import Branch
 from courses.models import Course, CourseTeacher
@@ -397,12 +397,9 @@ def post_change_url_comment(student_assignment: StudentAssignment,
                             change_url: str):
     course = student_assignment.assignment.course
     with translation.override(course.language):
-        message = _('Solution was submitted for code review. '
-                    'Use this link to track progress: {link}.')
-    print(message.format(link=change_url))
+        message = GerritRobotMessages.CHANGE_CREATED.format(link=change_url)
     AssignmentComment.objects.create(student_assignment=student_assignment,
-                                     text=message.format(link=change_url),
-                                     author=get_gerrit_robot())
+                                     text=message, author=get_gerrit_robot())
 
 
 def create_change(client, student_assignment: StudentAssignment):
