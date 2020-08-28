@@ -33,11 +33,10 @@ from courses.permissions import ViewCourseClassMaterials, \
 from courses.services import group_teachers, CourseService
 from courses.utils import get_current_term_pair, \
     get_term_index
-from courses.views.mixins import CourseURLParamsMixin
 from faq.models import Question
 from learning.models import Enrollment, GraduateProfile
-from learning.services import course_access_role, get_student_profile
 from learning.roles import Roles
+from learning.services import course_access_role
 from learning.settings import Branches, GradeTypes
 from online_courses.models import OnlineCourse, OnlineCourseTuple
 from projects.constants import ProjectTypes, ProjectGradeTypes
@@ -46,7 +45,8 @@ from stats.views import AlumniStats
 from study_programs.models import StudyProgram, AcademicDiscipline
 from study_programs.services import get_study_programs
 from users.constants import SHADCourseGradeTypes
-from users.models import User, SHADCourseRecord, StudentProfile
+from users.models import User, SHADCourseRecord
+from .mixins import CoursePublicURLParamsMixin
 
 # FIXME: remove?
 TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
@@ -251,12 +251,14 @@ class AlumniHonorBoardView(TemplateView):
             manager = GraduateProfile.active
         else:
             manager = GraduateProfile.objects
+        site_branches = Branch.objects.for_site(self.request.site.pk)
         graduates = list(manager
-                         .filter(graduation_year=graduation_year)
+                         .filter(graduation_year=graduation_year,
+                                 student_profile__branch__in=site_branches)
                          .get_only_required_fields()
                          .order_by("student_profile__user__last_name",
                                    "student_profile__user__first_name"))
-        if not len(graduates):
+        if not graduates:
             raise Http404
         # Get random testimonials
         with_testimonial = [gp for gp in graduates if gp.testimonial]
@@ -503,7 +505,7 @@ class GraduateProfileView(generic.DetailView):
 
     def get_queryset(self):
         return (GraduateProfile.active
-                .filter(student_profile__branch__site_id=self.request.site.pk)
+                .filter(student_profile__branch__site=self.request.site)
                 .select_related("student_profile"))
 
     def get_context_data(self, **kwargs):
@@ -592,7 +594,7 @@ class TeacherDetailView(PublicURLMixin, DetailView):
     context_object_name = 'teacher'
 
     def get_queryset(self, *args, **kwargs):
-        return User.objects.filter(group__role=Roles.TEACHER).distinct()
+        return User.objects.has_role(Roles.TEACHER)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -605,7 +607,6 @@ class TeacherDetailView(PublicURLMixin, DetailView):
                       .order_by('order')))
         courses = (Course.objects
                    .made_by(site_branches)
-                   .in_branches(site_branches)
                    .filter(semester__year__gte=min_established,
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
@@ -667,7 +668,8 @@ class CourseOfferingsView(TemplateView):
         return {"app_data": app_data}
 
 
-class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView):
+class CourseDetailView(PublicURLMixin, CoursePublicURLParamsMixin,
+                       generic.DetailView):
     model = MetaCourse
     template_name = "compscicenter_ru/courses/course_detail.html"
     context_object_name = 'course'
@@ -723,7 +725,7 @@ class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView)
         return context
 
 
-# FIXME: match course prefix with a course class id
+# FIXME: А может ну его лишний запрос делать - просто матчить url параметры и фильтровать класс по сайту бранчи
 class CourseClassDetailView(PublicURLMixin, generic.DetailView):
     model = CourseClass
     context_object_name = 'course_class'
@@ -731,6 +733,7 @@ class CourseClassDetailView(PublicURLMixin, generic.DetailView):
 
     def get_queryset(self):
         return (CourseClass.objects
+                .filter(course__main_branch__site=self.request.site)
                 .select_related("course",
                                 "course__meta_course",
                                 "course__semester",

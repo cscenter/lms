@@ -11,10 +11,13 @@ from announcements.views import AnnouncementTagAutocomplete, \
     AnnouncementDetailView
 from compscicenter_ru import views
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
-from courses.urls import RE_COURSE_URI
+from courses.urls import re_semester_slug
 from htmlpages.views import flatpage
 from library.views import BookTagAutocomplete
 from info_blocks.views import InfoBlockTagAutocomplete
+
+
+RE_COURSE_PUBLIC_URI = r"^(?P<course_slug>[-\w]+)/(?P<main_branch_code>\w*)(?P<branch_trailing_slash>/?)" + re_semester_slug + r"/"
 
 admin.autodiscover()
 
@@ -62,7 +65,7 @@ urlpatterns += [
     path("courses/", include([
         path("", views.CourseOfferingsView.as_view(), name="course_list"),
         path("<slug:course_slug>/", views.MetaCourseDetailView.as_view(), name="meta_course_detail"),
-        re_path(RE_COURSE_URI, include([
+        re_path(RE_COURSE_PUBLIC_URI, include([
             path("", views.CourseDetailView.as_view(), name="course_detail"),
             re_path(r"^(?P<tab>classes|about)/$", views.CourseDetailView.as_view(), name="course_detail_with_active_tab"),
             path("classes/<int:pk>/", views.CourseClassDetailView.as_view(), name="class_detail"),
