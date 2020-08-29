@@ -22,7 +22,7 @@ __all__ = ('CourseDetailView', 'CourseEditView')
 
 class CourseDetailView(CourseURLParamsMixin, DetailView):
     model = Course
-    template_name = "courses/course_detail.html"
+    template_name = "lms/courses/course_detail.html"
     context_object_name = 'course'
 
     def get_course_queryset(self):

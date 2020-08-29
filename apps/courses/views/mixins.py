@@ -2,7 +2,10 @@ import logging
 
 from django.conf import settings
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 
+from core.exceptions import Redirect
+from core.urls import reverse
 from courses.models import Course
 
 logger = logging.getLogger(__name__)
@@ -10,9 +13,40 @@ logger = logging.getLogger(__name__)
 
 class CourseURLParamsMixin:
     """
-    This mixin helps to retrieve course record based on `settings.RE_COURSE_URI`
-    friendly URL prefix. Returns 404 in case course is not found,
-    otherwise sets `course` attribute to the view instance.
+    This mixin helps to get course by url parameters and assigns it to the
+    `course` attribute of the view instance.
+    Returns 404 if course is not found or friendly part of the URL is not valid.
+
+    Note:
+        Previously friendly URL prefix was used to retrieve course record,
+        now `settings.RE_COURSE_URI` contains course PK to avoid url collisions.
+    """
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.course: Course = get_object_or_404(
+            self.get_course_queryset()
+                .filter(pk=kwargs['course_id'],
+                        main_branch_id=kwargs['main_branch_id'],
+                        meta_course__slug=kwargs['course_slug'],
+                        semester__type=kwargs['semester_type'],
+                        semester__year=kwargs['semester_year'])
+                .available_on_site(request.site)
+                .order_by('pk')
+        )
+
+    def get_course_queryset(self):
+        """Returns base queryset for the course"""
+        return (Course.objects
+                .select_related('meta_course', 'semester', 'main_branch'))
+
+
+class CoursePublicURLParamsMixin:
+    """
+    This mixin helps to retrieve course made by the current site (where
+    main branch is related to the `request.site`), `RE_COURSE_PUBLIC_URI`
+    friendly URL prefix contains all the required parameters for this.
+    Returns 404 in case course is not found, otherwise sets `course`
+    attribute to the view instance.
 
     Natural key for a course is [meta_course, semester, branch].
     To retrieve unique course record without specifying PK's we need:
@@ -21,16 +55,20 @@ class CourseURLParamsMixin:
         * branch code + site domain (uniquely identifies branch)
 
     Notes:
-        * `settings.RE_COURSE_URI` does not provide site domain information
-        * Main branch code is optional. Fallback to the default
-            branch if omitted
-        * Multiple readings of the course in the semester on the same site
-            is not supported
+        * `RE_COURSE_PUBLIC_URI` does not provide site domain
+            information which we can get from the project settings or request
+            object.
+        * Main branch code is optional. Fallback to the default branch code
+            if omitted
 
     """
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         main_branch_code = kwargs.get("main_branch_code", None)
+        if hasattr(request, 'branch'):
+            default_branch_code = request.branch.code
+        else:
+            default_branch_code = settings.DEFAULT_BRANCH_CODE
         slash = kwargs.get("branch_trailing_slash", None)
         # /aaa//bbb double slash problem. Actually doesn't happen, turn nginx
         # directive `merge_slashes` on to enable this behaviour
@@ -41,22 +79,22 @@ class CourseURLParamsMixin:
         elif main_branch_code and (not slash or slash != "/"):
             raise Http404
         elif not main_branch_code:
-            main_branch_code = settings.DEFAULT_BRANCH_CODE
+            main_branch_code = default_branch_code
+        elif main_branch_code == default_branch_code:
+            # Remove default branch code from the url
+            kwargs['main_branch_code'] = ""
+            kwargs['branch_trailing_slash'] = ""
+            url = reverse(request.resolver_match.view_name,
+                          subdomain=None,
+                          kwargs=kwargs)
+            raise Redirect(to=url)
 
-        # At this moment it's possible to narrow the search to the courses
-        # with a target course slug in a target semester where main branch
-        # has a target code.
-        # From this selection we need to filter out all courses that are not
-        # relevant to the current site (course is not shared on any branch
-        # of the current site).
         courses = list(self.get_course_queryset()
-                       .filter(main_branch__code=main_branch_code)
-                       .available_on_site(request.site)
+                       .filter(main_branch__code=main_branch_code,
+                               main_branch__site=request.site)
                        .order_by('pk'))
         if not courses:
             raise Http404
-
-        # FIXME: log warning/error if we don't meet a limitation "1 reading of the course in a semester on site"?
 
         self.course: Course = courses[0]
 

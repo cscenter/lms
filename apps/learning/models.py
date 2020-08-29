@@ -5,7 +5,6 @@ import os
 import os.path
 from secrets import token_urlsafe
 
-import pytz
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
@@ -25,20 +24,20 @@ from core.db.models import ScoreField, PrettyJSONField
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location, \
     SoftDeletionModel
 from core.timezone import TimezoneAwareModel, now_local
-from core.urls import reverse, branch_aware_reverse
+from core.urls import reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Assignment, StudentGroupTypes, \
     Semester, AssignmentSubmissionTypes
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
-from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
-    GraduateProfileActiveManager, AssignmentCommentPublishedManager, GraduateProfileDefaultManager
+    GraduateProfileActiveManager, AssignmentCommentPublishedManager, \
+    GraduateProfileDefaultManager
 from learning.settings import GradingSystems, GradeTypes, ENROLLMENT_DURATION
 from users.constants import ThumbnailSizes
 from users.models import StudentProfile
-from users.thumbnails import UserThumbnailMixin, ThumbnailMixin, \
+from users.thumbnails import ThumbnailMixin, \
     get_thumbnail_or_stub, get_stub_factory
 
 logger = logging.getLogger(__name__)
@@ -319,7 +318,7 @@ class CourseInvitation(models.Model):
         super().save(**kwargs)
 
     def get_absolute_url(self):
-        return branch_aware_reverse(
+        return reverse(
             "course_enroll_by_invitation",
             kwargs={"course_token": self.token, **self.course.url_kwargs},
             subdomain=settings.LMS_SUBDOMAIN)

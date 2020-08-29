@@ -5,7 +5,7 @@ from django.views import generic
 
 from core.timezone import now_local
 from courses.calendar import CalendarQueryParams, MonthFullWeeksEventsCalendar, \
-    WeekEventsCalendar, CalendarEvent
+    WeekEventsCalendar, CalendarEventW
 
 __all__ = ('MonthEventsCalendarView', 'WeekEventsView')
 
@@ -66,5 +66,5 @@ class WeekEventsView(generic.TemplateView):
         }
         return context
 
-    def get_events(self, iso_year, iso_week) -> Iterable[CalendarEvent]:
+    def get_events(self, iso_year, iso_week) -> Iterable[CalendarEventW]:
         raise NotImplementedError()

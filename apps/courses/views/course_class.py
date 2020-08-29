@@ -30,7 +30,7 @@ __all__ = ('CourseClassDetailView', 'CourseClassCreateView',
 class CourseClassDetailView(generic.DetailView):
     model = CourseClass
     context_object_name = 'course_class'
-    template_name = "courses/course_class_detail.html"
+    template_name = "lms/courses/course_class_detail.html"
 
     def get_queryset(self):
         return (CourseClass.objects

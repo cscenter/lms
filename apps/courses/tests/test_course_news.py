@@ -29,7 +29,7 @@ def test_course_news_create_security(client, settings, assert_login_redirect,
 @pytest.mark.django_db
 def test_course_news_create_data(client, assert_redirect):
     teacher = TeacherFactory()
-    course = CourseFactory.create(teachers=[teacher])
+    course = CourseFactory(teachers=[teacher])
     url = course.get_create_news_url()
     form = factory.build(dict, FACTORY_CLASS=CourseNewsFactory)
     form.update({'course': course})
@@ -39,7 +39,7 @@ def test_course_news_create_data(client, assert_redirect):
     response = client.get(news_tab_url)
     assert response.status_code == 200
     assert form['text'].encode() in response.content
-    course_news = response.context['course'].coursenews_set.all()[0]
+    course_news = response.context_data['course'].coursenews_set.all()[0]
     assert teacher == course_news.author
 
 

@@ -1,0 +1,58 @@
+{% extends "lms/layout/v1_base.html" %}
+
+{% block content %}
+<div class="container">
+<div class="row" id="teachers-detail">
+<div class="col-xs-9 profile-body">
+    <h2 class="content-title">{{ teacher.get_full_name() }}</h2>
+    {% if teacher.workplace %}<p>{{ teacher.workplace }}</p>{% endif %}
+    {% if teacher.bio %}
+        <div class="about-me">
+            <div class="ubertext">
+                {{ teacher.bio|markdown("user_note", 3600, teacher.pk, teacher.modified) }}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if request.user.is_authenticated and teacher.private_contacts %}
+        <div class="contact-info">
+            <h4>{% trans %}Contact information{% endtrans %}:</h4>
+            <div class="ubertext">
+                {{ teacher.private_contacts|markdown("user_private_contacts", 3600, teacher.pk, teacher.modified) }}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if courses %}
+        <h4>{% trans %}Course offerings{% endtrans %}</h4>
+        <table class="table table-bordered">
+          <thead>
+            <tr class="active">
+              <th>{% trans %}Course{% endtrans %}</th>
+              <th>{% trans %}Semester{% endtrans %}</th>
+            </tr>
+          </thead>
+            {% for course in courses %}
+              <tr>
+                <td><a href="{{ course.get_absolute_url() }}">{{ course.meta_course.name }}</a></td>
+                <td class="nowrap">{{ course.semester }}</td>
+              </tr>
+            {% endfor %}
+          </tr>
+        </table>
+    {% endif %}
+    {% block gallery %}{% endblock gallery %}
+</div>
+<div class="col-xs-3 profile-sidebar">
+    <div class="thumbnail text-center">
+        {% with im = teacher.get_thumbnail(teacher.ThumbnailSize.BASE, use_stub=True, stub_official=True) -%}
+            <img alt="{{ teacher.get_full_name() }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"/>
+        {% endwith -%}
+    </div>
+    {% if request.user.is_curator %}
+        <a class="btn btn-default btn-block" href="{{ url("user_detail", subdomain=LMS_SUBDOMAIN, pk=teacher.pk) }}"><i class="fa fa-user-secret" aria-hidden="true"></i> Профиль </a>
+    {% endif %}
+</div>
+</div>
+</div>
+{% endblock content %}

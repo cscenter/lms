@@ -3,14 +3,14 @@ from typing import List, Iterator
 import attr
 from django.db.models import Q
 
-from courses.calendar import CalendarEvent
+from courses.calendar import CalendarEventW
 from courses.services import get_teacher_branches
 from learning.services import get_student_classes, get_teacher_classes, \
     get_classes, get_study_events
 
 
 @attr.s
-class LearningCalendarEvent(CalendarEvent):
+class LearningCalendarEvent(CalendarEventW):
     @property
     def name(self):
         return self.event.name
@@ -27,10 +27,10 @@ def _to_range_q_filter(start_date, end_date) -> List[Q]:
 
 # FIXME: get_student_events  + CalendarEvent.build(instance) ?
 def get_student_calendar_events(*, user, start_date,
-                                end_date) -> Iterator[CalendarEvent]:
+                                end_date) -> Iterator[CalendarEventW]:
     period_filter = _to_range_q_filter(start_date, end_date)
     for c in get_student_classes(user, period_filter):
-        yield CalendarEvent(c)
+        yield CalendarEventW(c)
     # FIXME: User.branch for students is optional
     branch_list = [user.branch_id]
     event_filters = [Q(branch__in=branch_list), *period_filter]
@@ -39,11 +39,11 @@ def get_student_calendar_events(*, user, start_date,
 
 
 def get_teacher_calendar_events(*, user, start_date,
-                                end_date) -> Iterator[CalendarEvent]:
+                                end_date) -> Iterator[CalendarEventW]:
     branch_list = get_teacher_branches(user, start_date, end_date)
     period_filter = _to_range_q_filter(start_date, end_date)
     for c in get_teacher_classes(user, period_filter):
-        yield CalendarEvent(c)
+        yield CalendarEventW(c)
     event_filters = [Q(branch__in=branch_list), *period_filter]
     for e in get_study_events(event_filters):
         yield LearningCalendarEvent(e)
@@ -55,7 +55,7 @@ def get_calendar_events(*, branch_list, start_date, end_date):
     """
     period_filter = _to_range_q_filter(start_date, end_date)
     for c in get_classes(branch_list, period_filter):
-        yield CalendarEvent(c)
+        yield CalendarEventW(c)
     event_filters = [Q(branch__in=branch_list), *period_filter]
     for e in get_study_events(event_filters):
         yield LearningCalendarEvent(e)

@@ -1,16 +1,12 @@
-{% extends "base.html" %}
-
-{% load i18n %}
+{% extends "lms/layout/v1_base.html" %}
 
 {% block content %}
 <div class="container">
   {% if semester_list %}
   <div class="row">
     <div class="col-xs-12">
-        <h1 class="page-header">{% trans "Courses" %}</h1>
+        <h1 class="page-header">{% trans %}Courses{% endtrans %}</h1>
     {% for autumn_spring in semester_list %}
-      {% if forloop.counter == 2 %}
-      {% endif %}
       <table class="table table-stripped __courses">
         <tr>
         {% for semester in autumn_spring %}
@@ -23,8 +19,8 @@
             <ul>
             {% for course in semester.courseofferings %}
               <li>
-                <a href="{{ course.get_absolute_url }}">{{ course.meta_course.name }}</a>
-                ({% for teacher in course.teachers.all %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;color: #333;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %})
+                <a href="{{ course_public_url(course) }}">{{ course.meta_course.name }}</a>
+                ({% for teacher in course.teachers.all() %}<a href="{{ teacher.teacher_profile_url() }}" style="white-space:nowrap;color: #333;">{{ teacher.get_abbreviated_name() }}</a>{% if not loop.last %}, {% endif %}{% endfor %})
               </li>
             {% endfor %}
             </ul>
@@ -39,7 +35,7 @@
   <div class="row">
     <div class="col-xs-3"></div>
     <div class="col-xs-6 center-aligned">
-      <h4>{% trans "No courses yet" %}</h4>
+      <h4>{% trans %}No courses yet{% endtrans %}</h4>
     </div>
     <div class="col-xs-3">
     </div>

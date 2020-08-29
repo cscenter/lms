@@ -1,37 +1,22 @@
-{% extends "base.html" %}
-{% load tz %}
-{% load i18n %}
-{% load thumbnail %}
-{% load markdown call_method lookup can_enroll_in_course from core_tags %}
-{% load render_bundle from webpack_loader %}
-{% load user_thumbnail from user_thumbnail %}
+{% extends "lms/layout/v1_base.html" %}
 
 {% block title %}{{ course.meta_course.name }}, {{ course.semester }}{% endblock title %}
-
 {% block body_attrs %} data-init-sections="courseDetails"{% endblock body_attrs %}
 
 {% block javascripts %}
-    {% if user.is_curator %}{% render_bundle "supervising" "js" "V1" %}{% endif %}
+    {% if user.is_curator %}{{ render_bundle('supervising', config='V1') }}{% endif %}
 {% endblock javascripts %}
 
+{% set user = request.user %}
 
-{% block content %}{% localtime off %}
+{% block content %}
 <div class="container" id="course-detail-page">
     <div class="row">
         <div class="col-xs-9">
             <h2 class="course-main-title">
-            {{ course.meta_course.name }}{% if request.user.is_curator %} <a href="{% url "admin:courses_course_change" course.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
-              <small>{{ course.main_branch.name }} / {{ course.semester }}, <a href="{{ course.meta_course.get_absolute_url }}">посмотреть все семестры</a></small>
+            {{ course.meta_course.name }}{% if request.user.is_curator %} <a href="{{ url('admin:courses_course_change', object_id=course.pk) }}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
+              <small>{{ course.main_branch.name }} / {{ course.semester }}, <a href="{{ course.meta_course.get_absolute_url() }}">посмотреть все семестры</a></small>
             </h2>
-
-            {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
-                <div id="enroll-now">
-                      {% blocktrans %}
-                        Enroll in the course to get notifications and to be able to submit home assignments.<br>
-                        <a class="btn btn-success" href="/register/">Register to enroll now</a> <a class="btn btn-success" href="/login/">Login</a>
-                      {% endblocktrans %}
-                </div>
-            {% endif %}
 
             <ul class="nav nav-tabs square" role="tablist" id="course-detail-page__tablist">
                 {% for tab in course_tabs %}
@@ -41,12 +26,12 @@
                            aria-controls="course-{{ tab.type }}"
                            data-toggle="tab"
                            data-target="#course-{{ tab.type }}"
-                           {% if tab.type == "news" and unread_news is not None %}
+                           {% if tab.type == "news" and unread_news is not none %}
                                 data-has-unread="{% if unread_news > 0 %}true{% else %}false{% endif %}"
                                 data-notifications-url="{{ course.get_course_news_notifications_url }}"
                            {% endif %}
-                           href="{{ course.get_absolute_url }}{{ tab.type }}/">
-                            {{ tab.name }}{% if tab.type == "news" and unread_news > 0 %} <span class="badge badge-success">+{{ unread_news }}</span>{% endif %}
+                           href="{{ course.get_absolute_url() }}{{ tab.type }}/">
+                            {{ tab.name }}{% if tab.type == "news" and unread_news is not none and unread_news > 0 %} <span class="badge badge-success">+{{ unread_news }}</span>{% endif %}
                         </a>
                     </li>
                 {% endfor %}
@@ -57,13 +42,9 @@
                 <div class="tab-pane {% if tab.is_default %}active{% endif %}" role="tabpanel" id="course-{{ tab.type }}">
                     <div class="ubertext course-description">
                     {% if course.description %}
-                      {% markdown 3600 "course_description" course.pk course.modified %}
-                        {{ course.description }}
-                      {% endmarkdown %}
+                        {{ course.description|markdown("course_description", 3600, course.pk, course.modified) }}
                     {% else %}
-                      {% markdown 3600 "meta_course" course.meta_course.pk course.meta_course.modified %}
-                        {{ course.meta_course.description }}
-                      {% endmarkdown %}
+                        {{ course.meta_course.description|markdown("meta_course", 3600, course.meta_course.pk, course.meta_course.modified) }}
                     {% endif %}
                     </div>
                 </div>
@@ -72,11 +53,10 @@
                 {% if "contacts" in course_tabs and course_tabs.contacts.tab_panel %}
                 {% with tab=course_tabs.contacts %}
                     <div class="tab-pane {% if tab.is_default %}active{% endif %}" role="tabpanel" id="course-{{ tab.type }}">
-                    {% for course_teacher in tab.tab_panel.context.items %}
-                        {% with user_object=course_teacher.teacher %}
-                            <h4>{{ user_object.get_full_name }}</h4>
-                            {% markdown 3600 "user_private_contacts" user_object.pk user_object.modified %}
-                            {{ user_object.private_contacts }}{% endmarkdown %}
+                    {% for course_teacher in tab.tab_panel.context['items'] %}
+                        {% with user_object = course_teacher.teacher %}
+                            <h4>{{ user_object.get_full_name() }}</h4>
+                            {{ user_object.private_contacts|markdown("user_private_contacts", 3600, user_object.pk, user_object.modified) }}
                         {% endwith %}
                     {% endfor %}
                     </div>
@@ -86,11 +66,9 @@
                 {% if "reviews" in course_tabs and course_tabs.reviews.tab_panel %}
                 {% with tab=course_tabs.reviews %}
                     <div class="tab-pane {% if tab.is_default %}active{% endif %}" role="tabpanel" id="course-{{ tab.type }}">
-                        {% for review in tab.tab_panel.context.items %}
+                        {% for review in tab.tab_panel.context['items'] %}
                             <h4>{{ review.course.semester|title }}, {{ review.course.main_branch.name }}</h4>
-                              {% markdown 3600 "course_reviews" review.pk review.modified %}
-                                {{ review.text }}
-                              {% endmarkdown %}
+                            {{ review.text|markdown("course_reviews", 3600, review.pk, review.modified) }}
                         {% endfor %}
                     </div>
                 {% endwith %}
@@ -102,29 +80,29 @@
                       <table class="table timetable" width="100%">
                         <thead>
                         <tr>
-                          <th class="nobreak">{% trans "Date and time" %}</th>
-                          <th>{% trans "Class|Name" %}</th>
-                          <th style="min-width: 140px;">{% trans "Venue|short" %}</th>
-                          <th style="width: 110px;">{% trans "Materials" %}</th>
+                          <th class="nobreak">{% trans %}Date and time{% endtrans %}</th>
+                          <th>{% trans %}Class|Name{% endtrans %}</th>
+                          <th style="min-width: 140px;">{% trans %}Venue|short{% endtrans %}</th>
+                          <th style="width: 110px;">{% trans %}Materials{% endtrans %}</th>
                         </tr>
                         </thead>
-                        {% for course_class in tab.tab_panel.context.items %}
+                        {% for course_class in tab.tab_panel.context['items'] %}
                         <tr>
-                            <td>{{ course_class.date|date:"d E" }}<br><span class="text-muted">{{ course_class.starts_at|time:"H:i" }}–{{ course_class.ends_at|time:"H:i" }}</span></td>
+                            <td>{{ course_class.date|date("d E") }}<br><span class="text-muted">{{ course_class.starts_at|time("H:i") }}–{{ course_class.ends_at|time("H:i") }}</span></td>
                           <td>
-                            <a href="{{ course_class.get_absolute_url }}">
-                              {{ course_class.name }}</a><span class="text-muted">, {% if course_class.type == 'lecture'%}{% trans 'Lecture'|lower %}{% else %}{% trans 'Seminar'|lower %}</span>{% endif %}
+                            <a href="{{ course_class.get_absolute_url() }}">
+                              {{ course_class.name }}</a><span class="text-muted">, {% if course_class.type == 'lecture'%}{% trans %}Lecture{% endtrans %}{% else %}{% trans %}Seminar{% endtrans %}</span>{% endif %}
                           </td>
                           <td>
-                            <a href="{{ course_class.venue.location.get_absolute_url }}">{{ course_class.venue.location.name }}</a>
+                            <a href="{{ course_class.venue.location.get_absolute_url() }}">{{ course_class.venue.location.name }}</a>
                           </td>
                           <td>
                               {% if course_class.materials_is_public or has_access_to_private_materials %}
-                              {% with available_materials=course_class.get_available_materials %}
+                              {% with available_materials = course_class.get_available_materials() %}
                                   {% if available_materials %}
-                                      {% for m in available_materials %}<a href="{{ course_class.get_absolute_url }}#{{ m.type }}">{{ m.name }}</a>{% if not forloop.last %},{% if forloop.counter|divisibleby:2 %} {% else %}&nbsp;{% endif %}{% endif %}{% endfor %}
+                                      {% for m in available_materials %}<a href="{{ course_class.get_absolute_url() }}#{{ m.type }}">{{ m.name }}</a>{% if not loop.last %},{{ loop.cycle(' ', '&nbsp;') }}{% if loop.index % 2 == 0 %} {% else %}&nbsp;{% endif %}{% endif %}{% endfor %}
                                   {% else %}
-                                      {% trans "No" %}
+                                      {% trans %}No{% endtrans %}
                                   {% endif %}
                               {% endwith %}
                               {% endif %}
@@ -142,19 +120,19 @@
                         <table class="table timetable">
                         <thead>
                             <tr>
-                              <th>{% trans "Deadline" %}</th>
-                              <th>{% trans "Title" %}</th>
-                              <th class="nobreak" width="25%">{% trans "Submission Type" %}</th>
-                              <th style="width: 110px;">{% trans "Files" %}</th>
+                              <th>{% trans %}Deadline{% endtrans %}</th>
+                              <th>{% trans %}Title{% endtrans %}</th>
+                              <th class="nobreak" width="25%">{% trans %}Submission Type{% endtrans %}</th>
+                              <th style="width: 110px;">{% trans %}Files{% endtrans %}</th>
                             </tr>
                         </thead>
-                        {% for assignment in tab.tab_panel.context.items %}
+                        {% for assignment in tab.tab_panel.context['items'] %}
                             <tr>
                                 <td>
                                     <div class="assignment-deadline">
-                                        {% call_method assignment "deadline_at_local" tz_override as assignment_deadline_at_local %}
-                                        {{ assignment_deadline_at_local|date:"d E" }}<br>
-                                        <span class="text-muted">{{ assignment_deadline_at_local|time:"H:i" }}</span>
+                                        {% set assignment_deadline_at_local =  assignment.deadline_at_local(tz_override) %}
+                                        {{ assignment_deadline_at_local|date("d E") }}<br>
+                                        <span class="text-muted">{{ assignment_deadline_at_local|time("H:i") }}</span>
                                     </div>
                                 </td>
                                 <td>
@@ -164,16 +142,16 @@
                                         <div>{{ assignment.title }}</div>
                                     {% endif %}
                                 </td>
-                                <td>{{ assignment.get_submission_type_display }}</td>
+                                <td>{{ assignment.get_submission_type_display() }}</td>
                                 <td>
-                                    {% for attachment in assignment.assignmentattachment_set.all %}
+                                    {% for attachment in assignment.assignmentattachment_set.all() %}
                                         {% if assignment.magic_link %}
-                                            <a href="{{ attachment.get_download_url }}">{{ attachment.file_ext }}</a>{% if not forloop.last %}, {% endif %}
+                                            <a href="{{ attachment.get_download_url() }}">{{ attachment.file_ext }}</a>{% if not loop.last %}, {% endif %}
                                         {% else %}
-                                            {{ attachment.file_ext }}{% if not forloop.last %}, {% endif %}
+                                            {{ attachment.file_ext }}{% if not loop.last %}, {% endif %}
                                         {% endif %}
-                                        {% empty %}
-                                            Нет
+                                    {% else %}
+                                        Нет
                                     {% endfor %}
                                 </td>
                             </tr>
@@ -186,23 +164,21 @@
                 {% if "news" in course_tabs and course_tabs.news.tab_panel %}
                 {% with tab=course_tabs.news %}
                         <div class="tab-pane {% if tab.is_default %}active{% endif %}" role="tabpanel" id="course-{{ tab.type }}">
-                        {% for news in tab.tab_panel.context.items %}
+                        {% for news in tab.tab_panel.context['items'] %}
                             <div class="panel bg-gray" id="news-{{ news.pk }}">
                                 <div class="panel-body">
-                                    {% call_method news "created_local" tz_override as news_created_local %}
-                                    <div class="date">{{  news_created_local|date:"d E Y" }}</div>
+                                    {% set news_created_local = news.created_local(tz_override) %}
+                                    <div class="date">{{  news_created_local|date("d E Y") }}</div>
                                     <h4>{{ news.title }}{% if user.is_curator or user.is_teacher and is_actual_teacher %} <a href="#news-{{ news.pk }}"><i class="fa fa-link" aria-hidden="true"></i></a>{% endif %}</h4>
                                     <div class="ubertext shorten">
-                                    {% markdown 3600 "co_news_text" news.pk news.modified %}
-                                      {{ news.text }}
-                                    {% endmarkdown %}
+                                    {{ news.text|markdown("co_news_text", 3600, news.pk, news.modified) }}
                                     </div>
                                 </div>
                                 {% if user.is_curator or user.is_teacher and is_actual_teacher %}
                                     <div class="panel-footer">
-                                        {% if user.is_curator %}<a class="show_unread_notifications" title="Показать, кто не прочитал новость на сайте" href="{{ news.get_stats_url }}"><i class="fa fa-table" aria-hidden="true"></i></a>{% endif %}
-                                        <a class="pull-right" href="{{ news.get_delete_url }}">{% trans "delete" %}</a>
-                                        <a class="__pr5 pull-right" href="{{ news.get_update_url }}">{% trans "edit" %}</a>
+                                        {% if user.is_curator %}<a class="show_unread_notifications" title="Показать, кто не прочитал новость на сайте" href="{{ news.get_stats_url() }}"><i class="fa fa-table" aria-hidden="true"></i></a>{% endif %}
+                                        <a class="pull-right" href="{{ news.get_delete_url() }}">{% trans %}delete{% endtrans %}</a>
+                                        <a class="__pr5 pull-right" href="{{ news.get_update_url() }}">{% trans %}edit{% endtrans %}</a>
                                     </div>
                                 {% endif %}
                             </div>
@@ -216,35 +192,35 @@
     <div class="col-xs-3">
     {% if user.is_authenticated %}
         <div class="o-buttons-vertical">
-            {% call_method request.user "has_perm" "courses.add_assignment" course as can_add_assignment %}
+            {% set can_add_assignment = request.user.has_perm("courses.add_assignment", course) %}
             {% if can_add_assignment %}
-                <a href="{{ course.get_create_assignment_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add assignment" %}</a>
+                <a href="{{ course.get_create_assignment_url() }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans %}Add assignment{% endtrans %}</a>
             {% endif %}
             {% if user.is_curator or user.is_teacher and is_actual_teacher %}
-              <a href="{{ course.get_create_news_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add news" %}</a>
-              <a href="{{ course.get_create_class_url }}" class="btn btn-primary btn-outline btn-block">{% trans 'Add class' %}</a>
-              <a href="{{ course.get_update_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Edit description" %}</a>
+              <a href="{{ course.get_create_news_url() }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans %}Add news{% endtrans %}</a>
+              <a href="{{ course.get_create_class_url() }}" class="btn btn-primary btn-outline btn-block">{% trans %}Add class{% endtrans %}</a>
+              <a href="{{ course.get_update_url() }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans %}Edit description{% endtrans %}</a>
             {% endif %}
-            {% call_method request.user "has_perm" "learning.leave_course" course as can_leave_course %}
+            {% set can_leave_course = request.user.has_perm("learning.leave_course", course) %}
             {% if can_leave_course %}
-                <a href="{{ course.get_unenroll_url }}" class="btn btn-danger btn-block">{% trans "Unenroll from the course" %}</a>
+                <a href="{{ course.get_unenroll_url() }}" class="btn btn-danger btn-block">{% trans %}Unenroll from the course{% endtrans %}</a>
             {% else %}
-                {% can_enroll_in_course request.user course request.user.get_student_profile as can_enroll %}
+                {% set can_enroll = can_enroll_in_course(request.user, course, request.user.get_student_profile()) %}
                 {% if can_enroll %}
                     {% if course.ask_enrollment_reason %}
-                        <a href="{{ course.get_enroll_url }}" class="btn btn-primary btn-block">
-                            {% trans "Enroll in the course" %}
+                        <a href="{{ course.get_enroll_url() }}" class="btn btn-primary btn-block">
+                            {% trans %}Enroll in the course{% endtrans %}
                             {% if course.is_capacity_limited %}
-                                <br><small>{% trans "Places available" %}: {{ course.places_left }}</small>
+                                <br><small>{% trans %}Places available{% endtrans %}: {{ course.places_left }}</small>
                             {% endif %}
                         </a>
                     {% else %}
-                        <form action="{{ course.get_enroll_url }}" method="POST" class="mt-5">
+                        <form action="{{ course.get_enroll_url() }}" method="POST" class="mt-5">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-primary btn-block">
-                                {% trans "Enroll in the course" %}
+                                {% trans %}Enroll in the course{% endtrans %}
                                 {% if course.is_capacity_limited %}
-                                    <br><small>{% trans "Places available" %}: {{ course.places_left }}</small>
+                                    <br><small>{% trans %}Places available{% endtrans %}: {{ course.places_left }}</small>
                                 {% endif %}
                             </button>
                         </form>
@@ -253,10 +229,10 @@
             {% endif %}
 
             {% if survey_url %}
-                {% if request_user_enrollment is not None or user.is_curator %}
+                {% if request_user_enrollment is not none or user.is_curator %}
                     <a class=" btn btn-default btn-block btn-success"
                        href="{{ survey_url }}"
-                       target="_blank">{% trans "Start survey" %}</a>
+                       target="_blank">{% trans %}Start survey{% endtrans %}</a>
                 {% endif %}
             {% endif %}
         </div>
@@ -266,14 +242,13 @@
                 {% for course_teacher in teachers.main %}
                     {% with teacher=course_teacher.teacher %}
                     <li>
-                        <a href="{{ teacher.teacher_profile_url }}">
+                        <a href="{{ teacher.teacher_profile_url() }}">
                             {% if teacher.photo %}
-                                {% user_thumbnail teacher teacher.ThumbnailSize.BASE as im %}
-                                    <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"><br>
-                                    {% empty %}
-                                {% enduser_thumbnail %}
+                                {% with im = teacher.get_thumbnail(teacher.ThumbnailSize.BASE, use_stub=True, stub_official=True) -%}
+                                    <img alt="{{ teacher.get_full_name() }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"/><br>
+                                {% endwith -%}
                             {% endif %}
-                            {{ teacher.get_full_name }}
+                            {{ teacher.get_full_name() }}
                         </a>
                     </li>
                     {% endwith %}
@@ -287,7 +262,7 @@
                     {% for course_teacher in teachers.others %}
                         {% with teacher=course_teacher.teacher %}
                         <li>
-                            <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_full_name }}</a>
+                            <a href="{{ teacher.teacher_profile_url() }}">{{ teacher.get_full_name() }}</a>
                         </li>
                         {% endwith %}
                     {% endfor %}
@@ -298,7 +273,6 @@
   </div>
 </div>
 
-{% include "_modal.html" %}
+{% include "lms/layout/_modal.html" %}
 
-{% endlocaltime off %}
 {% endblock content %}

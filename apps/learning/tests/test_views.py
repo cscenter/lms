@@ -7,7 +7,7 @@ from django.utils.encoding import smart_bytes
 from testfixtures import LogCapture
 
 from core.timezone import now_local
-from core.urls import branch_aware_reverse, reverse
+from core.urls import reverse
 from courses.tests.factories import *
 from learning.tests.factories import *
 from users.tests.factories import StudentFactory, TeacherFactory, \
@@ -39,11 +39,12 @@ def test_course_detail_view_basic_get(client):
     course = CourseFactory()
     response = client.get(course.get_absolute_url())
     assert response.status_code == 200
-    url = branch_aware_reverse('courses:course_detail', kwargs={
+    url = reverse('courses:course_detail', kwargs={
+        "course_id": course.pk,
         "course_slug": "space-odyssey",
+        "main_branch_id": course.main_branch_id,
         "semester_year": 2010,
         "semester_type": "autumn",
-        "main_branch_code": ""
     })
     assert client.get(url).status_code == 404
 
@@ -58,30 +59,29 @@ def test_course_detail_view_course_user_relations(client):
     co = CourseFactory.create()
     co_other = CourseFactory.create()
     url = co.get_absolute_url()
-    ctx = client.get(url).context
     client.login(student)
-    ctx = client.get(url).context
+    ctx = client.get(url).context_data
     assert ctx['request_user_enrollment'] is None
     assert not ctx['is_actual_teacher']
     EnrollmentFactory(student=student, course=co_other)
-    ctx = client.get(url).context
+    ctx = client.get(url).context_data
     assert ctx['request_user_enrollment'] is None
     assert not ctx['is_actual_teacher']
     EnrollmentFactory(student=student, course=co)
-    ctx = client.get(url).context
+    ctx = client.get(url).context_data
     assert ctx['request_user_enrollment'] is not None
     assert not ctx['is_actual_teacher']
     client.logout()
     client.login(teacher)
-    ctx = client.get(url).context
+    ctx = client.get(url).context_data
     assert ctx['request_user_enrollment'] is None
     assert not ctx['is_actual_teacher']
     CourseTeacherFactory(course=co_other, teacher=teacher)
-    ctx = client.get(url).context
+    ctx = client.get(url).context_data
     assert ctx['request_user_enrollment'] is None
     assert not ctx['is_actual_teacher']
     CourseTeacherFactory(course=co, teacher=teacher)
-    ctx = client.get(url).context
+    ctx = client.get(url).context_data
     assert ctx['request_user_enrollment'] is None
     assert ctx['is_actual_teacher']
 

@@ -6,7 +6,6 @@ from django.urls import reverse as django_reverse
 from django.utils.functional import lazy
 from subdomains.utils import reverse as subdomain_reverse
 
-
 if settings.LMS_SUBDOMAIN:
     LMS_URL_NAMESPACES = getattr(settings, "REVERSE_TO_LMS_URL_NAMESPACES", [])
     prefixes = "|".join(f"{re.escape(p)}:" for p in LMS_URL_NAMESPACES)
@@ -27,17 +26,6 @@ else:
 
 
 reverse_lazy = lazy(reverse, str)
-
-
-def branch_aware_reverse(viewname, subdomain=None, scheme=None, args=None,
-                         kwargs=None, current_app=None):
-    assert "main_branch_code" in kwargs
-    if kwargs["main_branch_code"] == settings.DEFAULT_BRANCH_CODE:
-        kwargs["main_branch_code"] = ""
-    slash = "/" if kwargs["main_branch_code"] else ""
-    kwargs["branch_trailing_slash"] = slash
-    return reverse(viewname, subdomain=subdomain, scheme=scheme, args=args,
-                   kwargs=kwargs, current_app=current_app)
 
 
 def replace_hostname(url, new_hostname):

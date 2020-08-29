@@ -8,6 +8,7 @@ from courses.models import Assignment
 from courses.services import CourseService
 from courses.tabs import CourseTab, CourseTabPanel
 from courses.tabs_registry import register
+from learning.permissions import ViewCourseNews
 from learning.services import CourseRole, course_access_role
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ class CourseNewsTab(CourseTab):
 
     @classmethod
     def is_enabled(cls, course, user):
-        return user.has_perm("learning.view_course_news", course)
+        return user.has_perm(ViewCourseNews.name, course)
 
     def get_tab_panel(self, *, course, user) -> Optional[CourseTabPanel]:
         return CourseTabPanel(context={"items": CourseService.get_news(course)})

@@ -15,7 +15,7 @@ __all__ = ('MetaCourseDetailView', 'MetaCourseUpdateView')
 class MetaCourseDetailView(generic.DetailView):
     model = MetaCourse
     slug_url_kwarg = 'course_slug'
-    template_name = "courses/meta_detail.html"
+    template_name = "lms/courses/meta_detail.html"
 
     def get_context_data(self, **kwargs):
         filters = {}

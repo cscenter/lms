@@ -1,7 +1,9 @@
 import datetime
+from functools import partial
 
 import pytz
 from django.contrib.auth import get_user_model
+from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import caches
 from django.db import transaction
@@ -17,19 +19,36 @@ from vanilla import DetailView
 
 import core.utils
 from auth.tasks import send_activation_email, ActivationEmailContext
+from core.exceptions import Redirect
+from core.models import Branch
 from core.urls import reverse
-from courses.calendar import CalendarEvent
-from courses.constants import SemesterTypes
-from courses.models import Course, Semester, CourseClass
+from courses.calendar import CalendarEventW, CalendarEvent
+from courses.constants import SemesterTypes, TeacherRoles
+from courses.models import Course, Semester, CourseClass, CourseTeacher, \
+    MetaCourse
+from courses.services import group_teachers
+from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
 from courses.utils import get_current_term_pair, MonthPeriod, \
-    extended_month_date_range
+    extended_month_date_range, course_public_url, course_class_public_url
 from courses.views.calendar import MonthEventsCalendarView
+from courses.views.mixins import CoursePublicURLParamsMixin
 from learning.gallery.models import Image
 from learning.services import get_classes, create_student_profile
 from users.constants import Roles
 from users.models import User, StudentProfile, StudentTypes
 
 _TIME_ZONE = pytz.timezone('Europe/Moscow')
+
+
+class PublicURLContextMixin:
+    def get_public_urls(self):
+        code = self.request.branch.code
+        return {
+            'course_public_url': partial(course_public_url,
+                                         default_branch_code=code),
+            'course_class_public_url': partial(course_class_public_url,
+                                               default_branch_code=code)
+        }
 
 
 class AsyncEmailRegistrationView(RegistrationView):
@@ -76,10 +95,11 @@ class CalendarClubScheduleView(MonthEventsCalendarView):
         fs = [Q(date__range=[start, end]),
               ~Q(course__semester__type=SemesterTypes.SUMMER)]
         for c in get_classes(branch_list=[self.request.branch], filters=fs):
-            yield CalendarEvent(c)
+            yield CalendarEvent.from_course_class(
+                c, url_builder=course_class_public_url)
 
 
-class IndexView(generic.TemplateView):
+class IndexView(PublicURLContextMixin, generic.TemplateView):
     template_name = "compsciclub_ru/index.html"
 
     def get_context_data(self, **kwargs):
@@ -116,6 +136,7 @@ class IndexView(generic.TemplateView):
             context['courses'] = courses
         except Semester.DoesNotExist:
             pass
+        context.update(self.get_public_urls())
         return context
 
     @staticmethod
@@ -128,7 +149,7 @@ class IndexView(generic.TemplateView):
 
 
 class TeachersView(generic.ListView):
-    template_name = "compsciclub_ru/users/teacher_list.html"
+    template_name = "compsciclub_ru/teacher_list.html"
 
     @property
     def get_queryset(self):
@@ -142,31 +163,29 @@ class TeachersView(generic.ListView):
                 .distinct)
 
 
-class TeacherDetailView(DetailView):
-    template_name = "compsciclub_ru/users/teacher_detail.html"
+class TeacherDetailView(PublicURLContextMixin, DetailView):
+    template_name = "compsciclub_ru/teacher_detail.html"
     context_object_name = 'teacher'
 
-    def get_queryset(self):
-        co_queryset = (Course.objects
-                       .filter(main_branch=self.request.branch)
-                       .select_related('semester', 'meta_course',
-                                       'main_branch'))
-        return (get_user_model()._default_manager
-                .prefetch_related(
-                    Prefetch('teaching_set',
-                             queryset=co_queryset.all(),
-                             to_attr='course_offerings'),
-                    Prefetch('images',
-                             queryset=Image.objects.select_related(
-                                 "course",
-                                 "course__semester"))
-                    ))
+    def get_queryset(self, *args, **kwargs):
+        images_qs = Image.objects.select_related("course", "course__semester")
+        return (User.objects
+                .has_role(Roles.TEACHER)
+                .prefetch_related(Prefetch('images', queryset=images_qs)))
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        teacher = context[self.context_object_name]
-        if not teacher.is_teacher:
-            raise Http404
+        branches = Branch.objects.for_site(site_id=self.request.site.pk)
+        min_established = min(b.established for b in branches)
+        courses = (Course.objects
+                   .made_by(branches)
+                   .filter(semester__year__gte=min_established,
+                           teachers=self.object.pk)
+                   .select_related('semester', 'meta_course', 'main_branch'))
+        context = {
+            'teacher': self.object,
+            'courses': courses,
+            **self.get_public_urls()
+        }
         return context
 
 
@@ -237,7 +256,7 @@ class ClubClassesFeed(ICalFeed):
         return item.venue.address
 
 
-class CoursesListView(generic.ListView):
+class CoursesListView(PublicURLContextMixin, generic.ListView):
     model = Semester
     template_name = "compsciclub_ru/course_offerings.html"
 
@@ -273,4 +292,98 @@ class CoursesListView(generic.ListView):
             (a and a.courseofferings) or (s and s.courseofferings)
             ]
 
+        context.update(self.get_public_urls())
+
+        return context
+
+
+class MetaCourseDetailView(PublicURLContextMixin, generic.DetailView):
+    model = MetaCourse
+    slug_url_kwarg = 'course_slug'
+    template_name = "compsciclub_ru/meta_course_detail.html"
+
+    def get_context_data(self, **kwargs):
+        courses = (Course.objects
+                   .filter(meta_course=self.object,
+                           main_branch=self.request.branch)
+                   .select_related("meta_course", "semester", "main_branch")
+                   .order_by('-semester__index'))
+        context = {
+            'meta_course': self.object,
+            'courses': courses,
+            **self.get_public_urls()
+        }
+        return context
+
+
+# FIXME: redirect if authenticated and the student or teacher
+class CourseDetailView(PublicURLContextMixin,
+                       CoursePublicURLParamsMixin, generic.DetailView):
+    template_name = "compsciclub_ru/course_detail.html"
+    context_object_name = 'course'
+
+    def get_course_queryset(self):
+        course_teachers = Prefetch('course_teachers',
+                                   queryset=(CourseTeacher.objects
+                                             .select_related("teacher")
+                                             .order_by('teacher__last_name',
+                                                       'teacher__first_name')))
+        return (super().get_course_queryset()
+                .prefetch_related(course_teachers, "branches"))
+
+    def get_object(self):
+        return self.course
+
+    def get_context_data(self, *args, **kwargs):
+        course = self.course
+        # Tabs
+        tab_list = get_course_tab_list(self.request, course,
+                                       codes=['about', 'classes', 'news'])
+        try:
+            show_tab = self.kwargs.get('tab', CourseInfoTab.type)
+            tab_list.set_active_tab(show_tab)
+        except TabNotFound:
+            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
+        # Teachers
+        by_role = group_teachers(course.course_teachers.all())
+        teachers = {'main': [], 'others': []}
+        for role, ts in by_role.items():
+            if role in (TeacherRoles.LECTURER, TeacherRoles.SEMINAR):
+                group = 'main'
+            else:
+                group = 'others'
+            teachers[group].extend(ts)
+        tz_override = None
+        if self.request.user.is_authenticated:
+            tz_override = self.request.user.get_timezone()
+        context = {
+            'course': course,
+            'course_tabs': tab_list,
+            'teachers': teachers,
+            'tz_override': tz_override,
+            **self.get_public_urls()
+        }
+        return context
+
+
+class CourseClassDetailView(PublicURLContextMixin,
+                            CoursePublicURLParamsMixin, generic.DetailView):
+    context_object_name = 'course_class'
+    template_name = "compsciclub_ru/course_class_detail.html"
+
+    def get_queryset(self):
+        return (CourseClass.objects
+                .select_related("course",
+                                "course__meta_course",
+                                "course__main_branch",
+                                "course__semester",
+                                "venue",
+                                "venue__location",))
+
+    def get_context_data(self, **kwargs):
+        context = {
+            'course_class': self.object,
+            'attachments': self.object.courseclassattachment_set.all(),
+            **self.get_public_urls(),
+        }
         return context

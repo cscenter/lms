@@ -138,6 +138,7 @@ TEMPLATES = [
             "filters": {
                 "markdown": "core.jinja2.filters.markdown",
                 "pluralize": "core.jinja2.filters.pluralize",
+                "thumbnail": "core.jinja2.filters.thumbnail",
                 "with_classes": "core.jinja2.filters.with_classes",
                 "youtube_video_id": "core.jinja2.filters.youtube_video_id",
                 "as_survey": "surveys.jinja2_filters.render_form",
@@ -155,6 +156,8 @@ TEMPLATES = [
                 "get_menu": "core.jinja2.globals.generate_menu",
                 "crispy": "core.jinja2.globals.crispy",
                 "pagination": "core.jinja2.globals.pagination",
+                # FIXME: move from django template tags
+                "can_enroll_in_course": "core.templatetags.core_tags.can_enroll_in_course",
             },
             "extensions": [
                 "jinja2.ext.do",

@@ -1,16 +1,14 @@
-{% extends "base.html" %}
-{% load i18n %}
-{% load markdown call_method from core_tags %}
+{% extends "lms/layout/v1_base.html" %}
 
 {% block content %}
     <div class="container">
         <div class="row">
             <div class="col-xs-12 h2-and-buttons">
                 <h2>{{ meta_course.name }}</h2>
-                {% call_method request.user "has_perm" "courses.change_metacourse" course as can_update_meta_course %}
+                {% set can_update_meta_course = request.user.has_perm("courses.change_metacourse", course) %}
                 {% if can_update_meta_course %}
                     <div class="btn-toolbar">
-                        <a href="{{ meta_course.get_update_url }}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+                        <a href="{{ meta_course.get_update_url() }}" class="btn btn-primary" role="button">{% trans %}Edit{% endtrans %}</a>
                     </div>
                 {% endif %}
                 <hr>
@@ -19,20 +17,18 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="ubertext">
-                    {% markdown 3600 "course_description" meta_course.pk meta_course.modified %}
-                        {{ meta_course.description }}
-                    {% endmarkdown %}
+                    {{ meta_course.description|markdown("course_description", 3600, meta_course.pk, meta_course.modified) }}
                 </div>
-                <h4>{% trans 'Course Offerings' %}</h4>
+                <h4>{% trans %}Course Offerings{% endtrans %}</h4>
                 {% if courses %}
                     <table class="table" width="100%">
                         <tr class="active">
-                            <th>{% trans "Semester" %}</th>
-                            <th>{% trans "Branch" %}</th>
+                            <th>{% trans %}Semester{% endtrans %}</th>
+                            <th>{% trans %}Branch{% endtrans %}</th>
                         </tr>
                         {% for course in courses %}
                             <tr>
-                                <td><a href="{{ course.get_absolute_url }}">{{ course.semester }}</a></td>
+                                <td><a href="{{ course.get_absolute_url() }}">{{ course.semester }}</a></td>
                                 <td>{{ course.main_branch.name }}</td>
                             </tr>
                         {% endfor %}

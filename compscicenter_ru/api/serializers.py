@@ -3,7 +3,7 @@ from django.utils.encoding import force_bytes
 from rest_framework import serializers
 
 from api.utils import make_api_fragment_key
-from compscicenter_ru.utils import course_public_url
+from courses.utils import course_public_url
 from core.utils import render_markdown
 from courses.api.serializers import CourseSerializer
 from courses.models import Course, CourseTeacher

@@ -148,7 +148,6 @@ def test_teachers_detail_view_should_show_only_club_courses(client, settings):
                                     site__domain=settings.TEST_DOMAIN)
     t = TeacherFactory()
 
-    # Both courses are available for club students, but only course_club should be listed among teacher courses
     course_center = CourseFactory(main_branch=branch_spb_center,
                                   branches=[branch_spb_club],
                                   teachers=[t])
