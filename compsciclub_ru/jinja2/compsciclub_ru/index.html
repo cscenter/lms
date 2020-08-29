@@ -1,57 +1,53 @@
-{% extends "base.html" %}
-{% load static %}
-{% load i18n %}
-{% load htmlpage_url %}
-{% get_current_language as LANGUAGE_CODE %}
+{% extends "lms/layout/v1_base.html" %}
 
 {% block content %}
-<div class="banner _{{ request.branch.code|slugify }}">{% if request.branch.code == 'spb' %}<div id="copyright">{% trans "Author photo" %}: <a target="_blank" href="https://commons.wikimedia.org/wiki/User:Andrey.Salnikov">{% trans "Andrey Salnikov" %}</a></div>{% endif %}</div>
+<div class="banner _{{ request.branch.code|slugify }}">{% if request.branch.code == 'spb' %}<div id="copyright">{% trans %}Author photo{% endtrans %}: <a target="_blank" href="https://commons.wikimedia.org/wiki/User:Andrey.Salnikov">{% trans %}Andrey Salnikov{% endtrans %}</a></div>{% endif %}</div>
 
 
 <div class="container">
   <div class="font-bigger">
   {% if request.branch.code == 'spb' %}
-      {% blocktrans %}
+      {% trans %}
       The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.
-    {% endblocktrans %}
+    {% endtrans %}
   {% elif request.branch.code == 'nsk' and LANGUAGE_CODE == 'ru' %}
       Computer Science клуб — это открытые лекции и курсы. В клубе любой желающий может познакомиться с классическими результатами, современным положением дел и открытыми задачами в различных областях Computer Science. Вход на лекции свободный, посещать курсы можно начать в любое время. Зарегистрируйтесь на интересные вам курсы, чтобы получать уведомления по ним (если у вас нет пропуска в НГУ, то зарегистрируйтесь хотя бы за два дня с реальными именем и фамилией в профиле и возьмите с собой паспорт для прохода в здание).
   {% else %}
-      {% blocktrans %}
+      {% trans %}
       The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.
-      {% endblocktrans %}
+      {% endtrans %}
   {% endif %}
   </div>
   {% if courses %}
-  <h1>{% trans "Courses" %}: {{ featured_term }}</h1>
+  <h1>{% trans %}Courses{% endtrans %}: {{ featured_term }}</h1>
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>{% trans "Course name" %}</th>
-                <th>{% trans "Teachers" %}</th>
-                <th>{% trans "Next lecture" %}</th>
-                <th class="_language">{% trans "Language" %}</th>
+                <th>{% trans %}Course name{% endtrans %}</th>
+                <th>{% trans %}Teachers{% endtrans %}</th>
+                <th>{% trans %}Next lecture{% endtrans %}</th>
+                <th class="_language">{% trans %}Language{% endtrans %}</th>
             </tr>
         </thead>
         <tbody>
               {% for course in courses %}
                 <tr>
-                  <td><a href="{{ course_public_url:course }}">{{ course.meta_course.name }}</a></td>
-                  <td>{% for teacher in course.teachers.all %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                  <td><a href="{{ course_public_url(course) }}">{{ course.meta_course.name }}</a></td>
+                  <td>{% for teacher in course.teachers.all() %}<a href="{{ teacher.teacher_profile_url() }}" style="white-space:nowrap;">{{ teacher.get_abbreviated_name() }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</td>
                   <td>
                     {% if course.classes %}
                       {% with class=course.classes|first %}
-                      <a href="{{ course_class_public_url:class }}">{{ class.date|date:"l, d E" }}, {{ class.starts_at }}</a>
+                      <a href="{{ course_class_public_url(class) }}">{{ class.date|date("l, d E") }}, {{ class.starts_at }}</a>
                       {% endwith %}
                     {% else %}
                       {% if course.is_completed %}
-                        {% trans "The course is completed" %}
+                        {% trans %}The course is completed{% endtrans %}
                       {% else %}
-                        {% trans "To be announced" %}
+                        {% trans %}To be announced{% endtrans %}
                       {% endif %}
                     {% endif %}
                   </td>
-                  <td>{% if course.language == 'ru' %}{% trans "Russian" %}{% else %}{% trans "English" %}{% endif %}</td>
+                  <td>{% if course.language == 'ru' %}{% trans %}Russian{% endtrans %}{% else %}{% trans %}English{% endtrans %}{% endif %}</td>
                 </tr>
               {% endfor %}
           </tbody>

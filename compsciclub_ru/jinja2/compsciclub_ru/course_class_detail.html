@@ -1,0 +1,81 @@
+{% extends "lms/layout/v1_base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>
+        {{ course_class.name }}<br><small><a href="{{ course_public_url(course_class.course) }}">{{ course_class.course.meta_course.name }}</a></small>
+      </h2>
+    </div>
+  </div>
+
+  {% set can_view_course_class_materials = request.user.has_perm("learning.view_course_class_materials", course_class) %}
+
+  <div class="row">
+    <div class="col-xs-12">
+      <table class="table table-striped">
+        <tr>
+          <td>{% trans %}What{% endtrans %}:</td>
+          <td>{{ course_class.get_type_display() }}</td>
+        </tr>
+        <tr>
+          <td>{% trans %}When{% endtrans %}:</td>
+          <td>{{ course_class.date|date("l, d E Y") }}, {{ course_class.starts_at|time("H:i") }}–{{ course_class.ends_at|time("H:i") }}</td>
+        </tr>
+        <tr>
+          <td>{% trans %}Where{% endtrans %}:</td>
+          <td><a href="{{ course_class.venue.location.get_absolute_url() }}">{{ course_class.venue }}</a></td>
+        </tr>
+        {% if course_class.slides and can_view_course_class_materials %}
+        <tr>
+          <td>{% trans %}Slides{% endtrans %}:</td>
+          <td id="slides"><a href="{{ course_class.get_slides_download_url() }}">{{ course_class.slides_file_name }}</a></td>
+        </tr>
+        {% endif %}
+      </table>
+
+      {% if course_class.description %}
+      <h4 class="bigger-margin">{% trans %}Description{% endtrans %}</h4>
+      <div class="ubertext">
+          {{ course_class.description|markdown("course_class_description", 3600, course_class.pk, course_class.modified) }}
+      </div>
+      {% endif %}
+
+    {% if can_view_course_class_materials %}
+        {% if course_class.video_iframe() %}
+            <a id="video" href="#"></a><h4 class="bigger-margin">{% trans %}Video{% endtrans %}</h4>
+            <div class="">
+                {{ course_class.video_iframe()|safe }}
+            </div>
+        {% endif %}
+        {% if attachments %}
+            <h4 class="bigger-margin" id="attachments">{% trans %}Attached files{% endtrans %}</h4>
+            <ul class="list">
+                {% for attachment in attachments %}
+                    <li>
+                        <span class="assignment-attachment">
+                            <i class="fa fa-file"></i>
+                            <a href="{{ attachment.get_download_url() }}">{{ attachment.material_file_name }}</a>
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if course_class.other_materials or course_class.slides_iframe() %}
+            <h4 class="bigger-margin" id="other_materials">{% trans %}Other materials{% endtrans %}</h4>
+            {% if course_class.slides_iframe() %}
+              {{ course_class.slides_iframe()|safe }}
+            {% endif %}
+            <div class="ubertext">
+                {{ course_class.other_materials|markdown("course_class_materials", 3600, course_class.pk, course_class.modified) }}
+            </div>
+        {% endif %}
+    {% endif %}
+
+
+
+    </div>
+  </div>
+</div>
+{% endblock content %}

@@ -7,6 +7,7 @@ import pytest
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
@@ -101,7 +102,7 @@ def test_course_class_update(client, assert_redirect):
     form['name'] += " foobar"
     assert_redirect(client.post(url, form), cc.get_absolute_url())
     response = client.get(cc.get_absolute_url())
-    assert form['name'] == response.context['object'].name
+    assert form['name'] == response.context_data['object'].name
 
 
 @pytest.mark.django_db
@@ -118,7 +119,7 @@ def test_course_class_update_and_add(client, assert_redirect):
     assert_redirect(client.post(url, form),
                     cc.get_absolute_url())
     response = client.get(cc.get_absolute_url())
-    assert form['name'] == response.context['object'].name
+    assert form['name'] == response.context_data['object'].name
     form.update({'_addanother': True})
     expected_url = co.get_create_class_url()
     assert_redirect(client.post(url, form), expected_url)
@@ -189,22 +190,13 @@ def test_course_class_attachment_links(client, assert_redirect):
 @pytest.mark.django_db
 def test_course_class_attachments(client, assert_redirect,
                                   assert_login_redirect):
-    # Serving media enabled (TODO: rewrite with setup_module?)
-    import compscicenter_ru.urls
-    _original_urls = compscicenter_ru.urls.urlpatterns.copy()
-    settings.DEBUG = True
-    s = static(settings.MEDIA_URL,
-               document_root=settings.MEDIA_ROOT)
-    compscicenter_ru.urls.urlpatterns += s
-    settings.DEBUG = False
-
     teacher = TeacherFactory()
+    client.login(teacher)
     s = SemesterFactory.create_current()
-    co = CourseFactory.create(teachers=[teacher], semester=s)
-    cc = CourseClassFactory.create(course=co, slides=None)
+    co = CourseFactory(teachers=[teacher], semester=s)
+    cc = CourseClassFactory(course=co, slides=None)
     f1 = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
     f2 = SimpleUploadedFile("attachment2.txt", b"attachment2_content")
-    client.login(teacher)
     form = model_to_dict(cc)
     del form['slides']
     form['attachments'] = [f1, f2]
@@ -217,9 +209,9 @@ def test_course_class_attachments(client, assert_redirect,
              .find_all('span', class_='assignment-attachment'))
     assert len(spans) == 2
     cca_files = sorted(a.material.path
-                       for a in response.context['attachments'])
+                       for a in response.context_data['attachments'])
     # we will delete attachment2.txt
-    cca_to_delete = [a for a in response.context['attachments']
+    cca_to_delete = [a for a in response.context_data['attachments']
                      if a.material.path == cca_files[1]][0]
     as_ = sorted(span.a.contents[0].strip() for span in spans)
     assert re.match("attachment1(_[0-9a-zA-Z]+)?.txt", as_[0])
@@ -243,8 +235,6 @@ def test_course_class_attachments(client, assert_redirect,
     assert re.match("attachment1(_[0-9a-zA-Z]+)?.txt",
                     spans[0].a.contents[0].strip())
     assert not os.path.isfile(cca_files[1])
-    # Disable Serving media
-    compscicenter_ru.urls.urlpatterns = _original_urls
 
 
 @pytest.mark.django_db
@@ -292,9 +282,10 @@ def test_course_class_form_available(client, curator, settings):
         "ends_at": "18:50",
         "materials_visibility": MaterialVisibilityTypes.VISIBLE
     }
-    response = client.post(course_class_add_url, form, follow=True)
-    message = list(response.context['messages'])[0]
-    assert 'success' in message.tags
+    response = client.post(course_class_add_url, form)
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert 'success' in messages[0].tags
     # FIXME: добавить тест на is_form_available и посмотреть, можно ли удалить эту часть, по-моему это лишняя логика
 
 

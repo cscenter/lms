@@ -1,3 +1,5 @@
+from sorl.thumbnail import get_thumbnail
+
 from core.utils import render_markdown_and_cache, get_youtube_video_id
 
 
@@ -32,6 +34,10 @@ def with_classes(bound_field, class_names):
     if bound_field.field.show_hidden_initial:
         return widget_str + bound_field.as_hidden(only_initial=True)
     return widget_str
+
+
+def thumbnail(path, geometry, **options):
+    return get_thumbnail(path, geometry, **options)
 
 
 def youtube_video_id(url):

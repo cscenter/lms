@@ -16,7 +16,7 @@ from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.urls import reverse
 from core.utils import render_markdown
-from courses.calendar import CalendarEvent
+from courses.calendar import CalendarEventW
 from courses.constants import SemesterTypes
 from courses.models import Course, Assignment
 from courses.permissions import ViewAssignment
@@ -275,7 +275,7 @@ class TimetableView(TeacherOnlyMixin, MonthEventsCalendarView):
         in_range = [Q(date__range=[start, end])]
         cs = get_teacher_classes(self.request.user, in_range, with_venue=True)
         for c in cs:
-            yield CalendarEvent(c)
+            yield CalendarEventW(c)
 
 
 class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):

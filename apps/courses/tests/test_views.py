@@ -142,17 +142,17 @@ def test_course_assignment_timezone(client):
     client.login(teacher_nsk)
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
-    assert response.context["tz_override"] == branch_nsk.get_timezone()
+    assert response.context_data["tz_override"] == branch_nsk.get_timezone()
     StudentProfileFactory(user=teacher_nsk, branch=branch_nsk)
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
-    assert response.context["tz_override"] == branch_nsk.get_timezone()
+    assert response.context_data["tz_override"] == branch_nsk.get_timezone()
     # Don't override timezone if current authenticated user is an actual
     # teacher of the course
     CourseTeacherFactory(course=course_spb, teacher=teacher_nsk)
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
-    assert response.context["tz_override"] is None
+    assert response.context_data["tz_override"] is None
 
 
 @pytest.mark.django_db

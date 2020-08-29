@@ -37,35 +37,35 @@ def test_course_news_tab_permissions(client):
     student_spb = StudentFactory(branch__code=Branches.SPB)
     client.login(student_spb)
     response = client.get(course.get_absolute_url())
-    assert "news" not in response.context['course_tabs']
+    assert "news" not in response.context_data['course_tabs']
     response = client.get(co_prev.get_absolute_url())
-    assert "news" not in response.context['course_tabs']
+    assert "news" not in response.context_data['course_tabs']
     e_current = EnrollmentFactory(course=course, student=student_spb)
     response = client.get(course.get_absolute_url())
-    assert "news" in response.context['course_tabs']
+    assert "news" in response.context_data['course_tabs']
     # To see the news for completed course student should successfully pass it.
     e_prev = EnrollmentFactory(course=co_prev, student=student_spb)
     response = client.get(co_prev.get_absolute_url())
-    assert "news" not in response.context['course_tabs']
+    assert "news" not in response.context_data['course_tabs']
     e_prev.grade = GradeTypes.GOOD
     e_prev.save()
     response = client.get(co_prev.get_absolute_url())
-    assert "news" in response.context['course_tabs']
+    assert "news" in response.context_data['course_tabs']
     # Teacher from the same course can view news from other offerings
     teacher = TeacherFactory()
     client.login(teacher)
     response = client.get(co_prev.get_absolute_url())
-    assert "news" not in response.context['course_tabs']
+    assert "news" not in response.context_data['course_tabs']
     response = client.get(course.get_absolute_url())
-    assert "news" not in response.context['course_tabs']
+    assert "news" not in response.context_data['course_tabs']
     CourseTeacherFactory(course=co_prev, teacher=teacher)
     response = client.get(co_prev.get_absolute_url())
-    assert "news" in response.context['course_tabs']
+    assert "news" in response.context_data['course_tabs']
     response = client.get(course.get_absolute_url())
-    assert "news" in response.context['course_tabs']
+    assert "news" in response.context_data['course_tabs']
     co_other = CourseFactory(semester=current_semester)
     response = client.get(co_other.get_absolute_url())
-    assert "news" not in response.context['course_tabs']
+    assert "news" not in response.context_data['course_tabs']
 
 
 @pytest.mark.django_db
@@ -84,13 +84,13 @@ def test_course_assignments_tab_permissions(client):
     # Teacher can see links to assignments from other course sessions
     client.login(teacher)
     response = client.get(co_prev.get_absolute_url())
-    assert "assignments" in response.context['course_tabs']
+    assert "assignments" in response.context_data['course_tabs']
     assert smart_bytes(a.get_teacher_url()) in response.content
     student = StudentFactory()
     client.login(student)
     response = client.get(co_prev.get_absolute_url())
-    assert "assignments" in response.context['course_tabs']
-    tab = response.context['course_tabs']['assignments']
+    assert "assignments" in response.context_data['course_tabs']
+    tab = response.context_data['course_tabs']['assignments']
     assert len(tab.tab_panel.context["items"]) == 1
     assert smart_bytes(a.get_teacher_url()) not in response.content
 
@@ -112,7 +112,7 @@ def test_course_reviews_tab_permissions(client, curator, settings):
     client.login(student)
     response = client.get(course.get_absolute_url())
     assert CourseReviewsTab.is_enabled(course, student)
-    assert "reviews" in response.context['course_tabs']
+    assert "reviews" in response.context_data['course_tabs']
     volunteer = VolunteerFactory()
     assert CourseReviewsTab.is_enabled(course, volunteer)
     assert CourseReviewsTab.is_enabled(course, curator)

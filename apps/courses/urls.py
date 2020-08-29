@@ -11,7 +11,11 @@ _terms = r"|".join(slug for slug, _ in SemesterTypes.choices)
 re_semester_slug = r"(?P<semester_year>\d{4})-(?P<semester_type>" + _terms + r")"
 
 
-RE_COURSE_URI = r"^(?P<course_slug>[-\w]+)/(?P<main_branch_code>\w*)(?P<branch_trailing_slash>/?)" + re_semester_slug + r"/"
+RE_COURSE_URI = r"^" + re_semester_slug + r"/(?P<main_branch_id>\d+).(?P<course_id>\d+)-(?P<course_slug>[-\w]+)/"
+# Old-style urls have some limitations and are not used in the LMS, but they
+# are not easy to remove from public versions of compscicenter.ru and
+# compsciclub.ru because of indexing, urls in youtube video descriptions, etc.
+RE_COURSE_PUBLIC_URI = r"^(?P<course_slug>[-\w]+)/(?P<main_branch_code>\w*)(?P<branch_trailing_slash>/?)" + re_semester_slug + r"/"
 
 app_name = 'courses'
 

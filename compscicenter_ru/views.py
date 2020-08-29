@@ -20,10 +20,10 @@ from djchoices import DjangoChoices, C
 from vanilla import TemplateView, DetailView
 
 from announcements.models import Announcement
-from compscicenter_ru.utils import Tab, TabList, course_public_url
+from compscicenter_ru.utils import Tab, TabList
 from core.exceptions import Redirect
 from core.models import Branch
-from core.urls import reverse, branch_aware_reverse
+from core.urls import reverse
 from core.utils import bucketize
 from courses.constants import SemesterTypes, TeacherRoles
 from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
@@ -32,7 +32,7 @@ from courses.permissions import ViewCourseClassMaterials, \
     can_view_private_materials
 from courses.services import group_teachers, CourseService
 from courses.utils import get_current_term_pair, \
-    get_term_index
+    get_term_index, course_public_url, course_class_public_url
 from faq.models import Question
 from learning.models import Enrollment, GraduateProfile
 from learning.roles import Roles
@@ -46,7 +46,7 @@ from study_programs.models import StudyProgram, AcademicDiscipline
 from study_programs.services import get_study_programs
 from users.constants import SHADCourseGradeTypes
 from users.models import User, SHADCourseRecord
-from .mixins import CoursePublicURLParamsMixin
+from courses.views.mixins import CoursePublicURLParamsMixin
 
 # FIXME: remove?
 TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
@@ -81,9 +81,7 @@ class PublicURLMixin:
         if isinstance(obj, Course):
             return course_public_url(obj, **kwargs)
         elif isinstance(obj, CourseClass):
-            return branch_aware_reverse(
-                'class_detail',
-                kwargs={'pk': obj.pk, **obj.course.url_kwargs})
+            return course_class_public_url(obj)
         elif isinstance(obj, MetaCourse):
             return reverse('meta_course_detail',
                            kwargs={'course_slug': obj.slug})
@@ -670,7 +668,6 @@ class CourseOfferingsView(TemplateView):
 
 class CourseDetailView(PublicURLMixin, CoursePublicURLParamsMixin,
                        generic.DetailView):
-    model = MetaCourse
     template_name = "compscicenter_ru/courses/course_detail.html"
     context_object_name = 'course'
 

@@ -2,7 +2,8 @@ import datetime
 from abc import ABC
 from calendar import Calendar
 from collections import defaultdict
-from typing import List, Iterable, NewType
+from dataclasses import dataclass
+from typing import List, Iterable, NewType, Callable
 
 import attr
 from dateutil.relativedelta import relativedelta
@@ -17,16 +18,17 @@ from rest_framework import serializers, fields
 
 from core.utils import chunks
 from courses.constants import MONDAY_WEEKDAY, WEEKDAY_TITLES
+from courses.models import CourseClass
 from courses.utils import MonthPeriod, extended_month_date_range
 
-__all__ = ('EventsCalendar', 'CalendarEvent', 'MonthFullWeeksEventsCalendar',
+__all__ = ('EventsCalendar', 'CalendarEventW', 'CalendarEvent',
+           'MonthFullWeeksEventsCalendar',
            'WeekEventsCalendar', 'CalendarQueryParams')
 
 
-# FIXME: rename. Должно подходить для Class/Assignment/UncategorizedEvent
-# TODO: Month calendar has event interface, but timetable is not. Do not use for timetable right now?
+# FIXME: replace with CalendarEvent
 @attr.s
-class CalendarEvent:
+class CalendarEventW:
     """
     Wrapper for course events. Supports course classes, non-course events
     """
@@ -61,10 +63,44 @@ class CalendarEvent:
         return self.event.name
 
 
+@dataclass
+class CalendarEvent:
+    name: str
+    description: str
+    url: str
+    date: datetime.date
+    starts_at: datetime.time
+    ends_at: datetime.time
+    type: str
+
+    @property
+    def start(self):
+        return time_format(self.starts_at, "H:i")
+
+    @property
+    def end(self):
+        return time_format(self.ends_at, "H:i")
+
+    @classmethod
+    def from_course_class(cls, course_class: CourseClass,
+                          url_builder: Callable = None):
+        if url_builder:
+            url = url_builder(course_class)
+        else:
+            url = course_class.get_absolute_url()
+        return cls(name=course_class.name,
+                   description=course_class.name,
+                   url=url,
+                   date=course_class.date,
+                   starts_at=course_class.starts_at,
+                   ends_at=course_class.ends_at,
+                   type=course_class.type)
+
+
 @attr.s
 class CalendarDay:
     date: datetime.date = attr.ib()
-    events: List[CalendarEvent] = attr.ib(factory=list)
+    events: List[CalendarEventW] = attr.ib(factory=list)
 
 
 @attr.s
@@ -110,7 +146,7 @@ class EventsCalendar(ABC):
         self.week_starts_on = week_starts_on
         self._cal = Calendar(firstweekday=self.week_starts_on)
 
-    def _add_events(self, events: Iterable[CalendarEvent]):
+    def _add_events(self, events: Iterable[CalendarEventW]):
         # Note: Day events order could be broken on subsequent calls
         events = sorted(events, key=lambda evt: (evt.date, evt.start))
         for event in events:
@@ -159,7 +195,7 @@ class MonthFullWeeksEventsCalendar(EventsCalendar):
     `.days()` could return days out of the target month.
     """
     def __init__(self, month_period: MonthPeriod,
-                 events: Iterable[CalendarEvent],
+                 events: Iterable[CalendarEventW],
                  week_starts_on=MONDAY_WEEKDAY):
         super().__init__(week_starts_on)
         self.month_period = month_period
@@ -208,7 +244,7 @@ ISOWeekNumber = NewType('ISOWeekNumber', int)
 # TODO: add week_starts_on support
 class WeekEventsCalendar(EventsCalendar):
     def __init__(self, year: int, week_number: ISOWeekNumber,
-                 events: Iterable[CalendarEvent],
+                 events: Iterable[CalendarEventW],
                  week_starts_on=MONDAY_WEEKDAY):
         super().__init__(week_starts_on)
         w = Week(year, week_number)

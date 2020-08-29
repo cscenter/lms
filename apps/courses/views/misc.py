@@ -8,7 +8,7 @@ from users.models import User
 
 
 class TeacherDetailView(DetailView):
-    template_name = "courses/teacher_detail.html"
+    template_name = "lms/courses/teacher_detail.html"
     context_object_name = 'teacher'
 
     def get_queryset(self, *args, **kwargs):

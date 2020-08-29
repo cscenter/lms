@@ -267,18 +267,23 @@ class CourseTabList:
         return self._tabs[item]
 
 
-def get_course_tab_list(request, course):
+def get_course_tab_list(request, course, codes=None):
     """
     Retrieves the course tab list and manipulates the set as necessary
     """
-    tabs = (
-        CourseTab.load("about"),
-        CourseTab.load("contacts"),
-        CourseTab.load("reviews"),
-        CourseTab.load("classes"),
-        CourseTab.load("assignments"),
-        CourseTab.load("news")
-    )
+    available_codes = [
+        'about',
+        'contacts',
+        'reviews',
+        'classes',
+        'assignments',
+        'news',
+    ]
+    if codes:
+        to_process = [c for c in codes if c in available_codes]
+    else:
+        to_process = available_codes
+    tabs = (CourseTab.load(c) for c in to_process)
     user = request.user
     tab_list = CourseTabList()
     for tab in tabs:

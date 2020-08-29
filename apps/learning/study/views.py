@@ -13,7 +13,7 @@ from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.urls import reverse
 from core.utils import is_club_site
-from courses.calendar import CalendarEvent
+from courses.calendar import CalendarEventW
 from courses.constants import SemesterTypes
 from courses.models import Semester, Course
 from courses.utils import get_current_term_pair, MonthPeriod, \
@@ -72,12 +72,12 @@ class TimetableView(PermissionRequiredMixin, WeekEventsView):
     template_name = "learning/study/timetable.html"
     permission_required = "study.view_schedule"
 
-    def get_events(self, iso_year, iso_week) -> Iterable[CalendarEvent]:
+    def get_events(self, iso_year, iso_week) -> Iterable[CalendarEventW]:
         w = Week(iso_year, iso_week)
         in_range = [Q(date__range=[w.monday(), w.sunday()])]
         cs = get_student_classes(self.request.user, in_range, with_venue=True)
         for c in cs:
-            yield CalendarEvent(c)
+            yield CalendarEventW(c)
 
 
 class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):

@@ -11,13 +11,10 @@ from announcements.views import AnnouncementTagAutocomplete, \
     AnnouncementDetailView
 from compscicenter_ru import views
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
-from courses.urls import re_semester_slug
+from courses.urls import RE_COURSE_PUBLIC_URI
 from htmlpages.views import flatpage
 from library.views import BookTagAutocomplete
 from info_blocks.views import InfoBlockTagAutocomplete
-
-
-RE_COURSE_PUBLIC_URI = r"^(?P<course_slug>[-\w]+)/(?P<main_branch_code>\w*)(?P<branch_trailing_slash>/?)" + re_semester_slug + r"/"
 
 admin.autodiscover()
 

@@ -1,10 +1,10 @@
 import rules
 from django.conf import settings
 
-from auth.permissions import Permission
 from auth.utils import override_perm
 from courses.models import Course
-from learning.permissions import EnrollInCourse, EnrollPermissionObject
+from learning.permissions import EnrollInCourse, EnrollPermissionObject, \
+    ViewCourseNews
 
 
 @rules.predicate
@@ -32,9 +32,11 @@ def enroll_in_course(user, permission_object: EnrollPermissionObject):
     return True
 
 
-# FIXME: Only registered users can see the news. What about unauthenticated? Add default role with default permissions
-class ClubCourseViewNews(Permission):
-    name = "learning.view_course_news"
+class ClubCourseViewNews(ViewCourseNews):
+    @staticmethod
+    @rules.predicate
+    def rule(user, course: Course):
+        return True
 
 
 class ClubEnrollInCourse(EnrollInCourse):

@@ -10,9 +10,10 @@ from loginas import urls as loginas_urls
 from compsciclub_ru.views import CalendarClubScheduleView, IndexView, \
     TeachersView, \
     TeacherDetailView, AsyncEmailRegistrationView, ClubClassesFeed, \
-    CoursesListView
+    CoursesListView, CourseDetailView, CourseClassDetailView, \
+    MetaCourseDetailView
 from core.views import MarkdownHowToHelpView, MarkdownRenderView
-from courses.urls import RE_COURSE_URI
+from courses.urls import RE_COURSE_URI, RE_COURSE_PUBLIC_URI
 from htmlpages import views
 from international_schools.views import InternationalSchoolsListView
 from learning.views import CourseNewsNotificationUpdate, CourseEnrollView, \
@@ -30,8 +31,15 @@ urlpatterns = i18n_patterns(
     path("schedule/", CalendarClubScheduleView.as_view(), name="public_schedule"),
     path("schedule/classes.ics", ClubClassesFeed(), name="public_schedule_classes_ics"),
 
-    url(r"^courses/$", CoursesListView.as_view(), name="course_list"),
-
+    path("courses/", include([
+        path("", CoursesListView.as_view(), name="course_list"),
+        path("<slug:course_slug>/", MetaCourseDetailView.as_view(), name="meta_course_detail"),
+        re_path(RE_COURSE_PUBLIC_URI, include([
+            path("", CourseDetailView.as_view(), name="course_detail"),
+            re_path(r"^(?P<tab>classes|about|news)/$", CourseDetailView.as_view(), name="course_detail_with_active_tab"),
+            path("classes/<int:pk>/", CourseClassDetailView.as_view(), name="class_detail"),
+        ])),
+    ])),
     path('', include('courses.urls')),
 
     url(r'^teachers/$', TeachersView.as_view(), name='teachers'),

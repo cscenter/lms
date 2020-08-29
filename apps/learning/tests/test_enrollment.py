@@ -10,7 +10,7 @@ from django.utils.translation import gettext as _
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
-from core.urls import reverse, branch_aware_reverse
+from core.urls import reverse
 from courses.models import CourseBranch
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
@@ -436,7 +436,7 @@ def test_enrollment_by_invitation(settings, client):
     enroll_url = course_invitation.get_absolute_url()
     invited = InvitedStudentFactory(branch=course.main_branch)
     client.login(invited)
-    wrong_url = branch_aware_reverse(
+    wrong_url = reverse(
         "course_enroll_by_invitation",
         kwargs={"course_token": "WRONG_TOKEN", **course.url_kwargs},
         subdomain=settings.LMS_SUBDOMAIN)
