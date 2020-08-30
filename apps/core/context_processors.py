@@ -6,6 +6,7 @@ def common_context(request):
         "ESTABLISHED": settings.ESTABLISHED,
         "FAVICON_PATH": settings.FAVICON_PATH,
         "LOGO_PATH": settings.LOGO_PATH,
+        "YANDEX_METRIKA_ID": getattr(settings, "YANDEX_METRIKA_ID", None),
     }
 
 

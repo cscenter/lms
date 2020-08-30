@@ -74,14 +74,14 @@
 
     {% block javascripts %}{% endblock javascripts %}
 
-    {% if not debug %}
+    {% if YANDEX_METRIKA_ID %}
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
         (function (d, w, c) {
             (w[c] = w[c] || []).push(function() {
                 try {
-                    w.yaCounter25844420 = new Ya.Metrika({
-                        id:25844420,
+                    w.yaCounter{{ YANDEX_METRIKA_ID }} = new Ya.Metrika({
+                        id:{{ YANDEX_METRIKA_ID }},
                         clickmap:true,
                         trackLinks:true,
                         accurateTrackBounce:true,
@@ -102,7 +102,7 @@
             } else { f(); }
         })(document, window, "yandex_metrika_callbacks");
     </script>
-    <noscript><div><img src="https://mc.yandex.ru/watch/25844420" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <noscript><div><img src="https://mc.yandex.ru/watch/{{ YANDEX_METRIKA_ID }}" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <!-- /Yandex.Metrika counter -->
     {% endif %}
   </body>
