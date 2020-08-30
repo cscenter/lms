@@ -7,6 +7,7 @@ from collections import OrderedDict
 from django.apps import apps
 from django.conf import settings
 from django.contrib import auth
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Prefetch, Count, prefetch_related_objects
 from django.http import HttpResponseBadRequest, \
@@ -39,7 +40,7 @@ from .permissions import CreateCertificateOfParticipation, \
 from .services import get_graduate_profile
 
 
-class UserDetailView(generic.DetailView):
+class UserDetailView(LoginRequiredMixin, generic.DetailView):
     template_name = "users/user_detail.html"
     context_object_name = 'profile_user'
 

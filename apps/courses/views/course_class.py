@@ -3,6 +3,7 @@ import os
 from typing import Optional
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
 from django.shortcuts import redirect, get_object_or_404
@@ -27,7 +28,7 @@ __all__ = ('CourseClassDetailView', 'CourseClassCreateView',
            'CourseClassAttachmentDeleteView')
 
 
-class CourseClassDetailView(generic.DetailView):
+class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):
     model = CourseClass
     context_object_name = 'course_class'
     template_name = "lms/courses/course_class_detail.html"
