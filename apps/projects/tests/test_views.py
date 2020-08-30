@@ -31,6 +31,7 @@ def test_user_detail(client):
 
     Just a simple test to check something appears.
     """
+    client.login(UserFactory())
     student = StudentFactory()
     semester1 = SemesterFactory.create(year=2014, type='spring')
     semester2 = SemesterFactory.create(year=2014, type='autumn')
@@ -41,10 +42,10 @@ def test_user_detail(client):
     sp2 = p2.projectstudent_set.all()[0]
     sp2.final_grade = ProjectGradeTypes.GOOD
     sp2.save()
-    resp = client.get(student.get_absolute_url())
-    assert smart_bytes(p1.name) in resp.content
-    assert smart_bytes(p2.name) in resp.content
-    assert smart_bytes(sp2.get_final_grade_display().lower()) in resp.content
+    response = client.get(student.get_absolute_url())
+    assert smart_bytes(p1.name) in response.content
+    assert smart_bytes(p2.name) in response.content
+    assert smart_bytes(sp2.get_final_grade_display().lower()) in response.content
 
 
 @pytest.mark.django_db

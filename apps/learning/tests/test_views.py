@@ -11,7 +11,7 @@ from core.urls import reverse
 from courses.tests.factories import *
 from learning.tests.factories import *
 from users.tests.factories import StudentFactory, TeacherFactory, \
-    CuratorFactory
+    CuratorFactory, UserFactory
 
 
 # TODO: Написать тест, который проверяет, что по-умолчанию в форму
@@ -35,8 +35,10 @@ def test_course_list_view_permissions(client, assert_login_redirect):
 
 
 @pytest.mark.django_db
-def test_course_detail_view_basic_get(client):
+def test_course_detail_view_basic_get(client, assert_login_redirect):
     course = CourseFactory()
+    assert_login_redirect(course.get_absolute_url())
+    client.login(UserFactory())
     response = client.get(course.get_absolute_url())
     assert response.status_code == 200
     url = reverse('courses:course_detail', kwargs={
@@ -87,7 +89,7 @@ def test_course_detail_view_course_user_relations(client):
 
 
 @pytest.mark.django_db
-def test_course_detail_view_assignment_list(client):
+def test_course_detail_view_assignment_list(client, assert_login_redirect):
     student = StudentFactory()
     teacher = TeacherFactory()
     today = now_local(student.get_timezone()).date()
@@ -98,8 +100,7 @@ def test_course_detail_view_assignment_list(client):
     course_url = course.get_absolute_url()
     EnrollmentFactory(student=student, course=course)
     a = AssignmentFactory.create(course=course)
-    response = client.get(course_url)
-    assert response.status_code == 200
+    assert_login_redirect(course_url)
     client.login(student)
     assert smart_bytes(a.title) in client.get(course_url).content
     a_s = StudentAssignment.objects.get(assignment=a, student=student)

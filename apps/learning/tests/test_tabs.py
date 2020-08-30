@@ -21,7 +21,7 @@ from users.tests.factories import StudentFactory, TeacherFactory, \
 
 
 @pytest.mark.django_db
-def test_course_news_tab_permissions(client):
+def test_course_news_tab_permissions(client, assert_login_redirect):
     current_semester = SemesterFactory.create_current()
     prev_term = SemesterFactory.create_prev(current_semester)
     news: CourseNews = CourseNewsFactory(course__main_branch__code=Branches.SPB,
@@ -31,8 +31,7 @@ def test_course_news_tab_permissions(client):
                                               course__meta_course=course.meta_course,
                                               course__semester=prev_term)
     co_prev = news_prev.course
-    response = client.get(course.get_absolute_url())
-    assert response.status_code == 200
+    assert_login_redirect(course.get_absolute_url())
     # By default student can't see the news until enroll in the course
     student_spb = StudentFactory(branch__code=Branches.SPB)
     client.login(student_spb)
@@ -69,7 +68,7 @@ def test_course_news_tab_permissions(client):
 
 
 @pytest.mark.django_db
-def test_course_assignments_tab_permissions(client):
+def test_course_assignments_tab_permissions(client, assert_login_redirect):
     current_semester = SemesterFactory.create_current()
     prev_term = SemesterFactory.create_prev(current_semester)
     meta_course = MetaCourseFactory()
@@ -79,8 +78,7 @@ def test_course_assignments_tab_permissions(client):
     course = CourseFactory(meta_course=meta_course, semester=current_semester)
     teacher = TeacherFactory()
     CourseTeacherFactory(teacher=teacher, course=course)
-    response = client.get(co_prev.get_absolute_url())
-    assert response.status_code == 200
+    assert_login_redirect(co_prev.get_absolute_url())
     # Teacher can see links to assignments from other course sessions
     client.login(teacher)
     response = client.get(co_prev.get_absolute_url())
