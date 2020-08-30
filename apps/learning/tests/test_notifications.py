@@ -244,11 +244,14 @@ def test_new_assignment_create_notification(settings):
 
 
 @pytest.mark.django_db
-def test_new_assignment_create_notification_context(settings):
+def test_new_assignment_create_notification_context(client, settings):
     settings.SITE_ID = 1
     settings.DEFAULT_URL_SCHEME = 'https'
+    abs_url = client.get('', secure=True).wsgi_request.build_absolute_uri
     current_domain = get_domain()
     assert current_domain == settings.TEST_DOMAIN
+    if settings.LMS_SUBDOMAIN:
+        current_domain = f"{settings.LMS_SUBDOMAIN}.{current_domain}"
     branch_spb = BranchFactory(code=Branches.SPB)
     course = CourseFactory(main_branch=branch_spb)
     enrollment = EnrollmentFactory(course=course, student__branch=branch_spb)
@@ -257,26 +260,27 @@ def test_new_assignment_create_notification_context(settings):
     assert AssignmentNotification.objects.count() == 1
     an = AssignmentNotification.objects.first()
     context = get_assignment_notification_context(an)
-    student_url = an.student_assignment.get_student_url()
+    student_url = abs_url(an.student_assignment.get_student_url())
     parsed_url = urlparse(student_url)
     relative_student_url = parsed_url.path
     assert context['a_s_link_student'] == student_url
-    assert parsed_url.hostname == f"{settings.LMS_SUBDOMAIN}.{current_domain}"
+    assert parsed_url.hostname == current_domain
     assert context['a_s_link_student'] == f"https://{parsed_url.hostname}{relative_student_url}"
-    teacher_url = an.student_assignment.get_teacher_url()
+    teacher_url = abs_url(an.student_assignment.get_teacher_url())
     assert context['a_s_link_teacher'] == teacher_url
     parsed_url = urlparse(teacher_url)
-    assert parsed_url.hostname == f"{settings.LMS_SUBDOMAIN}.{current_domain}"
-    assignment_link = an.student_assignment.assignment.get_teacher_url()
+    assert parsed_url.hostname == current_domain
+    assignment_link = abs_url(an.student_assignment.assignment.get_teacher_url())
     assert context['assignment_link'] == assignment_link
     assert context['course_name'] == str(course.meta_course)
     assert context['student_name'] == str(student)
 
 
 @pytest.mark.django_db
-def test_new_course_news_notification_context(settings):
+def test_new_course_news_notification_context(settings, client):
     settings.SITE_ID = settings.TEST_DOMAIN_ID
     settings.DEFAULT_URL_SCHEME = 'https'
+    abs_url = client.get('', secure=True).wsgi_request.build_absolute_uri
     assert get_domain() == settings.TEST_DOMAIN
     course = CourseFactory()
     student = StudentFactory(branch=course.main_branch)
@@ -284,7 +288,7 @@ def test_new_course_news_notification_context(settings):
     cn = CourseNewsNotificationFactory(course_offering_news__course=course,
                                        user=student)
     context = get_course_news_notification_context(cn)
-    assert context['course_link'] == course.get_absolute_url()
+    assert context['course_link'] == abs_url(course.get_absolute_url())
     another_site = Site.objects.get(pk=settings.ANOTHER_DOMAIN_ID)
     branch = BranchFactory(code=settings.DEFAULT_BRANCH_CODE, site=another_site)
     cn = CourseNewsNotificationFactory(
