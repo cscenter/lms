@@ -9,6 +9,7 @@ from urllib import parse
 from braces.views import UserPassesTestMixin
 from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction, IntegrityError
 from django.db.models import Avg, Value, Prefetch
 from django.db.models.functions import Coalesce
@@ -36,10 +37,10 @@ from admission.models import Interview, Comment, Contest, Applicant, Campaign, \
     InterviewInvitation, Test, Exam
 from admission.services import create_invitation, create_student_from_applicant, \
     EmailQueueService, UsernameError, get_meeting_time
+from core.models import Branch
 from core.timezone import now_local
 from core.urls import reverse
 from core.utils import render_markdown, bucketize
-from core.views import BranchFromURLViewMixin
 from tasks.models import Task
 from users.mixins import CuratorOnlyMixin
 from users.models import User
@@ -536,6 +537,22 @@ class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
         return reverse("admission:branch_interview_results", kwargs={
             "branch_code": branch_code,
         })
+
+
+class BranchFromURLViewMixin:
+    """
+    This view mixin sets `branch` attribute to the request object based on
+    `request.site` and non-empty `branch_code` url named argument
+    """
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        branch_code = kwargs.get("branch_code", None)
+        if not branch_code:
+            raise ImproperlyConfigured(
+                f"{self.__class__} is subclass of {self.__class__.__name__} but "
+                f"`branch_code` view keyword argument is not specified or empty")
+        request.branch = Branch.objects.get_by_natural_key(branch_code,
+                                                           request.site.id)
 
 
 class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
