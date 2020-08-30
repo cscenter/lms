@@ -32,6 +32,10 @@ LOGO_PATH = 'v1/img/shad/logo.svg'
 
 for template in TEMPLATES:
     if "Jinja2" in template["BACKEND"]:
-        update_options = [("ESTABLISHED", ESTABLISHED), ("FAVICON_PATH", FAVICON_PATH), ("LOGO_PATH", LOGO_PATH)]
-        for option, value in update_options:
+        update_constants = [
+            ("ESTABLISHED", ESTABLISHED),
+            ("FAVICON_PATH", FAVICON_PATH),
+            ("LOGO_PATH", LOGO_PATH)
+        ]
+        for option, value in update_constants:
             template["OPTIONS"]["constants"][option] = value
