@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
 from django.db.models import Prefetch
 from django.views import generic
@@ -20,7 +21,7 @@ from users.mixins import TeacherOnlyMixin
 __all__ = ('CourseDetailView', 'CourseEditView')
 
 
-class CourseDetailView(CourseURLParamsMixin, DetailView):
+class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
     model = Course
     template_name = "lms/courses/course_detail.html"
     context_object_name = 'course'

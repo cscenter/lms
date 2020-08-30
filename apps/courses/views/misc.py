@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 from vanilla import DetailView
 
@@ -7,7 +8,7 @@ from learning.roles import Roles
 from users.models import User
 
 
-class TeacherDetailView(DetailView):
+class TeacherDetailView(LoginRequiredMixin, DetailView):
     template_name = "lms/courses/teacher_detail.html"
     context_object_name = 'teacher'
 
