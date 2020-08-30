@@ -33,7 +33,10 @@ class CourseClassDetailView(generic.DetailView):
     template_name = "lms/courses/course_class_detail.html"
 
     def get_queryset(self):
+        url_params = self.kwargs
+        # FIXME: check course is available on current site
         return (CourseClass.objects
+                .filter(course_id=url_params['course_id'])
                 .select_related("course",
                                 "course__meta_course",
                                 "course__main_branch",
