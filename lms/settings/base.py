@@ -122,6 +122,8 @@ SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
 ESTABLISHED = 2011
 FAVICON_PATH = 'v1/img/center/favicon.png'
 LOGO_PATH = 'v1/img/center/logo.svg'
+# Provide zero value to disable counter rendering
+YANDEX_METRIKA_ID = env.int("YANDEX_METRIKA_ID", default=None)
 
 TEMPLATES = [
     {
@@ -150,6 +152,7 @@ TEMPLATES = [
                 # JS configuration
                 "CSRF_COOKIE_NAME": CSRF_COOKIE_NAME,
                 "SENTRY_DSN": SENTRY_DSN,
+                "YANDEX_METRIKA_ID": YANDEX_METRIKA_ID,
             },
             "globals": {
                 "messages": "core.jinja2.globals.messages",

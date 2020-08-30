@@ -23,6 +23,8 @@ WSGI_APPLICATION = 'compscicenter_ru.wsgi.application'
 ROOT_URLCONF = 'compscicenter_ru.urls'
 # FIXME: move to the SiteConfiguration model
 LMS_SUBDOMAIN = 'my'
+if YANDEX_METRIKA_ID is None:
+    YANDEX_METRIKA_ID = 25844420
 
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,
@@ -44,6 +46,7 @@ NEWRELIC_ENV = env.str('NEWRELIC_ENV', default='production')
 for template in TEMPLATES:
     if "Jinja2" in template["BACKEND"]:
         template["DIRS"] = [str(PROJECT_DIR / "jinja2")] + template["DIRS"]
+        template["OPTIONS"]["constants"]["YANDEX_METRIKA_ID"] = YANDEX_METRIKA_ID
     elif "DjangoTemplates" in template["BACKEND"]:
         template["DIRS"] = [str(PROJECT_DIR / "templates")] + template["DIRS"]
 
