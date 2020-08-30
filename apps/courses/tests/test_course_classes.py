@@ -162,7 +162,7 @@ def test_course_class_back_variable(client, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_course_class_attachment_links(client, assert_redirect):
+def test_course_class_attachment_links(client, assert_login_redirect):
     teacher = TeacherFactory()
     s = SemesterFactory.create_current()
     co = CourseFactory.create(teachers=[teacher], semester=s)
@@ -171,13 +171,14 @@ def test_course_class_attachment_links(client, assert_redirect):
         course_class=cc, material__filename="foobar1.pdf")
     cca2 = CourseClassAttachmentFactory.create(
         course_class=cc, material__filename="foobar2.zip")
+    assert_login_redirect(cc.get_absolute_url())
+    client.login(teacher)
     response = client.get(cc.get_absolute_url())
     assert response.status_code == 200
     assert smart_bytes(cca1.get_download_url()) in response.content
     assert smart_bytes(cca1.material_file_name) in response.content
     assert smart_bytes(cca2.get_download_url()) in response.content
     assert smart_bytes(cca2.material_file_name) in response.content
-    client.login(teacher)
     class_update_url = cc.get_update_url()
     response = client.get(class_update_url)
     assert response.status_code == 200

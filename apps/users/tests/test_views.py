@@ -233,8 +233,10 @@ def test_auth_restrictions(client, assert_login_redirect):
 
 
 @pytest.mark.django_db
-def test_user_detail_view(client):
+def test_user_detail_view(client, assert_login_redirect):
     user = UserFactory()
+    assert_login_redirect(user.get_absolute_url())
+    client.login(user)
     response = client.get(user.get_absolute_url())
     assert response.status_code == 404
     student = StudentFactory()
@@ -265,9 +267,8 @@ def test_user_can_update_profile(client, assert_redirect):
 
 @pytest.mark.django_db
 def test_shads(client):
-    """
-    Students should have "shad courses" on profile page
-    """
+    """Shad courses are shown on the user profile page"""
+    client.login(UserFactory())
     student = StudentFactory()
     sc = SHADCourseRecordFactory(student=student, grade=GradeTypes.GOOD)
     response = client.get(student.get_absolute_url())
@@ -276,8 +277,6 @@ def test_shads(client):
     # Bad grades should be visible for authenticated users only
     sc.grade = GradeTypes.UNSATISFACTORY
     sc.save()
-    response = client.get(student.get_absolute_url())
-    assert smart_bytes(sc.name) not in response.content
     student2 = StudentFactory()
     client.login(student2)
     response = client.get(student.get_absolute_url())

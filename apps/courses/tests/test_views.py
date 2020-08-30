@@ -25,8 +25,10 @@ def get_timezone_gmt_offset(tz: pytz.timezone) -> Optional[datetime.timedelta]:
 
 
 @pytest.mark.django_db
-def test_teacher_detail_view(client):
+def test_teacher_detail_view(client, assert_login_redirect):
     user = UserFactory()
+    assert_login_redirect(user.teacher_profile_url())
+    client.login(user)
     response = client.get(user.teacher_profile_url())
     assert response.status_code == 404
     user.add_group(Roles.TEACHER)
