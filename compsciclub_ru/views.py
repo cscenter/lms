@@ -369,11 +369,18 @@ class CourseDetailView(PublicURLContextMixin,
 
 class CourseClassDetailView(PublicURLContextMixin,
                             CoursePublicURLParamsMixin, generic.DetailView):
-    context_object_name = 'course_class'
     template_name = "compsciclub_ru/course_class_detail.html"
 
     def get_queryset(self):
+        url_params = self.kwargs
+        main_branch_code = url_params.get("main_branch_code", None)
+        main_branch_code = main_branch_code or self.request.branch.code
         return (CourseClass.objects
+                .filter(course__main_branch__site=self.request.site,
+                        course__main_branch__code=main_branch_code,
+                        course__meta_course__slug=url_params['course_slug'],
+                        course__semester__type=url_params['semester_type'],
+                        course__semester__year=url_params['semester_year'])
                 .select_related("course",
                                 "course__meta_course",
                                 "course__main_branch",
