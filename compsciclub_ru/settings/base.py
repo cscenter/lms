@@ -50,11 +50,23 @@ LOCALE_PATHS = [
     str(PROJECT_DIR / "locale"),
 ] + LOCALE_PATHS
 
+
+ESTABLISHED = 2007
+FAVICON_PATH = 'v1/img/club/favicon.ico'
+LOGO_PATH = 'v1/img/club/logo.svg'
+
 # Append project template dirs
 for template in TEMPLATES:
     if "Jinja2" in template["BACKEND"]:
         template["DIRS"] = [str(PROJECT_DIR / "jinja2")] + template["DIRS"]
         template["OPTIONS"]["globals"]["get_branches"] = "compsciclub_ru.context_processors.get_branches"
+        update_constants = [
+            ("ESTABLISHED", ESTABLISHED),
+            ("FAVICON_PATH", FAVICON_PATH),
+            ("LOGO_PATH", LOGO_PATH)
+        ]
+        for option, value in update_constants:
+            template["OPTIONS"]["constants"][option] = value
     elif "DjangoTemplates" in template["BACKEND"]:
         template["DIRS"] = [str(PROJECT_DIR / "templates")] + template["DIRS"]
         template["OPTIONS"]["context_processors"] += ("compsciclub_ru.context_processors.get_branches",)

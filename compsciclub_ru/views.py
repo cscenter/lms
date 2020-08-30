@@ -180,7 +180,8 @@ class TeacherDetailView(PublicURLContextMixin, DetailView):
                    .made_by(branches)
                    .filter(semester__year__gte=min_established,
                            teachers=self.object.pk)
-                   .select_related('semester', 'meta_course', 'main_branch'))
+                   .select_related('semester', 'meta_course', 'main_branch')
+                   .order_by('-semester__index'))
         context = {
             'teacher': self.object,
             'courses': courses,
@@ -304,8 +305,8 @@ class MetaCourseDetailView(PublicURLContextMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         courses = (Course.objects
-                   .filter(meta_course=self.object,
-                           main_branch=self.request.branch)
+                   .filter(meta_course=self.object)
+                   .available_in(self.request.branch)
                    .select_related("meta_course", "semester", "main_branch")
                    .order_by('-semester__index'))
         context = {

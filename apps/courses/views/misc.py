@@ -23,7 +23,8 @@ class TeacherDetailView(DetailView):
                    .in_branches(branches)
                    .filter(semester__year__gte=min_established,
                            teachers=self.object.pk)
-                   .select_related('semester', 'meta_course', 'main_branch'))
+                   .select_related('semester', 'meta_course', 'main_branch')
+                   .order_by('-semester__index'))
         context['courses'] = courses
         return context
 

@@ -18,16 +18,9 @@ class MetaCourseDetailView(generic.DetailView):
     template_name = "lms/courses/meta_detail.html"
 
     def get_context_data(self, **kwargs):
-        filters = {}
-        # Limit results on compsciclub.ru
-        if hasattr(self.request, 'branch'):
-            filters['main_branch'] = self.request.branch
-        else:
-            site_branches = Branch.objects.for_site(self.request.site.pk)
-            filters['main_branch__in'] = [b.pk for b in site_branches]
         courses = (Course.objects
-                   .filter(meta_course=self.object,
-                           **filters)
+                   .filter(meta_course=self.object)
+                   .available_on_site(self.request.site)
                    .select_related("meta_course", "semester", "main_branch")
                    .order_by('-semester__index'))
         context = {
