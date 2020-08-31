@@ -17,7 +17,8 @@ from users.tests.factories import TeacherFactory
 @pytest.mark.django_db
 def test_index_view_course_list(client, settings):
     """
-    Only courses that were shared with CS Club in the current semester should be shown on the index page
+    Courses shared by other sites will be shown in LMS, on index page
+    show courses made by CS Club only
     """
     current_semester = SemesterFactory.create(year=2020, type='autumn')
     earlier_semester = SemesterFactory.create(year=2019, type='autumn')
@@ -42,9 +43,8 @@ def test_index_view_course_list(client, settings):
 
     response = client.get(reverse('index'))
     assert response.status_code == 200
-    print(response.content)
     assert smart_bytes(course_center_private.meta_course.name) not in response.content
-    assert smart_bytes(course_center_public.meta_course.name) in response.content
+    assert smart_bytes(course_center_public.meta_course.name) not in response.content
     assert smart_bytes(course_center_outdated.meta_course.name) not in response.content
     assert smart_bytes(course_club_actual.meta_course.name) in response.content
     assert smart_bytes(course_club_outdated.meta_course.name) not in response.content
