@@ -335,6 +335,11 @@ class CourseDetailView(PublicURLContextMixin,
     def get_object(self):
         return self.course
 
+    def dispatch(self, request, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            raise Redirect(self.course.get_absolute_url())
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, *args, **kwargs):
         course = self.course
         # Tabs
