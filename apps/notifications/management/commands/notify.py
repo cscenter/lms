@@ -14,9 +14,11 @@ from django.utils.encoding import smart_str
 from django.utils.html import strip_tags, linebreaks
 
 from core.urls import replace_hostname
+from courses.models import Course
 from learning.models import AssignmentNotification, \
     CourseNewsNotification
 from notifications import NotificationTypes as notification_types
+from users.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -48,16 +50,21 @@ EMAIL_TEMPLATES = {
 }
 
 
-def _get_base_domain(notification: Union[AssignmentNotification,
-                                         CourseNewsNotification]):
-    user_branch = notification.user.branch
-    base_domain = user_branch.site.domain
-    # FIXME: move to the SiteConfiguration model
-    resolve_subdomain = (user_branch.site_id == settings.CLUB_SITE_ID)
+def _get_base_domain(user: User, course: Course):
+    enrollment = user.get_enrollment(course.pk)
+    if enrollment:
+        branch = enrollment.student_profile.branch
+    else:
+        # It's not clear what domain use for teacher since the same course
+        # could be shared among sites, so let's resolve it in priority
+        if user.branch_id:
+            branch = user.branch
+        else:
+            branch = course.main_branch
+    base_domain = branch.site.domain
+    resolve_subdomain = (branch.site_id == settings.CLUB_SITE_ID)
     if resolve_subdomain:
-        # FIXME: проблема с приглашенными студентами, которые имели аккаунт на сайте клуба - домашнее отделение теперь указывает на СПБ[site_id=1]. Как им получить нотификацию на нужный сайт?
-        # FIXME
-        prefix = user_branch.code.lower()
+        prefix = branch.code.lower()
         if prefix == settings.DEFAULT_BRANCH_CODE:
             prefix = ""
     else:
@@ -114,12 +121,14 @@ def get_assignment_notification_template(notification: AssignmentNotification):
 
 
 def get_assignment_notification_context(notification: AssignmentNotification):
-    base_domain = _get_base_domain(notification)
+    base_domain = _get_base_domain(
+        notification.user,
+        notification.student_assignment.assignment.course)
     a_s = notification.student_assignment
     tz_override = None
-    u = notification.user
+    user = notification.user
     # Override timezone for enrolled students
-    if u.is_student or u.is_volunteer:
+    if user.is_student or user.is_volunteer:
         tz_override = notification.user.get_timezone()
     context = {
         'a_s_link_student': replace_hostname(a_s.get_student_url(), base_domain),
@@ -137,7 +146,9 @@ def get_assignment_notification_context(notification: AssignmentNotification):
 
 
 def get_course_news_notification_context(notification: CourseNewsNotification):
-    base_domain = _get_base_domain(notification)
+    base_domain = _get_base_domain(
+        notification.user,
+        notification.course_offering_news.course)
     course = notification.course_offering_news.course
     context = {
         'course_link': replace_hostname(course.get_absolute_url(), base_domain),
