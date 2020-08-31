@@ -1,4 +1,4 @@
-{% extends "lms/layout/v1_base.html" %}
+{% extends "lms/layouts/v1_base.html" %}
 
 {% block content %}
 <div class="banner _{{ request.branch.code|slugify }}">{% if request.branch.code == 'spb' %}<div id="copyright">{% trans %}Author photo{% endtrans %}: <a target="_blank" href="https://commons.wikimedia.org/wiki/User:Andrey.Salnikov">{% trans %}Andrey Salnikov{% endtrans %}</a></div>{% endif %}</div>

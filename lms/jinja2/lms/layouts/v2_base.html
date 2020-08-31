@@ -1,0 +1,98 @@
+{% import "compscicenter_ru/layouts/_macros.jinja2" as macros -%}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}{{ request.site.name }}{% endblock title %}</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/png" href="{{ static("v2/img/favicon.png") }}">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400,600&amp;subset=cyrillic" rel="stylesheet">
+    <link href="{{ static("v2/dist/css/main.css") }}" rel="stylesheet">
+    {%- block stylesheets %} {% endblock stylesheets %}
+    <script type="text/javascript">
+        window.__CSC__ = {
+            config: {
+                csrfCookieName: "{{ CSRF_COOKIE_NAME }}",
+                sentryDSN: "{{ SENTRY_DSN }}",
+            },
+            notifications: {{ messages(request)|tojson }},
+            sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
+        };
+    </script>
+</head>
+
+<body {% block body_attrs %}{% endblock body_attrs %}>
+    <div class="svg-inline">{% block sprites %}{% endblock sprites %}</div>
+    {% block before_navbar_container %}{% endblock before_navbar_container %}
+    {% block menu %}
+    <div class="navbar-container">
+        {%- include "lms/layouts/_v2_top_menu.html" %}
+    </div>
+    {% if self.top_banner() %}<div class="top-banner-spacer"></div>{% endif %}
+    {% endblock menu %}
+    {% block after_navbar_container %}{% endblock after_navbar_container %}
+
+    {% block content %}{% endblock content %}
+
+    {% block footer %}
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-auto">
+                    <span class="footer__copyright">&copy; Computer Science Center, 2020</span>
+                </div>
+                <div class="col-lg-auto ml-lg-auto">
+                    <a href="/policy/" class="footer__link">{{ _('Privacy&nbsp;Policy') }}</a>
+                    <a href="mailto:info@compscicenter.ru" class="footer__email">info@compscicenter.ru</a>
+                    <div class="footer__social-media-icons">
+                        <a target="_blank" rel="noopener" href="https://vk.com/compscicenter" title="Computer Science Center on VK.com">{{ macros.svg_icon('vk') }}</a>
+                        <a target="_blank" rel="noopener" href="https://tele.click/compscicenter_ru" title="Computer Science Center in Telegram">{{ macros.svg_icon('telegram') }}</a>
+                        <a target="_blank" rel="noopener" href="https://instagram.com/compscicenter" title="Computer Science Center on Instagram">{{ macros.svg_icon('instagram') }}</a>
+                        <a target="_blank" rel="noopener" href="https://www.facebook.com/CSCenter" title="{{ _('Computer Science Center on Facebook') }}">{{ macros.svg_icon('facebook') }}</a>
+                        <a target="_blank" rel="noopener" href="https://www.youtube.com/c/compscicenterru" title="Computer Science Center on YouTube">{{ macros.svg_icon('youtube') }}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endblock footer %}
+
+    {% if YANDEX_METRIKA_ID %}
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function (d, w, c) {
+            (w[c] = w[c] || []).push(function() {
+                try {
+                    w.yaCounter{{ YANDEX_METRIKA_ID }} = new Ya.Metrika({
+                        id:{{ YANDEX_METRIKA_ID }},
+                        clickmap:true,
+                        trackLinks:true,
+                        accurateTrackBounce:true,
+                        webvisor:true
+                    });
+                } catch(e) { }
+            });
+
+            var n = d.getElementsByTagName("script")[0],
+                s = d.createElement("script"),
+                f = function () { n.parentNode.insertBefore(s, n); };
+            s.type = "text/javascript";
+            s.async = true;
+            s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+            if (w.opera === "[object Opera]") {
+                d.addEventListener("DOMContentLoaded", f, false);
+            } else { f(); }
+        })(document, window, "yandex_metrika_callbacks");
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/{{ YANDEX_METRIKA_ID }}" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+    {% endif %}
+
+    {{ render_bundle('runtime', config='V2') }}
+    {{ render_bundle('common', config='V2') }}
+    {{ render_bundle('main', config='V2') }}
+</body>
+</html>
