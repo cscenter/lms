@@ -4,6 +4,7 @@ import pytest
 from django.core import mail, management
 
 from core.tests.factories import BranchFactory, SiteFactory
+from courses.models import Course
 from learning.models import AssignmentNotification
 from learning.tests.factories import AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
@@ -58,14 +59,16 @@ def test_notify_get_base_url(notification_factory, settings):
     branch = BranchFactory(site=SiteFactory(domain='test.cc'))
     user = UserFactory(branch=branch)
     notification = notification_factory(user=user)
-    assert _get_base_domain(notification) == f"{settings.LMS_SUBDOMAIN}.test.cc"
+    assert Course.objects.count() == 1
+    course = Course.objects.get()
+    assert _get_base_domain(notification.user, course) == f"{settings.LMS_SUBDOMAIN}.test.cc"
     # Test subdomain resolving (supported on club site)
     settings.LMS_SUBDOMAIN = None
     new_branch = BranchFactory()
     notification.user.branch = new_branch
     settings.DEFAULT_BRANCH_CODE = new_branch.code
     settings.CLUB_SITE_ID = new_branch.site_id
-    assert _get_base_domain(notification) == new_branch.site.domain
+    assert _get_base_domain(notification.user, course) == new_branch.site.domain
     branch_code = f"xyz{new_branch.code}"
     new_branch.code = branch_code
-    assert _get_base_domain(notification) == f"{branch_code}.{new_branch.site.domain}"
+    assert _get_base_domain(notification.user, course) == f"{branch_code}.{new_branch.site.domain}"
