@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
@@ -12,7 +13,7 @@ from users.mixins import CuratorOnlyMixin
 __all__ = ('MetaCourseDetailView', 'MetaCourseUpdateView')
 
 
-class MetaCourseDetailView(generic.DetailView):
+class MetaCourseDetailView(LoginRequiredMixin, generic.DetailView):
     model = MetaCourse
     slug_url_kwarg = 'course_slug'
     template_name = "lms/courses/meta_detail.html"
