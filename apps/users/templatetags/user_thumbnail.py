@@ -61,7 +61,10 @@ class UserThumbnailNode(ThumbnailNodeBase):
                 options[key] = value
 
         use_stub = bool(options.pop("use_stab", True))
-        thumbnail = user.get_thumbnail(geometry, use_stub=use_stub, **options)
+        stub_official = bool(options.pop("stub_official", True))
+        thumbnail = user.get_thumbnail(geometry, use_stub=use_stub,
+                                       stub_official=stub_official,
+                                       **options)
 
         render_empty = not thumbnail or isinstance(thumbnail, DummyImageFile)
 
