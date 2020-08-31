@@ -27,10 +27,8 @@
             {% if user.is_authenticated %}
                 <div class="dropdown">
                   <a href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {% user_thumbnail user user.ThumbnailSize.SQUARE_SMALL use_stab=0 as im %}
+                    {% user_thumbnail user user.ThumbnailSize.SQUARE_SMALL use_stab=True stub_official=False as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                    {% empty %}
-                        <img src="{% if user.gender == "F" %}{% static "v1/img/csc_girl_head.svg" %}{% else %}{% static "v1/img/csc_boy_head.svg" %}{% endif %}" class="_empty">
                     {% enduser_thumbnail %}
                     <span class="caret"></span>
                   </a>
