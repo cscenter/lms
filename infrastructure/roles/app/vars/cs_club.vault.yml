@@ -14,6 +14,7 @@ app_environement:
   HASHIDS_SALT: "^TimUbi)AUwc>]B-`g2"
   UPLOAD_USE_S3: "0"
   REDIS_SSL: "0"
+  REDIS_DB_INDEX: "1"
   YANDEX_DISK_USERNAME: "csc-slides@yandex.ru"
   YANDEX_DISK_PASSWORD: "deelthisat"
   RECAPTCHA_PUBLIC_KEY: "6Lc_7AsTAAAAAOoC9MhVSoJ6O-vILaGgDEgtLBty"
