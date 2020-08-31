@@ -118,10 +118,12 @@ class IndexView(PublicURLContextMixin, generic.TemplateView):
             courseclass_queryset = (CourseClass.objects
                                     .filter(date__gte=today)
                                     .order_by('date', 'starts_at'))
+            site_branches = Branch.objects.for_site(self.request.site)
             courses = list(
                 Course.objects
-                .available_in(self.request.branch)
                 .filter(semester=featured_term.pk)
+                .available_in(self.request.branch)
+                .made_by(site_branches)
                 .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(
                     'teachers',
