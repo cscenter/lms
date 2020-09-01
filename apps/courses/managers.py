@@ -91,7 +91,7 @@ class CourseClassQuerySet(query.QuerySet):
         return self.filter(course__teachers=user)
 
     def with_public_materials(self):
-        return self.filter(materials_visibility=MaterialVisibilityTypes.VISIBLE)
+        return self.filter(materials_visibility=MaterialVisibilityTypes.PUBLIC)
 
 
 CourseClassManager = models.Manager.from_queryset(CourseClassQuerySet)

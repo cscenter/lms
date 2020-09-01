@@ -32,7 +32,7 @@ def _get_course_post_data(course=None):
         "grading_type": GradingSystems.BASE,
         "capacity": 0,
         "language": "ru",
-        "materials_visibility": MaterialVisibilityTypes.VISIBLE,
+        "materials_visibility": MaterialVisibilityTypes.PUBLIC,
     }
     return form_data
 

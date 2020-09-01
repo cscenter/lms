@@ -12,6 +12,7 @@ from django.utils import formats
 from core.models import Branch
 from core.tests.factories import LocationFactory, BranchFactory
 from core.urls import reverse
+from courses.constants import MaterialVisibilityTypes
 from courses.tests.factories import CourseFactory, CourseNewsFactory, \
     AssignmentFactory, CourseClassFactory, CourseTeacherFactory
 from learning.settings import Branches
@@ -105,7 +106,8 @@ def test_update_derivable_fields(curator, client, mocker):
     mocker.patch("courses.tasks.maybe_upload_slides_yandex.delay")
     teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
-    cc1 = CourseClassFactory.create(course=co, video_url="")
+    cc1 = CourseClassFactory(course=co, video_url="",
+                             materials_visibility=MaterialVisibilityTypes.PUBLIC)
     co.refresh_from_db()
     assert not co.public_videos_count
     assert not co.public_slides_count
@@ -117,14 +119,17 @@ def test_update_derivable_fields(curator, client, mocker):
     client.post(cc1.get_update_url(), form)
     co.refresh_from_db()
     assert not co.public_videos_count
-    assert co.public_slides_count
+    assert co.public_slides_count == 1
     assert not co.public_attachments_count
-    cc2 = CourseClassFactory(course=co, video_url="youtuuube")
+    cc2 = CourseClassFactory(course=co, video_url="youtuuube",
+                             materials_visibility=MaterialVisibilityTypes.PUBLIC)
     co.refresh_from_db()
-    assert co.public_videos_count
-    # Slides were uploaded on first class
-    assert co.public_slides_count
-    assert not co.public_attachments_count
+    assert co.public_videos_count == 1
+    # Create course class with private materials
+    CourseClassFactory(course=co, video_url="youtuuube",
+                       materials_visibility=MaterialVisibilityTypes.PARTICIPANTS)
+    co.refresh_from_db()
+    assert co.public_videos_count == 1
 
 
 @pytest.mark.django_db

@@ -1,6 +1,7 @@
 from rules import predicate
 
 from auth.permissions import add_perm, Permission
+from courses.constants import MaterialVisibilityTypes
 from courses.models import Course, CourseClass, CourseTeacher, \
     CourseClassAttachment
 from learning.services import CourseRole, course_access_role
@@ -10,6 +11,11 @@ def can_view_private_materials(role: CourseRole) -> bool:
     return role in {CourseRole.TEACHER,
                     CourseRole.CURATOR,
                     CourseRole.STUDENT_REGULAR}
+
+
+@add_perm
+class ViewCourse(Permission):
+    name = "courses.view_course"
 
 
 @add_perm
@@ -91,10 +97,15 @@ class ViewCourseClassMaterials(Permission):
     @staticmethod
     @predicate
     def rule(user, course_class: CourseClass):
-        if course_class.materials_is_public:
+        visibility = course_class.materials_visibility
+        if visibility == MaterialVisibilityTypes.PUBLIC:
             return True
-        role = course_access_role(course=course_class.course, user=user)
-        return can_view_private_materials(role)
+        elif visibility == MaterialVisibilityTypes.PARTICIPANTS:
+            return user.has_perm(ViewCourse.name)
+        elif visibility == MaterialVisibilityTypes.COURSE_PARTICIPANTS:
+            role = course_access_role(course=course_class.course, user=user)
+            return can_view_private_materials(role)
+        return False
 
 
 @add_perm
