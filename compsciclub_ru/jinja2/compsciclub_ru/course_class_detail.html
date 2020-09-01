@@ -10,7 +10,7 @@
     </div>
   </div>
 
-  {% set can_view_course_class_materials = request.user.has_perm("learning.view_course_class_materials", course_class) %}
+  {% set can_view_course_class_materials = request.user.has_perm("courses.view_course_class_materials", course_class) %}
 
   <div class="row">
     <div class="col-xs-12">
