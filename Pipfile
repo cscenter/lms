@@ -63,7 +63,6 @@ django-post_office = "==3.4.1"
 hoep = {editable = true,git = "git://github.com/pacahon/Hoep.git",ref = "0d4c0507dcb34d1b63a099c8b08656b66394bc37"}
 # Monitoring
 sentry-sdk = "*"
-newrelic = "*"
 # Oauth2
 social-auth-core = "==3.3.3"
 social-auth-app-django = "==4.0.0"
