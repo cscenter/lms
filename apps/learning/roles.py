@@ -11,7 +11,7 @@ from courses.permissions import ChangeMetaCourse, ViewCourseContacts, \
     DeleteCourseClass, EditAssignment, EditOwnAssignment, \
     ViewCourseClassMaterials, ViewAssignment, ViewOwnAssignment, \
     ViewCourseClassAttachment, ViewPublicCourseClassAttachment, \
-    ViewPrivateCourseClassAttachment
+    ViewPrivateCourseClassAttachment, ViewCourse
 from users.permissions import CreateCertificateOfParticipation, \
     ViewCertificateOfParticipation
 from .permissions import CreateAssignmentComment, \
@@ -33,6 +33,7 @@ from info_blocks.permissions import ViewInternships
 # TODO: Add description to each role
 class Roles(DjangoChoices):
     CURATOR = C(5, _('Curator'), priority=0, permissions=(
+        ViewCourse,
         CreateCertificateOfParticipation,
         ViewCertificateOfParticipation,
         ChangeMetaCourse,
@@ -58,6 +59,7 @@ class Roles(DjangoChoices):
         ViewAssignmentCommentAttachment,
     ))
     STUDENT = C(1, _('Student'), priority=50, permissions=(
+        ViewCourse,
         ViewStudyMenu,
         ViewCourseContacts,
         ViewCourseAssignments,
@@ -83,6 +85,7 @@ class Roles(DjangoChoices):
     VOLUNTEER = C(4, _('Co-worker'), priority=50,
                   permissions=STUDENT.permissions)
     INVITED = C(11, _('Invited User'), permissions=(
+        ViewCourse,
         ViewStudyMenu,
         ViewCourseContacts,
         ViewCourseAssignments,
@@ -104,6 +107,7 @@ class Roles(DjangoChoices):
         LeaveCourse,
     ))
     GRADUATE = C(3, _('Graduate'), permissions=(
+        ViewCourse,
         ViewOwnEnrollments,
         ViewPrivateCourseClassAttachment,
         ViewOwnStudentAssignment,
@@ -111,6 +115,7 @@ class Roles(DjangoChoices):
         ViewAssignmentCommentAttachmentAsLearner,
     ))
     TEACHER = C(2, _('Teacher'), priority=30, permissions=(
+        ViewCourse,
         ViewTeachingMenu,
         ViewCourseContacts,
         ViewCourseNews,

@@ -5,7 +5,8 @@ from django.core.exceptions import ValidationError
 
 from core.models import Branch
 from core.tests.factories import BranchFactory
-from courses.constants import SemesterTypes, TeacherRoles
+from courses.constants import SemesterTypes, TeacherRoles, \
+    MaterialVisibilityTypes
 from courses.models import Assignment, CourseTeacher, Course
 from courses.tests.factories import CourseNewsFactory, SemesterFactory, \
     CourseFactory, \
@@ -105,18 +106,25 @@ def test_semester_cmp():
 
 @pytest.mark.django_db
 def test_course_derivable_fields():
-    co = CourseFactory()
+    co = CourseFactory(materials_visibility=MaterialVisibilityTypes.PUBLIC)
     assert not co.public_attachments_count
     assert not co.public_slides_count
     assert not co.public_videos_count
-    cc = CourseClassFactory(course=co, video_url="https://link/to/youtube")
+    cc = CourseClassFactory(course=co, video_url="https://link/to/youtube",
+                            materials_visibility=MaterialVisibilityTypes.PARTICIPANTS)
     co.refresh_from_db()
     assert not co.public_attachments_count
     assert not co.public_slides_count
-    assert co.public_videos_count
+    assert not co.public_videos_count
     _ = CourseClassAttachmentFactory(course_class=cc)
     co.refresh_from_db()
-    assert co.public_attachments_count
+    assert not co.public_attachments_count
+    cc.materials_visibility = MaterialVisibilityTypes.PUBLIC
+    cc.save()
+    co.refresh_from_db()
+    assert co.public_attachments_count == 1
+    assert co.public_videos_count == 1
+    assert co.public_slides_count == 0
 
 
 @pytest.mark.django_db

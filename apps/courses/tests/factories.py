@@ -163,7 +163,7 @@ class CourseClassFactory(factory.django.DjangoModelFactory):
             + datetime.timedelta(days=3)).date()
     starts_at = datetime.time(hour=13, minute=0)
     ends_at = datetime.time(hour=13, minute=45)
-    materials_visibility = MaterialVisibilityTypes.VISIBLE
+    materials_visibility = MaterialVisibilityTypes.PARTICIPANTS
 
     @factory.post_generation
     def restricted_to(self, create, extracted, **kwargs):

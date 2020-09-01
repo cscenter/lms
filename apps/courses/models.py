@@ -293,10 +293,10 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         default=settings.LANGUAGE_CODE)
     materials_visibility = models.CharField(
         verbose_name=_("Materials Visibility"),
-        max_length=8,
+        max_length=12,
         help_text=_("Default visibility for class materials."),
         choices=MaterialVisibilityTypes.choices,
-        default=MaterialVisibilityTypes.VISIBLE)
+        default=MaterialVisibilityTypes.PARTICIPANTS)
     # TODO: recalculate on deleting course class
     public_videos_count = models.PositiveIntegerField(default=0, editable=False)
     public_slides_count = models.PositiveIntegerField(
@@ -807,7 +807,7 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
     materials_visibility = models.CharField(
         verbose_name=_("Materials Visibility"),
-        max_length=8,
+        max_length=12,
         help_text=_("Slides, attachments and other materials"),
         choices=MaterialVisibilityTypes.choices)
     restricted_to = models.ManyToManyField(
@@ -905,7 +905,8 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
 
     @property
     def materials_is_public(self):
-        return self.materials_visibility == MaterialVisibilityTypes.VISIBLE
+        """Public materials will be visible to all users"""
+        return self.materials_visibility == MaterialVisibilityTypes.PUBLIC
 
     def get_available_materials(self):
         """

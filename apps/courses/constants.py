@@ -50,5 +50,6 @@ ASSIGNMENT_TASK_ATTACHMENT = 0
 
 
 class MaterialVisibilityTypes(DjangoChoices):
-    VISIBLE = C('all', _('All Users'))
-    HIDDEN = C('students', _('Only Students'))
+    PUBLIC = C('public', _('All Users'))
+    PARTICIPANTS = C('participants', _('All Students'))
+    COURSE_PARTICIPANTS = C('private', _('Course Participants'))

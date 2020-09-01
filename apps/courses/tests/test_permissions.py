@@ -1,9 +1,12 @@
 import pytest
 
+from courses.constants import MaterialVisibilityTypes
 from courses.permissions import EditCourseClass, CreateAssignment, \
-    EditAssignment
+    EditAssignment, ViewCourseClassMaterials
 from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
     CourseFactory
+from learning.settings import GradeTypes
+from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import UserFactory, TeacherFactory, CuratorFactory, \
     StudentFactory, InvitedStudentFactory
 
@@ -47,3 +50,26 @@ def test_can_edit_course_class(client):
     assert teacher.has_perm(EditCourseClass.name, cc_other)
     assert not teacher_other.has_perm(EditCourseClass.name, cc_other)
     assert not teacher.has_perm(EditCourseClass.name, course_class)
+
+
+@pytest.mark.django_db
+def test_course_class_materials_visibility(client):
+    user = UserFactory()
+    student = StudentFactory()
+    enrolled_student = StudentFactory()
+    course = CourseFactory()
+    EnrollmentFactory(student=enrolled_student, course=course,
+                      grade=GradeTypes.GOOD)
+    course_class = CourseClassFactory(
+        course=course,
+        materials_visibility=MaterialVisibilityTypes.PUBLIC)
+    assert user.has_perm(ViewCourseClassMaterials.name, course_class)
+    course_class.materials_visibility = MaterialVisibilityTypes.PARTICIPANTS
+    assert not user.has_perm(ViewCourseClassMaterials.name, course_class)
+    assert student.has_perm(ViewCourseClassMaterials.name, course_class)
+    assert enrolled_student.has_perm(ViewCourseClassMaterials.name, course_class)
+    course_class.materials_visibility = MaterialVisibilityTypes.COURSE_PARTICIPANTS
+    assert not student.has_perm(ViewCourseClassMaterials.name, course_class)
+    assert enrolled_student.has_perm(ViewCourseClassMaterials.name, course_class)
+
+
