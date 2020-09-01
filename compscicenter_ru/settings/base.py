@@ -39,9 +39,6 @@ INSTALLED_APPS += [
     'publications.apps.PublicationsConfig',
 ]
 
-NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
-NEWRELIC_ENV = env.str('NEWRELIC_ENV', default='production')
-
 # Append project template dirs
 for template in TEMPLATES:
     if "Jinja2" in template["BACKEND"]:

@@ -74,9 +74,6 @@ for template in TEMPLATES:
 # FIXME: hz
 FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
 
-NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
-NEWRELIC_ENV = env.str('NEWRELIC_ENV', default='production')
-
 # Public registration settings
 ACCOUNT_ACTIVATION_DAYS = 2
 INCLUDE_REGISTER_URL = False

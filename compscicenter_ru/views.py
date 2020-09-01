@@ -716,6 +716,7 @@ class CourseDetailView(PublicURLMixin, CoursePublicURLParamsMixin,
             'course': self.course,
             'tabs': tabs,
             'teachers': teachers,
+            # FIXME: check permission instead
             'has_access_to_private_materials': can_view_private_materials(role),
             'classes': classes,
         }
