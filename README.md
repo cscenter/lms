@@ -43,6 +43,8 @@ logger.removeHandler(sql_console_handler)
 # Run rqworker on Mac OS High Sierra
 OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES ./manage.py rqworker default hight
 # Hotfix for ipython `DEBUG parser diff`
-import logging; logging.getLogger('parso.python.diff').setLevel('INFO')  
+import logging; logging.getLogger('parso.python.diff').setLevel('INFO')
+# Enable DEBUG in shell
+logging.basicConfig(level=logging.DEBUG)  
 ```
 
