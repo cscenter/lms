@@ -295,9 +295,8 @@ class AssignmentService:
         created = (StudentAssignment.objects
                    .filter(assignment=assignment, student_id__in=pks)
                    .values_list('pk', 'student_id', named=True))
-        objs = (AssignmentNotification(user_id=sa.student_id,
-                                       student_assignment_id=sa.pk,
-                                       is_about_creation=True) for sa in created)
+        objs = (notify_student_new_assignment(sa, commit=False) for sa
+                in created)
         batch_size = 100
         while True:
             batch = list(islice(objs, batch_size))
@@ -445,11 +444,13 @@ class EnrollmentService:
             enrollment.save(update_fields=update_fields)
 
 
-def notify_student_new_assignment(student_assignment):
-    (AssignmentNotification(user_id=student_assignment.student_id,
-                            student_assignment_id=student_assignment.pk,
-                            is_about_creation=True)
-     .save())
+def notify_student_new_assignment(student_assignment, commit=True):
+    obj = AssignmentNotification(user_id=student_assignment.student_id,
+                                 student_assignment_id=student_assignment.pk,
+                                 is_about_creation=True)
+    if commit:
+        obj.save()
+    return obj
 
 
 def notify_new_assignment_comment(comment):
