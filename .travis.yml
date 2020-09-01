@@ -1,35 +1,43 @@
 language: python
 os: linux
 dist: xenial
-python:
-  - "3.7"
-services:
-  - redis-server
-addons:
-  postgresql: '11'
-  apt:
-    packages:
-      - libgnutls-dev
-before_install:
-  - sudo apt-get update
-  - sudo service postgresql stop
-  - sudo apt-get --yes remove postgresql\*
-  - sudo apt-get install -y postgresql-11 postgresql-client-11
-  - sudo sed -i.bak -e 's/^port.*/port = 5432/' /etc/postgresql/11/main/postgresql.conf
-  - sudo cp /etc/postgresql/{10,11}/main/pg_hba.conf
-  - sudo service postgresql restart 11
-install:
-  - pip3 install pycurl
-  - pip3 install pipenv
-  - pipenv sync --dev
-  - pip3 list
-before_script:
-  - cp lms/settings/.env.example lms/settings/.env
-  - cp compsciclub_ru/settings/.env.example compsciclub_ru/settings/.env
-  - psql --version
-  - psql -c 'CREATE DATABASE travis_ci_test;' -U postgres
-  - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
-  - python manage.py migrate --noinput --settings=compscicenter_ru.settings.test
-script:
-  - pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
-  - pytest -c compsciclub_ru/pytest.ini --create-db --cov=./compsciclub_ru/apps/
+jobs:
+  include:
+    - stage: test
+      python: "3.8"
+      services:
+        - redis-server
+      addons:
+        postgresql: '11'
+        apt:
+          packages:
+            - libgnutls-dev
+      before_install:
+        - sudo apt-get update
+        - sudo service postgresql stop
+        - sudo apt-get --yes remove postgresql\*
+        - sudo apt-get install -y postgresql-11 postgresql-client-11
+        - sudo sed -i.bak -e 's/^port.*/port = 5432/' /etc/postgresql/11/main/postgresql.conf
+        - sudo cp /etc/postgresql/{10,11}/main/pg_hba.conf
+        - sudo service postgresql restart 11
+      install:
+        - pip3 install pycurl
+        - pip3 install pipenv
+        - pipenv sync --dev
+        - pip3 list
+      before_script:
+        - cp lms/settings/.env.example lms/settings/.env
+        - cp compsciclub_ru/settings/.env.example compsciclub_ru/settings/.env
+        - psql --version
+        - psql -c 'CREATE DATABASE travis_ci_test;' -U postgres
+        - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
+        - python manage.py migrate --noinput --settings=compscicenter_ru.settings.test
+      script:
+        - pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
+        - pytest -c compsciclub_ru/pytest.ini --create-db --cov=./compsciclub_ru/apps/
+    - stage: build
+      name: "Build Docker Images and upload to ECR"
+      script: true
+      if: branch = master AND tag IS present
+
+
