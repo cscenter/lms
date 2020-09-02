@@ -37,7 +37,9 @@ jobs:
         - pytest -c compsciclub_ru/pytest.ini --create-db --cov=./compsciclub_ru/apps/
     - stage: build
       name: "Build Docker Images and upload to ECR"
+#      script: trigger-travis.sh cscenter lms-provisioning $TRAVIS_ACCESS_TOKEN $TRAVIS_BUILD_NUMBER
       script: true
-      if: branch = master AND tag IS present
+      # Note that for tags, git does not store the branch from which a commit was tagged
+      if: tag IS present
 
 
