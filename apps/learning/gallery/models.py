@@ -36,7 +36,8 @@ class Image(models.Model):
                               on_delete=models.CASCADE, verbose_name=_('Album'),
                               blank=True, null=True, related_name='images')
     order = models.IntegerField(verbose_name=_('Order'), default=0)
-    image = ImageField(verbose_name=_('File'), max_length=255,
+    image = ImageField(verbose_name=_('File'),
+                       max_length=255,
                        upload_to=gen_path_to_image)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('User'),
                              null=True, blank=True,

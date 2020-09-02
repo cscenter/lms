@@ -40,7 +40,10 @@ class Book(models.Model):
     description = models.TextField(
         verbose_name=_("Book|description"), default="")
     cover = ImageField(
-        _("Book|cover"), upload_to="books", null=True, blank=True)
+        _("Book|cover"),
+        upload_to="books",
+        max_length=200,
+        blank=True)
 
     tags = TaggableManager(through=TaggedBook)
 

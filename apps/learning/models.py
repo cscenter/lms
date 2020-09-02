@@ -777,6 +777,7 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
     photo = ImageField(
         _("Photo"),
         upload_to=graduate_photo_upload_to,
+        max_length=200,
         blank=True)
     testimonial = models.TextField(
         _("Testimonial"),
