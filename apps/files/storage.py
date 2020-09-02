@@ -119,14 +119,19 @@ class PrivateFileSystemStorage(FileSystemStorage):
 class PublicMediaS3Storage(S3Boto3Storage):
     location = getattr(settings, 'AWS_PUBLIC_MEDIA_LOCATION', 'media')
     file_overwrite = False
-    default_acl = 'public-read'
+    object_parameters = {
+        'ACL': 'public-read',
+    }
     url_protocol = 'https:'
+    # querystring_auth = False
 
 
 class PrivateMediaS3Storage(S3Boto3Storage):
     location = getattr(settings, 'AWS_PRIVATE_MEDIA_LOCATION', 'private')
     file_overwrite = False
-    default_acl = 'private'
+    object_parameters = {
+        'ACL': 'private',
+    }
     url_protocol = 'https:'
     custom_domain = False
     querystring_expire = 10  # in seconds
