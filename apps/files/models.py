@@ -10,7 +10,6 @@ class ConfigurableStorageFileField(FileField):
     on serialization. Looks like it's safe to remove this attribute to avoid
     messing up with migrations.
     """
-
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
         kwargs.pop('storage', None)

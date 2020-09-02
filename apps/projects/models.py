@@ -643,6 +643,7 @@ class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
         blank=True,
         null=True,
         upload_to=report_file_upload_to,
+        max_length=200,
         storage=private_storage)
     # curators criteria
     score_activity = models.PositiveSmallIntegerField(
@@ -953,6 +954,7 @@ class ReportComment(TimezoneAwareModel, TimeStampedModel):
     attached_file = ConfigurableStorageFileField(
         upload_to=report_comment_attachment_upload_to,
         storage=private_storage,
+        max_length=200,
         blank=True)
 
     class Meta:

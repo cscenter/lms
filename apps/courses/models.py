@@ -1152,7 +1152,7 @@ class AssignmentAttachment(TimeStampedModel):
     attachment = ConfigurableStorageFileField(
         upload_to=assignment_attachment_upload_to,
         storage=private_storage,
-        max_length=150)
+        max_length=200)
 
     class Meta:
         ordering = ["assignment", "-created"]

@@ -559,7 +559,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
     attached_file = ConfigurableStorageFileField(
-        max_length=150,
+        max_length=200,
         upload_to=assignment_comment_attachment_upload_to,
         storage=private_storage,
         blank=True)
