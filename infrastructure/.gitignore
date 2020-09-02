@@ -14,4 +14,4 @@ deploy_ssh_key
 deploy_ssh_key.pub
 *.retry
 .vagrant/
-
+*.vault.yml
