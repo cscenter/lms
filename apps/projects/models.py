@@ -520,6 +520,7 @@ class Project(TimezoneAwareModel, TimeStampedModel):
     supervisor_presentation = models.FileField(
         _("Supervisor presentation"),
         blank=True,
+        max_length=200,
         upload_to=project_presentations_upload_to)
     supervisor_presentation_url = models.URLField(
         _("Link to supervisor presentation"),
@@ -531,6 +532,7 @@ class Project(TimezoneAwareModel, TimeStampedModel):
     presentation = models.FileField(
         _("Participants presentation"),
         blank=True,
+        max_length=200,
         upload_to=project_presentations_upload_to)
     presentation_url = models.URLField(
         _("Link to participants presentation"),
