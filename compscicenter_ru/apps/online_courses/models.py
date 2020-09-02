@@ -30,6 +30,7 @@ class OnlineCourse(TimeStampedModel, TimeFramedModel):
     photo = ImageField(
         _("Online Course|photo"),
         upload_to="online_courses/",
+        max_length=200,
         blank=True)
     is_au_collaboration = models.BooleanField(
         _("Collaboration with AY"),

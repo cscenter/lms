@@ -77,7 +77,7 @@ class Announcement(TimeStampedModel):
         _("Photo"),
         upload_to="announcements/",
         blank=True,
-        null=True,
+        max_length=200,
         help_text=_("Recommended dimensions 600x400"))
     actions = models.TextField(
         _("Actions"),

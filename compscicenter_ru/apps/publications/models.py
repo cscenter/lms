@@ -84,6 +84,7 @@ class ProjectPublication(models.Model):
         _("Cover"),
         upload_to=publication_photo_upload_to,
         help_text=_("Min height - 180px"),
+        max_length=200,
         blank=True)
     description = models.TextField(
         verbose_name=_("Description"),
@@ -146,7 +147,7 @@ class Speaker(UserThumbnailMixin, models.Model):
         _("Photo"),
         upload_to=lecturer_photo_upload_to,
         blank=True,
-        null=True,
+        max_length=200,
         help_text=_("Aspect ratio 5:7. Min size: {}").format(ThumbnailSizes.BASE))
     workplace = models.CharField(_("Workplace"), max_length=255,
                                  blank=True, null=True)

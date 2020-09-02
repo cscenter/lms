@@ -184,6 +184,7 @@ class MetaCourse(TimeStampedModel):
     cover = ImageField(
         _("MetaCourse|cover"),
         upload_to=meta_course_cover_upload_to,
+        max_length=200,
         blank=True)
 
     class Meta:
