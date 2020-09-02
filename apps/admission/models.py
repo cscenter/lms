@@ -583,6 +583,7 @@ class Contest(models.Model):
         _("Assignments in pdf format"),
         blank=True,
         upload_to=contest_assignments_upload_to,
+        max_length=200,
         storage=private_storage)
 
     class Meta:
