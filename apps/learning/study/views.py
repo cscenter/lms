@@ -209,9 +209,6 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
         current_term_index = current_term.index
         in_current_term = Q(semester__index=current_term_index)
         enrolled_in = Q(id__in=list(student_enrolled_in))
-        # Hide summer courses on CS Club site until student enrolled in
-        if is_club_site():
-            in_current_term &= ~Q(semester__type=SemesterTypes.SUMMER)
         prefetch_teachers = Prefetch(
             'teachers',
             queryset=User.objects.only("id", "first_name", "last_name",
@@ -225,7 +222,8 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
                             .order_by('-semester__index',
                                       'meta_course__name', 'pk')
                             .prefetch_related(prefetch_teachers,
-                                              "branches"))
+                                              "branches",
+                                              "semester__enrollmentperiod_set"))
         # 2. And split them by type.
         ongoing_enrolled, ongoing_rest, archive_enrolled = [], [], []
         for course in course_offerings:
