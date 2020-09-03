@@ -223,7 +223,7 @@ class AssignmentListView(PermissionRequiredMixin, TemplateView):
         try:
             year, term_type = query_term.split("-")
             year = int(year)
-            if year < settings.FOUNDATION_YEAR:  # invalid GET-param value
+            if year < settings.ESTABLISHED:  # invalid GET-param value
                 raise ValidationError("Wrong year value")
             if term_type not in SemesterTypes.values:
                 raise ValidationError("Wrong term type")

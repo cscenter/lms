@@ -52,6 +52,7 @@ LOCALE_PATHS = [
 
 
 ESTABLISHED = 2007
+
 FAVICON_PATH = 'v1/img/club/favicon.ico'
 LOGO_PATH = 'v1/img/club/logo.svg'
 

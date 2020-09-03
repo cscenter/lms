@@ -336,7 +336,7 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
         # Validate year and term GET params
         try:
             term_year = int(self.kwargs['term_year'])
-            if term_year < settings.FOUNDATION_YEAR:
+            if term_year < settings.ESTABLISHED:
                 raise ValueError("ProgressReportForSemester: Wrong year format")
             term_type = self.kwargs['term_type']
             if term_type not in SemesterTypes.values:

@@ -20,8 +20,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         academic_year = options["academic_year"]
-        if academic_year < settings.FOUNDATION_YEAR:
-            raise CommandError(f"Academic year should be >= {settings.FOUNDATION_YEAR}")
+        if academic_year < settings.ESTABLISHED:
+            raise CommandError(f"Academic year should be >= {settings.ESTABLISHED}")
 
         queue = django_rq.get_queue('default')
         qs = (CourseClass.objects

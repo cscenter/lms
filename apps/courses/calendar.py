@@ -282,7 +282,7 @@ class WeekEventsCalendar(EventsCalendar):
 
 class CalendarQueryParams(serializers.Serializer):
     year = fields.IntegerField(required=False,
-                               min_value=settings.FOUNDATION_YEAR)
+                               min_value=settings.ESTABLISHED)
     month = fields.IntegerField(required=False, min_value=1, max_value=12)
     # ISO week-numbering year has 52 or 53 full weeks
     week = fields.IntegerField(required=False, min_value=1, max_value=53)

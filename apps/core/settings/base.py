@@ -140,11 +140,6 @@ WEBPACK_LOADER = {
 
 DATE_FORMAT = 'j E Y'
 
-# Presume foundation year starts from spring term
-# FIXME: separate between club and cscenter projects?
-FOUNDATION_YEAR = 2007
-
-
 # Determine if we should apply 'selected' to parents when one of their
 # children is the 'selected' menu
 MENU_SELECT_PARENTS = True
