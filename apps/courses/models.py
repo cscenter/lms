@@ -490,14 +490,12 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     def enrollment_is_open(self):
         if self.is_completed:
             return False
-        from learning.models import EnrollmentPeriod
-        # TODO: cache enrollment periods to avoid additional db hits
-        enrollment_period = (EnrollmentPeriod.objects
-                             .filter(site_id=settings.SITE_ID,
-                                     semester=self.semester)
-                             .first())
-        if not enrollment_period:
+        enrollment_periods = [e for e in
+                              self.semester.enrollmentperiod_set.all()
+                              if e.site_id == settings.SITE_ID]
+        if not enrollment_periods:
             return is_club_site()
+        enrollment_period = enrollment_periods[0]
         today = now_local(self.get_timezone()).date()
         return today in enrollment_period
 
