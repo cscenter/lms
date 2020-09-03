@@ -30,6 +30,9 @@ ESTABLISHED = 2007
 FAVICON_PATH = 'v1/img/shad/favicon.ico'
 LOGO_PATH = 'v1/img/shad/logo.svg'
 
+# Top menu customization
+EXCLUDE_MENU_ITEMS = ['admission', 'projects', 'learning:library']
+
 for template in TEMPLATES:
     if "Jinja2" in template["BACKEND"]:
         update_constants = [
