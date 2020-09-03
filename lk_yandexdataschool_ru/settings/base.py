@@ -22,11 +22,11 @@ SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,
 }
 
+ESTABLISHED = 2007
 DEFAULT_CITY_CODE = "msk"
 DEFAULT_BRANCH_CODE = "msk"
 
 # Template customization
-ESTABLISHED = 2007
 FAVICON_PATH = 'v1/img/shad/favicon.ico'
 LOGO_PATH = 'v1/img/shad/logo.svg'
 

@@ -125,8 +125,9 @@ THUMBNAIL_REDIS_SSL = REDIS_SSL
 SENTRY_DSN = env("SENTRY_DSN")
 SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
 
-# Template customization
 ESTABLISHED = 2011
+
+# Template customization
 FAVICON_PATH = 'v1/img/center/favicon.png'
 LOGO_PATH = 'v1/img/center/logo.svg'
 # Provide zero value to disable counter rendering
