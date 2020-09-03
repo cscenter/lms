@@ -44,7 +44,7 @@ class LearningSpace(TimezoneAwareModel, models.Model):
 
     location = models.ForeignKey(
         Location,
-        verbose_name=_("Location|Name"),
+        verbose_name=_("Address"),
         related_name="learning_spaces",
         null=True, blank=True,
         on_delete=models.PROTECT)
@@ -56,7 +56,7 @@ class LearningSpace(TimezoneAwareModel, models.Model):
     name = models.CharField(
         verbose_name=_("Name"),
         max_length=140,
-        help_text=_("Overrides location name"),
+        help_text=_("The location name will be added to the end if provided"),
         blank=True)
     description = models.TextField(
         _("Description"),
@@ -69,11 +69,17 @@ class LearningSpace(TimezoneAwareModel, models.Model):
         verbose_name_plural = _("Learning Spaces")
 
     def __str__(self):
-        return self.name if self.name else str(self.location)
+        return self.full_name
 
     @property
     def address(self):
         return self.location.address
+
+    @property
+    def full_name(self):
+        if self.name:
+            return f"{self.name}, {self.location.name}"
+        return self.location.name
 
 
 class Semester(models.Model):
