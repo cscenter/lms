@@ -17,10 +17,6 @@ DEFAULT_TIMEZONE = pytz.timezone("Europe/Moscow")
 # FIXME: remove
 CLUB_SITE_ID = 2
 
-LMS_SUBDOMAIN = None
-
-CSRF_COOKIE_NAME = 'csrf_token'
-
 INSTALLED_APPS = [
     'modeltranslation',  # insert before admin
     'dal',
