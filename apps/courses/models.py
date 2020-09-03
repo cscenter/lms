@@ -494,10 +494,9 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
                               self.semester.enrollmentperiod_set.all()
                               if e.site_id == settings.SITE_ID]
         if not enrollment_periods:
-            return is_club_site()
-        enrollment_period = enrollment_periods[0]
+            return False
         today = now_local(self.get_timezone()).date()
-        return today in enrollment_period
+        return today in enrollment_periods[0]
 
     @property
     def is_capacity_limited(self):

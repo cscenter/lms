@@ -1,26 +1,18 @@
-from typing import Set
-
-from django.db.models.signals import m2m_changed, pre_save
+from django.conf import settings
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from core.models import Branch
-from courses.models import Course, CourseBranch
-from learning.services import StudentGroupService
+from courses.models import Semester
+from learning.models import EnrollmentPeriod
 
 
-# FIXME: post_delete - если удаляется главная бранча, то запретить (лучше в админке?) 2. Убедиться, что она всегда есть, видимо, тоже в админке? Если на Course.post_add, то может быть ошибка валидации.
-def manage_course_branches(sender, **kwargs):
-    action = kwargs.pop("action")
-    if action not in ("pre_add", "post_remove"):
+@receiver(post_save, sender=Semester)
+def create_enrollment_period_for_compsciclub_ru(sender, instance: Semester,
+                                                created, *args, **kwargs):
+    """Side effect for compsciclub.ru creates predefined enrollment period"""
+    if not created:
         return
-    course = kwargs.pop("instance")
-    branches: Set[int] = kwargs.pop("pk_set", set())
-    for branch_id in branches:
-        # Case when the main branch was added as an additional one
-        if branch_id == course.main_branch_id:
-            continue
-        branch = Branch.objects.get_by_pk(branch_id)
-        if action == "post_add":
-            StudentGroupService.add(course, branch)
-        elif action == "post_remove":
-            StudentGroupService.remove(course, branch)
+    ends_on = instance.ends_at.date()
+    EnrollmentPeriod.objects.get_or_create(site_id=settings.CLUB_SITE_ID,
+                                           semester=instance,
+                                           defaults={"ends_on": ends_on})
