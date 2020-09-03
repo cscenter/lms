@@ -8,7 +8,7 @@ import pytest
 import pytz
 from django.core.exceptions import ValidationError
 
-from core.tests.factories import SiteFactory, BranchFactory
+from core.tests.factories import SiteFactory, BranchFactory, LocationFactory
 from core.tests.utils import CSCTestCase
 from django.utils.encoding import smart_str
 
@@ -17,9 +17,10 @@ from learning.tests.factories import StudentAssignmentFactory, \
     AssignmentCommentFactory, \
     EnrollmentFactory, AssignmentNotificationFactory, \
     CourseNewsNotificationFactory, EnrollmentPeriodFactory
-from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFactory, \
+from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
+    CourseFactory, \
     CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
-    AssignmentFactory
+    AssignmentFactory, LearningSpaceFactory
 from learning.models import StudentAssignment, AssignmentNotification, \
     AssignmentComment, EnrollmentPeriod
 from courses.models import Semester, CourseNews, CourseReview, \
@@ -337,3 +338,12 @@ def test_soft_delete_student_assignment():
     sa.restore()
     assert not sa.is_deleted
     assert AssignmentComment.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_learning_space_full_name():
+    location = LocationFactory(name='Zombie', address='ZombieLand')
+    learning_space = LearningSpaceFactory(location=location, name='')
+    assert learning_space.full_name == location.name
+    learning_space = LearningSpaceFactory(location=location, name='Hello')
+    assert learning_space.full_name == 'Hello, Zombie'

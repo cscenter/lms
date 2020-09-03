@@ -48,7 +48,7 @@
                 <a href="{{ class.course.get_absolute_url }}">{{ class.course.meta_course.name }}</a>
               </td>
               <td>
-                <a href="{{ class.venue.get_absolute_url }}">{{ class.venue }}</a>
+                <a href="{{ class.venue.get_absolute_url }}">{{ class.venue.full_name }}</a>
               </td>
               <td>
                 {% if class.type == 'lecture' %}
