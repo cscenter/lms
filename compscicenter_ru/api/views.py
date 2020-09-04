@@ -28,7 +28,8 @@ class SiteCourseList(ListAPIView):
 
     def get_queryset(self):
         return (Course.objects
-                .filter(main_branch__site_id=settings.SITE_ID)
+                .filter(main_branch__site_id=settings.SITE_ID,
+                        main_branch__active=True)
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related("meta_course")
                 .only("meta_course_id", "meta_course__name")
@@ -106,7 +107,8 @@ class CourseVideoList(ListAPIView):
                         # Could be incorrect within one day since it doesn't
                         # check timezone
                         completed_at__lte=now().date(),
-                        main_branch__site_id=settings.SITE_ID)
+                        main_branch__site_id=settings.SITE_ID,
+                        main_branch__active=True)
                 .order_by('-semester__year', 'semester__type')
                 .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(lecturers))

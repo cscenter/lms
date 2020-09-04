@@ -347,7 +347,8 @@ class OnCampusProgramsView(generic.TemplateView):
         # Active programs grouped by branch
         current_programs = (StudyProgram.objects
                             .filter(is_active=True,
-                                    branch__site=self.request.site)
+                                    branch__site=self.request.site,
+                                    branch__active=True)
                             .exclude(branch__city=None)
                             .select_related("branch", "academic_discipline")
                             .order_by("branch",
@@ -383,6 +384,7 @@ class OnCampusProgramDetailView(PublicURLMixin, generic.TemplateView):
                          .filter(academic_discipline__code=discipline_code,
                                  branch__code=selected_branch,
                                  branch__site=self.request.site,
+                                 branch__active=True,
                                  is_active=True)
                          .exclude(branch__city=None)
                          .prefetch_core_courses_groups()
@@ -582,7 +584,10 @@ class MetaCourseDetailView(PublicURLMixin, generic.DetailView):
         context['grouped_courses'] = courses_by_branch
         active_study_programs = get_study_programs(
             self.object.pk,
-            filters=[Q(is_active=True), Q(branch__site=self.request.site)])
+            filters=[
+                Q(is_active=True),
+                Q(branch__site=self.request.site, branch__active=True)
+            ])
         context['study_programs'] = active_study_programs
         return context
 
@@ -734,6 +739,7 @@ class CourseClassDetailView(PublicURLMixin, generic.DetailView):
         main_branch_code = main_branch_code or settings.DEFAULT_BRANCH_CODE
         return (CourseClass.objects
                 .filter(course__main_branch__site=self.request.site,
+                        course__main_branch__active=True,
                         course__main_branch__code=main_branch_code,
                         course__meta_course__slug=url_params['course_slug'],
                         course__semester__type=url_params['semester_type'],

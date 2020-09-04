@@ -91,6 +91,7 @@ class CoursePublicURLParamsMixin:
 
         courses = list(self.get_course_queryset()
                        .filter(main_branch__code=main_branch_code,
+                               main_branch__active=True,
                                main_branch__site=request.site)
                        .order_by('pk'))
         if not courses:
