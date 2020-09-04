@@ -47,10 +47,11 @@ INSTALLED_APPS = [
     'captcha',
     'taggit',
 
+    'core.apps.CoreConfig',
+    'menu',
     # django.contrib.static with a customized list of ignore patterns
     'files.apps.StaticFilesConfig',
     'files.apps.MediaFilesConfig',
-    'core.apps.CoreConfig',
     'auth.apps.AuthConfig',  # custom `User` model is defined in `users` app
     'users.apps.UsersConfig',
     'htmlpages',
@@ -86,7 +87,7 @@ LOCALE_PATHS = [
 ]
 USE_TZ = True
 TIME_ZONE = 'UTC'
-
+DATE_FORMAT = 'j E Y'
 
 AUTH_USER_MODEL = "users.User"
 AUTHENTICATION_BACKENDS = (
@@ -138,7 +139,6 @@ WEBPACK_LOADER = {
     }
 }
 
-DATE_FORMAT = 'j E Y'
 
 # Determine if we should apply 'selected' to parents when one of their
 # children is the 'selected' menu
