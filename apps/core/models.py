@@ -117,6 +117,9 @@ class City(TimezoneAwareModel, models.Model):
 class BranchManager(models.Manager):
     use_in_migrations = False
 
+    # def get_queryset(self):
+    #     return super().get_queryset().filter(active=True)
+
     def get_by_pk(self, branch_id: int):
         pk = BranchId(branch_id)
         if pk not in BRANCH_CACHE:
@@ -183,6 +186,9 @@ class Branch(TimezoneAwareModel, models.Model):
         db_index=True)
     name = models.CharField(_("Branch|Name"), max_length=255)
     established = models.PositiveIntegerField(_('Established'))
+    active = models.BooleanField(
+        verbose_name=_("Active"),
+        default=True)
     order = models.PositiveIntegerField(verbose_name=_('Order'), default=0)
     city = models.ForeignKey(City, verbose_name=_("Branch Location"),
                              blank=True, null=True,
@@ -197,6 +203,7 @@ class Branch(TimezoneAwareModel, models.Model):
         help_text=_("Branch|Description"),
         blank=True)
 
+    default_manager = models.Manager()
     objects = BranchManager()
 
     class Meta:

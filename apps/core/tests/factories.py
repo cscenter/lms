@@ -54,6 +54,7 @@ class BranchFactory(factory.django.DjangoModelFactory):
     city = factory.SubFactory(CityFactory)
     order = factory.Sequence(lambda n: n)
     established = 2013
+    active = True
 
     @factory.lazy_attribute
     def time_zone(self):
