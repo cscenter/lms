@@ -590,7 +590,9 @@ class GradeBookListView(CuratorOnlyMixin, GradeBookListBaseView):
             term.course_offerings = []
             semester_list.insert(0, term)
         semester_list = [(a, s) for s, a in core.utils.chunks(semester_list, 2)]
-
+        for autumn, spring in semester_list:
+            autumn.course_offerings = bucketize(autumn.course_offerings,
+                                                key=lambda c: c.main_branch.name)
         context["semester_list"] = semester_list
         return context
 
