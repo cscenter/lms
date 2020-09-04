@@ -117,9 +117,6 @@ class City(TimezoneAwareModel, models.Model):
 class BranchManager(models.Manager):
     use_in_migrations = False
 
-    # def get_queryset(self):
-    #     return super().get_queryset().filter(active=True)
-
     def get_by_pk(self, branch_id: int):
         pk = BranchId(branch_id)
         if pk not in BRANCH_CACHE:
@@ -132,8 +129,11 @@ class BranchManager(models.Manager):
             BRANCH_CACHE[key] = self.get(code=key.code, site_id=key.site_id)
         return BRANCH_CACHE[key]
 
-    def for_site(self, site_id: int) -> List["Branch"]:
-        """Returns all branches for concrete site"""
+    def for_site(self, site_id: int, all=False) -> List["Branch"]:
+        """
+        Returns active branches for concrete site. Pass in `all=True` to
+        include inactive branches.
+        """
         cache_key = SiteId(site_id)
         if cache_key not in BRANCH_SITE_CACHE:
             branches = list(self.filter(site_id=site_id).order_by('order'))
@@ -143,7 +143,10 @@ class BranchManager(models.Manager):
                 key = BranchId(b.pk)
                 BRANCH_CACHE[key] = b
             BRANCH_SITE_CACHE[cache_key] = [BranchId(b.pk) for b in branches]
-        return [BRANCH_CACHE[pk] for pk in BRANCH_SITE_CACHE[cache_key]]
+        branches = [BRANCH_CACHE[pk] for pk in BRANCH_SITE_CACHE[cache_key]]
+        if all:
+            return branches
+        return [b for b in branches if b.active]
 
     def get_current(self, request, site_id: int = settings.SITE_ID):
         """
