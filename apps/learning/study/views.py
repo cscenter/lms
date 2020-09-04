@@ -29,7 +29,7 @@ from learning.permissions import ViewOwnStudentAssignments, \
     EditOwnAssignmentExecutionTime, ViewOwnStudentAssignment, ViewCourses
 from info_blocks.permissions import ViewInternships
 from learning.roles import Roles
-from learning.services import get_student_classes
+from learning.services import get_student_classes, get_student_profile
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView, \
     StudentAssignmentURLParamsMixin
@@ -197,14 +197,15 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         # Student enrollments
+        auth_user = self.request.user
         student_enrollments = (Enrollment.active
-                               .filter(student_id=self.request.user)
+                               .filter(student_id=auth_user)
                                .select_related("course")
                                .only('id', 'grade', 'course_id',
                                      'course__grading_type'))
         student_enrolled_in = {e.course_id: e for e in student_enrollments}
         # 1. Union courses from current term and which student enrolled in
-        tz = self.request.user.get_timezone()
+        tz = auth_user.get_timezone()
         current_term = get_current_term_pair(tz)
         current_term_index = current_term.index
         in_current_term = Q(semester__index=current_term_index)
@@ -213,9 +214,9 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
             'teachers',
             queryset=User.objects.only("id", "first_name", "last_name",
                                        "patronymic"))
+        student_profile = get_student_profile(auth_user, self.request.site)
         course_offerings = (Course.objects
-                            # FIXME: user.branch is optional
-                            .available_in(self.request.user.branch_id)
+                            .available_in(student_profile.branch_id)
                             .filter(in_current_term | enrolled_in)
                             .select_related('meta_course', 'semester',
                                             'main_branch')
