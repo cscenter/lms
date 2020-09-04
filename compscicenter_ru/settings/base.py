@@ -55,4 +55,3 @@ CACHES['social_networks'] = {
 
 # Append project translation
 LOCALE_PATHS = [str(PROJECT_DIR / "locale")] + LOCALE_PATHS
-
