@@ -1,7 +1,7 @@
 from crispy_forms.utils import render_crispy_form
 from django.contrib.messages import get_messages, DEFAULT_LEVELS
 from jinja2 import contextfunction
-from menu import Menu
+from core.menu import Menu
 
 
 def messages(request):
