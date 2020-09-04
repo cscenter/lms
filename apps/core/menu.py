@@ -1,8 +1,21 @@
 import re
+from importlib import import_module
 
 from django.conf import settings
-from django.utils.translation import get_language
-from menu import MenuItem as _MenuItem
+from django.core.exceptions import ImproperlyConfigured
+from menu import Menu as _Menu, MenuItem as _MenuItem
+
+
+class Menu(_Menu):
+    @classmethod
+    def load_menus(cls):
+        super().load_menus()
+        module = getattr(settings, "LMS_MENU", None)
+        if module:
+            try:
+                import_module(module)
+            except ModuleNotFoundError:
+                raise ImproperlyConfigured("settings.LMS_MENU module not found")
 
 
 class MenuItem(_MenuItem):
