@@ -35,6 +35,7 @@ class GradeBookListBaseView(generic.ListView):
 
     def get_course_queryset(self):
         return (Course.objects
+                .available_on_site(self.request.site)
                 .select_related("meta_course", "main_branch")
                 .order_by("meta_course__name"))
 
@@ -55,11 +56,12 @@ class GradeBookListBaseView(generic.ListView):
         return (Semester.objects
                 .filter(index__lte=self.get_term_threshold())
                 .exclude(type=SemesterTypes.SUMMER)
+                .order_by('-index')
                 .prefetch_related(
                     Prefetch(
                         "course_set",
                         queryset=self.get_course_queryset(),
-                        to_attr="courseofferings"
+                        to_attr="course_offerings"
                     )))
 
 

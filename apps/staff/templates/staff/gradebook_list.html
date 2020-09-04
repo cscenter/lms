@@ -20,7 +20,7 @@
         {% for semester in autumn_spring %}
           <td class="semester-course-list">
             <ul>
-            {% for course in semester.courseofferings %}
+            {% for course in semester.course_offerings %}
               <li>
                 <a href="{% call_method course 'get_gradebook_url' url_name='staff:gradebook' %}">{{ course.meta_course.name }}</a>
               </li>

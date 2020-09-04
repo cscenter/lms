@@ -21,6 +21,7 @@ from admission.models import Campaign, Interview
 from admission.reports import AdmissionApplicantsReport, AdmissionExamReport
 from core.models import Branch
 from core.urls import reverse
+from core.utils import bucketize
 from courses.constants import SemesterTypes
 from courses.models import Course, Semester
 from courses.utils import get_current_term_pair, get_term_index
@@ -582,15 +583,15 @@ class GradeBookListView(CuratorOnlyMixin, GradeBookListBaseView):
         semester_list = list(context["semester_list"])
         if not semester_list:
             return context
-        # Add stub spring term if we have only the fall term for the ongoing
-        # academic year
+        # Add stub term if we have only 1 term for the ongoing academic year
         current = semester_list[0]
         if current.type == SemesterTypes.AUTUMN:
             term = Semester(type=SemesterTypes.SPRING, year=current.year + 1)
-            term.courseofferings = []
+            term.course_offerings = []
             semester_list.insert(0, term)
-        context["semester_list"] = [(a, s) for s, a in
-                                    core.utils.chunks(semester_list, 2)]
+        semester_list = [(a, s) for s, a in core.utils.chunks(semester_list, 2)]
+
+        context["semester_list"] = semester_list
         return context
 
 
