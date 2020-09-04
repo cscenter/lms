@@ -170,7 +170,7 @@ class TestimonialsListView(TemplateView):
     template_name = "compscicenter_ru/testimonials.html"
 
     def get_context_data(self, **kwargs):
-        site_branches = Branch.objects.for_site(self.request.site.pk)
+        site_branches = Branch.objects.for_site(self.request.site.pk, all=True)
         total = (GraduateProfile.active
                  .filter(student_profile__branch__in=site_branches)
                  .with_testimonial()
@@ -249,7 +249,7 @@ class AlumniHonorBoardView(TemplateView):
             manager = GraduateProfile.active
         else:
             manager = GraduateProfile.objects
-        site_branches = Branch.objects.for_site(self.request.site.pk)
+        site_branches = Branch.objects.for_site(self.request.site.pk, all=True)
         graduates = list(manager
                          .filter(graduation_year=graduation_year,
                                  student_profile__branch__in=site_branches)
@@ -295,7 +295,7 @@ class AlumniView(TemplateView):
         cache_key = cache_key_pattern.format(site_id=self.request.site.pk)
         history = cache.get(cache_key)
         today = now().date()
-        site_branches = Branch.objects.for_site(self.request.site.pk)
+        site_branches = Branch.objects.for_site(self.request.site.pk, all=True)
         if history is None:
             history = (GraduateProfile.active
                        .filter(graduated_on__lte=today,
