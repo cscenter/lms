@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django_rq',
     'webpack_loader',
     'django_filters',
-    'rest_framework',  # what about club site?
+    'rest_framework',
     'captcha',
     'taggit',
 
