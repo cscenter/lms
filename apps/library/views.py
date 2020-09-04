@@ -26,7 +26,8 @@ class BookListView(PermissionRequiredMixin, ListView):
     def get_queryset(self):
         qs = (Stock.objects
               .select_related("branch", "book")
-              .filter(branch__site=self.request.site)
+              .filter(branch__site=self.request.site,
+                      branch__active=True)
               .prefetch_related("borrows", "borrows__student"))
         # Students can see books from there branch only
         user = self.request.user
@@ -51,7 +52,8 @@ class BookDetailView(PermissionRequiredMixin, DetailView):
 
     def get_queryset(self):
         qs = (Stock.objects
-              .filter(branch__site=self.request.site)
+              .filter(branch__site=self.request.site,
+                      branch__active=True)
               .select_related("book")
               .prefetch_related("borrows"))
         # Students can see books from there branch only

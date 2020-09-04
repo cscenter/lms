@@ -384,6 +384,7 @@ class CourseClassDetailView(PublicURLContextMixin,
         main_branch_code = main_branch_code or self.request.branch.code
         return (CourseClass.objects
                 .filter(course__main_branch__site=self.request.site,
+                        course__main_branch__active=True,
                         course__main_branch__code=main_branch_code,
                         course__meta_course__slug=url_params['course_slug'],
                         course__semester__type=url_params['semester_type'],

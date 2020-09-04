@@ -28,6 +28,7 @@ class BranchCodeFilter(ChoiceFilter):
         qs = (qs
               .available_in(branch.pk)
               .filter(main_branch__site_id=settings.SITE_ID,
+                      main_branch__active=True,
                       semester__index__gte=term_index))
         return qs
 
