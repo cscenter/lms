@@ -6,7 +6,7 @@ from django_rq import job
 
 from admission.models import Test, Contest
 from admission.services import EmailQueueService
-from api.providers.yandex_contest import YandexContestAPI, RegisterStatus, \
+from contests.api.yandex_contest import YandexContestAPI, RegisterStatus, \
     ContestAPIError, ResponseStatus
 
 logger = logging.getLogger(__name__)

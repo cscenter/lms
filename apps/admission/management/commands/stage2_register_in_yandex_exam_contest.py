@@ -4,7 +4,7 @@ from django.core.management import BaseCommand, CommandError
 
 from admission.constants import ChallengeStatuses
 from admission.models import Applicant, Exam, Contest
-from api.providers.yandex_contest import YandexContestAPI, \
+from contests.api.yandex_contest import YandexContestAPI, \
     RegisterStatus, ContestAPIError
 from ._utils import CurrentCampaignMixin, CustomizeQueryMixin, \
     EmailTemplateMixin
