@@ -16,7 +16,7 @@
           </thead>
         {% if semester_list %}
             {% for semester in semester_list %}
-                {% for co in semester.courseofferings %}
+                {% for co in semester.course_offerings %}
                   <tr>
                     <td><a href="{{ co.get_gradebook_url }}">{{ co.meta_course.name }}</a></td>
                     <td>{{ co.semester }}</td>
