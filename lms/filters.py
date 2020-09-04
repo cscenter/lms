@@ -87,7 +87,7 @@ class CoursesFilter(FilterSet):
             data = data.copy()  # get a mutable copy of the QueryDict
         else:
             data = QueryDict(mutable=True)
-        self.site_branches = Branch.objects.for_site(request.site.pk)
+        self.site_branches = self.get_branches(request)
         branch_code = data.pop("branch", None)
         if not branch_code and hasattr(request.user, "branch_id"):
             branch = next((b for b in self.site_branches
@@ -101,6 +101,9 @@ class CoursesFilter(FilterSet):
         # Branch code choices depend on current site
         self.form['branch'].field.choices = [(b.code, b.name) for b
                                              in self.site_branches]
+
+    def get_branches(self, request):
+        return Branch.objects.for_site(request.site.pk)
 
     @property
     def form(self):

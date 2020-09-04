@@ -51,6 +51,10 @@ class CoursesPublicFilter(CoursesFilter):
     class Meta(CoursesFilter.Meta):
         fields = ('branch', 'academic_year')
 
+    def get_branches(self, request):
+        return Branch.objects.for_site(request.site.pk, all=True)
+
+
 
 class AlumniFilter(FilterSet):
     # TODO: We could avoid left join with `core_branch` table
