@@ -23,6 +23,7 @@ WSGI_APPLICATION = 'compscicenter_ru.wsgi.application'
 ROOT_URLCONF = 'compscicenter_ru.urls'
 # FIXME: move to the SiteConfiguration model
 LMS_SUBDOMAIN = 'my'
+LMS_MENU = 'compscicenter_ru.lms_menu'
 if YANDEX_METRIKA_ID is None:
     YANDEX_METRIKA_ID = 25844420
 
