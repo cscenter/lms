@@ -6,7 +6,7 @@ from .base import *
 
 INSTALLED_APPS += [
     'dbbackup',
-    'lms',
+    'lms.apps.LMSConfig',
     'post_office',
     'django_jinja',
     'projects.apps.ProjectsConfig',
