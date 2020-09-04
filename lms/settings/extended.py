@@ -7,7 +7,6 @@ from .base import *
 INSTALLED_APPS += [
     'dbbackup',
     'lms',
-    'menu',
     'post_office',
     'django_jinja',
     'projects.apps.ProjectsConfig',
