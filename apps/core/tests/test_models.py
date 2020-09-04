@@ -29,9 +29,3 @@ def test_branch_manager_get_current(rf, settings):
         Branch.objects.get_current(request)
     settings.DEFAULT_BRANCH_CODE = branch_code1
     assert Branch.objects.get_current(request) == branch1
-    # Without request object `get_current` method should return the default
-    # branch based on settings.SITE_ID value
-    assert Branch.objects.get_current() == branch1
-    settings.DEFAULT_BRANCH_CODE = 'null'
-    with pytest.raises(Branch.DoesNotExist):
-        Branch.objects.get_current()
