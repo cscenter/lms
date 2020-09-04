@@ -132,16 +132,6 @@ class BranchManager(models.Manager):
             BRANCH_CACHE[key] = self.get(code=key.code, site_id=key.site_id)
         return BRANCH_CACHE[key]
 
-    def _get_branch_by_request(self, request):
-        sub_domain = request.get_host().rsplit(request.site.domain, 1)[0][:-1]
-        branch_code = sub_domain.lower() or settings.DEFAULT_BRANCH_CODE
-        if branch_code == "www":
-            branch_code = settings.DEFAULT_BRANCH_CODE
-        key = BranchNaturalKey(code=branch_code, site_id=request.site.id)
-        if key not in BRANCH_CACHE:
-            BRANCH_CACHE[key] = self.get(code=key.code, site_id=key.site_id)
-        return BRANCH_CACHE[key]
-
     def for_site(self, site_id: int) -> List["Branch"]:
         """Returns all branches for concrete site"""
         cache_key = SiteId(site_id)
@@ -155,19 +145,21 @@ class BranchManager(models.Manager):
             BRANCH_SITE_CACHE[cache_key] = [BranchId(b.pk) for b in branches]
         return [BRANCH_CACHE[pk] for pk in BRANCH_SITE_CACHE[cache_key]]
 
-    def get_current(self, request=None, site_id: int = settings.SITE_ID):
+    def get_current(self, request, site_id: int = settings.SITE_ID):
         """
         Returns the Branch based on the subdomain of the `request.site`, where
         subdomain is a branch code (e.g. nsk.example.com)
         If request is not provided, returns the Branch based on the
         DEFAULT_BRANCH_CODE value in the project's settings.
         """
-        if request:
-            return self._get_branch_by_request(request)
-        else:
-            # FIXME: remove this logic? Not clear why we should use default branch code here
-            return self.get_by_natural_key(settings.DEFAULT_BRANCH_CODE,
-                                           site_id)
+        sub_domain = request.get_host().rsplit(request.site.domain, 1)[0][:-1]
+        branch_code = sub_domain.lower() or settings.DEFAULT_BRANCH_CODE
+        if branch_code == "www":
+            branch_code = settings.DEFAULT_BRANCH_CODE
+        key = BranchNaturalKey(code=branch_code, site_id=request.site.id)
+        if key not in BRANCH_CACHE:
+            BRANCH_CACHE[key] = self.get(code=key.code, site_id=key.site_id)
+        return BRANCH_CACHE[key]
 
     @staticmethod
     def clear_cache():
