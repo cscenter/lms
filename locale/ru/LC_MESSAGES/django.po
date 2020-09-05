@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-09-03 16:58+0000\n"
-"PO-Revision-Date: 2020-09-03 16:58+0000\n"
+"PO-Revision-Date: 2020-09-04 18:49+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -611,7 +611,7 @@ msgstr "Имя"
 #: apps/courses/models.py:59
 #| msgid "The name will be prepended to the location name if provided"
 msgid "The location name will be added to the end if provided"
-msgstr "К имени будет добавлено название адреса, если он указан."
+msgstr "К имени будет добавлено название адреса, если адрес указан."
 
 #: apps/courses/models.py:68
 msgid "Learning Space"

@@ -333,3 +333,20 @@ def test_student_assignment_detail_view_context_next_unchecked(client):
      for a_s in [a_s1, a_s2]]
     assert client.get(url1).context['next_student_assignment'] == a_s2
     assert client.get(url2).context['next_student_assignment'] == a_s1
+
+
+@pytest.mark.django_db
+def test_gradebook_list(client, assert_redirect):
+    teacher = TeacherFactory()
+    client.login(teacher)
+    gradebooks_url = reverse("teaching:gradebook_list")
+    response = client.get(gradebooks_url)
+    assert response.status_code == 200
+    # Redirect if there is only one course in the current term
+    semester = SemesterFactory.create_current()
+    course = CourseFactory(semester=semester, teachers=[teacher])
+    response = client.get(gradebooks_url)
+    assert_redirect(response, course.get_gradebook_url())
+    course2 = CourseFactory(semester=semester, teachers=[teacher])
+    response = client.get(gradebooks_url)
+    assert response.status_code == 200

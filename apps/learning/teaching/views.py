@@ -471,18 +471,16 @@ class GradeBookListView(TeacherOnlyMixin, GradeBookListBaseView):
         return qs.filter(teachers=self.request.user)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
         tz = self.request.user.get_timezone()
         current_term_index = get_current_term_pair(tz).index
-        co_count = 0
         # Redirect teacher to the appropriate gradebook page if he has only
         # one course in the current semester.
-        for semester in context["semester_list"]:
+        for semester in self.object_list:
             if semester.index == current_term_index:
-                if len(semester.courseofferings) == 1:
-                    co = semester.courseofferings[0]
-                    raise Redirect(to=co.get_gradebook_url())
-            co_count += len(semester.courseofferings)
-        if not co_count:
-            context["semester_list"] = []
+                if len(semester.course_offerings) == 1:
+                    course = semester.course_offerings[0]
+                    raise Redirect(to=course.get_gradebook_url())
+        context = {
+            "semester_list": self.object_list
+        }
         return context
