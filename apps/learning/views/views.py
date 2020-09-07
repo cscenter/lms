@@ -203,7 +203,7 @@ class CourseStudentsView(TeacherOnlyMixin, CourseURLParamsMixin, TemplateView):
     def get_context_data(self, **kwargs):
         course = self.course
         return {
-            "co": course,
+            "course": course,
             "enrollments": (course.enrollment_set(manager="active")
-                            .select_related("student"))
+                            .select_related("student", "student_profile"))
         }
