@@ -9,16 +9,22 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.utils import formats
 
+from auth.mixins import PermissionRequiredMixin
+from auth.permissions import perm_registry
 from core.models import Branch
 from core.tests.factories import LocationFactory, BranchFactory
 from core.urls import reverse
 from courses.constants import MaterialVisibilityTypes
+from courses.permissions import ViewCourseClassMaterials
 from courses.tests.factories import CourseFactory, CourseNewsFactory, \
-    AssignmentFactory, CourseClassFactory, CourseTeacherFactory
+    AssignmentFactory, CourseClassFactory, CourseTeacherFactory, \
+    CourseClassAttachmentFactory
+from files.response import XAccelRedirectFileResponse
+from files.views import ProtectedFileDownloadView
 from learning.settings import Branches
 from users.constants import Roles
 from users.tests.factories import TeacherFactory, CuratorFactory, UserFactory, \
-    StudentProfileFactory
+    StudentProfileFactory, StudentFactory
 
 
 def get_timezone_gmt_offset(tz: pytz.timezone) -> Optional[datetime.timedelta]:
@@ -168,3 +174,20 @@ def test_venue_list(client):
     response = client.get(reverse('courses:venue_list'))
     assert response.status_code == 200
     assert v in list(response.context_data['object_list'])
+
+
+@pytest.mark.django_db
+def test_download_course_class_attachment(client, lms_resolver, settings):
+    settings.USE_S3_FOR_UPLOAD = False
+    course_class = CourseClassFactory(
+        materials_visibility=MaterialVisibilityTypes.PARTICIPANTS)
+    cca = CourseClassAttachmentFactory(course_class=course_class)
+    download_url = cca.get_download_url()
+    resolver = lms_resolver(download_url)
+    assert issubclass(resolver.func.view_class, ProtectedFileDownloadView)
+    assert resolver.func.view_class.permission_required == ViewCourseClassMaterials.name
+    assert resolver.func.view_class.permission_required in perm_registry
+    student = StudentFactory()
+    client.login(student)
+    response = client.get(download_url)
+    assert isinstance(response, XAccelRedirectFileResponse)
