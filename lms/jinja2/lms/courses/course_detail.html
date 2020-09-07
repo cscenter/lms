@@ -28,7 +28,7 @@
                            data-target="#course-{{ tab.type }}"
                            {% if tab.type == "news" and unread_news is not none %}
                                 data-has-unread="{% if unread_news > 0 %}true{% else %}false{% endif %}"
-                                data-notifications-url="{{ course.get_course_news_notifications_url }}"
+                                data-notifications-url="{{ course.get_course_news_notifications_url() }}"
                            {% endif %}
                            href="{{ course.get_absolute_url() }}{{ tab.type }}/">
                             {{ tab.name }}{% if tab.type == "news" and unread_news is not none and unread_news > 0 %} <span class="badge badge-success">+{{ unread_news }}</span>{% endif %}
