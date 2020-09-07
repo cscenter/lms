@@ -147,7 +147,7 @@ class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
         }, subdomain=settings.LMS_SUBDOMAIN)
         context = ActivationEmailContext(
             site_name=site.name,
-            activation_url=activation_url,
+            activation_url=self.request.build_absolute_uri(activation_url),
             language_code=self.request.LANGUAGE_CODE)
         send_activation_email.delay(context, new_user.registrationprofile.pk)
         return new_user
