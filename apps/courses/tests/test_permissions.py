@@ -64,8 +64,10 @@ def test_course_class_materials_visibility_default(client):
         materials_visibility=MaterialVisibilityTypes.PUBLIC)
     assert user.has_perm(ViewCourseClassMaterials.name, course_class)
     course_class.materials_visibility = MaterialVisibilityTypes.PARTICIPANTS
+    instance_memoize.delete_cache(user)
     assert not user.has_perm(ViewCourseClassMaterials.name, course_class)
     course_class.materials_visibility = MaterialVisibilityTypes.COURSE_PARTICIPANTS
+    instance_memoize.delete_cache(user)
     assert not user.has_perm(ViewCourseClassMaterials.name, course_class)
 
 

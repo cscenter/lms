@@ -188,6 +188,9 @@ class CourseClassAttachmentDownloadView(ProtectedFileDownloadView):
               .select_related('course_class__course'))
         return get_object_or_404(qs)
 
+    def get_permission_object(self):
+        return self.protected_object.course_class
+
 
 class CourseClassSlidesDownloadView(ProtectedFileDownloadView):
     permission_required = ViewCourseClassMaterials.name
