@@ -25,7 +25,10 @@
         }
     </style>
     <div class="container">
-        <h2 class="hidden-print">{{ co }}</h2>
+        <h2 class="hidden-print">
+            <a href="{{ course.get_absolute_url }}">{{ course }}</a><br>
+            <small>{{ course.main_branch.name }}</small>
+        </h2>
         {% if enrollments %}
             <div class="c-student-faces">
             {% for enrollment in enrollments %}
@@ -35,7 +38,7 @@
                     {% user_thumbnail student student.ThumbnailSize.BASE as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                     {% enduser_thumbnail %}
-                        <figcaption {% if student.status == "expelled" or student.status == "academic" %}class="expelled"{% endif %}>{{ student.last_name }} {{ student.first_name }}</figcaption>
+                        <figcaption {% if not enrollment.student_profile.is_active %}class="expelled"{% endif %}>{{ student.last_name }} {{ student.first_name }}</figcaption>
                     </a>
                 </div>
                 {% endwith %}
