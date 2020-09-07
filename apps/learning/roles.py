@@ -10,8 +10,7 @@ from courses.permissions import ChangeMetaCourse, ViewCourseContacts, \
     EditCourseClass, EditOwnCourseClass, DeleteOwnCourseClass, \
     DeleteCourseClass, EditAssignment, EditOwnAssignment, \
     ViewCourseClassMaterials, ViewAssignment, ViewOwnAssignment, \
-    ViewCourseClassAttachment, ViewPublicCourseClassAttachment, \
-    ViewPrivateCourseClassAttachment, ViewCourse
+    ViewCourse
 from users.permissions import CreateCertificateOfParticipation, \
     ViewCertificateOfParticipation
 from .permissions import CreateAssignmentComment, \
@@ -47,7 +46,6 @@ class Roles(DjangoChoices):
         EditStudentAssignment,
         EditCourseClass,
         DeleteCourseClass,
-        ViewCourseClassAttachment,
         ViewCourseNews,
         ViewCourseReviews,
         ViewLibrary,
@@ -65,7 +63,6 @@ class Roles(DjangoChoices):
         ViewCourseAssignments,
         ViewCourseNews,
         ViewCourseReviews,
-        ViewPrivateCourseClassAttachment,
         ViewOwnEnrollments,
         ViewOwnStudentAssignments,
         ViewOwnStudentAssignment,
@@ -91,7 +88,6 @@ class Roles(DjangoChoices):
         ViewCourseAssignments,
         ViewCourseNews,
         ViewCourseReviews,
-        ViewPrivateCourseClassAttachment,
         ViewOwnEnrollments,
         ViewOwnStudentAssignments,
         ViewOwnStudentAssignment,
@@ -109,7 +105,6 @@ class Roles(DjangoChoices):
     GRADUATE = C(3, _('Graduate'), permissions=(
         ViewCourse,
         ViewOwnEnrollments,
-        ViewPrivateCourseClassAttachment,
         ViewOwnStudentAssignment,
         ViewAssignmentAttachmentAsLearner,
         ViewAssignmentCommentAttachmentAsLearner,
@@ -119,7 +114,6 @@ class Roles(DjangoChoices):
         ViewTeachingMenu,
         ViewCourseContacts,
         ViewCourseNews,
-        ViewPrivateCourseClassAttachment,
         CreateOwnAssignment,
         EditOwnAssignment,
         ViewOwnAssignment,
@@ -160,9 +154,9 @@ teacher_role.add_relation(CreateAssignment, CreateOwnAssignment)
 teacher_role.add_relation(EditAssignment, EditOwnAssignment)
 teacher_role.add_relation(ViewAssignment, ViewOwnAssignment)
 teacher_role.add_relation(ViewEnrollments, ViewRelatedEnrollments)
-teacher_role.add_relation(ViewCourseClassAttachment, ViewPrivateCourseClassAttachment)
 
-for role in (Roles.STUDENT, Roles.VOLUNTEER):
+
+for role in (Roles.STUDENT, Roles.VOLUNTEER, Roles.INVITED):
     student_role = role_registry[role]
     student_role.add_relation(ViewAssignmentAttachment,
                               ViewAssignmentAttachmentAsLearner)
@@ -170,23 +164,13 @@ for role in (Roles.STUDENT, Roles.VOLUNTEER):
                               CreateAssignmentCommentAsLearner)
     student_role.add_relation(ViewAssignmentCommentAttachment,
                               ViewAssignmentCommentAttachmentAsLearner)
-    student_role.add_relation(ViewCourseClassAttachment,
-                              ViewPrivateCourseClassAttachment)
-
-invited_role = role_registry[Roles.INVITED]
-invited_role.add_relation(ViewAssignmentAttachment, ViewAssignmentAttachmentAsLearner)
-invited_role.add_relation(CreateAssignmentComment, CreateAssignmentCommentAsLearner)
-invited_role.add_relation(ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner)
 
 graduate_role = role_registry[Roles.GRADUATE]
 graduate_role.add_relation(ViewAssignmentAttachment, ViewAssignmentAttachmentAsLearner)
 graduate_role.add_relation(ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner)
-graduate_role.add_relation(ViewCourseClassAttachment, ViewPrivateCourseClassAttachment)
 
 default_role = role_registry.default_role
 default_role.add_permission(ViewCourseClassMaterials)
-default_role.add_permission(ViewPublicCourseClassAttachment)
-default_role.add_relation(ViewCourseClassAttachment, ViewPublicCourseClassAttachment)
 
 
 # TODO: Write util method to view all role permissions, register global roles
