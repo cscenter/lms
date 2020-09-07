@@ -17,8 +17,7 @@ from core.utils import hashids
 from core.views import ProtectedFormMixin
 from courses.forms import CourseClassForm
 from courses.models import CourseClass, CourseClassAttachment
-from courses.permissions import ViewCourseClassAttachment, \
-    ViewCourseClassMaterials
+from courses.permissions import ViewCourseClassMaterials
 from courses.views.mixins import CourseURLParamsMixin
 from files.views import ProtectedFileDownloadView
 from users.mixins import TeacherOnlyMixin
@@ -177,7 +176,7 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
 
 
 class CourseClassAttachmentDownloadView(ProtectedFileDownloadView):
-    permission_required = ViewCourseClassAttachment.name
+    permission_required = ViewCourseClassMaterials.name
     file_field_name = 'material'
 
     def get_protected_object(self) -> Optional[CourseClassAttachment]:

@@ -1,5 +1,6 @@
 import pytest
 
+from core.utils import instance_memoize
 from courses.constants import MaterialVisibilityTypes
 from courses.permissions import EditCourseClass, CreateAssignment, \
     EditAssignment, ViewCourseClassMaterials
@@ -7,8 +8,9 @@ from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
     CourseFactory
 from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
+from users.models import User
 from users.tests.factories import UserFactory, TeacherFactory, CuratorFactory, \
-    StudentFactory, InvitedStudentFactory
+    StudentFactory, InvitedStudentFactory, VolunteerFactory
 
 
 @pytest.mark.django_db
@@ -53,23 +55,61 @@ def test_can_edit_course_class(client):
 
 
 @pytest.mark.django_db
-def test_course_class_materials_visibility(client):
+def test_course_class_materials_visibility_default(client):
+    """Authenticated user can see only public course class materials"""
     user = UserFactory()
-    student = StudentFactory()
-    enrolled_student = StudentFactory()
     course = CourseFactory()
-    EnrollmentFactory(student=enrolled_student, course=course,
-                      grade=GradeTypes.GOOD)
     course_class = CourseClassFactory(
         course=course,
         materials_visibility=MaterialVisibilityTypes.PUBLIC)
     assert user.has_perm(ViewCourseClassMaterials.name, course_class)
     course_class.materials_visibility = MaterialVisibilityTypes.PARTICIPANTS
     assert not user.has_perm(ViewCourseClassMaterials.name, course_class)
-    assert student.has_perm(ViewCourseClassMaterials.name, course_class)
-    assert enrolled_student.has_perm(ViewCourseClassMaterials.name, course_class)
     course_class.materials_visibility = MaterialVisibilityTypes.COURSE_PARTICIPANTS
-    assert not student.has_perm(ViewCourseClassMaterials.name, course_class)
-    assert enrolled_student.has_perm(ViewCourseClassMaterials.name, course_class)
+    assert not user.has_perm(ViewCourseClassMaterials.name, course_class)
 
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("participant_factory", [StudentFactory,
+                                                 InvitedStudentFactory,
+                                                 VolunteerFactory])
+def test_course_class_materials_visibility_students(participant_factory,
+                                                    client):
+    course = CourseFactory()
+    course_class = CourseClassFactory(
+        course=course,
+        materials_visibility=MaterialVisibilityTypes.PUBLIC)
+    participant: User = participant_factory()
+    assert participant.has_perm(ViewCourseClassMaterials.name, course_class)
+    course_class.materials_visibility = MaterialVisibilityTypes.PARTICIPANTS
+    instance_memoize.delete_cache(participant)
+    assert participant.has_perm(ViewCourseClassMaterials.name, course_class)
+    course_class.materials_visibility = MaterialVisibilityTypes.COURSE_PARTICIPANTS
+    instance_memoize.delete_cache(participant)
+    assert not participant.has_perm(ViewCourseClassMaterials.name, course_class)
+    EnrollmentFactory(student=participant, course=course, grade=GradeTypes.GOOD)
+    instance_memoize.delete_cache(participant)
+    assert participant.has_perm(ViewCourseClassMaterials.name, course_class)
+
+
+@pytest.mark.django_db
+def test_course_class_materials_visibility_teachers(client):
+    teacher = TeacherFactory()
+    course_teacher = TeacherFactory()
+    course = CourseFactory(teachers=[course_teacher])
+    course_class = CourseClassFactory(
+        course=course,
+        materials_visibility=MaterialVisibilityTypes.PUBLIC)
+    assert teacher.has_perm(ViewCourseClassMaterials.name, course_class)
+    assert course_teacher.has_perm(ViewCourseClassMaterials.name, course_class)
+    course_class.materials_visibility = MaterialVisibilityTypes.PARTICIPANTS
+    instance_memoize.delete_cache(teacher)
+    instance_memoize.delete_cache(course_teacher)
+    assert teacher.has_perm(ViewCourseClassMaterials.name, course_class)
+    assert course_teacher.has_perm(ViewCourseClassMaterials.name, course_class)
+    course_class.materials_visibility = MaterialVisibilityTypes.COURSE_PARTICIPANTS
+    instance_memoize.delete_cache(teacher)
+    instance_memoize.delete_cache(course_teacher)
+    assert not teacher.has_perm(ViewCourseClassMaterials.name, course_class)
+    assert course_teacher.has_perm(ViewCourseClassMaterials.name, course_class)
 
