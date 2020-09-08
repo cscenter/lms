@@ -174,6 +174,7 @@ class StudentProfileForm(forms.ModelForm):
             if profile_type == StudentTypes.REGULAR:
                 profile = (StudentProfile.objects
                            .filter(user=user, branch=branch,
+                                   type=StudentTypes.REGULAR,
                                    year_of_admission=year_of_admission))
                 if profile.exists():
                     msg = _('Regular student profile already exists for this '
