@@ -1,13 +1,16 @@
+from base64 import b64encode, urlsafe_b64encode
 from typing import NamedTuple, Dict, Union, NewType, List
 
 import pytz
 from bitfield import BitField
+from cryptography.fernet import Fernet
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models, router
-from django.utils.encoding import smart_str
+from django.utils.encoding import smart_str, force_bytes, force_str
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+from model_utils.models import TimeStampedModel
 
 from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
@@ -43,6 +46,77 @@ TIMEZONES = (
 )
 
 
+class ConfigurationModel(TimeStampedModel):
+    """Abstract base class for model-based configuration"""
+
+    enabled = models.BooleanField(default=False, verbose_name=_("Enabled"))
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        editable=False,
+        null=True,
+        on_delete=models.PROTECT,
+        verbose_name=_("Changed by"))
+
+    class Meta:
+        abstract = True
+
+
+class SiteConfiguration(ConfigurationModel):
+    site = models.OneToOneField(
+        Site,
+        verbose_name="Site",
+        on_delete=models.PROTECT,
+        related_name='site_configuration')
+    default_from_email = models.CharField(
+        "Default Email Address",
+        max_length=255)
+    email_host = models.CharField(
+        "Email Host",
+        help_text="The host to use for sending email",
+        max_length=255)
+    email_host_password = models.CharField(
+        "Email Host Password",
+        help_text="Password to use for the SMTP server defined in EMAIL_HOST. "
+                  "Should be encrypted with a symmetric key stored in a "
+                  "settings.SECRET_KEY",
+        max_length=255)
+    email_host_user = models.CharField(
+        "Email Host User",
+        help_text="Username to use for the SMTP server defined in EMAIL_HOST",
+        max_length=255)
+    email_port = models.PositiveSmallIntegerField(
+        "Email Port",
+        help_text="Port to use for the SMTP server defined in EMAIL_HOST.")
+    email_use_tls = models.BooleanField(
+        "Use TLS",
+        help_text="Whether to use an explicit TLS (secure) connection when "
+                  "talking to the SMTP server")
+    email_use_ssl = models.BooleanField(
+        "Use SSL",
+        help_text="Whether to use an implicit TLS (secure) connection when "
+                  "talking to the SMTP server.")
+
+    class Meta:
+        verbose_name = "Site Configuration"
+        db_table = "site_configurations"
+
+    @classmethod
+    def _get_fernet_key(cls):
+        """Fernet key must be 32 url-safe base64-encoded bytes"""
+        key = force_bytes(settings.SECRET_KEY)[:32]
+        return urlsafe_b64encode(key.ljust(32, b"="))
+
+    @classmethod
+    def encrypt(cls, value) -> str:
+        f = Fernet(cls._get_fernet_key())
+        return force_str(f.encrypt(force_bytes(value)))
+
+    @classmethod
+    def decrypt(cls, value) -> str:
+        f = Fernet(cls._get_fernet_key())
+        return force_str(f.decrypt(force_bytes(value)))
+
+
 class LiveManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(deleted_at__isnull=True)
@@ -54,6 +128,7 @@ class TrashManager(models.Manager):
 
 
 class SoftDeletionModel(models.Model):
+    """Abstract base class for model soft deletion"""
     deleted_at = models.DateTimeField(db_index=True, blank=True, null=True)
 
     objects = LiveManager()

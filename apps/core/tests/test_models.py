@@ -1,6 +1,6 @@
 import pytest
 
-from core.models import Branch
+from core.models import Branch, SiteConfiguration
 from core.tests.factories import BranchFactory, SiteFactory
 
 
@@ -29,3 +29,16 @@ def test_branch_manager_get_current(rf, settings):
         Branch.objects.get_current(request)
     settings.DEFAULT_BRANCH_CODE = branch_code1
     assert Branch.objects.get_current(request) == branch1
+
+
+@pytest.mark.django_db
+def test_site_configuration(rf, settings):
+    settings.SECRET_KEY = 'short'
+    value = 'secret_value'
+    encrypted = SiteConfiguration.encrypt(value)
+    assert SiteConfiguration.decrypt(encrypted) == value
+    settings.SECRET_KEY = 'hesoHHp44vRYpd#6mX$jX>6k*ue$gZhmzEE>wcF]48U'
+    assert len(settings.SECRET_KEY) > 32
+    value = 'secret password'
+    encrypted = SiteConfiguration.encrypt(value)
+    assert SiteConfiguration.decrypt(encrypted) == value
