@@ -1,7 +1,13 @@
 # Read project environment into os.environ before importing base configuration
 import environ
+import warnings
+
 env = environ.Env()
-environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
+# Try to read .env file, if it's not present, assume that application
+# is deployed to production and skip reading the file
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
 
 from lms.settings.extended import *
 

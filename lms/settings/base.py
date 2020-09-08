@@ -1,11 +1,18 @@
 import logging
+import warnings
+
 import django
 import environ
 
 from core.settings.base import *
 
 env = environ.Env()
-environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
+# Try to read .env file, if it's not present, assume that application
+# is deployed to production and skip reading the file
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
+
 
 SITE_ID = env.str('SITE_ID', default=None)
 
@@ -228,7 +235,10 @@ TEMPLATES = [
 ]
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
+# Sensitive model-based configuration is encrypted with this key.
+# Don't forget to update site configuration after rotating a secret key.
 SECRET_KEY = env('DJANGO_SECRET_KEY')
+
 
 # Email settings
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = env.str('DJANGO_EMAIL_ADDRESS')
