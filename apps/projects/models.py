@@ -290,7 +290,9 @@ class ReportingPeriod(models.Model):
         """
         Generate notifications for students without report.
         """
-        filters = {"student__branch": target_branch}
+        # FIXME: ProjectStudent should be connected with student_profile instead?
+        # Assume student profile is active
+        filters = {"student__student_profiles__branch": target_branch}
         if self.project_type is not None:
             filters["project__project_type"] = self.project_type
         project_students = (ProjectStudent.objects

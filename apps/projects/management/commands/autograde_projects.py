@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from django.conf import settings
 from django.core.management import BaseCommand
 from django.core.management import CommandError
 
 from courses.models import Semester
+from learning.services import get_student_profile
 from projects.models import ProjectStudent, ReportingPeriod, \
     ReportingPeriodKey
 from projects.constants import ProjectGradeTypes
@@ -13,6 +15,7 @@ from projects.constants import ProjectGradeTypes
 logger = logging.getLogger(__name__)
 
 
+# FIXME: add --site argument
 class Command(BaseCommand):
     help = """
     Set final grade for projects from current term to students who 
@@ -51,8 +54,10 @@ class Command(BaseCommand):
             # For external project `supervisor_grade` value is optional
             if not ps.project.is_external and ps.supervisor_grade is None:
                 continue
-            # FIXME: User.branch_id is optional for student!
-            key = ReportingPeriodKey(branch_code=ps.student.branch.code,
+            student_profile = get_student_profile(ps.student, settings.SITE_ID)
+            if not student_profile:
+                logger.error(f"Student profile not found for user {ps.student_id}")
+            key = ReportingPeriodKey(branch_code=student_profile.branch.code,
                                      project_type=ps.project.project_type)
             if key not in periods:
                 logger.warning(f"Не найден отчетный период. "

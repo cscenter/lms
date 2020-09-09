@@ -13,7 +13,8 @@ from learning.settings import Branches
 from learning.tests.factories import EventFactory, \
     EnrollmentFactory, GraduateFactory
 from learning.tests.utils import flatten_calendar_month_events
-from users.tests.factories import StudentFactory, TeacherFactory
+from users.tests.factories import StudentFactory, TeacherFactory, \
+    StudentProfileFactory
 
 
 # TODO: add test: kzn courses not shown on center site and spb on kzn
@@ -36,8 +37,9 @@ def test_teacher_calendar_group_security(client, assert_login_redirect):
 @pytest.mark.django_db
 def test_teacher_calendar(client):
     url = reverse('teaching:calendar')
-    teacher_spb = TeacherFactory(branch__code=Branches.SPB)
-    other_teacher = TeacherFactory(branch__code=Branches.SPB)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    teacher_spb = TeacherFactory(branch=branch_spb)
+    other_teacher = TeacherFactory(branch=branch_spb)
     client.login(teacher_spb)
     response = client.get(url)
     classes = flatten_calendar_month_events(response.context['calendar'])
@@ -94,11 +96,13 @@ def test_student_personal_calendar_view_permissions(lms_resolver):
 @pytest.mark.django_db
 def test_student_personal_calendar_view(client):
     calendar_url = reverse('study:calendar')
-    student_spb = StudentFactory(branch__code=Branches.SPB)
-    client.login(student_spb)
+    student_profile_spb = StudentProfileFactory(branch__code=Branches.SPB)
+    client.login(student_profile_spb.user)
     course = CourseFactory()
     course_other = CourseFactory.create()
-    e = EnrollmentFactory.create(course=course, student=student_spb)
+    e = EnrollmentFactory.create(course=course,
+                                 student_profile=student_profile_spb,
+                                 student=student_profile_spb.user)
     classes = flatten_calendar_month_events(
         client.get(calendar_url).context['calendar'])
     assert len(classes) == 0
@@ -131,7 +135,7 @@ def test_student_personal_calendar_view(client):
     classes = flatten_calendar_month_events(
         client.get(next_month_url).context['calendar'])
     assert set(next_month_classes) == set(classes)
-    location = LocationFactory(city_id=student_spb.branch.city_id)
+    location = LocationFactory(city_id=student_profile_spb.branch.city_id)
     events = EventFactory.create_batch(2, date=this_month_date, venue=location)
     response = client.get(calendar_url)
     assert response.status_code == 200
