@@ -181,7 +181,7 @@ class TeacherDetailView(PublicURLContextMixin, DetailView):
         branches = Branch.objects.for_site(site_id=self.request.site.pk)
         min_established = min(b.established for b in branches)
         courses = (Course.objects
-                   .made_by(branches)
+                   .available_in(self.request.branch)
                    .filter(semester__year__gte=min_established,
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
