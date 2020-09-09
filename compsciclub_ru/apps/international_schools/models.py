@@ -20,8 +20,8 @@ class InternationalSchool(TimeStampedModel):
     class Meta:
         db_table = 'international_schools'
         ordering = ["name"]
-        verbose_name = _("International school")
-        verbose_name_plural = _("International schools")
+        verbose_name = _("International School")
+        verbose_name_plural = _("International Schools")
 
     def __str__(self):
         return smart_str(self.name)

@@ -28,8 +28,8 @@ class Migration(migrations.Migration):
                 ('has_grants', models.BooleanField(default=False, verbose_name='InternationalSchool|Grants')),
             ],
             options={
-                'verbose_name': 'International school',
-                'verbose_name_plural': 'International schools',
+                'verbose_name': 'International School',
+                'verbose_name_plural': 'International Schools',
                 'db_table': 'international_schools',
                 'ordering': ['name'],
             },
