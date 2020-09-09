@@ -3,7 +3,7 @@ from typing import NamedTuple
 
 from django.apps import apps
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, get_connection
 from django.template import loader
 from django.utils import translation
 from django_rq import job
@@ -28,7 +28,9 @@ def send_restore_password_email(context, from_email, to_email, language_code):
     subject = loader.render_to_string(EMAIL_RESTORE_PASSWORD_SUBJECT, context)
     subject = ''.join(subject.splitlines())
     body = loader.render_to_string(EMAIL_RESTORE_PASSWORD_BODY, context)
-    email_message = EmailMultiAlternatives(subject, body, from_email, [to_email])
+    connection = get_connection(settings.POST_OFFICE['BACKENDS']['ses'])
+    email_message = EmailMultiAlternatives(subject, body, from_email, [to_email],
+                                           connection=connection)
     email_message.send()
 
 
@@ -59,7 +61,9 @@ def send_activation_email(context: ActivationEmailContext,
     subject = loader.render_to_string(EMAIL_ACTIVATION_SUBJECT, email_context)
     subject = ''.join(subject.splitlines())
     body = loader.render_to_string(EMAIL_ACTIVATION_BODY, email_context)
+    connection = get_connection(settings.POST_OFFICE['BACKENDS']['ses'])
     email_message = EmailMultiAlternatives(subject, body,
                                            settings.DEFAULT_FROM_EMAIL,
-                                           [reg_profile.user.email])
+                                           [reg_profile.user.email],
+                                           connection=connection)
     email_message.send()
