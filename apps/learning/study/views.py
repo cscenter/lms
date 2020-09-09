@@ -12,7 +12,6 @@ from vanilla import TemplateView, GenericModelView
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.urls import reverse
-from core.utils import is_club_site
 from courses.calendar import CalendarEventW
 from courses.constants import SemesterTypes
 from courses.models import Semester, Course
@@ -21,13 +20,13 @@ from courses.utils import get_current_term_pair, MonthPeriod, \
 from courses.views import WeekEventsView, MonthEventsCalendarView
 from info_blocks.constants import CurrentInfoBlockTags
 from info_blocks.models import InfoBlock
+from info_blocks.permissions import ViewInternships
 from learning import utils
 from learning.calendar import get_student_calendar_events, get_calendar_events
 from learning.forms import AssignmentExecutionTimeForm
 from learning.models import StudentAssignment, Enrollment
 from learning.permissions import ViewOwnStudentAssignments, \
     EditOwnAssignmentExecutionTime, ViewOwnStudentAssignment, ViewCourses
-from info_blocks.permissions import ViewInternships
 from learning.roles import Roles
 from learning.services import get_student_classes, get_student_profile
 from learning.views import AssignmentSubmissionBaseView
@@ -62,7 +61,11 @@ class CalendarPersonalView(CalendarFullView):
 
     def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
         start_date, end_date = extended_month_date_range(month_period)
-        return get_student_calendar_events(user=self.request.user,
+        student_profile = get_student_profile(self.request.user,
+                                              self.request.site)
+        if not student_profile:
+            return []
+        return get_student_calendar_events(student_profile=student_profile,
                                            start_date=start_date,
                                            end_date=end_date)
 
