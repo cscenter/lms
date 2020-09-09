@@ -9,7 +9,8 @@ from courses.tests.factories import SemesterFactory, CourseFactory, \
 from learning.models import StudentAssignment
 from learning.permissions import ViewOwnStudentAssignment
 from learning.tests.factories import EnrollmentFactory, StudentAssignmentFactory
-from users.tests.factories import TeacherFactory, StudentFactory
+from users.tests.factories import TeacherFactory, StudentFactory, \
+    StudentProfileFactory
 
 
 # TODO: test ViewOwnAssignment in test_permissions.py
@@ -51,10 +52,13 @@ def test_student_assignment_detail_view_handle_no_permission(client):
 
 @pytest.mark.django_db
 def test_assignment_contents(client):
-    student = StudentFactory()
+    student_profile = StudentProfileFactory()
+    student = student_profile.user
     semester = SemesterFactory.create_current()
-    course = CourseFactory(main_branch=student.branch, semester=semester)
-    EnrollmentFactory(student=student, course=course)
+    course = CourseFactory(main_branch=student_profile.branch, semester=semester)
+    EnrollmentFactory(student_profile=student_profile,
+                      student=student,
+                      course=course)
     assignment = AssignmentFactory(course=course)
     student_assignment = (StudentAssignment.objects
                           .filter(assignment=assignment, student=student)
@@ -67,10 +71,13 @@ def test_assignment_contents(client):
 
 @pytest.mark.django_db
 def test_student_assignment_detail_view_comment(client):
-    student = StudentFactory()
+    student_profile = StudentProfileFactory()
+    student = student_profile.user
     semester = SemesterFactory.create_current()
-    course = CourseFactory(main_branch=student.branch, semester=semester)
-    EnrollmentFactory(student=student, course=course)
+    course = CourseFactory(main_branch=student_profile.branch, semester=semester)
+    EnrollmentFactory(student_profile=student_profile,
+                      student=student,
+                      course=course)
     assignment = AssignmentFactory(course=course)
     student_assignment = (StudentAssignment.objects
                           .get(assignment=assignment, student=student))

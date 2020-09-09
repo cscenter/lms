@@ -2,7 +2,6 @@
 
 import logging
 from datetime import datetime
-from typing import Union
 
 from django.apps import apps
 from django.conf import settings

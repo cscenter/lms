@@ -11,7 +11,7 @@ from learning.settings import Branches
 from learning.tests.factories import EnrollmentFactory, GraduateFactory
 from learning.tests.utils import flatten_calendar_month_events
 from users.tests.factories import TeacherFactory, StudentFactory, \
-    CuratorFactory, VolunteerFactory
+    CuratorFactory, VolunteerFactory, StudentProfileFactory
 
 
 def flatten_events(calendar: WeekEventsCalendar):
@@ -87,10 +87,11 @@ def test_student_timetable_view_security(client, lms_resolver):
 
 @pytest.mark.django_db
 def test_student_timetable(client):
-    student = StudentFactory()
-    client.login(student)
-    co = CourseFactory(main_branch=student.branch)
-    e = EnrollmentFactory.create(course=co, student=student)
+    student_profile = StudentProfileFactory()
+    client.login(student_profile.user)
+    co = CourseFactory(main_branch=student_profile.branch)
+    e = EnrollmentFactory.create(course=co, student_profile=student_profile,
+                                 student=student_profile.user)
     timetable_url = reverse('study:timetable')
     response = client.get(timetable_url)
     calendar = response.context['calendar']

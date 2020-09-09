@@ -11,7 +11,8 @@ from learning.settings import Branches, StudentStatuses
 from learning.tests.factories import StudentGroupFactory, EnrollmentFactory, \
     AssignmentNotificationFactory
 from users.models import StudentTypes, UserGroup
-from users.tests.factories import StudentFactory, UserFactory
+from users.tests.factories import StudentFactory, UserFactory, \
+    StudentProfileFactory
 
 
 @pytest.mark.django_db
@@ -108,12 +109,18 @@ def test_assignment_service_create_student_assignments(settings):
                            branches=[branch_nsk])
     group_spb = StudentGroup.objects.get(course=course, branch=branch_spb)
     group_nsk = StudentGroup.objects.get(course=course, branch=branch_nsk)
-    student_spb = StudentFactory(branch=branch_spb)
-    student_nsk = StudentFactory(branch=branch_nsk)
-    student_other = StudentFactory(branch=branch_other)
-    e_spb = EnrollmentFactory(course=course, student=student_spb)
-    e_nsk = EnrollmentFactory(course=course, student=student_nsk)
-    e_other = EnrollmentFactory(course=course, student=student_other)
+    student_profile_spb = StudentProfileFactory(branch=branch_spb)
+    student_profile_nsk = StudentProfileFactory(branch=branch_nsk)
+    student_profile_other = StudentProfileFactory(branch=branch_other)
+    e_spb = EnrollmentFactory(course=course,
+                              student_profile=student_profile_spb,
+                              student=student_profile_spb.user)
+    e_nsk = EnrollmentFactory(course=course,
+                              student_profile=student_profile_nsk,
+                              student=student_profile_nsk.user)
+    e_other = EnrollmentFactory(course=course,
+                                student_profile=student_profile_other,
+                                student=student_profile_other.user)
     assignment = AssignmentFactory(course=course)
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment)
@@ -128,7 +135,7 @@ def test_assignment_service_create_student_assignments(settings):
     AssignmentService.bulk_create_student_assignments(assignment, for_groups=[group_nsk.pk])
     ss = StudentAssignment.objects.filter(assignment=assignment)
     assert len(ss) == 1
-    assert ss[0].student_id == student_nsk.pk
+    assert ss[0].student_id == student_profile_nsk.user_id
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment, for_groups=[])
     assert StudentAssignment.objects.count() == 0
@@ -138,28 +145,27 @@ def test_assignment_service_create_student_assignments(settings):
     AssignmentService.bulk_create_student_assignments(assignment)
     assert StudentAssignment.objects.count() == 2
     # Inactive status prevents generating student assignment too
-    student_spb_profile = student_spb.get_student_profile(settings.SITE_ID)
-    student_spb_profile.status = StudentStatuses.ACADEMIC_LEAVE
-    student_spb_profile.save()
+    student_profile_spb.status = StudentStatuses.ACADEMIC_LEAVE
+    student_profile_spb.save()
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment)
     assert StudentAssignment.objects.count() == 1
     # Now test assignment settings
-    student_spb_profile.status = ''
-    student_spb_profile.save()
+    student_profile_spb.status = ''
+    student_profile_spb.save()
     e_nsk.is_deleted = False
     e_nsk.save()
     assignment.restricted_to.add(group_spb)
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment)
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 1
-    assert StudentAssignment.objects.get(assignment=assignment).student_id == student_spb.pk
+    assert StudentAssignment.objects.get(assignment=assignment).student_id == student_profile_spb.user_id
     # Test that only groups from assignment settings get involved
     # if `for_groups` provided
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment, for_groups=[group_spb.pk, group_nsk.pk])
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 1
-    assert StudentAssignment.objects.get(assignment=assignment).student_id == student_spb.pk
+    assert StudentAssignment.objects.get(assignment=assignment).student_id == student_profile_spb.user_id
 
 
 @pytest.mark.django_db
@@ -172,12 +178,18 @@ def test_assignment_service_remove_student_assignments():
                            branches=[branch_nsk])
     group_spb = StudentGroup.objects.get(course=course, branch=branch_spb)
     group_nsk = StudentGroup.objects.get(course=course, branch=branch_nsk)
-    student_spb = StudentFactory(branch=branch_spb)
-    student_nsk = StudentFactory(branch=branch_nsk)
-    student_other = StudentFactory(branch=branch_other)
-    e_spb = EnrollmentFactory(course=course, student=student_spb)
-    e_nsk = EnrollmentFactory(course=course, student=student_nsk)
-    e_other = EnrollmentFactory(course=course, student=student_other)
+    student_profile_spb = StudentProfileFactory(branch=branch_spb)
+    student_profile_nsk = StudentProfileFactory(branch=branch_nsk)
+    student_profile_other = StudentProfileFactory(branch=branch_other)
+    e_spb = EnrollmentFactory(course=course,
+                              student_profile=student_profile_spb,
+                              student=student_profile_spb.user)
+    e_nsk = EnrollmentFactory(course=course,
+                              student_profile=student_profile_nsk,
+                              student=student_profile_nsk.user)
+    e_other = EnrollmentFactory(course=course,
+                                student_profile=student_profile_other,
+                                student=student_profile_other.user)
     assignment = AssignmentFactory(course=course)
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 3
     AssignmentService.bulk_remove_student_assignments(assignment)
@@ -191,8 +203,8 @@ def test_assignment_service_remove_student_assignments():
     AssignmentService.bulk_remove_student_assignments(assignment, for_groups=[])
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 2
     # Make sure notifications will be hard deleted
-    sa_nsk = StudentAssignment.objects.get(assignment=assignment, student=student_nsk)
-    sa_other = StudentAssignment.objects.get(assignment=assignment, student=student_other)
+    sa_nsk = StudentAssignment.objects.get(assignment=assignment, student=student_profile_nsk.user)
+    sa_other = StudentAssignment.objects.get(assignment=assignment, student=student_profile_other.user)
     AssignmentNotification.objects.all().delete()
     AssignmentNotificationFactory(student_assignment=sa_nsk)
     AssignmentNotificationFactory(student_assignment=sa_other)
@@ -213,21 +225,24 @@ def test_assignment_service_sync_student_assignments():
                            branches=[branch_nsk])
     group_spb = StudentGroup.objects.get(course=course, branch=branch_spb)
     group_nsk = StudentGroup.objects.get(course=course, branch=branch_nsk)
-    student_spb = StudentFactory(branch=branch_spb)
-    student_nsk = StudentFactory(branch=branch_nsk)
-    student_other = StudentFactory(branch=branch_other)
-    e_spb = EnrollmentFactory(course=course, student=student_spb)
-    e_nsk = EnrollmentFactory(course=course, student=student_nsk)
-    e_other = EnrollmentFactory(course=course, student=student_other)
+    student_profile_spb = StudentProfileFactory(branch=branch_spb)
+    student_profile_nsk = StudentProfileFactory(branch=branch_nsk)
+    student_profile_other = StudentProfileFactory(branch=branch_other)
+    e_spb = EnrollmentFactory(course=course, student=student_profile_spb.user,
+                              student_profile=student_profile_spb)
+    e_nsk = EnrollmentFactory(course=course, student=student_profile_nsk.user,
+                              student_profile=student_profile_nsk)
+    e_other = EnrollmentFactory(course=course, student=student_profile_other.user,
+                                student_profile=student_profile_other)
     assignment = AssignmentFactory(course=course, restricted_to=[group_spb])
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 1
-    assert StudentAssignment.objects.get(assignment=assignment).student_id == student_spb.pk
+    assert StudentAssignment.objects.get(assignment=assignment).student_id == student_profile_spb.user_id
     # [spb] -> [nsk, spb]
     assignment.restricted_to.add(group_nsk)
     AssignmentService.sync_student_assignments(assignment)
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 2
     assert not StudentAssignment.objects.filter(assignment=assignment,
-                                                student_id=student_other).exists()
+                                                student_id=student_profile_other.user_id).exists()
     # [nsk, spb] -> all (including manually added students without group)
     assignment.restricted_to.clear()
     AssignmentService.sync_student_assignments(assignment)

@@ -3,6 +3,7 @@ import datetime
 import pytest
 from django.utils.timezone import now
 
+from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.models import CourseTeacher
 from courses.tests.factories import SemesterFactory, CourseFactory, \
@@ -15,7 +16,7 @@ from users.tests.factories import TeacherFactory
 @pytest.mark.django_db
 def test_teachers_list(client, settings):
     url = reverse("public-api:v2:teachers")
-    teacher1, teacher2 = TeacherFactory.create_batch(2)
+    teacher1, teacher2 = TeacherFactory.create_batch(2, branch=BranchFactory())
     term = SemesterFactory.create_current()
     next_term = SemesterFactory.create_next(term)
     course1 = CourseFactory(semester=term)

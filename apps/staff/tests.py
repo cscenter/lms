@@ -11,12 +11,14 @@ from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import GraduateProfileFactory, EnrollmentFactory
 from projects.constants import ProjectGradeTypes
 from projects.tests.factories import ProjectFactory
-from users.tests.factories import StudentFactory, CuratorFactory
+from users.tests.factories import StudentFactory, CuratorFactory, \
+    StudentProfileFactory
 
 
 @pytest.mark.django_db
 def test_staff_diplomas_view(curator, client, settings):
-    student = StudentFactory(student_profile__status=StudentStatuses.WILL_GRADUATE)
+    student_profile = StudentProfileFactory(status=StudentStatuses.WILL_GRADUATE)
+    student = student_profile.user
     semester1 = SemesterFactory.create(year=2014, type='spring')
     p = ProjectFactory.create(students=[student], semester=semester1)
     sp = p.projectstudent_set.all()[0]
@@ -24,25 +26,25 @@ def test_staff_diplomas_view(curator, client, settings):
     sp.save()
     client.login(curator)
     response = client.get(reverse('staff:exports_future_graduates_diplomas_tex',
-                                  kwargs={"branch_id": student.branch_id}))
+                                  kwargs={"branch_id": student_profile.branch_id}))
     assert smart_bytes(p.name) in response.content
 
 
 @pytest.mark.django_db
 def test_staff_diplomas_view_should_contain_club_courses(curator, client, settings):
-    student = StudentFactory(student_profile__status=StudentStatuses.WILL_GRADUATE)
-    student_profile = student.student_profiles.first()
+    student_profile = StudentProfileFactory(status=StudentStatuses.WILL_GRADUATE)
+    student = student_profile.user
 
     # Add an enrollment to a club course, it should be shown in the TeX template
     branch_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
     course_club = CourseFactory(main_branch=branch_club,
-                                branches=[student.branch])
+                                branches=[student_profile.branch])
     EnrollmentFactory(course=course_club, student=student,
                       student_profile=student_profile, grade=GradeTypes.GOOD)
 
     client.login(curator)
     response = client.get(reverse('staff:exports_future_graduates_diplomas_tex',
-                                  kwargs={"branch_id": student.branch_id}))
+                                  kwargs={"branch_id": student_profile.branch_id}))
     assert smart_bytes(course_club.name) in response.content
 
 
@@ -152,14 +154,16 @@ def test_official_diplomas_tex_should_not_contain_club_courses(client, settings)
     student_profile1 = g1.student_profile
     student1 = student_profile1.user
 
-    course1 = CourseFactory(main_branch=student1.branch)
-    EnrollmentFactory(course=course1, student=student1, student_profile=student_profile1, grade=GradeTypes.GOOD)
+    course1 = CourseFactory(main_branch=student_profile1.branch)
+    EnrollmentFactory(course=course1, student=student1,
+                      student_profile=student_profile1, grade=GradeTypes.GOOD)
 
     # Add an enrollment to a club course, it should not be shown in the TeX template
     branch_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
     course_club = CourseFactory(main_branch=branch_club,
-                                branches=[student1.branch])
-    EnrollmentFactory(course=course_club, student=student1, student_profile=student_profile1, grade=GradeTypes.GOOD)
+                                branches=[student_profile1.branch])
+    EnrollmentFactory(course=course_club, student=student1,
+                      student_profile=student_profile1, grade=GradeTypes.GOOD)
 
     curator = CuratorFactory()
     client.login(curator)

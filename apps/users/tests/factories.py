@@ -31,9 +31,8 @@ class UserFactory(factory.django.DjangoModelFactory):
     email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
     first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
     last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
-    branch = factory.SubFactory('core.tests.factories.BranchFactory',
-                                code=settings.DEFAULT_BRANCH_CODE)
-    time_zone = factory.SelfAttribute('branch.time_zone')
+    branch = None
+    time_zone = factory.LazyAttribute(lambda user: user.branch.time_zone if user.branch is not None else str(settings.DEFAULT_TIMEZONE))
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
@@ -86,7 +85,8 @@ class StudentFactory(UserFactory):
     def student_profile(self, create, extracted, **kwargs):
         if not create:
             return
-        kwargs.setdefault('branch', self.branch)
+        if self.branch:
+            kwargs.setdefault('branch', self.branch)
         StudentProfileFactory(user=self, **kwargs)
 
 
@@ -95,7 +95,8 @@ class InvitedStudentFactory(UserFactory):
     def student_profile(self, create, extracted, **kwargs):
         if not create:
             return
-        kwargs.setdefault('branch', self.branch)
+        if self.branch:
+            kwargs.setdefault('branch', self.branch)
         StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)
 
 
@@ -105,7 +106,8 @@ class VolunteerFactory(UserFactory):
     def student_profile(self, create, extracted, **kwargs):
         if not create:
             return
-        kwargs.setdefault('branch', self.branch)
+        if self.branch:
+            kwargs.setdefault('branch', self.branch)
         StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)
 
 
@@ -126,7 +128,8 @@ class StudentProfileFactory(factory.django.DjangoModelFactory):
     type = StudentTypes.REGULAR
     user = factory.SubFactory(UserFactory,
                               time_zone=factory.SelfAttribute('..branch.time_zone'))
-    branch = factory.SubFactory(BranchFactory)
+    branch = factory.SubFactory(BranchFactory,
+                                code=settings.DEFAULT_BRANCH_CODE)
     year_of_admission = factory.SelfAttribute('user.date_joined.year')
 
 
