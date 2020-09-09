@@ -94,9 +94,11 @@ class CalendarClubScheduleView(MonthEventsCalendarView):
         start, end = extended_month_date_range(month_period)
         fs = [Q(date__range=[start, end]),
               ~Q(course__semester__type=SemesterTypes.SUMMER)]
+        public_url_builder = partial(course_class_public_url,
+                                     default_branch_code=self.request.branch.code)
         for c in get_classes(branch_list=[self.request.branch], filters=fs):
             yield CalendarEvent.from_course_class(
-                c, url_builder=course_class_public_url)
+                c, url_builder=public_url_builder)
 
 
 class IndexView(PublicURLContextMixin, generic.TemplateView):

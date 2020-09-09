@@ -37,7 +37,7 @@
                   <td>
                     {% if course.classes %}
                       {% with class=course.classes|first %}
-                      <a href="{{ course_class_public_url(class) }}">{{ class.date|date("l, d E") }}, {{ class.starts_at }}</a>
+                      <a href="{{ course_class_public_url(class) }}">{{ class.date|date("l, d E") }}, {{ class.starts_at|date("G:i") }}</a>
                       {% endwith %}
                     {% else %}
                       {% if course.is_completed %}
