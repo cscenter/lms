@@ -26,7 +26,7 @@
     {% endif %}
 
     {% if courses %}
-        <h4>{% trans %}Course offerings{% endtrans %}</h4>
+        <h4>{% trans %}Course Offerings{% endtrans %}</h4>
         <table class="table table-bordered">
           <thead>
             <tr class="active">
@@ -62,7 +62,7 @@
         {% endwith -%}
     </div>
     {% if request.user.is_curator %}
-        <a class="btn btn-default btn-block" href="{{ url("user_detail", subdomain=LMS_SUBDOMAIN, pk=teacher.pk) }}"><i class="fa fa-user-secret" aria-hidden="true"></i> Профиль </a>
+        <a class="btn btn-default btn-block" href="{{ url("user_detail", subdomain=LMS_SUBDOMAIN, pk=teacher.pk) }}"><i class="fa fa-user-secret" aria-hidden="true"></i> {% trans %}Profile{% endtrans %}</a>
     {% endif %}
 </div>
 </div>

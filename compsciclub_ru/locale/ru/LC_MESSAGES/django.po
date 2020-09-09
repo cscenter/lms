@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-02-03 16:55+0000\n"
-"PO-Revision-Date: 2020-02-03 16:58+0000\n"
+"POT-Creation-Date: 2020-09-09 04:25+0000\n"
+"PO-Revision-Date: 2020-09-09 04:43+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -17,143 +17,152 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Translated-Using: django-rosetta 0.9.3\n"
+"X-Translated-Using: django-rosetta 0.9.4\n"
 
 #: compsciclub_ru/apps/international_schools/apps.py:7
+#: compsciclub_ru/apps/international_schools/models.py:24
 msgid "International Schools"
-msgstr ""
+msgstr "Международные школы"
 
 #: compsciclub_ru/apps/international_schools/models.py:8
 msgid "InternationalSchool|name"
-msgstr ""
+msgstr "Название"
 
 #: compsciclub_ru/apps/international_schools/models.py:10
 msgid "InternationalSchool|Link"
-msgstr ""
+msgstr "Ссылка"
 
 #: compsciclub_ru/apps/international_schools/models.py:11
 msgid "InternationalSchool|place"
-msgstr ""
+msgstr "Место проведения"
 
 #: compsciclub_ru/apps/international_schools/models.py:12
 msgid "InternationalSchool|Deadline"
-msgstr ""
+msgstr "Дедлайн"
 
 #: compsciclub_ru/apps/international_schools/models.py:13
 msgid "InternationalSchool|Start"
-msgstr ""
+msgstr "Начало"
 
 #: compsciclub_ru/apps/international_schools/models.py:14
 msgid "InternationalSchool|End"
-msgstr ""
+msgstr "Конец"
 
 #: compsciclub_ru/apps/international_schools/models.py:17
 msgid "InternationalSchool|Grants"
-msgstr ""
+msgstr "Гранты"
 
 #: compsciclub_ru/apps/international_schools/models.py:23
-msgid "International school"
+#, fuzzy
+#| msgid "International school"
+msgid "International School"
+msgstr "Международная школа"
+
+#: compsciclub_ru/forms.py:13
+msgid "Gender"
 msgstr ""
 
-#: compsciclub_ru/apps/international_schools/models.py:24
-msgid "International schools"
-msgstr ""
-
-#: compsciclub_ru/forms.py:16
+#: compsciclub_ru/forms.py:21
 msgid "Submit"
 msgstr "Отправить"
 
-#: compsciclub_ru/menus.py:34
-msgctxt "menu"
-msgid "Обучение"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:19
+msgid "What"
 msgstr ""
 
-#: compsciclub_ru/menus.py:38 compsciclub_ru/menus.py:54
-msgctxt "menu"
-msgid "Задания"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:23
+msgid "When"
 msgstr ""
 
-#: compsciclub_ru/menus.py:39
-msgctxt "menu"
-msgid "Моё расписание"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:27
+msgid "Where"
 msgstr ""
 
-#: compsciclub_ru/menus.py:40 compsciclub_ru/menus.py:68
-msgctxt "menu"
-msgid "Календарь"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:32
+msgid "Slides"
 msgstr ""
 
-#: compsciclub_ru/menus.py:41 compsciclub_ru/menus.py:72
-msgctxt "menu"
-msgid "Мои курсы"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:39
+msgid "Description"
+msgstr "Описание"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:47
+msgid "Video"
 msgstr ""
 
-#: compsciclub_ru/menus.py:49
-msgctxt "menu"
-msgid "Преподавание"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:53
+msgid "Attached files"
 msgstr ""
 
-#: compsciclub_ru/menus.py:63
-msgctxt "menu"
-msgid "Расписание"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:66
+msgid "Other materials"
 msgstr ""
 
-#: compsciclub_ru/menus.py:77
-msgctxt "menu"
-msgid "Ведомости"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:23
+msgid ""
+"Enroll in the course to get notifications and to be able to submit home "
+"assignments."
 msgstr ""
+"Запишитесь на курс, чтобы получать уведомления и иметь возможность сдавать "
+"домашние задания. Для записи требуется регистрация на сайте."
 
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:24
+msgid "Register to enroll now"
+msgstr "Перейти к регистрации"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:24
+#: compsciclub_ru/jinja2/lms/layouts/_top_menu.html:31
 #: compsciclub_ru/templates/_top_menu.html:36
 msgid "Login"
 msgstr "Войти"
 
-#: compsciclub_ru/templates/_top_menu.html:39
-#: compsciclub_ru/templates/registration/registration_form.html:10
-msgid "Registration"
-msgstr "Регистрация"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:62
+msgid "Date and time"
+msgstr ""
 
-#: compsciclub_ru/templates/base.html:53
-msgid "Admin"
-msgstr "Админка"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:63
+msgid "Class|Name"
+msgstr "Занятие"
 
-#: compsciclub_ru/templates/base.html:60
-msgid "City"
-msgstr "Город"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:64
+msgid "Venue|short"
+msgstr ""
 
-#: compsciclub_ru/templates/base.html:63
-#: compsciclub_ru/templates/compsciclub_ru/index.html:33
-msgid "Language"
-msgstr "Язык"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:65
+msgid "Materials"
+msgstr ""
 
-#: compsciclub_ru/templates/base.html:84
-#| msgid "Computer Science Club, 2007–16 гг."
-msgid "Computer Science Club, 2007–20 гг."
-msgstr "Computer Science Club, 2007–20 гг."
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:72
+msgid "Lecture"
+msgstr "Лекция"
 
-#: compsciclub_ru/templates/base.html:114
-msgid "close all"
-msgstr "Закрыть все"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:72
+msgid "Seminar"
+msgstr ""
 
-#: compsciclub_ru/templates/compsciclub_ru/course_offerings.html:10
-#: compsciclub_ru/templates/compsciclub_ru/index.html:26
-#: compsciclub_ru/templates/users/user_detail.html:90
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:83
+msgid "No"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_offerings.html:8
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:22
+#: compsciclub_ru/templates/users/user_detail.html:86
 msgid "Courses"
 msgstr "Курсы"
 
-#: compsciclub_ru/templates/compsciclub_ru/course_offerings.html:42
-#| msgid "No news yet"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_offerings.html:38
 msgid "No courses yet"
 msgstr "Курсов пока нет"
 
-#: compsciclub_ru/templates/compsciclub_ru/index.html:8
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:4
 msgid "Author photo"
 msgstr "Автор фото"
 
-#: compsciclub_ru/templates/compsciclub_ru/index.html:8
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:4
 msgid "Andrey Salnikov"
 msgstr "Андрей Сальников"
 
-#: compsciclub_ru/templates/compsciclub_ru/index.html:14
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:10
 msgid ""
 "\n"
 "      The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.\n"
@@ -162,7 +171,7 @@ msgstr ""
 "\n"
 "<p>Computer Science клуб — это открытые лекции и курсы. В клубе любой желающий может познакомиться с классическими результатами, современным положением дел и открытыми задачами в различных областях Computer Science. Вход на лекции свободный, регистрация не требуется, посещать курсы можно начать в любое время.</p>"
 
-#: compsciclub_ru/templates/compsciclub_ru/index.html:20
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:16
 msgid ""
 "\n"
 "      The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.\n"
@@ -171,38 +180,102 @@ msgstr ""
 "\n"
 "<p>Computer Science клуб — это открытые лекции и курсы. В клубе любой желающий может познакомиться с классическими результатами, современным положением дел и открытыми задачами в различных областях Computer Science. Вход на лекции свободный, регистрация не требуется, посещать курсы можно начать в любое время.</p>"
 
-#: compsciclub_ru/templates/compsciclub_ru/index.html:30
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:26
 msgid "Course name"
 msgstr "Название курса"
 
-#: compsciclub_ru/templates/compsciclub_ru/index.html:31
-#: compsciclub_ru/templates/compsciclub_ru/users/teacher_list.html:12
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:27
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_list.html:7
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: compsciclub_ru/templates/compsciclub_ru/index.html:32
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:28
 msgid "Next lecture"
 msgstr "Следующая лекция"
 
-#: compsciclub_ru/templates/compsciclub_ru/index.html:48
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:29
+#: compsciclub_ru/jinja2/lms/layouts/v1_base.html:61
+#: compsciclub_ru/templates/base.html:65
+msgid "Language"
+msgstr "Язык"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:44
 msgid "The course is completed"
 msgstr "Курс завершён"
 
-#: compsciclub_ru/templates/compsciclub_ru/index.html:50
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:46
 msgid "To be announced"
 msgstr "Дата будет объявлена позже"
 
-#: compsciclub_ru/templates/compsciclub_ru/index.html:54
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:50
 msgid "Russian"
 msgstr "Русский"
 
-#: compsciclub_ru/templates/compsciclub_ru/index.html:54
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:50
 msgid "English"
 msgstr "Английский"
 
-#: compsciclub_ru/templates/compsciclub_ru/users/teacher_detail.html:11
+#: compsciclub_ru/jinja2/compsciclub_ru/meta_course_detail.html:11
+#: compsciclub_ru/templates/users/user_detail.html:50
+msgid "Edit"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/meta_course_detail.html:22
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:29
+msgid "Course Offerings"
+msgstr "Прочтения курсов"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/meta_course_detail.html:26
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:34
+msgid "Semester"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/meta_course_detail.html:27
+msgid "Branch"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:21
+#: compsciclub_ru/templates/users/user_detail.html:167
+msgid "Contact information"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:33
+msgid "Course"
+msgstr "Курс"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:47
 msgid "Photos"
 msgstr "Фотографии"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:65
+#: compsciclub_ru/templates/users/user_detail.html:8
+msgid "Profile"
+msgstr "Профиль"
+
+#: compsciclub_ru/jinja2/lms/layouts/_top_menu.html:34
+#: compsciclub_ru/templates/_top_menu.html:39
+#: compsciclub_ru/templates/registration/registration_form.html:10
+msgid "Registration"
+msgstr "Регистрация"
+
+#: compsciclub_ru/jinja2/lms/layouts/v1_base.html:52
+#: compsciclub_ru/templates/base.html:55
+msgid "Admin"
+msgstr "Админка"
+
+#: compsciclub_ru/jinja2/lms/layouts/v1_base.html:58
+#: compsciclub_ru/templates/base.html:62
+msgid "City"
+msgstr "Город"
+
+#: compsciclub_ru/jinja2/lms/layouts/v1_base.html:82
+#: compsciclub_ru/templates/base.html:86
+msgid "гг."
+msgstr ""
+
+#: compsciclub_ru/templates/base.html:118
+msgid "close all"
+msgstr "Закрыть все"
 
 #: compsciclub_ru/templates/registration/activate.html:5
 msgid "Account activation failed."
@@ -260,13 +333,7 @@ msgstr ""
 "С уважением, администрация %(site_name)s"
 
 #: compsciclub_ru/templates/registration/activation_email.txt:2
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "    You (or someone pretending to be you) have asked to register an account at\n"
-#| "    %(site_name)s.  If this wasn't you, please ignore this email\n"
-#| "    and your address will be removed from our records.\n"
-#| "    "
+#, python-format
 msgid ""
 "\n"
 "You (or someone pretending to be you) have asked to register an account at\n"
@@ -321,118 +388,83 @@ msgid "Register for an account"
 msgstr "Регистрация аккаунта на"
 
 #: compsciclub_ru/templates/users/user_detail.html:8
-msgid "Profile"
-msgstr "Профиль"
-
-#: compsciclub_ru/templates/users/user_detail.html:8
 msgid "on site"
 msgstr ""
 
-#: compsciclub_ru/templates/users/user_detail.html:41
+#: compsciclub_ru/templates/users/user_detail.html:40
 msgid "Change photo"
 msgstr ""
 
-#: compsciclub_ru/templates/users/user_detail.html:51
-msgid "Edit"
-msgstr ""
-
-#: compsciclub_ru/templates/users/user_detail.html:55
+#: compsciclub_ru/templates/users/user_detail.html:54
 msgid "Edit in admin"
 msgstr ""
 
-#: compsciclub_ru/templates/users/user_detail.html:60
+#: compsciclub_ru/templates/users/user_detail.html:59
 msgid "Edit info record"
 msgstr ""
 
-#: compsciclub_ru/templates/users/user_detail.html:63
-msgid "Change password"
-msgstr "Изменить пароль"
-
-#: compsciclub_ru/templates/users/user_detail.html:102
+#: compsciclub_ru/templates/users/user_detail.html:98
 msgid "teacher"
 msgstr "преподаватель"
 
-#: compsciclub_ru/templates/users/user_detail.html:118
+#: compsciclub_ru/templates/users/user_detail.html:115
 msgid ".iCal calendar"
 msgstr ""
 
-#: compsciclub_ru/templates/users/user_detail.html:119
+#: compsciclub_ru/templates/users/user_detail.html:116
 msgid "Link"
 msgstr ""
 
-#: compsciclub_ru/templates/users/user_detail.html:124
-msgid "Classes"
-msgstr "Занятия"
+#: compsciclub_ru/templates/users/user_detail.html:135
+msgid "Social accounts"
+msgstr "Социальные сети"
 
-#: compsciclub_ru/templates/users/user_detail.html:131
-#: compsciclub_ru/templates/users/user_detail.html:183
+#: compsciclub_ru/templates/users/user_detail.html:175
 msgid "Assignments"
 msgstr "Задания"
 
-#: compsciclub_ru/templates/users/user_detail.html:143
-msgid "Social accounts"
-msgstr ""
-
-#: compsciclub_ru/templates/users/user_detail.html:175
-msgid "Contact information"
-msgstr ""
-
-#: compsciclub_ru/templates/users/user_detail.html:189
+#: compsciclub_ru/templates/users/user_detail.html:181
 msgid "Course offering"
 msgstr "Название курса"
 
-#: compsciclub_ru/templates/users/user_detail.html:190
+#: compsciclub_ru/templates/users/user_detail.html:182
 msgid "Assignment"
 msgstr "Задание"
 
-#: compsciclub_ru/templates/users/user_detail.html:191
+#: compsciclub_ru/templates/users/user_detail.html:183
 msgid "Grade"
 msgstr ""
 
-#: compsciclub_ru/templates/users/user_detail.html:220
-#: compsciclub_ru/templates/users/user_detail.html:227
+#: compsciclub_ru/templates/users/user_detail.html:212
+#: compsciclub_ru/templates/users/user_detail.html:219
 msgid "books"
 msgstr "книги"
-
-#: compsciclub_ru/templates/users/user_detail.html:234
-msgid "Student info record"
-msgstr ""
-
-#: compsciclub_ru/templates/users/user_detail.html:237
-msgid "University"
-msgstr "Университет"
-
-#: compsciclub_ru/templates/users/user_detail.html:241
-msgid "Phone"
-msgstr "Телефон"
-
-#: compsciclub_ru/templates/users/user_detail.html:246
-msgid "Email"
-msgstr ""
-
-#: compsciclub_ru/templates/users/user_detail.html:253
-msgid "StudentInfo|University year"
-msgstr ""
-
-#: compsciclub_ru/templates/users/user_detail.html:257
-msgid "Comment"
-msgstr ""
-
-#: compsciclub_ru/templates/users/user_detail.html:273
-msgid "Status"
-msgstr "Статус"
-
-#: compsciclub_ru/templates/users/user_detail.html:275
-msgid "Non-degree student"
-msgstr ""
-
-#: compsciclub_ru/templates/users/user_detail.html:279
-msgid "Workplace"
-msgstr ""
 
 #: compsciclub_ru/translation.py:3
 msgid "Can be passed online"
 msgstr "Можно сдать через сайт CS клуба"
+
+#~ msgid "International schools"
+#~ msgstr "Международные школы"
+
+#, fuzzy
+#~ msgid "Course offerings"
+#~ msgstr "Название курса"
+
+#~ msgid "Computer Science Club, 2007–20 гг."
+#~ msgstr "Computer Science Club, 2007–20 гг."
+
+#~ msgid "Change password"
+#~ msgstr "Изменить пароль"
+
+#~ msgid "University"
+#~ msgstr "Университет"
+
+#~ msgid "Phone"
+#~ msgstr "Телефон"
+
+#~ msgid "Status"
+#~ msgstr "Статус"
 
 #~ msgid "This username is already in use. Please supply a different username."
 #~ msgstr "Извините, но никнейм уже занят."
