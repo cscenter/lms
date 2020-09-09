@@ -20,7 +20,8 @@ from learning.services import EnrollmentService, CourseCapacityFull, \
     StudentGroupService, get_student_profile
 from learning.settings import StudentStatuses, Branches
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
-from users.tests.factories import StudentFactory, InvitedStudentFactory
+from users.tests.factories import StudentFactory, InvitedStudentFactory, \
+    StudentProfileFactory
 
 
 # TODO: запись кем-то без группы INVITED.
@@ -32,19 +33,18 @@ from users.tests.factories import StudentFactory, InvitedStudentFactory
 
 @pytest.mark.django_db
 def test_service_enroll(settings):
-    student = StudentFactory()
-    student2 = StudentFactory(branch=student.branch)
+    student_profile = StudentProfileFactory()
+    student_profile2 = StudentProfileFactory(branch=student_profile.branch)
     current_semester = SemesterFactory.create_current()
-    course = CourseFactory(main_branch=student.branch, semester=current_semester)
-    student_profile = student.get_student_profile(settings.SITE_ID)
+    course = CourseFactory(main_branch=student_profile.branch,
+                           semester=current_semester)
     enrollment = EnrollmentService.enroll(student_profile, course, 'test enrollment')
     reason_entry = EnrollmentService._format_reason_record('test enrollment', course)
     assert enrollment.reason_entry == reason_entry
     assert not enrollment.is_deleted
     assert enrollment.student_group_id is None
-    student_group = StudentGroupService.resolve(course, student2,
+    student_group = StudentGroupService.resolve(course, student_profile2.user,
                                                 settings.SITE_ID)
-    student_profile2 = student2.get_student_profile(settings.SITE_ID)
     enrollment = EnrollmentService.enroll(student_profile2, course,
                                           'test enrollment',
                                           student_group=student_group)
@@ -53,9 +53,9 @@ def test_service_enroll(settings):
 
 @pytest.mark.django_db
 def test_enrollment_capacity(settings):
-    student = StudentFactory()
+    student_profile = StudentProfileFactory()
     current_semester = SemesterFactory.create_current()
-    course = CourseFactory.create(main_branch=student.branch,
+    course = CourseFactory.create(main_branch=student_profile.branch,
                                   semester=current_semester,
                                   capacity=1)
     EnrollmentFactory(course=course)
@@ -64,7 +64,6 @@ def test_enrollment_capacity(settings):
     # 1 active enrollment
     assert Enrollment.objects.count() == 1
     with pytest.raises(CourseCapacityFull):
-        student_profile = student.get_student_profile(settings.SITE_ID)
         EnrollmentService.enroll(student_profile, course, reason_entry='')
     # Make sure enrollment record created by enrollment service
     # was rollbacked by transaction context manager
@@ -73,13 +72,14 @@ def test_enrollment_capacity(settings):
 
 @pytest.mark.django_db
 def test_enrollment_capacity_view(client):
-    s = StudentFactory()
-    client.login(s)
+    student_profile = StudentProfileFactory()
+    student = student_profile.user
+    client.login(student)
     future = now() + datetime.timedelta(days=2)
     current_semester = SemesterFactory.create_current(
         enrollment_period__ends_on=future.date()
     )
-    course = CourseFactory(main_branch=s.branch,
+    course = CourseFactory(main_branch=student_profile.branch,
                            semester=current_semester,)
     response = client.get(course.get_absolute_url())
     assert smart_bytes(_("Places available")) not in response.content
@@ -89,7 +89,7 @@ def test_enrollment_capacity_view(client):
     assert smart_bytes(_("Places available")) in response.content
     form = {'course_pk': course.pk}
     client.post(course.get_enroll_url(), form)
-    assert 1 == Enrollment.active.filter(student=s, course=course).count()
+    assert 1 == Enrollment.active.filter(student=student, course=course).count()
     # Capacity is reached
     course.refresh_from_db()
     assert course.learners_count == 1
@@ -108,7 +108,7 @@ def test_enrollment_capacity_view(client):
     response = client.get(course.get_absolute_url())
     assert (smart_bytes(_("Places available")) + b": 1") in response.content
     # Unenroll first student, capacity should increase
-    client.login(s)
+    client.login(student)
     response = client.post(course.get_unenroll_url(), form)
     assert Enrollment.active.filter(course=course).count() == 0
     course.refresh_from_db()
@@ -144,21 +144,23 @@ def test_enrollment(client):
     current_semester = SemesterFactory.create_current(
         enrollment_period__ends_on=today.date())
     current_semester.save()
-    course = CourseFactory(main_branch=student1.branch, semester=current_semester)
+    course = CourseFactory(main_branch=student1.get_student_profile().branch,
+                           semester=current_semester)
     url = course.get_enroll_url()
     form = {'course_pk': course.pk}
     response = client.post(url, form)
     assert response.status_code == 302
-    assert 1 == Enrollment.active.filter(student=student1, course=course).count()
+    assert course.enrollment_set.count() == 1
     as_ = AssignmentFactory.create_batch(3, course=course)
     assert set((student1.pk, a.pk) for a in as_) == set(StudentAssignment.objects
                           .filter(student=student1)
                           .values_list('student', 'assignment'))
-    co_other = CourseFactory.create(semester=current_semester)
+    co_other = CourseFactory(semester=current_semester)
     form.update({'back': 'study:course_list'})
     url = co_other.get_enroll_url()
     response = client.post(url, form)
     assert response.status_code == 302
+    assert co_other.enrollment_set.count() == 1
     assert course.enrollment_set.count() == 1
     # Try to enroll to old CO
     old_semester = SemesterFactory.create(year=2010)
@@ -170,12 +172,12 @@ def test_enrollment(client):
 
 @pytest.mark.django_db
 def test_enrollment_reason_entry(client):
-    student = StudentFactory()
-    client.login(student)
-    today = now_local(student.get_timezone())
+    student_profile = StudentProfileFactory()
+    client.login(student_profile.user)
+    today = now_local(student_profile.user.get_timezone())
     current_term = SemesterFactory.create_current(
         enrollment_period__ends_on=today.date())
-    course = CourseFactory(main_branch=student.branch, semester=current_term)
+    course = CourseFactory(main_branch=student_profile.branch, semester=current_term)
     form = {'course_pk': course.pk, 'reason': 'foo'}
     client.post(course.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
@@ -193,12 +195,12 @@ def test_enrollment_reason_entry(client):
 
 @pytest.mark.django_db
 def test_enrollment_leave_reason(client):
-    student = StudentFactory()
-    client.login(student)
-    today = now_local(student.get_timezone())
+    student_profile = StudentProfileFactory()
+    client.login(student_profile.user)
+    today = now_local(student_profile.user.get_timezone())
     current_semester = SemesterFactory.create_current(
         enrollment_period__ends_on=today.date())
-    co = CourseFactory(main_branch=student.branch, semester=current_semester)
+    co = CourseFactory(main_branch=student_profile.branch, semester=current_semester)
     form = {'course_pk': co.pk}
     client.post(co.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
@@ -227,10 +229,10 @@ def test_enrollment_leave_reason(client):
 
 @pytest.mark.django_db
 def test_unenrollment(client, settings, assert_redirect):
-    s = StudentFactory()
-    client.login(s)
+    student = StudentFactory()
+    client.login(student)
     current_semester = SemesterFactory.create_current()
-    course = CourseFactory.create(main_branch=s.branch, semester=current_semester)
+    course = CourseFactory(main_branch=student.get_student_profile().branch, semester=current_semester)
     as_ = AssignmentFactory.create_batch(3, course=course)
     form = {'course_pk': course.pk}
     # Enrollment already closed
@@ -253,13 +255,13 @@ def test_unenrollment(client, settings, assert_redirect):
     enrollment = Enrollment.objects.first()
     assert not enrollment.is_deleted
     client.post(course.get_unenroll_url(), form)
-    assert Enrollment.active.filter(student=s, course=course).count() == 0
+    assert Enrollment.active.filter(student=student, course=course).count() == 0
     assert Enrollment.objects.count() == 1
     enrollment = Enrollment.objects.first()
     enrollment_id = enrollment.pk
     assert enrollment.is_deleted
     # Make sure student progress won't been deleted
-    a_ss = (StudentAssignment.objects.filter(student=s,
+    a_ss = (StudentAssignment.objects.filter(student=student,
                                              assignment__course=course))
     assert len(a_ss) == 3
     # On re-enroll use old record
@@ -278,7 +280,7 @@ def test_unenrollment(client, settings, assert_redirect):
     assert_redirect(client.post(url, form),
                     reverse('study:course_list'))
     assert set(a_ss) == set(StudentAssignment.objects
-                                  .filter(student=s,
+                                  .filter(student=student,
                                           assignment__course=course))
     # Check courses on student courses page are empty
     response = client.get(reverse("study:course_list"))
@@ -328,27 +330,27 @@ def test_enrollment_in_other_branch(client):
         enrollment_period__ends_on=tomorrow.date())
     course_spb = CourseFactory(semester=term, main_branch__code=Branches.SPB)
     assert course_spb.enrollment_is_open
-    student_spb = StudentFactory(branch__code=Branches.SPB)
-    student_nsk = StudentFactory(branch__code=Branches.NSK)
-    client.login(student_spb)
+    student_profile_spb = StudentProfileFactory(branch__code=Branches.SPB)
+    student_profile_nsk = StudentProfileFactory(branch__code=Branches.NSK)
+    client.login(student_profile_spb.user)
     form = {'course_pk': course_spb.pk}
     response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 302
     assert Enrollment.objects.count() == 1
-    client.login(student_nsk)
+    client.login(student_profile_nsk.user)
     response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 403
     assert Enrollment.objects.count() == 1
-    student = StudentFactory(branch__code='xxx')
+    student_profile = StudentProfileFactory(branch__code='xxx')
     # Check button visibility
     Enrollment.objects.all().delete()
-    client.login(student_spb)
+    client.login(student_profile_spb.user)
     response = client.get(course_spb.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
     buttons = (html.find("div", {"class": "o-buttons-vertical"})
                .find_all(attrs={'class': 'btn'}))
     assert any("Enroll in" in s.text for s in buttons)
-    for user in [student_nsk, student]:
+    for user in [student_profile_nsk.user, student_profile.user]:
         client.login(user)
         response = client.get(course_spb.get_absolute_url())
         assert smart_bytes("Enroll in") not in response.content

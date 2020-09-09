@@ -15,7 +15,7 @@ from notifications import NotificationTypes
 
 class Command(BaseCommand):
     help = """
-    Generate notifications about project reporting openings/deadlines
+    Generate notifications about project reporting period boundaries.
     """
 
     def handle(self, *args, **options):

@@ -25,7 +25,8 @@ from core.tests.factories import LocationFactory, BranchFactory
 from learning.models import StudentGroup
 from learning.services import EnrollmentService, StudentGroupService
 from learning.tests.factories import EnrollmentFactory
-from users.tests.factories import TeacherFactory, StudentFactory
+from users.tests.factories import TeacherFactory, StudentFactory, \
+    StudentProfileFactory
 
 
 @pytest.mark.django_db
@@ -293,12 +294,12 @@ def test_course_class_form_available(client, curator, settings):
 @pytest.mark.django_db
 def test_manager_for_student(settings):
     new_branch = BranchFactory()
-    student = StudentFactory()
+    student_profile = StudentProfileFactory()
+    student = student_profile.user
     teacher = TeacherFactory()
-    course = CourseFactory(main_branch=student.branch,
+    course = CourseFactory(main_branch=student_profile.branch,
                            branches=[new_branch])
     # Active enrollment
-    student_profile = student.get_student_profile(settings.SITE_ID)
     enrollment = EnrollmentService.enroll(student_profile, course)
     enrollment.student_group = StudentGroupService.resolve(course, student,
                                                            settings.SITE_ID)
@@ -315,7 +316,6 @@ def test_manager_for_student(settings):
     # Course class is visible to main course branch students
     cc = CourseClassFactory(course=course,
                             restricted_to=[enrollment.student_group])
-    student_profile = student.get_student_profile(settings.SITE_ID)
     EnrollmentService.enroll(student_profile, course)
     assert CourseClass.objects.for_student(student).count() == 2
     assert CourseClass.objects.for_student(teacher).count() == 0
@@ -328,7 +328,7 @@ def test_manager_for_student(settings):
     assert CourseClass.objects.for_student(student).count() == 2
     assert CourseClass.objects.for_student(teacher).count() == 0
     # Student is not enrolled in the course
-    course2 = CourseFactory(main_branch=student.branch)
+    course2 = CourseFactory(main_branch=student_profile.branch)
     CourseClassFactory(course=course2)
     assert CourseClass.objects.for_student(student).count() == 2
     EnrollmentFactory(student=student, course=course2)

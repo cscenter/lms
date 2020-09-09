@@ -28,6 +28,7 @@ from learning.tests.factories import *
 from notifications.management.commands.notify import \
     get_assignment_notification_context, get_course_news_notification_context
 from users.tests.factories import *
+from users.tests.factories import StudentProfileFactory
 
 
 class NotificationTests(CSCTestCase):
@@ -384,19 +385,21 @@ def test_deadline_changed_timezone(settings):
 @pytest.mark.parametrize("auth_user", ['student', 'teacher'])
 def test_new_assignment_comment(auth_user, client, assert_redirect):
     semester = SemesterFactory.create_current()
-    student = StudentFactory()
+    student_profile = StudentProfileFactory()
     teacher = TeacherFactory()
     teacher2 = TeacherFactory()
-    course = CourseFactory(main_branch=student.branch, semester=semester,
+    course = CourseFactory(main_branch=student_profile.branch, semester=semester,
                            teachers=[teacher, teacher2])
-    EnrollmentFactory.create(student=student, course=course)
+    EnrollmentFactory(student_profile=student_profile,
+                      student=student_profile.user,
+                      course=course)
     a = AssignmentFactory.create(course=course)
     a_s = (StudentAssignment.objects
-           .filter(assignment=a, student=student)
+           .filter(assignment=a, student=student_profile.user)
            .get())
     # Student and teacher views share the same logic for posting comment
     if auth_user == 'student':
-        client.login(student)
+        client.login(student_profile.user)
         detail_url = a_s.get_student_url()
         create_comment_url = reverse("study:assignment_comment_create",
                                      kwargs={"pk": a_s.pk})

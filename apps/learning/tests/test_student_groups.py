@@ -11,7 +11,7 @@ from learning.services import StudentGroupService
 from learning.settings import Branches, GradeTypes
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
 from users.tests.factories import StudentFactory, CuratorFactory, \
-    InvitedStudentFactory
+    InvitedStudentFactory, StudentProfileFactory
 
 
 @pytest.mark.django_db
@@ -68,27 +68,28 @@ def test_student_group_resolving_on_enrollment(client):
     Prevent enrollment ff it's impossible to resolve student group by
     student's root branch.
     """
-    student1 = StudentFactory()
-    student2 = StudentFactory(branch=BranchFactory())
-    today = now_local(student1.get_timezone()).date()
+    student_profile1 = StudentProfileFactory()
+    student_profile2 = StudentProfileFactory(branch=BranchFactory())
+    today = now_local(student_profile1.user.get_timezone()).date()
     current_semester = SemesterFactory.create_current(
         enrollment_period__ends_on=today)
-    course = CourseFactory(main_branch=student1.branch,
+    course = CourseFactory(main_branch=student_profile1.branch,
                            semester=current_semester)
     student_groups = StudentGroup.objects.filter(course=course).all()
     assert len(student_groups) == 1
     student_group = student_groups[0]
     enroll_url = course.get_enroll_url()
     form = {'course_pk': course.pk}
-    client.login(student1)
+    client.login(student_profile1.user)
     response = client.post(enroll_url, form)
     assert response.status_code == 302
-    enrollments = Enrollment.active.filter(student=student1, course=course).all()
+    enrollments = Enrollment.active.filter(student_profile=student_profile1,
+                                           course=course).all()
     assert len(enrollments) == 1
     enrollment = enrollments[0]
     assert enrollment.student_group == student_group
     # No permission through public interface
-    client.login(student2)
+    client.login(student_profile2.user)
     response = client.post(enroll_url, form)
     assert response.status_code == 403
 
@@ -162,14 +163,16 @@ def test_assignment_restricted_to(settings):
     sg_spb, sg_nsk = StudentGroup.objects.filter(course=course).all()
     if sg_spb.branch != branch_spb:
         sg_spb, sg_nsk = sg_nsk, sg_spb
-    student_spb = StudentFactory(branch=branch_spb)
-    student_nsk = StudentFactory(branch=branch_nsk)
-    EnrollmentFactory(course=course, student=student_spb)
-    EnrollmentFactory(course=course, student=student_nsk)
+    student_profile_spb = StudentProfileFactory(branch=branch_spb)
+    student_profile_nsk = StudentProfileFactory(branch=branch_nsk)
+    EnrollmentFactory(course=course, student_profile=student_profile_spb,
+                      student=student_profile_spb.user)
+    EnrollmentFactory(course=course, student_profile=student_profile_nsk,
+                      student=student_profile_nsk.user)
     a = AssignmentFactory(course=course, restricted_to=[sg_spb])
     student_assignments = StudentAssignment.objects.filter(assignment=a)
     assert len(student_assignments) == 1
-    assert student_assignments[0].student == student_spb
+    assert student_assignments[0].student == student_profile_spb.user
 
 
 @pytest.mark.django_db

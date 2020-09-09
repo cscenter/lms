@@ -20,7 +20,8 @@ from projects.tests.factories import ProjectFactory, SupervisorFactory, \
     ProjectStudentFactory
 from users.constants import Roles
 from users.tests.factories import SHADCourseRecordFactory, \
-    OnlineCourseRecordFactory, TeacherFactory, StudentFactory
+    OnlineCourseRecordFactory, TeacherFactory, StudentFactory, \
+    StudentProfileFactory
 
 
 def check_value_for_header(report, header, row_index, expected_value):
@@ -474,10 +475,10 @@ def test_report_official_diplomas_csv(settings):
 
     STATIC_HEADERS_CNT = len(get_report().columns)
 
-    student1, student2, student3 = StudentFactory.create_batch(3)
-    student_profile1 = student1.student_profiles.get()
-    student_profile2 = student2.student_profiles.get()
-    student_profile3 = student3.student_profiles.get()
+    student_profile1, student_profile2, student_profile3 = StudentProfileFactory.create_batch(3)
+    student1 = student_profile1.user
+    student2 = student_profile2.user
+    student3 = student_profile3.user
 
     # Two students received their diploma on 12-06-2020
     graduate_profile1 = GraduateProfileFactory(student_profile=student_profile1,
@@ -493,8 +494,9 @@ def test_report_official_diplomas_csv(settings):
     # Add an enrollment to a club course, it should not be shown in the report
     branch_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
     course_club = CourseFactory(main_branch=branch_club,
-                                branches=[student1.branch])
-    EnrollmentFactory(course=course_club, student=student1, student_profile=student_profile1, grade=GradeTypes.GOOD)
+                                branches=[student_profile1.branch])
+    EnrollmentFactory(course=course_club, student=student1,
+                      student_profile=student_profile1, grade=GradeTypes.GOOD)
 
     # No courses to show, no additional header columns expected
     progress_report = get_report()

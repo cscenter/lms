@@ -78,7 +78,7 @@ class EnrollmentFactory(factory.django.DjangoModelFactory):
     student_profile = factory.SubFactory(
         StudentProfileFactory,
         user=factory.SelfAttribute('..student'),
-        branch=factory.SelfAttribute('..student.branch'))
+        branch=factory.SelfAttribute('..course.main_branch'))
     course = factory.SubFactory(CourseFactory)
 
     @factory.post_generation

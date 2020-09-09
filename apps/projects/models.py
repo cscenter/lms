@@ -41,6 +41,7 @@ CURATOR_SCORE_FIELDS = [
 
 
 class ReportingPeriodKey(NamedTuple):
+    # FIXME: It should be branch ID now :<
     branch_code: str
     project_type: str
 
