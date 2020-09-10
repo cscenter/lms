@@ -8,7 +8,9 @@ from django.urls import resolve
 from post_office.models import EmailTemplate
 from pytest_django.lazy_django import skip_if_no_django
 
-from core.tests.factories import BranchFactory, CityFactory
+from core.models import SiteConfiguration
+from core.tests.factories import BranchFactory, CityFactory, \
+    SiteConfigurationFactory, SiteFactory
 from core.tests.utils import TestClient, CSCTestCase
 from learning.settings import Branches
 from notifications.models import Type
@@ -75,6 +77,7 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
     """
     with django_db_blocker.unblock():
         # Create site objects with respect to AutoField
+        SiteConfiguration.objects.all().delete()
         Site.objects.all().delete()
         domains = [
             (settings.TEST_DOMAIN_ID, settings.TEST_DOMAIN),
@@ -91,6 +94,14 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
         with connection.cursor() as cursor:
             for sql in sequence_sql:
                 cursor.execute(sql)
+        # Model-based configuration
+        site1 = SiteFactory(domain=settings.TEST_DOMAIN)
+        site1_conf = SiteConfigurationFactory(site=site1)
+        site2 = SiteFactory(domain=settings.ANOTHER_DOMAIN)
+        site2_conf = SiteConfigurationFactory(site=site2)
+        site2_conf.lms_subdomain = None
+        site2_conf.save()
+
         # Create cities
         city_spb = CityFactory(name="Saint Petersburg", code="spb", abbr="spb")
         city_nsk = CityFactory(name="Novosibirsk", code="nsk", abbr="nsk",

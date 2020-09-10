@@ -47,6 +47,8 @@ MEDIA_URL = "/media/"
 
 MIGRATION_MODULES = {}
 
+EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+
 LANGUAGE_CODE = 'en'
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
