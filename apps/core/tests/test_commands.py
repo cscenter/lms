@@ -2,10 +2,13 @@ import pytest
 from django.core import management
 
 from core.models import SiteConfiguration
+from core.tests.factories import SiteFactory
 
 
 @pytest.mark.django_db
 def test_update_site_configuration(settings):
+    site = SiteFactory(domain='super.new.domain')
+    settings.SITE_ID = site.pk
     expected_email_host = 'smtp.example.com'
     expected_email_password = 'email_password'
     use_tls_ssl = True
