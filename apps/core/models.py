@@ -70,6 +70,10 @@ class SiteConfiguration(ConfigurationModel):
     default_from_email = models.CharField(
         "Default Email Address",
         max_length=255)
+    email_backend = models.CharField(
+        "Email Backend",
+        help_text="Python import path of the backend to use for sending emails",
+        max_length=255)
     email_host = models.CharField(
         "Email Host",
         help_text="The host to use for sending email",
@@ -95,6 +99,14 @@ class SiteConfiguration(ConfigurationModel):
         "Use SSL",
         help_text="Whether to use an implicit TLS (secure) connection when "
                   "talking to the SMTP server.")
+    lms_subdomain = models.CharField(
+        "LMS Subdomain",
+        max_length=10,
+        blank=True,
+        null=True)
+    default_branch_code = models.CharField(
+        "Branch code",
+        max_length=10)
 
     class Meta:
         verbose_name = "Site Configuration"

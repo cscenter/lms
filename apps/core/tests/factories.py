@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 
-from core.models import City, Branch, Location
+from core.models import City, Branch, Location, SiteConfiguration
 from learning.settings import Branches
 
 __all__ = ('CityFactory', 'EmailTemplateFactory', 'BranchFactory',
@@ -19,6 +19,25 @@ class SiteFactory(factory.django.DjangoModelFactory):
 
     domain = settings.TEST_DOMAIN
     name = factory.Sequence(lambda n: "Site Name %03d" % n)
+
+
+class SiteConfigurationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = SiteConfiguration
+        django_get_or_create = ('site',)
+
+    site = factory.SubFactory(SiteFactory)
+    enabled = True
+    lms_subdomain = 'my'
+    default_branch_code = 'spb'
+    default_from_email = 'noreply@example.com'
+    email_backend = settings.EMAIL_BACKEND
+    email_host = settings.EMAIL_HOST
+    email_host_password = SiteConfiguration.encrypt('password')
+    email_host_user = factory.Sequence(lambda n: "User_%03d" % n)
+    email_port = settings.EMAIL_PORT
+    email_use_tls = False
+    email_use_ssl = False
 
 
 class CityFactory(factory.django.DjangoModelFactory):

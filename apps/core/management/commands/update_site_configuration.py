@@ -11,6 +11,8 @@ class Command(BaseCommand):
         SiteConfiguration.objects.update_or_create(
             site_id=settings.SITE_ID,
             defaults={
+                "lms_subdomain": settings.LMS_SUBDOMAIN,
+                "default_branch_code": settings.DEFAULT_BRANCH_CODE,
                 "default_from_email": settings.DEFAULT_FROM_EMAIL,
                 "email_host": settings.EMAIL_HOST,
                 "email_host_password": SiteConfiguration.encrypt(settings.EMAIL_HOST_PASSWORD),
