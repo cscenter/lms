@@ -14,6 +14,7 @@ class Command(BaseCommand):
                 "lms_subdomain": settings.LMS_SUBDOMAIN,
                 "default_branch_code": settings.DEFAULT_BRANCH_CODE,
                 "default_from_email": settings.DEFAULT_FROM_EMAIL,
+                "email_backend": settings.EMAIL_BACKEND,
                 "email_host": settings.EMAIL_HOST,
                 "email_host_password": SiteConfiguration.encrypt(settings.EMAIL_HOST_PASSWORD),
                 "email_host_user": settings.EMAIL_HOST_USER,
