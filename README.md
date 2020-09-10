@@ -22,6 +22,9 @@ return HttpResponse("<html><body>body tag should be returned</body></html>", con
 psql -h localhost postgres -c "DROP DATABASE cscdb;"; psql -h localhost postgres -c "CREATE DATABASE cscdb WITH encoding 'UTF-8' LC_COLLATE='C' TEMPLATE=template0;"; psql -h localhost postgres -c "GRANT ALL privileges ON DATABASE cscdb TO csc;"
 psql -h localhost cscdb csc < 
 psql -h localhost cscdb csc -c "update django_site set domain='csc.test' where id = 1; update django_site set domain = 'club.ru' where id = 2; update django_site set domain = 'lk.ynd.test' where id = 3;"
+./manage.py update_site_configuration --settings=compscicenter_ru.settings.local
+./manage.py update_site_configuration --settings=compsciclub_ru.settings.local
+./manage.py update_site_configuration --settings=lk_yandexdataschool_ru.settings.local
 ./manage.py changepassword admin
 # TODO: Write ansible command to automate routine
 
