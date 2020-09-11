@@ -9,13 +9,59 @@ const footer = $(".footer");
 const comment = $('.assignment-comment');
 const modalFormWrapper = $("#update-comment-model-form");
 
+const outlineClass = 'btn-outline';
+const commentButton = $("#add-comment");
+const commentForm = $('#comment-form-wrapper')
+const solutionButton = $("#add-solution");
+const solutionForm = $('#solution-form-wrapper')
+
 let editor;
 
 const fn = {
     Launch: function () {
+        fn.initCommentForm();
+        fn.initSolutionForm();
         fn.initCommentModal();
         fn.initStickySidebar();
         fn.initFileInput();
+    },
+
+    reflowEditor: function (formWrapper) {
+        const editorIframes = formWrapper.find('iframe[id^=epiceditor-]');
+        let editorIDs = [];
+        editorIframes.each(function(i, iframe) {
+            editorIDs.push($(iframe).attr('id'));
+        });
+        $(window.__CSC__.config.uberEditors).each(function(i, editor) {
+            if ($.inArray(editor._instanceId, editorIDs) !== -1) {
+                editor.emit('__update');
+            }
+        });
+    },
+
+    initCommentForm: function() {
+        commentButton.on('click', function() {
+            commentForm.removeClass('hidden');
+            fn.reflowEditor(commentForm);
+            $(this).removeClass(outlineClass);
+            if (solutionForm.length > 0) {
+                solutionForm.addClass('hidden');
+                solutionButton.addClass(outlineClass);
+            }
+        });
+    },
+
+    initSolutionForm: function() {
+        if (solutionForm.length > 0) {
+            solutionButton.on('click', function() {
+                solutionForm.removeClass('hidden');
+                fn.reflowEditor(solutionForm);
+                commentForm.addClass('hidden');
+                $(this).removeClass(outlineClass);
+                commentButton.addClass(outlineClass);
+            });
+        }
+
     },
 
     initCommentModal: function () {
