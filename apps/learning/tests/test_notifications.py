@@ -12,6 +12,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import smart_bytes
 from subdomains.utils import get_domain
 
+from core.models import SiteConfiguration
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU
 from core.tests.utils import CSCTestCase
@@ -260,7 +261,10 @@ def test_new_assignment_create_notification_context(client, settings):
     assignment = AssignmentFactory(course=course)
     assert AssignmentNotification.objects.count() == 1
     an = AssignmentNotification.objects.first()
-    context = get_assignment_notification_context(an)
+    site_settings = SiteConfiguration.objects.get(site_id=settings.SITE_ID)
+    participant_branch = enrollment.student_profile.branch
+    context = get_assignment_notification_context(an, participant_branch,
+                                                  site_settings)
     student_url = abs_url(an.student_assignment.get_student_url())
     parsed_url = urlparse(student_url)
     relative_student_url = parsed_url.path
