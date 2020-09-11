@@ -18,9 +18,11 @@ from courses.views.mixins import CourseURLParamsMixin
 from files.views import ProtectedFileDownloadView
 from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, AssignmentComment, \
-    AssignmentNotification, Event, CourseNewsNotification
+    AssignmentNotification, Event, CourseNewsNotification, \
+    AssignmentCommentTypes
 from learning.permissions import ViewAssignmentCommentAttachment, \
     ViewAssignmentAttachment
+from learning.study.services import get_draft_comment, get_draft_submission
 from users.mixins import TeacherOnlyMixin
 
 logger = logging.getLogger(__name__)
@@ -57,24 +59,20 @@ class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin,
                                   GenericModelView):
     """Post a new comment or save draft"""
     model = AssignmentComment
-
-    def get_drafts(self):
-        return (AssignmentComment.objects
-                .filter(author=self.request.user,
-                        is_published=False,
-                        student_assignment=self.student_assignment))
+    submission_type = None
 
     def post(self, request, *args, **kwargs):
-        save_draft = "save-draft" in request.POST
-        # Note: should be exactly one record
-        draft = self.get_drafts().last()
-        if not draft:
-            draft = AssignmentComment(student_assignment=self.student_assignment,
-                                      author=request.user,
-                                      is_published=False)
-        draft.is_published = not save_draft
-        form = AssignmentCommentForm(data=request.POST, files=request.FILES,
-                                     instance=draft)
+        # Saving drafts is only supported for comments.
+        is_comment = (self.submission_type == AssignmentCommentTypes.COMMENT)
+        save_draft = is_comment and "save-draft" in request.POST
+        assert self.submission_type is not None
+        submission = get_draft_submission(request.user,
+                                          self.student_assignment,
+                                          self.submission_type,
+                                          build=True)
+        submission.is_published = not save_draft
+        form = self.get_form(data=request.POST, files=request.FILES,
+                             instance=submission)
         if form.is_valid():
             return self.form_valid(form)
         return self.form_invalid(form)
@@ -95,7 +93,7 @@ class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin,
         return HttpResponseRedirect(redirect_to)
 
     def get_error_url(self):
-        return self.get_success_url()
+        raise NotImplementedError
 
 
 class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
@@ -113,8 +111,8 @@ class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
 
     def get_context_data(self, **kwargs):
         sa = self.student_assignment
-        # Not sure if it's the best place for this, but it's the simplest one
         user = self.request.user
+        # Not sure if it's the best place for this, but it's the simplest one
         (AssignmentNotification.unread
          .filter(student_assignment=sa, user=user)
          .update(is_unread=False))
@@ -124,19 +122,15 @@ class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
         cs_after_deadline = (c for c in sa.assignmentcomment_set.all() if
                              c.created >= deadline_at)
         first_comment_after_deadline = next(cs_after_deadline, None)
-        draft = (AssignmentComment.objects
-                 .filter(author=self.request.user,
-                         is_published=False,
-                         student_assignment=self.student_assignment)
-                 .last())
-        comment_form = AssignmentCommentForm(instance=draft)
+        draft_comment = get_draft_comment(user, self.student_assignment)
+        comment_form = AssignmentCommentForm(instance=draft_comment)
         context = {
             'a_s': sa,
             'timezone': sa.assignment.course.get_timezone(),
             'first_comment_after_deadline': first_comment_after_deadline,
             'one_teacher': sa.assignment.course.teachers.count() == 1,
             'hashes_json': comment_persistence.get_hashes_json(),
-            'comment_form': comment_form
+            'comment_form': comment_form,
         }
         return context
 

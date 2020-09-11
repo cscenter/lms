@@ -8,7 +8,7 @@ from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.admin import CourseTeacherInline, CourseBranchInline
 from courses.constants import MaterialVisibilityTypes
-from courses.models import Assignment, AssignmentSubmissionTypes, Course, \
+from courses.models import Assignment, AssignmentSubmissionFormats, Course, \
     CourseTeacher, CourseBranch
 from courses.tests.factories import CourseFactory, SemesterFactory, \
     MetaCourseFactory
@@ -288,7 +288,7 @@ def test_assignment_admin_view(settings, client):
     co_in_nsk = CourseFactory(main_branch__code=Branches.NSK)
     form_data = {
         "course": "",
-        "submission_type": AssignmentSubmissionTypes.ONLINE,
+        "submission_type": AssignmentSubmissionFormats.ONLINE,
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00:00",
         "title": "title",

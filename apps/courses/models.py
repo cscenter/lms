@@ -1012,7 +1012,7 @@ def course_class_attachment_post_delete(sender, instance, *args, **kwargs):
     )
 
 
-class AssignmentSubmissionTypes(DjangoChoices):
+class AssignmentSubmissionFormats(DjangoChoices):
     ONLINE = C("online", _("Online Submission"))  # file or text on site
     EXTERNAL = C("external", _("External Service"))
     CODE_REVIEW = C("code_review", _("Code Review Submission"))
@@ -1027,10 +1027,11 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
     deadline_at = TimezoneAwareDateTimeField(_("Assignment|deadline"))
+    # TODO: rename to submission_format
     submission_type = models.CharField(
         verbose_name=_("Submission Type"),
         max_length=42,
-        choices=AssignmentSubmissionTypes.choices
+        choices=AssignmentSubmissionFormats.choices
     )
     title = models.CharField(_("Assignment|name"),
                              max_length=140)
@@ -1129,7 +1130,7 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         Online is when you want students to submit their assignments
         using current site.
         """
-        return self.submission_type == AssignmentSubmissionTypes.ONLINE
+        return self.submission_type == AssignmentSubmissionFormats.ONLINE
 
     @cached_property
     def files_root(self):

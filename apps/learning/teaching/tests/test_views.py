@@ -247,38 +247,6 @@ def test_assignment_contents(client):
 
 
 @pytest.mark.django_db
-def test_student_assignment_detail_view_add_comment(client):
-    teacher = TeacherFactory()
-    enrollment = EnrollmentFactory(course__teachers=[teacher])
-    student = enrollment.student
-    a = AssignmentFactory.create(course=enrollment.course)
-    a_s = (StudentAssignment.objects
-           .filter(assignment=a, student=student)
-           .get())
-    teacher_url = a_s.get_teacher_url()
-    create_comment_url = reverse("teaching:assignment_comment_create",
-                                 kwargs={"pk": a_s.pk})
-    form_data = {'text': "Test comment without file"}
-    client.login(teacher)
-    response = client.post(create_comment_url, form_data)
-    assert response.status_code == 302
-    assert response.url == teacher_url
-    response = client.get(teacher_url)
-    assert smart_bytes(form_data['text']) in response.content
-    form_data = {
-        'text': "Test comment with file",
-        'attached_file': SimpleUploadedFile("attachment1.txt",
-                                            b"attachment1_content")
-    }
-    response = client.post(create_comment_url, form_data)
-    assert response.status_code == 302
-    assert response.url == teacher_url
-    response = client.get(teacher_url)
-    assert smart_bytes(form_data['text']) in response.content
-    assert smart_bytes('attachment1') in response.content
-
-
-@pytest.mark.django_db
 def test_student_assignment_detail_view_grading_form(client):
     teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])

@@ -9,7 +9,7 @@ from core.tests.factories import LocationFactory, BranchFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment, LearningSpace, CourseReview, \
-    AssignmentSubmissionTypes, CourseBranch
+    AssignmentSubmissionFormats, CourseBranch
 from courses.constants import MaterialVisibilityTypes
 from courses.services import CourseService
 from courses.utils import get_current_term_pair, get_term_by_index
@@ -187,7 +187,7 @@ class AssignmentFactory(factory.django.DjangoModelFactory):
     course = factory.SubFactory(CourseFactory)
     deadline_at = factory.Faker('date_time_between', start_date="+1d",
                                 end_date="+10d", tzinfo=pytz.UTC)
-    submission_type = AssignmentSubmissionTypes.ONLINE
+    submission_type = AssignmentSubmissionFormats.ONLINE
     title = factory.Sequence(lambda n: "Test assignment %03d" % n)
     text = "This is a text for a test assignment"
     passing_score = 10

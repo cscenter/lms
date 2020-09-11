@@ -4,16 +4,22 @@ from decimal import Decimal
 import pytest
 import pytz
 from bs4 import BeautifulSoup
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import formats
+from django.utils.encoding import smart_bytes
 
-from courses.models import AssignmentSubmissionTypes, Assignment
+from core.urls import reverse
+from courses.models import AssignmentSubmissionFormats, Assignment
 from courses.tests.factories import AssignmentFactory, CourseFactory, \
     CourseTeacherFactory, SemesterFactory, CourseNewsFactory
 from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, CourseNewsNotification
+    AssignmentNotification, CourseNewsNotification, AssignmentComment
 from learning.settings import Branches
-from learning.tests.factories import StudentAssignmentFactory, EnrollmentFactory
-from users.tests.factories import TeacherFactory, StudentFactory
+from learning.tests.factories import StudentAssignmentFactory, \
+    EnrollmentFactory, AssignmentCommentFactory
+from users.tests.factories import TeacherFactory, StudentFactory, \
+    StudentProfileFactory
+
 
 # TODO: Преподавание -> Задания, добавить тест для deadline_local
 
@@ -25,7 +31,7 @@ def test_assignment_public_form(settings, client):
     course_spb = CourseFactory(teachers=[teacher])
     client.login(teacher)
     form_data = {
-        "submission_type": AssignmentSubmissionTypes.ONLINE,
+        "submission_type": AssignmentSubmissionFormats.ONLINE,
         "title": "title",
         "text": "text",
         "deadline_at_0": "29.06.2017",
@@ -161,3 +167,119 @@ def test_create_assignment_public_form(client):
     assert CourseNewsNotification.objects.count() == 0
     CourseNewsFactory.create(course=co)
     assert CourseNewsNotification.objects.count() == enrolled_students
+
+
+@pytest.mark.django_db
+def test_student_assignment_detail_view_add_comment(client):
+    teacher = TeacherFactory()
+    enrollment = EnrollmentFactory(course__teachers=[teacher])
+    student = enrollment.student
+    a = AssignmentFactory.create(course=enrollment.course)
+    a_s = (StudentAssignment.objects
+           .filter(assignment=a, student=student)
+           .get())
+    teacher_url = a_s.get_teacher_url()
+    create_comment_url = reverse("teaching:assignment_comment_create",
+                                 kwargs={"pk": a_s.pk})
+    form_data = {
+        'comment-text': "Test comment without file"
+    }
+    client.login(teacher)
+    response = client.post(create_comment_url, form_data)
+    assert response.status_code == 302
+    assert response.url == teacher_url
+    response = client.get(teacher_url)
+    assert smart_bytes(form_data['comment-text']) in response.content
+    form_data = {
+        'comment-text': "Test comment with file",
+        'comment-attached_file': SimpleUploadedFile("attachment1.txt",
+                                            b"attachment1_content")
+    }
+    response = client.post(create_comment_url, form_data)
+    assert response.status_code == 302
+    assert response.url == teacher_url
+    response = client.get(teacher_url)
+    assert smart_bytes(form_data['comment-text']) in response.content
+    assert smart_bytes('attachment1') in response.content
+
+
+@pytest.mark.django_db
+def test_student_assignment_draft_comment(client, assert_redirect):
+    """
+    Draft comment shouldn't send any notification until publishing.
+    New published comment should replace draft comment record.
+    """
+    semester = SemesterFactory.create_current()
+    student_profile = StudentProfileFactory()
+    teacher = TeacherFactory()
+    teacher2 = TeacherFactory()
+    course = CourseFactory(main_branch=student_profile.branch, semester=semester,
+                           teachers=[teacher, teacher2])
+    EnrollmentFactory(student_profile=student_profile,
+                      student=student_profile.user,
+                      course=course)
+    a = AssignmentFactory.create(course=course)
+    a_s = (StudentAssignment.objects
+           .filter(assignment=a, student=student_profile.user)
+           .get())
+    client.login(teacher)
+    teacher_detail_url = a_s.get_teacher_url()
+    create_comment_url = reverse("teaching:assignment_comment_create",
+                                 kwargs={"pk": a_s.pk})
+    recipients_count = 1
+    assert AssignmentNotification.objects.count() == 1
+    n = AssignmentNotification.objects.first()
+    assert n.is_about_creation
+    # Publish new comment
+    AssignmentNotification.objects.all().delete()
+    form_data = {
+        'comment-text': "Test comment with file",
+        'comment-attached_file': SimpleUploadedFile("attachment1.txt",
+                                                    b"attachment1_content")
+    }
+    response = client.post(create_comment_url, form_data)
+    assert_redirect(response, teacher_detail_url)
+    response = client.get(teacher_detail_url)
+    assert smart_bytes(form_data['comment-text']) in response.content
+    assert smart_bytes('attachment1') in response.content
+    assert AssignmentNotification.objects.count() == recipients_count
+    # Create draft message
+    assert AssignmentComment.objects.count() == 1
+    AssignmentNotification.objects.all().delete()
+    form_data = {
+        'comment-text': "Test comment 2 with file",
+        'comment-attached_file': SimpleUploadedFile("a.txt", b"a_content"),
+        'save-draft': 'Submit button text'
+    }
+    response = client.post(create_comment_url, form_data)
+    assert_redirect(response, teacher_detail_url)
+    assert AssignmentComment.objects.count() == 2
+    assert AssignmentNotification.objects.count() == 0
+    response = client.get(teacher_detail_url)
+    assert 'comment_form' in response.context_data
+    form = response.context_data['comment_form']
+    assert form_data['comment-text'] == form.instance.text
+    rendered_form = BeautifulSoup(str(form), "html.parser")
+    file_name = rendered_form.find('span', class_='fileinput-filename')
+    assert file_name and file_name.string == form.instance.attached_file_name
+    draft = AssignmentComment.objects.get(text=form_data['comment-text'])
+    assert not draft.is_published
+    # Publish another draft comment - this one should override the previous one
+    # Make sure it won't touch draft comments from other users
+    teacher2_draft = AssignmentCommentFactory(author=teacher2,
+                                              student_assignment=a_s,
+                                              is_published=False)
+    assert AssignmentComment.published.count() == 1
+    form_data = {
+        'comment-text': "Updated test comment 2 with file",
+        'comment-attached_file': SimpleUploadedFile("test_file_b.txt", b"b_content"),
+    }
+    response = client.post(create_comment_url, form_data)
+    assert_redirect(response, teacher_detail_url)
+    assert AssignmentComment.published.count() == 2
+    assert AssignmentNotification.objects.count() == recipients_count
+    draft.refresh_from_db()
+    assert draft.is_published
+    assert draft.attached_file_name.startswith('test_file_b')
+    teacher2_draft.refresh_from_db()
+    assert not teacher2_draft.is_published
