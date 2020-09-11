@@ -1,18 +1,26 @@
 # -*- coding: utf-8 -*-
-
+import functools
 import logging
 from datetime import datetime
+from functools import partial
+from typing import Callable, Dict
+from urllib.parse import urlparse
 
 from django.apps import apps
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, get_connection
+from django.core.mail.backends import smtp
 from django.core.management.base import BaseCommand
 from django.template.loader import render_to_string
 from django.utils import translation
 from django.utils.encoding import smart_str
 from django.utils.html import strip_tags, linebreaks
+from django.utils.module_loading import import_string
+from django_ses import SESBackend
 
+from core.models import SiteConfiguration, Branch
 from core.urls import replace_hostname
+
 from courses.models import Course
 from learning.models import AssignmentNotification, \
     CourseNewsNotification
@@ -49,6 +57,27 @@ EMAIL_TEMPLATES = {
 }
 
 
+# TODO: In some cases by email template we could predict participant role
+#  and avoid additional db hits
+def resolve_course_participant_branch(course: Course, participant: User):
+    """
+    Base on Branch model instance it's possible to say where all links
+    in a message will lead to and what email address use to send the message
+    (FROM header)
+
+    Note:
+        This method doesn't check actual course participant role
+    """
+    enrollment = participant.get_enrollment(course.pk)
+    # Enrollment stores student profile they used to enroll in the course
+    if enrollment:
+        branch = enrollment.student_profile.branch
+    else:
+        # Fallback to the main branch of the course
+        branch = course.main_branch
+    return branch
+
+
 def _get_base_domain(user: User, course: Course):
     enrollment = user.get_enrollment(course.pk)
     if enrollment:
@@ -78,28 +107,29 @@ def report(f, s):
     f.write("{0} {1}".format(dt, s))
 
 
-def send_notification(notification, template, context, f):
+def send_notification(notification, template, context, stdout,
+                      site_settings: SiteConfiguration):
     """Sends email notification, then updates notification state in DB"""
     # XXX: Note that email is mandatory now
     if not notification.user.email:
-        report(f, "User {0} doesn't have an email"
-               .format(smart_str(notification.user)))
+        report(stdout, f"User {notification.user} has no email")
         notification.is_notified = True
         notification.save()
         return
 
+    connection = get_email_connection(site_settings)
+    from_email = site_settings.default_from_email
+    subject = "[{}] {}".format(context['course_name'], template['subject'])
     html_content = linebreaks(render_to_string(template['template_name'],
                                                context))
     text_content = strip_tags(html_content)
-
-    msg = EmailMultiAlternatives("[{}] {}".format(context['course_name'],
-                                                  template['subject']),
-                                 text_content,
-                                 settings.DEFAULT_FROM_EMAIL,
-                                 [notification.user.email])
+    msg = EmailMultiAlternatives(subject=subject,
+                                 body=text_content,
+                                 from_email=from_email,
+                                 to=[notification.user.email],
+                                 connection=connection)
     msg.attach_alternative(html_content, "text/html")
-    report(f, "sending {0} ({1})".format(smart_str(notification),
-                                         smart_str(template)))
+    report(stdout, f"sending {notification} ({template})")
     msg.send()
     notification.is_notified = True
     notification.save()
@@ -119,21 +149,39 @@ def get_assignment_notification_template(notification: AssignmentNotification):
     return EMAIL_TEMPLATES[template_code]
 
 
-def get_assignment_notification_context(notification: AssignmentNotification):
-    base_domain = _get_base_domain(
-        notification.user,
-        notification.student_assignment.assignment.course)
+def get_domain_name(branch: Branch, site_settings: SiteConfiguration) -> str:
+    domain_name = branch.site.domain
+    if site_settings.lms_subdomain:
+        subdomain = site_settings.lms_subdomain
+    else:
+        # This naive conversion works with regular students only
+        subdomain = branch.code.lower()
+        # spb.compsciclub.ru -> compsciclub.ru
+        if subdomain == site_settings.default_branch_code:
+            subdomain = ''
+    if subdomain:
+        domain_name = f"{subdomain}.{domain_name}"
+    return domain_name
+
+
+def _get_abs_url_builder(domain_name):
+    # Assume settings.DEFAULT_URL_SCHEME has the same value for all sites
+    return partial(replace_hostname, new_hostname=domain_name)
+
+
+def get_assignment_notification_context(
+        notification: AssignmentNotification,
+        participant_branch: Branch,
+        site_settings: SiteConfiguration) -> Dict:
     a_s = notification.student_assignment
-    tz_override = None
-    user = notification.user
-    # Override timezone for enrolled students
-    if user.is_student or user.is_volunteer:
-        tz_override = notification.user.get_timezone()
+    tz_override = notification.user.get_timezone()
+    domain_name = get_domain_name(participant_branch, site_settings)
+    abs_url_builder = _get_abs_url_builder(domain_name)
     context = {
-        'a_s_link_student': replace_hostname(a_s.get_student_url(), base_domain),
-        'a_s_link_teacher': replace_hostname(a_s.get_teacher_url(), base_domain),
+        'a_s_link_student': abs_url_builder(a_s.get_student_url()),
+        'a_s_link_teacher': abs_url_builder(a_s.get_teacher_url()),
         # FIXME: rename
-        'assignment_link': replace_hostname(a_s.assignment.get_teacher_url(), base_domain),
+        'assignment_link': abs_url_builder(a_s.assignment.get_teacher_url()),
         'notification_created': notification.created_local(tz_override),
         'assignment_name': smart_str(a_s.assignment),
         'assignment_text': smart_str(a_s.assignment.text),
@@ -158,45 +206,87 @@ def get_course_news_notification_context(notification: CourseNewsNotification):
     return context
 
 
+def get_email_connection(site_settings):
+    # FIXME: temporarily disable resolving connection at runtime until dkim will be enabled on @yandexdataschool.ru
+    return get_connection(settings.EMAIL_BACKEND)
+    email_backend = import_string(site_settings.email_backend)
+    if issubclass(email_backend, smtp.EmailBackend):
+        decrypted = site_settings.decrypt(site_settings.email_host_password)
+        connection = smtp.EmailBackend(host=site_settings.email_host,
+                                       port=site_settings.email_port,
+                                       username=site_settings.email_host_user,
+                                       password=decrypted,
+                                       use_tls=site_settings.email_use_tls,
+                                       use_ssl=site_settings.email_use_ssl)
+    elif issubclass(email_backend, SESBackend):
+        # AWS settings are not depends on site configuration
+        connection = SESBackend()
+    else:
+        connection = get_connection(site_settings.email_backend,
+                                    fail_silently=False)
+    return connection
+
+
+def send_assignment_notifications(site_configurations, stdout) -> None:
+    prefetch = [
+        'user__groups',
+        'student_assignment',
+        'student_assignment__assignment',
+        'student_assignment__assignment__course',
+        'student_assignment__assignment__course__meta_course',
+        'student_assignment__student',
+    ]
+    notifications = (AssignmentNotification.objects
+                     .filter(is_unread=True,
+                             is_notified=False)
+                     .select_related("user", "user__branch")
+                     .prefetch_related(*prefetch))
+    for notification in notifications:
+        template = get_assignment_notification_template(notification)
+        course = notification.student_assignment.assignment.course
+        branch = resolve_course_participant_branch(course, notification.user)
+        site_settings: SiteConfiguration = site_configurations[branch.site_id]
+        context = get_assignment_notification_context(
+            notification, branch, site_settings)
+        send_notification(notification, template, context, stdout, site_settings)
+
+
+def send_course_news_notifications(site_configurations, stdout) -> None:
+    prefetch = [
+        'user__groups',
+        'course_offering_news',
+        'course_offering_news__course',
+        'course_offering_news__course__meta_course',
+        'course_offering_news__course__semester',
+    ]
+    notifications = (CourseNewsNotification.objects
+                     .filter(is_unread=True, is_notified=False)
+                     .select_related("user")
+                     .prefetch_related(*prefetch))
+    for notification in notifications:
+        template = EMAIL_TEMPLATES['new_course_news']
+        course = notification.course_offering_news.course
+        branch = resolve_course_participant_branch(course, notification.user)
+        site_settings: SiteConfiguration = site_configurations[branch.site_id]
+        context = get_course_news_notification_context(notification)
+        send_notification(notification, template, context, stdout, site_settings)
+
+
 class Command(BaseCommand):
     help = 'Sends email notifications'
     can_import_settings = True
 
     def handle(self, *args, **options):
-        # TODO: Looks ugly, rewrite it cls
-        from django.conf import settings
         translation.activate(settings.LANGUAGE_CODE)
+        # Some configuration (like SMTP settings) should be resolved at runtime
+        site_settings = (SiteConfiguration.objects
+                         .filter(enabled=True)
+                         .select_related('site'))
+        site_settings = {s.site_id: s for s in site_settings}
 
-        notifications_assignments = (
-            AssignmentNotification.objects
-            .filter(is_unread=True, is_notified=False)
-            .select_related("user", "user__branch")
-            .prefetch_related(
-                "user__groups",
-                'student_assignment',
-                'student_assignment__assignment',
-                'student_assignment__assignment__course',
-                'student_assignment__assignment__course__meta_course',
-                'student_assignment__student'))
-        for notification in notifications_assignments:
-            context = get_assignment_notification_context(notification)
-            template = get_assignment_notification_template(notification)
-            send_notification(notification, template, context, self.stdout)
+        send_assignment_notifications(site_settings, self.stdout)
 
-        notifications_course_news \
-            = (CourseNewsNotification.objects
-               .filter(is_unread=True, is_notified=False)
-               .select_related("user")
-               .prefetch_related(
-                   'user__groups',
-                   'course_offering_news',
-                   'course_offering_news__course',
-                   'course_offering_news__course__meta_course',
-                   'course_offering_news__course__semester'))
-        for notification in notifications_course_news:
-            context = get_course_news_notification_context(notification)
-            send_notification(notification, EMAIL_TEMPLATES['new_course_news'],
-                              context, self.stdout)
+        send_course_news_notifications(site_settings, self.stdout)
 
         from notifications.models import Notification
         from notifications.registry import registry

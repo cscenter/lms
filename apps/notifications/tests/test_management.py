@@ -7,10 +7,11 @@ from core.tests.factories import BranchFactory, SiteFactory
 from courses.models import Course
 from learning.models import AssignmentNotification
 from learning.tests.factories import AssignmentNotificationFactory, \
-    CourseNewsNotificationFactory
-from notifications.management.commands.notify import _get_base_domain
-from users.constants import Roles
-from users.tests.factories import UserFactory, StudentFactory, TeacherFactory
+    CourseNewsNotificationFactory, EnrollmentFactory, CourseFactory
+from notifications.management.commands.notify import _get_base_domain, \
+    resolve_course_participant_branch
+from users.tests.factories import UserFactory, StudentFactory, TeacherFactory, \
+    CuratorFactory
 
 
 @pytest.mark.django_db
@@ -72,3 +73,18 @@ def test_notify_get_base_url(notification_factory, settings):
     branch_code = f"xyz{new_branch.code}"
     new_branch.code = branch_code
     assert _get_base_domain(notification.user, course) == f"{branch_code}.{new_branch.site.domain}"
+
+
+@pytest.mark.django_db
+def test_resolve_course_participant_branch():
+    curator = CuratorFactory()
+    main_branch = BranchFactory()
+    teacher = TeacherFactory(branch=BranchFactory())
+    other_teacher = TeacherFactory(branch=BranchFactory())
+    course = CourseFactory(main_branch=main_branch, teachers=[teacher])
+    enrollment = EnrollmentFactory(course=course)
+    student = enrollment.student
+    assert resolve_course_participant_branch(course, teacher) == course.main_branch
+    assert resolve_course_participant_branch(course, other_teacher) == course.main_branch
+    assert resolve_course_participant_branch(course, curator) == course.main_branch
+    assert resolve_course_participant_branch(course, student) == enrollment.student_profile.branch
