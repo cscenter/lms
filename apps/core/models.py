@@ -65,7 +65,7 @@ class SiteConfiguration(ConfigurationModel):
     site = models.OneToOneField(
         Site,
         verbose_name="Site",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name='site_configuration')
     default_from_email = models.CharField(
         "Default Email Address",
