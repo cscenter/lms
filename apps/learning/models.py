@@ -14,7 +14,7 @@ from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, ChoiceItem
+from djchoices import DjangoChoices, ChoiceItem, C
 from model_utils.fields import MonitorField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
@@ -542,6 +542,11 @@ def assignment_comment_attachment_upload_to(self: "AssignmentComment", filename)
         filename)
 
 
+class AssignmentCommentTypes(DjangoChoices):
+    COMMENT = C('comment', _("Comment"))
+    SOLUTION = C('solution', _("Solution"))
+
+
 class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'student_assignment'
 
@@ -549,6 +554,11 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         'StudentAssignment',
         verbose_name=_("AssignmentComment|student_assignment"),
         on_delete=models.CASCADE)
+    type = models.CharField(
+        verbose_name=_("AssignmentComment|Type"),
+        max_length=42,
+        choices=AssignmentCommentTypes.choices
+    )
     is_published = models.BooleanField(_("Published"), default=True)
     text = models.TextField(
         _("AssignmentComment|text"),
