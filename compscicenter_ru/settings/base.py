@@ -32,6 +32,7 @@ LMS_SUBDOMAIN = 'my'
 LMS_MENU = 'compscicenter_ru.lms_menu'
 if YANDEX_METRIKA_ID is None:
     YANDEX_METRIKA_ID = 25844420
+LMS_CURATOR_EMAIL = 'curators@compscicenter.ru'
 
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,

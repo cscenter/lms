@@ -26,7 +26,7 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[".compsciclub.ru"])
 
 WSGI_APPLICATION = 'compsciclub_ru.wsgi.application'
 ROOT_URLCONF = 'compsciclub_ru.urls'
-
+LMS_CURATOR_EMAIL = None
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF
 }

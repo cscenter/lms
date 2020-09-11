@@ -11,7 +11,7 @@
                 <h3>{% trans "Profile Update" %}</h3>
                 <form action="" method="post">
                     <p>Пожалуйста, указывайте только реальные ФИО.<br>
-                    Отделение самостоятельно изменить нельзя, если есть неточность в данных, напишите на <a href="mailto:curators@compscicenter.ru">curators@compscicenter.ru</a><br>
+                    Если считаете, что отделение указано неверно, напишите на <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.<br>
                     </p>
                     {% csrf_token %}
                     {% for hidden in form.hidden_fields %}
