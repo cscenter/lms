@@ -74,9 +74,13 @@
                 <li><hr class="deadline"></li>
             {% endif %}
         <li class="{% if comment.author == a_s.student %}student{% else %}teacher{% endif %}">
-          <div class="csc-well assignment-comment" {% if user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
+          <div class="csc-well assignment-{{ comment.type }}" {% if user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
             {% if is_actual_teacher and comment.author_id == user.pk and not comment.is_stale_for_edit or user.is_curator %}
-                <a href="{{ comment.get_update_url }}" class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
+                {% if comment.type == 'comment' %}
+                    <a href="{{ comment.get_update_url }}" class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
+                {% else %}
+                    <span class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% endif %}</span>
+                {% endif %}
             {% endif %}
             <h5 class="assignment">{{ comment.author }}</h5>
             <div class="ubertext">
@@ -101,7 +105,16 @@
         </ul>
       {% endif %}
 
-        <div class="csc-well">{% crispy comment_form %}</div>
+        <div class="mt-30 assignment-actions">
+            <button id="add-comment" class="btn btn-lg btn-link active">Написать комментарий</button>
+            <button id="add-solution" class="btn btn-lg btn-link">Добавить решение</button>
+        </div>
+        <div id="comment-form-wrapper" class="csc-well">
+            {% crispy comment_form %}
+        </div>
+        <div id="solution-form-wrapper" class="csc-well hidden">
+            {% crispy solution_form %}
+        </div>
     </div>
 
         <div class="col-xs-3">

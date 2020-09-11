@@ -1,4 +1,4 @@
-from crispy_forms.bootstrap import StrictButton
+from crispy_forms.bootstrap import StrictButton, InlineRadios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
     Div, HTML, BaseInput, Row
@@ -10,7 +10,8 @@ from core.models import LATEX_MARKDOWN_ENABLED
 from core.timezone.constants import TIME_FORMAT_RU
 from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
-from learning.models import GraduateProfile, StudentAssignment
+from learning.models import GraduateProfile, StudentAssignment, \
+    AssignmentCommentTypes
 from .models import AssignmentComment
 
 
@@ -27,8 +28,10 @@ class JesnyFileInput(forms.ClearableFileInput):
 
 
 class AssignmentCommentForm(forms.ModelForm):
+    prefix = "comment"
+
     text = forms.CharField(
-        label=_("Add comment"),
+        label=False,
         # help_text=_(LATEX_MARKDOWN_ENABLED),
         required=False,
         widget=UbereditorWidget(attrs={'data-quicksend': 'true',
@@ -41,16 +44,19 @@ class AssignmentCommentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.helper = FormHelper(self)
+        self.instance.type = AssignmentCommentTypes.COMMENT
         if self.instance and self.instance.pk:
             draft_button_label = _('Update Draft')
         else:
             draft_button_label = _('Save Draft')
+        self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Div('text', css_class='form-group-5'),
             Div('attached_file'),
-            Div(Submit('save', _('Send')),
-                SubmitLink('save-draft', draft_button_label),
+            Div(Submit('save', _('Send Comment'),
+                       css_id=f'submit-id-{self.prefix}-save'),
+                SubmitLink('save-draft', draft_button_label,
+                           css_id=f'submit-id-{self.prefix}-save-draft'),
                 css_class="form-group"))
 
     class Meta:
@@ -63,7 +69,49 @@ class AssignmentCommentForm(forms.ModelForm):
                 and not cleaned_data.get("attached_file")):
             raise forms.ValidationError(
                 _("Either text or file should be non-empty"))
+        return cleaned_data
 
+
+class AssignmentSolutionBaseForm(forms.ModelForm):
+    prefix = "solution"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.type = AssignmentCommentTypes.SOLUTION
+        self.helper = FormHelper(self)
+
+
+class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
+    text = forms.CharField(
+        label=False,
+        required=False,
+        widget=UbereditorWidget(attrs={'data-quicksend': 'true',
+                                       'data-local-persist': 'true',
+                                       'data-helper-formatting': 'true'}))
+    attached_file = forms.FileField(
+        label="",
+        required=False,
+        widget=JesnyFileInput)
+
+    class Meta:
+        model = AssignmentComment
+        fields = ('text', 'attached_file')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper.layout = Layout(
+            Div('text', css_class='form-group-5'),
+            Div('attached_file'),
+            Div(Submit('save', _('Send Solution'),
+                       css_id=f'submit-id-{self.prefix}-save'),
+                css_class="form-group"))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if (not cleaned_data.get("text")
+                and not cleaned_data.get("attached_file")):
+            raise forms.ValidationError(
+                _("Either text or file should be non-empty"))
         return cleaned_data
 
 

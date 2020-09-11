@@ -5,11 +5,8 @@ from urllib.parse import urlparse
 
 import pytest
 import pytz
-from bs4 import BeautifulSoup
 from django.contrib.sites.models import Site
 from django.core import mail, management
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.utils.encoding import smart_bytes
 from subdomains.utils import get_domain
 
 from core.models import SiteConfiguration
@@ -19,9 +16,8 @@ from core.tests.utils import CSCTestCase
 
 from core.urls import reverse
 from courses.admin import AssignmentAdmin
-from courses.models import CourseTeacher, Assignment, AssignmentSubmissionTypes
-from courses.tests.factories import CourseFactory, AssignmentFactory, \
-    SemesterFactory
+from courses.models import CourseTeacher, Assignment, AssignmentSubmissionFormats
+from courses.tests.factories import CourseFactory, AssignmentFactory
 from learning.services import course_failed_by_student, get_student_profile
 from learning.models import AssignmentNotification
 from learning.settings import StudentStatuses, GradeTypes, Branches
@@ -29,7 +25,6 @@ from learning.tests.factories import *
 from notifications.management.commands.notify import \
     get_assignment_notification_context, get_course_news_notification_context
 from users.tests.factories import *
-from users.tests.factories import StudentProfileFactory
 
 
 class NotificationTests(CSCTestCase):
@@ -49,7 +44,7 @@ class NotificationTests(CSCTestCase):
         a = AssignmentFactory.build()
         form = {
             'title': a.title,
-            'submission_type': AssignmentSubmissionTypes.ONLINE,
+            'submission_type': AssignmentSubmissionFormats.ONLINE,
             'text': a.text,
             'passing_score': 0,
             'maximum_score': 5,
@@ -75,8 +70,12 @@ class NotificationTests(CSCTestCase):
         teacher_url = a_s.get_teacher_url()
         student_list_url = reverse('study:assignment_list', args=[])
         teacher_list_url = reverse('teaching:assignment_list', args=[])
-        student_comment_dict = {'text': "Test student comment without file"}
-        teacher_comment_dict = {'text': "Test teacher comment without file"}
+        student_comment_dict = {
+            'comment-text': "Test student comment without file"
+        }
+        teacher_comment_dict = {
+            'comment-text': "Test teacher comment without file"
+        }
 
         # Post first comment on assignment
         assert not course_failed_by_student(co, student)
@@ -140,7 +139,7 @@ def test_assignment_notify_teachers_public_form(client):
     a = AssignmentFactory.build()
     form = {
         'title': a.title,
-        'submission_type': AssignmentSubmissionTypes.ONLINE,
+        'submission_type': AssignmentSubmissionFormats.ONLINE,
         'text': a.text,
         'passing_score': 0,
         'maximum_score': 5,
@@ -168,7 +167,7 @@ def test_assignment_notify_teachers_public_form(client):
     student_create_comment_url = reverse("study:assignment_comment_create",
                                          kwargs={"pk": sa.pk})
     client.post(student_create_comment_url,
-                {'text': 'test first comment'})
+                {'comment-text': 'test first comment'})
     notifications = [n.user.pk for n in AssignmentNotification.objects.all()]
     # 1 - about assignment creation and 3 for teachers
     assert len(notifications) == 4
@@ -176,8 +175,10 @@ def test_assignment_notify_teachers_public_form(client):
     AssignmentNotification.objects.all().delete()
     not_notify_teacher = assignment.notify_teachers.all()[0]
     assignment.notify_teachers.remove(not_notify_teacher)
-    client.post(student_create_comment_url,
-                {'text': 'second comment from student'})
+    form_data = {
+        'comment-text': 'second comment from student'
+    }
+    client.post(student_create_comment_url, form_data)
     notifications = [n.user.pk for n in AssignmentNotification.objects.all()]
     assert len(notifications) == 2
     assert not_notify_teacher not in notifications
@@ -201,7 +202,7 @@ def test_assignment_notify_teachers_admin_form(client):
     post_data = {
         'course': co.pk,
         'title': a.title,
-        'submission_type': AssignmentSubmissionTypes.ONLINE,
+        'submission_type': AssignmentSubmissionFormats.ONLINE,
         'text': a.text,
         'passing_score': 0,
         'maximum_score': 5,
@@ -383,90 +384,3 @@ def test_deadline_changed_timezone(settings):
     management.call_command("notify", stdout=out)
     assert len(mail.outbox) == 1
     assert "22:00 04 февраля" in mail.outbox[0].body
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize("auth_user", ['student', 'teacher'])
-def test_new_assignment_comment(auth_user, client, assert_redirect):
-    semester = SemesterFactory.create_current()
-    student_profile = StudentProfileFactory()
-    teacher = TeacherFactory()
-    teacher2 = TeacherFactory()
-    course = CourseFactory(main_branch=student_profile.branch, semester=semester,
-                           teachers=[teacher, teacher2])
-    EnrollmentFactory(student_profile=student_profile,
-                      student=student_profile.user,
-                      course=course)
-    a = AssignmentFactory.create(course=course)
-    a_s = (StudentAssignment.objects
-           .filter(assignment=a, student=student_profile.user)
-           .get())
-    # Student and teacher views share the same logic for posting comment
-    if auth_user == 'student':
-        client.login(student_profile.user)
-        detail_url = a_s.get_student_url()
-        create_comment_url = reverse("study:assignment_comment_create",
-                                     kwargs={"pk": a_s.pk})
-        recipients_count = 2
-    elif auth_user == 'teacher':
-        client.login(teacher)
-        detail_url = a_s.get_teacher_url()
-        create_comment_url = reverse("teaching:assignment_comment_create",
-                                     kwargs={"pk": a_s.pk})
-        recipients_count = 1
-    else:
-        pytest.skip("unsupported user role")
-    assert AssignmentNotification.objects.count() == 1
-    n = AssignmentNotification.objects.first()
-    assert n.is_about_creation
-    # Publish new comment
-    AssignmentNotification.objects.all().delete()
-    f = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
-    comment_dict = {'text': "Test comment with file",
-                    'attached_file': f}
-    response = client.post(create_comment_url, comment_dict)
-    assert_redirect(response, detail_url)
-    response = client.get(detail_url)
-    assert smart_bytes(comment_dict['text']) in response.content
-    assert smart_bytes('attachment1') in response.content
-    assert AssignmentNotification.objects.count() == recipients_count
-    # Create draft message
-    assert AssignmentComment.objects.count() == 1
-    AssignmentNotification.objects.all().delete()
-    comment_dict = {
-        'text': "Test comment 2 with file",
-        'attached_file': SimpleUploadedFile("a.txt", b"a_content"),
-        'save-draft': 'Submit button text'
-    }
-    response = client.post(create_comment_url, comment_dict)
-    assert_redirect(response, detail_url)
-    assert AssignmentComment.objects.count() == 2
-    assert AssignmentNotification.objects.count() == 0
-    response = client.get(detail_url)
-    assert 'comment_form' in response.context_data
-    form = response.context_data['comment_form']
-    assert comment_dict['text'] == form.instance.text
-    rendered_form = BeautifulSoup(str(form), "html.parser")
-    file_name = rendered_form.find('span', class_='fileinput-filename')
-    assert file_name and file_name.string == form.instance.attached_file_name
-    # Publish another comment. This one should override draft
-    # But first create unpublished comment for course teacher and make sure
-    # it won't be published on publishing new comment from another user
-    teacher2_draft = AssignmentCommentFactory(author=teacher2,
-                                              student_assignment=a_s,
-                                              is_published=False)
-    assert AssignmentComment.published.count() == 1
-    draft = AssignmentComment.objects.get(text=comment_dict['text'])
-    comment_dict = {
-        'text': "Updated test comment 2 with file",
-        'attached_file': SimpleUploadedFile("test_file_b.txt", b"b_content"),
-    }
-    response = client.post(create_comment_url, comment_dict)
-    assert_redirect(response, detail_url)
-    assert AssignmentComment.published.count() == 2
-    assert AssignmentNotification.objects.count() == recipients_count
-    draft.refresh_from_db()
-    assert draft.is_published
-    assert draft.attached_file_name.startswith('test_file_b')
-    teacher2_draft.refresh_from_db()
-    assert not teacher2_draft.is_published

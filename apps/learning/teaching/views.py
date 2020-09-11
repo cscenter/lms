@@ -26,9 +26,11 @@ from courses.utils import get_current_term_pair, MonthPeriod, \
 from courses.views.calendar import MonthEventsCalendarView
 from learning.api.serializers import AssignmentScoreSerializer
 from learning.calendar import get_teacher_calendar_events, get_calendar_events
-from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
+from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm, \
+    AssignmentCommentForm
 from learning.gradebook.views import GradeBookListBaseView
-from learning.models import AssignmentComment, StudentAssignment, Enrollment
+from learning.models import AssignmentComment, StudentAssignment, Enrollment, \
+    AssignmentCommentTypes
 from learning.permissions import CreateAssignmentComment, ViewStudentAssignment, \
     EditOwnStudentAssignment, ViewStudentAssignmentList
 from learning.services import get_teacher_classes, CourseRole, \
@@ -455,11 +457,18 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
                                          AssignmentCommentUpsertView):
     permission_required = CreateAssignmentComment.name
+    submission_type = AssignmentCommentTypes.COMMENT
 
     def get_permission_object(self):
         return self.student_assignment
 
+    def get_form_class(self):
+        return AssignmentCommentForm
+
     def get_success_url(self):
+        return self.student_assignment.get_teacher_url()
+
+    def get_error_url(self):
         return self.student_assignment.get_teacher_url()
 
 

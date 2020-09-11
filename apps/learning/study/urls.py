@@ -4,7 +4,8 @@ from django.views.generic.base import RedirectView
 from learning.study.views import TimetableView, \
     StudentAssignmentDetailView, StudentAssignmentListView, \
     CalendarFullView, CalendarPersonalView, CourseListView, \
-    StudentAssignmentCommentCreateView, AssignmentExecutionTimeUpdateView
+    StudentAssignmentCommentCreateView, AssignmentExecutionTimeUpdateView, \
+    StudentAssignmentSolutionCreateView
 from learning.views import AssignmentAttachmentDownloadView, \
     AssignmentCommentAttachmentDownloadView
 
@@ -17,6 +18,7 @@ urlpatterns = [
         path('<int:pk>/', StudentAssignmentDetailView.as_view(), name='student_assignment_detail'),
         path('<int:pk>/execution-time/', AssignmentExecutionTimeUpdateView.as_view(), name='student_assignment_execution_time_update'),
         path('<int:pk>/comments/', StudentAssignmentCommentCreateView.as_view(), name='assignment_comment_create'),
+        path('<int:pk>/solutions/', StudentAssignmentSolutionCreateView.as_view(), name='assignment_solution_create'),
     ])),
     path('attachments/assignments/', include([
         path('comments/<slug:sid>/<str:file_name>', AssignmentCommentAttachmentDownloadView.as_view(), name='download_assignment_comment_attachment'),

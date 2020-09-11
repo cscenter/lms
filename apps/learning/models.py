@@ -27,7 +27,7 @@ from core.timezone import TimezoneAwareModel, now_local
 from core.urls import reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Assignment, StudentGroupTypes, \
-    Semester, AssignmentSubmissionTypes
+    Semester, AssignmentSubmissionFormats
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
 from learning.managers import EnrollmentDefaultManager, \
@@ -625,7 +625,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         if self.is_published and (created or not is_published_before):
             notify_new_assignment_comment(self)
         self.__original_is_published = self.is_published
-        with_code_review = self.student_assignment.assignment.submission_type == AssignmentSubmissionTypes.CODE_REVIEW
+        with_code_review = self.student_assignment.assignment.submission_type == AssignmentSubmissionFormats.CODE_REVIEW
         # FIXME: move to the signal in code_reviews
         if self.attached_file and with_code_review:
             from code_reviews.tasks import upload_attachment_to_gerrit

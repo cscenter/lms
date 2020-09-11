@@ -23,12 +23,14 @@ from info_blocks.models import InfoBlock
 from info_blocks.permissions import ViewInternships
 from learning import utils
 from learning.calendar import get_student_calendar_events, get_calendar_events
-from learning.forms import AssignmentExecutionTimeForm
-from learning.models import StudentAssignment, Enrollment
+from learning.forms import AssignmentExecutionTimeForm, AssignmentCommentForm
+from learning.models import StudentAssignment, Enrollment, \
+    AssignmentCommentTypes
 from learning.permissions import ViewOwnStudentAssignments, \
     EditOwnAssignmentExecutionTime, ViewOwnStudentAssignment, ViewCourses
 from learning.roles import Roles
 from learning.services import get_student_classes, get_student_profile
+from learning.study.services import get_solution_form, get_draft_solution
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView, \
     StudentAssignmentURLParamsMixin
@@ -144,16 +146,23 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         context = super().get_context_data(**kwargs)
         sa = self.student_assignment
         comment_form = context['comment_form']
-        comment_form.helper.form_action = reverse(
-            'study:assignment_comment_create',
-            kwargs={'pk': sa.pk})
-        # Update `text` label if student has no submissions yet
-        if sa.assignment.is_online and not sa.has_comments(self.request.user):
-            comment_form.fields.get('text').label = _("Add solution")
+        add_comment_url = reverse('study:assignment_comment_create',
+                                  kwargs={'pk': sa.pk})
+        comment_form.helper.form_action = add_comment_url
         # Format datetime in student timezone
         context['timezone'] = self.request.user.get_timezone()
+        # FIXME: Merge with a solution form
         execution_time_form = AssignmentExecutionTimeForm(instance=sa)
         context['execution_time_form'] = execution_time_form
+        # Solution Form
+        draft_solution = get_draft_solution(self.request.user, sa)
+        solution_form = get_solution_form(sa.assignment.submission_type,
+                                          instance=draft_solution)
+        if solution_form:
+            add_solution_url = reverse('study:assignment_solution_create',
+                                       kwargs={'pk': sa.pk})
+            solution_form.helper.form_action = add_solution_url
+        context['solution_form'] = solution_form
         return context
 
 
@@ -184,11 +193,43 @@ class AssignmentExecutionTimeUpdateView(StudentAssignmentURLParamsMixin,
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
                                          AssignmentCommentUpsertView):
     permission_required = "study.create_assignment_comment"
+    submission_type = AssignmentCommentTypes.COMMENT
 
     def get_permission_object(self):
         return self.student_assignment
 
+    def get_form_class(self):
+        return AssignmentCommentForm
+
     def get_success_url(self):
+        msg = _("Comment successfully saved")
+        messages.success(self.request, msg)
+        return self.student_assignment.get_student_url()
+
+    def get_error_url(self):
+        return self.student_assignment.get_student_url()
+
+
+class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
+                                          AssignmentCommentUpsertView):
+    permission_required = "study.create_assignment_comment"
+    submission_type = AssignmentCommentTypes.SOLUTION
+
+    def get_permission_object(self):
+        return self.student_assignment
+
+    def get_form(self, data=None, files=None, **kwargs):
+        submission_format = self.student_assignment.assignment.submission_type
+        form = get_solution_form(submission_format, data=data, files=files,
+                                 **kwargs)
+        return form
+
+    def get_success_url(self):
+        msg = _("Solution successfully saved")
+        messages.success(self.request, msg)
+        return self.student_assignment.get_student_url()
+
+    def get_error_url(self):
         return self.student_assignment.get_student_url()
 
 

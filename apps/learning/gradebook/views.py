@@ -15,7 +15,7 @@ from vanilla import FormView
 
 from auth.mixins import PermissionRequiredMixin
 from courses.models import Course, Semester, Assignment, \
-    AssignmentSubmissionTypes
+    AssignmentSubmissionFormats
 from courses.constants import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index
 from courses.views.mixins import CourseURLParamsMixin
@@ -211,7 +211,7 @@ class AssignmentGradesImportBaseView(TeacherOnlyMixin, generic.View):
         except (MultiValueDictKeyError, ValueError, TypeError):
             return HttpResponseBadRequest()
         filters = (Q(pk=assignment_id) & Q(course_id=course_id) &
-                   ~Q(submission_type=AssignmentSubmissionTypes.ONLINE))
+                   ~Q(submission_type=AssignmentSubmissionFormats.ONLINE))
         if not request.user.is_curator:
             filters &= Q(course__teachers__id=request.user.pk)
         try:
