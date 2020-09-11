@@ -21,8 +21,8 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["lk.yandexdataschool.r
 
 WSGI_APPLICATION = 'lk_yandexdataschool_ru.wsgi.application'
 ROOT_URLCONF = 'lms.urls'
-# FIXME: move to the SiteConfiguration model
 LMS_SUBDOMAIN = None
+LMS_CURATOR_EMAIL = 'shadcurators@yandex.ru'
 LMS_MENU = 'lk_yandexdataschool_ru.menu'
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,

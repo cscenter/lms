@@ -205,5 +205,6 @@ class InvitationCompleteProfileView(InvitationURLParamsMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['contact_email'] = settings.LMS_CURATOR_EMAIL
         context['invitation'] = self.invitation
         return context
