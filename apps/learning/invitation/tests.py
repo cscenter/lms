@@ -124,6 +124,7 @@ def test_invitation_register_view(client, assert_redirect, settings, mocker):
     called_args, called_kwargs = mocked_task.delay.call_args
     email_context, reg_profile_id = called_args
     assert reg_profile_id == new_user.registrationprofile.pk
+    abs_url = client.get('', secure=False).wsgi_request.build_absolute_uri
     activation_url = reverse("invitation:activate", kwargs={
         "token": invitation.token,
         "activation_key": new_user.registrationprofile.activation_key
@@ -131,5 +132,5 @@ def test_invitation_register_view(client, assert_redirect, settings, mocker):
     site = Site.objects.get_current()
     assert email_context == ActivationEmailContext(
             site_name=site.name,
-            activation_url=activation_url,
+            activation_url=abs_url(activation_url),
             language_code=settings.LANGUAGE_CODE)
