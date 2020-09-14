@@ -20,6 +20,7 @@
 @import "components/breadcrumbs";
 @import "components/upload_photo";
 @import "components/editor";
+@import "components/comment";
 
 @import "top_menu";
 @import "profile_page";
@@ -395,13 +396,6 @@ h2 small a {
   width: 6em;
 }
 
-.csc-well {
-  background-color: #F1F1F1;
-  min-height: 20px;
-  padding: 19px;
-  margin-bottom: 20px;
-}
-
 h5.assignment {
   font-weight: bold;
 }
@@ -633,10 +627,6 @@ tr.unread {
   font-weight: bold;
   font-size: 20px;
   color: #1F4C66;
-}
-
-.csc-well blockquote {
-  border-left-color: #CFCFCF;
 }
 
 .student-comment-metainfo {
