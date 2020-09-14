@@ -9,11 +9,10 @@ const footer = $(".footer");
 const comment = $('.assignment-comment');
 const modalFormWrapper = $("#update-comment-model-form");
 
-const outlineClass = 'btn-outline';
 const commentButton = $("#add-comment");
 const commentForm = $('#comment-form-wrapper')
 const solutionButton = $("#add-solution");
-const solutionForm = $('#solution-form-wrapper')
+const solutionForm = $('#solution-form-wrapper');
 
 let editor;
 
@@ -43,10 +42,10 @@ const fn = {
         commentButton.on('click', function() {
             commentForm.removeClass('hidden');
             fn.reflowEditor(commentForm);
-            $(this).removeClass(outlineClass);
+            $(this).addClass('active');
             if (solutionForm.length > 0) {
                 solutionForm.addClass('hidden');
-                solutionButton.addClass(outlineClass);
+                solutionButton.removeClass('active');
             }
         });
     },
@@ -56,9 +55,9 @@ const fn = {
             solutionButton.on('click', function() {
                 solutionForm.removeClass('hidden');
                 fn.reflowEditor(solutionForm);
+                $(this).addClass('active');
                 commentForm.addClass('hidden');
-                $(this).removeClass(outlineClass);
-                commentButton.addClass(outlineClass);
+                commentButton.removeClass('active');
             });
         }
 

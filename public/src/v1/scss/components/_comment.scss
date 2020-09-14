@@ -32,3 +32,18 @@
     line-height: 1.1;
   }
 }
+
+.assignment-actions {
+  border-bottom: 1px solid $color-gray-90;
+}
+
+#add-comment,
+#add-solution {
+  outline: none;
+  &.active {
+    cursor: default;
+    color: $color-gray-48;
+    background: $background-grey;
+    text-decoration: none;
+  }
+}
