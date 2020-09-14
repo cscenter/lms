@@ -196,8 +196,9 @@ class CourseClassForm(forms.ModelForm):
         course = kwargs.pop('course', None)
         assert course is not None
         super().__init__(*args, **kwargs)
+        # Collect all venues
         self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
-            branch_id=course.main_branch_id)
+            branch__in=course.branches.all()).distinct()
         field_restrict_to = self.fields['restricted_to']
         field_restrict_to.choices = StudentGroupService.get_choices(course)
         self.instance.course = course
