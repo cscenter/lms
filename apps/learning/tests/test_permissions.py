@@ -243,8 +243,9 @@ def test_create_assignment_comment():
     assert CreateAssignmentComment.name in perm_registry
     assert CreateAssignmentCommentAsTeacher in perm_registry
     assert CreateAssignmentCommentAsLearner in perm_registry
-    e = EnrollmentFactory(course=course)
-    student = e.student
+    enrollment = EnrollmentFactory(course=course)
+    student_profile = enrollment.student_profile
+    student = enrollment.student
     AssignmentFactory(course=course)
     assert StudentAssignment.objects.count() == 1
     sa = StudentAssignment.objects.first()
@@ -259,12 +260,17 @@ def test_create_assignment_comment():
     assert not student_other.has_perm(CreateAssignmentComment.name, sa)
     assert student.has_perm(CreateAssignmentComment.name, sa)
     assert not user.has_perm(CreateAssignmentComment.name, sa)
-    # User is teacher and volunteer
+    # User is a teacher and a volunteer
     StudentProfileFactory(type=StudentTypes.VOLUNTEER, user=teacher)
     teacher.refresh_from_db()
     assert teacher.has_perm(CreateAssignmentComment.name, sa)
     assert teacher.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
     assert not teacher.has_perm(CreateAssignmentCommentAsLearner.name, sa)
+    # Inactive status
+    student_profile.status = StudentStatuses.EXPELLED
+    student_profile.save()
+    instance_memoize.delete_cache(student)
+    assert not student.has_perm(CreateAssignmentComment.name, sa)
 
 
 @pytest.mark.django_db

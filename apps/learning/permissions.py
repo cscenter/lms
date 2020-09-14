@@ -284,7 +284,8 @@ class CreateAssignmentCommentAsLearner(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, student_assignment: StudentAssignment):
-        if user.status in StudentStatuses.inactive_statuses:
+        student_profile = user.get_student_profile()
+        if student_profile.status in StudentStatuses.inactive_statuses:
             return False
         return student_assignment.student_id == user.id
 

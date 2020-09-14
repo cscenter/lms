@@ -27,7 +27,8 @@ from learning.forms import AssignmentExecutionTimeForm, AssignmentCommentForm
 from learning.models import StudentAssignment, Enrollment, \
     AssignmentCommentTypes
 from learning.permissions import ViewOwnStudentAssignments, \
-    EditOwnAssignmentExecutionTime, ViewOwnStudentAssignment, ViewCourses
+    EditOwnAssignmentExecutionTime, ViewOwnStudentAssignment, ViewCourses, \
+    CreateAssignmentCommentAsLearner
 from learning.roles import Roles
 from learning.services import get_student_classes, get_student_profile
 from learning.study.services import get_solution_form, get_draft_solution
@@ -192,7 +193,7 @@ class AssignmentExecutionTimeUpdateView(StudentAssignmentURLParamsMixin,
 
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
                                          AssignmentCommentUpsertView):
-    permission_required = "study.create_assignment_comment"
+    permission_required = CreateAssignmentCommentAsLearner.name
     submission_type = AssignmentCommentTypes.COMMENT
 
     def get_permission_object(self):
@@ -212,7 +213,7 @@ class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
 
 class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
                                           AssignmentCommentUpsertView):
-    permission_required = "study.create_assignment_comment"
+    permission_required = CreateAssignmentCommentAsLearner.name
     submission_type = AssignmentCommentTypes.SOLUTION
 
     def get_permission_object(self):
