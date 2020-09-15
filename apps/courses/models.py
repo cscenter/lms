@@ -268,6 +268,12 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("Ask a student why they wants to enroll in the course "
                     "when they clicks the 'Enroll' button."),
         default=False)
+    ask_ttc = models.BooleanField(
+        _("Ask Time to Completion"),
+        help_text=_("Teacher must specify estimated amount of time "
+                    "required for an assignment to be completed. Student "
+                    "enters the actual time on submitting the solution."),
+        default=False)
     is_published_in_video = models.BooleanField(
         _("Published in video section"),
         default=False)
