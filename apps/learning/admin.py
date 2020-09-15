@@ -27,6 +27,7 @@ class AssignmentCommentAdmin(BaseModelAdmin):
         'student_assignment__assignment__course__meta_course',
     ]
     readonly_fields = ['student_assignment']
+    raw_id_fields = ('author',)
     list_display = ["get_assignment_name", "get_student", "author"]
     search_fields = ["student_assignment__assignment__title",
                      "student_assignment__assignment__id"]

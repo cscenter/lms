@@ -559,6 +559,10 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         max_length=42,
         choices=AssignmentCommentTypes.choices
     )
+    execution_time = models.DurationField(
+        verbose_name=_("Solution Execution Time"),
+        blank=True, null=True,
+        help_text=_("The time spent by the student executing this submission"))
     is_published = models.BooleanField(_("Published"), default=True)
     text = models.TextField(
         _("AssignmentComment|text"),
@@ -569,6 +573,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
     attached_file = ConfigurableStorageFileField(
+        verbose_name=_("Attached File"),
         max_length=200,
         upload_to=assignment_comment_attachment_upload_to,
         storage=private_storage,
