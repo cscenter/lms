@@ -1,4 +1,4 @@
-from crispy_forms.bootstrap import StrictButton, InlineRadios
+from crispy_forms.bootstrap import StrictButton, InlineRadios, FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
     Div, HTML, BaseInput, Row
@@ -73,10 +73,26 @@ class AssignmentCommentForm(forms.ModelForm):
 
 
 class AssignmentSolutionBaseForm(forms.ModelForm):
+    """
+    Base class for an assignment solution form.
+    Dynamically adds `execution_time` field if asking time to completion
+    is enabled in the course settings.
+
+    XXX:
+        Make sure to include execution time field in the form layout if needed.
+    """
     prefix = "solution"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, course, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['execution_time'] = AssignmentDurationField(
+            label=_("Time Spent on Assignment"),
+            required=course.ask_ttc,
+            widget=forms.TextInput(attrs={'autocomplete': 'off',
+                                          'class': 'form-control',
+                                          'placeholder': _('hours:minutes')}),
+            help_text=_("Requires the full format including minutes. "
+                        "Do not include the time of previous submissions."))
         self.instance.type = AssignmentCommentTypes.SOLUTION
         self.helper = FormHelper(self)
 
@@ -95,16 +111,18 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
 
     class Meta:
         model = AssignmentComment
-        fields = ('text', 'attached_file')
+        fields = ('text', 'attached_file', 'execution_time')
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, course, *args, **kwargs):
+        super().__init__(course, *args, **kwargs)
         self.helper.layout = Layout(
             Div('text', css_class='form-group-5'),
-            Div('attached_file'),
-            Div(Submit('save', _('Send Solution'),
-                       css_id=f'submit-id-{self.prefix}-save'),
-                css_class="form-group"))
+            Div('attached_file', css_class='form-group-5'),
+            Div('execution_time'),
+            FormActions(Submit('save', _('Send Solution'),
+                               css_id=f'submit-id-{self.prefix}-save'),
+                        css_class="form-group")
+        )
 
     def clean(self):
         cleaned_data = super().clean()

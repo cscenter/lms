@@ -41,10 +41,13 @@ def get_draft_solution(user: User, student_assignment: StudentAssignment):
                                 AssignmentCommentTypes.SOLUTION)
 
 
-def get_solution_form(submission_format,
+def get_solution_form(student_assignment: StudentAssignment,
                       **kwargs) -> Optional[AssignmentSolutionBaseForm]:
+    course = student_assignment.assignment.course
+    submission_format = student_assignment.assignment.submission_type
     if submission_format == AssignmentSubmissionFormats.EXTERNAL:
         # FIXME: return None
-        return AssignmentSolutionDefaultForm(**kwargs)
+        form = AssignmentSolutionDefaultForm(course, **kwargs)
     else:
-        return AssignmentSolutionDefaultForm(**kwargs)
+        form = AssignmentSolutionDefaultForm(course, **kwargs)
+    return form

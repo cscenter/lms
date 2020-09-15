@@ -225,6 +225,10 @@ class AssignmentDurationField(forms.DurationField):
     """
     Supports `hours:minutes` format instead of Django's '%d %H:%M:%S.%f'.
     """
+    default_error_messages = {
+        'required': _('Enter the time spent on the assignment.'),
+    }
+
     def prepare_value(self, value):
         if isinstance(value, datetime.timedelta):
             return execution_time_string(value)
@@ -293,6 +297,7 @@ class AssignmentForm(TimezoneAwareModelForm):
         course = kwargs.pop('course', None)
         assert course is not None
         super().__init__(*args, **kwargs)
+        self.fields['ttc'].required = course.ask_ttc
         self.instance.course = course
         field_restrict_to = self.fields['restricted_to']
         if course.group_mode == StudentGroupTypes.BRANCH:

@@ -152,43 +152,15 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         comment_form.helper.form_action = add_comment_url
         # Format datetime in student timezone
         context['timezone'] = self.request.user.get_timezone()
-        # FIXME: Merge with a solution form
-        execution_time_form = AssignmentExecutionTimeForm(instance=sa)
-        context['execution_time_form'] = execution_time_form
         # Solution Form
         draft_solution = get_draft_solution(self.request.user, sa)
-        solution_form = get_solution_form(sa.assignment.submission_type,
-                                          instance=draft_solution)
+        solution_form = get_solution_form(sa, instance=draft_solution)
         if solution_form:
             add_solution_url = reverse('study:assignment_solution_create',
                                        kwargs={'pk': sa.pk})
             solution_form.helper.form_action = add_solution_url
         context['solution_form'] = solution_form
         return context
-
-
-class AssignmentExecutionTimeUpdateView(StudentAssignmentURLParamsMixin,
-                                        PermissionRequiredMixin,
-                                        GenericModelView):
-    permission_required = EditOwnAssignmentExecutionTime.name
-    form_class = AssignmentExecutionTimeForm
-
-    def get_permission_object(self):
-        return self.student_assignment
-
-    def post(self, request, *args, **kwargs):
-        form = self.get_form(data=request.POST, files=request.FILES,
-                             instance=self.student_assignment)
-        if form.is_valid():
-            # TODO: update only execution_time field
-            self.student_assignment = form.save()
-            success_url = self.student_assignment.get_student_url()
-            return HttpResponseRedirect(success_url)
-        msg = str(_("Form has not been saved."))
-        if "execution_time" in form.errors:
-            msg = msg + " " + str(_('Wrong time format'))
-        messages.error(request, msg)
-        return HttpResponseRedirect(self.student_assignment.get_student_url())
 
 
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
@@ -220,9 +192,8 @@ class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
         return self.student_assignment
 
     def get_form(self, data=None, files=None, **kwargs):
-        submission_format = self.student_assignment.assignment.submission_type
-        form = get_solution_form(submission_format, data=data, files=files,
-                                 **kwargs)
+        form = get_solution_form(self.student_assignment, data=data,
+                                 files=files, **kwargs)
         return form
 
     def get_success_url(self):

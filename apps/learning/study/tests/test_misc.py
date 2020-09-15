@@ -244,30 +244,6 @@ def test_projects_on_assignment_list_page(client):
 
 
 @pytest.mark.django_db
-def test_student_assignment_execution_time_form(client, settings, assert_redirect):
-    """
-    Execution time form is unavailable until student get score on assignment
-    """
-    term = SemesterFactory.create_current()
-    assignment = AssignmentFactory(course__semester=term, maximum_score=10)
-    student = StudentFactory()
-    student_profile = student.get_student_profile(settings.SITE_ID)
-    EnrollmentService.enroll(student_profile, assignment.course)
-    sa = StudentAssignment.objects.get(assignment=assignment, student=student)
-    assert sa.execution_time is None
-    update_url = reverse('study:student_assignment_execution_time_update',
-                         args=[sa.pk])
-    client.login(student)
-    form_data = {'execution_time': '2:45'}
-    response = client.post(update_url, form_data)
-    assert response.status_code == 403
-    sa.score = 4
-    sa.save()
-    response = client.post(update_url, form_data)
-    assert_redirect(response, sa.get_student_url())
-
-
-@pytest.mark.django_db
 def test_assignment_list_view_permissions(client, lms_resolver,
                                           assert_login_redirect):
     from auth.permissions import perm_registry

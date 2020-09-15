@@ -73,11 +73,16 @@
                     <div class="col-xs-4">
                         {% with field=form.ttc %}
                             <div class="form-group{% if field.errors %} has-error{% endif %}">
-                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                <label for="{{ field.id_for_label }}">
+                                    {{ field.label }}{% if field.field.required %}<span class="asteriskField">*</span>{% endif %}
+                                </label>
                                 <a class="btn btn-link p-0 pull-right has-popover"  data-content="{{ field.help_text }}"><i class="fa fa-question-circle-o" aria-hidden="true"></i></a>
                                 <div class="input-group">
                                     <span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
                                     {% crispy_field field %}
+                                </div>
+                                <div class="help-block">
+                                    Требуется указать полный формат, включая минуты.
                                 </div>
                                 {% if field.errors %}
                                     {% for error in field.errors %}
