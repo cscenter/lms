@@ -235,7 +235,7 @@ def test_add_solution(client):
     messages = list(get_messages(response.wsgi_request))
     assert len(messages) == 1
     assert 'error' in messages[0].tags
-    client.get('/')  # Refresh messages
+    client.get('/', follow=True)  # Flush messages with middleware
     form_data = {
         'solution-text': 'Test solution',
         'solution-execution_time': '1:12',
