@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+from datetime import timedelta
 from decimal import Decimal
 from unittest import mock
 
@@ -22,7 +23,7 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
     CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
     AssignmentFactory, LearningSpaceFactory
 from learning.models import StudentAssignment, AssignmentNotification, \
-    AssignmentComment, EnrollmentPeriod
+    AssignmentComment, EnrollmentPeriod, AssignmentCommentTypes
 from courses.models import Semester, CourseNews, CourseReview, \
     AssignmentSubmissionFormats
 from courses.constants import SemesterTypes
@@ -347,3 +348,23 @@ def test_learning_space_full_name():
     assert learning_space.full_name == location.name
     learning_space = LearningSpaceFactory(location=location, name='Hello')
     assert learning_space.full_name == 'Hello, Zombie'
+
+
+@pytest.mark.django_db
+def test_student_assignment_execution_time():
+    student_assignment = StudentAssignmentFactory()
+    solution1 = AssignmentCommentFactory(student_assignment=student_assignment,
+                                         type=AssignmentCommentTypes.SOLUTION,
+                                         execution_time=timedelta(hours=2))
+    solution2 = AssignmentCommentFactory(student_assignment=student_assignment,
+                                         type=AssignmentCommentTypes.SOLUTION,
+                                         execution_time=timedelta(minutes=3))
+    # Doesn't take into account even if an exec time has been provided
+    comment1 = AssignmentCommentFactory(student_assignment=student_assignment,
+                                        type=AssignmentCommentTypes.COMMENT,
+                                        execution_time=timedelta(hours=2))
+    # student_assignment.compute_fields("execution_time")
+    assert student_assignment.execution_time == timedelta(hours=2, minutes=3)
+    # Recalculate on removing solution through admin interface
+    solution2.delete()
+    assert student_assignment.execution_time == timedelta(hours=2)

@@ -16,7 +16,6 @@ class DerivableFieldsMixin:
     with .prefetch_related)
     """
     # TODO: Make as an abstract property
-    # TODO: Add Django's check
     derivable_fields = []
     prefetch_before_compute_fields = {}
 

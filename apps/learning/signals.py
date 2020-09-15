@@ -7,7 +7,8 @@ from core.models import Branch
 from courses.models import Assignment, CourseNews, CourseTeacher, Course, \
     StudentGroupTypes, CourseBranch
 from learning.models import AssignmentNotification, \
-    StudentAssignment, Enrollment, CourseNewsNotification
+    StudentAssignment, Enrollment, CourseNewsNotification, AssignmentComment, \
+    AssignmentCommentTypes
 from learning.services import StudentGroupService, update_course_learners_count
 
 
@@ -81,3 +82,20 @@ def create_deadline_change_notification(sender, instance, created,
             except StudentAssignment.DoesNotExist:
                 # It can occur for student with inactive status
                 continue
+
+
+@receiver(post_save, sender=AssignmentComment)
+def save_student_solution(sender, instance: AssignmentComment, *args, **kwargs):
+    """Updates aggregated execution time value on StudentAssignment model"""
+    if instance.type != AssignmentCommentTypes.SOLUTION:
+        return
+    instance.student_assignment.compute_fields('execution_time')
+
+
+@receiver(post_delete, sender=AssignmentComment)
+def delete_student_solution(sender, instance: AssignmentComment,
+                            *args, **kwargs):
+    """Updates aggregated execution time value on StudentAssignment model"""
+    if instance.type != AssignmentCommentTypes.SOLUTION:
+        return
+    instance.student_assignment.compute_fields('execution_time')

@@ -25,8 +25,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, Location, Branch
 from core.timezone import now_local, Timezone, TimezoneAwareModel, \
     TimezoneAwareDateTimeField
 from core.urls import reverse
-from core.utils import hashids, get_youtube_video_id, instance_memoize, \
-    is_club_site
+from core.utils import hashids, get_youtube_video_id, instance_memoize
 from courses.constants import TeacherRoles, \
     MaterialVisibilityTypes
 from courses.utils import get_current_term_pair, TermPair

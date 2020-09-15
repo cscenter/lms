@@ -3,11 +3,10 @@ from typing import Iterable
 from django.apps import apps
 from django.contrib import messages
 from django.db.models import Q, Prefetch
-from django.http import HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from isoweek import Week
-from vanilla import TemplateView, GenericModelView
+from vanilla import TemplateView
 
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
@@ -23,18 +22,17 @@ from info_blocks.models import InfoBlock
 from info_blocks.permissions import ViewInternships
 from learning import utils
 from learning.calendar import get_student_calendar_events, get_calendar_events
-from learning.forms import AssignmentExecutionTimeForm, AssignmentCommentForm
+from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, Enrollment, \
     AssignmentCommentTypes
 from learning.permissions import ViewOwnStudentAssignments, \
-    EditOwnAssignmentExecutionTime, ViewOwnStudentAssignment, ViewCourses, \
+    ViewOwnStudentAssignment, ViewCourses, \
     CreateAssignmentCommentAsLearner
 from learning.roles import Roles
 from learning.services import get_student_classes, get_student_profile
 from learning.study.services import get_solution_form, get_draft_solution
 from learning.views import AssignmentSubmissionBaseView
-from learning.views.views import AssignmentCommentUpsertView, \
-    StudentAssignmentURLParamsMixin
+from learning.views.views import AssignmentCommentUpsertView
 from users.models import User
 
 
