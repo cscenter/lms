@@ -133,20 +133,6 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
         return cleaned_data
 
 
-class AssignmentExecutionTimeForm(forms.ModelForm):
-    execution_time = AssignmentDurationField(
-        label="Time Spent on Assignment",
-        widget=forms.TextInput(attrs={'autocomplete': 'off',
-                                      'class': 'form-control',
-                                      'placeholder': _('hours:minutes')}),
-        help_text=_("Form will be available after grading")
-    )
-
-    class Meta:
-        model = StudentAssignment
-        fields = ('execution_time',)
-
-
 class AssignmentModalCommentForm(forms.ModelForm):
     text = forms.CharField(
         label="",

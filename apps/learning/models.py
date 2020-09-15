@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
+from django.db.models import Sum
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
@@ -21,6 +22,7 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField, PrettyJSONField
+from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location, \
     SoftDeletionModel
 from core.timezone import TimezoneAwareModel, now_local
@@ -374,7 +376,8 @@ class Invitation(TimeStampedModel):
                 .exists())
 
 
-class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel):
+class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel,
+                        DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'assignment'
 
     class CommentAuthorTypes(DjangoChoices):
@@ -420,6 +423,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
     execution_time = models.DurationField(
         verbose_name=_("Execution Time"),
         blank=True, null=True,
+        editable=False,
         help_text=_("The time spent by the student executing this task"),
     )
     first_student_comment_at = models.DateTimeField(
@@ -434,6 +438,10 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         default=CommentAuthorTypes.NOBODY)
 
     objects = StudentAssignmentManager()
+
+    derivable_fields = [
+        'execution_time',
+    ]
 
     class Meta:
         ordering = ["assignment", "student"]
@@ -454,6 +462,19 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
     def __str__(self):
         return "{0} - {1}".format(smart_str(self.assignment),
                                   smart_str(self.student.get_full_name()))
+
+    def _compute_execution_time(self):
+        time_spent = (AssignmentComment.objects
+                      .filter(type=AssignmentCommentTypes.SOLUTION,
+                              student_assignment=self)
+                      .aggregate(total=Sum('execution_time')))
+        execution_time = time_spent['total']
+
+        if self.execution_time != execution_time:
+            self.execution_time = execution_time
+            return True
+
+        return False
 
     def get_teacher_url(self):
         return reverse('teaching:student_assignment_detail',

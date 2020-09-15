@@ -1,5 +1,8 @@
+from datetime import timedelta
+
 import pytest
 from bs4 import BeautifulSoup
+from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import smart_bytes
 
@@ -184,3 +187,70 @@ def test_new_comment_on_assignment_page(client, assert_redirect):
     assert draft.attached_file_name.startswith('test_file_b')
     teacher2_draft.refresh_from_db()
     assert not teacher2_draft.is_published
+
+
+@pytest.mark.django_db
+def test_add_solution(client):
+    student_profile = StudentProfileFactory()
+    student = student_profile.user
+    semester = SemesterFactory.create_current()
+    course = CourseFactory(main_branch=student_profile.branch,
+                           semester=semester, ask_ttc=False)
+    EnrollmentFactory(student_profile=student_profile,
+                      student=student,
+                      course=course)
+    assignment = AssignmentFactory(course=course)
+    student_assignment = (StudentAssignment.objects
+                          .get(assignment=assignment, student=student))
+    student_url = student_assignment.get_student_url()
+    create_solution_url = reverse("study:assignment_solution_create",
+                                  kwargs={"pk": student_assignment.pk})
+    form_data = {
+        'solution-text': "Test comment without file"
+    }
+    client.login(student)
+    response = client.post(create_solution_url, form_data)
+    assert response.status_code == 302
+    assert response.url == student_url
+    response = client.get(student_url)
+    assert smart_bytes(form_data['solution-text']) in response.content
+    f = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
+    form_data = {
+        'solution-text': "Test solution with file",
+        'solution-attached_file': f
+    }
+    response = client.post(create_solution_url, form_data)
+    assert response.status_code == 302
+    assert response.url == student_url
+    response = client.get(student_url)
+    assert smart_bytes(form_data['solution-text']) in response.content
+    assert smart_bytes('attachment1') in response.content
+    # Make execution field mandatory
+    form_data = {
+        'solution-text': 'Test solution',
+    }
+    course.ask_ttc = True
+    course.save()
+    response = client.post(create_solution_url, form_data)
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert 'error' in messages[0].tags
+    client.get('/')  # Refresh messages
+    form_data = {
+        'solution-text': 'Test solution',
+        'solution-execution_time': '1:12',
+    }
+    response = client.post(create_solution_url, form_data)
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert 'success' in messages[0].tags
+    student_assignment.refresh_from_db()
+    assert student_assignment.execution_time == timedelta(hours=1, minutes=12)
+    # Add another solution
+    form_data = {
+        'solution-text': 'Fixes on test solution',
+        'solution-execution_time': '0:34',
+    }
+    response = client.post(create_solution_url, form_data)
+    student_assignment.refresh_from_db()
+    assert student_assignment.execution_time == timedelta(hours=1, minutes=46)
