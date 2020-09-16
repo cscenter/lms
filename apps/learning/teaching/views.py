@@ -137,12 +137,11 @@ class AssignmentListView(PermissionRequiredMixin, TemplateView):
         course_offerings = [c for c in teacher_all_courses
                             if c.semester.index == query_term_index]
         # Try to get assignments for requested course
-        query_co = self._get_requested_course(course_offerings)
+        course = self._get_requested_course(course_offerings)
         # FIXME: attach course or pass it to deadline_at_local
         assignments = list(
             Assignment.objects
-            .filter(notify_teachers__teacher=self.request.user,
-                    course=query_co)
+            .filter(course=course)
             .only("pk", "deadline_at", "title", "course_id")
             .order_by("-deadline_at"))
         query_assignment = self._get_requested_assignment(assignments)
@@ -162,8 +161,8 @@ class AssignmentListView(PermissionRequiredMixin, TemplateView):
         context["course_offerings"] = course_offerings
         context["assignments"] = assignments
         self.query = {
-            "course_slug": query_co.meta_course.slug,
-            "term": query_co.semester.slug,
+            "course_slug": course.meta_course.slug,
+            "term": course.semester.slug,
             "assignment": query_assignment,
             "score": query_score,
             "comment": query_comment
