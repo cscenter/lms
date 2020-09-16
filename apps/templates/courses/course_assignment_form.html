@@ -81,9 +81,6 @@
                                     <span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
                                     {% crispy_field field %}
                                 </div>
-                                <div class="help-block">
-                                    Требуется указать полный формат, включая минуты.
-                                </div>
                                 {% if field.errors %}
                                     {% for error in field.errors %}
                                         <p id="error_{{ forloop.counter }}_{{ field.auto_id }}" class="help-block"><strong>{{ error }}</strong></p>

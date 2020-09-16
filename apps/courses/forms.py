@@ -227,6 +227,7 @@ class AssignmentDurationField(forms.DurationField):
     """
     default_error_messages = {
         'required': _('Enter the time spent on the assignment.'),
+        'invalid': _('Enter a valid duration in a HH:MM format'),
     }
 
     def prepare_value(self, value):
