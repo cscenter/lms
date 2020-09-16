@@ -37,6 +37,7 @@ from learning.managers import EnrollmentDefaultManager, \
     GraduateProfileActiveManager, AssignmentCommentPublishedManager, \
     GraduateProfileDefaultManager
 from learning.settings import GradingSystems, GradeTypes, ENROLLMENT_DURATION
+from learning.utils import humanize_duration
 from users.constants import ThumbnailSizes
 from users.models import StudentProfile
 from users.thumbnails import ThumbnailMixin, \
@@ -547,10 +548,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel,
         return (self.assignment.weight * self.score) if self.score else None
 
     def get_execution_time_display(self):
-        if self.execution_time is not None:
-            total_minutes = int(self.execution_time.total_seconds()) // 60
-            hours, minutes = divmod(total_minutes, 60)
-            return str(_("{} hrs {:02d} min")).format(hours, minutes)
+        return humanize_duration(self.execution_time)
 
 
 def assignment_comment_attachment_upload_to(self: "AssignmentComment", filename):

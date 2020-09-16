@@ -1,3 +1,4 @@
+from datetime import timedelta
 from enum import Enum, auto
 from itertools import islice
 from typing import List, Iterable, Union, Optional
@@ -6,7 +7,7 @@ from django.contrib.sites.models import Site
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction, router
 from django.db.models import Q, OuterRef, Value, F, TextField, QuerySet, \
-    Subquery, Count
+    Subquery, Count, Avg
 from django.db.models.functions import Concat, Coalesce
 from django.utils.timezone import now
 
@@ -356,6 +357,30 @@ class AssignmentService:
         if groups_remove:
             cls.bulk_remove_student_assignments(assignment,
                                                 for_groups=groups_remove)
+
+    @classmethod
+    def get_mean_execution_time(cls, assignment: Assignment):
+        stats = (StudentAssignment.objects
+                 .filter(assignment=assignment)
+                 .aggregate(mean=Avg('execution_time')))
+        return stats['mean']
+
+    @classmethod
+    def get_median_execution_time(cls, assignment: Assignment):
+        queryset = (StudentAssignment.objects
+                    .filter(assignment=assignment)
+                    .exclude(execution_time__isnull=True))
+        count = queryset.count()
+        if not count:
+            return None
+        values = (queryset
+                  .values_list('execution_time', flat=True)
+                  .order_by('execution_time'))
+        if count % 2 == 1:
+            return values[count // 2]
+        else:
+            mid = count // 2
+            return sum(values[mid - 1:mid + 1], timedelta()) / 2
 
 
 class EnrollmentError(Exception):

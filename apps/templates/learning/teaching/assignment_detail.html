@@ -39,6 +39,15 @@
       <p>
         {% trans "Assignment Weight" %}: {{ assignment.weight|floatdot }}
       </p>
+        <p>
+            {% trans "Estimated Execution Time" %}: {{ assignment.get_ttc_display }}
+        </p>
+        <p>
+            {% trans "Mean Execution Time" %}: {{ execution_time_mean|default_if_none:"-" }}
+        </p>
+        <p>
+            {% trans "Median Execution Time" %}: {{ execution_time_median|default_if_none:"-" }}
+        </p>
       {% if assignment.assignmentattachment_set.all %}
       {% trans "Attached files" %}:
       <ul class="list-unstyled">
