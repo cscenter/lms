@@ -32,6 +32,7 @@ from courses.utils import get_current_term_pair, TermPair
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
 from learning.settings import GradingSystems, GradeTypes
+from learning.utils import humanize_duration
 from .constants import SemesterTypes, ClassTypes
 from .managers import CourseTeacherManager, AssignmentManager, \
     CourseClassManager, CourseDefaultManager
@@ -1144,6 +1145,9 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         """
         bucket = self.course.semester.slug
         return f'assignments/{bucket}/{self.pk}'
+
+    def get_ttc_display(self):
+        return humanize_duration(self.ttc)
 
 
 def assignment_attachment_upload_to(self: "AssignmentAttachment", filename):

@@ -34,7 +34,8 @@ from learning.models import AssignmentComment, StudentAssignment, Enrollment, \
 from learning.permissions import CreateAssignmentComment, ViewStudentAssignment, \
     EditOwnStudentAssignment, ViewStudentAssignmentList
 from learning.services import get_teacher_classes, CourseRole, \
-    course_access_role
+    course_access_role, AssignmentService
+from learning.utils import humanize_duration
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import logger, AssignmentCommentUpsertView
 from users.mixins import TeacherOnlyMixin
@@ -393,6 +394,12 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
                             'student')
             .prefetch_related('student__groups')
             .order_by('student__last_name', 'student__first_name'))
+        # Note: it's possible to return values instead and
+        # making 1 db hit instead of 3
+        exec_mean = AssignmentService.get_mean_execution_time(self.object)
+        exec_median = AssignmentService.get_median_execution_time(self.object)
+        context["execution_time_mean"] = humanize_duration(exec_mean)
+        context["execution_time_median"] = humanize_duration(exec_median)
         return context
 
 

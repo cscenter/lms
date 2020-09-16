@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import pytest
 
 from core.tests.factories import BranchFactory
@@ -9,7 +11,7 @@ from learning.services import StudentGroupService, GroupEnrollmentKeyError, \
     AssignmentService, create_student_profile, StudentProfileError
 from learning.settings import Branches, StudentStatuses
 from learning.tests.factories import StudentGroupFactory, EnrollmentFactory, \
-    AssignmentNotificationFactory
+    AssignmentNotificationFactory, StudentAssignmentFactory
 from users.models import StudentTypes, UserGroup
 from users.tests.factories import StudentFactory, UserFactory, \
     StudentProfileFactory
@@ -251,3 +253,36 @@ def test_assignment_service_sync_student_assignments():
     assignment.restricted_to.add(group_nsk)
     AssignmentService.sync_student_assignments(assignment)
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 1
+
+
+@pytest.mark.django_db
+def test_mean_execution_time():
+    assignment = AssignmentFactory()
+    assert AssignmentService.get_mean_execution_time(assignment) is None
+    sa1 = StudentAssignmentFactory(assignment=assignment,
+                                   execution_time=timedelta(hours=2, minutes=4))
+    assert AssignmentService.get_mean_execution_time(assignment) == timedelta(hours=2, minutes=4)
+    sa2 = StudentAssignmentFactory(assignment=assignment,
+                                   execution_time=timedelta(hours=4, minutes=12))
+    assert AssignmentService.get_mean_execution_time(assignment) == timedelta(hours=3, minutes=8)
+    sa3 = StudentAssignmentFactory(assignment=assignment,
+                                   execution_time=timedelta(minutes=56))
+    assert AssignmentService.get_mean_execution_time(assignment) == timedelta(hours=2, minutes=24)
+
+
+@pytest.mark.django_db
+def test_median_execution_time():
+    assignment = AssignmentFactory()
+    assert AssignmentService.get_median_execution_time(assignment) is None
+    sa1 = StudentAssignmentFactory(assignment=assignment,
+                                   execution_time=timedelta(hours=2, minutes=4))
+    assert AssignmentService.get_median_execution_time(assignment) == timedelta(hours=2, minutes=4)
+    sa2 = StudentAssignmentFactory(assignment=assignment,
+                                   execution_time=timedelta(hours=4, minutes=12))
+    assert AssignmentService.get_median_execution_time(assignment) == timedelta(hours=3, minutes=8)
+    sa3 = StudentAssignmentFactory(assignment=assignment,
+                                   execution_time=timedelta(minutes=56))
+    assert AssignmentService.get_median_execution_time(assignment) == timedelta(hours=2, minutes=4)
+    sa4 = StudentAssignmentFactory(assignment=assignment,
+                                   execution_time=timedelta(minutes=4))
+    assert AssignmentService.get_median_execution_time(assignment) == timedelta(hours=1, minutes=30)
