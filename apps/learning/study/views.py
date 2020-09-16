@@ -9,6 +9,8 @@ from isoweek import Week
 from vanilla import TemplateView
 
 from auth.mixins import PermissionRequiredMixin
+from contests.models import CheckingSystemTypes
+from contests.forms import YandexContestSubmissionForm
 from core.exceptions import Redirect
 from core.urls import reverse
 from courses.calendar import CalendarEventW
@@ -156,8 +158,13 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         if solution_form:
             add_solution_url = reverse('study:assignment_solution_create',
                                        kwargs={'pk': sa.pk})
-            solution_form.helper.form_action = add_solution_url
+            solution_form.helper.form_tag = False
+            context['add_solution_url'] = add_solution_url
         context['solution_form'] = solution_form
+        # Additional form - e.g., Yandex.Contest submission
+        checker = self.student_assignment.assignment.checking_system
+        if checker.type == CheckingSystemTypes.yandex:
+            context['yandex_contest_form'] = YandexContestSubmissionForm()
         return context
 
 
@@ -185,6 +192,15 @@ class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
                                           AssignmentCommentUpsertView):
     permission_required = CreateAssignmentCommentAsLearner.name
     submission_type = AssignmentCommentTypes.SOLUTION
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        checker = self.student_assignment.assignment.checking_system
+        if checker.type == CheckingSystemTypes.yandex:
+            context['yandex_contest_form'] = YandexContestSubmissionForm(
+                assignment_comment=self
+            )
+        return context
 
     def get_permission_object(self):
         return self.student_assignment

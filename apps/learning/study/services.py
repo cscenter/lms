@@ -2,7 +2,7 @@ from typing import Optional, Type
 
 from courses.models import Assignment, AssignmentSubmissionFormats
 from learning.forms import AssignmentSolutionBaseForm, \
-    AssignmentSolutionDefaultForm
+    AssignmentSolutionDefaultForm, AssignmentSolutionYandexContestForm
 from learning.models import AssignmentComment, StudentAssignment, \
     AssignmentCommentTypes
 from users.models import User
@@ -48,6 +48,8 @@ def get_solution_form(student_assignment: StudentAssignment,
     if submission_format == AssignmentSubmissionFormats.EXTERNAL:
         # FIXME: return None
         form = AssignmentSolutionDefaultForm(course, **kwargs)
+    elif submission_format == AssignmentSubmissionFormats.CODE_REVIEW:
+        form = AssignmentSolutionYandexContestForm(course, **kwargs)
     else:
         form = AssignmentSolutionDefaultForm(course, **kwargs)
     return form

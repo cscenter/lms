@@ -208,7 +208,7 @@ class YandexContestAPI:
         response = self.request_and_check(url, "post", headers=headers,
                                           data=payload, files=files,
                                           timeout=timeout)
-        data = response.content
+        data = response.json()
         logger.debug("Meta data: {}".format(data))
         return response.status_code, data
 

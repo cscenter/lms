@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.views import generic
 from vanilla import TemplateView, GenericModelView
 
+from contests.forms import YandexContestSubmissionForm
 from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin
@@ -63,6 +64,7 @@ class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin,
 
     def post(self, request, *args, **kwargs):
         # Saving drafts is only supported for comments.
+        print(request.POST)
         is_comment = (self.submission_type == AssignmentCommentTypes.COMMENT)
         save_draft = is_comment and "save-draft" in request.POST
         assert self.submission_type is not None
@@ -73,21 +75,39 @@ class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin,
         submission.is_published = not save_draft
         form = self.get_form(data=request.POST, files=request.FILES,
                              instance=submission)
+        # Process Yandex.Contest submission form
+        yandex_contest_form = None
+        ya_contest_submission = not is_comment and 'settings' in request.POST
+        print('*** YANDEX CONTEST ***', ya_contest_submission)
+        if ya_contest_submission:
+            yandex_contest_form = YandexContestSubmissionForm(
+                data=request.POST, files=request.FILES
+            )
         if form.is_valid():
+            if yandex_contest_form:
+                if yandex_contest_form.is_valid():
+                    return self.form_valid(form, yandex_contest_form)
+                else:
+                    return self.form_invalid(yandex_contest_form)
             return self.form_valid(form)
         return self.form_invalid(form)
 
-    def form_valid(self, form):
+    def form_valid(self, form, yandex_contest_form=None):
         comment = form.save(commit=False)
         comment.student_assignment = self.student_assignment
         comment.author = self.request.user
         comment.save()
         comment_persistence.report_saved(comment.text)
+        if yandex_contest_form:
+            submission = yandex_contest_form.save(commit=False)
+            submission.assignment_comment = comment
+            print(submission)
+            submission.save()
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form):
-        msg = "<br>".join("<br>".join(errors) for errors in
-                          form.errors.values())
+        msg = "<br>".join("<br>".join(errors)
+                          for errors in form.errors.values())
         messages.error(self.request, "Данные не сохранены!<br>" + msg)
         redirect_to = self.get_error_url()
         return HttpResponseRedirect(redirect_to)

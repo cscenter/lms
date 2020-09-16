@@ -133,6 +133,34 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
         return cleaned_data
 
 
+class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
+    attached_file = forms.FileField(
+        label=_("Solution file"),
+        required=False,
+        widget=JesnyFileInput)
+
+    class Meta:
+        model = AssignmentComment
+        fields = ('attached_file', 'execution_time')
+
+    def __init__(self, course, *args, **kwargs):
+        super().__init__(course, *args, **kwargs)
+        self.helper.layout = Layout(
+            Div('attached_file', css_class='form-group-5'),
+            Div('execution_time'),
+            FormActions(Submit('save', _('Send Solution'),
+                               css_id=f'submit-id-{self.prefix}-save'),
+                        css_class="form-group")
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get("attached_file"):
+            raise forms.ValidationError(
+                _("File should be non-empty"))
+        return cleaned_data
+
+
 class AssignmentModalCommentForm(forms.ModelForm):
     text = forms.CharField(
         label="",
