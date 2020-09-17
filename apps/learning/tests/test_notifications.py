@@ -12,14 +12,13 @@ from subdomains.utils import get_domain
 from core.models import SiteConfiguration
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU
-from core.tests.utils import CSCTestCase
-
 from core.urls import reverse
 from courses.admin import AssignmentAdmin
-from courses.models import CourseTeacher, Assignment, AssignmentSubmissionFormats
+from courses.models import CourseTeacher, Assignment, \
+    AssignmentSubmissionFormats
 from courses.tests.factories import CourseFactory, AssignmentFactory
-from learning.services import course_failed_by_student, get_student_profile
 from learning.models import AssignmentNotification
+from learning.services import course_failed_by_student, get_student_profile
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import *
 from notifications.management.commands.notify import \
@@ -27,97 +26,107 @@ from notifications.management.commands.notify import \
 from users.tests.factories import *
 
 
-class NotificationTests(CSCTestCase):
-    def _get_unread(self, url):
-        return (self.client.get(url)
-                .context['request']
-                .unread_notifications_cache)
+def _get_unread(client, url):
+    return client.get(url).context['request'].unread_notifications_cache
 
-    def test_assignment(self):
-        student = StudentFactory()
-        teacher1 = TeacherFactory()
-        teacher2 = TeacherFactory()
-        co = CourseFactory(teachers=[teacher1, teacher2])
-        EnrollmentFactory(student=student, course=co, grade=GradeTypes.GOOD)
-        # Notify_teachers m2m populated only from view action
-        self.client.login(teacher1)
-        a = AssignmentFactory.build()
-        form = {
-            'title': a.title,
-            'submission_type': AssignmentSubmissionFormats.ONLINE,
-            'text': a.text,
-            'passing_score': 0,
-            'maximum_score': 5,
-            'weight': 1,
-            'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
-            'deadline_at_1': '00:00'
-        }
-        response = self.client.post(co.get_create_assignment_url(), form,
-                                    follow=True)
-        assert response.status_code == 200
-        assignments = co.assignment_set.all()
-        assert len(assignments) == 1
-        a = assignments[0]
-        a_s = (StudentAssignment.objects
-               .filter(assignment=a, student=student)
-               .get())
-        student_url = a_s.get_student_url()
-        student_create_comment_url = reverse("study:assignment_comment_create",
-                                             kwargs={"pk": a_s.pk})
-        teacher_create_comment_url = reverse(
-            "teaching:assignment_comment_create",
-            kwargs={"pk": a_s.pk})
-        teacher_url = a_s.get_teacher_url()
-        student_list_url = reverse('study:assignment_list', args=[])
-        teacher_list_url = reverse('teaching:assignment_list', args=[])
-        student_comment_dict = {
-            'comment-text': "Test student comment without file"
-        }
-        teacher_comment_dict = {
-            'comment-text': "Test teacher comment without file"
-        }
 
-        # Post first comment on assignment
-        assert not course_failed_by_student(co, student)
-        self.client.login(student)
-        self.client.post(student_create_comment_url, student_comment_dict)
-        # FIXME(Dmitry): this should not affect this test, fix&remove
-        self.client.get(student_url)
-        self.assertEqual(2, (AssignmentNotification.objects
-                              .filter(is_about_passed=True,
-                                      is_unread=True,
-                                      is_notified=False)
-                              .count()))
-        self.assertEqual(0, len(self._get_unread(student_list_url)
-                                 .assignments))
-        self.client.login(teacher1)
-        assert len(self._get_unread(teacher_list_url).assignments) == 1
-        self.client.login(teacher2)
-        assert len(self._get_unread(teacher_list_url).assignments) == 1
-        # Read message
-        self.client.get(teacher_url)
-        assert len(self._get_unread(teacher_list_url).assignments) == 0
-        self.client.login(teacher1)
-        assert len(self._get_unread(teacher_list_url).assignments) == 1
+@pytest.mark.django_db
+def test_assignment(client):
+    teacher1 = TeacherFactory()
+    teacher2 = TeacherFactory()
+    course = CourseFactory(teachers=[teacher1, teacher2])
+    student = StudentFactory()
+    EnrollmentFactory(student=student, course=course, grade=GradeTypes.GOOD)
+    a = AssignmentFactory.build()
+    form = {
+        'title': a.title,
+        'submission_type': AssignmentSubmissionFormats.ONLINE,
+        'text': a.text,
+        'passing_score': 0,
+        'maximum_score': 5,
+        'weight': 1,
+        'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
+        'deadline_at_1': '00:00'
+    }
+    client.login(teacher1)
+    response = client.post(course.get_create_assignment_url(), form, follow=True)
+    assert response.status_code == 200
+    assignments = course.assignment_set.all()
+    assert len(assignments) == 1
+    a = assignments[0]
+    a_s = (StudentAssignment.objects
+           .filter(assignment=a, student=student)
+           .get())
+    assert AssignmentNotification.objects.filter(is_about_creation=True).count() == 1
+    student_url = a_s.get_student_url()
+    student_create_comment_url = reverse("study:assignment_comment_create",
+                                         kwargs={"pk": a_s.pk})
+    student_create_solution_url = reverse("study:assignment_solution_create",
+                                          kwargs={"pk": a_s.pk})
+    teacher_create_comment_url = reverse(
+        "teaching:assignment_comment_create",
+        kwargs={"pk": a_s.pk})
+    teacher_url = a_s.get_teacher_url()
+    student_list_url = reverse('study:assignment_list', args=[])
+    teacher_list_url = reverse('teaching:assignment_list', args=[])
+    student_comment_dict = {
+        'comment-text': "Test student comment without file"
+    }
+    teacher_comment_dict = {
+        'comment-text': "Test teacher comment without file"
+    }
 
-        # One of teachers answered
-        self.client.post(teacher_create_comment_url, teacher_comment_dict)
-        unread_msgs_for_student = (AssignmentNotification.objects
-                              .filter(user=student,
-                                      is_unread=True,
-                                      is_notified=False)
-                              .count())
-        assert unread_msgs_for_student == 1
-        self.client.login(student)
-        assert len(self._get_unread(student_list_url).assignments) == 1
-        self.client.post(student_create_comment_url, student_comment_dict)
-        unread_msgs_for_teacher1 = (AssignmentNotification.objects
-                                    .filter(is_about_passed=False,
-                                            user=teacher1,
-                                            is_unread=True,
-                                            is_notified=False)
-                                    .count())
-        assert unread_msgs_for_teacher1 == 1
+    # Post first comment on assignment
+    AssignmentNotification.objects.all().delete()
+    assert not course_failed_by_student(course, student)
+    client.login(student)
+    client.post(student_create_comment_url, student_comment_dict)
+    assert 2 == (AssignmentNotification.objects
+                 .filter(is_about_passed=False,
+                         is_unread=True,
+                         is_notified=False)
+                 .count())
+    assert len(_get_unread(client, student_list_url).assignments) == 0
+    client.login(teacher1)
+    assert len(_get_unread(client, teacher_list_url).assignments) == 1
+    client.login(teacher2)
+    assert len(_get_unread(client, teacher_list_url).assignments) == 1
+    # Read message
+    client.get(teacher_url)
+    client.login(teacher1)
+    assert len(_get_unread(client, teacher_list_url).assignments) == 1
+    client.login(teacher2)
+    assert len(_get_unread(client, teacher_list_url).assignments) == 0
+    # Teacher left a comment
+    client.post(teacher_create_comment_url, teacher_comment_dict)
+    unread_msgs_for_student = (AssignmentNotification.objects
+                               .filter(user=student,
+                                       is_unread=True,
+                                       is_notified=False)
+                               .count())
+    assert unread_msgs_for_student == 1
+    client.login(student)
+    assert len(_get_unread(client, student_list_url).assignments) == 1
+    # Student left a comment again
+    client.post(student_create_comment_url, student_comment_dict)
+    unread_msgs_for_teacher1 = (AssignmentNotification.objects
+                                .filter(is_about_passed=False,
+                                        user=teacher1,
+                                        is_unread=True,
+                                        is_notified=False)
+                                .count())
+    assert unread_msgs_for_teacher1 == 2
+    # Student sent a solution
+    client.login(student)
+    solution_form = {
+        'solution-text': "Test student solution without file"
+    }
+    client.post(student_create_solution_url, solution_form)
+    assert 2 == (AssignmentNotification.objects
+                 .filter(is_about_passed=True,
+                         is_unread=True,
+                         is_notified=False)
+                 .count())
 
 
 @pytest.mark.django_db

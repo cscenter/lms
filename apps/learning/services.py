@@ -19,7 +19,7 @@ from courses.managers import CourseClassQuerySet
 from courses.models import Course, Assignment, AssignmentAttachment, \
     StudentGroupTypes, CourseClass, CourseTeacher
 from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, StudentGroup, Event
+    AssignmentNotification, StudentGroup, Event, AssignmentSubmissionTypes
 from learning.settings import StudentStatuses
 from users.models import User, StudentProfile, StudentTypes
 
@@ -492,14 +492,14 @@ def notify_new_assignment_comment(comment):
                           .filter(author_id=comment.author_id)
                           .exclude(pk=comment.pk))
         is_first_comment = not other_comments.exists()
-        is_about_passed = sa.assignment.is_online and is_first_comment
+        is_solution = (comment.type == AssignmentSubmissionTypes.SOLUTION)
 
         teachers = comment.student_assignment.assignment.notify_teachers.all()
         for t in teachers:
             notifications.append(
                 AssignmentNotification(user_id=t.teacher_id,
                                        student_assignment=sa,
-                                       is_about_passed=is_about_passed))
+                                       is_about_passed=is_solution))
 
         if is_first_comment:
             sa_update_dict["first_student_comment_at"] = comment.created
