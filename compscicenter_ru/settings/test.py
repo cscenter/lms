@@ -53,6 +53,7 @@ PRIVATE_FILE_STORAGE = DEFAULT_FILE_STORAGE
 MEDIA_ROOT = '/tmp/django_test_media/'
 MEDIA_URL = "/media/"
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+EMAIL_SEND_COOLDOWN = 0
 
 MIGRATION_MODULES = {}
 
