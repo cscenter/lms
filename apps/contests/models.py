@@ -57,12 +57,14 @@ class YandexCompilers(DjangoChoices):
 
 class CheckingSystemTypes(DjangoChoices):
     yandex = ChoiceItem('ya', _("Yandex.Contest"))
+    none = ChoiceItem('none', _("No checking system"))
 
 
 class CheckingSystem(models.Model):
     created_at = AutoCreatedField(_('created'))
-    type = models.CharField(_("Type"), max_length=42,
+    type = models.CharField(_("Checking System Type"), max_length=42,
                             choices=CheckingSystemTypes.choices)
+    url = models.URLField(_("Checking System URL"), blank=True)
     settings = JSONField(
         verbose_name=_("Details"),
         blank=True,
