@@ -302,14 +302,18 @@ def test_new_course_news_notification_context(settings, client):
     enrollment = EnrollmentFactory(course=course, student=student)
     cn = CourseNewsNotificationFactory(course_offering_news__course=course,
                                        user=student)
-    context = get_course_news_notification_context(cn)
+    site_settings = SiteConfiguration.objects.get(site_id=settings.SITE_ID)
+    participant_branch = enrollment.student_profile.branch
+    context = get_course_news_notification_context(cn, participant_branch,
+                                                   site_settings)
     assert context['course_link'] == abs_url(course.get_absolute_url())
     another_site = Site.objects.get(pk=settings.ANOTHER_DOMAIN_ID)
     branch = BranchFactory(code=settings.DEFAULT_BRANCH_CODE, site=another_site)
     cn = CourseNewsNotificationFactory(
         course_offering_news__course=course,
         user=StudentFactory(branch=branch))
-    context = get_course_news_notification_context(cn)
+    site_settings = SiteConfiguration.objects.get(site_id=settings.ANOTHER_DOMAIN_ID)
+    context = get_course_news_notification_context(cn, branch, site_settings)
     assert context['course_link'].startswith(f'https://{settings.ANOTHER_DOMAIN}')
 
 

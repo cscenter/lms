@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-import functools
 import logging
 from datetime import datetime
 from functools import partial
-from typing import Callable, Dict
-from urllib.parse import urlparse
+from typing import Dict
 
 from django.apps import apps
 from django.conf import settings
@@ -20,7 +18,6 @@ from django_ses import SESBackend
 
 from core.models import SiteConfiguration, Branch
 from core.urls import replace_hostname
-
 from courses.models import Course
 from learning.models import AssignmentNotification, \
     CourseNewsNotification
@@ -76,30 +73,6 @@ def resolve_course_participant_branch(course: Course, participant: User):
         # Fallback to the main branch of the course
         branch = course.main_branch
     return branch
-
-
-def _get_base_domain(user: User, course: Course):
-    enrollment = user.get_enrollment(course.pk)
-    if enrollment:
-        branch = enrollment.student_profile.branch
-    else:
-        # It's not clear what domain use for teacher since the same course
-        # could be shared among sites, so let's resolve it in priority
-        if user.branch_id:
-            branch = user.branch
-        else:
-            branch = course.main_branch
-    base_domain = branch.site.domain
-    resolve_subdomain = (branch.site_id == settings.CLUB_SITE_ID)
-    if resolve_subdomain:
-        prefix = branch.code.lower()
-        if prefix == settings.DEFAULT_BRANCH_CODE:
-            prefix = ""
-    else:
-        prefix = settings.LMS_SUBDOMAIN if settings.LMS_SUBDOMAIN else ""
-    if prefix:
-        return f"{prefix}.{base_domain}"
-    return base_domain
 
 
 def report(f, s):
@@ -192,13 +165,15 @@ def get_assignment_notification_context(
     return context
 
 
-def get_course_news_notification_context(notification: CourseNewsNotification):
-    base_domain = _get_base_domain(
-        notification.user,
-        notification.course_offering_news.course)
+def get_course_news_notification_context(
+        notification: CourseNewsNotification,
+        participant_branch: Branch,
+        site_settings: SiteConfiguration) -> Dict:
+    domain_name = get_domain_name(participant_branch, site_settings)
+    abs_url_builder = _get_abs_url_builder(domain_name)
     course = notification.course_offering_news.course
     context = {
-        'course_link': replace_hostname(course.get_absolute_url(), base_domain),
+        'course_link': abs_url_builder(course.get_absolute_url()),
         'course_name': smart_str(course.meta_course),
         'course_news_name': notification.course_offering_news.title,
         'course_news_text': notification.course_offering_news.text,
@@ -268,7 +243,8 @@ def send_course_news_notifications(site_configurations, stdout) -> None:
         course = notification.course_offering_news.course
         branch = resolve_course_participant_branch(course, notification.user)
         site_settings: SiteConfiguration = site_configurations[branch.site_id]
-        context = get_course_news_notification_context(notification)
+        context = get_course_news_notification_context(notification,
+                                                       branch, site_settings)
         send_notification(notification, template, context, stdout, site_settings)
 
 
