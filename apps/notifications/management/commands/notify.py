@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import time
 from datetime import datetime
 from functools import partial
 from typing import Dict
@@ -226,6 +227,7 @@ def send_assignment_notifications(site_configurations, stdout) -> None:
         context = get_assignment_notification_context(
             notification, branch, site_settings)
         send_notification(notification, template, context, stdout, site_settings)
+        time.sleep(settings.EMAIL_SEND_COOLDOWN)
 
 
 def send_course_news_notifications(site_configurations, stdout) -> None:
@@ -248,6 +250,7 @@ def send_course_news_notifications(site_configurations, stdout) -> None:
         context = get_course_news_notification_context(notification,
                                                        branch, site_settings)
         send_notification(notification, template, context, stdout, site_settings)
+        time.sleep(settings.EMAIL_SEND_COOLDOWN)
 
 
 class Command(BaseCommand):

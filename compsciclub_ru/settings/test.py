@@ -48,6 +48,7 @@ MEDIA_URL = "/media/"
 MIGRATION_MODULES = {}
 
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+EMAIL_SEND_COOLDOWN = 0
 
 LANGUAGE_CODE = 'en'
 
