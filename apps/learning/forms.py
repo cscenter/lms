@@ -5,6 +5,7 @@ from crispy_forms.layout import Field, Layout, Submit, Hidden, \
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from contests.models import YandexCompilers, Submission
 from core.forms import GradeField
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.timezone.constants import TIME_FORMAT_RU
@@ -134,6 +135,10 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
 
 
 class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
+    compiler_id = forms.ChoiceField(
+        label=_("Compiler"),
+        choices=YandexCompilers.choices
+    )
     attached_file = forms.FileField(
         label=_("Solution file"),
         required=False,
@@ -145,7 +150,9 @@ class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
 
     def __init__(self, course, *args, **kwargs):
         super().__init__(course, *args, **kwargs)
+        self.post_comment_save = [self.save_submission]
         self.helper.layout = Layout(
+            Div('compiler_id', css_class='form-group-5'),
             Div('attached_file', css_class='form-group-5'),
             Div('execution_time'),
             FormActions(Submit('save', _('Send Solution'),
@@ -159,6 +166,12 @@ class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
             raise forms.ValidationError(
                 _("File should be non-empty"))
         return cleaned_data
+
+    def save_submission(self, assignment_submission):
+        settings = {'compiler_id': self.cleaned_data['compiler_id']}
+        submission, _ = Submission.objects.get_or_create(assignment_comment=assignment_submission,
+                                                      settings=settings)
+        submission.save()
 
 
 class AssignmentModalCommentForm(forms.ModelForm):

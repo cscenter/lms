@@ -129,12 +129,7 @@
             {% crispy comment_form %}
         </div>
         <div id="solution-form-wrapper" class="csc-well hidden">
-            <form action="{{ add_solution_url }}" method="post" enctype="multipart/form-data">
-                {% if yandex_contest_form %}
-                    {% crispy yandex_contest_form %}
-                {% endif %}
-                {% crispy solution_form %}
-            </form>
+            {% crispy solution_form %}
         </div>
     </div>
 

@@ -13,7 +13,7 @@ def add_submission_to_checking_system(sender, instance: Submission,
     if created:
         add_new_submission_to_checking_system.delay(submission_id=instance.pk,
                                                     retries=3)
-    elif 'status' in update_fields:
+    elif update_fields and 'status' in update_fields:
         if instance.status == SubmissionStatus.PASSED:
             assignment_comment = instance.assignment_comment
             submission_type = assignment_comment.student_assignment.assignment.submission_type

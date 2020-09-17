@@ -75,34 +75,20 @@ class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin,
         submission.is_published = not save_draft
         form = self.get_form(data=request.POST, files=request.FILES,
                              instance=submission)
-        # Process Yandex.Contest submission form
-        yandex_contest_form = None
-        ya_contest_submission = not is_comment and 'settings' in request.POST
-        print('*** YANDEX CONTEST ***', ya_contest_submission)
-        if ya_contest_submission:
-            yandex_contest_form = YandexContestSubmissionForm(
-                data=request.POST, files=request.FILES
-            )
         if form.is_valid():
-            if yandex_contest_form:
-                if yandex_contest_form.is_valid():
-                    return self.form_valid(form, yandex_contest_form)
-                else:
-                    return self.form_invalid(yandex_contest_form)
             return self.form_valid(form)
         return self.form_invalid(form)
 
-    def form_valid(self, form, yandex_contest_form=None):
+    def form_valid(self, form):
         comment = form.save(commit=False)
         comment.student_assignment = self.student_assignment
         comment.author = self.request.user
         comment.save()
         comment_persistence.report_saved(comment.text)
-        if yandex_contest_form:
-            submission = yandex_contest_form.save(commit=False)
-            submission.assignment_comment = comment
-            print(submission)
-            submission.save()
+        # Process related models (e.g., Submission for Yandex.Contest)
+        post_comment_save = getattr(form, 'post_comment_save', [])
+        for function_call in post_comment_save:
+            function_call(comment)
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form):
