@@ -92,6 +92,10 @@ def send_notification(notification, template, context, stdout,
 
     connection = get_email_connection(site_settings)
     from_email = site_settings.default_from_email
+    # FIXME: temporarily disable resolving connection at runtime until dkim will be enabled on @yandexdataschool.ru
+    if site_settings.site_id == 3:
+        connection = get_connection(settings.EMAIL_BACKEND)
+        from_email = settings.DEFAULT_FROM_EMAIL
     subject = "[{}] {}".format(context['course_name'], template['subject'])
     html_content = linebreaks(render_to_string(template['template_name'],
                                                context))
@@ -181,21 +185,19 @@ def get_course_news_notification_context(
     return context
 
 
-def get_email_connection(site_settings):
-    # FIXME: temporarily disable resolving connection at runtime until dkim will be enabled on @yandexdataschool.ru
-    return get_connection(settings.EMAIL_BACKEND)
+def get_email_connection(site_settings: SiteConfiguration):
     email_backend = import_string(site_settings.email_backend)
     if issubclass(email_backend, smtp.EmailBackend):
         decrypted = site_settings.decrypt(site_settings.email_host_password)
-        connection = smtp.EmailBackend(host=site_settings.email_host,
-                                       port=site_settings.email_port,
-                                       username=site_settings.email_host_user,
-                                       password=decrypted,
-                                       use_tls=site_settings.email_use_tls,
-                                       use_ssl=site_settings.email_use_ssl)
+        connection = email_backend(host=site_settings.email_host,
+                                   port=site_settings.email_port,
+                                   username=site_settings.email_host_user,
+                                   password=decrypted,
+                                   use_tls=site_settings.email_use_tls,
+                                   use_ssl=site_settings.email_use_ssl)
     elif issubclass(email_backend, SESBackend):
-        # AWS settings are not depends on site configuration
-        connection = SESBackend()
+        # AWS settings are shared among projects
+        connection = email_backend()
     else:
         connection = get_connection(site_settings.email_backend,
                                     fail_silently=False)
