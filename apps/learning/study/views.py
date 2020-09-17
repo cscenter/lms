@@ -9,8 +9,6 @@ from isoweek import Week
 from vanilla import TemplateView
 
 from auth.mixins import PermissionRequiredMixin
-from contests.models import CheckingSystemTypes
-from contests.forms import YandexContestSubmissionForm
 from core.exceptions import Redirect
 from core.urls import reverse
 from courses.calendar import CalendarEventW

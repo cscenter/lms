@@ -10,6 +10,7 @@ from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
 from auth.mixins import PermissionRequiredMixin
+from contests.models import CheckingSystemTypes
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
@@ -162,7 +163,8 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     form.update({'course': course.pk,
                  'attachments': tmp_file.open(),
                  'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time})
+                 'deadline_at_1': deadline_time,
+                 'checking_system_type': CheckingSystemTypes.none})
     url = course.get_create_assignment_url()
     client.post(url, form)
     assert Assignment.objects.count() == 1

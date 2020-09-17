@@ -4,6 +4,7 @@ from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
+from contests.models import CheckingSystemTypes
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.models import Assignment
@@ -37,7 +38,8 @@ def test_course_assignment_form_create(client):
     form.update({'course': co.pk,
                  # 'attached_file': None,
                  'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time})
+                 'deadline_at_1': deadline_time,
+                 'checking_system_type': CheckingSystemTypes.none})
     url = co.get_create_assignment_url()
     client.login(teacher)
     response = client.post(url, form)
@@ -75,6 +77,7 @@ def test_course_assignment_update(client, assert_redirect):
     a = AssignmentFactory.create(course=co)
     form = model_to_dict(a)
     del form['ttc']
+    del form['checking_system']
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     new_title = a.title + " foo42bar"
@@ -82,7 +85,8 @@ def test_course_assignment_update(client, assert_redirect):
                  'course': co.pk,
                  # 'attached_file': None,
                  'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time})
+                 'deadline_at_1': deadline_time,
+                 'checking_system_type': CheckingSystemTypes.none})
     # Make sure new title is not presented on /teaching/assignments/
     list_url = reverse('teaching:assignment_list')
     response = client.get(list_url)

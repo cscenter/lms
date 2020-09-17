@@ -10,7 +10,6 @@ from django.shortcuts import get_object_or_404
 from django.views import generic
 from vanilla import TemplateView, GenericModelView
 
-from contests.forms import YandexContestSubmissionForm
 from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin

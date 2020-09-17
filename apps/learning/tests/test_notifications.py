@@ -9,6 +9,7 @@ from django.contrib.sites.models import Site
 from django.core import mail, management
 from subdomains.utils import get_domain
 
+from contests.models import CheckingSystemTypes
 from core.models import SiteConfiguration
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU
@@ -50,7 +51,8 @@ class NotificationTests(CSCTestCase):
             'maximum_score': 5,
             'weight': 1,
             'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
-            'deadline_at_1': '00:00'
+            'deadline_at_1': '00:00',
+            'checking_system_type': CheckingSystemTypes.none
         }
         response = self.client.post(co.get_create_assignment_url(), form,
                                     follow=True)
@@ -145,7 +147,8 @@ def test_assignment_notify_teachers_public_form(client):
         'maximum_score': 5,
         'weight': '1.00',
         'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
-        'deadline_at_1': '00:00'
+        'deadline_at_1': '00:00',
+        'checking_system_type': CheckingSystemTypes.none
     }
     url = co.get_create_assignment_url()
     response = client.post(url, form, follow=True)
