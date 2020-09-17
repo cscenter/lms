@@ -466,10 +466,10 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel,
 
     def _compute_execution_time(self):
         time_spent = (AssignmentComment.objects
-                      .filter(type=AssignmentCommentTypes.SOLUTION,
+                      .filter(type=AssignmentSubmissionTypes.SOLUTION,
                               student_assignment=self)
                       .aggregate(total=Sum('execution_time')))
-        execution_time = time_spent['total']
+        execution_time = time_spent['total']  # Could be None
 
         if self.execution_time != execution_time:
             self.execution_time = execution_time
@@ -561,7 +561,7 @@ def assignment_comment_attachment_upload_to(self: "AssignmentComment", filename)
         filename)
 
 
-class AssignmentCommentTypes(DjangoChoices):
+class AssignmentSubmissionTypes(DjangoChoices):
     COMMENT = C('comment', _("Comment"))
     SOLUTION = C('solution', _("Solution"))
 
@@ -576,7 +576,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
     type = models.CharField(
         verbose_name=_("AssignmentComment|Type"),
         max_length=42,
-        choices=AssignmentCommentTypes.choices
+        choices=AssignmentSubmissionTypes.choices
     )
     execution_time = models.DurationField(
         verbose_name=_("Solution Execution Time"),

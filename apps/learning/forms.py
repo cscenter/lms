@@ -11,7 +11,7 @@ from core.timezone.constants import TIME_FORMAT_RU
 from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
 from learning.models import GraduateProfile, StudentAssignment, \
-    AssignmentCommentTypes
+    AssignmentSubmissionTypes
 from .models import AssignmentComment
 
 
@@ -44,7 +44,7 @@ class AssignmentCommentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.instance.type = AssignmentCommentTypes.COMMENT
+        self.instance.type = AssignmentSubmissionTypes.COMMENT
         if self.instance and self.instance.pk:
             draft_button_label = _('Update Draft')
         else:
@@ -93,7 +93,7 @@ class AssignmentSolutionBaseForm(forms.ModelForm):
                                           'placeholder': _('hours:minutes')}),
             help_text=_("Requires the full format including minutes. "
                         "Do not include the time of previous submissions."))
-        self.instance.type = AssignmentCommentTypes.SOLUTION
+        self.instance.type = AssignmentSubmissionTypes.SOLUTION
         self.helper = FormHelper(self)
 
 
