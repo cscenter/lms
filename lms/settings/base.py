@@ -235,9 +235,10 @@ TEMPLATES = [
 ]
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 # Sensitive model-based configuration is encrypted with this key.
 # Don't forget to update site configuration after rotating a secret key.
-SECRET_KEY = env('DJANGO_SECRET_KEY')
+DB_SECRET_KEY = env.str('DJANGO_DB_SECRET_KEY')
 
 
 # Email settings

@@ -115,7 +115,7 @@ class SiteConfiguration(ConfigurationModel):
     @classmethod
     def _get_fernet_key(cls):
         """Fernet key must be 32 url-safe base64-encoded bytes"""
-        key = force_bytes(settings.SECRET_KEY)[:32]
+        key = force_bytes(settings.DB_SECRET_KEY)[:32]
         return urlsafe_b64encode(key.ljust(32, b"="))
 
     @classmethod
