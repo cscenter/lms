@@ -15,11 +15,20 @@ def test_resolve_problem_id_should_fail_for_bad_syntax():
     assert 'Cannot extract contest and problem ids from URL' in str(e.value)
 
 
-@pytest.mark.parametrize("url,expected_contest_id,expected_problem_id",
-                         [("https://contest.yandex.ru/contest/15/problems/", 15, ''),
-                          ("https://contest.yandex.ru/contest/15/problems/D/", 15, 'D')])
-def test_resolve_problem_id_should_resolve_valid_links(url, expected_contest_id,
-                                                       expected_problem_id):
-    contest_id, problem_id = resolve_problem_id(url)
-    assert contest_id == expected_contest_id
-    assert problem_id == expected_problem_id
+def test_resolve_problem_id_should_fail_on_bad_contest_id():
+    with pytest.raises(ValueError) as e:
+        resolve_problem_id("https://contest.yandex.ru/contest/0000/problems/A/")
+    assert 'Contest ID should be positive' in str(e.value)
+
+
+def test_resolve_problem_id_should_fail_when_no_problem_id():
+    with pytest.raises(ValueError) as e:
+        resolve_problem_id("https://contest.yandex.ru/contest/15/problems/")
+    assert 'URL does not contain ID of the problem' in str(e.value)
+
+
+def test_resolve_problem_id_should_resolve_valid_links():
+    problem_url = "https://contest.yandex.ru/contest/15/problems/D/"
+    contest_id, problem_id = resolve_problem_id(problem_url)
+    assert contest_id == 15
+    assert problem_id == 'D'

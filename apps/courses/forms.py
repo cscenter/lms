@@ -346,7 +346,9 @@ class AssignmentForm(TimezoneAwareModelForm):
             checking_system, _ = CheckingSystem.objects.get_or_create(
                 type=checking_system_type, settings__contest_id=contest_id,
                 settings__problem_id=problem_id, defaults={
-                    'url': checking_system_url
+                    'url': checking_system_url,
+                    'settings': {'contest_id': contest_id,
+                                 'problem_id': problem_id}
                 }
             )
             instance = super(AssignmentForm, self).save(commit=False)

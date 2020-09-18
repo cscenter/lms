@@ -17,7 +17,6 @@ def add_submission_to_checking_system(sender, instance: Submission,
         if instance.status == SubmissionStatus.PASSED:
             assignment_comment = instance.assignment_comment
             submission_type = assignment_comment.student_assignment.assignment.submission_type
-            with_code_review = submission_type == AssignmentSubmissionFormats.CODE_REVIEW
-            if with_code_review:
+            if submission_type == AssignmentSubmissionFormats.CODE_REVIEW:
                 from code_reviews.tasks import upload_attachment_to_gerrit
                 upload_attachment_to_gerrit.delay(assignment_comment.pk)
