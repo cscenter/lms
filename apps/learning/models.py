@@ -635,20 +635,22 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         # Teacher can edit comment during 10 min period only
         return (now() - self.created).total_seconds() > 600
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.__original_is_published = self.is_published
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        instance._loaded_is_published = instance.is_published
+        return instance
 
     def save(self, **kwargs):
         from learning.services import notify_new_assignment_comment
         created = self.pk is None
-        is_published_before = getattr(self, '__original_is_published', False)
+        is_published_before = getattr(self, '_loaded_is_published', False)
         super().save(**kwargs)
         # FIXME: remove notification logic from model
         # Send notifications only on publishing comment
         if self.is_published and (created or not is_published_before):
             notify_new_assignment_comment(self)
-        self.__original_is_published = self.is_published
+        self._loaded_is_published = self.is_published
         with_code_review = self.student_assignment.assignment.submission_type == AssignmentSubmissionFormats.CODE_REVIEW
         # FIXME: move to the signal in code_reviews
         if self.attached_file and with_code_review:
