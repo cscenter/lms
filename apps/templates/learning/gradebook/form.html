@@ -79,10 +79,12 @@
                         {% if gradebook.assignments %}
                             <div class="title __total_score">{% trans "Total" %}</div>
                         {% endif %}
-                        {% for assignment in gradebook.assignments.values %}
-                            <div class="title __assignment{% if gradebook.show_weight %}  __weight{% endif %}">
-                                <a href="{{ assignment.get_teacher_url }}" title="{{ assignment.title }}">{{ assignment.title }}</a>{% if gradebook.show_weight %}<div class="assignment__weight">Вес: {{ assignment.weight }}</div>{% endif %}
-                            </div>
+                        {% for gradebook_assignment in gradebook.assignments.values %}
+                            {% with assignment=gradebook_assignment.assignment %}
+                                <div class="title __assignment{% if gradebook.show_weight %}  __weight{% endif %}">
+                                    <a href="{{ assignment.get_teacher_url }}" title="{{ assignment.title }}">{{ assignment.title }}</a>{% if gradebook.show_weight %}<div class="assignment__weight">Вес: {{ assignment.weight }}</div>{% endif %}
+                                </div>
+                            {% endwith %}
                         {% endfor %}
                     </div>
 
@@ -121,8 +123,8 @@
                         {% if gradebook.assignments %}
                             <div class="cell __total_score"></div>
                         {% endif %}
-                        {% for assignment in gradebook.assignments.values %}
-                        <div class="cell __assignment __meta">{{ assignment.passing_score }}/{{ assignment.maximum_score }}</div>
+                        {% for gradebook_assignment in gradebook.assignments.values %}
+                        <div class="cell __assignment __meta">{{ gradebook_assignment.assignment.passing_score }}/{{ gradebook_assignment.assignment.maximum_score }}</div>
                         {% endfor %}
                     </div>
 

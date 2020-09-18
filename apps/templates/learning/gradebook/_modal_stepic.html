@@ -12,10 +12,12 @@
                 <div class="form-group">
                         <label for="csv-assignment-selected">1. {% trans "Select assignment" %}</label>
                         <select name="assignment" class="form-control" id="csv-assignment-selected">
-                        {% for assignment in gradebook.assignments.values %}
+                        {% for gradebook_assignment in gradebook.assignments.values %}
+                            {% with assignment=gradebook_assignment.assignment %}
                             {% if not assignment.is_online %}
                                 <option value="{{ assignment.pk }}">{{ assignment.title}}</option>
                             {% endif %}
+                            {% endwith %}
                         {% endfor %}
                         </select>
                         <span class="help-block">{% trans "Score will be imported for selected assignment" %}</span>
