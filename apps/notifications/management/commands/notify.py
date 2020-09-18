@@ -137,7 +137,7 @@ def get_domain_name(branch: Branch, site_settings: SiteConfiguration) -> str:
         # spb.compsciclub.ru -> compsciclub.ru
         if subdomain == site_settings.default_branch_code:
             subdomain = ''
-    if subdomain:
+    if subdomain and not domain_name.startswith(subdomain):
         domain_name = f"{subdomain}.{domain_name}"
     return domain_name
 
