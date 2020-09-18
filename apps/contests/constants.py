@@ -1,0 +1,1 @@
+YANDEX_SUBMISSION_REPORT_URL = 'https://contest.yandex.ru/contest/{contest_id}/run-report/{run_id}/'

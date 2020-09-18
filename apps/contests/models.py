@@ -12,6 +12,7 @@ from djchoices import DjangoChoices, ChoiceItem, C
 from model_utils.fields import AutoCreatedField, AutoLastModifiedField
 
 from contests.api.yandex_contest import SubmissionVerdict
+from contests.constants import YANDEX_SUBMISSION_REPORT_URL
 from learning.models import AssignmentComment
 
 
@@ -142,6 +143,19 @@ class Submission(models.Model):
     @property
     def status_choice(self):
         return SubmissionStatus.get_choice(self.status)
+
+    @property
+    def get_report_url(self):
+        if self.checking_system_choice.value == CheckingSystemTypes.yandex:
+            required_attributes = ['contestId', 'runId']
+            for attr in required_attributes:
+                if attr not in self.meta:
+                    return None
+            contest_id = self.meta['contestId']
+            run_id = self.meta['runId']
+            return YANDEX_SUBMISSION_REPORT_URL.format(contest_id=contest_id,
+                                                       run_id=run_id)
+        return None
 
     def get_verdict(self) -> Optional[str]:
         if not SubmissionStatus.was_checked(self.status):

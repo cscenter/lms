@@ -103,13 +103,12 @@
               {% if comment.submission %}
                 <div class="submission-info mt-3">
                   <table class="table table-condensed">
-                      <tr class="col-9">
-                          <td>Проверка в {{ submission.checking_system_choice.label }}</td>
-                          <td class="text-right"><span class="nowrap badge assignment-status {{ submission.state.css_class }}">{{ submission.get_verdict }}</span></td>
-                      </tr>
-                      <tr class="col-3">
-                          <td>Загрузка решения в Gerrit</td>
-                          <td class="text-right"></td>
+                      <tr>
+                          <td class="col-xs-6">Проверка в {{ submission.checking_system_choice.label }}</td>
+                          {% if submission.get_report_url %}
+                              <td class="col-xs-3"><a href="{{ submission.get_report_url }}">отчёт о проверке</a></td>
+                          {% endif %}
+                          <td class="col-auto text-right"><span class="nowrap badge assignment-status {{ submission.state.css_class }}">{{ submission.get_verdict }}</span></td>
                       </tr>
                   </table>
                 </div>
