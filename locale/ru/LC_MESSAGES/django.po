@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-18 16:43+0000\n"
-"PO-Revision-Date: 2020-09-18 16:44+0000\n"
+"POT-Creation-Date: 2020-09-18 17:57+0000\n"
+"PO-Revision-Date: 2020-09-18 17:57+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -160,7 +160,8 @@ msgstr ""
 msgid "Cancel"
 msgstr "Отмена"
 
-#: apps/core/forms.py:10 apps/templates/learning/gradebook/form.html:34
+#: apps/core/forms.py:10
+#: apps/templates/learning/gradebook/gradebook_form.html:34
 #: apps/templates/users/_user_detail_upload_photo.html:42
 #: apps/users/forms.py:82 lms/jinja2/lms/courses/course_class_form.html:79
 msgid "Save"
@@ -1317,7 +1318,7 @@ msgid "Final grade"
 msgstr "Итоговая оценка"
 
 #: apps/learning/gradebook/views.py:185
-#: apps/templates/learning/gradebook/form.html:80
+#: apps/templates/learning/gradebook/gradebook_form.html:81
 msgid "Total"
 msgstr "Сумма баллов"
 
@@ -2317,6 +2318,59 @@ msgstr "Когда"
 msgid "Where"
 msgstr "Где"
 
+#: apps/templates/learning/gradebook/_modal_enrollments.html:7
+msgid "Import scores from CSV"
+msgstr "Импорт оценок из CSV-файла"
+
+#: apps/templates/learning/gradebook/_modal_enrollments.html:13
+msgid "Choose assignment"
+msgstr "Выберите задание"
+
+#: apps/templates/learning/gradebook/_modal_enrollments.html:21
+#: apps/templates/learning/gradebook/_modal_stepic.html:23
+#: apps/templates/learning/gradebook/_modal_yandex.html:23
+msgid "Score will be imported for selected assignment"
+msgstr "Оценки будут импортированы для выбранного задания"
+
+#: apps/templates/learning/gradebook/_modal_enrollments.html:24
+msgid "Choose csv file"
+msgstr "Выберите csv-файл"
+
+#: apps/templates/learning/gradebook/_modal_enrollments.html:27
+msgid ""
+"\n"
+"                                    File Format:<br>\n"
+"                                    <ul class=\"mb-0\">\n"
+"                                        <li>First row contains column headers. Column headers <code>id</code> and <code>score</code> are required.</li>\n"
+"                                        <li>Other rows contain values of enrollment ID and assignment score in the corresponding columns.</li>\n"
+"                                    </ul>\n"
+"                                    The easiest way to get student enrollment ID's is to export the gradebook to a csv file and copy <code>ID</code> column from there.<br>\n"
+"                                    File Content Example:<br>\n"
+"                                "
+msgstr ""
+"\n"
+"Формат файла:<br>\n"
+"<ul class=\"mb-0\">\n"
+"<li>Первая строка содержит заголовки колонок. Для успешного импорта необходимы колонки <code>id</code> и <code>score</code>.</li>\n"
+"<li>Остальные строки содержат идентификатор студента и его оценку в соответствующих колонках.</li>\n"
+"</ul>\n"
+"Самый простой способ получить идентификаторы студентов для курса - скачать ведомость в csv формате, она содержит целевую колонку <code>ID</code>.<br>\n"
+"Пример содержимого файла:<br>"
+
+#: apps/templates/learning/gradebook/_modal_enrollments.html:43
+#: apps/templates/learning/gradebook/_modal_stepic.html:34
+#: apps/templates/learning/gradebook/_modal_yandex.html:34
+#: apps/templates/learning/teaching/modal_update_assignment_comment.html:8
+#: apps/templates/projects/modal_update_report_comment.html:9
+msgid "Close"
+msgstr "Закрыть"
+
+#: apps/templates/learning/gradebook/_modal_enrollments.html:44
+#: apps/templates/learning/gradebook/_modal_stepic.html:35
+#: apps/templates/learning/gradebook/_modal_yandex.html:35
+msgid "Import"
+msgstr "Импортировать"
+
 #: apps/templates/learning/gradebook/_modal_stepic.html:7
 msgid "Import stepik statements"
 msgstr "Импортировать баллы по stepik.org ID"
@@ -2325,11 +2379,6 @@ msgstr "Импортировать баллы по stepik.org ID"
 #: apps/templates/learning/gradebook/_modal_yandex.html:13
 msgid "Select assignment"
 msgstr "Выбрать задание"
-
-#: apps/templates/learning/gradebook/_modal_stepic.html:23
-#: apps/templates/learning/gradebook/_modal_yandex.html:23
-msgid "Score will be imported for selected assignment"
-msgstr "Оценки будут импортированы для выбранного задания"
 
 #: apps/templates/learning/gradebook/_modal_stepic.html:26
 #: apps/templates/learning/gradebook/_modal_yandex.html:26
@@ -2342,18 +2391,6 @@ msgid ""
 "score. First row is header. Example:"
 msgstr "Значения должны быть разделены запятой. Первая строка - заголовки."
 
-#: apps/templates/learning/gradebook/_modal_stepic.html:34
-#: apps/templates/learning/gradebook/_modal_yandex.html:34
-#: apps/templates/learning/teaching/modal_update_assignment_comment.html:8
-#: apps/templates/projects/modal_update_report_comment.html:9
-msgid "Close"
-msgstr "Закрыть"
-
-#: apps/templates/learning/gradebook/_modal_stepic.html:35
-#: apps/templates/learning/gradebook/_modal_yandex.html:35
-msgid "Import"
-msgstr "Импортировать"
-
 #: apps/templates/learning/gradebook/_modal_yandex.html:7
 msgid "Import yandex statements"
 msgstr "Импортировать баллы по Яндекс-логину"
@@ -2364,24 +2401,29 @@ msgid ""
 "score. First row is header. Example:"
 msgstr "Значения должны быть разделены запятой. Первая строка - заголовки."
 
-#: apps/templates/learning/gradebook/form.html:30
+#: apps/templates/learning/gradebook/gradebook_form.html:30
 msgid "Marks sheet"
 msgstr "Ведомость"
 
-#: apps/templates/learning/gradebook/form.html:44
+#: apps/templates/learning/gradebook/gradebook_form.html:44
+#| msgid "Enrollment"
+msgid "By enrollment ID"
+msgstr "По идентификатору студента"
+
+#: apps/templates/learning/gradebook/gradebook_form.html:45
 msgid "By stepik.org ID"
 msgstr "По stepik.org ID"
 
-#: apps/templates/learning/gradebook/form.html:45
+#: apps/templates/learning/gradebook/gradebook_form.html:46
 msgid "By Yandex login"
 msgstr "По yandex логину"
 
-#: apps/templates/learning/gradebook/form.html:77
-#: apps/templates/learning/gradebook/form.html:123
+#: apps/templates/learning/gradebook/gradebook_form.html:78
+#: apps/templates/learning/gradebook/gradebook_form.html:124
 msgid "Students"
 msgstr "Студенты"
 
-#: apps/templates/learning/gradebook/form.html:78
+#: apps/templates/learning/gradebook/gradebook_form.html:79
 msgid "Grades"
 msgstr "Итоговая оценка"
 
@@ -3314,6 +3356,9 @@ msgstr "осенний"
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
+
+#~ msgid "From CSV-file"
+#~ msgstr "Из CSV-файла"
 
 #~ msgid "Form will be available after grading"
 #~ msgstr "Форма станет доступна после оценки задания преподавателем"
