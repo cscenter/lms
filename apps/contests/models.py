@@ -58,19 +58,23 @@ class YandexCompilers(DjangoChoices):
 
 class CheckingSystemTypes(DjangoChoices):
     yandex = ChoiceItem('ya', _("Yandex.Contest"))
-    none = ChoiceItem('none', _("No checking system"))
 
 
 class CheckingSystem(models.Model):
     created_at = AutoCreatedField(_('created'))
-    type = models.CharField(_("Checking System Type"), max_length=42,
+    name = models.CharField(_("CheckingSystem|Name"),
+                            max_length=80)
+    type = models.CharField(_("CheckingSystem|Type"), max_length=42,
                             choices=CheckingSystemTypes.choices)
-    url = models.URLField(_("Checking System URL"), blank=True)
+    description = models.TextField(
+        verbose_name=_("What can it be used for?"),
+        blank=True
+    )
     settings = JSONField(
-        verbose_name=_("Details"),
+        verbose_name=_("CheckingSystem|Details"),
         blank=True,
         default=dict,
-        help_text=_("Contest id, problem id, etc")
+        help_text=_("Access token, etc")
     )
 
     class Meta:
@@ -78,16 +82,51 @@ class CheckingSystem(models.Model):
         verbose_name_plural = _("Checking Systems")
 
     def __str__(self):
-        return f'{self.type} {", ".join(f"{k}: {v}" for k, v in self.settings.items())}'
+        return self.name
 
     def clean(self):
         if self.type == CheckingSystemTypes.yandex:
+            has_access_token = 'access_token' in self.settings
+            use_participant_oauth = ('use_participant_oauth' in self.settings
+                                     and self.settings['use_participant_oauth'])
+            if not (has_access_token or use_participant_oauth):
+                raise ValidationError(_("Access token should be specified,"
+                                        "or participant's OAuth token should"
+                                        "be used for submission."))
+
+
+class Checker(models.Model):
+    checking_system = models.ForeignKey(
+        CheckingSystem,
+        verbose_name=_("Checking System"),
+        on_delete=models.CASCADE
+    )
+    url = models.URLField(_("Checker|URL"), blank=True)
+    settings = JSONField(
+        verbose_name=_("Checker|Settings"),
+        blank=True,
+        default=dict,
+        help_text=_("Contest id, problem id, etc")
+    )
+
+    class Meta:
+        verbose_name = _("Checker")
+        verbose_name_plural = _("Checkers")
+
+    def __str__(self):
+        return (self.checking_system.name +
+                f' [{", ".join(f"{k}: {v}" for k, v in self.settings.items())}]')
+
+    def clean(self):
+        if self.checking_system.type == CheckingSystemTypes.yandex:
             required_settings = ['contest_id', 'problem_id']
             for key in required_settings:
                 if key not in self.settings:
-                    msg = (f"Убедитесь, что указаны "
-                           f"настройки: {', '.join(required_settings)}")
-                    raise ValidationError(msg)
+                    # FIXME: add translation _("Убедитесь, что указаны настройки: {}")
+                    msg = _("Please check that the following settings "
+                            "are provided: {}")
+                    settings_needed = ', '.join(required_settings)
+                    raise ValidationError(msg.format(settings_needed))
 
 
 class SubmissionStatus(DjangoChoices):
@@ -111,6 +150,7 @@ class Submission(models.Model):
     modified_at = AutoLastModifiedField(_('modified'))
     assignment_comment = models.OneToOneField(
         AssignmentComment,
+        verbose_name=_("Assignment Submission"),
         on_delete=models.CASCADE
     )
     status = models.IntegerField(
@@ -137,7 +177,7 @@ class Submission(models.Model):
     @property
     def checking_system_choice(self):
         assignment = self.assignment_comment.student_assignment.assignment
-        checking_system_type = assignment.checking_system.type
+        checking_system_type = assignment.checker.checking_system.type
         return CheckingSystemTypes.get_choice(checking_system_type)
 
     @property

@@ -169,8 +169,10 @@ class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
 
     def save_submission(self, assignment_submission):
         settings = {'compiler_id': self.cleaned_data['compiler_id']}
-        submission, _ = Submission.objects.get_or_create(assignment_comment=assignment_submission,
-                                                      settings=settings)
+        submission, _ = Submission.objects.get_or_create(
+            assignment_comment=assignment_submission,
+            settings=settings
+        )
         submission.save()
 
 

@@ -17,7 +17,8 @@ def get_submission(submission_id) -> Optional["Submission"]:
     return (Submission.objects
             .filter(pk=submission_id)
             .select_related("assignment_comment",
-                            "assignment_comment__student_assignment__assignment__checking_system")
+                            "assignment_comment__student_assignment__assignment__checker",
+                            "assignment_comment__student_assignment__assignment__checker__checking_system")
             .first())
 
 
@@ -27,20 +28,23 @@ def add_new_submission_to_checking_system(submission_id, *, retries):
     submission = get_submission(submission_id)
     if not submission:
         return "Submission not found"
-    assignment = submission.assignment_comment.student_assignment.assignment
-    checker_settings = assignment.checking_system.settings
-    access_token = 'AgAAAAANbLCrAAZtKUiNoGLqlEU6r0o7tn5LjrE'
+    checker = submission.assignment_comment.student_assignment.assignment.checker
+    checking_system_settings = checker.checking_system.settings
+    access_token = checking_system_settings['access_token']
+    print(access_token)
     api = YandexContestAPI(
         access_token=access_token,
         refresh_token=access_token)
     data = {
-        'problem': checker_settings["problem_id"],
+        'problem': checker.settings["problem_id"],
         'compiler': submission.settings["compiler_id"]
     }
+    print(data)
     submission_content = submission.assignment_comment.attached_file.read()
+    print(submission_content)
     files = {'file': ('test.txt', submission_content)}
     try:
-        status, json_data = api.add_submission(checker_settings['contest_id'],
+        status, json_data = api.add_submission(checker.settings['contest_id'],
                                                files=files, **data)
     except Unavailable as e:
         if retries:
@@ -79,14 +83,15 @@ def monitor_submission_status_in_yandex_contest(submission_id,
     if not submission:
         return "Submission not found"
     assignment = submission.assignment_comment.student_assignment.assignment
-    checker_settings = assignment.checking_system.settings
-    access_token = 'AgAAAAANbLCrAAZtKUiNoGLqlEU6r0o7tn5LjrE'
+    checker = submission.assignment_comment.student_assignment.assignment.checker
+    checking_system_settings = checker.checking_system.settings
+    access_token = checking_system_settings['access_token']
     api = YandexContestAPI(
         access_token=access_token,
         refresh_token=access_token)
     try:
         status, json_data = api.submission_details(
-            checker_settings['contest_id'],
+            checker.settings['contest_id'],
             remote_submission_id, full=True)
     except Unavailable as e:
         scheduler = django_rq.get_scheduler('default')

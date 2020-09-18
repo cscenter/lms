@@ -1,10 +1,14 @@
 from django.contrib import admin
 
-from contests.models import CheckingSystem, Submission
+from contests.models import CheckingSystem, Submission, Checker
 
 
 class CheckingSystemAdmin(admin.ModelAdmin):
     model = CheckingSystem
+
+
+class CheckerAdmin(admin.ModelAdmin):
+    model = Checker
 
 
 class SubmissionAdmin(admin.ModelAdmin):
@@ -12,4 +16,5 @@ class SubmissionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(CheckingSystem, CheckingSystemAdmin)
+admin.site.register(Checker, CheckerAdmin)
 admin.site.register(Submission, SubmissionAdmin)

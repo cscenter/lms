@@ -1070,8 +1070,8 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         verbose_name=_("Groups"),
         related_name='restricted_assignments',
         through='learning.AssignmentGroup')
-    checking_system = models.ForeignKey(
-        'contests.CheckingSystem',
+    checker = models.ForeignKey(
+        'contests.Checker',
         on_delete=models.CASCADE,
         verbose_name=_("Checking System"),
         blank=True, null=True,

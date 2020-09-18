@@ -7,7 +7,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from contests.models import CheckingSystem, CheckingSystemTypes
+from contests.models import CheckingSystem, CheckingSystemTypes, Checker
 from contests.utils import resolve_problem_id
 from core.forms import CANCEL_SAVE_PAIR
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
@@ -295,12 +295,12 @@ class AssignmentForm(TimezoneAwareModelForm):
         label=_("Available for"),
         required=False,
         help_text=_("Restrict assignment to selected groups. Available to all by default."))
-    checking_system_type = forms.ChoiceField(
+    checking_system = forms.ModelChoiceField(
         label=_("Checking System Type"),
-        initial=CheckingSystemTypes.none,
-        choices=CheckingSystemTypes.choices
+        empty_label=_("No Checking System"),
+        queryset=CheckingSystem.objects.all()
     )
-    checking_system_url = forms.URLField(
+    checker_url = forms.URLField(
         label=_("Checking System URL"),
         required=False,
         widget=forms.TextInput(attrs={'placeholder': _("Paste URL of the Yandex.Contest problem")})
@@ -317,10 +317,10 @@ class AssignmentForm(TimezoneAwareModelForm):
             field_restrict_to.label = _("Available to Branches")
             field_restrict_to.widget.attrs['title'] = _("All Branches")
         field_restrict_to.choices = StudentGroupService.get_choices(course)
-        checker = self.instance.checking_system
+        checker = self.instance.checker
         if checker:
-            self.fields['checking_system_type'].initial = checker.type
-            self.fields['checking_system_url'].initial = checker.url
+            self.fields['checking_system'].initial = checker.checking_system
+            self.fields['checker_url'].initial = checker.url
 
     class Meta:
         model = Assignment
@@ -330,29 +330,30 @@ class AssignmentForm(TimezoneAwareModelForm):
 
     def clean(self):
         cleaned_data = super(AssignmentForm, self).clean()
-        checking_system_type = cleaned_data['checking_system_type']
-        if checking_system_type == CheckingSystemTypes.yandex:
+        checking_system = cleaned_data['checking_system']
+        if checking_system.type == CheckingSystemTypes.yandex:
             try:
-                checking_system_url = cleaned_data['checking_system_url']
+                checking_system_url = cleaned_data['checker_url']
                 resolve_problem_id(checking_system_url)
             except ValueError as e:
-                self.add_error('checking_system_url', str(e))
+                self.add_error('checker_url', str(e))
 
     def save(self, commit=True):
-        checking_system_type = self.cleaned_data['checking_system_type']
-        if checking_system_type == CheckingSystemTypes.yandex:
-            checking_system_url = self.cleaned_data['checking_system_url']
-            contest_id, problem_id = resolve_problem_id(checking_system_url)
-            checking_system, _ = CheckingSystem.objects.get_or_create(
-                type=checking_system_type, settings__contest_id=contest_id,
+        checking_system = self.cleaned_data['checking_system']
+        if checking_system.type == CheckingSystemTypes.yandex:
+            checker_url = self.cleaned_data['checker_url']
+            contest_id, problem_id = resolve_problem_id(checker_url)
+            checker, _ = Checker.objects.get_or_create(
+                checking_system=checking_system,
+                settings__contest_id=contest_id,
                 settings__problem_id=problem_id, defaults={
-                    'url': checking_system_url,
+                    'url': checker_url,
                     'settings': {'contest_id': contest_id,
                                  'problem_id': problem_id}
                 }
             )
             instance = super(AssignmentForm, self).save(commit=False)
-            instance.checking_system = checking_system
+            instance.checker = checker
             instance.save()
             return instance
         else:
