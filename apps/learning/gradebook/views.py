@@ -163,7 +163,7 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
         return self.course
 
     def get(self, request, *args, **kwargs):
-        data = gradebook_data(self.course)
+        gradebook = gradebook_data(self.course)
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         filename = "{}-{}-{}.csv".format(kwargs['course_slug'],
                                          kwargs['semester_year'],
@@ -173,21 +173,26 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
 
         writer = csv.writer(response)
         headers = [
+            # "ID",
             _("Last name"),
             _("First name"),
             _("Yandex Login"),
+            # _("Branch"),
+            # _("Type"),
+            # _("Student Group"),
             _("Codeforces Handle"),
             _("Final grade"),
             _("Total"),
         ]
-        for a in data.assignments.values():
-            if data.show_weight:
+        for gradebook_assignment in gradebook.assignments.values():
+            a = gradebook_assignment.assignment
+            if gradebook.show_weight:
                 title = f"{a.title} (вес: {a.weight})"
             else:
                 title = a.title
             headers.append(title)
         writer.writerow(headers)
-        for student in data.students.values():
+        for student in gradebook.students.values():
             writer.writerow(
                 itertools.chain(
                     [student.last_name,
@@ -197,7 +202,7 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
                      student.final_grade_display,
                      student.total_score],
                     [(a.score if a and a.score is not None else '')
-                     for a in data.submissions[student.index]]))
+                     for a in gradebook.submissions[student.index]]))
         return response
 
 

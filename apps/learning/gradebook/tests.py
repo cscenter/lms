@@ -184,7 +184,7 @@ def test_gradebook_data(settings):
     a2.save()
     a3.save()
     data = gradebook_data(co)
-    assert list(data.assignments.values()) == [a1, a3, a2]
+    assert list(ga.assignment for ga in data.assignments.values()) == [a1, a3, a2]
     # Check students order (should be sorted by surname)
     s1 = e1.student
     s3 = e3.student
