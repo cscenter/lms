@@ -130,11 +130,11 @@ class Checker(models.Model):
 
 
 class SubmissionStatus(DjangoChoices):
-    NEW = ChoiceItem(1, _("New"), icon='time')
-    SUBMIT_FAIL = ChoiceItem(20, _("Not Submitted"), icon='cross')
-    CHECKING = ChoiceItem(30, _("Checking"), icon='time')
-    FAILED = ChoiceItem(40, _("Wrong Answer"), icon='cross')
-    PASSED = ChoiceItem(50, _("Correct Answer"), icon='checkmark')
+    NEW = ChoiceItem(1, _("New"), css_class='new')
+    SUBMIT_FAIL = ChoiceItem(20, _("Not Submitted"), css_class='failed')
+    CHECKING = ChoiceItem(30, _("Checking"), css_class='checking')
+    FAILED = ChoiceItem(40, _("Wrong Answer"), css_class='failed')
+    PASSED = ChoiceItem(50, _("Correct Answer"), css_class='passed')
 
     checked_statuses = [FAILED, PASSED]
 
