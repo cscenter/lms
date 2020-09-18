@@ -68,7 +68,7 @@ class GradeBookListBaseView(generic.ListView):
 class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
     is_for_staff = False
     user_type = 'teacher'
-    template_name = "learning/gradebook/form.html"
+    template_name = "learning/gradebook/gradebook_form.html"
     context_object_name = 'assignment_list'
     permission_required = "teaching.view_own_gradebook"
 
