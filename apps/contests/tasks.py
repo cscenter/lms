@@ -31,7 +31,6 @@ def add_new_submission_to_checking_system(submission_id, *, retries):
     checker = submission.assignment_comment.student_assignment.assignment.checker
     checking_system_settings = checker.checking_system.settings
     access_token = checking_system_settings['access_token']
-    print(access_token)
     api = YandexContestAPI(
         access_token=access_token,
         refresh_token=access_token)
@@ -39,9 +38,7 @@ def add_new_submission_to_checking_system(submission_id, *, retries):
         'problem': checker.settings["problem_id"],
         'compiler': submission.settings["compiler_id"]
     }
-    print(data)
     submission_content = submission.assignment_comment.attached_file.read()
-    print(submission_content)
     files = {'file': ('test.txt', submission_content)}
     try:
         status, json_data = api.add_submission(checker.settings['contest_id'],
@@ -82,7 +79,6 @@ def monitor_submission_status_in_yandex_contest(submission_id,
     submission = get_submission(submission_id)
     if not submission:
         return "Submission not found"
-    assignment = submission.assignment_comment.student_assignment.assignment
     checker = submission.assignment_comment.student_assignment.assignment.checker
     checking_system_settings = checker.checking_system.settings
     access_token = checking_system_settings['access_token']

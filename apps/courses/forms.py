@@ -297,6 +297,7 @@ class AssignmentForm(TimezoneAwareModelForm):
         help_text=_("Restrict assignment to selected groups. Available to all by default."))
     checking_system = forms.ModelChoiceField(
         label=_("Checking System Type"),
+        required=False,
         empty_label=_("No Checking System"),
         queryset=CheckingSystem.objects.all()
     )

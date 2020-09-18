@@ -9,7 +9,6 @@ from courses.models import AssignmentSubmissionFormats
 @receiver(post_save, sender=Submission)
 def add_submission_to_checking_system(sender, instance: Submission,
                                       created, update_fields, *args, **kwargs):
-    print(instance, created, update_fields)
     if created:
         add_new_submission_to_checking_system.delay(submission_id=instance.pk,
                                                     retries=3)

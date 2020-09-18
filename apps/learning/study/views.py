@@ -186,15 +186,6 @@ class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
     permission_required = CreateAssignmentCommentAsLearner.name
     submission_type = AssignmentCommentTypes.SOLUTION
 
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     checker = self.student_assignment.assignment.checking_system
-    #     if checker.type == CheckingSystemTypes.yandex:
-    #         context['yandex_contest_form'] = YandexContestSubmissionForm(
-    #             assignment_comment=self
-    #         )
-    #     return context
-
     def get_permission_object(self):
         return self.student_assignment
 

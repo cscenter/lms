@@ -63,7 +63,6 @@ class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin,
 
     def post(self, request, *args, **kwargs):
         # Saving drafts is only supported for comments.
-        print(request.POST)
         is_comment = (self.submission_type == AssignmentCommentTypes.COMMENT)
         save_draft = is_comment and "save-draft" in request.POST
         assert self.submission_type is not None

@@ -131,6 +131,7 @@ class Checker(models.Model):
 
 class SubmissionStatus(DjangoChoices):
     NEW = ChoiceItem(1, _("New"), css_class='new')
+    # SUBMIT_FAIL is set when error occurred during upload to checking system
     SUBMIT_FAIL = ChoiceItem(20, _("Not Submitted"), css_class='failed')
     CHECKING = ChoiceItem(30, _("Checking"), css_class='checking')
     FAILED = ChoiceItem(40, _("Wrong Answer"), css_class='failed')
