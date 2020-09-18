@@ -366,6 +366,31 @@ def test_create_deadline_change_notification(settings):
 
 
 @pytest.mark.django_db
+def test_change_assignment_comment(settings):
+    """Don't send notification on editing assignment comment   """
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    enrollment = EnrollmentFactory(course=course)
+    student = enrollment.student
+    student_profile = enrollment.student_profile
+    assignment = AssignmentFactory(course=course)
+    student_assignment = StudentAssignment.objects.get(student=student,
+                                                       assignment=assignment)
+    assert AssignmentNotification.objects.count() == 1
+    comment = AssignmentCommentFactory(student_assignment=student_assignment,
+                                       author=teacher)
+    assert AssignmentNotification.objects.count() == 2
+    comment.text = 'New Content'
+    comment.save()
+    assert AssignmentNotification.objects.count() == 2
+    # Get comment from db
+    comment = AssignmentComment.objects.get(pk=comment.pk)
+    comment.text = 'Updated Comment'
+    comment.save()
+    assert AssignmentNotification.objects.count() == 2
+
+
+@pytest.mark.django_db
 def test_deadline_changed_timezone(settings):
     settings.LANGUAGE_CODE = 'ru'
     branch_spb = BranchFactory(code=Branches.SPB)
