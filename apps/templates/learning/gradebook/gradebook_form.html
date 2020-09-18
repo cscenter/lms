@@ -39,8 +39,9 @@
                      class="btn btn-default marks-sheet-csv-link" role="button" data-toggle="tooltip"><i class="fa fa-download"></i> Сохранить .csv</a>
                 </div>
                 <div class="btn-group">
-                  <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт <span class="caret"></span></a>
+                  <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт оценок <span class="caret"></span></a>
                   <ul class="dropdown-menu pull-right" role="menu">
+                      <li role="presentation"><a href="#import-marks-csv-enrollments" role="menuitem" data-toggle="modal">{% trans "By enrollment ID" %}</a></li>
                       <li role="presentation"><a href="#import-marks-csv-stepic" role="menuitem" data-toggle="modal">{% trans "By stepik.org ID" %}</a></li>
                       <li role="presentation"><a href="#import-marks-csv-yandex" role="menuitem" data-toggle="modal">{% trans "By Yandex login" %}</a></li>
                   </ul>
@@ -137,6 +138,7 @@
     </form>
 </div>
 
+{% include "learning/gradebook/_modal_enrollments.html" %}
 {% include "learning/gradebook/_modal_stepic.html" %}
 {% include "learning/gradebook/_modal_yandex.html" %}
 
