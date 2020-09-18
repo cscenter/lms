@@ -37,45 +37,12 @@ class GradebookStudent:
         return self._enrollment.grade
 
     @property
-    def first_name(self):
-        return self._enrollment.student.first_name
-
-    @property
-    def last_name(self):
-        return self._enrollment.student.last_name
-
-    @property
-    def patronymic(self):
-        return self._enrollment.student.patronymic
-
-    @property
-    def username(self):
-        return self._enrollment.student.username
-
-    @property
-    def email(self):
-        return self._enrollment.student.email
-
-    @property
-    def yandex_login(self):
-        return self._enrollment.student.yandex_login
-
-    @property
-    def codeforces_login(self):
-        return self._enrollment.student.codeforces_login
-
-    def get_absolute_url(self):
-        return self._enrollment.student.get_absolute_url()
-
-    def get_abbreviated_name(self):
-        return self._enrollment.student.get_abbreviated_name()
-
-    def get_abbreviated_short_name(self):
-        return self._enrollment.student.get_abbreviated_short_name()
-
-    @property
     def final_grade_display(self):
         return GradeTypes.values[self.final_grade]
+
+    @property
+    def student(self):
+        return self._enrollment.student
 
 
 @dataclass

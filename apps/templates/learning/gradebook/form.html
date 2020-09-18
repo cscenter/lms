@@ -89,31 +89,33 @@
                     </div>
 
                     <div class="grid">
-                        {% for student in gradebook.students.values %}{% spaceless %}
-                            <div class="student{% if forloop.counter|divisibleby:2 %} even{% endif %}">
-                               <a class="cell __student{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}" title="{{ student.username }}">
-                                   {{ student.get_abbreviated_short_name }}
-                               </a>
-                                <div class="cell __final_grade{% if forloop.counter|divisibleby:2 %} even{% endif %}">
-                                    {% call_method form 'get_final_widget' student.enrollment_id %}
-                                </div>
-                                {% if gradebook.assignments %}
-                                    <div class="cell __total_score{% if forloop.counter|divisibleby:2 %} even{% endif %}">{{ student.total_score }}</div>
-                                {% endif %}
-                                {% for student_progress in gradebook.submissions|lookup:student.index %}
-                                    {% if student_progress %}
-                                        {% if student_progress.assignment.is_online %}
-                                            <div class="cell __assignment __score">
-                                                <a href="{{ student_progress.get_teacher_url }}">{{ student_progress.get_state }}</a>
-                                            </div>
-                                        {% else %}
-                                            {% call_method form 'get_assignment_widget' student_progress.id %}
-                                        {% endif %}
-                                    {% else %}
-                                        <div class="cell __assignment __expelled"></div>
+                        {% for gradebook_student in gradebook.students.values %}{% spaceless %}
+                            {% with student=gradebook_student.student %}
+                                <div class="student{% if forloop.counter|divisibleby:2 %} even{% endif %}">
+                                   <a class="cell __student{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}" title="{{ student.username }}">
+                                       {{ student.get_abbreviated_short_name }}
+                                   </a>
+                                    <div class="cell __final_grade{% if forloop.counter|divisibleby:2 %} even{% endif %}">
+                                        {% call_method form 'get_final_widget' gradebook_student.enrollment_id %}
+                                    </div>
+                                    {% if gradebook.assignments %}
+                                        <div class="cell __total_score{% if forloop.counter|divisibleby:2 %} even{% endif %}">{{ gradebook_student.total_score }}</div>
                                     {% endif %}
-                                {% endfor %}
-                            </div>
+                                    {% for student_progress in gradebook.submissions|lookup:gradebook_student.index %}
+                                        {% if student_progress %}
+                                            {% if student_progress.assignment.is_online %}
+                                                <div class="cell __assignment __score">
+                                                    <a href="{{ student_progress.get_teacher_url }}">{{ student_progress.get_state }}</a>
+                                                </div>
+                                            {% else %}
+                                                {% call_method form 'get_assignment_widget' student_progress.id %}
+                                            {% endif %}
+                                        {% else %}
+                                            <div class="cell __assignment __expelled"></div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endwith %}
                         {% endspaceless %}{% endfor %}
                     </div>
 

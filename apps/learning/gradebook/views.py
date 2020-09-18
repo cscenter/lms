@@ -192,17 +192,18 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
                 title = a.title
             headers.append(title)
         writer.writerow(headers)
-        for student in gradebook.students.values():
+        for gradebook_student in gradebook.students.values():
+            student = gradebook_student.student
             writer.writerow(
                 itertools.chain(
                     [student.last_name,
                      student.first_name,
                      student.yandex_login,
                      student.codeforces_login,
-                     student.final_grade_display,
-                     student.total_score],
+                     gradebook_student.final_grade_display,
+                     gradebook_student.total_score],
                     [(a.score if a and a.score is not None else '')
-                     for a in gradebook.submissions[student.index]]))
+                     for a in gradebook.submissions[gradebook_student.index]]))
         return response
 
 
