@@ -173,13 +173,13 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
 
         writer = csv.writer(response)
         headers = [
-            # "ID",
+            "ID",
             _("Last name"),
             _("First name"),
+            _("Branch"),
+            _("Role"),
+            _("Group"),
             _("Yandex Login"),
-            # _("Branch"),
-            # _("Type"),
-            # _("Student Group"),
             _("Codeforces Handle"),
             _("Final grade"),
             _("Total"),
@@ -194,10 +194,16 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
         writer.writerow(headers)
         for gradebook_student in gradebook.students.values():
             student = gradebook_student.student
+            student_profile = gradebook_student.student_profile
+            student_group = gradebook_student.student_group
             writer.writerow(
                 itertools.chain(
-                    [student.last_name,
+                    [gradebook_student.enrollment_id,
+                     student.last_name,
                      student.first_name,
+                     student_profile.branch.name,
+                     student_profile.get_type_display(),
+                     student_group.name,
                      student.yandex_login,
                      student.codeforces_login,
                      gradebook_student.final_grade_display,

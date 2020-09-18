@@ -44,6 +44,14 @@ class GradebookStudent:
     def student(self):
         return self._enrollment.student
 
+    @property
+    def student_profile(self):
+        return self._enrollment.student_profile
+
+    @property
+    def student_group(self):
+        return self._enrollment.student_group
+
 
 @dataclass
 class GradebookAssignment:
@@ -153,7 +161,9 @@ def gradebook_data(course: Course) -> GradeBookData:
     enrolled_students = OrderedDict()
     enrollments = (Enrollment.active
                    .filter(course=course)
-                   .select_related("student", "student_profile")
+                   .select_related("student",
+                                   "student_profile__branch",
+                                   "student_group")
                    .order_by("student__last_name", "pk"))
     for index, e in enumerate(enrollments.iterator()):
         enrolled_students[e.student_id] = GradebookStudent(e, index)
