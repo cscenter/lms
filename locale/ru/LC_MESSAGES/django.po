@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-18 17:57+0000\n"
-"PO-Revision-Date: 2020-09-18 17:57+0000\n"
+"POT-Creation-Date: 2020-09-19 18:17+0000\n"
+"PO-Revision-Date: 2020-09-19 18:18+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -259,7 +259,7 @@ msgstr "Общее описание, правила обучения"
 
 #: apps/core/models.py:296 apps/courses/models.py:53
 #: apps/courses/models.py:222 apps/courses/models.py:541
-#: apps/learning/gradebook/views.py:179 apps/learning/models.py:71
+#: apps/learning/gradebook/views.py:181 apps/learning/models.py:71
 #: apps/learning/models.py:342 apps/learning/models.py:738
 #: apps/library/models.py:65 apps/study_programs/models.py:53
 #: apps/templates/learning/invitation/complete_profile.html:23
@@ -1133,7 +1133,7 @@ msgid "Enrollment|grade changed"
 msgstr "Оценка изменена"
 
 #: apps/learning/admin.py:131 apps/learning/models.py:206
-#: apps/learning/roles.py:59
+#: apps/learning/roles.py:61
 #: apps/templates/learning/study/student_assignment_detail.html:139
 #: apps/templates/learning/teaching/assignment_detail.html:75
 #: apps/templates/learning/teaching/assignment_list.html:93
@@ -1264,67 +1264,76 @@ msgstr "Альбомы"
 msgid "Empty album"
 msgstr "Пустой альбом"
 
-#: apps/learning/gradebook/imports.py:74
-msgid "Can't convert points for user '{}'"
-msgstr "Ошибка конвертирования оценки для пользователя '{}'"
+#: apps/learning/gradebook/imports.py:28
+msgid "Header '{}' not found"
+msgstr "Заголовок '{}' не найден"
 
-#: apps/learning/gradebook/imports.py:78
-msgid "Score is greater than max grade for user '{}'"
-msgstr ""
-"Текущая оценка для студента '{}' больше максимально возможного значения"
+#: apps/learning/gradebook/imports.py:119
+msgid "Invalid score format '{}'"
+msgstr "Неверный формат оценки '{}'"
 
-#: apps/learning/gradebook/views.py:98
+#: apps/learning/gradebook/imports.py:122
+#| msgid "Score '{}' is greater than the maximum score {}"
+msgid "Score '{}' is greater than the maximum score '{}'"
+msgstr "Оценка '{}' выше максимально возможной '{}'"
+
+#: apps/learning/gradebook/tests.py:93 apps/learning/gradebook/views.py:179
+msgid "Last name"
+msgstr "Фамилия"
+
+#: apps/learning/gradebook/views.py:100
 msgid ""
 "<b>Внимание, часть данных не была сохранена!</b><br>В процессе "
 "редактирования данные были изменены другими участниками. Необходимо вручную "
 "разрешить конфликты и повторить отправку формы."
 msgstr ""
 
-#: apps/learning/gradebook/views.py:117
+#: apps/learning/gradebook/views.py:119
 msgid "Gradebook successfully saved."
 msgstr "Ведомость успешно сохранена."
 
-#: apps/learning/gradebook/views.py:130
+#: apps/learning/gradebook/views.py:132
 msgid "Gradebook hasn't been saved."
 msgstr "Ведомость не была сохранена."
 
-#: apps/learning/gradebook/views.py:177
-msgid "Last name"
-msgstr "Фамилия"
-
-#: apps/learning/gradebook/views.py:178
+#: apps/learning/gradebook/views.py:180
 msgid "First name"
 msgstr "Имя"
 
-#: apps/learning/gradebook/views.py:180 apps/users/models.py:166
+#: apps/learning/gradebook/views.py:182 apps/users/models.py:166
 msgid "Role"
 msgstr "Роль"
 
-#: apps/learning/gradebook/views.py:181 apps/learning/models.py:101
+#: apps/learning/gradebook/views.py:183 apps/learning/models.py:101
 #: apps/learning/models.py:123
 msgid "Group"
 msgstr "Группа"
 
-#: apps/learning/gradebook/views.py:182 apps/users/models.py:312
+#: apps/learning/gradebook/views.py:184 apps/users/models.py:312
 msgid "Yandex Login"
 msgstr "Логин на Яндексе"
 
-#: apps/learning/gradebook/views.py:183 apps/users/models.py:321
+#: apps/learning/gradebook/views.py:185 apps/users/models.py:321
 msgid "Codeforces Handle"
 msgstr ""
 
-#: apps/learning/gradebook/views.py:184
+#: apps/learning/gradebook/views.py:186
 msgid "Final grade"
 msgstr "Итоговая оценка"
 
-#: apps/learning/gradebook/views.py:185
+#: apps/learning/gradebook/views.py:187
 #: apps/templates/learning/gradebook/gradebook_form.html:81
 msgid "Total"
 msgstr "Сумма баллов"
 
-#: apps/learning/gradebook/views.py:238
-msgid "Successfully imported {} results"
-msgstr "Успешно импортировано оценок: {}"
+#: apps/learning/gradebook/views.py:247
+msgid "Imported records: {} out of {}"
+msgstr "Импортировано записей: {} из {}"
+
+#: apps/learning/gradebook/views.py:250
+msgid "<b>Not all records were processed. Import stopped by an error:</b><br>"
+msgstr ""
+"<b>Не все записи были обработаны. Импорт прекращён из-за ошибки:</b><br>"
 
 #: apps/learning/invitation/forms.py:35
 msgid "Submit"
@@ -1719,24 +1728,24 @@ msgstr "Профиль выпускника"
 msgid "Graduate Profiles"
 msgstr "Профили выпускников"
 
-#: apps/learning/roles.py:34 apps/users/constants.py:33
+#: apps/learning/roles.py:35 apps/users/constants.py:33
 msgid "Curator"
 msgstr "Куратор"
 
-#: apps/learning/roles.py:82 apps/users/constants.py:32
+#: apps/learning/roles.py:84 apps/users/constants.py:32
 #: apps/users/models.py:680
 msgid "Co-worker"
 msgstr "Сотрудник"
 
-#: apps/learning/roles.py:84 apps/users/constants.py:37
+#: apps/learning/roles.py:86 apps/users/constants.py:37
 msgid "Invited User"
 msgstr "Приглашенный студент"
 
-#: apps/learning/roles.py:105 apps/users/constants.py:31
+#: apps/learning/roles.py:107 apps/users/constants.py:31
 msgid "Graduate"
 msgstr "Выпускник"
 
-#: apps/learning/roles.py:112 apps/users/constants.py:30
+#: apps/learning/roles.py:114 apps/users/constants.py:30
 msgid "Teacher"
 msgstr "Преподаватель"
 
@@ -2344,7 +2353,7 @@ msgid ""
 "                                        <li>First row contains column headers. Column headers <code>id</code> and <code>score</code> are required.</li>\n"
 "                                        <li>Other rows contain values of enrollment ID and assignment score in the corresponding columns.</li>\n"
 "                                    </ul>\n"
-"                                    The easiest way to get student enrollment ID's is to export the gradebook to a csv file and copy <code>ID</code> column from there.<br>\n"
+"                                    The easiest way to get student enrollment ID's is to export the gradebook to a csv file and copy <code>id</code> column from there.<br>\n"
 "                                    File Content Example:<br>\n"
 "                                "
 msgstr ""
@@ -2354,7 +2363,7 @@ msgstr ""
 "<li>Первая строка содержит заголовки колонок. Для успешного импорта необходимы колонки <code>id</code> и <code>score</code>.</li>\n"
 "<li>Остальные строки содержат идентификатор студента и его оценку в соответствующих колонках.</li>\n"
 "</ul>\n"
-"Самый простой способ получить идентификаторы студентов для курса - скачать ведомость в csv формате, она содержит целевую колонку <code>ID</code>.<br>\n"
+"Самый простой способ получить идентификаторы студентов для курса - скачать ведомость в csv формате, она содержит целевую колонку <code>id</code>.<br>\n"
 "Пример содержимого файла:<br>"
 
 #: apps/templates/learning/gradebook/_modal_enrollments.html:43
@@ -2406,7 +2415,6 @@ msgid "Marks sheet"
 msgstr "Ведомость"
 
 #: apps/templates/learning/gradebook/gradebook_form.html:44
-#| msgid "Enrollment"
 msgid "By enrollment ID"
 msgstr "По идентификатору студента"
 
@@ -3356,6 +3364,12 @@ msgstr "осенний"
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
+
+#~ msgid "Can't convert points for user '{}'"
+#~ msgstr "Ошибка конвертирования оценки для пользователя '{}'"
+
+#~ msgid "Successfully imported {} results"
+#~ msgstr "Успешно импортировано оценок: {}"
 
 #~ msgid "From CSV-file"
 #~ msgstr "Из CSV-файла"
