@@ -20,8 +20,9 @@ from courses.tests.factories import CourseFactory, \
 from learning.gradebook import gradebook_data, BaseGradebookForm, \
     GradeBookFormFactory
 from learning.gradebook.imports import import_assignment_scores, \
-    get_enrolled_students_by_stepik_id
+    get_course_students_by_stepik_id
 from learning.models import StudentAssignment, Enrollment
+from learning.permissions import ViewOwnGradebook
 from learning.services import get_student_profile
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory
@@ -37,13 +38,13 @@ def test_view_gradebook_permission():
     teacher = TeacherFactory()
     teacher_other = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
-    assert teacher.has_perm("teaching.view_own_gradebook", course)
-    assert not teacher_other.has_perm("teaching.view_own_gradebook", course)
+    assert teacher.has_perm(ViewOwnGradebook.name, course)
+    assert not teacher_other.has_perm(ViewOwnGradebook.name, course)
     e = EnrollmentFactory(course=course)
-    assert not e.student.has_perm("teaching.view_own_gradebook", course)
-    assert not UserFactory().has_perm("teaching.view_own_gradebook", course)
+    assert not e.student.has_perm(ViewOwnGradebook.name, course)
+    assert not UserFactory().has_perm(ViewOwnGradebook.name, course)
     curator = CuratorFactory()
-    assert not curator.has_perm("teaching.view_own_gradebook", course)
+    assert not curator.has_perm(ViewOwnGradebook.name, course)
     assert curator.has_perm("teaching.view_gradebook")
 
 
@@ -52,7 +53,7 @@ def test_gradebook_view_security(client, lms_resolver):
     course = CourseFactory()
     resolver = lms_resolver(course.get_gradebook_url())
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
-    assert resolver.func.view_class.permission_required == "teaching.view_own_gradebook"
+    assert resolver.func.view_class.permission_required == ViewOwnGradebook.name
     assert resolver.func.view_class.permission_required in perm_registry
 
 
@@ -61,7 +62,7 @@ def test_gradebook_csv_view_security(client, lms_resolver):
     course = CourseFactory()
     resolver = lms_resolver(course.get_gradebook_url(format='csv'))
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
-    assert resolver.func.view_class.permission_required == "teaching.view_own_gradebook"
+    assert resolver.func.view_class.permission_required == ViewOwnGradebook.name
     assert resolver.func.view_class.permission_required in perm_registry
 
 
@@ -547,7 +548,7 @@ def test_gradebook_view_form_conflict(client):
 
 
 @pytest.mark.django_db
-def test_gradebook_import_assignments_from_csv_security(client):
+def test_gradebook_import_assignment_scores_from_csv_permissions(client):
     teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
     student_spb = StudentFactory(branch__code=Branches.SPB)
@@ -558,19 +559,19 @@ def test_gradebook_import_assignments_from_csv_security(client):
         submission_type=AssignmentSubmissionFormats.OTHER)
     teacher2 = TeacherFactory()
     client.login(teacher2)
-    url = reverse('teaching:gradebook_csv_import_stepic', args=[co.pk])
+    url = reverse('teaching:gradebook_import_scores_by_stepik_id', args=[co.pk])
     response = client.post(url, {'assignment': assignments[0].pk,
                                  'csv_file': StringIO("stub\n")})
-    assert response.status_code == 403  # not actual teacher
-    # Wrong course offering id
-    url = reverse('teaching:gradebook_csv_import_stepic',
+    assert response.status_code == 403  # not a teacher of the course
+    # Course does not exist
+    url = reverse('teaching:gradebook_import_scores_by_stepik_id',
                   args=[assignments[0].course_id + 1])
     response = client.post(url, {'assignment': assignments[0].pk,
                                  'csv_file': StringIO("stub\n")})
-    assert response.status_code == 403
+    assert response.status_code == 404
     # csv_file not provided
-    redirect_url = co.get_gradebook_url()
-    url = reverse('teaching:gradebook_csv_import_stepic', args=[co.pk])
+    client.login(teacher)
+    url = reverse('teaching:gradebook_import_scores_by_stepik_id', args=[co.pk])
     response = client.post(url, {'assignment': assignments[0].pk})
     assert response.status_code == 400
 
@@ -591,7 +592,7 @@ def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
                                 "{},{}\n".format(student.stepic_id,
                                                  expected_score))
         csv_file = BytesIO(csv_input)
-        with_stepik_id = get_enrolled_students_by_stepik_id(assignment.course_id)
+        with_stepik_id = get_course_students_by_stepik_id(assignment.course_id)
         import_assignment_scores(assignment, csv_file,
                                  required_headers=['stepic_id', 'score'],
                                  enrolled_students=with_stepik_id,
@@ -631,7 +632,7 @@ header1,header2,score
         'assignment': assignment.pk,
         'csv_file': tmp_file.open()
     }
-    url_import = reverse('teaching:gradebook_csv_import_yandex',
+    url_import = reverse('teaching:gradebook_import_scores_by_yandex_login',
                          args=[co.pk])
     client.login(teacher)
     response = client.post(url_import, form, follow=True)
@@ -668,7 +669,7 @@ stepic_id,header2,score
         'assignment': assignment.pk,
         'csv_file': tmp_file.open()
     }
-    url_import = reverse('teaching:gradebook_csv_import_stepic', args=[co.pk])
+    url_import = reverse('teaching:gradebook_import_scores_by_stepik_id', args=[co.pk])
     response = client.post(url_import, form, follow=True)
     assert StudentAssignment.objects.get(student=student1).score == 10
     assert StudentAssignment.objects.get(student=student2).score == 42

@@ -38,9 +38,9 @@ urlpatterns = [
             path('csv/', gv.GradeBookCSVView.as_view(), name='gradebook_csv'),
         ])),
         path('<int:course_id>/import/', include([
-            path('stepic', gv.AssignmentScoresImportByStepikIDView.as_view(), name='gradebook_csv_import_stepic'),
-            path('yandex', gv.AssignmentScoresImportByYandexLoginView.as_view(), name='gradebook_csv_import_yandex'),
-            path('enrollments', gv.AssignmentScoresImportByYandexLoginView.as_view(), name='gradebook_import_scores_by_enrollment_id'),
+            path('stepic', gv.ImportAssignmentScoresByStepikIDView.as_view(), name='gradebook_import_scores_by_stepik_id'),
+            path('yandex', gv.ImportAssignmentScoresByYandexLoginView.as_view(), name='gradebook_import_scores_by_yandex_login'),
+            path('enrollments', gv.ImportAssignmentScoresByEnrollmentIDView.as_view(), name='gradebook_import_scores_by_enrollment_id'),
         ])),
     ])),
 ]

@@ -5,7 +5,7 @@ from crispy_forms.layout import Field, Layout, Submit, Hidden, \
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from core.forms import GradeField
+from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.timezone.constants import TIME_FORMAT_RU
 from core.widgets import UbereditorWidget
@@ -157,7 +157,7 @@ class AssignmentModalCommentForm(forms.ModelForm):
 
 
 class AssignmentScoreForm(forms.Form):
-    score = GradeField(required=False, label="")
+    score = ScoreField(required=False, label="")
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
