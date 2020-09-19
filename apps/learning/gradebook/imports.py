@@ -25,7 +25,7 @@ def validate_headers(reader: csv.DictReader,
     errors = []
     for header in required_headers:
         if header not in headers:
-            errors.append(f"Header `{header}` not found")
+            errors.append(_("Header '{}' not found").format(header))
     return errors
 
 
@@ -119,7 +119,7 @@ def score_to_python(raw_value: str, maximum_score) -> Optional[Decimal]:
         msg = _("Invalid score format '{}'").format(raw_value)
         raise ValidationError(msg, code="invalid_score")
     if cleaned_value > maximum_score:
-        msg = _("Score '{}' is greater than the maximum score {}").format(
+        msg = _("Score '{}' is greater than the maximum score '{}'").format(
             raw_value, maximum_score)
         raise ValidationError(msg, code='score_overflow')
     return cleaned_value
