@@ -9,20 +9,21 @@ import pytz
 from bs4 import BeautifulSoup
 from django.contrib import messages
 from django.utils.encoding import smart_bytes, force_bytes
+from django.utils.translation import gettext_lazy
 
 from auth.mixins import PermissionRequiredMixin
 from auth.permissions import perm_registry
 from core.urls import reverse
 from courses.models import AssignmentSubmissionFormats
-from courses.tests.factories import SemesterFactory, CourseFactory, \
+from courses.tests.factories import CourseFactory, \
     AssignmentFactory
 from learning.gradebook import gradebook_data, BaseGradebookForm, \
     GradeBookFormFactory
-from learning.gradebook.imports import AssignmentGradesImport
+from learning.gradebook.imports import import_assignment_scores, \
+    get_enrolled_students_by_stepik_id
 from learning.models import StudentAssignment, Enrollment
 from learning.services import get_student_profile
-from learning.settings import GradingSystems, \
-    StudentStatuses, GradeTypes, Branches
+from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import TeacherFactory, UserFactory, StudentFactory, \
     CuratorFactory
@@ -88,7 +89,8 @@ def test_gradebook_in_csv_format(client):
     data = [s for s in csv.reader(io.StringIO(gradebook_csv)) if s]
     assert len(data) == 3
     assert a1.title in data[0]
-    row_last_names = [row[0] for row in data]
+    last_name_column_index = data[0].index(str(gettext_lazy("Last name")))
+    row_last_names = [row[last_name_column_index] for row in data]
     for a, s, grade in combos:
         row = row_last_names.index(s.last_name)
         col = data[0].index(a.title)
@@ -585,11 +587,15 @@ def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
     assignments = AssignmentFactory.create_batch(3, course=co)
     assignment = assignments[0]
     for expected_score in [13, Decimal('13.42'), '12.34', '"34,56"']:
-        csv_input = force_bytes("stepic_id,total\n"
+        csv_input = force_bytes("stepic_id,score\n"
                                 "{},{}\n".format(student.stepic_id,
                                                  expected_score))
         csv_file = BytesIO(csv_input)
-        AssignmentGradesImport(assignment, csv_file, "stepic_id").process()
+        with_stepik_id = get_enrolled_students_by_stepik_id(assignment.course_id)
+        import_assignment_scores(assignment, csv_file,
+                                 required_headers=['stepic_id', 'score'],
+                                 enrolled_students=with_stepik_id,
+                                 lookup_column_name='stepic_id')
         a_s = StudentAssignment.objects.get(student=student,
                                             assignment=assignment)
         if hasattr(expected_score, "replace"):
@@ -617,7 +623,7 @@ def test_gradebook_import_assignments_from_csv(client, tmpdir):
     # Generate csv file with missing header `login`
     tmp_file = tmpdir.mkdir("csv").join("grades_missing_header.csv")
     tmp_file.write("""
-header1,header2,total
+header1,header2,score
 1,2,10
 2,3,20
     """.strip())
@@ -635,7 +641,7 @@ header1,header2,total
     #
     tmp_file = tmpdir.join("csv").join("grades_yandex_logins.csv")
     tmp_file.write("""
-yandex_login,header2,total
+yandex_login,header2,score
 yandex1,1,10
 yandex2,2,20
 yandex3,3,30
@@ -652,7 +658,7 @@ yandex3,3,30
     # Try to override grades from csv with stepik ids
     tmp_file = tmpdir.join("csv").join("grades_stepik_ids.csv")
     tmp_file.write("""
-stepic_id,header2,total
+stepic_id,header2,score
 2,2,42
 3,3,1
 4,3,1
