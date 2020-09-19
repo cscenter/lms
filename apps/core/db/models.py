@@ -36,7 +36,7 @@ class ScoreField(DecimalField):
         return normalize_score(value)
 
     def formfield(self, **kwargs):
-        kwargs.setdefault("form_class", forms.GradeField)
+        kwargs.setdefault("form_class", forms.ScoreField)
         return super().formfield(**kwargs)
 
 

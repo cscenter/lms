@@ -29,9 +29,16 @@ def validate_headers(reader: csv.DictReader,
     return errors
 
 
-def get_enrolled_students_by_stepik_id(course_id) -> Dict[CSVColumnValue, int]:
+def get_course_students(course_id) -> Dict[CSVColumnValue, int]:
+    enrollments = (Enrollment.active
+                   .filter(course_id=course_id)
+                   .only("student_id", "id"))
+    return {str(e.id): e.student_id for e in enrollments}
+
+
+def get_course_students_by_stepik_id(course_id) -> Dict[CSVColumnValue, int]:
     """
-    Returns enrolled students that provided stepik ID in their profiles.
+    Returns course students that provided stepik ID in their accounts.
     """
     enrollments = (Enrollment.active
                    .filter(course_id=course_id)
@@ -44,9 +51,9 @@ def get_enrolled_students_by_stepik_id(course_id) -> Dict[CSVColumnValue, int]:
     return enrolled_students
 
 
-def get_enrolled_students_by_yandex_login(course_id) -> Dict[CSVColumnValue, int]:
+def get_course_students_by_yandex_login(course_id) -> Dict[CSVColumnValue, int]:
     """
-    Returns enrolled students that provided yandex login in their profiles.
+    Returns course students that provided yandex login in their accounts.
     """
     enrollments = (Enrollment.active
                    .filter(course_id=course_id)
@@ -76,7 +83,7 @@ def import_assignment_scores(assignment: Assignment,
     found = 0
     imported = 0
     maximum_score = assignment.maximum_score
-    for row in reader:
+    for row_number, row in enumerate(reader, start=1):
         lookup_column_value = row[lookup_column_name].strip()
         student_id = enrolled_students.get(lookup_column_value, None)
         if not student_id:
@@ -86,8 +93,9 @@ def import_assignment_scores(assignment: Assignment,
             score = score_to_python(row["score"], maximum_score)
         except ValidationError as e:
             logger.debug(e.message)
-            # TODO: collect errors?
-            continue
+            raise ValidationError(f'Row {row_number}: {e.message}',
+                                  code='invalid_score')
+            # TODO: collect errors instead?
         # Try to update student assignment score
         updated = (StudentAssignment.objects
                    .filter(assignment=assignment,
@@ -103,10 +111,15 @@ def import_assignment_scores(assignment: Assignment,
     return found, imported
 
 
-def score_to_python(score: str, maximum_score) -> Optional[Decimal]:
+def score_to_python(raw_value: str, maximum_score) -> Optional[Decimal]:
     score_field = AssignmentScoreForm.declared_fields['score']
-    score = score_field.to_python(score)
-    if score > maximum_score:
-        msg = _("Score '{}' is greater than the maximum score").format(score)
+    try:
+        cleaned_value = score_field.clean(raw_value)
+    except ValidationError:
+        msg = _("Invalid score format '{}'").format(raw_value)
+        raise ValidationError(msg, code="invalid_score")
+    if cleaned_value > maximum_score:
+        msg = _("Score '{}' is greater than the maximum score {}").format(
+            raw_value, maximum_score)
         raise ValidationError(msg, code='score_overflow')
-    return score
+    return cleaned_value

@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.forms import BoundField
 from django.utils.encoding import force_str
 
-from core.forms import GradeField
+from core.forms import ScoreField
 from learning.gradebook.data import GradeBookData
 from learning.models import StudentAssignment, Enrollment
 
@@ -100,7 +100,7 @@ class CustomBoundField(BoundField):
                                         attrs=attrs))
 
 
-class AssignmentScore(GradeField):
+class AssignmentScore(ScoreField):
     def __init__(self, assignment, submission):
         score = submission.score
         widget = forms.TextInput(attrs={
