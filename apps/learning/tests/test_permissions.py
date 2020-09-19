@@ -16,7 +16,8 @@ from learning.permissions import CreateAssignmentComment, \
     CreateAssignmentCommentAsLearner, ViewRelatedStudentAssignment, \
     ViewStudentAssignment, EditOwnStudentAssignment, \
     EditOwnAssignmentExecutionTime, EnrollInCourse, EnrollPermissionObject, \
-    InvitationEnrollPermissionObject, ViewAssignmentCommentAttachment
+    InvitationEnrollPermissionObject, ViewAssignmentCommentAttachment, \
+    ViewOwnGradebook, ViewGradebook, EditGradebook
 from learning.services import get_student_profile, CourseRole, \
     course_access_role
 from learning.settings import StudentStatuses, GradeTypes, Branches
@@ -387,4 +388,33 @@ def test_update_assignment_execution_time():
     for u in no_permission:
         assert not u.has_perm(permission_name, sa)
 
+
+@pytest.mark.django_db
+def test_view_gradebook():
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    assert teacher.has_perm(ViewOwnGradebook.name, course)
+    assert not teacher_other.has_perm(ViewOwnGradebook.name, course)
+    e = EnrollmentFactory(course=course)
+    assert not e.student.has_perm(ViewOwnGradebook.name, course)
+    assert not UserFactory().has_perm(ViewOwnGradebook.name, course)
+    curator = CuratorFactory()
+    assert not curator.has_perm(ViewOwnGradebook.name, course)
+    assert curator.has_perm(ViewGradebook.name)
+
+
+@pytest.mark.django_db
+def test_edit_gradebook():
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    assert teacher.has_perm(EditGradebook.name, course)
+    assert not teacher_other.has_perm(EditGradebook.name, course)
+    e = EnrollmentFactory(course=course)
+    assert not e.student.has_perm(EditGradebook.name, course)
+    assert not UserFactory().has_perm(EditGradebook.name, course)
+    curator = CuratorFactory()
+    assert curator.has_perm(EditGradebook.name)
+    assert not curator.has_perm(ViewOwnGradebook.name, course)
 
