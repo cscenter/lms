@@ -1,11 +1,10 @@
 import csv
 import itertools
-from typing import Optional
 
 from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.db.models import Prefetch, Q
-from django.http import HttpResponseRedirect, Http404, HttpResponse, \
+from django.http import HttpResponseRedirect, HttpResponse, \
     HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.utils.datastructures import MultiValueDictKeyError
@@ -14,13 +13,14 @@ from django.views import generic
 from vanilla import FormView
 
 from auth.mixins import PermissionRequiredMixin
+from courses.constants import SemesterTypes
 from courses.models import Course, Semester, Assignment, \
     AssignmentSubmissionFormats
-from courses.constants import SemesterTypes
-from courses.utils import get_current_term_pair, get_term_index
+from courses.utils import get_current_term_pair
 from courses.views.mixins import CourseURLParamsMixin
 from learning.gradebook import GradeBookFormFactory, gradebook_data
-from learning.gradebook.imports import AssignmentGradesImport
+from learning.gradebook.imports import import_assignment_scores, \
+    get_enrolled_students_by_stepik_id, get_enrolled_students_by_yandex_login
 from users.mixins import TeacherOnlyMixin
 
 __all__ = [
@@ -213,7 +213,7 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
         return response
 
 
-class AssignmentGradesImportBaseView(TeacherOnlyMixin, generic.View):
+class AssignmentScoresImportBaseView(TeacherOnlyMixin, generic.View):
     is_for_staff = False
 
     def post(self, request, course_id, *args, **kwargs):
@@ -249,13 +249,21 @@ class AssignmentGradesImportBaseView(TeacherOnlyMixin, generic.View):
         raise NotImplementedError()
 
 
-class AssignmentScoresImportByStepikIDView(AssignmentGradesImportBaseView):
+class AssignmentScoresImportByStepikIDView(AssignmentScoresImportBaseView):
     def import_grades_for_assignment(self, assignment):
         csv_file = self.request.FILES['csv_file']
-        return AssignmentGradesImport(assignment, csv_file, "stepic_id").process()
+        with_stepik_id = get_enrolled_students_by_stepik_id(assignment.course_id)
+        return import_assignment_scores(assignment, csv_file,
+                                        required_headers=['stepic_id', 'score'],
+                                        enrolled_students=with_stepik_id,
+                                        lookup_column_name='stepic_id')
 
 
-class AssignmentScoresImportByYandexLoginView(AssignmentGradesImportBaseView):
+class AssignmentScoresImportByYandexLoginView(AssignmentScoresImportBaseView):
     def import_grades_for_assignment(self, assignment):
         csv_file = self.request.FILES['csv_file']
-        return AssignmentGradesImport(assignment, csv_file, "yandex_login").process()
+        with_yandex_login = get_enrolled_students_by_yandex_login(assignment.course_id)
+        return import_assignment_scores(assignment, csv_file,
+                                        required_headers=['yandex_login', 'score'],
+                                        enrolled_students=with_yandex_login,
+                                        lookup_column_name='yandex_login')

@@ -1,92 +1,112 @@
 import csv
 import logging
+from decimal import Decimal
+from typing import Optional, List, IO, Dict
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.utils.translation import gettext_lazy as _
 
+from courses.models import Assignment
 from learning.forms import AssignmentScoreForm
 from learning.models import Enrollment, StudentAssignment
 
-__all__ = ('AssignmentGradesImport',)
+__all__ = ('import_assignment_scores',)
 
 logger = logging.getLogger(__name__)
 
+CSVColumnName = str
+CSVColumnValue = str
 
-class AssignmentGradesImport:
-    def __init__(self, assignment, csv_file: UploadedFile,
-                 lookup_field, request=None):
-        self.assignment = assignment
-        # Remove BOM by using 'utf-8-sig'
-        f = (bs.decode("utf-8-sig") for bs in csv_file)
-        self.reader = csv.DictReader(f)
-        self.lookup_field = lookup_field
 
-    def validate_headers(self):
-        headers = self.reader.fieldnames
-        errors = []
-        for header in [self.lookup_field, "total"]:
-            if header not in headers:
-                errors.append(f"Header `{header}` not found")
-        return errors
+def validate_headers(reader: csv.DictReader,
+                     required_headers: List[CSVColumnName]):
+    headers = reader.fieldnames
+    errors = []
+    for header in required_headers:
+        if header not in headers:
+            errors.append(f"Header `{header}` not found")
+    return errors
 
-    def process(self):
-        errors = self.validate_headers()
-        if errors:
-            raise ValidationError("<br>".join(errors))
-        msg = f"Start processing results for assignment {self.assignment.id}"
-        logger.debug(msg)
 
-        qs = (Enrollment.active
-              .filter(course_id=self.assignment.course_id)
-              .only("student_id",
-                    f"student__{self.lookup_field}"))
-        active_students = {}
-        for s in qs.iterator():
-            lookup_field_value = getattr(s.student, self.lookup_field)
-            active_students[str(lookup_field_value)] = s.student_id
+def get_enrolled_students_by_stepik_id(course_id) -> Dict[CSVColumnValue, int]:
+    """
+    Returns enrolled students that provided stepik ID in their profiles.
+    """
+    enrollments = (Enrollment.active
+                   .filter(course_id=course_id)
+                   .only("student_id", "student__stepic_id"))
+    enrolled_students = {}
+    for enrollment in enrollments.iterator():
+        stepik_id = enrollment.student.stepic_id
+        if stepik_id:
+            enrolled_students[str(stepik_id)] = enrollment.student_id
+    return enrolled_students
 
-        total = 0
-        success = 0
-        for row in self.reader:
-            total += 1
-            try:
-                lookup_field_value, score = self.clean(row)
-                student_id = active_students.get(lookup_field_value, None)
-                if student_id:
-                    updated = self.update_score(student_id, score)
-                    if not updated:
-                        msg = (f"Student with {self.lookup_field} = "
-                               f"{lookup_field_value} enrolled "
-                               f"but doesn't have an assignment.")
-                        logger.debug(msg)
-                    success += int(updated)
-            except ValidationError as e:
-                logger.debug(e.message)
-        return total, success
 
-    def clean(self, row):
-        lookup_field_value = row[self.lookup_field].strip()
+def get_enrolled_students_by_yandex_login(course_id) -> Dict[CSVColumnValue, int]:
+    """
+    Returns enrolled students that provided yandex login in their profiles.
+    """
+    enrollments = (Enrollment.active
+                   .filter(course_id=course_id)
+                   .only("student_id", "student__yandex_login"))
+    enrolled_students = {}
+    for enrollment in enrollments.iterator():
+        yandex_login = enrollment.student.yandex_login
+        if yandex_login:
+            enrolled_students[str(yandex_login)] = enrollment.student_id
+    return enrolled_students
+
+
+def import_assignment_scores(assignment: Assignment,
+                             csv_file: IO,
+                             enrolled_students: Dict[CSVColumnValue, int],
+                             required_headers: List[CSVColumnName],
+                             lookup_column_name: str):
+    # Remove BOM by using 'utf-8-sig'
+    f = (bs.decode("utf-8-sig") for bs in csv_file)
+    reader = csv.DictReader(f)
+    errors = validate_headers(reader, required_headers)
+    if errors:
+        raise ValidationError("<br>".join(errors))
+
+    logger.debug(f"Start processing results for assignment {assignment.id}")
+
+    found = 0
+    imported = 0
+    maximum_score = assignment.maximum_score
+    for row in reader:
+        lookup_column_value = row[lookup_column_name].strip()
+        student_id = enrolled_students.get(lookup_column_value, None)
+        if not student_id:
+            continue
+        found += 1
         try:
-            score_field = AssignmentScoreForm.declared_fields['score']
-            score = score_field.to_python(row["total"])
-        except ValidationError:
-            msg = _("Can't convert points for user '{}'").format(
-                lookup_field_value)
-            raise ValidationError(msg, code='invalid_score_value')
-        if score > self.assignment.maximum_score:
-            msg = _("Score is greater than max grade for user '{}'").format(
-                lookup_field_value)
-            raise ValidationError(msg, code='invalid_score_value')
-        return lookup_field_value, score
-
-    def update_score(self, student_id, score):
-        assignment_id = self.assignment.pk
+            score = score_to_python(row["score"], maximum_score)
+        except ValidationError as e:
+            logger.debug(e.message)
+            # TODO: collect errors?
+            continue
+        # Try to update student assignment score
         updated = (StudentAssignment.objects
-                   .filter(assignment__id=assignment_id,
+                   .filter(assignment=assignment,
                            student_id=student_id)
                    .update(score=score))
-        if not updated:
-            return False
-        logger.debug(f"{score} points has written to student {student_id}")
-        return True
+        if updated:
+            msg = f"{score} points has written to student {student_id}"
+        else:
+            msg = (f"Student with {lookup_column_name} = {lookup_column_value} "
+                   f"is enrolled but doesn't have personal assignment.")
+        logger.debug(msg)
+        imported += int(updated)
+    return found, imported
+
+
+def score_to_python(score: str, maximum_score) -> Optional[Decimal]:
+    score_field = AssignmentScoreForm.declared_fields['score']
+    score = score_field.to_python(score)
+    if score > maximum_score:
+        msg = _("Score '{}' is greater than the maximum score").format(score)
+        raise ValidationError(msg, code='score_overflow')
+    return score
