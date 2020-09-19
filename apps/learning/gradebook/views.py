@@ -158,7 +158,6 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
 
 class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
                        generic.base.View):
-    http_method_names = ['get']
     permission_required = ViewOwnGradebook.name
 
     def get_permission_object(self):

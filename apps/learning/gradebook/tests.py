@@ -8,11 +8,13 @@ import pytest
 import pytz
 from bs4 import BeautifulSoup
 from django.contrib import messages
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import smart_bytes, force_bytes
 from django.utils.translation import gettext_lazy
 
 from auth.mixins import PermissionRequiredMixin
 from auth.permissions import perm_registry
+from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.models import AssignmentSubmissionFormats
 from courses.tests.factories import CourseFactory, \
@@ -26,26 +28,10 @@ from learning.permissions import ViewOwnGradebook
 from learning.services import get_student_profile
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory
-from users.tests.factories import TeacherFactory, UserFactory, StudentFactory, \
-    CuratorFactory
+from users.tests.factories import TeacherFactory, StudentFactory
 
 
 # TODO: test redirect to gradebook for teachers if only 1 course in current term
-
-
-@pytest.mark.django_db
-def test_view_gradebook_permission():
-    teacher = TeacherFactory()
-    teacher_other = TeacherFactory()
-    course = CourseFactory(teachers=[teacher])
-    assert teacher.has_perm(ViewOwnGradebook.name, course)
-    assert not teacher_other.has_perm(ViewOwnGradebook.name, course)
-    e = EnrollmentFactory(course=course)
-    assert not e.student.has_perm(ViewOwnGradebook.name, course)
-    assert not UserFactory().has_perm(ViewOwnGradebook.name, course)
-    curator = CuratorFactory()
-    assert not curator.has_perm(ViewOwnGradebook.name, course)
-    assert curator.has_perm("teaching.view_gradebook")
 
 
 @pytest.mark.django_db
@@ -67,7 +53,7 @@ def test_gradebook_csv_view_security(client, lms_resolver):
 
 
 @pytest.mark.django_db
-def test_gradebook_in_csv_format(client):
+def test_gradebook_download_csv(client):
     teacher = TeacherFactory()
     student1, student2 = StudentFactory.create_batch(2)
     co = CourseFactory.create(teachers=[teacher])
@@ -606,71 +592,196 @@ def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
 
 
 @pytest.mark.django_db
-def test_gradebook_import_assignments_from_csv(client, tmpdir):
+def test_gradebook_import_assignment_score_by_stepik_id(client):
     teacher = TeacherFactory()
-    co = CourseFactory.create(teachers=[teacher])
-    student1 = StudentFactory(branch__code=Branches.SPB, yandex_login='yandex1',
-                              stepic_id='1')
-    student2 = StudentFactory(branch__code=Branches.SPB, yandex_login='yandex2',
-                              stepic_id='2')
-    student3 = StudentFactory(branch__code=Branches.SPB, yandex_login='custom_one',
-                              stepic_id='3')
+    course = CourseFactory.create(teachers=[teacher])
+    student1 = StudentFactory(branch__code=Branches.SPB, stepic_id='2')
+    student2 = StudentFactory(branch__code=Branches.SPB, stepic_id=None)
+    student3 = StudentFactory(branch__code=Branches.SPB, stepic_id='4')
     for s in [student1, student2, student3]:
-        EnrollmentFactory.create(student=s, course=co)
+        EnrollmentFactory.create(student=s, course=course)
     assignment = AssignmentFactory.create(
-        course=co,
+        course=course,
         submission_type=AssignmentSubmissionFormats.OTHER,
         maximum_score=50)
-    # Generate csv file with missing header `login`
-    tmp_file = tmpdir.mkdir("csv").join("grades_missing_header.csv")
-    tmp_file.write("""
+    # Missing header
+    csv_data = b"""
 header1,header2,score
 1,2,10
 2,3,20
-    """.strip())
+    """.strip()
     form = {
         'assignment': assignment.pk,
-        'csv_file': tmp_file.open()
+        'csv_file': SimpleUploadedFile("data.csv", csv_data)
     }
-    url_import = reverse('teaching:gradebook_import_scores_by_yandex_login',
-                         args=[co.pk])
+    import_csv_url = reverse('teaching:gradebook_import_scores_by_stepik_id',
+                             args=[course.pk])
     client.login(teacher)
-    response = client.post(url_import, form, follow=True)
+    response = client.post(import_csv_url, form, follow=True)
     assert response.status_code == 200
     assert 'messages' in response.context
     assert list(response.context['messages'])[0].level == messages.ERROR
-    #
-    tmp_file = tmpdir.join("csv").join("grades_yandex_logins.csv")
-    tmp_file.write("""
-yandex_login,header2,score
-yandex1,1,10
-yandex2,2,20
-yandex3,3,30
-    """.strip())
-    form = {
-        'assignment': assignment.pk,
-        'csv_file': tmp_file.open()
-    }
-    response = client.post(url_import, form, follow=True)
-    assert response.status_code == 200
-    assert StudentAssignment.objects.get(student=student1).score == 10
-    assert StudentAssignment.objects.get(student=student2).score == 20
-    assert StudentAssignment.objects.get(student=student3).score is None
-    # Try to override grades from csv with stepik ids
-    tmp_file = tmpdir.join("csv").join("grades_stepik_ids.csv")
-    tmp_file.write("""
+    csv_data = b"""
 stepic_id,header2,score
 2,2,42
 3,3,1
 4,3,1
 5,3,100
+    """.strip()
+    form = {
+        'assignment': assignment.pk,
+        'csv_file': SimpleUploadedFile("data.csv", csv_data)
+    }
+    response = client.post(import_csv_url, form, follow=True)
+    assert StudentAssignment.objects.get(student=student1).score == 42
+    assert StudentAssignment.objects.get(student=student2).score is None
+    assert StudentAssignment.objects.get(student=student3).score == 1
+
+
+@pytest.mark.django_db
+def test_gradebook_import_assignment_score_by_yandex_login(client):
+    teacher = TeacherFactory()
+    branch = BranchFactory(code=Branches.SPB)
+    course = CourseFactory(teachers=[teacher])
+    student1 = StudentFactory(branch=branch, yandex_login='yandex1')
+    student2 = StudentFactory(branch=branch, yandex_login='yandex2')
+    student3 = StudentFactory(branch=branch, yandex_login='')
+    for s in [student1, student2, student3]:
+        EnrollmentFactory.create(student=s, course=course)
+    assignment = AssignmentFactory(
+        course=course,
+        submission_type=AssignmentSubmissionFormats.OTHER,
+        maximum_score=50)
+    student_assignment3 = StudentAssignment.objects.get(assignment=assignment,
+                                                        student=student3)
+    assert student_assignment3.score is None
+    csv_data = b"""
+header1,header2,score
+1,2,10
+2,3,20
+    """.strip()
+    csv_file = SimpleUploadedFile("grades_missing_header.csv", csv_data)
+    form = {
+        'assignment': assignment.pk,
+        'csv_file': csv_file
+    }
+    import_csv_url = reverse('teaching:gradebook_import_scores_by_yandex_login',
+                             args=[course.pk])
+    client.login(teacher)
+    response = client.post(import_csv_url, form, follow=True)
+    assert response.status_code == 200
+    assert 'messages' in response.context
+    assert list(response.context['messages'])[0].level == messages.ERROR
+    #
+    csv_data = b"""
+yandex_login,header2,score
+yandex1,1,10
+yandex2,2,20
+,3,30
+    """.strip()
+    form = {
+        'assignment': assignment.pk,
+        'csv_file': SimpleUploadedFile("scores.csv", csv_data)
+    }
+    response = client.post(import_csv_url, form, follow=True)
+    assert response.status_code == 200
+    assert StudentAssignment.objects.get(student=student1).score == 10
+    assert StudentAssignment.objects.get(student=student2).score == 20
+    assert StudentAssignment.objects.get(student=student3).score is None
+
+
+@pytest.mark.django_db
+def test_gradebook_import_assignment_score_by_enrollment_id_invalid_data(client):
+    teacher = TeacherFactory()
+    client.login(teacher)
+    course = CourseFactory(teachers=[teacher])
+    import_csv_url = reverse('teaching:gradebook_import_scores_by_enrollment_id',
+                             args=[course.pk])
+    e1, e2, e3 = EnrollmentFactory.create_batch(3, course=course)
+    assignment = AssignmentFactory.create(
+        course=course,
+        submission_type=AssignmentSubmissionFormats.OTHER,
+        maximum_score=50)
+    # Invalid headers
+    csv_data = b"""
+header1,header2,score
+1,2,10
+2,3,20
+    """.strip()
+    form = {
+        'assignment': assignment.pk,
+        'csv_file': SimpleUploadedFile("data.csv", csv_data)
+    }
+    response = client.post(import_csv_url, form, follow=True)
+    assert response.status_code == 200
+    assert 'messages' in response.context
+    assert list(response.context['messages'])[-1].level == messages.ERROR
+    # Score > maximum score
+    csv_data = force_bytes(f"""
+id,header2,score
+{e1.id},2,10
+{e2.id},3,200
     """.strip())
     form = {
         'assignment': assignment.pk,
-        'csv_file': tmp_file.open()
+        'csv_file': SimpleUploadedFile("data.csv", csv_data)
     }
-    url_import = reverse('teaching:gradebook_import_scores_by_stepik_id', args=[co.pk])
-    response = client.post(url_import, form, follow=True)
-    assert StudentAssignment.objects.get(student=student1).score == 10
-    assert StudentAssignment.objects.get(student=student2).score == 42
-    assert StudentAssignment.objects.get(student=student3).score == 1
+    response = client.post(import_csv_url, form, follow=True)
+    assert response.status_code == 200
+    assert 'messages' in response.context
+    msgs = list(response.context['messages'])
+    assert msgs[-1].level == messages.ERROR
+    # Score for enrollment1 has been imported
+    assert StudentAssignment.objects.get(student=e1.student).score == 10
+    assert StudentAssignment.objects.get(student=e2.student).score is None
+
+
+@pytest.mark.django_db
+def test_gradebook_import_assignment_score_by_enrollment_id(client):
+    teacher = TeacherFactory()
+    client.login(teacher)
+    course = CourseFactory(teachers=[teacher])
+    import_csv_url = reverse('teaching:gradebook_import_scores_by_enrollment_id',
+                             args=[course.pk])
+    e1, e2, e3 = EnrollmentFactory.create_batch(3, course=course)
+    assignment = AssignmentFactory.create(
+        course=course,
+        submission_type=AssignmentSubmissionFormats.OTHER,
+        maximum_score=500)
+    csv_data = force_bytes(f"""
+id,header2,score
+{e1.id},2,42
+3,3,1
+{e2.id},3,100
+{e2.id},3,101
+    """.strip())
+    form = {
+        'assignment': assignment.pk,
+        'csv_file': SimpleUploadedFile("data.csv", csv_data)
+    }
+    response = client.post(import_csv_url, form, follow=True)
+    assert StudentAssignment.objects.get(student=e1.student).score == 42
+    assert StudentAssignment.objects.get(student=e2.student).score == 101
+    assert StudentAssignment.objects.get(student=e3.student).score is None
+    # Enrollment id from other course
+    other_course = CourseFactory(teachers=[teacher])
+    e4 = EnrollmentFactory(course=other_course)
+    assignment_other = AssignmentFactory.create(
+        course=other_course,
+        submission_type=AssignmentSubmissionFormats.OTHER,
+        maximum_score=200)
+    csv_data = force_bytes(f"""
+id,header2,score
+{e1.id},2,42
+3,3,1
+{e2.id},3,100
+{e4.id},3,101
+    """.strip())
+    form = {
+        'assignment': assignment.pk,
+        'csv_file': SimpleUploadedFile("data.csv", csv_data)
+    }
+    response = client.post(import_csv_url, form, follow=True)
+    assert StudentAssignment.objects.get(student=e2.student).score == 100
+    assert StudentAssignment.objects.get(student=e4.student).score is None
+
