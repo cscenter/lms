@@ -28,7 +28,7 @@ class CourseNewsUnreadNotificationsView(ListAPIView):
 
 class CourseList(ListAPIView):
     """
-    Returns course list the authenticated teacher participated in.
+    List courses the authenticated user participated in as a teacher.
     """
     permission_classes = [IsAuthenticated]
     serializer_class = MyCourseSerializer
@@ -41,7 +41,7 @@ class CourseList(ListAPIView):
 
 class EnrollmentList(ListAPIView):
     """
-    Returns student list participate in the course.
+    List students enrolled in the course.
     """
     permission_classes = [IsAuthenticated, ViewEnrollments]
     serializer_class = EnrollmentSerializer
@@ -59,7 +59,7 @@ class EnrollmentList(ListAPIView):
 
 class CourseAssignmentList(ListAPIView):
     """
-    Returns assignment list of the course.
+    List assignments of the course.
     """
     permission_classes = [IsAuthenticated, CreateAssignment]
     serializer_class = MyCourseAssignmentSerializer
