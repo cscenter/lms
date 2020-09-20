@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import TimeStampedModel
 
-from .settings import DIGEST_LENGTH, TOKEN_KEY_LENGTH
+from .settings import DIGEST_MAX_LENGTH, TOKEN_KEY_LENGTH
 
 
 class Token(TimeStampedModel):
@@ -11,7 +11,7 @@ class Token(TimeStampedModel):
     This model doesn't store token as a plain text
     """
     digest = models.CharField(
-        max_length=DIGEST_LENGTH, primary_key=True)
+        max_length=DIGEST_MAX_LENGTH, primary_key=True)
     access_key = models.CharField(
         verbose_name=_("Access Key"),
         max_length=TOKEN_KEY_LENGTH,

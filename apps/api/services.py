@@ -29,6 +29,7 @@ def hash_token(token):
     return generate_hash(binascii.unhexlify(token), salt=False)
 
 
+# TODO: move to core utils
 def generate_hash(*bits: bytes, salt=True):
     """Use salt=False if key needs to be mapped 1 to 1"""
     digest = hashes.Hash(SECURE_HASH_ALGORITHM(), backend=default_backend())
