@@ -12,15 +12,15 @@ class TokenObtainSerializer(serializers.Serializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.fields[self.username_field] = serializers.CharField()
+        #
+        self.fields['login'] = serializers.CharField()
         self.fields['password'] = serializers.CharField(
             style={'input_type': 'password'},
             write_only=True)
 
     def validate(self, attrs):
         authenticate_kwargs = {
-            self.username_field: attrs[self.username_field],
+            self.username_field: attrs['login'],
             'password': attrs['password'],
         }
         try:
@@ -33,7 +33,7 @@ class TokenObtainSerializer(serializers.Serializer):
         if self.user is None or not self.user.is_active:
             raise serializers.ValidationError(_('No active account found'))
         return {
-            'secret_key': self.get_token(self.user)
+            'secret_token': self.get_token(self.user)
         }
 
     @classmethod

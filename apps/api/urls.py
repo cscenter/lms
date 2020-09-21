@@ -1,11 +1,13 @@
-from django.urls import path
+from django.urls import path, include
 
 from .views import TokenObtainView, TokenRevokeView
 
-app_name = 'api-auth'
+app_name = 'auth-api'
 
 
 urlpatterns = [
-    path('token/', TokenObtainView.as_view(), name='token_obtain'),
-    path('revoke/', TokenRevokeView.as_view(), name='token_revoke'),
+    path('v1/', include(([
+        path('token/', TokenObtainView.as_view(), name='token_obtain'),
+        path('revoke/', TokenRevokeView.as_view(), name='token_revoke'),
+    ], 'v1')))
 ]
