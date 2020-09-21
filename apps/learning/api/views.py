@@ -8,7 +8,7 @@ from courses.models import Course, Assignment
 from courses.permissions import CreateAssignment
 from learning.api.serializers import CourseNewsNotificationSerializer, \
     StudentAssignmentSerializer, MyCourseSerializer, \
-    MyCourseAssignmentSerializer, EnrollmentSerializer
+    MyCourseAssignmentSerializer, EnrollmentSerializer, MyEnrollmentSerializer
 from learning.models import CourseNewsNotification, StudentAssignment, \
     Enrollment
 from learning.permissions import EditStudentAssignment, \
@@ -30,6 +30,7 @@ class CourseList(ListAPIView):
     """
     List courses the authenticated user participated in as a teacher.
     """
+    # authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = MyCourseSerializer
 
@@ -37,24 +38,6 @@ class CourseList(ListAPIView):
         return (Course.objects
                 .filter(teachers=self.request.user)
                 .select_related('meta_course', 'semester', 'main_branch'))
-
-
-class EnrollmentList(ListAPIView):
-    """
-    List students enrolled in the course.
-    """
-    permission_classes = [IsAuthenticated, ViewEnrollments]
-    serializer_class = EnrollmentSerializer
-
-    def initial(self, request, *args, **kwargs):
-        super().initial(request, *args, **kwargs)
-        self.course = get_object_or_404(Course.objects.get_queryset(),
-                                        pk=kwargs['course_id'])
-        self.check_object_permissions(self.request, self.course)
-
-    def get_queryset(self):
-        return (Enrollment.active
-                .filter(course_id=self.kwargs['course_id']))
 
 
 class CourseAssignmentList(ListAPIView):
@@ -81,6 +64,26 @@ class CourseAssignmentList(ListAPIView):
                 .order_by('-deadline_at'))
 
 
+class EnrollmentList(ListAPIView):
+    """
+    List students enrolled in the course.
+    """
+    permission_classes = [IsAuthenticated, ViewEnrollments]
+    serializer_class = MyEnrollmentSerializer
+
+    def initial(self, request, *args, **kwargs):
+        super().initial(request, *args, **kwargs)
+        self.course = get_object_or_404(Course.objects.get_queryset(),
+                                        pk=kwargs['course_id'])
+        self.check_object_permissions(self.request, self.course)
+
+    def get_queryset(self):
+        return (Enrollment.active
+                .select_related('student_profile__user',
+                                'student_profile__branch')
+                .filter(course_id=self.kwargs['course_id']))
+
+
 class StudentAssignmentList(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = StudentAssignmentSerializer
@@ -95,9 +98,14 @@ class StudentAssignmentList(ListAPIView):
 
 
 class StudentAssignmentUpdate(UpdateAPIView):
-    authentication_classes = [TokenAuthentication]
+    # authentication_classes = [TokenAuthentication]
     permission_classes = [EditStudentAssignment]
     serializer_class = StudentAssignmentSerializer
+    lookup_url_kwarg = 'student_id'
+    lookup_field = 'student_id'
 
     def get_queryset(self):
-        return StudentAssignment.objects.select_related('assignment')
+        return (StudentAssignment.objects
+                .filter(assignment_id=self.kwargs['assignment_id'])
+                .select_related('assignment')
+                .order_by())

@@ -1,16 +1,17 @@
+from django.conf import settings
 from django.core.cache import caches, InvalidCacheBackendError
 from django.utils.encoding import force_bytes
 from rest_framework import serializers
 
 from api.utils import make_api_fragment_key
-from courses.utils import course_public_url
+from core.api.serializers import BranchSerializer
 from core.utils import render_markdown
 from courses.api.serializers import CourseSerializer
 from courses.models import Course, CourseTeacher
-from learning.api.serializers import StudentSerializer
+from courses.utils import course_public_url
 from learning.models import GraduateProfile
 from users.api.serializers import PhotoSerializerField
-from users.models import User
+from users.models import User, StudentProfile
 
 
 class CourseRelatedField(serializers.RelatedField):
@@ -85,10 +86,23 @@ class SiteCourseSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+class StudentProfilePublicSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="user_id")
+    name = serializers.CharField(source="user.first_name")
+    surname = serializers.CharField(source="user.last_name")
+    patronymic = serializers.CharField(source="user.patronymic")
+    branch = serializers.CharField(source="branch.code")
+    sex = serializers.CharField(source="user.gender")
+
+    class Meta:
+        model = StudentProfile
+        fields = ('id', 'name', 'surname', 'patronymic', 'sex', 'branch')
+
+
 # TODO: add detail_url?
 class GraduateProfileSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="pk")
-    student = StudentSerializer(source="student_profile")
+    student = StudentProfilePublicSerializer(source="student_profile")
     photo = PhotoSerializerField(GraduateProfile.ThumbnailSize.BASE,
                                  thumbnail_options={"stub_official": False})
     year = serializers.IntegerField(source="graduation_year")
@@ -132,7 +146,19 @@ class TestimonialCardSerializer(GraduateProfileSerializer):
         return graduate_profile.student_profile.user.get_full_name()
 
 
+class BranchPublicSerializer(serializers.ModelSerializer):
+    is_club = serializers.SerializerMethodField()
+
+    def get_is_club(self, obj):
+        return obj.site_id == settings.CLUB_SITE_ID
+
+    class Meta(BranchSerializer.Meta):
+        fields = ("id", "code", 'is_club')
+
+
 class CoursePublicSerializer(CourseSerializer):
+    branch = BranchPublicSerializer(source="main_branch")
+
     def get_url(self, obj: Course):
         return course_public_url(obj)
 

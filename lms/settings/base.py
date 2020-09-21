@@ -21,7 +21,7 @@ DEBUG = MODELTRANSLATION_DEBUG = env.bool('DEBUG', default=False)
 RESTRICT_LOGIN_TO_LMS = True
 REVERSE_TO_LMS_URL_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
                                  'files', 'surveys', 'library', 'admission',
-                                 'auth', 'courses')
+                                 'auth', 'courses', 'learning-api')
 
 # Default scheme for `core.urls.reverse`
 DEFAULT_URL_SCHEME = env.str("REVERSE_URL_SCHEME", default="https")
