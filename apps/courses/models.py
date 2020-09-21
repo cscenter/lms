@@ -1033,7 +1033,7 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
     deadline_at = TimezoneAwareDateTimeField(_("Assignment|deadline"))
-    # TODO: rename to submission_format
+    # TODO: rename to solution_format
     submission_type = models.CharField(
         verbose_name=_("Submission Type"),
         max_length=42,

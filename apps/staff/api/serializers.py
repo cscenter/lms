@@ -1,13 +1,13 @@
 from rest_framework import serializers
 
-from learning.api.serializers import StudentSerializer
+from learning.api.serializers import StudentProfileSerializer
 
 
-class StudentSearchSerializer(StudentSerializer):
+class StudentProfileSearchSerializer(StudentProfileSerializer):
     pk = serializers.IntegerField(source="user_id")
     short_name = serializers.SerializerMethodField()
 
-    class Meta(StudentSerializer.Meta):
+    class Meta(StudentProfileSerializer.Meta):
         fields = ('short_name', 'pk')
 
     def get_short_name(self, student_profile):

@@ -33,6 +33,7 @@ class CourseSerializer(serializers.ModelSerializer):
     semester = SemesterSerializer()
     teachers = CourseTeacherSerializer(source="course_teachers",
                                        many=True, read_only=True)
+    # FIXME: rename to main_branch, remove .is_club
     branch = BranchSerializer(source="main_branch")
     materials = serializers.SerializerMethodField()
 
@@ -57,11 +58,12 @@ class CourseSerializer(serializers.ModelSerializer):
 
 class AssignmentSerializer(serializers.ModelSerializer):
     text = serializers.SerializerMethodField()
+    solution_format = serializers.CharField(source='submission_type')
 
     class Meta:
         model = Assignment
-        fields = ('pk', 'deadline_at', 'title', 'text',
-                  'passing_score', 'maximum_score', 'weight')
+        fields = ('pk', 'deadline_at', 'title', 'text', 'ttc',
+                  'passing_score', 'maximum_score', 'weight', 'solution_format')
 
     def get_text(self, obj: Assignment):
         return render_markdown_and_cache(obj.text, "assignment_text", 3600,
