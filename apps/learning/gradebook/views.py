@@ -243,7 +243,8 @@ class ImportAssignmentScoresBaseView(PermissionRequiredMixin, generic.View):
     def import_scores(self, assignment, csv_file):
         try:
             found, imported = self._import_scores(assignment, csv_file)
-            msg = _("Imported records: {} out of {}").format(imported, found)
+            msg = _("Imported records for assignment {} - {} out of {}").format(
+                assignment.title, imported, found)
             messages.info(self.request, msg)
         except ValidationError as e:
             msg = _('<b>Not all records were processed. '

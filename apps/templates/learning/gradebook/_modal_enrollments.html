@@ -11,7 +11,8 @@
                 <div class="modal-body">
                     <div class="form-group">
                             <label for="csv-assignment-selected">1. {% trans "Choose assignment" %}</label>
-                            <select name="assignment" class="form-control" id="csv-assignment-selected">
+                            <select required name="assignment" class="form-control" id="csv-assignment-selected">
+                            <option value="">-----</option>
                             {% for gradebook_assignment in gradebook.assignments.values %}
                                 {% with assignment=gradebook_assignment.assignment %}
                                     <option value="{{ assignment.pk }}">{{ assignment.title}}</option>
