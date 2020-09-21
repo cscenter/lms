@@ -24,7 +24,7 @@ urlpatterns = [
 
     path('', include('auth.urls')),
 
-    # path('api/', include('api.urls')),
+    path('api/', include('api.urls')),
     path('api/', include('learning.api.urls')),
     path('api/', include('code_reviews.api.urls')),
     path('api/', include('stats.api_urls')),
