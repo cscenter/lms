@@ -4,6 +4,7 @@ from django.conf import settings
 from django.test import Client, TestCase
 from django.utils.functional import Promise
 
+from core.urls import reverse
 from learning.settings import Branches
 
 if settings.LMS_SUBDOMAIN:
@@ -22,12 +23,32 @@ class TestClient(Client):
             return super().login(username=user_model.username,
                                  password=user_model.raw_password)
 
+    def get_api_token(self, user):
+        url = reverse("auth-api:v1:token_obtain",
+                      subdomain=settings.LMS_SUBDOMAIN)
+        credentials = {
+            'login': user.email,
+            'password': user.raw_password
+        }
+        response = self.post(url, credentials)
+        return response.data['secret_token']
+
     def _base_environ(self, **request):
         env = super()._base_environ(**request)
         if 'SERVER_NAME' not in request:
             # Override default server name `testserver`
             env['SERVER_NAME'] = settings.TEST_DOMAIN
         return env
+
+    def _patch_extra(self, path, extra):
+        if "HTTP_HOST" not in extra:
+            # FIXME: better way to customize url_resolve from django.shortcuts
+            # FIXME: by replacing `django.urls.reverse` with core.urls.reverse
+            if isinstance(path, Promise):
+                path = str(path)
+            parsed_url = urlparse(path)
+            if settings.LMS_SUBDOMAIN and parsed_url.netloc.startswith(settings.LMS_SUBDOMAIN):
+                extra["SERVER_NAME"] = _SERVER_NAME
 
     def get(self, path, *args, **kwargs):
         """
@@ -38,12 +59,7 @@ class TestClient(Client):
 
         We could override HTTP_HOST value but it won't be overriding
         """
-        if "HTTP_HOST" not in kwargs:
-            if isinstance(path, Promise):
-                path = str(path)
-            parsed_url = urlparse(path)
-            if settings.LMS_SUBDOMAIN and parsed_url.netloc.startswith(settings.LMS_SUBDOMAIN):
-                kwargs["SERVER_NAME"] = _SERVER_NAME
+        self._patch_extra(path, kwargs)
         return super().get(path, *args, **kwargs)
 
     def post(self, path, *args, **kwargs):
@@ -64,15 +80,16 @@ class TestClient(Client):
             Test client uses only relative part of the url by discarding domain
             part (just a fun fact to know)
         """
-        if "HTTP_HOST" not in kwargs:
-            # FIXME: better way to customize url_resolve from django.shortcuts
-            # FIXME: by replacing `django.urls.reverse` with core.urls.reverse
-            if isinstance(path, Promise):
-                path = str(path)
-            parsed_url = urlparse(path)
-            if settings.LMS_SUBDOMAIN and parsed_url.netloc.startswith(settings.LMS_SUBDOMAIN):
-                kwargs["SERVER_NAME"] = _SERVER_NAME
+        self._patch_extra(path, kwargs)
         return super().post(path, *args, **kwargs)
+
+    def patch(self, path, *args, **kwargs):
+        self._patch_extra(path, kwargs)
+        return super().patch(path, *args, **kwargs)
+
+    def put(self, path, *args, **kwargs):
+        self._patch_extra(path, kwargs)
+        return super().put(path, *args, **kwargs)
 
 
 class CSCTestCase(TestCase):
