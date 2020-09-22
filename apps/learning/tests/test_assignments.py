@@ -163,8 +163,7 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     form.update({'course': course.pk,
                  'attachments': tmp_file.open(),
                  'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time,
-                 'checking_system_type': CheckingSystemTypes.none})
+                 'deadline_at_1': deadline_time})
     url = course.get_create_assignment_url()
     client.post(url, form)
     assert Assignment.objects.count() == 1

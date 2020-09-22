@@ -333,30 +333,32 @@ class AssignmentForm(TimezoneAwareModelForm):
     def clean(self):
         cleaned_data = super(AssignmentForm, self).clean()
         checking_system = cleaned_data['checking_system']
-        if checking_system.type == CheckingSystemTypes.YANDEX:
-            try:
-                checking_system_url = cleaned_data['checker_url']
-                resolve_problem_id(checking_system_url)
-            except ValueError as e:
-                self.add_error('checker_url', str(e))
+        if checking_system:
+            if checking_system.type == CheckingSystemTypes.YANDEX:
+                try:
+                    checking_system_url = cleaned_data['checker_url']
+                    resolve_problem_id(checking_system_url)
+                except ValueError as e:
+                    self.add_error('checker_url', str(e))
 
     def save(self, commit=True):
         checking_system = self.cleaned_data['checking_system']
-        if checking_system.type == CheckingSystemTypes.YANDEX:
-            checker_url = self.cleaned_data['checker_url']
-            contest_id, problem_id = resolve_problem_id(checker_url)
-            checker, _ = Checker.objects.get_or_create(
-                checking_system=checking_system,
-                settings__contest_id=contest_id,
-                settings__problem_id=problem_id, defaults={
-                    'url': checker_url,
-                    'settings': {'contest_id': contest_id,
-                                 'problem_id': problem_id}
-                }
-            )
-            instance = super(AssignmentForm, self).save(commit=False)
-            instance.checker = checker
-            instance.save()
-            return instance
+        if checking_system:
+            if checking_system.type == CheckingSystemTypes.YANDEX:
+                checker_url = self.cleaned_data['checker_url']
+                contest_id, problem_id = resolve_problem_id(checker_url)
+                checker, _ = Checker.objects.get_or_create(
+                    checking_system=checking_system,
+                    settings__contest_id=contest_id,
+                    settings__problem_id=problem_id, defaults={
+                        'url': checker_url,
+                        'settings': {'contest_id': contest_id,
+                                     'problem_id': problem_id}
+                    }
+                )
+                instance = super(AssignmentForm, self).save(commit=False)
+                instance.checker = checker
+                instance.save()
+                return instance
         else:
             return super(AssignmentForm, self).save(commit=commit)

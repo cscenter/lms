@@ -4,8 +4,9 @@ from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
-from contests.models import CheckingSystem
+from contests.models import CheckingSystem, Checker
 from contests.constants import CheckingSystemTypes
+from contests.tests.factories import CheckingSystemFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.models import Assignment
@@ -39,8 +40,7 @@ def test_course_assignment_form_create(client):
     form.update({'course': co.pk,
                  # 'attached_file': None,
                  'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time,
-                 'checking_system_type': CheckingSystemTypes.none})
+                 'deadline_at_1': deadline_time})
     url = co.get_create_assignment_url()
     client.login(teacher)
     response = client.post(url, form)
@@ -63,24 +63,28 @@ def test_course_assignment_form_create_with_checking_system(client):
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
+    checking_system = CheckingSystemFactory.create(
+        type=CheckingSystemTypes.YANDEX
+    )
     checking_system_url = "https://contest.yandex.ru/contest/15/problems/D/"
     form.update({'course': co.pk,
                  # 'attached_file': None,
                  'deadline_at_0': deadline_date,
                  'deadline_at_1': deadline_time,
-                 'checking_system_type': CheckingSystemTypes.YANDEX,
-                 'checking_system_url': checking_system_url})
+                 'checking_system': checking_system.pk,
+                 'checker_url': checking_system_url})
+    print(form)
     url = co.get_create_assignment_url()
     client.login(teacher)
     response = client.post(url, form)
     assert response.status_code == 302
     assert Assignment.objects.count() == 1
-    assert CheckingSystem.objects.count() == 1
-    checking_system = CheckingSystem.objects.first()
-    assert checking_system.type == CheckingSystemTypes.YANDEX
-    assert checking_system.url == checking_system_url
-    assert checking_system.settings['contest_id'] == 15
-    assert checking_system.settings['problem_id'] == 'D'
+    assert Checker.objects.count() == 1
+    checker = Checker.objects.first()
+    assert checker.checking_system.type == CheckingSystemTypes.YANDEX
+    assert checker.url == checking_system_url
+    assert checker.settings['contest_id'] == 15
+    assert checker.settings['problem_id'] == 'D'
 
 
 @pytest.mark.django_db
@@ -105,7 +109,7 @@ def test_course_assignment_update(client, assert_redirect):
     a = AssignmentFactory.create(course=co)
     form = model_to_dict(a)
     del form['ttc']
-    del form['checking_system']
+    del form['checker']
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     new_title = a.title + " foo42bar"
@@ -113,8 +117,7 @@ def test_course_assignment_update(client, assert_redirect):
                  'course': co.pk,
                  # 'attached_file': None,
                  'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time,
-                 'checking_system_type': CheckingSystemTypes.none})
+                 'deadline_at_1': deadline_time})
     # Make sure new title is not presented on /teaching/assignments/
     list_url = reverse('teaching:assignment_list')
     response = client.get(list_url)

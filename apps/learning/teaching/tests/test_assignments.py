@@ -39,8 +39,7 @@ def test_assignment_public_form(settings, client):
         "deadline_at_1": "00:00",
         "passing_score": "3",
         "maximum_score": "5",
-        "weight": "1.00",
-        "checking_system_type": CheckingSystemTypes.none
+        "weight": "1.00"
     }
     add_url = course_spb.get_create_assignment_url()
     response = client.post(add_url, form_data, follow=True)
