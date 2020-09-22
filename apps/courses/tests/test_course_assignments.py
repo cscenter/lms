@@ -4,12 +4,12 @@ from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
-from contests.models import CheckingSystem, Checker
+from contests.models import Checker
 from contests.constants import CheckingSystemTypes
-from contests.tests.factories import CheckingSystemFactory
+from contests.tests.factories import CheckingSystemFactory, CheckerFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.models import Assignment
+from courses.models import Assignment, AssignmentSubmissionFormats
 from courses.permissions import CreateAssignment, EditAssignment
 from courses.tests.factories import CourseFactory, AssignmentFactory
 from users.tests.factories import TeacherFactory, CuratorFactory
@@ -69,11 +69,11 @@ def test_course_assignment_form_create_with_checking_system(client):
     checking_system_url = "https://contest.yandex.ru/contest/15/problems/D/"
     form.update({'course': co.pk,
                  # 'attached_file': None,
+                 'submission_type': AssignmentSubmissionFormats.CODE_REVIEW,
                  'deadline_at_0': deadline_date,
                  'deadline_at_1': deadline_time,
                  'checking_system': checking_system.pk,
                  'checker_url': checking_system_url})
-    print(form)
     url = co.get_create_assignment_url()
     client.login(teacher)
     response = client.post(url, form)
@@ -85,6 +85,25 @@ def test_course_assignment_form_create_with_checking_system(client):
     assert checker.url == checking_system_url
     assert checker.settings['contest_id'] == 15
     assert checker.settings['problem_id'] == 'D'
+
+
+@pytest.mark.django_db
+def test_course_assignment_form_update_remove_checking_system(client):
+    teacher = TeacherFactory()
+    co = CourseFactory.create(teachers=[teacher])
+    checker = CheckerFactory()
+    a = AssignmentFactory(course=co)
+    form = model_to_dict(a)
+    del form['ttc']
+    del form['checker']
+    form.update({'submission_type': AssignmentSubmissionFormats.ONLINE})
+    url = co.get_create_assignment_url()
+    client.login(teacher)
+    response = client.post(url, form)
+    assert Assignment.objects.count() == 1
+    assert Checker.objects.count() == 1
+    a.refresh_from_db()
+    assert not a.checker
 
 
 @pytest.mark.django_db

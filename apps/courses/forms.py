@@ -331,27 +331,37 @@ class AssignmentForm(TimezoneAwareModelForm):
                   'submission_type', 'passing_score', 'maximum_score',
                   'weight', 'ttc', 'restricted_to')
 
+    @property
+    def checking_system_submission_formats(self):
+        return [AssignmentSubmissionFormats.CODE_REVIEW]
+
     def checking_system_fieldset_display(self):
         """
         Return assignment submission formats, which might need checking system
         fieldset to be displayed.
         """
-        submission_formats = [AssignmentSubmissionFormats.CODE_REVIEW]
-        return ",".join(submission_formats)
+        return ",".join(self.checking_system_submission_formats)
 
     def clean(self):
         cleaned_data = super(AssignmentForm, self).clean()
         checking_system = cleaned_data['checking_system']
+        checking_system_url = cleaned_data['checker_url']
         if checking_system:
             if checking_system.type == CheckingSystemTypes.YANDEX:
                 try:
-                    checking_system_url = cleaned_data['checker_url']
                     resolve_problem_id(checking_system_url)
                 except ValueError as e:
                     self.add_error('checker_url', str(e))
+        elif checking_system_url:
+            self.add_error('checker_url',
+                           _("Non-empty URL for no checking system"))
 
     def save(self, commit=True):
+        submission_type = self.cleaned_data['submission_type']
         checking_system = self.cleaned_data['checking_system']
+        checker = None
+        if submission_type not in self.checking_system_submission_formats:
+            checking_system = None
         if checking_system:
             if checking_system.type == CheckingSystemTypes.YANDEX:
                 checker_url = self.cleaned_data['checker_url']
@@ -365,9 +375,8 @@ class AssignmentForm(TimezoneAwareModelForm):
                                      'problem_id': problem_id}
                     }
                 )
-                instance = super(AssignmentForm, self).save(commit=False)
-                instance.checker = checker
-                instance.save()
-                return instance
-        else:
-            return super(AssignmentForm, self).save(commit=commit)
+
+        instance = super(AssignmentForm, self).save(commit=False)
+        instance.checker = checker
+        instance.save()
+        return instance
