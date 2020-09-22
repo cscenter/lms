@@ -5,7 +5,8 @@ from crispy_forms.layout import Field, Layout, Submit, Hidden, \
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from contests.models import YandexCompilers, Submission
+from contests.models import Submission
+from contests.constants import YandexCompilers
 from core.forms import GradeField
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.timezone.constants import TIME_FORMAT_RU

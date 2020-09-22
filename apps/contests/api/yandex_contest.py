@@ -1,5 +1,6 @@
 import io
 import logging
+import re
 from enum import IntEnum, Enum
 
 import requests
@@ -276,3 +277,9 @@ class YandexContestAPI:
         json_data = response.json()
         logger.debug(f"Meta data: {json_data}")
         return response.status_code, json_data
+
+
+YANDEX_SUBMISSION_REPORT_URL = 'https://contest.yandex.ru/contest/{contest_id}/run-report/{run_id}/'
+YANDEX_CONTEST_PROBLEM_URL = r"/contest\/(?P<contest_id>[\d]+)\/problems\/(?P<problem_id>[a-zA-Z0-9]?)(?P<trailing_slash>[\/]?)"
+YANDEX_CONTEST_DOMAIN = "contest.yandex.ru"
+YANDEX_CONTEST_PROBLEM_REGEX = re.compile(YANDEX_CONTEST_PROBLEM_URL)

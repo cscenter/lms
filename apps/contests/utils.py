@@ -1,10 +1,7 @@
-import re
-
 from django.utils.translation import gettext_lazy as _
 
-YANDEX_CONTEST_DOMAIN = "contest.yandex.ru"
-YANDEX_CONTEST_PROBLEM_URL = r"/contest\/(?P<contest_id>[\d]+)\/problems\/(?P<problem_id>[a-zA-Z0-9]?)(?P<trailing_slash>[\/]?)"
-YANDEX_CONTEST_PROBLEM_REGEX = re.compile(YANDEX_CONTEST_PROBLEM_URL)
+from contests.api.yandex_contest import YANDEX_CONTEST_DOMAIN, \
+    YANDEX_CONTEST_PROBLEM_REGEX
 
 
 def resolve_problem_id(url):

@@ -1,7 +1,8 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from contests.models import Submission, SubmissionStatus
+from contests.models import Submission
+from contests.constants import SubmissionStatus
 from contests.tasks import add_new_submission_to_checking_system
 from courses.models import AssignmentSubmissionFormats
 

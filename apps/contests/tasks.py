@@ -24,7 +24,7 @@ def get_submission(submission_id) -> Optional["Submission"]:
 
 @job('default')
 def add_new_submission_to_checking_system(submission_id, *, retries):
-    from contests.models import SubmissionStatus
+    from contests.constants import SubmissionStatus
     submission = get_submission(submission_id)
     if not submission:
         return "Submission not found"

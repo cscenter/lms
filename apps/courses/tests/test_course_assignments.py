@@ -4,7 +4,8 @@ from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
-from contests.models import CheckingSystemTypes, CheckingSystem
+from contests.models import CheckingSystem
+from contests.constants import CheckingSystemTypes
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.models import Assignment
@@ -67,7 +68,7 @@ def test_course_assignment_form_create_with_checking_system(client):
                  # 'attached_file': None,
                  'deadline_at_0': deadline_date,
                  'deadline_at_1': deadline_time,
-                 'checking_system_type': CheckingSystemTypes.yandex,
+                 'checking_system_type': CheckingSystemTypes.YANDEX,
                  'checking_system_url': checking_system_url})
     url = co.get_create_assignment_url()
     client.login(teacher)
@@ -76,7 +77,7 @@ def test_course_assignment_form_create_with_checking_system(client):
     assert Assignment.objects.count() == 1
     assert CheckingSystem.objects.count() == 1
     checking_system = CheckingSystem.objects.first()
-    assert checking_system.type == CheckingSystemTypes.yandex
+    assert checking_system.type == CheckingSystemTypes.YANDEX
     assert checking_system.url == checking_system_url
     assert checking_system.settings['contest_id'] == 15
     assert checking_system.settings['problem_id'] == 'D'

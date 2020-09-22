@@ -8,7 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import formats
 from django.utils.encoding import smart_bytes
 
-from contests.models import CheckingSystemTypes
+from contests.constants import CheckingSystemTypes
 from core.urls import reverse
 from courses.models import AssignmentSubmissionFormats, Assignment
 from courses.tests.factories import AssignmentFactory, CourseFactory, \

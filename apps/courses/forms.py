@@ -7,7 +7,8 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from contests.models import CheckingSystem, CheckingSystemTypes, Checker
+from contests.models import CheckingSystem, Checker
+from contests.constants import CheckingSystemTypes
 from contests.utils import resolve_problem_id
 from core.forms import CANCEL_SAVE_PAIR
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
@@ -332,7 +333,7 @@ class AssignmentForm(TimezoneAwareModelForm):
     def clean(self):
         cleaned_data = super(AssignmentForm, self).clean()
         checking_system = cleaned_data['checking_system']
-        if checking_system.type == CheckingSystemTypes.yandex:
+        if checking_system.type == CheckingSystemTypes.YANDEX:
             try:
                 checking_system_url = cleaned_data['checker_url']
                 resolve_problem_id(checking_system_url)
@@ -341,7 +342,7 @@ class AssignmentForm(TimezoneAwareModelForm):
 
     def save(self, commit=True):
         checking_system = self.cleaned_data['checking_system']
-        if checking_system.type == CheckingSystemTypes.yandex:
+        if checking_system.type == CheckingSystemTypes.YANDEX:
             checker_url = self.cleaned_data['checker_url']
             contest_id, problem_id = resolve_problem_id(checker_url)
             checker, _ = Checker.objects.get_or_create(
