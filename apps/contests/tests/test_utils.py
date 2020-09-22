@@ -32,3 +32,8 @@ def test_resolve_problem_id_should_resolve_valid_links():
     contest_id, problem_id = resolve_problem_id(problem_url)
     assert contest_id == 15
     assert problem_id == 'D'
+    # Problem IDs can be unusual
+    problem_url = "https://contest.yandex.ru/contest/15/problems/1A/"
+    contest_id, problem_id = resolve_problem_id(problem_url)
+    assert contest_id == 15
+    assert problem_id == '1A'
