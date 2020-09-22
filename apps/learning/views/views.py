@@ -80,10 +80,6 @@ class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin,
     def form_valid(self, form):
         comment = form.save()
         comment_persistence.report_saved(comment.text)
-        # Process related models (e.g., Submission for Yandex.Contest)
-        post_comment_save = getattr(form, 'post_comment_save', [])
-        for function_call in post_comment_save:
-            function_call(comment)
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form):
