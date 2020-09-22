@@ -74,7 +74,6 @@ class Checker(models.Model):
             required_settings = ['contest_id', 'problem_id']
             for key in required_settings:
                 if key not in self.settings:
-                    # FIXME: add translation _("Убедитесь, что указаны настройки: {}")
                     msg = _("Please check that the following settings "
                             "are provided: {}")
                     settings_needed = ', '.join(required_settings)

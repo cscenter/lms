@@ -297,13 +297,13 @@ class AssignmentForm(TimezoneAwareModelForm):
         required=False,
         help_text=_("Restrict assignment to selected groups. Available to all by default."))
     checking_system = forms.ModelChoiceField(
-        label=_("Checking System Type"),
+        label=_("Checking System"),
         required=False,
-        empty_label=_("No Checking System"),
+        empty_label=_("Not Used"),
         queryset=CheckingSystem.objects.all()
     )
     checker_url = forms.URLField(
-        label=_("Checking System URL"),
+        label=_("Checker URL"),
         required=False,
         help_text=_("For example, URL of the Yandex.Contest problem: "
                     "https://contest.yandex.ru/contest/3/problems/A/")
