@@ -19,7 +19,7 @@ from core.widgets import UbereditorWidget, DateInputTextWidget, \
     TimeInputTextWidget
 from courses.constants import ClassTypes
 from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
-    Assignment, LearningSpace, StudentGroupTypes
+    Assignment, LearningSpace, StudentGroupTypes, AssignmentSubmissionFormats
 
 __all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
            'CourseClassForm', 'AssignmentForm')
@@ -305,7 +305,7 @@ class AssignmentForm(TimezoneAwareModelForm):
     checker_url = forms.URLField(
         label=_("Checking System URL"),
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': _("Paste URL of the Yandex.Contest problem")})
+        widget=forms.TextInput(attrs={'placeholder': _("For example, URL of the Yandex.Contest problem")})
     )
 
     def __init__(self, *args, **kwargs):
@@ -329,6 +329,14 @@ class AssignmentForm(TimezoneAwareModelForm):
         fields = ('title', 'text', 'deadline_at', 'attachments',
                   'submission_type', 'passing_score', 'maximum_score',
                   'weight', 'ttc', 'restricted_to')
+
+    def checking_system_fieldset_display(self):
+        """
+        Return assignment submission formats, which might need checking system
+        fieldset to be displayed.
+        """
+        submission_formats = [AssignmentSubmissionFormats.CODE_REVIEW]
+        return ",".join(submission_formats)
 
     def clean(self):
         cleaned_data = super(AssignmentForm, self).clean()

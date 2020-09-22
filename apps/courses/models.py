@@ -1134,6 +1134,10 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         return self.id in cache.assignment_ids_set
 
     @property
+    def checking_system_needed(self):
+        return self.submission_type == AssignmentSubmissionFormats.CODE_REVIEW
+
+    @property
     def deadline_is_exceeded(self):
         return self.deadline_at < timezone.now()
 

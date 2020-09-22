@@ -141,7 +141,7 @@
                 </div>
             </fieldset>
 
-            <fieldset id="checking-system-">
+            <fieldset id="checking-system-info" {% if not form.instance.checking_system_needed %}class="hidden"{% endif %} data-display="{{ form.checking_system_fieldset_display }}">
                 <legend>Настройки проверяющей системы</legend>
                 <div class="row">
                     <div class="col-xs-12">
