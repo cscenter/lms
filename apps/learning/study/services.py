@@ -31,14 +31,16 @@ def get_draft_submission(user: User,
     return draft
 
 
-def get_draft_comment(user: User, student_assignment: StudentAssignment):
+def get_draft_comment(user: User,
+                      student_assignment: StudentAssignment, **kwargs):
     return get_draft_submission(user, student_assignment,
-                                AssignmentCommentTypes.COMMENT)
+                                AssignmentCommentTypes.COMMENT, **kwargs)
 
 
-def get_draft_solution(user: User, student_assignment: StudentAssignment):
+def get_draft_solution(user: User,
+                       student_assignment: StudentAssignment, **kwargs):
     return get_draft_submission(user, student_assignment,
-                                AssignmentCommentTypes.SOLUTION)
+                                AssignmentCommentTypes.SOLUTION, **kwargs)
 
 
 def get_solution_form(student_assignment: StudentAssignment,

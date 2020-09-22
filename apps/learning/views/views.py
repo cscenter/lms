@@ -22,7 +22,8 @@ from learning.models import StudentAssignment, AssignmentComment, \
     AssignmentCommentTypes
 from learning.permissions import ViewAssignmentCommentAttachment, \
     ViewAssignmentAttachment
-from learning.study.services import get_draft_comment, get_draft_submission
+from learning.study.services import get_draft_comment, get_draft_submission, \
+    get_draft_solution
 from users.mixins import TeacherOnlyMixin
 
 logger = logging.getLogger(__name__)
@@ -55,31 +56,18 @@ class StudentAssignmentURLParamsMixin:
                                 'assignment__course__semester'))
 
 
-class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin,
-                                  GenericModelView):
+class AssignmentSubmissionUpsertView(StudentAssignmentURLParamsMixin,
+                                     GenericModelView):
     """Post a new comment or save draft"""
     model = AssignmentComment
     submission_type = None
 
     def post(self, request, *args, **kwargs):
-        # Saving drafts is only supported for comments.
-        is_comment = (self.submission_type == AssignmentCommentTypes.COMMENT)
-        save_draft = is_comment and "save-draft" in request.POST
-        assert self.submission_type is not None
-        submission = get_draft_submission(request.user,
-                                          self.student_assignment,
-                                          self.submission_type,
-                                          build=True)
-        submission.is_published = not save_draft
-        form = self.get_form(data=request.POST, files=request.FILES,
-                             instance=submission)
-        if form.is_valid():
-            return self.form_valid(form)
-        return self.form_invalid(form)
+        raise NotImplementedError
 
     def form_valid(self, form):
-        comment = form.save()
-        comment_persistence.report_saved(comment.text)
+        submission = form.save()
+        comment_persistence.report_saved(submission.text)
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form):
@@ -91,6 +79,43 @@ class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin,
 
     def get_error_url(self):
         raise NotImplementedError
+
+
+class AssignmentCommentUpsertView(AssignmentSubmissionUpsertView):
+    """Post a new comment or save draft"""
+    model = AssignmentComment
+    submission_type = AssignmentCommentTypes.COMMENT
+
+    def post(self, request, *args, **kwargs):
+        save_draft = "save-draft" in request.POST
+        submission = get_draft_comment(request.user,
+                                       self.student_assignment,
+                                       build=True)
+        submission.is_published = not save_draft
+        form = self.get_form(data=request.POST, files=request.FILES,
+                             instance=submission)
+        if form.is_valid():
+            return self.form_valid(form)
+        return self.form_invalid(form)
+
+
+class AssignmentSolutionUpsertView(AssignmentSubmissionUpsertView):
+    """Post a new solution"""
+    model = AssignmentComment
+    submission_type = AssignmentCommentTypes.SOLUTION
+
+    def post(self, request, *args, **kwargs):
+        # Saving drafts is only supported for comments.
+        save_draft = False
+        submission = get_draft_solution(request.user,
+                                        self.student_assignment,
+                                        build=True)
+        submission.is_published = not save_draft
+        form = self.get_form(data=request.POST, files=request.FILES,
+                             instance=submission)
+        if form.is_valid():
+            return self.form_valid(form)
+        return self.form_invalid(form)
 
 
 class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
