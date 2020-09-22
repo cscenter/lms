@@ -8,7 +8,7 @@ class SubmissionService:
         Creates a Submission with all kwargs (e.g., compiler) saved as settings.
         """
         submission, _ = Submission.objects.get_or_create(
-            assignment_comment=assignment_submission,
+            assignment_submission=assignment_submission,
             settings=kwargs
         )
         submission.save()

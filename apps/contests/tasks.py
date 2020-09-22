@@ -17,8 +17,8 @@ def get_submission(submission_id) -> Optional["Submission"]:
     return (Submission.objects
             .filter(pk=submission_id)
             .select_related("assignment_submission",
-                            "assignment_comment__student_assignment__assignment__checker",
-                            "assignment_comment__student_assignment__assignment__checker__checking_system")
+                            "assignment_submission__student_assignment__assignment__checker",
+                            "assignment_submission__student_assignment__assignment__checker__checking_system")
             .first())
 
 
