@@ -16,7 +16,7 @@ def get_submission(submission_id) -> Optional["Submission"]:
     from contests.models import Submission
     return (Submission.objects
             .filter(pk=submission_id)
-            .select_related("assignment_comment",
+            .select_related("assignment_submission",
                             "assignment_comment__student_assignment__assignment__checker",
                             "assignment_comment__student_assignment__assignment__checker__checking_system")
             .first())
@@ -28,7 +28,7 @@ def add_new_submission_to_checking_system(submission_id, *, retries):
     submission = get_submission(submission_id)
     if not submission:
         return "Submission not found"
-    checker = submission.assignment_comment.student_assignment.assignment.checker
+    checker = submission.assignment_submission.student_assignment.assignment.checker
     checking_system_settings = checker.checking_system.settings
     access_token = checking_system_settings['access_token']
     api = YandexContestAPI(
@@ -36,9 +36,9 @@ def add_new_submission_to_checking_system(submission_id, *, retries):
         refresh_token=access_token)
     data = {
         'problem': checker.settings["problem_id"],
-        'compiler': submission.settings["compiler_id"]
+        'compiler': submission.settings["compiler"]
     }
-    submission_content = submission.assignment_comment.attached_file.read()
+    submission_content = submission.assignment_submission.attached_file.read()
     files = {'file': ('test.txt', submission_content)}
     try:
         status, json_data = api.add_submission(checker.settings['contest_id'],
@@ -79,7 +79,7 @@ def monitor_submission_status_in_yandex_contest(submission_id,
     submission = get_submission(submission_id)
     if not submission:
         return "Submission not found"
-    checker = submission.assignment_comment.student_assignment.assignment.checker
+    checker = submission.assignment_submission.student_assignment.assignment.checker
     checking_system_settings = checker.checking_system.settings
     access_token = checking_system_settings['access_token']
     api = YandexContestAPI(

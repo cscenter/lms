@@ -305,7 +305,8 @@ class AssignmentForm(TimezoneAwareModelForm):
     checker_url = forms.URLField(
         label=_("Checking System URL"),
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': _("For example, URL of the Yandex.Contest problem")})
+        help_text=_("For example, URL of the Yandex.Contest problem: "
+                    "https://contest.yandex.ru/contest/3/problems/A/")
     )
 
     def __init__(self, *args, **kwargs):

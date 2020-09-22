@@ -136,7 +136,7 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
 
 
 class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
-    compiler_id = forms.ChoiceField(
+    compiler = forms.ChoiceField(
         label=_("Compiler"),
         choices=YandexCompilers.choices
     )
@@ -152,7 +152,7 @@ class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
     def __init__(self, course, *args, **kwargs):
         super().__init__(course, *args, **kwargs)
         self.helper.layout = Layout(
-            Div('compiler_id', css_class='form-group-5'),
+            Div('compiler', css_class='form-group-5'),
             Div('attached_file', css_class='form-group-5'),
             Div('execution_time'),
             FormActions(Submit('save', _('Send Solution'),
@@ -169,9 +169,9 @@ class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
 
     def save(self, commit=True):
         instance = super().save(commit=commit)
-        compiler_id = self.cleaned_data['compiler_id']
+        compiler = self.cleaned_data['compiler']
         SubmissionService.save_submission_settings(instance,
-                                                   compiler_id=compiler_id)
+                                                   compiler=compiler)
         return instance
 
 

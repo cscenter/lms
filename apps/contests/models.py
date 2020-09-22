@@ -86,7 +86,7 @@ class Submission(models.Model):
 
     created_at = AutoCreatedField(_('created'))
     modified_at = AutoLastModifiedField(_('modified'))
-    assignment_comment = models.OneToOneField(
+    assignment_submission = models.OneToOneField(
         AssignmentComment,
         verbose_name=_("Assignment Submission"),
         on_delete=models.CASCADE
@@ -114,7 +114,7 @@ class Submission(models.Model):
 
     @property
     def checking_system_choice(self):
-        assignment = self.assignment_comment.student_assignment.assignment
+        assignment = self.assignment_submission.student_assignment.assignment
         checking_system_type = assignment.checker.checking_system.type
         return CheckingSystemTypes.get_choice(checking_system_type)
 
