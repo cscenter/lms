@@ -23,7 +23,7 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
     CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
     AssignmentFactory, LearningSpaceFactory
 from learning.models import StudentAssignment, AssignmentNotification, \
-    AssignmentComment, EnrollmentPeriod, AssignmentCommentTypes
+    AssignmentComment, EnrollmentPeriod, AssignmentSubmissionTypes
 from courses.models import Semester, CourseNews, CourseReview, \
     AssignmentSubmissionFormats
 from courses.constants import SemesterTypes
@@ -354,14 +354,14 @@ def test_learning_space_full_name():
 def test_student_assignment_execution_time():
     student_assignment = StudentAssignmentFactory()
     solution1 = AssignmentCommentFactory(student_assignment=student_assignment,
-                                         type=AssignmentCommentTypes.SOLUTION,
+                                         type=AssignmentSubmissionTypes.SOLUTION,
                                          execution_time=timedelta(hours=2))
     solution2 = AssignmentCommentFactory(student_assignment=student_assignment,
-                                         type=AssignmentCommentTypes.SOLUTION,
+                                         type=AssignmentSubmissionTypes.SOLUTION,
                                          execution_time=timedelta(minutes=3))
     # Doesn't take into account even if an exec time has been provided
     comment1 = AssignmentCommentFactory(student_assignment=student_assignment,
-                                        type=AssignmentCommentTypes.COMMENT,
+                                        type=AssignmentSubmissionTypes.COMMENT,
                                         execution_time=timedelta(hours=2))
     # student_assignment.compute_fields("execution_time")
     assert student_assignment.execution_time == timedelta(hours=2, minutes=3)

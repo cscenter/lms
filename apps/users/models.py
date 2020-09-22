@@ -18,7 +18,7 @@ from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
 from django.db.models import prefetch_related_objects, Q
 from django.utils import timezone
-from django.utils.encoding import smart_str
+from django.utils.encoding import smart_str, force_bytes
 from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
 from django.utils.translation import gettext_lazy as _
@@ -28,6 +28,8 @@ from model_utils.fields import MonitorField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
+from api.services import generate_hash
+from api.settings import DIGEST_MAX_LENGTH
 from auth.permissions import perm_registry
 from core.timezone import Timezone, TimezoneAwareModel
 from core.timezone.constants import DATETIME_FORMAT_RU
@@ -343,6 +345,9 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         _("Workplace"),
         max_length=200,
         blank=True)
+    # FIXME: remove null=True after populating field with a real value
+    calendar_key = models.CharField(unique=True, max_length=DIGEST_MAX_LENGTH,
+                                    blank=True, null=True)
 
     objects = CustomUserManager()
 
@@ -379,6 +384,9 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
             username, domain = self.email.split("@", 1)
             if domain in YANDEX_DOMAINS:
                 self.yandex_login = username
+        if not self.calendar_key:
+            self.calendar_key = generate_hash(b'calendar',
+                                              force_bytes(self.email))
         if self.yandex_login:
             suffixes = tuple(f"@{d}" for d in YANDEX_DOMAINS)
             if self.yandex_login.endswith(suffixes):

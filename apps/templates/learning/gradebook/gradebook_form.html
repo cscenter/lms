@@ -39,8 +39,9 @@
                      class="btn btn-default marks-sheet-csv-link" role="button" data-toggle="tooltip"><i class="fa fa-download"></i> Сохранить .csv</a>
                 </div>
                 <div class="btn-group">
-                  <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт <span class="caret"></span></a>
+                  <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт оценок <span class="caret"></span></a>
                   <ul class="dropdown-menu pull-right" role="menu">
+                      <li role="presentation"><a href="#import-marks-csv-enrollments" role="menuitem" data-toggle="modal">{% trans "By enrollment ID" %}</a></li>
                       <li role="presentation"><a href="#import-marks-csv-stepic" role="menuitem" data-toggle="modal">{% trans "By stepik.org ID" %}</a></li>
                       <li role="presentation"><a href="#import-marks-csv-yandex" role="menuitem" data-toggle="modal">{% trans "By Yandex login" %}</a></li>
                   </ul>
@@ -79,39 +80,43 @@
                         {% if gradebook.assignments %}
                             <div class="title __total_score">{% trans "Total" %}</div>
                         {% endif %}
-                        {% for assignment in gradebook.assignments.values %}
-                            <div class="title __assignment{% if gradebook.show_weight %}  __weight{% endif %}">
-                                <a href="{{ assignment.get_teacher_url }}" title="{{ assignment.title }}">{{ assignment.title }}</a>{% if gradebook.show_weight %}<div class="assignment__weight">Вес: {{ assignment.weight }}</div>{% endif %}
-                            </div>
+                        {% for gradebook_assignment in gradebook.assignments.values %}
+                            {% with assignment=gradebook_assignment.assignment %}
+                                <div class="title __assignment{% if gradebook.show_weight %}  __weight{% endif %}">
+                                    <a href="{{ assignment.get_teacher_url }}" title="{{ assignment.title }}">{{ assignment.title }}</a>{% if gradebook.show_weight %}<div class="assignment__weight">Вес: {{ assignment.weight }}</div>{% endif %}
+                                </div>
+                            {% endwith %}
                         {% endfor %}
                     </div>
 
                     <div class="grid">
-                        {% for student in gradebook.students.values %}{% spaceless %}
-                            <div class="student{% if forloop.counter|divisibleby:2 %} even{% endif %}">
-                               <a class="cell __student{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}" title="{{ student.username }}">
-                                   {{ student.get_abbreviated_short_name }}
-                               </a>
-                                <div class="cell __final_grade{% if forloop.counter|divisibleby:2 %} even{% endif %}">
-                                    {% call_method form 'get_final_widget' student.enrollment_id %}
-                                </div>
-                                {% if gradebook.assignments %}
-                                    <div class="cell __total_score{% if forloop.counter|divisibleby:2 %} even{% endif %}">{{ student.total_score }}</div>
-                                {% endif %}
-                                {% for student_progress in gradebook.submissions|lookup:student.index %}
-                                    {% if student_progress %}
-                                        {% if student_progress.assignment.is_online %}
-                                            <div class="cell __assignment __score">
-                                                <a href="{{ student_progress.get_teacher_url }}">{{ student_progress.get_state }}</a>
-                                            </div>
-                                        {% else %}
-                                            {% call_method form 'get_assignment_widget' student_progress.id %}
-                                        {% endif %}
-                                    {% else %}
-                                        <div class="cell __assignment __expelled"></div>
+                        {% for gradebook_student in gradebook.students.values %}{% spaceless %}
+                            {% with student=gradebook_student.student %}
+                                <div class="student{% if forloop.counter|divisibleby:2 %} even{% endif %}">
+                                   <a class="cell __student{% if forloop.counter|divisibleby:2 %} even{% endif %}" href="{{ student.get_absolute_url }}" title="{{ student.username }}">
+                                       {{ student.get_abbreviated_short_name }}
+                                   </a>
+                                    <div class="cell __final_grade{% if forloop.counter|divisibleby:2 %} even{% endif %}">
+                                        {% call_method form 'get_final_widget' gradebook_student.enrollment_id %}
+                                    </div>
+                                    {% if gradebook.assignments %}
+                                        <div class="cell __total_score{% if forloop.counter|divisibleby:2 %} even{% endif %}">{{ gradebook_student.total_score }}</div>
                                     {% endif %}
-                                {% endfor %}
-                            </div>
+                                    {% for student_progress in gradebook.submissions|lookup:gradebook_student.index %}
+                                        {% if student_progress %}
+                                            {% if student_progress.assignment.is_online %}
+                                                <div class="cell __assignment __score">
+                                                    <a href="{{ student_progress.get_teacher_url }}">{{ student_progress.get_state }}</a>
+                                                </div>
+                                            {% else %}
+                                                {% call_method form 'get_assignment_widget' student_progress.id %}
+                                            {% endif %}
+                                        {% else %}
+                                            <div class="cell __assignment __expelled"></div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endwith %}
                         {% endspaceless %}{% endfor %}
                     </div>
 
@@ -121,8 +126,8 @@
                         {% if gradebook.assignments %}
                             <div class="cell __total_score"></div>
                         {% endif %}
-                        {% for assignment in gradebook.assignments.values %}
-                        <div class="cell __assignment __meta">{{ assignment.passing_score }}/{{ assignment.maximum_score }}</div>
+                        {% for gradebook_assignment in gradebook.assignments.values %}
+                        <div class="cell __assignment __meta">{{ gradebook_assignment.assignment.passing_score }}/{{ gradebook_assignment.assignment.maximum_score }}</div>
                         {% endfor %}
                     </div>
 
@@ -133,6 +138,7 @@
     </form>
 </div>
 
+{% include "learning/gradebook/_modal_enrollments.html" %}
 {% include "learning/gradebook/_modal_stepic.html" %}
 {% include "learning/gradebook/_modal_yandex.html" %}
 

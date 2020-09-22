@@ -1,9 +1,12 @@
 import binascii
+import random
 from os import urandom as generate_bytes
+from typing import List, Tuple
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from django.utils import timezone
+from django.utils.encoding import force_bytes
 
 from api.models import Token
 from api.settings import TOKEN_TTL, MIN_REFRESH_INTERVAL, \
@@ -19,12 +22,20 @@ def create_token_string():
 def hash_token(token):
     """
     Calculates the hash of a token.
-    Input is unhexlified
-    token must contain an even number of hex digits or
-    a binascii.Error exception will be raised
+
+    Token must contain an even number of hex digits or a binascii.Error
+    will be raised.
     """
+    return generate_hash(binascii.unhexlify(token), salt=False)
+
+
+# TODO: move to core utils
+def generate_hash(*bits: bytes, salt=True):
+    """Use salt=False if key needs to be mapped 1 to 1"""
     digest = hashes.Hash(SECURE_HASH_ALGORITHM(), backend=default_backend())
-    digest.update(binascii.unhexlify(token))
+    salt = force_bytes(str(random.random())[2:]) if salt else b''
+    token = salt + b'#'.join(bits)
+    digest.update(token)
     return binascii.hexlify(digest.finalize()).decode()
 
 

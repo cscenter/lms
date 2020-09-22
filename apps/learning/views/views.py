@@ -19,7 +19,7 @@ from files.views import ProtectedFileDownloadView
 from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, AssignmentComment, \
     AssignmentNotification, Event, CourseNewsNotification, \
-    AssignmentCommentTypes
+    AssignmentSubmissionTypes
 from learning.permissions import ViewAssignmentCommentAttachment, \
     ViewAssignmentAttachment
 from learning.study.services import get_draft_comment, get_draft_submission, \
@@ -84,7 +84,7 @@ class AssignmentSubmissionUpsertView(StudentAssignmentURLParamsMixin,
 class AssignmentCommentUpsertView(AssignmentSubmissionUpsertView):
     """Post a new comment or save draft"""
     model = AssignmentComment
-    submission_type = AssignmentCommentTypes.COMMENT
+    submission_type = AssignmentSubmissionTypes.COMMENT
 
     def post(self, request, *args, **kwargs):
         save_draft = "save-draft" in request.POST
@@ -102,7 +102,7 @@ class AssignmentCommentUpsertView(AssignmentSubmissionUpsertView):
 class AssignmentSolutionUpsertView(AssignmentSubmissionUpsertView):
     """Post a new solution"""
     model = AssignmentComment
-    submission_type = AssignmentCommentTypes.SOLUTION
+    submission_type = AssignmentSubmissionTypes.SOLUTION
 
     def post(self, request, *args, **kwargs):
         # Saving drafts is only supported for comments.

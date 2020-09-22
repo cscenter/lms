@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from . import serializers
+from .authentication import TokenAuthentication
 from .errors import InvalidToken, TokenError
 
 

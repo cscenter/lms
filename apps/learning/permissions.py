@@ -242,6 +242,22 @@ class ViewOwnGradebook(Permission):
 
 
 @add_perm
+class EditGradebook(Permission):
+    name = "teaching.edit_gradebook"
+
+
+@add_perm
+class EditOwnGradebook(Permission):
+    name = "teaching.edit_own_gradebook"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, course: Course):
+        # FIXME: check course is ended and teacher is not in a spectator mode
+        return user in course.teachers.all()
+
+
+@add_perm
 class ViewAssignmentAttachment(Permission):
     name = "learning.view_assignment_attachment"
 

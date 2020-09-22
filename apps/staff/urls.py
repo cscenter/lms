@@ -3,8 +3,9 @@ from django.urls import path, re_path, register_converter
 
 from courses.urls import RE_COURSE_URI
 from learning.gradebook.views import GradeBookView, GradeBookCSVView, \
-    AssignmentScoresImportByStepikIDView, \
-    AssignmentScoresImportByYandexLoginView
+    ImportAssignmentScoresByStepikIDView, \
+    ImportAssignmentScoresByYandexLoginView, \
+    ImportAssignmentScoresByEnrollmentIDView
 from staff.views import HintListView, StudentSearchView, ExportsView, \
     FutureGraduateStatsView, FutureGraduateDiplomasTeXView, \
     FutureGraduateDiplomasCSVView, ProgressReportFullView, \
@@ -41,8 +42,11 @@ urlpatterns = [
             path('', GradeBookView.as_view(is_for_staff=True, permission_required="teaching.view_gradebook"), name='gradebook'),
             path('csv/', GradeBookCSVView.as_view(permission_required="teaching.view_gradebook"), name='gradebook_csv'),
         ])),
-        path('<int:course_id>/import/stepic', AssignmentScoresImportByStepikIDView.as_view(is_for_staff=True), name='gradebook_csv_import_stepic'),
-        path('<int:course_id>/import/yandex', AssignmentScoresImportByYandexLoginView.as_view(is_for_staff=True), name='gradebook_csv_import_yandex'),
+        path('<int:course_id>/import/', include([
+            path('stepic', ImportAssignmentScoresByStepikIDView.as_view(), name='gradebook_import_scores_by_stepik_id'),
+            path('yandex', ImportAssignmentScoresByYandexLoginView.as_view(), name='gradebook_import_scores_by_yandex_login'),
+            path('enrollments', ImportAssignmentScoresByEnrollmentIDView.as_view(), name='gradebook_import_scores_by_enrollment_id'),
+        ])),
     ])),
 
     path('student-search/', StudentSearchView.as_view(), name='student_search'),

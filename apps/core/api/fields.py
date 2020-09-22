@@ -5,7 +5,7 @@ class ScoreField(DecimalField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("max_digits", 6)
         kwargs.setdefault("decimal_places", 2)
-        kwargs.setdefault("min_value", 3)
+        kwargs.setdefault("min_value", 0)
         super().__init__(*args, **kwargs)
 
     def to_internal_value(self, data):

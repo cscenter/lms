@@ -12,7 +12,7 @@ from courses.tests.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     CourseNewsNotification, Event, GraduateProfile, Invitation, \
-    CourseInvitation, StudentGroup, EnrollmentPeriod, AssignmentCommentTypes
+    CourseInvitation, StudentGroup, EnrollmentPeriod, AssignmentSubmissionTypes
 from learning.services import StudentGroupService
 from learning.settings import StudentStatuses
 from users.constants import Roles
@@ -58,7 +58,7 @@ class AssignmentCommentFactory(factory.django.DjangoModelFactory):
     student_assignment = factory.SubFactory(StudentAssignmentFactory)
     text = factory.Sequence(lambda n: "Test comment %03d" % n)
     author = factory.SubFactory(UserFactory)
-    type = AssignmentCommentTypes.COMMENT
+    type = AssignmentSubmissionTypes.COMMENT
     attached_file = factory.django.FileField()
 
 

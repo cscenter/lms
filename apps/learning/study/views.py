@@ -24,7 +24,7 @@ from learning import utils
 from learning.calendar import get_student_calendar_events, get_calendar_events
 from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, Enrollment, \
-    AssignmentCommentTypes
+    AssignmentSubmissionTypes
 from learning.permissions import ViewOwnStudentAssignments, \
     ViewOwnStudentAssignment, ViewCourses, \
     CreateAssignmentCommentAsLearner
@@ -165,6 +165,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
                                          AssignmentCommentUpsertView):
     permission_required = CreateAssignmentCommentAsLearner.name
+    submission_type = AssignmentSubmissionTypes.COMMENT
 
     def get_permission_object(self):
         return self.student_assignment
@@ -184,6 +185,7 @@ class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
 class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
                                           AssignmentSolutionUpsertView):
     permission_required = CreateAssignmentCommentAsLearner.name
+    submission_type = AssignmentSubmissionTypes.SOLUTION
 
     def get_permission_object(self):
         return self.student_assignment

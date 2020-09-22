@@ -30,7 +30,7 @@ from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm, \
     AssignmentCommentForm
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import AssignmentComment, StudentAssignment, Enrollment, \
-    AssignmentCommentTypes
+    AssignmentSubmissionTypes
 from learning.permissions import CreateAssignmentComment, ViewStudentAssignment, \
     EditOwnStudentAssignment, ViewStudentAssignmentList
 from learning.services import get_teacher_classes, CourseRole, \
@@ -463,6 +463,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
                                          AssignmentCommentUpsertView):
     permission_required = CreateAssignmentComment.name
+    submission_type = AssignmentSubmissionTypes.COMMENT
 
     def get_permission_object(self):
         return self.student_assignment

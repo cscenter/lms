@@ -21,7 +21,7 @@ DEBUG = MODELTRANSLATION_DEBUG = env.bool('DEBUG', default=False)
 RESTRICT_LOGIN_TO_LMS = True
 REVERSE_TO_LMS_URL_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
                                  'files', 'surveys', 'library', 'admission',
-                                 'auth', 'courses')
+                                 'auth', 'courses', 'learning-api')
 
 # Default scheme for `core.urls.reverse`
 DEFAULT_URL_SCHEME = env.str("REVERSE_URL_SCHEME", default="https")
@@ -235,9 +235,10 @@ TEMPLATES = [
 ]
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 # Sensitive model-based configuration is encrypted with this key.
 # Don't forget to update site configuration after rotating a secret key.
-SECRET_KEY = env('DJANGO_SECRET_KEY')
+DB_SECRET_KEY = env.str('DJANGO_DB_SECRET_KEY')
 
 
 # Email settings
@@ -248,6 +249,7 @@ EMAIL_PORT = env.int('DJANGO_EMAIL_PORT', default=465)
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_SEND_COOLDOWN = 0.3
 
 HASHIDS_SALT = env.str('HASHIDS_SALT')
 

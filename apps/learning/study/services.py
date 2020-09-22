@@ -4,7 +4,7 @@ from courses.models import Assignment, AssignmentSubmissionFormats
 from learning.forms import AssignmentSolutionBaseForm, \
     AssignmentSolutionDefaultForm, AssignmentSolutionYandexContestForm
 from learning.models import AssignmentComment, StudentAssignment, \
-    AssignmentCommentTypes
+    AssignmentSubmissionTypes
 from users.models import User
 
 
@@ -34,13 +34,13 @@ def get_draft_submission(user: User,
 def get_draft_comment(user: User,
                       student_assignment: StudentAssignment, **kwargs):
     return get_draft_submission(user, student_assignment,
-                                AssignmentCommentTypes.COMMENT, **kwargs)
+                                AssignmentSubmissionTypes.COMMENT, **kwargs)
 
 
 def get_draft_solution(user: User,
                        student_assignment: StudentAssignment, **kwargs):
     return get_draft_submission(user, student_assignment,
-                                AssignmentCommentTypes.SOLUTION, **kwargs)
+                                AssignmentSubmissionTypes.SOLUTION, **kwargs)
 
 
 def get_solution_form(student_assignment: StudentAssignment,

@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.forms import BoundField
 from django.utils.encoding import force_str
 
-from core.forms import GradeField
+from core.forms import ScoreField
 from learning.gradebook.data import GradeBookData
 from learning.models import StudentAssignment, Enrollment
 
@@ -100,7 +100,7 @@ class CustomBoundField(BoundField):
                                         attrs=attrs))
 
 
-class AssignmentScore(GradeField):
+class AssignmentScore(ScoreField):
     def __init__(self, assignment, submission):
         score = submission.score
         widget = forms.TextInput(attrs={
@@ -170,9 +170,9 @@ class GradeBookFormFactory:
                     k = BaseGradebookForm.GRADE_PREFIX + str(sa.id)
                     fields[k] = AssignmentScore(assignment, sa)
 
-        for s in gradebook.students.values():
-            k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(s.enrollment_id)
-            fields[k] = EnrollmentFinalGrade(s, gradebook.course)
+        for gs in gradebook.students.values():
+            k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(gs.enrollment_id)
+            fields[k] = EnrollmentFinalGrade(gs, gradebook.course)
         cls_dict["_course"] = gradebook.course
         return type("GradebookForm", (BaseGradebookForm,), cls_dict)
 
@@ -188,7 +188,7 @@ class GradeBookFormFactory:
                 if not assignment.is_online:
                     k = BaseGradebookForm.GRADE_PREFIX + str(submission.id)
                     initial[k] = submission.score
-        for s in gradebook.students.values():
-            k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(s.enrollment_id)
-            initial[k] = s.final_grade
+        for gs in gradebook.students.values():
+            k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(gs.enrollment_id)
+            initial[k] = gs.final_grade
         return initial

@@ -1,5 +1,7 @@
 from collections import OrderedDict
+from dataclasses import dataclass
 from decimal import Decimal
+from typing import Dict
 
 import numpy as np
 from django.utils.translation import gettext_lazy as _
@@ -10,10 +12,11 @@ from learning.models import StudentAssignment, Enrollment
 from learning.settings import GradeTypes
 
 
-__all__ = ('StudentMeta', 'StudentProgress', 'GradeBookData', 'gradebook_data')
+__all__ = ('GradebookStudent', 'StudentProgress', 'GradeBookData',
+           'gradebook_data')
 
 
-class StudentMeta:
+class GradebookStudent:
     def __init__(self, enrollment: Enrollment, index: int):
         self._enrollment = enrollment
         self.index = index  # Row index in enrolled students list
@@ -34,45 +37,26 @@ class StudentMeta:
         return self._enrollment.grade
 
     @property
-    def first_name(self):
-        return self._enrollment.student.first_name
-
-    @property
-    def last_name(self):
-        return self._enrollment.student.last_name
-
-    @property
-    def patronymic(self):
-        return self._enrollment.student.patronymic
-
-    @property
-    def username(self):
-        return self._enrollment.student.username
-
-    @property
-    def email(self):
-        return self._enrollment.student.email
-
-    @property
-    def yandex_login(self):
-        return self._enrollment.student.yandex_login
-
-    @property
-    def codeforces_login(self):
-        return self._enrollment.student.codeforces_login
-
-    def get_absolute_url(self):
-        return self._enrollment.student.get_absolute_url()
-
-    def get_abbreviated_name(self):
-        return self._enrollment.student.get_abbreviated_name()
-
-    def get_abbreviated_short_name(self):
-        return self._enrollment.student.get_abbreviated_short_name()
-
-    @property
     def final_grade_display(self):
         return GradeTypes.values[self.final_grade]
+
+    @property
+    def student(self):
+        return self._enrollment.student
+
+    @property
+    def student_profile(self):
+        return self._enrollment.student_profile
+
+    @property
+    def student_group(self):
+        return self._enrollment.student_group
+
+
+@dataclass
+class GradebookAssignment:
+    index: int
+    assignment: Assignment
 
 
 class StudentProgress:
@@ -116,7 +100,11 @@ class GradeBookData:
     # Magic "100" constant - width of assignment column
     ASSIGNMENT_COLUMN_WIDTH = 100
 
-    def __init__(self, course: Course, students, assignments, submissions,
+    def __init__(self,
+                 course: Course,
+                 students: Dict[int, GradebookStudent],
+                 assignments: Dict[int, GradebookAssignment],
+                 submissions,
                  show_weight=False):
         """
         X-axis of submissions ndarray is students data.
@@ -140,7 +128,7 @@ def gradebook_data(course: Course) -> GradeBookData:
     """
     Returns:
         students = OrderedDict(
-            1: StudentMeta(
+            1: GradebookStudent(
                 "pk": 1,
                 "full_name": "Ivan Ivanov",
                 "final_grade": "good",
@@ -150,7 +138,7 @@ def gradebook_data(course: Course) -> GradeBookData:
             ...
         ),
         assignments = OrderedDict(
-            1: Assignment(...)
+            1: GradebookAssignment(...)
             ...
         ),
         submissions = [
@@ -169,62 +157,62 @@ def gradebook_data(course: Course) -> GradeBookData:
             [ ... ]
         ]
     """
+    # Collect active enrollments
     enrolled_students = OrderedDict()
-    _enrollments_qs = (Enrollment.active
-                       .filter(course=course)
-                       .select_related("student")
-                       .order_by("student__last_name", "student_id"))
-    for index, e in enumerate(_enrollments_qs.iterator()):
-        enrolled_students[e.student_id] = StudentMeta(e, index)
-
+    enrollments = (Enrollment.active
+                   .filter(course=course)
+                   .select_related("student",
+                                   "student_profile__branch",
+                                   "student_group")
+                   .order_by("student__last_name", "pk"))
+    for index, e in enumerate(enrollments.iterator()):
+        enrolled_students[e.student_id] = GradebookStudent(e, index)
+    # Collect course assignments
     assignments = OrderedDict()
-    assignments_id_to_index = {}
-    _assignments_qs = (Assignment.objects
-                       .filter(course_id=course.pk)
-                       .only("pk",
-                             "title",
-                             # Assignment constructor caches course id
-                             "course_id",
-                             "submission_type",
-                             "maximum_score",
-                             "passing_score",
-                             "weight")
-                       .order_by("deadline_at", "pk"))
-    for index, a in enumerate(_assignments_qs.iterator()):
-        assignments[a.pk] = a
-        assignments_id_to_index[a.pk] = index
+    queryset = (Assignment.objects
+                .filter(course_id=course.pk)
+                .only("pk",
+                      "title",
+                      # Assignment constructor caches course id
+                      "course_id",
+                      "submission_type",
+                      "maximum_score",
+                      "passing_score",
+                      "weight")
+                .order_by("deadline_at", "pk"))
+    for index, a in enumerate(queryset.iterator()):
+        assignments[a.pk] = GradebookAssignment(index, assignment=a)
+    # Collect students progress
     submissions = np.empty((len(enrolled_students), len(assignments)),
                            dtype=object)
-    _student_assignments_qs = (
-        StudentAssignment.objects
-        .filter(assignment__course_id=course.pk)
-        .only("pk",
-              "score",
-              "first_student_comment_at",  # needs to calculate progress status
-              "assignment_id",
-              "student_id")
-        .order_by("student_id", "assignment_id"))
-    for sa in _student_assignments_qs.iterator():
-        student_id = sa.student_id
+    queryset = (StudentAssignment.objects
+                .filter(assignment__course_id=course.pk)
+                .only("pk",
+                      "score",
+                      # needs to calculate progress status
+                      "first_student_comment_at",
+                      "assignment_id",
+                      "student_id")
+                .order_by("student_id", "assignment_id"))
+    for student_assignment in queryset.iterator():
+        student_id = student_assignment.student_id
         if student_id not in enrolled_students:
             continue
         student_index = enrolled_students[student_id].index
-        assignment_index = assignments_id_to_index[sa.assignment_id]
-        submissions[student_index][assignment_index] = StudentProgress(
-            sa, assignments[sa.assignment_id])
+        gradebook_assignment = assignments[student_assignment.assignment_id]
+        submissions[student_index][gradebook_assignment.index] = StudentProgress(
+            student_assignment, gradebook_assignment.assignment)
+    # Aggregate student total score
     for student_id in enrolled_students:
-        student_index = enrolled_students[student_id].index
-        student_submissions = submissions[student_index]
-        total_score = sum(s.score for s in student_submissions
-                          if s is not None and s.score is not None)
-        setattr(enrolled_students[student_id], "total_score", total_score)
+        gradebook_student = enrolled_students[student_id]
+        student_submissions = submissions[gradebook_student.index]
         total_score = Decimal(0)
         for s in student_submissions:
             if s is not None and s.weight_score is not None:
                 total_score += s.weight_score
         total_score = normalize_score(total_score)
-        setattr(enrolled_students[student_id], "total_score", total_score)
-    show_weight = any(a.weight < 1 for a in assignments.values())
+        setattr(gradebook_student, "total_score", total_score)
+    show_weight = any(ga.assignment.weight < 1 for ga in assignments.values())
     return GradeBookData(course=course,
                          students=enrolled_students,
                          assignments=assignments,

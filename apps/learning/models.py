@@ -466,10 +466,10 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel,
 
     def _compute_execution_time(self):
         time_spent = (AssignmentComment.objects
-                      .filter(type=AssignmentCommentTypes.SOLUTION,
+                      .filter(type=AssignmentSubmissionTypes.SOLUTION,
                               student_assignment=self)
                       .aggregate(total=Sum('execution_time')))
-        execution_time = time_spent['total']
+        execution_time = time_spent['total']  # Could be None
 
         if self.execution_time != execution_time:
             self.execution_time = execution_time
@@ -561,7 +561,7 @@ def assignment_comment_attachment_upload_to(self: "AssignmentComment", filename)
         filename)
 
 
-class AssignmentCommentTypes(DjangoChoices):
+class AssignmentSubmissionTypes(DjangoChoices):
     COMMENT = C('comment', _("Comment"))
     SOLUTION = C('solution', _("Solution"))
 
@@ -576,7 +576,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
     type = models.CharField(
         verbose_name=_("AssignmentComment|Type"),
         max_length=42,
-        choices=AssignmentCommentTypes.choices
+        choices=AssignmentSubmissionTypes.choices
     )
     execution_time = models.DurationField(
         verbose_name=_("Solution Execution Time"),
@@ -635,20 +635,22 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         # Teacher can edit comment during 10 min period only
         return (now() - self.created).total_seconds() > 600
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.__original_is_published = self.is_published
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        instance._loaded_is_published = instance.is_published
+        return instance
 
     def save(self, **kwargs):
         from learning.services import notify_new_assignment_comment
         created = self.pk is None
-        is_published_before = getattr(self, '__original_is_published', False)
+        is_published_before = getattr(self, '_loaded_is_published', False)
         super().save(**kwargs)
         # FIXME: remove notification logic from model
         # Send notifications only on publishing comment
         if self.is_published and (created or not is_published_before):
             notify_new_assignment_comment(self)
-        self.__original_is_published = self.is_published
+        self._loaded_is_published = self.is_published
 
 
 class AssignmentNotification(TimezoneAwareModel, TimeStampedModel):

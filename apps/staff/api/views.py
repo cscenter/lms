@@ -5,7 +5,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from api.permissions import CuratorAccessPermission
 from users.filters import StudentFilter
 from users.models import StudentProfile
-from .serializers import StudentSearchSerializer
+from .serializers import StudentProfileSearchSerializer
 
 
 class StudentOffsetPagination(LimitOffsetPagination):
@@ -14,7 +14,7 @@ class StudentOffsetPagination(LimitOffsetPagination):
 
 class StudentSearchJSONView(ListAPIView):
     permission_classes = [CuratorAccessPermission]
-    serializer_class = StudentSearchSerializer
+    serializer_class = StudentProfileSearchSerializer
     pagination_class = StudentOffsetPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = StudentFilter

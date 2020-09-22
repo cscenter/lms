@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-import functools
 import logging
+import time
 from datetime import datetime
 from functools import partial
-from typing import Callable, Dict
-from urllib.parse import urlparse
+from typing import Dict
 
 from django.apps import apps
 from django.conf import settings
@@ -20,7 +19,6 @@ from django_ses import SESBackend
 
 from core.models import SiteConfiguration, Branch
 from core.urls import replace_hostname
-
 from courses.models import Course
 from learning.models import AssignmentNotification, \
     CourseNewsNotification
@@ -78,30 +76,6 @@ def resolve_course_participant_branch(course: Course, participant: User):
     return branch
 
 
-def _get_base_domain(user: User, course: Course):
-    enrollment = user.get_enrollment(course.pk)
-    if enrollment:
-        branch = enrollment.student_profile.branch
-    else:
-        # It's not clear what domain use for teacher since the same course
-        # could be shared among sites, so let's resolve it in priority
-        if user.branch_id:
-            branch = user.branch
-        else:
-            branch = course.main_branch
-    base_domain = branch.site.domain
-    resolve_subdomain = (branch.site_id == settings.CLUB_SITE_ID)
-    if resolve_subdomain:
-        prefix = branch.code.lower()
-        if prefix == settings.DEFAULT_BRANCH_CODE:
-            prefix = ""
-    else:
-        prefix = settings.LMS_SUBDOMAIN if settings.LMS_SUBDOMAIN else ""
-    if prefix:
-        return f"{prefix}.{base_domain}"
-    return base_domain
-
-
 def report(f, s):
     dt = datetime.now().strftime("%Y.%m.%d %H:%M:%S")
     f.write("{0} {1}".format(dt, s))
@@ -119,6 +93,10 @@ def send_notification(notification, template, context, stdout,
 
     connection = get_email_connection(site_settings)
     from_email = site_settings.default_from_email
+    # FIXME: temporarily disable resolving connection at runtime until dkim will be enabled on @yandexdataschool.ru
+    if site_settings.site_id == 3:
+        connection = get_connection(settings.EMAIL_BACKEND)
+        from_email = settings.DEFAULT_FROM_EMAIL
     subject = "[{}] {}".format(context['course_name'], template['subject'])
     html_content = linebreaks(render_to_string(template['template_name'],
                                                context))
@@ -159,7 +137,7 @@ def get_domain_name(branch: Branch, site_settings: SiteConfiguration) -> str:
         # spb.compsciclub.ru -> compsciclub.ru
         if subdomain == site_settings.default_branch_code:
             subdomain = ''
-    if subdomain:
+    if subdomain and not domain_name.startswith(subdomain):
         domain_name = f"{subdomain}.{domain_name}"
     return domain_name
 
@@ -192,13 +170,15 @@ def get_assignment_notification_context(
     return context
 
 
-def get_course_news_notification_context(notification: CourseNewsNotification):
-    base_domain = _get_base_domain(
-        notification.user,
-        notification.course_offering_news.course)
+def get_course_news_notification_context(
+        notification: CourseNewsNotification,
+        participant_branch: Branch,
+        site_settings: SiteConfiguration) -> Dict:
+    domain_name = get_domain_name(participant_branch, site_settings)
+    abs_url_builder = _get_abs_url_builder(domain_name)
     course = notification.course_offering_news.course
     context = {
-        'course_link': replace_hostname(course.get_absolute_url(), base_domain),
+        'course_link': abs_url_builder(course.get_absolute_url()),
         'course_name': smart_str(course.meta_course),
         'course_news_name': notification.course_offering_news.title,
         'course_news_text': notification.course_offering_news.text,
@@ -206,21 +186,19 @@ def get_course_news_notification_context(notification: CourseNewsNotification):
     return context
 
 
-def get_email_connection(site_settings):
-    # FIXME: temporarily disable resolving connection at runtime until dkim will be enabled on @yandexdataschool.ru
-    return get_connection(settings.EMAIL_BACKEND)
+def get_email_connection(site_settings: SiteConfiguration):
     email_backend = import_string(site_settings.email_backend)
     if issubclass(email_backend, smtp.EmailBackend):
         decrypted = site_settings.decrypt(site_settings.email_host_password)
-        connection = smtp.EmailBackend(host=site_settings.email_host,
-                                       port=site_settings.email_port,
-                                       username=site_settings.email_host_user,
-                                       password=decrypted,
-                                       use_tls=site_settings.email_use_tls,
-                                       use_ssl=site_settings.email_use_ssl)
+        connection = email_backend(host=site_settings.email_host,
+                                   port=site_settings.email_port,
+                                   username=site_settings.email_host_user,
+                                   password=decrypted,
+                                   use_tls=site_settings.email_use_tls,
+                                   use_ssl=site_settings.email_use_ssl)
     elif issubclass(email_backend, SESBackend):
-        # AWS settings are not depends on site configuration
-        connection = SESBackend()
+        # AWS settings are shared among projects
+        connection = email_backend()
     else:
         connection = get_connection(site_settings.email_backend,
                                     fail_silently=False)
@@ -249,6 +227,7 @@ def send_assignment_notifications(site_configurations, stdout) -> None:
         context = get_assignment_notification_context(
             notification, branch, site_settings)
         send_notification(notification, template, context, stdout, site_settings)
+        time.sleep(settings.EMAIL_SEND_COOLDOWN)
 
 
 def send_course_news_notifications(site_configurations, stdout) -> None:
@@ -268,8 +247,10 @@ def send_course_news_notifications(site_configurations, stdout) -> None:
         course = notification.course_offering_news.course
         branch = resolve_course_participant_branch(course, notification.user)
         site_settings: SiteConfiguration = site_configurations[branch.site_id]
-        context = get_course_news_notification_context(notification)
+        context = get_course_news_notification_context(notification,
+                                                       branch, site_settings)
         send_notification(notification, template, context, stdout, site_settings)
+        time.sleep(settings.EMAIL_SEND_COOLDOWN)
 
 
 class Command(BaseCommand):

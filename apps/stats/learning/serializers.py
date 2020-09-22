@@ -23,7 +23,7 @@ class ParticipantsStatsSerializer(serializers.Serializer):
         pass
 
 
-class StudentSerializer(serializers.ModelSerializer):
+class LegacyStudentSerializer(serializers.ModelSerializer):
     groups = serializers.SlugRelatedField(many=True, read_only=True,
                                           slug_field='role')
 
@@ -37,7 +37,7 @@ class StudentAssignmentsSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()
     first_student_comment_at = serializers.DateTimeField()
     score = serializers.IntegerField()
-    student = StudentSerializer(read_only=True)
+    student = LegacyStudentSerializer(read_only=True)
 
     class Meta:
         model = StudentAssignment
@@ -75,7 +75,7 @@ class AssignmentsStatsSerializer(serializers.Serializer):
 
 class EnrollmentsStatsSerializer(serializers.Serializer):
     grade = serializers.CharField(read_only=True)
-    student = StudentSerializer(read_only=True)
+    student = LegacyStudentSerializer(read_only=True)
 
     def create(self, validated_data):
         pass
