@@ -1,5 +1,10 @@
-from contests.constants import YandexCompilers
-from contests.models import Submission
+from contests.constants import YandexCompilers, CheckingSystemTypes
+from contests.models import Submission, Checker
+from contests.utils import resolve_problem_id
+
+
+class CheckerURLError(Exception):
+    pass
 
 
 class CheckerService:
@@ -13,6 +18,29 @@ class CheckerService:
         contest_compilers = checker.settings['compilers']
         return [compiler for compiler in YandexCompilers.choices
                 if compiler[0] in contest_compilers]
+
+    @staticmethod
+    def get_or_create_checker_from_url(checking_system, checker_url,
+                                       commit=True):
+        """
+        Option commit=False is used to validate URL during assignment form clean
+        """
+        if checking_system.type == CheckingSystemTypes.YANDEX:
+            try:
+                contest_id, problem_id = resolve_problem_id(checker_url)
+            except ValueError as e:
+                raise CheckerURLError(e)
+            if commit:
+                checker, _ = Checker.objects.get_or_create(
+                    checking_system=checking_system,
+                    settings__contest_id=contest_id,
+                    settings__problem_id=problem_id, defaults={
+                        'url': checker_url,
+                        'settings': {'contest_id': contest_id,
+                                     'problem_id': problem_id}
+                    }
+                )
+                return checker
 
 
 class SubmissionService:

@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 
 from contests.models import CheckingSystem, Checker
 from contests.constants import CheckingSystemTypes
+from contests.services import CheckerURLError, CheckerService
 from contests.utils import resolve_problem_id
 from core.forms import CANCEL_SAVE_PAIR
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
@@ -347,11 +348,12 @@ class AssignmentForm(TimezoneAwareModelForm):
         checking_system = cleaned_data['checking_system']
         checking_system_url = cleaned_data['checker_url']
         if checking_system:
-            if checking_system.type == CheckingSystemTypes.YANDEX:
-                try:
-                    resolve_problem_id(checking_system_url)
-                except ValueError as e:
-                    self.add_error('checker_url', str(e))
+            try:
+                CheckerService.get_or_create_checker_from_url(
+                    checking_system, checking_system_url, commit=False
+                )
+            except CheckerURLError as e:
+                self.add_error('checker_url', str(e))
         elif checking_system_url:
             self.add_error('checker_url',
                            _("Non-empty URL for no checking system"))
@@ -363,18 +365,10 @@ class AssignmentForm(TimezoneAwareModelForm):
         if submission_type not in self.checking_system_submission_formats:
             checking_system = None
         if checking_system:
-            if checking_system.type == CheckingSystemTypes.YANDEX:
-                checker_url = self.cleaned_data['checker_url']
-                contest_id, problem_id = resolve_problem_id(checker_url)
-                checker, _ = Checker.objects.get_or_create(
-                    checking_system=checking_system,
-                    settings__contest_id=contest_id,
-                    settings__problem_id=problem_id, defaults={
-                        'url': checker_url,
-                        'settings': {'contest_id': contest_id,
-                                     'problem_id': problem_id}
-                    }
-                )
+            checking_system_url = self.cleaned_data['checker_url']
+            checker = CheckerService.get_or_create_checker_from_url(
+                checking_system, checking_system_url
+            )
 
         instance = super(AssignmentForm, self).save(commit=False)
         instance.checker = checker
