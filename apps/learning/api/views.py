@@ -30,7 +30,7 @@ class CourseList(ListAPIView):
     """
     List courses the authenticated user participated in as a teacher.
     """
-    # authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = MyCourseSerializer
 
@@ -44,6 +44,7 @@ class CourseAssignmentList(ListAPIView):
     """
     List assignments of the course.
     """
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, CreateAssignment]
     serializer_class = MyCourseAssignmentSerializer
 
@@ -68,6 +69,7 @@ class EnrollmentList(ListAPIView):
     """
     List students enrolled in the course.
     """
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, ViewEnrollments]
     serializer_class = MyEnrollmentSerializer
 
@@ -85,6 +87,7 @@ class EnrollmentList(ListAPIView):
 
 
 class StudentAssignmentList(ListAPIView):
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = StudentAssignmentSerializer
 
@@ -98,7 +101,7 @@ class StudentAssignmentList(ListAPIView):
 
 
 class StudentAssignmentUpdate(UpdateAPIView):
-    # authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication]
     permission_classes = [EditStudentAssignment]
     serializer_class = StudentAssignmentSerializer
     lookup_url_kwarg = 'student_id'
