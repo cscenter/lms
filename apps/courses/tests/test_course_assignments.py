@@ -7,6 +7,7 @@ from auth.mixins import PermissionRequiredMixin
 from contests.models import Checker
 from contests.constants import CheckingSystemTypes
 from contests.tests.factories import CheckingSystemFactory, CheckerFactory
+from contests.utils import get_yandex_contest_problem_url
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.models import Assignment, AssignmentSubmissionFormats
@@ -67,7 +68,7 @@ def test_course_assignment_form_create_with_checking_system(client, mocker):
     checking_system = CheckingSystemFactory.create(
         type=CheckingSystemTypes.YANDEX
     )
-    checking_system_url = "https://contest.yandex.ru/contest/15/problems/D/"
+    checking_system_url = get_yandex_contest_problem_url(15, 'D')
     form.update({'course': co.pk,
                  # 'attached_file': None,
                  'submission_type': AssignmentSubmissionFormats.CODE_REVIEW,
@@ -81,11 +82,6 @@ def test_course_assignment_form_create_with_checking_system(client, mocker):
     assert response.status_code == 302
     assert Assignment.objects.count() == 1
     assert Checker.objects.count() == 1
-    checker = Checker.objects.first()
-    assert checker.checking_system.type == CheckingSystemTypes.YANDEX
-    assert checker.url == checking_system_url
-    assert checker.settings['contest_id'] == 15
-    assert checker.settings['problem_id'] == 'D'
     assert mock_compiler_sync.call_count == 1
 
 

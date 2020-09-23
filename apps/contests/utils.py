@@ -1,8 +1,12 @@
 from django.utils.translation import gettext_lazy as _
 
 from contests.api.yandex_contest import YANDEX_CONTEST_DOMAIN, \
-    YANDEX_CONTEST_PROBLEM_REGEX
+    YANDEX_CONTEST_PROBLEM_REGEX, YANDEX_CONTEST_PROBLEM_URL
 
+
+def get_yandex_contest_problem_url(contest_id, problem_id):
+    return YANDEX_CONTEST_PROBLEM_URL.format(contest_id=contest_id,
+                                             problem_id=problem_id)
 
 def resolve_problem_id(url):
     prefix, domain, suffix = url.partition(YANDEX_CONTEST_DOMAIN)

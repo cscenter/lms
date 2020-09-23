@@ -29,7 +29,7 @@ class CheckerService:
             try:
                 contest_id, problem_id = resolve_problem_id(checker_url)
             except ValueError as e:
-                raise CheckerURLError(e)
+                raise CheckerURLError(str(e))
             if commit:
                 checker, _ = Checker.objects.get_or_create(
                     checking_system=checking_system,

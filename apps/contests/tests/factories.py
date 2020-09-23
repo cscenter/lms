@@ -2,6 +2,7 @@ import factory
 from factory.fuzzy import FuzzyText, FuzzyInteger
 
 from contests.models import CheckingSystem, Checker
+from contests.utils import get_yandex_contest_problem_url
 
 
 class CheckingSystemFactory(factory.django.DjangoModelFactory):
@@ -16,9 +17,7 @@ class CheckingSystemFactory(factory.django.DjangoModelFactory):
 
 class CheckerFactory(factory.django.DjangoModelFactory):
     checking_system = factory.SubFactory(CheckingSystemFactory)
-    url = factory.Sequence(lambda n:
-                           'https://contest.yandex.ru/contest/%s/problems/%s'
-                           % (n, n))
+    url = factory.Sequence(lambda n: get_yandex_contest_problem_url(n, n))
     settings = factory.Dict({
         'contest_id': FuzzyInteger(0, 100),
         'problem_id': factory.Iterator(['A', 'B', 'C', 'D'])
