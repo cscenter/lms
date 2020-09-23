@@ -40,7 +40,7 @@
         {% trans "Assignment Weight" %}: {{ assignment.weight|floatdot }}
       </p>
         <p>
-            {% trans "Estimated Execution Time" %}: {{ assignment.get_ttc_display }}
+            {% trans "Estimated Execution Time" %}: {% if assignment.ttc == None %}-{% else %}{{ assignment.get_ttc_display }}{% endif %}
         </p>
         <p>
             {% trans "Mean Execution Time" %}: {{ execution_time_mean|default_if_none:"-" }}

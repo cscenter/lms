@@ -62,7 +62,7 @@ class Command(BaseCommand):
             if key not in periods:
                 logger.warning(f"Не найден отчетный период. "
                                f"Семестр {current_term}, "
-                               f"отделение: {ps.student.branch}, "
+                               f"отделение: {student_profile.branch}, "
                                f"тип проекта: {ps.project.project_type}")
                 continue
             period = periods[key]
