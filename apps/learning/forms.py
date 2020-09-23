@@ -5,8 +5,7 @@ from crispy_forms.layout import Field, Layout, Submit, Hidden, \
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from contests.constants import YandexCompilers
-from contests.services import SubmissionService
+from contests.services import SubmissionService, CheckerService
 from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.timezone.constants import TIME_FORMAT_RU
@@ -85,11 +84,11 @@ class AssignmentSolutionBaseForm(forms.ModelForm):
     """
     prefix = "solution"
 
-    def __init__(self, course, *args, **kwargs):
+    def __init__(self, assignment, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['execution_time'] = AssignmentDurationField(
             label=_("Time Spent on Assignment"),
-            required=course.ask_ttc,
+            required=assignment.course.ask_ttc,
             widget=forms.TextInput(attrs={'autocomplete': 'off',
                                           'class': 'form-control',
                                           'placeholder': _('hours:minutes')}),
@@ -115,8 +114,8 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
         model = AssignmentComment
         fields = ('text', 'attached_file', 'execution_time')
 
-    def __init__(self, course, *args, **kwargs):
-        super().__init__(course, *args, **kwargs)
+    def __init__(self, assignment, *args, **kwargs):
+        super().__init__(assignment, *args, **kwargs)
         self.helper.layout = Layout(
             Div('text', css_class='form-group-5'),
             Div('attached_file', css_class='form-group-5'),
@@ -138,7 +137,6 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
 class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
     compiler = forms.ChoiceField(
         label=_("Compiler"),
-        choices=YandexCompilers.choices
     )
     attached_file = forms.FileField(
         label=_("Solution file"),
@@ -149,8 +147,11 @@ class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
         model = AssignmentComment
         fields = ('attached_file', 'execution_time')
 
-    def __init__(self, course, *args, **kwargs):
-        super().__init__(course, *args, **kwargs)
+    def __init__(self, assignment, *args, **kwargs):
+        super().__init__(assignment, *args, **kwargs)
+        checker = assignment.checker
+        field_compiler = self.fields['compiler']
+        field_compiler.choices = CheckerService.get_available_compiler_choices(checker)
         self.helper.layout = Layout(
             Div('compiler', css_class='form-group-5'),
             Div('attached_file', css_class='form-group-5'),

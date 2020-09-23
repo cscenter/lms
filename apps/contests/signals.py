@@ -1,10 +1,25 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
 from contests.models import Submission
-from contests.constants import SubmissionStatus
-from contests.tasks import add_new_submission_to_checking_system
-from courses.models import AssignmentSubmissionFormats
+from contests.constants import SubmissionStatus, CheckingSystemTypes
+from contests.tasks import add_new_submission_to_checking_system, \
+    retrieve_yandex_contest_checker_compilers
+from courses.models import AssignmentSubmissionFormats, Assignment
+
+
+@receiver(pre_save, sender=Assignment)
+def retrieve_yandex_contest_compilers(sender, instance: Assignment,
+                                      *args, **kwargs):
+    """
+    Triggered on every save for assigments with checker to allow updating
+    compiler list on demand by clicking "Save" button on assignment form.
+    """
+    if instance.checker:
+        if instance.checker.checking_system.type == CheckingSystemTypes.YANDEX:
+            retrieve_yandex_contest_checker_compilers.delay(
+                checker_id=instance.checker.pk, retries=3
+            )
 
 
 @receiver(post_save, sender=Submission)

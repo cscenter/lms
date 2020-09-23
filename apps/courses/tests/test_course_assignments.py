@@ -57,7 +57,8 @@ def test_course_assignment_form_create(client):
 
 
 @pytest.mark.django_db
-def test_course_assignment_form_create_with_checking_system(client):
+def test_course_assignment_form_create_with_checking_system(client, mocker):
+    mock_compiler_sync = mocker.patch('contests.tasks.retrieve_yandex_contest_checker_compilers')
     teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
@@ -85,6 +86,7 @@ def test_course_assignment_form_create_with_checking_system(client):
     assert checker.url == checking_system_url
     assert checker.settings['contest_id'] == 15
     assert checker.settings['problem_id'] == 'D'
+    assert mock_compiler_sync.call_count == 1
 
 
 @pytest.mark.django_db

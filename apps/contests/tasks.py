@@ -23,6 +23,50 @@ def get_submission(submission_id) -> Optional["Submission"]:
 
 
 @job('default')
+def retrieve_yandex_contest_checker_compilers(checker_id, *, retries):
+    from contests.models import Checker
+    checker = (Checker.objects
+               .filter(pk=checker_id)
+               .first())
+    if not checker:
+        return "Checker not found"
+    access_token = checker.checking_system.settings['access_token']
+    api = YandexContestAPI(
+        access_token=access_token,
+        refresh_token=access_token
+    )
+    contest_id = checker.settings['contest_id']
+    problem_id = checker.settings['problem_id']
+    try:
+        status, json_data = api.contest_problems(contest_id)
+    except Unavailable as e:
+        if retries:
+            scheduler = django_rq.get_scheduler('default')
+            scheduler.enqueue_in(timedelta(minutes=10),
+                                 retrieve_yandex_contest_checker_compilers,
+                                 checker_id,
+                                 retries=retries - 1)
+            logger.info("Remote server is unavailable. "
+                        "Repeat job in 10 minutes.")
+            return "Requeue job in 10 minutes"
+        else:
+            raise
+    except ContestAPIError as e:
+        logger.error(f"Yandex.Contest api request error "
+                     f"[checker_id = {checker_id}]")
+        raise
+    problems = {problem['shortName']: problem for problem in json_data}
+    if problem_id in problems:
+        problem = problems[problem_id]
+        checker.settings['compilers'] = problem['compilers']
+        checker.save(update_fields=['settings'])
+        return "Done"
+    logger.error(f"Did not find problem {problem_id} "
+                 f"in contest {contest_id}")
+    raise
+
+
+@job('default')
 def add_new_submission_to_checking_system(submission_id, *, retries):
     from contests.constants import SubmissionStatus
     submission = get_submission(submission_id)

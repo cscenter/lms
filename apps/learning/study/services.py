@@ -45,13 +45,13 @@ def get_draft_solution(user: User,
 
 def get_solution_form(student_assignment: StudentAssignment,
                       **kwargs) -> Optional[AssignmentSolutionBaseForm]:
-    course = student_assignment.assignment.course
+    assignment = student_assignment.assignment
     submission_format = student_assignment.assignment.submission_type
     if submission_format == AssignmentSubmissionFormats.EXTERNAL:
         # FIXME: return None
-        form = AssignmentSolutionDefaultForm(course, **kwargs)
+        form = AssignmentSolutionDefaultForm(assignment, **kwargs)
     elif submission_format == AssignmentSubmissionFormats.CODE_REVIEW:
-        form = AssignmentSolutionYandexContestForm(course, **kwargs)
+        form = AssignmentSolutionYandexContestForm(assignment, **kwargs)
     else:
-        form = AssignmentSolutionDefaultForm(course, **kwargs)
+        form = AssignmentSolutionDefaultForm(assignment, **kwargs)
     return form
