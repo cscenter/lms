@@ -19,7 +19,8 @@ from courses.managers import CourseClassQuerySet
 from courses.models import Course, Assignment, AssignmentAttachment, \
     StudentGroupTypes, CourseClass, CourseTeacher
 from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, StudentGroup, Event, AssignmentSubmissionTypes
+    AssignmentNotification, StudentGroup, Event, AssignmentSubmissionTypes, \
+    CourseNewsNotification
 from learning.settings import StudentStatuses
 from users.models import User, StudentProfile, StudentTypes
 
@@ -467,6 +468,18 @@ class EnrollmentService:
             update_fields.append('reason_leave')
         with transaction.atomic():
             enrollment.save(update_fields=update_fields)
+            remove_course_notifications_for_student(enrollment)
+
+
+def remove_course_notifications_for_student(enrollment: Enrollment):
+    (AssignmentNotification.objects
+     .filter(user_id=enrollment.student_id,
+             student_assignment__assignment__course_id=enrollment.course_id)
+     .delete())
+    (CourseNewsNotification.objects
+     .filter(user_id=enrollment.student_id,
+             course_offering_news__course_id=enrollment.course_id)
+     .delete())
 
 
 def notify_student_new_assignment(student_assignment, commit=True):

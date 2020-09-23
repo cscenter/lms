@@ -16,9 +16,11 @@ from core.urls import reverse
 from courses.admin import AssignmentAdmin
 from courses.models import CourseTeacher, Assignment, \
     AssignmentSubmissionFormats
-from courses.tests.factories import CourseFactory, AssignmentFactory
-from learning.models import AssignmentNotification
-from learning.services import course_failed_by_student, get_student_profile
+from courses.tests.factories import CourseFactory, AssignmentFactory, \
+    CourseNewsFactory
+from learning.models import AssignmentNotification, CourseNewsNotification
+from learning.services import course_failed_by_student, get_student_profile, \
+    EnrollmentService
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import *
 from notifications.management.commands.notify import \
@@ -367,7 +369,7 @@ def test_create_deadline_change_notification(settings):
 
 @pytest.mark.django_db
 def test_change_assignment_comment(settings):
-    """Don't send notification on editing assignment comment   """
+    """Don't send notification on editing assignment comment"""
     teacher = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
     enrollment = EnrollmentFactory(course=course)
@@ -422,3 +424,29 @@ def test_deadline_changed_timezone(settings):
     management.call_command("notify", stdout=out)
     assert len(mail.outbox) == 1
     assert "22:00 04 февраля" in mail.outbox[0].body
+
+
+@pytest.mark.django_db
+def test_remove_assignment_notifications_on_leaving_course(settings):
+    course = CourseFactory()
+    other_course = CourseFactory()
+    enrollment = EnrollmentFactory(course=course)
+    AssignmentFactory(course=course)
+    an = AssignmentNotificationFactory(student_assignment__assignment__course=other_course)
+    assert AssignmentNotification.objects.count() == 2
+    EnrollmentService.leave(enrollment)
+    assert AssignmentNotification.objects.count() == 1
+    assert AssignmentNotification.objects.get() == an
+
+
+@pytest.mark.django_db
+def test_remove_course_news_notifications_on_leaving_course(settings):
+    course = CourseFactory()
+    other_course = CourseFactory()
+    enrollment = EnrollmentFactory(course=course)
+    CourseNewsFactory(course=course)
+    cn = CourseNewsNotificationFactory(course_offering_news__course=other_course)
+    assert CourseNewsNotification.objects.count() == 2
+    EnrollmentService.leave(enrollment)
+    assert CourseNewsNotification.objects.count() == 1
+    assert CourseNewsNotification.objects.get() == cn
