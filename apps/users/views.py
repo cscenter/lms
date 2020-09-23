@@ -63,9 +63,10 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
         elif self.request.user.is_curator:
             enrollments_queryset = enrollments_queryset.annotate(
                 classes_total=Count('course__courseclass'))
-        co_queryset = Course.objects.select_related('semester',
-                                                    'meta_course',
-                                                    'main_branch')
+        co_queryset = (Course.objects
+                       .available_on_site(self.request.site)
+                       .select_related('semester', 'meta_course',
+                                       'main_branch'))
         # Limit results on compsciclub.ru
         if hasattr(self.request, "branch"):
             co_queryset = co_queryset.filter(main_branch=self.request.branch)
