@@ -33,7 +33,7 @@ from learning.services import get_student_classes, get_student_profile
 from learning.study.services import get_solution_form, get_draft_solution
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView, \
-    AssignmentSolutionUpsertView
+    AssignmentSolutionCreateView
 from users.models import User
 
 
@@ -183,7 +183,7 @@ class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
 
 
 class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
-                                          AssignmentSolutionUpsertView):
+                                          AssignmentSolutionCreateView):
     permission_required = CreateAssignmentCommentAsLearner.name
     submission_type = AssignmentSubmissionTypes.SOLUTION
 

@@ -17,11 +17,12 @@ class CheckerService:
 
 class SubmissionService:
     @staticmethod
-    def save_submission_settings(assignment_submission, **kwargs):
+    def update_or_create_submission_settings(assignment_submission, **kwargs):
         """
-        Creates a Submission with all kwargs (e.g., compiler) saved as settings.
+        Updates or creates a Submission with all kwargs (e.g., compiler)
+        saved as settings.
         """
-        submission, _ = Submission.objects.get_or_create(
+        submission, _ = Submission.objects.update_or_create(
             assignment_submission=assignment_submission,
             settings=kwargs
         )

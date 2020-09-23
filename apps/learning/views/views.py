@@ -22,8 +22,7 @@ from learning.models import StudentAssignment, AssignmentComment, \
     AssignmentSubmissionTypes
 from learning.permissions import ViewAssignmentCommentAttachment, \
     ViewAssignmentAttachment
-from learning.study.services import get_draft_comment, get_draft_submission, \
-    get_draft_solution
+from learning.study.services import get_draft_comment
 from users.mixins import TeacherOnlyMixin
 
 logger = logging.getLogger(__name__)
@@ -83,6 +82,7 @@ class AssignmentSubmissionUpsertView(StudentAssignmentURLParamsMixin,
 
 class AssignmentCommentUpsertView(AssignmentSubmissionUpsertView):
     """Post a new comment or save draft"""
+
     model = AssignmentComment
     submission_type = AssignmentSubmissionTypes.COMMENT
 
@@ -98,24 +98,29 @@ class AssignmentCommentUpsertView(AssignmentSubmissionUpsertView):
             return self.form_valid(form)
         return self.form_invalid(form)
 
+    def get_error_url(self):
+        raise NotImplementedError
 
-class AssignmentSolutionUpsertView(AssignmentSubmissionUpsertView):
+
+class AssignmentSolutionCreateView(AssignmentSubmissionUpsertView):
     """Post a new solution"""
     model = AssignmentComment
     submission_type = AssignmentSubmissionTypes.SOLUTION
 
     def post(self, request, *args, **kwargs):
-        # Saving drafts is only supported for comments.
-        save_draft = False
-        submission = get_draft_solution(request.user,
-                                        self.student_assignment,
-                                        build=True)
-        submission.is_published = not save_draft
+        submission = AssignmentComment(
+            student_assignment=self.student_assignment,
+            author=request.user,
+            type=self.submission_type,
+            is_published=True)
         form = self.get_form(data=request.POST, files=request.FILES,
                              instance=submission)
         if form.is_valid():
             return self.form_valid(form)
         return self.form_invalid(form)
+
+    def get_error_url(self):
+        raise NotImplementedError
 
 
 class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,

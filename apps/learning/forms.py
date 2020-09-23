@@ -171,8 +171,8 @@ class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
     def save(self, commit=True):
         instance = super().save(commit=commit)
         compiler = self.cleaned_data['compiler']
-        SubmissionService.save_submission_settings(instance,
-                                                   compiler=compiler)
+        SubmissionService.update_or_create_submission_settings(instance,
+                                                               compiler=compiler)
         return instance
 
 
