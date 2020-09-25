@@ -251,6 +251,9 @@ class AssignmentDurationField(forms.DurationField):
             raise ValidationError(self.error_messages['invalid'], code='invalid')
         if value is None:
             raise ValidationError(self.error_messages['invalid'], code='invalid')
+        if value.total_seconds() < 0:
+            raise ValidationError(self.error_messages['invalid'],
+                                  code='invalid')
         return value
 
 
