@@ -102,7 +102,7 @@
             {% with submission=comment.submission %}
               {% if comment.submission %}
                 <div class="submission-info mt-5 pt-5" style="border-top: 1px solid #eee;">
-                {{ submission.checking_system_choice.label }}. Статус: <span class="nowrap badge submission-status {{ submission.status_choice.css_class }}">{{ submission.get_status_display }}</span>
+                {{ submission.checking_system_choice.label }}. Статус посылки: <span class="nowrap badge submission-status {{ submission.status_choice.css_class }}">{{ submission.get_status_display }}</span>
                     {% if submission.get_report_url %} <a target="_blank" href="{{ submission.get_report_url }}">Отчёт о проверке</a>{% endif %}
                 </div>
               {% endif %}
