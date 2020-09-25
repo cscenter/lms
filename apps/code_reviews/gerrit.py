@@ -300,7 +300,27 @@ def init_project_for_course(course, skip_users=False):
     for e in enrollments:
         add_student_to_project(client, e.student_profile, course,
                                project_students_group_uuid)
+
+    # Enable automatic sync of LDAP database
+    course.is_code_review_system_used = True
+    course.save()
     # TODO: What to do with notifications?
+
+
+def add_reviewer_to_project(client: Gerrit, course_teacher: CourseTeacher,
+                            course: Course):
+    reviewers_group_name = get_students_group_name(course)
+    reviewers_group_res = client.get_group(reviewers_group_name)
+    if not reviewers_group_res.ok:
+        logger.error('Reviewers group for the project not found')
+        return
+    reviewers_group_uuid = reviewers_group_res.data['id']
+    reviewer_uid = course_teacher.teacher.ldap_username
+    res = client.create_group_member(reviewers_group_uuid, reviewer_uid)
+    if not res.ok:
+        logger.error(f"Couldn't add new reviewer {reviewer_uid} to group "
+                     f"{reviewers_group_uuid}. Message: {res.text}")
+        return
 
 
 def add_student_to_project(client: Gerrit, student: StudentProfile,

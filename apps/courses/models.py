@@ -310,6 +310,12 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("Default visibility for class materials."),
         choices=MaterialVisibilityTypes.choices,
         default=MaterialVisibilityTypes.PARTICIPANTS)
+    # Enables automatic sync of LDAP database for course teachers and students
+    # after creating the project in Gerrit
+    is_code_review_system_used = models.BooleanField(
+        _("Uses Code Review System"),
+        editable=False,
+        default=False)
     # TODO: recalculate on deleting course class
     public_videos_count = models.PositiveIntegerField(default=0, editable=False)
     public_slides_count = models.PositiveIntegerField(

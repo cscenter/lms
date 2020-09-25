@@ -6,10 +6,11 @@ from django_rq import job
 
 from code_reviews.api.gerrit import Gerrit
 from code_reviews.api.ldap import init_client
-from code_reviews.gerrit import get_or_create_change, list_change_files
+from code_reviews.gerrit import get_or_create_change, list_change_files, \
+    get_students_group_name, add_student_to_project
 from code_reviews.ldap import get_ldap_username, user_to_ldap_entry, \
     get_password_hash
-from learning.models import AssignmentComment
+from learning.models import AssignmentComment, Enrollment
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ def update_password_in_gerrit(*, user_id: int):
 
 
 @job('default')
-def upload_attachment_to_gerrit(assignment_comment_id):
+def upload_attachment_to_gerrit(*, assignment_comment_id: int):
     assignment_comment = (AssignmentComment.objects
                           .select_related('student_assignment')
                           .get(pk=assignment_comment_id))
@@ -102,3 +103,39 @@ def upload_attachment_to_gerrit(assignment_comment_id):
     if not response.no_content:
         logger.info('Failed to publish change edit')
         return
+
+
+@job('default')
+def add_student_to_project_in_gerrit(*, enrollment_id: int):
+    client = Gerrit(settings.GERRIT_API_URI,
+                    auth=(settings.GERRIT_CLIENT_USERNAME,
+                          settings.GERRIT_CLIENT_HTTP_PASSWORD))
+
+    try:
+        e = Enrollment.objects.get(pk=enrollment_id)
+    except Enrollment.DoesNotExist:
+        logger.error("Enrollment not found")
+        return
+
+    student_profile = e.student_profile
+    course = e.course
+
+    add_student_to_project(client, student_profile, course)
+
+
+@job('default')
+def add_reviewer_to_project_in_gerrit(*, enrollment_id: int):
+    client = Gerrit(settings.GERRIT_API_URI,
+                    auth=(settings.GERRIT_CLIENT_USERNAME,
+                          settings.GERRIT_CLIENT_HTTP_PASSWORD))
+
+    try:
+        e = Enrollment.objects.get(pk=enrollment_id)
+    except Enrollment.DoesNotExist:
+        logger.error("Enrollment not found")
+        return
+
+    student_profile = e.student_profile
+    course = e.course
+
+    add_student_to_project(client, student_profile, course)
