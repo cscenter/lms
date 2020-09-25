@@ -70,7 +70,7 @@ def user_to_ldap_entry(user: User, domain_component=settings.LDAP_DB_SUFFIX):
 
 
 # FIXME: у некоторых пользователей нет пароля, надо их импортировать и посмотреть, создастся ли для них аккаунт и не будет ли там падать с 500й, если пробовать входить по пустому паролю или любому невалидному.
-def export(file_path):
+def export(file_path, site_id=settings.SITE_ID):
     """
     Exports account data in a LDIF format for users having at least one
     of the **GROUPS_IMPORT_TO_GERRIT** groups.
@@ -78,7 +78,10 @@ def export(file_path):
         export("/path/to/dir/230320.ldif")
     """
     with open(file_path, 'w') as f:
-        for user in User.objects.has_role(*GROUPS_IMPORT_TO_GERRIT).distinct():
+        users = (User.objects
+                 .has_role(*GROUPS_IMPORT_TO_GERRIT, site_id=site_id)
+                 .distinct())
+        for user in users:
             entry = user_to_ldap_entry(user)
             user_dn = entry.pop('dn')
             ldif_writer = ldif.LDIFWriter(f)
