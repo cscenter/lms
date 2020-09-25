@@ -324,7 +324,7 @@ class AssignmentForm(TimezoneAwareModelForm):
         if checker:
             self.fields['checking_system'].initial = checker.checking_system
             self.fields['checker_url'].initial = checker.url
-        data = kwargs.get('data', dict)
+        data = kwargs.get('data', {})
         submission_type = data.get('submission_type', None)
         if submission_type in AssignmentSubmissionFormats.with_checking_system:
             self.fields['checking_system'].required = True
