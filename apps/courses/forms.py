@@ -300,7 +300,6 @@ class AssignmentForm(TimezoneAwareModelForm):
     checking_system = forms.ModelChoiceField(
         label=_("Checking System"),
         required=False,
-        empty_label=_("Not Used"),
         queryset=CheckingSystem.objects.all()
     )
     checker_url = forms.URLField(
@@ -325,6 +324,11 @@ class AssignmentForm(TimezoneAwareModelForm):
         if checker:
             self.fields['checking_system'].initial = checker.checking_system
             self.fields['checker_url'].initial = checker.url
+        data = kwargs.get('data', dict)
+        submission_type = data.get('submission_type', None)
+        if submission_type in AssignmentSubmissionFormats.with_checking_system:
+            self.fields['checking_system'].required = True
+            self.fields['checker_url'].required = True
 
     class Meta:
         model = Assignment
@@ -332,45 +336,45 @@ class AssignmentForm(TimezoneAwareModelForm):
                   'submission_type', 'passing_score', 'maximum_score',
                   'weight', 'ttc', 'restricted_to')
 
-    @property
-    def checking_system_submission_formats(self):
-        return [AssignmentSubmissionFormats.CODE_REVIEW]
-
     def checking_system_fieldset_display(self):
         """
         Return assignment submission formats, which might need checking system
-        fieldset to be displayed.
+        fieldset to be displayed. Used as a data attribute in template.
         """
-        return ",".join(self.checking_system_submission_formats)
+        return ",".join(AssignmentSubmissionFormats.with_checking_system)
 
     def clean(self):
         cleaned_data = super(AssignmentForm, self).clean()
-        checking_system = cleaned_data['checking_system']
-        checking_system_url = cleaned_data['checker_url']
-        if checking_system:
-            try:
-                CheckerService.get_or_create_checker_from_url(
-                    checking_system, checking_system_url, commit=False
-                )
-            except CheckerURLError as e:
-                self.add_error('checker_url', str(e))
-        elif checking_system_url:
-            self.add_error('checker_url',
-                           _("Non-empty URL for no checking system"))
+        if 'checking_system' in cleaned_data:
+            checking_system = cleaned_data['checking_system']
+            checking_system_url = cleaned_data['checker_url']
+            if checking_system:
+                try:
+                    CheckerService.get_or_create_checker_from_url(
+                        checking_system, checking_system_url, commit=False
+                    )
+                except CheckerURLError as e:
+                    self.add_error('checker_url', str(e))
+            elif checking_system_url:
+                self.add_error('checker_url',
+                               _("Non-empty URL for no checking system"))
+        return cleaned_data
 
     def save(self, commit=True):
-        submission_type = self.cleaned_data['submission_type']
-        checking_system = self.cleaned_data['checking_system']
-        checker = None
-        if submission_type not in self.checking_system_submission_formats:
-            checking_system = None
-        if checking_system:
-            checking_system_url = self.cleaned_data['checker_url']
-            checker = CheckerService.get_or_create_checker_from_url(
-                checking_system, checking_system_url
-            )
-
         instance = super(AssignmentForm, self).save(commit=False)
-        instance.checker = checker
-        instance.save()
+        submission_type = self.cleaned_data['submission_type']
+        # Remove checker if submission type was changed
+        if submission_type not in AssignmentSubmissionFormats.with_checking_system:
+            instance.checker = None
+            instance.save()
+        if 'checking_system' in self.cleaned_data:
+            checking_system = self.cleaned_data['checking_system']
+            checker = None
+            if checking_system:
+                checking_system_url = self.cleaned_data['checker_url']
+                checker = CheckerService.get_or_create_checker_from_url(
+                    checking_system, checking_system_url
+                )
+            instance.checker = checker
+            instance.save()
         return instance

@@ -54,8 +54,8 @@ $(document).ready(function () {
         const checkingSystemFieldSet = $('#checking-system-info');
         const checkerSubmissionFormats = checkingSystemFieldSet.data('display');
         $('select[name="submission_type"]').change(function(e) {
-            console.log(this.value);
-            if (checkerSubmissionFormats.includes(this.value)) {
+            if (this.value.length > 0 &&
+                checkerSubmissionFormats.includes(this.value)) {
                 checkingSystemFieldSet.removeClass('hidden');
             } else {
                 checkingSystemFieldSet.addClass('hidden');
