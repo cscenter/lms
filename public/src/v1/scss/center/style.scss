@@ -508,6 +508,26 @@ h2 {
   }
 }
 
+.submission-status {
+  font-weight: normal;
+  white-space: nowrap;
+
+  &.badge {
+    color: #fff;
+
+    &.failed {
+      background-color: $color-red;
+    }
+
+    &.checking {
+      background-color: $color-yellow;
+    }
+
+    &.passed {
+      background-color: $color-green;
+    }
+  }
+}
 
 
 tr.unread {

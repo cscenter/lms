@@ -50,5 +50,16 @@ $(document).ready(function () {
                 return $(helpBlockId).html();
             }
         });
+
+        const checkingSystemFieldSet = $('#checking-system-info');
+        const checkerSubmissionFormats = checkingSystemFieldSet.data('display');
+        $('select[name="submission_type"]').change(function(e) {
+            if (this.value.length > 0 &&
+                checkerSubmissionFormats.includes(this.value)) {
+                checkingSystemFieldSet.removeClass('hidden');
+            } else {
+                checkingSystemFieldSet.addClass('hidden');
+            }
+        });
     }
 });

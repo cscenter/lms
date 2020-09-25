@@ -49,6 +49,7 @@ MIDDLEWARE = [
 INSTALLED_APPS += [
     'international_schools.apps.Config',
     'info_blocks.apps.InfoBlocksConfig',
+    'contests.apps.ContestsConfig',
     'compsciclub_ru.project_conf.ProjectConfig',  # should be the last one
 ]
 LOCALE_PATHS = [

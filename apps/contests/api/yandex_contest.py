@@ -1,10 +1,17 @@
 import io
 import logging
+import re
 from enum import IntEnum, Enum
 
 import requests
 
 logger = logging.getLogger(__name__)
+
+
+YANDEX_SUBMISSION_REPORT_URL = 'https://contest.yandex.ru/contest/{contest_id}/run-report/{run_id}/'
+YANDEX_CONTEST_PROBLEM_URL = 'https://contest.yandex.ru/contest/{contest_id}/problems/{problem_id}/'
+YANDEX_CONTEST_PROBLEM_REGEX = re.compile(r"/contest\/(?P<contest_id>[\d]+)\/problems\/(?P<problem_id>[a-zA-Z0-9]*)(?P<trailing_slash>[\/]?)")
+YANDEX_CONTEST_DOMAIN = "contest.yandex.ru"
 
 
 class RegisterStatus(IntEnum):
@@ -208,7 +215,7 @@ class YandexContestAPI:
         response = self.request_and_check(url, "post", headers=headers,
                                           data=payload, files=files,
                                           timeout=timeout)
-        data = response.content
+        data = response.json()
         logger.debug("Meta data: {}".format(data))
         return response.status_code, data
 

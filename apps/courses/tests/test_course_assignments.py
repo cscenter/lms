@@ -4,9 +4,13 @@ from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
+from contests.models import Checker
+from contests.constants import CheckingSystemTypes
+from contests.tests.factories import CheckingSystemFactory, CheckerFactory
+from contests.utils import get_yandex_contest_problem_url
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.models import Assignment
+from courses.models import Assignment, AssignmentSubmissionFormats
 from courses.permissions import CreateAssignment, EditAssignment
 from courses.tests.factories import CourseFactory, AssignmentFactory
 from users.tests.factories import TeacherFactory, CuratorFactory
@@ -54,6 +58,53 @@ def test_course_assignment_form_create(client):
 
 
 @pytest.mark.django_db
+def test_course_assignment_form_create_with_checking_system(client, mocker):
+    mock_compiler_sync = mocker.patch('contests.tasks.retrieve_yandex_contest_checker_compilers')
+    teacher = TeacherFactory()
+    co = CourseFactory.create(teachers=[teacher])
+    form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
+    deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
+    deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
+    checking_system = CheckingSystemFactory.create(
+        type=CheckingSystemTypes.YANDEX
+    )
+    checking_system_url = get_yandex_contest_problem_url(15, 'D')
+    form.update({'course': co.pk,
+                 # 'attached_file': None,
+                 'submission_type': AssignmentSubmissionFormats.CODE_REVIEW,
+                 'deadline_at_0': deadline_date,
+                 'deadline_at_1': deadline_time,
+                 'checking_system': checking_system.pk,
+                 'checker_url': checking_system_url})
+    url = co.get_create_assignment_url()
+    client.login(teacher)
+    response = client.post(url, form)
+    assert response.status_code == 302
+    assert Assignment.objects.count() == 1
+    assert Checker.objects.count() == 1
+    assert mock_compiler_sync.call_count == 1
+
+
+@pytest.mark.django_db
+def test_course_assignment_form_update_remove_checking_system(client):
+    teacher = TeacherFactory()
+    co = CourseFactory.create(teachers=[teacher])
+    checker = CheckerFactory()
+    a = AssignmentFactory(course=co)
+    form = model_to_dict(a)
+    del form['ttc']
+    del form['checker']
+    form.update({'submission_type': AssignmentSubmissionFormats.ONLINE})
+    url = co.get_create_assignment_url()
+    client.login(teacher)
+    response = client.post(url, form)
+    assert Assignment.objects.count() == 1
+    assert Checker.objects.count() == 1
+    a.refresh_from_db()
+    assert not a.checker
+
+
+@pytest.mark.django_db
 def test_course_assignment_update_view_security(client, assert_login_redirect,
                                                 lms_resolver):
     from auth.permissions import perm_registry
@@ -75,6 +126,7 @@ def test_course_assignment_update(client, assert_redirect):
     a = AssignmentFactory.create(course=co)
     form = model_to_dict(a)
     del form['ttc']
+    del form['checker']
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     new_title = a.title + " foo42bar"

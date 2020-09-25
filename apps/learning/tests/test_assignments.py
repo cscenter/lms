@@ -10,6 +10,7 @@ from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
 from auth.mixins import PermissionRequiredMixin
+from contests.constants import CheckingSystemTypes
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse

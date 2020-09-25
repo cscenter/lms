@@ -8,6 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import formats
 from django.utils.encoding import smart_bytes
 
+from contests.constants import CheckingSystemTypes
 from core.urls import reverse
 from courses.models import AssignmentSubmissionFormats, Assignment
 from courses.tests.factories import AssignmentFactory, CourseFactory, \
@@ -38,7 +39,7 @@ def test_assignment_public_form(settings, client):
         "deadline_at_1": "00:00",
         "passing_score": "3",
         "maximum_score": "5",
-        "weight": "1.00",
+        "weight": "1.00"
     }
     add_url = course_spb.get_create_assignment_url()
     response = client.post(add_url, form_data, follow=True)

@@ -651,11 +651,6 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         if self.is_published and (created or not is_published_before):
             notify_new_assignment_comment(self)
         self._loaded_is_published = self.is_published
-        with_code_review = self.student_assignment.assignment.submission_type == AssignmentSubmissionFormats.CODE_REVIEW
-        # FIXME: move to the signal in code_reviews
-        if self.attached_file and with_code_review:
-            from code_reviews.tasks import upload_attachment_to_gerrit
-            upload_attachment_to_gerrit.delay(self.pk)
 
 
 class AssignmentNotification(TimezoneAwareModel, TimeStampedModel):

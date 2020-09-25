@@ -7,6 +7,10 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from contests.models import CheckingSystem, Checker
+from contests.constants import CheckingSystemTypes
+from contests.services import CheckerURLError, CheckerService
+from contests.utils import resolve_problem_id
 from core.forms import CANCEL_SAVE_PAIR
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
@@ -16,7 +20,7 @@ from core.widgets import UbereditorWidget, DateInputTextWidget, \
     TimeInputTextWidget
 from courses.constants import ClassTypes
 from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
-    Assignment, LearningSpace, StudentGroupTypes
+    Assignment, LearningSpace, StudentGroupTypes, AssignmentSubmissionFormats
 
 __all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
            'CourseClassForm', 'AssignmentForm')
@@ -293,6 +297,17 @@ class AssignmentForm(TimezoneAwareModelForm):
         label=_("Available for"),
         required=False,
         help_text=_("Restrict assignment to selected groups. Available to all by default."))
+    checking_system = forms.ModelChoiceField(
+        label=_("Checking System"),
+        required=False,
+        queryset=CheckingSystem.objects.all()
+    )
+    checker_url = forms.URLField(
+        label=_("Checker URL"),
+        required=False,
+        help_text=_("For example, URL of the Yandex.Contest problem: "
+                    "https://contest.yandex.ru/contest/3/problems/A/")
+    )
 
     def __init__(self, *args, **kwargs):
         course = kwargs.pop('course', None)
@@ -305,9 +320,61 @@ class AssignmentForm(TimezoneAwareModelForm):
             field_restrict_to.label = _("Available to Branches")
             field_restrict_to.widget.attrs['title'] = _("All Branches")
         field_restrict_to.choices = StudentGroupService.get_choices(course)
+        checker = self.instance.checker
+        if checker:
+            self.fields['checking_system'].initial = checker.checking_system
+            self.fields['checker_url'].initial = checker.url
+        data = kwargs.get('data', {})
+        submission_type = data.get('submission_type', None)
+        if submission_type in AssignmentSubmissionFormats.with_checking_system:
+            self.fields['checking_system'].required = True
+            self.fields['checker_url'].required = True
 
     class Meta:
         model = Assignment
         fields = ('title', 'text', 'deadline_at', 'attachments',
                   'submission_type', 'passing_score', 'maximum_score',
                   'weight', 'ttc', 'restricted_to')
+
+    def checking_system_fieldset_display(self):
+        """
+        Return assignment submission formats, which might need checking system
+        fieldset to be displayed. Used as a data attribute in template.
+        """
+        return ",".join(AssignmentSubmissionFormats.with_checking_system)
+
+    def clean(self):
+        cleaned_data = super(AssignmentForm, self).clean()
+        if 'checking_system' in cleaned_data:
+            checking_system = cleaned_data['checking_system']
+            checking_system_url = cleaned_data['checker_url']
+            if checking_system:
+                try:
+                    CheckerService.get_or_create_checker_from_url(
+                        checking_system, checking_system_url, commit=False
+                    )
+                except CheckerURLError as e:
+                    self.add_error('checker_url', str(e))
+            elif checking_system_url:
+                self.add_error('checker_url',
+                               _("Non-empty URL for no checking system"))
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super(AssignmentForm, self).save(commit=False)
+        submission_type = self.cleaned_data['submission_type']
+        # Remove checker if submission type was changed
+        if submission_type not in AssignmentSubmissionFormats.with_checking_system:
+            instance.checker = None
+            instance.save()
+        if 'checking_system' in self.cleaned_data:
+            checking_system = self.cleaned_data['checking_system']
+            checker = None
+            if checking_system:
+                checking_system_url = self.cleaned_data['checker_url']
+                checker = CheckerService.get_or_create_checker_from_url(
+                    checking_system, checking_system_url
+                )
+            instance.checker = checker
+            instance.save()
+        return instance

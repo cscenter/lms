@@ -254,3 +254,41 @@ def test_add_solution(client):
     response = client.post(create_solution_url, form_data)
     student_assignment.refresh_from_db()
     assert student_assignment.execution_time == timedelta(hours=1, minutes=46)
+
+
+@pytest.mark.django_db
+def test_assignment_comment_author_should_be_resolved(client):
+    student = StudentFactory()
+    sa = StudentAssignmentFactory(student=student)
+    create_comment_url = reverse("study:assignment_comment_create",
+                                 kwargs={"pk": sa.pk})
+    form_data = {
+        'comment-text': "Test comment with file"
+    }
+    client.login(student)
+    client.post(create_comment_url, form_data)
+    assert AssignmentComment.objects.count() == 1
+    comment = AssignmentComment.objects.first()
+    assert comment.author == student
+    assert comment.student_assignment == sa
+
+
+@pytest.mark.django_db
+def test_assignment_comment_author_cannot_be_modified_by_user(client):
+    student1, student2 = StudentFactory.create_batch(2)
+    sa1 = StudentAssignmentFactory(student=student1)
+    sa2 = StudentAssignmentFactory(student=student2)
+    create_comment_url = reverse("study:assignment_comment_create",
+                                 kwargs={"pk": sa1.pk})
+    form_data = {
+        'comment-text': "Test comment with file",
+        # Attempt to explicitly override system fields via POST data
+        'author': student2.pk,
+        'student_assignment': sa2.pk
+    }
+    client.login(student1)
+    client.post(create_comment_url, form_data)
+    assert AssignmentComment.objects.count() == 1
+    comment = AssignmentComment.objects.first()
+    assert comment.author == student1
+    assert comment.student_assignment == sa1
