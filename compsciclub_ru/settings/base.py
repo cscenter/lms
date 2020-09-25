@@ -99,4 +99,5 @@ MIGRATION_MODULES = {
     "library": None,
     "study_programs": None,
     "users": None,
+    "contests": None,
 }
