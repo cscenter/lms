@@ -2,7 +2,7 @@ from typing import Optional, Type
 
 from courses.models import Assignment, AssignmentSubmissionFormats
 from learning.forms import AssignmentSolutionBaseForm, \
-    AssignmentSolutionDefaultForm
+    AssignmentSolutionDefaultForm, AssignmentSolutionYandexContestForm
 from learning.models import AssignmentComment, StudentAssignment, \
     AssignmentSubmissionTypes
 from users.models import User
@@ -31,23 +31,27 @@ def get_draft_submission(user: User,
     return draft
 
 
-def get_draft_comment(user: User, student_assignment: StudentAssignment):
+def get_draft_comment(user: User,
+                      student_assignment: StudentAssignment, **kwargs):
     return get_draft_submission(user, student_assignment,
-                                AssignmentSubmissionTypes.COMMENT)
+                                AssignmentSubmissionTypes.COMMENT, **kwargs)
 
 
-def get_draft_solution(user: User, student_assignment: StudentAssignment):
+def get_draft_solution(user: User,
+                       student_assignment: StudentAssignment, **kwargs):
     return get_draft_submission(user, student_assignment,
-                                AssignmentSubmissionTypes.SOLUTION)
+                                AssignmentSubmissionTypes.SOLUTION, **kwargs)
 
 
 def get_solution_form(student_assignment: StudentAssignment,
                       **kwargs) -> Optional[AssignmentSolutionBaseForm]:
-    course = student_assignment.assignment.course
+    assignment = student_assignment.assignment
     submission_format = student_assignment.assignment.submission_type
     if submission_format == AssignmentSubmissionFormats.EXTERNAL:
         # FIXME: return None
-        form = AssignmentSolutionDefaultForm(course, **kwargs)
+        form = AssignmentSolutionDefaultForm(assignment, **kwargs)
+    elif submission_format == AssignmentSubmissionFormats.CODE_REVIEW:
+        form = AssignmentSolutionYandexContestForm(assignment, **kwargs)
     else:
-        form = AssignmentSolutionDefaultForm(course, **kwargs)
+        form = AssignmentSolutionDefaultForm(assignment, **kwargs)
     return form

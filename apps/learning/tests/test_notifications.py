@@ -9,6 +9,7 @@ from django.contrib.sites.models import Site
 from django.core import mail, management
 from subdomains.utils import get_domain
 
+from contests.constants import CheckingSystemTypes
 from core.models import SiteConfiguration
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU

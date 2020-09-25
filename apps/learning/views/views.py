@@ -22,7 +22,7 @@ from learning.models import StudentAssignment, AssignmentComment, \
     AssignmentSubmissionTypes
 from learning.permissions import ViewAssignmentCommentAttachment, \
     ViewAssignmentAttachment
-from learning.study.services import get_draft_comment, get_draft_submission
+from learning.study.services import get_draft_comment
 from users.mixins import TeacherOnlyMixin
 
 logger = logging.getLogger(__name__)
@@ -55,21 +55,42 @@ class StudentAssignmentURLParamsMixin:
                                 'assignment__course__semester'))
 
 
-class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin,
-                                  GenericModelView):
+class AssignmentSubmissionUpsertView(StudentAssignmentURLParamsMixin,
+                                     GenericModelView):
     """Post a new comment or save draft"""
     model = AssignmentComment
     submission_type = None
 
     def post(self, request, *args, **kwargs):
-        # Saving drafts is only supported for comments.
-        is_comment = (self.submission_type == AssignmentSubmissionTypes.COMMENT)
-        save_draft = is_comment and "save-draft" in request.POST
-        assert self.submission_type is not None
-        submission = get_draft_submission(request.user,
-                                          self.student_assignment,
-                                          self.submission_type,
-                                          build=True)
+        raise NotImplementedError
+
+    def form_valid(self, form):
+        submission = form.save()
+        comment_persistence.report_saved(submission.text)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        msg = "<br>".join("<br>".join(errors)
+                          for errors in form.errors.values())
+        messages.error(self.request, "Данные не сохранены!<br>" + msg)
+        redirect_to = self.get_error_url()
+        return HttpResponseRedirect(redirect_to)
+
+    def get_error_url(self):
+        raise NotImplementedError
+
+
+class AssignmentCommentUpsertView(AssignmentSubmissionUpsertView):
+    """Post a new comment or save draft"""
+
+    model = AssignmentComment
+    submission_type = AssignmentSubmissionTypes.COMMENT
+
+    def post(self, request, *args, **kwargs):
+        save_draft = "save-draft" in request.POST
+        submission = get_draft_comment(request.user,
+                                       self.student_assignment,
+                                       build=True)
         submission.is_published = not save_draft
         form = self.get_form(data=request.POST, files=request.FILES,
                              instance=submission)
@@ -77,20 +98,26 @@ class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin,
             return self.form_valid(form)
         return self.form_invalid(form)
 
-    def form_valid(self, form):
-        comment = form.save(commit=False)
-        comment.student_assignment = self.student_assignment
-        comment.author = self.request.user
-        comment.save()
-        comment_persistence.report_saved(comment.text)
-        return HttpResponseRedirect(self.get_success_url())
+    def get_error_url(self):
+        raise NotImplementedError
 
-    def form_invalid(self, form):
-        msg = "<br>".join("<br>".join(errors) for errors in
-                          form.errors.values())
-        messages.error(self.request, "Данные не сохранены!<br>" + msg)
-        redirect_to = self.get_error_url()
-        return HttpResponseRedirect(redirect_to)
+
+class AssignmentSolutionCreateView(AssignmentSubmissionUpsertView):
+    """Post a new solution"""
+    model = AssignmentComment
+    submission_type = AssignmentSubmissionTypes.SOLUTION
+
+    def post(self, request, *args, **kwargs):
+        submission = AssignmentComment(
+            student_assignment=self.student_assignment,
+            author=request.user,
+            type=self.submission_type,
+            is_published=True)
+        form = self.get_form(data=request.POST, files=request.FILES,
+                             instance=submission)
+        if form.is_valid():
+            return self.form_valid(form)
+        return self.form_invalid(form)
 
     def get_error_url(self):
         raise NotImplementedError

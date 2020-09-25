@@ -1024,6 +1024,8 @@ class AssignmentSubmissionFormats(DjangoChoices):
     CODE_REVIEW = C("code_review", _("Code Review Submission"))
     OTHER = C("other", _("No Submission"))  # on paper, etc
 
+    with_checking_system = {CODE_REVIEW.value}
+
 
 class Assignment(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'course'
@@ -1070,6 +1072,13 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         verbose_name=_("Groups"),
         related_name='restricted_assignments',
         through='learning.AssignmentGroup')
+    checker = models.ForeignKey(
+        'contests.Checker',
+        on_delete=models.CASCADE,
+        verbose_name=_("Checking System"),
+        blank=True, null=True,
+        related_name='+'
+    )
 
     tracker = FieldTracker(fields=['deadline_at'])
 
@@ -1125,6 +1134,10 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         from notifications.middleware import get_unread_notifications_cache
         cache = get_unread_notifications_cache()
         return self.id in cache.assignment_ids_set
+
+    @property
+    def checking_system_needed(self):
+        return self.submission_type == AssignmentSubmissionFormats.CODE_REVIEW
 
     @property
     def deadline_is_exceeded(self):

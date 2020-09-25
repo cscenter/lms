@@ -5,6 +5,7 @@ from crispy_forms.layout import Field, Layout, Submit, Hidden, \
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from contests.services import SubmissionService, CheckerService
 from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.timezone.constants import TIME_FORMAT_RU
@@ -83,11 +84,11 @@ class AssignmentSolutionBaseForm(forms.ModelForm):
     """
     prefix = "solution"
 
-    def __init__(self, course, *args, **kwargs):
+    def __init__(self, assignment, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['execution_time'] = AssignmentDurationField(
             label=_("Time Spent on Assignment"),
-            required=course.ask_ttc,
+            required=assignment.course.ask_ttc,
             widget=forms.TextInput(attrs={'autocomplete': 'off',
                                           'class': 'form-control',
                                           'placeholder': _('hours:minutes')}),
@@ -113,8 +114,8 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
         model = AssignmentComment
         fields = ('text', 'attached_file', 'execution_time')
 
-    def __init__(self, course, *args, **kwargs):
-        super().__init__(course, *args, **kwargs)
+    def __init__(self, assignment, *args, **kwargs):
+        super().__init__(assignment, *args, **kwargs)
         self.helper.layout = Layout(
             Div('text', css_class='form-group-5'),
             Div('attached_file', css_class='form-group-5'),
@@ -131,6 +132,48 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
             raise forms.ValidationError(
                 _("Either text or file should be non-empty"))
         return cleaned_data
+
+
+class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
+    compiler = forms.ChoiceField(
+        label=_("Compiler"),
+    )
+    attached_file = forms.FileField(
+        label=_("Solution file"),
+        required=False,
+        widget=JesnyFileInput)
+
+    class Meta:
+        model = AssignmentComment
+        fields = ('attached_file', 'execution_time')
+
+    def __init__(self, assignment, *args, **kwargs):
+        super().__init__(assignment, *args, **kwargs)
+        checker = assignment.checker
+        field_compiler = self.fields['compiler']
+        field_compiler.choices = CheckerService.get_available_compiler_choices(checker)
+        self.helper.layout = Layout(
+            Div('compiler', css_class='form-group-5'),
+            Div('attached_file', css_class='form-group-5'),
+            Div('execution_time'),
+            FormActions(Submit('save', _('Send Solution'),
+                               css_id=f'submit-id-{self.prefix}-save'),
+                        css_class="form-group")
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get("attached_file"):
+            raise forms.ValidationError(
+                _("File should be non-empty"))
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=commit)
+        compiler = self.cleaned_data['compiler']
+        SubmissionService.update_or_create_submission_settings(instance,
+                                                               compiler=compiler)
+        return instance
 
 
 class AssignmentModalCommentForm(forms.ModelForm):
