@@ -108,7 +108,7 @@
                           {% if submission.get_report_url %}
                               <td class="col-xs-3"><a href="{{ submission.get_report_url }}">отчёт о проверке</a></td>
                           {% endif %}
-                          <td class="col-auto text-right"><span class="nowrap badge submission-status {{ submission.status_choice.css_class }}">{{ submission.get_verdict }}</span></td>
+                          <td class="col-auto text-right"><span class="nowrap badge submission-status {{ submission.status_choice.css_class }}">{{ submission.get_status_display }}</span></td>
                       </tr>
                   </table>
                 </div>

@@ -112,10 +112,12 @@ class Submission(models.Model):
         verbose_name_plural = _("Submissions")
 
     @property
+    def checker(self):
+        return self.assignment_submission.student_assignment.assignment.checker
+
+    @property
     def checking_system_choice(self):
-        assignment = self.assignment_submission.student_assignment.assignment
-        checking_system_type = assignment.checker.checking_system.type
-        return CheckingSystemTypes.get_choice(checking_system_type)
+        return CheckingSystemTypes.get_choice(self.checker.checking_system.type)
 
     @property
     def status_choice(self):
@@ -134,7 +136,8 @@ class Submission(models.Model):
                                                        run_id=run_id)
         return None
 
-    def get_verdict(self) -> Optional[str]:
+    @property
+    def get_status_display(self) -> Optional[str]:
         if not SubmissionStatus.was_checked(self.status):
             return self.status_choice.label
         if "verdict" in self.meta:
@@ -144,7 +147,7 @@ class Submission(models.Model):
                 if verdict == SubmissionVerdict.WA.value:
                     for t in self.meta.get('checkerLog', []):
                         if t["verdict"] == SubmissionVerdict.WA.value:
-                            output += f" [тест {t['sequenceNumber']}]"
+                            output += _(" [test %d]") % t['sequenceNumber']
                             break
                 return output
             except ValueError:

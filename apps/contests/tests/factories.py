@@ -1,8 +1,10 @@
 import factory
 from factory.fuzzy import FuzzyText, FuzzyInteger
 
-from contests.models import CheckingSystem, Checker
+from contests.models import CheckingSystem, Checker, Submission
 from contests.utils import get_yandex_contest_problem_url
+from learning.models import AssignmentSubmissionTypes
+from learning.tests.factories import AssignmentCommentFactory
 
 
 class CheckingSystemFactory(factory.django.DjangoModelFactory):
@@ -25,3 +27,11 @@ class CheckerFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Checker
+
+
+class SubmissionFactory(factory.django.DjangoModelFactory):
+    assignment_submission = factory.SubFactory(AssignmentCommentFactory,
+                                               type=AssignmentSubmissionTypes.SOLUTION)
+
+    class Meta:
+        model = Submission

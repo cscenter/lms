@@ -59,7 +59,7 @@ class SubmissionStatus(DjangoChoices):
     FAILED = ChoiceItem(40, _("Wrong Answer"), css_class='failed')
     PASSED = ChoiceItem(50, _("Correct Answer"), css_class='passed')
 
-    checked_statuses = [FAILED, PASSED]
+    checked_statuses = [FAILED.value, PASSED.value]
 
     @classmethod
     def was_checked(cls, status):
