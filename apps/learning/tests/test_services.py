@@ -6,7 +6,7 @@ from core.tests.factories import BranchFactory
 from courses.models import StudentGroupTypes
 from courses.tests.factories import CourseFactory, AssignmentFactory
 from learning.models import StudentGroup, StudentAssignment, \
-    AssignmentNotification
+    AssignmentNotification, Enrollment
 from learning.services import StudentGroupService, GroupEnrollmentKeyError, \
     AssignmentService, create_student_profile, StudentProfileError
 from learning.settings import Branches, StudentStatuses
@@ -123,6 +123,7 @@ def test_assignment_service_create_student_assignments(settings):
     e_other = EnrollmentFactory(course=course,
                                 student_profile=student_profile_other,
                                 student=student_profile_other.user)
+    assert Enrollment.active.count() == 3
     assignment = AssignmentFactory(course=course)
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment)
@@ -144,6 +145,7 @@ def test_assignment_service_create_student_assignments(settings):
     # Check soft deleted enrollments don't taken into account
     e_nsk.is_deleted = True
     e_nsk.save()
+    assert Enrollment.active.count() == 2
     AssignmentService.bulk_create_student_assignments(assignment)
     assert StudentAssignment.objects.count() == 2
     # Inactive status prevents generating student assignment too

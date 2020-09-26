@@ -448,3 +448,35 @@ def test_enrollment_by_invitation(settings, client):
     assert response.status_code == 302
     enrollments = Enrollment.active.filter(student=invited, course=course).all()
     assert len(enrollments) == 1
+
+
+@pytest.mark.django_db
+def test_enrollment_populate_assignments(client):
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    student_profile = StudentProfileFactory(branch=branch_spb)
+    student = student_profile.user
+    today = now_local(student.get_timezone())
+    current_semester = SemesterFactory.create_current(
+        enrollment_period__ends_on=today.date())
+    course = CourseFactory(main_branch=branch_spb,
+                           branches=[branch_nsk],
+                           semester=current_semester)
+    assert StudentGroup.objects.count() == 2
+    student_group_spb = StudentGroup.objects.get(branch=branch_spb)
+    student_group_nsk = StudentGroup.objects.get(branch=branch_nsk)
+    assignment_all = AssignmentFactory(course=course)
+    assignment_spb = AssignmentFactory(course=course, restricted_to=[student_group_spb])
+    assignment_nsk = AssignmentFactory(course=course, restricted_to=[student_group_nsk])
+    assert StudentAssignment.objects.count() == 0
+    form = {'course_pk': course.pk}
+    client.login(student)
+    enroll_url = course.get_enroll_url()
+    response = client.post(enroll_url, form)
+    assert response.status_code == 302
+    assert course.enrollment_set.count() == 1
+    student_assignments = StudentAssignment.objects.filter(student=student)
+    assert student_assignments.count() == 2
+    assignments = [sa.assignment for sa in student_assignments]
+    assert assignment_all in assignments
+    assert assignment_spb in assignments
