@@ -2,16 +2,23 @@ import logging
 import os
 import posixpath
 import shutil
+from datetime import timedelta
 
+import django_rq
 import requests
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models.fields.files import FieldFile
 from django_rq import job
 
 from api.providers.yandex_disk import YandexDiskRestAPI
 
 logger = logging.getLogger(__name__)
+
+
+class DownloadPresentationError(Exception):
+    pass
 
 
 REQUIRED_SETTINGS = [
@@ -35,85 +42,65 @@ YANDEX_DISK_API_DATA = {
 @job('default')
 def download_presentation_from_yandex_disk_supervisor(project_id, retries=3):
     """Download supervisor presentation to local storage by public link"""
-    from projects.models import project_presentations_upload_to
     Project = apps.get_model('projects', 'Project')
     project = Project.objects.get(pk=project_id)
-    file_path = _download_presentation(
-        instance=project,
-        public_link=project.supervisor_presentation_url,
-        file_attribute_name="supervisor_presentation",
-        file_path_without_ext=project_presentations_upload_to(project, "supervisor"),
-        retries=retries
-    )
+    file_path = _download_file_from_yandex_disk(
+        public_url=project.supervisor_presentation_url,
+        file_field=project.supervisor_presentation,
+        file_name="supervisor",
+        caller=download_presentation_from_yandex_disk_supervisor,
+        retries=retries)
     return file_path
 
 
 @job('default')
 def download_presentation_from_yandex_disk_students(project_id, retries=3):
     """Download participants presentation to local storage by public link"""
-    from projects.models import project_presentations_upload_to
     Project = apps.get_model('projects', 'Project')
     project = Project.objects.get(pk=project_id)
-    file_path = _download_presentation(
-        instance=project,
-        public_link=project.presentation_url,
-        file_attribute_name="presentation",
-        file_path_without_ext=project_presentations_upload_to(project,
-                                                         "participants"),
-        retries=retries
-    )
+    file_path = _download_file_from_yandex_disk(
+        public_url=project.presentation_url,
+        file_field=project.presentation,
+        file_name="participants",
+        caller=download_presentation_from_yandex_disk_students,
+        retries=retries)
     return file_path
 
 
-def _download_presentation(instance, public_link, file_attribute_name,
-                           file_path_without_ext, retries):
-    """
-    Download file by public link and save it with predefined name.
-
-    Notes:
-        We ignore original file name, but get extension from it.
-        All tasks runs in fail-safe context.
-    Properties:
-        object : instance
-            model object
-        str : file_attribute_name
-            Name of attribute which store path to local file with presentation
-        str : file_path_without_ext
-            Relative path from media root to new file without ext
-        int : retries
-            Attempts to download file before fail
-    """
-    Project = apps.get_model('projects', 'Project')
-    file_attribute = getattr(instance, file_attribute_name)
-    if public_link and file_attribute != '':
-        logger.warning("File path not empty for project {}. Field: {}. "
-                       "Skip".format(instance.pk, file_attribute_name))
+def _download_file_from_yandex_disk(public_url: str,
+                                    file_field: FieldFile,
+                                    file_name: str,
+                                    caller,
+                                    retries: int):
+    """Download file by public url and save to the storage."""
+    instance = file_field.instance
+    if public_url and file_field != '':
+        logger.warning("Project {} already has a file value for field {}. "
+                       "Skip".format(instance.pk, file_field.field.name))
         return
-    yandex_api_client = YandexDiskRestAPI(**YANDEX_DISK_API_DATA)
-    # Get file extension and attach it
-    meta_data = yandex_api_client.get_metadata(public_link)
+
+    client = YandexDiskRestAPI(**YANDEX_DISK_API_DATA)
+
+    meta_data = client.get_metadata(public_url)
     _, ext = posixpath.splitext(meta_data["name"])
-    file_path = file_path_without_ext + ext
+    file_name = file_name + ext
+    file_path = file_field.field.upload_to(instance, file_name)
 
-    download_data = yandex_api_client.get_download_data(public_link)
-    r = requests.get(download_data["href"], stream=True)
-    exc = None
-    full_path = os.path.join(settings.MEDIA_ROOT, file_path)
-    # Create all intermediate directories if not exists
-    os.makedirs(posixpath.dirname(full_path),
-                settings.FILE_UPLOAD_DIRECTORY_PERMISSIONS, exist_ok=True)
-    for i in range(retries):
-        try:
-            with open(full_path, 'wb') as f:
-                shutil.copyfileobj(r.raw, f, length=3 * 1024)
-            instance.__class__.objects.filter(pk=instance.pk).update(
-                **{file_attribute_name: file_path})
-        except ValueError as e:
-            exc = e
-        else:
-            logger.debug("File successfully saved to {}".format(full_path))
-            return file_path
-    logger.error("Errors occurred during file downloading for "
-                 "project {}".format(instance.pk))
-    raise exc
-
+    try:
+        r = requests.get(meta_data["file"], stream=True,
+                         # connect and read timeouts
+                         timeout=(3, 20))
+        actual_file_path = file_field.storage.save(file_path, r.raw)
+        instance.__class__.objects.filter(pk=instance.pk).update(
+            **{file_field.field.name: actual_file_path})
+        return actual_file_path
+    except (requests.ConnectionError, requests.Timeout) as e:
+        if not retries:
+            msg = (f"Failed to download {file_field.field.name} for "
+                   f"project {instance.pk}")
+            raise DownloadPresentationError(msg) from e
+        scheduler = django_rq.get_scheduler('default')
+        scheduler.enqueue_in(timedelta(minutes=1),
+                             caller,
+                             instance.pk,
+                             retries=retries - 1)
