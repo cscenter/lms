@@ -257,11 +257,8 @@ class Enrollment(TimezoneAwareModel, TimeStampedModel):
                                   smart_str(self.student.get_full_name()))
 
     def save(self, *args, **kwargs):
-        from learning.services import populate_assignments_for_student
         created = self.pk is None
         super().save(*args, **kwargs)
-        if created or not self.is_deleted:
-            populate_assignments_for_student(self)
 
     def clean(self):
         if self.student_profile_id and self.student_profile.user_id != self.student_id:

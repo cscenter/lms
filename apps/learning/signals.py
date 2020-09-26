@@ -9,7 +9,8 @@ from courses.models import Assignment, CourseNews, CourseTeacher, Course, \
 from learning.models import AssignmentNotification, \
     StudentAssignment, Enrollment, CourseNewsNotification, AssignmentComment, \
     AssignmentSubmissionTypes
-from learning.services import StudentGroupService, update_course_learners_count
+from learning.services import StudentGroupService, update_course_learners_count, \
+    populate_assignments_for_student
 
 
 # FIXME: post_delete нужен? Что лучше - удалять StudentGroup + SET_NULL у Enrollment или делать soft-delete?
@@ -40,6 +41,14 @@ def compute_course_learners_count(sender, instance: Enrollment, created,
     if created and instance.is_deleted:
         return
     update_course_learners_count(instance.course_id)
+
+
+@receiver(post_save, sender=Enrollment)
+def sync_assignments_for_student(sender, instance: Enrollment, created,
+                                 *args, **kwargs):
+    if instance.is_deleted:
+        return
+    populate_assignments_for_student(instance)
 
 
 @receiver(post_save, sender=CourseNews)

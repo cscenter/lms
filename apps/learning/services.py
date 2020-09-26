@@ -9,6 +9,7 @@ from django.db import transaction, router
 from django.db.models import Q, OuterRef, Value, F, TextField, QuerySet, \
     Subquery, Count, Avg
 from django.db.models.functions import Concat, Coalesce
+from django.db.models.signals import post_save
 from django.utils.timezone import now
 
 from core.models import Branch
@@ -413,6 +414,8 @@ class EnrollmentService:
                                   F('reason_entry'),
                                   output_field=TextField())
         with transaction.atomic():
+            # At this moment enrollment instance not in a consistent state -
+            # it has no student group, etc
             enrollment, created = (Enrollment.objects.get_or_create(
                 student=student.user, course=course,
                 defaults={'is_deleted': True, 'student_profile': student}))
@@ -448,10 +451,11 @@ class EnrollmentService:
                 if course.is_capacity_limited:
                     raise CourseCapacityFull
             else:
-                if not created:
-                    populate_assignments_for_student(enrollment)
-                update_course_learners_count(course.pk)
-        enrollment.refresh_from_db()
+                enrollment.refresh_from_db()
+                # Send signal to trigger callbacks:
+                # - update learners count
+                # - populate student assignments
+                post_save.send(Enrollment, instance=enrollment, created=created)
         return enrollment
 
     @classmethod
