@@ -87,9 +87,8 @@ def _download_file_from_yandex_disk(public_url: str,
     file_path = file_field.field.upload_to(instance, file_name)
 
     try:
-        r = requests.get(meta_data["file"], stream=True,
-                         # connect and read timeouts
-                         timeout=(3, 20))
+        # connect and read timeouts
+        r = requests.get(meta_data["file"], timeout=(3, 20))
         actual_file_path = file_field.storage.save(file_path, r.raw)
         instance.__class__.objects.filter(pk=instance.pk).update(
             **{file_field.field.name: actual_file_path})
