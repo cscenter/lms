@@ -3,6 +3,7 @@ import os
 import posixpath
 import shutil
 from datetime import timedelta
+from io import BytesIO
 
 import django_rq
 import requests
@@ -87,9 +88,11 @@ def _download_file_from_yandex_disk(public_url: str,
     file_path = file_field.field.upload_to(instance, file_name)
 
     try:
-        # connect and read timeouts
-        r = requests.get(meta_data["file"], timeout=(3, 20))
-        actual_file_path = file_field.storage.save(file_path, r.raw)
+        r = requests.get(meta_data["file"], allow_redirects=True,
+                         # connect and read timeouts
+                         timeout=(3, 20))
+        source_file = BytesIO(r.content)
+        actual_file_path = file_field.storage.save(file_path, source_file)
         instance.__class__.objects.filter(pk=instance.pk).update(
             **{file_field.field.name: actual_file_path})
         return actual_file_path
