@@ -1534,6 +1534,18 @@ msgstr "Группа для задания"
 msgid "Assignment Groups"
 msgstr "Группы для задания"
 
+#: apps/learning/models.py:128
+msgid "Assignee"
+msgstr "Ответственный за проверку"
+
+#: apps/learning/models.py:132
+msgid "Assignment Assignee"
+msgstr "Ответственный за проверку задания"
+
+#: apps/learning/models.py:133
+msgid "Assignment Assignees"
+msgstr "Ответственный за проверку задания"
+
 #: apps/learning/models.py:119
 msgid "Course Class"
 msgstr "Занятие"

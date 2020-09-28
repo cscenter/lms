@@ -281,3 +281,9 @@ class Gerrit:
     def delete_change_edit(self, change_id):
         change_edit_uri = f'changes/{change_id}/edit'
         return self._request('DELETE', change_edit_uri)
+
+    def set_reviewer(self, change_id, reviewer):
+        change_reviewers_uri = f'changes/{change_id}/reviewers'
+        return self._request('POST', change_reviewers_uri, json={
+            'reviewer': reviewer
+        })

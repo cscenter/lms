@@ -11,6 +11,7 @@ from code_reviews.models import GerritChange
 from core.models import Branch
 from courses.models import Course, CourseTeacher
 from learning.models import Enrollment, StudentAssignment, AssignmentComment
+from learning.services import get_assignees_for_student_assignment
 from users.models import User, StudentProfile
 
 logger = logging.getLogger(__name__)
@@ -401,6 +402,16 @@ def post_change_url_comment(student_assignment: StudentAssignment,
                                      text=message, author=get_gerrit_robot())
 
 
+def set_reviewers_for_change(client: Gerrit, change: GerritChange):
+    """
+    Set reviewers in Gerrit according to the AssignmentAssignee model.
+    """
+    assignment_assignees = get_assignees_for_student_assignment(change.student_assignment)
+    for assignment_assignee in assignment_assignees:
+        reviewer = assignment_assignee.assignee.ldap_username
+        client.set_reviewer(change.change_id, reviewer)
+
+
 def create_change(client, student_assignment: StudentAssignment):
     """
     Create new change in Gerrit and store info in GerritChange model.
@@ -454,7 +465,7 @@ def get_or_create_change(client: Gerrit, student_assignment: StudentAssignment):
               .first())
     if not change:
         change = create_change(client, student_assignment)
-        # TODO: set_reviewers_for_change(client, change)
+        set_reviewers_for_change(client, change)
     return change
 
 

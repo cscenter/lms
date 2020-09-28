@@ -1,6 +1,7 @@
 import os
 
 from django.db import transaction
+from django.forms import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from vanilla import CreateView, UpdateView, DeleteView
@@ -8,10 +9,11 @@ from vanilla import CreateView, UpdateView, DeleteView
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
 from core.views import ProtectedFormMixin
-from courses.forms import AssignmentForm
+from courses.forms import AssignmentForm, AssignmentAssigneeForm, AssignmentAssigneeFormSet
 from courses.models import Assignment, AssignmentAttachment
 from courses.permissions import CreateAssignment, EditAssignment
 from courses.views.mixins import CourseURLParamsMixin
+from learning.models import AssignmentAssignee
 from learning.services import AssignmentService
 from users.mixins import TeacherOnlyMixin
 
@@ -24,6 +26,13 @@ class AssignmentCreateUpdateMixin(CourseURLParamsMixin,
     model = Assignment
     form_class = AssignmentForm
     template_name = "courses/course_assignment_form.html"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        AssigneeFormSet = modelformset_factory(AssignmentAssignee, form=AssignmentAssigneeForm,
+                                               formset=AssignmentAssigneeFormSet, can_delete=True)
+        context['assignee_formset'] = AssigneeFormSet(course=self.course)
+        return context
 
     def get_permission_object(self):
         return self.course

@@ -113,6 +113,33 @@ class AssignmentGroup(models.Model):
         ]
 
 
+class AssignmentAssignee(models.Model):
+    assignment = models.ForeignKey(
+        'courses.Assignment',
+        verbose_name=_("Assignment"),
+        on_delete=models.CASCADE)
+    group = models.ForeignKey(
+        StudentGroup,
+        verbose_name=_("Group"),
+        blank=True, null=True,
+        on_delete=models.CASCADE)
+    assignee = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Assignee"),
+        on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("Assignment Assignee")
+        verbose_name_plural = _("Assignment Assignees")
+        constraints = [
+            models.UniqueConstraint(fields=('assignment', 'group', 'assignee'),
+                                    name='unique_assignment_group_assignee'),
+        ]
+
+    def __str__(self):
+        return f'{self.assignment.title} / {self.group} - {self.assignee}'
+
+
 class CourseClassGroup(models.Model):
     course_class = models.ForeignKey(
         'courses.CourseClass',

@@ -28,6 +28,14 @@ def group_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
     return {k: v for k, v in grouped.items() if v}
 
 
+def get_reviewer_choices(course):
+    choices = []
+    grouped_teachers = group_teachers(course.course_teachers.all(), multiple_roles=True)
+    for course_teacher in grouped_teachers[TeacherRoles.REVIEWER]:
+        choices.append((str(course_teacher.teacher.pk), course_teacher.teacher.get_full_name()))
+    return choices
+
+
 class CourseService:
     @staticmethod
     def sync_branches(course):

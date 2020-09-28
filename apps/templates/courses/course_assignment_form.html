@@ -59,6 +59,8 @@
                                     <dd>Студент отправляет решение в виде текста или приложенного файла.</dd>
                                     <dt>Внешний сервис</dt>
                                     <dd>Это может быть ревью кода на github, gerrit, Яндекс.Контест, оценка за курс на stepik.org и др.</dd>
+                                    <dt>Задание на код-ревью</dt>
+                                    <dd>Студент отправляет код решения в Яндекс.Контест, для ревью кода используется Gerrit.</dd>
                                     <dt>Без отправки решения</dt>
                                     <dd>Например, устная форма, сдача задания непосредственно в аудитории (тест, контрольная работа, семинар&nbsp;итд)</dd>
                                 </dl>
@@ -139,6 +141,21 @@
                         </div>
                     </div>
                 </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Настройка ответственных за проверку задания</legend>
+                {{ assignee_formset.management_form|crispy }}
+                {% for assignee_form in assignee_formset %}
+                    <div class="row">
+                        <div class="col-xs-4">
+                            {{ assignee_form.group|as_crispy_field }}
+                        </div>
+                        <div class="col-xs-8">
+                            {{ assignee_form.assignees|as_crispy_field }}
+                        </div>
+                    </div>
+                {% endfor %}
             </fieldset>
 
             <fieldset id="checking-system-info" {% if not form.instance.checking_system_needed %}class="hidden"{% endif %} data-display="{{ form.checking_system_fieldset_display }}">

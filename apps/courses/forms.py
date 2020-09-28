@@ -21,12 +21,13 @@ from core.widgets import UbereditorWidget, DateInputTextWidget, \
 from courses.constants import ClassTypes
 from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
     Assignment, LearningSpace, StudentGroupTypes, AssignmentSubmissionFormats
+from courses.services import get_reviewer_choices
 
 __all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
            'CourseClassForm', 'AssignmentForm')
 
 from courses.utils import execution_time_string
-from learning.models import StudentGroup
+from learning.models import StudentGroup, AssignmentAssignee
 from learning.services import StudentGroupService
 
 DROP_ATTACHMENT_LINK = '<a href="{}"><i class="fa fa-trash-o"></i>&nbsp;{}</a>'
@@ -49,6 +50,16 @@ class MultipleStudentGroupField(forms.TypedMultipleChoiceField):
         widget_attrs.update({
             'class': 'multiple-select bs-select-hidden',
             'title': _('All groups'),
+        })
+        return widget_attrs
+
+
+class MultipleReviewerField(forms.TypedMultipleChoiceField):
+    def widget_attrs(self, widget):
+        widget_attrs = super().widget_attrs(widget)
+        widget_attrs.update({
+            'class': 'multiple-select bs-select-hidden',
+            'title': _('Assignees'),
         })
         return widget_attrs
 
@@ -381,3 +392,38 @@ class AssignmentForm(TimezoneAwareModelForm):
             instance.checker = checker
             instance.save()
         return instance
+
+
+class AssignmentAssigneeForm(forms.ModelForm):
+    group = forms.ChoiceField(
+        label=_("Student Group"),
+    )
+    assignees = MultipleReviewerField(
+        label=_("Assignees"),
+    )
+
+    def __init__(self, *args, **kwargs):
+        course = kwargs.pop('course', None)
+        assert course is not None
+        super().__init__(*args, **kwargs)
+        group_field = self.fields['group']
+        assignee_field = self.fields['assignees']
+        group_field.choices = StudentGroupService.get_choices(course)
+        assignee_field.choices = get_reviewer_choices(course)
+
+    class Meta:
+        model = AssignmentAssignee
+        fields = ('group', 'assignee')
+
+
+class AssignmentAssigneeFormSet(forms.BaseModelFormSet):
+    def __init__(self, *args, **kwargs):
+        # Save course to pass to the nested forms
+        self.course = kwargs.pop('course', None)
+        assert self.course is not None
+        super(AssignmentAssigneeFormSet, self).__init__(*args, **kwargs)
+
+    def _construct_form(self, i, **kwargs):
+        # Inject course into kwargs for form construction
+        kwargs['course'] = self.course
+        return super(AssignmentAssigneeFormSet, self)._construct_form(i, **kwargs)

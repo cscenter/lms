@@ -21,7 +21,7 @@ from courses.models import Course, Assignment, AssignmentAttachment, \
     StudentGroupTypes, CourseClass, CourseTeacher
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, StudentGroup, Event, AssignmentSubmissionTypes, \
-    CourseNewsNotification
+    CourseNewsNotification, AssignmentAssignee
 from learning.settings import StudentStatuses
 from users.models import User, StudentProfile, StudentTypes
 
@@ -530,6 +530,15 @@ def notify_new_assignment_comment(comment):
     StudentAssignment.objects.filter(pk=sa.pk).update(**sa_update_dict)
     for attr_name, attr_value in sa_update_dict.items():
         setattr(sa, attr_name, attr_value)
+
+
+def get_assignees_for_student_assignment(student_assignment: StudentAssignment) -> List[AssignmentAssignee]:
+    assignment = student_assignment.assignment
+    enrollment = student_assignment.student.get_enrollment(assignment.course_id)
+    return (AssignmentAssignee.objects
+            .filter(assignment=assignment,
+                    group=enrollment.student_group)
+            .select_related('assignee'))
 
 
 def get_student_classes(user, filters: List[Q] = None,
