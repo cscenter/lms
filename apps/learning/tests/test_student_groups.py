@@ -121,7 +121,7 @@ def test_student_group_resolving_on_enrollment_admin(client, settings):
     e = enrollments[0]
     assert e.student_group_id is not None
     assert e.student_group.name_en == 'Others'
-    assert e.student_group.type == StudentGroupTypes.MANUAL
+    assert e.student_group.type == StudentGroupTypes.SYSTEM
     # Enroll the second student
     post_data['student'] = student2.pk
     post_data['student_profile'] = student2.get_student_profile().pk

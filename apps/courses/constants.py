@@ -45,10 +45,6 @@ class TeacherRoles(DjangoChoices):
     SEMINAR = C('seminar', _("Seminarian"))
 
 
-# TODO: Make a redirect for old links and rewrite download view without this constant?
-ASSIGNMENT_TASK_ATTACHMENT = 0
-
-
 class MaterialVisibilityTypes(DjangoChoices):
     PUBLIC = C('public', _('All Users'))
     PARTICIPANTS = C('participants', _('All Students'))

@@ -20,7 +20,8 @@ from core.widgets import UbereditorWidget, DateInputTextWidget, \
     TimeInputTextWidget
 from courses.constants import ClassTypes
 from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
-    Assignment, LearningSpace, StudentGroupTypes, AssignmentSubmissionFormats
+    Assignment, LearningSpace, StudentGroupTypes, AssignmentSubmissionFormats, \
+    CourseGroupModes
 
 __all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
            'CourseClassForm', 'AssignmentForm')
@@ -297,7 +298,7 @@ class AssignmentForm(TimezoneAwareModelForm):
                    "class": "form-control",
                    "placeholder": _("hours:minutes")}))
     restricted_to = MultipleStudentGroupField(
-        label=_("Available for"),
+        label=_("Available for Groups"),
         required=False,
         help_text=_("Restrict assignment to selected groups. Available to all by default."))
     checking_system = forms.ModelChoiceField(
@@ -319,7 +320,7 @@ class AssignmentForm(TimezoneAwareModelForm):
         self.fields['ttc'].required = course.ask_ttc
         self.instance.course = course
         field_restrict_to = self.fields['restricted_to']
-        if course.group_mode == StudentGroupTypes.BRANCH:
+        if course.group_mode == CourseGroupModes.BRANCH:
             field_restrict_to.label = _("Available to Branches")
             field_restrict_to.widget.attrs['title'] = _("All Branches")
         field_restrict_to.choices = StudentGroupService.get_choices(course)

@@ -3,7 +3,7 @@ from datetime import timedelta
 import pytest
 
 from core.tests.factories import BranchFactory
-from courses.models import StudentGroupTypes
+from courses.models import StudentGroupTypes, CourseGroupModes
 from courses.tests.factories import CourseFactory, AssignmentFactory
 from learning.models import StudentGroup, StudentAssignment, \
     AssignmentNotification, Enrollment
@@ -73,7 +73,6 @@ def test_delete_student_profile():
     assert permission_group.role == StudentTypes.to_permission_role(StudentTypes.INVITED)
 
 
-
 @pytest.mark.django_db
 def test_student_group_service_resolve(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
@@ -92,11 +91,17 @@ def test_student_group_service_resolve(settings):
         course, student_spb, settings.SITE_ID,
         enrollment_key=sg_other.enrollment_key)
     assert found == student_group
-    assert StudentGroupService.resolve(course, student_nsk, settings.SITE_ID) is None
-    course.group_mode = StudentGroupTypes.MANUAL
+    student_group = StudentGroupService.resolve(course, student_nsk, settings.SITE_ID)
+    assert student_group.type == StudentGroupTypes.SYSTEM
+    course.group_mode = CourseGroupModes.MANUAL
     assert StudentGroupService.resolve(
         course, student_spb, settings.SITE_ID,
         enrollment_key=sg_other.enrollment_key) == sg_other
+    with pytest.raises(GroupEnrollmentKeyError):
+        StudentGroupService.resolve(course, student_spb, settings.SITE_ID, enrollment_key='wrong')
+    student_group = StudentGroupService.resolve(course, student_spb, settings.SITE_ID, enrollment_key=None)
+    assert student_group.type == StudentGroupTypes.SYSTEM
+    course.group_mode = 'unknown'
     with pytest.raises(GroupEnrollmentKeyError):
         StudentGroupService.resolve(course, student_spb, settings.SITE_ID, enrollment_key='wrong')
 

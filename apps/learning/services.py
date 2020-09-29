@@ -18,7 +18,7 @@ from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
 from courses.managers import CourseClassQuerySet
 from courses.models import Course, Assignment, AssignmentAttachment, \
-    StudentGroupTypes, CourseClass, CourseTeacher
+    StudentGroupTypes, CourseClass, CourseTeacher, CourseGroupModes
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, StudentGroup, Event, AssignmentSubmissionTypes, \
     CourseNewsNotification
@@ -127,8 +127,9 @@ class GroupEnrollmentKeyError(StudentGroupError):
 
 class StudentGroupService:
     @staticmethod
-    def add(course: Course, branch: Branch):
-        if course.group_mode == StudentGroupTypes.BRANCH:
+    def add(course: Course, **attrs):
+        if course.group_mode == CourseGroupModes.BRANCH:
+            branch = attrs.pop('branch')
             group, _ = (StudentGroup.objects.get_or_create(
                 course_id=course.pk,
                 type=StudentGroupTypes.BRANCH,
@@ -136,13 +137,21 @@ class StudentGroupService:
                 defaults={
                     "name_ru": branch.name_ru,
                     "name_en": branch.name_en,
+                    **attrs,
                 }))
+            return group
+        elif course.group_mode == CourseGroupModes.MANUAL:
+            group, _ = (StudentGroup.objects.get_or_create(
+                course_id=course.pk,
+                type=StudentGroupTypes.MANUAL,
+                defaults=attrs))
+            return group
         else:
-            raise StudentGroupError("Only `branch` group mode is supported")
+            raise StudentGroupError("Student group mode is not supported")
 
     @staticmethod
     def remove(course: Course, instance):
-        if course.group_mode == StudentGroupTypes.BRANCH:
+        if course.group_mode == CourseGroupModes.BRANCH:
             assert isinstance(instance, Branch)
             StudentGroup.objects.filter(course_id=course.pk,
                                         branch_id=instance.pk).delete()
@@ -154,26 +163,48 @@ class StudentGroupService:
     def resolve(course: Course, student: User, site: Union[Site, int],
                 enrollment_key: str = None):
         """
-        Returns the target or associated student group for the course.
+        Returns the target or associated student group for the course. Assumed
+        that student is not enrolled in the course.
         """
-        if course.group_mode == StudentGroupTypes.BRANCH:
-            # It's possible to miss student group here since student could be
-            # added to the course through the admin interface without
-            # checking all the requirements
+        if course.group_mode == CourseGroupModes.BRANCH:
             student_profile = student.get_student_profile(site)
             if not student_profile:
                 return
-            return (StudentGroup.objects
-                    .filter(course=course, branch_id=student_profile.branch_id)
-                    .first())
-        elif course.group_mode == StudentGroupTypes.MANUAL:
-            try:
-                return StudentGroup.objects.get(course=course,
-                                                enrollment_key=enrollment_key)
-            except StudentGroup.DoesNotExist:
-                raise GroupEnrollmentKeyError
-        elif course.group_mode == StudentGroupTypes.NO_GROUPS:
-            return None
+            student_group = (StudentGroup.objects
+                             .filter(course=course,
+                                     type=StudentGroupTypes.BRANCH,
+                                     branch_id=student_profile.branch_id)
+                             .first())
+            # Student could be enrolled in the course through the admin
+            # interface without meeting the branch requirements. In that case
+            # add them to the special group
+            if student_group is None:
+                student_group, _ = StudentGroup.objects.get_or_create(
+                    course=course,
+                    type=StudentGroupTypes.SYSTEM,
+                    branch_id__isnull=True,
+                    defaults={"name_en": "Others", "name_ru": "Другие"})
+            return student_group
+        elif course.group_mode == CourseGroupModes.MANUAL:
+            if enrollment_key:
+                try:
+                    return StudentGroup.objects.get(course=course,
+                                                    type=StudentGroupTypes.MANUAL,
+                                                    enrollment_key=enrollment_key)
+                except StudentGroup.DoesNotExist:
+                    raise GroupEnrollmentKeyError
+            else:
+                # Вытаскивать по факту из уже записанного?
+                student_group, _ = StudentGroup.objects.get_or_create(
+                    course=course,
+                    type=StudentGroupTypes.SYSTEM,
+                    branch_id__isnull=True,
+                    defaults={
+                        "name_en": "Without Group",
+                        "name_ru": "Без группы"
+                    })
+                return student_group
+        raise GroupEnrollmentKeyError
 
     @classmethod
     def get_choices(cls, course: Course):
@@ -181,7 +212,7 @@ class StudentGroupService:
         qs = StudentGroup.objects.filter(course=course).order_by('pk')
         groups = list(qs)
         sites_count = 1
-        if course.group_mode == StudentGroupTypes.BRANCH:
+        if course.group_mode == CourseGroupModes.BRANCH:
             sites = set()
             for g in groups:
                 # Special case when student group manually added in admin

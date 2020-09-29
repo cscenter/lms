@@ -1,11 +1,8 @@
-from typing import Set
-
-from django.db.models.signals import post_save, m2m_changed, post_delete
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
-from core.models import Branch
 from courses.models import Assignment, CourseNews, CourseTeacher, Course, \
-    StudentGroupTypes, CourseBranch
+    CourseBranch, CourseGroupModes
 from learning.models import AssignmentNotification, \
     StudentAssignment, Enrollment, CourseNewsNotification, AssignmentComment, \
     AssignmentSubmissionTypes
@@ -25,8 +22,8 @@ def manage_student_group_for_course_root_branch(sender, instance, created,
 @receiver(post_save, sender=CourseBranch)
 def create_student_group_from_course_branch(sender, instance: CourseBranch,
                                             created, *args, **kwargs):
-    if created and instance.course.group_mode == StudentGroupTypes.BRANCH:
-        StudentGroupService.add(instance.course, instance.branch)
+    if created and instance.course.group_mode == CourseGroupModes.BRANCH:
+        StudentGroupService.add(instance.course, branch=instance.branch)
 
 
 @receiver(post_delete, sender=CourseBranch)

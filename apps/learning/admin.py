@@ -8,7 +8,7 @@ from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from courses.models import StudentGroupTypes
+from courses.models import StudentGroupTypes, CourseGroupModes
 from learning.models import GraduateProfile, Invitation, CourseInvitation, \
     StudentAssignment, StudentGroup
 from users.models import StudentStatusLog
@@ -78,16 +78,9 @@ class EnrollmentAdmin(BaseModelAdmin):
         if created:
             course = instance.course
             student = instance.student
-            if course.group_mode == StudentGroupTypes.BRANCH:
+            if course.group_mode == CourseGroupModes.BRANCH:
                 student_group = StudentGroupService.resolve(course, student,
                                                             settings.SITE_ID)
-                if student_group is None:
-                    student_group, _ = StudentGroup.objects.get_or_create(
-                        course=course,
-                        type=StudentGroupTypes.MANUAL,
-                        branch_id__isnull=True,
-                        name_en="Others",
-                        defaults={"name_ru": "Другие"})
                 instance.student_group = student_group
         return instance
 
