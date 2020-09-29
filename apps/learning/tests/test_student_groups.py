@@ -173,24 +173,3 @@ def test_assignment_restricted_to(settings):
     student_assignments = StudentAssignment.objects.filter(assignment=a)
     assert len(student_assignments) == 1
     assert student_assignments[0].student == student_profile_spb.user
-
-
-@pytest.mark.django_db
-def test_student_group_service_get_choices(settings):
-    branch_spb = BranchFactory(code=Branches.SPB)
-    course = CourseFactory(main_branch=branch_spb,
-                           group_mode=StudentGroupTypes.BRANCH)
-    assert StudentGroup.objects.filter(course=course).count() == 1
-    groups = list(StudentGroup.objects.filter(course=course).order_by('pk'))
-    choices = StudentGroupService.get_choices(course)
-    assert len(choices) == 1
-    assert choices[0] == (str(groups[0].pk), groups[0].name)
-    branch_nsk = BranchFactory(code=Branches.NSK,
-                               site=SiteFactory(domain=settings.ANOTHER_DOMAIN))
-    assert branch_nsk.site_id == settings.ANOTHER_DOMAIN_ID
-    CourseBranch(course=course, branch=branch_nsk).save()
-    assert StudentGroup.objects.filter(course=course).count() == 2
-    sg1, sg2 = list(StudentGroup.objects.filter(course=course).order_by('pk'))
-    choices = StudentGroupService.get_choices(course)
-    assert choices[0] == (str(sg1.pk), f"{sg1.name} [{settings.TEST_DOMAIN}]")
-    assert choices[1] == (str(sg2.pk), f"{sg2.name} [{settings.ANOTHER_DOMAIN}]")

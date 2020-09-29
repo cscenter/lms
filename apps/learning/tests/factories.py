@@ -12,13 +12,14 @@ from courses.tests.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     CourseNewsNotification, Event, GraduateProfile, Invitation, \
-    CourseInvitation, StudentGroup, EnrollmentPeriod, AssignmentSubmissionTypes
+    CourseInvitation, StudentGroup, EnrollmentPeriod, AssignmentSubmissionTypes, \
+    StudentGroupAssignee
 from learning.services import StudentGroupService
 from learning.settings import StudentStatuses
 from users.constants import Roles
 from users.models import UserGroup
 from users.tests.factories import UserFactory, StudentFactory, \
-    StudentProfileFactory
+    StudentProfileFactory, TeacherFactory
 
 __all__ = ('StudentGroupFactory', 'StudentAssignmentFactory',
            'AssignmentCommentFactory', 'EnrollmentPeriodFactory',
@@ -36,6 +37,14 @@ class StudentGroupFactory(factory.django.DjangoModelFactory):
     type = StudentGroupTypes.MANUAL
     name = factory.Sequence(lambda n: "Group Name %03d" % n)
     course = factory.SubFactory(CourseFactory)
+
+
+class StudentGroupAssigneeFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = StudentGroupAssignee
+
+    student_group = factory.SubFactory(StudentGroupFactory)
+    assignee = factory.SubFactory(TeacherFactory)
 
 
 # FIXME: create enrollment

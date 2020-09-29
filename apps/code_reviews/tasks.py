@@ -9,7 +9,7 @@ from code_reviews.api.ldap import init_client
 from code_reviews.gerrit import get_or_create_change, list_change_files
 from code_reviews.ldap import get_ldap_username, user_to_ldap_entry, \
     get_password_hash
-from learning.models import AssignmentComment
+from learning.models import AssignmentComment, AssignmentSubmissionTypes
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -59,11 +59,12 @@ def update_password_in_gerrit(*, user_id: int):
 
 @job('default')
 def upload_attachment_to_gerrit(assignment_comment_id):
-    assignment_comment = (AssignmentComment.objects
-                          .select_related('student_assignment')
-                          .get(pk=assignment_comment_id))
-    student_assignment = assignment_comment.student_assignment
-    attached_file = assignment_comment.attached_file
+    assignment_solution = (AssignmentComment.objects
+                           .select_related('student_assignment')
+                           .get(type=AssignmentSubmissionTypes.SOLUTION,
+                                pk=assignment_comment_id))
+    student_assignment = assignment_solution.student_assignment
+    attached_file = assignment_solution.attached_file
 
     client = Gerrit(settings.GERRIT_API_URI,
                     auth=(settings.GERRIT_CLIENT_USERNAME,

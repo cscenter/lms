@@ -21,7 +21,7 @@ from courses.models import Course, Assignment, AssignmentAttachment, \
     StudentGroupTypes, CourseClass, CourseTeacher, CourseGroupModes
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, StudentGroup, Event, AssignmentSubmissionTypes, \
-    CourseNewsNotification
+    CourseNewsNotification, StudentGroupAssignee
 from learning.settings import StudentStatuses
 from users.models import User, StudentProfile, StudentTypes
 
@@ -230,6 +230,23 @@ class StudentGroupService:
         if student_group.type == StudentGroupTypes.BRANCH and sites_count > 1:
             return f"{student_group.name} [{student_group.branch.site}]"
         return student_group.name
+
+    @staticmethod
+    def get_assignees(student_group: StudentGroup,
+                      assignment: Assignment = None):
+        default_and_overridden = Q(assignment__isnull=True)
+        if assignment:
+            default_and_overridden |= Q(assignment=assignment)
+        assignees = list(StudentGroupAssignee.objects
+                         .filter(default_and_overridden,
+                                 student_group=student_group)
+                         .select_related('assignee'))
+        # Default values could be overwritten by assignment specific
+        if any(ga.assignment_id is not None for ga in assignees):
+            # Remove defaults
+            assignees = [ga for ga in assignees if ga.assignment_id]
+        filtered = [ga.assignee for ga in assignees]
+        return filtered
 
 
 class AssignmentService:

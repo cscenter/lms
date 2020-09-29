@@ -2,16 +2,17 @@ from datetime import timedelta
 
 import pytest
 
-from core.tests.factories import BranchFactory
-from courses.models import StudentGroupTypes, CourseGroupModes
+from core.tests.factories import BranchFactory, SiteFactory
+from courses.models import StudentGroupTypes, CourseGroupModes, CourseBranch
 from courses.tests.factories import CourseFactory, AssignmentFactory
 from learning.models import StudentGroup, StudentAssignment, \
-    AssignmentNotification, Enrollment
+    AssignmentNotification, Enrollment, StudentGroupAssignee
 from learning.services import StudentGroupService, GroupEnrollmentKeyError, \
     AssignmentService, create_student_profile, StudentProfileError
 from learning.settings import Branches, StudentStatuses
 from learning.tests.factories import StudentGroupFactory, EnrollmentFactory, \
-    AssignmentNotificationFactory, StudentAssignmentFactory
+    AssignmentNotificationFactory, StudentAssignmentFactory, \
+    StudentGroupAssigneeFactory
 from users.models import StudentTypes, UserGroup
 from users.tests.factories import StudentFactory, UserFactory, \
     StudentProfileFactory
@@ -104,6 +105,69 @@ def test_student_group_service_resolve(settings):
     course.group_mode = 'unknown'
     with pytest.raises(GroupEnrollmentKeyError):
         StudentGroupService.resolve(course, student_spb, settings.SITE_ID, enrollment_key='wrong')
+
+
+@pytest.mark.django_db
+def test_student_group_service_get_choices(settings):
+    branch_spb = BranchFactory(code=Branches.SPB)
+    course = CourseFactory(main_branch=branch_spb,
+                           group_mode=StudentGroupTypes.BRANCH)
+    assert StudentGroup.objects.filter(course=course).count() == 1
+    groups = list(StudentGroup.objects.filter(course=course).order_by('pk'))
+    choices = StudentGroupService.get_choices(course)
+    assert len(choices) == 1
+    assert choices[0] == (str(groups[0].pk), groups[0].name)
+    branch_nsk = BranchFactory(code=Branches.NSK,
+                               site=SiteFactory(domain=settings.ANOTHER_DOMAIN))
+    assert branch_nsk.site_id == settings.ANOTHER_DOMAIN_ID
+    CourseBranch(course=course, branch=branch_nsk).save()
+    assert StudentGroup.objects.filter(course=course).count() == 2
+    sg1, sg2 = list(StudentGroup.objects.filter(course=course).order_by('pk'))
+    choices = StudentGroupService.get_choices(course)
+    assert choices[0] == (str(sg1.pk), f"{sg1.name} [{settings.TEST_DOMAIN}]")
+    assert choices[1] == (str(sg2.pk), f"{sg2.name} [{settings.ANOTHER_DOMAIN}]")
+
+
+@pytest.mark.django_db
+def test_student_group_get_assignees():
+    course = CourseFactory(group_mode=StudentGroupTypes.MANUAL)
+    assignment1 = AssignmentFactory(course=course)
+    assignment2 = AssignmentFactory(course=course)
+    assert StudentGroup.objects.filter(course=course).count() == 0
+    student_group1 = StudentGroupFactory(course=course)
+    student_group2 = StudentGroupFactory(course=course)
+    sga1 = StudentGroupAssigneeFactory(student_group=student_group1)
+    sga2 = StudentGroupAssigneeFactory(student_group=student_group1)
+    sga3 = StudentGroupAssigneeFactory(student_group=student_group1,
+                                       assignment=assignment1)
+    sga4 = StudentGroupAssigneeFactory(student_group=student_group1,
+                                       assignment=assignment1)
+    sga5 = StudentGroupAssigneeFactory(student_group=student_group1,
+                                       assignment=assignment2)
+    assert StudentGroupService.get_assignees(student_group2) == []
+    assignees = StudentGroupService.get_assignees(student_group1)
+    assert len(assignees) == 2
+    assert sga1.assignee in assignees
+    assert sga2.assignee in assignees
+    assignees = StudentGroupService.get_assignees(student_group1,
+                                                  assignment=assignment1)
+    assert len(assignees) == 2
+    assert sga3.assignee in assignees
+    assert sga4.assignee in assignees
+    assignees = StudentGroupService.get_assignees(student_group1,
+                                                  assignment=assignment2)
+    assert len(assignees) == 1
+    assert sga5.assignee == assignees[0]
+    sga6 = StudentGroupAssigneeFactory(student_group=student_group2,
+                                       assignment=assignment2)
+    assignees = StudentGroupService.get_assignees(student_group1,
+                                                  assignment=assignment2)
+    assert len(assignees) == 1
+    assert sga5.assignee == assignees[0]
+    assignees = StudentGroupService.get_assignees(student_group2,
+                                                  assignment=assignment2)
+    assert len(assignees) == 1
+    assert sga6.assignee == assignees[0]
 
 
 @pytest.mark.django_db

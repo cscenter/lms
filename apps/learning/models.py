@@ -91,6 +91,36 @@ class StudentGroup(TimeStampedModel):
         super().save(**kwargs)
 
 
+class StudentGroupAssignee(models.Model):
+    student_group = models.ForeignKey(
+        StudentGroup,
+        verbose_name=_("Student Group"),
+        on_delete=models.CASCADE)
+    assignee = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Assignee"),
+        on_delete=models.CASCADE)
+    assignment = models.ForeignKey(
+        'courses.Assignment',
+        verbose_name=_("Assignment"),
+        blank=True, null=True,
+        on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("Student Group Assignee")
+        verbose_name_plural = _("Student Group Assignees")
+        constraints = [
+            models.UniqueConstraint(
+                fields=('student_group', 'assignee', 'assignment'),
+                name='unique_assignee_per_student_or_assignment_group'
+            ),
+        ]
+
+    def __str__(self):
+        return "[StudentGroupAssignee] group: {} user: {} assignment: {}".format(
+            self.student_group, self.assignee, self.assignment)
+
+
 class AssignmentGroup(models.Model):
     assignment = models.ForeignKey(
         'courses.Assignment',

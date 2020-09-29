@@ -52,7 +52,7 @@ def user_to_ldap_entry(user: User, domain_component=settings.LDAP_DB_SUFFIX):
         Each value of this list should be forced to bytes except `dn`
             since it's not used as a part of `modlist`
     """
-    uid = user.ldap_username
+    uid = get_ldap_username(user)
     dn = f"uid={uid},ou=users,{domain_component}"
     password_hash = get_password_hash(user)
     return {

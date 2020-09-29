@@ -7,10 +7,12 @@ from django.utils import translation
 
 from code_reviews.api.gerrit import Gerrit
 from code_reviews.constants import GerritRobotMessages
+from code_reviews.ldap import get_ldap_username
 from code_reviews.models import GerritChange
 from core.models import Branch
 from courses.models import Course, CourseTeacher
 from learning.models import Enrollment, StudentAssignment, AssignmentComment
+from learning.services import StudentGroupService
 from users.models import User, StudentProfile
 
 logger = logging.getLogger(__name__)
@@ -220,7 +222,7 @@ def init_project_for_course(course, skip_users=False):
                 .select_related("teacher"))
     # Creates separated self-owned group for project reviewers
     reviewers_group_name = get_reviewers_group_name(course)
-    reviewers_group_members = [t.teacher.ldap_username for t in teachers]
+    reviewers_group_members = [get_ldap_username(t.teacher) for t in teachers]
     reviewers_group_res = client.create_group(reviewers_group_name, {
         "members": reviewers_group_members
     })
@@ -341,14 +343,14 @@ def add_test_student_to_project(client: Gerrit, course: Course,
     branch = Branch.objects.get_by_natural_key(settings.DEFAULT_BRANCH_CODE,
                                                site_id=settings.SITE_ID)
     student = User(username='student')
-    student.email = 'student'  # hack `.ldap_username`
+    student.email = 'student'  # ldap username
     student_profile = StudentProfile(user=student, branch=branch)
     add_student_to_project(client, student_profile, course,
                            project_students_group_uuid)
 
 
 def create_user_group(client: Gerrit, user: User):
-    user_group = user.ldap_username
+    user_group = get_ldap_username(user)
     group_res = client.create_single_user_group(user_group)
     if not group_res.created:
         if not group_res.already_exists:
@@ -392,8 +394,8 @@ def get_gerrit_robot() -> User:
     return User.objects.get(username=settings.GERRIT_ROBOT_USERNAME)
 
 
-def post_change_url_comment(student_assignment: StudentAssignment,
-                            change_url: str):
+def add_assignment_comment_about_new_change(student_assignment: StudentAssignment,
+                                            change_url: str):
     course = student_assignment.assignment.course
     with translation.override(course.language):
         message = GerritRobotMessages.CHANGE_CREATED.format(link=change_url)
@@ -439,12 +441,10 @@ def create_change(client, student_assignment: StudentAssignment):
     site = student_assignment.assignment.course.main_branch.site
     change = GerritChange.objects.create(student_assignment=student_assignment,
                                          change_id=change_id, site=site)
-
     change_number = change_res.json['_number']
     gerrit_changes_uri = settings.GERRIT_API_URI.replace("/a/", "/c/")
     change_url = f'{gerrit_changes_uri}{project_name}/+/{change_number}'
-    post_change_url_comment(student_assignment, change_url)
-
+    add_assignment_comment_about_new_change(student_assignment, change_url)
     return change
 
 
@@ -454,8 +454,22 @@ def get_or_create_change(client: Gerrit, student_assignment: StudentAssignment):
               .first())
     if not change:
         change = create_change(client, student_assignment)
-        # TODO: set_reviewers_for_change(client, change)
+        set_reviewers_for_change(client, change)
     return change
+
+
+def set_reviewers_for_change(client: Gerrit, change: GerritChange):
+    """Set reviewers in Gerrit"""
+    assignment = change.student_assignment.assignment
+    student = change.student_assignment.student
+    enrollment = student.get_enrollment(assignment.course_id)
+    if not enrollment or not enrollment.student_group_id:
+        return
+    assignees = StudentGroupService.get_assignees(enrollment.student_group,
+                                                  assignment=assignment)
+    for assignee in assignees:
+        reviewer_uid = get_ldap_username(assignee)
+        client.set_reviewer(change.change_id, reviewer_uid)
 
 
 def list_change_files(client: Gerrit, change: GerritChange):

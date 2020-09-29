@@ -435,16 +435,6 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         except User.DoesNotExist:
             return username
 
-    # TODO: move to ldap module
-    @property
-    def ldap_username(self):
-        """
-        Portable Filename Character Set (according to POSIX.1-2017) is used for
-        username since @ in username can be misleading when you connected
-        over ssh. `foo@localhost.ru@domain.ltd` really looks weird.
-        """
-        return self.email.replace("@", ".")
-
     def __str__(self):
         return smart_str(self.get_full_name(True))
 
