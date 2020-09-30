@@ -41,6 +41,8 @@ class CheckerService:
                     }
                 )
                 return checker
+        else:
+            raise CheckerURLError("Checking system type is not supported")
 
 
 class SubmissionService:

@@ -1024,7 +1024,7 @@ class AssignmentSubmissionFormats(DjangoChoices):
     CODE_REVIEW = C("code_review", _("Code Review Submission"))
     OTHER = C("other", _("No Submission"))  # on paper, etc
 
-    with_checking_system = {CODE_REVIEW.value}
+    with_checker = {CODE_REVIEW.value}
 
 
 class Assignment(TimezoneAwareModel, TimeStampedModel):

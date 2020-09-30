@@ -1,20 +1,28 @@
 import datetime
 from decimal import Decimal
 
+import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.forms import model_to_dict
 from django.utils import formats
 from django.utils.encoding import smart_bytes
 
 from contests.constants import CheckingSystemTypes
+from contests.models import Checker
+from contests.tests.factories import CheckingSystemFactory, CheckerFactory
+from contests.utils import get_yandex_contest_problem_url
+from core.tests.factories import BranchFactory
+from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.models import AssignmentSubmissionFormats, Assignment
 from courses.tests.factories import AssignmentFactory, CourseFactory, \
     CourseTeacherFactory, SemesterFactory, CourseNewsFactory
 from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, CourseNewsNotification, AssignmentComment
+    AssignmentNotification, CourseNewsNotification, AssignmentComment, \
+    StudentGroup
 from learning.settings import Branches
 from learning.tests.factories import StudentAssignmentFactory, \
     EnrollmentFactory, AssignmentCommentFactory
@@ -104,7 +112,7 @@ def test_assignment_detail_deadline_l10n(settings, client):
 
 
 @pytest.mark.django_db
-def test_student_assignment_submission_grade(client):
+def test_student_assignment_submission_score(client):
     """
     Make sure we can remove zeroed grade for student assignment and use both
     1.23 and 1,23 formats
@@ -168,6 +176,146 @@ def test_create_assignment_public_form(client):
     assert CourseNewsNotification.objects.count() == 0
     CourseNewsFactory.create(course=co)
     assert CourseNewsNotification.objects.count() == enrolled_students
+
+
+@pytest.mark.django_db
+def test_create_assignment_public_form_restricted_to_settings(client):
+    teacher = TeacherFactory()
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    course = CourseFactory(semester=SemesterFactory.create_current(),
+                           main_branch=branch_spb,
+                           teachers=[teacher],
+                           branches=[branch_nsk])
+    add_url = course.get_create_assignment_url()
+    form_data = {
+        "submission_type": AssignmentSubmissionFormats.ONLINE,
+        "title": "title",
+        "text": "text",
+        "deadline_at_0": "29.06.2017",
+        "deadline_at_1": "00:00",
+        "passing_score": "3",
+        "maximum_score": "5",
+        "weight": "1.00"
+    }
+    client.login(teacher)
+    response = client.post(add_url, form_data, follow=True)
+    assert response.status_code == 200
+    assert Assignment.objects.filter(course=course).count() == 1
+    assignment = Assignment.objects.get(course=course)
+    assert list(assignment.restricted_to.all()) == []
+    assert StudentGroup.objects.filter(course=course).count() == 2
+    student_group1, student_group2 = list(StudentGroup.objects.filter(course=course))
+    form_data['restricted_to'] = student_group1.pk
+    Assignment.objects.filter(course=course).delete()
+    response = client.post(add_url, form_data)
+    assert response.status_code == 302
+    assert Assignment.objects.filter(course=course).count() == 1
+    assignment = Assignment.objects.get(course=course)
+    assert assignment.restricted_to.count() == 1
+    assert student_group1 in assignment.restricted_to.all()
+
+
+@pytest.mark.django_db
+def test_course_assignment_form_create_with_checking_system(client, mocker):
+    mock_compiler_sync = mocker.patch('contests.tasks.retrieve_yandex_contest_checker_compilers')
+    teacher = TeacherFactory()
+    co = CourseFactory.create(teachers=[teacher])
+    form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
+    deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
+    deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
+    checking_system = CheckingSystemFactory.create(
+        type=CheckingSystemTypes.YANDEX
+    )
+    checking_system_url = get_yandex_contest_problem_url(15, 'D')
+    form.update({'course': co.pk,
+                 # 'attached_file': None,
+                 'submission_type': AssignmentSubmissionFormats.CODE_REVIEW,
+                 'deadline_at_0': deadline_date,
+                 'deadline_at_1': deadline_time,
+                 'checking_system': checking_system.pk,
+                 'checker_url': checking_system_url})
+    url = co.get_create_assignment_url()
+    client.login(teacher)
+    response = client.post(url, form)
+    assert response.status_code == 302
+    assert Assignment.objects.count() == 1
+    assert Checker.objects.count() == 1
+    assert mock_compiler_sync.call_count == 1
+
+
+@pytest.mark.django_db
+def test_course_assignment_form_update_remove_checking_system(client):
+    teacher = TeacherFactory()
+    co = CourseFactory.create(teachers=[teacher])
+    checker = CheckerFactory()
+    a = AssignmentFactory(course=co)
+    form = model_to_dict(a)
+    del form['ttc']
+    del form['checker']
+    form.update({'submission_type': AssignmentSubmissionFormats.ONLINE})
+    url = co.get_create_assignment_url()
+    client.login(teacher)
+    response = client.post(url, form)
+    assert Assignment.objects.count() == 1
+    assert Checker.objects.count() == 1
+    a.refresh_from_db()
+    assert not a.checker
+
+
+@pytest.mark.django_db
+def test_create_assignment_public_form_code_review_without_checker(client):
+    teacher = TeacherFactory()
+    course = CourseFactory(semester=SemesterFactory.create_current(),
+                           teachers=[teacher])
+    add_url = course.get_create_assignment_url()
+    form_data = {
+        "submission_type": AssignmentSubmissionFormats.CODE_REVIEW,
+        "title": "title",
+        "text": "text",
+        "deadline_at_0": "29.06.2017",
+        "deadline_at_1": "00:00",
+        "passing_score": "3",
+        "maximum_score": "5",
+        "weight": "1.00"
+    }
+    client.login(teacher)
+    # Save without specifying checking system
+    response = client.post(add_url, form_data, follow=True)
+    assert response.status_code == 200
+    assert Assignment.objects.filter(course=course).count() == 1
+
+
+@pytest.mark.django_db
+def test_create_assignment_public_form_code_review_with_yandex_checker(client, mocker):
+    mock_compiler_sync = mocker.patch('contests.tasks.retrieve_yandex_contest_checker_compilers')
+    teacher = TeacherFactory()
+    course = CourseFactory(semester=SemesterFactory.create_current(),
+                           teachers=[teacher])
+    checking_system = CheckingSystemFactory(type=CheckingSystemTypes.YANDEX)
+    add_url = course.get_create_assignment_url()
+    form_data = {
+        "submission_type": AssignmentSubmissionFormats.CODE_REVIEW,
+        "title": "title",
+        "text": "text",
+        "deadline_at_0": "29.06.2017",
+        "deadline_at_1": "00:00",
+        "passing_score": "3",
+        "maximum_score": "5",
+        "weight": "1.00",
+        "checking_system": checking_system.pk,
+    }
+    client.login(teacher)
+    # Checker URL is not specified
+    response = client.post(add_url, form_data, follow=True)
+    assert response.status_code == 200
+    assert Assignment.objects.filter(course=course).count() == 0
+    assert not response.context_data['form'].is_valid()
+    # FIXME: This doesn't mean we have access to the contest or oauth token is valid
+    form_data['checker_url'] = 'https://contest.yandex.ru/contest/3/problems/A/'
+    response = client.post(add_url, form_data, follow=True)
+    assert response.status_code == 200
+    assert Assignment.objects.filter(course=course).count() == 1
 
 
 @pytest.mark.django_db
