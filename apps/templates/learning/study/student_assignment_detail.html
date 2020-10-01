@@ -73,42 +73,38 @@
             {% if first_comment_after_deadline and comment.pk == first_comment_after_deadline.pk %}
                 <li><hr class="deadline"></li>
             {% endif %}
-        <li class="{% if comment.author == a_s.student %}student{% else %}teacher{% endif %}">
-          <div class="csc-well assignment-{{ comment.type }}" {% if user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
-            {% if is_actual_teacher and comment.author_id == user.pk and not comment.is_stale_for_edit or user.is_curator %}
-                {% if comment.type == 'comment' %}
-                    <a href="{{ comment.get_update_url }}" class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
-                {% else %}
-                    <span class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% endif %}</span>
-                {% endif %}
-            {% endif %}
-            <h5 class="assignment">{{ comment.author }}</h5>
-            <div class="ubertext">
-              {% markdown 3600 "assignment_comment" comment.pk comment.modified %}
-                {{ comment.text }}
-              {% endmarkdown %}
-            </div>
-            <div class="metainfo-holder">
-              {% if comment.attached_file %}
-              <span class="assignment-attachment">
-                <i class="fa fa-file"></i>
-                <a href="{{ comment.get_attachment_download_url }}">
-                  {{ comment.attached_file_name }}
-                </a>
-              </span>
-              {% endif %}
-              <span class="metainfo pull-right">{{ comment.created|timezone:timezone|date:"d.m.Y H:i" }}</span>
-            </div>
-            {% with submission=comment.submission %}
-              {% if comment.submission %}
-                <div class="submission-info mt-5 pt-5" style="border-top: 1px solid #eee;">
-                {{ submission.checking_system_choice.label }}. Статус посылки: <span class="nowrap badge submission-status {{ submission.status_choice.css_class }}">{{ submission.get_status_display }}</span>
-                    {% if submission.get_report_url %} <a target="_blank" href="{{ submission.get_report_url }}">Отчёт о проверке</a>{% endif %}
+            <li class="{% if comment.author == a_s.student %}student{% else %}teacher{% endif %}">
+                <div class="panel bg-gray assignment-submission assignment-{{ comment.type }}" {% if user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
+                    <div class="panel-body">
+                        <span class="assignment-submission__date pull-right">{{ comment.created|timezone:timezone|date:"d.m.Y H:i" }}</span>
+                        <h5 class="assignment">{{ comment.author }}</h5>
+                        <div class="ubertext">
+                          {% markdown 3600 "assignment_comment" comment.pk comment.modified %}
+                            {{ comment.text }}
+                          {% endmarkdown %}
+                        </div>
+                        {% if comment.attached_file %}
+                            <div class="metainfo-holder">
+                                <span class="assignment-attachment"><i class="fa fa-file"></i> <a href="{{ comment.get_attachment_download_url }}">{{ comment.attached_file_name }}</a></span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% with submission=comment.submission %}
+                    {% if submission %}
+                        <div class="panel-footer" style="border-top: 1px solid #eee;">
+                        {{ submission.checking_system_choice.label }} {% if submission.get_report_url %}<a class="pull-right nowrap submission-status {{ submission.status_choice.css_class }}" target="_blank" href="{{ submission.get_report_url }}">{{ submission.get_status_display }}</a>{% else %}<span class="pull-right nowrap submission-status {{ submission.status_choice.css_class }}">{{ submission.get_status_display }}</span>{% endif %}
+                        </div>
+                    {% endif %}
+                    {% endwith %}
+
+                    {% if comment.type == 'comment' %}{% if is_actual_teacher and comment.author_id == user.pk and not comment.is_stale_for_edit or user.is_curator %}
+                      <div class="panel-footer clearfix" style="border-top: 1px solid #eee;">
+                          <a href="{{ comment.get_update_url }}" class="__edit pull-right">{% if user.is_curator %}Редактировать{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
+                      </div>
+                    {% endif %}{% endif %}
                 </div>
-              {% endif %}
-            {% endwith %}
-          </div>
-        </li>
+            </li>
         {% endfor %}
         </ul>
       {% endif %}
