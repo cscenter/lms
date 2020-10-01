@@ -322,7 +322,6 @@ class MetaCourseDetailView(PublicURLContextMixin, generic.DetailView):
         return context
 
 
-# FIXME: redirect if authenticated and the student or teacher
 class CourseDetailView(PublicURLContextMixin,
                        CoursePublicURLParamsMixin, generic.DetailView):
     template_name = "compsciclub_ru/course_detail.html"
@@ -380,6 +379,13 @@ class CourseDetailView(PublicURLContextMixin,
 class CourseClassDetailView(PublicURLContextMixin,
                             CoursePublicURLParamsMixin, generic.DetailView):
     template_name = "compsciclub_ru/course_class_detail.html"
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.request.user.is_authenticated:
+            raise Redirect(self.object.get_absolute_url())
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
 
     def get_queryset(self):
         url_params = self.kwargs
