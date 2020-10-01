@@ -11,7 +11,8 @@ from code_reviews.ldap import get_ldap_username
 from code_reviews.models import GerritChange
 from core.models import Branch
 from courses.models import Course, CourseTeacher
-from learning.models import Enrollment, StudentAssignment, AssignmentComment
+from learning.models import Enrollment, StudentAssignment, AssignmentComment, \
+    AssignmentSubmissionTypes
 from learning.services import StudentGroupService
 from users.models import User, StudentProfile
 
@@ -400,6 +401,7 @@ def add_assignment_comment_about_new_change(student_assignment: StudentAssignmen
     with translation.override(course.language):
         message = GerritRobotMessages.CHANGE_CREATED.format(link=change_url)
     AssignmentComment.objects.create(student_assignment=student_assignment,
+                                     type=AssignmentSubmissionTypes.COMMENT,
                                      text=message, author=get_gerrit_robot())
 
 
