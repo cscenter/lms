@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import datetime
 from io import StringIO
+from unittest.mock import MagicMock
 from urllib.parse import urlparse
 
 import pytest
 import pytz
 from django.contrib.sites.models import Site
 from django.core import mail, management
+from fakeredis import FakeRedis
 from subdomains.utils import get_domain
 
 from contests.constants import CheckingSystemTypes
@@ -321,7 +323,8 @@ def test_new_course_news_notification_context(settings, client):
 
 
 @pytest.mark.django_db
-def test_new_assignment_timezone(settings):
+def test_new_assignment_timezone(settings, mocker):
+    mocker.patch('core.locks.get_shared_connection', MagicMock())
     settings.LANGUAGE_CODE = 'ru'
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
@@ -394,7 +397,8 @@ def test_change_assignment_comment(settings):
 
 
 @pytest.mark.django_db
-def test_deadline_changed_timezone(settings):
+def test_deadline_changed_timezone(settings, mocker):
+    mocker.patch('core.locks.get_shared_connection', MagicMock())
     settings.LANGUAGE_CODE = 'ru'
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)

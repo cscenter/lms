@@ -1,4 +1,5 @@
 from io import StringIO as OutputIO
+from unittest.mock import MagicMock
 
 import pytest
 from django.core import mail, management
@@ -14,7 +15,8 @@ from users.tests.factories import StudentFactory, TeacherFactory, \
 
 
 @pytest.mark.django_db
-def test_notifications(client, settings):
+def test_notifications(client, settings, mocker):
+    mocker.patch('core.locks.get_shared_connection', MagicMock())
     settings.DEFAULT_URL_SCHEME = 'https'
     out = OutputIO()
     mail.outbox = []

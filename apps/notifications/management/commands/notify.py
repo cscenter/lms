@@ -12,11 +12,13 @@ from django.core.mail.backends import smtp
 from django.core.management.base import BaseCommand
 from django.template.loader import render_to_string
 from django.utils import translation
+from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from django.utils.html import strip_tags, linebreaks
 from django.utils.module_loading import import_string
 from django_ses import SESBackend
 
+from core.locks import distributed_lock, get_shared_connection
 from core.models import SiteConfiguration, Branch
 from core.urls import replace_hostname
 from courses.models import Course
@@ -257,6 +259,8 @@ class Command(BaseCommand):
     help = 'Sends email notifications'
     can_import_settings = True
 
+    @method_decorator(distributed_lock('notify-lock', timeout=600,
+                                       get_client=get_shared_connection))
     def handle(self, *args, **options):
         translation.activate(settings.LANGUAGE_CODE)
         # Some configuration (like SMTP settings) should be resolved at runtime
