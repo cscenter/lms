@@ -289,8 +289,7 @@
                         </table>
                     {% endif %}
                 </div>
-
-                {% if profile_user.is_student or profile_user.is_volunteer or profile_user.is_graduate %}
+                {% if student_profile %}
                     <div class="tab-pane" role="tabpanel" id="student-assignments-tab">
                         {% if assignments %}
                             <h4 class="_mtop-30">{% trans "Assignments" %}:
