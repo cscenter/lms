@@ -78,11 +78,13 @@
                     <div class="panel-body">
                         <span class="assignment-submission__date pull-right">{{ comment.created|timezone:timezone|date:"d.m.Y H:i" }}</span>
                         <h5 class="assignment">{{ comment.author }}</h5>
+                        {% if comment.text %}
                         <div class="ubertext">
                           {% markdown 3600 "assignment_comment" comment.pk comment.modified %}
                             {{ comment.text }}
                           {% endmarkdown %}
                         </div>
+                        {% endif %}
                         {% if comment.attached_file %}
                             <div class="metainfo-holder">
                                 <span class="assignment-attachment"><i class="fa fa-file"></i> <a href="{{ comment.get_attachment_download_url }}">{{ comment.attached_file_name }}</a></span>
