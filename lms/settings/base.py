@@ -249,7 +249,7 @@ EMAIL_PORT = env.int('DJANGO_EMAIL_PORT', default=465)
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_SEND_COOLDOWN = 0.3
+EMAIL_SEND_COOLDOWN = 0.5
 
 HASHIDS_SALT = env.str('HASHIDS_SALT')
 
