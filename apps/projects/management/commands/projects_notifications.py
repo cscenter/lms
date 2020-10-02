@@ -4,7 +4,9 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.core.management import BaseCommand
+from django.utils.decorators import method_decorator
 
+from core.locks import distributed_lock, get_shared_connection
 from core.timezone import now_local
 from core.models import Branch
 from projects.constants import REPORTING_NOTIFY_BEFORE_START, \
@@ -18,6 +20,9 @@ class Command(BaseCommand):
     Generate notifications about project reporting period boundaries.
     """
 
+    @method_decorator(distributed_lock('projects-notifications-lock',
+                                       timeout=600,
+                                       get_client=get_shared_connection))
     def handle(self, *args, **options):
         for branch in Branch.objects.for_site(site_id=settings.SITE_ID):
             today = now_local(branch.get_timezone()).date()
