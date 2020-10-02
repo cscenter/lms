@@ -166,16 +166,8 @@ class ViewRelatedStudentAssignment(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, student_assignment: StudentAssignment):
-        """
-        Teachers can view all assignments related to the meta course
-        they participated in.
-        """
-        # FIXME: создать отдельный доступ на просмотр соседних прочтений и явно выдавать нуждающимся
         course = student_assignment.assignment.course
-        all_teachers = (CourseTeacher.objects
-                        .filter(course__meta_course_id=course.meta_course_id)
-                        .values_list('teacher_id', flat=True))
-        return user.pk in all_teachers
+        return user in course.teachers.all()
 
 
 @add_perm
@@ -253,8 +245,8 @@ class EditOwnGradebook(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, course: Course):
-        # FIXME: check course is ended and teacher is not in a spectator mode
-        return user in course.teachers.all()
+        # FIXME: check course is ended
+        return course.is_actual_teacher(user.pk)
 
 
 @add_perm

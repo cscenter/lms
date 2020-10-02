@@ -99,7 +99,7 @@ class ProgressReport:
         for student in students:
             for e in student.enrollments_progress:
                 unique_courses.add(e.course_id)
-        course_teachers = CourseTeacher.get_most_priority_role_prefetch()
+        course_teachers = CourseTeacher.get_prefetch()
         qs = (Course.objects
               .filter(pk__in=unique_courses)
               .select_related('meta_course', 'semester')

@@ -88,7 +88,10 @@ class CourseClassQuerySet(query.QuerySet):
                             course__enrollment__is_deleted=False))
 
     def for_teacher(self, user):
-        return self.filter(course__teachers=user)
+        from courses.models import CourseTeacher
+        spectator = CourseTeacher.roles.spectator
+        return self.filter(course__teachers=user,
+                           course__course_teachers__roles=~spectator)
 
     def with_public_materials(self):
         return self.filter(materials_visibility=MaterialVisibilityTypes.PUBLIC)

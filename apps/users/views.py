@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Prefetch, Count, prefetch_related_objects
+from django.db.models import Prefetch, Count, prefetch_related_objects, Q
 from django.http import HttpResponseBadRequest, \
     JsonResponse, HttpResponseForbidden
 from django.utils.decorators import method_decorator
@@ -20,7 +20,7 @@ from django.utils.translation import gettext_lazy as _
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
 from core.views import ProtectedFormMixin
-from courses.models import Course, Semester
+from courses.models import Course, Semester, CourseTeacher
 from files.handlers import MemoryImageUploadHandler, \
     TemporaryImageUploadHandler
 from learning.forms import TestimonialForm
@@ -63,8 +63,10 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
         elif self.request.user.is_curator:
             enrollments_queryset = enrollments_queryset.annotate(
                 classes_total=Count('course__courseclass'))
+        not_a_spectator = Q(course_teachers__roles=~CourseTeacher.roles.spectator)
         co_queryset = (Course.objects
                        .available_on_site(self.request.site)
+                       .filter(not_a_spectator)
                        .select_related('semester', 'meta_course',
                                        'main_branch'))
         # Limit results on compsciclub.ru

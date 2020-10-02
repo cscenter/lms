@@ -23,6 +23,7 @@ from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, StudentGroup, Event, AssignmentSubmissionTypes, \
     CourseNewsNotification, StudentGroupAssignee
 from learning.settings import StudentStatuses
+from users.constants import Roles
 from users.models import User, StudentProfile, StudentTypes
 
 
@@ -633,7 +634,7 @@ def course_access_role(*, course, user) -> CourseRole:
     """
     Some course data (e.g. assignments, news) are private and accessible
     depending on the user role: curator, course teacher or
-    enrolled student. This UserRoles do not overlap in the same course.
+    enrolled student. This roles do not overlap in the same course.
     """
     if not user.is_authenticated:
         return CourseRole.NO_ROLE
@@ -648,11 +649,8 @@ def course_access_role(*, course, user) -> CourseRole:
             role = CourseRole.STUDENT_REGULAR
         else:
             role = CourseRole.STUDENT_RESTRICT
-    # Teachers from the same course permits to view the news/assignments/etc
-    all_meta_course_teachers = (CourseTeacher.objects
-                           .for_meta_course(course.meta_course)
-                           .values_list('teacher_id', flat=True))
-    if user.is_teacher and user.pk in all_meta_course_teachers:
-        # Overrides student role if a teacher enrolled in his own course
+    # FIXME: separate into teacher_spectator and teacher_regular?
+    if Roles.TEACHER in user.roles and user in course.teachers.all():
+        # Teacher role has a higher precedence
         role = CourseRole.TEACHER
     return role

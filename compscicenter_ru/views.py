@@ -611,6 +611,7 @@ class TeacherDetailView(PublicURLMixin, DetailView):
         courses = (Course.objects
                    .made_by(site_branches)
                    .filter(semester__year__gte=min_established,
+                           course_teachers__roles=~CourseTeacher.roles.spectator,
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index')
@@ -677,14 +678,12 @@ class CourseDetailView(PublicURLMixin, CoursePublicURLParamsMixin,
     context_object_name = 'course'
 
     def get_course_queryset(self):
-        course_teachers = Prefetch('course_teachers',
-                                   queryset=(CourseTeacher.objects
-                                             .select_related("teacher")
-                                             .order_by('teacher__last_name',
-                                                       'teacher__first_name')))
+        course_teachers = CourseTeacher.get_queryset()
         return (super().get_course_queryset()
                 .select_related('meta_course', 'semester', 'main_branch')
-                .prefetch_related(course_teachers))
+                .prefetch_related(
+                    Prefetch('course_teachers', queryset=course_teachers)
+                ))
 
     def get_object(self, queryset=None):
         return self.course

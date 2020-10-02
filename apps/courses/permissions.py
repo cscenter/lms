@@ -49,12 +49,7 @@ class ViewOwnAssignment(Permission):
     @staticmethod
     @predicate
     def rule(user, course: Course):
-        if user.is_teacher:
-            return (CourseTeacher.objects
-                    .filter(course__meta_course_id=course.meta_course_id,
-                            teacher_id=user.pk)
-                    .exists())
-        return False
+        return user in course.teachers.all()
 
 
 @add_perm
@@ -69,8 +64,7 @@ class CreateOwnAssignment(Permission):
     @staticmethod
     @predicate
     def rule(user, course: Course):
-        return any(t.teacher_id == user.pk for t in
-                   course.course_teachers.all())
+        return course.is_actual_teacher(user.pk)
 
 
 @add_perm
@@ -85,8 +79,7 @@ class EditOwnAssignment(Permission):
     @staticmethod
     @predicate
     def rule(user, course: Course):
-        return any(t.teacher_id == user.pk for t in
-                   course.course_teachers.all())
+        return course.is_actual_teacher(user.pk)
 
 
 @add_perm

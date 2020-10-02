@@ -41,11 +41,6 @@
         {{ a_s.student.get_short_name }} <br>
         <small>{{ a_s.assignment.title }} (<a href="{{ a_s.assignment.course.get_absolute_url }}">{{ a_s.assignment.course }}</a>)</small>
       </h2>
-      {% if user.is_curator or is_actual_teacher %}
-      <div class="btn-toolbar">
-        <a href="{{ a_s.assignment.get_update_url }}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
-      </div>
-      {% endif %}
       <hr>
     </div>
   </div>
@@ -137,6 +132,9 @@
                     <span class="nowrap badge assignment-status {{ a_s.state.css_class }}">{{ a_s.state_display }}</span>
                 {% endif %}
 
+                <h5 class="assignment">{% if a_s.student.is_volunteer %}{% trans "Volunteer" %}{% else %}{% trans "Student" %}{% endif %}</h5>
+                <a href="{{ a_s.student.get_absolute_url }}">{{ a_s.student.get_full_name }}</a>
+
                 <h5 class="assignment">{% trans "Time Spent on Assignment" %}</h5>
                 <span>{% if a_s.execution_time == None %}{% trans "No value is specified" %}{% else %}{{ a_s.get_execution_time_display }}{% endif %}</span>
 
@@ -147,15 +145,13 @@
                       <h5 class="assignment">{% trans "Professors" %}</h5>
                       {% endif %}
                       <ul class="list-unstyled">
-                        {% for teacher in a_s.assignment.course.teachers.all %}
+                        {% for course_teacher in a_s.assignment.course.course_teachers.all %}
                         <li>
-                          <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_full_name }}</a>
+                          <a href="{{ course_teacher.teacher.teacher_profile_url }}">{{ course_teacher.teacher.get_full_name }}</a>
                         </li>
                         {% endfor %}
                       </ul>
                 {% endif %}
-                <h5 class="assignment">{% if a_s.student.is_volunteer %}{% trans "Volunteer" %}{% else %}{% trans "Student" %}{% endif %}</h5>
-                <a href="{{ a_s.student.get_absolute_url }}">{{ a_s.student.get_full_name }}</a>
 
                 <h5 class="assignment">{% trans "Deadline" %}</h5>
                 <span class="nowrap">{{ a_s.assignment.deadline_at|timezone:timezone|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at|timezone:timezone|time:"H:i" }}</span>

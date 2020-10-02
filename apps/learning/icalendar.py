@@ -10,7 +10,7 @@ from icalendar import vText, vUri, Calendar, Event as ICalendarEvent, \
     Timezone, TimezoneStandard
 from icalendar.prop import vInline
 
-from courses.models import CourseClass, Assignment
+from courses.models import CourseClass, Assignment, CourseTeacher
 from learning.models import StudentAssignment, Event
 from users.models import User
 
@@ -224,7 +224,8 @@ def get_icalendar_teacher_assignments(user: User, event_builder: ICalendarEventB
     where user is participating as a teacher.
     """
     queryset = (Assignment.objects
-                .filter(course__teachers=user)
+                .filter(course__teachers=user,
+                        course__course_teachers__roles=~CourseTeacher.roles.spectator)
                 .with_future_deadline()
                 .select_related('course',
                                 'course__meta_course',

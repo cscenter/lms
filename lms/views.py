@@ -47,7 +47,9 @@ class CourseOfferingsView(FilterMixin, TemplateView):
     template_name = "lms/course_offerings.html"
 
     def get_queryset(self):
-        course_teachers = CourseTeacher.get_most_priority_role_prefetch()
+        course_teachers = Prefetch(
+            'course_teachers',
+            queryset=CourseTeacher.get_queryset(role_priority=True))
         return (Course.objects
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'main_branch')

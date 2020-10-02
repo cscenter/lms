@@ -3,7 +3,7 @@ from django.views import generic
 from vanilla import DetailView
 
 from core.models import Location, Branch
-from courses.models import Course
+from courses.models import Course, CourseTeacher
 from learning.roles import Roles
 from users.models import User
 
@@ -23,6 +23,7 @@ class TeacherDetailView(LoginRequiredMixin, DetailView):
         courses = (Course.objects
                    .in_branches(branches)
                    .filter(semester__year__gte=min_established,
+                           course_teachers__roles=~CourseTeacher.roles.spectator,
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index'))

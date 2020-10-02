@@ -6,7 +6,7 @@ from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.utils import instance_memoize
-from courses.models import Course, CourseBranch
+from courses.models import Course, CourseBranch, CourseTeacher
 from courses.services import CourseService
 from courses.tests.factories import CourseFactory, SemesterFactory, \
     AssignmentFactory
@@ -58,31 +58,25 @@ def test_course_access_role_teacher():
     assert role == CourseRole.TEACHER
     role = course_access_role(course=course, user=teacher_other)
     assert role == CourseRole.NO_ROLE
-    # Teacher of the same meta course has access to all readings
-    meta_course = course.meta_course
-    teacher2 = TeacherFactory()
-    course2 = CourseFactory(meta_course=meta_course, teachers=[teacher2])
-    role = course_access_role(course=course2, user=teacher2)
-    assert role == CourseRole.TEACHER
-    # Make sure student `expelled` status doesn't affect on teacher role
-    teacher2.status = StudentStatuses.EXPELLED
-    teacher2.save()
-    role = course_access_role(course=course2, user=teacher2)
-    assert role == CourseRole.TEACHER
-    # Now make sure that teacher role is prevailed on any student role
-    student_profile = StudentProfileFactory(user=teacher2,
+    # Make sure that teacher role is prevailed on any student role
+    student_profile = StudentProfileFactory(user=teacher,
                                             branch=course.main_branch)
-    role = course_access_role(course=course, user=teacher2)
+    role = course_access_role(course=course, user=teacher)
     assert role == CourseRole.TEACHER
-    delete_enrollment_cache(teacher2, course)
+    delete_enrollment_cache(teacher, course)
     student_profile.status = StudentStatuses.EXPELLED
     student_profile.save()
-    role = course_access_role(course=course, user=teacher2)
+    role = course_access_role(course=course, user=teacher)
     assert role == CourseRole.TEACHER
-    EnrollmentFactory(student=teacher2, course=course,
+    EnrollmentFactory(student=teacher, course=course,
                       grade=GradeTypes.UNSATISFACTORY)
-    delete_enrollment_cache(teacher2, course)
-    assert course_access_role(course=course, user=teacher2) == CourseRole.TEACHER
+    delete_enrollment_cache(teacher, course)
+    assert course_access_role(course=course, user=teacher) == CourseRole.TEACHER
+    # Spectator has a teacher role
+    ct = CourseTeacher.objects.get(course=course, teacher=teacher)
+    ct.roles = CourseTeacher.roles.spectator
+    ct.save()
+    assert course_access_role(course=course, user=teacher) == CourseRole.TEACHER
 
 
 @pytest.mark.django_db
@@ -306,26 +300,19 @@ def test_view_assignment_comment_attachment():
 
 
 @pytest.mark.django_db
-def test_view_related_student_assignment():
+def test_view_student_assignment_as_teacher():
     curator = CuratorFactory()
     teacher = TeacherFactory()
     teacher_other = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
     sa = StudentAssignmentFactory(assignment__course=course)
     assert not ViewRelatedStudentAssignment.rule(UserFactory(), sa)
+    assert teacher.has_perm(ViewRelatedStudentAssignment.name, sa)
+    assert not teacher_other.has_perm(ViewRelatedStudentAssignment.name, sa)
+    assert not curator.has_perm(ViewRelatedStudentAssignment.name, sa)
+    # `expelled` status on a student profile doesn't affect a teacher role
+    StudentProfileFactory(user=teacher, status=StudentStatuses.EXPELLED)
     assert ViewRelatedStudentAssignment.rule(teacher, sa)
-    assert not ViewRelatedStudentAssignment.rule(teacher_other, sa)
-    assert not ViewRelatedStudentAssignment.rule(curator, sa)
-    # Teacher for the same meta course has access to all readings
-    meta_course = course.meta_course
-    teacher2 = TeacherFactory()
-    course2 = CourseFactory(meta_course=meta_course, teachers=[teacher2])
-    sa2 = StudentAssignmentFactory(assignment__course=course2)
-    assert ViewRelatedStudentAssignment.rule(teacher2, sa)
-    # Make sure student `expelled` status doesn't affect on teacher role
-    teacher2.status = StudentStatuses.EXPELLED
-    teacher2.save()
-    assert ViewRelatedStudentAssignment.rule(teacher2, sa)
 
 
 @pytest.mark.django_db

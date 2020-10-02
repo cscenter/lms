@@ -128,7 +128,8 @@ class IndexView(PublicURLContextMixin, generic.TemplateView):
                 .made_by(site_branches)
                 .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(
-                    'teachers',
+                    Prefetch('course_teachers',
+                             queryset=CourseTeacher.get_queryset()),
                     Prefetch(
                         'courseclass_set',
                         queryset=courseclass_queryset,
@@ -184,6 +185,7 @@ class TeacherDetailView(PublicURLContextMixin, DetailView):
                    .made_by(branches)
                    .available_in(self.request.branch)
                    .filter(semester__year__gte=min_established,
+                           course_teachers__roles=~CourseTeacher.roles.spectator,
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index'))
@@ -267,10 +269,12 @@ class CoursesListView(PublicURLContextMixin, generic.ListView):
     template_name = "compsciclub_ru/course_offerings.html"
 
     def get_queryset(self):
+        course_teachers = Prefetch('course_teachers',
+                                   queryset=CourseTeacher.get_queryset())
         courses_qs = (Course.objects
                       .available_in(self.request.branch)
                       .select_related('meta_course', 'main_branch')
-                      .prefetch_related('teachers')
+                      .prefetch_related(course_teachers)
                       .order_by('meta_course__name'))
         courses_set = Prefetch('course_set',
                                queryset=courses_qs,
@@ -328,13 +332,11 @@ class CourseDetailView(PublicURLContextMixin,
     context_object_name = 'course'
 
     def get_course_queryset(self):
-        course_teachers = Prefetch('course_teachers',
-                                   queryset=(CourseTeacher.objects
-                                             .select_related("teacher")
-                                             .order_by('teacher__last_name',
-                                                       'teacher__first_name')))
         return (super().get_course_queryset()
-                .prefetch_related(course_teachers, "branches"))
+                .prefetch_related(
+                    Prefetch('course_teachers',
+                             queryset=CourseTeacher.get_queryset()),
+                    "branches"))
 
     def get_object(self):
         return self.course

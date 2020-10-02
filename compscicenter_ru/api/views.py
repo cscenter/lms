@@ -38,20 +38,24 @@ class SiteCourseList(ListAPIView):
 
 
 class TeacherList(ListAPIView):
-    """Returns teachers except for those who only help with homework"""
+    """Returns all teachers except pure reviewers or spectators"""
     pagination_class = None
     serializer_class = TeacherSerializer
 
+    # FIXME: cheaper and easier to aggregate courseteacher, than filter users (see compsciclub.ru TeachersView)
     def get_queryset(self):
         reviewer = CourseTeacher.roles.reviewer
-        # `.exclude` generates wrong sql (as well as `.filter`) combined with
-        # `~` operation. BitField overrides default `exact` lookup, so
-        # let's filter out non-reviewers with `__ne` custom lookup
-        any_role_except_reviewer = (Q(courseteacher__roles__ne=reviewer.mask) &
-                                    Q(courseteacher__roles__ne=0))
+        spectator = CourseTeacher.roles.spectator
+        # `__ne` custom lookup used to filter out teachers without any role or
+        # pure reviewers - those who has only reviewer role
+        any_role_except_pure_reviewer_or_spectator = (
+                Q(courseteacher__roles__ne=reviewer.mask) &
+                Q(courseteacher__roles=~spectator) &
+                Q(courseteacher__roles__ne=0)
+        )
         queryset = (User.objects
                     .has_role(Roles.TEACHER, site_id=self.request.site.pk)
-                    .filter(any_role_except_reviewer)
+                    .filter(any_role_except_pure_reviewer_or_spectator)
                     .select_related('branch')
                     .only("pk", "first_name", "last_name", "patronymic",
                           "username", "cropbox_data", "photo", "branch__code",
@@ -66,12 +70,16 @@ class TeacherList(ListAPIView):
             queryset = queryset.filter(
                 courseteacher__course__meta_course_id=course,
                 courseteacher__course__semester__index__gte=term_index)
-        any_role_except_reviewer = Q(roles__ne=reviewer.mask) & Q(roles__ne=0)
+        any_role_except_pure_reviewer_or_spectator = (
+                Q(roles__ne=reviewer.mask) &
+                Q(roles=~spectator) &
+                Q(roles__ne=0)
+        )
         queryset = queryset.prefetch_related(
             Prefetch(
                 "courseteacher_set",
                 queryset=(CourseTeacher.objects
-                          .filter(any_role_except_reviewer)
+                          .filter(any_role_except_pure_reviewer_or_spectator)
                           .select_related("course",
                                           "course__semester")
                           .only("teacher_id",
@@ -179,7 +187,7 @@ class CourseList(ListAPIView):
     serializer_class = CoursePublicSerializer
 
     def get_queryset(self):
-        course_teachers = CourseTeacher.get_most_priority_role_prefetch()
+        course_teachers = CourseTeacher.get_prefetch()
         return (Course.objects
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'main_branch')

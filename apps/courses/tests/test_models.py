@@ -42,7 +42,7 @@ def test_course_teacher_get_most_priority_role_prefetch(django_assert_num_querie
     ct3.save()
     ct4.roles = CourseTeacher.roles.lecturer
     ct4.save()
-    course_teachers = CourseTeacher.get_most_priority_role_prefetch()
+    course_teachers = CourseTeacher.get_prefetch()
     with django_assert_num_queries(2):
         course = (Course.objects
                   .filter(pk=course.pk)

@@ -33,7 +33,7 @@
               {% for course in courses %}
                 <tr>
                   <td><a href="{{ course_public_url(course) }}">{{ course.meta_course.name }}</a></td>
-                  <td>{% for teacher in course.teachers.all() %}<a href="{{ teacher.teacher_profile_url() }}" style="white-space:nowrap;">{{ teacher.get_abbreviated_name() }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</td>
+                  <td>{% for course_teacher in course.course_teachers.all() %}<a href="{{ course_teacher.teacher.teacher_profile_url() }}" style="white-space:nowrap;">{{ course_teacher.teacher.get_abbreviated_name() }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</td>
                   <td>
                     {% if course.classes %}
                       {% with class=course.classes|first %}

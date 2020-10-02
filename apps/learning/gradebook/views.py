@@ -72,6 +72,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
     user_type = 'teacher'
     template_name = "learning/gradebook/gradebook_form.html"
     context_object_name = 'assignment_list'
+    # FIXME: check EditOwnGradebook permission on POST action
     permission_required = ViewOwnGradebook.name
 
     def get_permission_object(self):

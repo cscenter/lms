@@ -135,9 +135,9 @@
                     <h5 class="assignment">{% trans "Professors" %}</h5>
                 {% endif %}
                 <ul class="list-unstyled">
-                    {% for teacher in a_s.assignment.course.teachers.all %}
+                    {% for course_teacher in a_s.assignment.course.course_teachers.all %}
                         <li>
-                            <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_full_name }}</a>
+                            <a href="{{ course_teacher.teacher.teacher_profile_url }}">{{ course_teacher.teacher.get_full_name }}</a>
                         </li>
                     {% endfor %}
                 </ul>

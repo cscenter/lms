@@ -34,8 +34,8 @@
                 <a href="{{ course.get_absolute_url }}" class="title">{{ course.meta_course.name }}</a> &nbsp;
                   <span class="badge assignment-status {{ course.grading_system.css_class }} {{ course.enrollment.grade }}">{{ course.enrollment.grade_honest }}</span><br>
               {% trans "Professors" %}:
-                {% for teacher in course.teachers.all %}
-                <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
+                {% for course_teacher in course.course_teachers.all %}
+                <a href="{{ course_teacher.teacher.teacher_profile_url }}">{{ course_teacher.teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %}
                 </td>
                 <td>
@@ -56,8 +56,8 @@
                 <a class="title" href="{{ course.get_absolute_url }}">
                     {{ course.meta_course.name }}</a>{% if request.site.domain == "compscicenter.ru" and course.is_club_course %}<span>, курс CS клуба</span>{% endif %}<br>
               {% trans "Professors" %}:
-                {% for teacher in course.teachers.all %}
-                <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
+                {% for course_teacher in course.course_teachers.all %}
+                <a href="{{ course_teacher.teacher.teacher_profile_url }}">{{ course_teacher.teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %}
               </td>
               <td>

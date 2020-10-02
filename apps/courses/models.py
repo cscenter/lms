@@ -534,7 +534,8 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
 
     @instance_memoize
     def is_actual_teacher(self, teacher_id):
-        return teacher_id in (co.teacher_id for co in
+        # FIXME: skip spectator role if it's not filtered out on a query level with prefetch
+        return teacher_id in (ct.teacher_id for ct in
                               self.course_teachers.all())
 
 
@@ -587,7 +588,7 @@ class CourseTeacher(models.Model):
     notify_by_default = models.BooleanField(
         _("Notify by default"),
         help_text=(_("Add teacher to assignment notify settings by default")),
-        default=False)
+        default=True)
 
     class Meta:
         verbose_name = _("Course Teacher")
@@ -621,21 +622,31 @@ class CourseTeacher(models.Model):
                       .select_related('teacher')))
 
     @classmethod
-    def get_most_priority_role_prefetch(cls,
-                                        lookup='course_teachers') -> Prefetch:
-        most_priority_role = cls.get_most_priority_role_expr()
-        return Prefetch(
-            lookup,
-            queryset=(cls.objects
-                      .select_related('teacher')
-                      .annotate(most_priority_role=most_priority_role)
-                      .only('id', 'course_id', 'teacher_id',
-                            'teacher__first_name',
-                            'teacher__last_name',
-                            'teacher__patronymic')
-                      .order_by('-most_priority_role',
-                                'teacher__last_name',
-                                'teacher__first_name')))
+    def get_prefetch(cls, lookup='course_teachers') -> Prefetch:
+        """Course teachers sorted by the most priority role"""
+        return Prefetch(lookup,
+                        queryset=cls.get_queryset(role_priority=True))
+
+    @classmethod
+    def get_queryset(cls, role_priority=False):
+        """
+        Base queryset for prefetching course teachers.
+
+        Set `role_priority=True` to sort teachers by the most priority role.
+        """
+        sort = ['teacher__last_name', 'teacher__first_name']
+        qs = (cls.objects
+              .filter(roles=~cls.roles.spectator)
+              .select_related('teacher')
+              .only('id', 'course_id', 'teacher_id', 'roles',
+                    'teacher__first_name',
+                    'teacher__last_name',
+                    'teacher__patronymic'))
+        if role_priority:
+            most_priority_role = cls.get_most_priority_role_expr()
+            qs = qs.annotate(most_priority_role=most_priority_role)
+            sort.insert(0, '-most_priority_role')
+        return qs.order_by(*sort)
 
     @staticmethod
     def get_most_priority_role_expr():
@@ -645,29 +656,11 @@ class CourseTeacher(models.Model):
         It's helpful for showing lecturers first, then seminarians, etc.
         """
         return Case(
+            When(roles=CourseTeacher.roles.spectator, then=Value(-1)),
             When(roles=CourseTeacher.roles.lecturer, then=Value(8)),
             When(roles=CourseTeacher.roles.seminar, then=Value(4)),
             default=Value(0),
             output_field=IntegerField())
-
-    @staticmethod
-    def grouped(course_teachers):
-        """
-        Group teachers by role.
-
-        A bit complicated to implement this logic on query level without
-        ORM hacking.
-        """
-        # TODO: replace with sql logic after drop sqlite compability at all
-        ts = {'lecturers': [], 'others': []}
-
-        def __cmp__(ct):
-            return -ct.is_lecturer, ct.teacher.last_name
-
-        for t in sorted(course_teachers, key=__cmp__):
-            slot = ts['lecturers'] if t.is_lecturer else ts['others']
-            slot.append(t)
-        return ts
 
 
 class CourseReview(TimeStampedModel):

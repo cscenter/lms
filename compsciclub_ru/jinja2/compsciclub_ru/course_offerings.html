@@ -20,7 +20,7 @@
             {% for course in semester.courseofferings %}
               <li>
                 <a href="{{ course_public_url(course) }}">{{ course.meta_course.name }}</a>
-                ({% for teacher in course.teachers.all() %}<a href="{{ teacher.teacher_profile_url() }}" style="white-space:nowrap;color: #333;">{{ teacher.get_abbreviated_name() }}</a>{% if not loop.last %}, {% endif %}{% endfor %})
+                ({% for course_teacher in course.course_teachers.all() %}<a href="{{ course_teacher.teacher.teacher_profile_url() }}" style="white-space:nowrap;color: #333;">{{ course_teacher.teacher.get_abbreviated_name() }}</a>{% if not loop.last %}, {% endif %}{% endfor %})
               </li>
             {% endfor %}
             </ul>

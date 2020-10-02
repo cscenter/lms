@@ -18,7 +18,7 @@ from core.urls import reverse
 from core.utils import render_markdown
 from courses.calendar import CalendarEventW
 from courses.constants import SemesterTypes
-from courses.models import Course, Assignment
+from courses.models import Course, Assignment, CourseTeacher
 from courses.permissions import ViewAssignment
 from courses.services import get_teacher_branches
 from courses.utils import get_current_term_pair, MonthPeriod, \
@@ -421,13 +421,14 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                          .filter(score__isnull=True,
                                  first_student_comment_at__isnull=False,
                                  assignment__course=course,
-                                 assignment__course__teachers=user)
+                                 assignment__course__teachers=user,
+                                 assignment__course__course_teachers__roles=~CourseTeacher.roles.spectator)
                          .order_by('assignment__deadline_at', 'pk')
                          .only('pk'))
         next_ungraded = (ungraded_base.filter(pk__gt=a_s.pk).first() or
                          ungraded_base.filter(pk__lt=a_s.pk).first())
         context['next_student_assignment'] = next_ungraded
-        context['is_actual_teacher'] = user in course.teachers.all()
+        context['is_actual_teacher'] = course.is_actual_teacher(user.pk)
         context['score_form'] = AssignmentScoreForm(
             initial={'score': a_s.score},
             maximum_score=a_s.assignment.maximum_score)

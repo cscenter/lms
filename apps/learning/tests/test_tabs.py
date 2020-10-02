@@ -14,14 +14,14 @@ from learning.settings import GradeTypes, Branches
 from learning.tabs import CourseReviewsTab
 from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import StudentFactory, TeacherFactory, \
-    VolunteerFactory
+    VolunteerFactory, CuratorFactory
 
 
 # TODO: тест для видимости таб из под разных ролей. (прятать табу во вьюхе, если нет содержимого)
 
 
 @pytest.mark.django_db
-def test_course_news_tab_permissions(client, assert_login_redirect):
+def test_course_news_tab_permissions_student(client, assert_login_redirect):
     current_semester = SemesterFactory.create_current()
     prev_term = SemesterFactory.create_prev(current_semester)
     news: CourseNews = CourseNewsFactory(course__main_branch__code=Branches.SPB,
@@ -50,47 +50,56 @@ def test_course_news_tab_permissions(client, assert_login_redirect):
     e_prev.save()
     response = client.get(co_prev.get_absolute_url())
     assert "news" in response.context_data['course_tabs']
-    # Teacher from the same course can view news from other offerings
-    teacher = TeacherFactory()
-    client.login(teacher)
-    response = client.get(co_prev.get_absolute_url())
-    assert "news" not in response.context_data['course_tabs']
+
+
+@pytest.mark.django_db
+def test_course_news_tab_permissions_teacher_and_curator(client):
+    course_teacher = TeacherFactory()
+    other_teacher = TeacherFactory()
+    course = CourseFactory(semester=SemesterFactory.create_current(),
+                           teachers=[course_teacher])
+    news = CourseNewsFactory(course=course)
+    client.login(other_teacher)
     response = client.get(course.get_absolute_url())
     assert "news" not in response.context_data['course_tabs']
-    CourseTeacherFactory(course=co_prev, teacher=teacher)
-    response = client.get(co_prev.get_absolute_url())
-    assert "news" in response.context_data['course_tabs']
+    client.login(course_teacher)
     response = client.get(course.get_absolute_url())
     assert "news" in response.context_data['course_tabs']
-    co_other = CourseFactory(semester=current_semester)
-    response = client.get(co_other.get_absolute_url())
-    assert "news" not in response.context_data['course_tabs']
+    curator = CuratorFactory()
+    client.login(curator)
+    response = client.get(course.get_absolute_url())
+    assert "news" in response.context_data['course_tabs']
 
 
 @pytest.mark.django_db
 def test_course_assignments_tab_permissions(client, assert_login_redirect):
-    current_semester = SemesterFactory.create_current()
-    prev_term = SemesterFactory.create_prev(current_semester)
-    meta_course = MetaCourseFactory()
-    a = AssignmentFactory(course__semester=prev_term,
-                          course__meta_course=meta_course)
-    co_prev = a.course
-    course = CourseFactory(meta_course=meta_course, semester=current_semester)
+    current_term = SemesterFactory.create_current()
+    prev_term = SemesterFactory.create_prev(current_term)
     teacher = TeacherFactory()
-    CourseTeacherFactory(teacher=teacher, course=course)
-    assert_login_redirect(co_prev.get_absolute_url())
-    # Teacher can see links to assignments from other course sessions
+    course = CourseFactory(semester=current_term,
+                           teachers=[teacher])
+    course_prev = CourseFactory(meta_course=course.meta_course,
+                                semester=prev_term)
+    assert_login_redirect(course_prev.get_absolute_url())
     client.login(teacher)
-    response = client.get(co_prev.get_absolute_url())
+    response = client.get(course.get_absolute_url())
+    assert "assignments" not in response.context_data['course_tabs']
+    a = AssignmentFactory(course=course)
+    response = client.get(course.get_absolute_url())
     assert "assignments" in response.context_data['course_tabs']
     assert smart_bytes(a.get_teacher_url()) in response.content
+    # Show links only if a teacher is an actual teacher of the course
+    a_prev = AssignmentFactory(course=course_prev)
+    response = client.get(course_prev.get_absolute_url())
+    assert "assignments" in response.context_data['course_tabs']
+    assert smart_bytes(a_prev.get_teacher_url()) not in response.content
     student = StudentFactory()
     client.login(student)
-    response = client.get(co_prev.get_absolute_url())
+    response = client.get(course_prev.get_absolute_url())
     assert "assignments" in response.context_data['course_tabs']
     tab = response.context_data['course_tabs']['assignments']
     assert len(tab.tab_panel.context["items"]) == 1
-    assert smart_bytes(a.get_teacher_url()) not in response.content
+    assert smart_bytes(a_prev.get_teacher_url()) not in response.content
 
 
 @pytest.mark.django_db

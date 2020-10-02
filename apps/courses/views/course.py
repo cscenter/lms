@@ -27,13 +27,15 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
     context_object_name = 'course'
 
     def get_course_queryset(self):
-        course_teachers = Prefetch('course_teachers',
-                                   queryset=(CourseTeacher.objects
-                                             .select_related("teacher")
-                                             .order_by('teacher__last_name',
-                                                       'teacher__first_name')))
+        spectator = CourseTeacher.roles.spectator
+        teachers = Prefetch('course_teachers',
+                            queryset=(CourseTeacher.objects
+                                      .filter(roles=~spectator)
+                                      .select_related("teacher")
+                                      .order_by('teacher__last_name',
+                                                'teacher__first_name')))
         return (super().get_course_queryset()
-                .prefetch_related(course_teachers, "branches"))
+                .prefetch_related(teachers, "branches"))
 
     def get_object(self):
         return self.course

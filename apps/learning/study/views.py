@@ -13,7 +13,7 @@ from core.exceptions import Redirect
 from core.urls import reverse
 from courses.calendar import CalendarEventW
 from courses.constants import SemesterTypes
-from courses.models import Semester, Course
+from courses.models import Semester, Course, CourseTeacher
 from courses.utils import get_current_term_pair, MonthPeriod, \
     extended_month_date_range
 from courses.views import WeekEventsView, MonthEventsCalendarView
@@ -225,10 +225,8 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
         current_term_index = current_term.index
         in_current_term = Q(semester__index=current_term_index)
         enrolled_in = Q(id__in=list(student_enrolled_in))
-        prefetch_teachers = Prefetch(
-            'teachers',
-            queryset=User.objects.only("id", "first_name", "last_name",
-                                       "patronymic"))
+        prefetch_teachers = Prefetch('course_teachers',
+                                     queryset=CourseTeacher.get_queryset())
         student_profile = get_student_profile(auth_user, self.request.site)
         course_offerings = (Course.objects
                             .available_in(student_profile.branch_id)

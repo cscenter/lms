@@ -43,6 +43,7 @@ class TeacherRoles(DjangoChoices):
     LECTURER = C('lecturer', _("Lecturer"))
     REVIEWER = C('reviewer', _("Reviewer"))
     SEMINAR = C('seminar', _("Seminarian"))
+    SPECTATOR = C('spectator', _("Spectator"))
 
 
 class MaterialVisibilityTypes(DjangoChoices):
