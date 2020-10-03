@@ -12,6 +12,9 @@ from learning.services import StudentGroupService, update_course_learners_count,
 
 # FIXME: post_delete нужен? Что лучше - удалять StudentGroup + SET_NULL у Enrollment или делать soft-delete?
 # FIXME: группу лучше удалить, т.к. она будет предлагаться для новых заданий, хотя типа уже удалена.
+from learning.tasks import convert_assignment_submission_ipynb_file_to_html
+
+
 @receiver(post_save, sender=Course)
 def manage_student_group_for_course_root_branch(sender, instance, created,
                                                 **kwargs):
@@ -88,6 +91,15 @@ def create_deadline_change_notification(sender, instance, created,
             except StudentAssignment.DoesNotExist:
                 # It can occur for student with inactive status
                 continue
+
+
+@receiver(post_save, sender=AssignmentComment)
+def convert_ipynb_files(sender, instance: AssignmentComment, *args, **kwargs):
+    if not instance.attached_file:
+        return
+    if instance.attached_file_name.endswith('.ipynb'):
+        kwargs = {'assignment_submission_id': instance.pk}
+        convert_assignment_submission_ipynb_file_to_html.delay(**kwargs)
 
 
 @receiver(post_save, sender=AssignmentComment)

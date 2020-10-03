@@ -11,22 +11,9 @@
 {% block title %}{{ a_s.student.get_short_name }} - {{ a_s.assignment.title }}{% endblock %}
 
 {% block javascripts %}
-    {#    TODO: append instead of replace #}
     <script type="text/javascript">
-      window.__CSC__.config.localStorage.hashes = {{ hashes_json|safe }};
+        window.__CSC__.config.localStorage.hashes = Object.assign((window.__CSC__.config.localStorage.hashes || {}), {{ hashes_json|safe }});
     </script>
-    {% if is_actual_teacher or request.user.is_curator %}
-        <script type="text/javascript">
-        $('.assignment-attachment a:contains(".ipynb")').each(function() {
-            if ( $(this).text().trim().match(".ipynb$") ) {
-                $(this).clone()
-                        .attr("href", this.href + "?html=1")
-                        .attr("target", "_blank")
-                        .text("[html]").insertAfter(this);
-            }
-        });
-        </script>
-    {% endif %}
     {% render_bundle 'learning' 'js' 'V1' %}
 {% endblock javascripts %}
 
@@ -86,9 +73,12 @@
                               {% endmarkdown %}
                             </div>
                             {% endif %}
-                            {% if comment.attached_file %}
+                            {% if comment.attached_file or comment.attachments.all %}
                                 <div class="metainfo-holder">
-                                    <span class="assignment-attachment"><i class="fa fa-file"></i> <a href="{{ comment.get_attachment_download_url }}">{{ comment.attached_file_name }}</a></span>
+                                    <div class="assignment-attachment"><i class="fa fa-file"></i> <a href="{{ comment.get_attachment_download_url }}">{{ comment.attached_file_name }}</a></div>
+                                    {% for submission_attachment in comment.attachments.all %}{% if submission_attachment.file_name %}
+                                        <div class="assignment-attachment"><i class="fa fa-file"></i> <a href="{{ submission_attachment.get_download_url }}">{{ submission_attachment.file_name }}</a></div>
+                                    {% endif %}{% endfor %}
                                 </div>
                             {% endif %}
                         </div>

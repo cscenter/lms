@@ -9,7 +9,7 @@ from nbformat.validator import NotebookValidationError
 
 from auth.mixins import PermissionRequiredMixin
 from files.response import XAccelRedirectFileResponse
-from files.tasks import convert_ipynb_to_html
+from files.utils import convert_ipynb_to_html
 
 
 class ProtectedFileDownloadView(ABC, PermissionRequiredMixin, generic.View):

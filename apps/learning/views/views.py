@@ -128,13 +128,13 @@ class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
 
     def get_student_assignment_queryset(self):
         qs = super().get_student_assignment_queryset()
-        prefetch_comments = Prefetch('assignmentcomment_set',
-                                     queryset=(AssignmentComment.published
-                                               .select_related('author',
-                                                               'submission')
-                                               .order_by('created')))
+        submissions = (AssignmentComment.published
+                       .select_related('author', 'submission')
+                       .prefetch_related('attachments')
+                       .order_by('created'))
         return qs.prefetch_related(
-            prefetch_comments,
+            Prefetch('assignmentcomment_set',
+                     queryset=submissions),
             Prefetch('assignment__course__course_teachers',
                      queryset=CourseTeacher.get_queryset()),
             'assignment__assignmentattachment_set')

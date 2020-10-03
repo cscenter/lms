@@ -578,8 +578,8 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel,
         return humanize_duration(self.execution_time)
 
 
-def assignment_submission_attachment_upload_to(self: "AssignmentComment",
-                                               filename) -> str:
+def assignment_comment_attachment_upload_to(self: "AssignmentComment",
+                                            filename) -> str:
     sa = self.student_assignment
     return "{}/assignments/{}/{}/user_{}/{}".format(
         sa.assignment.course.main_branch.site_id,
@@ -622,7 +622,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
     attached_file = ConfigurableStorageFileField(
         verbose_name=_("Attached File"),
         max_length=200,
-        upload_to=assignment_submission_attachment_upload_to,
+        upload_to=assignment_comment_attachment_upload_to,
         storage=private_storage,
         blank=True)
 
@@ -681,6 +681,17 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         self._loaded_is_published = self.is_published
 
 
+def assignment_submission_attachment_upload_to(self: "SubmissionAttachment",
+                                               filename) -> str:
+    sa = self.submission.student_assignment
+    return "{}/assignments/{}/{}/user_{}/{}".format(
+        sa.assignment.course.main_branch.site_id,
+        sa.assignment.course.semester.slug,
+        sa.assignment_id,
+        sa.student_id,
+        filename)
+
+
 class SubmissionAttachment(TimeStampedModel):
     """
     This model could be used for multiple attachments for assignment submission
@@ -689,6 +700,7 @@ class SubmissionAttachment(TimeStampedModel):
     submission = models.ForeignKey(
         AssignmentComment,
         verbose_name=_("Assignment Submission"),
+        related_name='attachments',
         on_delete=models.CASCADE)
     attachment = ConfigurableStorageFileField(
         upload_to=assignment_submission_attachment_upload_to,
