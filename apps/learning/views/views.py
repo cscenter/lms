@@ -19,7 +19,7 @@ from files.views import ProtectedFileDownloadView
 from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, AssignmentComment, \
     AssignmentNotification, Event, CourseNewsNotification, \
-    AssignmentSubmissionTypes
+    AssignmentSubmissionTypes, SubmissionAttachment
 from learning.permissions import ViewAssignmentCommentAttachment, \
     ViewAssignmentAttachment
 from learning.study.services import get_draft_comment
@@ -188,6 +188,7 @@ class AssignmentAttachmentDownloadView(ProtectedFileDownloadView):
 
 
 class AssignmentCommentAttachmentDownloadView(ProtectedFileDownloadView):
+    """Download file directly attached to the AssignmentComment"""
     permission_required = ViewAssignmentCommentAttachment.name
     file_field_name = 'attached_file'
 
@@ -202,6 +203,24 @@ class AssignmentCommentAttachmentDownloadView(ProtectedFileDownloadView):
 
     def get_permission_object(self):
         return self.protected_object.student_assignment
+
+
+class AssignmentSubmissionAttachmentDownloadView(ProtectedFileDownloadView):
+    """Download file attached to the SubmissionAttachment model"""
+    permission_required = ViewAssignmentCommentAttachment.name
+    file_field_name = 'attachment'
+
+    def get_protected_object(self) -> Optional[SubmissionAttachment]:
+        ids: tuple = hashids.decode(self.kwargs['sid'])
+        if not ids:
+            raise Http404
+        qs = (SubmissionAttachment.objects
+              .filter(pk=ids[0])
+              .select_related("submission__student_assignment__assignment__course"))
+        return get_object_or_404(qs)
+
+    def get_permission_object(self):
+        return self.protected_object.submission.student_assignment
 
 
 class CourseNewsNotificationUpdate(LoginRequiredMixin, CourseURLParamsMixin,

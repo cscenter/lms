@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='assignmentcomment',
             name='attached_file',
-            field=files.models.ConfigurableStorageFileField(blank=True, max_length=200, upload_to=learning.models.assignment_comment_attachment_upload_to, verbose_name='Attached File'),
+            field=files.models.ConfigurableStorageFileField(blank=True, max_length=200, upload_to=learning.models.assignment_submission_attachment_upload_to, verbose_name='Attached File'),
         ),
         migrations.AlterField(
             model_name='studentassignment',

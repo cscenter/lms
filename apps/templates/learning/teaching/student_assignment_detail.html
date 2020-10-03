@@ -96,7 +96,7 @@
                         {% with submission=comment.submission %}
                         {% if submission %}
                             <div class="panel-footer" style="border-top: 1px solid #eee;">
-                            {{ submission.checking_system_choice.label }} {% if submission.get_report_url %}<a class="pull-right nowrap submission-status {{ submission.status_choice.css_class }}" target="_blank" href="{{ submission.get_report_url }}">{{ submission.get_status_display }}</a>{% else %}<span class="pull-right nowrap badge submission-status {{ submission.status_choice.css_class }}">{{ submission.get_status_display }}</span>{% endif %}
+                            {{ submission.checking_system_choice.label }} {% if submission.get_report_url %}<a class="pull-right nowrap submission-status {{ submission.status_choice.css_class }}" target="_blank" href="{{ submission.get_report_url }}">{{ submission.get_status_display }}</a>{% else %}<span class="pull-right nowrap submission-status {{ submission.status_choice.css_class }}">{{ submission.get_status_display }}</span>{% endif %}
                             </div>
                         {% endif %}
                         {% endwith %}

@@ -578,7 +578,8 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel,
         return humanize_duration(self.execution_time)
 
 
-def assignment_comment_attachment_upload_to(self: "AssignmentComment", filename):
+def assignment_submission_attachment_upload_to(self: "AssignmentComment",
+                                               filename) -> str:
     sa = self.student_assignment
     return "{}/assignments/{}/{}/user_{}/{}".format(
         sa.assignment.course.main_branch.site_id,
@@ -621,7 +622,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
     attached_file = ConfigurableStorageFileField(
         verbose_name=_("Attached File"),
         max_length=200,
-        upload_to=assignment_comment_attachment_upload_to,
+        upload_to=assignment_submission_attachment_upload_to,
         storage=private_storage,
         blank=True)
 
@@ -678,6 +679,43 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         if self.is_published and (created or not is_published_before):
             notify_new_assignment_comment(self)
         self._loaded_is_published = self.is_published
+
+
+class SubmissionAttachment(TimeStampedModel):
+    """
+    This model could be used for multiple attachments for assignment submission
+    but currently stores only ipynb files converted to the html format.
+    """
+    submission = models.ForeignKey(
+        AssignmentComment,
+        verbose_name=_("Assignment Submission"),
+        on_delete=models.CASCADE)
+    attachment = ConfigurableStorageFileField(
+        upload_to=assignment_submission_attachment_upload_to,
+        storage=private_storage,
+        max_length=200)
+
+    class Meta:
+        verbose_name = _("Assignment Submission Attachment")
+        verbose_name_plural = _("Assignment Submission Attachments")
+
+    def __str__(self):
+        return self.file_name
+
+    @property
+    def file_name(self):
+        return os.path.basename(self.attachment.name)
+
+    @property
+    def file_ext(self):
+        _, ext = os.path.splitext(self.attachment.name)
+        return ext
+
+    def get_download_url(self):
+        return reverse("study:download_submission_attachment", kwargs={
+            "sid": hashids.encode(self.pk),
+            "file_name": self.file_name
+        })
 
 
 class AssignmentNotification(TimezoneAwareModel, TimeStampedModel):

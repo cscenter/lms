@@ -7,6 +7,7 @@ from learning.study.views import TimetableView, \
     StudentAssignmentCommentCreateView, StudentAssignmentSolutionCreateView
 from learning.views import AssignmentAttachmentDownloadView, \
     AssignmentCommentAttachmentDownloadView
+from learning.views.views import AssignmentSubmissionAttachmentDownloadView
 
 app_name = 'study'
 
@@ -20,6 +21,7 @@ urlpatterns = [
     ])),
     path('attachments/assignments/', include([
         path('comments/<slug:sid>/<str:file_name>', AssignmentCommentAttachmentDownloadView.as_view(), name='download_assignment_comment_attachment'),
+        path('submissions/<slug:sid>/<str:file_name>', AssignmentSubmissionAttachmentDownloadView.as_view(), name='download_submission_attachment'),
         path('<slug:sid>/<str:file_name>', AssignmentAttachmentDownloadView.as_view(), name='download_assignment_attachment'),
     ])),
     path('timetable/', TimetableView.as_view(), name='timetable'),
