@@ -84,7 +84,7 @@ class AssignmentAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         self.object.delete()
-        os.remove(self.object.attachment.path)
+        self.object.attachment.delete(save=False)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
