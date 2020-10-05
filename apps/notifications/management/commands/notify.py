@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import smtplib
 import time
 from datetime import datetime
 from functools import partial
@@ -28,6 +29,11 @@ from notifications import NotificationTypes as notification_types
 from users.models import User
 
 logger = logging.getLogger(__name__)
+
+
+class EmailServiceError(Exception):
+    pass
+
 
 EMAIL_TEMPLATES = {
     'new_comment_for_student': {
@@ -93,12 +99,17 @@ def send_notification(notification, template, context, stdout,
         notification.save()
         return
 
+    smtp_health_status = getattr(site_settings, 'smtp_health_status', None)
+    if smtp_health_status is None:
+        raise EmailServiceError(f'Unknown smtp health status for {site_settings}')
+    elif smtp_health_status == EmailServiceHealthCheck.FAIL:
+        msg = (f"skip {notification}. SMTP "
+               f"service {site_settings.default_from_email} is unavailable.")
+        report(stdout, msg)
+        return
+
     connection = get_email_connection(site_settings)
     from_email = site_settings.default_from_email
-    # FIXME: temporarily disable resolving connection at runtime until dkim will be enabled on @yandexdataschool.ru
-    if site_settings.site_id == 3:
-        connection = get_connection(settings.EMAIL_BACKEND)
-        from_email = settings.DEFAULT_FROM_EMAIL
     subject = "[{}] {}".format(context['course_name'], template['subject'])
     html_content = linebreaks(render_to_string(template['template_name'],
                                                context))
@@ -110,9 +121,16 @@ def send_notification(notification, template, context, stdout,
                                  connection=connection)
     msg.attach_alternative(html_content, "text/html")
     report(stdout, f"sending {notification} ({template})")
-    msg.send()
+    try:
+        msg.send()
+    except smtplib.SMTPException as e:
+        site_settings.smtp_health_status = EmailServiceHealthCheck.FAIL
+        logger.exception(e)
+        report(stdout, f"SMTP service {site_settings.default_from_email} is unhealthy")
+        return
     notification.is_notified = True
     notification.save()
+    time.sleep(settings.EMAIL_SEND_COOLDOWN)
 
 
 def get_assignment_notification_template(notification: AssignmentNotification):
@@ -229,7 +247,6 @@ def send_assignment_notifications(site_configurations, stdout) -> None:
         context = get_assignment_notification_context(
             notification, branch, site_settings)
         send_notification(notification, template, context, stdout, site_settings)
-        time.sleep(settings.EMAIL_SEND_COOLDOWN)
 
 
 def send_course_news_notifications(site_configurations, stdout) -> None:
@@ -252,7 +269,11 @@ def send_course_news_notifications(site_configurations, stdout) -> None:
         context = get_course_news_notification_context(notification,
                                                        branch, site_settings)
         send_notification(notification, template, context, stdout, site_settings)
-        time.sleep(settings.EMAIL_SEND_COOLDOWN)
+
+
+class EmailServiceHealthCheck:
+    HEALTH = 1
+    FAIL = 0
 
 
 class Command(BaseCommand):
@@ -268,10 +289,28 @@ class Command(BaseCommand):
                          .filter(enabled=True)
                          .select_related('site'))
         site_settings = {s.site_id: s for s in site_settings}
+        # The destination address is resolved at runtime. When smtp error
+        # occurs (e.g. on sending from noreply@yandexdataschool.ru) the whole
+        # process will be terminated that leads to potential starvation for
+        # other addresses we sent emails from. To make it starvation-free check
+        # smtp service health status and prevent sending emails from it
+        # instead of raising an exception.
+        for s in site_settings.values():
+            s.smtp_health_status = EmailServiceHealthCheck.HEALTH
+
+        send_course_news_notifications(site_settings, self.stdout)
+
+        if all(s.smtp_health_status == EmailServiceHealthCheck.FAIL for s
+               in site_settings.values()):
+            report(self.stdout, 'All services are unhealthy. Try again later.')
+            return
 
         send_assignment_notifications(site_settings, self.stdout)
 
-        send_course_news_notifications(site_settings, self.stdout)
+        if all(s.smtp_health_status == EmailServiceHealthCheck.FAIL for s
+               in site_settings.values()):
+            report(self.stdout, 'All services are unhealthy. Try again later.')
+            return
 
         from notifications.models import Notification
         from notifications.registry import registry
