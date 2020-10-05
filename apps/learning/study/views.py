@@ -137,8 +137,10 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         user = self.request.user
         if user.is_authenticated:
             course = self.student_assignment.assignment.course
-            if Roles.TEACHER in user.roles and user in course.teachers.all():
-                # Redirects actual course teacher to the teaching/ section
+            is_curator = Roles.CURATOR in user.roles
+            is_teacher = Roles.TEACHER in user.roles
+            if is_curator or (is_teacher and user in course.teachers.all()):
+                # Redirects course teacher to the teaching/ section
                 raise Redirect(to=self.student_assignment.get_teacher_url())
         return super().handle_no_permission()
 
