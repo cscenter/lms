@@ -4,7 +4,7 @@ from django.core import checks
 from django.db import models
 from django.db.models import prefetch_related_objects
 
-from .tasks import compute_model_field
+from .tasks import compute_model_fields
 
 logger = logging.getLogger(__name__)
 
@@ -79,10 +79,7 @@ class DerivableFieldsMixin:
             raise TypeError('DerivableFieldsMixin needs a model instance')
 
         content_type = ContentType.objects.get_for_model(self)
-        derivable_fields = derivable_fields or self.derivable_fields
-
-        for field in derivable_fields:
-            compute_model_field.delay(content_type.id, self.pk, field)
+        compute_model_fields.delay(content_type.id, self.pk, derivable_fields)
 
     @classmethod
     def check(cls, **kwargs):
