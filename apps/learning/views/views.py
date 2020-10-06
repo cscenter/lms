@@ -102,27 +102,6 @@ class AssignmentCommentUpsertView(AssignmentSubmissionUpsertView):
         raise NotImplementedError
 
 
-class AssignmentSolutionCreateView(AssignmentSubmissionUpsertView):
-    """Post a new solution"""
-    model = AssignmentComment
-    submission_type = AssignmentSubmissionTypes.SOLUTION
-
-    def post(self, request, *args, **kwargs):
-        submission = AssignmentComment(
-            student_assignment=self.student_assignment,
-            author=request.user,
-            type=self.submission_type,
-            is_published=True)
-        form = self.get_form(data=request.POST, files=request.FILES,
-                             instance=submission)
-        if form.is_valid():
-            return self.form_valid(form)
-        return self.form_invalid(form)
-
-    def get_error_url(self):
-        raise NotImplementedError
-
-
 class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
                                    TemplateView):
 

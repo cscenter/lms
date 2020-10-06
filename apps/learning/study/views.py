@@ -24,7 +24,7 @@ from learning import utils
 from learning.calendar import get_student_calendar_events, get_calendar_events
 from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, Enrollment, \
-    AssignmentSubmissionTypes
+    AssignmentSubmissionTypes, AssignmentComment
 from learning.permissions import ViewOwnStudentAssignments, \
     ViewOwnStudentAssignment, ViewCourses, \
     CreateAssignmentCommentAsLearner
@@ -33,8 +33,7 @@ from learning.services import get_student_classes, get_student_profile
 from learning.study.services import get_solution_form, get_draft_solution
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView, \
-    AssignmentSolutionCreateView
-from users.models import User
+    AssignmentSubmissionUpsertView
 
 
 class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
@@ -185,7 +184,7 @@ class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
 
 
 class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
-                                          AssignmentSolutionCreateView):
+                                          AssignmentSubmissionUpsertView):
     permission_required = CreateAssignmentCommentAsLearner.name
     submission_type = AssignmentSubmissionTypes.SOLUTION
 
@@ -201,6 +200,18 @@ class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
         msg = _("Solution successfully saved")
         messages.success(self.request, msg)
         return self.student_assignment.get_student_url()
+
+    def post(self, request, *args, **kwargs):
+        submission = AssignmentComment(
+            student_assignment=self.student_assignment,
+            author=request.user,
+            type=self.submission_type,
+            is_published=True)
+        form = self.get_form(data=request.POST, files=request.FILES,
+                             instance=submission)
+        if form.is_valid():
+            return self.form_valid(form)
+        return self.form_invalid(form)
 
     def get_error_url(self):
         return self.student_assignment.get_student_url()
