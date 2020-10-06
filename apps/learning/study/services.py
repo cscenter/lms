@@ -50,7 +50,7 @@ def get_solution_form(student_assignment: StudentAssignment,
     submission_format = student_assignment.assignment.submission_type
     if submission_format == AssignmentSubmissionFormats.NO_SUBMIT:
         return None
-    if submission_format == AssignmentSubmissionFormats.EXTERNAL:
+    elif submission_format == AssignmentSubmissionFormats.EXTERNAL:
         # FIXME: return None
         form = AssignmentSolutionDefaultForm(assignment, **kwargs)
     elif (submission_format == AssignmentSubmissionFormats.CODE_REVIEW

@@ -11,22 +11,9 @@
 {% block title %}{{ a_s.student.get_short_name }} - {{ a_s.assignment.title }}{% endblock %}
 
 {% block javascripts %}
-    {#    TODO: append instead of replace #}
     <script type="text/javascript">
-      window.__CSC__.config.localStorage.hashes = {{ hashes_json|safe }};
+        window.__CSC__.config.localStorage.hashes = Object.assign((window.__CSC__.config.localStorage.hashes || {}), {{ hashes_json|safe }});
     </script>
-    {% if is_actual_teacher or request.user.is_curator %}
-        <script type="text/javascript">
-        $('.assignment-attachment a:contains(".ipynb")').each(function() {
-            if ( $(this).text().trim().match(".ipynb$") ) {
-                $(this).clone()
-                        .attr("href", this.href + "?html=1")
-                        .attr("target", "_blank")
-                        .text("[html]").insertAfter(this);
-            }
-        });
-        </script>
-    {% endif %}
     {% render_bundle 'learning' 'js' 'V1' %}
 {% endblock javascripts %}
 
@@ -113,14 +100,16 @@
 
         <div class="mt-30 assignment-actions">
             <button id="add-comment" class="btn btn-lg btn-link active">Написать комментарий</button>
-            <button id="add-solution" class="btn btn-lg btn-link">Добавить решение</button>
+            {% if solution_form %}<button id="add-solution" class="btn btn-lg btn-link">Добавить решение</button>{% endif %}
         </div>
         <div id="comment-form-wrapper" class="csc-well">
             {% crispy comment_form %}
         </div>
-        <div id="solution-form-wrapper" class="csc-well hidden">
-            {% crispy solution_form %}
-        </div>
+        {% if solution_form %}
+            <div id="solution-form-wrapper" class="csc-well hidden">
+                {% crispy solution_form %}
+            </div>
+        {% endif %}
     </div>
 
         <div class="col-xs-3">
