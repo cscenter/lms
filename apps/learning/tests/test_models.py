@@ -125,7 +125,7 @@ class StudentAssignmentTests(CSCTestCase):
         as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course__teachers=[u_teacher],
-            assignment__submission_type=AssignmentSubmissionFormats.OTHER)
+            assignment__submission_type=AssignmentSubmissionFormats.NO_SUBMIT)
         as_.refresh_from_db()
         self.assertFalse(as_.submission_is_received)
         AssignmentCommentFactory.create(student_assignment=as_,
@@ -157,7 +157,7 @@ class StudentAssignmentTests(CSCTestCase):
         self.assertEqual(a_s.state.value, a_s.States.NOT_SUBMITTED)
         a_offline = AssignmentFactory.create(
             passing_score=5, maximum_score=10,
-            submission_type=AssignmentSubmissionFormats.OTHER,
+            submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
         )
         ctx['assignment'] = a_offline

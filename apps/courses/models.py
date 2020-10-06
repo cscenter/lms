@@ -1015,7 +1015,7 @@ class AssignmentSubmissionFormats(DjangoChoices):
     ONLINE = C("online", _("Online Submission"))  # file or text on site
     EXTERNAL = C("external", _("External Service"))
     CODE_REVIEW = C("code_review", _("Code Review Submission"))
-    OTHER = C("other", _("No Submission"))  # on paper, etc
+    NO_SUBMIT = C("other", _("No Submission"))  # on paper, etc
 
     with_checker = {CODE_REVIEW.value}
 
