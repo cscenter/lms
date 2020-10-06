@@ -26,7 +26,8 @@ from .permissions import CreateAssignmentComment, \
     ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner, \
     ViewAssignmentCommentAttachmentAsTeacher, ViewAssignmentAttachment, \
     ViewAssignmentAttachmentAsLearner, ViewAssignmentAttachmentAsTeacher, \
-    EditGradebook, EditOwnGradebook
+    EditGradebook, EditOwnGradebook, CreateAssignmentSolution, \
+    CreateOwnAssignmentSolution
 from info_blocks.permissions import ViewInternships
 
 
@@ -55,6 +56,7 @@ class Roles(DjangoChoices):
         ViewGradebook,
         EditGradebook,
         CreateAssignmentComment,
+        CreateAssignmentSolution,
         ViewAssignmentAttachment,
         ViewAssignmentCommentAttachment,
     ))
@@ -70,6 +72,7 @@ class Roles(DjangoChoices):
         ViewOwnStudentAssignment,
         ViewAssignmentAttachmentAsLearner,
         CreateAssignmentCommentAsLearner,
+        CreateOwnAssignmentSolution,
         ViewAssignmentCommentAttachmentAsLearner,
         EditOwnAssignmentExecutionTime,
         ViewCourses,
@@ -95,6 +98,7 @@ class Roles(DjangoChoices):
         ViewOwnStudentAssignment,
         ViewAssignmentAttachmentAsLearner,
         CreateAssignmentCommentAsLearner,
+        CreateOwnAssignmentSolution,
         ViewAssignmentCommentAttachmentAsLearner,
         ViewCourses,
         ViewSchedule,
@@ -167,6 +171,8 @@ for role in (Roles.STUDENT, Roles.VOLUNTEER, Roles.INVITED):
                               ViewAssignmentAttachmentAsLearner)
     student_role.add_relation(CreateAssignmentComment,
                               CreateAssignmentCommentAsLearner)
+    student_role.add_relation(CreateAssignmentSolution,
+                              CreateOwnAssignmentSolution)
     student_role.add_relation(ViewAssignmentCommentAttachment,
                               ViewAssignmentCommentAttachmentAsLearner)
 

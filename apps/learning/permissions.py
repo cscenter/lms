@@ -5,7 +5,8 @@ import rules
 from django.conf import settings
 
 from auth.permissions import add_perm, Permission
-from courses.models import Course, CourseTeacher, Assignment
+from courses.models import Course, CourseTeacher, Assignment, \
+    AssignmentSubmissionFormats
 from learning.models import StudentAssignment, CourseInvitation
 from learning.services import course_failed_by_student, CourseRole, \
     course_access_role
@@ -306,6 +307,27 @@ class CreateAssignmentCommentAsTeacher(Permission):
     @rules.predicate
     def rule(user, student_assignment: StudentAssignment):
         return user in student_assignment.assignment.course.teachers.all()
+
+
+@add_perm
+class CreateAssignmentSolution(Permission):
+    name = "learning.create_assignment_solution"
+
+
+@add_perm
+class CreateOwnAssignmentSolution(Permission):
+    name = "study.create_assignment_solution"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_assignment: StudentAssignment):
+        submission_format = student_assignment.assignment.submission_type
+        if submission_format == AssignmentSubmissionFormats.NO_SUBMIT:
+            return False
+        student_profile = user.get_student_profile()
+        if student_profile.status in StudentStatuses.inactive_statuses:
+            return False
+        return student_assignment.student_id == user.id
 
 
 @add_perm

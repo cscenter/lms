@@ -27,7 +27,7 @@ from learning.models import StudentAssignment, Enrollment, \
     AssignmentSubmissionTypes, AssignmentComment
 from learning.permissions import ViewOwnStudentAssignments, \
     ViewOwnStudentAssignment, ViewCourses, \
-    CreateAssignmentCommentAsLearner
+    CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution
 from learning.roles import Roles
 from learning.services import get_student_classes, get_student_profile
 from learning.study.services import get_solution_form, get_draft_solution
@@ -185,7 +185,7 @@ class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
 
 class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
                                           AssignmentSubmissionUpsertView):
-    permission_required = CreateAssignmentCommentAsLearner.name
+    permission_required = CreateOwnAssignmentSolution.name
     submission_type = AssignmentSubmissionTypes.SOLUTION
 
     def get_permission_object(self):

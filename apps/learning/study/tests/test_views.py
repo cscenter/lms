@@ -8,6 +8,7 @@ from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
+from courses.models import AssignmentSubmissionFormats
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from learning.models import StudentAssignment, AssignmentNotification, \
@@ -254,6 +255,36 @@ def test_add_solution(client):
     response = client.post(create_solution_url, form_data)
     student_assignment.refresh_from_db()
     assert student_assignment.execution_time == timedelta(hours=1, minutes=46)
+
+
+@pytest.mark.django_db
+def test_add_solution_for_assignment_without_solutions(client):
+    student_profile = StudentProfileFactory()
+    student = student_profile.user
+    course = CourseFactory(main_branch=student_profile.branch,
+                           semester=SemesterFactory.create_current(),
+                           ask_ttc=False)
+    EnrollmentFactory(student_profile=student_profile,
+                      student=student,
+                      course=course)
+    assignment = AssignmentFactory(
+        course=course,
+        submission_type=AssignmentSubmissionFormats.NO_SUBMIT)
+    student_assignment = (StudentAssignment.objects
+                          .get(assignment=assignment, student=student))
+    student_url = student_assignment.get_student_url()
+    client.login(student)
+    response = client.get(student_url)
+    assert response.context_data['solution_form'] is None
+    create_solution_url = reverse("study:assignment_solution_create",
+                                  kwargs={"pk": student_assignment.pk})
+    form_data = {
+        'solution-text': "Test comment without file"
+    }
+    response = client.post(create_solution_url, form_data)
+    assert response.status_code == 403
+    response = client.get(student_url)
+    assert smart_bytes(form_data['solution-text']) not in response.content
 
 
 @pytest.mark.django_db
