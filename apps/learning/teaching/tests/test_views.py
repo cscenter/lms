@@ -102,6 +102,7 @@ def test_student_assignment_list_view_filters(client):
     sa2 = StudentAssignment.objects.get(student=student2,
                                         assignment=assignment)
     AssignmentCommentFactory.create(student_assignment=sa1, author=teacher)
+    sa1.refresh_from_db()
     assert sa1.last_comment_from == sa1.CommentAuthorTypes.TEACHER
     response = client.get(url + "?comment=any")
     assert len(response.context['student_assignment_list']) == 3
@@ -148,15 +149,14 @@ def test_student_assignment_list_view_filters(client):
     assert len(response.context['student_assignment_list']) == 0
     # teacher has set a grade
     sa3.score = 3
-    sa3.save()
+    sa3.save(update_fields=['score'])
     response = client.get(url + "?comment=student&score=no")
     assert len(response.context['student_assignment_list']) == 0
-    response = client.get(url +
-                           "?comment=student&score=any")
+    response = client.get(url + "?comment=student&score=any")
     assert len(response.context['student_assignment_list']) == 1
     sa3.refresh_from_db()
     sa1.score = 3
-    sa1.save()
+    sa1.save(update_fields=['score'])
     response = client.get(url + "?comment=student&score=yes")
     assert len(response.context['student_assignment_list']) == 1
 
