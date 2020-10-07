@@ -66,8 +66,9 @@ def test_access_student_assignment_regular_student(client):
     student = student_assignment.student
     # Course didn't failed by the student so he has full access to
     # the student assignment page.
-    enrollment = EnrollmentFactory(course=course, student=student,
-                                   grade=GradeTypes.GOOD)
+    enrollment = Enrollment.objects.get(course=course, student=student)
+    enrollment.grade = GradeTypes.GOOD
+    enrollment.save()
     assert course_access_role(course=course, user=student) == CourseRole.STUDENT_REGULAR
     client.login(student)
     response = client.get(student_url)
@@ -106,8 +107,9 @@ def test_access_student_assignment_failed_course(client):
     student_url = student_assignment.get_student_url()
     active_student = student_assignment.student
     assert active_student.is_active_student
-    enrollment = EnrollmentFactory(course=course, student=active_student,
-                                   grade=GradeTypes.UNSATISFACTORY)
+    enrollment = Enrollment.objects.get(course=course, student=active_student)
+    enrollment.grade = GradeTypes.UNSATISFACTORY
+    enrollment.save()
     assert course_access_role(course=course, user=active_student) == CourseRole.STUDENT_RESTRICT
     # Student failed the course and has no positive grade on target assignment
     client.login(active_student)
@@ -145,7 +147,9 @@ def test_access_student_assignment_inactive_student(inactive_status, client,
                                                   assignment__maximum_score=80,
                                                   score=None)
     student = student_assignment.student
-    EnrollmentFactory(course=active_course, student=student, grade=GradeTypes.GOOD)
+    enrollment = Enrollment.objects.get(course=active_course, student=student)
+    enrollment.grade = GradeTypes.GOOD
+    enrollment.save()
     assert course_access_role(course=active_course, user=student) == CourseRole.STUDENT_REGULAR
     student_profile = get_student_profile(student, settings.SITE_ID)
     assert student_profile.branch == active_course.main_branch
@@ -169,7 +173,9 @@ def test_access_student_assignment_inactive_student(inactive_status, client,
         assignment__maximum_score=80,
         score=None)
     student_url = student_assignment.get_student_url()
-    EnrollmentFactory(course=past_course, student=student, grade=GradeTypes.GOOD)
+    enrollment = Enrollment.objects.get(course=past_course, student=student)
+    enrollment.grade = GradeTypes.GOOD
+    enrollment.save()
     assert course_access_role(course=past_course, user=student) == CourseRole.STUDENT_RESTRICT
     response = client.get(student_url)
     assert response.status_code == 403

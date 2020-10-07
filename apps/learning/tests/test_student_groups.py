@@ -3,15 +3,17 @@ import pytest
 from core.tests.factories import BranchFactory, SiteFactory
 from core.timezone import now_local
 from core.urls import reverse
-from courses.models import StudentGroupTypes, CourseBranch
+from courses.models import StudentGroupTypes, CourseBranch, CourseTeacher
 from courses.tests.factories import CourseFactory, AssignmentFactory, \
-    SemesterFactory
+    SemesterFactory, CourseTeacherFactory
 from learning.models import StudentGroup, StudentAssignment, Enrollment
 from learning.services import StudentGroupService
 from learning.settings import Branches, GradeTypes
-from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
+from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory, \
+    AssignmentCommentFactory, StudentGroupAssigneeFactory, \
+    StudentAssignmentFactory
 from users.tests.factories import StudentFactory, CuratorFactory, \
-    InvitedStudentFactory, StudentProfileFactory
+    InvitedStudentFactory, StudentProfileFactory, TeacherFactory
 
 
 @pytest.mark.django_db
@@ -173,3 +175,33 @@ def test_assignment_restricted_to(settings):
     student_assignments = StudentAssignment.objects.filter(assignment=a)
     assert len(student_assignments) == 1
     assert student_assignments[0].student == student_profile_spb.user
+
+
+@pytest.mark.django_db
+def test_auto_assign_teacher_to_student_assignment():
+    student = StudentFactory()
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    student_assignment = StudentAssignmentFactory(assignment__course=course,
+                                                  student=student)
+    comment1 = AssignmentCommentFactory(student_assignment=student_assignment,
+                                        author=teacher)
+    student_assignment.refresh_from_db()
+    assert student_assignment.assignee is None
+    assert student_assignment.trigger_auto_assign is True
+    enrollment = Enrollment.objects.get(student=comment1.student_assignment.student)
+    course_teacher = CourseTeacher.objects.get(course=course)
+    StudentGroupAssigneeFactory(student_group=enrollment.student_group,
+                                assignee=course_teacher)
+    comment2 = AssignmentCommentFactory(student_assignment=student_assignment,
+                                        author=student)
+    student_assignment.refresh_from_db()
+    assert student_assignment.trigger_auto_assign is False
+    assert student_assignment.assignee == course_teacher
+    enrollment.is_deleted = True
+    enrollment.save()
+    student_assignment.trigger_auto_assign = True
+    student_assignment.assignee = None
+    student_assignment.save()
+    comment3 = AssignmentCommentFactory(student_assignment=student_assignment,
+                                        author=student)

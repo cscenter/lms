@@ -14,7 +14,7 @@ from learning.models import StudentAssignment, \
     CourseNewsNotification, Event, GraduateProfile, Invitation, \
     CourseInvitation, StudentGroup, EnrollmentPeriod, AssignmentSubmissionTypes, \
     StudentGroupAssignee
-from learning.services import StudentGroupService
+from learning.services import StudentGroupService, get_student_profile
 from learning.settings import StudentStatuses
 from users.constants import Roles
 from users.models import UserGroup
@@ -44,16 +44,26 @@ class StudentGroupAssigneeFactory(factory.django.DjangoModelFactory):
         model = StudentGroupAssignee
 
     student_group = factory.SubFactory(StudentGroupFactory)
-    assignee = factory.SubFactory(TeacherFactory)
+    assignee = factory.SubFactory(CourseTeacherFactory)
 
 
-# FIXME: create enrollment
 class StudentAssignmentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = StudentAssignment
 
     assignment = factory.SubFactory(AssignmentFactory)
     student = factory.SubFactory(StudentFactory)
+
+    @factory.post_generation
+    def create_enrollment(self, create, extracted, **kwargs):
+        if not create:
+            return
+        try:
+            Enrollment.objects.get(course=self.assignment.course,
+                                   student=self.student)
+        except Enrollment.DoesNotExist:
+            EnrollmentFactory(course=self.assignment.course,
+                              student=self.student)
 
 
 class AssignmentCommentFactory(factory.django.DjangoModelFactory):

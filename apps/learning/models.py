@@ -97,7 +97,7 @@ class StudentGroupAssignee(models.Model):
         verbose_name=_("Student Group"),
         on_delete=models.CASCADE)
     assignee = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        'courses.CourseTeacher',
         verbose_name=_("Assignee"),
         on_delete=models.CASCADE)
     assignment = models.ForeignKey(
@@ -404,6 +404,13 @@ class Invitation(TimeStampedModel):
                 .exists())
 
 
+class AssignmentStatuses(DjangoChoices):
+    NEW = ChoiceItem('new', _("New"))
+    CHECK = ChoiceItem('check', _("Check"))
+    ACCEPTED = ChoiceItem('accept', _("Accepted"))
+    REWORK = ChoiceItem('rework', _("Rework"))
+
+
 class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel,
                         DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'assignment'
@@ -441,10 +448,32 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel,
         settings.AUTH_USER_MODEL,
         verbose_name=_("StudentAssignment|student"),
         on_delete=models.CASCADE)
+    status = models.CharField(
+        verbose_name=_("StudentAssignment|Status"),
+        choices=AssignmentStatuses.choices,
+        default=AssignmentStatuses.NEW,
+        max_length=10)
     score = ScoreField(
         verbose_name=_("Grade"),
         null=True,
         blank=True)
+    assignee = models.ForeignKey(
+        'courses.CourseTeacher',
+        verbose_name=_("Assignee"),
+        on_delete=models.SET_NULL,
+        blank=True, null=True,
+        related_name="+",  # Disable backwards relation
+    )
+    trigger_auto_assign = models.BooleanField(
+        null=True,
+        help_text='Try to set assignee on first student activity',
+        editable=False,
+        default=True)
+    watchers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Student Assignment Watchers"),
+        related_name="+",  # Disable backwards relation
+    )
     score_changed = MonitorField(
         verbose_name=_("Assignment|grade changed"),
         monitor='score')
@@ -469,6 +498,8 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel,
 
     derivable_fields = [
         'execution_time',
+        'first_student_comment_at',
+        'last_comment_from',
     ]
 
     class Meta:
@@ -497,11 +528,42 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel,
                               student_assignment=self)
                       .aggregate(total=Sum('execution_time')))
         execution_time = time_spent['total']  # Could be None
-
         if self.execution_time != execution_time:
             self.execution_time = execution_time
             return True
+        return False
 
+    def _compute_first_student_comment_at(self):
+        first_student_submission = (AssignmentComment.objects
+                                    .filter(student_assignment=self,
+                                            author_id=self.student_id)
+                                    .order_by('created')
+                                    .values('created')
+                                    .first())
+        if not first_student_submission:
+            return False
+        first_student_submission_at = first_student_submission['created']
+        if self.first_student_comment_at != first_student_submission_at:
+            self.first_student_comment_at = first_student_submission_at
+            return True
+        return False
+
+    def _compute_last_comment_from(self):
+        latest_comment = (AssignmentComment.objects
+                          .filter(student_assignment=self,
+                                  type=AssignmentSubmissionTypes.COMMENT)
+                          .order_by('-created')
+                          .values('author_id')
+                          .first())
+        if not latest_comment:
+            comment_from = self.CommentAuthorTypes.NOBODY
+        elif latest_comment['author_id'] == self.student_id:
+            comment_from = self.CommentAuthorTypes.STUDENT
+        else:
+            comment_from = self.CommentAuthorTypes.TEACHER
+        if self.last_comment_from != comment_from:
+            self.last_comment_from = comment_from
+            return True
         return False
 
     def get_teacher_url(self):
@@ -670,13 +732,20 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
         return instance
 
     def save(self, **kwargs):
-        from learning.services import notify_new_assignment_comment
+        from learning.services import notify_new_assignment_comment, \
+            update_student_assignment_derivable_fields, \
+            trigger_auto_assign_for_student_assignment
         created = self.pk is None
         is_published_before = getattr(self, '_loaded_is_published', False)
         super().save(**kwargs)
-        # FIXME: remove notification logic from model
-        # Send notifications only on publishing comment
-        if self.is_published and (created or not is_published_before):
+        has_been_published = self.is_published and (created or
+                                                    not is_published_before)
+        # Send notifications on publishing submission
+        if has_been_published:
+            # TODO: replace with self.student_assignment.('first_student_comment_at', 'last_comment_from')
+            update_student_assignment_derivable_fields(self)
+            trigger_auto_assign_for_student_assignment(self)
+            # FIXME: move notification to signal
             notify_new_assignment_comment(self)
         self._loaded_is_published = self.is_published
 

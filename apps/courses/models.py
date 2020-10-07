@@ -1055,10 +1055,11 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         _("Time to Completion"),
         blank=True, null=True,
         help_text=_("Estimated amount of time required for the task to be completed"))
+    # TODO: Rename to assignees
     notify_teachers = models.ManyToManyField(
         CourseTeacher,
-        verbose_name=_("Assignment|notify_settings"),
-        help_text=_("Specify who will receive notifications about new comments"),
+        verbose_name=_("Assignment|assignees"),
+        help_text=_("Has lower priority than student group assignees"),
         blank=True)
     restricted_to = models.ManyToManyField(
         'learning.StudentGroup',

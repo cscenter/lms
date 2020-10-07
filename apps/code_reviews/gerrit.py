@@ -470,7 +470,7 @@ def set_reviewers_for_change(client: Gerrit, change: GerritChange):
     assignees = StudentGroupService.get_assignees(enrollment.student_group,
                                                   assignment=assignment)
     for assignee in assignees:
-        reviewer_uid = get_ldap_username(assignee)
+        reviewer_uid = get_ldap_username(assignee.teacher)
         client.set_reviewer(change.change_id, reviewer_uid)
 
 

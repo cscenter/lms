@@ -18,7 +18,7 @@ from courses.models import Assignment, AssignmentAttachment, \
     AssignmentSubmissionFormats
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory, AssignmentAttachmentFactory
-from learning.models import StudentAssignment
+from learning.models import StudentAssignment, Enrollment
 from learning.permissions import ViewAssignmentAttachment
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, \
@@ -132,7 +132,6 @@ def test_first_comment_after_deadline(client):
     sa = StudentAssignmentFactory(assignment=assignment,
                                   student__branch=branch_spb)
     student = sa.student
-    EnrollmentFactory(student=student, course=assignment.course)
     comment = AssignmentCommentFactory.create(student_assignment=sa,
                                               author=student,
                                               created=dt)

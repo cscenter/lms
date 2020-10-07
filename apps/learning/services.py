@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 from enum import Enum, auto
 from itertools import islice
@@ -21,10 +22,13 @@ from courses.models import Course, Assignment, AssignmentAttachment, \
     StudentGroupTypes, CourseClass, CourseTeacher, CourseGroupModes
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, StudentGroup, Event, AssignmentSubmissionTypes, \
-    CourseNewsNotification, StudentGroupAssignee
+    CourseNewsNotification, StudentGroupAssignee, AssignmentComment
 from learning.settings import StudentStatuses
 from users.constants import Roles
 from users.models import User, StudentProfile, StudentTypes
+
+
+logger = logging.getLogger(__name__)
 
 
 class StudentProfileError(Exception):
@@ -234,14 +238,14 @@ class StudentGroupService:
 
     @staticmethod
     def get_assignees(student_group: StudentGroup,
-                      assignment: Assignment = None):
+                      assignment: Assignment = None) -> List[CourseTeacher]:
         default_and_overridden = Q(assignment__isnull=True)
         if assignment:
             default_and_overridden |= Q(assignment=assignment)
         assignees = list(StudentGroupAssignee.objects
                          .filter(default_and_overridden,
                                  student_group=student_group)
-                         .select_related('assignee'))
+                         .select_related('assignee__teacher'))
         # Default values could be overwritten by assignment specific
         if any(ga.assignment_id is not None for ga in assignees):
             # Remove defaults
@@ -547,38 +551,84 @@ def notify_student_new_assignment(student_assignment, commit=True):
 def notify_new_assignment_comment(comment):
     """
     Notify teachers if student leave a comment, otherwise notify student.
-    Update `first_student_comment_at` and `last_comment_from`
-    StudentAssignment model fields.
     """
     sa: StudentAssignment = comment.student_assignment
     notifications = []
-    sa_update_dict = {"modified": now()}
     if comment.author_id == sa.student_id:
-        other_comments = (sa.assignmentcomment_set(manager='published')
-                          .filter(author_id=comment.author_id)
-                          .exclude(pk=comment.pk))
-        is_first_comment = not other_comments.exists()
         is_solution = (comment.type == AssignmentSubmissionTypes.SOLUTION)
-
         teachers = comment.student_assignment.assignment.notify_teachers.all()
         for t in teachers:
             notifications.append(
                 AssignmentNotification(user_id=t.teacher_id,
                                        student_assignment=sa,
                                        is_about_passed=is_solution))
-
-        if is_first_comment:
-            sa_update_dict["first_student_comment_at"] = comment.created
-        sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.STUDENT
     else:
-        sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.TEACHER
         notifications.append(
             AssignmentNotification(user_id=sa.student_id, student_assignment=sa)
         )
     AssignmentNotification.objects.bulk_create(notifications)
-    StudentAssignment.objects.filter(pk=sa.pk).update(**sa_update_dict)
-    for attr_name, attr_value in sa_update_dict.items():
+
+
+def update_student_assignment_derivable_fields(comment):
+    """
+    Optimize db queries by reimplementing next logic:
+        student_assignment.compute_fields('first_student_comment_at')
+        student_assignment.compute_fields('last_comment_from')
+    """
+    if not comment.pk:
+        return
+    sa: StudentAssignment = comment.student_assignment
+    fields = {"modified": now()}
+    if comment.author_id == sa.student_id:
+        # FIXME: includes solutions. is it ok?
+        other_comments = (sa.assignmentcomment_set(manager='published')
+                          .filter(author_id=comment.author_id)
+                          .exclude(pk=comment.pk))
+        is_first_comment = not other_comments.exists()
+        if is_first_comment:
+            fields["first_student_comment_at"] = comment.created
+        fields["last_comment_from"] = sa.CommentAuthorTypes.STUDENT
+    else:
+        fields["last_comment_from"] = sa.CommentAuthorTypes.TEACHER
+    StudentAssignment.objects.filter(pk=sa.pk).update(**fields)
+    for attr_name, attr_value in fields.items():
         setattr(sa, attr_name, attr_value)
+
+
+def trigger_auto_assign_for_student_assignment(submission: AssignmentComment):
+    """
+    Auto assign teacher in a lazy manner (on student activity) when
+    student group has assignee.
+    """
+    student_assignment = submission.student_assignment
+    # Trigger on student activity
+    if submission.author_id != student_assignment.student_id:
+        return
+    if not student_assignment.trigger_auto_assign:
+        return
+    update_fields = ['trigger_auto_assign', 'modified']
+    assignment = student_assignment.assignment
+    try:
+        enrollment = (Enrollment.active
+                      .select_related('student_group')
+                      .get(course_id=assignment.course_id,
+                           student_id=student_assignment.student_id))
+    except Enrollment.DoesNotExist:
+        logger.error('Auto assign triggered for student that left the course')
+        return
+    student_group = enrollment.student_group
+    assignees = StudentGroupService.get_assignees(student_group, assignment)
+    if assignees:
+        update_fields.append('assignee')
+        if len(assignees) == 1:
+            assignee = assignees[0]
+        else:
+            # TODO: set all of them as watchers instead or get random
+            assignee = assignees[0]
+        student_assignment.assignee = assignee
+    student_assignment.trigger_auto_assign = False
+    student_assignment.modified = now()
+    student_assignment.save(update_fields=update_fields)
 
 
 def get_student_classes(user, filters: List[Q] = None,
