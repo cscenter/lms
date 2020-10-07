@@ -264,14 +264,15 @@ class AssignmentService:
                  .create(assignment=assignment, attachment=attachment))
 
     @staticmethod
-    def setup_notification_settings(assignment: Assignment):
+    def setup_assignees(assignment: Assignment):
         """
-        Auto populate assignment notification settings based on
-        default course notification settings.
+        Copy course homework reviewers to the assignment settings for further
+        customization.
         """
-        course_teachers = assignment.course.course_teachers.all()
-        notify_teachers = [t.pk for t in course_teachers if t.notify_by_default]
-        assignment.notify_teachers.add(*notify_teachers)
+        course_reviewers = assignment.course.course_teachers.filter(
+            roles=CourseTeacher.roles.reviewer
+        )
+        assignment.assignees.add(*course_reviewers)
 
     @classmethod
     def create_student_assignment(cls, assignment: Assignment,

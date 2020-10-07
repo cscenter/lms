@@ -51,7 +51,7 @@ class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
 
     def post_save(self, assignment):
         AssignmentService.bulk_create_student_assignments(assignment)
-        AssignmentService.setup_notification_settings(assignment)
+        AssignmentService.setup_assignees(assignment)
 
 
 class AssignmentUpdateView(AssignmentCreateUpdateMixin, UpdateView):

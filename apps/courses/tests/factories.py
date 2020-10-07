@@ -208,14 +208,14 @@ class AssignmentFactory(factory.django.DjangoModelFactory):
             AssignmentService.bulk_create_student_assignments(self)
 
     @factory.post_generation
-    def notify_teachers(self, create, extracted, **kwargs):
+    def assignees(self, create, extracted, **kwargs):
         if not create:
             return
         if extracted:
             for co_teacher in extracted:
-                self.notify_teachers.add(co_teacher)
+                self.assignees.add(co_teacher)
         else:
-            AssignmentService.setup_notification_settings(self)
+            AssignmentService.setup_assignees(self)
 
 
 class AssignmentAttachmentFactory(factory.django.DjangoModelFactory):

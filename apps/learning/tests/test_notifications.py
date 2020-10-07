@@ -135,19 +135,22 @@ def test_assignment(client):
 
 
 @pytest.mark.django_db
-def test_assignment_notify_teachers_public_form(client):
+def test_assignment_setup_assignees_public_form(client):
     """
-    On assignment creation we have to ensure that `notify_teachers`
-    m2m prepopulated by the course teachers with `notify_by_default=True`
+    Make sure `Assignment.assignees` are prepopulated by the course
+    homework reviewers
     """
     student = StudentFactory()
     t1, t2, t3, t4 = TeacherFactory.create_batch(4)
-    # Course offering with 4 teachers whom notify_by_default flag set to True
-    co = CourseFactory.create(teachers=[t1, t2, t3, t4])
-    co_teacher1 = CourseTeacher.objects.get(course=co, teacher=t1)
+    course = CourseFactory.create(teachers=[t1, t2, t3, t4])
+    for course_teacher in CourseTeacher.objects.filter(course=course):
+        course_teacher.roles = CourseTeacher.roles.reviewer
+        course_teacher.save()
+    co_teacher1 = CourseTeacher.objects.get(course=course, teacher=t1)
     co_teacher1.notify_by_default = False
+    co_teacher1.roles = None
     co_teacher1.save()
-    EnrollmentFactory.create(student=student, course=co, grade=GradeTypes.GOOD)
+    EnrollmentFactory.create(student=student, course=course, grade=GradeTypes.GOOD)
     # Create first assignment
     client.login(t1)
     a = AssignmentFactory.build()
@@ -161,49 +164,49 @@ def test_assignment_notify_teachers_public_form(client):
         'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
         'deadline_at_1': '00:00'
     }
-    url = co.get_create_assignment_url()
+    url = course.get_create_assignment_url()
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
-    assignments = co.assignment_set.all()
+    assignments = course.assignment_set.all()
     assert len(assignments) == 1
     assignment = assignments[0]
-    assert len(assignment.notify_teachers.all()) == 3
-    # Update assignment and check, that notify_teachers list not changed
+    assert len(assignment.assignees.all()) == 3
+    # Update assignment and check, that assignees are not changed
     form['maximum_score'] = 10
     url = assignment.get_update_url()
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
-    assert len(assignment.notify_teachers.all()) == 3
+    assert len(assignment.assignees.all()) == 3
+
+
+@pytest.mark.django_db
+def test_assignment_teacher_notifications(client):
+    t1, t2, t3, t4 = TeacherFactory.create_batch(4)
+    course = CourseFactory(teachers=[t1, t2, t3, t4])
+    course_teacher1 = CourseTeacher.objects.get(course=course, teacher=t1)
+    course_teacher1.notify_by_default = False
+    course_teacher1.save()
     # Leave a comment from student
-    assert not course_failed_by_student(co, student)
+    student = StudentFactory()
+    assert not course_failed_by_student(course, student)
     client.login(student)
-    sa = StudentAssignment.objects.get(assignment=assignment, student=student)
+    assert Assignment.objects.count() == 0
+    sa = StudentAssignmentFactory(student=student, assignment__course=course)
+    assignment = sa.assignment
     student_create_comment_url = reverse("study:assignment_comment_create",
                                          kwargs={"pk": sa.pk})
     client.post(student_create_comment_url,
                 {'comment-text': 'test first comment'})
     notifications = [n.user.pk for n in AssignmentNotification.objects.all()]
-    # 1 - about assignment creation and 3 for teachers
-    assert len(notifications) == 4
+    assert len(notifications) == 3
     assert t1.pk not in notifications
-    AssignmentNotification.objects.all().delete()
-    not_notify_teacher = assignment.notify_teachers.all()[0]
-    assignment.notify_teachers.remove(not_notify_teacher)
-    form_data = {
-        'comment-text': 'second comment from student'
-    }
-    client.post(student_create_comment_url, form_data)
-    notifications = [n.user.pk for n in AssignmentNotification.objects.all()]
-    assert len(notifications) == 2
-    assert not_notify_teacher not in notifications
 
 
 @pytest.mark.django_db
-def test_assignment_notify_teachers_admin_form(client):
+def test_assignment_assignees_admin_form(client):
     """
-    On assignment creation `notify_teachers` should be prepopulated with
-    the course teachers by default.
-    For create view `notify_teachers` is hidden and not processed.
+    Make sure `Assignment.assignees` are prepopulated by the course
+    homework reviewers
     """
     admin = CuratorFactory()
     client.login(admin)
@@ -212,7 +215,7 @@ def test_assignment_notify_teachers_admin_form(client):
     co = CourseFactory.create(teachers=[t1, t2, t3, t4])
     ma = AssignmentAdmin(Assignment, AdminSite())
     a = AssignmentFactory.build()
-    # Send data with empty notify_teachers list
+    # Send data with empty assignees list
     post_data = {
         'course': co.pk,
         'title': a.title,
@@ -226,14 +229,14 @@ def test_assignment_notify_teachers_admin_form(client):
     }
     response = client.post(reverse('admin:courses_assignment_add'), post_data)
     assert (Assignment.objects.count() == 1)
-    assert len(Assignment.objects.order_by('id').all()[0].notify_teachers.all()) == 4
+    assert len(Assignment.objects.order_by('id').all()[0].assignees.all()) == 4
     # Specifying teacher list on creation doesn't affect notification settings
     co_t1, co_t2, co_t3, co_t4 = CourseTeacher.objects.filter(course=co).all()
-    post_data['notify_teachers'] = [co_t1.pk, co_t2.pk]
+    post_data['assignees'] = [co_t1.pk, co_t2.pk]
     response = client.post(reverse('admin:courses_assignment_add'), post_data)
     assert (Assignment.objects.count() == 2)
-    assert len(Assignment.objects.order_by('id').all()[0].notify_teachers.all()) == 4
-    assert len(Assignment.objects.order_by('id').all()[1].notify_teachers.all()) == 4
+    assert len(Assignment.objects.order_by('id').all()[0].assignees.all()) == 4
+    assert len(Assignment.objects.order_by('id').all()[1].assignees.all()) == 4
 
 
 @pytest.mark.django_db

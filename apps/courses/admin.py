@@ -155,13 +155,13 @@ class AssignmentAdminForm(TimezoneAwareAdminForm):
         cleaned_data = super().clean()
         # We can select teachers only from related course offering
         if ('course' in cleaned_data
-                and 'notify_teachers' in cleaned_data
-                and cleaned_data['notify_teachers']):
+                and 'assignees' in cleaned_data
+                and cleaned_data['assignees']):
             co = cleaned_data['course']
             co_teachers = [t.pk for t in co.course_teachers.all()]
-            if any(t.pk not in co_teachers for t in cleaned_data['notify_teachers']):
-                self.add_error('notify_teachers', ValidationError(
-                        _("Please, double check teacher list. Some "
+            if any(t.pk not in co_teachers for t in cleaned_data['assignees']):
+                self.add_error('assignees', ValidationError(
+                        _("Please, double check the list. Some "
                           "users are not related to the selected course")))
 
 
@@ -204,10 +204,10 @@ class AssignmentAdmin(admin.ModelAdmin):
         return ['course'] if obj else []
 
     def get_exclude(self, request, obj=None):
-        return None if obj else ('notify_teachers',)
+        return None if obj else ('assignees',)
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
-        if db_field.name == "notify_teachers":
+        if db_field.name == "assignees":
             qs = CourseTeacher.objects.select_related("teacher", "course")
             try:
                 assignment_id = request.resolver_match.kwargs['object_id']
@@ -223,7 +223,7 @@ class AssignmentAdmin(admin.ModelAdmin):
         created = not change
         if created:
             AssignmentService.bulk_create_student_assignments(form.instance)
-            AssignmentService.setup_notification_settings(form.instance)
+            AssignmentService.setup_assignees(form.instance)
 
     def created_local(self, obj):
         return admin_datetime(obj.created_local())
