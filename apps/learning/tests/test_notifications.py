@@ -36,10 +36,13 @@ def _get_unread(client, url):
 
 
 @pytest.mark.django_db
-def test_assignment(client):
+def test_view_new_assignment(client):
     teacher1 = TeacherFactory()
     teacher2 = TeacherFactory()
     course = CourseFactory(teachers=[teacher1, teacher2])
+    for ct in CourseTeacher.objects.filter(course=course):
+        ct.roles = CourseTeacher.roles.reviewer
+        ct.save()
     student = StudentFactory()
     EnrollmentFactory(student=student, course=course, grade=GradeTypes.GOOD)
     a = AssignmentFactory.build()
@@ -80,7 +83,6 @@ def test_assignment(client):
     teacher_comment_dict = {
         'comment-text': "Test teacher comment without file"
     }
-
     # Post first comment on assignment
     AssignmentNotification.objects.all().delete()
     assert not course_failed_by_student(course, student)
@@ -137,8 +139,8 @@ def test_assignment(client):
 @pytest.mark.django_db
 def test_assignment_setup_assignees_public_form(client):
     """
-    Make sure `Assignment.assignees` are prepopulated by the course
-    homework reviewers
+    Make sure `Assignment.assignees` are populated by the course
+    homework reviewers on adding new assignment.
     """
     student = StudentFactory()
     t1, t2, t3, t4 = TeacherFactory.create_batch(4)
@@ -180,30 +182,7 @@ def test_assignment_setup_assignees_public_form(client):
 
 
 @pytest.mark.django_db
-def test_assignment_teacher_notifications(client):
-    t1, t2, t3, t4 = TeacherFactory.create_batch(4)
-    course = CourseFactory(teachers=[t1, t2, t3, t4])
-    course_teacher1 = CourseTeacher.objects.get(course=course, teacher=t1)
-    course_teacher1.notify_by_default = False
-    course_teacher1.save()
-    # Leave a comment from student
-    student = StudentFactory()
-    assert not course_failed_by_student(course, student)
-    client.login(student)
-    assert Assignment.objects.count() == 0
-    sa = StudentAssignmentFactory(student=student, assignment__course=course)
-    assignment = sa.assignment
-    student_create_comment_url = reverse("study:assignment_comment_create",
-                                         kwargs={"pk": sa.pk})
-    client.post(student_create_comment_url,
-                {'comment-text': 'test first comment'})
-    notifications = [n.user.pk for n in AssignmentNotification.objects.all()]
-    assert len(notifications) == 3
-    assert t1.pk not in notifications
-
-
-@pytest.mark.django_db
-def test_assignment_assignees_admin_form(client):
+def test_assignment_setup_assignees_admin_form(client):
     """
     Make sure `Assignment.assignees` are prepopulated by the course
     homework reviewers
@@ -213,6 +192,9 @@ def test_assignment_assignees_admin_form(client):
     from django.contrib.admin.sites import AdminSite
     t1, t2, t3, t4 = TeacherFactory.create_batch(4)
     co = CourseFactory.create(teachers=[t1, t2, t3, t4])
+    for ct in CourseTeacher.objects.filter(course=co):
+        ct.roles = CourseTeacher.roles.reviewer
+        ct.save()
     ma = AssignmentAdmin(Assignment, AdminSite())
     a = AssignmentFactory.build()
     # Send data with empty assignees list
@@ -240,12 +222,39 @@ def test_assignment_assignees_admin_form(client):
 
 
 @pytest.mark.django_db
-def test_new_assignment_create_notification(settings):
+def test_assignment_submission_notifications_for_teacher(client):
+    t1, t2, t3, t4 = TeacherFactory.create_batch(4)
+    course = CourseFactory(teachers=[t1, t2, t3, t4])
+    for ct in CourseTeacher.objects.filter(course=course):
+        ct.roles = CourseTeacher.roles.reviewer
+        ct.save()
+    course_teacher1 = CourseTeacher.objects.get(course=course, teacher=t1)
+    course_teacher1.notify_by_default = False
+    course_teacher1.save()
+    # Leave a comment from student
+    student = StudentFactory()
+    assert not course_failed_by_student(course, student)
+    client.login(student)
+    assert Assignment.objects.count() == 0
+    sa = StudentAssignmentFactory(student=student, assignment__course=course)
+    assignment = sa.assignment
+    student_create_comment_url = reverse("study:assignment_comment_create",
+                                         kwargs={"pk": sa.pk})
+    client.post(student_create_comment_url,
+                {'comment-text': 'test first comment'})
+    notifications = [n.user.pk for n in AssignmentNotification.objects.all()]
+    assert len(notifications) == 3
+    assert t1.pk not in notifications
+
+
+@pytest.mark.django_db
+def test_new_assignment_generate_notifications(settings):
+    """Generate notifications for students about new assignment"""
     course = CourseFactory()
     enrollments = EnrollmentFactory.create_batch(5, course=course)
     assignment = AssignmentFactory(course=course)
     assert AssignmentNotification.objects.count() == 5
-    # Dont' send notification to the students who leaved the course
+    # Dont' send notification to the students who left the course
     AssignmentNotification.objects.all().delete()
     assert AssignmentNotification.objects.count() == 0
     enrollment = enrollments[0]
@@ -264,7 +273,7 @@ def test_new_assignment_create_notification(settings):
 
 
 @pytest.mark.django_db
-def test_new_assignment_create_notification_context(client, settings):
+def test_new_assignment_notification_context(client, settings):
     settings.SITE_ID = 1
     settings.DEFAULT_URL_SCHEME = 'https'
     abs_url = client.get('', secure=True).wsgi_request.build_absolute_uri
@@ -300,33 +309,7 @@ def test_new_assignment_create_notification_context(client, settings):
 
 
 @pytest.mark.django_db
-def test_new_course_news_notification_context(settings, client):
-    settings.SITE_ID = settings.TEST_DOMAIN_ID
-    settings.DEFAULT_URL_SCHEME = 'https'
-    abs_url = client.get('', secure=True).wsgi_request.build_absolute_uri
-    assert get_domain() == settings.TEST_DOMAIN
-    course = CourseFactory()
-    student = StudentFactory(branch=course.main_branch)
-    enrollment = EnrollmentFactory(course=course, student=student)
-    cn = CourseNewsNotificationFactory(course_offering_news__course=course,
-                                       user=student)
-    site_settings = SiteConfiguration.objects.get(site_id=settings.SITE_ID)
-    participant_branch = enrollment.student_profile.branch
-    context = get_course_news_notification_context(cn, participant_branch,
-                                                   site_settings)
-    assert context['course_link'] == abs_url(course.get_absolute_url())
-    another_site = Site.objects.get(pk=settings.ANOTHER_DOMAIN_ID)
-    branch = BranchFactory(code=settings.DEFAULT_BRANCH_CODE, site=another_site)
-    cn = CourseNewsNotificationFactory(
-        course_offering_news__course=course,
-        user=StudentFactory(branch=branch))
-    site_settings = SiteConfiguration.objects.get(site_id=settings.ANOTHER_DOMAIN_ID)
-    context = get_course_news_notification_context(cn, branch, site_settings)
-    assert context['course_link'].startswith(f'https://{settings.ANOTHER_DOMAIN}')
-
-
-@pytest.mark.django_db
-def test_new_assignment_timezone(settings, mocker):
+def test_new_assignment_notification_context_timezone(settings, mocker):
     mocker.patch('core.locks.get_shared_connection', MagicMock())
     settings.LANGUAGE_CODE = 'ru'
     branch_spb = BranchFactory(code=Branches.SPB)
@@ -359,19 +342,29 @@ def test_new_assignment_timezone(settings, mocker):
 
 
 @pytest.mark.django_db
-def test_create_deadline_change_notification(settings):
-    co = CourseFactory()
-    e1, e2 = EnrollmentFactory.create_batch(2, course=co)
-    s1 = e1.student
-    s1_profile = get_student_profile(e1.student, settings.SITE_ID)
-    s1_profile.status = StudentStatuses.EXPELLED
-    s1_profile.save()
-    a = AssignmentFactory(course=co)
-    assert AssignmentNotification.objects.count() == 1
-    dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    a.deadline_at = dt
-    a.save()
-    assert AssignmentNotification.objects.count() == 2
+def test_new_course_news_notification_context(settings, client):
+    settings.SITE_ID = settings.TEST_DOMAIN_ID
+    settings.DEFAULT_URL_SCHEME = 'https'
+    abs_url = client.get('', secure=True).wsgi_request.build_absolute_uri
+    assert get_domain() == settings.TEST_DOMAIN
+    course = CourseFactory()
+    student = StudentFactory(branch=course.main_branch)
+    enrollment = EnrollmentFactory(course=course, student=student)
+    cn = CourseNewsNotificationFactory(course_offering_news__course=course,
+                                       user=student)
+    site_settings = SiteConfiguration.objects.get(site_id=settings.SITE_ID)
+    participant_branch = enrollment.student_profile.branch
+    context = get_course_news_notification_context(cn, participant_branch,
+                                                   site_settings)
+    assert context['course_link'] == abs_url(course.get_absolute_url())
+    another_site = Site.objects.get(pk=settings.ANOTHER_DOMAIN_ID)
+    branch = BranchFactory(code=settings.DEFAULT_BRANCH_CODE, site=another_site)
+    cn = CourseNewsNotificationFactory(
+        course_offering_news__course=course,
+        user=StudentFactory(branch=branch))
+    site_settings = SiteConfiguration.objects.get(site_id=settings.ANOTHER_DOMAIN_ID)
+    context = get_course_news_notification_context(cn, branch, site_settings)
+    assert context['course_link'].startswith(f'https://{settings.ANOTHER_DOMAIN}')
 
 
 @pytest.mark.django_db
@@ -400,7 +393,23 @@ def test_change_assignment_comment(settings):
 
 
 @pytest.mark.django_db
-def test_deadline_changed_timezone(settings, mocker):
+def test_changed_assignment_deadline_generate_notifications(settings):
+    co = CourseFactory()
+    e1, e2 = EnrollmentFactory.create_batch(2, course=co)
+    s1 = e1.student
+    s1_profile = get_student_profile(e1.student, settings.SITE_ID)
+    s1_profile.status = StudentStatuses.EXPELLED
+    s1_profile.save()
+    a = AssignmentFactory(course=co)
+    assert AssignmentNotification.objects.count() == 1
+    dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    a.deadline_at = dt
+    a.save()
+    assert AssignmentNotification.objects.count() == 2
+
+
+@pytest.mark.django_db
+def test_changed_assignment_deadline_notifications_timezone(settings, mocker):
     mocker.patch('core.locks.get_shared_connection', MagicMock())
     settings.LANGUAGE_CODE = 'ru'
     branch_spb = BranchFactory(code=Branches.SPB)

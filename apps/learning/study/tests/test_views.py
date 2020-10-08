@@ -8,7 +8,7 @@ from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
-from courses.models import AssignmentSubmissionFormats
+from courses.models import AssignmentSubmissionFormats, CourseTeacher
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from learning.models import StudentAssignment, AssignmentNotification, \
@@ -121,6 +121,9 @@ def test_new_comment_on_assignment_page(client, assert_redirect):
     teacher2 = TeacherFactory()
     course = CourseFactory(main_branch=student_profile.branch, semester=semester,
                            teachers=[teacher, teacher2])
+    for ct in CourseTeacher.objects.filter(course=course):
+        ct.roles = CourseTeacher.roles.reviewer
+        ct.save()
     EnrollmentFactory(student_profile=student_profile,
                       student=student_profile.user,
                       course=course)

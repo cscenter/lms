@@ -3,16 +3,19 @@ from datetime import timedelta
 import pytest
 
 from core.tests.factories import BranchFactory, SiteFactory
-from courses.models import StudentGroupTypes, CourseGroupModes, CourseBranch
-from courses.tests.factories import CourseFactory, AssignmentFactory
+from courses.models import StudentGroupTypes, CourseGroupModes, CourseBranch, \
+    CourseTeacher
+from courses.tests.factories import CourseFactory, AssignmentFactory, \
+    CourseTeacherFactory
 from learning.models import StudentGroup, StudentAssignment, \
-    AssignmentNotification, Enrollment, StudentGroupAssignee
+    AssignmentNotification, Enrollment, StudentGroupAssignee, AssignmentComment
 from learning.services import StudentGroupService, GroupEnrollmentKeyError, \
-    AssignmentService, create_student_profile, StudentProfileError
+    AssignmentService, create_student_profile, StudentProfileError, \
+    create_notifications_about_new_submission
 from learning.settings import Branches, StudentStatuses
 from learning.tests.factories import StudentGroupFactory, EnrollmentFactory, \
     AssignmentNotificationFactory, StudentAssignmentFactory, \
-    StudentGroupAssigneeFactory
+    StudentGroupAssigneeFactory, AssignmentCommentFactory
 from users.models import StudentTypes, UserGroup
 from users.tests.factories import StudentFactory, UserFactory, \
     StudentProfileFactory
@@ -357,3 +360,49 @@ def test_median_execution_time():
     sa4 = StudentAssignmentFactory(assignment=assignment,
                                    execution_time=timedelta(minutes=4))
     assert AssignmentService.get_median_execution_time(assignment) == timedelta(hours=1, minutes=30)
+
+
+@pytest.mark.django_db
+def test_create_notifications_about_new_submission():
+    student_assignment = StudentAssignmentFactory()
+    student = student_assignment.student
+    course = student_assignment.assignment.course
+    comment = AssignmentCommentFactory(author=student,
+                                       student_assignment=student_assignment)
+    AssignmentNotification.objects.all().delete()
+    create_notifications_about_new_submission(comment)
+    assert AssignmentNotification.objects.count() == 0
+    # Add course teacher without reviewer role
+    ct1 = CourseTeacherFactory(course=course)
+    create_notifications_about_new_submission(comment)
+    assert AssignmentNotification.objects.count() == 0
+    # Add course teachers with a reviewer role
+    ct2 = CourseTeacherFactory(course=course,
+                               roles=CourseTeacher.roles.reviewer,
+                               notify_by_default=True)
+    ct3 = CourseTeacherFactory(course=course,
+                               roles=CourseTeacher.roles.reviewer,
+                               notify_by_default=True)
+    create_notifications_about_new_submission(comment)
+    assert AssignmentNotification.objects.count() == 2
+    # Assign student assignment to teacher
+    student_assignment.assignee = ct2
+    student_assignment.save()
+    AssignmentNotification.objects.all().delete()
+    create_notifications_about_new_submission(comment)
+    notifications = (AssignmentNotification.objects
+                     .filter(student_assignment=student_assignment))
+    assert notifications.count() == 1
+    assert notifications[0].user == ct2.teacher
+    student_assignment.assignee = None
+    student_assignment.save()
+    # Add student group assignees
+    AssignmentNotification.objects.all().delete()
+    enrollment = Enrollment.objects.get(course=course)
+    StudentGroupAssigneeFactory(student_group=enrollment.student_group,
+                                assignee=ct3)
+    create_notifications_about_new_submission(comment)
+    notifications = (AssignmentNotification.objects
+                     .filter(student_assignment=student_assignment))
+    assert notifications.count() == 1
+    assert notifications[0].user == ct3.teacher

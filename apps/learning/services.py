@@ -237,7 +237,7 @@ class StudentGroupService:
         return student_group.name
 
     @staticmethod
-    def get_assignees(student_group: StudentGroup,
+    def get_assignees(student_group,
                       assignment: Assignment = None) -> List[CourseTeacher]:
         default_and_overridden = Q(assignment__isnull=True)
         if assignment:
@@ -549,24 +549,52 @@ def notify_student_new_assignment(student_assignment, commit=True):
     return obj
 
 
-def notify_new_assignment_comment(comment):
-    """
-    Notify teachers if student leave a comment, otherwise notify student.
-    """
-    sa: StudentAssignment = comment.student_assignment
+# FIXME: для решений в Я.Контест неплохо бы отправлять уведомления учителям, только если это gerrit.bot?
+def create_notifications_about_new_submission(submission: AssignmentComment):
+    if not submission.pk:
+        return
     notifications = []
-    if comment.author_id == sa.student_id:
-        is_solution = (comment.type == AssignmentSubmissionTypes.SOLUTION)
-        teachers = comment.student_assignment.assignment.notify_teachers.all()
-        for t in teachers:
-            notifications.append(
-                AssignmentNotification(user_id=t.teacher_id,
-                                       student_assignment=sa,
-                                       is_about_passed=is_solution))
+    student_assignment: StudentAssignment = submission.student_assignment
+    if submission.author_id != student_assignment.student_id:
+        # Generate notification for student
+        n = AssignmentNotification(user_id=student_assignment.student_id,
+                                   student_assignment=student_assignment)
+        notifications.append(n)
     else:
-        notifications.append(
-            AssignmentNotification(user_id=sa.student_id, student_assignment=sa)
-        )
+        assignees = []
+        assignment = student_assignment.assignment
+        if student_assignment.assignee_id:
+            assignees.append(student_assignment.assignee.teacher_id)
+        else:
+            # There is no teacher assigned, check student group assignees
+            try:
+                enrollment = (Enrollment.active
+                              .get(course_id=assignment.course_id,
+                                   student_id=student_assignment.student_id))
+            except Enrollment.DoesNotExist:
+                logger.info("No need to send assignment notifications "
+                            "for student that left the course")
+                return
+            student_group = enrollment.student_group_id
+            group_assignees = StudentGroupService.get_assignees(student_group,
+                                                                assignment)
+            if group_assignees:
+                assignees = [a.teacher_id for a in group_assignees]
+            else:
+                assignees = [a.teacher_id for a in assignment.assignees.all()]
+        # Skip course teachers who don't want receive notifications
+        if assignees:
+            course_teachers = (CourseTeacher.objects
+                               .filter(course=assignment.course_id))
+            notifications_enabled = {ct.teacher_id for ct in course_teachers
+                                     if ct.notify_by_default}
+            assignees = [a for a in assignees if a in notifications_enabled]
+        is_solution = (submission.type == AssignmentSubmissionTypes.SOLUTION)
+        for a in assignees:
+            n = AssignmentNotification(user_id=a,
+                                       student_assignment=student_assignment,
+                                       is_about_passed=is_solution)
+            notifications.append(n)
     AssignmentNotification.objects.bulk_create(notifications)
 
 

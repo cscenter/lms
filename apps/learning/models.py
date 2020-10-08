@@ -700,6 +700,31 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
             smart_str(self.student_assignment.assignment),
             smart_str(self.student_assignment.student.get_full_name())))
 
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        instance._loaded_is_published = instance.is_published
+        return instance
+
+    def save(self, **kwargs):
+        from learning.services import update_student_assignment_derivable_fields, \
+            trigger_auto_assign_for_student_assignment
+        from learning.tasks import generate_notifications_about_new_submission
+        created = self.pk is None
+        is_published_before = getattr(self, '_loaded_is_published', False)
+        super().save(**kwargs)
+        has_been_published = self.is_published and (created or
+                                                    not is_published_before)
+        # Send notifications on publishing submission
+        if has_been_published:
+            trigger_auto_assign_for_student_assignment(self)
+            # FIXME: move side effects outside model saving, e.g. to on_commit
+            # TODO: replace with self.student_assignment.('first_student_comment_at', 'last_comment_from')
+            update_student_assignment_derivable_fields(self)
+            generate_notifications_about_new_submission.delay(
+                assignment_submission_id=self.pk)
+        self._loaded_is_published = self.is_published
+
     def created_local(self, tz=None):
         if not tz:
             tz = self.get_timezone()
@@ -724,30 +749,6 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel)
     def is_stale_for_edit(self):
         # Teacher can edit comment during 10 min period only
         return (now() - self.created).total_seconds() > 600
-
-    @classmethod
-    def from_db(cls, db, field_names, values):
-        instance = super().from_db(db, field_names, values)
-        instance._loaded_is_published = instance.is_published
-        return instance
-
-    def save(self, **kwargs):
-        from learning.services import notify_new_assignment_comment, \
-            update_student_assignment_derivable_fields, \
-            trigger_auto_assign_for_student_assignment
-        created = self.pk is None
-        is_published_before = getattr(self, '_loaded_is_published', False)
-        super().save(**kwargs)
-        has_been_published = self.is_published and (created or
-                                                    not is_published_before)
-        # Send notifications on publishing submission
-        if has_been_published:
-            # TODO: replace with self.student_assignment.('first_student_comment_at', 'last_comment_from')
-            update_student_assignment_derivable_fields(self)
-            trigger_auto_assign_for_student_assignment(self)
-            # FIXME: move notification to signal
-            notify_new_assignment_comment(self)
-        self._loaded_is_published = self.is_published
 
 
 def assignment_submission_attachment_upload_to(self: "SubmissionAttachment",

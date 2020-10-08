@@ -4,6 +4,7 @@ from django_rq import job
 
 from files.utils import convert_ipynb_to_html
 from learning.models import AssignmentComment, SubmissionAttachment
+from learning.services import create_notifications_about_new_submission
 
 logger = logging.getLogger(__file__)
 
@@ -28,3 +29,22 @@ def convert_assignment_submission_ipynb_file_to_html(*, assignment_submission_id
     submission_attachment = SubmissionAttachment(submission=submission,
                                                  attachment=html_source)
     submission_attachment.save()
+
+
+@job('high')
+def generate_notifications_about_new_submission(*, assignment_submission_id):
+    try:
+        submission = (AssignmentComment.objects
+                      .select_related('student_assignment__assignment',
+                                      'student_assignment__assignee')
+                      .only('id', 'type', 'is_published', 'author_id',
+                            'student_assignment_id',
+                            'student_assignment__assignment__course_id',
+                            'student_assignment__student_id',
+                            'student_assignment__assignee__teacher_id')
+                      .order_by()
+                      .get(pk=assignment_submission_id))
+    except AssignmentComment.DoesNotExist:
+        logger.debug(f"Submission with id={assignment_submission_id} not found")
+        return
+    create_notifications_about_new_submission(submission)
