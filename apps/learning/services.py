@@ -596,6 +596,7 @@ def create_notifications_about_new_submission(submission: AssignmentComment):
                                        is_about_passed=is_solution)
             notifications.append(n)
     AssignmentNotification.objects.bulk_create(notifications)
+    return len(notifications)
 
 
 def update_student_assignment_derivable_fields(comment):

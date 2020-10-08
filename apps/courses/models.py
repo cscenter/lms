@@ -586,8 +586,7 @@ class CourseTeacher(models.Model):
     roles = BitField(flags=TeacherRoles.choices,
                      default=(TeacherRoles.LECTURER,))
     notify_by_default = models.BooleanField(
-        _("Notify by default"),
-        help_text=(_("Add teacher to assignment notify settings by default")),
+        _("Notifications"),
         default=True)
 
     class Meta:

@@ -47,4 +47,5 @@ def generate_notifications_about_new_submission(*, assignment_submission_id):
     except AssignmentComment.DoesNotExist:
         logger.debug(f"Submission with id={assignment_submission_id} not found")
         return
-    create_notifications_about_new_submission(submission)
+    count = create_notifications_about_new_submission(submission)
+    return f'Generated {count} notifications'

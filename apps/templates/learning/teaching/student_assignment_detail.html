@@ -146,6 +146,11 @@
                 <h5 class="assignment">{% trans "Deadline" %}</h5>
                 <span class="nowrap">{{ a_s.assignment.deadline_at|timezone:timezone|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at|timezone:timezone|time:"H:i" }}</span>
 
+                {% if a_s.assignee_id %}
+                <h5 class="assignment">{% trans "Assignee" %}</h5>
+                <span class="nowrap">{{ a_s.assignee.teacher.get_full_name }}</span>
+                {% endif %}
+
                 <h5 class="assignment">{% trans "Submission Type" %}</h5>
                 {{ a_s.assignment.get_submission_type_display }}
 
