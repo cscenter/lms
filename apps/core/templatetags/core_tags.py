@@ -216,6 +216,12 @@ def call_method(obj, method_name, *args, **kwargs):
     return method(*args, **kwargs)
 
 
+@register.simple_tag(takes_context=True)
+def call_function(context, func_name, *args, **kwargs):
+    method = context[func_name]
+    return method(*args, **kwargs)
+
+
 @register.simple_tag
 def can_enroll_in_course(user, course, student_profile):
     from learning.permissions import EnrollInCourse, EnrollPermissionObject
