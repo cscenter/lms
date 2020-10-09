@@ -184,6 +184,7 @@ class EditOwnStudentAssignment(Permission):
     @rules.predicate
     def rule(user, student_assignment: StudentAssignment):
         course = student_assignment.assignment.course
+        # FIXME: check is actual teacher?
         return user in course.teachers.all()
 
 

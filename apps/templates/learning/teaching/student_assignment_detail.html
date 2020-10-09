@@ -10,11 +10,14 @@
 
 {% block title %}{{ a_s.student.get_short_name }} - {{ a_s.assignment.title }}{% endblock %}
 
+{% block body_attrs %} data-init-sections="studentAssignment"{% endblock body_attrs %}
+
 {% block javascripts %}
     <script type="text/javascript">
         window.__CSC__.config.localStorage.hashes = Object.assign((window.__CSC__.config.localStorage.hashes || {}), {{ hashes_json|safe }});
     </script>
     {% render_bundle 'learning' 'js' 'V1' %}
+    {% render_bundle 'teaching' 'js' 'V1' %}
 {% endblock javascripts %}
 
 
@@ -108,7 +111,6 @@
     </div>
 
         <div class="col-xs-3">
-            <div class="-submission" id="o-sidebar">
                 {% if is_actual_teacher and next_student_assignment %}
                   <a href="{% url 'teaching:student_assignment_detail' next_student_assignment.pk %}" class="btn btn-default">
                     {% trans "Next unchecked[assignment]" %} <i class="fa fa-angle-right"></i>
@@ -128,6 +130,9 @@
                 <h5 class="assignment">{% trans "Time Spent on Assignment" %}</h5>
                 <span>{% if a_s.execution_time == None %}{% trans "No value is specified" %}{% else %}{{ a_s.get_execution_time_display }}{% endif %}</span>
 
+                <h5 class="assignment">{% trans "Assignee" %}{% if a_s.assignment.course.course_teachers.all|length > 0 %} <a href="#" id="edit-assignee" data-toggle="modal" data-target="#update-assignee-form">Изменить</a>{% endif %}</h5>
+                <div class="nowrap" id="assignee-value" style="text-overflow: ellipsis; overflow: hidden;">{% if a_s.assignee_id %}{{ a_s.assignee.teacher.get_full_name }}{% else %}Не указан{% endif %}</div>
+
                 {% if not is_actual_teacher %}
                       {% if one_teacher %}
                       <h5 class="assignment">{% trans "Professor" %}</h5>
@@ -146,11 +151,6 @@
                 <h5 class="assignment">{% trans "Deadline" %}</h5>
                 <span class="nowrap">{{ a_s.assignment.deadline_at|timezone:timezone|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at|timezone:timezone|time:"H:i" }}</span>
 
-                {% if a_s.assignee_id %}
-                <h5 class="assignment">{% trans "Assignee" %}</h5>
-                <span class="nowrap">{{ a_s.assignee.teacher.get_full_name }}</span>
-                {% endif %}
-
                 <h5 class="assignment">{% trans "Submission Type" %}</h5>
                 {{ a_s.assignment.get_submission_type_display }}
 
@@ -162,12 +162,10 @@
 
                 <h5 class="assignment">{% trans "Assignment created" %}</h5>
                 {{ a_s.assignment.created_local|date:"d E Y" }}
-            </div>
         </div>
     </div>
 </div>
 
-{#  XXX: Due to bug with `fade` class and `shown.bs.modal` event put this html code here  #}
 <div id='update-comment-model-form' class='modal' tabindex='-1' role='dialog'>
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -177,6 +175,35 @@
                 <p class="text-muted">Пожалуйста, не меняйте смысл комментария, т.к. студент потенциально мог его прочитать в текущей версии и начать отвечать.<br>В таком случае лучше написать новый.</p>
             </div>
             <div class="inner"></div>
+        </div>
+    </div>
+</div>
+
+<div id='update-assignee-form' class='modal' tabindex='-1' role='dialog'>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Форма назначения проверяющего</h4>
+            </div>
+            <form action="{% url 'learning-api:v1:my_course_student_assignment_assignee_update' a_s.assignment.course_id a_s.assignment_id a_s.student_id %}" id="assignee-form">
+            <div class="modal-body">
+                <div class="non_field_errors"></div>
+                <div class="form-group">
+                    <label for="assignee-select">Преподаватель</label>
+                    <select name="assignee" id="assignee-select" class="select form-control">
+                        <option value="" {% if not a_s.assignee_id %}selected{% endif %}>Не указан</option>
+                        {% for course_teacher in a_s.assignment.course.course_teachers.all %}
+                            <option value="{{ course_teacher.pk }}" {% if course_teacher.pk == a_s.assignee_id %}selected{% endif %}>{{ course_teacher.teacher.get_full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                <button type="submit" class="btn btn-primary">Обновить</button>
+            </div>
+            </form>
         </div>
     </div>
 </div>

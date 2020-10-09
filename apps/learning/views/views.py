@@ -48,6 +48,7 @@ class StudentAssignmentURLParamsMixin:
         return (StudentAssignment.objects
                 .filter(pk=self.kwargs['pk'])
                 .select_related('student',
+                                'assignee__teacher',
                                 'assignment',
                                 'assignment__course',
                                 'assignment__course__main_branch',
@@ -137,7 +138,7 @@ class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
             'a_s': sa,
             'timezone': sa.assignment.course.get_timezone(),
             'first_comment_after_deadline': first_comment_after_deadline,
-            'one_teacher': sa.assignment.course.teachers.count() == 1,
+            'one_teacher': len(sa.assignment.course.course_teachers.all()) == 1,
             'hashes_json': comment_persistence.get_hashes_json(),
             'comment_form': comment_form,
         }

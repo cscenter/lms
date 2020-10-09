@@ -50,7 +50,7 @@ class StudentAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentAssignment
         fields = ('pk', 'score', 'state', 'student_id')
-        read_only_fields = ['state']
+        read_only_fields = ['state', 'student_id']
 
     def validate_score(self, value):
         max_score = self.instance.assignment.maximum_score
@@ -66,6 +66,19 @@ class StudentAssignmentSerializer(serializers.ModelSerializer):
 class AssignmentScoreSerializer(StudentAssignmentSerializer):
     class Meta(StudentAssignmentSerializer.Meta):
         fields = ('score',)
+
+
+class StudentAssignmentAssigneeSerializer(StudentAssignmentSerializer):
+    class Meta(StudentAssignmentSerializer.Meta):
+        fields = ('pk', 'assignee',)
+
+    def validate_assignee(self, value):
+        teachers = self.instance.assignment.course.course_teachers.all()
+        valid_values = {t for t in teachers if not t.roles.spectator}
+        if value and value not in valid_values:
+            msg = _("Invalid course teacher %s") % value
+            raise serializers.ValidationError(msg)
+        return value
 
 
 class MyCourseSerializer(CourseSerializer):

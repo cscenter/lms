@@ -8,7 +8,8 @@ from courses.models import Course, Assignment
 from courses.permissions import CreateAssignment
 from learning.api.serializers import CourseNewsNotificationSerializer, \
     StudentAssignmentSerializer, MyCourseSerializer, \
-    MyCourseAssignmentSerializer, EnrollmentSerializer, MyEnrollmentSerializer
+    MyCourseAssignmentSerializer, EnrollmentSerializer, MyEnrollmentSerializer, \
+    StudentAssignmentAssigneeSerializer
 from learning.models import CourseNewsNotification, StudentAssignment, \
     Enrollment
 from learning.permissions import EditStudentAssignment, \
@@ -111,4 +112,18 @@ class StudentAssignmentUpdate(UpdateAPIView):
         return (StudentAssignment.objects
                 .filter(assignment_id=self.kwargs['assignment_id'])
                 .select_related('assignment')
+                .order_by())
+
+
+class StudentAssignmentAssigneeUpdate(UpdateAPIView):
+    permission_classes = [EditStudentAssignment]
+    serializer_class = StudentAssignmentAssigneeSerializer
+    lookup_url_kwarg = 'student_id'
+    lookup_field = 'student_id'
+
+    def get_queryset(self):
+        print(self.request.POST)
+        return (StudentAssignment.objects
+                .filter(assignment_id=self.kwargs['assignment_id'])
+                .select_related('assignment__course')
                 .order_by())

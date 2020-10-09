@@ -36,7 +36,7 @@
                 <div class="btn-group">
                   <a href="{% if view.is_for_staff %}{% call_method gradebook.course 'get_gradebook_url' url_name='staff:gradebook' format='csv' %}{% else %}{% call_method gradebook.course 'get_gradebook_url' url_name='teaching:gradebook' format='csv' %}{% endif %}"
                      target="_blank"
-                     class="btn btn-default marks-sheet-csv-link" role="button" data-toggle="tooltip"><i class="fa fa-download"></i> Сохранить .csv</a>
+                     class="btn btn-default marks-sheet-csv-link" role="button" data-toggle="tooltip"><i class="fa fa-download"></i> Скачать .csv</a>
                 </div>
                 <div class="btn-group">
                   <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт оценок .csv <span class="caret"></span></a>

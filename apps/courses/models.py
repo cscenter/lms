@@ -597,8 +597,7 @@ class CourseTeacher(models.Model):
     objects = CourseTeacherManager()
 
     def __str__(self):
-        return "{0} [{1}]".format(smart_str(self.teacher),
-                                  smart_str(self.course_id))
+        return f"{self.teacher}, course: {self.course_id}"
 
     def get_absolute_url(self, subdomain=settings.LMS_SUBDOMAIN):
         return reverse('teacher_detail', args=[self.teacher_id],
