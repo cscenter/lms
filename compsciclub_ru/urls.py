@@ -60,6 +60,7 @@ urlpatterns += [
 
     path('teaching/', include('learning.teaching.urls')),
     path('learning/', include('learning.study.urls')),
+    path('api/', include('learning.api.urls')),
     path("events/<int:pk>/", EventDetailView.as_view(), name="non_course_event_detail"),
 
     path("courses/", include([
