@@ -166,7 +166,7 @@ class GradeBookFormFactory:
                 if not sa:
                     continue
                 assignment = sa.assignment
-                if not assignment.is_online:
+                if not assignment.is_online and not gradebook.is_readonly:
                     k = BaseGradebookForm.GRADE_PREFIX + str(sa.id)
                     fields[k] = AssignmentScore(assignment, sa)
 

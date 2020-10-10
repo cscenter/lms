@@ -4,6 +4,8 @@ from decimal import Decimal
 from typing import Dict
 
 import numpy as np
+from django.conf import settings
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from core.db.models import normalize_score
@@ -122,6 +124,23 @@ class GradeBookData:
         # First 3 columns in gradebook table, see `pages/_gradebook.scss`
         magic = 150 + 140 + 66
         return len(self.assignments) * self.ASSIGNMENT_COLUMN_WIDTH + magic
+
+    @cached_property
+    def number_of_fields(self):
+        # Note: assignment field uses hidden input for current value
+        inputs_for_assignments = len(self.assignments) * len(self.students) * 2
+        fields_for_final_grades = len(self.students)
+        return inputs_for_assignments + fields_for_final_grades
+
+    @cached_property
+    def is_readonly(self):
+        """
+        Later based on this property value decide should assignment fields
+        be read only or not in the gradebook form.
+        """
+        max_number = settings.DATA_UPLOAD_MAX_NUMBER_FIELDS
+        number_of_fields_is_exceeded = (self.number_of_fields > max_number)
+        return len(self.students) > 100 or number_of_fields_is_exceeded
 
 
 def gradebook_data(course: Course) -> GradeBookData:
