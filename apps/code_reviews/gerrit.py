@@ -462,7 +462,7 @@ def get_or_create_change(client: Gerrit, student_assignment: StudentAssignment):
 
 
 def set_reviewers_for_change(client: Gerrit, change: GerritChange):
-    """Set reviewers in Gerrit"""
+    """Set reviewers and CC in Gerrit"""
     assignment = change.student_assignment.assignment
     student = change.student_assignment.student
     enrollment = student.get_enrollment(assignment.course_id)
@@ -471,8 +471,14 @@ def set_reviewers_for_change(client: Gerrit, change: GerritChange):
     assignees = StudentGroupService.get_assignees(enrollment.student_group,
                                                   assignment=assignment)
     for assignee in assignees:
-        reviewer_uid = get_ldap_username(assignee.teacher)
-        client.set_reviewer(change.change_id, reviewer_uid)
+        individual_group_uuid = create_user_group(client, assignee.teacher)
+        client.set_reviewer(change.change_id, individual_group_uuid,
+                            state='REVIEWER', notify='NONE')
+    # The Change owner is admin (limitation of gerrit), not a student,
+    # let's add them to CC to notify about updates
+    individual_group_uuid = create_user_group(client, student)
+    client.set_reviewer(change.change_id, individual_group_uuid, state='CC',
+                        notify='NONE')
 
 
 def list_change_files(client: Gerrit, change: GerritChange):

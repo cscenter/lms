@@ -235,18 +235,20 @@ class Gerrit:
             "name": new_name
         })
 
-    def set_reviewer(self, change_id, reviewer):
+    def set_reviewer(self, change_id, reviewer, **payload):
         change_reviewers_uri = f'changes/{change_id}/reviewers'
         return self._request('POST', change_reviewers_uri, json={
-            'reviewer': reviewer
+            'reviewer': reviewer,
+            **payload
         })
 
-    def create_change(self, project_name, branch_name, subject):
+    def create_change(self, project_name, branch_name, subject, **payload):
         changes_uri = 'changes/'
         return self._request('POST', changes_uri, json={
             'project': project_name,
             'subject': subject,
             'branch': branch_name,
+            **payload
         })
 
     def get_change(self, change_id):
