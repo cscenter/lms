@@ -146,9 +146,13 @@ class StudentGroupService:
                 }))
             return group
         elif course.group_mode == CourseGroupModes.MANUAL:
+            group_name = attrs.pop('name', None)
+            if not group_name:
+                raise StudentGroupError('Provide a unique name for group')
             group, _ = (StudentGroup.objects.get_or_create(
                 course_id=course.pk,
                 type=StudentGroupTypes.MANUAL,
+                name=group_name,
                 defaults=attrs))
             return group
         else:

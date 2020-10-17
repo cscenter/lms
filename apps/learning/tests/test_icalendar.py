@@ -1,7 +1,6 @@
 from itertools import chain
 
 import pytest
-from django.conf import settings
 from django.contrib.sites.models import Site
 from icalendar import Calendar, Event
 
@@ -11,8 +10,7 @@ from courses.tests.factories import CourseFactory, CourseClassFactory, \
 from learning.settings import Branches
 from learning.tests.factories import EnrollmentFactory, EventFactory
 from users.constants import Roles
-from users.models import User
-from users.tests.factories import UserFactory, StudentFactory
+from users.tests.factories import StudentFactory
 
 
 # TODO: убедиться, что для заданий/занятий учитывается таймзона пользователя из URL календаря, а не залогиненного
@@ -30,7 +28,8 @@ def test_smoke(client, curator, settings):
 
 
 @pytest.mark.django_db
-def test_course_classes(client, settings):
+def test_course_classes(client, settings, mocker):
+    mocker.patch('code_reviews.tasks.update_password_in_gerrit')
     user = StudentFactory(groups=[Roles.TEACHER])
     client.login(user)
     fname = 'classes.ics'
@@ -60,7 +59,8 @@ def test_course_classes(client, settings):
 
 
 @pytest.mark.django_db
-def test_assignments(client, settings):
+def test_assignments(client, settings, mocker):
+    mocker.patch('code_reviews.tasks.update_password_in_gerrit')
     user = StudentFactory(groups=[Roles.TEACHER],
                           branch__code=Branches.SPB)
     client.login(user)
