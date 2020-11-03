@@ -78,7 +78,7 @@
                     {% bootstrap_paginate page_obj range=10 show_prev_next="false" show_first_last="true" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>" %}
                 {% endif %}
             {% else %}
-                <div class="projects-empty-list">В данный момент вы не подписаны ни на один проект. Список проектов текущего семестра можно найти <a href="{% url "projects:current_term_projects" %}">здесь</a>.</div>
+                <div class="projects-empty-list">В данный момент нет присланных отчетов.</div>
             {% endif %}
         </div>
     </div>
