@@ -138,8 +138,6 @@ class Submission(models.Model):
 
     @property
     def get_status_display(self) -> Optional[str]:
-        if not SubmissionStatus.was_checked(self.status):
-            return self.status_choice.label
         if "verdict" in self.meta:
             verdict = self.meta["verdict"]
             try:

@@ -100,11 +100,18 @@ def add_new_submission_to_checking_system(submission_id, *, retries):
         else:
             raise
     except ContestAPIError as e:
+        raise_error = True
+        update_fields = ['status']
+        if e.code == 400 and "Duplicate submission" in e.message:
+            submission.meta = {'verdict': e.message}
+            update_fields.append('meta')
+            raise_error = False
         submission.status = SubmissionStatus.SUBMIT_FAIL
-        submission.save(update_fields=['status'])
-        logger.error(f"Yandex.Contest api request error "
-                     f"[submission_id = {submission_id}]")
-        raise
+        submission.save(update_fields=update_fields)
+        if raise_error:
+            logger.error(f"Yandex.Contest api request error "
+                         f"[submission_id = {submission_id}]")
+            raise
     submission.meta = json_data
     submission.status = SubmissionStatus.CHECKING
     submission.save(update_fields=['meta', 'status'])

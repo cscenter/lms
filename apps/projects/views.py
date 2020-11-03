@@ -149,7 +149,7 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
         current_term_index = get_current_term_pair(tz).index
         qs = (Project.active
               .filter(semester__index=current_term_index)
-              .select_related("semester")
+              .select_related("semester", "branch")
               .prefetch_related("students", "reviewers", "supervisors")
               .annotate(reviewers_cnt=Count("reviewers"))
               .order_by("reviewers_cnt", "name", "pk"))
