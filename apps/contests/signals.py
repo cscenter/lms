@@ -8,7 +8,7 @@ from contests.tasks import add_new_submission_to_checking_system, \
 from courses.models import AssignmentSubmissionFormats, Assignment
 
 
-@receiver(pre_save, sender=Assignment)
+@receiver(post_save, sender=Assignment)
 def retrieve_yandex_contest_compilers(sender, instance: Assignment,
                                       *args, **kwargs):
     """

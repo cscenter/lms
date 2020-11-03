@@ -15,7 +15,7 @@ def get_compilers(checker):
 @pytest.mark.django_db
 def test_get_available_compiler_choices():
     checker = CheckerFactory()
-    assert 'rust' in get_compilers(checker)
+    assert not get_compilers(checker)
     checker.settings['compilers'] = ['ruby']
     checker.save()
     assert 'rust' not in get_compilers(checker)

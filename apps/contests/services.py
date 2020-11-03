@@ -10,11 +10,8 @@ class CheckerURLError(Exception):
 class CheckerService:
     @staticmethod
     def get_available_compiler_choices(checker):
-        """
-        Returns a list of compilers for the checker, fallback to YandexCompilers
-        """
         if 'compilers' not in checker.settings:
-            return YandexCompilers.choices
+            return []
         contest_compilers = checker.settings['compilers']
         return [compiler for compiler in YandexCompilers.choices
                 if compiler[0] in contest_compilers]

@@ -4,6 +4,7 @@ import math
 
 import pytest
 
+from core.models import Branch
 from courses.tests.factories import SemesterFactory
 from projects.constants import ProjectTypes, ProjectGradeTypes
 from projects.models import ReportingPeriod, \
@@ -16,7 +17,7 @@ from core.tests.factories import BranchFactory
 
 
 @pytest.mark.django_db
-def test_final_reporting_periods_for_term():
+def test_final_reporting_periods_for_term(settings):
     branch_nsk = BranchFactory(code=Branches.NSK)
     branch_spb = BranchFactory(code=Branches.SPB)
     current_term = SemesterFactory.create_current()
@@ -74,7 +75,7 @@ def test_final_reporting_periods_for_term():
                                     score_excellent=100, score_good=50,
                                     score_pass=25)
     periods = ReportingPeriod.get_final_periods(current_term)
-    assert len(periods) == len(ProjectTypes.choices) * len(Branches.choices)
+    assert len(periods) == len(ProjectTypes.choices) * len(Branch.objects.for_site(settings.SITE_ID))
     assert periods[ReportingPeriodKey(Branches.NSK, ProjectTypes.research)] == rp_nsk_all
     rp_nsk_all = ReportingPeriodFactory(
         term=current_term, branch=branch_nsk,
@@ -102,7 +103,7 @@ def test_final_reporting_periods_for_term():
 
 
 @pytest.mark.django_db
-def test_final_reporting_periods_for_term_and_branch():
+def test_final_reporting_periods_for_term_and_branch(settings):
     branch_nsk = BranchFactory(code=Branches.NSK)
     branch_spb = BranchFactory(code=Branches.SPB)
     current_term = SemesterFactory.create_current()
@@ -122,7 +123,7 @@ def test_final_reporting_periods_for_term_and_branch():
         score_pass=3)
     branch_spb = rp_spb_all.branch
     periods = ReportingPeriod.get_final_periods(current_term)
-    assert len(periods) == len(ProjectTypes.choices) * len(Branches.choices)
+    assert len(periods) == len(ProjectTypes.choices) * len(Branch.objects.for_site(settings.SITE_ID))
     periods_spb = periods.for_branch(branch_spb)
     assert len(periods_spb) == len(ProjectTypes.choices)
     for project_type, _ in ProjectTypes.choices:
@@ -131,7 +132,7 @@ def test_final_reporting_periods_for_term_and_branch():
 
 
 @pytest.mark.django_db
-def test_starting_periods():
+def test_starting_periods(settings):
     branch_nsk = BranchFactory(code=Branches.NSK)
     branch_spb = BranchFactory(code=Branches.SPB)
     current_term = SemesterFactory.create_current()
@@ -159,7 +160,7 @@ def test_starting_periods():
     periods = ReportingPeriod.get_periods(start_on=start_on + datetime.timedelta(days=1))
     assert len(periods) == 0
     coming_periods = ReportingPeriod.get_periods(start_on=start_on)
-    assert len(coming_periods) == len(ProjectTypes.choices) * len(Branches.choices)
+    assert len(coming_periods) == len(ProjectTypes.choices) * len(Branch.objects.for_site(settings.SITE_ID))
     key = ReportingPeriodKey(Branches.NSK, ProjectTypes.research)
     assert coming_periods[key] == [rp_all]
     key = ReportingPeriodKey(Branches.SPB, ProjectTypes.research)

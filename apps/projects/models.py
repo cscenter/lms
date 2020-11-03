@@ -66,9 +66,8 @@ class ReportingPeriodDict(dict):
         for period in queryset:
             branches = []
             if period.branch_id is None:
-                # FIXME: restrict by site, code is not unique anymore
-                for branch_code, _ in Branches.choices:
-                    branches.append(branch_code)
+                for branch in Branch.objects.for_site(settings.SITE_ID):
+                    branches.append(branch.code)
             else:
                 branches.append(period.branch.code)
             project_types = [period.project_type]
