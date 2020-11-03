@@ -1,8 +1,11 @@
+import os
+
 from crispy_forms.bootstrap import StrictButton, InlineRadios, FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
     Div, HTML, BaseInput, Row
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from contests.services import SubmissionService, CheckerService
@@ -134,13 +137,26 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
         return cleaned_data
 
 
+def validate_attachment_has_file_extension(value):
+    file_name = value.name
+    if not file_name:
+        raise ValidationError(_('File name is not provided'))
+    file_name, ext = os.path.splitext(file_name)
+    if not ext:
+        raise ValidationError(
+            _('`%(value)s` file name has no extension'),
+            params={'value': file_name},
+        )
+
+
 class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
     compiler = forms.ChoiceField(
         label=_("Compiler"),
     )
     attached_file = forms.FileField(
         label=_("Solution file"),
-        required=False,
+        required=True,
+        validators=[validate_attachment_has_file_extension],
         widget=JesnyFileInput)
 
     class Meta:
@@ -163,7 +179,8 @@ class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        if not cleaned_data.get("attached_file"):
+        invalid_attachment = 'attached_file' in self.errors
+        if not cleaned_data.get("attached_file") and not invalid_attachment:
             raise forms.ValidationError(
                 _("File should be non-empty"))
         return cleaned_data
