@@ -112,6 +112,8 @@ def add_new_submission_to_checking_system(submission_id, *, retries):
             logger.error(f"Yandex.Contest api request error "
                          f"[submission_id = {submission_id}]")
             raise
+        else:
+            return e.message
     submission.meta = json_data
     submission.status = SubmissionStatus.CHECKING
     submission.save(update_fields=['meta', 'status'])
