@@ -29,6 +29,9 @@ def test_branch_manager_get_current(rf, settings):
         Branch.objects.get_current(request)
     settings.DEFAULT_BRANCH_CODE = branch_code1
     assert Branch.objects.get_current(request) == branch1
+    # Host header is not case-insensitive
+    request.META['HTTP_HOST'] = "{}:8000".format(domain1.upper())
+    assert Branch.objects.get_current(request) == branch1
 
 
 @pytest.mark.django_db

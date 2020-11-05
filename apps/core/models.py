@@ -242,8 +242,8 @@ class BranchManager(models.Manager):
         If request is not provided, returns the Branch based on the
         DEFAULT_BRANCH_CODE value in the project's settings.
         """
-        sub_domain = request.get_host().rsplit(request.site.domain, 1)[0][:-1]
-        branch_code = sub_domain.lower() or settings.DEFAULT_BRANCH_CODE
+        sub_domain = request.get_host().lower().rsplit(request.site.domain, 1)[0][:-1]
+        branch_code = sub_domain or settings.DEFAULT_BRANCH_CODE
         if branch_code == "www":
             branch_code = settings.DEFAULT_BRANCH_CODE
         key = BranchNaturalKey(code=branch_code, site_id=request.site.id)
