@@ -277,13 +277,14 @@ class EmailServiceHealthCheck:
 
 
 class Command(BaseCommand):
-    help = 'Sends email notifications'
+    help = 'Send email notifications about news, assignments and assignment comments'
     can_import_settings = True
 
     @method_decorator(distributed_lock('notify-lock', timeout=600,
                                        get_client=get_shared_connection))
     def handle(self, *args, **options):
         translation.activate(settings.LANGUAGE_CODE)
+
         # Some configuration (like SMTP settings) should be resolved at runtime
         site_settings = (SiteConfiguration.objects
                          .filter(enabled=True)
@@ -306,41 +307,5 @@ class Command(BaseCommand):
             return
 
         send_assignment_notifications(site_settings, self.stdout)
-
-        if all(s.smtp_health_status == EmailServiceHealthCheck.FAIL for s
-               in site_settings.values()):
-            report(self.stdout, 'All services are unhealthy. Try again later.')
-            return
-
-        from notifications.models import Notification
-        from notifications.registry import registry
-        unread_notifications = (Notification.objects
-                                .unread()
-                                .filter(public=True, emailed=False)
-                                .select_related("recipient"))
-        # FIXME: Refactor
-        # id => code
-        types_map = {v: k for k, v in
-                     apps.get_app_config('notifications').type_map.items()}
-        # TODO: skip EMPTY type notifications?
-        for notification in unread_notifications:
-            try:
-                code = types_map[notification.type_id]
-            except KeyError:
-                # On notification type deletion, we should cascading
-                # delete all notifications, low chance of error this type.
-                logger.error("Couldn't map code to type_id {}. "
-                             "Mark as deleted.".format(notification.type_id))
-                Notification.objects.filter(pk=notification.pk).update(
-                    deleted=True)
-                continue
-            notification_type = getattr(notification_types, code)
-            if notification_type in registry:
-                registry[code].notify(notification)
-            else:
-                logger.warning("Handler for type '{}' not registered. "
-                               "Mark as deleted.".format(code))
-                Notification.objects.filter(pk=notification.pk).update(
-                    deleted=True)
 
         translation.deactivate()
