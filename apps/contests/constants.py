@@ -14,6 +14,7 @@ class YandexCompilers(DjangoChoices):
     clang_cxx11 = C("clang_cxx11", "Clang cxx11 3.8")
     gcc = C("gcc", "GNU c++ 4.9")
     gcc0x = C("gcc0x", "GNU c++ 11 4.9")
+    gnuc14 = C("gnuc14", "GNU c++ 14 4.9")
     gcc0x_x32 = C("gcc0x_x32", "GNU c++ 11 x32 4.9")
     gcc_docker2_make = C("gcc_docker2_make", "GCC C++17 make")
     gcc7_3 = C("gcc7_3", "GNU c++17 7.3")
