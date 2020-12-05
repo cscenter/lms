@@ -83,9 +83,10 @@ def create_student_profile(*, user: User, branch: Branch, profile_type,
     return new_student_profile
 
 
-def populate_assignments_for_student(enrollment):
+def recreate_assignments_for_student(enrollment):
+    """Resets progress for existing and creates missing assignments"""
     for a in enrollment.course.assignment_set.all():
-        AssignmentService.create_student_assignment(a, enrollment)
+        AssignmentService.recreate_student_assignment(a, enrollment)
 
 
 def get_learners_count_subquery(outer_ref: OuterRef):
@@ -279,8 +280,8 @@ class AssignmentService:
         assignment.assignees.add(*course_reviewers)
 
     @classmethod
-    def create_student_assignment(cls, assignment: Assignment,
-                                  enrollment: Enrollment):
+    def recreate_student_assignment(cls, assignment: Assignment,
+                                    enrollment: Enrollment):
         """
         Creates or restores record for tracking student progress on assignment
         if the assignment is not restricted for the student's group.
@@ -512,8 +513,8 @@ class EnrollmentService:
                 enrollment.refresh_from_db()
                 # Send signal to trigger callbacks:
                 # - update learners count
-                # - populate student assignments
                 post_save.send(Enrollment, instance=enrollment, created=created)
+                recreate_assignments_for_student(enrollment)
         return enrollment
 
     @classmethod

@@ -267,6 +267,8 @@
                                             {% endif %}
                                         {% endfor %}
                                         <br>Обозначения: <span class="text-success">зелёный</span> - курс сдан / <span class="text-info">синий</span> - запись в текущем семестре<br>
+                                    {% else %}
+                                        [{% for academic_discipline in student_profile.academic_disciplines.all %}{{ academic_discipline }}{% if not forloop.last %}, {% endif %}{% endfor %}]
                                     {% endif %}
                                 </td>
                             </tr>

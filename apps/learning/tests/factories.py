@@ -14,7 +14,8 @@ from learning.models import StudentAssignment, \
     CourseNewsNotification, Event, GraduateProfile, Invitation, \
     CourseInvitation, StudentGroup, EnrollmentPeriod, AssignmentSubmissionTypes, \
     StudentGroupAssignee
-from learning.services import StudentGroupService, get_student_profile
+from learning.services import StudentGroupService, get_student_profile, \
+    recreate_assignments_for_student
 from learning.settings import StudentStatuses
 from users.constants import Roles
 from users.models import UserGroup
@@ -100,6 +101,12 @@ class EnrollmentFactory(factory.django.DjangoModelFactory):
         user=factory.SelfAttribute('..student'),
         branch=factory.SelfAttribute('..course.main_branch'))
     course = factory.SubFactory(CourseFactory)
+
+    @factory.post_generation
+    def recreate_assignments(self, create, extracted, **kwargs):
+        if not create:
+            return
+        recreate_assignments_for_student(self)
 
     @factory.post_generation
     def student_group(self, create, extracted, **kwargs):
