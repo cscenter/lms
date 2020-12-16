@@ -1,5 +1,5 @@
 import pytest
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from contests.api.yandex_contest import SubmissionVerdict
 from contests.constants import SubmissionStatus

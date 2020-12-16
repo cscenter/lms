@@ -3,7 +3,7 @@ from typing import Optional
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from model_utils.fields import AutoCreatedField, AutoLastModifiedField
 
 from contests.api.yandex_contest import SubmissionVerdict, \
