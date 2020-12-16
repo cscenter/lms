@@ -111,7 +111,7 @@ def autodiscover():
             if sys.argv[1] in ('runserver', 'runserver_plus'):
                 names = ', '.join("{}: {}".format(str(n), cls.__class__) for
                                   n, cls in registry.items())
-                print('notifications: Registered %d type notifications (%s) '
+                print('notifications: Registered %d notification types (%s) '
                       '[pid: %d].' % (len(registry), names, os.getpid()))
         except IndexError:
             pass
