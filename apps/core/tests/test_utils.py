@@ -8,7 +8,7 @@ from core.utils import get_youtube_video_id, queryset_iterator, instance_memoize
 def test_get_youtube_video_id():
     assert get_youtube_video_id('https://youtu.be/sxnSFdRECas') == 'sxnSFdRECas'
     assert get_youtube_video_id('https://youtu.be/sxnSFdRECas?v=42') == 'sxnSFdRECas'
-    # Not valid url btw
+    # Not a valid url btw
     assert get_youtube_video_id('https://youtu.be/sxnSFdRECas/what?') == 'sxnSFdRECas'
     assert get_youtube_video_id('youtu.be/sxnSFdRECas?') == 'sxnSFdRECas'
     assert get_youtube_video_id('https://ya.ru/watch?v=0lZJicHYJXM') is None
@@ -16,6 +16,7 @@ def test_get_youtube_video_id():
     assert get_youtube_video_id('https://www.youtube.com/watch?v=0lZJicHYJXM') == '0lZJicHYJXM'
     assert get_youtube_video_id('youtube.com/embed/8SPq-9kS69M') == '8SPq-9kS69M'
     assert get_youtube_video_id('https://www.youtube-nocookie.com/embed/8SPq-9kS69M') == '8SPq-9kS69M'
+    assert get_youtube_video_id('http://www.youtube.com/watch?v=0zM3nApSvMg#t=0m10s') == '0zM3nApSvMg'
 
 
 @pytest.mark.django_db

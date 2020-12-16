@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     'sorl.thumbnail',
     'crispy_forms',
     'formtools',
-    'micawber.contrib.mcdjango',
     'simple_history',
     'import_export',
     'bootstrap_pagination',
@@ -64,15 +63,6 @@ INSTALLED_APPS = [
     'api.apps.APIConfig',
     'library.apps.LibraryConfig',
 ]
-
-# oEmbed
-MICAWBER_PROVIDERS = "courses.micawber_providers.oembed_providers"
-MICAWBER_DEFAULT_SETTINGS = {
-    'maxwidth': 599,
-    'maxheight': 467,
-    'width': 599,
-    'height': 487
-}
 
 # i18n, l10n
 LANGUAGE_CODE = 'ru'

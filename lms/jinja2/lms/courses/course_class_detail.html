@@ -1,5 +1,7 @@
 {% extends "lms/layouts/v1_base.html" %}
 
+{% import "lms/layouts/_macros.jinja2" as macros -%}
+
 {% block content %}
 <div class="container">
   <div class="row">
@@ -54,11 +56,10 @@
       {% endif %}
 
     {% if can_view_course_class_materials %}
-        {% if course_class.video_iframe() %}
-            <a id="video" href="#"></a><h4 class="bigger-margin">{% trans %}Video{% endtrans %}</h4>
-            <div class="">
-                {{ course_class.video_iframe()|safe }}
-            </div>
+        {% if course_class.video_url %}
+          <a id="video" href="#"></a>
+          <h4 class="bigger-margin">{% trans %}Video{% endtrans %}</h4>
+          {{ macros.b3_video_iframe(course_class.video_url) }}
         {% endif %}
         {% if attachments %}
             <h4 class="bigger-margin" id="attachments">{% trans %}Attached files{% endtrans %}</h4>
@@ -73,11 +74,8 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        {% if course_class.other_materials or course_class.slides_iframe() %}
+        {% if course_class.other_materials %}
             <h4 class="bigger-margin" id="other_materials">{% trans %}Other materials{% endtrans %}</h4>
-            {% if course_class.slides_iframe() %}
-              {{ course_class.slides_iframe()|safe }}
-            {% endif %}
             <div class="ubertext">
                 {{ course_class.other_materials|markdown("course_class_materials", 3600, course_class.pk, course_class.modified) }}
             </div>

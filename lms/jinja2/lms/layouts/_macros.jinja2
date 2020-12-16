@@ -6,9 +6,15 @@
 <svg class="sprite-img svg-icon _{{ id }}{% if modifiers %} {{ modifiers }}{% endif %}" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#{{ id }}"></use></svg>
 {%- endmacro %}
 
-{% macro video_iframe(url, modifiers='') -%}
-<div class="video{% if modifiers %} {{ modifiers }}{% endif %}">
-    <iframe class="embed _responsive" src="{{ url }}" width="560" height="315"  frameborder="0"  allowfullscreen></iframe>
+{% macro b3_video_iframe(video_url, modifiers='') -%}
+<div class="embed-responsive embed-responsive-16by9{% if modifiers %} {{ modifiers }}{% endif %}">
+    {% set youtube_video_id = video_url|youtube_video_id %}
+    {% if youtube_video_id %}
+        {% set video_iframe_url = 'https://www.youtube.com/embed/' + youtube_video_id %}
+    {% else %}
+        {% set video_iframe_url = video_url %}
+    {% endif %}
+    <iframe class="embed-responsive-item" src="{{ video_iframe_url }}" frameborder="0"  allowfullscreen></iframe>
 </div>
 {%- endmacro %}
 

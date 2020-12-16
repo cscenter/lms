@@ -36,7 +36,6 @@ from learning.utils import humanize_duration
 from .constants import SemesterTypes, ClassTypes
 from .managers import CourseTeacherManager, AssignmentManager, \
     CourseClassManager, CourseDefaultManager
-from .micawber_providers import get_oembed_html
 
 
 class LearningSpace(TimezoneAwareModel, models.Model):
@@ -891,14 +890,6 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
 
     def _get_track_field(self, field):
         return getattr(self, '_original_{}'.format(field))
-
-    def video_iframe(self):
-        return get_oembed_html(self.video_url, 'video_oembed',
-                               use_default=True)
-
-    def slides_iframe(self):
-        return get_oembed_html(self.slides_url, 'slides_oembed',
-                               use_default=False)
 
     @property
     def slides_file_name(self):
