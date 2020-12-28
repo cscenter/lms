@@ -12,7 +12,7 @@ export function csrfSafeMethod(method) {
 }
 
 export function getCSRFToken() {
-    return getCookie(process.env.DJANGO_CSRF_COOKIE_NAME);
+    return getCookie(window.__CSC__.config.csrfCookieName);
 }
 
 export function getTemplate (id) {

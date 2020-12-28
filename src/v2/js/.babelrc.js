@@ -1,7 +1,7 @@
 var env = process.env.BABEL_ENV || process.env.NODE_ENV;
 var plugins = [
     "@babel/plugin-proposal-object-rest-spread",
-    "@babel/syntax-object-rest-spread",
+    "@babel/plugin-transform-spread",
     // Stage 2
     ["@babel/plugin-proposal-decorators", {"legacy": true}],
     "@babel/plugin-proposal-function-sent",

@@ -164,9 +164,134 @@
                                                 место и&nbsp;сократить
                                                 время на&nbsp;объяснение.
                                             </li>
+                                            <li><b>Сессионные залы.</b> Если вы&nbsp;хотите дать студентам командное
+                                                задание, распределите их&nbsp;по
+                                                сессионным залам. Можно сделать автоматическое (случайное распределение)
+                                                или разбить
+                                                студентов на&nbsp;команды вручную. Каждому студенту будет отправлено
+                                                приглашение перейти
+                                                в&nbsp;какой-то из&nbsp;залов. Преподаватели смогут перемещаться между
+                                                залами и&nbsp;работать с
+                                                каждой командой отдельно.
+                                            </li>
                                         </ul>
                                     </li>
                                 </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="collapsible">
+                    <div class="card _qa mb-4">
+                        <button aria-expanded="false" class="btn card__header"
+                                id="question-7">{{ macros.svg_icon('border-arrow-right') }}Чем заменить
+                            доску?
+                        </button>
+                        <div aria-expanded="true" class="collapse" id="answer-7">
+                            <div class="card__content mb-4">
+                                <p>Инструменты: <a
+                                        href="https://zoom.us/"
+                                        rel="nofollow noopener" target="_blank">Zoom</a>,
+                                    <a href="https://miro.com/app/dashboard/" rel="nofollow noopener" target="_blank">Miro
+                                        Board</a>, планшет со стилусом.
+                                </p>
+                                <p>Даже если вы&nbsp;предпочитаете пользоваться слайдами, во&nbsp;время
+                                    лекции может
+                                    возникнуть необходимость добавить какую-то дополнительную
+                                    информацию: формулу,
+                                    пояснительный рисунок и&nbsp;т.д. Тогда на&nbsp;помощь приходит
+                                    доска. Но&nbsp;чем
+                                    заменить доску при проведении удалённого занятия?</p>
+
+                                <p><b>Вариант 1.</b> Опция «Комментировать» в <a
+                                        href="https://zoom.us/" rel="nofollow noopener"
+                                        target="_blank">Zoom</a>.</p>
+                                <p>В&nbsp;режиме демонстрации экрана переведите курсор к&nbsp;центру
+                                    верхней границы
+                                    экрана, чтобы вызвать меню управления трансляцией. В&nbsp;нем
+                                    выберите опцию &laquo;Комментировать&raquo;.</p>
+                                <figure>
+                                    <a href="/static/v2/img/pages/stayhome/zoom1.jpg" target="_blank">
+                                        <img class="img-fluid"
+                                             src="{{ static('v2/img/pages/stayhome/zoom1.jpg') }}"
+                                             alt="Комментарии в Zoom">
+                                    </a>
+                                </figure>
+                                <p>Появится панель, на которой вы можете выбрать необходимый вам
+                                    инструмент.</p>
+                                <figure>
+                                    <a href="/static/v2/img/pages/stayhome/zoom2.jpg" target="_blank">
+                                        <img class="img-fluid"
+                                             src="{{ static('v2/img/pages/stayhome/zoom2.jpg') }}"
+                                             alt="Панель выбора инструментов">
+                                    </a>
+                                </figure>
+                                <p>Данный вариант хорош тем, что не&nbsp;требует использования каких-то
+                                    дополнительных
+                                    сервисов, если вы&nbsp;и&nbsp;так используете Zoom. Однако у&nbsp;него
+                                    есть два
+                                    недостатка:</p>
+                                <ol>
+                                    <li>Рисунки и&nbsp;комментарии не&nbsp;привязаны к&nbsp;слайду. А&nbsp;значит,
+                                        при переходе к&nbsp;следующему слайду вы&nbsp;захотите их&nbsp;стереть.
+                                        И&nbsp;если в&nbsp;дальнейшем понадобится вернуться к&nbsp;рисунку,
+                                        придется создавать его заново.
+                                    </li>
+                                    <li>Оставлять комментарии может только тот, чей экран находится в&nbsp;режиме
+                                        демонстрации. То&nbsp;есть организовать совместную работу на&nbsp;импровизированной
+                                        доске в&nbsp;Zoom не&nbsp;получится.
+                                    </li>
+                                </ol>
+                                <p><b>Вариант 2.</b> Сервис <a href="https://miro.com/" rel="nofollow noopener" target="_blank">Miro Realtime
+                                    Board</a></p>
+                                <p>Сервис позволяет создавать интерактивные доски с&nbsp;совместным
+                                    доступом. Miro не&nbsp;нужно устанавливать&nbsp;&mdash; работайте с&nbsp;доской
+                                    прямо из&nbsp;браузера.
+                                    При регистрации на&nbsp;сервисе вам будет предложено создать команд,
+                                    позднее в&nbsp;неё можно будет пригласить студентов&nbsp;&mdash; по&nbsp;e-mail
+                                    или через Slack.</p>
+                                <p>Создав доску, вы&nbsp;можете создать материалы для лекции с&nbsp;нуля
+                                    или загрузить ваши pdf слайды (см. картинку).</p>
+                                <figure>
+                                    <a href="/static/v2/img/pages/stayhome/miro1.jpg" target="_blank">
+                                        <img class="img-fluid"
+                                             src="{{ static('v2/img/pages/stayhome/miro1.jpg') }}"
+                                             alt="Создание слайдов">
+                                    </a>
+                                </figure>
+                                <p>Слайды можно &laquo;разложить на&nbsp;доске&raquo;, кликнув по&nbsp;элементу со&nbsp;слайдами
+                                    и&nbsp;выбрав опцию &laquo;Extract pages&raquo;.</p>
+                                <figure>
+                                    <a href="/static/v2/img/pages/stayhome/miro2.jpg" target="_blank">
+                                        <img class="img-fluid"
+                                             src="{{ static('v2/img/pages/stayhome/miro2.jpg') }}"
+                                             alt="Раскладка слайдов">
+                                    </a>
+                                </figure>
+                                <p>После этого на доске должны появиться все слайды.</p>
+                                <figure>
+                                    <a href="/static/v2/img/pages/stayhome/miro3.jpg" target="_blank">
+                                        <img class="img-fluid"
+                                             src="{{ static('v2/img/pages/stayhome/miro3.jpg') }}"
+                                             alt="Все слайды на доске">
+                                    </a>
+                                </figure>
+                                <p>Приближайте первый слайд и&nbsp;начинайте читать лекцию в&nbsp;Zoom, не&nbsp;забыв
+                                    сделать демонстрацию экрана с&nbsp;доской Miro. при необходимости перейти к&nbsp;следующему
+                                    слайду, просто перемещайтесь к&nbsp;нему на&nbsp;доске.</p>
+                                <p>Все сделанные на&nbsp;слайдах пометки будут сохранены вместе с&nbsp;доской. Вы&nbsp;сможете
+                                    вернуться к&nbsp;ним в&nbsp;случае необходимости.</p>
+                                <p>Своим студентам вы&nbsp;также можете предоставить доступ к&nbsp;доске: для
+                                    редактирования, комментирования или просмотра.</p>
+                                <figure>
+                                    <a href="/static/v2/img/pages/stayhome/miro4.jpg" target="_blank">
+                                        <img class="img-fluid"
+                                             src="{{ static('v2/img/pages/stayhome/miro4.jpg') }}"
+                                             alt="Все слайды на доске">
+                                    </a>
+                                </figure>
+                                <p>У&nbsp;Miro Board есть несколько тарифных планов, с&nbsp;ними можно ознакомиться на&nbsp;странице
+                                    сервиса. Нам&nbsp;же для проведения лекций хватило бесплатной версии.</p>
                             </div>
                         </div>
                     </div>

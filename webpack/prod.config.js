@@ -1,6 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 
+const BundleTracker = require('webpack-bundle-tracker');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');  // clean build dir before building
 const TerserPlugin = require('terser-webpack-plugin');
 const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 const DeleteSourceMapWebpackPlugin = require('delete-sourcemap-webpack-plugin');
@@ -8,7 +10,8 @@ const DeleteSourceMapWebpackPlugin = require('delete-sourcemap-webpack-plugin');
 const APP_VERSION = process.env.APP_VERSION || "v1";
 const LOCAL_BUILD = (process.env.LOCAL_BUILD === "1");
 
-let __outputdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/js`);
+const __rootdir = path.join(__dirname, '..');
+let __outputdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/prod`);
 
 // TODO: add css minimization
 const prodConfiguration = {
@@ -17,10 +20,11 @@ const prodConfiguration = {
     devtool: "hidden-source-map",
 
     output: {
+        path: __outputdir,
         filename: '[name]-[chunkhash].js',
         sourceMapFilename: '[name]-[chunkhash].js.map',
         chunkFilename: '[name]-[chunkhash].js',
-        publicPath: `/static/${APP_VERSION}/dist/js/`,
+        publicPath: `/static/${APP_VERSION}/dist/prod/`,
     },
 
     stats: {
@@ -52,6 +56,10 @@ const prodConfiguration = {
     },
 
     plugins: [
+        new CleanWebpackPlugin({
+            verbose: true,
+            cleanOnceBeforeBuildPatterns: ['**/*', '!.gitattributes'],
+        }),
         new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: '"production"'
@@ -64,6 +72,12 @@ const prodConfiguration = {
 };
 
 if (!LOCAL_BUILD) {
+    prodConfiguration.plugins.push(
+        new BundleTracker({
+            path: path.join(__rootdir, '..'),
+            filename: `webpack-stats-${APP_VERSION}.json`,
+        })
+    );
     const sentryPlugins = [
         new SentryWebpackPlugin({
             include: [
@@ -82,7 +96,7 @@ if (!LOCAL_BUILD) {
         // Delete source maps after uploading to sentry.io
        new DeleteSourceMapWebpackPlugin()
     ];
-    prodConfiguration.plugins.push(sentryPlugins);
+    prodConfiguration.plugins.push(...sentryPlugins);
 }
 
 module.exports = prodConfiguration;

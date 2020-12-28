@@ -75,7 +75,7 @@ export function initTimePickers() {
     });
 }
 
-export function initMultiSelectPickers() {
+export function initSelectPickers() {
     document.querySelectorAll('.multiple-select').forEach((element) => {
         $(element).selectpicker({
             iconBase: 'fa',

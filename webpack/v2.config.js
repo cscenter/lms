@@ -1,11 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
-const BundleTracker = require('webpack-bundle-tracker');
 const merge = require('webpack-merge');  // merge webpack configs
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');  // clean build dir before building
 const Dotenv = require('dotenv-webpack');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-
 
 const DEBUG = (process.env.NODE_ENV !== "production");
 const LOCAL_BUILD = (process.env.LOCAL_BUILD === "1");
@@ -20,8 +17,6 @@ const APP_VERSION = "v2";
 
 const __srcdir = path.join(__dirname, `../src/${APP_VERSION}`);
 const __nodemodulesdir = path.join(__dirname, '../node_modules');
-let __bundlesdir = path.join(__dirname, `../assets/${APP_VERSION}/dist`);
-let __outputdir = path.join(__bundlesdir, `js`);
 
 // All dependencies will be copied to path, relative to bundles output
 const STATIC_URL = path.join('/static/');
@@ -50,7 +45,6 @@ const common = {
 
     output: {
         filename: '[name]-[hash].js',
-        path: __outputdir,
     },
 
     externals: {},
@@ -195,16 +189,7 @@ const common = {
     plugins: [
         new Dotenv({
             path: path.join(__dirname, '.env'),
-            silent: false,
-        }),
-        new BundleTracker({
-            // TODO: override plugin with webpack-merge, merge.unique store the first entry, need something else
-            path: !LOCAL_BUILD ? __bundlesdir : path.join(__bundlesdir, '.local'),
-            filename: `webpack-stats-${APP_VERSION}.json`,
-        }),
-        new CleanWebpackPlugin({
-            verbose: true,
-            cleanOnceBeforeBuildPatterns: ['**/*', '!.gitattributes'],
+            silent: true,
         }),
         new MiniCssExtractPlugin({
             // Options similar to the same options in webpackOptions.output

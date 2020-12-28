@@ -20,7 +20,15 @@ $(document).ready(function () {
     if (sections.includes("selectpickers")) {
         import('components/forms')
             .then(m => {
-                m.initMultiSelectPickers();
+                m.initSelectPickers();
+            })
+            .catch(error => showComponentError(error));
+    }
+    if (sections.includes("studentAssignment")) {
+        import(/* webpackChunkName: "gradebook" */ 'teaching/studentAssignment')
+            .then(module => {
+                const component = module.default;
+                component.launch();
             })
             .catch(error => showComponentError(error));
     }
@@ -48,6 +56,17 @@ $(document).ready(function () {
             content: function () {
                 let helpBlockId = $(this).data('target');
                 return $(helpBlockId).html();
+            }
+        });
+
+        const checkingSystemFieldSet = $('#checking-system-info');
+        const checkerSubmissionFormats = checkingSystemFieldSet.data('display');
+        $('select[name="submission_type"]').change(function(e) {
+            if (this.value.length > 0 &&
+                checkerSubmissionFormats.includes(this.value)) {
+                checkingSystemFieldSet.removeClass('hidden');
+            } else {
+                checkingSystemFieldSet.addClass('hidden');
             }
         });
     }

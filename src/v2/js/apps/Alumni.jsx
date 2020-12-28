@@ -156,7 +156,7 @@ class Alumni extends React.Component {
                             value={branch}
                             name="branch"
                             isClearable={true}
-                            placeholder={i18next.t("Город")}
+                            placeholder={i18next.t("Отделение")}
                             options={branchOptions}
                             key="branch"
                         />

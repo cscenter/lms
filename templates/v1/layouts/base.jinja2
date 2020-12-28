@@ -23,8 +23,10 @@
     <![endif]-->
     <script>
       // Global Configuration
-      window.CSC = {
+      window.__CSC__ = {
           config: {
+              csrfCookieName: "csrftoken",
+              sentryDSN: "",
               JS_SRC: {
                 MATHJAX: "//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML",
                 HIGHLIGHTJS: "{{ static("v1/js/vendor/highlight.pack.js") }}",
@@ -72,10 +74,10 @@
     <script type="text/javascript" src="//code.jquery.com/jquery-3.2.1.min.js"></script>
     <script type="text/javascript">window.jQuery || document.write('<script src="{{ static("v1/js/vendor/jquery-3.2.1.min.js") }}"><\/script>')</script>
 
-    {{ render_bundle('runtime', 'js') }}
-    {{ render_bundle('vendor', 'js') }}
-    {{ render_bundle('main', 'js') }}
-    {{ render_bundle('center', 'js') }}
+    {{ render_bundle('runtime', 'js', config='V1') }}
+    {{ render_bundle('vendor', 'js', config='V1') }}
+    {{ render_bundle('main', 'js', config='V1') }}
+    {{ render_bundle('center', 'js', config='V1') }}
 
     {% if messages %}
       <script type="text/javascript">

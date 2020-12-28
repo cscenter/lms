@@ -21,7 +21,7 @@ import {
 
 // Configure Sentry SDK
 Sentry.init({
-    dsn: process.env.SENTRY_DSN,
+    dsn: window.__CSC__.config.sentryDSN,
     ...sentryOptions
 });
 const userInfo = document.getElementById('userMenuButton');

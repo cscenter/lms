@@ -17,7 +17,7 @@ import sentryOptions from "./sentry_conf";
 
 // Configure Sentry SDK
 Sentry.init({
-    dsn: process.env.SENTRY_DSN,
+    dsn: window.__CSC__.config.sentryDSN,
     ...sentryOptions
 });
 const userInfo = document.getElementById('login');
@@ -30,7 +30,7 @@ if (userInfo) {
     }
 }
 
-const CSC = window.CSC;
+const CSC = window.__CSC__;
 
 $(document).ready(function () {
     fn.configureCSRFAjax();
@@ -41,6 +41,11 @@ $(document).ready(function () {
     let sections = getSections();
     if (sections.includes("lazy-img")) {
         import(/* webpackChunkName: "lazyload" */ 'components/lazyload')
+            .then(m => m.launch())
+            .catch(error => showComponentError(error));
+    }
+    if (sections.includes("gallery")) {
+        import(/* webpackChunkName: "courseGallery" */ 'club/gallery')
             .then(m => m.launch())
             .catch(error => showComponentError(error));
     }
@@ -63,8 +68,8 @@ $(document).ready(function () {
 });
 
 function displayNotifications() {
-    if (window.CSC.notifications !== undefined) {
-        window.CSC.notifications.forEach((message) => {
+    if (window.__CSC__.notifications !== undefined) {
+        window.__CSC__.notifications.forEach((message) => {
             $.jGrowl(message.text, {
                 position: 'bottom-right',
                 sticky: (message.timeout !== 0),
