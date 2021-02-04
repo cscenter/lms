@@ -72,7 +72,7 @@ sync:
 deploy:
 	$(call check_defined, app_user)
 	git push
-	cd infrastructure && make deploy SITE_USER=$(app_user)
+	cd ansible && make deploy SITE_USER=$(app_user)
 
 # Check that given variables are set and all have non-empty values,
 # die with an error otherwise.

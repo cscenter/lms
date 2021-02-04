@@ -5,6 +5,7 @@
 *.sublime-project
 *.pyc
 *.sqlite3
+ansible/
 media/
 apps/coverage/
 .idea/
