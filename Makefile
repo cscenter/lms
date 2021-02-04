@@ -67,7 +67,7 @@ sync:
 	git pull
 	pipenv sync
 	python manage.py migrate --settings=$(app).settings.$(conf)
-	python manage.py collectstatic  --noinput --settings=$(app).settings.$(conf) --ignore src --ignore *.map
+	python manage.py collectstatic  --noinput --settings=$(app).settings.$(conf) --ignore *.map --ignore "webpack-stats-v*.json"
 
 deploy:
 	$(call check_defined, app_user)

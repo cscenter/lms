@@ -64,9 +64,31 @@ else:
     PRIVATE_MEDIA_URL = '/media/private/'
 
 # Static Files Settings
+DJANGO_ASSETS_ROOT = ROOT_DIR / "assets"
+WEBPACK_ASSETS_ROOT = Path(env.str('WEBPACK_ASSETS_ROOT'), default=DJANGO_ASSETS_ROOT).resolve()
+STATICFILES_DIRS = [
+    str(DJANGO_ASSETS_ROOT),
+    str(WEBPACK_ASSETS_ROOT),
+]
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 STATIC_ROOT = env.str('DJANGO_STATIC_ROOT', default=str(ROOT_DIR / "static"))
 STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'files.storage.FixedCompressedManifestStaticFilesStorage'
+
+WEBPACK_ENVIRONMENT = env.str('WEBPACK_ENVIRONMENT', default="prod")
+WEBPACK_LOADER = {
+    'V1': {
+        'BUNDLE_DIR_NAME': f'v1/dist/{WEBPACK_ENVIRONMENT}/',  # relative to the ASSETS_ROOT
+        'STATS_FILE': str(WEBPACK_ASSETS_ROOT / "v1" / "dist" / WEBPACK_ENVIRONMENT / "webpack-stats-v1.json"),
+    },
+    'V2': {
+        'BUNDLE_DIR_NAME': f'v2/dist/{WEBPACK_ENVIRONMENT}/',  # relative to the ASSETS_ROOT
+        'STATS_FILE': str(WEBPACK_ASSETS_ROOT / "v2" / "dist" / WEBPACK_ENVIRONMENT / "webpack-stats-v2.json"),
+    }
+}
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {

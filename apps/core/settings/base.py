@@ -91,16 +91,6 @@ LOGINAS_FROM_USER_SESSION_FLAG = "loginas_from_user"
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
-# https://docs.djangoproject.com/en/2.2/howto/static-files/
-ASSETS_ROOT = ROOT_DIR / "assets"
-STATICFILES_DIRS = [
-    str(ASSETS_ROOT),
-]
-STATICFILES_FINDERS = [
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-]
-
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 3000
 
 REST_FRAMEWORK = {
@@ -116,17 +106,6 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     )
-}
-
-WEBPACK_LOADER = {
-    'V1': {
-        'BUNDLE_DIR_NAME': 'v1/dist/prod/',  # relative to the ASSETS_ROOT
-        'STATS_FILE': str(ROOT_DIR / "webpack-stats-v1.json"),
-    },
-    'V2': {
-        'BUNDLE_DIR_NAME': 'v2/dist/prod/',
-        'STATS_FILE': str(ROOT_DIR / "webpack-stats-v2.json"),
-    }
 }
 
 
