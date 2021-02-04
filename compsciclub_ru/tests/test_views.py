@@ -20,7 +20,7 @@ def test_index_view_course_list(client, settings):
     Courses shared by other sites will be shown in LMS, on index page
     show courses made by CS Club only
     """
-    current_semester = SemesterFactory.create(year=2020, type='autumn')
+    current_semester = SemesterFactory.create_current()
     earlier_semester = SemesterFactory.create(year=2019, type='autumn')
 
     branch_spb_center = BranchFactory(code=Branches.SPB,
@@ -55,7 +55,7 @@ def test_course_list(client, settings):
     """
     Сlub students can see all Club or CS Center courses that have been shared with their branch
     """
-    current_semester = SemesterFactory.create(year=2020, type='spring')
+    current_semester = SemesterFactory.create_current()
     branch_spb_center = BranchFactory(code=Branches.SPB,
                                       site__domain=settings.ANOTHER_DOMAIN)
     branch_spb_club = BranchFactory(code=Branches.SPB,
@@ -85,7 +85,7 @@ def test_club_classes_feed(rf, client, settings, mocker):
       * are hosted by the current club branch
       * were shared with the current club branch
     """
-    current_semester = SemesterFactory.create(year=2020, type='spring')
+    current_semester = SemesterFactory.create_current()
     branch_center = BranchFactory(code=Branches.SPB,
                                   site__domain=settings.ANOTHER_DOMAIN)
     branch_club = BranchFactory(code=Branches.SPB)
