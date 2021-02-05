@@ -71,13 +71,12 @@ if settings.DEBUG:
         path('404/', handler404, kwargs={'exception': Exception("404")}),
         path('500/', handler500),
     ]
-    if 'debug_toolbar' in settings.INSTALLED_APPS:
+    if apps.is_installed('debug_toolbar'):
         import debug_toolbar
-        urlpatterns += [
-            path('__debug__/', include(debug_toolbar.urls)),
-        ]
-    if 'rosetta' in settings.INSTALLED_APPS:
+        urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
+    if apps.is_installed('rosetta'):
         urlpatterns += [path('rosetta/', include('rosetta.urls'))]
+
 
 if apps.is_installed('announcements'):
     from announcements.views import AnnouncementTagAutocomplete
