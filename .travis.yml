@@ -36,8 +36,7 @@ jobs:
       before_script:
         - git clone git@github.com:cscenter/site-frontend.git
         # TODO: remove after testing
-        - ls -ls
-        - python manage.py shell -c 'from django.conf import settings; print(settings.WEBPACK_ASSETS_ROOT)'
+        - python manage.py shell --settings=compscicenter_ru.settings.test -c 'from django.conf import settings; print(settings.WEBPACK_ASSETS_ROOT)'
         - cp lms/settings/.env.example lms/settings/.env
         - cp compsciclub_ru/settings/.env.example compsciclub_ru/settings/.env
         - psql --version
