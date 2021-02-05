@@ -1,6 +1,9 @@
 language: python
 os: linux
 dist: xenial
+env:
+  jobs:
+    - WEBPACK_ENVIRONMENT=prod
 jobs:
   include:
     - stage: test
