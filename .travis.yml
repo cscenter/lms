@@ -35,10 +35,10 @@ jobs:
         - pip3 list
       before_script:
         - git clone git@github.com:cscenter/site-frontend.git
-        # TODO: remove after testing
-        - python manage.py shell --settings=compscicenter_ru.settings.test -c 'from django.conf import settings; print(settings.WEBPACK_ASSETS_ROOT)'
         - cp lms/settings/.env.example lms/settings/.env
         - cp compsciclub_ru/settings/.env.example compsciclub_ru/settings/.env
+        # TODO: remove after testing
+        - python manage.py shell --settings=compscicenter_ru.settings.test -c 'from django.conf import settings; print(settings.WEBPACK_ASSETS_ROOT)'
         - psql --version
         - psql -c 'CREATE DATABASE travis_ci_test;' -U postgres
         - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
