@@ -2,7 +2,7 @@ language: python
 os: linux
 dist: xenial
 env:
-  jobs:
+  global:
     - WEBPACK_ENVIRONMENT=prod
     - WEBPACK_ASSETS_ROOT=./site-frontend/assets/
 jobs:
