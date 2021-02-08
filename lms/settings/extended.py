@@ -27,7 +27,7 @@ for template in TEMPLATES:
         template["DIRS"] += [
             str(SHARED_APPS_DIR / "surveys" / "jinja2"),
             # svg inline support
-            str(DJANGO_ASSETS_ROOT / "v2" / "dist" / "img"),
+            str(WEBPACK_ASSETS_ROOT / "v2" / "dist" / "img"),
         ]
     elif "DjangoTemplates" in template["BACKEND"]:
         template["DIRS"] += [
