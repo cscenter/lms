@@ -73,6 +73,7 @@
     </footer>
     {% endblock footer %}
 
+    {% if YANDEX_METRIKA_ID %}
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
         (function (d, w, c) {
@@ -102,6 +103,7 @@
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/25844420" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <!-- /Yandex.Metrika counter -->
+    {% endif %}
 
     {{ render_bundle('runtime', config='V2') }}
     {{ render_bundle('common', config='V2') }}
