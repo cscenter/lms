@@ -11,7 +11,7 @@ from surveys.models import Form, FieldChoice, CourseSurvey
 OFFLINE_COURSES_Q = ['lectures_assessment', 'attendance_frequency']
 
 
-def create_survey_notifications(survey):
+def create_survey_notifications(survey: CourseSurvey):
     if not survey.email_template_id or survey.students_notified:
         return
     course = survey.course
