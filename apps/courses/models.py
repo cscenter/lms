@@ -1044,12 +1044,6 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         _("Time to Completion"),
         blank=True, null=True,
         help_text=_("Estimated amount of time required for the task to be completed"))
-    # TODO: remove
-    notify_teachers = models.ManyToManyField(
-        CourseTeacher,
-        verbose_name=_("Legacy Field"),
-        help_text=_("TODO: remove"),
-        blank=True)
     assignees = models.ManyToManyField(
         CourseTeacher,
         verbose_name=_("Assignment Assignees"),
