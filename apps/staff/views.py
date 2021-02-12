@@ -111,15 +111,17 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
                                    .distinct('diploma_issued_on')
                                    .order_by('-diploma_issued_on')
                                    .values_list('diploma_issued_on', flat=True))
+        branches = Branch.objects.filter(site_id=settings.SITE_ID)
         context = {
             "alumni_profiles_form": graduation_form,
             "current_term": current_term,
             "prev_term": {"year": prev_term.year, "type": prev_term.type},
             "campaigns": (Campaign.objects
+                          .filter(branch__in=branches)
                           .select_related("branch")
                           .order_by("-year", "branch__name")),
             "invitations": invitations,
-            "branches": Branch.objects.filter(site_id=settings.SITE_ID),
+            "branches": branches,
             "official_diplomas_dates": official_diplomas_dates,
         }
         return context
@@ -362,7 +364,8 @@ class InvitationStudentsProgressReportView(CuratorOnlyMixin, View):
 
 class AdmissionApplicantsReportView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, campaign_id, output_format, **kwargs):
-        campaign = get_object_or_404(Campaign.objects.filter(pk=campaign_id))
+        campaign = get_object_or_404(Campaign.objects
+                                     .filter(pk=campaign_id, branch__site_id=settings.SITE_ID))
         report = AdmissionApplicantsReport(campaign=campaign)
         if output_format == "csv":
             return report.output_csv()
@@ -372,7 +375,8 @@ class AdmissionApplicantsReportView(CuratorOnlyMixin, generic.base.View):
 
 class AdmissionExamReportView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, campaign_id, output_format, **kwargs):
-        campaign = get_object_or_404(Campaign.objects.filter(pk=campaign_id))
+        campaign = get_object_or_404(Campaign.objects
+                                     .filter(pk=campaign_id, branch__site_id=settings.SITE_ID))
         report = AdmissionExamReport(campaign=campaign)
         return dataframe_to_response(report.generate(), output_format,
                                      report.get_filename())
