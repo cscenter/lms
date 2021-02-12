@@ -21,7 +21,7 @@ djdt_flamegraph = "*"
 django-extensions = "*"
 # Fixtures
 testfixtures = "*"
-factory_boy = "==3.1.0"
+factory_boy = "==3.2.0"
 fakeredis = "*"
 # Test framework
 pytest = "*"
@@ -33,7 +33,7 @@ pytest-pythonpath = "*"
 
 [packages]
 # Core
-pytz = "==2020.4"
+pytz = "*"
 Django = "==3.0.9"
 django-environ = "*"
 rules = "*"
@@ -44,7 +44,7 @@ django-prettyjson = "==0.4.1"
 # Images
 sorl-thumbnail = "==12.7.0"
 python-magic = "==0.4.18"
-Pillow = "==8.0.1"
+Pillow = "==8.1.0"
 # Forms
 django-crispy-forms = "==1.10.0"
 django-formtools = "==2.2"
@@ -64,36 +64,37 @@ hoep = {editable = true,git = "git://github.com/pacahon/Hoep.git",ref = "0d4c050
 # Monitoring
 sentry-sdk = "*"
 # Oauth2
-social-auth-core = "==3.3.3"
+social-auth-core = "==4.0.3"
 social-auth-app-django = "==4.0.0"
 # Task manager
 rq = "==1.7.0"
 django-rq = "==2.4.0"
 rq-scheduler = ">=0.9"
 # Security
-bleach = "==3.2.1"
+bleach = "==3.3.0"
 cryptography = "*"
 # API
 djangorestframework = "==3.12.2"
 rest-pandas = "==1.1.0"
 # Misc
-requests = "==2.25.0"
+requests = "==2.25.1"
 django-model-utils = "==4.1.1"
-django-storages = "==1.10.1"
+django-storages = "==1.11.1"
 django-dbbackup = "==3.3.0"
 django-import-export = "==2.4.0"
 tablib = "==3.0.0"
 nbconvert = "==6.0.7"
 django-js-reverse = "==0.9.1"
-numpy = "==1.19.4"
+numpy = "==1.20.1"
 icalendar = "==4.0.7"
 django-ical = "==1.7.1"
 python-dateutil = "==2.8.1"
-django-jinja = "==2.7.0"
+# XXX: `makemessages` command doesn't work with django-jinja 2.7.0
+django-jinja = "==2.6.0"
 python-ldap = "==3.3.1"
 attrs = "==20.3.0"
 django-choices = "==1.7.1"
-django-vanilla-views = "==1.1.0"
+django-vanilla-views = "==2.0.0"
 django-autocomplete-light = "==3.8.1"
 django-mptt = "==0.11.0"
 django-bootstrap-pagination = "==1.7.1"
