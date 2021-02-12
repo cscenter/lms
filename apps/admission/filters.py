@@ -5,6 +5,7 @@ import django_filters
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Row, Field
 from django import forms
+from django.conf import settings
 from django.forms import SelectMultiple
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -47,6 +48,7 @@ class ApplicantFilter(django_filters.FilterSet):
     campaign = django_filters.ModelChoiceFilter(
         label=_("Campaign"),
         queryset=(Campaign.objects
+                  .filter(branch__site_id=settings.SITE_ID)
                   .select_related("branch")
                   .order_by("-year", "branch__order").all()))
     status = ApplicantStatusFilter(choices=Applicant.STATUS,
@@ -155,6 +157,7 @@ class InterviewsCuratorFilter(InterviewsBaseFilter):
         field_name="applicant__campaign",
         label=_("Campaign"),
         queryset=(Campaign.objects
+                  .filter(branch__site_id=settings.SITE_ID)
                   .select_related("branch")
                   .order_by("-branch_id", "-year").all()),
         help_text="")

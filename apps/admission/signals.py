@@ -15,9 +15,8 @@ APPLICANT_FINAL_STATES = (Applicant.ACCEPT,
 
 @receiver(post_save, sender=Campaign)
 def post_save_campaign(sender, instance, created, *args, **kwargs):
-    """Make sure we have only one active campaign for a branch in a moment."""
+    """Make sure we have only one active campaign for a branch"""
     campaign = instance
-    # OK to update on each model change
     if campaign.current:
         (Campaign.objects
          .filter(branch=campaign.branch)

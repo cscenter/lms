@@ -133,8 +133,10 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     paginate_by = 50
 
     def get_queryset(self):
+        branches = Branch.objects.for_site(site_id=settings.SITE_ID)
         return (
             Applicant.objects
+            .filter(campaign__branch__in=branches)
             .select_related("exam", "online_test", "campaign", "university",
                             "campaign__branch")
             .prefetch_related("interview")
@@ -393,7 +395,9 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         return context
 
     def get_queryset(self):
+        branches = Branch.objects.for_site(site_id=settings.SITE_ID)
         q = (Interview.objects
+             .filter(applicant__campaign__branch__in=branches)
              .select_related("applicant", "applicant__campaign",
                              "applicant__campaign__branch")
              .prefetch_related("interviewers")
@@ -403,7 +407,9 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             # To interviewers show interviews from current campaigns where
             # they participate.
             try:
-                current_campaigns = list(Campaign.objects.filter(current=True)
+                current_campaigns = list(Campaign.objects
+                                         .filter(current=True,
+                                                 branch__site_id=settings.SITE_ID)
                                          .values_list("pk", flat=True))
             except Campaign.DoesNotExist:
                 messages.error(self.request, "Нет активных кампаний по набору.")
@@ -568,7 +574,8 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
     filterset_class = ResultsFilter
 
     def dispatch(self, request, *args, **kwargs):
-        self.active_campaigns = Campaign.objects.filter(current=True)
+        self.active_campaigns = (Campaign.objects
+                                 .filter(current=True, branch__site_id=settings.SITE_ID))
         try:
             self.selected_campaign = next(c for c in self.active_campaigns
                                           if c.branch_id == request.branch.pk)

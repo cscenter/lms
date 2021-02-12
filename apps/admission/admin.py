@@ -66,7 +66,7 @@ class ApplicantCampaignListFilter(CampaignListFilter):
 class CampaignAdmin(admin.ModelAdmin):
     form = TimezoneAwareAdminForm
     list_display = ['year', 'branch', 'current']
-    list_filter = ['branch']
+    list_filter = ['branch__site', 'branch']
     formfield_overrides = {
         TimezoneAwareDateTimeField: {
             'widget': TimezoneAwareAdminSplitDateTimeWidget,

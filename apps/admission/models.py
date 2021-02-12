@@ -60,6 +60,10 @@ class Campaign(TimezoneAwareModel, models.Model):
                                verbose_name=_("Branch"),
                                related_name="campaigns",
                                on_delete=models.PROTECT)
+    current = models.BooleanField(
+        _("Current Admission"),
+        help_text=_("You can mark campaign as current only after adding contests for testing"),
+        default=False)
     online_test_max_score = models.SmallIntegerField(
         _("Campaign|Test_max_score"))
     online_test_passing_score = models.SmallIntegerField(
@@ -72,10 +76,6 @@ class Campaign(TimezoneAwareModel, models.Model):
         _("Campaign|Exam_passing_score"),
         help_text=_("Campaign|Exam_passing_score-help"),
         null=True, blank=True)
-    current = models.BooleanField(
-        _("Current campaign"),
-        help_text=_("Show in application form list"),
-        default=False)
     application_starts_at = TimezoneAwareDateTimeField(_("Application Starts on"))
     application_ends_at = TimezoneAwareDateTimeField(
         _("Application Ends on"),
