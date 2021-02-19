@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 from typing import Optional, Tuple, List, Dict
 
-from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
@@ -201,7 +200,7 @@ class AbstractFieldEntry(models.Model):
     field_id = models.IntegerField()
     value = models.TextField(null=True)
     is_choice = models.BooleanField(_("Is Choice"), default=False)
-    meta = JSONField(_("Meta"), null=True, blank=True)
+    meta = models.JSONField(_("Meta"), null=True, blank=True)
 
     class Meta:
         verbose_name = _("Form Submission Entry")
@@ -344,7 +343,7 @@ class Field(AbstractField):
     form = models.ForeignKey(Form,
                              related_name="fields",
                              on_delete=models.CASCADE)
-    conditional_logic = JSONField(
+    conditional_logic = models.JSONField(
         _("Conditional Logic"),
         help_text=_("Array of dictionaries with logic rules"),
         null=True, blank=True)

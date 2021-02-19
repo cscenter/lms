@@ -1,9 +1,8 @@
 from decimal import Decimal
 from typing import Optional, Union
 
-from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
-from django.db.models import DecimalField
+from django.db.models import DecimalField, JSONField
 
 from core import forms
 

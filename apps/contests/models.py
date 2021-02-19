@@ -1,6 +1,5 @@
 from typing import Optional
 
-from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -22,7 +21,7 @@ class CheckingSystem(models.Model):
         verbose_name=_("What can it be used for?"),
         blank=True
     )
-    settings = JSONField(
+    settings = models.JSONField(
         verbose_name=_("CheckingSystem|Details"),
         blank=True,
         default=dict,
@@ -54,7 +53,7 @@ class Checker(models.Model):
         on_delete=models.CASCADE
     )
     url = models.URLField(_("Checker|URL"), blank=True)
-    settings = JSONField(
+    settings = models.JSONField(
         verbose_name=_("Checker|Settings"),
         blank=True,
         default=dict,
@@ -94,13 +93,13 @@ class Submission(models.Model):
         _("Status"),
         default=SubmissionStatus.NEW,
         choices=SubmissionStatus.choices)
-    settings = JSONField(
+    settings = models.JSONField(
         verbose_name=_("Settings"),
         blank=True,
         default=dict,
         help_text=_("Selected compiler, etc")
     )
-    meta = JSONField(
+    meta = models.JSONField(
         verbose_name=_("Meta"),
         blank=True,
         default=dict,
