@@ -15,6 +15,7 @@ from lms.views import IndexView, CourseOfferingsView
 from users.views import CertificateOfParticipationCreateView, \
     CertificateOfParticipationDetailView
 
+admin.site.enable_nav_sidebar = False
 admin.autodiscover()
 
 
