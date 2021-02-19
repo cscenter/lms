@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8b4c928d661f646b084b3d01259c2920ca1cbfcb04c443f071f94df7892321ed"
+            "sha256": "eb712da8c9e1dc822c3ccc13dc73c737d62d22a848f27d55ac85182f967620ee"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -400,10 +400,10 @@
         },
         "django-modeltranslation": {
             "hashes": [
-                "sha256:6e351473ae66c382fe831249aaab1f8b725c7be3914e73036505f758db8e9c88"
+                "sha256:a14e67d40952a6e927fb743e6529e29ccfd33a80d8aaaa39036aaf994cfdaf7e"
             ],
             "index": "pypi",
-            "version": "==0.16.1"
+            "version": "==0.16.2"
         },
         "django-mptt": {
             "hashes": [
@@ -452,11 +452,11 @@
         },
         "django-registration-redux": {
             "hashes": [
-                "sha256:ed1ead5398e48bdc37064ab1e269b49301765701984e8d956a641aad2ff3a3ca",
-                "sha256:ed525f393c452d3f5044148131cafbf50da7bdec9f78b594450bf01ad67085d4"
+                "sha256:e3d123354a1b8cbfa005d60f1ebb89ae8541f3eaffd6174d9f2aff529b57e430",
+                "sha256:e94b8a945e1cbfa9ec6c32b549597270405328d4e26651985d287d0211120691"
             ],
             "index": "pypi",
-            "version": "==2.8"
+            "version": "==2.9"
         },
         "django-rosetta": {
             "hashes": [
@@ -654,11 +654,11 @@
         },
         "jupyter-client": {
             "hashes": [
-                "sha256:49e390b36fe4b4226724704ea28d9fb903f1a3601b6882ce3105221cd09377a1",
-                "sha256:c958d24d6eacb975c1acebb68ac9077da61b5f5c040f22f6849928ad7393b950"
+                "sha256:5eaaa41df449167ebba5e1cf6ca9b31f7fd4f71625069836e2e4fee07fe3cb13",
+                "sha256:649ca3aca1e28f27d73ef15868a7c7f10d6e70f761514582accec3ca6bb13085"
             ],
             "index": "pypi",
-            "version": "==6.1.7"
+            "version": "==6.1.11"
         },
         "jupyter-core": {
             "hashes": [
@@ -1104,11 +1104,11 @@
         },
         "python-magic": {
             "hashes": [
-                "sha256:356efa93c8899047d1eb7d3eb91e871ba2f5b1376edbaf4cc305e3c872207355",
-                "sha256:b757db2a5289ea3f1ced9e60f072965243ea43a2221430048fd8cacab17be0ce"
+                "sha256:8551e804c09a3398790bd9e392acb26554ae2609f29c72abb0b9dee9a5571eae",
+                "sha256:ca884349f2c92ce830e3f498c5b7c7051fe2942c3ee4332f65213b8ebff15a62"
             ],
             "index": "pypi",
-            "version": "==0.4.18"
+            "version": "==0.4.22"
         },
         "python3-openid": {
             "hashes": [
