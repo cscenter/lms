@@ -339,7 +339,7 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         null=True,
         blank=True)
     # Education
-    is_studying = models.NullBooleanField(_("Are you studying?"))
+    is_studying = models.BooleanField(_("Are you studying?"), null=True)
     university = models.ForeignKey(
         University,
         verbose_name=_("Applicant|University"),
@@ -380,9 +380,10 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         help_text=_("Applicant|work_or_study_experience"),
         null=True,
         blank=True)
-    has_job = models.NullBooleanField(
+    has_job = models.BooleanField(
         _("Do you work?"),
-        help_text=_("Applicant|has_job"))
+        help_text=_("Applicant|has_job"),
+        null=True)
     workplace = models.CharField(
         _("Workplace"),
         help_text=_("Applicant|workplace"),
