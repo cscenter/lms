@@ -34,7 +34,7 @@ pytest-pythonpath = "*"
 [packages]
 # Core
 pytz = "*"
-Django = "==3.0.9"
+Django = "==3.1.7"
 django-environ = "*"
 rules = "*"
 # DB
@@ -89,8 +89,7 @@ numpy = "==1.20.1"
 icalendar = "==4.0.7"
 django-ical = "==1.7.1"
 python-dateutil = "==2.8.1"
-# XXX: `makemessages` command doesn't work with django-jinja 2.7.0
-django-jinja = "==2.6.0"
+django-jinja = "==2.7.0"
 python-ldap = "==3.3.1"
 attrs = "==20.3.0"
 django-choices = "==1.7.1"
