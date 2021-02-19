@@ -276,22 +276,43 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         verbose_name=_("Applicant|Campaign"),
         on_delete=models.PROTECT,
         related_name="applicants")
+    status = models.CharField(
+        choices=STATUS,
+        verbose_name=_("Applicant|Status"),
+        blank=True,
+        null=True,
+        max_length=20)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Account"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    # Personal
     first_name = models.CharField(_("First name"), max_length=255)
-    surname = models.CharField(_("Surname"), max_length=255)
+    last_name = models.CharField(_("Surname"), max_length=255)
     patronymic = models.CharField(_("Patronymic"), max_length=255,
                                   blank=True, null=True)
+    email = models.EmailField(
+        _("Email"),
+        help_text=_("Applicant|email"))
+    is_unsubscribed = models.BooleanField(
+        _("Unsubscribed"),
+        default=False,
+        db_index=True,
+        help_text=_("Unsubscribe from future notifications"))
+    phone = models.CharField(
+        _("Contact phone"),
+        max_length=42,
+        help_text=_("Applicant|phone"))
     living_place = models.CharField(
         _("Living Place"),
         max_length=255,
         null=True,
         blank=True)
-    email = models.EmailField(
-        _("Email"),
-        help_text=_("Applicant|email"))
-    phone = models.CharField(
-        _("Contact phone"),
-        max_length=42,
-        help_text=_("Applicant|phone"))
+    birth_date = models.DateField(_("Birth Date"), blank=True, null=True)
+    # Social Networks
     stepic_id = models.CharField(
         _("Stepik ID"),
         help_text=_("Applicant|stepic_id"),
@@ -308,6 +329,7 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         _("Yandex Login (normalized)"),
         max_length=80,
         help_text=_("Applicant|yandex_id_normalization"),
+        editable=False,
         null=True,
         blank=True)
     github_login = models.CharField(
@@ -316,41 +338,35 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         help_text=_("Applicant|github_login"),
         null=True,
         blank=True)
-
+    # Education
+    is_studying = models.NullBooleanField(_("Are you studying?"))
     university = models.ForeignKey(
         University,
         verbose_name=_("Applicant|University"),
         on_delete=models.PROTECT,
-        related_name="applicants")
-    # TODO: remove
-    university2 = models.CharField(
-        _("University_legacy"),
-        help_text=_("Applicant|university_legacy"),
-        max_length=255,
-        null=True,
-        blank=True)
+        related_name="applicants",
+        blank=True, null=True)
     university_other = models.CharField(
         _("University (Other)"),
-        help_text=_("Applicant|university_other"),
         max_length=255,
         null=True,
         blank=True)
     faculty = models.TextField(
         _("Faculty"),
-        help_text=_("Applicant|faculty"))
+        help_text=_("Applicant|faculty"),
+        blank=True, null=True)
     level_of_education = models.CharField(
         _("Course"),
         choices=AcademicDegreeLevels.choices,
         help_text=_("Applicant|course"),
-        max_length=355)
+        max_length=355,
+        blank=True, null=True)
+    year_of_graduation = models.PositiveSmallIntegerField(
+        verbose_name=_("Graduation Year"),
+        blank=True, null=True)
     graduate_work = models.TextField(
         _("Graduate work"),
         help_text=_("Applicant|graduate_work_or_dissertation"),
-        null=True,
-        blank=True)
-    experience = models.TextField(
-        _("Experience"),
-        help_text=_("Applicant|work_or_study_experience"),
         null=True,
         blank=True)
     online_education_experience = models.TextField(
@@ -358,9 +374,10 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         help_text=_("Applicant|online_education_experience"),
         null=True,
         blank=True)
-    probability = models.TextField(
-        _("Probability"),
-        help_text=_("Applicant|probability"),
+    # Work related questions
+    experience = models.TextField(
+        _("Experience"),
+        help_text=_("Applicant|work_or_study_experience"),
         null=True,
         blank=True)
     has_job = models.NullBooleanField(
@@ -384,11 +401,11 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         help_text=_("Applicant|motivation_why"),
         blank=True,
         null=True)
-    additional_info = models.TextField(
-        _("Additional info from applicant about himself"),
-        help_text=_("Applicant|additional_info"),
-        blank=True,
-        null=True)
+    probability = models.TextField(
+        _("Probability"),
+        help_text=_("Applicant|probability"),
+        null=True,
+        blank=True)
     preferred_study_programs = MultiSelectField(
         _("Study program"),
         help_text=_("Applicant|study_program"),
@@ -413,11 +430,11 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
     # Note: replace with m2m relation first if you need some statistics
     # based on field below
     where_did_you_learn = MultiSelectField(
-        _("Where did you learn?"),
-        help_text=_("Applicant|where_did_you_learn_about_cs_center"),
-        choices=INFO_SOURCES)
+        _("Where did you learn about admission?"),
+        choices=INFO_SOURCES,
+        blank=True)
     where_did_you_learn_other = models.CharField(
-        _("Where did you learn? (other)"),
+        _("Where did you learn about admission? (other)"),
         max_length=255,
         null=True,
         blank=True)
@@ -426,28 +443,16 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         help_text=_("Applicant|future_plans"),
         blank=True,
         null=True)
+    additional_info = models.TextField(
+        _("Additional Info"),
+        help_text=_("Applicant|additional_info"),
+        blank=True,
+        null=True)
     admin_note = models.TextField(
         _("Admin note"),
         help_text=_("Applicant|admin_note"),
         blank=True,
         null=True)
-    status = models.CharField(
-        choices=STATUS,
-        verbose_name=_("Applicant|Status"),
-        blank=True,
-        null=True,
-        max_length=20)
-    is_unsubscribed = models.BooleanField(
-        _("Unsubscribed"),
-        default=False,
-        db_index=True,
-        help_text=_("Unsubscribe from future notifications"))
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
 
     class Meta:
         verbose_name = _("Applicant")
@@ -484,7 +489,7 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
 
     @property
     def full_name(self):
-        parts = [self.surname, self.first_name, self.patronymic]
+        parts = [self.last_name, self.first_name, self.patronymic]
         return smart_str(" ".join(part for part in parts if part).strip())
 
     def clean(self):
@@ -518,7 +523,7 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
             Q(email=self.email),
             (
                 Q(first_name__iexact=self.first_name) &
-                Q(surname__iexact=self.surname) &
+                Q(last_name__iexact=self.last_name) &
                 Q(patronymic__iexact=self.patronymic)
             ),
         ]

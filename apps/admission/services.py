@@ -107,7 +107,7 @@ def create_student_from_applicant(applicant):
             level_of_education_on_admission=applicant.level_of_education,
             university=applicant.university.name)
     user.first_name = applicant.first_name
-    user.last_name = applicant.surname
+    user.last_name = applicant.last_name
     user.patronymic = applicant.patronymic if applicant.patronymic else ""
     user.phone = applicant.phone
     user.workplace = applicant.workplace if applicant.workplace else ""
@@ -145,7 +145,7 @@ class EmailQueueService:
             template=applicant.campaign.template_registration,
             context={
                 'FIRST_NAME': applicant.first_name,
-                'SURNAME': applicant.surname,
+                'SURNAME': applicant.last_name,
                 'PATRONYMIC': applicant.patronymic if applicant.patronymic else "",
                 'EMAIL': applicant.email,
                 'BRANCH': applicant.campaign.branch.name,

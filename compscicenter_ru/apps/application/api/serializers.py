@@ -42,7 +42,7 @@ class ApplicationFormSerializer(serializers.ModelSerializer):
         model = Applicant
         fields = (
             # Personal info
-            "surname", "first_name", "patronymic",
+            "last_name", "first_name", "patronymic",
             "email", "phone",
             # Accounts
             "stepic_id", "github_login", "yandex_login",

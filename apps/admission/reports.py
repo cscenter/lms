@@ -161,7 +161,7 @@ class AdmissionExamReport:
                 participant_id = ""
             row = [
                 exam.applicant.pk,
-                exam.applicant.surname,
+                exam.applicant.last_name,
                 exam.applicant.first_name,
                 exam.applicant.patronymic,
                 exam.applicant.yandex_login,

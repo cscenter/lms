@@ -213,10 +213,10 @@ class ApplicantReadOnlyForm(ReadOnlyFieldsMixin, forms.ModelForm):
 
     class Meta:
         model = Applicant
-        exclude = ("campaign", "first_name", "patronymic", "surname",
+        exclude = ("campaign", "first_name", "patronymic", "last_name",
                    "status", "yandex_login_q", "user",
                    "university_other", "contest_id", "participant_id",
-                   "is_unsubscribed", "university2")
+                   "is_unsubscribed",)
 
     def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)

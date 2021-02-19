@@ -61,7 +61,7 @@ class ApplicantFactory(factory.django.DjangoModelFactory):
     campaign = factory.SubFactory(CampaignFactory)
     first_name = factory.Sequence(lambda n: "Name %03d" % n)
     patronymic = factory.Sequence(lambda n: "Patronymic %03d" % n)
-    surname = factory.Sequence(lambda n: "Surname %03d" % n)
+    last_name = factory.Sequence(lambda n: "Surname %03d" % n)
     email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
     phone = factory.Sequence(lambda n: '123-555-%04d' % n)
     university = factory.SubFactory(UniversityFactory)

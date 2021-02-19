@@ -79,7 +79,7 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = OnlineTestRecordResource
     list_display = ['get_applicant', 'score', 'get_campaign', 'yandex_contest_id']
     list_filter = ['applicant__campaign']
-    search_fields = ['applicant__yandex_login', 'applicant__surname',
+    search_fields = ['applicant__yandex_login', 'applicant__last_name',
                      'applicant__first_name', 'applicant__email']
     raw_id_fields = ['applicant']
     formfield_overrides = {
@@ -96,7 +96,7 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
         return obj.applicant.campaign
     get_campaign.short_description = _("Campaign")
 
-    @meta(_("Applicant"), admin_order_field="applicant__surname")
+    @meta(_("Applicant"), admin_order_field="applicant__last_name")
     def get_applicant(self, obj):
         return obj.applicant.full_name
 
@@ -111,7 +111,7 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
             kwargs['queryset'] = (
                 Applicant.objects
                          .select_related("campaign", "campaign__branch")
-                         .order_by("surname"))
+                         .order_by("last_name"))
         return (super(OnlineTestAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
@@ -120,7 +120,7 @@ class ExamAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_class = ExamRecordResource
     raw_id_fields = ("applicant",)
     list_display = ('__str__', 'score', 'yandex_contest_id', 'status')
-    search_fields = ['applicant__yandex_login', 'applicant__surname',
+    search_fields = ['applicant__yandex_login', 'applicant__last_name',
                      'applicant__email',
                      'applicant__first_name', 'yandex_contest_id',
                      'contest_participant_id']
@@ -147,18 +147,17 @@ class ExamAdmin(ImportExportMixin, admin.ModelAdmin):
             kwargs['queryset'] = (
                 Applicant.objects
                          .select_related("campaign", "campaign__branch")
-                         .order_by("surname"))
+                         .order_by("last_name"))
         return (super(ExamAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
 class ApplicantAdmin(admin.ModelAdmin):
-    list_display = ('id', 'yandex_login', 'surname', 'first_name', 'campaign',
+    list_display = ('id', 'yandex_login', 'last_name', 'first_name', 'campaign',
                     'created_local')
     list_filter = [CampaignListFilter, 'status']
     search_fields = ('yandex_login', 'yandex_login_q', 'stepic_id',
-                     'first_name', 'surname', 'email', 'phone')
-    readonly_fields = ['yandex_login_q']
+                     'first_name', 'last_name', 'email', 'phone')
     raw_id_fields = ('user',)
 
     def created_local(self, obj):
@@ -221,7 +220,7 @@ class InterviewAdmin(admin.ModelAdmin):
             kwargs['queryset'] = (
                 Applicant.objects
                          .select_related("campaign", "campaign__branch")
-                         .order_by("surname"))
+                         .order_by("last_name"))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_date_local(self, obj):
@@ -242,7 +241,7 @@ class InterviewAdmin(admin.ModelAdmin):
 
 class InterviewCommentAdmin(admin.ModelAdmin):
     list_display = ['get_interview', 'get_interviewer', 'score']
-    search_fields = ['interview__applicant__surname']
+    search_fields = ['interview__applicant__last_name']
     list_filter = ['interview__applicant__campaign']
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
@@ -260,7 +259,7 @@ class InterviewCommentAdmin(admin.ModelAdmin):
                              "interviewer")
         return q
 
-    @meta(_("Interview"), admin_order_field="interview__applicant__surname")
+    @meta(_("Interview"), admin_order_field="interview__applicant__last_name")
     def get_interview(self, obj):
         return obj.interview.applicant.full_name
 

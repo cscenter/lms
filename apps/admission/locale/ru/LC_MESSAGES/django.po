@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-12 13:45+0000\n"
-"PO-Revision-Date: 2021-02-12 13:50+0000\n"
+"PO-Revision-Date: 2021-02-17 14:57+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -441,7 +441,7 @@ msgstr "Вуз, в котором учился или который закон�
 
 #: apps/admission/models.py:333
 msgid "University (Other)"
-msgstr "Университет"
+msgstr "Университет, другое"
 
 #: apps/admission/models.py:334
 msgid "Applicant|university_other"
@@ -535,7 +535,7 @@ msgstr "Мотивация поступающего"
 
 #: apps/admission/models.py:384
 msgid "Applicant|motivation_why"
-msgstr "Почему Вы хотели бы обучаться в Computer Science Center?"
+msgstr "Почему Вы хотите обучаться у нас?"
 
 #: apps/admission/models.py:388
 msgid "Additional info from applicant about himself"
@@ -544,8 +544,8 @@ msgstr "Дополнительно о себе"
 #: apps/admission/models.py:389
 msgid "Applicant|additional_info"
 msgstr ""
-"Если хотите, напишите о себе любую дополнительную информацию, которая могла "
-"бы помочь Вам поступить в центр"
+"Если хотите, напишите любую дополнительную информацию, которая могла бы "
+"помочь Вам поступить"
 
 #: apps/admission/models.py:393
 msgid "Study program"

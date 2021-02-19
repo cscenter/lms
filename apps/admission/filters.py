@@ -53,8 +53,8 @@ class ApplicantFilter(django_filters.FilterSet):
                   .order_by("-year", "branch__order").all()))
     status = ApplicantStatusFilter(choices=Applicant.STATUS,
                                    label=_("Status"))
-    surname = django_filters.CharFilter(lookup_expr='icontains',
-                                        label=_("Surname"))
+    last_name = django_filters.CharFilter(lookup_expr='icontains',
+                                          label=_("Surname"))
 
     class Meta:
         model = Applicant
@@ -70,7 +70,7 @@ class ApplicantFilter(django_filters.FilterSet):
                 Row(
                     Div("campaign", css_class="col-xs-3"),
                     Div("status", css_class="col-xs-3"),
-                    Div("surname", css_class="col-xs-4"),
+                    Div("last_name", css_class="col-xs-4"),
                     Div(Submit('', _('Filter'),
                                css_class="btn-block -inline-submit"),
                         css_class="col-xs-2"),

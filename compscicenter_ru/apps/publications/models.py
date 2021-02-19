@@ -172,7 +172,7 @@ class Speaker(UserThumbnailMixin, models.Model):
     @property
     def abbreviated_name_in_latin(self):
         """
-        Returns transliterated user surname + rest initials in lower case.
+        Returns transliterated full last name + other initials in lower case.
         Examples:
             Жуков Иван Викторович -> zhukov.i.v
             Иванов Кирилл -> ivanov.k
