@@ -7,11 +7,11 @@ from typing import Optional, NamedTuple
 
 from django.conf import settings
 from django.core import checks
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, FieldDoesNotExist
 from django.core.validators import MinValueValidator, \
     MaxValueValidator
 from django.db import models, transaction
-from django.db.models import query, Q, FieldDoesNotExist
+from django.db.models import query, Q
 from django.utils import timezone, numberformat
 from django.utils.encoding import smart_str
 from django.utils.formats import date_format, time_format
