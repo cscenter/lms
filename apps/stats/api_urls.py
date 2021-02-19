@@ -1,11 +1,11 @@
-from django.conf.urls import include, url
+from django.urls import path, include
 
 app_name = 'stats-api'
 
 urlpatterns = [
-    url(r'^v1/stats/', include([
+    path('v1/stats/', include([
         # TODO: move to appropriate app
-        url(r'^learning/', include('stats.learning.api_urls')),
-        url(r'^admission/', include('admission.api.stats.urls')),
+        path('learning/', include('stats.learning.api_urls')),
+        path('admission/', include('admission.api.stats.urls')),
     ]))
 ]

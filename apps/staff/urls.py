@@ -1,11 +1,11 @@
-from django.conf.urls import include, url
-from django.urls import path, re_path, register_converter
+from django.urls import include, path, re_path, register_converter
 
 from courses.urls import RE_COURSE_URI
 from learning.gradebook.views import GradeBookView, GradeBookCSVView, \
     ImportAssignmentScoresByStepikIDView, \
     ImportAssignmentScoresByYandexLoginView, \
     ImportAssignmentScoresByEnrollmentIDView
+from staff.api.views import StudentSearchJSONView
 from staff.views import HintListView, StudentSearchView, ExportsView, \
     FutureGraduateStatsView, FutureGraduateDiplomasTeXView, \
     FutureGraduateDiplomasCSVView, ProgressReportFullView, \
@@ -17,7 +17,6 @@ from staff.views import HintListView, StudentSearchView, ExportsView, \
     SurveySubmissionsStatsView, GradeBookListView, create_alumni_profiles, \
     InvitationStudentsProgressReportView, StudentSearchCSVView, \
     AdmissionExamReportView
-from staff.api.views import StudentSearchJSONView
 
 app_name = 'staff'
 
@@ -67,26 +66,26 @@ urlpatterns = [
     path('exports/', ExportsView.as_view(), name='exports'),
 
     # FIXME: Is it useful?
-    url(r'^reports/learning/will_graduate/(?P<output_format>csv|xlsx)/$', WillGraduateStatsReportView.as_view(), name='exports_report_will_graduate'),
-    url(r'^reports/future-graduates/(?P<branch_id>\d+)/', include([
-        url(r'^stats/$', FutureGraduateStatsView.as_view(), name='export_future_graduates_stats'),
-        url(r'^tex/$', FutureGraduateDiplomasTeXView.as_view(), name='exports_future_graduates_diplomas_tex'),
-        url(r'^csv/$', FutureGraduateDiplomasCSVView.as_view(), name='exports_future_graduates_diplomas_csv'),
+    re_path(r'^reports/learning/will_graduate/(?P<output_format>csv|xlsx)/$', WillGraduateStatsReportView.as_view(), name='exports_report_will_graduate'),
+    re_path(r'^reports/future-graduates/(?P<branch_id>\d+)/', include([
+        path('stats/', FutureGraduateStatsView.as_view(), name='export_future_graduates_stats'),
+        path('tex/', FutureGraduateDiplomasTeXView.as_view(), name='exports_future_graduates_diplomas_tex'),
+        path('csv/', FutureGraduateDiplomasCSVView.as_view(), name='exports_future_graduates_diplomas_csv'),
     ])),
-    url(r'^reports/students-progress/', include([
-        url(r'^(?P<output_format>csv|xlsx)/$', ProgressReportFullView.as_view(), name='students_progress_report'),
-        url(r'^terms/(?P<term_year>\d+)/(?P<term_type>\w+)/(?P<output_format>csv|xlsx)/$', ProgressReportForSemesterView.as_view(), name='students_progress_report_for_term'),
-        url(r'^invitations/(?P<invitation_id>\d+)/(?P<output_format>csv|xlsx)/$', InvitationStudentsProgressReportView.as_view(), name='students_progress_report_for_invitation'),
+    path('reports/students-progress/', include([
+        re_path(r'^(?P<output_format>csv|xlsx)/$', ProgressReportFullView.as_view(), name='students_progress_report'),
+        re_path(r'^terms/(?P<term_year>\d+)/(?P<term_type>\w+)/(?P<output_format>csv|xlsx)/$', ProgressReportForSemesterView.as_view(), name='students_progress_report_for_term'),
+        re_path(r'^invitations/(?P<invitation_id>\d+)/(?P<output_format>csv|xlsx)/$', InvitationStudentsProgressReportView.as_view(), name='students_progress_report_for_invitation'),
     ])),
-    url(r'^reports/official-diplomas/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/', include([
-        url(r'^list/$', OfficialDiplomasListView.as_view(), name='exports_official_diplomas_list'),
-        url(r'^tex/$', OfficialDiplomasTeXView.as_view(), name='exports_official_diplomas_tex'),
-        url(r'^csv/$', OfficialDiplomasCSVView.as_view(), name='exports_official_diplomas_csv'),
+    re_path(r'^reports/official-diplomas/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/', include([
+        path('list/', OfficialDiplomasListView.as_view(), name='exports_official_diplomas_list'),
+        path('tex/', OfficialDiplomasTeXView.as_view(), name='exports_official_diplomas_tex'),
+        path('csv/', OfficialDiplomasCSVView.as_view(), name='exports_official_diplomas_csv'),
     ])),
-    path('reports/admission/<int:campaign_id>/applicants/<export_fmt:output_format>/', AdmissionApplicantsReportView.as_view(), name='exports_report_admission_applicants'),
-    path('reports/admission/<int:campaign_id>/exam/<export_fmt:output_format>/', AdmissionExamReportView.as_view(), name='exports_report_admission_exam'),
-    url(r'^reports/surveys/(?P<survey_pk>\d+)/(?P<output_format>csv|xlsx)/$', SurveySubmissionsReportView.as_view(), name='exports_report_survey_submissions'),
-    url(r'^reports/surveys/(?P<survey_pk>\d+)/txt/$', SurveySubmissionsStatsView.as_view(), name='exports_report_survey_submissions_stats'),
+    re_path('reports/admission/<int:campaign_id>/applicants/<export_fmt:output_format>/', AdmissionApplicantsReportView.as_view(), name='exports_report_admission_applicants'),
+    re_path('reports/admission/<int:campaign_id>/exam/<export_fmt:output_format>/', AdmissionExamReportView.as_view(), name='exports_report_admission_exam'),
+    re_path(r'^reports/surveys/(?P<survey_pk>\d+)/(?P<output_format>csv|xlsx)/$', SurveySubmissionsReportView.as_view(), name='exports_report_survey_submissions'),
+    re_path(r'^reports/surveys/(?P<survey_pk>\d+)/txt/$', SurveySubmissionsStatsView.as_view(), name='exports_report_survey_submissions_stats'),
 
 
     path('warehouse/', HintListView.as_view(), name='staff_warehouse'),

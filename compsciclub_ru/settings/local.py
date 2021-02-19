@@ -10,7 +10,7 @@ if DEBUG:
     MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
     INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
     DEBUG_TOOLBAR_CONFIG = {
-        'SHOW_TOOLBAR_CALLBACK': lambda request: not request.is_ajax()
+        'SHOW_TOOLBAR_CALLBACK': lambda request: request.headers.get('x-requested-with') != 'XMLHttpRequest'
     }
 
     # Translate .po files with UI

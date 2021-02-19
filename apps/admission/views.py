@@ -488,7 +488,7 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
 
     @transaction.atomic
     def form_valid(self, form):
-        if self.request.is_ajax():
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             _ = form.save()
             return JsonResponse({"success": "true"})
         return super().form_valid(form)
@@ -500,7 +500,7 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
                        args=[self.object.interview_id])
 
     def form_invalid(self, form):
-        if self.request.is_ajax():
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             # TODO: return 400 status code?
             msg = "<br>".join(m for ms in form.errors.values() for m in ms)
             r = JsonResponse({"errors": msg})
