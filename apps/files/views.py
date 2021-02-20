@@ -51,7 +51,7 @@ class ProtectedFileDownloadView(ABC, PermissionRequiredMixin, generic.View):
             return HttpResponseNotFound()
 
         # FIXME: preprocess ipynb files and save locally or in S3!
-        if settings.USE_S3_FOR_UPLOAD:
+        if settings.USE_CLOUD_STORAGE:
             signed_url = file_field.url
             if getattr(settings, "PROXYING_REMOTE_FILES", False):
                 from urllib.parse import urlparse

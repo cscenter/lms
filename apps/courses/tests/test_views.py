@@ -178,7 +178,7 @@ def test_venue_list(client):
 
 @pytest.mark.django_db
 def test_download_course_class_attachment(client, lms_resolver, settings):
-    settings.USE_S3_FOR_UPLOAD = False
+    settings.USE_CLOUD_STORAGE = False
     course_class = CourseClassFactory(
         materials_visibility=MaterialVisibilityTypes.PARTICIPANTS)
     cca = CourseClassAttachmentFactory(course_class=course_class)

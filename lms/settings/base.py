@@ -36,9 +36,9 @@ CSRF_COOKIE_DOMAIN = env.str('DJANGO_CSRF_COOKIE_DOMAIN', default=None)
 CSRF_COOKIE_NAME = env.str('DJANGO_CSRF_COOKIE_NAME', default='csrftoken')
 
 # Upload Settings
-USE_S3_FOR_UPLOAD = env.bool('USE_CLOUD_STORAGE', default=False)
+USE_CLOUD_STORAGE = env.bool('USE_CLOUD_STORAGE', default=True)
 AWS_DEFAULT_ACL = None  # All files will inherit the bucket’s ACL
-if USE_S3_FOR_UPLOAD:
+if USE_CLOUD_STORAGE:
     DEFAULT_FILE_STORAGE = 'files.storage.PublicMediaS3Storage'
     AWS_PUBLIC_MEDIA_LOCATION = 'media'
     PRIVATE_FILE_STORAGE = 'files.storage.PrivateMediaS3Storage'

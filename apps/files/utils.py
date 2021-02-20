@@ -28,7 +28,7 @@ def convert_ipynb_to_html(file_field: FieldFile,
         logger.debug(f"File extension is not .ipynb")
         return
     html_exporter = HTMLExporter()
-    if settings.USE_S3_FOR_UPLOAD:
+    if settings.USE_CLOUD_STORAGE:
         signed_url = file_field.url
         try:
             with requests.get(signed_url, allow_redirects=True, stream=True) as r:
