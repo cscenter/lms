@@ -740,7 +740,7 @@ class StudentProfile(TimeStampedModel):
     level_of_education_on_admission = models.CharField(
         _("StudentInfo|University year"),
         choices=AcademicDegreeLevels.choices,
-        max_length=2,
+        max_length=12,
         null=True, blank=True)
     is_official_student = models.BooleanField(
         verbose_name=_("Official Student"),

@@ -454,6 +454,12 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         help_text=_("Applicant|admin_note"),
         blank=True,
         null=True)
+    # Any useful data like application form integration log
+    meta = models.JSONField(
+        blank=True,
+        editable=False,
+        default=dict,
+    )
 
     class Meta:
         verbose_name = _("Applicant")
