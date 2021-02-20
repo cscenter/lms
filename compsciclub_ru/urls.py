@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.i18n import i18n_patterns
@@ -75,6 +76,7 @@ urlpatterns += [
     path('narnia/', include(loginas_urls)),
     path('narnia/django-rq/', include('django_rq.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 
 if settings.DEBUG:
     from django.conf.urls import handler400, handler403, handler404, handler500
