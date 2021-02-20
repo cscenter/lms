@@ -2,7 +2,6 @@
 
 import datetime
 import uuid
-from collections import OrderedDict
 from typing import Optional, NamedTuple
 
 from django.conf import settings
@@ -17,7 +16,6 @@ from django.utils.encoding import smart_str
 from django.utils.formats import date_format, time_format
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-from jsonfield import JSONField
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
 from post_office.models import EmailTemplate
@@ -585,11 +583,10 @@ class Contest(models.Model):
         max_length=42,
         blank=True,
         null=True)
-    details = JSONField(
+    details = models.JSONField(
         verbose_name=_("Details"),
-        load_kwargs={'object_pairs_hook': OrderedDict},
         blank=True,
-        validators=[validate_json_container]
+        default=dict,
     )
     file = ConfigurableStorageFileField(
         _("Assignments in pdf format"),
@@ -601,10 +598,6 @@ class Contest(models.Model):
     class Meta:
         verbose_name = _("Contest")
         verbose_name_plural = _("Contests")
-
-    def clean(self):
-        if not self.details:
-            self.details = {}
 
     def file_url(self):
         return self.file.url
@@ -834,10 +827,10 @@ class Test(TimeStampedModel, YandexContestIntegration,
         related_name="online_test")
     score = models.PositiveSmallIntegerField(
         verbose_name=_("Score"), null=True, blank=True)
-    details = JSONField(
+    details = models.JSONField(
         verbose_name=_("Details"),
-        load_kwargs={'object_pairs_hook': OrderedDict},
         blank=True,
+        default=dict,
     )
 
     class Meta:
@@ -878,9 +871,8 @@ class Exam(TimeStampedModel, YandexContestIntegration,
         # Avoid loading empty values with admin interface
         null=True,
         blank=True)
-    details = JSONField(
+    details = models.JSONField(
         verbose_name=_("Details"),
-        load_kwargs={'object_pairs_hook': OrderedDict},
         blank=True,
         null=True
     )
