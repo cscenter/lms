@@ -1,5 +1,6 @@
 # Read project environment into os.environ before importing base configuration
 import environ
+import sys
 import warnings
 
 env = environ.Env()
@@ -11,6 +12,8 @@ with warnings.catch_warnings():
 
 from lms.settings.extended import *
 
+sys.path.append(str(Path(__file__).parents[1] / "apps"))
+
 SITE_ID = 3
 if REDIS_DB_INDEX is None:
     for queue_config in RQ_QUEUES.values():
@@ -20,13 +23,17 @@ if REDIS_DB_INDEX is None:
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["lk.yandexdataschool.ru"])
 
 WSGI_APPLICATION = 'lk_yandexdataschool_ru.wsgi.application'
-ROOT_URLCONF = 'lms.urls'
+ROOT_URLCONF = 'lk_yandexdataschool_ru.urls'
 LMS_SUBDOMAIN = None
 LMS_CURATOR_EMAIL = 'shadcurators@yandex.ru'
 LMS_MENU = 'lk_yandexdataschool_ru.menu'
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,
 }
+
+INSTALLED_APPS += [
+    'application.apps.ApplicationConfig',
+]
 
 ESTABLISHED = 2007
 DEFAULT_CITY_CODE = "msk"
@@ -45,3 +52,7 @@ for template in TEMPLATES:
         ]
         for option, value in update_constants:
             template["OPTIONS"]["constants"][option] = value
+
+
+# Application form webhook authorization token. Send it over https only.
+APPLICATION_FORM_SECRET_TOKEN = 'eb224e98-fffa-4e21-ab92-744f2e95e551-3f2a5499-89bf-4f8b-9c90-117b960f0fdf'
