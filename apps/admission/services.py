@@ -22,10 +22,9 @@ from learning.services import create_student_profile, get_student_profile
 from users.models import User, StudentProfile, StudentTypes
 
 
-def get_email_from(campaign: Campaign, default=None):
-    if campaign.branch.site.domain == 'compscicenter.ru':
-        return 'CS центр <info@compscicenter.ru>'
-    return default or settings.DEFAULT_FROM_EMAIL
+def get_email_from(campaign: Campaign):
+    # TODO: add email to Campaign model?
+    return campaign.branch.default_email_from
 
 
 def create_invitation(streams: List[InterviewStream], applicant: Applicant):
@@ -134,21 +133,19 @@ def get_meeting_time(meeting_at: datetime, stream: InterviewStream):
 
 
 class EmailQueueService:
-    """
-    Adds email to the db queue instead of sending email directly.
-    """
     @staticmethod
     def new_registration(applicant: Applicant) -> Email:
+        campaign = applicant.campaign
         return mail.send(
             [applicant.email],
-            sender='CS центр <info@compscicenter.ru>',
-            template=applicant.campaign.template_registration,
+            sender=get_email_from(campaign),
+            template=campaign.template_registration,
             context={
                 'FIRST_NAME': applicant.first_name,
                 'SURNAME': applicant.last_name,
                 'PATRONYMIC': applicant.patronymic if applicant.patronymic else "",
                 'EMAIL': applicant.email,
-                'BRANCH': applicant.campaign.branch.name,
+                'BRANCH': campaign.branch.name,
                 'PHONE': applicant.phone,
                 'CONTEST_ID': applicant.online_test.yandex_contest_id,
                 'YANDEX_LOGIN': applicant.yandex_login,

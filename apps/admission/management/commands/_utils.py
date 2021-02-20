@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import ast
 
+from django.conf import settings
 from django.core.management import CommandError
 from post_office.models import EmailTemplate
 from post_office.utils import get_email_template
@@ -21,7 +22,9 @@ class CurrentCampaignMixin:
     def get_current_campaigns(self, options, required=False):
         branch_code = options["branch"]
         if not branch_code and required:
-            available = (Campaign.objects.filter(current=True)
+            available = (Campaign.objects
+                         .filter(current=True,
+                                 branch__site_id=settings.SITE_ID)
                          .select_related('branch'))
             campaigns = [c.branch.code for c in available]
             msg = f"Provide the code of the campaign branch. Options: {campaigns}"

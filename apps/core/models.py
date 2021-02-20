@@ -314,6 +314,15 @@ class Branch(TimezoneAwareModel, models.Model):
     def _timezone(self):
         return pytz.timezone(self.time_zone)
 
+    @cached_property
+    def default_email_from(self):
+        if self.site.domain == 'compscicenter.ru':
+            return 'CS центр <info@compscicenter.ru>'
+        elif self.site.domain == 'compsciclub.ru':
+            return 'CS клуб <spbinfo@compsciclub.ru>'
+        elif self.site.domain == 'lk.yandexdataschool.ru':
+            return 'ШАД <noreply@yandexdataschool.ru>'
+
 
 class Location(TimezoneAwareModel, models.Model):
     TIMEZONE_AWARE_FIELD_NAME = 'city'

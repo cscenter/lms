@@ -359,7 +359,7 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         _("Course"),
         choices=AcademicDegreeLevels.choices,
         help_text=_("Applicant|course"),
-        max_length=355,
+        max_length=12,
         blank=True, null=True)
     year_of_graduation = models.PositiveSmallIntegerField(
         verbose_name=_("Graduation Year"),

@@ -26,7 +26,7 @@ class Command(EmailTemplateMixin, CustomizeQueryMixin,
         super().add_arguments(parser)
         parser.add_argument(
             '--from', type=str,
-            help='Override default `From` header')
+            help='Overrides default `From` header')
 
     def get_template_name(self, campaign, suffix):
         return self.TEMPLATE_REGEXP.format(
@@ -41,12 +41,12 @@ class Command(EmailTemplateMixin, CustomizeQueryMixin,
             self.stdout.write("Canceled")
             return
 
-        default_email_from = options["from"]
+        sender = options["from"]
 
         manager = self.get_manager(Applicant, options)
 
         for campaign in campaigns:
-            email_from = get_email_from(campaign, default_email_from)
+            email_from = sender or get_email_from(campaign)
             self.stdout.write("{}:".format(campaign))
             applicants = manager.filter(campaign_id=campaign.pk)
 

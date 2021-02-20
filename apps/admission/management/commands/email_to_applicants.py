@@ -69,11 +69,11 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin,
 
         manager = self.get_manager(Applicant, options)
 
-        default_from = options["from"]
+        sender = options["from"]
 
         for campaign in campaigns:
             self.stdout.write(f"{campaign}")
-            email_from = get_email_from(campaign, default=default_from)
+            email_from = sender or get_email_from(campaign)
             template = get_email_template(template_name)
             processed = 0
             new_emails = 0
