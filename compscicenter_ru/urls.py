@@ -17,6 +17,7 @@ from htmlpages.views import flatpage
 from library.views import BookTagAutocomplete
 from info_blocks.views import InfoBlockTagAutocomplete
 
+admin.site.enable_nav_sidebar = False
 admin.autodiscover()
 
 urlpatterns = i18n_patterns(

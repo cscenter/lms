@@ -11,10 +11,12 @@ from djchoices import DjangoChoices, C
 ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)
 
 
+# TODO: remove
 class Branches(DjangoChoices):
     SPB = C("spb", _("Saint Petersburg"))
     NSK = C("nsk", _("Novosibirsk"))
     DISTANCE = C("distance", _("Branches|Distance"))
+    DISTANCE_2019 = C("distance_2019", _("Branches|Distance"))
 
 
 # FIXME: move to users?

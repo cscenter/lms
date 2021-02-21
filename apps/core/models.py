@@ -264,7 +264,7 @@ class Branch(TimezoneAwareModel, models.Model):
 
     code = models.CharField(
         _("Code"),
-        max_length=8,
+        max_length=15,
         db_index=True)
     name = models.CharField(_("Branch|Name"), max_length=255)
     established = models.PositiveIntegerField(_('Established'))
