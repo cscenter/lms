@@ -1,9 +1,9 @@
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from contests.models import Submission
-from contests.constants import SubmissionStatus, CheckingSystemTypes
-from contests.tasks import add_new_submission_to_checking_system, \
+from grading.models import Submission
+from grading.constants import SubmissionStatus, CheckingSystemTypes
+from grading.tasks import add_new_submission_to_checking_system, \
     retrieve_yandex_contest_checker_compilers
 from courses.models import AssignmentSubmissionFormats, Assignment
 

@@ -1,6 +1,6 @@
 from typing import Optional, Type
 
-from contests.constants import CheckingSystemTypes
+from grading.constants import CheckingSystemTypes
 from courses.models import Assignment, AssignmentSubmissionFormats
 from learning.forms import AssignmentSolutionBaseForm, \
     AssignmentSolutionDefaultForm, AssignmentSolutionYandexContestForm

@@ -1,6 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 
-from contests.api.yandex_contest import YANDEX_CONTEST_DOMAIN, \
+from grading.api.yandex_contest import YANDEX_CONTEST_DOMAIN, \
     YANDEX_CONTEST_PROBLEM_REGEX, YANDEX_CONTEST_PROBLEM_URL
 
 

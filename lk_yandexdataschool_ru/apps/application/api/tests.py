@@ -122,7 +122,7 @@ def test_admission_application_form_post(settings, client, mocker):
 
 @pytest.mark.django_db
 def test_applicant_form_serializer(settings, mocker):
-    mocked_api = mocker.patch('contests.api.yandex_contest.YandexContestAPI.register_in_contest')
+    mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
     mocked_api.return_value = 200, 1
     data = {**form_data['params']}
     serializer = ApplicantYandexFormSerializer(data=data)

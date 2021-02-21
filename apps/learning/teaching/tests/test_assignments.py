@@ -10,10 +10,10 @@ from django.forms import model_to_dict
 from django.utils import formats
 from django.utils.encoding import smart_bytes
 
-from contests.constants import CheckingSystemTypes
-from contests.models import Checker
-from contests.tests.factories import CheckingSystemFactory, CheckerFactory
-from contests.utils import get_yandex_contest_problem_url
+from grading.constants import CheckingSystemTypes
+from grading.models import Checker
+from grading.tests.factories import CheckingSystemFactory, CheckerFactory
+from grading.utils import get_yandex_contest_problem_url
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
@@ -218,7 +218,7 @@ def test_create_assignment_public_form_restricted_to_settings(client):
 
 @pytest.mark.django_db
 def test_course_assignment_form_create_with_checking_system(client, mocker):
-    mock_compiler_sync = mocker.patch('contests.tasks.retrieve_yandex_contest_checker_compilers')
+    mock_compiler_sync = mocker.patch('grading.tasks.retrieve_yandex_contest_checker_compilers')
     teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
@@ -288,7 +288,7 @@ def test_create_assignment_public_form_code_review_without_checker(client):
 
 @pytest.mark.django_db
 def test_create_assignment_public_form_code_review_with_yandex_checker(client, mocker):
-    mock_compiler_sync = mocker.patch('contests.tasks.retrieve_yandex_contest_checker_compilers')
+    mock_compiler_sync = mocker.patch('grading.tasks.retrieve_yandex_contest_checker_compilers')
     teacher = TeacherFactory()
     course = CourseFactory(semester=SemesterFactory.create_current(),
                            teachers=[teacher])

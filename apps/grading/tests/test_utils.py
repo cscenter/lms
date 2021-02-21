@@ -1,6 +1,6 @@
 import pytest
 
-from contests.utils import resolve_problem_id
+from grading.utils import resolve_problem_id
 
 
 def test_resolve_problem_id_should_fail_for_wrong_domain():

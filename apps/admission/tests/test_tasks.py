@@ -10,7 +10,7 @@ from admission.tests.factories import ApplicantFactory, ContestFactory, \
 @pytest.mark.django_db
 def test_register_in_yandex_contest_success(mocker):
     """Email has been generated after registration in yandex contest"""
-    mocked_api = mocker.patch('contests.api.yandex_contest.YandexContestAPI.register_in_contest')
+    mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
     mocked_api.return_value = 200, 1
     campaign = CampaignFactory()
     contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)

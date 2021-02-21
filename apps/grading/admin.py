@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-from contests.models import CheckingSystem, Submission, Checker
+from grading.models import CheckingSystem, Submission, Checker
 from core.admin import meta
 
 

@@ -1,8 +1,8 @@
 import factory
 from factory.fuzzy import FuzzyText, FuzzyInteger
 
-from contests.models import CheckingSystem, Checker, Submission
-from contests.utils import get_yandex_contest_problem_url
+from grading.models import CheckingSystem, Checker, Submission
+from grading.utils import get_yandex_contest_problem_url
 from learning.models import AssignmentSubmissionTypes
 from learning.tests.factories import AssignmentCommentFactory
 

@@ -7,10 +7,10 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from contests.models import CheckingSystem, Checker
-from contests.constants import CheckingSystemTypes
-from contests.services import CheckerURLError, CheckerService
-from contests.utils import resolve_problem_id
+from grading.models import CheckingSystem, Checker
+from grading.constants import CheckingSystemTypes
+from grading.services import CheckerURLError, CheckerService
+from grading.utils import resolve_problem_id
 from core.forms import CANCEL_SAVE_PAIR
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU

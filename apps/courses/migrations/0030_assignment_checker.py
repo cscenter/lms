@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('contests', '0001_initial'),
+        ('grading', '0001_initial'),
         ('courses', '0029_auto_20200915_1129'),
     ]
 
@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='assignment',
             name='checker',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='contests.Checker', verbose_name='Checking System'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='grading.Checker', verbose_name='Checking System'),
         ),
     ]

@@ -1,6 +1,6 @@
-from contests.constants import YandexCompilers, CheckingSystemTypes
-from contests.models import Submission, Checker
-from contests.utils import resolve_problem_id
+from grading.constants import YandexCompilers, CheckingSystemTypes
+from grading.models import Submission, Checker
+from grading.utils import resolve_problem_id
 
 
 class CheckerURLError(Exception):

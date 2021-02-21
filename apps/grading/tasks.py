@@ -6,14 +6,14 @@ import django_rq
 from django.db import transaction
 from django_rq import job
 
-from contests.api.yandex_contest import YandexContestAPI, Unavailable, \
+from grading.api.yandex_contest import YandexContestAPI, Unavailable, \
     ContestAPIError, SubmissionVerdict
 
 logger = logging.getLogger(__name__)
 
 
 def get_submission(submission_id) -> Optional["Submission"]:
-    from contests.models import Submission
+    from grading.models import Submission
     return (Submission.objects
             .filter(pk=submission_id)
             .select_related("assignment_submission",
@@ -24,7 +24,7 @@ def get_submission(submission_id) -> Optional["Submission"]:
 
 @job('default')
 def retrieve_yandex_contest_checker_compilers(checker_id, *, retries):
-    from contests.models import Checker
+    from grading.models import Checker
     checker = (Checker.objects
                .filter(pk=checker_id)
                .first())
@@ -68,7 +68,7 @@ def retrieve_yandex_contest_checker_compilers(checker_id, *, retries):
 
 @job('default')
 def add_new_submission_to_checking_system(submission_id, *, retries):
-    from contests.constants import SubmissionStatus
+    from grading.constants import SubmissionStatus
     submission = get_submission(submission_id)
     if not submission:
         return "Submission not found"

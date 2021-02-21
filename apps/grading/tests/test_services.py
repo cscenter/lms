@@ -1,10 +1,10 @@
 import pytest
 
-from contests.constants import CheckingSystemTypes
-from contests.models import Checker
-from contests.services import CheckerService, CheckerURLError
-from contests.tests.factories import CheckerFactory, CheckingSystemFactory
-from contests.utils import get_yandex_contest_problem_url
+from grading.constants import CheckingSystemTypes
+from grading.models import Checker
+from grading.services import CheckerService, CheckerURLError
+from grading.tests.factories import CheckerFactory, CheckingSystemFactory
+from grading.utils import get_yandex_contest_problem_url
 
 
 def get_compilers(checker):

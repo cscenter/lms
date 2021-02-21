@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('url', models.URLField(blank=True, verbose_name='Checker|URL')),
                 ('settings', models.JSONField(blank=True, default=dict, help_text='Contest id, problem id, etc', verbose_name='Checker|Settings')),
-                ('checking_system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contests.CheckingSystem', verbose_name='Checking System')),
+                ('checking_system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='grading.CheckingSystem', verbose_name='Checking System')),
             ],
             options={
                 'verbose_name': 'Checker',

@@ -1,9 +1,9 @@
 import pytest
 from django.utils.translation import gettext_lazy as _
 
-from contests.api.yandex_contest import SubmissionVerdict
-from contests.constants import SubmissionStatus
-from contests.tests.factories import SubmissionFactory
+from grading.api.yandex_contest import SubmissionVerdict
+from grading.constants import SubmissionStatus
+from grading.tests.factories import SubmissionFactory
 
 
 @pytest.mark.parametrize("status,label",
@@ -12,14 +12,14 @@ from contests.tests.factories import SubmissionFactory
                           (SubmissionStatus.SUBMIT_FAIL, _("Not Submitted"))])
 @pytest.mark.django_db
 def test_submission_get_status_display_not_checked(status, label, mocker):
-    mocker.patch('contests.tasks.add_new_submission_to_checking_system')
+    mocker.patch('grading.tasks.add_new_submission_to_checking_system')
     submission = SubmissionFactory(status=status)
     assert submission.get_status_display == label
 
 
 @pytest.mark.django_db
 def test_submission_get_status_display_passed(mocker):
-    mocker.patch('contests.tasks.add_new_submission_to_checking_system')
+    mocker.patch('grading.tasks.add_new_submission_to_checking_system')
     submission = SubmissionFactory(status=SubmissionStatus.PASSED,
                                    meta={'verdict': SubmissionVerdict.OK.value})
     assert submission.get_status_display == SubmissionVerdict.OK.value
@@ -27,7 +27,7 @@ def test_submission_get_status_display_passed(mocker):
 
 @pytest.mark.django_db
 def test_submission_get_status_display_wrong_answer_show_test_number(mocker):
-    mocker.patch('contests.tasks.add_new_submission_to_checking_system')
+    mocker.patch('grading.tasks.add_new_submission_to_checking_system')
     meta = {
         'verdict': SubmissionVerdict.WA.value,
         'checkerLog': [
