@@ -1,4 +1,3 @@
-import base64
 import logging
 import os
 import uuid
@@ -9,7 +8,6 @@ from typing import Optional, Set
 import pytz
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, PermissionsMixin, \
     _user_has_perm
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -23,7 +21,6 @@ from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
 from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, C
-from jsonfield import JSONField
 from model_utils.fields import MonitorField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
@@ -292,7 +289,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         _("CSCUser|photo"),
         upload_to=user_photo_upload_to,
         blank=True)
-    cropbox_data = JSONField(
+    cropbox_data = models.JSONField(
         blank=True,
         null=True
     )

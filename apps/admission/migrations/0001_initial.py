@@ -6,7 +6,6 @@ import core.timezone.models
 import django.core.validators
 from django.db import migrations, models
 import django.utils.timezone
-import jsonfield.fields
 import model_utils.fields
 import multiselectfield.db.fields
 import uuid
@@ -110,7 +109,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('type', models.IntegerField(choices=[(1, 'Testing'), (2, 'Exam')], verbose_name='Type')),
                 ('contest_id', models.CharField(blank=True, help_text='Applicant|yandex_contest_id', max_length=42, null=True, verbose_name='Contest #ID')),
-                ('details', jsonfield.fields.JSONField(blank=True, validators=[admission.models.validate_json_container], verbose_name='Details')),
+                ('details', models.JSONField(blank=True, verbose_name='Details')),
                 ('file', models.FileField(blank=True, help_text='Make sure file does not include solutions due to it visible with direct url link', upload_to=admission.models.contest_assignments_upload_to, verbose_name='Assignments in pdf format')),
             ],
             options={
@@ -129,7 +128,7 @@ class Migration(migrations.Migration):
                 ('contest_status_code', models.IntegerField(blank=True, null=True, verbose_name='Yandex API Response')),
                 ('status', models.CharField(choices=[('new', 'Not registered in the contest'), ('registered', 'Registered in the contest'), ('manual', 'Manual score input')], default='new', help_text='Choose `manual score input` to avoid synchronization with contest results', max_length=15, verbose_name='Status')),
                 ('score', core.db.models.ScoreField(blank=True, decimal_places=2, max_digits=6, null=True, verbose_name='Score')),
-                ('details', jsonfield.fields.JSONField(blank=True, null=True, verbose_name='Details')),
+                ('details', models.JSONField(blank=True, null=True, verbose_name='Details')),
             ],
             options={
                 'verbose_name': 'Exam',
@@ -224,7 +223,7 @@ class Migration(migrations.Migration):
                 ('contest_status_code', models.IntegerField(blank=True, null=True, verbose_name='Yandex API Response')),
                 ('status', models.CharField(choices=[('new', 'Not registered in the contest'), ('registered', 'Registered in the contest'), ('manual', 'Manual score input')], default='new', help_text='Choose `manual score input` to avoid synchronization with contest results', max_length=15, verbose_name='Status')),
                 ('score', models.PositiveSmallIntegerField(blank=True, null=True, verbose_name='Score')),
-                ('details', jsonfield.fields.JSONField(blank=True, verbose_name='Details')),
+                ('details', models.JSONField(blank=True, verbose_name='Details')),
             ],
             options={
                 'verbose_name': 'Testing',

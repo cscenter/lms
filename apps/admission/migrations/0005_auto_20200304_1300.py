@@ -2,8 +2,7 @@
 
 import admission.models
 import collections
-from django.db import migrations
-import jsonfield.fields
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -21,16 +20,16 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='contest',
             name='details',
-            field=jsonfield.fields.JSONField(blank=True, load_kwargs={'object_pairs_hook': collections.OrderedDict}, validators=[admission.models.validate_json_container], verbose_name='Details'),
+            field=models.JSONField(blank=True, verbose_name='Details'),
         ),
         migrations.AlterField(
             model_name='exam',
             name='details',
-            field=jsonfield.fields.JSONField(blank=True, load_kwargs={'object_pairs_hook': collections.OrderedDict}, null=True, verbose_name='Details'),
+            field=models.JSONField(blank=True, null=True, verbose_name='Details'),
         ),
         migrations.AlterField(
             model_name='test',
             name='details',
-            field=jsonfield.fields.JSONField(blank=True, load_kwargs={'object_pairs_hook': collections.OrderedDict}, verbose_name='Details'),
+            field=models.JSONField(blank=True, verbose_name='Details'),
         ),
     ]

@@ -7,7 +7,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from import_export.admin import ExportMixin, ImportExportMixin
 from import_export.formats.base_formats import CSV
-from jsonfield import JSONField
 from prettyjson import PrettyJSONWidget
 
 from admission.forms import InterviewStreamChangeForm
@@ -83,7 +82,7 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
                      'applicant__first_name', 'applicant__email']
     raw_id_fields = ['applicant']
     formfield_overrides = {
-        JSONField: {'widget': PrettyJSONWidget}
+        models.JSONField: {'widget': PrettyJSONWidget}
     }
 
     def get_readonly_fields(self, request, obj=None):
@@ -126,7 +125,7 @@ class ExamAdmin(ImportExportMixin, admin.ModelAdmin):
                      'contest_participant_id']
     list_filter = ['applicant__campaign']
     formfield_overrides = {
-        JSONField: {'widget': PrettyJSONWidget}
+        models.JSONField: {'widget': PrettyJSONWidget}
     }
     formats = (CSV,)
 
@@ -187,7 +186,7 @@ class ContestAdmin(admin.ModelAdmin):
     list_display = ['contest_id', 'campaign', 'type']
     list_filter = [CampaignListFilter, 'type']
     formfield_overrides = {
-        JSONField: {'widget': PrettyJSONWidget}
+        models.JSONField: {'widget': PrettyJSONWidget}
     }
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):

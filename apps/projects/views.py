@@ -668,10 +668,10 @@ class ProcessReviewFormView(LoginRequiredMixin, ModelFormMixin, View):
                                   "project_student__project",
                                   "project_student__student")
                   .get(pk=review.report_id))
-        other_reports = (Report.objects
-            .filter(project_student__project=report.project_student.project)
-            .exclude(project_student=report.project_student)
-            .values_list("pk", flat=True))
+        other_reports = list(Report.objects
+                             .filter(project_student__project=report.project_student.project)
+                             .exclude(project_student=report.project_student)
+                             .values_list("pk", flat=True))
         student = report.project_student.student
         student_declension = ""
         if student.gender == GenderTypes.FEMALE:
@@ -831,7 +831,7 @@ class ReportCuratorSummarizeView(ReportUpdateViewMixin):
         # FIXME: test db hitting
         context = {
             "project_name": self.object.project_student.project.name,
-            "final_score": self.object.final_score,
+            "final_score": str(self.object.final_score),
             "message": self.object.final_score_note
         }
         notify.send(

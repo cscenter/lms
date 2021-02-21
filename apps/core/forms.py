@@ -1,6 +1,5 @@
 from crispy_forms.layout import Button, Submit, Div
 from django import forms
-from django.contrib.postgres.forms import JSONField
 from django.utils.translation import gettext_lazy as _
 from prettyjson import PrettyJSONWidget
 
@@ -27,5 +26,5 @@ class ScoreField(forms.DecimalField):
         return super().clean(value)
 
 
-class PrettyJSONField(JSONField):
+class PrettyJSONField(forms.JSONField):
     widget = PrettyJSONWidget

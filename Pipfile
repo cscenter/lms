@@ -39,7 +39,6 @@ django-environ = "*"
 rules = "*"
 # DB
 psycopg2-binary = "==2.8.6"
-jsonfield = "==3.1.0"
 django-prettyjson = "==0.4.1"
 # Images
 sorl-thumbnail = "==12.7.0"

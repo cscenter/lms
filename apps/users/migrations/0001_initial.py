@@ -7,8 +7,7 @@ import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
-import jsonfield.fields
-import learning.permissions
+
 import model_utils.fields
 import sorl.thumbnail.fields
 import users.models
@@ -49,7 +48,7 @@ class Migration(migrations.Migration):
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
                 ('patronymic', models.CharField(blank=True, max_length=100, verbose_name='CSCUser|patronymic')),
                 ('photo', sorl.thumbnail.fields.ImageField(blank=True, upload_to='photos/', verbose_name='CSCUser|photo')),
-                ('cropbox_data', jsonfield.fields.JSONField(blank=True, null=True)),
+                ('cropbox_data', models.JSONField(blank=True, null=True)),
                 ('bio', models.TextField(blank=True, help_text='LaTeX+Markdown is enabled', verbose_name='CSCUser|note')),
                 ('yandex_login', models.CharField(blank=True, max_length=80, verbose_name='Yandex Login')),
                 ('github_login', models.CharField(blank=True, max_length=80, validators=[django.core.validators.RegexValidator(regex='^[a-zA-Z0-9](-?[a-zA-Z0-9])*$')], verbose_name='Github Login')),

@@ -5,7 +5,6 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, ChoiceItem
-from jsonfield.fields import JSONField
 
 
 class NotificationQuerySet(models.query.QuerySet):
@@ -184,7 +183,7 @@ class Notification(models.Model):
     deleted = models.BooleanField(default=False)
     emailed = models.BooleanField(default=False)
 
-    data = JSONField(blank=True, null=True)
+    data = models.JSONField(blank=True, null=True)
     objects = NotificationQuerySet.as_manager()
 
     class Meta:
