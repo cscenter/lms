@@ -316,6 +316,10 @@ class AlumniView(TemplateView):
         # Branches
         branch_options = []
         for branch in site_branches:
+            # TODO: aggregate number of graduates for each branch and filter out branches without graduates instead
+            if today.year < branch.established + 2:
+                # 2 year program is the minimum period for graduation
+                continue
             row = {"label": str(branch.name), "value": branch.code}
             branch_options.append(row)
         # Area state and props
@@ -628,7 +632,7 @@ class CourseOfferingsView(TemplateView):
         # TODO: use Branch.objects.for_site()
         branches = list(Branch.objects
                         .filter(site_id=settings.SITE_ID,
-                                established__lte=term_pair.year)
+                                established__lte=term_pair.academic_year)
                         .annotate(value=F('code'), label=F('name'))
                         .order_by('order')
                         .values('value', 'label', 'established'))

@@ -268,6 +268,7 @@ class Branch(TimezoneAwareModel, models.Model):
         db_index=True)
     name = models.CharField(_("Branch|Name"), max_length=255)
     established = models.PositiveIntegerField(_('Established'))
+    # TODO: document what activity means
     active = models.BooleanField(
         verbose_name=_("Active"),
         default=True)

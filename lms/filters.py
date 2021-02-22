@@ -7,7 +7,7 @@ from django_filters import FilterSet, ChoiceFilter, Filter
 from core.models import Branch
 from courses.constants import SemesterTypes
 from courses.models import Course
-from courses.utils import semester_slug_re, get_term_index
+from courses.utils import semester_slug_re, get_term_index, get_current_term_pair
 
 
 class BranchCodeFilter(ChoiceFilter):
@@ -99,8 +99,9 @@ class CoursesFilter(FilterSet):
         data.setlist("branch", branch_code)
         super().__init__(data=data, queryset=queryset, request=request, **kwargs)
         # Branch code choices depend on current site
-        self.form['branch'].field.choices = [(b.code, b.name) for b
-                                             in self.site_branches]
+        current_term = get_current_term_pair()
+        self.form['branch'].field.choices = [(b.code, b.name) for b in self.site_branches
+                                             if b.established <= current_term.academic_year]
 
     def get_branches(self, request):
         return Branch.objects.for_site(request.site.pk)
