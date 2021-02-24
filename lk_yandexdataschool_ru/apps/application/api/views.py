@@ -31,7 +31,7 @@ class ApplicationFormCreateTaskView(APIView):
             return HttpResponseBadRequest()
         delayed_job = register_new_application_form.delay(answer_id=answer_id,
                                                           language_code=request.LANGUAGE_CODE,
-                                                          form_data=json.dumps(form_data))
+                                                          form_data=form_data)
         payload = {
             "jsonrpc": "2.0",
             "id": answer_id,

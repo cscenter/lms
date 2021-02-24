@@ -14,7 +14,7 @@ from learning.settings import AcademicDegreeLevels
 from .fields import AliasedChoiceField
 from .serializers import ApplicantYandexFormSerializer
 
-form_data = {
+post_data = {
   "jsonrpc": "2.0",
   "method": "admission:form.add",
   "params": {
@@ -117,14 +117,14 @@ def test_admission_application_form_post(settings, client, mocker):
     }
     response = client.post(url, data=post_data, content_type="application/json")
     assert response.status_code == 201
-    mocked_task.assert_called_once_with(answer_id="33", language_code="ru", form_data=json.dumps({'id': '33'}))
+    mocked_task.assert_called_once_with(answer_id="33", language_code="ru", form_data={'id': '33'})
 
 
 @pytest.mark.django_db
 def test_applicant_form_serializer(settings, mocker):
     mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
     mocked_api.return_value = 200, 1
-    data = {**form_data['params']}
+    data = {**post_data['params']}
     serializer = ApplicantYandexFormSerializer(data=data)
     is_valid = serializer.is_valid(raise_exception=False)
     assert not is_valid
@@ -147,3 +147,4 @@ def test_applicant_form_serializer(settings, mocker):
         assert data[field_name] == getattr(instance, field_name)
     assert instance.level_of_education == AcademicDegreeLevels.MASTER_1
     assert instance.year_of_graduation == 2012
+

@@ -37,6 +37,7 @@ jobs:
         - git clone git@github.com:cscenter/site-frontend.git
         - cp lms/settings/.env.example lms/settings/.env
         - cp compsciclub_ru/settings/.env.example compsciclub_ru/settings/.env
+        - cp lk_yandexdataschool_ru/settings/.env.example lk_yandexdataschool_ru/settings/.env
         - psql --version
         - psql -c 'CREATE DATABASE travis_ci_test;' -U postgres
         - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
@@ -44,6 +45,7 @@ jobs:
       script:
         - pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
         - pytest -c compsciclub_ru/pytest.ini --create-db --cov=./compsciclub_ru/apps/
+        - pytest -c lk_yandexdataschool_ru/pytest.ini --create-db --cov=./lk_yandexdataschool_ru/apps/
     - stage: build
       name: "Build Docker Images and upload to ECR"
       script: sh trigger-travis.sh cscenter lms-provisioning $TRAVIS_ACCESS_TOKEN $TRAVIS_BUILD_NUMBER
