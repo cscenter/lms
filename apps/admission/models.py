@@ -834,8 +834,8 @@ class Test(TimeStampedModel, YandexContestIntegration,
     )
 
     class Meta:
-        verbose_name = _("Testing")
-        verbose_name_plural = _("Testings")
+        verbose_name = _("Testing Result")
+        verbose_name_plural = _("Testing Results")
 
     def __str__(self):
         """ Import/export get repr before instance created in db."""
