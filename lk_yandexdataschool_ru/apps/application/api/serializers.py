@@ -4,14 +4,11 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from admission.models import Applicant, Campaign
-from core.models import University
 from learning.settings import AcademicDegreeLevels
 from .fields import AliasedChoiceField
 
 
 class ApplicantYandexFormSerializer(serializers.ModelSerializer):
-    # TODO: в универах http://my.csc.test/narnia/admission/university/ надо убирать привязку к отделению. Нужна связь m2m для отделений
-
     is_studying = AliasedChoiceField(
         choices=[
             ('Да', True, 'Да'),
@@ -41,18 +38,17 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
             ('Другое', AcademicDegreeLevels.OTHER),
         ]
     )
-    # TODO: значение university => FK value (быстрый варик через aliases)
     university = AliasedChoiceField(
         choices=[
             ('БГУ', 20),
             ('БГУИР', 21),
-            ('КПИ', 1),  # TODO: добавить
-            ('МГТУ им. Баумана', 1),  # TODO: добавить
+            ('КПИ', 23),
+            ('МГТУ им. Баумана', 22),
             ('МГУ', 16),
             ('МФТИ', 15),
             ('НГУ', 12),
             ('НИУ ВШЭ', 17),
-            ('НИУ ИТМО', 2),  # FIXME: 2 - ИТМО, другое Добавить общий вариант
+            ('НИУ ИТМО', 24),
             ('СПбГУ', 19),
             ('УрФУ', 18),
             ('Другое', 1),
@@ -162,11 +158,4 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         except Campaign.DoesNotExist:
             raise ValidationError(f"Current campaign for branch code `{attrs['branch']}` "
                                   f"in {current_year} does not exist")
-
-        # FIXME: not really sure I need this one
-        if attrs.get('university_other'):
-            university, created = University.objects.get_or_create(
-                abbr="other", city_id=None,
-                defaults={"name": "Другое"})
-            attrs['university'] = university
         return attrs

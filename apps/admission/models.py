@@ -156,6 +156,7 @@ class Campaign(TimezoneAwareModel, models.Model):
         return self.current and today <= self.application_ends_at
 
 
+# TODO: remove after migrating to core.University
 class University(models.Model):
     """
     Some universities are interesting for statistics. To avoid typos,
@@ -338,12 +339,6 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         blank=True)
     # Education
     is_studying = models.BooleanField(_("Are you studying?"), null=True)
-    university2 = models.ForeignKey(
-        'admission.University',
-        verbose_name=_("Applicant|University"),
-        on_delete=models.PROTECT,
-        related_name="applicants",
-        blank=True, null=True)
     university = models.ForeignKey(
         'core.University',
         verbose_name=_("Applicant|University"),
