@@ -8,7 +8,7 @@ from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
-from core.db.models import normalize_score
+from core.db.utils import normalize_score
 from courses.models import Course, Assignment
 from learning.models import StudentAssignment, Enrollment
 from learning.settings import GradeTypes

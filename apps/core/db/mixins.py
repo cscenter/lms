@@ -4,7 +4,7 @@ from django.core import checks
 from django.db import models
 from django.db.models import prefetch_related_objects
 
-from .tasks import compute_model_fields
+from core.tasks import compute_model_fields
 
 logger = logging.getLogger(__name__)
 

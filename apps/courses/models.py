@@ -20,7 +20,7 @@ from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
-from core.mixins import DerivableFieldsMixin
+from core.db.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Location, Branch
 from core.timezone import now_local, Timezone, TimezoneAwareModel, \
     TimezoneAwareDateTimeField

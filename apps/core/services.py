@@ -5,7 +5,7 @@ from django.db.models import sql, signals
 from django.db.models.deletion import Collector
 from django.utils import timezone
 
-from core.models import SoftDeletionModel
+from core.db.models import SoftDeletionModel
 
 
 class SoftDeleteService:

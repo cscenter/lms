@@ -2,7 +2,7 @@ from django.core.validators import MinValueValidator
 from django.db.models import DecimalField, JSONField
 
 from core import forms
-from core.db.models import normalize_score
+from core.db.utils import normalize_score
 
 
 class ScoreField(DecimalField):

@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models import query
 from django.utils import timezone
 
-from core.models import LiveManager
+from core.db.models import LiveManager
 from core.utils import is_club_site
 
 

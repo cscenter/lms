@@ -3,7 +3,7 @@ import ast
 
 from django.core.management.base import AppCommand, CommandError
 
-from core.mixins import DerivableFieldsMixin
+from core.db.mixins import DerivableFieldsMixin
 from courses.models import Course, CourseClassAttachment
 
 

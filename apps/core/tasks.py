@@ -4,7 +4,7 @@ from django_rq import job
 
 @job('default')
 def compute_model_fields(content_type_id, object_id, compute_fields):
-    from .mixins import DerivableFieldsMixin
+    from core.db.mixins import DerivableFieldsMixin
 
     content_type = ContentType.objects.get_for_id(content_type_id)
     model = content_type.model_class()

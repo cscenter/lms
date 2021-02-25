@@ -22,9 +22,9 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.db.fields import ScoreField, PrettyJSONField
-from core.mixins import DerivableFieldsMixin
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location, \
-    SoftDeletionModel
+from core.db.mixins import DerivableFieldsMixin
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
+from core.db.models import SoftDeletionModel
 from core.timezone import TimezoneAwareModel, now_local
 from core.urls import reverse
 from core.utils import hashids

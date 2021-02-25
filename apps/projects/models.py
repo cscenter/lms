@@ -19,7 +19,7 @@ from djchoices import DjangoChoices, C
 from model_utils.models import TimeStampedModel
 
 from core.db.fields import ScoreField
-from core.mixins import DerivableFieldsMixin
+from core.db.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch
 from core.timezone import now_local, TimezoneAwareModel
 from core.urls import reverse

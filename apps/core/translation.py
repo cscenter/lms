@@ -12,4 +12,3 @@ class CityTranslationOptions(TranslationOptions):
 class BranchTranslationOptions(TranslationOptions):
     fields = ('name',)
     required_languages = ('ru', 'en')
-
