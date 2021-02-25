@@ -309,7 +309,7 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         max_length=255,
         null=True,
         blank=True)
-    birth_date = models.DateField(_("Birth Date"), blank=True, null=True)
+    birth_date = models.DateField(_("Date of Birth"), blank=True, null=True)
     # Social Networks
     stepic_id = models.CharField(
         _("Stepik ID"),
