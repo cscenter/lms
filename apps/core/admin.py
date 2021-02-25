@@ -140,3 +140,4 @@ class LocationAdmin(admin.ModelAdmin):
 @admin.register(University)
 class UniversityAdmin(admin.ModelAdmin):
     list_display = ('name', 'city')
+    ordering = ('name',)
