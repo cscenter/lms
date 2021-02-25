@@ -309,3 +309,22 @@ class Location(TimezoneAwareModel, models.Model):
 
     def get_absolute_url(self):
         return reverse('courses:venue_detail', args=[self.pk])
+
+
+class University(models.Model):
+    name = models.CharField(_("Name"), max_length=255)
+    abbr = models.CharField(_("Abbreviation"), max_length=100,
+                            blank=True, null=True)
+    city = models.ForeignKey(City,
+                             verbose_name=_("City"),
+                             related_name="+",
+                             null=True,
+                             blank=True,
+                             on_delete=models.PROTECT)
+
+    class Meta:
+        verbose_name = _("University")
+        verbose_name_plural = _("Universities")
+
+    def __str__(self):
+        return self.name

@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _, gettext_noop
 from modeltranslation.admin import TranslationAdmin
 from taggit.models import Tag
 
-from core.models import Location
+from core.models import Location, University
 from core.widgets import AdminRichTextAreaWidget
 from .models import City, Branch
 
@@ -106,7 +106,6 @@ def meta(text=None, **kwargs):
 
 # Models
 
-
 @admin.register(City)
 class CityAdmin(TranslationAdmin, admin.ModelAdmin):
     pass
@@ -136,3 +135,8 @@ class LocationAdmin(admin.ModelAdmin):
     list_display = ('name', 'city')
     list_filter = ('city',)
     list_select_related = ("city",)
+
+
+@admin.register(University)
+class UniversityAdmin(admin.ModelAdmin):
+    list_display = ('name', 'city')
