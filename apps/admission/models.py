@@ -338,11 +338,17 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         blank=True)
     # Education
     is_studying = models.BooleanField(_("Are you studying?"), null=True)
-    university = models.ForeignKey(
-        University,
+    university2 = models.ForeignKey(
+        'admission.University',
         verbose_name=_("Applicant|University"),
         on_delete=models.PROTECT,
         related_name="applicants",
+        blank=True, null=True)
+    university = models.ForeignKey(
+        'core.University',
+        verbose_name=_("Applicant|University"),
+        on_delete=models.PROTECT,
+        related_name="+",
         blank=True, null=True)
     university_other = models.CharField(
         _("University (Other)"),

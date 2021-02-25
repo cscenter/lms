@@ -18,8 +18,9 @@ from social_django.models import DjangoStorage
 from social_django.strategy import DjangoStrategy
 
 from admission.constants import WHERE_DID_YOU_LEARN
-from admission.models import Applicant, Campaign, University
+from admission.models import Applicant, Campaign
 from auth.backends import YandexRuOAuth2Backend
+from core.models import University
 from core.urls import reverse
 from learning.settings import AcademicDegreeLevels
 
@@ -110,9 +111,9 @@ class ApplicationFormView(TemplateView):
             universities = (University.objects
                             .exclude(abbr='other')
                             .annotate(value=F('id'), label=F('name'))
-                            .values('value', 'label', 'branch_id')
+                            .values('value', 'label', 'city_id')
                             .order_by("name"))
-            levels_of_education = [{"value": k, "label": str(v)} for k, v in
+            levels_of_education = [{"value": k, "label": str(v).lower()} for k, v in
                                    AcademicDegreeLevels.values.items()]
             study_programs = [{"value": k, "label": v} for k, v in
                               Applicant.STUDY_PROGRAMS]

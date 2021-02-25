@@ -14,7 +14,7 @@ from admission.import_export import OnlineTestRecordResource, \
     ExamRecordResource
 from admission.models import Campaign, Interview, Applicant, Test, \
     Exam, Comment, InterviewAssignment, Contest, InterviewSlot, InterviewStream, \
-    InterviewInvitation, University, InterviewFormat
+    InterviewInvitation, InterviewFormat
 from admission.services import EmailQueueService
 from core.admin import meta
 from core.timezone import TimezoneAwareDateTimeField
@@ -22,23 +22,6 @@ from core.timezone.forms import TimezoneAwareAdminForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-
-
-class UniversityAdminForm(forms.ModelForm):
-    class Meta:
-        model = University
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['branch'].required = True
-
-
-class UniversityAdmin(admin.ModelAdmin):
-    form = UniversityAdminForm
-    list_editable = ['sort']
-    list_display = ('name', 'branch', 'sort')
-    list_filter = ('branch',)
 
 
 class CampaignListFilter(admin.SimpleListFilter):
@@ -348,7 +331,6 @@ class InterviewInvitationAdmin(admin.ModelAdmin):
         return obj.applicant.campaign.branch
 
 
-admin.site.register(University, UniversityAdmin)
 admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Applicant, ApplicantAdmin)
 admin.site.register(Test, OnlineTestAdmin)

@@ -10,10 +10,10 @@ from django.forms import SelectMultiple
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-
+from core.models import University
 from core.widgets import DateTimeRangeWidget
 from admission.forms import ResultsModelForm
-from admission.models import Applicant, Interview, Campaign, University
+from admission.models import Applicant, Interview, Campaign
 
 
 # Fields
@@ -180,10 +180,7 @@ class ResultsFilter(django_filters.FilterSet):
     def __init__(self, *args, branch_code, **kwargs):
         super().__init__(*args, **kwargs)
         # Get universities based on requested branch
-        qs = (University.objects
-              .filter(branch__code=branch_code)
-              .select_related("branch")
-              .order_by("-branch", "sort"))
+        qs = University.objects.order_by("name")
         university_choices = [(u.id, u.name) for u in qs.all()]
         self.filters['university'].extra["choices"] = university_choices
 

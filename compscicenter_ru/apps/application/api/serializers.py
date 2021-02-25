@@ -4,8 +4,9 @@ from rest_framework.fields import empty
 from rest_framework.validators import UniqueTogetherValidator
 
 from admission.constants import WHERE_DID_YOU_LEARN
-from admission.models import Applicant, Campaign, University
+from admission.models import Applicant, Campaign
 from admission.tasks import register_in_yandex_contest
+from core.models import University
 
 
 class OpenRegistrationCampaignsField(serializers.PrimaryKeyRelatedField):
@@ -122,7 +123,7 @@ class ApplicationFormSerializer(serializers.ModelSerializer):
                     del attrs[attr]
         if attrs.get('university_other'):
             university, created = University.objects.get_or_create(
-                abbr="other", branch_id=None,
+                abbr="other", city_id=None,
                 defaults={"name": "Другое"})
             attrs['university'] = university
         # TODO: if where_did_you_learn.other selected, where_did_you_learn_other should be provided?

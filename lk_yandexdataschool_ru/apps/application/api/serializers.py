@@ -3,7 +3,8 @@ from django.utils.timezone import now
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from admission.models import Applicant, University, Campaign
+from admission.models import Applicant, Campaign
+from core.models import University
 from learning.settings import AcademicDegreeLevels
 from .fields import AliasedChoiceField
 
@@ -43,18 +44,18 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
     # TODO: значение university => FK value (быстрый варик через aliases)
     university = AliasedChoiceField(
         choices=[
-            ('БГУ', 25),
-            ('БГУИР', 26),
-            ('КПИ', 10),  # TODO: добавить
-            ('МГТУ им. Баумана', 10),  # TODO: добавить
-            ('МГУ', 18),
-            ('МФТИ', 17),
-            ('НГУ', 11),
-            ('НИУ ВШЭ', 19),
-            ('НИУ ИТМО', 9),  # FIXME: 9 - ИТМО, другое
-            ('СПбГУ', 23),  # FIXME: привязка к заочке
-            ('УрФУ', 21),
-            ('Другое', 10),
+            ('БГУ', 20),
+            ('БГУИР', 21),
+            ('КПИ', 1),  # TODO: добавить
+            ('МГТУ им. Баумана', 1),  # TODO: добавить
+            ('МГУ', 16),
+            ('МФТИ', 15),
+            ('НГУ', 12),
+            ('НИУ ВШЭ', 17),
+            ('НИУ ИТМО', 2),  # FIXME: 2 - ИТМО, другое Добавить общий вариант
+            ('СПбГУ', 19),
+            ('УрФУ', 18),
+            ('Другое', 1),
         ]
     )
     scientific_work = serializers.CharField(
@@ -165,7 +166,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         # FIXME: not really sure I need this one
         if attrs.get('university_other'):
             university, created = University.objects.get_or_create(
-                abbr="other", branch_id=None,
+                abbr="other", city_id=None,
                 defaults={"name": "Другое"})
             attrs['university'] = university
         return attrs

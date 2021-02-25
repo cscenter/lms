@@ -11,11 +11,10 @@ from admission.constants import WHERE_DID_YOU_LEARN, \
     APPOINTMENT_INVITATION_TEMPLATE, InterviewFormats
 from admission.models import Campaign, Applicant, Contest, Test, \
     Exam, InterviewAssignment, Interview, Comment, \
-    InterviewSlot, InterviewStream, InterviewInvitation, University, \
-    InterviewFormat
+    InterviewSlot, InterviewStream, InterviewInvitation, InterviewFormat
 from admission.signals import post_save_interview
 from core.tests.factories import BranchFactory, LocationFactory, \
-    EmailTemplateFactory
+    EmailTemplateFactory, UniversityFactory
 from learning.settings import AcademicDegreeLevels
 from users.constants import Roles
 from users.tests.factories import UserFactory, add_user_groups
@@ -25,14 +24,6 @@ class FuzzyTime(FuzzyNaiveDateTime):
     def fuzz(self):
         dt = super().fuzz()
         return dt.time()
-
-
-class UniversityFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = University
-
-    name = factory.Sequence(lambda n: "University name %03d" % n)
-    branch = factory.SubFactory(BranchFactory)
 
 
 class CampaignFactory(factory.django.DjangoModelFactory):

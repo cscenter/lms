@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 
-from core.models import City, Branch, Location, SiteConfiguration
+from core.models import City, Branch, Location, SiteConfiguration, University
 from learning.settings import Branches
 
 __all__ = ('CityFactory', 'EmailTemplateFactory', 'BranchFactory',
@@ -94,3 +94,11 @@ class LocationFactory(factory.django.DjangoModelFactory):
     city = factory.SubFactory(CityFactory, code=Branches.SPB)
     name = factory.Sequence(lambda n: "Location %03d" % n)
     description = factory.Sequence(lambda n: "location for tests %03d" % n)
+
+
+class UniversityFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = University
+
+    name = factory.Sequence(lambda n: "University %03d" % n)
+    city = factory.SubFactory(CityFactory)

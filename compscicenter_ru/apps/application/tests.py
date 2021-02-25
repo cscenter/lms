@@ -5,11 +5,10 @@ import pytest
 from django.db import models
 from django.utils import timezone
 
-from admission.tests.factories import CampaignFactory, ApplicantFactory, \
-    UniversityFactory
+from admission.tests.factories import CampaignFactory, ApplicantFactory
 from application.api.serializers import ApplicationFormSerializer
 from application.views import SESSION_LOGIN_KEY
-from core.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory, UniversityFactory
 from core.timezone import now_local
 from core.urls import reverse
 from learning.settings import Branches
