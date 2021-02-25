@@ -21,7 +21,7 @@ from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
-from core.db.models import ScoreField, PrettyJSONField
+from core.db.fields import ScoreField, PrettyJSONField
 from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location, \
     SoftDeletionModel

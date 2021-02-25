@@ -13,7 +13,7 @@ class CoreConfig(AppConfig):
         # Register custom lookups
         from .db import lookups
         # Update Django Rest Framework serializer mappings
-        from core.db.models import ScoreField
+        from core.db.fields import ScoreField
         from core.api import fields
         field_mapping = ModelSerializer.serializer_field_mapping
         field_mapping.update({

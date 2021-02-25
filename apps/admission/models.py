@@ -24,7 +24,7 @@ from admission.constants import ChallengeStatuses, InterviewFormats
 from admission.utils import slot_range, get_next_process
 from grading.api.yandex_contest import RegisterStatus, \
     Error as YandexContestError
-from core.db.models import ScoreField
+from core.db.fields import ScoreField
 from core.models import Branch, Location
 from core.timezone import TimezoneAwareModel, TimezoneAwareDateTimeField
 from core.urls import reverse

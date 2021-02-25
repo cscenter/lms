@@ -18,7 +18,7 @@ from django.utils.translation import gettext_lazy as _
 from djchoices import DjangoChoices, C
 from model_utils.models import TimeStampedModel
 
-from core.db.models import ScoreField
+from core.db.fields import ScoreField
 from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch
 from core.timezone import now_local, TimezoneAwareModel
