@@ -33,7 +33,7 @@ LOGGING = {
             'format': '%(levelname)s %(message)s'
         },
         'sql': {
-            '()': 'core.utils.SQLFormatter',
+            '()': 'core.logging.SQLFormatter',
             'format': '[%(duration).3f] %(statement)s',
         },
         "rq_console": {

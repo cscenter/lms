@@ -34,7 +34,7 @@ logging.getLogger('parso.python.diff').disabled = True
 
 # Enable sql console logger
 import logging
-from core.utils import SQLFormatter
+from core.logging import SQLFormatter
 sql_console_handler = logging.StreamHandler()
 sql_console_handler.setLevel(logging.DEBUG)
 formatter = SQLFormatter('[%(duration).3f] %(statement)s')
