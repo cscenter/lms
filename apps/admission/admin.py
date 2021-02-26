@@ -17,7 +17,7 @@ from admission.models import Campaign, Interview, Applicant, Test, \
     InterviewInvitation, InterviewFormat
 from admission.services import EmailQueueService
 from core.admin import meta
-from core.timezone import TimezoneAwareDateTimeField
+from core.timezone.fields import TimezoneAwareDateTimeField
 from core.timezone.forms import TimezoneAwareAdminForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.utils import admin_datetime

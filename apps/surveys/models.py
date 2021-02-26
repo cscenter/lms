@@ -12,8 +12,8 @@ from django.utils.translation import gettext_lazy as _
 from post_office import mail
 from post_office.models import EmailTemplate
 
-from core.timezone import now_local, TimezoneAwareModel, \
-    TimezoneAwareDateTimeField
+from core.timezone import now_local, TimezoneAwareMixin
+from core.timezone.fields import TimezoneAwareDateTimeField
 from core.urls import reverse
 from courses.models import Course
 from learning.models import Enrollment
@@ -231,7 +231,7 @@ class Form(AbstractForm):
         super().save(*args, **kwargs)
 
 
-class CourseSurvey(TimezoneAwareModel, models.Model):
+class CourseSurvey(TimezoneAwareMixin, models.Model):
     TIMEZONE_AWARE_FIELD_NAME = 'course'
 
     MIDDLE = 'middle'

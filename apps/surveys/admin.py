@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from core.admin import meta
-from core.timezone import TimezoneAwareDateTimeField
+from core.timezone.fields import TimezoneAwareDateTimeField
 from core.timezone.forms import TimezoneAwareAdminForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.filters import AdminRelatedDropdownFilter

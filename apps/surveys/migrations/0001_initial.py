@@ -127,6 +127,6 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Course Surveys',
                 'unique_together': {('course', 'type')},
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
     ]

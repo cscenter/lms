@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Applicant',
                 'verbose_name_plural': 'Applicants',
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='Campaign',
@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Campaign',
                 'verbose_name_plural': 'Campaigns',
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='Comment',
@@ -151,7 +151,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Interview',
                 'verbose_name_plural': 'Interviews',
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='InterviewAssignment',
@@ -211,7 +211,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Interview stream',
                 'verbose_name_plural': 'Interview streams',
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='Test',

@@ -28,7 +28,7 @@ from sorl.thumbnail import ImageField
 from api.services import generate_hash
 from api.settings import DIGEST_MAX_LENGTH
 from auth.permissions import perm_registry
-from core.timezone import Timezone, TimezoneAwareModel
+from core.timezone import Timezone, TimezoneAwareMixin
 from core.timezone.constants import DATETIME_FORMAT_RU
 from core.urls import reverse
 from core.utils import is_club_site, ru_en_mapping, instance_memoize
@@ -228,9 +228,9 @@ def user_photo_upload_to(instance: "User", filename):
     return f"profiles/{bucket}/{file_name}{ext}"
 
 
-class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
+class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
            UserThumbnailMixin, AbstractBaseUser):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']

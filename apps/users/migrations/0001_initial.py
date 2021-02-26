@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'CSCUser|users',
                 'db_table': 'users_user',
             },
-            bases=(core.timezone.models.TimezoneAwareModel,
+            bases=(core.timezone.models.TimezoneAwareMixin,
                    users.models.LearningPermissionsMixin, users.thumbnails.UserThumbnailMixin, models.Model),
         ),
         migrations.CreateModel(

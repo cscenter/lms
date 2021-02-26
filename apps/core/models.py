@@ -12,7 +12,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from core.db.models import ConfigurationModel
-from core.timezone import Timezone, TimezoneAwareModel
+from core.timezone import Timezone, TimezoneAwareMixin
 from core.urls import reverse
 
 
@@ -114,8 +114,8 @@ class SiteConfiguration(ConfigurationModel):
         return force_str(f.decrypt(force_bytes(value)))
 
 
-class City(TimezoneAwareModel, models.Model):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
+class City(TimezoneAwareMixin, models.Model):
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
 
     code = models.CharField(
         _("Code"),
@@ -200,8 +200,8 @@ class BranchManager(models.Manager):
         BRANCH_SITE_CACHE = {}
 
 
-class Branch(TimezoneAwareModel, models.Model):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
+class Branch(TimezoneAwareMixin, models.Model):
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
 
     code = models.CharField(
         _("Code"),
@@ -266,7 +266,7 @@ class Branch(TimezoneAwareModel, models.Model):
             return 'ШАД <noreply@yandexdataschool.ru>'
 
 
-class Location(TimezoneAwareModel, models.Model):
+class Location(TimezoneAwareMixin, models.Model):
     TIMEZONE_AWARE_FIELD_NAME = 'city'
 
     INTERVIEW = 'interview'

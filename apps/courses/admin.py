@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
 from core.models import Branch
-from core.timezone import TimezoneAwareDateTimeField
+from core.timezone.fields import TimezoneAwareDateTimeField
 from core.timezone.forms import TimezoneAwareAdminForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.utils import is_club_site, admin_datetime

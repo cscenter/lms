@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Assignment-comments',
                 'ordering': ['created'],
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='AssignmentNotification',
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Assignment notifications',
                 'ordering': ['-created'],
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='CourseInvitation',
@@ -98,7 +98,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Enrollment',
                 'verbose_name_plural': 'Enrollments',
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='Event',
@@ -183,6 +183,6 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Assignment-students',
                 'ordering': ['assignment', 'student'],
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
     ]

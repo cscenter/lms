@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Student project',
                 'verbose_name_plural': 'Student projects',
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='ProjectStudent',
@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Project student',
                 'verbose_name_plural': 'Project students',
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='Report',
@@ -103,7 +103,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Reports',
                 'verbose_name_plural': 'Reports',
             },
-            bases=(core.timezone.models.TimezoneAwareModel, core.db.mixins.DerivableFieldsMixin, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, core.db.mixins.DerivableFieldsMixin, models.Model),
         ),
         migrations.CreateModel(
             name='ReportComment',
@@ -119,7 +119,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Report comments',
                 'ordering': ['created'],
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='ReportingPeriod',

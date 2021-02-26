@@ -7,10 +7,6 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from grading.models import CheckingSystem, Checker
-from grading.constants import CheckingSystemTypes
-from grading.services import CheckerURLError, CheckerService
-from grading.utils import resolve_problem_id
 from core.forms import CANCEL_SAVE_PAIR
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
@@ -20,8 +16,10 @@ from core.widgets import UbereditorWidget, DateInputTextWidget, \
     TimeInputTextWidget
 from courses.constants import ClassTypes
 from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
-    Assignment, LearningSpace, StudentGroupTypes, AssignmentSubmissionFormats, \
+    Assignment, LearningSpace, AssignmentSubmissionFormats, \
     CourseGroupModes
+from grading.models import CheckingSystem
+from grading.services import CheckerURLError, CheckerService
 
 __all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
            'CourseClassForm', 'AssignmentForm')

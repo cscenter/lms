@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Assignments',
                 'ordering': ['created', 'course'],
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='AssignmentAttachment',
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Course offerings',
                 'ordering': ['-semester', 'meta_course__created'],
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model,
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model,
                    core.db.mixins.DerivableFieldsMixin),
         ),
         migrations.CreateModel(
@@ -110,7 +110,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Classes',
                 'ordering': ['-date', 'course', '-starts_at'],
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='CourseClassAttachment',
@@ -125,7 +125,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Class attachments',
                 'ordering': ['course_class', '-created'],
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='CourseNews',
@@ -141,7 +141,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Course news-plural',
                 'ordering': ['-created'],
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='CourseReview',
@@ -213,7 +213,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Learning Space',
                 'verbose_name_plural': 'Learning Spaces',
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='CourseTeacher',

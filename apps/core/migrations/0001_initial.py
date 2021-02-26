@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Cities',
                 'ordering': ['name'],
             },
-            bases=(tz_models.TimezoneAwareModel, models.Model),
+            bases=(tz_models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='Location',
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Locations',
                 'ordering': ('name',),
             },
-            bases=(tz_models.TimezoneAwareModel, models.Model),
+            bases=(tz_models.TimezoneAwareMixin, models.Model),
         ),
         migrations.CreateModel(
             name='Branch',
@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Branch',
                 'verbose_name_plural': 'Branches',
             },
-            bases=(tz_models.TimezoneAwareModel, models.Model),
+            bases=(tz_models.TimezoneAwareMixin, models.Model),
             managers=[
                 ('objects', core.models.BranchManager()),
             ],

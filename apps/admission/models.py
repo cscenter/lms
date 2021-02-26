@@ -26,7 +26,8 @@ from grading.api.yandex_contest import RegisterStatus, \
     Error as YandexContestError
 from core.db.fields import ScoreField
 from core.models import Branch, Location
-from core.timezone import TimezoneAwareModel, TimezoneAwareDateTimeField
+from core.timezone import TimezoneAwareMixin
+from core.timezone.fields import TimezoneAwareDateTimeField
 from core.urls import reverse
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
@@ -47,7 +48,7 @@ def validate_email_template_name(value):
         )
 
 
-class Campaign(TimezoneAwareModel, models.Model):
+class Campaign(TimezoneAwareMixin, models.Model):
     TIMEZONE_AWARE_FIELD_NAME = 'branch'
 
     year = models.PositiveSmallIntegerField(
@@ -198,7 +199,7 @@ ApplicantSubscribedManager = _ApplicantSubscribedManager.from_queryset(
     ApplicantQuerySet)
 
 
-class Applicant(TimezoneAwareModel, TimeStampedModel):
+class Applicant(TimezoneAwareMixin, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'campaign'
 
     REJECTED_BY_TEST = 'rejected_test'
@@ -973,7 +974,7 @@ class InterviewFormat(models.Model):
         return self.format
 
 
-class Interview(TimezoneAwareModel, TimeStampedModel):
+class Interview(TimezoneAwareMixin, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'applicant'
 
     APPROVAL = 'approval'
@@ -1096,7 +1097,7 @@ class Comment(TimeStampedModel):
                                            self.interview.applicant.full_name))
 
 
-class InterviewStream(TimezoneAwareModel, TimeStampedModel):
+class InterviewStream(TimezoneAwareMixin, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'venue'
     formats = InterviewFormats
 

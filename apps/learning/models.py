@@ -25,7 +25,7 @@ from core.db.fields import ScoreField, PrettyJSONField
 from core.db.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
 from core.db.models import SoftDeletionModel
-from core.timezone import TimezoneAwareModel, now_local
+from core.timezone import TimezoneAwareMixin, now_local
 from core.urls import reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Assignment, StudentGroupTypes, \
@@ -226,7 +226,7 @@ class EnrollmentPeriod(TimeStampedModel):
         return self.starts_on <= date <= self.ends_on
 
 
-class Enrollment(TimezoneAwareModel, TimeStampedModel):
+class Enrollment(TimezoneAwareMixin, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'course'
 
     GRADES = GradeTypes
@@ -411,7 +411,7 @@ class AssignmentStatuses(DjangoChoices):
     REWORK = ChoiceItem('rework', _("Rework"))
 
 
-class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel,
+class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
                         DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'assignment'
 
@@ -656,7 +656,7 @@ class AssignmentSubmissionTypes(DjangoChoices):
     SOLUTION = C('solution', _("Solution"))
 
 
-class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel):
+class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'student_assignment'
 
     student_assignment = models.ForeignKey(
@@ -800,7 +800,7 @@ class SubmissionAttachment(TimeStampedModel):
         })
 
 
-class AssignmentNotification(TimezoneAwareModel, TimeStampedModel):
+class AssignmentNotification(TimezoneAwareMixin, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'student_assignment'
 
     user = models.ForeignKey(

@@ -9,10 +9,11 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.widgets import DateInputTextWidget, TimeInputTextWidget
-from .models import TimezoneAwareDateTimeField, TimezoneAwareModel
+from .models import TimezoneAwareMixin
+from .fields import TimezoneAwareDateTimeField
 
 
-def aware_to_naive(value, instance: TimezoneAwareModel):
+def aware_to_naive(value, instance: TimezoneAwareMixin):
     """
     Make an aware datetime.datetime naive in a time zone of the given instance
     """
@@ -22,7 +23,7 @@ def aware_to_naive(value, instance: TimezoneAwareModel):
     return value
 
 
-def naive_to_aware(value, instance: TimezoneAwareModel):
+def naive_to_aware(value, instance: TimezoneAwareMixin):
     """
     Make a naive datetime.datetime in a given instance time zone aware.
     """
@@ -100,9 +101,9 @@ class TimezoneAwareModelForm(forms.ModelForm):
         timezone.
         """
         super().__init__(*args, **kwargs)
-        if not isinstance(self.instance, TimezoneAwareModel):
+        if not isinstance(self.instance, TimezoneAwareMixin):
             raise TypeError(f"{TimezoneAwareModelForm.__class__}.instance "
-                            f"must be subclassed from {TimezoneAwareModel}")
+                            f"must be subclassed from {TimezoneAwareMixin}")
         for field_name, form_field in self.fields.items():
             if isinstance(form_field, TimezoneAwareFormField):
                 form_field.widget.instance = self.instance

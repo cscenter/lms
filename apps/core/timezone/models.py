@@ -1,16 +1,16 @@
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist
-from django.db.models import DateTimeField
 
 from .typing import Timezone
 
 
-class TimezoneAwareModel:
-    SELF_AWARE = object()
+class TimezoneAwareMixin:
     """
     `TIMEZONE_AWARE_FIELD_NAME = SELF_AWARE` is a special case when
     current model knows how to get timezone without using __mro__ call chain
     """
+    SELF_AWARE = object()
+
     def get_timezone(self) -> Timezone:
         related_model = getattr(self, self.get_tz_aware_field_name())
         return related_model.get_timezone()
@@ -39,7 +39,7 @@ class TimezoneAwareModel:
                 ))
         else:
             tz_aware_field_name = cls.TIMEZONE_AWARE_FIELD_NAME
-            if tz_aware_field_name is not TimezoneAwareModel.SELF_AWARE:
+            if tz_aware_field_name is not TimezoneAwareMixin.SELF_AWARE:
                 if 'get_timezone' in cls.__dict__:
                     errors.append(
                         checks.Error(
@@ -60,7 +60,7 @@ class TimezoneAwareModel:
                             id='timezone.E002',
                         ))
                 if tz_aware_field is not None:
-                    if not issubclass(tz_aware_field.related_model, TimezoneAwareModel):
+                    if not issubclass(tz_aware_field.related_model, TimezoneAwareMixin):
                         errors.append(
                             checks.Error(
                                 f"`{cls}`.{tz_aware_field} is not a subclass of TimezoneAwareMixin",
@@ -89,7 +89,7 @@ class TimezoneAwareModel:
         errors = []
         next_cls = cls
         next_field_name = next_cls.TIMEZONE_AWARE_FIELD_NAME
-        while next_field_name is not TimezoneAwareModel.SELF_AWARE:
+        while next_field_name is not TimezoneAwareMixin.SELF_AWARE:
             try:
                 next_field = next_cls._meta.get_field(next_field_name)
                 next_cls = next_field.related_model
@@ -112,7 +112,7 @@ class TimezoneAwareModel:
                         id='timezone.E007',
                     ))
                 break
-            if next_cls is TimezoneAwareModel:
+            if next_cls is TimezoneAwareMixin:
                 errors.append(
                     checks.Error(
                         f"`{cls.__name__}` is not terminated properly",
@@ -122,7 +122,3 @@ class TimezoneAwareModel:
                     ))
                 break
         return errors
-
-
-class TimezoneAwareDateTimeField(DateTimeField):
-    pass
