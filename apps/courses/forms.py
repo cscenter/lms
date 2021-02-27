@@ -214,6 +214,7 @@ class CourseClassForm(forms.ModelForm):
             if tz:
                 time_zones.add((str(tz), tz.zone))
         time_zones = list(time_zones)
+        # TODO: remove? tz for branch is mandatory
         tz_choices = [('', '---------'), *time_zones]
         self.fields['time_zone'].choices = tz_choices
         field_restrict_to = self.fields['restricted_to']

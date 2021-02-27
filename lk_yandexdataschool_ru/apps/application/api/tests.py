@@ -1,5 +1,6 @@
 import json
 from datetime import date
+from unittest.mock import MagicMock
 
 import pytest
 from django.utils.timezone import now
@@ -8,7 +9,8 @@ from rest_framework.exceptions import ValidationError
 
 from admission.models import Contest
 from admission.tests.factories import CampaignFactory, ContestFactory
-from core.tests.factories import BranchFactory
+from core.models import University
+from core.tests.factories import BranchFactory, UniversityFactory
 from core.urls import reverse
 from learning.settings import AcademicDegreeLevels
 from .fields import AliasedChoiceField
@@ -125,12 +127,14 @@ def test_applicant_form_serializer(settings, mocker):
     mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
     mocked_api.return_value = 200, 1
     data = {**post_data['params']}
+    data['university'] = 'Другое'
     serializer = ApplicantYandexFormSerializer(data=data)
     is_valid = serializer.is_valid(raise_exception=False)
     assert not is_valid
     branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
     contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    university, _ = University.objects.update_or_create(pk=1, defaults={"name": data['university']})
     serializer = ApplicantYandexFormSerializer(data=data)
     serializer.is_valid(raise_exception=False)
     assert not serializer.errors

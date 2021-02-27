@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from admission.models import Applicant, Campaign
+from core.models import University
 from learning.settings import AcademicDegreeLevels
 from .fields import AliasedChoiceField
 
@@ -116,6 +117,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         data = {**validated_data}
+        data['university'] = University.objects.get(pk=data['university'])
         # Contact fields about scientific and programming experiences into one
         experience = ""
         for field_name in ('scientific_work', 'programming_experience'):
@@ -158,4 +160,6 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         except Campaign.DoesNotExist:
             raise ValidationError(f"Current campaign for branch code `{attrs['branch']}` "
                                   f"in {current_year} does not exist")
+        if not University.objects.filter(pk=attrs['university']).exists():
+            raise ValidationError(f"University `{attrs['university']}` does not exist")
         return attrs
