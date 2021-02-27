@@ -63,6 +63,7 @@ class TimeZoneField(models.Field):
             now_utc = timezone.now()
             zero_ = timedelta(0)
             for tz_name in values:
+                # TODO: use babel.dates.get_timezone_gmt instead?
                 offset = now_utc.astimezone(pytz.timezone(tz_name)).utcoffset()
                 sign = "+" if offset >= zero_ else "-"
                 hh_mm = str(abs(offset)).zfill(8)[:-3]
@@ -99,7 +100,7 @@ class TimeZoneField(models.Field):
         return parse_timezone_string(value)
 
     def get_prep_value(self, value):
-        if value is None:
+        if value is None or value == '':
             return None
         if isinstance(value, pytz.tzinfo.BaseTzInfo):
             return value.zone
