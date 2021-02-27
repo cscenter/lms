@@ -163,6 +163,7 @@ class CourseClassFactory(factory.django.DjangoModelFactory):
             + datetime.timedelta(days=3)).date()
     starts_at = datetime.time(hour=13, minute=0)
     ends_at = datetime.time(hour=13, minute=45)
+    time_zone = factory.LazyAttribute(lambda o: o.course.main_branch.get_timezone())
     materials_visibility = MaterialVisibilityTypes.PARTICIPANTS
 
     @factory.post_generation

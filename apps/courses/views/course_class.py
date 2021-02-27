@@ -98,7 +98,8 @@ class CourseClassCreateView(TeacherOnlyMixin,
     def get_initial(self, **kwargs):
         course = kwargs["course"]
         initial = {
-            "materials_visibility": course.materials_visibility
+            "materials_visibility": course.materials_visibility,
+            "time_zone": course.main_branch.get_timezone() or None
         }
         # TODO: Add tests for initial data after discussion
         previous_class = (CourseClass.objects

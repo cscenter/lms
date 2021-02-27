@@ -184,6 +184,10 @@ class CourseClassForm(forms.ModelForm):
         label=_("Ends at"),
         help_text=_("Format: hh:mm"),
         widget=TimeInputTextWidget())
+    time_zone = forms.ChoiceField(
+        label=_("Time Zone"),
+        required=True,
+        help_text="&nbsp;")
     restricted_to = MultipleStudentGroupField(
         label=_("Student Groups"),
         required=False,
@@ -191,7 +195,7 @@ class CourseClassForm(forms.ModelForm):
 
     class Meta:
         model = CourseClass
-        fields = ['venue', 'type', 'date', 'starts_at', 'ends_at', 'name',
+        fields = ['venue', 'type', 'date', 'starts_at', 'ends_at', 'time_zone', 'name',
                   'description', 'slides', 'attachments', 'video_url',
                   'other_materials', 'materials_visibility', 'restricted_to']
 
@@ -199,9 +203,19 @@ class CourseClassForm(forms.ModelForm):
         course = kwargs.pop('course', None)
         assert course is not None
         super().__init__(*args, **kwargs)
-        # Collect all venues
-        self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
-            branch__in=course.branches.all()).distinct()
+        self.fields['venue'].queryset = (LearningSpace.objects
+                                         .select_related('location')
+                                         .filter(branch__in=course.branches.all())
+                                         .distinct()
+                                         .order_by('name'))
+        time_zones = set()
+        for branch in course.branches.all():
+            tz = branch.get_timezone()
+            if tz:
+                time_zones.add((str(tz), tz.zone))
+        time_zones = list(time_zones)
+        tz_choices = [('', '---------'), *time_zones]
+        self.fields['time_zone'].choices = tz_choices
         field_restrict_to = self.fields['restricted_to']
         field_restrict_to.choices = StudentGroupService.get_choices(course)
         self.instance.course = course

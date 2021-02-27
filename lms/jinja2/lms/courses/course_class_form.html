@@ -34,7 +34,8 @@
                         <div class="form-inline">
                             {{ forms.field(form['date'], prepend_text='<i class="fa fa-calendar"></i>', input_classes='datepicker') }}&nbsp;
                             {{ forms.field(form['starts_at'], prepend_text='<i class="fa fa-clock-o"></i>', input_classes='timepicker') }}&nbsp;
-                            {{ forms.field(form['ends_at'], prepend_text='<i class="fa fa-clock-o"></i>', input_classes='timepicker') }}
+                            {{ forms.field(form['ends_at'], prepend_text='<i class="fa fa-clock-o"></i>', input_classes='timepicker') }}&nbsp;
+                            {{ forms.field(form['time_zone']) }}
                         </div>
                     </div>
                 </fieldset>
