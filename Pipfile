@@ -93,7 +93,7 @@ python-ldap = "==3.3.1"
 attrs = "==20.3.0"
 django-choices = "==1.7.1"
 django-vanilla-views = "==2.0.0"
-django-autocomplete-light = "==3.8.1"
+django-autocomplete-light = "==3.8.2"
 django-mptt = "==0.11.0"
 django-bootstrap-pagination = "==1.7.1"
 django-bitfield = "==2.0.1"
@@ -121,6 +121,7 @@ django-simple-history = "*"
 # XXX: wrong implementation for Django >= 1.11 in ver 1.2.1
 django-static-compress = "==1.2.1"
 webdavclient3 = "*"
+babel = "*"
 
 [requires]
 python_version = "3.8"
