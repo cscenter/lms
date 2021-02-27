@@ -24,6 +24,7 @@ from core.db.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Location, Branch
 from core.timezone import now_local, Timezone, TimezoneAwareMixin
 from core.timezone.fields import TimezoneAwareDateTimeField
+from core.db.fields import TimeZoneField
 from core.urls import reverse
 from core.utils import hashids, get_youtube_video_id, instance_memoize
 from courses.constants import TeacherRoles, \
@@ -787,10 +788,9 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
     date = models.DateField(_("Date"))
     starts_at = models.TimeField(_("Starts at"))
     ends_at = models.TimeField(_("Ends at"))
-    # time_zone = models.CharField(
-    #     verbose_name=_("Timezone"), max_length=63,
-    #     choices=tuple(zip(pytz.all_timezones, pytz.all_timezones)),
-    #     default=settings.DEFAULT_TIMEZONE.zone)
+    # TODO: fill values, add default, then make required
+    time_zone = TimeZoneField(_("Time Zone"))
+
     name = models.CharField(_("CourseClass|Name"), max_length=255)
     description = models.TextField(
         _("Description"),

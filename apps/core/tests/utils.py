@@ -5,7 +5,6 @@ from django.test import Client, TestCase
 from django.utils.functional import Promise
 
 from core.urls import reverse
-from learning.settings import Branches
 
 if settings.LMS_SUBDOMAIN:
     _SERVER_NAME = f"{settings.LMS_SUBDOMAIN}.{settings.TEST_DOMAIN}"
