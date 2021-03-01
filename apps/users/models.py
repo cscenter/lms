@@ -28,6 +28,7 @@ from sorl.thumbnail import ImageField
 from api.services import generate_hash
 from api.settings import DIGEST_MAX_LENGTH
 from auth.permissions import perm_registry
+from core.db.fields import TimeZoneField
 from core.timezone import Timezone, TimezoneAwareMixin
 from core.timezone.constants import DATETIME_FORMAT_RU
 from core.urls import reverse
@@ -299,10 +300,7 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         related_name="+",  # Disable backwards relation
         on_delete=models.PROTECT,
         null=True, blank=True)
-    time_zone = models.CharField(
-        verbose_name=_("Timezone"), max_length=63,
-        choices=tuple(zip(pytz.all_timezones, pytz.all_timezones)),
-        default=settings.DEFAULT_TIMEZONE.zone)
+    time_zone = TimeZoneField(_("Time Zone"))
     bio = models.TextField(
         _("CSCUser|note"),
         help_text=_("LaTeX+Markdown is enabled"),
