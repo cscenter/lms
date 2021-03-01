@@ -26,6 +26,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         ]
     )
     level_of_education = AliasedChoiceField(
+        required=False,
         choices=[
             ('1', AcademicDegreeLevels.BACHELOR_SPECIALITY_1),
             ('2', AcademicDegreeLevels.BACHELOR_SPECIALITY_2),
@@ -79,17 +80,21 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         label='Планируете ли вы воспользоваться новым треком поступления?'
     )
     new_track_scientific_articles = serializers.CharField(
+        required=False,
         allow_blank=True,
         label='Есть ли у вас научные статьи? Если да, то дайте их координаты.')
     new_track_projects = serializers.CharField(
+        required=False,
         allow_blank=True,
         label='Есть ли у вас открытые проекты вашего авторства, или в которых вы участвовали '
               'в составе команды, на github или на каком-либо из подобных сервисов? '
               'Если да, дайте ссылки на них.')
     new_track_tech_articles = serializers.CharField(
+        required=False,
         allow_blank=True,
         label='Есть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.')
     new_track_project_details = serializers.CharField(
+        required=False,
         allow_blank=True,
         label='Расскажите более подробно о каком-нибудь из своих проектов. Что хотелось сделать? '
               'Какие нетривиальные технические решения вы использовали? '
@@ -161,5 +166,5 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
             raise ValidationError(f"Current campaign for branch code `{attrs['branch']}` "
                                   f"in {current_year} does not exist")
         if not University.objects.filter(pk=attrs['university']).exists():
-            raise ValidationError(f"University `{attrs['university']}` does not exist")
+            raise ValidationError(f"University with pk=`{attrs['university']}` does not exist")
         return attrs

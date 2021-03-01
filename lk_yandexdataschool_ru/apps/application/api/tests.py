@@ -19,6 +19,7 @@ from .serializers import ApplicantYandexFormSerializer
 post_data = {
   "jsonrpc": "2.0",
   "method": "admission:form.add",
+  "id": "21067737",
   "params": {
     "id": "473801197",
     "SecretToken": "",
@@ -49,7 +50,6 @@ post_data = {
     "new_track_tech_articles": "Есть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.",
     "new_track_project_details": "Расскажите более подробно о каком-нибудь из своих проектов. Что хотелось сделать? Какие нетривиальные технические решения вы использовали? В чём были трудности и как вы их преодолевали? Пожалуйста, сохраните свой ответ в файле .pdf, выложите его на Яндекс.Диск и поместите сюда ссылку. Если у вас уже есть статья на эту тему и вы давали на неё ссылку в предыдущем вопросе, то можете поставить здесь прочерк.\r\n\r\nhttps://ya.ru/"
   },
-  "id": "21067737"
 }
 
 
@@ -151,4 +151,46 @@ def test_applicant_form_serializer(settings, mocker):
         assert data[field_name] == getattr(instance, field_name)
     assert instance.level_of_education == AcademicDegreeLevels.MASTER_1
     assert instance.year_of_graduation == 2012
+    assert serializer.fields['new_track_scientific_articles'].label in instance.additional_info
+    assert data['new_track_scientific_articles'] in instance.additional_info
 
+
+@pytest.mark.django_db
+def test_applicant_form_serializer_min_fields(settings, mocker):
+    mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
+    mocked_api.return_value = 200, 1
+    branch = BranchFactory(code='msk', name='Москва', site_id=settings.SITE_ID)
+    campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    university, _ = University.objects.update_or_create(pk=1, defaults={"name": 'Другое'})
+    data = {
+        'id': '504733988',
+        'last_name': 'Иванов',
+        'first_name': 'Иван',
+        'patronymic': 'Иванович',
+        'email': 'example@jetbrains.com',
+        'phone': '+7 323 987-23-62',
+        'birth_date': '2021-03-10',
+        'living_place': 'Санкт-Петербург',
+        'branch': branch.name,
+        'university': university.name,
+        'is_studying': 'Нет',
+        'faculty': 'ИФФ',
+        'year_of_graduation': '2012',
+        'where_did_you_learn_other': '',
+        'scientific_work': '',
+        'programming_experience': '',
+        'motivation': 'Зачем.',
+        'ml_experience': 'Зачем.',
+        'shad_plus_rash': 'Нет',
+        'new_track': 'Нет',
+        # 'new_track_scientific_articles': '', 'new_track_projects': '', 'new_track_tech_articles': '',
+        'new_track_project_details': '',
+        'yandex_login': 'test'
+    }
+    serializer = ApplicantYandexFormSerializer(data=data)
+    serializer.is_valid(raise_exception=False)
+    assert not serializer.errors
+    instance = serializer.save()
+    assert instance.level_of_education is None
+    assert serializer.fields['new_track_scientific_articles'].label not in instance.additional_info
