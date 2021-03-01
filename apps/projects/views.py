@@ -78,7 +78,7 @@ class ReportListViewMixin:
     template_name = "projects/reports.html"
 
     def get_queryset(self):
-        tz = self.request.user.get_timezone()
+        tz = self.request.user.time_zone
         current_term_index = get_current_term_pair(tz).index
         qs = (Report.objects
               .filter(project_student__project__semester__index=current_term_index)
@@ -145,7 +145,7 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
         return self.render_to_response(context)
 
     def get_queryset(self):
-        tz = self.request.user.get_timezone()
+        tz = self.request.user.time_zone
         current_term_index = get_current_term_pair(tz).index
         qs = (Project.active
               .filter(semester__index=current_term_index)

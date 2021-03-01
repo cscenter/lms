@@ -106,15 +106,13 @@ class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
     index_redirect = None
     branch_id = None
     roles = set()
+    time_zone = None
 
     def __str__(self):
         return 'ExtendedAnonymousUser'
 
     def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
         return None
-
-    def get_timezone(self) -> Timezone:
-        return settings.DEFAULT_TIMEZONE
 
 
 class Group(models.Model):
@@ -400,11 +398,8 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         self.groups.filter(user=self, role=role, site_id=sid).delete()
 
     def get_timezone(self) -> Timezone:
-        return self._timezone
-
-    @cached_property
-    def _timezone(self):
-        return pytz.timezone(self.time_zone)
+        # This method is needed for TimezoneAwareMixin
+        return self.time_zone
 
     @staticmethod
     def generate_random_username(length=30,

@@ -42,7 +42,7 @@ class GradeBookListBaseView(generic.ListView):
                 .order_by("meta_course__name"))
 
     def get_term_threshold(self):
-        tz = self.request.user.get_timezone()
+        tz = self.request.user.time_zone
         term_pair = get_current_term_pair(tz)
         term_index = term_pair.index
         # Skip to the spring semester

@@ -122,7 +122,7 @@ def test_enrollment_capacity_view(client):
 def test_enrollment_inactive_student(inactive_status, client, settings):
     student = StudentFactory(branch__code=Branches.SPB)
     client.login(student)
-    tomorrow = now_local(student.get_timezone()) + datetime.timedelta(days=1)
+    tomorrow = now_local(student.time_zone) + datetime.timedelta(days=1)
     current_semester = SemesterFactory.create_current(
         enrollment_period__ends_on=tomorrow.date())
     course = CourseFactory(semester=current_semester)
@@ -140,7 +140,7 @@ def test_enrollment_inactive_student(inactive_status, client, settings):
 def test_enrollment(client):
     student1, student2 = StudentFactory.create_batch(2)
     client.login(student1)
-    today = now_local(student1.get_timezone())
+    today = now_local(student1.time_zone)
     current_semester = SemesterFactory.create_current(
         enrollment_period__ends_on=today.date())
     current_semester.save()
@@ -174,7 +174,7 @@ def test_enrollment(client):
 def test_enrollment_reason_entry(client):
     student_profile = StudentProfileFactory()
     client.login(student_profile.user)
-    today = now_local(student_profile.user.get_timezone())
+    today = now_local(student_profile.user.time_zone)
     current_term = SemesterFactory.create_current(
         enrollment_period__ends_on=today.date())
     course = CourseFactory(main_branch=student_profile.branch, semester=current_term)
@@ -197,7 +197,7 @@ def test_enrollment_reason_entry(client):
 def test_enrollment_leave_reason(client):
     student_profile = StudentProfileFactory()
     client.login(student_profile.user)
-    today = now_local(student_profile.user.get_timezone())
+    today = now_local(student_profile.user.time_zone)
     current_semester = SemesterFactory.create_current(
         enrollment_period__ends_on=today.date())
     co = CourseFactory(main_branch=student_profile.branch, semester=current_semester)
@@ -456,7 +456,7 @@ def test_enrollment_populate_assignments(client):
     branch_spb = BranchFactory(code=Branches.SPB)
     student_profile = StudentProfileFactory(branch=branch_spb)
     student = student_profile.user
-    today = now_local(student.get_timezone())
+    today = now_local(student.time_zone)
     current_semester = SemesterFactory.create_current(
         enrollment_period__ends_on=today.date())
     course = CourseFactory(main_branch=branch_spb,

@@ -448,7 +448,7 @@ class GradeBookListView(TeacherOnlyMixin, GradeBookListBaseView):
         return qs.filter(teachers=self.request.user)
 
     def get_context_data(self, **kwargs):
-        tz = self.request.user.get_timezone()
+        tz = self.request.user.time_zone
         current_term_index = get_current_term_pair(tz).index
         # Redirect teacher to the appropriate gradebook page if he has only
         # one course in the current semester.

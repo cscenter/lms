@@ -440,7 +440,7 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     assert len(response.context['ongoing_rest']) == 0
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['archive_enrolled']) == 0
-    current_term = get_current_term_pair(student_spb.get_timezone())
+    current_term = get_current_term_pair(student_spb.time_zone)
     current_term_spb = SemesterFactory(year=current_term.year,
                                        type=current_term.type)
     cos = CourseFactory.create_batch(4, semester=current_term_spb,

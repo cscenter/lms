@@ -1,6 +1,7 @@
 import itertools
 from typing import NamedTuple, Iterable
 
+from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -31,7 +32,7 @@ class UserICalendarView(generic.base.View):
         site = self.request.site
         url_builder = request.build_absolute_uri
         product_id = f"-//{site.name} Calendar//{site.domain}//"
-        tz = user.get_timezone()
+        tz = user.time_zone or settings.DEFAULT_TIMEZONE
         calendar_meta = self.get_calendar_meta(user, site, url_builder, tz)
         events = self.get_calendar_events(user, site, url_builder, tz)
         cal = generate_icalendar(product_id,

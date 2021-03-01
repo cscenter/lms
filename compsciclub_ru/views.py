@@ -367,7 +367,7 @@ class CourseDetailView(PublicURLContextMixin,
             teachers[group].extend(ts)
         tz_override = None
         if self.request.user.is_authenticated:
-            tz_override = self.request.user.get_timezone()
+            tz_override = self.request.user.time_zone
         context = {
             'course': course,
             'course_tabs': tab_list,

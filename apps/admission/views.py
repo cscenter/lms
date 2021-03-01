@@ -167,7 +167,7 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                            .order_by("-id")
                            .first())
             if latest_task:
-                tz = self.request.user.get_timezone()
+                tz = self.request.user.time_zone
                 import_testing_results_btn_state = {
                     # TODO: humanize
                     "date": latest_task.created_at_local(tz),

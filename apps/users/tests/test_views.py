@@ -149,7 +149,10 @@ def test_graduate_can_edit_testimonial(client, settings):
     profiles
     """
     test_review = "CSC are the bollocks"
-    form_data = {'testimonial': test_review}
+    form_data = {
+        'time_zone': 'Europe/Moscow',
+        'testimonial': test_review
+    }
     student = StudentFactory()
     client.login(student)
     response = client.post(student.get_update_profile_url(), form_data)
@@ -258,7 +261,10 @@ def test_user_can_update_profile(client, assert_redirect):
     assert smart_bytes(user.get_update_profile_url()) in response.content
     response = client.get(user.get_update_profile_url())
     assert b'bio' in response.content
-    form_data = {'bio': test_note}
+    form_data = {
+        'time_zone': user.time_zone,
+        'bio': test_note
+    }
     response = client.post(user.get_update_profile_url(), form_data)
     assert_redirect(response, user.get_absolute_url())
     response = client.get(user.get_absolute_url())

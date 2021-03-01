@@ -266,7 +266,7 @@ def test_course_class_form_available(client, curator, settings):
     response = client.post(course_class_add_url, form, follow=True)
     assert response.status_code == 403
     # Check we can post form if course is active
-    today = now_local(teacher.get_timezone()).date()
+    today = now_local(teacher.time_zone).date()
     next_day = today + datetime.timedelta(days=1)
     course.completed_at = next_day
     course.save()

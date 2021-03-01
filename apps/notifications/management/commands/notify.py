@@ -172,7 +172,7 @@ def get_assignment_notification_context(
         participant_branch: Branch,
         site_settings: SiteConfiguration) -> Dict:
     a_s = notification.student_assignment
-    tz_override = notification.user.get_timezone()
+    tz_override = notification.user.time_zone
     domain_name = get_domain_name(participant_branch, site_settings)
     abs_url_builder = _get_abs_url_builder(domain_name)
     context = {

@@ -118,7 +118,7 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
         context = {
             'assignment_list_open': in_progress,
             'assignment_list_archive': archive,
-            'tz_override': student.get_timezone(),
+            'tz_override': student.time_zone,
             'reporting_periods': reporting_periods
         }
         return context
@@ -151,7 +151,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                                   kwargs={'pk': sa.pk})
         comment_form.helper.form_action = add_comment_url
         # Format datetime in student timezone
-        context['timezone'] = self.request.user.get_timezone()
+        context['timezone'] = self.request.user.time_zone
         # Solution Form
         draft_solution = get_draft_solution(self.request.user, sa)
         solution_form = get_solution_form(sa, instance=draft_solution)
@@ -233,7 +233,7 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
                                      'course__grading_type'))
         student_enrolled_in = {e.course_id: e for e in student_enrollments}
         # 1. Union courses from current term and which student enrolled in
-        tz = auth_user.get_timezone()
+        tz = auth_user.time_zone
         current_term = get_current_term_pair(tz)
         current_term_index = current_term.index
         in_current_term = Q(semester__index=current_term_index)

@@ -72,7 +72,7 @@ def test_student_group_resolving_on_enrollment(client):
     """
     student_profile1 = StudentProfileFactory()
     student_profile2 = StudentProfileFactory(branch=BranchFactory())
-    today = now_local(student_profile1.user.get_timezone()).date()
+    today = now_local(student_profile1.user.time_zone).date()
     current_semester = SemesterFactory.create_current(
         enrollment_period__ends_on=today)
     course = CourseFactory(main_branch=student_profile1.branch,
@@ -104,7 +104,7 @@ def test_student_group_resolving_on_enrollment_admin(client, settings):
     special group `Others`.
     """
     student, student2 = StudentFactory.create_batch(2, branch=BranchFactory())
-    today = now_local(student.get_timezone()).date()
+    today = now_local(student.time_zone).date()
     current_semester = SemesterFactory.create_current(
         enrollment_period__ends_on=today)
     course = CourseFactory(main_branch=BranchFactory(),
@@ -137,7 +137,7 @@ def test_student_group_resolving_on_enrollment_admin(client, settings):
 def test_student_group_resolving_enrollment_by_invitation(settings, client):
     branch_spb = BranchFactory(code=Branches.SPB)
     invited = InvitedStudentFactory(branch=branch_spb)
-    today = now_local(invited.get_timezone()).date()
+    today = now_local(invited.time_zone).date()
     term = SemesterFactory.create_current(enrollment_period__ends_on=today)
     course = CourseFactory(main_branch=branch_spb, semester=term)
     student_groups = StudentGroup.objects.filter(course=course).all()

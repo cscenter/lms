@@ -23,7 +23,7 @@ class MonthEventsCalendarView(generic.TemplateView):
         query_params = CalendarQueryParams(data=request.GET)
         if not query_params.is_valid():
             return HttpResponseRedirect(request.path)
-        today_local = now_local(request.user.get_timezone()).date()
+        today_local = now_local(request.user.time_zone).date()
         # FIXME: validate in a MonthPeriod instead?
         year = query_params.validated_data.get('year', today_local.year)
         month = query_params.validated_data.get('month', today_local.month)
@@ -51,7 +51,7 @@ class WeekEventsView(generic.TemplateView):
         query_params = CalendarQueryParams(data=request.GET)
         if not query_params.is_valid():
             return HttpResponseRedirect(request.path)
-        today_local = now_local(request.user.get_timezone()).date()
+        today_local = now_local(request.user.time_zone).date()
         today_iso_year, today_iso_week, _ = today_local.isocalendar()
         iso_year = query_params.validated_data.get('year', today_iso_year)
         iso_week = query_params.validated_data.get('week', today_iso_week)

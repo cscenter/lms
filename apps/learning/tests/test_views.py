@@ -92,7 +92,7 @@ def test_course_detail_view_course_user_relations(client):
 def test_course_detail_view_assignment_list(client, assert_login_redirect):
     student = StudentFactory()
     teacher = TeacherFactory()
-    today = now_local(student.get_timezone()).date()
+    today = now_local(student.time_zone).date()
     next_day = today + datetime.timedelta(days=1)
     course = CourseFactory(teachers=[teacher],
                            semester=SemesterFactory.create_current(),

@@ -75,7 +75,7 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
         tz_override = None
         # FIXME: cache additional branch count?
         if not is_actual_teacher and len(course.branches.all()) > 1:
-            tz_override = request_user.get_timezone()
+            tz_override = request_user.time_zone
 
         if request_user.has_perm("study.view_own_enrollments"):
             request_user_enrollment = request_user.get_enrollment(course.pk)

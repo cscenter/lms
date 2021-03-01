@@ -32,7 +32,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
     last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
     branch = None
-    time_zone = factory.LazyAttribute(lambda user: user.branch.time_zone if user.branch is not None else str(settings.DEFAULT_TIMEZONE))
+    time_zone = factory.LazyAttribute(lambda user: user.branch._timezone if user.branch is not None else settings.DEFAULT_TIMEZONE)
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
@@ -127,7 +127,7 @@ class StudentProfileFactory(factory.django.DjangoModelFactory):
 
     type = StudentTypes.REGULAR
     user = factory.SubFactory(UserFactory,
-                              time_zone=factory.SelfAttribute('..branch.time_zone'))
+                              time_zone=factory.SelfAttribute('..branch._timezone'))
     branch = factory.SubFactory(BranchFactory,
                                 code=settings.DEFAULT_BRANCH_CODE)
     year_of_admission = factory.SelfAttribute('user.date_joined.year')
