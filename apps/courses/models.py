@@ -1,6 +1,6 @@
-import datetime
 import os.path
 from typing import NamedTuple
+from datetime import datetime, timedelta
 
 import pytz
 from bitfield import BitField
@@ -142,7 +142,7 @@ class Semester(models.Model):
         tz = pytz.UTC
         self.index = term_pair.index
         self.starts_at = term_pair.starts_at(tz)
-        self.ends_at = next_term.starts_at(tz) - datetime.timedelta(days=1)
+        self.ends_at = next_term.starts_at(tz) - timedelta(days=1)
         super().save(*args, **kwargs)
 
     @property
@@ -857,6 +857,40 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
             'public_slides_count',
             'public_attachments_count'
         )
+
+    def starts_at_local(self, tz=None) -> datetime:
+        """
+        Returns aware datetime in *tz* time zone. If *tz* is not specified
+        fallback to the course class time zone.
+
+        Note:
+            Ambiguous dates will be resolved with `is_dst=False`
+        """
+        if not tz:
+            tz = self.time_zone
+        # Make sure dt_naive is not ambiguous
+        dt_naive = datetime.combine(self.date, self.starts_at)
+        dt_aware: datetime = self.time_zone.localize(dt_naive)
+        if tz:
+            return dt_aware.astimezone(tz)
+        return dt_aware
+
+    def ends_at_local(self, tz=None) -> datetime:
+        """
+        Returns aware datetime in *tz* time zone. If *tz* is not specified
+        fallback to the course class time zone.
+
+        Note:
+            Ambiguous dates will be resolved with `is_dst=False`
+        """
+        if not tz:
+            tz = self.time_zone
+        # Make sure dt_naive is not ambiguous
+        dt_naive = datetime.combine(self.date, self.ends_at)
+        dt_aware: datetime = self.time_zone.localize(dt_naive)
+        if tz:
+            return dt_aware.astimezone(tz)
+        return dt_aware
 
     def get_absolute_url(self):
         return reverse('courses:class_detail', kwargs={

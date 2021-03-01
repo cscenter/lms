@@ -246,13 +246,13 @@ class ClubClassesFeed(ICalFeed):
     def item_link(self, item):
         return item.get_absolute_url()
 
-    def item_start_datetime(self, item):
+    def item_start_datetime(self, item: CourseClass):
         tz = _TIME_ZONE
-        return tz.localize(datetime.datetime.combine(item.date, item.starts_at))
+        return item.starts_at_local(tz)
 
-    def item_end_datetime(self, item):
+    def item_end_datetime(self, item: CourseClass):
         tz = _TIME_ZONE
-        return tz.localize(datetime.datetime.combine(item.date, item.ends_at))
+        return item.ends_at_local(tz)
 
     def item_created(self, item):
         return item.created

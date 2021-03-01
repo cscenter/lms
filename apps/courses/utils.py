@@ -153,10 +153,10 @@ def get_term_by_index(term_index) -> TermPair:
 def get_terms_in_range(start: datetime.date,
                        end: datetime.date) -> Iterator[TermPair]:
     time_part = datetime.time(tzinfo=pytz.UTC)
-    start_aware = datetime.datetime.combine(start, time_part)
-    end_aware = datetime.datetime.combine(end, time_part)
-    start_term = date_to_term_pair(start_aware)
-    end_term = date_to_term_pair(end_aware)
+    start_utc = datetime.datetime.combine(start, time_part)
+    end_utc = datetime.datetime.combine(end, time_part)
+    start_term = date_to_term_pair(start_utc)
+    end_term = date_to_term_pair(end_utc)
     current = start_term
     while current.index <= end_term.index:
         yield current

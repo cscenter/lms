@@ -111,15 +111,13 @@ class CourseClassICalendarEventBuilder(ICalendarEventBuilder):
     def model_to_dict(self, instance: CourseClass):
         url = self.url_builder(instance.get_absolute_url())
         description = "{}\n\n{}".format(instance.description, url).strip()
-        starts_at = datetime.combine(instance.date, instance.starts_at)
-        ends_at = datetime.combine(instance.date, instance.ends_at)
         return {
             'url': vUri(url),
             'summary': vText(instance.name),
             'description': vText(description),
             'location': vText(instance.venue.address),
-            'dtstart': self.time_zone.localize(starts_at),
-            'dtend': self.time_zone.localize(ends_at),
+            'dtstart': instance.starts_at_local(self.time_zone),
+            'dtend': instance.ends_at_local(self.time_zone),
             'created': instance.created,
             'last-modified': instance.modified,
         }

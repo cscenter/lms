@@ -177,6 +177,7 @@ class CourseClassForm(forms.ModelForm):
         label=_("Date"),
         help_text=_("Format: dd.mm.yyyy"),
         widget=DateInputTextWidget(attrs={'class': 'datepicker'}))
+    # TODO: validate ambiguous time points
     starts_at = forms.TimeField(
         label=_("Starts at"),
         help_text=_("Format: hh:mm"),

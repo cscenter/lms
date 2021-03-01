@@ -1,13 +1,15 @@
+import datetime
 import re
 
 import pytest
+import pytz
 from django.core.exceptions import ValidationError
 
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from courses.constants import SemesterTypes, TeacherRoles, \
     MaterialVisibilityTypes
-from courses.models import Assignment, CourseTeacher, Course
+from courses.models import Assignment, CourseTeacher, Course, CourseClass
 from courses.tests.factories import CourseNewsFactory, SemesterFactory, \
     CourseFactory, \
     CourseClassFactory, CourseClassAttachmentFactory, MetaCourseFactory, \
@@ -191,6 +193,42 @@ def test_course_class_start_end_validation():
     cc = CourseClassFactory.create(starts_at=time2, ends_at=time1)
     with pytest.raises(ValidationError):
         cc.clean()
+
+
+def test_course_class_starts_at_local():
+    course_class = CourseClass(date=datetime.date(year=2020, month=1, day=1),
+                               starts_at=datetime.time(hour=23, minute=20),
+                               ends_at=datetime.time(hour=2, minute=20),
+                               time_zone=pytz.timezone('Europe/Moscow'))
+    assert course_class.starts_at_local().strftime('%H:%M') == '23:20'
+    assert course_class.starts_at_local(pytz.UTC).strftime('%H:%M') == '20:20'
+    assert course_class.starts_at_local(pytz.timezone('Asia/Novosibirsk')).strftime('%d %H:%M') == '02 03:20'
+    # Ambiguous dates will be resolved with is_dst=False
+    eastern = pytz.timezone('US/Eastern')
+    ambiguous = datetime.datetime(year=2002, month=10, day=27, hour=1, minute=30)
+    course_class = CourseClass(date=ambiguous.date(),
+                               starts_at=ambiguous.time(),
+                               ends_at=datetime.time(hour=5, minute=0),
+                               time_zone=eastern)
+    assert course_class.starts_at_local() == eastern.localize(ambiguous, is_dst=False)
+
+
+def test_course_class_ends_at_local():
+    course_class = CourseClass(date=datetime.date(year=2020, month=1, day=1),
+                               starts_at=datetime.time(hour=21, minute=20),
+                               ends_at=datetime.time(hour=23, minute=20),
+                               time_zone=pytz.timezone('Europe/Moscow'))
+    assert course_class.ends_at_local().strftime('%H:%M') == '23:20'
+    assert course_class.ends_at_local(pytz.UTC).strftime('%H:%M') == '20:20'
+    assert course_class.ends_at_local(pytz.timezone('Asia/Novosibirsk')).strftime('%d %H:%M') == '02 03:20'
+    # Ambiguous dates will be resolved with is_dst=False
+    eastern = pytz.timezone('US/Eastern')
+    ambiguous = datetime.datetime(year=2002, month=10, day=27, hour=1, minute=30)
+    course_class = CourseClass(date=ambiguous.date(),
+                               starts_at=datetime.time(hour=0, minute=10),
+                               ends_at=ambiguous.time(),
+                               time_zone=eastern)
+    assert course_class.ends_at_local() == eastern.localize(ambiguous, is_dst=False)
 
 
 @pytest.mark.django_db
