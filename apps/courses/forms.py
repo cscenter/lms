@@ -1,5 +1,6 @@
 import datetime
 
+from babel.dates import get_timezone_location
 from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div
@@ -199,10 +200,10 @@ class CourseClassForm(forms.ModelForm):
                   'description', 'slides', 'attachments', 'video_url',
                   'other_materials', 'materials_visibility', 'restricted_to']
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, locale='en', **kwargs):
         course = kwargs.pop('course', None)
         assert course is not None
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.fields['venue'].queryset = (LearningSpace.objects
                                          .select_related('location')
                                          .filter(branch__in=course.branches.all())
@@ -212,11 +213,8 @@ class CourseClassForm(forms.ModelForm):
         for branch in course.branches.all():
             tz = branch.get_timezone()
             if tz:
-                time_zones.add((str(tz), tz.zone))
-        time_zones = list(time_zones)
-        # TODO: remove? tz for branch is mandatory
-        tz_choices = [('', '---------'), *time_zones]
-        self.fields['time_zone'].choices = tz_choices
+                time_zones.add((str(tz), get_timezone_location(tz, locale=locale, return_city=True)))
+        self.fields['time_zone'].choices = list(time_zones)
         field_restrict_to = self.fields['restricted_to']
         field_restrict_to.choices = StudentGroupService.get_choices(course)
         self.instance.course = course

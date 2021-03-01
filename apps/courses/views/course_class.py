@@ -57,7 +57,7 @@ class CourseClassCreateUpdateMixin(CourseURLParamsMixin):
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         kwargs["course"] = course
         kwargs["initial"] = self.get_initial(**kwargs)
-        return CourseClassForm(**kwargs)
+        return CourseClassForm(locale=self.request.LANGUAGE_CODE, **kwargs)
 
     @staticmethod
     def is_form_allowed(user, course):
