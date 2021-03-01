@@ -26,32 +26,21 @@ class UserProfileForm(forms.ModelForm):
         self.fields['index_redirect'].choices = [option_empty] + user_options
 
         self.helper = FormHelper()
-        show_fields = ['phone', 'workplace', 'bio',
-                       'yandex_login', 'github_login', 'stepic_id',
-                       'codeforces_login', 'private_contacts']
+        show_fields = list(UserProfileForm.Meta.fields)
 
         if is_club_site():
-            club_fields = ['first_name', 'last_name', 'patronymic']
-            show_fields = club_fields + show_fields
+            show_fields.extend(['first_name', 'last_name', 'patronymic'])
         else:
-            for field_name in ('index_redirect', 'social_networks'):
-                show_fields.append(field_name)
-        to_delete = []
-        for field_name in self.fields:
-            if field_name not in show_fields:
-                to_delete.append(field_name)
-        for field_name in to_delete:
-            del self.fields[field_name]
+            show_fields.extend(['index_redirect', 'social_networks'])
 
         self.helper.layout = Layout(Div(*show_fields))
         self.helper.form_tag = False
 
     class Meta:
         model = User
-        fields = ('phone', 'workplace', 'bio', 'yandex_login', 'github_login',
-                  'stepic_id', 'codeforces_login',
-                  'private_contacts', 'first_name', 'last_name',
-                  'patronymic', 'index_redirect', 'social_networks')
+        fields = ('phone', 'workplace', 'bio', 'time_zone',
+                  'yandex_login', 'github_login', 'stepic_id', 'codeforces_login',
+                  'private_contacts')
         widgets = {
             'bio': UbereditorWidget,
             'private_contacts': UbereditorWidget,
