@@ -50,7 +50,7 @@
                     {% elif second_level.selected %}class="active"{% endif %}>
                         <a {% if second_level.is_external %}target="_blank"{% endif %} href="{{ second_level.url }}">
                             {{ second_level.title }}
-                            {% if second_level.budge and second_level.budge in request.unread_notifications_cache %}
+                            {% if second_level.budge and request.unread_notifications_cache|attr(second_level.budge) %}
                             <span class="badge">
                               {{ request.unread_notifications_cache[second_level.budge]|length }}
                             </span>
