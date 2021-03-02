@@ -1,3 +1,5 @@
+import re
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.forms import SlugField, forms
@@ -7,7 +9,7 @@ from django_filters import FilterSet, ChoiceFilter, Filter
 from core.models import Branch
 from courses.constants import SemesterTypes
 from courses.models import Course
-from courses.utils import semester_slug_re, get_term_index, get_current_term_pair
+from courses.utils import get_term_index, get_current_term_pair
 
 
 class BranchCodeFilter(ChoiceFilter):
@@ -34,6 +36,10 @@ class SlugFilter(Filter):
 class SemesterFilter(SlugFilter):
     def filter(self, qs, value):
         return qs
+
+
+_term_types = r"|".join(slug for slug, _ in SemesterTypes.choices)
+semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" + _term_types + r")$")
 
 
 class CoursesFilterForm(forms.Form):

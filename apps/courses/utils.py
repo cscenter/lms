@@ -1,5 +1,4 @@
 import datetime
-import re
 from calendar import monthrange
 from dataclasses import dataclass, field
 from typing import Iterator
@@ -57,9 +56,17 @@ class TermPair:
         return get_term_starts_at(self.year, self.type, tz)
 
 
-_term_types = r"|".join(slug for slug, _ in SemesterTypes.choices)
-semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
-                              _term_types + r")$")
+@dataclass
+class MonthPeriod:
+    year: int
+    month: int
+    starts: datetime.date = field(init=False)
+    ends: datetime.date = field(init=False)
+
+    def __post_init__(self):
+        weekday, days_in_month = monthrange(self.year, self.month)
+        self.starts = datetime.date(self.year, self.month, 1)
+        self.ends = self.starts + datetime.timedelta(days=days_in_month - 1)
 
 
 def date_to_term_pair(dt: datetime.datetime) -> TermPair:
@@ -166,19 +173,6 @@ def execution_time_string(value: datetime.timedelta):
     minutes = int(value.total_seconds()) // 60
     hours, minutes = divmod(minutes, 60)
     return f"{hours}:{minutes:02}"
-
-
-@dataclass
-class MonthPeriod:
-    year: int
-    month: int
-    starts: datetime.date = field(init=False)
-    ends: datetime.date = field(init=False)
-
-    def __post_init__(self):
-        weekday, days_in_month = monthrange(self.year, self.month)
-        self.starts = datetime.date(self.year, self.month, 1)
-        self.ends = self.starts + datetime.timedelta(days=days_in_month - 1)
 
 
 def extended_month_date_range(month_period: MonthPeriod,
