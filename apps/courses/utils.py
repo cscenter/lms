@@ -169,25 +169,6 @@ def execution_time_string(value: datetime.timedelta):
     return f"{hours}:{minutes:02}"
 
 
-def get_start_of_week(value: Union[datetime.datetime, datetime.date],
-                      week_start_on=MONDAY_WEEKDAY):
-    """
-    Returns the first day of the week. By default week starts on Monday.
-    """
-    weekday = value.weekday()  # 0 - 6
-    days_diff = (weekday - week_start_on) % 7
-    return value - datetime.timedelta(days=days_diff)
-
-
-def get_end_of_week(value: Union[datetime.datetime, datetime.date],
-                    week_start_on=MONDAY_WEEKDAY):
-    """
-    Returns the last day of the week. By default week starts on Monday.
-    """
-    first_day = get_start_of_week(value, week_start_on)
-    return first_day + datetime.timedelta(days=6)
-
-
 @dataclass
 class MonthPeriod:
     year: int
@@ -210,6 +191,23 @@ def extended_month_date_range(month_period: MonthPeriod,
     start_date = get_start_of_week(month_period.starts, week_start_on)
     end_date = get_end_of_week(month_period.ends, week_start_on)
     return start_date, end_date
+
+
+def get_start_of_week(value: datetime.date, week_start_on=MONDAY_WEEKDAY) -> datetime.date:
+    """
+    Returns the first day of the week. By default week starts on Monday.
+    """
+    weekday = value.weekday()  # 0 - 6
+    days_diff = (weekday - week_start_on) % 7
+    return value - datetime.timedelta(days=days_diff)
+
+
+def get_end_of_week(value: datetime.date, week_start_on=MONDAY_WEEKDAY) -> datetime.date:
+    """
+    Returns the last day of the week. By default week starts on Monday.
+    """
+    first_day = get_start_of_week(value, week_start_on)
+    return first_day + datetime.timedelta(days=6)
 
 
 def course_public_url(course: 'Course', tab=None,
