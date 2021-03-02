@@ -99,15 +99,11 @@ class ICalendarEventBuilder(ABC):
         event_properties = self.model_to_dict(instance)
         for k, v in event_properties.items():
             event_component.add(k, v)
-        self.post_create(event_component, instance)
         return event_component
-
-    def post_create(self, event_component: ICalendarEvent, instance):
-        pass
 
 
 # noinspection PyAbstractClass
-class CourseClassICalendarEventBuilder(ICalendarEventBuilder):
+class _CourseClassICalendarEventBuilder(ICalendarEventBuilder):
     def model_to_dict(self, instance: CourseClass):
         url = self.url_builder(instance.get_absolute_url())
         description = "{}\n\n{}".format(instance.description, url).strip()
@@ -123,20 +119,24 @@ class CourseClassICalendarEventBuilder(ICalendarEventBuilder):
         }
 
 
-class StudentClassICalendarEventBuilder(CourseClassICalendarEventBuilder):
+class StudentClassICalendarEventBuilder(_CourseClassICalendarEventBuilder):
     def get_calendar_event_id(self, instance: CourseClass, user):
         return f"courseclasses-{instance.pk}-learning@{self.domain}"
 
-    def post_create(self, event_component, instance):
+    def create(self, instance, user: User) -> ICalendarEvent:
+        event_component = super().create(instance, user)
         event_component.add('categories', ['CSC', 'CLASS', 'LEARNING'])
+        return event_component
 
 
-class TeacherClassICalendarEventBuilder(CourseClassICalendarEventBuilder):
+class TeacherClassICalendarEventBuilder(_CourseClassICalendarEventBuilder):
     def get_calendar_event_id(self, instance: CourseClass, user):
         return f"courseclasses-{user.pk}-{instance.pk}-teaching@{self.domain}"
 
-    def post_create(self, event_component, instance):
+    def create(self, instance, user: User) -> ICalendarEvent:
+        event_component = super().create(instance, user)
         event_component.add('categories', ['CSC', 'CLASS', 'TEACHING'])
+        return event_component
 
 
 class TeacherAssignmentICalendarEventBuilder(ICalendarEventBuilder):
