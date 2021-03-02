@@ -20,7 +20,7 @@ from djchoices import DjangoChoices, C
 from vanilla import TemplateView, DetailView
 
 from announcements.models import Announcement
-from compscicenter_ru.utils import Tab, TabList
+from compscicenter_ru.utils import Tab, TabList, course_public_url, course_class_public_url
 from core.exceptions import Redirect
 from core.models import Branch
 from core.urls import reverse
@@ -32,7 +32,7 @@ from courses.permissions import ViewCourseClassMaterials, \
     can_view_private_materials
 from courses.services import group_teachers, CourseService
 from courses.utils import get_current_term_pair, \
-    get_term_index, course_public_url, course_class_public_url
+    get_term_index
 from faq.models import Question
 from learning.models import Enrollment, GraduateProfile
 from learning.roles import Roles

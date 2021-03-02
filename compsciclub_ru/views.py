@@ -29,7 +29,8 @@ from courses.models import Course, Semester, CourseClass, CourseTeacher, \
 from courses.services import group_teachers
 from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
 from courses.utils import get_current_term_pair, MonthPeriod, \
-    extended_month_date_range, course_public_url, course_class_public_url
+    extended_month_date_range
+from compscicenter_ru.utils import course_public_url, course_class_public_url
 from courses.views.calendar import MonthEventsCalendarView
 from courses.views.mixins import CoursePublicURLParamsMixin
 from learning.gallery.models import Image

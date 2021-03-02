@@ -2,7 +2,7 @@ import datetime
 import re
 from calendar import monthrange
 from dataclasses import dataclass, field
-from typing import Union, Iterator
+from typing import Iterator
 
 import attr
 import pytz
@@ -11,7 +11,6 @@ from django.conf import settings
 from django.utils import timezone
 
 from core.timezone import Timezone, now_local
-from core.urls import reverse
 from courses.constants import SemesterTypes, \
     AUTUMN_TERM_START, SPRING_TERM_START, SUMMER_TERM_START, MONDAY_WEEKDAY
 
@@ -208,48 +207,3 @@ def get_end_of_week(value: datetime.date, week_start_on=MONDAY_WEEKDAY) -> datet
     """
     first_day = get_start_of_week(value, week_start_on)
     return first_day + datetime.timedelta(days=6)
-
-
-def course_public_url(course: 'Course', tab=None,
-                      default_branch_code=settings.DEFAULT_BRANCH_CODE):
-    # Hide links to courses not made by current site
-    if course.main_branch.site_id != settings.SITE_ID:
-        return None
-    url_params = {
-        "course_slug": course.meta_course.slug,
-        "main_branch_code": course.main_branch.code,
-        "semester_year": course.semester.year,
-        "semester_type": course.semester.type,
-    }
-    if tab is None:
-        route_name = 'course_detail'
-    else:
-        route_name = 'course_detail_with_active_tab'
-        url_params['tab'] = tab
-    return _reverse_with_optional_branch(route_name, default_branch_code,
-                                         subdomain=None, kwargs=url_params)
-
-
-def course_class_public_url(course_class: 'CourseClass',
-                            default_branch_code=settings.DEFAULT_BRANCH_CODE):
-    url_params = {
-        "course_slug": course_class.course.meta_course.slug,
-        "main_branch_code": course_class.course.main_branch.code,
-        "semester_year": course_class.course.semester.year,
-        "semester_type": course_class.course.semester.type,
-    }
-    return _reverse_with_optional_branch(
-        'class_detail',
-        default_branch_code,
-        kwargs={'pk': course_class.pk, **url_params})
-
-
-def _reverse_with_optional_branch(viewname, default_branch_code,
-                                  subdomain=None, scheme=None,
-                                  args=None, kwargs=None, current_app=None):
-    if kwargs["main_branch_code"] == default_branch_code:
-        kwargs["main_branch_code"] = ""
-    slash = "/" if kwargs["main_branch_code"] else ""
-    kwargs["branch_trailing_slash"] = slash
-    return reverse(viewname, subdomain=subdomain, scheme=scheme, args=args,
-                   kwargs=kwargs, current_app=current_app)

@@ -8,7 +8,7 @@ from core.api.serializers import BranchSerializer
 from core.utils import render_markdown
 from courses.api.serializers import CourseSerializer
 from courses.models import Course, CourseTeacher
-from courses.utils import course_public_url
+from compscicenter_ru.utils import course_public_url
 from learning.models import GraduateProfile
 from users.api.serializers import PhotoSerializerField
 from users.models import User, StudentProfile
