@@ -129,7 +129,7 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
         context['current_semester'] = Semester.get_current()
         # Assignments sorted by course name
         assignments_qs = (StudentAssignment.objects
-                          .for_user(profile_user)
+                          .for_student(profile_user)
                           .in_term(context['current_semester'])
                           .order_by('assignment__course__meta_course__name',
                                     'assignment__deadline_at',

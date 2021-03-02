@@ -91,7 +91,7 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
 
     def get_queryset(self, current_term):
         return (StudentAssignment.objects
-                .for_user(self.request.user)
+                .for_student(self.request.user)
                 .in_term(current_term)
                 .order_by('assignment__deadline_at',
                           'assignment__course__meta_course__name',

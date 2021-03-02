@@ -6,11 +6,11 @@ import pytz
 from dateutil.relativedelta import relativedelta
 from django.contrib.sites.models import Site
 from django.utils import timezone
-from icalendar import vText, vUri, Calendar, Event as ICalendarEvent, \
+from icalendar import vText, vUri, Calendar, Event as ICalEvent, \
     Timezone, TimezoneStandard
 from icalendar.prop import vInline
 
-from courses.models import CourseClass, Assignment, CourseTeacher
+from courses.models import CourseClass, Assignment
 from learning.models import StudentAssignment, Event
 from users.models import User
 
@@ -33,7 +33,7 @@ def generate_icalendar(product_id: str,
                        name: str,
                        description: str,
                        time_zone: pytz.timezone,
-                       events: Iterable[ICalendarEvent]) -> Calendar:
+                       events: Iterable[ICalEvent]) -> Calendar:
     """
     Creates VTIMEZONE component like in a google calendar.
 
@@ -67,13 +67,13 @@ def generate_icalendar(product_id: str,
     return cal
 
 
-class ICalendarEventBuilder(ABC):
+class ICalendarEvent(ABC):
     @abstractmethod
     def get_calendar_event_id(self, instance, user):
         pass
 
     @abstractmethod
-    def model_to_dict(self, instance):
+    def _model_to_dict(self, instance):
         """
         Check https://tools.ietf.org/rfc/rfc5545.txt for the list of properties.
         """
@@ -93,18 +93,18 @@ class ICalendarEventBuilder(ABC):
         # Domain name is a part of the UID for the calendar component
         self.domain = site.domain
 
-    def create(self, instance, user: User) -> ICalendarEvent:
+    def create(self, instance, user: User) -> ICalEvent:
         uid = self.get_calendar_event_id(instance, user)
-        event_component = ICalendarEvent(uid=vText(uid), dtstamp=timezone.now())
-        event_properties = self.model_to_dict(instance)
+        event_component = ICalEvent(uid=vText(uid), dtstamp=timezone.now())
+        event_properties = self._model_to_dict(instance)
         for k, v in event_properties.items():
             event_component.add(k, v)
         return event_component
 
 
 # noinspection PyAbstractClass
-class _CourseClassICalendarEventBuilder(ICalendarEventBuilder):
-    def model_to_dict(self, instance: CourseClass):
+class _CourseClassICalendarEvent(ICalendarEvent):
+    def _model_to_dict(self, instance: CourseClass):
         url = self.url_builder(instance.get_absolute_url())
         description = "{}\n\n{}".format(instance.description, url).strip()
         return {
@@ -119,31 +119,31 @@ class _CourseClassICalendarEventBuilder(ICalendarEventBuilder):
         }
 
 
-class StudentClassICalendarEventBuilder(_CourseClassICalendarEventBuilder):
+class StudentClassICalendarEvent(_CourseClassICalendarEvent):
     def get_calendar_event_id(self, instance: CourseClass, user):
         return f"courseclasses-{instance.pk}-learning@{self.domain}"
 
-    def create(self, instance, user: User) -> ICalendarEvent:
+    def create(self, instance, user: User) -> ICalEvent:
         event_component = super().create(instance, user)
         event_component.add('categories', ['CSC', 'CLASS', 'LEARNING'])
         return event_component
 
 
-class TeacherClassICalendarEventBuilder(_CourseClassICalendarEventBuilder):
+class TeacherClassICalendarEvent(_CourseClassICalendarEvent):
     def get_calendar_event_id(self, instance: CourseClass, user):
         return f"courseclasses-{user.pk}-{instance.pk}-teaching@{self.domain}"
 
-    def create(self, instance, user: User) -> ICalendarEvent:
+    def create(self, instance, user: User) -> ICalEvent:
         event_component = super().create(instance, user)
         event_component.add('categories', ['CSC', 'CLASS', 'TEACHING'])
         return event_component
 
 
-class TeacherAssignmentICalendarEventBuilder(ICalendarEventBuilder):
+class TeacherAssignmentICalendarEvent(ICalendarEvent):
     def get_calendar_event_id(self, instance: Assignment, user):
         return f"assignments-{user.pk}-{instance.pk}-teaching@{self.domain}"
 
-    def model_to_dict(self, instance: Assignment):
+    def _model_to_dict(self, instance: Assignment):
         absolute_url = self.url_builder(instance.get_teacher_url())
         description = absolute_url
         summary = "{} ({})".format(instance.title, instance.course.name)
@@ -161,12 +161,12 @@ class TeacherAssignmentICalendarEventBuilder(ICalendarEventBuilder):
         }
 
 
-class StudentAssignmentICalendarEventBuilder(ICalendarEventBuilder):
+class StudentAssignmentICalendarEvent(ICalendarEvent):
     def get_calendar_event_id(self, instance: StudentAssignment, user):
         id_ = instance.assignment.pk
         return f"assignments-{user.pk}-{id_}-teaching@{self.domain}"
 
-    def model_to_dict(self, instance: StudentAssignment):
+    def _model_to_dict(self, instance: StudentAssignment):
         assignment = instance.assignment
         absolute_url = self.url_builder(instance.get_student_url())
         description = absolute_url
@@ -185,11 +185,11 @@ class StudentAssignmentICalendarEventBuilder(ICalendarEventBuilder):
         }
 
 
-class StudyEventICalendarEventBuilder(ICalendarEventBuilder):
+class StudyEventICalendarEvent(ICalendarEvent):
     def get_calendar_event_id(self, instance: Event, user):
         return f"noncourseevents-{instance.pk}@{self.domain}"
 
-    def model_to_dict(self, instance: Event):
+    def _model_to_dict(self, instance: Event):
         absolute_url = self.url_builder(instance.get_absolute_url())
         description = "{}\n\n{}".format(instance.name, absolute_url).strip()
         starts_at = datetime.combine(instance.date, instance.starts_at)
@@ -204,29 +204,3 @@ class StudyEventICalendarEventBuilder(ICalendarEventBuilder):
             'last-modified': instance.modified,
             'categories': vInline('CSC,EVENT')
         }
-
-
-# FIXME: теперь можно выделить queryset и удалить все методы ниже
-def get_icalendar_student_assignments(user: User,
-                                      event_builder: ICalendarEventBuilder):
-    queryset = (StudentAssignment.objects
-                .for_user(user)
-                .with_future_deadline())
-    for sa in queryset:
-        yield event_builder.create(sa, user)
-
-
-def get_icalendar_teacher_assignments(user: User, event_builder: ICalendarEventBuilder):
-    """
-    Generates icalendar events from assignments with future deadline
-    where user is participating as a teacher.
-    """
-    queryset = (Assignment.objects
-                .filter(course__teachers=user,
-                        course__course_teachers__roles=~CourseTeacher.roles.spectator)
-                .with_future_deadline()
-                .select_related('course',
-                                'course__meta_course',
-                                'course__semester'))
-    for assignment in queryset:
-        yield event_builder.create(assignment, user)

@@ -1,4 +1,3 @@
-import itertools
 from typing import NamedTuple, Iterable
 
 from django.conf import settings
@@ -8,14 +7,14 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views import generic
 
-from learning.services import get_student_classes, get_teacher_classes, \
-    get_study_events
 from learning.icalendar import generate_icalendar, \
-    get_icalendar_teacher_assignments, get_icalendar_student_assignments, \
-    TeacherAssignmentICalendarEventBuilder, \
-    StudyEventICalendarEventBuilder, \
-    StudentAssignmentICalendarEventBuilder, TeacherClassICalendarEventBuilder, \
-    StudentClassICalendarEventBuilder
+    TeacherAssignmentICalendarEvent, \
+    StudyEventICalendarEvent, \
+    StudentAssignmentICalendarEvent, TeacherClassICalendarEvent, \
+    StudentClassICalendarEvent
+from learning.models import StudentAssignment
+from learning.services import get_student_classes, get_teacher_classes, \
+    get_study_events, get_teacher_assignments
 from users.models import User
 
 
@@ -71,13 +70,13 @@ class ICalClassesView(UserICalendarView):
         )
 
     def get_calendar_events(self, user, site, url_builder, tz):
-        event_builder = StudentClassICalendarEventBuilder(tz, url_builder, site)
+        event_factory = StudentClassICalendarEvent(tz, url_builder, site)
         # FIXME: filter out past course classes?
         for course_class in get_student_classes(user, with_venue=True):
-            yield event_builder.create(course_class, user)
-        event_builder = TeacherClassICalendarEventBuilder(tz, url_builder, site)
+            yield event_factory.create(course_class, user)
+        event_factory = TeacherClassICalendarEvent(tz, url_builder, site)
         for course_class in get_teacher_classes(user, with_venue=True):
-            yield event_builder.create(course_class, user)
+            yield event_factory.create(course_class, user)
 
 
 class ICalAssignmentsView(UserICalendarView):
@@ -91,11 +90,15 @@ class ICalAssignmentsView(UserICalendarView):
             file_name="assignments.ics")
 
     def get_calendar_events(self, user, site, url_builder, tz):
-        builder = TeacherAssignmentICalendarEventBuilder(tz, url_builder, site)
-        as_teacher = get_icalendar_teacher_assignments(user, builder)
-        builder = StudentAssignmentICalendarEventBuilder(tz, url_builder, site)
-        as_student = get_icalendar_student_assignments(user, builder)
-        return itertools.chain(as_teacher, as_student)
+        event_factory = TeacherAssignmentICalendarEvent(tz, url_builder, site)
+        for assignment in get_teacher_assignments(user).with_future_deadline():
+            yield event_factory.create(assignment, user)
+        event_factory = StudentAssignmentICalendarEvent(tz, url_builder, site)
+        queryset = (StudentAssignment.objects
+                    .for_student(user)
+                    .with_future_deadline())
+        for sa in queryset:
+            yield event_factory.create(sa, user)
 
 
 class ICalEventsView(UserICalendarView):
@@ -110,7 +113,7 @@ class ICalEventsView(UserICalendarView):
             file_name="events.ics")
 
     def get_calendar_events(self, user, site, url_builder, tz):
-        event_builder = StudyEventICalendarEventBuilder(tz, url_builder, site)
+        event_factory = StudyEventICalendarEvent(tz, url_builder, site)
         filters = []
         future_events = Q(date__gt=timezone.now())
         filters.append(future_events)
@@ -118,4 +121,4 @@ class ICalEventsView(UserICalendarView):
         if hasattr(user, "branch_id") and user.branch_id:
             filters.append(Q(branch_id=user.branch_id))
         for e in get_study_events(filters).select_related('venue'):
-            yield event_builder.create(e, user)
+            yield event_factory.create(e, user)

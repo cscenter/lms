@@ -704,6 +704,18 @@ def get_study_events(filters: List[Q] = None) -> QuerySet:
             .order_by('date', 'starts_at'))
 
 
+def get_teacher_assignments(user):
+    """
+    Returns assignments where user is participating as a teacher.
+    """
+    return (Assignment.objects
+            .filter(course__teachers=user,
+                    course__course_teachers__roles=~CourseTeacher.roles.spectator)
+            .select_related('course',
+                            'course__meta_course',
+                            'course__semester'))
+
+
 class CourseRole(Enum):
     NO_ROLE = auto()
     STUDENT_REGULAR = auto()  # Enrolled active student

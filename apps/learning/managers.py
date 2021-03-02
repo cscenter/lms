@@ -8,7 +8,7 @@ from core.utils import is_club_site
 
 
 class StudentAssignmentQuerySet(query.QuerySet):
-    def for_user(self, user):
+    def for_student(self, user):
         return (self.filter(student=user)
                 .select_related('assignment',
                                 'assignment__course',
