@@ -26,6 +26,9 @@ __all__ = ('EventsCalendar', 'CalendarEventW', 'CalendarEvent',
            'WeekEventsCalendar', 'CalendarQueryParams')
 
 
+ISOWeekNumber = NewType('ISOWeekNumber', int)
+
+
 # FIXME: replace with CalendarEvent
 @attr.s
 class CalendarEventW:
@@ -238,9 +241,6 @@ class MonthFullWeeksEventsCalendar(EventsCalendar):
         begin, end = extended_month_date_range(self.month_period,
                                                week_start_on=self.week_starts_on)
         return self._days(begin, end)
-
-
-ISOWeekNumber = NewType('ISOWeekNumber', int)
 
 
 # TODO: add week_starts_on support
