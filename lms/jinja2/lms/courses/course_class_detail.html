@@ -3,6 +3,7 @@
 {% import "lms/layouts/_macros.jinja2" as macros -%}
 
 {% block content %}
+{%- set tz = request.user.time_zone -%}
 <div class="container">
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
@@ -34,7 +35,7 @@
         </tr>
         <tr>
           <td>{% trans %}When{% endtrans %}:</td>
-          <td>{{ course_class.date|date("l, d E Y") }}, {{ course_class.starts_at|time("H:i") }}–{{ course_class.ends_at|time("H:i") }}</td>
+          <td>{{ course_class.starts_at_local(tz)|date("l, d E Y") }}, {{ course_class.starts_at_local(tz)|time("H:i") }}–{{ course_class.ends_at_local(tz)|time("H:i") }}</td>
         </tr>
         <tr>
           <td>{% trans %}Where{% endtrans %}:</td>

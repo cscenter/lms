@@ -10,6 +10,7 @@
 {% set user = request.user %}
 
 {% block content %}
+{%- set tz = request.user.time_zone -%}
 <div class="container" id="course-detail-page">
     <div class="row">
         <div class="col-xs-9">
@@ -88,7 +89,7 @@
                         </thead>
                         {% for course_class in tab.tab_panel.context['items'] %}
                         <tr>
-                            <td>{{ course_class.date|date("d E") }}<br><span class="text-muted">{{ course_class.starts_at|time("H:i") }}–{{ course_class.ends_at|time("H:i") }}</span></td>
+                            <td>{{ course_class.starts_at_local(tz)|date("d E") }}<br><span class="text-muted">{{ course_class.starts_at_local(tz)|time("H:i") }}–{{ course_class.ends_at_local(tz)|time("H:i") }}</span></td>
                           <td>
                             <a href="{{ course_class.get_absolute_url() }}">
                               {{ course_class.name }}</a><span class="text-muted">, {% if course_class.type == 'lecture'%}{% trans %}Lecture{% endtrans %}{% else %}{% trans %}Seminar{% endtrans %}</span>{% endif %}

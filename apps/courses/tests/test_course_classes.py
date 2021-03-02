@@ -4,6 +4,7 @@ import re
 
 import factory
 import pytest
+import pytz
 from bs4 import BeautifulSoup
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -23,7 +24,54 @@ from courses.tests.factories import CourseClassFactory, CourseFactory, \
 from learning.models import StudentGroup
 from learning.services import EnrollmentService, StudentGroupService
 from learning.tests.factories import EnrollmentFactory
-from users.tests.factories import TeacherFactory, StudentProfileFactory
+from users.tests.factories import TeacherFactory, StudentProfileFactory, CuratorFactory
+
+
+@pytest.mark.django_db
+def test_manager_for_student(settings):
+    new_branch = BranchFactory()
+    student_profile = StudentProfileFactory()
+    student = student_profile.user
+    teacher = TeacherFactory()
+    course = CourseFactory(main_branch=student_profile.branch,
+                           branches=[new_branch])
+    # Active enrollment
+    enrollment = EnrollmentService.enroll(student_profile, course)
+    enrollment.student_group = StudentGroupService.resolve(course, student,
+                                                           settings.SITE_ID)
+    enrollment.save()
+    assert CourseClass.objects.for_student(student).count() == 0
+    assert CourseClass.objects.for_student(teacher).count() == 0
+    cc = CourseClassFactory(course=course)
+    assert CourseClass.objects.for_student(student).count() == 1
+    assert CourseClass.objects.for_student(teacher).count() == 0
+    # Student left the course
+    EnrollmentService.leave(enrollment)
+    assert CourseClass.objects.for_student(student).count() == 0
+    assert CourseClass.objects.for_student(teacher).count() == 0
+    # Course class is visible to main course branch students
+    cc = CourseClassFactory(course=course,
+                            restricted_to=[enrollment.student_group])
+    EnrollmentService.enroll(student_profile, course)
+    assert CourseClass.objects.for_student(student).count() == 2
+    assert CourseClass.objects.for_student(teacher).count() == 0
+    # This one is hidden to main branch
+    new_branch_group = StudentGroup.objects.filter(course=course,
+                                                   branch_id=new_branch).first()
+    assert new_branch_group is not None
+    cc = CourseClassFactory(course=course,
+                            restricted_to=[new_branch_group])
+    assert CourseClass.objects.for_student(student).count() == 2
+    assert CourseClass.objects.for_student(teacher).count() == 0
+    # Student is not enrolled in the course
+    course2 = CourseFactory(main_branch=student_profile.branch)
+    CourseClassFactory(course=course2)
+    assert CourseClass.objects.for_student(student).count() == 2
+    EnrollmentFactory(student=student, course=course2)
+    assert CourseClass.objects.for_student(student).count() == 3
+    CourseClassFactory(course=course,
+                       restricted_to=[enrollment.student_group, new_branch_group])
+    assert CourseClass.objects.for_student(student).count() == 4
 
 
 @pytest.mark.django_db
@@ -290,47 +338,19 @@ def test_course_class_form_available(client, curator, settings):
 
 
 @pytest.mark.django_db
-def test_manager_for_student(settings):
-    new_branch = BranchFactory()
-    student_profile = StudentProfileFactory()
-    student = student_profile.user
-    teacher = TeacherFactory()
-    course = CourseFactory(main_branch=student_profile.branch,
-                           branches=[new_branch])
-    # Active enrollment
-    enrollment = EnrollmentService.enroll(student_profile, course)
-    enrollment.student_group = StudentGroupService.resolve(course, student,
-                                                           settings.SITE_ID)
-    enrollment.save()
-    assert CourseClass.objects.for_student(student).count() == 0
-    assert CourseClass.objects.for_student(teacher).count() == 0
-    cc = CourseClassFactory(course=course)
-    assert CourseClass.objects.for_student(student).count() == 1
-    assert CourseClass.objects.for_student(teacher).count() == 0
-    # Student left the course
-    EnrollmentService.leave(enrollment)
-    assert CourseClass.objects.for_student(student).count() == 0
-    assert CourseClass.objects.for_student(teacher).count() == 0
-    # Course class is visible to main course branch students
-    cc = CourseClassFactory(course=course,
-                            restricted_to=[enrollment.student_group])
-    EnrollmentService.enroll(student_profile, course)
-    assert CourseClass.objects.for_student(student).count() == 2
-    assert CourseClass.objects.for_student(teacher).count() == 0
-    # This one is hidden to main branch
-    new_branch_group = StudentGroup.objects.filter(course=course,
-                                                   branch_id=new_branch).first()
-    assert new_branch_group is not None
-    cc = CourseClassFactory(course=course,
-                            restricted_to=[new_branch_group])
-    assert CourseClass.objects.for_student(student).count() == 2
-    assert CourseClass.objects.for_student(teacher).count() == 0
-    # Student is not enrolled in the course
-    course2 = CourseFactory(main_branch=student_profile.branch)
-    CourseClassFactory(course=course2)
-    assert CourseClass.objects.for_student(student).count() == 2
-    EnrollmentFactory(student=student, course=course2)
-    assert CourseClass.objects.for_student(student).count() == 3
-    CourseClassFactory(course=course,
-                       restricted_to=[enrollment.student_group, new_branch_group])
-    assert CourseClass.objects.for_student(student).count() == 4
+def test_course_class_detail_view_timezone(client, settings):
+    settings.LANGUAGE_CODE = 'ru'
+    curator = CuratorFactory(time_zone=pytz.timezone('Europe/Moscow'))
+    client.login(curator)
+    course_class = CourseClassFactory(
+        date=datetime.date(year=2020, month=1, day=1),
+        starts_at=datetime.time(hour=20, minute=0),
+        ends_at=datetime.time(hour=23, minute=0),
+        time_zone=pytz.timezone('Europe/Moscow'))
+    response = client.get(course_class.get_absolute_url())
+    assert smart_bytes("01 января 2020, 20:00–23:00") in response.content
+    curator.time_zone = pytz.timezone('Asia/Novosibirsk')
+    curator.save()
+    response = client.get(course_class.get_absolute_url())
+    assert smart_bytes("02 января 2020, 00:00–03:00") in response.content
+

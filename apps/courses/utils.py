@@ -204,7 +204,8 @@ class MonthPeriod:
 def extended_month_date_range(month_period: MonthPeriod,
                               week_start_on=MONDAY_WEEKDAY):
     """
-    Complete weeks for the given month and return new date range.
+    Returns date range started from the first day of the first week
+    of the month and ended by the last day of the last week of the month.
     """
     start_date = get_start_of_week(month_period.starts, week_start_on)
     end_date = get_end_of_week(month_period.ends, week_start_on)
