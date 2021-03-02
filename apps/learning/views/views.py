@@ -32,6 +32,7 @@ __all__ = (
     'AssignmentSubmissionBaseView', 'EventDetailView',
     'AssignmentAttachmentDownloadView', 'CourseNewsNotificationUpdate',
     'CourseStudentsView', 'AssignmentCommentAttachmentDownloadView',
+    'AssignmentCommentUpsertView', 'AssignmentSubmissionUpsertView',
 )
 
 
