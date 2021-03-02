@@ -47,7 +47,7 @@ class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
         student = self.request.user
         student_profile = student.get_student_profile(self.request.site)
         branches = [student_profile.branch_id]
-        start_date, end_date = extended_month_date_range(month_period)
+        start_date, end_date = extended_month_date_range(month_period, expand=1)
         return get_calendar_events(branch_list=branches, start_date=start_date,
                                    end_date=end_date)
 
@@ -61,7 +61,7 @@ class CalendarPersonalView(CalendarFullView):
     template_name = "lms/courses/calendar.html"
 
     def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
-        start_date, end_date = extended_month_date_range(month_period)
+        start_date, end_date = extended_month_date_range(month_period, expand=1)
         student_profile = get_student_profile(self.request.user,
                                               self.request.site)
         if not student_profile:

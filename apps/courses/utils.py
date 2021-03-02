@@ -176,13 +176,17 @@ def execution_time_string(value: datetime.timedelta):
 
 
 def extended_month_date_range(month_period: MonthPeriod,
-                              week_start_on=MONDAY_WEEKDAY):
+                              week_start_on=MONDAY_WEEKDAY,
+                              expand: int = 0):
     """
-    Returns date range started from the first day of the first week
-    of the month and ended by the last day of the last week of the month.
+    Returns date range (the first day of the first week of the month,
+    the last day of the last week of the month) expanded by *expand* days.
     """
     start_date = get_start_of_week(month_period.starts, week_start_on)
     end_date = get_end_of_week(month_period.ends, week_start_on)
+    if expand:
+        start_date -= datetime.timedelta(days=expand)
+        end_date += datetime.timedelta(days=expand)
     return start_date, end_date
 
 

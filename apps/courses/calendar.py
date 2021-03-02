@@ -161,8 +161,10 @@ class EventsCalendar(ABC):
 
     def _weeks(self, month_period: MonthPeriod) -> List[CalendarWeek]:
         """
-        Returns a list of `CalendarWeek` for one month. It contains dates
-        outside the specified month since it iterates over complete weeks.
+        Returns a list of complete `CalendarWeek`s for the requested month.
+
+        Note:
+            Complete week could contain dates outside the specified month.
         """
         weeks = []
         dates = self._cal.itermonthdates(month_period.year, month_period.month)
@@ -176,6 +178,7 @@ class EventsCalendar(ABC):
                                       days=week_days))
         return weeks
 
+    # TODO: return full range instead with an empty event list
     def _days(self, start: datetime.date,
               end: datetime.date) -> List[CalendarDay]:
         """

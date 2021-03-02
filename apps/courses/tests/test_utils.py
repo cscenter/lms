@@ -3,10 +3,10 @@ import datetime
 import pytest
 import pytz
 
-from courses.constants import SemesterTypes
+from courses.constants import SemesterTypes, MONDAY_WEEKDAY, SUNDAY_WEEKDAY
 from courses.utils import get_term_index, get_term_by_index, \
     get_current_term_pair, TermPair, TermIndexError, \
-    get_start_of_week, get_end_of_week, MonthPeriod
+    get_start_of_week, get_end_of_week, MonthPeriod, extended_month_date_range
 
 
 def test_get_term_index(mocker):
@@ -84,3 +84,16 @@ def test_month_period():
     assert month.starts == datetime.date(2019, 1, 1)
     assert month.ends == datetime.date(2019, 1, 31)
     assert MonthPeriod(2020, 2).ends == datetime.date(2020, 2, 29)
+
+
+def test_extended_month_date_range():
+    month = MonthPeriod(2019, 2)
+    start, end = extended_month_date_range(month, week_start_on=MONDAY_WEEKDAY)
+    assert start == datetime.date(2019, 1, 28)
+    assert end == datetime.date(2019, 3, 3)
+    start, end = extended_month_date_range(month, week_start_on=SUNDAY_WEEKDAY)
+    assert start == datetime.date(2019, 1, 27)
+    assert end == datetime.date(2019, 3, 2)
+    start, end = extended_month_date_range(month, week_start_on=MONDAY_WEEKDAY, expand=1)
+    assert start == datetime.date(2019, 1, 27)
+    assert end == datetime.date(2019, 3, 4)

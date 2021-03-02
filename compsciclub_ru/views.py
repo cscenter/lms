@@ -92,7 +92,7 @@ class CalendarClubScheduleView(MonthEventsCalendarView):
     template_name = "lms/courses/calendar.html"
 
     def get_events(self, month_period: MonthPeriod, **kwargs):
-        start, end = extended_month_date_range(month_period)
+        start, end = extended_month_date_range(month_period, expand=1)
         fs = [Q(date__range=[start, end]),
               ~Q(course__semester__type=SemesterTypes.SUMMER)]
         public_url_builder = partial(course_class_public_url,

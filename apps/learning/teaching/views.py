@@ -34,8 +34,7 @@ from learning.models import AssignmentComment, StudentAssignment, Enrollment, \
     AssignmentSubmissionTypes
 from learning.permissions import CreateAssignmentComment, ViewStudentAssignment, \
     EditOwnStudentAssignment, ViewStudentAssignmentList
-from learning.services import get_teacher_classes, AssignmentService, \
-    StudentGroupService
+from learning.services import get_teacher_classes, AssignmentService
 from learning.teaching.filters import AssignmentStudentsFilter
 from learning.utils import humanize_duration
 from learning.views import AssignmentSubmissionBaseView
@@ -234,7 +233,7 @@ class TimetableView(TeacherOnlyMixin, MonthEventsCalendarView):
     template_name = "learning/teaching/timetable.html"
 
     def get_events(self, month_period: MonthPeriod, **kwargs):
-        start, end = extended_month_date_range(month_period)
+        start, end = extended_month_date_range(month_period, expand=1)
         in_range = [Q(date__range=[start, end])]
         cs = get_teacher_classes(self.request.user, in_range, with_venue=True)
         for c in cs:
@@ -247,7 +246,7 @@ class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):
     authorized teacher has taught.
     """
     def get_events(self, month_period: MonthPeriod, **kwargs):
-        start_date, end_date = extended_month_date_range(month_period)
+        start_date, end_date = extended_month_date_range(month_period, expand=1)
         branches = get_teacher_branches(self.request.user, start_date, end_date)
         return get_calendar_events(branch_list=branches, start_date=start_date,
                                    end_date=end_date)
@@ -262,7 +261,7 @@ class CalendarPersonalView(CalendarFullView):
     template_name = "lms/courses/calendar.html"
 
     def get_events(self, month_period: MonthPeriod, **kwargs):
-        start_date, end_date = extended_month_date_range(month_period)
+        start_date, end_date = extended_month_date_range(month_period, expand=1)
         return get_teacher_calendar_events(user=self.request.user,
                                            start_date=start_date,
                                            end_date=end_date)

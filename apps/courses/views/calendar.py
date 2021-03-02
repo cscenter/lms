@@ -25,7 +25,6 @@ class MonthEventsCalendarView(generic.TemplateView):
         year = query_params.validated_data.get('year', today_local.year)
         month = query_params.validated_data.get('month', today_local.month)
         month_period = MonthPeriod(year, month)
-
         events = self.get_events(month_period)
         calendar = MonthFullWeeksEventsCalendar(month_period, events)
         context = {
