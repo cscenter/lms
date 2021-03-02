@@ -866,8 +866,6 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
         Note:
             Ambiguous dates will be resolved with `is_dst=False`
         """
-        if not tz:
-            tz = self.time_zone
         # Make sure dt_naive is not ambiguous
         dt_naive = datetime.combine(self.date, self.starts_at)
         dt_aware: datetime = self.time_zone.localize(dt_naive)
@@ -883,8 +881,6 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
         Note:
             Ambiguous dates will be resolved with `is_dst=False`
         """
-        if not tz:
-            tz = self.time_zone
         # Make sure dt_naive is not ambiguous
         dt_naive = datetime.combine(self.date, self.ends_at)
         dt_aware: datetime = self.time_zone.localize(dt_naive)

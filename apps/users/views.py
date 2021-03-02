@@ -4,6 +4,7 @@ import json
 import os
 from collections import OrderedDict
 
+from babel.dates import get_timezone_gmt
 from django.apps import apps
 from django.conf import settings
 from django.contrib import auth
@@ -19,6 +20,7 @@ from django.utils.translation import gettext_lazy as _
 
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
+from core.timezone.utils import get_now_utc, get_gmt
 from core.views import ProtectedFormMixin
 from courses.models import Course, Semester, CourseTeacher
 from files.handlers import MemoryImageUploadHandler, \
@@ -97,6 +99,8 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
         context = super().get_context_data(**kwargs)
         u = self.request.user
         profile_user = context[self.context_object_name]
+        tz = profile_user.time_zone
+        context['time_zone'] = f"{get_gmt(tz)} {tz.zone}"
         icalendars = []
         if profile_user.pk == u.pk:
             ics_url_classes = reverse('user_ical_classes',

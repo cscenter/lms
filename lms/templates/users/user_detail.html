@@ -424,29 +424,25 @@
                     {% endif %}
                 </ul>
 
-                {% if icalendars %}
-                    <table class="table calc table-condensed table-striped">
-                        <thead>
-                        <tr>
-                            <th width="25%">{% trans ".iCal calendar" %}</th>
-                            <th>{% trans "Link" %}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            {% for name, url in icalendars %}
-                                <tr>
-                                    <td>{{ name }}:</td>
-                                    <td><input type="text" value="{{ url }}" disabled="disabled" /></td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% endif %}
-
                 {% if user.is_authenticated %}
                     <div class="accounts">
-                        <h4>{% trans "Social accounts" %}</h4>
                         <table class="table table-condensed table-striped">
+                            {% if profile_user.pk == user.pk or user.is_curator %}
+                            <tr>
+                                <td>{% trans "Time Zone" %}</td>
+                                <td>{{ time_zone }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if icalendars %}
+                              <tr>
+                                  <td>.iCal-календари</td>
+                                  <td>
+                                    {% for name, url in icalendars %}
+                                      <a target="_blank" href="{{ url }}">{{ name }}</a>{% if not forloop.last %}&nbsp;&nbsp;{% endif %}
+                                    {% endfor %}
+                                  </td>
+                              </tr>
+                            {% endif %}
                             <tr>
                                 <td>Yandex</td>
                                 <td>{{ profile_user.yandex_login|default:"—" }}</td>
