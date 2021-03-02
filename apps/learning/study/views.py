@@ -58,7 +58,7 @@ class CalendarPersonalView(CalendarFullView):
     on which authenticated student enrolled.
     """
     calendar_type = "student"
-    template_name = "learning/calendar.html"
+    template_name = "lms/courses/calendar.html"
 
     def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
         start_date, end_date = extended_month_date_range(month_period)

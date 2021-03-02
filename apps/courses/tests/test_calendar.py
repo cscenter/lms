@@ -41,7 +41,7 @@ def test_month_events_calendar(client, settings):
     assert calendar.prev_month == datetime.date(year=2018, month=1, day=1)
     assert calendar.month_label == 'Февраль 2018'
     week_index = 0  # week index of the month
-    events = calendar.weeks()[week_index].days[class_date.weekday()].events
+    events = calendar.weeks[week_index].days[class_date.weekday()].events
     assert len(events) == 5
     # Make sure events are sorted by `event.start_at`
     current_event = events[0]

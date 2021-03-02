@@ -88,7 +88,7 @@ class AsyncEmailRegistrationView(RegistrationView):
 class CalendarClubScheduleView(MonthEventsCalendarView):
     """Shows classes from public courses."""
     calendar_type = "public_full"
-    template_name = "learning/calendar.html"
+    template_name = "lms/courses/calendar.html"
 
     def get_events(self, month_period: MonthPeriod, **kwargs):
         start, end = extended_month_date_range(month_period)

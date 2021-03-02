@@ -14,7 +14,7 @@ from courses.utils import MonthPeriod
 
 class MonthEventsCalendarView(generic.TemplateView):
     calendar_type = "full"
-    template_name = "courses/calendar.html"
+    template_name = "lms/courses/calendar.html"
 
     def get(self, request, *args, **kwargs):
         """Validates GET-parameters, set defaults if no values provided."""

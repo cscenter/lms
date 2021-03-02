@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% load i18n %}
+{% extends "lms/layouts/v1_base.html" %}
 
 {% block content %}
 <div class="container" id="calendar-container">
@@ -13,10 +12,10 @@
         </div>
         {% if calendar_type != 'full' and calendar_type != 'public_full' %}
           <div class="btn-group">
-            <a href="{% if calendar_type == 'teacher' %}{% url 'teaching:timetable' %}{% else %}{% url 'study:timetable' %}{% endif %}"
+            <a href="{% if calendar_type == 'teacher' %}{{ url('teaching:timetable') }}{% else %}{{ url('study:timetable') }}{% endif %}"
                role="button"
-               class="btn btn-default">{% trans 'List' %}</a>
-            <button class="btn btn-default active">{% trans 'Calendar' %}</button>
+               class="btn btn-default">{% trans %}List{% endtrans %}</a>
+            <button class="btn btn-default active">{% trans %}Calendar{% endtrans %}</button>
           </div>
         {% endif %}
       </div>
@@ -39,11 +38,11 @@
         <tr id="week_{{week.iso_number}}">
           {% for day in week.days %}
           <td class="{% if day.date.month == calendar.month %}in-semester{% else %}not-in-semester{% endif %}{% if day.date == today %} today{% endif %}">
-            {% if forloop.first %}
+            {% if loop.first %}
                 <div class="week-num-container">
                   <div class="week-num">
                     {% if calendar_type != 'public_full' %}
-                      <a href="{% if calendar_type == 'teacher' %}{% url 'teaching:timetable' %}{% else %}{% url 'study:timetable' %}{% endif %}?year={{ calendar.year }}&week={{ week.iso_number }}">{{ week.iso_number }}</a>
+                      <a href="{% if calendar_type == 'teacher' %}{{ url('teaching:timetable') }}{% else %}{{ url('study:timetable') }}{% endif %}?year={{ calendar.year }}&week={{ week.iso_number }}">{{ week.iso_number }}</a>
                     {% else %}
                       {{ week.iso_number }}
                     {% endif %}

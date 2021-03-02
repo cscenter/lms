@@ -42,7 +42,7 @@ def test_teacher_calendar(client):
     other_teacher = TeacherFactory(branch=branch_spb)
     client.login(teacher_spb)
     response = client.get(url)
-    classes = flatten_calendar_month_events(response.context['calendar'])
+    classes = flatten_calendar_month_events(response.context_data['calendar'])
     assert len(classes) == 0
     this_month_date = (datetime.datetime.now()
                        .replace(day=15, tzinfo=timezone.utc))
@@ -59,17 +59,17 @@ def test_teacher_calendar(client):
                                        venue=location)
     # teacher should see only his own classes and non-course events
     resp = client.get(url)
-    classes = flatten_calendar_month_events(resp.context['calendar'])
+    classes = flatten_calendar_month_events(resp.context_data['calendar'])
     assert set(own_classes + events) == set(classes)
     # No events on the next month
     next_month_qstr = (
         "?year={0}&month={1}"
-        .format(resp.context['calendar'].next_month.year,
-                str(resp.context['calendar'].next_month.month)))
+        .format(resp.context_data['calendar'].next_month.year,
+                str(resp.context_data['calendar'].next_month.month)))
     next_month_url = url + next_month_qstr
     assert smart_bytes(next_month_qstr) in resp.content
     classes = flatten_calendar_month_events(
-        client.get(next_month_url).context['calendar'])
+        client.get(next_month_url).context_data['calendar'])
     assert classes == []
     # Add some and test
     next_month_date = this_month_date + relativedelta(months=1)
@@ -78,11 +78,11 @@ def test_teacher_calendar(client):
         .create_batch(2, course__teachers=[teacher_spb],
                       date=next_month_date))
     classes = flatten_calendar_month_events(
-        client.get(next_month_url).context['calendar'])
+        client.get(next_month_url).context_data['calendar'])
     assert set(next_month_classes) == set(classes)
     # On a full calendar all classes should be shown
     response = client.get(reverse('teaching:calendar_full'))
-    classes = flatten_calendar_month_events(response.context['calendar'])
+    classes = flatten_calendar_month_events(response.context_data['calendar'])
     assert set(own_classes + others_classes + events) == set(classes)
 
 
@@ -104,7 +104,7 @@ def test_student_personal_calendar_view(client):
                                  student_profile=student_profile_spb,
                                  student=student_profile_spb.user)
     classes = flatten_calendar_month_events(
-        client.get(calendar_url).context['calendar'])
+        client.get(calendar_url).context_data['calendar'])
     assert len(classes) == 0
     this_month_date = (datetime.datetime.now()
                        .replace(day=15,
@@ -113,27 +113,27 @@ def test_student_personal_calendar_view(client):
     others_classes = CourseClassFactory.create_batch(5, course=course_other, date=this_month_date)
     # student should see only his own classes
     response = client.get(calendar_url)
-    classes = flatten_calendar_month_events(response.context['calendar'])
+    classes = flatten_calendar_month_events(response.context_data['calendar'])
     assert set(own_classes) == set(classes)
     # but in full calendar all classes should be shown
     classes = flatten_calendar_month_events(
-        client.get(reverse('study:calendar_full')).context['calendar'])
+        client.get(reverse('study:calendar_full')).context_data['calendar'])
     assert set(own_classes + others_classes) == set(classes)
     next_month_qstr = (
         "?year={0}&month={1}"
-            .format(response.context['calendar'].next_month.year,
-                    str(response.context['calendar'].next_month.month)))
+            .format(response.context_data['calendar'].next_month.year,
+                    str(response.context_data['calendar'].next_month.month)))
     next_month_url = calendar_url + next_month_qstr
     assert smart_bytes(next_month_qstr) in response.content
     classes = flatten_calendar_month_events(
-        client.get(next_month_url).context['calendar'])
+        client.get(next_month_url).context_data['calendar'])
     assert len(classes) == 0
     next_month_date = this_month_date + relativedelta(months=1)
     next_month_classes = (
         CourseClassFactory
             .create_batch(2, course=course, date=next_month_date))
     classes = flatten_calendar_month_events(
-        client.get(next_month_url).context['calendar'])
+        client.get(next_month_url).context_data['calendar'])
     assert set(next_month_classes) == set(classes)
     location = LocationFactory(city_id=student_profile_spb.branch.city_id)
     events = EventFactory.create_batch(2, date=this_month_date, venue=location)
@@ -166,10 +166,10 @@ def test_correspondence_courses_in_a_full_calendar(client):
     CourseClassFactory.create_batch(
             3, course=course, date=this_month_date)
     classes = flatten_calendar_month_events(
-        client.get(reverse("study:calendar_full")).context['calendar'])
+        client.get(reverse("study:calendar_full")).context_data['calendar'])
     assert len(classes) == 3
     teacher = TeacherFactory(branch=branch_spb)
     client.login(teacher)
     classes = flatten_calendar_month_events(
-        client.get(reverse("teaching:calendar_full")).context['calendar'])
+        client.get(reverse("teaching:calendar_full")).context_data['calendar'])
     assert len(classes) == 3

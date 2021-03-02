@@ -152,6 +152,7 @@ class EventsCalendar(ABC):
         for event in events:
             self._date_to_events[event.date].append(event)
 
+    @property
     def week_titles(self):
         return [_(WEEKDAY_TITLES[n]) for n in self._cal.iterweekdays()]
 
@@ -191,7 +192,7 @@ class EventsCalendar(ABC):
 # TODO: more generic class DateRangeEventsCalendar? No need right now
 class MonthFullWeeksEventsCalendar(EventsCalendar):
     """
-    This class extends all non-complete weeks of the month, `.weeks()` or
+    This class extends all non-complete weeks of the month, `.weeks` or
     `.days()` could return days out of the target month.
     """
     def __init__(self, month_period: MonthPeriod,
@@ -224,6 +225,7 @@ class MonthFullWeeksEventsCalendar(EventsCalendar):
     def year(self):
         return self.month_period.year
 
+    @property
     def weeks(self) -> List[CalendarWeek]:
         """
         Returns a list of the weeks in the month as full weeks.
