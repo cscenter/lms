@@ -338,9 +338,8 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         _("Workplace"),
         max_length=200,
         blank=True)
-    # FIXME: remove null=True after populating field with a real value
     calendar_key = models.CharField(unique=True, max_length=DIGEST_MAX_LENGTH,
-                                    blank=True, null=True)
+                                    blank=True)
 
     objects = CustomUserManager()
 
