@@ -15,7 +15,7 @@ from users.tests.factories import TeacherFactory, StudentFactory, \
 
 
 def flatten_events(calendar: WeekEventsCalendar):
-    return [calendar_event.event for day in calendar.days()
+    return [calendar_event for day in calendar.days()
             for calendar_event in day.events]
 
 

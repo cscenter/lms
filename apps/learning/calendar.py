@@ -1,20 +1,12 @@
 from typing import List, Iterator
 
-import attr
 from django.db.models import Q
 
-from courses.calendar import CalendarEventW
+from courses.calendar import CalendarEvent, CalendarEventFactory
 from courses.services import get_teacher_branches
 from learning.services import get_student_classes, get_teacher_classes, \
     get_classes, get_study_events
 from users.models import StudentProfile
-
-
-@attr.s
-class LearningCalendarEvent(CalendarEventW):
-    @property
-    def name(self):
-        return self.event.name
 
 
 def _to_range_q_filter(start_date, end_date) -> List[Q]:
@@ -28,25 +20,25 @@ def _to_range_q_filter(start_date, end_date) -> List[Q]:
 
 # FIXME: get_student_events  + CalendarEvent.build(instance) ?
 def get_student_calendar_events(*, student_profile: StudentProfile,
-                                start_date, end_date) -> Iterator[CalendarEventW]:
+                                start_date, end_date) -> Iterator[CalendarEvent]:
     period_filter = _to_range_q_filter(start_date, end_date)
     for c in get_student_classes(student_profile.user, period_filter):
-        yield CalendarEventW(c)
+        yield CalendarEventFactory.create(c)
     branch_list = [student_profile.branch_id]
     event_filters = [Q(branch__in=branch_list), *period_filter]
     for e in get_study_events(event_filters):
-        yield LearningCalendarEvent(e)
+        yield CalendarEventFactory.create(e)
 
 
 def get_teacher_calendar_events(*, user, start_date,
-                                end_date) -> Iterator[CalendarEventW]:
+                                end_date) -> Iterator[CalendarEvent]:
     branch_list = get_teacher_branches(user, start_date, end_date)
     period_filter = _to_range_q_filter(start_date, end_date)
     for c in get_teacher_classes(user, period_filter):
-        yield CalendarEventW(c)
+        yield CalendarEventFactory.create(c)
     event_filters = [Q(branch__in=branch_list), *period_filter]
     for e in get_study_events(event_filters):
-        yield LearningCalendarEvent(e)
+        yield CalendarEventFactory.create(e)
 
 
 def get_calendar_events(*, branch_list, start_date, end_date):
@@ -55,7 +47,7 @@ def get_calendar_events(*, branch_list, start_date, end_date):
     """
     period_filter = _to_range_q_filter(start_date, end_date)
     for c in get_classes(branch_list, period_filter):
-        yield CalendarEventW(c)
+        yield CalendarEventFactory.create(c)
     event_filters = [Q(branch__in=branch_list), *period_filter]
     for e in get_study_events(event_filters):
-        yield LearningCalendarEvent(e)
+        yield CalendarEventFactory.create(e)

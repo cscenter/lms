@@ -11,7 +11,7 @@ from vanilla import TemplateView
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.urls import reverse
-from courses.calendar import CalendarEventW
+from courses.calendar import CalendarEvent, CalendarEventFactory
 from courses.constants import SemesterTypes
 from courses.models import Semester, Course, CourseTeacher
 from courses.utils import get_current_term_pair, MonthPeriod, \
@@ -76,12 +76,12 @@ class TimetableView(PermissionRequiredMixin, WeekEventsView):
     template_name = "learning/study/timetable.html"
     permission_required = "study.view_schedule"
 
-    def get_events(self, iso_year, iso_week) -> Iterable[CalendarEventW]:
+    def get_events(self, iso_year, iso_week) -> Iterable[CalendarEvent]:
         w = Week(iso_year, iso_week)
         in_range = [Q(date__range=[w.monday(), w.sunday()])]
         cs = get_student_classes(self.request.user, in_range, with_venue=True)
         for c in cs:
-            yield CalendarEventW(c)
+            yield CalendarEventFactory.create(c)
 
 
 class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):

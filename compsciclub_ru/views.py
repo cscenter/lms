@@ -2,13 +2,11 @@ import datetime
 from functools import partial
 
 import pytz
-from django.contrib.auth import get_user_model
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import caches
 from django.db import transaction
 from django.db.models import Prefetch, Q
-from django.http import Http404
 from django.utils import timezone
 from django.utils.timezone import now
 from django.views import generic
@@ -19,10 +17,11 @@ from vanilla import DetailView
 
 import core.utils
 from auth.tasks import send_activation_email, ActivationEmailContext
+from compscicenter_ru.utils import course_public_url, course_class_public_url
 from core.exceptions import Redirect
 from core.models import Branch
 from core.urls import reverse
-from courses.calendar import CalendarEventW, CalendarEvent
+from courses.calendar import CalendarEventFactory
 from courses.constants import SemesterTypes, TeacherRoles
 from courses.models import Course, Semester, CourseClass, CourseTeacher, \
     MetaCourse
@@ -30,13 +29,12 @@ from courses.services import group_teachers
 from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
 from courses.utils import get_current_term_pair, MonthPeriod, \
     extended_month_date_range
-from compscicenter_ru.utils import course_public_url, course_class_public_url
 from courses.views.calendar import MonthEventsCalendarView
 from courses.views.mixins import CoursePublicURLParamsMixin
 from learning.gallery.models import Image
 from learning.services import get_classes, create_student_profile
 from users.constants import Roles
-from users.models import User, StudentProfile, StudentTypes
+from users.models import User, StudentTypes
 
 _TIME_ZONE = pytz.timezone('Europe/Moscow')
 
@@ -98,7 +96,7 @@ class CalendarClubScheduleView(MonthEventsCalendarView):
         public_url_builder = partial(course_class_public_url,
                                      default_branch_code=self.request.branch.code)
         for c in get_classes(branch_list=[self.request.branch], filters=fs):
-            yield CalendarEvent.from_course_class(
+            yield CalendarEventFactory.create(
                 c, url_builder=public_url_builder)
 
 

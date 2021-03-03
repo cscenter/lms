@@ -8,11 +8,12 @@ from django.utils.encoding import smart_bytes
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import LocationFactory, BranchFactory
 from core.urls import reverse
+from courses.calendar import CalendarEventFactory
 from courses.tests.factories import CourseFactory, CourseClassFactory
 from learning.settings import Branches
 from learning.tests.factories import EventFactory, \
     EnrollmentFactory, GraduateFactory
-from learning.tests.utils import flatten_calendar_month_events
+from learning.tests.utils import flatten_calendar_month_events, compare_calendar_events_with_models
 from users.tests.factories import StudentFactory, TeacherFactory, \
     StudentProfileFactory
 
@@ -49,18 +50,18 @@ def test_teacher_calendar(client):
     own_classes = list(
         CourseClassFactory
         .create_batch(3, course__teachers=[teacher_spb],
-                      date=this_month_date))
+                      date=this_month_date.date()))
     others_classes = list(
         CourseClassFactory
         .create_batch(5, course__teachers=[other_teacher],
-                      date=this_month_date))
+                      date=this_month_date.date()))
     location = LocationFactory(city_id=teacher_spb.branch.city_id)
-    events = EventFactory.create_batch(2, date=this_month_date,
+    events = EventFactory.create_batch(2, date=this_month_date.date(),
                                        venue=location)
     # teacher should see only his own classes and non-course events
     resp = client.get(url)
-    classes = flatten_calendar_month_events(resp.context_data['calendar'])
-    assert set(own_classes + events) == set(classes)
+    calendar_events = set(flatten_calendar_month_events(resp.context_data['calendar']))
+    compare_calendar_events_with_models(calendar_events, own_classes + events)
     # No events on the next month
     next_month_qstr = (
         "?year={0}&month={1}"
@@ -76,14 +77,14 @@ def test_teacher_calendar(client):
     next_month_classes = (
         CourseClassFactory
         .create_batch(2, course__teachers=[teacher_spb],
-                      date=next_month_date))
+                      date=next_month_date.date()))
     classes = flatten_calendar_month_events(
         client.get(next_month_url).context_data['calendar'])
-    assert set(next_month_classes) == set(classes)
+    assert set(CalendarEventFactory.create(x) for x in next_month_classes) == set(classes)
     # On a full calendar all classes should be shown
     response = client.get(reverse('teaching:calendar_full'))
-    classes = flatten_calendar_month_events(response.context_data['calendar'])
-    assert set(own_classes + others_classes + events) == set(classes)
+    calendar_events = set(flatten_calendar_month_events(response.context_data['calendar']))
+    compare_calendar_events_with_models(calendar_events, own_classes + others_classes + events)
 
 
 @pytest.mark.django_db
@@ -108,17 +109,16 @@ def test_student_personal_calendar_view(client):
     assert len(classes) == 0
     this_month_date = (datetime.datetime.now()
                        .replace(day=15,
-                                tzinfo=timezone.utc))
+                                tzinfo=timezone.utc)).date()
     own_classes = CourseClassFactory.create_batch(3, course=course, date=this_month_date)
     others_classes = CourseClassFactory.create_batch(5, course=course_other, date=this_month_date)
     # student should see only his own classes
     response = client.get(calendar_url)
-    classes = flatten_calendar_month_events(response.context_data['calendar'])
-    assert set(own_classes) == set(classes)
+    calendar_events = set(flatten_calendar_month_events(response.context_data['calendar']))
+    compare_calendar_events_with_models(calendar_events, own_classes)
     # but in full calendar all classes should be shown
-    classes = flatten_calendar_month_events(
-        client.get(reverse('study:calendar_full')).context_data['calendar'])
-    assert set(own_classes + others_classes) == set(classes)
+    calendar_events = set(flatten_calendar_month_events(client.get(reverse('study:calendar_full')).context_data['calendar']))
+    compare_calendar_events_with_models(calendar_events, own_classes + others_classes)
     next_month_qstr = (
         "?year={0}&month={1}"
             .format(response.context_data['calendar'].next_month.year,
@@ -132,9 +132,9 @@ def test_student_personal_calendar_view(client):
     next_month_classes = (
         CourseClassFactory
             .create_batch(2, course=course, date=next_month_date))
-    classes = flatten_calendar_month_events(
-        client.get(next_month_url).context_data['calendar'])
-    assert set(next_month_classes) == set(classes)
+    calendar_events = set(flatten_calendar_month_events(
+        client.get(next_month_url).context_data['calendar']))
+    compare_calendar_events_with_models(calendar_events, next_month_classes)
     location = LocationFactory(city_id=student_profile_spb.branch.city_id)
     events = EventFactory.create_batch(2, date=this_month_date, venue=location)
     response = client.get(calendar_url)

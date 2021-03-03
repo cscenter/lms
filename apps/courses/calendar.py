@@ -21,60 +21,24 @@ from courses.constants import MONDAY_WEEKDAY, WEEKDAY_TITLES
 from courses.models import CourseClass
 from courses.utils import MonthPeriod, extended_month_date_range
 
-__all__ = ('EventsCalendar', 'CalendarEventW', 'CalendarEvent',
+__all__ = ('EventsCalendar', 'CalendarEvent', 'CalendarEventFactory',
            'MonthFullWeeksEventsCalendar',
            'WeekEventsCalendar', 'CalendarQueryParams')
 
+from learning.models import Event
 
 ISOWeekNumber = NewType('ISOWeekNumber', int)
 
 
-# FIXME: replace with CalendarEvent
-@attr.s
-class CalendarEventW:
-    """
-    Wrapper for course events. Supports course classes, non-course events
-    """
-    event = attr.ib()
-
-    @property
-    def date(self):
-        return self.event.date
-
-    @property
-    def type(self):
-        return self.event.type
-
-    @property
-    def start(self):
-        return time_format(self.event.starts_at, "H:i")
-
-    @property
-    def end(self):
-        return time_format(self.event.ends_at, "H:i")
-
-    @property
-    def url(self):
-        return self.event.get_absolute_url()
-
-    @property
-    def name(self):
-        return self.event.course.meta_course.name
-
-    @property
-    def description(self):
-        return self.event.name
-
-
-@dataclass
+@dataclass(eq=True, frozen=True)
 class CalendarEvent:
-    name: str
-    description: str
-    url: str
+    type: str
     date: datetime.date
     starts_at: datetime.time
     ends_at: datetime.time
-    type: str
+    name: str
+    description: str
+    url: str
 
     @property
     def start(self):
@@ -84,26 +48,46 @@ class CalendarEvent:
     def end(self):
         return time_format(self.ends_at, "H:i")
 
+
+class CalendarEventFactory:
     @classmethod
-    def from_course_class(cls, course_class: CourseClass,
-                          url_builder: Callable = None):
+    def create(cls, instance, **kwargs):
+        # FIXME: Consider to use abstract factory class instead before add new class here
+        if isinstance(instance, CourseClass):
+            return cls._from_course_class(instance, **kwargs)
+        elif isinstance(instance, Event):
+            return cls._from_generic_event(instance, **kwargs)
+        raise ValueError(f"{instance.__class__} is not supported")
+
+    @classmethod
+    def _from_course_class(cls, instance: CourseClass, url_builder: Callable = None):
         if url_builder:
-            url = url_builder(course_class)
+            url = url_builder(instance)
         else:
-            url = course_class.get_absolute_url()
-        return cls(name=course_class.name,
-                   description=course_class.name,
-                   url=url,
-                   date=course_class.date,
-                   starts_at=course_class.starts_at,
-                   ends_at=course_class.ends_at,
-                   type=course_class.type)
+            url = instance.get_absolute_url()
+        return CalendarEvent(name=instance.course.meta_course.name,
+                             description=instance.name,
+                             url=url,
+                             date=instance.date,
+                             starts_at=instance.starts_at,
+                             ends_at=instance.ends_at,
+                             type=instance.type)
+
+    @classmethod
+    def _from_generic_event(cls, instance: Event):
+        return CalendarEvent(name=instance.name,
+                             description=instance.name,
+                             url=instance.get_absolute_url(),
+                             date=instance.date,
+                             starts_at=instance.starts_at,
+                             ends_at=instance.ends_at,
+                             type=instance.type)
 
 
 @attr.s
 class CalendarDay:
     date: datetime.date = attr.ib()
-    events: List[CalendarEventW] = attr.ib(factory=list)
+    events: List[CalendarEvent] = attr.ib(factory=list)
 
 
 @attr.s
@@ -149,7 +133,7 @@ class EventsCalendar(ABC):
         self.week_starts_on = week_starts_on
         self._cal = Calendar(firstweekday=self.week_starts_on)
 
-    def _add_events(self, events: Iterable[CalendarEventW]):
+    def _add_events(self, events: Iterable[CalendarEvent]):
         # Note: Day events order could be broken on subsequent calls
         events = sorted(events, key=lambda evt: (evt.date, evt.start))
         for event in events:
@@ -178,7 +162,7 @@ class EventsCalendar(ABC):
                                       days=week_days))
         return weeks
 
-    # TODO: return full range instead with an empty event list
+    # TODO: return full range with an empty event list
     def _days(self, start: datetime.date,
               end: datetime.date) -> List[CalendarDay]:
         """
@@ -202,7 +186,7 @@ class MonthFullWeeksEventsCalendar(EventsCalendar):
     `.days()` could return days out of the target month.
     """
     def __init__(self, month_period: MonthPeriod,
-                 events: Iterable[CalendarEventW],
+                 events: Iterable[CalendarEvent],
                  week_starts_on=MONDAY_WEEKDAY):
         super().__init__(week_starts_on)
         self.month_period = month_period
@@ -249,7 +233,7 @@ class MonthFullWeeksEventsCalendar(EventsCalendar):
 # TODO: add week_starts_on support
 class WeekEventsCalendar(EventsCalendar):
     def __init__(self, year: int, week_number: ISOWeekNumber,
-                 events: Iterable[CalendarEventW],
+                 events: Iterable[CalendarEvent],
                  week_starts_on=MONDAY_WEEKDAY):
         super().__init__(week_starts_on)
         w = Week(year, week_number)

@@ -2,10 +2,9 @@ import datetime
 
 import pytest
 
-from courses.calendar import MonthFullWeeksEventsCalendar, CalendarEventW, \
-    WeekEventsCalendar
+from courses.calendar import MonthFullWeeksEventsCalendar, \
+    WeekEventsCalendar, CalendarEventFactory
 from courses.tests.factories import CourseClassFactory, CourseFactory
-from courses.models import CourseClass
 
 
 # TODO: test CourseClassQuerySet manager
@@ -13,15 +12,15 @@ from courses.models import CourseClass
 from courses.utils import MonthPeriod
 
 
+@pytest.mark.django_db
 def test_calendar_event():
     class_date = datetime.date(year=2018, month=2, day=3)
-    course_class = CourseClass(
-        course=CourseFactory.build(),
+    course_class = CourseClassFactory(
         name='Event Name',
         date=class_date,
         starts_at=datetime.time(hour=11, minute=0),
         ends_at=datetime.time(hour=13, minute=0))
-    calendar_event = CalendarEventW(course_class)
+    calendar_event = CalendarEventFactory.create(course_class)
     assert calendar_event.date == course_class.date
     assert calendar_event.start == '11:00'
     assert calendar_event.end == '13:00'
@@ -35,7 +34,7 @@ def test_month_events_calendar(client, settings):
     settings.LANGUAGE_CODE = 'ru'
     class_date = datetime.date(year=2018, month=2, day=3)
     course_classes = CourseClassFactory.create_batch(5, date=class_date)
-    events = (CalendarEventW(e) for e in course_classes)
+    events = (CalendarEventFactory.create(e) for e in course_classes)
     calendar = MonthFullWeeksEventsCalendar(month_period=MonthPeriod(2018, 2), events=events)
     assert calendar.next_month == datetime.date(year=2018, month=3, day=1)
     assert calendar.prev_month == datetime.date(year=2018, month=1, day=1)
@@ -57,7 +56,7 @@ def test_week_events_calendar(client, settings):
     course_classes = CourseClassFactory.create_batch(5, date=class_date)
     next_week_start = datetime.date(year=2018, month=2, day=5)
     CourseClassFactory.create_batch(2, date=next_week_start)
-    events = (CalendarEventW(e) for e in course_classes)
+    events = (CalendarEventFactory.create(e) for e in course_classes)
     year, week_number, _ = class_date.isocalendar()
     calendar = WeekEventsCalendar(2018, week_number, events=events)
     assert calendar.week.monday() == datetime.date(year=2018, month=1, day=29)
