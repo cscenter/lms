@@ -57,8 +57,7 @@ class AsyncEmailRegistrationView(RegistrationView):
         new_user = form.save(commit=False)
         new_user.branch = self.request.branch
         new_user.is_active = False
-        # Since we calculate the RegistrationProfile expiration from this date,
-        # we want to ensure that it is current
+        # Activation key expiration will be calculated from the date of join
         new_user.date_joined = timezone.now()
         new_user.time_zone = new_user.branch.time_zone
         with transaction.atomic():
@@ -85,7 +84,7 @@ class AsyncEmailRegistrationView(RegistrationView):
 
 
 class CalendarClubScheduleView(MonthEventsCalendarView):
-    """Shows classes from public courses."""
+    """Shows course classes in the time zone of the requested branch"""
     calendar_type = "public_full"
     template_name = "lms/courses/calendar.html"
 
@@ -96,8 +95,9 @@ class CalendarClubScheduleView(MonthEventsCalendarView):
         public_url_builder = partial(course_class_public_url,
                                      default_branch_code=self.request.branch.code)
         for c in get_classes(branch_list=[self.request.branch], filters=fs):
-            yield CalendarEventFactory.create(
-                c, url_builder=public_url_builder)
+            yield CalendarEventFactory.create(c,
+                                              url_builder=public_url_builder,
+                                              time_zone=self.request.branch.get_timezone())
 
 
 class IndexView(PublicURLContextMixin, generic.TemplateView):

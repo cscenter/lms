@@ -78,9 +78,9 @@ def test_teacher_calendar(client):
         CourseClassFactory
         .create_batch(2, course__teachers=[teacher_spb],
                       date=next_month_date.date()))
-    classes = flatten_calendar_month_events(
-        client.get(next_month_url).context_data['calendar'])
-    assert set(CalendarEventFactory.create(x) for x in next_month_classes) == set(classes)
+    calendar_events = set(flatten_calendar_month_events(
+        client.get(next_month_url).context_data['calendar']))
+    compare_calendar_events_with_models(calendar_events, next_month_classes)
     # On a full calendar all classes should be shown
     response = client.get(reverse('teaching:calendar_full'))
     calendar_events = set(flatten_calendar_month_events(response.context_data['calendar']))

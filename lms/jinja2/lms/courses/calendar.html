@@ -55,7 +55,7 @@
               </div>
               {% for event in day.events %}
               <div class="event {{ event.type }}" title="{{ event.description }}">
-                <a href="{{ event.url }}">{{ event.start }}–{{ event.end }} {{ event.name }}</a>
+                <a href="{{ event.url }}">{{ event.starts_at|time("H:i") }}–{{ event.ends_at|time("H:i") }} {{ event.name }}</a>
               </div>
               {% endfor %}
             </div>

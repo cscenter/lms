@@ -16,13 +16,14 @@ from django.utils.translation import gettext_lazy as _
 from isoweek import Week
 from rest_framework import serializers, fields
 
+from core.timezone import Timezone
 from core.utils import chunks
 from courses.constants import MONDAY_WEEKDAY, WEEKDAY_TITLES
-from courses.models import CourseClass
+from courses.models import CourseClass, LearningSpace, Course
 from courses.utils import MonthPeriod, extended_month_date_range
 
-__all__ = ('EventsCalendar', 'CalendarEvent', 'CalendarEventFactory',
-           'MonthFullWeeksEventsCalendar',
+__all__ = ('CalendarEvent', 'TimetableEvent', 'CalendarEventFactory',
+           'EventsCalendar', 'MonthFullWeeksEventsCalendar',
            'WeekEventsCalendar', 'CalendarQueryParams')
 
 from learning.models import Event
@@ -40,13 +41,25 @@ class CalendarEvent:
     description: str
     url: str
 
-    @property
-    def start(self):
-        return time_format(self.starts_at, "H:i")
 
-    @property
-    def end(self):
-        return time_format(self.ends_at, "H:i")
+@dataclass(eq=True, frozen=True)
+class TimetableEvent(CalendarEvent):
+    course: Course
+    venue: LearningSpace
+
+    @classmethod
+    def create(cls, course_class: CourseClass, time_zone: Timezone):
+        starts_at = course_class.starts_at_local(tz=time_zone)
+        ends_at = course_class.ends_at_local(tz=time_zone)
+        return cls(type=course_class.type,
+                   name=course_class.name,
+                   description=course_class.name,
+                   url=course_class.get_absolute_url(),
+                   date=starts_at.date(),
+                   starts_at=starts_at.time(),
+                   ends_at=ends_at.time(),
+                   course=course_class.course,
+                   venue=course_class.venue)
 
 
 class CalendarEventFactory:
@@ -60,21 +73,24 @@ class CalendarEventFactory:
         raise ValueError(f"{instance.__class__} is not supported")
 
     @classmethod
-    def _from_course_class(cls, instance: CourseClass, url_builder: Callable = None):
+    def _from_course_class(cls, course_class: CourseClass, time_zone: Timezone,
+                           url_builder: Callable = None, **kwargs):
         if url_builder:
-            url = url_builder(instance)
+            url = url_builder(course_class)
         else:
-            url = instance.get_absolute_url()
-        return CalendarEvent(name=instance.course.meta_course.name,
-                             description=instance.name,
+            url = course_class.get_absolute_url()
+        starts_at = course_class.starts_at_local(tz=time_zone)
+        ends_at = course_class.ends_at_local(tz=time_zone)
+        return CalendarEvent(type=course_class.type,
+                             name=course_class.course.meta_course.name,
+                             description=course_class.name,
                              url=url,
-                             date=instance.date,
-                             starts_at=instance.starts_at,
-                             ends_at=instance.ends_at,
-                             type=instance.type)
+                             date=starts_at.date(),
+                             starts_at=starts_at.time(),
+                             ends_at=ends_at.time())
 
     @classmethod
-    def _from_generic_event(cls, instance: Event):
+    def _from_generic_event(cls, instance: Event, **kwargs):
         return CalendarEvent(name=instance.name,
                              description=instance.name,
                              url=instance.get_absolute_url(),
@@ -135,7 +151,7 @@ class EventsCalendar(ABC):
 
     def _add_events(self, events: Iterable[CalendarEvent]):
         # Note: Day events order could be broken on subsequent calls
-        events = sorted(events, key=lambda evt: (evt.date, evt.start))
+        events = sorted(events, key=lambda evt: (evt.date, evt.starts_at))
         for event in events:
             self._date_to_events[event.date].append(event)
 

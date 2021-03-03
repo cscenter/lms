@@ -17,7 +17,7 @@ from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.urls import reverse
 from core.utils import render_markdown
-from courses.calendar import CalendarEventFactory
+from courses.calendar import TimetableEvent
 from courses.constants import SemesterTypes
 from courses.models import Course, Assignment, CourseTeacher
 from courses.permissions import ViewAssignment
@@ -26,7 +26,7 @@ from courses.utils import get_current_term_pair, MonthPeriod, \
     extended_month_date_range
 from courses.views.calendar import MonthEventsCalendarView
 from learning.api.serializers import AssignmentScoreSerializer
-from learning.calendar import get_teacher_calendar_events, get_calendar_events
+from learning.calendar import get_teacher_calendar_events, get_all_calendar_events
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm, \
     AssignmentCommentForm
 from learning.gradebook.views import GradeBookListBaseView
@@ -230,14 +230,14 @@ class TimetableView(TeacherOnlyMixin, MonthEventsCalendarView):
     Shows classes for courses where authorized teacher participate in.
     """
     calendar_type = "teacher"
-    template_name = "learning/teaching/timetable.html"
+    template_name = "lms/teaching/timetable.html"
 
     def get_events(self, month_period: MonthPeriod, **kwargs):
         start, end = extended_month_date_range(month_period, expand=1)
         in_range = [Q(date__range=[start, end])]
-        cs = get_teacher_classes(self.request.user, in_range, with_venue=True)
-        for c in cs:
-            yield CalendarEventFactory.create(c)
+        user = self.request.user
+        for c in get_teacher_classes(user, in_range, with_venue=True):
+            yield TimetableEvent.create(c, time_zone=user.time_zone)
 
 
 class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):
@@ -247,9 +247,10 @@ class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):
     """
     def get_events(self, month_period: MonthPeriod, **kwargs):
         start_date, end_date = extended_month_date_range(month_period, expand=1)
-        branches = get_teacher_branches(self.request.user, start_date, end_date)
-        return get_calendar_events(branch_list=branches, start_date=start_date,
-                                   end_date=end_date)
+        user = self.request.user
+        branches = get_teacher_branches(user, start_date, end_date)
+        return get_all_calendar_events(branch_list=branches, start_date=start_date,
+                                       end_date=end_date, time_zone=user.time_zone)
 
 
 class CalendarPersonalView(CalendarFullView):

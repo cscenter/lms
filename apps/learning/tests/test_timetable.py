@@ -44,14 +44,14 @@ def test_teacher_timetable(client):
     timetable_url = reverse('teaching:timetable')
     response = client.get(timetable_url)
     assert response.status_code == 200
-    events = flatten_events(response.context['calendar'])
+    events = flatten_events(response.context_data['calendar'])
     assert len(events) == 0
     branch_spb = BranchFactory(code=Branches.SPB)
     today_spb = now_local(branch_spb.get_timezone()).date()
     CourseClassFactory.create_batch(3, course__teachers=[teacher],
                                     date=today_spb)
     response = client.get(timetable_url)
-    calendar = response.context['calendar']
+    calendar = response.context_data['calendar']
     assert isinstance(calendar, MonthFullWeeksEventsCalendar)
     assert len(flatten_calendar_month_events(calendar)) == 3
     next_month_qstr = ("?year={0}&month={1}"
@@ -61,7 +61,7 @@ def test_teacher_timetable(client):
     assert next_month_qstr.encode() in response.content
     response = client.get(next_month_url)
     assert response.status_code == 200
-    calendar = response.context['calendar']
+    calendar = response.context_data['calendar']
     days = calendar.days()
     expected = 0
     if days:
@@ -73,7 +73,7 @@ def test_teacher_timetable(client):
     CourseClassFactory.create_batch(2, course__teachers=[teacher],
                                     date=next_month_date)
     response = client.get(next_month_url)
-    calendar = response.context['calendar']
+    calendar = response.context_data['calendar']
     assert len(flatten_calendar_month_events(calendar)) == 2 + expected
 
 
@@ -94,14 +94,14 @@ def test_student_timetable(client):
                                  student=student_profile.user)
     timetable_url = reverse('study:timetable')
     response = client.get(timetable_url)
-    calendar = response.context['calendar']
+    calendar = response.context_data['calendar']
     assert isinstance(calendar, WeekEventsCalendar)
     assert len(flatten_events(calendar)) == 0
     branch_spb = BranchFactory(code=Branches.SPB)
     today_spb = now_local(branch_spb.get_timezone()).date()
     CourseClassFactory.create_batch(3, course=co, date=today_spb)
     response = client.get(timetable_url)
-    calendar = response.context['calendar']
+    calendar = response.context_data['calendar']
     assert len(flatten_events(calendar)) == 3
     next_week_qstr = ("?year={0}&week={1}"
                       .format(calendar.next_week.year,
@@ -109,10 +109,10 @@ def test_student_timetable(client):
     assert next_week_qstr.encode() in response.content
     next_week_url = timetable_url + next_week_qstr
     response = client.get(next_week_url)
-    calendar = response.context['calendar']
+    calendar = response.context_data['calendar']
     assert len(flatten_events(calendar)) == 0
     next_week_date = today_spb + relativedelta(weeks=1)
     CourseClassFactory.create_batch(2, course=co, date=next_week_date)
     response = client.get(next_week_url)
-    calendar = response.context['calendar']
+    calendar = response.context_data['calendar']
     assert len(flatten_events(calendar)) == 2

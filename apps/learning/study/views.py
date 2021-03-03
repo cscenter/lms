@@ -11,7 +11,7 @@ from vanilla import TemplateView
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.urls import reverse
-from courses.calendar import CalendarEvent, CalendarEventFactory
+from courses.calendar import CalendarEvent, TimetableEvent
 from courses.constants import SemesterTypes
 from courses.models import Semester, Course, CourseTeacher
 from courses.utils import get_current_term_pair, MonthPeriod, \
@@ -21,7 +21,7 @@ from info_blocks.constants import CurrentInfoBlockTags
 from info_blocks.models import InfoBlock
 from info_blocks.permissions import ViewInternships
 from learning import utils
-from learning.calendar import get_student_calendar_events, get_calendar_events
+from learning.calendar import get_student_calendar_events, get_all_calendar_events
 from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, Enrollment, \
     AssignmentSubmissionTypes, AssignmentComment
@@ -45,11 +45,11 @@ class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
 
     def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
         start_date, end_date = extended_month_date_range(month_period, expand=1)
-        student_profile = get_student_profile(self.request.user,
-                                              self.request.site)
+        user = self.request.user
+        student_profile = get_student_profile(user, self.request.site)
         branches = [student_profile.branch_id]
-        return get_calendar_events(branch_list=branches, start_date=start_date,
-                                   end_date=end_date)
+        return get_all_calendar_events(branch_list=branches, start_date=start_date,
+                                       end_date=end_date, time_zone=user.time_zone)
 
 
 class CalendarPersonalView(CalendarFullView):
@@ -73,15 +73,15 @@ class CalendarPersonalView(CalendarFullView):
 
 class TimetableView(PermissionRequiredMixin, WeekEventsView):
     """Shows classes for courses which authorized student enrolled in"""
-    template_name = "learning/study/timetable.html"
+    template_name = "lms/learning/timetable.html"
     permission_required = "study.view_schedule"
 
     def get_events(self, iso_year, iso_week) -> Iterable[CalendarEvent]:
         w = Week(iso_year, iso_week)
         in_range = [Q(date__range=[w.monday(), w.sunday()])]
-        cs = get_student_classes(self.request.user, in_range, with_venue=True)
-        for c in cs:
-            yield CalendarEventFactory.create(c)
+        user = self.request.user
+        for c in get_student_classes(user, in_range, with_venue=True):
+            yield TimetableEvent.create(c, time_zone=user.time_zone)
 
 
 class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):

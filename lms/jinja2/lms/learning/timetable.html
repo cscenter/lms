@@ -1,0 +1,75 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block content %}
+  <div class="container">
+    <div class="row timetable-header-row">
+      <div class="col-xs-12 h2-and-buttons">
+        <h2>{{ calendar.week_label }}</h2>
+        <div class="btn-toolbar">
+          <div class="btn-group">
+            <a href="?year={{ calendar.prev_week.year }}&week={{ calendar.prev_week.week }}" role="button" class="btn btn-default"><i
+                    class="fa fa-chevron-left"></i></a>
+            <a href="?year={{ calendar.next_week.year }}&week={{ calendar.next_week.week }}" role="button" class="btn btn-default"><i
+                    class="fa fa-chevron-right"></i></a>
+          </div>
+          <div class="btn-group">
+            <a href="{{ url('study:timetable') }}" role="button" class="btn btn-default active">{% trans %}List{% endtrans %}</a>
+            <a href="{{  url('study:calendar') }}" role="button" class="btn btn-default">{% trans %}Calendar{% endtrans %}</a>
+          </div>
+        </div>
+        <hr>
+      </div>
+    </div>
+    {% with events_by_day=calendar.days() %}
+      {% if events_by_day %}
+        <div class="row timetable-main-row">
+          <div class="col-xs-12">
+            {% for day in events_by_day %}
+              <h4>{{ day.date|date("l, d E Y") }}</h4>
+              <table class="table timetable" width="100%">
+                <thead>
+                <tr>
+                  <th width="15%">{% trans %}Time{% endtrans %}</th>
+                  <th>{% trans %}Class|Name{% endtrans %}</th>
+                  <th width="15%">{% trans %}Course{% endtrans %}</th>
+                  <th width="12%">{% trans %}Venue|short{% endtrans %}</th>
+                  <th width="10%"></th>
+                </tr>
+                </thead>
+                {% for event in day.events %}
+                    <tr>
+                      <td>{{ event.starts_at|time("H:i") }}–{{ event.ends_at|time("H:i") }}</td>
+                      <td>
+                        <a href="{{ event.url }}">{{ event.name }}</a>
+                      </td>
+                      <td>
+                        <a href="{{ event.course.get_absolute_url() }}">{{ event.course.meta_course.name }}</a>
+                      </td>
+                      <td>
+                        <a href="{{ event.venue.location.get_absolute_url() }}">
+                          {{ event.venue.full_name }}
+                        </a>
+                      </td>
+                      <td>
+                        {% if event.type == 'lecture' %}
+                          <span class="badge lecture">{% trans %}Lecture{% endtrans %}</span>
+                        {% else %}
+                          <span class="badge seminar">{% trans %}Seminar{% endtrans %}</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                {% endfor %}
+              </table>
+            {% endfor %}
+          </div>
+        </div>
+      {% else %}
+        <div class="row">
+          <div class="col-xs-12 center-aligned">
+            <h4>{% trans %}No classes yet{% endtrans %}</h4>
+          </div>
+        </div>
+      {% endif %}
+    {% endwith %}
+  </div>
+{% endblock content %}

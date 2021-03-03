@@ -34,7 +34,7 @@ class MonthEventsCalendarView(generic.TemplateView):
         }
         return self.render_to_response(context)
 
-    def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
+    def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable[CalendarEvent]:
         raise NotImplementedError()
 
 

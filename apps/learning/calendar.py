@@ -22,8 +22,9 @@ def _to_range_q_filter(start_date, end_date) -> List[Q]:
 def get_student_calendar_events(*, student_profile: StudentProfile,
                                 start_date, end_date) -> Iterator[CalendarEvent]:
     period_filter = _to_range_q_filter(start_date, end_date)
-    for c in get_student_classes(student_profile.user, period_filter):
-        yield CalendarEventFactory.create(c)
+    user = student_profile.user
+    for c in get_student_classes(user, period_filter):
+        yield CalendarEventFactory.create(c, time_zone=user.time_zone)
     branch_list = [student_profile.branch_id]
     event_filters = [Q(branch__in=branch_list), *period_filter]
     for e in get_study_events(event_filters):
@@ -32,22 +33,22 @@ def get_student_calendar_events(*, student_profile: StudentProfile,
 
 def get_teacher_calendar_events(*, user, start_date,
                                 end_date) -> Iterator[CalendarEvent]:
-    branch_list = get_teacher_branches(user, start_date, end_date)
     period_filter = _to_range_q_filter(start_date, end_date)
     for c in get_teacher_classes(user, period_filter):
-        yield CalendarEventFactory.create(c)
+        yield CalendarEventFactory.create(c, time_zone=user.time_zone)
+    branch_list = get_teacher_branches(user, start_date, end_date)
     event_filters = [Q(branch__in=branch_list), *period_filter]
     for e in get_study_events(event_filters):
         yield CalendarEventFactory.create(e)
 
 
-def get_calendar_events(*, branch_list, start_date, end_date):
+def get_all_calendar_events(*, branch_list, start_date, end_date, time_zone):
     """
     Returns events in a given date range for the given branch list.
     """
     period_filter = _to_range_q_filter(start_date, end_date)
     for c in get_classes(branch_list, period_filter):
-        yield CalendarEventFactory.create(c)
+        yield CalendarEventFactory.create(c, time_zone=time_zone)
     event_filters = [Q(branch__in=branch_list), *period_filter]
     for e in get_study_events(event_filters):
         yield CalendarEventFactory.create(e)

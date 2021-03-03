@@ -20,10 +20,10 @@ def test_calendar_event():
         date=class_date,
         starts_at=datetime.time(hour=11, minute=0),
         ends_at=datetime.time(hour=13, minute=0))
-    calendar_event = CalendarEventFactory.create(course_class)
+    calendar_event = CalendarEventFactory.create(course_class, time_zone=None)
     assert calendar_event.date == course_class.date
-    assert calendar_event.start == '11:00'
-    assert calendar_event.end == '13:00'
+    assert calendar_event.starts_at == course_class.starts_at
+    assert calendar_event.ends_at == course_class.ends_at
     assert calendar_event.name == course_class.course.meta_course.name
     assert calendar_event.description == course_class.name
     assert calendar_event.description == course_class.name
@@ -34,7 +34,7 @@ def test_month_events_calendar(client, settings):
     settings.LANGUAGE_CODE = 'ru'
     class_date = datetime.date(year=2018, month=2, day=3)
     course_classes = CourseClassFactory.create_batch(5, date=class_date)
-    events = (CalendarEventFactory.create(e) for e in course_classes)
+    events = (CalendarEventFactory.create(e, time_zone=None) for e in course_classes)
     calendar = MonthFullWeeksEventsCalendar(month_period=MonthPeriod(2018, 2), events=events)
     assert calendar.next_month == datetime.date(year=2018, month=3, day=1)
     assert calendar.prev_month == datetime.date(year=2018, month=1, day=1)
@@ -45,7 +45,7 @@ def test_month_events_calendar(client, settings):
     # Make sure events are sorted by `event.start_at`
     current_event = events[0]
     for e in events:
-        assert e.start <= current_event.start
+        assert e.starts_at <= current_event.starts_at
         current_event = e
 
 
@@ -56,7 +56,7 @@ def test_week_events_calendar(client, settings):
     course_classes = CourseClassFactory.create_batch(5, date=class_date)
     next_week_start = datetime.date(year=2018, month=2, day=5)
     CourseClassFactory.create_batch(2, date=next_week_start)
-    events = (CalendarEventFactory.create(e) for e in course_classes)
+    events = (CalendarEventFactory.create(e, time_zone=None) for e in course_classes)
     year, week_number, _ = class_date.isocalendar()
     calendar = WeekEventsCalendar(2018, week_number, events=events)
     assert calendar.week.monday() == datetime.date(year=2018, month=1, day=29)
@@ -68,5 +68,5 @@ def test_week_events_calendar(client, settings):
     assert len(events) == 5
     current_event = events[0]
     for e in events:
-        assert e.start <= current_event.start
+        assert e.starts_at <= current_event.starts_at
         current_event = e
