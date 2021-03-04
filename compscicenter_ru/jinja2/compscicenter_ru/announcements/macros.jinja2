@@ -41,7 +41,7 @@
 {%- endmacro %}
 
 {% macro announcement_horizontal(announcement, card_type='h') -%}
-<div class="card _horizontal _dark">
+<div class="card _horizontal grey-bg">
     <div class="row no-gutters">
         {% if announcement.thumbnail %}
         <div class="col-md-5 card__background" style="min-height: 196px; background-image: url('{{ announcement.thumbnail.url }}');"></div>
@@ -59,7 +59,7 @@
 {%- endmacro %}
 
 {% macro announcement_vertical(announcement, card_type) -%}
-<div class="card _dark">
+<div class="card grey-bg">
     {% if announcement.thumbnail %}
     <div class="w-100 card__background" style="min-height: 196px; background-image: url('{{ announcement.thumbnail.url }}');"></div>
     {% endif %}

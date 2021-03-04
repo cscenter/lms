@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from typing import NamedTuple
 
+from django.conf import settings
 from django.core.cache import caches
 from django.core.management.base import BaseCommand
 from requests import RequestException
@@ -22,6 +23,10 @@ class SocialPost(NamedTuple):
     date: datetime
     post_url: str
     thumbnail: str = ''
+
+
+# FIXME: get from db settings
+ACCESS_TOKEN = "IGQVJXbVZAmZAjdDazdjbDRGZAWsxRGg3VmtOMUtmdjhpWWs5QWdPQ01LeHJXaTJvRnZAqN2dMNmRXREJ4eWFWODg1WVB2ZAmFmX1NKX1YwWktXbzBJVWxWNTZAzN3NwZAmtBZAGxRbHk4MDBjRFhzWjFNcm9vRgZDZD" or settings.INSTAGRAM_ACCESS_TOKEN
 
 
 class Command(BaseCommand):
@@ -54,21 +59,22 @@ class Command(BaseCommand):
         except VkAPIException:
             pass
 
-        instagram_api = InstagramAPI()
+        instagram_api = InstagramAPI(access_token=ACCESS_TOKEN)
         try:
-            json_data = instagram_api.get_recent_posts(count=1)
+            json_data = instagram_api.get_recent_posts()
             data_to_cache = []
             for post in json_data["data"]:
-                thumbnail = post['images']['standard_resolution']['url']
-                if post.get('caption', None):
-                    caption = post['caption']['text']
-                else:
-                    caption = ''
+                # TODO: support all media types
+                if post['media_type'] != 'IMAGE':
+                    continue
+                thumbnail = post['media_url']
+                caption = post['caption']
                 to_cache = SocialPost(text=caption,
-                                      date=datetime.fromtimestamp(int(post['created_time'])),
-                                      post_url=post['link'],
+                                      date=datetime.strptime(post['timestamp'], "%Y-%m-%dT%H:%M:%S%z"),
+                                      post_url=post['permalink'],
                                       thumbnail=thumbnail)
                 data_to_cache.append(to_cache)
+                break
             cache.set(IndexView.INSTAGRAM_CACHE_KEY, data_to_cache,
                       CACHE_EXPIRES_IN)
         except RequestException:
