@@ -92,6 +92,9 @@ class SiteConfiguration(ConfigurationModel):
     default_branch_code = models.CharField(
         "Branch code",
         max_length=10)
+    instagram_access_token = models.CharField(
+        max_length=420,
+        blank=True, null=True)
 
     class Meta:
         verbose_name = "Site Configuration"

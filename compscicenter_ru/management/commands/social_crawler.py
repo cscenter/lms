@@ -11,6 +11,7 @@ from requests import RequestException
 from api.providers.instagram import InstagramAPI, InstagramAPIException
 from api.providers.vk import VkOpenAPI, CSCENTER_GROUP_ID, VkAPIException
 from compscicenter_ru.views import IndexView
+from core.models import SiteConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +24,6 @@ class SocialPost(NamedTuple):
     date: datetime
     post_url: str
     thumbnail: str = ''
-
-
-# FIXME: get from db settings
-ACCESS_TOKEN = "IGQVJXbVZAmZAjdDazdjbDRGZAWsxRGg3VmtOMUtmdjhpWWs5QWdPQ01LeHJXaTJvRnZAqN2dMNmRXREJ4eWFWODg1WVB2ZAmFmX1NKX1YwWktXbzBJVWxWNTZAzN3NwZAmtBZAGxRbHk4MDBjRFhzWjFNcm9vRgZDZD" or settings.INSTAGRAM_ACCESS_TOKEN
 
 
 class Command(BaseCommand):
@@ -59,17 +56,20 @@ class Command(BaseCommand):
         except VkAPIException:
             pass
 
-        instagram_api = InstagramAPI(access_token=ACCESS_TOKEN)
+        site_settings = (SiteConfiguration.objects
+                         .get(site_id=settings.SITE_ID))
+        if not site_settings.instagram_access_token:
+            logger.info("Instagram API access token is not provided. Exit")
+            return
+
+        access_token = SiteConfiguration.decrypt(site_settings.instagram_access_token)
+        instagram_client = InstagramAPI(access_token=access_token)
         try:
-            json_data = instagram_api.get_recent_posts()
+            json_data = instagram_client.get_recent_posts()
             data_to_cache = []
             for post in json_data["data"]:
-                # TODO: support all media types
-                if post['media_type'] != 'IMAGE':
-                    continue
-                thumbnail = post['media_url']
-                caption = post['caption']
-                to_cache = SocialPost(text=caption,
+                thumbnail = post['thumbnail_url'] if post['media_type'] == 'VIDEO' else post['media_url']
+                to_cache = SocialPost(text=post['caption'],
                                       date=datetime.strptime(post['timestamp'], "%Y-%m-%dT%H:%M:%S%z"),
                                       post_url=post['permalink'],
                                       thumbnail=thumbnail)
@@ -81,3 +81,7 @@ class Command(BaseCommand):
             logger.error("instagram.com: Network connection problem")
         except InstagramAPIException:
             pass
+        # Long-lived token expires in 60 days
+        data = instagram_client.refresh_access_token()
+        new_token = SiteConfiguration.encrypt(data['access_token'])
+        SiteConfiguration.objects.filter(pk=site_settings.pk).update(instagram_access_token=new_token)
