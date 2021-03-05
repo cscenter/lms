@@ -29,7 +29,7 @@
         </div>
 
         {% if not request.user.is_authenticated %}
-            <a class="btn _outline _gray menu-btn-reg" href="{{ url('auth:login') }}">
+            <a class="btn _outline _white menu-btn-reg" href="{{ url('auth:login') }}">
                 {{ macros.svg_icon('user') }} Войти
             </a>
         {% else %}

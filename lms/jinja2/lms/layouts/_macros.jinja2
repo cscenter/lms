@@ -3,7 +3,7 @@
 {%- endmacro %}
 
 {% macro svg_icon(id, modifiers='') -%}
-<svg class="sprite-img svg-icon _{{ id }}{% if modifiers %} {{ modifiers }}{% endif %}" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#{{ id }}"></use></svg>
+<svg class="sprite-img svg-icon _icon-{{ id }}{% if modifiers %} {{ modifiers }}{% endif %}" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#icon-{{ id }}"></use></svg>
 {%- endmacro %}
 
 {% macro b3_video_iframe(video_url, modifiers='') -%}
