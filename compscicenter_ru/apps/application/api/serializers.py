@@ -9,11 +9,12 @@ from admission.tasks import register_in_yandex_contest
 from core.models import University
 
 
-class OpenRegistrationCampaignsField(serializers.PrimaryKeyRelatedField):
+class OpenRegistrationCampaignField(serializers.PrimaryKeyRelatedField):
     def get_queryset(self):
         if self.queryset:
             return self.queryset.all()
-        return Campaign.with_open_registration()
+        return (Campaign.with_open_registration()
+                .filter(branch__site_id=settings.SITE_ID))
 
 
 class ApplicationFormSerializer(serializers.ModelSerializer):
@@ -22,12 +23,12 @@ class ApplicationFormSerializer(serializers.ModelSerializer):
         allow_empty=False)
     preferred_study_programs = serializers.MultipleChoiceField(
         Applicant.STUDY_PROGRAMS,
-        required=False,
+        allow_empty=False,
         error_messages={
             'empty': 'Выберите интересующие вас направления обучения'
         }
     )
-    campaign = OpenRegistrationCampaignsField(
+    campaign = OpenRegistrationCampaignField(
         label='Отделение',
         error_messages={
             'does_not_exist': 'Приемная кампания окончена либо не существует',
@@ -82,30 +83,14 @@ class ApplicationFormSerializer(serializers.ModelSerializer):
         ]
 
     def __init__(self, instance=None, data=empty, **kwargs):
+        super().__init__(instance, data, **kwargs)
+        self.fields["living_place"].required = True
         if data is not empty and data:
             if "university_other" in data:
                 # Make university optional cause its value should be empty in
                 # case when `university_other` value provided. Set value
                 # later in `.validate` method.
                 self.fields["university"].required = False
-            if "campaign" in data:
-                try:
-                    # This logic adds one additional DB hit, but
-                    # improves validation since we need dynamically set
-                    # `required` logic for some fields
-                    campaign_id = int(data['campaign'])
-                    campaign = (self.fields['campaign']
-                                .get_queryset()
-                                .get(pk=campaign_id))
-                    if campaign.branch.city_id:
-                        field = self.fields["preferred_study_programs"]
-                        field.required = True
-                        field.allow_empty = False
-                    elif not data.get("living_place"):
-                        self.fields["living_place"].required = True
-                except (ValueError, Campaign.DoesNotExist):
-                    self.fields['campaign'].queryset = Campaign.objects.none()
-        super().__init__(instance, data, **kwargs)
 
     def save(self, **kwargs):
         instance = super().save(**kwargs)

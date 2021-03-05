@@ -69,7 +69,6 @@ def test_application_form_inactive_or_past_campaign(client):
 
 @pytest.mark.django_db
 def test_application_form_preferred_study_programs(client):
-    """`preferred_study_programs` is mandatory for on-campus branches"""
     url = reverse("public-api:v2:applicant_create")
     branch_spb = BranchFactory(code=Branches.SPB)
     today = now_local(branch_spb.get_timezone())
@@ -80,10 +79,7 @@ def test_application_form_preferred_study_programs(client):
     form_data = build_application_form(campaign=campaign, university=university)
     if "preferred_study_programs" in form_data:
         del form_data["preferred_study_programs"]
-    # preferred_study_programs are not specified for the distance branch
-    assert campaign.branch.code != Branches.DISTANCE
-    # Yandex.Login stored in client session and will override form value
-    # in any case
+    # Yandex.Login stored in client session and will override form value in any case
     session = client.session
     session[SESSION_LOGIN_KEY] = 'yandex_login'
     session.save()
@@ -94,7 +90,6 @@ def test_application_form_preferred_study_programs(client):
 
 @pytest.mark.django_db
 def test_application_form_living_place(client):
-    """`living_place` is mandatory for distance branch"""
     url = reverse("public-api:v2:applicant_create")
     branch_spb = BranchFactory(code=Branches.SPB)
     today = now_local(branch_spb.get_timezone())
@@ -107,12 +102,10 @@ def test_application_form_living_place(client):
     form_data = build_application_form(campaign=campaign, university=university)
     if "living_place" in form_data:
         del form_data["living_place"]
-    # Yandex.Login stored in client session and will override form value
-    # in any case
+    # Yandex.Login stored in client session and will override form value in any case
     session = client.session
     session[SESSION_LOGIN_KEY] = 'yandex_login'
     session.save()
     response = client.post(url, form_data)
     assert response.status_code == 400
     assert "living_place" in response.data
-    assert "preferred_study_programs" not in response.data
