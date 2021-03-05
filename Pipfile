@@ -49,9 +49,10 @@ django-crispy-forms = "==1.10.0"
 django-formtools = "==2.2"
 # Parsing
 beautifulsoup4 = "*"
-# Translation
+# i18n/l10n
 django-rosetta = "==0.9.5"
 django-modeltranslation = "==0.16.2"
+babel = "*"
 # AWS
 boto3 = "*"
 boto = "*"
@@ -121,7 +122,6 @@ django-simple-history = "*"
 # XXX: wrong implementation for Django >= 1.11 in ver 1.2.1
 django-static-compress = "==1.2.1"
 webdavclient3 = "*"
-babel = "*"
 
 [requires]
 python_version = "3.8"
