@@ -109,11 +109,21 @@
 {%- endmacro %}
 
 {# Used on index page in courses block #}
-{% macro meta_course_card(course_title, course_link, image_url, image_title) -%}
-    <a href="{{ course_link }}"
+{% macro meta_course_card(course_title, course_slug, image_url='', image_title='') %}
+    {%  if image_url %}
+      {%- set icon_url = image_url -%}
+    {% else -%}
+      {%- set icon_url = "v2/img/pages/index/offline-courses/" + course_slug + ".jpg" -%}
+    {% endif -%}
+    {% if image_title != '' %}
+      {%- set image_alt = image_title -%}
+    {% else -%}
+      {%- set image_alt = course_title.replace("&nbsp;", " ") -%}
+    {% endif -%}
+    <a href="https://compscicenter.ru/courses/{{ course_slug }}/"
        class="card _horizontal-mobile _no-border _shadowed p-3 text-center">
         <div class="card__img">
-            <img src="{{ static(image_url) }}" alt="{{ image_title}}">
+            <img src="{{ static(icon_url) }}" alt="{{ image_alt }}">
         </div>
         <div class="card__content">
             {{ course_title|safe }}

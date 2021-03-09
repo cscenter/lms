@@ -55,75 +55,55 @@
   {%- set courses = [
     {
         "course_title": "Алгоритмы и&nbsp;структуры данных",
-        "course_link": "https://compscicenter.ru/courses/algorithms-1/",
-        "image_url": "v2/img/pages/index/offline-courses/algorithms-and-data-structures-default.jpg",
-        "image_title": "Алгоритмы и структуры данных",
+        "course_slug": "algorithms-1",
+        "image_url": "v2/img/pages/index/offline-courses/algorithms-index.jpg",
     },
     {
         "course_title": "Анализ изображений и&nbsp;видео",
-        "course_link": "https://compscicenter.ru/courses/images-and-video-1/",
-        "image_url": "v2/img/pages/index/offline-courses/analyzing-images-and-videos-default.jpg",
-        "image_title": "Анализ изображений и видео",
+        "course_slug": "images-and-video-1",
+        "image_url": "v2/img/pages/index/offline-courses/images-and-video-index.jpg",
     },
     {
         "course_title": "Асимптотический анализ и&nbsp;теория вероятности",
-        "course_link": "https://compscicenter.ru/courses/prob-theory/",
-        "image_url": "v2/img/pages/index/offline-courses/asymptotic-analysis-and-probability-theory.jpg",
-        "image_title": "Асимптотический анализ и теория вероятности",
+        "course_slug": "prob-theory",
     },
     {
         "course_title": "Вычисления на&nbsp;видеокартах",
-        "course_link": "https://compscicenter.ru/courses/video_cards_computation/",
-        "image_url": "v2/img/pages/index/offline-courses/screensaver.jpg",
-        "image_title": "Вычисления на видеокартах",
+        "course_slug": "video_cards_computation",
     },
     {
         "course_title": "Машинное обучение",
-        "course_link": "https://compscicenter.ru/courses/machine-learning-1/",
-        "image_url": "v2/img/pages/index/offline-courses/screensaver.jpg",
-        "image_title": "Машинное обучение",
+        "course_slug": "machine-learning-1",
+        "image_url": "v2/img/pages/index/offline-courses/machine-learning-index.jpg",
     },
     {
         "course_title": "Основы дискретной математики",
-        "course_link": "https://compscicenter.ru/courses/discrete-math/",
-        "image_url": "v2/img/pages/index/offline-courses/screensaver.jpg",
-        "image_title": "Основы дискретной математики",
+        "course_slug": "discrete-math",
     },
     {
         "course_title": "Параллельное программирование",
-        "course_link": "https://compscicenter.ru/courses/hp-course/",
-        "image_url": "v2/img/pages/index/offline-courses/screensaver.jpg",
-        "image_title": "Параллельное программирование",
+        "course_slug": "hp-course",
     },
     {
         "course_title": "Программирование на&nbsp;C++",
-        "course_link": "https://compscicenter.ru/courses/cpp-1/",
-        "image_url": "v2/img/pages/index/offline-courses/c-plus-programming-default.jpg",
-        "image_title": "Программирование на C++",
+        "course_slug": "cpp-1",
+        "image_url": "v2/img/pages/index/offline-courses/cpp-index.jpg",
     },
     {
         "course_title": "Программирование на&nbsp;Java",
-        "course_link": "https://compscicenter.ru/courses/java/",
-        "image_url": "v2/img/pages/index/offline-courses/java-programming.jpg",
-        "image_title": "Программирование на Java",
+        "course_slug": "java",
     },
     {
         "course_title": "Программирование на&nbsp;Kotlin",
-        "course_link": "https://compscicenter.ru/courses/kotlinprogramming/",
-        "image_url": "v2/img/pages/index/offline-courses/kotlin-programming.jpg",
-        "image_title": "Программирование на Kotlin",
+        "course_slug": "kotlinprogramming",
     },
     {
         "course_title": "Программирование на&nbsp;Python",
-        "course_link": "https://compscicenter.ru/courses/python/",
-        "image_url": "v2/img/pages/index/offline-courses/python-programming.jpg",
-        "image_title": "Программирование на Python",
+        "course_slug": "python",
     },
     {
         "course_title": "Функциональное программирование",
-        "course_link": "https://compscicenter.ru/courses/func-prog/",
-        "image_url": "v2/img/pages/index/offline-courses/screensaver.jpg",
-        "image_title": "Функциональное программирование",
+        "course_slug": "func-prog",
     }
   ] -%}
 
@@ -134,7 +114,7 @@
         <div class="col-12">
           <div class="card-deck _six">
             {% for row in courses %}
-              {{ macros_cards.meta_course_card(row["course_title"], row["course_link"], row["image_url"], row["image_title"]) }}
+              {{ macros_cards.meta_course_card(row["course_title"], row["course_slug"], row["image_url"], row.get("image_title", "")) }}
             {% endfor %}
           </div>
         </div>
