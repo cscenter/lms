@@ -199,17 +199,38 @@
     </div>
   </div>
 
-  <div class="container text-center pt-4 pb-8">
+<div class="container pt-4 pb-8">
     <div class="about-csc__organizers my-10">
-      <h3>Организаторы</h3>
-      <p>CS центр — это совместная инициатива Школы анализа данных, Computer Science клуба и JetBrains.</p>
-      <div class="col-12">
-        <a target="_blank" rel="noopener" href="https://jetbrains.ru/students"
-           title="JetBrains">{{ macros.svg_image('logo-jetbrains') }}</a>
-        <a target="_blank" rel="noopener" href="https://yandexdataschool.ru/" title="Яндекс ШАД">{{ macros.svg_image('logo-shad') }}</a>
-        <a target="_blank" rel="noopener" href="http://239.ru/" title="ФМЛ №239">{{ macros.svg_image('logo-fml239') }}</a>
-        <a target="_blank" rel="noopener" href="https://compsciclub.ru/"
-           title="Computer Science Club">{{ macros.svg_image('logo-csclub') }}</a>
+      <div class="row">
+        <div class="col-md-auto mb-10">
+          <h3>Организаторы</h3>
+          <a target="_blank"  href="https://jetbrains.ru/students"
+             title="JetBrains">{{ macros.svg_image('logo-jetbrains') }}</a>
+          <a target="_blank"  href="https://yandexdataschool.ru/"
+             title="Яндекс ШАД">{{ macros.svg_image('logo-shad') }}</a>
+          <a target="_blank"  href="https://compsciclub.ru/"
+             title="Computer Science Club">{{ macros.svg_image('logo-csclub') }}</a>
+        </div>
+        <div class="col-md-auto offset-lg-1 mb-10">
+          <h3>Спонсоры</h3>
+          <a target="_blank"  href="https://jetbrains.ru/students"
+             title="JetBrains">{{ macros.svg_image('logo-jetbrains') }}</a>
+          <a target="_blank"  href="https://yandex.ru/"
+             title="Яндекс">{{ macros.svg_image('logo-yandex') }}</a>
+          <a target="_blank"  href="https://www.gazprom-neft.ru/"
+             title="Газпромнефть">{{ macros.svg_image('logo-gazprom') }}</a>
+        </div>
+        <div class="col-12 pt-lg-10">
+          <h3>Сотрудничество</h3>
+          <a target="_blank"  href="http://239.ru/"
+             title="ФМЛ №239">{{ macros.svg_image('logo-fml239') }}</a>
+          <a target="_blank"  href="https://itmo.ru"
+             title="Университет ИТМО">{{ macros.svg_image('logo-itmo') }}</a>
+          <a target="_blank"  href="https://math-cs.spbu.ru/"
+             title="Факультет математики и компьютерных наук СПБГУ">{{ macros.svg_image('logo-mkn') }}</a>
+          <a target="_blank"  href="https://www.nsu.ru/n/"
+             title="Новосибирский Государственный Университет">{{ macros.svg_image('logo-ngu') }}</a>
+        </div>
       </div>
     </div>
   </div>
@@ -248,7 +269,7 @@
             <h2 class="text-center mb-10">Онлайн-образование</h2>
             <div class="card-deck _online-education">
                 {% for course in online_courses %}
-                    <a class="card _horizontal-mobile _no-border" href="{{ course.link }}" target="_blank" rel="noopener">
+                    <a class="card _horizontal-mobile _no-border" href="{{ course.link }}" target="_blank" >
                         {% if course.avatar_url -%}
                             <div class="card__img _darken"><img src="{{ course.avatar_url }}" alt="{{ course.name }}"></div>
                         {%- endif %}
@@ -287,7 +308,7 @@
                 {% if instagram_posts %}
                     <div class="col-lg">
                         {% for post in instagram_posts %}
-                            <a href="{{ post.post_url }}" target="_blank" rel="noopener" class="social-media social-media--instagram social-media--full-size" style="background-image:url('{{ post.thumbnail }}')">
+                            <a href="{{ post.post_url }}" target="_blank"  class="social-media social-media--instagram social-media--full-size" style="background-image:url('{{ post.thumbnail }}')">
                                 <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/instagram.svg') }}" width="34" alt="">
                                 <div class="social-media__text">{{ post.text }}</div>
                                 <p class="social-media__date social-media__date--light">{{ post.date|date("j b") }}</p>
@@ -298,7 +319,7 @@
                 <div class="col-lg">
                     {% if vk_news %}
                         {% for post in vk_news %}
-                            <a href="{{ post.post_url }}" target="_blank" rel="noopener" class="social-media social-media--vk social-media--half-size">
+                            <a href="{{ post.post_url }}" target="_blank" rel="noopener nofollow" class="social-media social-media--vk social-media--half-size">
                                 <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/vk.svg') }}" width="40" alt="">
                                 <div class="social-media__text social-media__text--dark">{{ post.text }}</div>
                                 <p class="social-media__date">{{ post.date|date("j b") }}</p>
