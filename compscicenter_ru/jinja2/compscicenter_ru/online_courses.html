@@ -25,8 +25,8 @@
     </div>
     <div class="row online-courses-list">
         {% for online_course in online_courses %}
-        <div class="offset-2 offset-md-0 col-8 col-md-4 col-lg-3 mb-8">
-            <div class="card _shadowed">
+        <div class="col-12 col-md-4 col-lg-3 mb-8">
+            <div class="card _horizontal-mobile _shadowed">
                 {% if online_course.photo %}
                 <a class="card__img" href="{{ online_course.link }}" title="{{ online_course.name }}" rel="noopener" target="_blank"><img src="{{ online_course.photo.url }}" alt=""></a>
                 {% endif %}
