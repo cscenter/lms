@@ -1,10 +1,14 @@
 from typing import Iterable
 
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.views import generic
+from rest_framework import serializers
 
-from core.timezone import now_local
-from courses.calendar import CalendarQueryParams, MonthFullWeeksEventsCalendar, \
+from api.utils import requires_context
+from core.timezone import now_local, get_now_utc
+from courses.calendar import MonthFullWeeksEventsCalendar, \
     WeekEventsCalendar, CalendarEvent
 
 __all__ = ('MonthEventsCalendarView', 'WeekEventsView')
@@ -12,23 +16,45 @@ __all__ = ('MonthEventsCalendarView', 'WeekEventsView')
 from courses.utils import MonthPeriod
 
 
+def calendar_max_year(value):
+    today = get_now_utc()
+    if value > today.year + 1:
+        raise ValidationError("Year value is too big")
+
+
+@requires_context
+def current_user_year(serializer_field):
+    """Returns current year in the timezone of the current user"""
+    return now_local(serializer_field.context['request'].user.time_zone).year
+
+
+@requires_context
+def current_user_month(serializer_field):
+    """Returns current month in the timezone of the current user"""
+    return now_local(serializer_field.context['request'].user.time_zone).month
+
+
 class MonthEventsCalendarView(generic.TemplateView):
     calendar_type = "full"
     template_name = "lms/courses/calendar.html"
 
+    class InputSerializer(serializers.Serializer):
+        year = serializers.IntegerField(required=False, default=current_user_year,
+                                        min_value=settings.ESTABLISHED,
+                                        validators=[calendar_max_year])
+        month = serializers.IntegerField(required=False, default=current_user_month,
+                                         min_value=1, max_value=12)
+
     def get(self, request, *args, **kwargs):
-        # Get month period from GET-parameters or current month by default
-        query_params = CalendarQueryParams(data=request.GET)
-        if not query_params.is_valid():
+        serializer = self.InputSerializer(data=request.GET, context={'request': request})
+        if not serializer.is_valid(raise_exception=False):
             return HttpResponseRedirect(request.path)
-        today_local = now_local(request.user.time_zone)
-        year = query_params.validated_data.get('year', today_local.year)
-        month = query_params.validated_data.get('month', today_local.month)
-        month_period = MonthPeriod(year, month)
+        month_period = MonthPeriod(year=serializer.validated_data['year'],
+                                   month=serializer.validated_data['month'])
         events = self.get_events(month_period)
         calendar = MonthFullWeeksEventsCalendar(month_period, events)
         context = {
-            "today": today_local.date(),
+            "today": now_local(request.user.time_zone).date(),
             "calendar_type": self.calendar_type,
             "calendar": calendar
         }
@@ -38,16 +64,29 @@ class MonthEventsCalendarView(generic.TemplateView):
         raise NotImplementedError()
 
 
+@requires_context
+def current_user_iso_week(serializer_field):
+    """Returns current iso week in the timezone of the current user"""
+    now_ = now_local(serializer_field.context['request'].user.time_zone)
+    iso_year, iso_week, _ = now_.isocalendar()
+    return iso_week
+
+
 class WeekEventsView(generic.TemplateView):
+    class InputSerializer(serializers.Serializer):
+        year = serializers.IntegerField(required=False, default=current_user_year,
+                                        min_value=settings.ESTABLISHED,
+                                        validators=[calendar_max_year])
+        # ISO week-numbering year has 52 or 53 full weeks
+        week = serializers.IntegerField(required=False, default=current_user_iso_week,
+                                        min_value=1, max_value=53)
+
     def get(self, request, *args, **kwargs):
-        """Validates GET-parameters, set defaults if no values provided."""
-        query_params = CalendarQueryParams(data=request.GET)
-        if not query_params.is_valid():
+        serializer = self.InputSerializer(data=request.GET, context={'request': request})
+        if not serializer.is_valid(raise_exception=False):
             return HttpResponseRedirect(request.path)
-        today_local = now_local(request.user.time_zone).date()
-        today_iso_year, today_iso_week, _ = today_local.isocalendar()
-        iso_year = query_params.validated_data.get('year', today_iso_year)
-        iso_week = query_params.validated_data.get('week', today_iso_week)
+        iso_year = serializer.validated_data['year']
+        iso_week = serializer.validated_data['week']
         events = self.get_events(iso_year, iso_week)
         calendar = WeekEventsCalendar(iso_year, iso_week, events)
         context = {

@@ -8,13 +8,9 @@ from typing import List, Iterable, NewType, Callable
 import attr
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrule, DAILY
-from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.utils import timezone
-from django.utils.formats import date_format, time_format
+from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 from isoweek import Week
-from rest_framework import serializers, fields
 
 from core.timezone import Timezone
 from core.utils import chunks
@@ -24,7 +20,7 @@ from courses.utils import MonthPeriod, extended_month_date_range
 
 __all__ = ('CalendarEvent', 'TimetableEvent', 'CalendarEventFactory',
            'EventsCalendar', 'MonthFullWeeksEventsCalendar',
-           'WeekEventsCalendar', 'CalendarQueryParams')
+           'WeekEventsCalendar')
 
 from learning.models import Event
 
@@ -283,17 +279,3 @@ class WeekEventsCalendar(EventsCalendar):
 
     def days(self) -> List[CalendarDay]:
         return self._days(self.week.monday(), self.week.sunday())
-
-
-class CalendarQueryParams(serializers.Serializer):
-    year = fields.IntegerField(required=False,
-                               min_value=settings.ESTABLISHED)
-    month = fields.IntegerField(required=False, min_value=1, max_value=12)
-    # ISO week-numbering year has 52 or 53 full weeks
-    week = fields.IntegerField(required=False, min_value=1, max_value=53)
-
-    def validate_year(self, value):
-        today = timezone.now()
-        if value > today.year + 1:
-            raise ValidationError("Year value is too big")
-        return value
