@@ -26,88 +26,229 @@
 {% endblock after_navbar_container %}
 
 {% block content %}
-    <div class="csc-study-areas" id="study-areas">
-        <div class="container">
-            <h2 class="m-center">Очные курсы центра</h2>
-            <p class="card-offline-course__text">
-                Центр приглашает молодых специалистов, аспирантов, студентов средних и старших курсов технических специальностей пройти двух- или трёхлетние курсы по направлениям:
-            </p>
-
-            <div class="card-deck _three">
-                <a href="{{ url('on_campus_program_detail', discipline_code='se') }}" class="card _study-area">
-                    <div class="card__content">
-                        <div class="card-offline-course__icon">{{ macros.svg_image('se') }}</div>
-                        <h3 class="card__title">Software Engineering</h3>
-                        <p class="card__subtitle">Разработка программного обеспечения</p>
-                    </div>
-                </a>
-
-                <a href="{{ url('on_campus_program_detail', discipline_code='ds') }}" class="card _study-area">
-                    <div class="card__content">
-                        <div class="card-offline-course__icon">{{ macros.svg_image('ds') }}</div>
-                        <h3 class="card__title">Data Science</h3>
-                        <p class="card__subtitle">Анализ данных</p>
-                    </div>
-                </a>
-
-                <a href="{{ url('on_campus_program_detail', discipline_code='cs') }}" class="card _study-area">
-                    <div class="card__content">
-                        <div class="card-offline-course__icon">{{ macros.svg_image('cs') }}</div>
-                        <h3 class="card__title">Computer Science</h3>
-                        <p class="card__subtitle">Современная информатика</p>
-                    </div>
-                </a>
-            </div>
-
+  <div class="grey-bg py-6">
+    <div class="container py-10">
+      <h2 class="text-left text-sm-center mb-10">Обучение в&nbsp;CS&nbsp;центре</h2>
+      <div class="row">
+        <div class="col-sm-6 col-lg-4 pr-sm-8 mb-8">
+          {{ macros.svg_image('graduate') }}
+          <h3 class="mt-4">Направления обучения</h3>
+          <p>Студенты могут выпуститься из&nbsp;CS&nbsp;центра по&nbsp;одному из&nbsp;трёх направлений: Data
+            Science, Software Enginering, Computer Science</p>
         </div>
-    </div>
-
-    <div class="about-csc">
-        <div class="container">
-            <div class="about-csc__cover">
-                <div class="lazy-wrapper">
-                    <img data-src="{{ static("v2/img/pages/index/cscenter_meetup-1136.jpg") }}"
-                         data-srcset="{{ static("v2/img/pages/index/cscenter_meetup-1056.jpg") }} 1056w,
-                                      {{ static("v2/img/pages/index/cscenter_meetup-1408.jpg") }} 1408w,
-                                      {{ static("v2/img/pages/index/cscenter_meetup-1136@2x.jpg") }} 2272w"
-                         alt="">
-                </div>
-                <div class="about-csc__description">
-                    <h1>О центре</h1>
-                    <p>
-                        Computer Science Center&nbsp;существует, чтобы дать возможность талантливым студентам и&nbsp;выпускникам
-                        развиваться в&nbsp;интересном им&nbsp;направлении.
-                    </p>
-                </div>
-                <a class="btn _big _primary about-csc_btn" href="{{ url('history') }}">Подробнее</a>
-            </div>
-            <div class="about-csc__organizers">
-                <h3>Организаторы</h3>
-                <p>CS центр — это совместная инициатива Школы анализа данных, Computer Science клуба и JetBrains.</p>
-                <div class="col-12">
-                    <a target="_blank" rel="noopener" href="https://jetbrains.ru/students" title="JetBrains">{{ macros.svg_image('logo-jetbrains') }}</a>
-                    <a target="_blank" rel="noopener" href="https://yandexdataschool.ru/" title="Яндекс ШАД">{{ macros.svg_image('logo-shad') }}</a>
-                    <a target="_blank" rel="noopener" href="http://239.ru/" title="ФМЛ №239">{{ macros.svg_image('logo-fml239') }}</a>
-                    <a target="_blank" rel="noopener" href="https://compsciclub.ru/" title="Computer Science Club">{{ macros.svg_image('logo-csclub') }}</a>
-                </div>
-            </div>
+        <div class="col-sm-6 col-lg-4 pr-sm-8 mb-8">
+          {{ macros.svg_image('courses') }}
+          <h3 class="mt-4">Большой выбор курсов</h3>
+          <p>Для выпуска нужно сдать двенадцать курсов за&nbsp;два или три года. Несколько обязательных для
+            выбранного направления и&nbsp;минимум пять на&nbsp;выбор из&nbsp;всех остальных.</p>
         </div>
+        <div class="col-sm-6 col-lg-4 pr-sm-8 mb-8">
+          {{ macros.svg_image('practice') }}
+          <h3 class="mt-4">Практика или научная работа</h3>
+          <p>За&nbsp;время обучения студенты три семестра выполняют практику или научно-исследовательскую
+            работу под руководством опытного наставника.</p>
+        </div>
+      </div>
     </div>
+  </div>
 
-    {% if announcements %}
-        <script type="text/javascript">
-            (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
-        </script>
-        {% with %}
-            {% if announcements|length % 2 == 0 %}
-                {% set card_type = "v2" %}
-            {% elif announcements|length % 3 == 0 %}
-                {% set card_type = "v3" %}
-            {% else %}
-                {% set card_type = "h" %}
-            {% endif %}
-            <div class="container mb-10">
-                <h2 class="text-center mb-6">Мероприятия</h2>
+  {%- set courses = [
+    {
+        "course_title": "Алгоритмы и&nbsp;структуры данных",
+        "course_link": "https://compscicenter.ru/courses/algorithms-1/",
+        "image_url": "v2/img/pages/index/offline-courses/algorithms-and-data-structures-default.jpg",
+        "image_title": "Алгоритмы и структуры данных",
+    },
+    {
+        "course_title": "Анализ изображений и&nbsp;видео",
+        "course_link": "https://compscicenter.ru/courses/images-and-video-1/",
+        "image_url": "v2/img/pages/index/offline-courses/analyzing-images-and-videos-default.jpg",
+        "image_title": "Анализ изображений и видео",
+    },
+    {
+        "course_title": "Асимптотический анализ и&nbsp;теория вероятности",
+        "course_link": "https://compscicenter.ru/courses/prob-theory/",
+        "image_url": "v2/img/pages/index/offline-courses/asymptotic-analysis-and-probability-theory.jpg",
+        "image_title": "Асимптотический анализ и теория вероятности",
+    },
+    {
+        "course_title": "Вычисления на&nbsp;видеокартах",
+        "course_link": "https://compscicenter.ru/courses/video_cards_computation/",
+        "image_url": "v2/img/pages/index/offline-courses/screensaver.jpg",
+        "image_title": "Вычисления на видеокартах",
+    },
+    {
+        "course_title": "Машинное обучение",
+        "course_link": "https://compscicenter.ru/courses/machine-learning-1/",
+        "image_url": "v2/img/pages/index/offline-courses/screensaver.jpg",
+        "image_title": "Машинное обучение",
+    },
+    {
+        "course_title": "Основы дискретной математики",
+        "course_link": "https://compscicenter.ru/courses/discrete-math/",
+        "image_url": "v2/img/pages/index/offline-courses/screensaver.jpg",
+        "image_title": "Основы дискретной математики",
+    },
+    {
+        "course_title": "Параллельное программирование",
+        "course_link": "https://compscicenter.ru/courses/hp-course/",
+        "image_url": "v2/img/pages/index/offline-courses/screensaver.jpg",
+        "image_title": "Параллельное программирование",
+    },
+    {
+        "course_title": "Программирование на&nbsp;C++",
+        "course_link": "https://compscicenter.ru/courses/cpp-1/",
+        "image_url": "v2/img/pages/index/offline-courses/c-plus-programming-default.jpg",
+        "image_title": "Программирование на C++",
+    },
+    {
+        "course_title": "Программирование на&nbsp;Java",
+        "course_link": "https://compscicenter.ru/courses/java/",
+        "image_url": "v2/img/pages/index/offline-courses/java-programming.jpg",
+        "image_title": "Программирование на Java",
+    },
+    {
+        "course_title": "Программирование на&nbsp;Kotlin",
+        "course_link": "https://compscicenter.ru/courses/kotlinprogramming/",
+        "image_url": "v2/img/pages/index/offline-courses/kotlin-programming.jpg",
+        "image_title": "Программирование на Kotlin",
+    },
+    {
+        "course_title": "Программирование на&nbsp;Python",
+        "course_link": "https://compscicenter.ru/courses/python/",
+        "image_url": "v2/img/pages/index/offline-courses/python-programming.jpg",
+        "image_title": "Программирование на Python",
+    },
+    {
+        "course_title": "Функциональное программирование",
+        "course_link": "https://compscicenter.ru/courses/func-prog/",
+        "image_url": "v2/img/pages/index/offline-courses/screensaver.jpg",
+        "image_title": "Функциональное программирование",
+    }
+  ] -%}
+
+  <div class="py-6">
+    <div class="container py-10">
+      <h2 class="text-left text-sm-center mb-10">Очные курсы центра</h2>
+      <div class="row">
+        <div class="col-12">
+          <div class="card-deck _six">
+            {% for row in courses %}
+              {{ macros_cards.meta_course_card(row["course_title"], row["course_link"], row["image_url"], row["image_title"]) }}
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-12 text-center mt-4">
+          <a href="/courses/" class="btn _big _outline _gray _m-wide">Все курсы центра</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dark-bg py-6">
+    <div class="container py-10">
+      <h2 class="h1 theme-dark mb-10">Очное обучение в центре</h2>
+      <div class="row">
+        <div class="col-sm-6 col-md-5 mb-8">
+          <div class="card _no-border theme-dark">
+            <div class="card__img">
+              <img class="img-fluid" src="{{ static("v2/img/pages/index/about-csc/curators.jpg") }}"
+                   alt="Кураторы центра">
+            </div>
+            <div class="card__content">
+              <div class="card__title mb-4">Заботливые кураторы</div>
+              Команда CS&nbsp;центра чутко следит за&nbsp;процессом обучения и&nbsp;всегда готова помочь
+              каждому студенту
+            </div>
+            <div class="card__content _meta">
+              <a href="/team/" target="_blank" class="btn _small _rounded _outline _gray">Команда центра</a>
+            </div>
+
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-5 mb-8 offset-md-1">
+          <div class=" card _no-border theme-dark">
+            <div class="card__img">
+              <img class="img-fluid" src="{{ static("v2/img/pages/index/about-csc/teachers.jpg") }}"
+                   alt="Преподаватель на лекции">
+            </div>
+            <div class="card__content">
+              <div class="card__title mb-4">Увлечённые преподаватели</div>
+              Мы ценим наших преподавателей — заслуженных деятелей науки и&nbsp;успешных специалистов в&nbsp;области.
+              Им действительно важно научить
+            </div>
+            <div class="card__content _meta">
+              <a href="/teachers/" target="_blank" class="btn _small _rounded _outline _gray">Преподаватели</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-5 mb-8">
+          <div class=" card _no-border theme-dark">
+            <div class="card__img">
+              <img class="img-fluid" src="{{ static("v2/img/pages/index/about-csc/holidays.jpg") }}"
+                   alt="Студенческий праздник в центре">
+            </div>
+            <div class="card__content">
+              <div class="card__title mb-4">Студенческие мероприятия</div>
+              В центре получают не&nbsp;только знания, но и&nbsp;знакомятся с&nbsp;людьми, близкими по&nbsp;духу
+              и&nbsp;увлечениям.
+            </div>
+            <div class="card__content _meta">
+              <a href="https://www.instagram.com/compscicenter/" rel="nofollow noopener" target="_blank"
+                 class="btn _small _rounded _outline _gray">Наш инстаграм</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-5 mb-8 offset-md-1">
+          <div class=" card _no-border theme-dark">
+            <div class="card__img">
+              <img class="img-fluid" src="{{ static("v2/img/pages/index/about-csc/graduation.jpg") }}"
+                   alt="Выпускной в центре">
+            </div>
+            <div class="card__content">
+              <div class="card__title">Выпускной</div>
+              Ежегодный выпускной — праздник для студентов, преподавателей и&nbsp;организаторов.
+              Подводим итоги года в&nbsp;неучебной обстановке
+            </div>
+            <div class="card__content _meta">
+              <a href="/alumni/" target="_blank" class="btn _small _rounded _outline _gray">Выпускники</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container text-center pt-4 pb-8">
+    <div class="about-csc__organizers my-10">
+      <h3>Организаторы</h3>
+      <p>CS центр — это совместная инициатива Школы анализа данных, Computer Science клуба и JetBrains.</p>
+      <div class="col-12">
+        <a target="_blank" rel="noopener" href="https://jetbrains.ru/students"
+           title="JetBrains">{{ macros.svg_image('logo-jetbrains') }}</a>
+        <a target="_blank" rel="noopener" href="https://yandexdataschool.ru/" title="Яндекс ШАД">{{ macros.svg_image('logo-shad') }}</a>
+        <a target="_blank" rel="noopener" href="http://239.ru/" title="ФМЛ №239">{{ macros.svg_image('logo-fml239') }}</a>
+        <a target="_blank" rel="noopener" href="https://compsciclub.ru/"
+           title="Computer Science Club">{{ macros.svg_image('logo-csclub') }}</a>
+      </div>
+    </div>
+  </div>
+
+  {% if announcements %}
+      <script type="text/javascript">
+          (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+      </script>
+      {% with %}
+          {% if announcements|length % 2 == 0 %}
+              {% set card_type = "v2" %}
+          {% elif announcements|length % 3 == 0 %}
+              {% set card_type = "v3" %}
+          {% else %}
+              {% set card_type = "h" %}
+          {% endif %}
+          <div class="grey-bg py-6">
+            <div class="container py-10">
+                <h2 class="text-center mb-10">Мероприятия</h2>
                 <div class="card-deck{% if card_type == 'v2' %} _two{% elif card_type == 'v3' %} _three{% endif %}">
                     {% for announcement in announcements %}
                         {% if card_type == 'h' %}
@@ -118,14 +259,15 @@
                     {% endfor %}
                 </div>
             </div>
-        {% endwith %}
-    {% endif %}
+          </div>
+      {% endwith %}
+  {% endif %}
 
-    <div class="csc-online-education">
-        <div class="container">
-            <h2 class="text-center">Онлайн-обучение</h2>
+    <div class="csc-online-education py-6">
+        <div class="container py-10">
+            <h2 class="text-center mb-10">Онлайн-образование</h2>
             <div class="card-deck _online-education">
-                {% for course in courses %}
+                {% for course in online_courses %}
                     <a class="card _no-border" href="{{ course.link }}" target="_blank" rel="noopener">
                         {% if course.avatar_url -%}
                             <div class="card__img _darken"><img src="{{ course.avatar_url }}" alt="{{ course.name }}"></div>
@@ -144,9 +286,9 @@
         </div>
     </div>
 
-    <div class="csc-student-reviews _grey-bg">
-        <div class="container">
-            <h2 class="text-center">Отзывы студентов</h2>
+    <div class="csc-student-reviews grey-bg py-6">
+        <div class="container py-10">
+            <h2 class="text-center mb-10">Отзывы студентов</h2>
             <div class="card-columns _testimonials">
                 {% for graduate_profile in testimonials %}
                     {{ macros_cards.testimonial_card(graduate_profile) }}
@@ -158,10 +300,9 @@
     </div>
 
 
-    <div class="social-media-posts">
-        <div class="container">
-            <h2 class="m-center">#compscicenter</h2>
-
+    <div class="social-media-posts py-6">
+        <div class="container py-10">
+            <h2 class="text-center text-sm-left mb-10">#compscicenter</h2>
             <div class="row">
                 {% if instagram_posts %}
                     <div class="col-lg">
@@ -174,7 +315,6 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-
                 <div class="col-lg">
                     {% if vk_news %}
                         {% for post in vk_news %}

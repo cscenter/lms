@@ -95,7 +95,7 @@ class IndexView(TemplateView):
 
     def get_context_data(self, **kwargs):
         # Online programs + online courses
-        courses = [
+        online_courses = [
             OnlineCourseTuple('Алгоритмы и эффективные вычисления',
                               'https://code.stepik.org/algo/',
                               staticfiles_storage.url('v2/img/pages/index/online_programs/algo.jpg'),
@@ -116,15 +116,15 @@ class IndexView(TemplateView):
                     .order_by("start", "name"))
         random.shuffle(pool)
         for course in pool[:3]:
-            courses.append(OnlineCourseTuple(name=course.name,
-                                             link=course.link,
-                                             avatar_url=course.avatar_url,
-                                             tag='Онлайн-курс'))
+            online_courses.append(OnlineCourseTuple(name=course.name,
+                                                    link=course.link,
+                                                    avatar_url=course.avatar_url,
+                                                    tag='Онлайн-курс'))
         testimonials = get_random_testimonials(4, TESTIMONIALS_CACHE_KEY)
         _cache = caches['social_networks']
         context = {
             'testimonials': testimonials,
-            'courses': courses,
+            'online_courses': online_courses,
             'vk_news': _cache.get(self.VK_CACHE_KEY),
             'instagram_posts': _cache.get(self.INSTAGRAM_CACHE_KEY),
             'is_admission_active': False,

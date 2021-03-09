@@ -107,3 +107,16 @@
     </div>
 </a>
 {%- endmacro %}
+
+{# Used on index page in courses block #}
+{% macro meta_course_card(course_title, course_link, image_url, image_title) -%}
+    <a href="{{ course_link }}"
+       class="card _horizontal-mobile _no-border _shadowed p-3 text-center">
+        <div class="card__img">
+            <img src="{{ static(image_url) }}" alt="{{ image_title}}">
+        </div>
+        <div class="card__content">
+            {{ course_title|safe }}
+        </div>
+    </a>
+{%- endmacro %}
