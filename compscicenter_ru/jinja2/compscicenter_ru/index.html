@@ -34,7 +34,7 @@
           {{ macros.svg_image('graduate') }}
           <h3 class="mt-4">Направления обучения</h3>
           <p>Студенты могут выпуститься из&nbsp;CS&nbsp;центра по&nbsp;одному из&nbsp;трёх направлений: Data
-            Science, Software Enginering, Computer Science</p>
+            Science, Software Enginering, Computer Science.</p>
         </div>
         <div class="col-sm-6 col-lg-4 pr-sm-8 mb-8">
           {{ macros.svg_image('courses') }}
@@ -138,7 +138,7 @@
             <div class="card__content">
               <div class="card__title mb-4">Заботливые кураторы</div>
               Команда CS&nbsp;центра чутко следит за&nbsp;процессом обучения и&nbsp;всегда готова помочь
-              каждому студенту
+              каждому студенту.
             </div>
             <div class="card__content _meta">
               <a href="/team/" target="_blank" class="btn _small _rounded _outline _gray">Команда центра</a>
@@ -155,7 +155,7 @@
             <div class="card__content">
               <div class="card__title mb-4">Увлечённые преподаватели</div>
               Мы ценим наших преподавателей — заслуженных деятелей науки и&nbsp;успешных специалистов в&nbsp;области.
-              Им действительно важно научить
+              Им действительно важно научить.
             </div>
             <div class="card__content _meta">
               <a href="/teachers/" target="_blank" class="btn _small _rounded _outline _gray">Преподаватели</a>
@@ -186,9 +186,9 @@
                    alt="Выпускной в центре">
             </div>
             <div class="card__content">
-              <div class="card__title">Выпускной</div>
+              <div class="card__title mb-4">Выпускной</div>
               Ежегодный выпускной — праздник для студентов, преподавателей и&nbsp;организаторов.
-              Подводим итоги года в&nbsp;неучебной обстановке
+              Подводим итоги года в&nbsp;неучебной обстановке.
             </div>
             <div class="card__content _meta">
               <a href="/alumni/" target="_blank" class="btn _small _rounded _outline _gray">Выпускники</a>
@@ -248,7 +248,7 @@
             <h2 class="text-center mb-10">Онлайн-образование</h2>
             <div class="card-deck _online-education">
                 {% for course in online_courses %}
-                    <a class="card _no-border" href="{{ course.link }}" target="_blank" rel="noopener">
+                    <a class="card _horizontal-mobile _no-border" href="{{ course.link }}" target="_blank" rel="noopener">
                         {% if course.avatar_url -%}
                             <div class="card__img _darken"><img src="{{ course.avatar_url }}" alt="{{ course.name }}"></div>
                         {%- endif %}
