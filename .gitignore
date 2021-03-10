@@ -19,3 +19,8 @@ coverage_html/
 .env
 # TODO: replace public/ with submodule, add to ignore here
 *-debug.log
+
+
+# Translations
+*.mo
+*.pot
