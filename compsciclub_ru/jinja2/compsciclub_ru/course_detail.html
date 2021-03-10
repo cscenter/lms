@@ -46,9 +46,9 @@
                 <div class="tab-pane {% if tab.is_default %}active{% endif %}" role="tabpanel" id="course-{{ tab.type }}">
                     <div class="ubertext course-description">
                     {% if course.description %}
-                        {{ course.description|markdown("course_description", 3600, course.pk, course.modified) }}
+                        {{ course.description|markdown("course_description", 3600, course.pk, course.modified, request.LANGUAGE_CODE) }}
                     {% else %}
-                        {{ course.meta_course.description|markdown("meta_course", 3600, course.meta_course.pk, course.meta_course.modified) }}
+                        {{ course.meta_course.description|markdown("meta_course", 3600, course.meta_course.pk, course.meta_course.modified, request.LANGUAGE_CODE) }}
                     {% endif %}
                     </div>
                 </div>

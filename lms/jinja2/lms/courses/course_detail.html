@@ -43,7 +43,7 @@
                 <div class="tab-pane {% if tab.is_default %}active{% endif %}" role="tabpanel" id="course-{{ tab.type }}">
                     <div class="ubertext course-description">
                     {% if course.description %}
-                        {{ course.description|markdown("course_description", 3600, course.pk, course.modified) }}
+                        {{ course.description|markdown("course_description", 3600, course.pk, course.modified, request.LANGUAGE_CODE) }}
                     {% else %}
                         TBA
                     {% endif %}
