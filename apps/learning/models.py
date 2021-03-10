@@ -405,10 +405,11 @@ class Invitation(TimeStampedModel):
 
 
 class AssignmentStatuses(DjangoChoices):
-    NEW = ChoiceItem('new', _("New"))
-    CHECK = ChoiceItem('check', _("Check"))
-    ACCEPTED = ChoiceItem('accept', _("Accepted"))
-    REWORK = ChoiceItem('rework', _("Rework"))
+    # TODO: describe each status
+    NEW = ChoiceItem('new', _("AssignmentStatus|New"))
+    CHECK = ChoiceItem('check', _("AssignmentStatus|Check"))
+    ACCEPTED = ChoiceItem('accept', _("AssignmentStatus|Accepted"))
+    REWORK = ChoiceItem('rework', _("AssignmentStatus|Rework"))
 
 
 class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
@@ -473,6 +474,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         settings.AUTH_USER_MODEL,
         verbose_name=_("Student Assignment Watchers"),
         related_name="+",  # Disable backwards relation
+        blank=True,  # Make this field optional in django admin
     )
     score_changed = MonitorField(
         verbose_name=_("Assignment|grade changed"),

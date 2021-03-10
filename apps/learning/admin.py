@@ -85,6 +85,14 @@ class EnrollmentAdmin(BaseModelAdmin):
         return instance
 
 
+class StudentAssignmentWatcherInlineAdmin(admin.TabularInline):
+    verbose_name_plural = _("Watchers")
+    verbose_name = _("Watcher")
+    model = StudentAssignment.watchers.through
+    raw_id_fields = ('user',)
+    extra = 0
+
+
 @admin.register(StudentAssignment)
 class StudentAssignmentAdmin(BaseModelAdmin):
     list_select_related = [
@@ -97,7 +105,9 @@ class StudentAssignmentAdmin(BaseModelAdmin):
     list_display = ['student', 'assignment', 'score', 'score_changed',
                     'state_display']
     search_fields = ['student__last_name']
-    raw_id_fields = ["assignment", "student"]
+    raw_id_fields = ["assignment", "student", "assignee"]
+    exclude = ['watchers']
+    inlines = [StudentAssignmentWatcherInlineAdmin]
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
