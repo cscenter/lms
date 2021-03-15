@@ -294,6 +294,9 @@ class Enrollment(TimezoneAwareMixin, TimeStampedModel):
         if self.student_profile_id and self.student_profile.user_id != self.student_id:
             raise ValidationError(_("Student profile does not match "
                                     "selected user"))
+        if self.student_group_id and self.student_group.course_id != self.course_id:
+            raise ValidationError(_("Student group must refer to one of the"
+                                    "student groups of the selected course"))
 
     def grade_changed_local(self, tz=None):
         if not tz:

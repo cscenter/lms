@@ -327,6 +327,10 @@ def test_assignment_service_sync_student_assignments():
     assignment.restricted_to.add(group_nsk)
     AssignmentService.sync_student_assignments(assignment)
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 1
+    # [nsk] -> [nsk, spb]
+    assignment.restricted_to.add(group_spb)
+    AssignmentService.sync_student_assignments(assignment)
+    assert StudentAssignment.objects.filter(assignment=assignment).count() == 2
 
 
 @pytest.mark.django_db
