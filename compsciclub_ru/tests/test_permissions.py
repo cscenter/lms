@@ -4,6 +4,7 @@ import datetime
 import pytest
 
 from core.tests.factories import BranchFactory
+from core.tests.settings import TEST_DOMAIN
 from core.timezone import now_local
 from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.models import Enrollment
@@ -16,7 +17,7 @@ from users.tests.factories import StudentFactory
 def test_enrollment(client, settings):
     """ Club Student can enroll only on open courses """
     branch_spb = BranchFactory(code=Branches.SPB,
-                               site__domain=settings.TEST_DOMAIN)
+                               site__domain=TEST_DOMAIN)
     today = now_local(branch_spb.get_timezone())
     tomorrow = today + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(

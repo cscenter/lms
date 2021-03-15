@@ -6,6 +6,7 @@ from django.core.cache import cache
 
 from core.models import Branch
 from core.tests.factories import BranchFactory
+from core.tests.settings import ANOTHER_DOMAIN_ID
 from core.urls import reverse
 from courses.services import CourseService
 from learning.models import GraduateProfile
@@ -82,7 +83,7 @@ def test_meta_course_detail(client, settings):
     assert 'tabs' in response.context_data
     assert len(response.context_data['tabs']) == 1
     # Relocate course to the non-target branch
-    branch = BranchFactory(site_id=settings.ANOTHER_DOMAIN_ID)
+    branch = BranchFactory(site_id=ANOTHER_DOMAIN_ID)
     course2.main_branch = branch
     course2.save()
     CourseService.sync_branches(course2)

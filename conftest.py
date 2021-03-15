@@ -11,6 +11,7 @@ from pytest_django.lazy_django import skip_if_no_django
 from core.models import SiteConfiguration
 from core.tests.factories import BranchFactory, CityFactory, \
     SiteConfigurationFactory, SiteFactory
+from core.tests.settings import TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID, TEST_DOMAIN, ANOTHER_DOMAIN
 from core.tests.utils import TestClient, CSCTestCase
 from learning.settings import Branches
 from notifications.models import Type
@@ -80,8 +81,8 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
         SiteConfiguration.objects.all().delete()
         Site.objects.all().delete()
         domains = [
-            (settings.TEST_DOMAIN_ID, settings.TEST_DOMAIN),
-            (settings.ANOTHER_DOMAIN_ID, settings.ANOTHER_DOMAIN),
+            (TEST_DOMAIN_ID, TEST_DOMAIN),
+            (ANOTHER_DOMAIN_ID, ANOTHER_DOMAIN),
         ]
         for site_id, domain in domains:
             Site.objects.update_or_create(id=site_id, defaults={
@@ -95,9 +96,9 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
             for sql in sequence_sql:
                 cursor.execute(sql)
         # Model-based configuration
-        site1 = SiteFactory(domain=settings.TEST_DOMAIN)
+        site1 = SiteFactory(domain=TEST_DOMAIN)
         site1_conf = SiteConfigurationFactory(site=site1)
-        site2 = SiteFactory(domain=settings.ANOTHER_DOMAIN)
+        site2 = SiteFactory(domain=ANOTHER_DOMAIN)
         site2_conf = SiteConfigurationFactory(site=site2)
         site2_conf.lms_subdomain = None
         site2_conf.save()
@@ -108,7 +109,7 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
                                time_zone='Asia/Novosibirsk',)
         city_kzn = CityFactory(name="Kazan", code="kzn", abbr="kzn")
         # FIXME: add ru/en names
-        for site_id in (settings.TEST_DOMAIN_ID, settings.ANOTHER_DOMAIN_ID):
+        for site_id in (TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID):
             BranchFactory(code=Branches.SPB,
                           site=Site.objects.get(id=site_id),
                           name="Санкт-Петербург",
@@ -124,12 +125,12 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
                           city=city_nsk)
 
         BranchFactory(code=Branches.DISTANCE,
-                      site=Site.objects.get(id=settings.TEST_DOMAIN_ID),
+                      site=Site.objects.get(id=TEST_DOMAIN_ID),
                       name="Заочное",
                       city=None)
 
         BranchFactory(code='kzn',
-                      site=Site.objects.get(id=settings.ANOTHER_DOMAIN_ID),
+                      site=Site.objects.get(id=ANOTHER_DOMAIN_ID),
                       name="Казань",
                       city=city_kzn)
 

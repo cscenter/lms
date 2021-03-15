@@ -4,12 +4,13 @@ from django.conf import settings
 from django.test import Client, TestCase
 from django.utils.functional import Promise
 
+from core.tests.settings import TEST_DOMAIN
 from core.urls import reverse
 
 if settings.LMS_SUBDOMAIN:
-    _SERVER_NAME = f"{settings.LMS_SUBDOMAIN}.{settings.TEST_DOMAIN}"
+    _SERVER_NAME = f"{settings.LMS_SUBDOMAIN}.{TEST_DOMAIN}"
 else:
-    _SERVER_NAME = settings.TEST_DOMAIN
+    _SERVER_NAME = TEST_DOMAIN
 
 
 class TestClient(Client):
@@ -36,7 +37,7 @@ class TestClient(Client):
         env = super()._base_environ(**request)
         if 'SERVER_NAME' not in request:
             # Override default server name `testserver`
-            env['SERVER_NAME'] = settings.TEST_DOMAIN
+            env['SERVER_NAME'] = TEST_DOMAIN
         return env
 
     def _patch_extra(self, path, extra):

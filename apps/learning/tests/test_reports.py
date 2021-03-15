@@ -7,6 +7,7 @@ from pandas import DataFrame
 
 from core.models import Branch
 from core.tests.factories import BranchFactory
+from core.tests.settings import ANOTHER_DOMAIN
 from courses.utils import get_term_by_index
 from learning.reports import FutureGraduateDiplomasReport, ProgressReportFull, \
     ProgressReportForSemester, ProgressReport, OfficialDiplomasReport
@@ -492,7 +493,7 @@ def test_report_official_diplomas_csv(settings):
     assert len(progress_report) == 2
 
     # Add an enrollment to a club course, it should not be shown in the report
-    branch_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
+    branch_club = BranchFactory(site__domain=ANOTHER_DOMAIN)
     course_club = CourseFactory(main_branch=branch_club,
                                 branches=[student_profile1.branch])
     EnrollmentFactory(course=course_club, student=student1,

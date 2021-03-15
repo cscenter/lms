@@ -4,6 +4,7 @@ import pytest
 from django.utils.timezone import now
 
 from core.tests.factories import BranchFactory
+from core.tests.settings import ANOTHER_DOMAIN_ID
 from core.urls import reverse
 from courses.models import CourseTeacher
 from courses.tests.factories import SemesterFactory, CourseFactory, \
@@ -68,7 +69,7 @@ def test_teachers_list(client, settings):
     response = client.get(url)
     assert len(response.data) == 1
     assert len(response.data[0]["courses"]) == 2
-    teacher1.add_group(Roles.TEACHER, site_id=settings.ANOTHER_DOMAIN_ID)
+    teacher1.add_group(Roles.TEACHER, site_id=ANOTHER_DOMAIN_ID)
     response = client.get(url)
     assert len(response.data) == 1
     assert len(response.data[0]["courses"]) == 2

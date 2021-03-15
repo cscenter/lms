@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from django.utils.encoding import smart_bytes
 
 from core.tests.factories import BranchFactory
+from core.tests.settings import ANOTHER_DOMAIN
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
@@ -36,7 +37,7 @@ def test_staff_diplomas_view_should_contain_club_courses(curator, client, settin
     student = student_profile.user
 
     # Add an enrollment to a club course, it should be shown in the TeX template
-    branch_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
+    branch_club = BranchFactory(site__domain=ANOTHER_DOMAIN)
     course_club = CourseFactory(main_branch=branch_club,
                                 branches=[student_profile.branch])
     EnrollmentFactory(course=course_club, student=student,
@@ -106,7 +107,7 @@ def test_official_diplomas_list_view(client):
 def test_official_diplomas_views_should_be_site_aware(client, settings):
     # 2-digit day and month to avoid bothering with zero padding
     diploma_issued_on = date(2020, 12, 20)
-    g1 = GraduateProfileFactory(student_profile__branch__site__domain=settings.ANOTHER_DOMAIN,
+    g1 = GraduateProfileFactory(student_profile__branch__site__domain=ANOTHER_DOMAIN,
                                 diploma_issued_on=diploma_issued_on)
 
     # No graduates from current site, status codes should be 404
@@ -159,7 +160,7 @@ def test_official_diplomas_tex_should_not_contain_club_courses(client, settings)
                       student_profile=student_profile1, grade=GradeTypes.GOOD)
 
     # Add an enrollment to a club course, it should not be shown in the TeX template
-    branch_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
+    branch_club = BranchFactory(site__domain=ANOTHER_DOMAIN)
     course_club = CourseFactory(main_branch=branch_club,
                                 branches=[student_profile1.branch])
     EnrollmentFactory(course=course_club, student=student1,

@@ -5,6 +5,7 @@ from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 
 from core.models import City, Branch, Location, SiteConfiguration, University
+from core.tests.settings import TEST_DOMAIN
 from learning.settings import Branches
 
 __all__ = ('CityFactory', 'EmailTemplateFactory', 'BranchFactory',
@@ -17,7 +18,7 @@ class SiteFactory(factory.django.DjangoModelFactory):
         model = Site
         django_get_or_create = ('domain',)
 
-    domain = settings.TEST_DOMAIN
+    domain = TEST_DOMAIN
     name = factory.Sequence(lambda n: "Site Name %03d" % n)
 
 
@@ -69,7 +70,7 @@ class BranchFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Branch %03d" % n)
     code = factory.Sequence(lambda n: "b%03d" % n)
     site = factory.SubFactory(SiteFactory,
-                              domain=factory.LazyAttribute(lambda o: settings.TEST_DOMAIN))
+                              domain=factory.LazyAttribute(lambda o: TEST_DOMAIN))
     city = factory.SubFactory(CityFactory)
     order = factory.Sequence(lambda n: n)
     established = 2013

@@ -2,6 +2,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from core.tests.factories import BranchFactory
+from core.tests.settings import TEST_DOMAIN_ID
 from courses.models import CourseBranch
 from courses.services import CourseService
 from courses.tests.factories import CourseFactory, CourseClassFactory
@@ -48,7 +49,7 @@ def test_get_course_sync_branches_change_main_branch():
 def test_get_teacher_classes_should_not_return_duplicate_classes(settings):
     branch1, branch2 = BranchFactory.create_batch(2)
     t = TeacherFactory(branch=branch1,
-                       required_groups__site_id=settings.TEST_DOMAIN_ID)
+                       required_groups__site_id=TEST_DOMAIN_ID)
     course = CourseFactory(teachers=[t],
                            main_branch=branch1,
                            branches=[branch1, branch2])

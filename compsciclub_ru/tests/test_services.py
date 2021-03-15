@@ -1,6 +1,7 @@
 import pytest
 
 from core.tests.factories import BranchFactory
+from core.tests.settings import ANOTHER_DOMAIN
 from courses.tests.factories import SemesterFactory, CourseFactory, CourseClassFactory
 from learning.services import get_classes
 from learning.settings import Branches
@@ -15,7 +16,7 @@ def test_course_class_manager_in_branches_for_club(client, settings):
     """
     current_semester = SemesterFactory.create_current()
     branch_center = BranchFactory(code=Branches.SPB,
-                                  site__domain=settings.ANOTHER_DOMAIN)
+                                  site__domain=ANOTHER_DOMAIN)
     branch_club = BranchFactory(code=Branches.SPB)
     co_center = CourseFactory.create(semester=current_semester,
                                      main_branch=branch_center)

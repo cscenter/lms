@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 
 from core.models import Branch
 from core.tests.factories import BranchFactory
+from core.tests.settings import TEST_DOMAIN, ANOTHER_DOMAIN
 from courses.constants import SemesterTypes, TeacherRoles, \
     MaterialVisibilityTypes
 from courses.models import Assignment, CourseTeacher, Course, CourseClass
@@ -144,8 +145,8 @@ def test_course_is_club_course(settings):
     """
     Center courses should not be considered as Club courses even if they were shared with CS Club
     """
-    branch_spb_center = BranchFactory(site__domain=settings.TEST_DOMAIN)
-    branch_spb_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
+    branch_spb_center = BranchFactory(site__domain=TEST_DOMAIN)
+    branch_spb_club = BranchFactory(site__domain=ANOTHER_DOMAIN)
     course_center = CourseFactory(main_branch=branch_spb_center)
     course_club = CourseFactory(main_branch=branch_spb_club)
     course_center.branches.add(branch_spb_club)

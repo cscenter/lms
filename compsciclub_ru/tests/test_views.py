@@ -1,4 +1,3 @@
-from functools import partial
 
 import pytest
 from bs4 import BeautifulSoup
@@ -7,9 +6,10 @@ from django.utils.encoding import smart_bytes
 
 from compsciclub_ru.views import ClubClassesFeed
 from core.tests.factories import BranchFactory
+from core.tests.settings import ANOTHER_DOMAIN, TEST_DOMAIN
 from core.urls import reverse
-from courses.models import Course
-from courses.tests.factories import CourseClassFactory, SemesterFactory, CourseFactory
+from courses.tests.factories import CourseClassFactory, SemesterFactory, \
+    CourseFactory
 from learning.settings import Branches
 from users.tests.factories import TeacherFactory
 
@@ -24,9 +24,9 @@ def test_index_view_course_list(client, settings):
     earlier_semester = SemesterFactory.create(year=2019, type='autumn')
 
     branch_spb_center = BranchFactory(code=Branches.SPB,
-                                      site__domain=settings.ANOTHER_DOMAIN)
+                                      site__domain=ANOTHER_DOMAIN)
     branch_spb_club = BranchFactory(code=Branches.SPB,
-                                    site__domain=settings.TEST_DOMAIN)
+                                    site__domain=TEST_DOMAIN)
 
     course_center_private = CourseFactory(semester=current_semester,
                                           main_branch=branch_spb_center)
@@ -57,9 +57,9 @@ def test_course_list(client, settings):
     """
     current_semester = SemesterFactory.create_current()
     branch_spb_center = BranchFactory(code=Branches.SPB,
-                                      site__domain=settings.ANOTHER_DOMAIN)
+                                      site__domain=ANOTHER_DOMAIN)
     branch_spb_club = BranchFactory(code=Branches.SPB,
-                                    site__domain=settings.TEST_DOMAIN)
+                                    site__domain=TEST_DOMAIN)
     course_center_private = CourseFactory(semester=current_semester,
                                           main_branch=branch_spb_center)
     course_center_public = CourseFactory(semester=current_semester,
@@ -87,7 +87,7 @@ def test_club_classes_feed(rf, client, settings, mocker):
     """
     current_semester = SemesterFactory.create_current()
     branch_center = BranchFactory(code=Branches.SPB,
-                                  site__domain=settings.ANOTHER_DOMAIN)
+                                  site__domain=ANOTHER_DOMAIN)
     branch_club = BranchFactory(code=Branches.SPB)
     co_center = CourseFactory.create(semester=current_semester,
                                      main_branch=branch_center)
@@ -120,9 +120,9 @@ def test_club_classes_feed(rf, client, settings, mocker):
 @pytest.mark.django_db
 def test_teachers_list_view_should_show_only_club_course_teachers(client, settings):
     branch_spb_center = BranchFactory(code=Branches.SPB,
-                                      site__domain=settings.ANOTHER_DOMAIN)
+                                      site__domain=ANOTHER_DOMAIN)
     branch_spb_club = BranchFactory(code=Branches.SPB,
-                                    site__domain=settings.TEST_DOMAIN)
+                                    site__domain=TEST_DOMAIN)
     t1, t2 = TeacherFactory.create_batch(2)
 
     # Both courses are available for club students, but only t2 should be listed among teachers
@@ -143,9 +143,9 @@ def test_teachers_list_view_should_show_only_club_course_teachers(client, settin
 @pytest.mark.django_db
 def test_teachers_detail_view_should_show_only_club_courses(client, settings):
     branch_spb_center = BranchFactory(code=Branches.SPB,
-                                      site__domain=settings.ANOTHER_DOMAIN)
+                                      site__domain=ANOTHER_DOMAIN)
     branch_spb_club = BranchFactory(code=Branches.SPB,
-                                    site__domain=settings.TEST_DOMAIN)
+                                    site__domain=TEST_DOMAIN)
     t = TeacherFactory()
 
     course_center = CourseFactory(main_branch=branch_spb_center,

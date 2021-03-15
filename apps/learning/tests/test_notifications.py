@@ -12,6 +12,7 @@ from subdomains.utils import get_domain
 
 from core.models import SiteConfiguration
 from core.tests.factories import BranchFactory
+from core.tests.settings import TEST_DOMAIN, TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID, ANOTHER_DOMAIN
 from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse
 from courses.admin import AssignmentAdmin
@@ -276,7 +277,7 @@ def test_new_assignment_notification_context(client, settings):
     settings.DEFAULT_URL_SCHEME = 'https'
     abs_url = client.get('', secure=True).wsgi_request.build_absolute_uri
     current_domain = get_domain()
-    assert current_domain == settings.TEST_DOMAIN
+    assert current_domain == TEST_DOMAIN
     if settings.LMS_SUBDOMAIN:
         current_domain = f"{settings.LMS_SUBDOMAIN}.{current_domain}"
     branch_spb = BranchFactory(code=Branches.SPB)
@@ -341,10 +342,10 @@ def test_new_assignment_notification_context_timezone(settings, mocker):
 
 @pytest.mark.django_db
 def test_new_course_news_notification_context(settings, client):
-    settings.SITE_ID = settings.TEST_DOMAIN_ID
+    settings.SITE_ID = TEST_DOMAIN_ID
     settings.DEFAULT_URL_SCHEME = 'https'
     abs_url = client.get('', secure=True).wsgi_request.build_absolute_uri
-    assert get_domain() == settings.TEST_DOMAIN
+    assert get_domain() == TEST_DOMAIN
     course = CourseFactory()
     student = StudentFactory(branch=course.main_branch)
     enrollment = EnrollmentFactory(course=course, student=student)
@@ -355,14 +356,14 @@ def test_new_course_news_notification_context(settings, client):
     context = get_course_news_notification_context(cn, participant_branch,
                                                    site_settings)
     assert context['course_link'] == abs_url(course.get_absolute_url())
-    another_site = Site.objects.get(pk=settings.ANOTHER_DOMAIN_ID)
+    another_site = Site.objects.get(pk=ANOTHER_DOMAIN_ID)
     branch = BranchFactory(code=settings.DEFAULT_BRANCH_CODE, site=another_site)
     cn = CourseNewsNotificationFactory(
         course_offering_news__course=course,
         user=StudentFactory(branch=branch))
-    site_settings = SiteConfiguration.objects.get(site_id=settings.ANOTHER_DOMAIN_ID)
+    site_settings = SiteConfiguration.objects.get(site_id=ANOTHER_DOMAIN_ID)
     context = get_course_news_notification_context(cn, branch, site_settings)
-    assert context['course_link'].startswith(f'https://{settings.ANOTHER_DOMAIN}')
+    assert context['course_link'].startswith(f'https://{ANOTHER_DOMAIN}')
 
 
 @pytest.mark.django_db

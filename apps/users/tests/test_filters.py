@@ -3,6 +3,7 @@ import datetime
 import pytest
 
 from core.tests.factories import BranchFactory
+from core.tests.settings import ANOTHER_DOMAIN_ID
 from core.urls import reverse_lazy
 from courses.constants import SemesterTypes
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
@@ -64,7 +65,7 @@ def test_student_search(client, curator, search_url, settings):
                    student_profile__status=StudentStatuses.EXPELLED,
                    last_name='Иванов',
                    first_name='Иван')
-    branch = BranchFactory(site_id=settings.ANOTHER_DOMAIN_ID)
+    branch = BranchFactory(site_id=ANOTHER_DOMAIN_ID)
     StudentFactory(last_name='Сидоров', first_name='Сидор',
                    student_profile__year_of_admission=2011,
                    student_profile__year_of_curriculum=2011,
@@ -188,7 +189,7 @@ def test_student_search_enrollments(client, curator, search_url):
 def test_student_search_by_types(client, curator, search_url, settings):
     client.login(curator)
     # All users below are considered as `studying` due to empty status
-    branch = BranchFactory(site_id=settings.ANOTHER_DOMAIN_ID)
+    branch = BranchFactory(site_id=ANOTHER_DOMAIN_ID)
     StudentFactory.create_batch(2, student_profile__branch=branch)
     students = StudentFactory.create_batch(
         3,
@@ -212,7 +213,7 @@ def test_student_search_by_types(client, curator, search_url, settings):
     graduated = GraduateFactory(student_profile__year_of_admission=2012,
                                 student_profile__year_of_curriculum=2012,
                                 student_profile__status="",
-                                student_profile__site_id=settings.ANOTHER_DOMAIN_ID)
+                                student_profile__site_id=ANOTHER_DOMAIN_ID)
     url = f"{search_url}?status=studying&types={StudentTypes.REGULAR}&curriculum_year=2011,2012"
     response = client.get(url)
     assert response.json()["count"] == len(students)
