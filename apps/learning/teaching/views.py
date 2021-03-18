@@ -286,6 +286,14 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
                 .order_by('-semester__index', 'meta_course__name'))
 
 
+class StudentGroupListView(TeacherOnlyMixin, generic.ListView):
+    model = StudentGroup
+    context_object_name = 'student_group_list'
+    template_name = "learning/teaching/student_group_list.html"
+
+    def get_queryset(self):
+        return StudentGroup.objects.all()
+
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
 # FIXME: replace with vanilla view
 class AssignmentCommentUpdateView(generic.UpdateView):

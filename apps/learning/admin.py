@@ -171,8 +171,14 @@ class InvitationAdmin(BaseModelAdmin):
         return mark_safe(f"<a target='_blank' href='{url}'>Смотреть на сайте</a>")
 
 
+class StudentGroupAdmin(BaseModelAdmin):
+    list_display = ('name', 'course', 'type')
+    list_filter = ('course', 'branch')
+
+
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(Invitation, InvitationAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(GraduateProfile, GraduateProfileAdmin)
+admin.site.register(StudentGroup, StudentGroupAdmin)
