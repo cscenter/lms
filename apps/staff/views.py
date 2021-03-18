@@ -79,11 +79,18 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
             'json_api_uri': reverse('staff:student_search_json'),
             'branches': {b.pk: b.name for b in branches},
             'curriculum_years': (StudentProfile.objects
+                                 .filter(site=self.request.site,
+                                         year_of_curriculum__isnull=False)
                                  .values_list('year_of_curriculum',
                                               flat=True)
-                                 .filter(year_of_curriculum__isnull=False)
                                  .order_by('year_of_curriculum')
                                  .distinct()),
+            'admission_years': (StudentProfile.objects
+                                .filter(site=self.request.site,
+                                        year_of_admission__isnull=False)
+                                .values_list('year_of_admission', flat=True)
+                                .order_by('year_of_admission')
+                                .distinct()),
             "types": StudentTypes.choices,
             "academic_disciplines": AcademicDiscipline.objects.all(),
             "status": StudentStatuses.values,

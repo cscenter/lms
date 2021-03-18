@@ -32,11 +32,23 @@
             </div>
           </div>
           <div class="form-group">
+            <label>{% trans %}Student|admission year{% endtrans %}</label><br>
+            <div class="btn-group btn-group-sm" data-toggle="buttons">
+              {% for year in admission_years %}
+                <label class="btn btn-default">
+                  <input type="checkbox" name="year_of_admission"
+                         value="{{ year }}"
+                         autocomplete="off">{{ year }}
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="form-group">
             <label>{% trans %}CSCUser|Curriculum year{% endtrans %}</label><br>
             <div class="btn-group btn-group-sm" data-toggle="buttons">
               {% for year in curriculum_years %}
                 <label class="btn btn-default">
-                  <input type="checkbox" name="curriculum_year_cb"
+                  <input type="checkbox" name="year_of_curriculum"
                          value="{{ year }}"
                          autocomplete="off">{{ year }}
                 </label>
