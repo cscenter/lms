@@ -66,6 +66,7 @@ class StudentFilter(FilterSet):
     status = CharFilter(label='Student Status', method='status_filter')
     cnt_enrollments = CharFilter(label='Enrollments',
                                  method='courses_filter')
+    academic_disciplines = CharInFilter(field_name='academic_disciplines', distinct=True)
 
     class Meta:
         model = StudentProfile

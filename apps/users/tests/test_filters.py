@@ -10,6 +10,7 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, GraduateFactory
+from study_programs.tests.factories import AcademicDisciplineFactory
 from users.constants import Roles
 from users.models import StudentTypes
 from users.tests.factories import UserFactory, VolunteerFactory, \
@@ -237,7 +238,7 @@ def test_student_search_by_branch(client, curator, search_url):
     response = client.get("{}?branches={}".format(search_url, branch_spb.pk))
     json_data = response.json()
     assert json_data["count"] == len(students_spb)
-    assert {s.pk for s in students_spb} == {r["pk"] for r in
+    assert {s.pk for s in students_spb} == {r["user_id"] for r in
                                             json_data["results"]}
     response = client.get(
         f"{search_url}?branches={branch_spb.pk},{branch_nsk.pk}")
@@ -295,3 +296,26 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
     query = f"status=studying,{StudentStatuses.GRADUATE}&types={StudentTypes.VOLUNTEER}"
     response = client.get("{}?{}".format(search_url, query))
     assert response.json()["count"] == len(volunteers)
+
+
+@pytest.mark.django_db
+def test_student_search_academic_disciplines(settings, client, search_url):
+    branch_spb = BranchFactory(code=Branches.SPB, site_id=settings.SITE_ID)
+    ad1, ad2, ad3 = AcademicDisciplineFactory.create_batch(3)
+    client.login(CuratorFactory())
+    params = dict(student_profile__year_of_admission=2011, student_profile__status="", branch=branch_spb,)
+    students_1 = StudentFactory.create_batch(3, student_profile__academic_disciplines=[ad1, ad2], **params)
+    students_2 = StudentFactory.create_batch(2, student_profile__academic_disciplines=[ad2, ad3], **params)
+    students_3 = StudentFactory.create_batch(2, student_profile__academic_disciplines=[], **params)
+    # Empty query
+    response = client.get("{}?{}".format(search_url, "branches="))
+    assert response.json()["count"] == 0
+    response = client.get("{}?academic_disciplines={}".format(search_url, ad1.pk))
+    assert response.json()["count"] == len(students_1)
+    assert {s.pk for s in students_1} == {r["user_id"] for r in response.json()["results"]}
+    response = client.get(f"{search_url}?academic_disciplines={ad1.pk},{ad2.pk}")
+    assert response.json()["count"] == len(students_1) + len(students_2)
+    response = client.get(f"{search_url}?academic_disciplines={ad1.pk},{ad3.pk}")
+    assert response.json()["count"] == len(students_1) + len(students_2)
+    assert not {s.pk for s in students_3}.intersection({r["user_id"] for r in response.json()["results"]})
+
