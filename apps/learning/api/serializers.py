@@ -1,6 +1,7 @@
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
+from api.utils import DynamicFieldsModelSerializer
 from core.api.serializers import BranchSerializer
 from courses.api.serializers import CourseSerializer, AssignmentSerializer
 from learning.models import CourseNewsNotification, StudentAssignment, \
@@ -19,17 +20,21 @@ class StudentSerializer(UserSerializer):
         fields = ('id', 'first_name', 'last_name', 'patronymic', 'gender')
 
 
-class StudentProfileSerializer(serializers.ModelSerializer):
+class StudentProfileSerializer(DynamicFieldsModelSerializer):
     branch = BranchSerializer()
     student = StudentSerializer(source='user')
+    short_name = serializers.SerializerMethodField()
 
     class Meta:
         model = StudentProfile
-        fields = ('id', 'type', 'branch', 'year_of_admission', 'student')
+        fields = ('id', 'type', 'branch', 'year_of_admission', 'student', 'short_name')
+
+    def get_short_name(self, student_profile):
+        return student_profile.user.get_short_name()
 
 
 class EnrollmentSerializer(serializers.ModelSerializer):
-    student_profile = StudentProfileSerializer()
+    student_profile = StudentProfileSerializer(fields=('id', 'type', 'branch', 'year_of_admission', 'student'))
 
     class Meta:
         model = Enrollment
