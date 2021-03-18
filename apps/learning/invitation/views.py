@@ -45,7 +45,8 @@ def complete_student_profile(user: User, site: Site, invitation: Invitation):
             create_student_profile(user=user,
                                    branch=invitation.branch,
                                    profile_type=StudentTypes.INVITED,
-                                   year_of_admission=invitation_year)
+                                   year_of_admission=invitation_year,
+                                   invitation=invitation)
 
 
 class InvitationURLParamsMixin:
