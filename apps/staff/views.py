@@ -37,6 +37,7 @@ from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import FacesQueryParams
 from staff.tex import generate_tex_student_profile_for_diplomas
+from study_programs.models import AcademicDiscipline
 from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.filters import StudentFilter
@@ -70,13 +71,10 @@ class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):
 
 
 class StudentSearchView(CuratorOnlyMixin, TemplateView):
-    template_name = "staff/student_search.html"
+    template_name = "lms/staff/student_search.html"
 
     def get_context_data(self, **kwargs):
-        # TODO: rewrite with django-filters
-        branches = (Branch.objects
-                    .filter(site_id=settings.SITE_ID)
-                    .order_by('order'))
+        branches = Branch.objects.for_site(site_id=settings.SITE_ID)
         context = {
             'json_api_uri': reverse('staff:student_search_json'),
             'branches': {b.pk: b.name for b in branches},
@@ -87,6 +85,7 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
                                  .order_by('year_of_curriculum')
                                  .distinct()),
             "types": StudentTypes.choices,
+            "academic_disciplines": AcademicDiscipline.objects.all(),
             "status": StudentStatuses.values,
             "cnt_enrollments": range(StudentFilter.ENROLLMENTS_MAX + 1)
         }
