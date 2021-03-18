@@ -8,7 +8,7 @@ from learning.teaching.views import TimetableView as TeacherTimetable, \
     AssignmentCommentUpdateView, AssignmentDetailView, AssignmentListView, \
     CalendarFullView, CalendarPersonalView, CourseListView, \
     StudentAssignmentDetailView, GradeBookListView, \
-    StudentAssignmentCommentCreateView
+    StudentAssignmentCommentCreateView, StudentGroupListView
 from learning.api.views import CourseNewsUnreadNotificationsView
 
 
@@ -21,6 +21,7 @@ urlpatterns = [
     path('full-calendar/', CalendarFullView.as_view(), name='calendar_full'),
     path('courses/', include([
         path('', CourseListView.as_view(), name='course_list'),
+        path('group/', StudentGroupListView.as_view(), name='student_group_list'),
         # TODO: separate api views?
         path("news/<int:news_pk>/stats", CourseNewsUnreadNotificationsView.as_view(), name="course_news_unread"),
     ])),

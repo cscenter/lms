@@ -31,7 +31,7 @@ from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm, \
     AssignmentCommentForm
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import AssignmentComment, StudentAssignment, Enrollment, \
-    AssignmentSubmissionTypes
+    AssignmentSubmissionTypes, StudentGroup, StudentGroupAssignee
 from learning.permissions import CreateAssignmentComment, ViewStudentAssignment, \
     EditOwnStudentAssignment, ViewStudentAssignmentList
 from learning.services import get_teacher_classes, AssignmentService
@@ -280,6 +280,14 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
                 .prefetch_related('teachers')
                 .order_by('-semester__index', 'meta_course__name'))
 
+
+class StudentGroupListView(TeacherOnlyMixin, generic.ListView):
+    model = StudentGroup
+    context_object_name = 'student_group_list'
+    template_name = "learning/teaching/student_group_list.html"
+
+    def get_queryset(self):
+        return StudentGroup.objects.all()
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
 # FIXME: replace with vanilla view
