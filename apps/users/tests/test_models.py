@@ -9,7 +9,7 @@ from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
 from users.constants import Roles
 from users.tests.factories import StudentFactory, CuratorFactory, UserFactory, \
-    UserGroupFactory
+    UserGroupFactory, StudentProfileFactory
 
 
 @pytest.mark.django_db
@@ -135,6 +135,15 @@ def test_github_login_validation():
     user.clean_fields()
     user.github_login = "m-i-k-h-a-i-l-m"
     user.clean_fields()
+
+
+@pytest.mark.django_db
+def test_student_profile_year_of_admission():
+    branch = BranchFactory(established=2011)
+    with pytest.raises(ValidationError):
+        StudentProfileFactory(branch=branch, year_of_admission=2010)
+    student_profile = StudentProfileFactory(branch=branch, year_of_admission=2011)
+    assert student_profile.pk
 
 
 def test_get_abbreviated_short_name():

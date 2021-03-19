@@ -73,7 +73,7 @@ class BranchFactory(factory.django.DjangoModelFactory):
                               domain=factory.LazyAttribute(lambda o: TEST_DOMAIN))
     city = factory.SubFactory(CityFactory)
     order = factory.Sequence(lambda n: n)
-    established = 2013
+    established = 1990
     active = True
 
     @factory.lazy_attribute

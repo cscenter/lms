@@ -12,6 +12,7 @@ from django.contrib.auth.models import AnonymousUser, PermissionsMixin, \
     _user_has_perm
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.sites.models import Site
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
 from django.db.models import prefetch_related_objects, Q
@@ -715,8 +716,7 @@ class StudentProfile(TimeStampedModel):
         max_length=15,
         blank=True)
     year_of_admission = models.PositiveSmallIntegerField(
-        _("Student|admission year"),
-        validators=[MinValueValidator(1990)])
+        _("Student|admission year"))
     year_of_curriculum = models.PositiveSmallIntegerField(
         _("CSCUser|Curriculum year"),
         validators=[MinValueValidator(2000)],
@@ -800,8 +800,16 @@ class StudentProfile(TimeStampedModel):
         created = self.pk is None
         self.site_id = self.branch.site_id
         self.priority = StudentTypes.get_choice(self.type).priority
+        self.full_clean()
         super().save(**kwargs)
         instance_memoize.delete_cache(self.user)
+
+    def clean(self):
+        # TODO: move to the service that creates model object, don't leave non-relational model fields here
+        established = self.branch.established
+        if self.year_of_admission and self.year_of_admission < established:
+            msg = _("Value should be >= {} (year of the branch establishment)").format(established)
+            raise ValidationError({"year_of_admission": msg})
 
     def __str__(self):
         return f"{self.user.get_full_name()} [{self.site.domain}]"
