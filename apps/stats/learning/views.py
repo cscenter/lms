@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db.models import Prefetch
+from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -10,47 +11,40 @@ from courses.models import Assignment
 from learning.models import StudentAssignment, \
     Enrollment
 from stats.renderers import ListRenderersMixin
-from users.constants import Roles
-from users.models import User, UserGroup
+from users.models import User, UserGroup, StudentProfile
 from .pandas_serializers import ParticipantsByYearPandasSerializer, \
-    ParticipantsByGroupPandasSerializer
+    StudentsByTypePandasSerializer
 from .serializers import ParticipantsStatsSerializer, \
     AssignmentsStatsSerializer, EnrollmentsStatsSerializer
 
 
-class CourseParticipantsStatsByGroup(ListRenderersMixin, PandasView):
+class CourseParticipantsStatsByType(ListRenderersMixin, PandasView):
     """
-    Aggregate stats about course offering participants.
+    Aggregate stats how many students of each type participate in the course
     """
     permission_classes = [CuratorAccessPermission]
-    serializer_class = ParticipantsStatsSerializer
-    pandas_serializer_class = ParticipantsByGroupPandasSerializer
+
+    class OutputSerializer(serializers.ModelSerializer):
+        class Meta:
+            list_serializer_class = StudentsByTypePandasSerializer
+            model = StudentProfile
+            fields = ("year_of_admission", "type")
+
+    def get_serializer(self, *args, **kwargs):
+        return self.OutputSerializer(*args, **kwargs)
 
     def get_queryset(self):
-        groups = [
-            Roles.STUDENT,
-            Roles.VOLUNTEER,
-            Roles.GRADUATE,
-        ]
+        # TODO: add virtual `graduate` type (graduate is student profile status, not a type)
         course_id = self.kwargs['course_id']
-        return (User.objects
-                .only("curriculum_year")
+        return (StudentProfile.objects
                 .filter(enrollment__is_deleted=False,
                         enrollment__course_id=course_id)
-                .prefetch_related(
-                    Prefetch(
-                        "groups",
-                        queryset=(UserGroup.objects
-                                  .filter(role__in=groups,
-                                          site_id=settings.SITE_ID))
-                    )
-                )
-                .order_by())
+                .only('year_of_admission', 'type'))
 
 
 class CourseParticipantsStatsByYear(ListRenderersMixin, PandasView):
     """
-    Aggregate stats about course offering participants.
+    Aggregate stats about students enrolled in the course.
     """
     permission_classes = [CuratorAccessPermission]
     serializer_class = ParticipantsStatsSerializer
@@ -117,15 +111,14 @@ class AssignmentsStats(ReadOnlyModelViewSet):
 
 class EnrollmentsStats(APIView):
     """
-    Aggregate stats about course offering assignment progress.
+    Aggregate stats about course enrollment progress.
     """
     http_method_names = ['get']
     permission_classes = [CuratorAccessPermission]
 
     def get(self, request, course_id, format=None):
         enrollments = (Enrollment.active
-                       .only("pk", "grade", "student_id", "student__gender",
-                             "student__curriculum_year")
+                       .only("pk", "grade", "student_id")
                        .select_related("student")
                        .filter(course_id=course_id)
                        .order_by())
