@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db.models import Prefetch
 from rest_framework import serializers
 from rest_framework.response import Response
@@ -11,11 +10,10 @@ from courses.models import Assignment
 from learning.models import StudentAssignment, \
     Enrollment
 from stats.renderers import ListRenderersMixin
-from users.models import User, UserGroup, StudentProfile
-from .pandas_serializers import ParticipantsByYearPandasSerializer, \
-    StudentsByTypePandasSerializer
-from .serializers import ParticipantsStatsSerializer, \
-    AssignmentsStatsSerializer, EnrollmentsStatsSerializer
+from users.models import StudentProfile
+from .pandas_serializers import StudentsTotalByYearPandasSerializer, \
+    StudentsTotalByTypePandasSerializer
+from .serializers import AssignmentsStatsSerializer, EnrollmentsStatsSerializer
 
 
 class CourseParticipantsStatsByType(ListRenderersMixin, PandasView):
@@ -26,7 +24,7 @@ class CourseParticipantsStatsByType(ListRenderersMixin, PandasView):
 
     class OutputSerializer(serializers.ModelSerializer):
         class Meta:
-            list_serializer_class = StudentsByTypePandasSerializer
+            list_serializer_class = StudentsTotalByTypePandasSerializer
             model = StudentProfile
             fields = ("year_of_admission", "type")
 
@@ -44,27 +42,26 @@ class CourseParticipantsStatsByType(ListRenderersMixin, PandasView):
 
 class CourseParticipantsStatsByYear(ListRenderersMixin, PandasView):
     """
-    Aggregate stats about students enrolled in the course.
+    Groups students of the course by year of admission and
+    counts how many of them are in each group.
     """
     permission_classes = [CuratorAccessPermission]
-    serializer_class = ParticipantsStatsSerializer
-    pandas_serializer_class = ParticipantsByYearPandasSerializer
+
+    class OutputSerializer(serializers.ModelSerializer):
+        class Meta:
+            list_serializer_class = StudentsTotalByYearPandasSerializer
+            model = StudentProfile
+            fields = ("year_of_admission",)
+
+    def get_serializer(self, *args, **kwargs):
+        return self.OutputSerializer(*args, **kwargs)
 
     def get_queryset(self):
         course_id = self.kwargs['course_id']
-        return (User.objects
-                .only("curriculum_year")
-                .filter(
-                    enrollment__is_deleted=False,
-                    enrollment__course_id=course_id)
-                .prefetch_related(
-                    Prefetch(
-                        "groups",
-                        queryset=(UserGroup.objects
-                                  .filter(site_id=settings.SITE_ID))
-                    )
-                )
-                .order_by())
+        return (StudentProfile.objects
+                .filter(enrollment__is_deleted=False,
+                        enrollment__course_id=course_id)
+                .only('year_of_admission'))
 
 
 class AssignmentsStats(ReadOnlyModelViewSet):

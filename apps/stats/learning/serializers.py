@@ -10,19 +10,6 @@ class GroupSerializer(serializers.ModelSerializer):
         fields = ("name",)
 
 
-class ParticipantsStatsSerializer(serializers.Serializer):
-    # FIXME: groups -> roles
-    groups = serializers.SlugRelatedField(many=True, read_only=True,
-                                          slug_field='role')
-    curriculum_year = serializers.IntegerField(read_only=True)
-
-    def create(self, validated_data):
-        pass
-
-    def update(self, instance, validated_data):
-        pass
-
-
 class LegacyStudentSerializer(serializers.ModelSerializer):
     groups = serializers.SlugRelatedField(many=True, read_only=True,
                                           slug_field='role')
