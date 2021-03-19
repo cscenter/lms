@@ -1,0 +1,127 @@
+{% extends "compscicenter_ru/syllabus/detail.html" %}
+
+{% block inner %}
+  <div class="container py-10 text-left">
+    <div class="row text-center text-md-left">
+      <div class="col-md-6 order-1 order-md-0 d-md-flex" style="justify-content: center; flex-direction: column">
+        <h1 class="super-hero mb-0">Data Science</h1>
+        <p class="mt-3 mb-0">Анализ данных</p>
+        <div class="row my-6">
+          <div class="col-sm col-md-auto mr-0 mr-md-6">
+            <div class="h1 mb-2">
+              2-3
+            </div>
+            <p>года обучения</p>
+          </div>
+          <div class="col-sm col-md-auto mr-0 mr-md-6">
+            <div class="h1 mb-2">
+              12
+            </div>
+            <p>курсов</p>
+          </div>
+          <div class="col-sm col-md-auto mr-0 mr-md-6">
+            <div class="h1 mb-2">
+              3
+            </div>
+            <p>семестра практики</p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-auto m-auto m-md-0">
+            <a href="/application/" class="btn _big _primary _m-wide">Поступить</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <img class="img-fluid" src="{{ static('v2/img/pages/syllabus/on-campus/data-science.svg') }}" alt="Иллюстрация. Анализ данных">
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid grey-bg py-10">
+    <div class="container py-10">
+      <div class="row">
+        <div class="col-lg-10">
+          <h1>О направлении</h1>
+          <p>Направление Data Science можно рассматривать как отделение Школы анализа данных Яндекса в Санкт-Петербурге и в Новосибирске.
+            Здесь готовят специалистов в области обработки и анализа данных и извлечения информации из интернета.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% set branches = [
+    {'target': 'spb', 'name': 'Санкт-Петербург', 'active': selected_branch == 'spb', 'url': '?branch=spb'},
+    {'target': 'nsk', 'name': 'Новосибирск', 'active': selected_branch == 'nsk', 'url': '?branch=nsk'}
+  ] %}
+  <div class="container py-10">
+    <div class="row">
+      <div class="col-lg-10">
+        <div class="mb-10">
+
+          {% call macros.scrollable(modifiers='mt-4') %}{{ tabs(branches, modifiers='mt-4') }}{% endcall %}
+
+          <div class="tab-content mt-10">
+            {% with tab = branches[0] %}
+              <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel"
+                   aria-labelledby="tab__{{ tab.target }}">
+                <h2>Обязательные курсы</h2>
+                <h3 class="mt-10">Алгоритмы</h3>
+                {{ collapsible_meta_course('Алгоритмы и структуры данных, часть 1', 'algorithms-1', '<p>Курс знакомит слушателей с базовыми алгоритмическими приёмами и структурами данных.</p>') }}
+                {{ collapsible_meta_course('Алгоритмы и структуры данных, часть 2', 'algorithms-2', '<p>Продолжение изучения базовых алгоритмов</p>') }}
+                <p class="text-muted">или</p>
+                {{ collapsible_meta_course('Дополнительные главы алгоритмов, часть 1', 'advanced-algo', '<p>Курс рассчитан на студентов, сдавших базовые курсы по алгоритмам, предлагаемые в CS центре, и желающих применить свои знания для более сложных задач.</p>') }}
+                {{ collapsible_meta_course('Дополнительные главы алгоритмов, часть 2', 'advanced-algo_part2', '<p>Курс рассчитан на студентов, сдавших базовые курсы по алгоритмам, предлагаемые в CS центре, и желающих применить свои знания для более сложных задач.</p>') }}
+
+                <h3 class="mt-10">Математика</h3>
+                {{ collapsible_meta_course('Асимптотический анализ и теория вероятностей', 'prob-theory', '<p>В курсе разбираются следующие темы: теория множеств, асимптотики, производящие функции, дискретная и условная вероятность, случайные величины, предельные теоремы.</p>') }}
+                {{ collapsible_meta_course('Основы дискретной математики', 'discrete-math', '<p>Целью курса является знакомство слушателей с основными понятиями и методами дискретной математики.</p>') }}
+
+                <h3 class="mt-10">Программирование</h3>
+                {{ collapsible_meta_course('Программирование на Java', 'java', '<p>Курс знакомит слушателей с языком Java на базовом уровне, как в теории, так и на практике.</p>') }}
+                <p class="text-muted">или</p>
+                {{ collapsible_meta_course('Программирование на Python', 'python', '<p>Погружение в программирование на Python. Продвинутый курс.</p>') }}
+
+                <h3 class="mt-10">Машинное обучение</h3>
+                {{ collapsible_meta_course('Машинное обучение, часть 1', 'machine-learning-1', '<p>Курс является первой частью годового курса. Он знакомит слушателей с основными понятиями и базовыми методами машинного обучения.</p>') }}
+                {{ collapsible_meta_course('Машинное обучение, часть 2', 'machine-learning-2', '<p>Курс является второй частью годового курса. В нём более подробно затрагиваются другие методы машинного обучения.</p>') }}
+
+                <h3 class="mt-10">Пять любых других курсов</h3>
+                <a href="/courses/" class="btn _outline _gray _m-wide">Все курсы центра</a>
+
+                <h3 class="mt-10">Три семестра практики</h3>
+                <a href="/projects/" class="btn _outline _gray _m-wide">Примеры проектов</a>
+              </div>
+            {% endwith %}
+
+            {% with tab = branches[1] %}
+              <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel"
+                   aria-labelledby="tab__{{ tab.target }}">
+                <h2>Обязательные курсы</h2>
+                <h3 class="mt-10">Алгоритмы</h3>
+                {{ collapsible_meta_course('Алгоритмы и структуры данных, часть 1', 'algorithms-1', '<p>Курс знакомит слушателей с базовыми алгоритмическими приёмами и структурами данных.</p>') }}
+                {{ collapsible_meta_course('Алгоритмы и структуры данных, часть 2', 'algorithms-2', '<p>Продолжение изучения базовых алгоритмов</p>') }}
+                <h3 class="mt-10">Математика</h3>
+                {{ collapsible_meta_course('Дискретный анализ и теория вероятностей', 'discrete-analysis', '<p>Курс будет посвящён основам комбинаторики и теории вероятностей, а также студентам будут даны основные сведения из математической статистики и линейной алгебры.</p>') }}
+
+                <h3 class="mt-10">Программирование</h3>
+                {{ collapsible_meta_course('Программирование на Java', 'java', '<p>Курс знакомит слушателей с языком Java на базовом уровне, как в теории, так и на практике.</p>') }}
+                <p class="text-muted">или</p>
+                {{ collapsible_meta_course('Программирование на Python', 'python', '<p>Погружение в программирование на Python. Продвинутый курс.</p>') }}
+
+                <h3 class="mt-10">Машинное обучение</h3>
+                {{ collapsible_meta_course('Машинное обучение, часть 1', 'machine-learning-1', '<p>Курс является первой частью годового курса. Он знакомит слушателей с основными понятиями и базовыми методами машинного обучения.</p>') }}
+                {{ collapsible_meta_course('Машинное обучение, часть 2', 'machine-learning-2', '<p>Курс является второй частью годового курса. В нём более подробно затрагиваются другие методы машинного обучения.</p>') }}
+
+                <h3 class="mt-10">Шесть любых других курсов</h3>
+                <a href="/courses/" class="btn _outline _gray _m-wide">Все курсы центра</a>
+                <h3 class="mt-10">Три семестра практики</h3>
+                <a href="/projects/" class="btn _outline _gray _m-wide">Примеры проектов</a>
+              </div>
+            {% endwith %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock inner %}

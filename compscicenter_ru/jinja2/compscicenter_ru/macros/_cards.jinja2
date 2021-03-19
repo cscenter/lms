@@ -1,3 +1,5 @@
+{% from "compscicenter_ru/macros/_global.jinja2" import svg_icon %}
+
 {% macro author_card(img_url, title, subtitle, testimonial='', modifiers='') -%}
     <div class="author{% if modifiers %} {{ modifiers }}{% endif %}">
         {% if img_url %}
@@ -129,4 +131,21 @@
             {{ course_title|safe }}
         </div>
     </a>
+{%- endmacro %}
+
+{% macro collapsible_block(title, id, open=false) %}
+  <div class="collapsible">
+    <div class="card _qa mb-4">
+      <button class="btn card__header" id="collapsible-block-{{ id }}"
+              aria-expanded="{% if open %}true{% else %}false{% endif %}" href="#collapsible-block-{{ id }}__inner">
+        {{ svg_icon('border-arrow-right') }}{{ title|safe }}
+      </button>
+      <div class="{% if not open %}collapse{% endif %} pb-4" id="collapsible-block-{{ id }}__inner"
+           aria-expanded="{% if open %}true{% else %}false{% endif %}">
+        <div class="card__content">
+          {{ caller() }}
+        </div>
+      </div>
+    </div>
+  </div>
 {%- endmacro %}

@@ -41,10 +41,12 @@ urlpatterns += [
     path('pages/questions/', RedirectView.as_view(url='/enrollment/program/', permanent=True)),
     re_path(r'^(?P<year>20[0-9]{2})/$', views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
     # Programs
-    path('syllabus/', RedirectView.as_view(url='/syllabus/on-campus/', permanent=False)),
-    path('syllabus/on-campus/', views.OnCampusProgramsView.as_view(), name='on_campus_programs'),
-    path('syllabus/on-campus/<slug:discipline_code>/', views.OnCampusProgramDetailView.as_view(), name='on_campus_program_detail'),
-    path('syllabus/distance/', views.DistanceProgramView.as_view(), name='distance_program'),
+    path('syllabus/', include([
+        path('', RedirectView.as_view(url='/syllabus/on-campus/', permanent=False)),
+        path('on-campus/', views.OnCampusProgramsView.as_view(), name='on_campus_programs'),
+        path('on-campus/<slug:discipline_code>/', views.OnCampusProgramDetailView.as_view(), name='on_campus_program_detail'),
+        path('distance/', views.DistanceProgramView.as_view(), name='distance_program'),
+    ])),
     # Admission
     path('enrollment/', RedirectView.as_view(url='/application/')),
     path('enrollment/checklist/', views.EnrollmentChecklistView.as_view(), name='enrollment_checklist'),
