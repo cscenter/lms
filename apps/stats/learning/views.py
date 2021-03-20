@@ -1,4 +1,4 @@
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Case, When, Value, F, CharField
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -6,14 +6,17 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_pandas import PandasView
 
 from api.permissions import CuratorAccessPermission
+from api.utils import inline_serializer, get_serializer_fields
 from courses.models import Assignment
+from learning.api.serializers import StudentProfileSerializer, UserSerializer
 from learning.models import StudentAssignment, \
     Enrollment
+from learning.settings import StudentStatuses
 from stats.renderers import ListRenderersMixin
 from users.models import StudentProfile
 from .pandas_serializers import StudentsTotalByYearPandasSerializer, \
     StudentsTotalByTypePandasSerializer
-from .serializers import AssignmentsStatsSerializer, EnrollmentsStatsSerializer
+from .serializers import StudentAssignmentsSerializer
 
 
 class CourseParticipantsStatsByType(ListRenderersMixin, PandasView):
@@ -23,6 +26,8 @@ class CourseParticipantsStatsByType(ListRenderersMixin, PandasView):
     permission_classes = [CuratorAccessPermission]
 
     class OutputSerializer(serializers.ModelSerializer):
+        type = serializers.CharField(source="student_type")
+
         class Meta:
             list_serializer_class = StudentsTotalByTypePandasSerializer
             model = StudentProfile
@@ -32,12 +37,17 @@ class CourseParticipantsStatsByType(ListRenderersMixin, PandasView):
         return self.OutputSerializer(*args, **kwargs)
 
     def get_queryset(self):
-        # TODO: add virtual `graduate` type (graduate is student profile status, not a type)
         course_id = self.kwargs['course_id']
+        # `graduate` is actually a status, not a real profile type.
+        # Also its value inconsistent since it changes after student graduation
+        student_type_annotation = Case(When(status=StudentStatuses.GRADUATE, then=Value('graduate')),
+                                       default=F('type'),
+                                       output_field=CharField())
         return (StudentProfile.objects
                 .filter(enrollment__is_deleted=False,
                         enrollment__course_id=course_id)
-                .only('year_of_admission', 'type'))
+                .only('year_of_admission', 'type')
+                .annotate(student_type=student_type_annotation))
 
 
 class CourseParticipantsStatsByYear(ListRenderersMixin, PandasView):
@@ -64,36 +74,51 @@ class CourseParticipantsStatsByYear(ListRenderersMixin, PandasView):
                 .only('year_of_admission'))
 
 
-class AssignmentsStats(ReadOnlyModelViewSet):
-    """
-    Aggregate stats about course assignment progress.
-    """
+class AssignmentsStats(APIView):
+    """Aggregate stats about course assignments progress"""
     permission_classes = [CuratorAccessPermission]
-    serializer_class = AssignmentsStatsSerializer
+
+    class OutputSerializer(serializers.Serializer):
+        id = serializers.IntegerField(read_only=True)
+        is_online = serializers.ReadOnlyField()
+        title = serializers.CharField(read_only=True)
+        deadline_at = serializers.DateTimeField(label="deadline", read_only=True)
+        passing_score = serializers.IntegerField(read_only=True)
+        maximum_score = serializers.IntegerField(read_only=True)
+        students = StudentAssignmentsSerializer(many=True, read_only=True)
+
+    def get(self, request, **kwargs):
+        assignments = self.get_queryset()
+        data = self.OutputSerializer(assignments, many=True).data
+        return Response(data)
 
     def get_queryset(self):
         course_id = self.kwargs["course_id"]
+        # On client this stats used in conjunction with EnrollmentsStats API
+        # which returns active enrollments and as a result it doesn't
+        # return all student profiles.
+        # After student left the course we store student progress (TODO: make sure it's as written)
+        #  and don't soft delete related StudentAssignment objects. It means
+        #  we miss student profile data for this records on client.
+        # To avoid this error let's filter out assignments of students who
+        # left the course, but better option is to return all required data
+        # in EnrollmentsStats (or any other API view) and don't miss this stats.
         active_students = (Enrollment.active
                            .filter(course_id=course_id)
                            .values_list("student_id", flat=True))
         return (Assignment.objects
+                .filter(course_id=course_id)
                 .only("pk", "title", "course_id", "deadline_at",
                       "passing_score", "maximum_score", "submission_type")
-                .filter(course_id=course_id)
                 .prefetch_related(
                     Prefetch(
                         "studentassignment_set",
-                        # FIXME: добавить smoke test
-                        # FIXME: что считать всё-таки сданным. Там где есть оценка?
                         queryset=(StudentAssignment.objects
                                   .filter(student_id__in=active_students)
-                                  .select_related("student", "assignment")
-                                  .prefetch_related("student__groups")
-                                  .only("pk", "assignment_id", "score",
-                                        "student_id",
+                                  .select_related("assignment")
+                                  .only("pk", "assignment_id", "student_id",
+                                        "score",
                                         "first_student_comment_at",
-                                        "student__gender",
-                                        "student__curriculum_year",
                                         "assignment__course_id",
                                         "assignment__maximum_score",
                                         "assignment__passing_score",
@@ -101,7 +126,6 @@ class AssignmentsStats(ReadOnlyModelViewSet):
                                   .order_by()),
                         to_attr="students"
                     ),
-
                 )
                 .order_by("deadline_at"))
 
@@ -110,15 +134,20 @@ class EnrollmentsStats(APIView):
     """
     Aggregate stats about course enrollment progress.
     """
-    http_method_names = ['get']
     permission_classes = [CuratorAccessPermission]
 
-    def get(self, request, course_id, format=None):
+    class OutputSerializer(serializers.Serializer):
+        grade = serializers.CharField(read_only=True)
+        student_profile = inline_serializer(fields={
+            **get_serializer_fields(StudentProfileSerializer, fields=('type', 'status', 'year_of_curriculum')),
+            "user": UserSerializer(fields=('id', 'gender'))
+        })
+
+    def get(self, request, course_id):
         enrollments = (Enrollment.active
-                       .only("pk", "grade", "student_id")
-                       .select_related("student")
+                       .select_related("student_profile__user")
+                       .only("pk", "grade", "student_profile_id")
                        .filter(course_id=course_id)
                        .order_by())
-
-        serializer = EnrollmentsStatsSerializer(enrollments, many=True)
+        serializer = self.OutputSerializer(enrollments, many=True)
         return Response(serializer.data)

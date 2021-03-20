@@ -1,22 +1,6 @@
 from rest_framework import serializers
 
 from learning.models import StudentAssignment
-from users.models import User, Group
-
-
-class GroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Group
-        fields = ("name",)
-
-
-class LegacyStudentSerializer(serializers.ModelSerializer):
-    groups = serializers.SlugRelatedField(many=True, read_only=True,
-                                          slug_field='role')
-
-    class Meta:
-        model = User
-        fields = ("curriculum_year", "gender", "groups")
 
 
 class StudentAssignmentsSerializer(serializers.ModelSerializer):
@@ -24,11 +8,11 @@ class StudentAssignmentsSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()
     first_student_comment_at = serializers.DateTimeField()
     score = serializers.IntegerField()
-    student = LegacyStudentSerializer(read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(source="student", read_only=True)
 
     class Meta:
         model = StudentAssignment
-        fields = ("id", "sent", "first_student_comment_at", "score", "student",
+        fields = ("id", "sent", "first_student_comment_at", "score", "user_id",
                   "state")
 
     def get_state(self, obj):
@@ -42,30 +26,3 @@ class StudentAssignmentsSerializer(serializers.ModelSerializer):
         #  offline assignments here.
         return int(obj.score is not None or
                    obj.submission_is_received != StudentAssignment.CommentAuthorTypes.NOBODY)
-
-
-class AssignmentsStatsSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    is_online = serializers.ReadOnlyField()
-    title = serializers.CharField(read_only=True)
-    deadline_at = serializers.DateTimeField(label="deadline", read_only=True)
-    passing_score = serializers.IntegerField(read_only=True)
-    maximum_score = serializers.IntegerField(read_only=True)
-    students = StudentAssignmentsSerializer(many=True, read_only=True)
-
-    def create(self, validated_data):
-        pass
-
-    def update(self, instance, validated_data):
-        pass
-
-
-class EnrollmentsStatsSerializer(serializers.Serializer):
-    grade = serializers.CharField(read_only=True)
-    student = LegacyStudentSerializer(read_only=True)
-
-    def create(self, validated_data):
-        pass
-
-    def update(self, instance, validated_data):
-        pass

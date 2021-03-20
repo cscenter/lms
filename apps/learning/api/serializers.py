@@ -9,25 +9,22 @@ from learning.models import CourseNewsNotification, StudentAssignment, \
 from users.models import User, StudentProfile
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name')
-
-
-class StudentSerializer(UserSerializer):
-    class Meta(UserSerializer.Meta):
         fields = ('id', 'first_name', 'last_name', 'patronymic', 'gender')
 
 
 class StudentProfileSerializer(DynamicFieldsModelSerializer):
     branch = BranchSerializer()
-    student = StudentSerializer(source='user')
+    student = UserSerializer(source='user')
+    # TODO: remove
     short_name = serializers.SerializerMethodField()
 
     class Meta:
         model = StudentProfile
-        fields = ('id', 'type', 'branch', 'year_of_admission', 'student', 'short_name')
+        fields = ('id', 'type', 'status', 'branch', 'year_of_admission', 'year_of_curriculum',
+                  'student', 'short_name')
 
     def get_short_name(self, student_profile):
         return student_profile.user.get_short_name()
@@ -42,7 +39,7 @@ class EnrollmentSerializer(serializers.ModelSerializer):
 
 
 class CourseNewsNotificationSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = UserSerializer(fields=('first_name', 'last_name'))
 
     class Meta:
         model = CourseNewsNotification
@@ -103,7 +100,7 @@ class EnrollmentStudentProfileSerializer(StudentProfileSerializer):
 
 
 class MyEnrollmentSerializer(EnrollmentSerializer):
-    student = StudentSerializer()
+    student = UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic'))
     student_profile = EnrollmentStudentProfileSerializer()
 
     class Meta(EnrollmentSerializer.Meta):

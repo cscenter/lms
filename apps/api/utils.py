@@ -1,5 +1,7 @@
+import copy
 import hashlib
 from functools import wraps
+from typing import Iterable, Type
 from urllib.parse import quote
 
 from django.utils.encoding import force_bytes
@@ -31,18 +33,22 @@ def requires_context(f):
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
     """
-    A ModelSerializer that takes an additional `fields` argument that
-    controls which fields should be displayed.
+    A ModelSerializer that takes an additional `fields` argument
+    that controls which fields should be displayed
     """
 
     def __init__(self, *args, **kwargs):
-        fields = kwargs.pop('fields', None)
+        fields: Iterable[str] = kwargs.pop('fields', None)
         super().__init__(*args, **kwargs)
 
         if fields is not None:
-            # Drop any fields that are not specified in the `fields` argument
             allowed = set(fields)
             existing = set(self.fields)
+            for field_name in allowed:
+                if field_name not in existing:
+                    raise ValueError(f"Field with name '{field_name}' "
+                                     f"is not defined in {self.__class__.__name__}")
+            # Drop any fields that are not specified in the `fields` argument
             for field_name in existing - allowed:
                 self.fields.pop(field_name)
 
@@ -58,3 +64,15 @@ def inline_serializer(*, fields, data=None, **kwargs):
         return serializer_class(data=data, **kwargs)
 
     return serializer_class(**kwargs)
+
+
+def get_serializer_fields(serializer: Type[serializers.Serializer], fields: Iterable[str]):
+    """
+    Returns subset of serializer fields. Useful with *inline_serializer*.
+
+    Note:
+        Reuse serializers as little as possible.
+    """
+    return {field_name: copy.deepcopy(field_instance) for field_name, field_instance
+            in serializer().get_fields().items() if field_name in fields}
+

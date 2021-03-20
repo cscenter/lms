@@ -67,5 +67,4 @@ def test_get_classes_should_not_return_duplicate_classes():
     cc = CourseClassFactory(course=course)
     assert len(get_classes([branch1.pk])) == 1
     assert len(get_classes([branch2.pk])) == 1
-    print(get_classes([branch1.pk, branch2.pk]).query)
     assert len(get_classes([branch1.pk, branch2.pk])) == 1
