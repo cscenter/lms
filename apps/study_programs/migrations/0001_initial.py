@@ -21,7 +21,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AcademicDiscipline',
             fields=[
-                ('code', models.CharField(max_length=2, primary_key=True, serialize=False, verbose_name='PK|Code')),
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('code', models.CharField(max_length=2, verbose_name='PK|Code')),
                 ('name', models.CharField(max_length=255, verbose_name='AreaOfStudy|Name')),
                 ('name_ru', models.CharField(max_length=255, null=True, verbose_name='AreaOfStudy|Name')),
                 ('name_en', models.CharField(max_length=255, null=True, verbose_name='AreaOfStudy|Name')),

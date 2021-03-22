@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models import query, Prefetch
@@ -11,7 +13,12 @@ from courses.models import MetaCourse
 
 
 class AcademicDiscipline(models.Model):
-    code = models.CharField(_("PK|Code"), max_length=2, primary_key=True)
+    code = models.CharField(_("PK|Code"), max_length=10)
+    site = models.ForeignKey(
+        Site, verbose_name=_("Site"),
+        default=settings.SITE_ID,
+        on_delete=models.CASCADE,
+        related_name='+')
     name = models.CharField(_("AreaOfStudy|Name"), max_length=255)
     cover = ImageField(
         _("AcademicDiscipline|cover"),
