@@ -323,7 +323,7 @@ class AlumniView(TemplateView):
             row = {"label": str(branch.name), "value": branch.code}
             branch_options.append(row)
         # Area state and props
-        areas = [{"label": a.name, "value": a.code} for a in
+        areas = [{"label": a.name, "value": a.pk} for a in
                  AcademicDiscipline.objects.filter(code__in=['cs', 'se', 'ds'])]
         area = self.kwargs.get("area", None)
         area_option = next((a for a in areas if a['value'] == area), None)
@@ -395,7 +395,7 @@ class OnCampusProgramDetailView(PublicURLMixin, generic.TemplateView):
             raise Http404
         # Randomize testimonials
         cache_key = f"{TESTIMONIALS_CACHE_KEY}_{discipline_code}"
-        random_testimonials = get_random_testimonials(4, cache_key, academic_disciplines=discipline_code)
+        random_testimonials = get_random_testimonials(4, cache_key, academic_disciplines__code=discipline_code)
         context = {
             "study_program": study_program,
             "selected_branch": selected_branch,
