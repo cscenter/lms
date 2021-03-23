@@ -276,3 +276,52 @@ class CourseEnrollmentForm(forms.Form):
         super().__init__(**kwargs)
         self.helper = FormHelper(self)
         self.helper.layout.append(Submit('enroll', 'Записаться на курс'))
+
+
+class StudentGroupForm(forms.ModelForm):
+    class Meta:
+        model = StudentGroup
+        fields = ('type', 'name', 'course', 'meta', 'branch', 'enrollment_key')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'blueForms'
+        self.helper.form_method = 'post'
+        # self.helper.form_action = '/teaching/courses/group/'
+
+        self.helper.add_input(Submit('submit', 'Сохранить'))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format(f'../../')))
+
+
+class StudentGroupAddForm(forms.ModelForm):
+    class Meta:
+        model = StudentGroup
+        fields = ('type', 'name', 'course', 'meta', 'branch', 'enrollment_key')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'blueForms'
+        self.helper.form_method = 'post'
+
+        self.helper.add_input(Submit('submit', 'Добавить'))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../')))
+
+
+class StudentGroupDeleteForm(forms.ModelForm):
+    class Meta:
+        model = StudentGroup
+        fields = ('type', 'name', 'course', 'meta', 'branch', 'enrollment_key')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'blueForms'
+        self.helper.form_method = 'post'
+
+        self.helper.add_input(Button('delete', 'Delete', onclick='window.location.href="{}"'.format('../delete')))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../')))

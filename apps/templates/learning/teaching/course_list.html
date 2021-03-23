@@ -28,7 +28,9 @@
                                         </ul>
                                     </td>
                                     <td>
-                                        <a href="{{ course.get_create_news_url }}">{% trans "Add news" %}</a>
+                                        <a href="{{ course.get_create_news_url }}">{% trans "Add news" %}</a><br>
+{#                                        <a href="/teaching/courses/group/">Группы студентов</a>#}
+                                        <a href="/teaching/courses/{{ course.id }}/group/">Группы студентов</a>
                                     </td>
                                 </tr>
                             {% endwith %}
@@ -37,9 +39,6 @@
                 {% else %}
                     <h4>Список прочтений пуст... :(</h4>
                 {% endif %}
-            </div>
-            <div>
-                <a href="/teaching/courses/group/">Группы студентов</a>
             </div>
         </div>
     </div>
