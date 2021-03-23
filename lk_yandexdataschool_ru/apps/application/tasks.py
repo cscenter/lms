@@ -11,8 +11,7 @@ def register_new_application_form(*, answer_id, language_code, form_data):
     translation.activate(language_code)
     serializer = ApplicantYandexFormSerializer(data=form_data)
     serializer.is_valid(raise_exception=True)
-    # TODO: прокинуть answer_id в .save?
-    new_applicant = serializer.save()
-    # TODO: сохранять лог обновлений в Applicant.meta (добавить), прикрутить .update Не регать в контесте, если уже это было сделано?
+    # Registration by the same email is prohibited by form settings
+    new_applicant = serializer.save(meta={"answer_id": answer_id})
     if new_applicant.pk:
         register_in_yandex_contest.delay(new_applicant.pk, settings.LANGUAGE_CODE)
