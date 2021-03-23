@@ -28,7 +28,7 @@ from courses.views.calendar import MonthEventsCalendarView
 from learning.api.serializers import AssignmentScoreSerializer
 from learning.calendar import get_teacher_calendar_events, get_all_calendar_events
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm, \
-    AssignmentCommentForm
+    AssignmentCommentForm, StudentGroupForm, StudentGroupAddForm
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import AssignmentComment, StudentAssignment, Enrollment, \
     AssignmentSubmissionTypes, StudentGroup, StudentGroupAssignee
@@ -284,10 +284,57 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
 class StudentGroupListView(TeacherOnlyMixin, generic.ListView):
     model = StudentGroup
     context_object_name = 'student_group_list'
-    template_name = "learning/teaching/student_group_list.html"
+    template_name = "learning/teaching/student_group_list.jinja2"
 
     def get_queryset(self):
         return StudentGroup.objects.all()
+
+
+class StudentGroupFilterListView(TeacherOnlyMixin, generic.ListView):
+    model = StudentGroup
+    context_object_name = 'student_group_list'
+    template_name = "learning/teaching/student_group_filter_list.jinja2"
+
+    def get_queryset(self):
+        return StudentGroup.objects.filter(course_id=self.kwargs.get("pk"))
+
+
+class StudentGroupDetailView(generic.DetailView):
+    model = StudentGroup
+    context_object_name = 'student_group_detail'
+    template_name = "learning/teaching/student_group_view.jinja2"
+
+    def get_object(self, queryset=None):
+        return StudentGroup.objects.get(id=self.kwargs.get("group_pk"))
+
+
+class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
+    model = StudentGroup
+    # pk_url_kwarg = 'pk'
+    context_object_name = 'student_group_update'
+    template_name = "learning/teaching/student_group_update.jinja2"
+    form_class = StudentGroupForm
+    # success_url = '/teaching/courses/group/{id}'
+    # success_url = '/teaching/courses/group/'
+    success_url = '/teaching/courses/{course_id}/group/'
+
+
+class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
+    model = StudentGroup
+    # pk_url_kwarg = 'pk'
+    context_object_name = 'student_group_create'
+    template_name = "learning/teaching/student_group_add.jinja2"
+    form_class = StudentGroupAddForm
+    success_url = '/teaching/courses/{course_id}/group/'
+
+
+class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
+    model = StudentGroup
+    # pk_url_kwarg = 'pk'
+    context_object_name = 'student_group_delete'
+    template_name = "learning/teaching/student_group_delete.jinja2"
+    success_url = '/teaching/courses/{course_id}/group/'
+
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
 # FIXME: replace with vanilla view

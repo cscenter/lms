@@ -3,7 +3,7 @@ import os
 from crispy_forms.bootstrap import StrictButton, InlineRadios, FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
-    Div, HTML, BaseInput, Row
+    Div, HTML, BaseInput, Row, Reset, Button
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -15,7 +15,7 @@ from core.timezone.constants import TIME_FORMAT_RU
 from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
 from learning.models import GraduateProfile, StudentAssignment, \
-    AssignmentSubmissionTypes
+    AssignmentSubmissionTypes, StudentGroup
 from .models import AssignmentComment
 
 
@@ -277,3 +277,52 @@ class CourseEnrollmentForm(forms.Form):
         super().__init__(**kwargs)
         self.helper = FormHelper(self)
         self.helper.layout.append(Submit('enroll', 'Записаться на курс'))
+
+
+class StudentGroupForm(forms.ModelForm):
+    class Meta:
+        model = StudentGroup
+        fields = ('type', 'name', 'course', 'meta', 'branch', 'enrollment_key')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'blueForms'
+        self.helper.form_method = 'post'
+        # self.helper.form_action = '/teaching/courses/group/'
+
+        self.helper.add_input(Submit('submit', 'Сохранить'))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format(f'../../')))
+
+
+class StudentGroupAddForm(forms.ModelForm):
+    class Meta:
+        model = StudentGroup
+        fields = ('type', 'name', 'course', 'meta', 'branch', 'enrollment_key')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'blueForms'
+        self.helper.form_method = 'post'
+
+        self.helper.add_input(Submit('submit', 'Добавить'))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../')))
+
+
+class StudentGroupDeleteForm(forms.ModelForm):
+    class Meta:
+        model = StudentGroup
+        fields = ('type', 'name', 'course', 'meta', 'branch', 'enrollment_key')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'blueForms'
+        self.helper.form_method = 'post'
+
+        self.helper.add_input(Button('delete', 'Delete', onclick='window.location.href="{}"'.format('../delete')))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../')))
