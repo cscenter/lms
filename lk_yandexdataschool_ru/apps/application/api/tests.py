@@ -182,8 +182,6 @@ def test_applicant_form_serializer_min_fields(settings, mocker):
         'programming_experience': '',
         'motivation': 'Зачем.',
         'ml_experience': 'Зачем.',
-        'shad_plus_rash': 'Нет',
-        'new_track': 'Нет',
         # 'new_track_scientific_articles': '', 'new_track_projects': '', 'new_track_tech_articles': '',
         'new_track_project_details': '',
         'yandex_login': 'test'

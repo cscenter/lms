@@ -63,6 +63,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         allow_blank=True,
         label='Расскажите о своем опыте программирования')
     shad_plus_rash = AliasedChoiceField(
+        required=False,
         choices=[
             ('Да', True, 'Да'),
             ('Нет', False, 'Нет'),
@@ -73,6 +74,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         label='Изучали ли вы раньше машинное обучение/анализ данных? Каким образом? '
               'Какие навыки удалось приобрести, какие проекты сделать?')
     new_track = AliasedChoiceField(
+        required=False,
         choices=[
             ('Да', True, 'Да'),
             ('Нет', False, 'Нет'),
