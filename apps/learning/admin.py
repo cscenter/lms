@@ -10,7 +10,7 @@ from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import StudentGroupTypes, CourseGroupModes
 from learning.models import GraduateProfile, Invitation, CourseInvitation, \
-    StudentAssignment, StudentGroup
+    StudentAssignment, StudentGroup, StudentGroupAssignee, AssignmentGroup
 from users.models import StudentStatusLog
 from .models import AssignmentComment, Enrollment, Event
 from .services import StudentGroupService
@@ -174,9 +174,19 @@ class StudentGroupAdmin(BaseModelAdmin):
     list_filter = ('course', 'branch')
 
 
+class StudentGroupAssigneeAdmin(BaseModelAdmin):
+    list_display = ('student_group', 'assignee', 'assignment')
+    list_filter = ('student_group', 'assignee')
+
+class AssignmentGroupAdmin(BaseModelAdmin):
+    list_display = ('assignment', 'group')
+    list_filter = ('assignment', 'group')
+
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(Invitation, InvitationAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(GraduateProfile, GraduateProfileAdmin)
 admin.site.register(StudentGroup, StudentGroupAdmin)
+admin.site.register(StudentGroupAssignee, StudentGroupAssigneeAdmin)
+admin.site.register(AssignmentGroup, AssignmentGroupAdmin)
