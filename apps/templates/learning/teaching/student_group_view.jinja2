@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+    <div class="container">
+    <a href="/teaching/courses/group/"> < Группы студентов </a><br>
+        <h4> <b>Группа "{{ student_group_detail.name }}"</b> </h4>
+        <div class="row">
+            <div class="col-xs-12">
+                {% if student_group_detail %}
+                    <table class="table table-bordered">
+                        <tr class="active">
+                            <th>Название группы</th>
+                            <th>Тип</th>
+                            <th width="30%">Курс</th>
+                            <th width="15%"></th>
+                        </tr>
+                            <tr>
+                                <td>{{ student_group_detail.name }}</td>
+                                <td>{{ student_group_detail.type }}</td>
+                                <td>{{ student_group_detail.course }}</td>
+                                <td></td>
+                            </tr>
+                    </table>
+                {% else %}
+                    <h4>Список прочтений пуст... :(</h4>
+                {% endif %}
+            </div>
+        </div>
+    <button type="button" class="btn btn-primary" onclick="window.location.href =
+                            './update/';">
+                            {% trans "Редактировать группу" %}</button>
+    <button type="button" class="btn" onclick="window.location.href =
+                            './delete/';">
+                            {% trans "Удалить группу" %}</button>
+    </div>
+{% endblock content %}
