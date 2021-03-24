@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core import forms
 from core.db.utils import normalize_score
+from core.timezone import get_now_utc
 
 
 class ScoreField(DecimalField):
@@ -59,7 +60,7 @@ class TimeZoneField(models.Field):
             # It doesn't contain deprecated zones or historical zones.
             values = pytz.common_timezones
             choices_ = []
-            now_utc = timezone.now()
+            now_utc = get_now_utc()
             zero_ = timedelta(0)
             for tz_name in values:
                 # TODO: use babel.dates.get_timezone_gmt instead?

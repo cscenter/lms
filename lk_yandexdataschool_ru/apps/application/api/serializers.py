@@ -146,7 +146,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
             for field_name in new_track_fields:
                 value = data.get(field_name, None)
                 if value:
-                    additional_info.append(f"{self.fields[field_name].label}\n{data[field_name]}")
+                    additional_info.append(f"{self.fields[field_name].label}\n{value}")
         data['additional_info'] = '\n\n'.join(additional_info)
         # Remove fields that are actually not present on Applicant model
         custom_fields = []
