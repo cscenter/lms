@@ -255,10 +255,12 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
     STUDY_PROGRAM_DS = "ds"
     STUDY_PROGRAM_CS = "cs"
     STUDY_PROGRAM_SE = "se"
+    STUDY_PROGRAM_ROBOTICS = "robotics"
     STUDY_PROGRAMS = (
         (STUDY_PROGRAM_CS, "Computer Science (Современная информатика)"),
         (STUDY_PROGRAM_DS, "Data Science (Анализ данных)"),
-        (STUDY_PROGRAM_SE, "Software Engineering (Разработка ПО)")
+        (STUDY_PROGRAM_SE, "Software Engineering (Разработка ПО)"),
+        (STUDY_PROGRAM_ROBOTICS, "Robotics (Роботы)")
     )
     INFO_SOURCES = (
         ('uni', 'плакат/листовка в университете'),
