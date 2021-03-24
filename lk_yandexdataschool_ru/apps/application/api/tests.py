@@ -192,3 +192,43 @@ def test_applicant_form_serializer_min_fields(settings, mocker):
     instance = serializer.save()
     assert instance.level_of_education is None
     assert serializer.fields['new_track_scientific_articles'].label not in instance.additional_info
+
+
+@pytest.mark.django_db
+def test_applicant_form_serializer_save_new_track_fields(settings, mocker):
+    mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
+    mocked_api.return_value = 200, 1
+    branch = BranchFactory(code='msk', name='Москва', site_id=settings.SITE_ID)
+    campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    university, _ = University.objects.update_or_create(pk=1, defaults={"name": 'Другое'})
+    data = {
+        'id': '112326498',
+        'last_name': 'Иванова',
+        'first_name': 'Мария',
+        'patronymic': 'Ивановна',
+        'email': 'example@yandex.ru',
+        'phone': '+7 977 123-45-67',
+        'birth_date': '2021-03-01',
+        'living_place': 'Воркута, Республика Коми, Россия',
+        'branch': 'Москва',
+        'university': 'Другое',
+        'university_other': 'Государственный левополушарный',
+        'is_studying': 'Да',
+        'level_of_education': 'Другое',
+        'faculty': 'кафедра Смеха Сквозь Слезы',
+        'year_of_graduation': '2222',
+        'where_did_you_learn_other': 'в клубе анонимных нытиков',
+        'scientific_work': '',
+        'programming_experience': '',
+        'motivation': 'привлекает бесплатная еда',
+        'ml_experience': 'иногда училась в машине, да',
+        'shad_plus_rash': 'Нет',
+        'new_track': 'Да',
+        'new_track_scientific_articles': 'несколько в кул гёрл, найду, пришлю',
+        'yandex_login': 'test'
+    }
+    serializer = ApplicantYandexFormSerializer(data=data)
+    serializer.is_valid(raise_exception=False)
+    assert not serializer.errors
+    instance = serializer.save()

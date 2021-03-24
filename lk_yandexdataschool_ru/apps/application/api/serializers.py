@@ -140,10 +140,13 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         if data.get('new_track'):
             display_value = self.fields['new_track'].to_representation(data.get('new_track'))
             additional_info.append(f"{self.fields['new_track'].label}\n{display_value}")
+            # new_track_* fields are optional
             new_track_fields = ["new_track_scientific_articles", "new_track_projects", "new_track_tech_articles",
                                 "new_track_project_details"]
             for field_name in new_track_fields:
-                additional_info.append(f"{self.fields[field_name].label}\n{data[field_name]}")
+                value = data.get(field_name, None)
+                if value:
+                    additional_info.append(f"{self.fields[field_name].label}\n{data[field_name]}")
         data['additional_info'] = '\n\n'.join(additional_info)
         # Remove fields that are actually not present on Applicant model
         custom_fields = []
