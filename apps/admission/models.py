@@ -413,6 +413,11 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
         choices=STUDY_PROGRAMS,
         max_length=255,
         blank=True)
+    # TODO: Store all study program notes in this field in label + value format instead
+    #  of separated preferred_study_programs_*_note fields
+    preferred_study_program_notes = models.TextField(
+        _("Study Program Notes"),
+        null=True, blank=True)
     preferred_study_programs_dm_note = models.TextField(
         _("Study program (DM note)"),
         help_text=_("Applicant|study_program_dm"),
