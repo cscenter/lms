@@ -9,17 +9,17 @@
                 {% if student_group_detail %}
                     <table class="table table-bordered">
                         <tr class="active">
-                            <th>Название группы</th>
+                            <th>Название</th>
                             <th>Тип</th>
                             <th width="30%">Курс</th>
                             <th width="15%"></th>
                         </tr>
-                            <tr>
-                                <td>{{ student_group_detail.name }}</td>
-                                <td>{{ student_group_detail.type }}</td>
-                                <td>{{ student_group_detail.course }}</td>
-                                <td></td>
-                            </tr>
+                        <tr>
+                            <td>{{ student_group_detail.name }}</td>
+                            <td>{{ student_group_detail.type }}</td>
+                            <td>{{ student_group_detail.course }}</td>
+                            <td></td>
+                        </tr>
                     </table>
                 {% else %}
                     <h4>Список прочтений пуст... :(</h4>
@@ -32,5 +32,40 @@
     <button type="button" class="btn" onclick="window.location.href =
                             './delete/';">
                             {% trans "Удалить группу" %}</button>
+
+        <br><br><br><h4> <b>Ответственные за группу</b> </h4>
+        <div class="row">
+            <div class="col-xs-12">
+                {% if assignees %}
+                    <table class="table table-bordered">
+{#                        <tr class="active">#}
+{#                            <th>Ответственный группы</th>#}
+{#                            <th>Управление</th>#}
+{#                        </tr>#}
+                        {% for assignee in assignees %}
+                            <tr>
+                                <td class="align-middle">{{ assignee.assignee }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary" onclick="window.location.href =
+                                        '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/update/';">{% trans "Редактировать" %}</button>
+                                    <button type="button" class="btn" onclick="window.location.href =
+                                        '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/delete/';">{% trans "Удалить" %}</button>
+{#                                    <a href="/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/update/">Редактировать</a>#}
+{#                                    <a href="/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/delete/">Удалить</a>#}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <h4>Список ответственных пуст... :(</h4>
+                {% endif %}
+            </div>
+        </div>
+    <button type="button" class="btn btn-primary" onclick="window.location.href =
+                            '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/add/';">
+                            {% trans "Добавить ответственного" %}</button>
+{#    <button type="button" class="btn" onclick="window.location.href =#}
+{#                            './delete/';">#}
+{#                            {% trans "Удалить группу" %}</button>#}
     </div>
 {% endblock content %}

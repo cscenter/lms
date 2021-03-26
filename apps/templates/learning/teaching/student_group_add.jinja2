@@ -2,8 +2,6 @@
 {% load i18n %}
 {% block content %}
     <div class="container">
-       <p>Имя: {{ student_group_update.name }}</p>
-
         {% load crispy_forms_tags %}
         <form method="POST">
             {% csrf_token %}
