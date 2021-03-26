@@ -44,6 +44,7 @@ from learning.utils import humanize_duration
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView
 from users.mixins import TeacherOnlyMixin
+from secrets import token_urlsafe
 
 
 def set_query_parameter(url, param_name, param_value):
@@ -309,6 +310,13 @@ class StudentGroupDetailView(generic.DetailView):
     context_object_name = 'student_group_detail'
     template_name = "learning/teaching/student_group_view.jinja2"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['assignees'] = StudentGroupAssignee.objects.filter(student_group_id=self.kwargs.get("group_pk"))
+        context['group_id'] = self.kwargs.get("group_pk")
+        context['course_id'] = self.kwargs.get("course_pk")
+        return context
+
     def get_object(self, queryset=None):
         return StudentGroup.objects.get(id=self.kwargs.get("group_pk"))
 
@@ -332,6 +340,27 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
     form_class = StudentGroupAddForm
     success_url = '/teaching/courses/{course_id}/group/'
 
+    def get_initial(self, **kwargs):
+        initial = super().get_initial()
+        course = Course.objects.get(id=self.kwargs['course_pk'])
+        initial['course'] = course
+        initial['type'] = 'manual'
+        initial['enrollment_key'] = token_urlsafe(18)
+        return initial
+
+    def form_valid(self, form):
+        self.object = form.save()
+
+        assignee = form.cleaned_data['assignee']
+        if assignee:
+            new_assignees = StudentGroupAssignee(
+                student_group=self.object,
+                assignee=assignee
+            )
+            new_assignees.save()
+        # return redirect(self.get_success_url())
+        return super().form_valid(form)
+
 
 class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
     model = StudentGroup
@@ -339,6 +368,47 @@ class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
     context_object_name = 'student_group_delete'
     template_name = "learning/teaching/student_group_delete.jinja2"
     success_url = '/teaching/courses/{course_id}/group/'
+
+
+class StudentGroupAssigneeCreateView(TeacherOnlyMixin, generic.CreateView):
+    model = StudentGroupAssignee
+    # pk_url_kwarg = 'pk'
+    context_object_name = 'student_group_assignee_create'
+    template_name = "learning/teaching/student_group_assignee_add.jinja2"
+    # success_url = '/teaching/courses/{course_id}/group/{group_id}/'
+    success_url = '../../'
+    form_class = StudentGroupAssigneeAddForm
+
+    def get_initial(self, **kwargs):
+        initial = super().get_initial()
+        course = Course.objects.get(id=self.kwargs['course_pk'])
+        student_group = StudentGroup.objects.get(id=self.kwargs['group_pk'])
+        initial['student_group'] = student_group
+        return initial
+
+
+class StudentGroupAssigneeDeleteView(TeacherOnlyMixin, generic.DeleteView):
+    model = StudentGroupAssignee
+    # pk_url_kwarg = 'pk'
+    context_object_name = 'student_group_assignee_delete'
+    template_name = "learning/teaching/student_group_assignee_delete.jinja2"
+    success_url = '../../../'
+
+
+class StudentGroupAssigneeUpdateView(TeacherOnlyMixin, generic.UpdateView):
+    model = StudentGroupAssignee
+    # pk_url_kwarg = 'pk'
+    context_object_name = 'student_group_assignee_update'
+    template_name = "learning/teaching/student_group_assignee_update.jinja2"
+    success_url = '../../../'
+    form_class = StudentGroupAssigneeUpdateForm
+
+    def get_initial(self, **kwargs):
+        initial = super().get_initial()
+        course = Course.objects.get(id=self.kwargs['course_pk'])
+        student_group = StudentGroup.objects.get(id=self.kwargs['group_pk'])
+        initial['student_group'] = student_group
+        return initial
 
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
