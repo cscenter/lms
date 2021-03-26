@@ -110,7 +110,8 @@ class StudentGroupAssignee(models.Model):
         verbose_name_plural = _("Student Group Assignees")
         constraints = [
             models.UniqueConstraint(
-                fields=('student_group', 'assignee', 'assignment'),
+                # fields=('student_group', 'assignee', 'assignment'),
+                fields=('student_group', 'assignee'),
                 name='unique_assignee_per_student_or_assignment_group'
             ),
         ]
