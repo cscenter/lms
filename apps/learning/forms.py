@@ -15,7 +15,8 @@ from core.timezone.constants import TIME_FORMAT_RU
 from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
 from learning.models import GraduateProfile, StudentAssignment, \
-    AssignmentSubmissionTypes, StudentGroup
+    AssignmentSubmissionTypes, StudentGroup, StudentGroupAssignee
+from courses.models import Course, CourseTeacher
 from .models import AssignmentComment
 
 
@@ -283,6 +284,13 @@ class StudentGroupForm(forms.ModelForm):
     class Meta:
         model = StudentGroup
         fields = ('type', 'name', 'course', 'meta', 'branch', 'enrollment_key')
+        widgets = {
+            'type': forms.HiddenInput(),
+            'course': forms.HiddenInput(),
+            'meta': forms.HiddenInput(),
+            'branch': forms.HiddenInput(),
+            'enrollment_key': forms.HiddenInput(),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -299,7 +307,18 @@ class StudentGroupForm(forms.ModelForm):
 class StudentGroupAddForm(forms.ModelForm):
     class Meta:
         model = StudentGroup
-        fields = ('type', 'name', 'course', 'meta', 'branch', 'enrollment_key')
+        fields = ('type', 'name', 'course', 'meta', 'branch', 'enrollment_key', 'assignee')
+        widgets = {
+            'type': forms.HiddenInput(),
+            'course': forms.HiddenInput(),
+            'meta': forms.HiddenInput(),
+            'branch': forms.HiddenInput(),
+            'enrollment_key': forms.HiddenInput(),
+        }
+
+    assignee = forms.ModelChoiceField(queryset=CourseTeacher.objects.select_related('teacher'),
+                                      label='Ответственный',
+                                      required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -326,3 +345,41 @@ class StudentGroupDeleteForm(forms.ModelForm):
 
         self.helper.add_input(Button('delete', 'Delete', onclick='window.location.href="{}"'.format('../delete')))
         self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../')))
+
+
+class StudentGroupAssigneeAddForm(forms.ModelForm):
+    class Meta:
+        model = StudentGroupAssignee
+        fields = ('student_group', 'assignee')
+        widgets = {
+            'student_group': forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'blueForms'
+        self.helper.form_method = 'post'
+
+        self.helper.add_input(Submit('submit', 'Добавить'))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../../')))
+
+
+class StudentGroupAssigneeUpdateForm(forms.ModelForm):
+    class Meta:
+        model = StudentGroupAssignee
+        fields = ('student_group', 'assignee')
+        widgets = {
+            'student_group': forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'blueForms'
+        self.helper.form_method = 'post'
+
+        self.helper.add_input(Submit('submit', 'Сохранить'))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../../../')))

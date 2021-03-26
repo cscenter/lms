@@ -10,7 +10,8 @@ from learning.teaching.views import TimetableView as TeacherTimetable, \
     StudentAssignmentDetailView, GradeBookListView, \
     StudentAssignmentCommentCreateView, StudentGroupListView, \
     StudentGroupDetailView, StudentGroupUpdateView, StudentGroupCreateView, \
-    StudentGroupDeleteView, StudentGroupFilterListView
+    StudentGroupDeleteView, StudentGroupFilterListView, StudentGroupAssigneeCreateView, \
+    StudentGroupAssigneeDeleteView, StudentGroupAssigneeUpdateView
 from learning.api.views import CourseNewsUnreadNotificationsView
 
 
@@ -28,6 +29,10 @@ urlpatterns = [
         path('<int:pk>/group/', StudentGroupFilterListView.as_view(), name='student_group_list'),
         path('<int:course_pk>/group/create/', StudentGroupCreateView.as_view(), name='student_group_create'),
         path('<int:course_pk>/group/<int:group_pk>/', StudentGroupDetailView.as_view(), name='student_group_detail'),
+        path('<int:course_pk>/group/<int:group_pk>/assignee/add/', StudentGroupAssigneeCreateView.as_view(), name='student_group_assignee_create'),
+        # path('<int:course_pk>/group/<int:group_pk>/assignee/add/', StudentGroupCreateNewView.as_view(), name='student_group_assignee_create'),
+        path('<int:course_pk>/group/<int:group_pk>/assignee/<int:pk>/delete/', StudentGroupAssigneeDeleteView.as_view(), name='student_group_assignee_delete'),
+        path('<int:course_pk>/group/<int:group_pk>/assignee/<int:pk>/update/', StudentGroupAssigneeUpdateView.as_view(), name='student_group_assignee_update'),
         path('<int:course_pk>/group/<int:pk>/update/', StudentGroupUpdateView.as_view(), name='student_group_update'),
         path('<int:course_pk>/group/<int:pk>/delete/', StudentGroupDeleteView.as_view(), name='student_group_delete'),
         # TODO: separate api views?

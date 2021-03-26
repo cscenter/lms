@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+    <div class="container">
+        <h4> <b>Удаление ответственного группы </b></h4>
+        <table class="table table-borderless table-sm">
+            <tr>
+                <td width="150px">Ответственный:</td>
+                <td><b>{{ student_group_assignee_delete.assignee }}</b></td>
+            </tr>
+            <tr>
+                <td>Название группы:</td>
+                <td><b>{{ student_group_assignee_delete.student_group }}</b></td>
+            </tr>
+        </table>
+        <form method="post">
+            {% csrf_token %}
+            <input type="submit" class="btn btn-primary" value="Удалить">
+{#            <button type="button" class="btn" onclick="window.location.href =#}
+{#            '/teaching/courses/{{ student_group_delete.course.id }}/group/';">{% trans "Отмена" %}</button>#}
+            <button type="button" class="btn" onclick="history.go(-1);">{% trans "Отмена" %}</button>
+        </form>
+    </div>
+{% endblock content %}
