@@ -60,7 +60,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                 return
 
         template_name = self.get_template_name(current_campaign,
-                                               self.TEMPLATE_TYPE)
+                                               type=self.TEMPLATE_TYPE)
         template = get_email_template(template_name)
         exclude_statuses = [Applicant.ACCEPT,
                             Applicant.ACCEPT_IF,

@@ -28,7 +28,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
         generated = 0
         for campaign in campaigns:
             email_from = get_email_from(campaign)
-            template_name = self.get_template_name(campaign, self.TEMPLATE_TYPE)
+            template_name = self.get_template_name(campaign, type=self.TEMPLATE_TYPE)
             template = get_email_template(template_name)
             exams = (Exam.objects
                      .filter(applicant__campaign=campaign.pk,

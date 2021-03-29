@@ -43,7 +43,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                                   "for {}. Skip".format(campaign))
                 continue
 
-            template_name = self.get_template_name(campaign, template_type)
+            template_name = self.get_template_name(campaign, type=template_type)
             template = get_email_template(template_name)
 
             applicants = (Applicant.objects

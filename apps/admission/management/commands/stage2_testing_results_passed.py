@@ -46,7 +46,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                 self.stdout.write(f"Zero testing passing score for {campaign}. Skip")
                 continue
 
-            template_name = self.get_template_name(campaign, template_type)
+            template_name = self.get_template_name(campaign, type=template_type)
             template = get_email_template(template_name)
 
             applicants = (Applicant.objects
