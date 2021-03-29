@@ -199,13 +199,8 @@ class UserGroup(models.Model):
             self.user_id, self.role, self.site_id)
 
 
-# FIXME: .curriculum_year and status are used at least in stats :<
 class StudentProfileAbstract(models.Model):
-    curriculum_year = models.PositiveSmallIntegerField(
-        _("CSCUser|Curriculum year"),
-        validators=[MinValueValidator(2000)],
-        blank=True,
-        null=True)
+    # FIXME: remove
     status = models.CharField(
         choices=StudentStatuses.choices,
         verbose_name=_("Status"),
@@ -570,7 +565,7 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
 
     def stats(self, current_term):
         """
-        Stats for SUCCESSFULLY completed courses and enrollments in 
+        Stats for SUCCESSFULLY completed courses and enrollments in
         requested term.
         Additional DB queries may occur:
             * enrollment_set
