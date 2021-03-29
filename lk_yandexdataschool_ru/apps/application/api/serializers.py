@@ -49,6 +49,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
             ('МГУ', 16),
             ('МФТИ', 15),
             ('НГУ', 12),
+            ('ННГУ', 25),
             ('НИУ ВШЭ', 17),
             ('НИУ ИТМО', 24),
             ('СПбГУ', 19),
