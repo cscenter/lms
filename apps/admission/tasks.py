@@ -1,6 +1,7 @@
 import logging
 
 from django.apps import apps
+from django.db.models import Q
 from django.utils import translation, timezone
 from django_rq import job
 
@@ -58,11 +59,17 @@ def import_testing_results(*, task_id):
         logger.error(f"Task with id = {task_id} not found.")
         return
     task.lock(locked_by="rqworker")
-    active_campaigns = Campaign.objects.filter(current=True)
+
+    filters = [Q(current=True)]
+    _, task_kwargs = task.params()
+    if "campaign_id" in task_kwargs:
+        filters.append(Q(pk=task_kwargs["campaign_id"]))
+    active_campaigns = Campaign.objects.filter(*filters)
     for campaign in active_campaigns:
+        logger.info(f"Campaign id = {campaign.pk}")
         api = YandexContestAPI(access_token=campaign.access_token)
         for contest in campaign.contests.filter(type=Contest.TYPE_TEST):
-            logger.debug(f"Starting processing contest {contest.pk}")
+            logger.info(f"Starting processing contest {contest.pk}")
             try:
                 on_scoreboard, updated = Test.import_results(api, contest)
             except ContestAPIError as e:
@@ -70,7 +77,7 @@ def import_testing_results(*, task_id):
                     notify_admin_bad_token(campaign.pk)
                     # FIXME: skip campaign processing instead of raising exc
                 raise
-            logger.debug(f"Scoreboard total = {on_scoreboard}")
-            logger.debug(f"Updated = {updated}")
+            logger.info(f"Scoreboard total = {on_scoreboard}")
+            logger.info(f"Updated = {updated}")
         # FIXME: если контест закончился - для всех, кого нет в scoreboard надо проставить соответствующий статус анкете и тесту.
     task.complete()
