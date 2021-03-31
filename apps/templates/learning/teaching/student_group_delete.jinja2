@@ -5,36 +5,26 @@
         <h4> <b>Удаление группы </b></h4>
         <table class="table table-borderless table-sm">
             <tr>
-                <td width="30px">Имя:</td>
+                <td width="150px">Название группы:</td>
                 <td><b>{{ student_group_delete.name }}</b></td>
-            </tr>
-            <tr>
-                <td>Тип:</td>
-                <td><b>{{ student_group_detail.type }}</b></td>
             </tr>
             <tr>
                 <td>Курс:</td>
                 <td><b>{{ student_group_delete.course }}</b></td>
             </tr>
-            <tr>
-                <td>Отделение:</td>
-                <td><b>{{ student_group_delete.branch }}</b></td>
-            </tr>
-            <tr>
-                <td>Meta:</td>
-                <td><b>{{ student_group_delete.meta }}</b></td>
-            </tr>
-            <tr>
-                <td>Enrollment_key:</td>
-                <td><b>{{ student_group_delete.enrollment_key }}</b></td>
-            </tr>
         </table>
         <form method="post">
             {% csrf_token %}
+            {% if delete %}
+            <input disabled='disabled' type="submit" class="btn btn-primary" value="Удалить"
+                   placeholder="группа связана с заданием - удаление невозможно">
+            {% else %}
             <input type="submit" class="btn btn-primary" value="Удалить">
-{#            <button type="button" class="btn" onclick="window.location.href =#}
-{#            '/teaching/courses/{{ student_group_delete.course.id }}/group/';">{% trans "Отмена" %}</button>#}
+            {% endif %}
             <button type="button" class="btn" onclick="history.go(-1);">{% trans "Отмена" %}</button>
+            {% if delete %}
+            <p style="color:red">Группа связана с заданием. Удаление невозможно!</p>
+            {% endif %}
         </form>
     </div>
 {% endblock content %}

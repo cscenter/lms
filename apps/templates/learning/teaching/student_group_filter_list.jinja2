@@ -2,28 +2,38 @@
 {% load i18n %}
 {% block content %}
     <div class="container">
-{#    <a href="/teaching/courses/"> < Мои курсы </a><br>#}
-{#        <h4> <b> Список групп </b> </h4>#}
+        <h4><b>Студенческие группы курса "{{ course.0 }}"</b></h4><br>
         <div class="row">
             <div class="col-xs-12">
                 {% if student_group_list %}
-                    <table class="table table-bordered">
+{#                    <table class="table table-bordered">#}
+                    <table>
                         <tr class="active">
-                            <th width="30%">Название группы</th>
-                            <th width="20%">Тип</th>
-                            <th width="30%">Курс</th>
-                            <th width="15%"></th>
+                            <th>Название группы</th>
+{#                            <th width="20%">Тип</th>#}
+{#                            <th width="30%">Курс</th>#}
+{#                            <th>Управление</th>#}
                         </tr>
+                        <tr height="20px"> </tr>
                         {% for group in student_group_list %}
                             <tr>
                                 <td class="align-middle"><a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}">{{ group.name }}</a></td>
-                                <td class="align-middle">{{ group.type }}</td>
-                                <td class="align-middle">{{ group.course }}</td>
+{#                                <td class="align-middle">{{ group.type }}</td>#}
+{#                                <td class="align-middle">{{ group.course }}</td>#}
+                                <td width="20px"></td>
                                 <td class="align-middle">
-                                    <a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/update/">редактировать</a><br>
-                                    <a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/delete/">удалить</a><br>
+{#                                    <a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/update/">редактировать</a><br>#}
+{#                                    <a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/delete/">удалить</a><br>#}
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href =
+                                        '/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/update/';"><b>{% trans "Редактировать" %}</b></button>
+                                </td>
+                                <td width="10px"></td>
+                                <td>
+                                    <button type="button" class="btn btn-sm" onclick="window.location.href =
+                                        '/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/delete/';"><b>{% trans "Удалить" %}</b></button>
                                 </td>
                             </tr>
+                            <tr height="20px"> </tr>
                         {% endfor %}
                     </table>
                 {% else %}
@@ -33,7 +43,6 @@
 
         </div>
         <button type="button" class="btn btn-primary" onclick="window.location.href =
-            './create/';">{% trans "Добавить группу" %}</button>
-        <a href="/teaching/courses/group/">Перейти в полный список групп института</a>
+            '../group/create/';">{% trans "Добавить группу" %}</button>
     </div>
 {% endblock content %}
