@@ -2,7 +2,6 @@
 {% load i18n %}
 {% block content %}
     <div class="container">
-{#    <a href="/teaching/courses/"> < Мои курсы </a><br>#}
         <h4> <b> Список всех групп студентов </b> </h4>
         <div class="row">
             <div class="col-xs-12">
@@ -19,11 +18,7 @@
                                 <td class="align-middle"><a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}">{{ group.name }}</a></td>
                                 <td class="align-middle">{{ group.type }}</td>
                                 <td class="align-middle">{{ group.course }}</td>
-                                <td>
-{#                                    <a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/update/">редактировать</a><br>#}
-{#                                    <a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/delete/">удалить</a><br>#}
-
-                                </td>
+                                <td></td>
                             </tr>
                         {% endfor %}
                     </table>

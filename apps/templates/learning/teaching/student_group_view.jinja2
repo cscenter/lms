@@ -16,7 +16,6 @@
                 <td><a href="../../groups/">{{ course.0 }}</a></td>
             </tr>
         </table>
-
         <br><br><b>Список студентов группы</b><br>
         <div class="row">
             <div class="col-xs-12">
@@ -40,7 +39,6 @@
                 {% endif %}
             </div>
         </div>
-
         <br><br><b>Ответственные</b>
         <div class="row">
             <div class="col-xs-12">
@@ -54,8 +52,6 @@
                                 <td>
                                     <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href =
                                             '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/update/';"><b>{% trans "Редактировать" %}</b></button>
-{#                                    <a href="/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/update/">Редактировать</a>#}
-{#                                    <a href="/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/delete/">Удалить</a>#}
                                 </td>
                                 <td width="10px"></td>
                                 <td><button type="button" class="btn btn-sm" onclick="window.location.href =
@@ -72,9 +68,5 @@
         <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href =
                             '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/add/';">
             <b>{% trans "Добавить ответственного" %}</b></button>
-
-{#        <button type="button" class="btn btn-primary" onclick="window.location.href =#}
-{#                            '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/add/';">#}
-{#                            {% trans "Добавить ответственного" %}</button>#}
     </div>
 {% endblock content %}
