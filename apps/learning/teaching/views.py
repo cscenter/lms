@@ -283,15 +283,6 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
                 .order_by('-semester__index', 'meta_course__name'))
 
 
-# class StudentGroupListView(TeacherOnlyMixin, generic.ListView):
-#     model = StudentGroup
-#     context_object_name = 'student_group_list'
-#     template_name = "learning/teaching/student_group_list.jinja2"
-#
-#     def get_queryset(self):
-#         return StudentGroup.objects.all()
-
-
 class StudentGroupFilterListView(TeacherOnlyMixin, generic.ListView):
     model = StudentGroup
     context_object_name = 'student_group_list'
@@ -326,12 +317,9 @@ class StudentGroupDetailView(generic.DetailView):
 
 class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
     model = StudentGroup
-    # pk_url_kwarg = 'pk'
     context_object_name = 'student_group_update'
     template_name = "learning/teaching/student_group_update.jinja2"
     form_class = StudentGroupForm
-    # success_url = '/teaching/courses/group/{id}'
-    # success_url = '/teaching/courses/group/'
     success_url = '/teaching/courses/{course_id}/group/{id}'
 
     def get_context_data(self, **kwargs):
@@ -355,7 +343,6 @@ class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
 
 class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
     model = StudentGroup
-    # pk_url_kwarg = 'pk'
     context_object_name = 'student_group_create'
     template_name = "learning/teaching/student_group_add.jinja2"
     form_class = StudentGroupAddForm
@@ -384,13 +371,11 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
                 assignee=assignee
             )
             new_assignees.save()
-        # return redirect(self.get_success_url())
         return super().form_valid(form)
 
 
 class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
     model = StudentGroup
-    # pk_url_kwarg = 'pk'
     context_object_name = 'student_group_delete'
     template_name = "learning/teaching/student_group_delete.jinja2"
     success_url = '/teaching/courses/{course_id}/groups/'
@@ -401,13 +386,11 @@ class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
         assignee_group = AssignmentGroup.objects.filter(group_id=self.kwargs['pk'])
         if assignee_group:
             context['delete'] = True
-
         return context
 
 
 class StudentGroupStudentUpdateView(TeacherOnlyMixin, generic.UpdateView):
     model = Enrollment
-    # pk_url_kwarg = 'pk'
     context_object_name = 'student_group_student_update'
     template_name = "learning/teaching/student_group_student_update.jinja2"
     form_class = EnrollmentForm
@@ -421,16 +404,13 @@ class StudentGroupStudentUpdateView(TeacherOnlyMixin, generic.UpdateView):
 
 class StudentGroupAssigneeCreateView(TeacherOnlyMixin, generic.CreateView):
     model = StudentGroupAssignee
-    # pk_url_kwarg = 'pk'
     context_object_name = 'student_group_assignee_create'
     template_name = "learning/teaching/student_group_assignee_add.jinja2"
-    # success_url = '/teaching/courses/{course_id}/group/{group_id}/'
     success_url = '../../'
     form_class = StudentGroupAssigneeAddForm
 
     def get_initial(self, **kwargs):
         initial = super().get_initial()
-        course = Course.objects.get(id=self.kwargs['course_pk'])
         student_group = StudentGroup.objects.get(id=self.kwargs['group_pk'])
         initial['student_group'] = student_group
         return initial
@@ -443,7 +423,6 @@ class StudentGroupAssigneeCreateView(TeacherOnlyMixin, generic.CreateView):
 
 class StudentGroupAssigneeDeleteView(TeacherOnlyMixin, generic.DeleteView):
     model = StudentGroupAssignee
-    # pk_url_kwarg = 'pk'
     context_object_name = 'student_group_assignee_delete'
     template_name = "learning/teaching/student_group_assignee_delete.jinja2"
     success_url = '../../../'
@@ -451,7 +430,6 @@ class StudentGroupAssigneeDeleteView(TeacherOnlyMixin, generic.DeleteView):
 
 class StudentGroupAssigneeUpdateView(TeacherOnlyMixin, generic.UpdateView):
     model = StudentGroupAssignee
-    # pk_url_kwarg = 'pk'
     context_object_name = 'student_group_assignee_update'
     template_name = "learning/teaching/student_group_assignee_update.jinja2"
     success_url = '../../../'
@@ -459,7 +437,6 @@ class StudentGroupAssigneeUpdateView(TeacherOnlyMixin, generic.UpdateView):
 
     def get_initial(self, **kwargs):
         initial = super().get_initial()
-        course = Course.objects.get(id=self.kwargs['course_pk'])
         student_group = StudentGroup.objects.get(id=self.kwargs['group_pk'])
         initial['student_group'] = student_group
         return initial

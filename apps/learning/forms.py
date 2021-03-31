@@ -302,10 +302,7 @@ class StudentGroupForm(forms.ModelForm):
         self.helper.form_id = 'id-exampleForm'
         self.helper.form_class = 'blueForms'
         self.helper.form_method = 'post'
-        # self.helper.form_action = '/teaching/courses/group/'
-
         self.helper.add_input(Submit('submit', 'Сохранить'))
-        # self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format(f'../../')))
         self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format(f'../')))
 
 
@@ -334,22 +331,6 @@ class StudentGroupAddForm(forms.ModelForm):
 
         self.helper.add_input(Submit('submit', 'Добавить'))
         self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../../groups/')))
-
-
-# class StudentGroupDeleteForm(forms.ModelForm):
-#     class Meta:
-#         model = StudentGroup
-#         fields = ('type', 'name', 'course', 'meta', 'branch', 'enrollment_key')
-#
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.helper = FormHelper()
-#         self.helper.form_id = 'id-exampleForm'
-#         self.helper.form_class = 'blueForms'
-#         self.helper.form_method = 'post'
-#
-#         self.helper.add_input(Button('delete', 'Delete', onclick='window.location.href="{}"'.format('../delete')))
-#         self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../')))
 
 
 class StudentGroupAssigneeAddForm(forms.ModelForm):
@@ -403,12 +384,7 @@ class EnrollmentForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        # student_group = kwargs.pop('student_group', None)
-        # course = kwargs.pop('course', None)
         super().__init__(*args, **kwargs)
-        # self.instance.course = course
-        # self.fields['student_group'].queryset = student_group
-        # self.fields['course'].initial = course
         self.helper = FormHelper()
         self.helper.form_id = 'id-exampleForm'
         self.helper.form_class = 'blueForms'
