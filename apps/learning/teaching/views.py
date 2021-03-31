@@ -287,19 +287,24 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
                 .order_by('-semester__index', 'meta_course__name'))
 
 
-class StudentGroupListView(TeacherOnlyMixin, generic.ListView):
-    model = StudentGroup
-    context_object_name = 'student_group_list'
-    template_name = "learning/teaching/student_group_list.jinja2"
-
-    def get_queryset(self):
-        return StudentGroup.objects.all()
+# class StudentGroupListView(TeacherOnlyMixin, generic.ListView):
+#     model = StudentGroup
+#     context_object_name = 'student_group_list'
+#     template_name = "learning/teaching/student_group_list.jinja2"
+#
+#     def get_queryset(self):
+#         return StudentGroup.objects.all()
 
 
 class StudentGroupFilterListView(TeacherOnlyMixin, generic.ListView):
     model = StudentGroup
     context_object_name = 'student_group_list'
     template_name = "learning/teaching/student_group_filter_list.jinja2"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course'] = Course.objects.filter(id=self.kwargs.get("pk"))
+        return context
 
     def get_queryset(self):
         return StudentGroup.objects.filter(course_id=self.kwargs.get("pk"))
@@ -313,8 +318,10 @@ class StudentGroupDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['assignees'] = StudentGroupAssignee.objects.filter(student_group_id=self.kwargs.get("group_pk"))
+        context['course'] = Course.objects.filter(id=self.kwargs.get("course_pk"))
         context['group_id'] = self.kwargs.get("group_pk")
         context['course_id'] = self.kwargs.get("course_pk")
+        context['enrollment'] = Enrollment.objects.filter(student_group_id=self.kwargs.get("group_pk"))
         return context
 
     def get_object(self, queryset=None):
@@ -329,7 +336,25 @@ class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
     form_class = StudentGroupForm
     # success_url = '/teaching/courses/group/{id}'
     # success_url = '/teaching/courses/group/'
-    success_url = '/teaching/courses/{course_id}/group/'
+    success_url = '/teaching/courses/{course_id}/group/{id}'
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentGroupUpdateView, self).get_context_data(**kwargs)
+        context['form'].fields['assignee'].queryset = CourseTeacher.objects.filter(course_id=self.kwargs['course_pk'])
+        return context
+
+    def form_valid(self, form):
+        self.object = form.save()
+
+        assignee = form.cleaned_data['assignee']
+        assignee_in = StudentGroupAssignee.objects.filter(id=self.object.id)
+        if assignee in assignee_in:
+            new_assignees = StudentGroupAssignee(
+                student_group=self.object,
+                assignee=assignee
+            )
+            new_assignees.save()
+        return super().form_valid(form)
 
 
 class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
@@ -338,7 +363,7 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
     context_object_name = 'student_group_create'
     template_name = "learning/teaching/student_group_add.jinja2"
     form_class = StudentGroupAddForm
-    success_url = '/teaching/courses/{course_id}/group/'
+    success_url = '/teaching/courses/{course_id}/groups/'
 
     def get_initial(self, **kwargs):
         initial = super().get_initial()
@@ -347,6 +372,11 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
         initial['type'] = 'manual'
         initial['enrollment_key'] = token_urlsafe(18)
         return initial
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentGroupCreateView, self).get_context_data(**kwargs)
+        context['form'].fields['assignee'].queryset = CourseTeacher.objects.filter(course_id=self.kwargs['course_pk'])
+        return context
 
     def form_valid(self, form):
         self.object = form.save()
@@ -367,7 +397,30 @@ class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
     # pk_url_kwarg = 'pk'
     context_object_name = 'student_group_delete'
     template_name = "learning/teaching/student_group_delete.jinja2"
-    success_url = '/teaching/courses/{course_id}/group/'
+    success_url = '/teaching/courses/{course_id}/groups/'
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentGroupDeleteView, self).get_context_data(**kwargs)
+        context['delete'] = False
+        assignee_group = AssignmentGroup.objects.filter(group_id=self.kwargs['pk'])
+        if assignee_group:
+            context['delete'] = True
+
+        return context
+
+
+class StudentGroupStudentUpdateView(TeacherOnlyMixin, generic.UpdateView):
+    model = Enrollment
+    # pk_url_kwarg = 'pk'
+    context_object_name = 'student_group_student_update'
+    template_name = "learning/teaching/student_group_student_update.jinja2"
+    form_class = EnrollmentForm
+    success_url = '../../../'
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentGroupStudentUpdateView, self).get_context_data(**kwargs)
+        context['form'].fields['student_group'].queryset = StudentGroup.objects.filter(course_id=self.kwargs['course_pk'])
+        return context
 
 
 class StudentGroupAssigneeCreateView(TeacherOnlyMixin, generic.CreateView):
@@ -385,6 +438,11 @@ class StudentGroupAssigneeCreateView(TeacherOnlyMixin, generic.CreateView):
         student_group = StudentGroup.objects.get(id=self.kwargs['group_pk'])
         initial['student_group'] = student_group
         return initial
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentGroupAssigneeCreateView, self).get_context_data(**kwargs)
+        context['form'].fields['assignee'].queryset = CourseTeacher.objects.filter(course_id=self.kwargs['course_pk'])
+        return context
 
 
 class StudentGroupAssigneeDeleteView(TeacherOnlyMixin, generic.DeleteView):
@@ -409,6 +467,11 @@ class StudentGroupAssigneeUpdateView(TeacherOnlyMixin, generic.UpdateView):
         student_group = StudentGroup.objects.get(id=self.kwargs['group_pk'])
         initial['student_group'] = student_group
         return initial
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentGroupAssigneeUpdateView, self).get_context_data(**kwargs)
+        context['form'].fields['assignee'].queryset = CourseTeacher.objects.filter(course_id=self.kwargs['course_pk'])
+        return context
 
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
