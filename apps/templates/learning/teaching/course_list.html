@@ -29,7 +29,9 @@
                                     </td>
                                     <td>
                                         <a href="{{ course.get_create_news_url }}">{% trans "Add news" %}</a><br>
-                                        <a href="/teaching/courses/{{ course.id }}/groups/">Группы студентов</a>
+                                        {% if course.group_mode != "branch" %}
+                                            <a href="/teaching/courses/{{ course.id }}/groups/">Группы студентов</a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endwith %}
