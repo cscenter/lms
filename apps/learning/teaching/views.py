@@ -407,7 +407,7 @@ class StudentGroupStudentUpdateView(TeacherOnlyMixin, generic.UpdateView):
     model = Enrollment
     context_object_name = 'student_group_student_update'
     template_name = "learning/teaching/student_group_student_update.jinja2"
-    form_class = EnrollmentForm
+    form_class = StudentEnrollmentForm
 
     def get_success_url(self):
         return reverse("teaching:student_group_detail", kwargs={'course_pk': self.kwargs['course_pk'], 'group_pk': self.kwargs['group_pk']})
