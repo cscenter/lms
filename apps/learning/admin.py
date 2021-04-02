@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.db import models as db_models
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from django.contrib.contenttypes.admin import GenericTabularInline
 
 from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
@@ -169,18 +170,19 @@ class InvitationAdmin(BaseModelAdmin):
         return mark_safe(f"<a target='_blank' href='{url}'>Смотреть на сайте</a>")
 
 
+class StudentGroupAssigneeInline(admin.TabularInline):
+    model = StudentGroupAssignee
+    list_display = ('assignee',)
+    exclude = ('assignment',)
+
 class StudentGroupAdmin(BaseModelAdmin):
     list_display = ('name', 'course', 'type')
     list_filter = ('course', 'branch')
 
+    inlines = [
+        StudentGroupAssigneeInline,
+    ]
 
-class StudentGroupAssigneeAdmin(BaseModelAdmin):
-    list_display = ('student_group', 'assignee', 'assignment')
-    list_filter = ('student_group', 'assignee')
-
-class AssignmentGroupAdmin(BaseModelAdmin):
-    list_display = ('assignment', 'group')
-    list_filter = ('assignment', 'group')
 
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
@@ -188,5 +190,3 @@ admin.site.register(Invitation, InvitationAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(GraduateProfile, GraduateProfileAdmin)
 admin.site.register(StudentGroup, StudentGroupAdmin)
-admin.site.register(StudentGroupAssignee, StudentGroupAssigneeAdmin)
-admin.site.register(AssignmentGroup, AssignmentGroupAdmin)
