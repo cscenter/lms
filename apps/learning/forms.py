@@ -16,6 +16,7 @@ from grading.services import CheckerService, SubmissionService
 from learning.models import AssignmentSubmissionTypes, GraduateProfile
 
 from .models import AssignmentComment
+from django.urls import reverse
 
 
 class SubmitLink(BaseInput):
@@ -295,6 +296,7 @@ class StudentGroupForm(forms.ModelForm):
                                       required=False)
 
     def __init__(self, *args, **kwargs):
+        reverse_param = kwargs.pop('reverse_param', None)
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'id-exampleForm'
@@ -302,6 +304,9 @@ class StudentGroupForm(forms.ModelForm):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Сохранить'))
         self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format(f'../')))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
+            .format(reverse("teaching:student_group_detail", kwargs={'course_pk': reverse_param['course_pk'],
+            'group_pk': reverse_param['group_pk']}))))
 
 
 class StudentGroupAddForm(forms.ModelForm):
@@ -321,6 +326,7 @@ class StudentGroupAddForm(forms.ModelForm):
                                       required=False)
 
     def __init__(self, *args, **kwargs):
+        reverse_param = kwargs.pop('reverse_param', None)
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'id-exampleForm'
@@ -329,6 +335,8 @@ class StudentGroupAddForm(forms.ModelForm):
 
         self.helper.add_input(Submit('submit', 'Добавить'))
         self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../../groups/')))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
+            .format(reverse("teaching:student_group_list", kwargs={'course_pk': reverse_param['course_pk']}))))
 
 
 class StudentGroupAssigneeAddForm(forms.ModelForm):
@@ -340,6 +348,7 @@ class StudentGroupAssigneeAddForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        reverse_param = kwargs.pop('reverse_param', None)
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'id-exampleForm'
@@ -347,7 +356,9 @@ class StudentGroupAssigneeAddForm(forms.ModelForm):
         self.helper.form_method = 'post'
 
         self.helper.add_input(Submit('submit', 'Добавить'))
-        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../../')))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
+            .format(reverse("teaching:student_group_detail", kwargs={'course_pk': reverse_param['course_pk'],
+            'group_pk': reverse_param['group_pk']}))))
 
 
 class StudentGroupAssigneeUpdateForm(forms.ModelForm):
@@ -359,6 +370,7 @@ class StudentGroupAssigneeUpdateForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        reverse_param = kwargs.pop('reverse_param', None)
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'id-exampleForm'
@@ -366,9 +378,11 @@ class StudentGroupAssigneeUpdateForm(forms.ModelForm):
         self.helper.form_method = 'post'
 
         self.helper.add_input(Submit('submit', 'Сохранить'))
-        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../../../')))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
+            .format(reverse("teaching:student_group_detail", kwargs={'course_pk': reverse_param['course_pk'],
+            'group_pk': reverse_param['group_pk']}))))
 
-
+# FIXME: Сменить название класса формы
 class EnrollmentForm(forms.ModelForm):
     class Meta:
         model = Enrollment
@@ -382,6 +396,7 @@ class EnrollmentForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        reverse_param = kwargs.pop('reverse_param', None)
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'id-exampleForm'
@@ -389,4 +404,6 @@ class EnrollmentForm(forms.ModelForm):
         self.helper.form_method = 'post'
 
         self.helper.add_input(Submit('submit', 'Сохранить'))
-        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../../../')))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
+            .format(reverse("teaching:student_group_detail", kwargs={'course_pk': reverse_param['course_pk'],
+            'group_pk': reverse_param['group_pk']}))))
