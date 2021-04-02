@@ -305,7 +305,6 @@ class StudentGroupForm(forms.ModelForm):
         self.helper.form_class = 'blueForms'
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Сохранить'))
-        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format(f'../')))
         self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
             .format(reverse("teaching:student_group_detail", kwargs={'course_pk': reverse_param['course_pk'],
             'group_pk': reverse_param['group_pk']}))))
@@ -336,7 +335,6 @@ class StudentGroupAddForm(forms.ModelForm):
         self.helper.form_method = 'post'
 
         self.helper.add_input(Submit('submit', 'Добавить'))
-        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'.format('../../groups/')))
         self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
             .format(reverse("teaching:student_group_list", kwargs={'course_pk': reverse_param['course_pk']}))))
 
@@ -384,8 +382,8 @@ class StudentGroupAssigneeUpdateForm(forms.ModelForm):
             .format(reverse("teaching:student_group_detail", kwargs={'course_pk': reverse_param['course_pk'],
             'group_pk': reverse_param['group_pk']}))))
 
-# FIXME: Сменить название класса формы
-class EnrollmentForm(forms.ModelForm):
+
+class StudentEnrollmentForm(forms.ModelForm):
     class Meta:
         model = Enrollment
         fields = ('student', 'student_profile', 'course', 'grade', 'grade_changed', 'student_group')
