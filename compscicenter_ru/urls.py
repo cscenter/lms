@@ -40,6 +40,10 @@ urlpatterns += [
     # TODO: move redirect to nginx?
     path('pages/questions/', RedirectView.as_view(url='/enrollment/program/', permanent=True)),
     re_path(r'^(?P<year>20[0-9]{2})/$', views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
+    path('partners/', include([
+        path('itmo/', TemplateView.as_view(template_name='compscicenter_ru/partners/itmo.html'), name='partners_itmo'),
+        path('mkn-spbgu/', TemplateView.as_view(template_name='compscicenter_ru/partners/mkn-spbgu.html'), name='partners_mkn_spbgu'),
+    ])),
     # Programs
     path('syllabus/', include([
         path('', RedirectView.as_view(url='/syllabus/on-campus/', permanent=False)),
