@@ -310,7 +310,7 @@ class InterviewAssignmentDetailView(CuratorOnlyMixin, generic.DetailView):
 
 
 def get_default_campaign_for_user(user: User) -> Optional[Campaign]:
-    active_campaigns = list(Campaign.objects.filter(current=True)
+    active_campaigns = list(Campaign.objects.filter(current=True, branch__site_id=settings.SITE_ID)
                             .only("pk", "branch_id")
                             .order_by('branch__order'))
     try:
