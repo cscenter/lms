@@ -29,13 +29,13 @@
 <div class="admission-list-page">
     {% crispy filter.form %}
 
-{% if import_testing_results != None %}
+{% if import_testing_results.campaign %}
     <a href="#import_testing_results" data-toggle="collapse" aria-expanded="false" class="dashed pb-10" style="display: inline-block; text-decoration: dashed!important;">Импорт результатов</a><br>
     <div class="collapse" id="import_testing_results">
         <div class="pb-10">
-            <a href="{% url 'admission:import_testing_results' %}" class="btn btn-default _btn-import-testings-results mr-10">
+            <a href="{% url 'admission:import_testing_results' import_testing_results.campaign.pk %}" class="btn btn-default _btn-import-testings-results mr-10">
                 <i class="fa fa-refresh" aria-hidden="true"></i> Результаты теста
-            </a>{% if import_testing_results %} Задача добавлена {{ import_testing_results.date }} [{{ import_testing_results.status }}]{% endif %}
+            </a>{% if import_testing_results.latest_task %} Задача добавлена {{ import_testing_results.latest_task.date }} [{{ import_testing_results.latest_task.status }}]{% endif %}
         </div>
     </div>
 {% endif %}
@@ -73,7 +73,7 @@
                                     </form>
                                 {% endif %}
                             {% endif %}<br>
-                            {% if applicant.university_other %}{{ applicant.university_other }}{% else %}{{ applicant.university }}{% endif %}
+                            {% if applicant.university_other %}{{ applicant.university_other }}{% else %}{% if applicant.university.abbr %}{{ applicant.university.abbr }}{% else %}{{ applicant.university.name }}{% endif %}{% endif %}
                             {% if applicant.course %}<br>{{ applicant.get_course_display }}{% endif %}
 
                         </td>

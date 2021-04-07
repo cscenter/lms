@@ -228,6 +228,10 @@
                                 <td>{{ student_profile.branch }}</td>
                             </tr>
                             <tr>
+                                <td>{% trans "Student|admission year" %}:</td>
+                                <td>{{ student_profile.year_of_admission }}</td>
+                            </tr>
+                            <tr>
                                 <td>Статус</td>
                                 <td>{{ student_profile.get_status_display|default:"—" }}</td>
                             </tr>
@@ -267,10 +271,16 @@
                                             {% endif %}
                                         {% endfor %}
                                         <br>Обозначения: <span class="text-success">зелёный</span> - курс сдан / <span class="text-info">синий</span> - запись в текущем семестре<br>
-                                    {% else %}
-                                        [{% for academic_discipline in student_profile.academic_disciplines.all %}{{ academic_discipline }}{% if not forloop.last %}, {% endif %}{% endfor %}]
                                     {% endif %}
                                 </td>
+                            </tr>
+                            <tr>
+                                <td>{% trans "Areas of study" %}:</td>
+                                <td>
+                                  {% if student_profile.academic_disciplines.all|length > 0 %}
+                                    {% for academic_discipline in student_profile.academic_disciplines.all %}{{ academic_discipline }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                                  {% else %}—{% endif %}
+                                  </td>
                             </tr>
                             <tr>
                                 <td>{% trans "Comment" %}:</td>

@@ -1,0 +1,119 @@
+{% extends "compscicenter_ru/syllabus/detail.html" %}
+
+{% block inner %}
+  <div class="container py-10 text-left">
+    <div class="row text-center text-md-left">
+      <div class="col-md-6 order-1 order-md-0 d-md-flex" style="justify-content: center; flex-direction: column">
+        <h1 class="super-hero mb-0">Computer Science</h1>
+        <p class="mt-3 mb-0">Современная информатика</p>
+        <div class="row my-6">
+          <div class="col-sm col-md-auto mr-0 mr-md-6">
+            <div class="h1 mb-2">
+              2-3
+            </div>
+            <p>года обучения</p>
+          </div>
+          <div class="col-sm col-md-auto mr-0 mr-md-6">
+            <div class="h1 mb-2">
+              12
+            </div>
+            <p>курсов</p>
+          </div>
+          <div class="col-sm col-md-auto mr-0 mr-md-6">
+            <div class="h1 mb-2">
+              3
+            </div>
+            <p>семестра НИР</p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-auto m-auto m-md-0">
+            <a href="/application/" class="btn _big _primary _m-wide">Поступить</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <img class="img-fluid" src="{{ static('v2/img/pages/syllabus/on-campus/computer-science.svg') }}" alt="Иллюстрация. Информатика">
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid grey-bg py-10">
+    <div class="container py-10">
+      <div class="row">
+        <div class="col-lg-10">
+          <h1>О направлении</h1>
+          <p>Цель обучения на направлении Computer Science — подготовка специалистов по современной информатике. Студенты направления
+            изучают
+            теоретические основы информатики и более прикладные научные области.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% set branches = [
+    {'target': 'spb', 'name': 'Санкт-Петербург', 'active': selected_branch == 'spb', 'url': '?branch=spb'},
+    {'target': 'nsk', 'name': 'Новосибирск', 'active': selected_branch == 'nsk', 'url': '?branch=nsk'}
+  ] %}
+
+  <div class="container py-10">
+    <div class="row">
+      <div class="col-lg-10">
+        <div class="mb-10">
+
+          {% call macros.scrollable(modifiers='mt-4') %}{{ tabs(branches, modifiers='mt-4') }}{% endcall %}
+
+          <div class="tab-content mt-10">
+            {% with tab = branches[0] %}
+              <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel"
+                   aria-labelledby="tab__{{ tab.target }}">
+                <h2>Обязательные курсы</h2>
+                <h3 class="mt-10">Алгоритмы</h3>
+                {{ collapsible_meta_course('Алгоритмы и структуры данных, часть 1', 'algorithms-1', '<p>Курс знакомит слушателей с базовыми алгоритмическими приёмами и структурами данных.</p>') }}
+                {{ collapsible_meta_course('Алгоритмы и структуры данных, часть 2', 'algorithms-2', '<p>Продолжение изучения базовых алгоритмов</p>') }}
+                <p class="text-muted">или</p>
+                {{ collapsible_meta_course('Дополнительные главы алгоритмов, часть 1', 'advanced-algo', '<p>Курс рассчитан на студентов, сдавших базовые курсы по алгоритмам, предлагаемые в CS центре, и желающих применить свои знания для более сложных задач.</p>') }}
+                {{ collapsible_meta_course('Дополнительные главы алгоритмов, часть 2', 'advanced-algo_part2', '<p>Курс рассчитан на студентов, сдавших базовые курсы по алгоритмам, предлагаемые в CS центре, и желающих применить свои знания для более сложных задач.</p>') }}
+
+                <h3 class="mt-10">Математика</h3>
+                {{ collapsible_meta_course('Асимптотический анализ и теория вероятностей', 'prob-theory', '<p>В курсе разбираются следующие темы: теория множеств, асимптотики, производящие функции, дискретная и условная вероятность, случайные величины, предельные теоремы.</p>') }}
+                {{ collapsible_meta_course('Основы дискретной математики', 'discrete-math', '<p>Целью курса является знакомство слушателей с основными понятиями и методами дискретной математики.</p>') }}
+
+                <h3 class="mt-10">Теоретическая информатика</h3>
+                {{ collapsible_meta_course('Обзорный курс по теоретической информатике', 'cs-intro', 'Курс призван познакомить слушателей с некоторыми классическими результатами и идеями теоретической информатики (Theoretical Computer Science), которые будут полезны как исследователям, так и программистам, желающим расширить свой кругозор.</p>') }}
+
+                <h3 class="mt-10">Семь любых других курсов</h3>
+                <a href="/courses/" class="btn _outline _gray _m-wide">Все курсы центра</a>
+
+                <h3 class="mt-10">Три семестра научно-исследовательской работы</h3>
+                <a href="/projects/?type=research" class="btn _outline _gray _m-wide">Примеры НИР</a>
+              </div>
+            {% endwith %}
+            {% with tab = branches[1] %}
+              <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel"
+                   aria-labelledby="tab__{{ tab.target }}">
+                <h2>Обязательные курсы</h2>
+
+                <h3 class="mt-10">Алгоритмы</h3>
+                {{ collapsible_meta_course('Алгоритмы и структуры данных, часть 1', 'algorithms-1', '<p>Курс знакомит слушателей с базовыми алгоритмическими приёмами и структурами данных.</p>') }}
+                {{ collapsible_meta_course('Алгоритмы и структуры данных, часть 2', 'algorithms-2', '<p>Продолжение изучения базовых алгоритмов</p>') }}
+
+                <h3 class="mt-10">Математика</h3>
+                {{ collapsible_meta_course('Дискретный анализ и теория вероятностей', 'discrete-analysis', '<p>Курс будет посвящён основам комбинаторики и теории вероятностей, а также студентам будут даны основные сведения из математической статистики и линейной алгебры.</p>') }}
+
+                <h3 class="mt-10">Теоретическая информатика</h3>
+                {{ collapsible_meta_course('Обзорный курс по теоретической информатике', 'cs-intro', '<p>Курс призван познакомить слушателей с некоторыми классическими результатами и идеями теоретической информатики (Theoretical Computer Science), которые будут полезны как исследователям, так и программистам, желающим расширить свой кругозор.</p>') }}
+                {{ collapsible_meta_course('Функциональное программирование', 'func-prog', '<p>Курс знакомит слушателей с функциональными языками программирования и методами программирования на этих языках.</p>', url_params='?branch=nsk') }}
+
+                <h3 class="mt-10">Семь любых других курсов</h3>
+                <a href="/courses/" class="btn _outline _gray _m-wide">Все курсы центра</a>
+                <h3 class="mt-10">Три семестра научно-исследовательской работы</h3>
+                <a href="/projects/?type=research" class="btn _outline _gray _m-wide">Примеры НИР</a>
+              </div>
+            {% endwith %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock inner %}

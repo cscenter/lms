@@ -43,14 +43,14 @@ django-prettyjson = "==0.4.1"
 # Images
 sorl-thumbnail = "==12.7.0"
 python-magic = "==0.4.22"
-Pillow = "==8.1.0"
+Pillow = "==8.1.2"
 # Forms
-django-crispy-forms = "==1.10.0"
+django-crispy-forms = "==1.11.2"
 django-formtools = "==2.2"
 # Parsing
 beautifulsoup4 = "*"
 # i18n/l10n
-django-rosetta = "==0.9.5"
+django-rosetta = "*"
 django-modeltranslation = "==0.16.2"
 babel = "*"
 # AWS
@@ -64,7 +64,7 @@ hoep = {editable = true,git = "git://github.com/pacahon/Hoep.git",ref = "0d4c050
 # Monitoring
 sentry-sdk = "*"
 # Oauth2
-social-auth-core = "==4.0.3"
+social-auth-core = "==4.1.0"
 social-auth-app-django = "==4.0.0"
 # Task manager
 rq = "==1.7.0"
@@ -81,7 +81,7 @@ requests = "==2.25.1"
 django-model-utils = "==4.1.1"
 django-storages = "==1.11.1"
 django-dbbackup = "==3.3.0"
-django-import-export = "==2.4.0"
+django-import-export = "==2.5.0"
 tablib = "==3.0.0"
 nbconvert = "==6.0.7"
 django-js-reverse = "==0.9.1"
@@ -95,7 +95,7 @@ attrs = "==20.3.0"
 django-choices = "==1.7.1"
 django-vanilla-views = "==2.0.0"
 django-autocomplete-light = "==3.8.2"
-django-mptt = "==0.11.0"
+django-mptt = "==0.12.0"
 django-bootstrap-pagination = "==1.7.1"
 django-bitfield = "==2.0.1"
 django-multiselectfield = "==0.1.12"
@@ -112,7 +112,7 @@ sqlparse = "==0.4.1"
 django-loginas = "==0.3.9"
 django-webpack-loader = "==0.7.0"
 XlsxWriter = "==1.3.7"
-jupyter_client = "==6.1.11"
+jupyter_client = "==6.1.12"
 webdavclient = "==1.0.8"
 isoweek = "*"
 django-subdomains = {git = "git://github.com/pacahon/django-subdomains.git",ref = "4096c2dc82f9f5e511e8c8f78d31e804ac028b5d"}

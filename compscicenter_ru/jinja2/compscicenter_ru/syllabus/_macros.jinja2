@@ -1,0 +1,8 @@
+{% from "compscicenter_ru/macros/_cards.jinja2" import collapsible_block %}
+
+{% macro collapsible_meta_course(title, course_slug, description, base_url='', url_params='') %}
+  {% call collapsible_block(title, course_slug) %}
+    {{ description|safe }}
+    <a href="{{ base_url }}/courses/{{ course_slug }}/{{ url_params }}" class="btn _outline _gray _small" target="_blank">Страница курса</a>
+  {% endcall %}
+{%- endmacro %}

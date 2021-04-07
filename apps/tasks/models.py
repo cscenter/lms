@@ -53,7 +53,7 @@ class Task(models.Model):
     # the "name" of the task/function to be run
     task_name = models.CharField(max_length=190, db_index=True)
     # the json encoded parameters to pass to the task
-    task_params = models.TextField()
+    task_params = models.TextField()  # TODO: replace with JSONField
     # a sha1 hash of the name and params, to lookup already scheduled tasks
     task_hash = models.CharField(max_length=40, db_index=True)
 
@@ -112,6 +112,7 @@ class Task(models.Model):
             return "waiting"
 
     def params(self):
+        # FIXME: Deny args for task params, use only kwargs
         args, kwargs = json.loads(self.task_params)
         # need to coerce kwargs keys to str
         kwargs = dict((str(k), v) for k, v in kwargs.items())

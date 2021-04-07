@@ -1,0 +1,27 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% from "compscicenter_ru/macros/_cards.jinja2" import collapsible_block %}
+{% from "compscicenter_ru/syllabus/_macros.jinja2" import collapsible_meta_course %}
+{% from "compscicenter_ru/macros/_nav.jinja2" import tabs %}
+{% from "compscicenter_ru/macros/_cards.jinja2" import testimonial_card %}
+
+{% block title %}Направление {{ study_program.academic_discipline.name_en }} в {{ super() }}{% endblock title %}
+
+{% block body_attrs %}data-init-sections="tabs,collapsible"{% endblock body_attrs %}
+
+{% block content %}
+  {% block inner %}{% endblock inner %}
+
+  {% if testimonials %}
+    <div class="csc-student-reviews grey-bg">
+      <div class="container">
+        <h2 class="text-center">Отзывы студентов</h2>
+        <div class="card-columns _testimonials">
+          {% for graduate_profile in testimonials %}
+            {{ testimonial_card(graduate_profile) }}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock content %}

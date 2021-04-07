@@ -1,4 +1,4 @@
-{% import "compscicenter_ru/layouts/_macros.jinja2" as macros -%}
+{% import "compscicenter_ru/macros/_global.jinja2" as macros -%}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -33,13 +33,14 @@
     <div class="navbar-container">
         {% block top_banner %}
             {%- if not is_admission_disabled -%}
-                <div class="top-banner-wrapper">
-                    <div class="container">
-                        <div class="top-banner">
-                            <img class="mr-2 d-none d-lg-inline-block" src="{{ static('v2/img/icons/top-banner-kids.svg') }}" alt="" /> <div>До 10 апреля открыт <a href="{{ url('application:form') }}">приём заявок</a> на обучение в центре</div>
-                        </div>
-                    </div>
+              <a href="/syllabus/on-campus/robotics/" class="top-banner-wrapper green-bg">
+                <div class="container">
+                  <div class="top-banner">
+                    <img class="mr-2 d-none d-lg-inline-block" src="/static/v2/img/icons/top-banner-robotics.svg" alt="Направление роботы">
+                    <div>Открылось новое направление обучения – Robotics</div>
+                  </div>
                 </div>
+              </a>
             {%- endif -%}
         {% endblock top_banner %}
         {%- include "compscicenter_ru/layouts/_top_menu.html" %}

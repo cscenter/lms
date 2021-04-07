@@ -1,11 +1,13 @@
-{% macro author_card(img_url, full_name, details, testimonial='', modifiers='') -%}
+{% from "compscicenter_ru/macros/_global.jinja2" import svg_icon %}
+
+{% macro author_card(img_url, title, subtitle, testimonial='', modifiers='') -%}
     <div class="author{% if modifiers %} {{ modifiers }}{% endif %}">
         {% if img_url %}
-            <img class="author__img" alt="{{ full_name }}" src="{{ img_url }}" />
+            <img class="author__img" alt="{{ title }}" src="{{ img_url }}" />
         {% endif %}
         <div class="author__details">
-            <h4>{{ full_name }}</h4>
-            <span>{{ details }}</span>
+            <h4>{{ title }}</h4>
+            <span>{{ subtitle }}</span>
         </div>
         {% if testimonial %}<div class="author__testimonial">{{ testimonial }}</div>{% endif %}
     </div>
@@ -35,8 +37,8 @@
         {% set parts = ["Выпуск ", graduate_profile.graduation_year, ", ", graduate_profile.academic_disciplines.all()|join(", ")] %}
         {% with im = graduate_profile.get_thumbnail(graduate_profile.ThumbnailSize.SQUARE) %}
             {{ author_card(im.url,
-                           full_name=graduate_profile.student_profile.user.get_short_name(),
-                           details=parts|join(''),
+                           title=graduate_profile.student_profile.user.get_short_name(),
+                           subtitle=parts|join(''),
                            testimonial=graduate_profile.testimonial|markdown(graduate_profile.TESTIMONIAL_CACHE_KEY, 3600, graduate_profile.pk, graduate_profile.modified),
                            modifiers='_testimonial') }}
         {% endwith %}
@@ -48,8 +50,8 @@
     {% with im = speaker.get_thumbnail(speaker.ThumbnailSize.SQUARE) %}
         {{ author_card(
                 im.url,
-                full_name=speaker.full_name,
-                details=speaker.workplace) }}
+                title=speaker.full_name,
+                subtitle=speaker.workplace) }}
     {% endwith %}
 {%- endmacro %}
 
@@ -100,7 +102,7 @@
         {% set participants = project_publication.get_participants() %}
         {% if participants|length > 1 %}
             {{ author_card(img_url=user_img_url,
-            full_name='Несколько участников', details='', modifiers='_project') }}
+            title='Несколько участников', subtitle='', modifiers='_project') }}
         {% else %}
             {{ user_card(participants[0], '', modifiers='_project') }}
         {% endif %}
@@ -129,4 +131,21 @@
             {{ course_title|safe }}
         </div>
     </a>
+{%- endmacro %}
+
+{% macro collapsible_block(title, id, open=false) %}
+  <div class="collapsible">
+    <div class="card _qa mb-4">
+      <button class="btn card__header" id="collapsible-block-{{ id }}"
+              aria-expanded="{% if open %}true{% else %}false{% endif %}" href="#collapsible-block-{{ id }}__inner">
+        {{ svg_icon('border-arrow-right') }}{{ title|safe }}
+      </button>
+      <div class="{% if not open %}collapse{% endif %} pb-4" id="collapsible-block-{{ id }}__inner"
+           aria-expanded="{% if open %}true{% else %}false{% endif %}">
+        <div class="card__content">
+          {{ caller() }}
+        </div>
+      </div>
+    </div>
+  </div>
 {%- endmacro %}

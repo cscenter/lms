@@ -323,7 +323,7 @@ class AlumniView(TemplateView):
             row = {"label": str(branch.name), "value": branch.code}
             branch_options.append(row)
         # Area state and props
-        areas = [{"label": a.name, "value": a.code} for a in
+        areas = [{"label": a.name, "value": a.pk} for a in
                  AcademicDiscipline.objects.filter(code__in=['cs', 'se', 'ds'])]
         area = self.kwargs.get("area", None)
         area_option = next((a for a in areas if a['value'] == area), None)
@@ -344,7 +344,7 @@ class AlumniView(TemplateView):
 
 
 class OnCampusProgramsView(generic.TemplateView):
-    template_name = "compscicenter_ru/programs/on_campus.html"
+    template_name = "compscicenter_ru/syllabus/on_campus.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -378,12 +378,11 @@ class OnCampusProgramsView(generic.TemplateView):
 
 
 class OnCampusProgramDetailView(PublicURLMixin, generic.TemplateView):
-    template_name = "compscicenter_ru/programs/on_campus_detail.html"
+    def get_template_names(self):
+        return f"compscicenter_ru/syllabus/{self.kwargs['discipline_code']}.html"
 
     def get_context_data(self, discipline_code, **kwargs):
-        context = super().get_context_data(**kwargs)
-        selected_branch = self.request.GET.get('branch',
-                                               settings.DEFAULT_BRANCH_CODE)
+        selected_branch = self.request.GET.get('branch', settings.DEFAULT_BRANCH_CODE)
         study_program = (StudyProgram.objects
                          .filter(academic_discipline__code=discipline_code,
                                  branch__code=selected_branch,
@@ -391,40 +390,22 @@ class OnCampusProgramDetailView(PublicURLMixin, generic.TemplateView):
                                  branch__active=True,
                                  is_active=True)
                          .exclude(branch__city=None)
-                         .prefetch_core_courses_groups()
-                         .select_related("branch", "academic_discipline")
                          .first())
         if not study_program:
             raise Http404
-
-        # Collect tabs with cities where academic discipline is presented
-        tabs = TabList()
-        branches = (Branch.objects
-                    .filter(study_programs__academic_discipline__code=discipline_code,
-                            study_programs__is_active=True,
-                            site=self.request.site)
-                    .exclude(city=None))
-        for branch in branches:
-            tab = Tab(target=branch.code, name=branch.name,
-                      url=f"{self.request.path}?branch={branch.code}",
-                      order=branch.order)
-            if branch.code == selected_branch:
-                tab.active = True
-            tabs.add(tab)
-        tabs.sort()
-
+        # Randomize testimonials
         cache_key = f"{TESTIMONIALS_CACHE_KEY}_{discipline_code}"
-        random_testimonials = get_random_testimonials(
-            4, cache_key, academic_disciplines=discipline_code)
-
-        context["study_program"] = study_program
-        context["tabs"] = tabs
-        context["testimonials"] = random_testimonials
+        random_testimonials = get_random_testimonials(4, cache_key, academic_disciplines__code=discipline_code)
+        context = {
+            "study_program": study_program,
+            "selected_branch": selected_branch,
+            "testimonials": random_testimonials,
+        }
         return context
 
 
 class DistanceProgramView(generic.TemplateView):
-    template_name = "compscicenter_ru/programs/distance.html"
+    template_name = "compscicenter_ru/syllabus/distance.html"
 
 
 class CourseVideoTypes(DjangoChoices):

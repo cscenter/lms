@@ -2,7 +2,7 @@
 
 import uuid
 from collections import Counter
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import Optional
 from urllib import parse
 
@@ -96,7 +96,7 @@ class InterviewerOnlyMixin(UserPassesTestMixin):
         return user.is_interviewer or user.is_curator
 
 
-def applicant_testing_new_task(request):
+def import_campaign_testing_results(request, campaign_id: int):
     """
     Creates new task for importing testing results from yandex contests.
     Make sure `current` campaigns are already exist in DB before add new task.
@@ -104,22 +104,19 @@ def applicant_testing_new_task(request):
     if request.method == "POST" and request.user.is_curator:
         task = Task.build(
             task_name="admission.tasks.import_testing_results",
+            kwargs={"campaign_id": campaign_id},
             creator=request.user)
-        # Not really atomic, just trying to avoid useless rows in DB
-        try:
-            # FIXME: Deal with deadlocks (locked tasks which were started
-            # processing by rqworker but did fail during the processing)
-            # Without it this try-block looks useless
-            Task.objects.get(locked_by__isnull=True,
-                             processed_at__isnull=True,
-                             task_name=task.task_name,
-                             task_hash=task.task_hash)
-            # TODO: update `.created`?
-        except Task.MultipleObjectsReturned:
-            # Even more than 1 job in Task.MAX_RUN_TIME seconds
-            pass
-        except Task.DoesNotExist:
+        same_task_in_queue = (Task.objects
+                              # Add new task even if the same task is locked
+                              # and in progress since it could fail in the process
+                              .filter(locked_by__isnull=True,
+                                      processed_at__isnull=True,
+                                      task_name=task.task_name,
+                                      task_params=task.task_params,
+                                      task_hash=task.task_hash))
+        if not same_task_in_queue.exists():
             task.save()
+            # FIXME: potential deadlock if using task id instead of (task_name, task_params)
             import_testing_results.delay(task_id=task.pk)
         return HttpResponse(status=201)
     return HttpResponseForbidden()
@@ -159,23 +156,21 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         campaign = context['filter'].form.cleaned_data.get('campaign')
-        import_testing_results_btn_state = None
+        testing_results = {"campaign": campaign}
         if campaign and campaign.current and self.request.user.is_curator:
             task_name = "admission.tasks.import_testing_results"
             latest_task = (Task.objects
-                           .get_task(task_name)
+                           .get_task(task_name, kwargs={"campaign_id": campaign.pk})
                            .order_by("-id")
                            .first())
             if latest_task:
                 tz = self.request.user.time_zone
-                import_testing_results_btn_state = {
+                testing_results["latest_task"] = {
                     # TODO: humanize
                     "date": latest_task.created_at_local(tz),
                     "status": latest_task.status
                 }
-            else:
-                import_testing_results_btn_state = {}
-        context["import_testing_results"] = import_testing_results_btn_state
+        context["import_testing_results"] = testing_results
         return context
 
 
@@ -315,7 +310,7 @@ class InterviewAssignmentDetailView(CuratorOnlyMixin, generic.DetailView):
 
 
 def get_default_campaign_for_user(user: User) -> Optional[Campaign]:
-    active_campaigns = list(Campaign.objects.filter(current=True)
+    active_campaigns = list(Campaign.objects.filter(current=True, branch__site_id=settings.SITE_ID)
                             .only("pk", "branch_id")
                             .order_by('branch__order'))
     try:

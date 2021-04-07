@@ -1,0 +1,51 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% block body_attrs %}data-init-sections="tabs,collapsible"{% endblock body_attrs %}
+
+{% block sprites %}
+  <script type="text/javascript">
+    (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+  </script>
+{% endblock sprites %}
+
+{% block content %}
+  <div class="container py-10">
+    <div class="row mt-8">
+      <div class="col-md-10">
+        <h1 class="h2 mb-10">Сотрудничество с ИТМО</h1>
+        <h2 class="h1 mb-0">Магистерская программа «Разработка ПО / Software Engineering» в ИТМО</h2>
+        <p class="ui label _icon mt-4">
+          {{ macros.svg_icon('web') }} <a href="https://abit.itmo.ru/program/14575/" target="_blank"
+                                          rel="nofollow noopener">abit.itmo.ru/program/14575/</a>
+        </p>
+        <p class="mt-4">
+          Магистерская программа рассчитана на студентов, уже имеющих некоторые знания в области разработки ПО, но желающих их
+          систематизировать и расширить для того, чтобы стать востребованными профессионалами. Обучение ведётся по двум специализациям:
+          «Разработка программного обеспечения» и «Алгоритмы и анализ данных в биоинформатике». Преподаватели — действующие учёные и
+          разработчики из крупных IT-компаний Петербурга.
+        </p>
+        <p>Бюджетных мест — 30, коммерческих мест — 5. Дополнительная спонсорская стипендия до 15000 рублей. Возможна оплата поездок на
+          конференции, школы, соревнования.</p>
+        <h3 class="mt-8">Контакты</h3>
+        <p>Почта <a href="mailto:mse@itmo.ru">mse@itmo.ru</a></p>
+        <p><a href="https://t.me/mse_itmo" target="_blank" rel="nofollow noopener">Телеграм чат для абитуриентов</a></p>
+
+        <h3 class="mt-8">Полезные ссылки</h3>
+        <p><a href="https://mse.itmo.ru/enrollment" target="_blank" rel="nofollow noopener">Подробнее о поступлении на программу</a></p>
+        <p><a href="https://mse.itmo.ru/news" target="_blank" rel="nofollow noopener">Публикации о программе</a></p>
+
+        <h2 class="h1 mt-10 mb-0">Магистратура «Аналитика данных» в ИТМО</h2>
+        <p class="ui label _icon mt-4">
+          {{ macros.svg_icon('web') }} <a href="https://abit.itmo.ru/program/14679/" target="_blank"
+                                          rel="nofollow noopener">abit.itmo.ru/program/14679/</a>
+        </p>
+        <p class="mt-4">Магистерская программа «Аналитика данных» открылась в Университете ИТМО в 2020 году совместно с Яндексом. Здесь
+          готовят специалистов, способных создавать, адаптировать и применять методы анализа данных к разным предметным областям, используя
+          методы машинного обучения, анализ временных рядов, интеллектуальный анализ текстов на естественном языке, изображений, звуков,
+          компьютерное зрение.
+        </p>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}

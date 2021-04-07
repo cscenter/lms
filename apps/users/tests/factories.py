@@ -132,6 +132,14 @@ class StudentProfileFactory(factory.django.DjangoModelFactory):
                                 code=settings.DEFAULT_BRANCH_CODE)
     year_of_admission = factory.SelfAttribute('user.date_joined.year')
 
+    @factory.post_generation
+    def academic_disciplines(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for academic_discipline in extracted:
+                self.academic_disciplines.add(academic_discipline)
+
 
 class OnlineCourseRecordFactory(factory.django.DjangoModelFactory):
     class Meta:

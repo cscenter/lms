@@ -79,6 +79,6 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             template_type = "exam-success"
         else:
             template_type = "exam-fail"
-        template_name = self.get_template_name(campaign, template_type)
+        template_name = self.get_template_name(campaign, type=template_type)
         return get_email_template(template_name)
 

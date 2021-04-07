@@ -49,6 +49,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
             ('МГУ', 16),
             ('МФТИ', 15),
             ('НГУ', 12),
+            ('ННГУ', 25),
             ('НИУ ВШЭ', 17),
             ('НИУ ИТМО', 24),
             ('СПбГУ', 19),
@@ -63,6 +64,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         allow_blank=True,
         label='Расскажите о своем опыте программирования')
     shad_plus_rash = AliasedChoiceField(
+        required=False,
         choices=[
             ('Да', True, 'Да'),
             ('Нет', False, 'Нет'),
@@ -73,6 +75,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         label='Изучали ли вы раньше машинное обучение/анализ данных? Каким образом? '
               'Какие навыки удалось приобрести, какие проекты сделать?')
     new_track = AliasedChoiceField(
+        required=False,
         choices=[
             ('Да', True, 'Да'),
             ('Нет', False, 'Нет'),
@@ -138,10 +141,13 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         if data.get('new_track'):
             display_value = self.fields['new_track'].to_representation(data.get('new_track'))
             additional_info.append(f"{self.fields['new_track'].label}\n{display_value}")
+            # new_track_* fields are optional
             new_track_fields = ["new_track_scientific_articles", "new_track_projects", "new_track_tech_articles",
                                 "new_track_project_details"]
             for field_name in new_track_fields:
-                additional_info.append(f"{self.fields[field_name].label}\n{data[field_name]}")
+                value = data.get(field_name, None)
+                if value:
+                    additional_info.append(f"{self.fields[field_name].label}\n{value}")
         data['additional_info'] = '\n\n'.join(additional_info)
         # Remove fields that are actually not present on Applicant model
         custom_fields = []

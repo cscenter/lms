@@ -58,7 +58,7 @@ def test_alumni(client, settings):
     a = AcademicDisciplineFactory(code='ds')
     response = client.get(url_alumni_all)
     json_data = response.context_data['app_data']
-    assert json_data['props']['areaOptions'] == [{'label': a.name, 'value': a.code}]
+    assert json_data['props']['areaOptions'] == [{'label': a.name, 'value': a.pk}]
 
 
 @pytest.mark.django_db

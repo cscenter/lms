@@ -255,10 +255,12 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
     STUDY_PROGRAM_DS = "ds"
     STUDY_PROGRAM_CS = "cs"
     STUDY_PROGRAM_SE = "se"
+    STUDY_PROGRAM_ROBOTICS = "robotics"
     STUDY_PROGRAMS = (
         (STUDY_PROGRAM_CS, "Computer Science (Современная информатика)"),
         (STUDY_PROGRAM_DS, "Data Science (Анализ данных)"),
-        (STUDY_PROGRAM_SE, "Software Engineering (Разработка ПО)")
+        (STUDY_PROGRAM_SE, "Software Engineering (Разработка ПО)"),
+        (STUDY_PROGRAM_ROBOTICS, "Robotics (Роботы)")
     )
     INFO_SOURCES = (
         ('uni', 'плакат/листовка в университете'),
@@ -413,6 +415,11 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
         choices=STUDY_PROGRAMS,
         max_length=255,
         blank=True)
+    # TODO: Store all study program notes in this field in label + value format instead
+    #  of separated preferred_study_programs_*_note fields
+    preferred_study_program_notes = models.TextField(
+        _("Study Program Notes"),
+        null=True, blank=True)
     preferred_study_programs_dm_note = models.TextField(
         _("Study program (DM note)"),
         help_text=_("Applicant|study_program_dm"),

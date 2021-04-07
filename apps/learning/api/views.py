@@ -122,7 +122,6 @@ class StudentAssignmentAssigneeUpdate(UpdateAPIView):
     lookup_field = 'student_id'
 
     def get_queryset(self):
-        print(self.request.POST)
         return (StudentAssignment.objects
                 .filter(assignment_id=self.kwargs['assignment_id'])
                 .select_related('assignment__course')

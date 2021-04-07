@@ -2,7 +2,9 @@
 import ast
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.management import CommandError
+from django.db.models import Q
 from post_office.models import EmailTemplate
 from post_office.utils import get_email_template
 
@@ -30,12 +32,12 @@ class CurrentCampaignMixin:
             msg = f"Provide the code of the campaign branch. Options: {campaigns}"
             raise CommandError(msg)
 
-        filter_params = {"current": True}
+        filter_params = [Q(current=True), Q(branch__site_id=settings.SITE_ID)]
         if branch_code:
-            filter_params["branch__code"] = branch_code
+            filter_params.append(Q(branch__code=branch_code))
         campaigns = (Campaign.objects
                      .select_related("branch")
-                     .filter(**filter_params)
+                     .filter(*filter_params)
                      .all())
         self.stdout.write("Selected campaigns ({} total):".format(
             len(campaigns)))
@@ -64,19 +66,24 @@ class EmailTemplateMixin:
         # passing score for test results non zero
         check_types = types or ["success", "fail"]
         errors = []
-        for c in campaigns:
+        for campaign in campaigns:
             if validate_campaign_settings:
-                self._validate_campaign_settings(c, errors)
+                self._validate_campaign_settings(campaign, errors)
             for t in check_types:
-                template_name = self.get_template_name(c, t)
+                template_name = self.get_template_name(campaign, type=t)
                 try:
-                    # Use post office method for caching purpose
-                    get_email_template(template_name)
-                except EmailTemplate.DoesNotExist:
-                    msg = f"Email template `{template_name}` not found"
-                    errors.append(msg)
+                    self.check_template_exists(template_name)
+                except ValidationError as e:
+                    errors.append(e.message)
         if errors:
             raise CommandError("\n".join(errors))
+
+    def check_template_exists(self, template_name):
+        try:
+            # Use post office method for caching purpose
+            get_email_template(template_name)
+        except EmailTemplate.DoesNotExist:
+            raise ValidationError(f"Email template `{template_name}` not found")
 
     # FIXME: Not sure why this validation is in templates
     def _validate_campaign_settings(self, campaign, errors):
@@ -84,11 +91,11 @@ class EmailTemplateMixin:
             msg = f"Passing score for campaign '{campaign}' must be non zero"
             errors.append(msg)
 
-    def get_template_name(self, campaign, suffix):
+    def get_template_name(self, campaign, **kwargs):
         return self.TEMPLATE_REGEXP.format(
             year=campaign.year,
             branch_code=campaign.branch.code,
-            type=suffix
+            **kwargs
         )
 
 

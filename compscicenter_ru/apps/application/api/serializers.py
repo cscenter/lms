@@ -28,6 +28,11 @@ class ApplicationFormSerializer(serializers.ModelSerializer):
             'empty': 'Выберите интересующие вас направления обучения'
         }
     )
+    preferred_study_programs_robotics_note = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        label='Какие направления применения роботов вы считаете наиболее перспективными?',
+    )
     campaign = OpenRegistrationCampaignField(
         label='Отделение',
         error_messages={
@@ -57,6 +62,7 @@ class ApplicationFormSerializer(serializers.ModelSerializer):
             "campaign",
             "living_place",
             "preferred_study_programs",
+            "preferred_study_programs_robotics_note",
             "preferred_study_programs_dm_note",
             "preferred_study_programs_cs_note",
             "preferred_study_programs_se_note",
@@ -91,6 +97,16 @@ class ApplicationFormSerializer(serializers.ModelSerializer):
                 # case when `university_other` value provided. Set value
                 # later in `.validate` method.
                 self.fields["university"].required = False
+
+    def create(self, validated_data):
+        data = {**validated_data}
+        if "preferred_study_programs_robotics_note" in data:
+            if data["preferred_study_programs_robotics_note"]:
+                label = self.fields['preferred_study_programs_robotics_note'].label
+                value = data.get('preferred_study_programs_robotics_note')
+                data['preferred_study_program_notes'] = f"{label}\n{value}"
+            del data["preferred_study_programs_robotics_note"]
+        return super().create(data)
 
     def save(self, **kwargs):
         instance = super().save(**kwargs)

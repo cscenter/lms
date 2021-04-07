@@ -2,6 +2,7 @@
 
 from functools import wraps
 
+from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.db.models import F
 from django.http.response import Http404
@@ -102,6 +103,7 @@ class ApplicationFormView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         active_campaigns = (Campaign.with_open_registration()
+                            .filter(branch__site_id=settings.SITE_ID)
                             .annotate(value=F('branch__code'),
                                       label=F('branch__name'))
                             .values('value', 'label', 'id'))
