@@ -48,13 +48,6 @@
                             <tr>
                                 <td class="align-middle">{{ assignee.assignee }}</td>
                                 <td width="20px"></td>
-                                <td>
-                                    <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href =
-                                            '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/update/';"><b>Редактировать</b></button>
-                                </td>
-                                <td width="10px"></td>
-                                <td><button type="button" class="btn btn-sm" onclick="window.location.href =
-                                        '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/delete/';"><b>Удалить</b></button></td>
                             </tr>
                             <tr height="10px"> </tr>
                         {% endfor %}
@@ -64,8 +57,5 @@
                 {% endif %}
             </div>
         </div>
-        <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href =
-                            '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/add/';">
-            <b>Добавить ответственного</b></button>
     </div>
 {% endblock content %}
