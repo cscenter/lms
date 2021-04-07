@@ -55,7 +55,7 @@ def retrieve_yandex_contest_checker_compilers(checker_id, *, retries):
         logger.error(f"Yandex.Contest api request error "
                      f"[checker_id = {checker_id}]")
         raise
-    problems = {problem['shortName']: problem for problem in json_data}
+    problems = {problem['alias']: problem for problem in json_data}
     if problem_id in problems:
         problem = problems[problem_id]
         checker.settings['compilers'] = problem['compilers']
