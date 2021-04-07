@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% load i18n %}
+{% extends "lms/layouts/v1_base.html" %}
 {% block content %}
     <div class="container">
         <h4> <b>Удаление группы </b></h4>
@@ -21,7 +20,7 @@
             {% else %}
             <input type="submit" class="btn btn-primary" value="Удалить">
             {% endif %}
-            <button type="button" class="btn" onclick="history.go(-1);">{% trans "Отмена" %}</button>
+            <button type="button" class="btn" onclick="history.go(-1);">Отмена</button>
             {% if delete %}
             <p style="color:red">Группа связана с заданием. Удаление невозможно!</p>
             {% endif %}
