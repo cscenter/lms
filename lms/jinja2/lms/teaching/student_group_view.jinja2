@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% load i18n %}
+{% extends "lms/layouts/v1_base.html" %}
 {% block content %}
     <div class="container">
         <table>
@@ -7,10 +6,10 @@
                 <td><h4> Группа <b>"{{ student_group_detail.name }}"</b> </h4></td>
                 <td width="20px"></td>
                 <td><button type="button" class="btn btn-primary btn-sm" onclick="window.location.href =
-                            './update/';"><b>{% trans "Редактировать" %}</b></button></td>
+                            './update/';"><b>Редактировать</b></button></td>
                 <td width="10px"></td>
                 <td><button type="button" class="btn btn-sm" onclick="window.location.href =
-                            './delete/';"><b>{% trans "Удалить" %}</b></button></td>
+                            './delete/';"><b>Удалить</b></button></td>
             </tr>
             <tr>
                 <td><a href="../../groups/">{{ course.0 }}</a></td>
@@ -28,7 +27,7 @@
                                 <td width="20px"></td>
                                 <td>
                                     <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href =
-                                            '/teaching/courses/{{ course_id }}/group/{{ group_id }}/student/{{ student.student.id }}/update/';"><b>{% trans "Сменить группу" %}</b></button>
+                                            '/teaching/courses/{{ course_id }}/group/{{ group_id }}/student/{{ student.student.id }}/update/';"><b>Сменить группу</b></button>
                                 </td>
                             </tr>
                             <tr height="10px"> </tr>
@@ -51,11 +50,11 @@
                                 <td width="20px"></td>
                                 <td>
                                     <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href =
-                                            '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/update/';"><b>{% trans "Редактировать" %}</b></button>
+                                            '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/update/';"><b>Редактировать</b></button>
                                 </td>
                                 <td width="10px"></td>
                                 <td><button type="button" class="btn btn-sm" onclick="window.location.href =
-                                        '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/delete/';"><b>{% trans "Удалить" %}</b></button></td>
+                                        '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/{{ assignee.id }}/delete/';"><b>Удалить</b></button></td>
                             </tr>
                             <tr height="10px"> </tr>
                         {% endfor %}
@@ -67,6 +66,6 @@
         </div>
         <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href =
                             '/teaching/courses/{{ course_id }}/group/{{ group_id }}/assignee/add/';">
-            <b>{% trans "Добавить ответственного" %}</b></button>
+            <b>Добавить ответственного</b></button>
     </div>
 {% endblock content %}
