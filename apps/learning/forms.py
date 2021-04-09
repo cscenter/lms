@@ -282,14 +282,7 @@ class CourseEnrollmentForm(forms.Form):
 class StudentGroupForm(forms.ModelForm):
     class Meta:
         model = StudentGroup
-        fields = ('type', 'name', 'course', 'meta', 'branch', 'enrollment_key', 'assignee')
-        widgets = {
-            'type': forms.HiddenInput(),
-            'course': forms.HiddenInput(),
-            'meta': forms.HiddenInput(),
-            'branch': forms.HiddenInput(),
-            'enrollment_key': forms.HiddenInput(),
-        }
+        fields = ('name', 'assignee')
 
     assignee = forms.ModelChoiceField(queryset=CourseTeacher.objects.select_related('teacher'),
                                       label='Ответственный',
@@ -311,13 +304,9 @@ class StudentGroupForm(forms.ModelForm):
 class StudentGroupAddForm(forms.ModelForm):
     class Meta:
         model = StudentGroup
-        fields = ('type', 'name', 'course', 'meta', 'branch', 'enrollment_key', 'assignee')
+        fields = ('course', 'name', 'assignee')
         widgets = {
-            'type': forms.HiddenInput(),
             'course': forms.HiddenInput(),
-            'meta': forms.HiddenInput(),
-            'branch': forms.HiddenInput(),
-            'enrollment_key': forms.HiddenInput(),
         }
 
     assignee = forms.ModelChoiceField(queryset=CourseTeacher.objects.select_related('teacher'),
@@ -340,14 +329,7 @@ class StudentGroupAddForm(forms.ModelForm):
 class StudentEnrollmentForm(forms.ModelForm):
     class Meta:
         model = Enrollment
-        fields = ('student', 'student_profile', 'course', 'grade', 'grade_changed', 'student_group')
-        widgets = {
-            'student': forms.HiddenInput(),
-            'course': forms.HiddenInput(),
-            'student_profile': forms.HiddenInput(),
-            'grade': forms.HiddenInput(),
-            'grade_changed': forms.HiddenInput(),
-        }
+        fields = ('student_group',)
 
     def __init__(self, *args, **kwargs):
         reverse_param = kwargs.pop('reverse_param', None)
