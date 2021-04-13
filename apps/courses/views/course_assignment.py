@@ -23,7 +23,7 @@ class AssignmentCreateUpdateMixin(CourseURLParamsMixin,
                                   PermissionRequiredMixin):
     model = Assignment
     form_class = AssignmentForm
-    template_name = "courses/course_assignment_form.html"
+    template_name = "lms/courses/course_assignment_form.html"
 
     def get_permission_object(self):
         return self.course

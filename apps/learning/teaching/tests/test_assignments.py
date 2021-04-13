@@ -63,7 +63,7 @@ def test_assignment_public_form(settings, client):
     assert assignment.deadline_at_local().utcoffset() == tz_diff
     # Check widget shows local time
     response = client.get(assignment.get_update_url())
-    widget_html = response.context['form']['deadline_at'].as_widget()
+    widget_html = response.context_data['form']['deadline_at'].as_widget()
     widget = BeautifulSoup(widget_html, "html.parser")
     time_input = widget.find('input', {"name": 'deadline_at_1'})
     assert time_input.get('value') == '00:00'
