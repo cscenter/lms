@@ -90,11 +90,12 @@ def test_course_assignment_deadline_l10n(settings, client):
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     teacher = TeacherFactory()
     assignment = AssignmentFactory(deadline_at=dt,
+                                   time_zone=pytz.timezone('Europe/Moscow'),
                                    course__main_branch__code=Branches.SPB,
                                    course__teachers=[teacher])
-    co = assignment.course
+    course = assignment.course
     client.login(teacher)
-    response = client.get(co.get_url_for_tab('assignments'))
+    response = client.get(course.get_url_for_tab('assignments'))
     html = BeautifulSoup(response.content, "html.parser")
     deadline_date_str = formats.date_format(assignment.deadline_at_local(), 'd E')
     assert deadline_date_str == "01 января"

@@ -43,6 +43,7 @@ def test_assignment_public_form(settings, client):
         "submission_type": AssignmentSubmissionFormats.ONLINE,
         "title": "title",
         "text": "text",
+        "time_zone": "Europe/Moscow",
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00",
         "passing_score": "3",
@@ -72,6 +73,7 @@ def test_assignment_public_form(settings, client):
                               meta_course=course_spb.meta_course,
                               teachers=[teacher])
     add_url = co_in_nsk.get_create_assignment_url()
+    form_data['time_zone'] = 'Asia/Novosibirsk'
     response = client.post(add_url, form_data, follow=True)
     assert response.status_code == 200
     assert Assignment.objects.count() == 2
@@ -88,6 +90,7 @@ def test_assignment_detail_deadline_l10n(settings, client):
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     teacher = TeacherFactory()
     assignment = AssignmentFactory(deadline_at=dt,
+                                   time_zone=pytz.timezone('Europe/Moscow'),
                                    course__main_branch__code=Branches.SPB,
                                    course__teachers=[teacher])
     url_for_teacher = assignment.get_teacher_url()
@@ -192,6 +195,7 @@ def test_create_assignment_public_form_restricted_to_settings(client):
         "submission_type": AssignmentSubmissionFormats.ONLINE,
         "title": "title",
         "text": "text",
+        "time_zone": "Europe/Moscow",
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00",
         "passing_score": "3",
@@ -228,13 +232,15 @@ def test_course_assignment_form_create_with_checking_system(client, mocker):
         type=CheckingSystemTypes.YANDEX
     )
     checking_system_url = get_yandex_contest_problem_url(15, 'D')
-    form.update({'course': co.pk,
-                 # 'attached_file': None,
-                 'submission_type': AssignmentSubmissionFormats.CODE_REVIEW,
-                 'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time,
-                 'checking_system': checking_system.pk,
-                 'checker_url': checking_system_url})
+    form.update({
+        'course': co.pk,
+        'submission_type': AssignmentSubmissionFormats.CODE_REVIEW,
+        'time_zone': 'Europe/Moscow',
+        'deadline_at_0': deadline_date,
+        'deadline_at_1': deadline_time,
+        'checking_system': checking_system.pk,
+        'checker_url': checking_system_url
+    })
     url = co.get_create_assignment_url()
     client.login(teacher)
     response = client.post(url, form)
@@ -247,14 +253,17 @@ def test_course_assignment_form_create_with_checking_system(client, mocker):
 @pytest.mark.django_db
 def test_course_assignment_form_update_remove_checking_system(client):
     teacher = TeacherFactory()
-    co = CourseFactory.create(teachers=[teacher])
+    course = CourseFactory.create(teachers=[teacher])
     checker = CheckerFactory()
-    a = AssignmentFactory(course=co)
+    a = AssignmentFactory(course=course)
     form = model_to_dict(a)
     del form['ttc']
     del form['checker']
-    form.update({'submission_type': AssignmentSubmissionFormats.ONLINE})
-    url = co.get_create_assignment_url()
+    form.update({
+        'time_zone': 'Europe/Moscow',
+        'submission_type': AssignmentSubmissionFormats.ONLINE
+    })
+    url = course.get_create_assignment_url()
     client.login(teacher)
     response = client.post(url, form)
     assert Assignment.objects.count() == 1
@@ -273,6 +282,7 @@ def test_create_assignment_public_form_code_review_without_checker(client):
         "submission_type": AssignmentSubmissionFormats.CODE_REVIEW,
         "title": "title",
         "text": "text",
+        "time_zone": "Europe/Moscow",
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00",
         "passing_score": "3",
@@ -298,6 +308,7 @@ def test_create_assignment_public_form_code_review_with_yandex_checker(client, m
         "submission_type": AssignmentSubmissionFormats.CODE_REVIEW,
         "title": "title",
         "text": "text",
+        "time_zone": "Europe/Moscow",
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00",
         "passing_score": "3",

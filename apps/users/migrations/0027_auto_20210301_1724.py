@@ -19,6 +19,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='user',
             name='time_zone',
-            field=core.db.fields.TimeZoneField(verbose_name='Time Zone'),
+            field=core.db.fields.TimeZoneField(verbose_name='Time Zone', null=True),
         ),
     ]

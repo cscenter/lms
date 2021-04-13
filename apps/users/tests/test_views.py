@@ -115,7 +115,7 @@ def test_logout_redirect_works(client):
 
 
 @pytest.mark.django_db
-def test_yandex_login_from_email(client):
+def test_yandex_login_from_email(client, settings):
     """
     yandex_login can be exctracted from email if email is on @yandex.ru
     """

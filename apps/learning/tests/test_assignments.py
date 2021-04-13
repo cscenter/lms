@@ -159,10 +159,13 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     tmp_file = tmpdir.mkdir("attachment").join("attachment.txt")
     tmp_file.write("content")
-    form.update({'course': course.pk,
-                 'attachments': tmp_file.open(),
-                 'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time})
+    form.update({
+        'course': course.pk,
+        'attachments': tmp_file.open(),
+        'time_zone': 'Europe/Moscow',
+        'deadline_at_0': deadline_date,
+        'deadline_at_1': deadline_time
+    })
     url = course.get_create_assignment_url()
     client.post(url, form)
     assert Assignment.objects.count() == 1
@@ -243,6 +246,7 @@ def test_create_assignment_admin_form(client):
         'passing_score': 0,
         'maximum_score': 5,
         'weight': 1,
+        'time_zone': 'Europe/Moscow',
         'deadline_at_0': str(a.deadline_at.date()),
         'deadline_at_1': '00:00'
     }

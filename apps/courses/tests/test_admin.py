@@ -291,6 +291,7 @@ def test_assignment_admin_view(settings, client):
         "submission_type": AssignmentSubmissionFormats.ONLINE,
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00:00",
+        "time_zone": "Europe/Moscow",
         "title": "title",
         "text": "text",
         "passing_score": "3",
@@ -328,15 +329,9 @@ def test_assignment_admin_view(settings, client):
     assert time_input.get('value') == '00:00:00'
     date_input = widget.find('input', {"name": 'deadline_at_0'})
     assert date_input.get('value') == '29.06.2017'
-    # We can't update course offering through admin interface
-    response = client.post(change_url, form_data)
-    assert response.status_code == 302
-    assignment.refresh_from_db()
-    assert assignment.course_id == co_in_spb.pk
-    # But do it manually to test widget
-    assignment.course = co_in_nsk
-    assignment.save()
-    form_data["deadline_at_1"] = "00:00:00"
+    # Change time zone
+    form_data["time_zone"] = "Asia/Novosibirsk"
+    # form_data["deadline_at_1"] = "00:00:00"
     response = client.post(change_url, form_data)
     assignment.refresh_from_db()
     response = client.get(change_url)
@@ -346,9 +341,8 @@ def test_assignment_admin_view(settings, client):
     assert time_input.get('value') == '00:00:00'
     assert assignment.deadline_at.hour == 17  # UTC +7 in nsk
     assert assignment.deadline_at.minute == 0
-    # Update course and deadline time
-    assignment.course = co_in_spb
-    assignment.save()
+    # Update both time zone and deadline time
+    form_data["time_zone"] = "Europe/Moscow"
     form_data["deadline_at_1"] = "06:00:00"
     response = client.post(change_url, form_data)
     assert response.status_code == 302
@@ -360,10 +354,9 @@ def test_assignment_admin_view(settings, client):
     assert time_input.get('value') == '06:00:00'
     assert assignment.deadline_at.hour == 3
     assert assignment.deadline_at.minute == 0
-    # Update course offering and deadline, but choose values when
+    # Update time zone and deadline, but choose values when
     # UTC time shouldn't change
-    assignment.course = co_in_nsk
-    assignment.save()
+    form_data["time_zone"] = "Asia/Novosibirsk"
     form_data["deadline_at_1"] = "10:00:00"
     response = client.post(change_url, form_data)
     assert response.status_code == 302
@@ -375,4 +368,3 @@ def test_assignment_admin_view(settings, client):
     assert time_input.get('value') == '10:00:00'
     assert assignment.deadline_at.hour == 3
     assert assignment.deadline_at.minute == 0
-    assert assignment.course_id == co_in_nsk.pk

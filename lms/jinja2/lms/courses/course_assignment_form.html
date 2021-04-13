@@ -62,13 +62,18 @@
                   </div>
                 {% endwith %}
               </div>
-              <div class="col-xs-5">
-                {{ forms.field(form['deadline_at']) }}
-              </div>
-              <div class="col-xs-4">
+              <div class="col-xs-3">
                 {% with field = form['ttc'] -%}
                   {{ forms.field(field, prepend_text='<i class="fa fa-clock-o"></i>', popover_help_text=field.help_text) }}
                 {%- endwith %}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4">
+                {{ forms.field(form['deadline_at']) }}
+              </div>
+              <div class="col-xs-3">
+                {{ forms.field(form['time_zone']) }}
               </div>
             </div>
             <div class="row">

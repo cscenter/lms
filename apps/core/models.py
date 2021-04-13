@@ -11,6 +11,7 @@ from django.utils.encoding import smart_str, force_bytes, force_str
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
+from core.db.fields import TimeZoneField
 from core.db.models import ConfigurationModel
 from core.timezone import Timezone, TimezoneAwareMixin
 from core.urls import reverse
@@ -118,7 +119,7 @@ class SiteConfiguration(ConfigurationModel):
 
 
 class City(TimezoneAwareMixin, models.Model):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
+    TIMEZONE_AWARE_FIELD_NAME = "time_zone"
 
     code = models.CharField(
         _("Code"),
@@ -126,8 +127,8 @@ class City(TimezoneAwareMixin, models.Model):
         primary_key=True)
     name = models.CharField(_("City name"), max_length=255)
     abbr = models.CharField(_("Abbreviation"), max_length=20)
-    time_zone = models.CharField(verbose_name=_("Timezone"), max_length=63,
-                                 choices=tuple(zip(TIMEZONES, TIMEZONES)))
+    time_zone = TimeZoneField(verbose_name=_("Timezone"),
+                              choices=tuple(zip(TIMEZONES, TIMEZONES)))
 
     class Meta:
         ordering = ["name"]
@@ -136,13 +137,6 @@ class City(TimezoneAwareMixin, models.Model):
 
     def __str__(self):
         return smart_str(self.name)
-
-    def get_timezone(self) -> Timezone:
-        return self._timezone
-
-    @cached_property
-    def _timezone(self):
-        return pytz.timezone(self.time_zone)
 
 
 class BranchManager(models.Manager):
@@ -204,7 +198,7 @@ class BranchManager(models.Manager):
 
 
 class Branch(TimezoneAwareMixin, models.Model):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
+    TIMEZONE_AWARE_FIELD_NAME = "time_zone"
 
     code = models.CharField(
         _("Code"),
@@ -223,8 +217,8 @@ class Branch(TimezoneAwareMixin, models.Model):
     site = models.ForeignKey(Site, verbose_name=_("Site"),
                              default=settings.SITE_ID,
                              on_delete=models.CASCADE)
-    time_zone = models.CharField(verbose_name=_("Timezone"), max_length=63,
-                                 choices=tuple(zip(TIMEZONES, TIMEZONES)))
+    time_zone = TimeZoneField(verbose_name=_("Timezone"),
+                              choices=tuple(zip(TIMEZONES, TIMEZONES)))
     description = models.TextField(
         _("Description"),
         help_text=_("Branch|Description"),
@@ -251,13 +245,6 @@ class Branch(TimezoneAwareMixin, models.Model):
 
     def natural_key(self):
         return BranchNaturalKey(self.code, self.site_id)
-
-    def get_timezone(self) -> Timezone:
-        return self._timezone
-
-    @cached_property
-    def _timezone(self):
-        return pytz.timezone(self.time_zone)
 
     @cached_property
     def default_email_from(self):

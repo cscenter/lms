@@ -225,7 +225,7 @@ def user_photo_upload_to(instance: "User", filename):
 
 class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
            UserThumbnailMixin, AbstractBaseUser):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
+    TIMEZONE_AWARE_FIELD_NAME = "time_zone"
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
@@ -294,7 +294,7 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         related_name="+",  # Disable backwards relation
         on_delete=models.PROTECT,
         null=True, blank=True)
-    time_zone = TimeZoneField(_("Time Zone"))
+    time_zone = TimeZoneField(_("Time Zone"), null=True)
     bio = models.TextField(
         _("CSCUser|note"),
         help_text=_("LaTeX+Markdown is enabled"),
@@ -391,10 +391,6 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
     def remove_group(self, role, site_id: int = None):
         sid = site_id or settings.SITE_ID
         self.groups.filter(user=self, role=role, site_id=sid).delete()
-
-    def get_timezone(self) -> Timezone:
-        # This method is needed for TimezoneAwareMixin
-        return self.time_zone
 
     @staticmethod
     def generate_random_username(length=30,

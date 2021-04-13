@@ -354,6 +354,7 @@ def test_deadline_l10n_on_student_assignment_list_page(learner_factory,
     # assignments page since course offering semester set to current
     current_term = SemesterFactory.create_current()
     assignment = AssignmentFactory(deadline_at=dt,
+                                   time_zone=pytz.timezone('Europe/Moscow'),
                                    course__main_branch__code=Branches.SPB,
                                    course__semester_id=current_term.pk)
     student = learner_factory(branch__code=Branches.SPB)

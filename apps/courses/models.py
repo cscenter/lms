@@ -771,7 +771,7 @@ class ClassMaterial(NamedTuple):
 
 
 class CourseClass(TimezoneAwareMixin, TimeStampedModel):
-    TIMEZONE_AWARE_FIELD_NAME = 'course'  # or venue?
+    TIMEZONE_AWARE_FIELD_NAME = 'time_zone'
 
     course = models.ForeignKey(
         Course,
@@ -788,8 +788,7 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
     date = models.DateField(_("Date"))
     starts_at = models.TimeField(_("Starts at"))
     ends_at = models.TimeField(_("Ends at"))
-    # TODO: fill values, add default, then make required
-    time_zone = TimeZoneField(_("Time Zone"))
+    time_zone = TimeZoneField(_("Time Zone"), null=True)
 
     name = models.CharField(_("CourseClass|Name"), max_length=255)
     description = models.TextField(
@@ -838,7 +837,7 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
         return smart_str(self.name)
 
     def clean(self):
-        super(CourseClass, self).clean()
+        super().clean()
         # ends_at should be later than starts_at
         if self.starts_at and self.ends_at and self.starts_at >= self.ends_at:
             raise ValidationError(_("Class should end after it started"))
@@ -1043,13 +1042,15 @@ class AssignmentSubmissionFormats(DjangoChoices):
 
 
 class Assignment(TimezoneAwareMixin, TimeStampedModel):
-    TIMEZONE_AWARE_FIELD_NAME = 'course'
+    TIMEZONE_AWARE_FIELD_NAME = 'time_zone'
 
     course = models.ForeignKey(
         Course,
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
     deadline_at = TimezoneAwareDateTimeField(_("Assignment|deadline"))
+    # FIXME: remove null after fullfill actual values
+    time_zone = TimeZoneField(_("Time Zone"), null=True)
     # TODO: rename to solution_format
     submission_type = models.CharField(
         verbose_name=_("Submission Type"),

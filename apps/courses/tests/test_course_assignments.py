@@ -30,15 +30,17 @@ def test_course_assignment_form_create(client):
     import datetime
     teacher = TeacherFactory()
     CourseFactory.create_batch(3, teachers=[teacher])
-    co = CourseFactory.create(teachers=[teacher])
+    course = CourseFactory.create(teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
-    form.update({'course': co.pk,
-                 # 'attached_file': None,
-                 'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time})
-    url = co.get_create_assignment_url()
+    form.update({
+        'course': course.pk,
+        'deadline_at_0': deadline_date,
+        'deadline_at_1': deadline_time,
+        'time_zone': 'Europe/Moscow',
+    })
+    url = course.get_create_assignment_url()
     client.login(teacher)
     response = client.post(url, form)
     assert response.status_code == 302
@@ -71,20 +73,22 @@ def test_course_assignment_update_view_security(client, assert_login_redirect,
 def test_course_assignment_update(client, assert_redirect):
     teacher = TeacherFactory()
     client.login(teacher)
-    co = CourseFactory.create(teachers=[teacher])
-    a = AssignmentFactory.create(course=co)
+    course = CourseFactory.create(teachers=[teacher])
+    a = AssignmentFactory.create(course=course)
     form = model_to_dict(a)
     del form['ttc']
     del form['checker']
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     new_title = a.title + " foo42bar"
-    form.update({'title': new_title,
-                 'course': co.pk,
-                 # 'attached_file': None,
-                 'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time})
-    # Make sure new title is not presented on /teaching/assignments/
+    form.update({
+        'title': new_title,
+        'course': course.pk,
+        'time_zone': 'Europe/Moscow',
+        'deadline_at_0': deadline_date,
+        'deadline_at_1': deadline_time,
+    })
+    # Make sure new title is not present on /teaching/assignments/
     list_url = reverse('teaching:assignment_list')
     response = client.get(list_url)
     assert response.status_code == 200

@@ -38,11 +38,10 @@ def test_get_next_process():
 
 @pytest.mark.django_db
 def test_create_invitation(mocker):
-    # Fix current time
     mocked_timezone = mocker.patch('django.utils.timezone.now')
-    dt_utc = datetime.datetime(2018, month=3, day=8, hour=13, minute=0,
-                               tzinfo=datetime.timezone.utc)
-    mocked_timezone.return_value = dt_utc
+    now_utc = datetime.datetime(2018, month=3, day=8, hour=13, minute=0,
+                                tzinfo=datetime.timezone.utc)
+    mocked_timezone.return_value = now_utc
     tomorrow = datetime.date(2018, month=3, day=9)
     from django.utils import timezone
     stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
@@ -56,7 +55,7 @@ def test_create_invitation(mocker):
     tomorrow_begin = datetime.datetime.combine(tomorrow,
                                                datetime.datetime.min.time())
     tomorrow_begin_local = tz.localize(tomorrow_begin)
-    expired_at_expected = dt_utc + datetime.timedelta(hours=INVITATION_EXPIRED_IN_HOURS)
+    expired_at_expected = now_utc + datetime.timedelta(hours=INVITATION_EXPIRED_IN_HOURS)
     assert expired_at_expected > tomorrow_begin_local
     create_invitation([stream], applicant)
     assert InterviewInvitation.objects.count() == 1
