@@ -53,7 +53,6 @@ class TimeZoneField(models.Field):
         # The Area and Location names have a maximum length of 14 characters.
         # In some cases the Location is itself represented as a compound name, so max_length is 42 characters
         kwargs['max_length'] = 42
-        kwargs['null'] = True  # Stores empty values as null
         self._default_choices = not choices
         if not choices:
             # `pytz.common_timezones` is a list of useful, current timezones.
@@ -77,7 +76,6 @@ class TimeZoneField(models.Field):
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
         del kwargs["max_length"]
-        del kwargs["null"]
         if self._default_choices:
             del kwargs['choices']
         else:
