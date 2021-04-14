@@ -84,7 +84,8 @@
     {% if query.assignment %}
     <div class="panel">
         <div class="panel-body">
-            <b>{% trans "Deadline" %}</b>: <span class="assignment-date {{ assignment.deadline_at_local|date_soon_css }}">{{ assignment.deadline_at_local|naturalday:"d E" }} {{ assignment.deadline_at_local|time:"H:i" }}</span>
+          {% call_method assignment "deadline_at_local" tz_override as assignment_deadline_at_local %}
+            <b>{% trans "Deadline" %}</b>: <span class="assignment-date {{ assignment_deadline_at_local|date_soon_css }}">{{ assignment_deadline_at_local|naturalday:"d E" }} {{ assignment_deadline_at_local|time:"H:i" }}</span>
             <div class="pull-right"><a href="{{ assignment.get_teacher_url }}">Страница задания</a></div>
         </div>
     </div>

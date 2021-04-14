@@ -70,13 +70,7 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
 
     def _get_additional_context(self, course, **kwargs):
         request_user = self.request.user
-        is_actual_teacher = course.is_actual_teacher(request_user.pk)
-        # For correspondence course try to override timezone
-        tz_override = None
-        # FIXME: cache additional branch count?
-        if not is_actual_teacher and len(course.branches.all()) > 1:
-            tz_override = request_user.time_zone
-
+        tz_override = request_user.time_zone
         if request_user.has_perm("study.view_own_enrollments"):
             request_user_enrollment = request_user.get_enrollment(course.pk)
         else:
@@ -84,6 +78,7 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
         # Attach unread notifications count if authenticated user is in
         # a mailing list
         unread_news = None
+        is_actual_teacher = course.is_actual_teacher(request_user.pk)
         if request_user_enrollment or is_actual_teacher:
             unread_news = (CourseNewsNotification.unread
                            .filter(course_offering_news__course=course,

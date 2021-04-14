@@ -30,8 +30,9 @@
         {% endmarkdown %}
       </div>
       <p>
+        {% call_method assignment "deadline_at_local" request.user.time_zone as assignment_deadline_at_local %}
         {% trans "Deadline" %}:
-        {{ assignment.deadline_at_local|naturalday:"d E Y" }} {{ assignment.deadline_at_local|time:"H:i" }}
+        {{ assignment_deadline_at_local|naturalday:"d E Y" }} {{ assignment_deadline_at_local|time:"H:i" }}
       </p>
       <p>
         {% trans "Submission Type" %}: {{ assignment.get_submission_type_display|lower }}

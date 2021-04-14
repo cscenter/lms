@@ -99,6 +99,7 @@ class AssignmentListView(PermissionRequiredMixin, FilterMixin, TemplateView):
         query_params["course"] = course.meta_course.slug
         query_params["term"] = course.semester.slug
 
+        context["tz_override"] = self.request.user.time_zone
         context["assignment"] = assignment
         context["all_terms"] = terms
         context["course_offerings"] = courses
