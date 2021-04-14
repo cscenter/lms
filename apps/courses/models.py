@@ -1124,12 +1124,12 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
 
     def deadline_at_local(self, tz=None):
         if not tz:
-            tz = self.get_timezone()
+            tz = self.time_zone
         return timezone.localtime(self.deadline_at, timezone=tz)
 
     def created_local(self, tz=None):
         if not tz:
-            tz = self.get_timezone()
+            tz = self.time_zone
         return timezone.localtime(self.created, timezone=tz)
 
     def get_teacher_url(self):

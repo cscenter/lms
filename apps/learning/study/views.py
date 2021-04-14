@@ -86,7 +86,7 @@ class TimetableView(PermissionRequiredMixin, WeekEventsView):
 
 class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
     """Shows assignments for the current term."""
-    template_name = "learning/study/assignment_list.html"
+    template_name = "lms/study/assignment_list.html"
     permission_required = ViewOwnStudentAssignments.name
 
     def get_queryset(self, current_term):

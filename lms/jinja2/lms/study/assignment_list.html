@@ -1,0 +1,126 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block content %}
+  <div class="container">
+    {% if not assignment_list_open and not assignment_list_archive %}
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-3"></div>
+          <div class="col-xs-6 center-aligned">
+            <h4>{% trans %}No assignments yet{% endtrans %}</h4>
+          </div>
+          <div class="col-xs-3">
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if assignment_list_open %}
+      <div class="row">
+        <div class="col-xs-12">
+          <h3>{% trans %}Open assignments{% endtrans %}</h3>
+          <table class="table" width="100%">
+            <thead>
+            <th width="15%">{% trans %}Deadline{% endtrans %}</th>
+            <th></th>
+            <th width="20%">{% trans %}Course{% endtrans %}</th>
+            <th width="17%">{% trans %}State{% endtrans %}</th>
+            <th width="15%">{% trans %}Submission Type{% endtrans %}</th>
+            </thead>
+            {% for a_s in assignment_list_open %}
+              <tr class="{{ "unread" if a_s.has_unread() else "noop" }}">
+                <td>
+                  {% set assignment_deadline_at_local = a_s.assignment.deadline_at_local(tz_override) %}
+                  <div class="assignment-date {{ assignment_deadline_at_local|date_soon_css() }}">
+              <span class="nowrap">
+                {{ assignment_deadline_at_local|naturalday("d E Y") }}
+              </span><br>
+                    {{ assignment_deadline_at_local|time("H:i") }}
+                  </div>
+                </td>
+                <td>
+                  <a href="{{ a_s.get_student_url() }}">
+                    {{ a_s.assignment.title }}
+                  </a>
+                </td>
+                <td>
+                  <a href="{{ a_s.assignment.course.get_absolute_url() }}">
+                    {{ a_s.assignment.course.meta_course.name }}
+                  </a>
+                </td>
+                <td>
+            <span style="white-space: nowrap;"
+                  class="badge assignment-status {{ a_s.state.css_class }}">
+              {{ a_s.state_display }}
+            </span>
+                </td>
+                <td>
+                  {{ a_s.assignment.get_submission_type_display() }}
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if reporting_periods %}
+      <div class="alert alert-info my-25">
+        <h4 class="mt-0">Отчетные периоды</h4>
+        {% for student_project, periods in reporting_periods.items() %}
+          {% for reporting_period in periods %}
+            Проект <a href="{{ student_project.project.get_absolute_url() }}">{{ student_project.project.name }}</a>,
+            {{ reporting_period.start_on|date("d E") }} &mdash; {{ reporting_period.end_on|date("d E") }}
+          {% endfor %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+
+    {% if assignment_list_archive %}
+      <div class="row">
+        <div class="col-xs-12">
+          <h3>{% trans %}Archive{% endtrans %}</h3>
+          <table class="table" width="100%">
+            <thead>
+            <th width="15%">{% trans %}Deadline{% endtrans %}</th>
+            <th></th>
+            <th width="20%">{% trans %}Course{% endtrans %}</th>
+            <th width="17%">{% trans %}State{% endtrans %}</th>
+            <th width="15%">{% trans %}Submission Type{% endtrans %}</th>
+            </thead>
+            {% for a_s in assignment_list_archive %}
+              <tr class="{{ "unread" if a_s.has_unread() else "noop" }}">
+                <td>
+                  <div class="assignment-date">
+                    {%  with assignment_deadline_at_local = a_s.assignment.deadline_at_local(tz_override) %}
+                      <span class="nowrap">{{ assignment_deadline_at_local|naturalday("d E Y") }}</span><br>
+                      {{ assignment_deadline_at_local|time("H:i") }}
+                    {% endwith %}
+                  </div>
+                </td>
+                <td>
+                  <a href="{{ a_s.get_student_url() }}">{{ a_s.assignment.title }}</a>
+                </td>
+                <td>
+                  <a href="{{ a_s.assignment.course.get_absolute_url() }}">
+                    {{ a_s.assignment.course.meta_course.name }}
+                  </a>
+                </td>
+                <td>
+            <span style="white-space: nowrap;"
+                  class="badge assignment-status {{ a_s.state.css_class }}">
+              {{ a_s.state_display }}
+            </span>
+                </td>
+                <td>
+                  {{ a_s.assignment.get_submission_type_display() }}
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock content %}

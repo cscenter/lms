@@ -31,7 +31,7 @@ from users.tests.factories import *
 
 
 def _get_unread(client, url):
-    return client.get(url).context['request'].unread_notifications_cache
+    return client.get(url).wsgi_request.unread_notifications_cache
 
 
 @pytest.mark.django_db

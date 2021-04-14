@@ -276,19 +276,19 @@ def test_assignment_list_view(client):
     client.login(student)
     # no assignments yet
     response = client.get(url)
-    assert len(response.context['assignment_list_open']) == 0
-    assert len(response.context['assignment_list_archive']) == 0
+    assert len(response.context_data['assignment_list_open']) == 0
+    assert len(response.context_data['assignment_list_archive']) == 0
     # enroll at course offering, assignments are shown
     EnrollmentFactory(student=student, course=course)
     response = client.get(url)
-    assert len(response.context['assignment_list_open']) == 2
-    assert len(response.context['assignment_list_archive']) == 0
+    assert len(response.context_data['assignment_list_open']) == 2
+    assert len(response.context_data['assignment_list_archive']) == 0
     # add a few assignments, they should show up
     as2 = AssignmentFactory.create_batch(3, course=course)
     response = client.get(url)
     assert {(StudentAssignment.objects.get(assignment=a, student=student))
-            for a in (as1 + as2)} == set(response.context['assignment_list_open'])
-    assert len(as1) + len(as2) == len(response.context['assignment_list_open'])
+            for a in (as1 + as2)} == set(response.context_data['assignment_list_open'])
+    assert len(as1) + len(as2) == len(response.context_data['assignment_list_open'])
     # Add few old assignments from current semester with expired deadline
     deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
                    - datetime.timedelta(days=1))
@@ -300,15 +300,15 @@ def test_assignment_list_view(client):
     for a in as_olds:
         assert smart_bytes(a.title) in response.content
     assert {StudentAssignment.objects.get(assignment=a, student=student)
-            for a in (as1 + as2)} == set(response.context['assignment_list_open'])
+            for a in (as1 + as2)} == set(response.context_data['assignment_list_open'])
     assert {StudentAssignment.objects.get(assignment=a, student=student)
-            for a in as_olds} == set(response.context['assignment_list_archive'])
+            for a in as_olds} == set(response.context_data['assignment_list_archive'])
     # Now add assignment from the past semester
     old_s = SemesterFactory.create_prev(s)
     old_co = CourseFactory.create(semester=old_s)
     as_past = AssignmentFactory(course=old_co)
     response = client.get(url)
-    assert as_past not in response.context['assignment_list_archive']
+    assert as_past not in response.context_data['assignment_list_archive']
 
 
 @pytest.mark.django_db
@@ -329,14 +329,14 @@ def test_assignment_list_view_context_unenrolled_course(client):
     # Enroll in course
     EnrollmentFactory(student=student, course=course)
     response = client.get(url)
-    assert len(response.context['assignment_list_open']) == 2
-    assert len(response.context['assignment_list_archive']) == 0
+    assert len(response.context_data['assignment_list_open']) == 2
+    assert len(response.context_data['assignment_list_archive']) == 0
     # Now unenroll from the course
     form = {'course_pk': course.pk}
     response = client.post(course.get_unenroll_url(), form)
     response = client.get(url)
-    assert len(response.context['assignment_list_open']) == 0
-    assert len(response.context['assignment_list_archive']) == 2
+    assert len(response.context_data['assignment_list_open']) == 0
+    assert len(response.context_data['assignment_list_archive']) == 2
 
 
 @pytest.mark.django_db
@@ -395,7 +395,7 @@ def test_deadline_l10n_on_student_assignment_list_page(learner_factory,
     StudentAssignmentFactory(assignment=assignment_nsk, student=student)
     client.login(student)
     response = client.get(url_learning_assignments)
-    assert response.context["tz_override"] == branch_spb.get_timezone()
+    assert response.context_data["tz_override"] == branch_spb.get_timezone()
     year_part = formats.date_format(assignment_nsk.deadline_at_local(),
                                     FORMAT_DATE_PART)
     assert year_part == "01 января 2017"

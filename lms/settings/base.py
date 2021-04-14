@@ -180,6 +180,8 @@ TEMPLATES = [
                 "thumbnail": "core.jinja2.filters.thumbnail",
                 "with_classes": "core.jinja2.filters.with_classes",
                 "youtube_video_id": "core.jinja2.filters.youtube_video_id",
+                "date_soon_css": "core.jinja2.filters.date_soon_css",
+                "naturalday": "django.contrib.humanize.templatetags.humanize.naturalday",
                 "as_survey": "surveys.jinja2_filters.render_form",
             },
             "constants": {
