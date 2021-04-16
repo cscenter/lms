@@ -10,7 +10,8 @@ from core.urls import reverse
 from courses.admin import CourseBranchInline, CourseTeacherInline
 from courses.constants import MaterialVisibilityTypes
 from courses.models import (
-    Assignment, AssignmentSubmissionFormats, Course, CourseBranch, CourseTeacher
+    Assignment, AssignmentSubmissionFormats, Course, CourseBranch, CourseTeacher,
+	CourseGroupModes
 )
 from courses.tests.factories import CourseFactory, MetaCourseFactory, SemesterFactory
 from learning.settings import Branches, GradingSystems
@@ -34,6 +35,7 @@ def _get_course_post_data(course=None):
         "capacity": 0,
         "language": "ru",
         "materials_visibility": MaterialVisibilityTypes.PUBLIC,
+        "group_mode": CourseGroupModes.BRANCH
     }
     return form_data
 
