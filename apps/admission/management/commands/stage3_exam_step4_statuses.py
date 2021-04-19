@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 from decimal import Decimal
 
 from django.core.management import BaseCommand, CommandError
 from django.db.models import Q
 
+from admission.models import Applicant
 from ._utils import CurrentCampaignMixin
-from admission.models import Applicant, Test, Campaign
 
 
 class Command(CurrentCampaignMixin, BaseCommand):
@@ -26,7 +25,7 @@ class Command(CurrentCampaignMixin, BaseCommand):
                  ' below this value.')
 
     def handle(self, *args, **options):
-        campaigns = self.get_current_campaigns(options, required=True)
+        campaigns = self.get_current_campaigns(options, branch_is_required=True)
         assert len(campaigns) == 1
 
         campaign = campaigns.get()

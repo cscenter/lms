@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+from django.core.exceptions import ValidationError
 from django.core.management import BaseCommand, CommandError
 
 from admission.constants import ChallengeStatuses
@@ -7,58 +6,51 @@ from admission.models import Applicant, Exam, Contest
 from grading.api.yandex_contest import YandexContestAPI, \
     RegisterStatus, ContestAPIError
 from ._utils import CurrentCampaignMixin, CustomizeQueryMixin, \
-    EmailTemplateMixin
+    EmailTemplateMixin, APPROVAL_DIALOG, validate_campaign_passing_score, validate_campaign_contests
 from ...services import EmailQueueService
 
 
+# TODO: filter by status instead of online test exam results?
 class Command(CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin,
               BaseCommand):
     help = """
     For those who passed testing (score >= passing_score) create 
     exam record and register in yandex contest.
- 
-    Note: 
-        This command does not update applicant status
     """
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument(
             '--send-email', action='store_true',
-            dest='send_notification',
+            dest='send_email',
             help='Send notification with details')
 
     def handle(self, *args, **options):
-        send_notification = options['send_notification']
-        if send_notification:
-            self.stdout.write("Email notifications are enabled")
-        else:
-            self.stdout.write("Email notifications are disabled")
-        campaigns = self.get_current_campaigns(options)
+        campaigns = self.get_current_campaigns(options, confirm=False)
+
+        send_email = options['send_email']
+        send_email_display = "enabled" if send_email else "disabled"
+        self.stdout.write(f"Email notifications are {send_email_display}")
+
+        errors = []
+        for campaign in campaigns:
+            try:
+                validate_campaign_passing_score(campaign)
+            except ValidationError as e:
+                errors.append(e.message)
+            try:
+                validate_campaign_contests(campaign, contest_type=Contest.TYPE_EXAM)
+            except ValidationError as e:
+                errors.append(e.message)
+            if send_email and not campaign.template_exam_invitation:
+                errors.append(f"Exam invitation email template for campaign '{campaign}' not found")
+        if errors:
+            raise CommandError("\n".join(errors))
+
+        if input(APPROVAL_DIALOG) != "y":
+            raise CommandError("Error asking for approval. Canceled")
 
         manager = self.get_manager(Applicant, options)
-        # Validation
-        has_errors = False
-        for campaign in campaigns:
-            self.stdout.write(f"Validating {campaign}:")
-            errors = []
-            if not campaign.online_test_passing_score:
-                msg = f"\tZero passing score settings"
-                errors.append(msg)
-            # Make sure we have exam contests associated with campaign
-            # Otherwise we can't assign random contest number
-            if not Contest.objects.filter(type=Contest.TYPE_EXAM,
-                                          campaign=campaign).exists():
-                msg = f"\tExam contests not found"
-                errors.append(msg)
-            if send_notification and not campaign.template_exam_invitation:
-                msg = f"\tExam invitation email template not found"
-                errors.append(msg)
-            if errors:
-                has_errors = True
-                self.stdout.write("\n".join(errors))
-        if has_errors:
-            raise CommandError("Campaign validation errors")
 
         for campaign in campaigns:
             self.stdout.write(f"Processing {campaign}:")
@@ -88,11 +80,11 @@ class Command(CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin,
                             f"Code: {e.code}. Message: {e.message}"
                         )
                         continue
-                    if send_notification and exam.status != ChallengeStatuses.NEW:
+                    if send_email and exam.status != ChallengeStatuses.NEW:
                         e, created = EmailQueueService.new_exam_invitation(a)
                         emails_generated += created
             self.stdout.write(f"\tNew exam records: {new_records}")
             self.stdout.write(f"\tTotal: {total}")
-            if send_notification:
+            if send_email:
                 self.stdout.write(f"\tNew emails: {emails_generated}")
         self.stdout.write("Done")

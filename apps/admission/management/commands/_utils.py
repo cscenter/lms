@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 import ast
-from typing import List
+from typing import List, Iterable
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -9,8 +8,7 @@ from django.db.models import Q
 from post_office.models import EmailTemplate
 from post_office.utils import get_email_template
 
-from admission.models import Campaign
-
+from admission.models import Campaign, Contest
 
 APPROVAL_DIALOG = "There is no undo. Only 'y' will be accepted to confirm.\n\nEnter a value: "
 
@@ -23,6 +21,21 @@ def validate_template(template_name: str):
         raise ValidationError(f"Email template `{template_name}` not found")
 
 
+def validate_campaign_passing_score(campaign):
+    if not campaign.online_test_passing_score:
+        raise ValidationError(f"Passing score for campaign '{campaign}' must be non zero.")
+
+
+def validate_campaign_contests(campaign, contest_type):
+    """Make sure we have exam contests associated with a campaign."""
+    if contest_type not in (type_ for (type_, _) in Contest.TYPES):
+        raise ValueError(f"Contest type {contest_type} is not supported")
+    qs = (Contest.objects
+          .filter(type=contest_type, campaign=campaign))
+    if not qs.exists():
+        raise ValidationError(f"Contests of type {contest_type} not found for campaign {campaign}")
+
+
 class CurrentCampaignMixin:
     CURRENT_CAMPAIGNS_AGREE = APPROVAL_DIALOG
 
@@ -32,9 +45,9 @@ class CurrentCampaignMixin:
             '--branch', type=str,
             help='Branch code to restrict current campaigns')
 
-    def get_current_campaigns(self, options, required=False):
+    def get_current_campaigns(self, options, confirm=True, branch_is_required=False):
         branch_code = options["branch"]
-        if not branch_code and required:
+        if not branch_code and branch_is_required:
             available = (Campaign.objects
                          .filter(current=True,
                                  branch__site_id=settings.SITE_ID)
@@ -46,17 +59,15 @@ class CurrentCampaignMixin:
         filter_params = [Q(current=True), Q(branch__site_id=settings.SITE_ID)]
         if branch_code:
             filter_params.append(Q(branch__code=branch_code))
-        campaigns = (Campaign.objects
-                     .select_related("branch")
-                     .filter(*filter_params)
-                     .all())
-        self.stdout.write("Selected campaigns ({} total):".format(
-            len(campaigns)))
+        campaigns = list(Campaign.objects
+                         .select_related("branch")
+                         .filter(*filter_params))
+        self.stdout.write(f"Selected campaigns ({len(campaigns)} total):")
         for campaign in campaigns:
             self.stdout.write(f"\t[{campaign.branch.site}] {campaign.branch.name}, {campaign.year}")
         self.stdout.write("")
 
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
+        if confirm and input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             raise CommandError("Error asking for approval. Canceled")
 
         return campaigns
@@ -74,7 +85,7 @@ class HandleErrorsMixin:
 
 
 class EmailTemplateMixin:
-    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-{type}"
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-{suffix}"
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
@@ -82,59 +93,31 @@ class EmailTemplateMixin:
             '--template-pattern', type=str, default=None,
             help='Overrides default template name pattern')
 
-    def validate_templates_legacy(self, campaigns, types=None,
-                                  validate_campaign_settings=True):
-        # For each campaign check email template exists and
-        # passing score for test results non zero
-        check_types = types or ["success", "fail"]
-        errors = []
-        for campaign in campaigns:
-            if validate_campaign_settings:
-                self._validate_campaign_settings(campaign, errors)
-            for t in check_types:
-                template_name = self.get_template_name(campaign, type=t)
-                try:
-                    self.check_template_exists(template_name)
-                except ValidationError as e:
-                    errors.append(e.message)
-        if errors:
-            raise CommandError("\n".join(errors))
-
-    def validate_template(self, campaigns, template_name_pattern):
+    def validate_templates(self, campaigns, template_name_patterns: Iterable[str], confirm=True):
         """
         For each campaign validates whether template exists.
         If so ask to confirm and continue.
         """
         errors = []
-        templates = []
+        templates = set()
         for campaign in campaigns:
-            template_name = self.get_template_name(campaign, template_name_pattern)
-            try:
-                validate_template(template_name)
-                templates.append(template_name)
-            except ValidationError as e:
-                errors.append(e)
+            for pattern in template_name_patterns:
+                template_name = self.get_template_name(campaign, pattern)
+                try:
+                    validate_template(template_name)
+                    templates.add(template_name)
+                except ValidationError as e:
+                    errors.append(e)
         if errors:
-            raise CommandError("\n".join((e.message for e in errors)))
+            msg = "\n".join((e.message for e in errors))
+            raise CommandError(f"Validation errors\n{msg}")
 
         self.stdout.write("\nThese templates will be used in command:")
         self.stdout.write("\n".join(f"\t{t}" for t in templates))
         self.stdout.write("")
-        if input(APPROVAL_DIALOG) != "y":
+
+        if confirm and input(APPROVAL_DIALOG) != "y":
             raise CommandError("Error asking for approval. Canceled")
-
-    def check_template_exists(self, template_name):
-        try:
-            # Use post office method for caching purpose
-            get_email_template(template_name)
-        except EmailTemplate.DoesNotExist:
-            raise ValidationError(f"Email template `{template_name}` not found")
-
-    # FIXME: Not sure why this validation is in templates
-    def _validate_campaign_settings(self, campaign, errors):
-        if not campaign.online_test_passing_score:
-            msg = f"Passing score for campaign '{campaign}' must be non zero"
-            errors.append(msg)
 
     def get_template_name(self, campaign, pattern: str = None, **kwargs):
         pattern = pattern or self.TEMPLATE_PATTERN

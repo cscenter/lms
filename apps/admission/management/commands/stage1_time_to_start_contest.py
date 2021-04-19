@@ -11,34 +11,22 @@ from admission.services import get_email_from
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
-    TEMPLATE_TYPE = "testing-reminder"
     help = """
     Send notification to those who applied but haven't yet started the contest.
     """
 
-    def add_arguments(self, parser):
-        super().add_arguments(parser)
-        parser.add_argument(
-            '--template', type=str,
-            help='Post Office template name common for all campaigns')
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-testing-reminder"
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
 
-        common_template = options['template']
-        if common_template:
-            try:
-                self.check_template_exists(common_template)
-            except ValidationError as e:
-                raise CommandError(e.message)
-        else:
-            self.validate_templates_legacy(campaigns, types=[self.TEMPLATE_TYPE],
-                                           validate_campaign_settings=False)
+        template_name_pattern = options['template_pattern']
+        self.validate_templates(campaigns, [template_name_pattern])
 
         generated = 0
         for campaign in campaigns:
             email_from = get_email_from(campaign)
-            template_name = common_template or self.get_template_name(campaign, type=self.TEMPLATE_TYPE)
+            template_name = self.get_template_name(campaign, template_name_pattern)
             template = get_email_template(template_name)
             tests = (Test.objects
                      .filter(applicant__campaign_id=campaign.pk,

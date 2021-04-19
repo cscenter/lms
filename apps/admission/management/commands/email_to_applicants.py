@@ -10,7 +10,7 @@ from post_office.utils import get_email_template
 from admission.models import Applicant
 from admission.services import get_email_from
 from ._utils import CurrentCampaignMixin, EmailTemplateMixin, \
-    CustomizeQueryMixin
+    CustomizeQueryMixin, validate_template
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin,
@@ -38,19 +38,13 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin,
             '--scheduled_time', type=str,
             help='Scheduled time in UTC [YYYY-MM-DD HH:MM]')
 
-    def get_template_name(self, campaign, template):
-        return template
-
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
-        template_name = options['template']
+        template_name = options['template_pattern']
         if not template_name:
-            raise CommandError(f"Provide email template name")
-        self.validate_templates_legacy(campaigns, types=[template_name])
+            raise CommandError("Provide email template name")
+        validate_template(template_name)
 
         scheduled_time = options['scheduled_time']
         time_display = 'now'
