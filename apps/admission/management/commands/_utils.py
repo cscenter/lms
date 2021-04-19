@@ -12,20 +12,19 @@ from post_office.utils import get_email_template
 from admission.models import Campaign
 
 
-def validate_templates(template_names: List[str]):
+APPROVAL_DIALOG = "There is no undo. Only 'y' will be accepted to confirm.\n\nEnter a value: "
+
+
+def validate_template(template_name: str):
     """Checks all email template are exists."""
-    errors = []
-    for template_name in template_names:
-        try:
-            get_email_template(template_name)
-        except EmailTemplate.DoesNotExist:
-            error = ValidationError(f"Email template `{template_name}` not found")
-            errors.append(error)
-    return errors
+    try:
+        get_email_template(template_name)
+    except EmailTemplate.DoesNotExist:
+        raise ValidationError(f"Email template `{template_name}` not found")
 
 
 class CurrentCampaignMixin:
-    CURRENT_CAMPAIGNS_AGREE = "There is no undo. Only 'y' will be accepted to confirm.\n\nEnter a value: "
+    CURRENT_CAMPAIGNS_AGREE = APPROVAL_DIALOG
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
@@ -56,6 +55,10 @@ class CurrentCampaignMixin:
         for campaign in campaigns:
             self.stdout.write(f"\t[{campaign.branch.site}] {campaign.branch.name}, {campaign.year}")
         self.stdout.write("")
+
+        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
+            raise CommandError("Error asking for approval. Canceled")
+
         return campaigns
 
 
@@ -97,13 +100,28 @@ class EmailTemplateMixin:
         if errors:
             raise CommandError("\n".join(errors))
 
-    def validate_templates(self, campaigns, template_name_pattern):
+    def validate_template(self, campaigns, template_name_pattern):
+        """
+        For each campaign validates whether template exists.
+        If so ask to confirm and continue.
+        """
         errors = []
+        templates = []
         for campaign in campaigns:
             template_name = self.get_template_name(campaign, template_name_pattern)
-            errors.extend(validate_templates([template_name]))
+            try:
+                validate_template(template_name)
+                templates.append(template_name)
+            except ValidationError as e:
+                errors.append(e)
         if errors:
             raise CommandError("\n".join((e.message for e in errors)))
+
+        self.stdout.write("\nThese templates will be used in command:")
+        self.stdout.write("\n".join(f"\t{t}" for t in templates))
+        self.stdout.write("")
+        if input(APPROVAL_DIALOG) != "y":
+            raise CommandError("Error asking for approval. Canceled")
 
     def check_template_exists(self, template_name):
         try:

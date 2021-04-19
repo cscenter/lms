@@ -22,12 +22,9 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
         template_name_pattern = options['template_pattern']
-        self.validate_templates(campaigns, template_name_pattern)
+        self.validate_template(campaigns, template_name_pattern)
 
         for campaign in campaigns:
             self.stdout.write(str(campaign))

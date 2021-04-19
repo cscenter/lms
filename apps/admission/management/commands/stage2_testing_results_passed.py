@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.db import transaction
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
 from admission.models import Applicant
-from ._utils import CurrentCampaignMixin, EmailTemplateMixin, validate_templates
 from admission.services import get_email_from
+from ._utils import CurrentCampaignMixin, EmailTemplateMixin
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
@@ -31,12 +31,9 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
         template_name_pattern = options['template_pattern']
-        self.validate_templates(campaigns, template_name_pattern)
+        self.validate_template(campaigns, template_name_pattern)
 
         skip_exam_invitation = options['skip_exam_invitation']
 
