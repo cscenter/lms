@@ -37,9 +37,6 @@ class Command(EmailTemplateMixin, CustomizeQueryMixin,
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options, required=True)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
         sender = options["from"]
 

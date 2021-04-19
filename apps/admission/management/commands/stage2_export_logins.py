@@ -11,9 +11,6 @@ class Command(CurrentCampaignMixin, BaseCommand):
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
         for campaign in campaigns:
             self.stdout.write(f"Processing {campaign}")

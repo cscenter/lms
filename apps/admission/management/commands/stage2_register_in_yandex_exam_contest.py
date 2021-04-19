@@ -35,9 +35,6 @@ class Command(CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin,
         else:
             self.stdout.write("Email notifications are disabled")
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
         manager = self.get_manager(Applicant, options)
         # Validation

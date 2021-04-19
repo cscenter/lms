@@ -28,9 +28,6 @@ class Command(CurrentCampaignMixin, BaseCommand):
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options, required=True)
         assert len(campaigns) == 1
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
         campaign = campaigns.get()
         self.stdout.write("Минимальный шаг оценки - 0.01")

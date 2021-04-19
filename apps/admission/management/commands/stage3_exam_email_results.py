@@ -22,9 +22,6 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
         email_types = ["exam-fail"]
         if not options["fail_only"]:

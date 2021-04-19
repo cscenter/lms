@@ -19,9 +19,6 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
         self.validate_templates_legacy(campaigns, types=[self.TEMPLATE_TYPE])
 
