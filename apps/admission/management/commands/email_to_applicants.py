@@ -23,7 +23,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin,
         ./manage.py email_to_applicants --branch=spb --template=admission-2019-try-online -f online_test__score__in=[5,6]
     """
     help = """Send notification to current campaigns applicants"""
-    TEMPLATE_REGEXP = "{type}"
+    TEMPLATE_PATTERN = "{type}"
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
@@ -50,7 +50,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin,
         template_name = options['template']
         if not template_name:
             raise CommandError(f"Provide email template name")
-        self.validate_templates(campaigns, types=[template_name])
+        self.validate_templates_legacy(campaigns, types=[template_name])
 
         scheduled_time = options['scheduled_time']
         time_display = 'now'

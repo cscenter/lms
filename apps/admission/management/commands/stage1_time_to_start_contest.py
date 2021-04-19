@@ -35,8 +35,8 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             except ValidationError as e:
                 raise CommandError(e.message)
         else:
-            self.validate_templates(campaigns, types=[self.TEMPLATE_TYPE],
-                                    validate_campaign_settings=False)
+            self.validate_templates_legacy(campaigns, types=[self.TEMPLATE_TYPE],
+                                           validate_campaign_settings=False)
 
         generated = 0
         for campaign in campaigns:

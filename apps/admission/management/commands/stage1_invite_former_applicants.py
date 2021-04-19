@@ -11,7 +11,7 @@ from ._utils import CurrentCampaignMixin, EmailTemplateMixin
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
-    TEMPLATE_REGEXP = "admission-{year}-{branch_code}-{type}"
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-{type}"
     TEMPLATE_TYPE = "invite-former-applicants"
     help = """
     Those who didn't pass admission campaign in the past N years (2 by default)
@@ -32,8 +32,8 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             self.stdout.write("Canceled")
             return
 
-        self.validate_templates(campaigns, types=[self.TEMPLATE_TYPE],
-                                validate_campaign_settings=False)
+        self.validate_templates_legacy(campaigns, types=[self.TEMPLATE_TYPE],
+                                       validate_campaign_settings=False)
 
         number_of_years = options["years"]
         if number_of_years < 1:

@@ -21,7 +21,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             self.stdout.write("Canceled")
             return
 
-        self.validate_templates(campaigns, types=[self.TEMPLATE_TYPE])
+        self.validate_templates_legacy(campaigns, types=[self.TEMPLATE_TYPE])
 
         generated = 0
         for campaign in campaigns:

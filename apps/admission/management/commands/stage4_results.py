@@ -14,7 +14,7 @@ from admission.services import get_email_from
 
 class Command(EmailTemplateMixin, CustomizeQueryMixin,
               CurrentCampaignMixin, BaseCommand):
-    TEMPLATE_REGEXP = "admission-{year}-{branch_code}-results-{status}"
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-results-{status}"
     help = """
     Generates emails with final decision based on applicant status.
 
@@ -51,7 +51,7 @@ class Command(EmailTemplateMixin, CustomizeQueryMixin,
             applicants = manager.filter(campaign_id=campaign.pk)
 
             all_statuses = applicants.values_list('status', flat=True).distinct()
-            self.validate_templates(campaigns, types=all_statuses)
+            self.validate_templates_legacy(campaigns, types=all_statuses)
 
             stats = Counter()
             for a in applicants.order_by('status').iterator():

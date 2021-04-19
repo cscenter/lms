@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import ast
+from typing import List
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -11,9 +12,20 @@ from post_office.utils import get_email_template
 from admission.models import Campaign
 
 
+def validate_templates(template_names: List[str]):
+    """Checks all email template are exists."""
+    errors = []
+    for template_name in template_names:
+        try:
+            get_email_template(template_name)
+        except EmailTemplate.DoesNotExist:
+            error = ValidationError(f"Email template `{template_name}` not found")
+            errors.append(error)
+    return errors
+
+
 class CurrentCampaignMixin:
-    CURRENT_CAMPAIGNS_AGREE = "The action will affect campaigns above. " \
-                              "Continue? (y/[n]): "
+    CURRENT_CAMPAIGNS_AGREE = "There is no undo. Only 'y' will be accepted to confirm.\n\nEnter a value: "
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
@@ -42,7 +54,7 @@ class CurrentCampaignMixin:
         self.stdout.write("Selected campaigns ({} total):".format(
             len(campaigns)))
         for campaign in campaigns:
-            self.stdout.write(f"  {campaign} [{campaign.branch}]")
+            self.stdout.write(f"[{campaign.branch.site}] {campaign.branch.name}, {campaign.year}")
         return campaigns
 
 
@@ -58,10 +70,16 @@ class HandleErrorsMixin:
 
 
 class EmailTemplateMixin:
-    TEMPLATE_REGEXP = "admission-{year}-{branch_code}-{type}"
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-{type}"
 
-    def validate_templates(self, campaigns, types=None,
-                           validate_campaign_settings=True):
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        parser.add_argument(
+            '--template-pattern', type=str, default=None,
+            help='Overrides default template name pattern')
+
+    def validate_templates_legacy(self, campaigns, types=None,
+                                  validate_campaign_settings=True):
         # For each campaign check email template exists and
         # passing score for test results non zero
         check_types = types or ["success", "fail"]
@@ -78,6 +96,14 @@ class EmailTemplateMixin:
         if errors:
             raise CommandError("\n".join(errors))
 
+    def validate_templates(self, campaigns, template_name_pattern):
+        errors = []
+        for campaign in campaigns:
+            template_name = self.get_template_name(campaign, template_name_pattern)
+            errors.extend(validate_templates([template_name]))
+        if errors:
+            raise CommandError("\n".join((e.message for e in errors)))
+
     def check_template_exists(self, template_name):
         try:
             # Use post office method for caching purpose
@@ -91,8 +117,9 @@ class EmailTemplateMixin:
             msg = f"Passing score for campaign '{campaign}' must be non zero"
             errors.append(msg)
 
-    def get_template_name(self, campaign, **kwargs):
-        return self.TEMPLATE_REGEXP.format(
+    def get_template_name(self, campaign, pattern: str = None, **kwargs):
+        pattern = pattern or self.TEMPLATE_PATTERN
+        return pattern.format(
             year=campaign.year,
             branch_code=campaign.branch.code,
             **kwargs

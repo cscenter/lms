@@ -29,7 +29,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
         email_types = ["exam-fail"]
         if not options["fail_only"]:
             email_types.append("exam-success")
-        self.validate_templates(campaigns, types=email_types)
+        self.validate_templates_legacy(campaigns, types=email_types)
 
         for campaign in campaigns:
             self.stdout.write("{}:".format(campaign))

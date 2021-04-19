@@ -11,7 +11,7 @@ from admission.services import get_email_from
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
-    TEMPLATE_REGEXP = "admission-{year}-{branch_code}-stage1-open-day"
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-stage1-open-day"
     help = """Generate notification about open day for those who submitted an application form."""
 
     def add_arguments(self, parser):
@@ -33,7 +33,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             except ValidationError as e:
                 raise CommandError(e.message)
         else:
-            self.validate_templates(campaigns, types=['open-day'], validate_campaign_settings=False)
+            self.validate_templates_legacy(campaigns, types=['open-day'], validate_campaign_settings=False)
 
         for campaign in campaigns:
             self.stdout.write(f"Process campaign {campaign}")

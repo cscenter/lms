@@ -18,12 +18,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     send notification to them.
     """
 
-    def add_arguments(self, parser):
-        super().add_arguments(parser)
-        parser.add_argument(
-            '--skip-context', action='store_true',
-            dest='skip_context',
-            help='Skip email context')
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-testing-fail"
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
@@ -31,20 +26,20 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             self.stdout.write("Canceled")
             return
 
-        template_type = "testing-fail"
-        self.validate_templates(campaigns, types=[template_type])
+        template_name_pattern = options['template_pattern']
+        self.validate_templates(campaigns, template_name_pattern)
 
         for campaign in campaigns:
-            email_from = get_email_from(campaign)
             self.stdout.write(str(campaign))
             testing_passing_score = campaign.online_test_passing_score
             if not testing_passing_score:
-                self.stdout.write("Zero testing passing score "
-                                  "for {}. Skip".format(campaign))
+                self.stdout.write(f"Passing score for campaign '{campaign}' must be non zero. Skip")
                 continue
 
-            template_name = self.get_template_name(campaign, type=template_type)
+            template_name = self.get_template_name(campaign, template_name_pattern)
             template = get_email_template(template_name)
+
+            email_from = get_email_from(campaign)
 
             applicants = (Applicant.objects
                           .filter(campaign_id=campaign.pk)
@@ -52,26 +47,23 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                                   Q(online_test__score__isnull=True))
                           .values("pk",
                                   "online_test__score",
+                                  "online_test__yandex_contest_id",
                                   "yandex_login",
                                   "email"))
             total = 0
             generated = 0
             for a in applicants:
                 total += 1
-                context = {}
-                if not options['skip_context']:
-                    if a["online_test__score"] is None:
-                        score = 0
-                    else:
-                        score = int(a["online_test__score"])
-                    assert score < testing_passing_score
-                    context = {
-                        'LOGIN': a["yandex_login"],
-                        'SCORE': score,
-                    }
                 recipients = [a["email"]]
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
+                    score = 0 if a["online_test__score"] is None else int(a["online_test__score"])
+                    assert score < testing_passing_score
+                    context = {
+                        'LOGIN': a["yandex_login"],
+                        'TEST_SCORE': score,
+                        'TEST_CONTEST_ID': a["online_test__yandex_contest_id"],
+                    }
                     with transaction.atomic():
                         (Applicant.objects
                          .filter(pk=a["pk"])
@@ -88,6 +80,6 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                             backend='ses',
                         )
                         generated += 1
-            self.stdout.write(f"    Processed: {total}")
-            self.stdout.write(f"    New emails: {generated}")
+            self.stdout.write(f"    total: {total}")
+            self.stdout.write(f"    updated: {generated}")
         self.stdout.write("Done")
