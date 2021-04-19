@@ -1,61 +1,60 @@
 {% extends "lms/layouts/v1_base.html" %}
 {% block content %}
     <div class="container">
-        <table>
-            <tr>
-                <td><h4> Группа <b>"{{ student_group_detail.name }}"</b> </h4></td>
-                <td width="20px"></td>
-                <td><button type="button" class="btn btn-primary btn-sm" onclick="window.location.href =
-                            './update/';"><b>Редактировать</b></button></td>
-                <td width="10px"></td>
-                <td><button type="button" class="btn btn-sm" onclick="window.location.href =
-                            './delete/';"><b>Удалить</b></button></td>
-            </tr>
-            <tr>
-                <td><a href="../../groups/">{{ course.0 }}</a></td>
-            </tr>
-        </table>
-        <br><br><b>Список студентов группы</b><br>
         <div class="row">
-            <div class="col-xs-12">
-                {% if enrollment %}
-                    <table>
-                        <tr height="10px"> </tr>
-                        {% for student in enrollment %}
-                            <tr>
-                                <td class="align-middle">{{ student.student.last_name }} {{ student.student.first_name }}</td>
-                                <td width="20px"></td>
-                                <td>
-                                    <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href =
-                                            '/teaching/courses/{{ course_id }}/group/{{ group_id }}/student/{{ student.student.id }}/update/';"><b>Сменить группу</b></button>
-                                </td>
-                            </tr>
-                            <tr height="10px"> </tr>
-                        {% endfor %}
-                    </table>
-                {% else %}
-                    Список студентов группы пуст... :(
-                {% endif %}
-            </div>
+        <div class="col-xs-12 h2-and-buttons">
+                <h2><a href="/teaching/courses/{{ course.0.id }}/groups/"><span class="fa fa-angle-left"> </span></a>
+                    {{ student_group_detail.name }}
+                <br><small>{{ course.0 }}<br></small></h2>
+                <div class="btn-toolbar">
+                    <a href="./update/" class="btn btn-primary" role="button">Редактировать</a>
+                    <a href="./delete/" class="btn btn-danger" role="button">Удалить</a>
+                </div>
+        <hr>
         </div>
-        <br><br><b>Ответственные</b>
-        <div class="row">
-            <div class="col-xs-12">
-                {% if assignees %}
-                    <table>
+        <div class="col-xs-12">
+            <h3>Ответственные</h3>
+            {% if assignees %}
+                <table>
+                    <tr height="10px"> </tr>
+                    {% for assignee in assignees %}
+                        <tr>
+                            <td class="align-middle">
+                                {% if assignee.assignee.teacher.first_name == "" and assignee.assignee.teacher.last_name == "" %}
+                                    {{ assignee.assignee.teacher.username }}
+                                {% else %}
+                                    {{ assignee.assignee.teacher.last_name }} {{ assignee.assignee.teacher.first_name }}
+                                {% endif %}
+                            </td>
+                            <td width="20px"></td>
+                        </tr>
                         <tr height="10px"> </tr>
-                        {% for assignee in assignees %}
-                            <tr>
-                                <td class="align-middle">{{ assignee.assignee }}</td>
-                                <td width="20px"></td>
-                            </tr>
-                            <tr height="10px"> </tr>
-                        {% endfor %}
-                    </table>
-                {% else %}
-                    Список ответственных пуст... :(
-                {% endif %}
-            </div>
+                    {% endfor %}
+                </table>
+            {% else %}
+                Список ответственных пуст... :(
+            {% endif %}
+        <hr>
+        </div>
+        <div class="col-xs-12">
+            <h3>Список студентов группы</h3>
+            {% if enrollment %}
+                <table class="table table-borderless">
+                    <tr height="10px"> </tr>
+                    {% for student in enrollment %}
+                        <tr>
+                            <td width="50%" class="align-middle">
+                                    {{ student.student }}
+                            </td>
+                            <td>
+                                <a href="/teaching/courses/{{ course_id }}/group/{{ group_id }}/student/{{ student.student.id }}/update/">Сменить группу</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                Список студентов группы пуст... :(
+            {% endif %}
         </div>
     </div>
 {% endblock content %}
