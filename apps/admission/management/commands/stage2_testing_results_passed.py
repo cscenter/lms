@@ -38,7 +38,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
         template_name_pattern = options['template_pattern']
         self.validate_templates(campaigns, template_name_pattern)
 
-        skip_exam_invitation = options['skip-exam-invitation']
+        skip_exam_invitation = options['skip_exam_invitation']
 
         for campaign in campaigns:
             self.stdout.write(str(campaign))
@@ -67,7 +67,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             for a in applicants:
                 total += 1
                 if a["status"] is not None:
-                    msg = f"Applicant {a['pk']} already has status {a['status']}. Skip"
+                    msg = f"\tApplicant {a['pk']} already has status {a['status']}. Skip"
                     self.stdout.write(msg)
                     continue
                 recipients = [a["email"]]

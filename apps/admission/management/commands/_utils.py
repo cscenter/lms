@@ -54,7 +54,8 @@ class CurrentCampaignMixin:
         self.stdout.write("Selected campaigns ({} total):".format(
             len(campaigns)))
         for campaign in campaigns:
-            self.stdout.write(f"[{campaign.branch.site}] {campaign.branch.name}, {campaign.year}")
+            self.stdout.write(f"\t[{campaign.branch.site}] {campaign.branch.name}, {campaign.year}")
+        self.stdout.write("")
         return campaigns
 
 
