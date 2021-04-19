@@ -1,30 +1,35 @@
 {% extends "lms/layouts/v1_base.html" %}
 {% block content %}
     <div class="container">
-        <h4><b>Студенческие группы курса "{{ course.0 }}"</b></h4><br>
         <div class="row">
+            <div class="col-xs-12 h2-and-buttons">
+                <h2><a href="/teaching/courses/"><span class="fa fa-angle-left"> </span></a>
+                    Студенческие группы
+                <br><small>{{ course.0 }}<br></small></h2>
+                <div class="btn-toolbar">
+                    <button type="button" class="btn btn-primary" onclick="window.location.href =
+                        '../group/create/';">Добавить группу</button>
+            </div>
+            <hr>
+            </div>
             <div class="col-xs-12">
                 {% if student_group_list %}
-                    <table>
+                    <table class="table table-borderless">
                         <tr class="active">
-                            <th>Название группы</th>
+                            <b><br>Название</b>
                         </tr>
                         <tr height="20px"> </tr>
                         {% for group in student_group_list %}
                             <tr>
-                                <td class="align-middle"><a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}">{{ group.name }}</a></td>
-                                <td width="20px"></td>
+                                <td class="align-middle" width="50%">
+                                    <a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}">{{ group.name }}</a></td>
                                 <td class="align-middle">
-                                    <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href =
-                                        '/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/update/';"><b>Редактировать</b></button>
-                                </td>
-                                <td width="10px"></td>
-                                <td>
-                                    <button type="button" class="btn btn-sm" onclick="window.location.href =
-                                        '/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/delete/';"><b>"Удалить</b></button>
+                                    <a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/update/">Редактировать</a>
+                                    <span>&emsp;</span>
+                                    <a style="color:black" href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/delete/">Удалить</a>
                                 </td>
                             </tr>
-                            <tr height="20px"> </tr>
+{#                            <tr height="20px"> </tr>#}
                         {% endfor %}
                     </table>
                 {% else %}
@@ -32,7 +37,5 @@
                 {% endif %}
             </div>
         </div>
-        <button type="button" class="btn btn-primary" onclick="window.location.href =
-            '../group/create/';">Добавить группу</button>
     </div>
 {% endblock content %}
