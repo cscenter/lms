@@ -72,6 +72,8 @@
                                         {% if report.status == 'sent' %}
                                             {% if request.user.is_curator %}
                                                 <a href="{{ report.get_absolute_url }}">Оценить отчет</a>
+                                            {% else %}
+                                              На проверке у кураторов
                                             {% endif %}
                                         {% else %}
                                             <a href="{{ report.get_absolute_url }}">Смотреть отчет</a>
