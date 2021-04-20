@@ -287,7 +287,7 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
                 .order_by('-semester__index', 'meta_course__name'))
 
 
-class StudentGroupFilterListView(PermissionRequiredMixin, TeacherOnlyMixin, generic.ListView):
+class StudentGroupFilterListView(TeacherOnlyMixin, generic.ListView):
     model = StudentGroup
     context_object_name = 'student_group_list'
     template_name = "lms/teaching/student_group_filter_list.jinja2"
@@ -301,7 +301,7 @@ class StudentGroupFilterListView(PermissionRequiredMixin, TeacherOnlyMixin, gene
         return StudentGroup.objects.filter(course_id=self.kwargs.get("course_pk"))
 
 
-class StudentGroupDetailView(PermissionRequiredMixin, TeacherOnlyMixin, generic.DetailView):
+class StudentGroupDetailView(TeacherOnlyMixin, generic.DetailView):
     model = StudentGroup
     context_object_name = 'student_group_detail'
     template_name = "lms/teaching/student_group_view.jinja2"
@@ -319,7 +319,7 @@ class StudentGroupDetailView(PermissionRequiredMixin, TeacherOnlyMixin, generic.
         return StudentGroup.objects.get(id=self.kwargs.get("group_pk"))
 
 
-class StudentGroupUpdateView(PermissionRequiredMixin, TeacherOnlyMixin, generic.UpdateView):
+class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
     model = StudentGroup
     context_object_name = 'student_group_update'
     template_name = "lms/teaching/student_group_update.jinja2"
@@ -361,7 +361,7 @@ class StudentGroupUpdateView(PermissionRequiredMixin, TeacherOnlyMixin, generic.
         return super().form_valid(form)
 
 
-class StudentGroupCreateView(PermissionRequiredMixin, TeacherOnlyMixin, generic.CreateView):
+class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
     model = StudentGroup
     context_object_name = 'student_group_create'
     template_name = "lms/teaching/student_group_add.jinja2"
@@ -399,7 +399,7 @@ class StudentGroupCreateView(PermissionRequiredMixin, TeacherOnlyMixin, generic.
         return super().form_valid(form)
 
 
-class StudentGroupDeleteView(PermissionRequiredMixin, TeacherOnlyMixin, generic.DeleteView):
+class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
     model = StudentGroup
     context_object_name = 'student_group_delete'
     template_name = "lms/teaching/student_group_delete.jinja2"
@@ -414,7 +414,7 @@ class StudentGroupDeleteView(PermissionRequiredMixin, TeacherOnlyMixin, generic.
         return context
 
 
-class StudentGroupStudentUpdateView(PermissionRequiredMixin, TeacherOnlyMixin, generic.UpdateView):
+class StudentGroupStudentUpdateView(TeacherOnlyMixin, generic.UpdateView):
     model = Enrollment
     context_object_name = 'student_group_student_update'
     template_name = "lms/teaching/student_group_student_update.jinja2"
