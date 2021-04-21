@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_filters.conf import settings as filters_settings
 
+from admission.constants import InterviewSections
 from admission.models import Interview, Comment, Applicant, \
     InterviewAssignment, InterviewSlot, InterviewStream
 from core.timezone import now_local
@@ -53,6 +54,7 @@ class InterviewForm(forms.ModelForm):
         return {
             'applicant': applicant.pk,
             'status': Interview.APPROVED,
+            'section': InterviewSections.ALL_IN_ONE,
             'interviewers': slot.stream.interviewers.all(),
             'date': slot.datetime_local
         }
