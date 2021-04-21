@@ -662,6 +662,49 @@ class ProgressReportFull(ProgressReport):
             'Пройдено семестров НИР (закончили, успех)',
         ]
 
+    def _generate_headers_update(self, *, courses, meta_courses, shads_max, online_max,
+                                 projects_max):
+        return [
+            'ID',
+            'Отделение',
+            'Фамилия',
+            'Имя',
+            'Отчество',
+            'Профиль на сайте',
+            # 'Пол - удалён',
+            'Почта',
+            'Телефон',
+            'Работа',  # up
+            'Яндекс',  # up
+            'Stepik ID',  # up
+            'Github Login',  # up
+            'ВУЗ',
+            'Курс (на момент поступления)',
+            'Год поступления',
+            'Год программы обучения',
+            'Номер семестра обучения',  # new
+            # 'Год выпуска - удалён',
+            # 'Яндекс ID - перемещён',
+            # 'Stepik ID - перемещён',
+            # 'Github Login - перемещён',
+            'Официальный студент',
+            'Номер диплома о высшем образовании',
+            'Направления обучения',
+            'Статус',
+            'Комментарий',
+            'Дата последнего изменения комментария',
+            # 'Работа - перемещён',
+            # 'Анкеты - удалён',
+            'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
+            'Пройдено семестров практики(закончили, успех)',
+            'Пройдено семестров НИР (закончили, успех)',
+
+            'Проекты за семестр "%s"' % self.target_semester,  # new
+            *self.get_courses_headers(meta_courses),    # new
+            *self.generate_shad_courses_headers(shads_max),  # new
+            *self.generate_online_courses_headers(online_max),  # new
+        ]
+
     def _export_row(self, student_profile, **kwargs):
         try:
             disciplines = student_profile.graduate_profile.academic_disciplines.all()
