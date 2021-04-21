@@ -20,7 +20,7 @@ from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
 from post_office.models import EmailTemplate
 
-from admission.constants import ChallengeStatuses, InterviewFormats
+from admission.constants import ChallengeStatuses, InterviewFormats, InterviewSections
 from admission.utils import slot_range, get_next_process
 from grading.api.yandex_contest import RegisterStatus, \
     Error as YandexContestError
@@ -1003,6 +1003,10 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
         related_name="interview")
+    section = models.CharField(
+        choices=InterviewSections,
+        verbose_name=_("Interview|Section"),
+        max_length=15)
     date = TimezoneAwareDateTimeField(_("When"))
     status = models.CharField(
         choices=STATUSES,

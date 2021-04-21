@@ -8,7 +8,7 @@ from django.utils import timezone
 from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime
 
 from admission.constants import WHERE_DID_YOU_LEARN, \
-    APPOINTMENT_INVITATION_TEMPLATE, InterviewFormats
+    APPOINTMENT_INVITATION_TEMPLATE, InterviewFormats, InterviewSections
 from admission.models import Campaign, Applicant, Contest, Test, \
     Exam, InterviewAssignment, Interview, Comment, \
     InterviewSlot, InterviewStream, InterviewInvitation, InterviewFormat
@@ -122,6 +122,7 @@ class InterviewFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Interview
 
+    section = InterviewSections.ALL_IN_ONE
     applicant = factory.SubFactory(ApplicantFactory)
     # TODO: replace with FuzzyDate
     date = (datetime.datetime.now().replace(tzinfo=pytz.UTC)
