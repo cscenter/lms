@@ -1,5 +1,6 @@
 import pytest
 
+from admission.constants import InterviewSections
 from admission.models import Contest, Applicant
 from admission.tests.factories import CampaignFactory, ContestFactory, \
     ApplicantFactory, InterviewInvitationFactory
@@ -25,12 +26,12 @@ def test_compute_contest_id():
 
 @pytest.mark.django_db
 def test_interview_invitation_create():
-    """Make sure Applicant status autoupdated"""
+    """Make sure Applicant status auto updated"""
     a = ApplicantFactory(status=Applicant.PERMIT_TO_EXAM)
     invitation = InterviewInvitationFactory(applicant=a, interview=None)
     a.refresh_from_db()
     assert a.status == Applicant.INTERVIEW_TOBE_SCHEDULED
-    invitation = InterviewInvitationFactory(applicant=a)
+    invitation = InterviewInvitationFactory(applicant=a, interview__section=InterviewSections.ALL_IN_ONE)
     assert invitation.interview_id is not None
     a.refresh_from_db()
     assert a.status == Applicant.INTERVIEW_SCHEDULED

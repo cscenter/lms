@@ -1,5 +1,6 @@
 import pytest
 
+from admission.constants import InterviewSections
 from admission.reports import AdmissionApplicantsReport, AdmissionExamReport
 from admission.tests.factories import CampaignFactory, ApplicantFactory, \
     CommentFactory, InterviewFactory, ExamFactory
@@ -22,7 +23,8 @@ def check_value_for_header(report, header, row_index, expected_value):
 def test_report_smoke():
     campaign = CampaignFactory(branch__code=Branches.SPB)
     applicant = ApplicantFactory(campaign=campaign)
-    interview = InterviewFactory(applicant=applicant)
+    interview = InterviewFactory(applicant=applicant,
+                                 section=InterviewSections.ALL_IN_ONE)
     CommentFactory(score=1, interview=interview)
     report = AdmissionApplicantsReport(campaign=campaign)
     assert len(report.data) == 1

@@ -6,7 +6,7 @@ from django.utils import timezone, formats
 from django.utils.timezone import now
 from post_office.models import Email
 
-from admission.constants import INVITATION_EXPIRED_IN_HOURS, InterviewFormats
+from admission.constants import INVITATION_EXPIRED_IN_HOURS, InterviewFormats, InterviewSections
 from admission.forms import InterviewFromStreamForm
 from admission.models import Applicant, Interview, InterviewInvitation
 from admission.services import get_meeting_time
@@ -41,6 +41,7 @@ def test_simple_interviews_list(client, curator, settings):
     interview1, interview2, interview3 = InterviewFactory.create_batch(3,
         interviewers=[interviewer],
         date=today_local_nsk,
+        section=InterviewSections.ALL_IN_ONE,
         status=Interview.COMPLETED,
         applicant__status=Applicant.INTERVIEW_COMPLETED,
         applicant__campaign=campaign)
@@ -85,7 +86,7 @@ def test_simple_interviews_list(client, curator, settings):
 def test_autoupdate_applicant_status_canceled():
     applicant = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED)
     # Default interview status is `APPROVAL`
-    interview = InterviewFactory(applicant=applicant)
+    interview = InterviewFactory(applicant=applicant, section=InterviewSections.ALL_IN_ONE)
     # applicant status must be updated to `scheduled`
     applicant.refresh_from_db()
     assert applicant.status == Applicant.INTERVIEW_SCHEDULED
@@ -102,9 +103,10 @@ def test_autoupdate_applicant_status_canceled():
 
 
 @pytest.mark.django_db
-def test_autoupdate_applicant_status_deffered():
+def test_auto_update_applicant_status_deferred():
     applicant = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED)
-    interview = InterviewFactory(applicant=applicant, status=Interview.APPROVED)
+    interview = InterviewFactory(applicant=applicant, status=Interview.APPROVED,
+                                 section=InterviewSections.ALL_IN_ONE)
     applicant.refresh_from_db()
     assert applicant.status == Applicant.INTERVIEW_SCHEDULED
     interview.status = Interview.DEFERRED
@@ -121,6 +123,7 @@ def test_autocomplete_interview():
     """
     interviewer1, interviewer2, interviewer3 = InterviewerFactory.create_batch(3)
     interview = InterviewFactory(status=Interview.APPROVED,
+                                 section=InterviewSections.ALL_IN_ONE,
                                  interviewers=[interviewer1, interviewer2])
     assert interview.applicant.status == Applicant.INTERVIEW_SCHEDULED
     CommentFactory(interview=interview, interviewer=interviewer1)
@@ -134,7 +137,8 @@ def test_autocomplete_interview():
     interview.refresh_from_db()
     assert interview.status == Interview.COMPLETED
     # No assigned interviewers
-    interview2 = InterviewFactory(status=Interview.APPROVED)
+    interview2 = InterviewFactory(status=Interview.APPROVED,
+                                  section=InterviewSections.ALL_IN_ONE)
     CommentFactory(interview=interview2, interviewer=interviewer1)
     interview2.refresh_from_db()
     assert interview2.status == Interview.COMPLETED
@@ -142,7 +146,8 @@ def test_autocomplete_interview():
 
 @pytest.mark.django_db
 def test_update_applicant_status_if_interview_has_been_completed():
-    interview2 = InterviewFactory(status=Interview.APPROVED)
+    interview2 = InterviewFactory(status=Interview.APPROVED,
+                                  section=InterviewSections.ALL_IN_ONE)
     CommentFactory(interview=interview2)
     interview2.refresh_from_db()
     assert interview2.status == Interview.COMPLETED
@@ -159,11 +164,13 @@ def test_autoupdate_applicant_status_completed():
     try to switch interview and applicant status to `complete` state.
     """
     # Default applicant status is nullable, so we can easily set `complete`
-    interview = InterviewFactory(status=Interview.COMPLETED)
+    interview = InterviewFactory(status=Interview.COMPLETED,
+                                 section=InterviewSections.ALL_IN_ONE)
     assert interview.applicant.status == Applicant.INTERVIEW_COMPLETED
     interview.delete()
     interviewer1, interviewer2 = InterviewerFactory.create_batch(2)
     interview = InterviewFactory(status=Interview.APPROVED,
+                                 section=InterviewSections.ALL_IN_ONE,
                                  interviewers=[interviewer1, interviewer2])
     assert interview.applicant.status == Applicant.INTERVIEW_SCHEDULED
     CommentFactory.create(interview=interview, interviewer=interviewer1)
@@ -191,7 +198,8 @@ def test_autoupdate_applicant_status_completed():
 def test_autoupdate_applicant_status_from_final():
     """Don't update applicant status if it already in final state"""
     applicant = ApplicantFactory(status=Applicant.ACCEPT)
-    InterviewFactory(applicant=applicant, status=Interview.APPROVED)
+    InterviewFactory(applicant=applicant, status=Interview.APPROVED,
+                     section=InterviewSections.ALL_IN_ONE)
     applicant.refresh_from_db()
     assert applicant.status == Applicant.ACCEPT
 
@@ -250,7 +258,7 @@ def test_interview_results_dispatch_view(client, settings, assert_redirect,
 
 @pytest.mark.django_db
 def test_interview_comment_create(curator, client, settings):
-    interview = InterviewFactory.create()
+    interview = InterviewFactory(section=InterviewSections.ALL_IN_ONE)
     client.login(curator)
     form = {
         "text": "Comment message",
@@ -302,6 +310,7 @@ def test_create_interview_from_slot(curator, client, settings):
     tomorrow_utc = now() + datetime.timedelta(days=2)
     interviewer = InterviewerFactory()
     stream = InterviewStreamFactory(date=tomorrow_utc.date(),
+                                    section=InterviewSections.ALL_IN_ONE,
                                     start_at=datetime.time(hour=12),
                                     end_at=datetime.time(hour=15),
                                     campaign=campaign,
@@ -310,7 +319,7 @@ def test_create_interview_from_slot(curator, client, settings):
     assert stream.slots.count() > 0
     # Make slot busy
     slot = stream.slots.order_by("start_at").first()
-    interview = InterviewFactory()
+    interview = InterviewFactory(section=InterviewSections.ALL_IN_ONE)
     slot.interview_id = interview.pk
     slot.save()
     # Try to create interview for reserved slot
@@ -354,6 +363,7 @@ def test_invitation_slots(curator, client, settings):
                                     date=dt.date(),
                                     with_assignments=False,
                                     campaign=campaign,
+                                    section=InterviewSections.ALL_IN_ONE,
                                     format=InterviewFormats.OFFLINE,)
     assert stream.slots.count() == 3
     slot = stream.slots.order_by('start_at').first()
@@ -393,6 +403,7 @@ def test_create_interview_with_invitation_view(curator, client, settings):
     stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
                                     end_at=datetime.time(15, 0),
                                     duration=20,
+                                    section=InterviewSections.ALL_IN_ONE,
                                     date=dt.date(),
                                     with_assignments=False,
                                     campaign__current=True,

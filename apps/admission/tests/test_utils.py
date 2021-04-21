@@ -4,7 +4,7 @@ import pytest
 from post_office.models import Email, STATUS as EMAIL_STATUS
 
 from admission.constants import INTERVIEW_FEEDBACK_TEMPLATE, \
-    INVITATION_EXPIRED_IN_HOURS
+    INVITATION_EXPIRED_IN_HOURS, InterviewSections
 from admission.services import create_invitation
 from admission.tests.factories import InterviewFactory, InterviewerFactory, \
     CommentFactory, InterviewStreamFactory, ApplicantFactory
@@ -47,6 +47,7 @@ def test_create_invitation(mocker):
     stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
                                     end_at=datetime.time(16, 0),
                                     duration=20,
+                                    section=InterviewSections.ALL_IN_ONE,
                                     date=tomorrow,
                                     with_assignments=False,
                                     campaign__current=True)
@@ -68,6 +69,7 @@ def test_create_invitation(mocker):
 def test_generate_interview_feedback_email():
     email_qs = Email.objects.filter(template__name=INTERVIEW_FEEDBACK_TEMPLATE)
     interview = InterviewFactory(status=Interview.APPROVED,
+                                 section=InterviewSections.ALL_IN_ONE,
                                  applicant__campaign__branch__code=Branches.SPB)
     assert Email.objects.count() == 0
     interview.status = Interview.COMPLETED

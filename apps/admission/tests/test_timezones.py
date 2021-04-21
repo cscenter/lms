@@ -4,6 +4,7 @@ import pytest
 import pytz
 from bs4 import BeautifulSoup
 
+from admission.constants import InterviewSections
 from admission.tests.factories import InterviewFactory, \
     InterviewStreamFactory, InterviewInvitationFactory
 from core.admin import get_admin_url
@@ -30,7 +31,8 @@ def test_model(settings):
     HOUR = 15  # Make sure (HOUR - nsk utc offset) > 0
     expired_at_naive = datetime.datetime(2017, 1, 1, HOUR, 0, 0, 0)
     with pytest.warns(RuntimeWarning) as record:
-        invitation = InterviewInvitationFactory(expired_at=expired_at_naive)
+        invitation = InterviewInvitationFactory(expired_at=expired_at_naive,
+                                                interview__section=InterviewSections.ALL_IN_ONE)
     assert "received a naive datetime" in str(record[0].message)
     # tzinfo have to be None until we explicitly set it or sync data with DB
     assert invitation.expired_at.tzinfo is None
@@ -55,6 +57,7 @@ def test_get_timezone(settings):
     branch_nsk = BranchFactory(code=Branches.NSK)
     date = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     interview = InterviewFactory(applicant__campaign__branch=branch_nsk,
+                                 section=InterviewSections.ALL_IN_ONE,
                                  date=date)
     assert interview.get_timezone() == branch_nsk.get_timezone()
     branch_spb = Branch.objects.get(code=Branches.SPB, site_id=settings.SITE_ID)
@@ -172,6 +175,7 @@ def test_interview_list(settings, client, curator):
     # Add interview for msk timezone
     date_at = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     interview = InterviewFactory(date=date_at,
+                                 section=InterviewSections.ALL_IN_ONE,
                                  applicant__campaign__branch__code=Branches.SPB)
     assert interview.applicant.campaign.branch.code == Branches.SPB
     # We set naive datetime which should been interpreted as UTC
@@ -188,9 +192,8 @@ def test_interview_list(settings, client, curator):
 
     assert html.find('div', {"class": "time"}, text=time_str) is not None
     # Add interview for nsk timezone
-    interview = InterviewFactory(date=datetime.datetime(2017, 1, 1,
-                                                        12, 0, 0, 0,
-                                                        tzinfo=pytz.UTC))
+    interview = InterviewFactory(date=datetime.datetime(2017, 1, 1, 12, 0, 0, 0, tzinfo=pytz.UTC),
+                                 section=InterviewSections.ALL_IN_ONE)
     branch_nsk = Branch.objects.get(code=Branches.NSK, site_id=settings.SITE_ID)
     interview.applicant.campaign.branch_id = branch_nsk
     interview.applicant.campaign.save()
@@ -214,6 +217,7 @@ def test_interview_detail(settings, client, curator):
     # Add interview for msk timezone
     dt_at = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     interview = InterviewFactory(date=dt_at,
+                                 section=InterviewSections.ALL_IN_ONE,
                                  applicant__campaign__branch__code=Branches.NSK)
     date_in_utc = interview.date
     branch_nsk = BranchFactory(code=Branches.NSK)

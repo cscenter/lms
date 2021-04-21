@@ -1034,6 +1034,14 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         verbose_name = _("Interview")
         verbose_name_plural = _("Interviews")
 
+    def __str__(self):
+        return smart_str(self.applicant)
+
+    def save(self, **kwargs):
+        created = self.pk is None
+        self.full_clean()
+        super().save(**kwargs)
+
     def date_local(self, tz=None):
         if not tz:
             tz = self.get_timezone()
@@ -1070,9 +1078,6 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
 
     def get_average_score_display(self, decimal_pos=2):
         return numberformat.format(self.average_score, ".", decimal_pos)
-
-    def __str__(self):
-        return smart_str(self.applicant)
 
 
 class Comment(TimeStampedModel):
@@ -1117,6 +1122,10 @@ class InterviewStream(TimezoneAwareMixin, TimeStampedModel):
         verbose_name=_("Campaign"),
         on_delete=models.CASCADE,
         related_name="interview_streams")
+    section = models.CharField(
+        choices=InterviewSections,
+        verbose_name=_("Interview|Section"),
+        max_length=15)
     format = models.CharField(
         verbose_name=_("Interview Format"),
         choices=InterviewFormats.choices,

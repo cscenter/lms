@@ -54,7 +54,7 @@ class InterviewForm(forms.ModelForm):
         return {
             'applicant': applicant.pk,
             'status': Interview.APPROVED,
-            'section': InterviewSections.ALL_IN_ONE,
+            'section': slot.stream.section,
             'interviewers': slot.stream.interviewers.all(),
             'date': slot.datetime_local
         }

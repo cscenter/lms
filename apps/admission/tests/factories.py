@@ -122,7 +122,6 @@ class InterviewFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Interview
 
-    section = InterviewSections.ALL_IN_ONE
     applicant = factory.SubFactory(ApplicantFactory)
     # TODO: replace with FuzzyDate
     date = (datetime.datetime.now().replace(tzinfo=pytz.UTC)
