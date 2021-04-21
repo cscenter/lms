@@ -19,7 +19,7 @@ urlpatterns = [
         re_path(r'^interviews/$', InterviewListView.as_view(), name='interviews'),
         re_path(r'^interviews/assignments/(?P<pk>\d+)/$', InterviewAssignmentDetailView.as_view(), name='interview_assignment_detail'),
         re_path(r'^interviews/(?P<pk>\d+)/$', InterviewDetailView.as_view(), name='interview_detail'),
-        re_path(r'^interviews/(?P<pk>\d+)/comment$', InterviewCommentView.as_view(), name='interview_comment'),
+        path('interviews/<int:pk>/comment', InterviewCommentView.as_view(), name='interview_comment'),
         re_path(r'^results/$', InterviewResultsDispatchView.as_view(), name='interview_results_dispatch'),
         re_path(r'^results/(?P<branch_code>\w+)/$', InterviewResultsView.as_view(), name='branch_interview_results'),
     ])),

@@ -50,11 +50,11 @@ from .tasks import import_testing_results
 class ApplicantContextMixin:
     @staticmethod
     def get_applicant_context(request, applicant_id):
-        applicant = get_object_or_404(
-            Applicant.objects
-                     .select_related("exam", "campaign", "campaign__branch",
-                                     "online_test", "university")
-                     .filter(pk=applicant_id))
+        qs = (Applicant.objects
+              .select_related("exam", "campaign__branch",
+                              "online_test", "university")
+              .filter(pk=applicant_id))
+        applicant = get_object_or_404(qs)
         contest_ids = []
         try:
             online_test = applicant.online_test
@@ -420,16 +420,16 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
 
     def get_context_data(self, **kwargs):
         interview_id = self.kwargs['pk']
-        interview = get_object_or_404(
-            Interview.objects
-                .filter(pk=interview_id)
-                .prefetch_related(
-                    "interviewers",
-                    "assignments",
-                    Prefetch("comments",
-                             queryset=(Comment.objects
-                                       .select_related("interviewer")))))
+        qs = (Interview.objects
+              .filter(pk=interview_id)
+              .prefetch_related("interviewers",
+                                "assignments",
+                                Prefetch("comments",
+                                         queryset=(Comment.objects
+                                                   .select_related("interviewer")))))
+        interview = get_object_or_404(qs)
         context = self.get_applicant_context(self.request, interview.applicant_id)
+        interview.applicant = context['applicant']
         context.update({
             "interview": interview,
             "assignments_form": InterviewAssignmentsForm(instance=interview),

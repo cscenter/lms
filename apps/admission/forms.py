@@ -202,9 +202,8 @@ class InterviewCommentForm(forms.ModelForm):
 
     def clean_interview(self):
         interview = self.cleaned_data['interview']
-        if str(interview.pk) != self.interview_id:
-            raise ValidationError(
-                "Submitted interview id not match GET-value")
+        if interview.pk != self.interview_id:
+            raise ValidationError("Submitted interview id not match GET-value")
         return interview
 
 
