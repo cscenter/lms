@@ -788,7 +788,7 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
     date = models.DateField(_("Date"))
     starts_at = models.TimeField(_("Starts at"))
     ends_at = models.TimeField(_("Ends at"))
-    time_zone = TimeZoneField(_("Time Zone"), null=True)
+    time_zone = TimeZoneField(_("Time Zone"))
 
     name = models.CharField(_("CourseClass|Name"), max_length=255)
     description = models.TextField(
@@ -1049,8 +1049,7 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
     deadline_at = TimezoneAwareDateTimeField(_("Assignment|deadline"))
-    # FIXME: remove null after fullfill actual values
-    time_zone = TimeZoneField(_("Time Zone"), null=True)
+    time_zone = TimeZoneField(_("Time Zone"))
     # TODO: rename to solution_format
     submission_type = models.CharField(
         verbose_name=_("Submission Type"),
