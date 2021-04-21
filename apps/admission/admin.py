@@ -15,6 +15,7 @@ from admission.import_export import OnlineTestRecordResource, \
 from admission.models import Campaign, Interview, Applicant, Test, \
     Exam, Comment, InterviewAssignment, Contest, InterviewSlot, InterviewStream, \
     InterviewInvitation, InterviewFormat
+from admission.roles import Roles
 from admission.services import EmailQueueService
 from core.admin import meta
 from core.timezone.fields import TimezoneAwareDateTimeField
@@ -22,6 +23,7 @@ from core.timezone.forms import TimezoneAwareAdminForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
+from users.models import User
 
 
 class CampaignListFilter(admin.SimpleListFilter):
@@ -184,6 +186,20 @@ class InterviewFormatAdmin(admin.ModelAdmin):
     list_filter = ['campaign']
 
 
+class InterviewAssigneeAdminInline(admin.TabularInline):
+    # TODO: create intermediate model with validation by interviewer role, then add 'user' field to raw fields
+    model = Interview.interviewers.through
+    verbose_name = _("Interviewer")
+    verbose_name_plural = _("Interviewers")
+    extra = 0
+    min_num = 0
+
+    def formfield_for_foreignkey(self, db_field, *args, **kwargs):
+        if db_field.name == "user":
+            kwargs["queryset"] = User.objects.filter(group__role=Roles.INTERVIEWER)
+        return super().formfield_for_foreignkey(db_field, *args, **kwargs)
+
+
 class InterviewAdmin(admin.ModelAdmin):
     form = TimezoneAwareAdminForm
     formfield_overrides = {
@@ -196,6 +212,8 @@ class InterviewAdmin(admin.ModelAdmin):
     list_filter = ['status', ApplicantCampaignListFilter]
     readonly_fields = ['secret_code']
     raw_id_fields = ["applicant"]
+    exclude = ['interviewers']
+    inlines = [InterviewAssigneeAdminInline]
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'applicant':

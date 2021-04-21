@@ -998,12 +998,17 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
     )
     TRANSITION_STATUSES = [DEFERRED, CANCELED, APPROVAL]
 
-    date = TimezoneAwareDateTimeField(_("When"))
     applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
         related_name="interview")
+    date = TimezoneAwareDateTimeField(_("When"))
+    status = models.CharField(
+        choices=STATUSES,
+        default=APPROVAL,
+        verbose_name=_("Interview|Status"),
+        max_length=15)
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
@@ -1012,11 +1017,6 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         'InterviewAssignment',
         verbose_name=_("Interview|Assignments"),
         blank=True)
-    status = models.CharField(
-        choices=STATUSES,
-        default=APPROVAL,
-        verbose_name=_("Interview|Status"),
-        max_length=15)
     secret_code = models.UUIDField(
         verbose_name=_("Secret code"),
         editable=False,
