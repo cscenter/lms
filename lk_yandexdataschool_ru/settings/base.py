@@ -27,6 +27,8 @@ ROOT_URLCONF = 'lk_yandexdataschool_ru.urls'
 LMS_SUBDOMAIN = None
 LMS_CURATOR_EMAIL = 'shadcurators@yandex.ru'
 LMS_MENU = 'lk_yandexdataschool_ru.menu'
+if YANDEX_METRIKA_ID is None:
+    YANDEX_METRIKA_ID = 75819112
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,
 }
@@ -45,6 +47,7 @@ LOGO_PATH = 'v1/img/shad/logo.svg'
 
 for template in TEMPLATES:
     if "Jinja2" in template["BACKEND"]:
+        template["OPTIONS"]["constants"]["YANDEX_METRIKA_ID"] = YANDEX_METRIKA_ID
         update_constants = [
             ("ESTABLISHED", ESTABLISHED),
             ("FAVICON_PATH", FAVICON_PATH),

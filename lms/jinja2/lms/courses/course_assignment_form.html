@@ -27,7 +27,7 @@
               {% if form.instance %}
                 <ul class="list-unstyled __files mt-10">
                   {% for aa in form.instance.assignmentattachment_set.all() %}
-                    <li><a title="Удалить файл" href="{{ aa.get_delete_url }}"><i class="fa fa-trash-o"></i>&nbsp;{{ aa.file_name }}</a>
+                    <li><a title="Удалить файл" href="{{ aa.get_delete_url() }}"><i class="fa fa-trash-o"></i>&nbsp;{{ aa.file_name }}</a>
                     </li>
                   {% endfor %}
                 </ul>

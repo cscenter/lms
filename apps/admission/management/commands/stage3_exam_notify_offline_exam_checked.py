@@ -1,34 +1,30 @@
-# -*- coding: utf-8 -*-
-import math
-from decimal import Decimal
-
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
 from admission.constants import ChallengeStatuses
-from ._utils import EmailTemplateMixin, CurrentCampaignMixin
 from admission.models import Applicant, Exam
 from admission.services import get_email_from
+from core.jinja2.filters import pluralize
+from ._utils import EmailTemplateMixin, CurrentCampaignMixin
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
-    TEMPLATE_TYPE = "offline-exam-checked"
     help = 'Generate mails about check completeness'
+
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-offline-exam-checked"
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
-        self.validate_templates(campaigns, types=[self.TEMPLATE_TYPE])
+        template_name_pattern = options['template_pattern']
+        self.validate_templates(campaigns, [template_name_pattern])
 
         generated = 0
         for campaign in campaigns:
             email_from = get_email_from(campaign)
-            template_name = self.get_template_name(campaign, type=self.TEMPLATE_TYPE)
+            template_name = self.get_template_name(campaign, template_name_pattern)
             template = get_email_template(template_name)
             exams = (Exam.objects
                      .filter(applicant__campaign=campaign.pk,
@@ -41,16 +37,16 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
                     details = {}
-                    for k, v in e.details.items():
+                    for k, value in e.details.items():
                         # Pluralize scores
                         if "Задание" in k:
                             try:
-                                v = int(v)
-                                plural_part = self.pluralize(v)
+                                value = int(value)
+                                plural_part = pluralize(value, "", "a", "ов")
                             except ValueError:
                                 plural_part = "а"
-                            v = f"{v} балл{plural_part}"
-                        details[k] = v
+                            value = f"{value} балл{plural_part}"
+                        details[k] = value
                     context = {
                         "total": str(e.score),
                         "details": details
@@ -69,16 +65,3 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                     generated += 1
         self.stdout.write("Generated emails: {}".format(generated))
         self.stdout.write("Done")
-
-    # shitty code
-    @staticmethod
-    def pluralize(value):
-        endings = ["", "a", "ов"]
-        if value % 100 in (11, 12, 13, 14):
-            return endings[2]
-        if value % 10 == 1:
-            return endings[0]
-        if value % 10 in (2, 3, 4):
-            return endings[1]
-        else:
-            return endings[2]

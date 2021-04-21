@@ -28,9 +28,6 @@ class Command(CurrentCampaignMixin, BaseCommand):
     def handle(self, *args, **options):
         csv_path = options["csv"]
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
         # Collect map "yandex_login -> participant_id" from monitor
         participants = {}

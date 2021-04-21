@@ -12,21 +12,20 @@ from admission.services import get_email_from
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
-    TEMPLATE_TYPE = "exam-contest-checked"
     help = 'Generate notifications about contest check completeness'
+
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-exam-contest-checked"
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
-        self.validate_templates(campaigns, types=[self.TEMPLATE_TYPE])
+        template_name_pattern = options['template_pattern']
+        self.validate_templates(campaigns, [template_name_pattern])
 
         generated = 0
         for campaign in campaigns:
             email_from = get_email_from(campaign)
-            template_name = self.get_template_name(campaign, type=self.TEMPLATE_TYPE)
+            template_name = self.get_template_name(campaign, template_name_pattern)
             template = get_email_template(template_name)
             exam_results = (
                 Exam.objects
