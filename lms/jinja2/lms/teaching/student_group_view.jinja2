@@ -3,12 +3,15 @@
     <div class="container">
         <div class="row">
         <div class="col-xs-12 h2-and-buttons">
-                <h2><a href="/teaching/courses/{{ course.0.id }}/groups/"><span class="fa fa-angle-left"> </span></a>
+                <h2><a href="{{ url("teaching:student_group_list", course_pk=course_id) }}">
+                    <span class="fa fa-angle-left"> </span></a>
                     {{ student_group_detail.name }}
-                <br><small>{{ course.0 }}<br></small></h2>
+                <br><small>{{ course }}<br></small></h2>
                 <div class="btn-toolbar">
-                    <a href="./update/" class="btn btn-primary" role="button">Редактировать</a>
-                    <a href="./delete/" class="btn btn-danger" role="button">Удалить</a>
+                    <a href="{{ url("teaching:student_group_update", course_pk=course_id, pk=group_id) }}"
+                       class="btn btn-primary" role="button">Редактировать</a>
+                    <a href="{{ url("teaching:student_group_delete", course_pk=course_id, pk=group_id) }}"
+                       class="btn btn-danger" role="button">Удалить</a>
                 </div>
         <hr>
         </div>
@@ -47,7 +50,8 @@
                                     {{ student.student }}
                             </td>
                             <td>
-                                <a href="/teaching/courses/{{ course_id }}/group/{{ group_id }}/student/{{ student.student.id }}/update/">Сменить группу</a>
+                                <a href="{{ url("teaching:student_group_student_update", course_pk=course_id,
+                                    group_pk=group_id, pk=student.student.id) }}">Сменить группу</a>
                             </td>
                         </tr>
                     {% endfor %}
