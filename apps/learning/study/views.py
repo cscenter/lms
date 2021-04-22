@@ -27,7 +27,7 @@ from learning.models import StudentAssignment, Enrollment, \
     AssignmentSubmissionTypes, AssignmentComment
 from learning.permissions import ViewOwnStudentAssignments, \
     ViewOwnStudentAssignment, ViewCourses, \
-    CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution
+    CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution, EnrollPermissionObject
 from learning.roles import Roles
 from learning.services import get_student_classes, get_student_profile
 from learning.study.services import get_solution_form, get_draft_solution
@@ -220,7 +220,7 @@ class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
 class CourseListView(PermissionRequiredMixin, generic.TemplateView):
     model = Course
     context_object_name = 'course_list'
-    template_name = "learning/study/course_list.html"
+    template_name = "lms/study/course_list.html"
     permission_required = ViewCourses.name
 
     def get_context_data(self, **kwargs):
@@ -270,9 +270,9 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
             "archive_enrolled": archive_enrolled,
             # FIXME: what about custom template tag for this?
             # TODO: Add util method
-            "current_term": "{} {}".format(
-                SemesterTypes.values[current_term.type],
-                current_term.year).capitalize()
+            "current_term": "{} {}".format(SemesterTypes.values[current_term.type],
+                                           current_term.year).capitalize(),
+            "EnrollPermissionObject": EnrollPermissionObject
         }
         return context
 
