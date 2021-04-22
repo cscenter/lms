@@ -307,7 +307,8 @@ class StudentGroupDetailView(TeacherOnlyMixin, generic.DetailView):
         context['course'] = Course.objects.filter(id=self.kwargs.get("course_pk"))
         context['group_id'] = self.kwargs.get("group_pk")
         context['course_id'] = self.kwargs.get("course_pk")
-        context['enrollment'] = Enrollment.objects.filter(student_group_id=self.kwargs.get("group_pk"))
+        context['enrollment'] = Enrollment.objects.filter(student_group_id=self.kwargs.get("group_pk")) \
+            .order_by('student__last_name')
         return context
 
     def get_object(self, queryset=None):
