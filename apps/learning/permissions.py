@@ -394,7 +394,7 @@ class LeaveCourse(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, course: Course):
-        # Student could unenroll before enrollment deadline
+        """Student could leave the course before enrollment deadline."""
         if not course.enrollment_is_open:
             return False
         enrollment = user.get_enrollment(course)

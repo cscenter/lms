@@ -128,15 +128,15 @@ def test_course_assignment_delete_security(client, assert_login_redirect):
 @pytest.mark.django_db
 def test_course_assignment_delete(client, assert_redirect):
     teacher = TeacherFactory()
-    co = CourseFactory.create(teachers=[teacher])
-    a = AssignmentFactory.create(course=co)
-    delete_url = a.get_delete_url()
+    course = CourseFactory(teachers=[teacher])
+    assignment = AssignmentFactory(course=course)
+    delete_url = assignment.get_delete_url()
     client.login(teacher)
     response = client.get(delete_url)
     assert response.status_code == 200
-    assert smart_bytes(a.title) in response.content
+    assert smart_bytes(assignment.title) in response.content
     teaching_assignment_list = reverse('teaching:assignment_list')
     assert_redirect(client.post(delete_url), teaching_assignment_list)
     response = client.get(teaching_assignment_list)
     assert response.status_code == 200
-    assert smart_bytes(a.title) not in response.content
+    assert smart_bytes(assignment.title) not in response.content

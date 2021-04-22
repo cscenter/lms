@@ -272,9 +272,9 @@ def test_unenrollment(client, settings, assert_redirect):
     assert not enrollment.is_deleted
     # Check ongoing courses on student courses page are not empty
     response = client.get(reverse("study:course_list"))
-    assert len(response.context['ongoing_rest']) == 0
-    assert len(response.context['ongoing_enrolled']) == 1
-    assert len(response.context['archive_enrolled']) == 0
+    assert len(response.context_data['ongoing_rest']) == 0
+    assert len(response.context_data['ongoing_enrolled']) == 1
+    assert len(response.context_data['archive']) == 0
     # Check `back` url on unenroll action
     url = course.get_unenroll_url() + "?back=study:course_list"
     assert_redirect(client.post(url, form),
@@ -284,9 +284,9 @@ def test_unenrollment(client, settings, assert_redirect):
                                           assignment__course=course))
     # Check courses on student courses page are empty
     response = client.get(reverse("study:course_list"))
-    assert len(response.context['ongoing_rest']) == 1
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['archive_enrolled']) == 0
+    assert len(response.context_data['ongoing_rest']) == 1
+    assert len(response.context_data['ongoing_enrolled']) == 0
+    assert len(response.context_data['archive']) == 0
 
 
 @pytest.mark.django_db
