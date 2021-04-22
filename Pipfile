@@ -9,6 +9,7 @@ colour-runner = "==0.1.1"
 ipython = "*"
 Werkzeug = "*"
 # Code Quality
+pydocstyle = "*"
 isort = "*"
 pylint = "*"
 pylint-django = "*"
