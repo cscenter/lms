@@ -3,12 +3,13 @@
     <div class="container">
         <div class="row">
             <div class="col-xs-12 h2-and-buttons">
-                <h2><a href="/teaching/courses/"><span class="fa fa-angle-left"> </span></a>
+                <h2><a href="{{ url("teaching:course_list") }}"><span class="fa fa-angle-left"> </span></a>
                     Студенческие группы
-                <br><small>{{ course.0 }}<br></small></h2>
+                <br><small>{{ course }}<br></small></h2>
                 <div class="btn-toolbar">
-                    <button style="width: 215px; padding: 12px 10px" type="button" class=" btn btn-primary btn-outline btn-block" onclick="window.location.href =
-                        '../group/create/';">Добавить группу</button>
+                    <a href="{{ url("teaching:student_group_create", course_pk=course.id) }}"
+                       class="btn btn-primary btn-outline btn-block" style="width: 215px;
+                       padding: 12px 10px" role="button">Добавить группу</a>
                 </div>
             <hr>
             </div>
@@ -22,14 +23,16 @@
                         {% for group in student_group_list %}
                             <tr>
                                 <td class="align-middle" width="50%">
-                                    <a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}">{{ group.name }}</a></td>
+                                    <a href="{{ url("teaching:student_group_detail", course_pk=group.course.id,
+                                        group_pk=group.id) }}">{{ group.name }}</a></td>
                                 <td class="align-middle">
-                                    <a href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/update/">Редактировать</a>
+                                    <a href="{{ url("teaching:student_group_update", course_pk=group.course.id,
+                                        pk=group.id) }}">Редактировать</a>
                                     <span>&emsp;</span>
-                                    <a style="color:black" href="/teaching/courses/{{ group.course.id }}/group/{{ group.id }}/delete/">Удалить</a>
+                                    <a style="color:black" href="{{ url("teaching:student_group_delete",
+                                        course_pk=group.course.id, pk=group.id) }}">Удалить</a>
                                 </td>
                             </tr>
-{#                            <tr height="20px"> </tr>#}
                         {% endfor %}
                     </table>
                 {% else %}
