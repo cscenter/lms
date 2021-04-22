@@ -6,9 +6,12 @@ verify_ssl = true
 [dev-packages]
 pywatchman = "*"
 colour-runner = "==0.1.1"
-pylint-django = "*"
 ipython = "*"
 Werkzeug = "*"
+# Code Quality
+isort = "*"
+pylint = "*"
+pylint-django = "*"
 # Coverage
 coverage = "*"
 django-coverage = "==1.2.4"
