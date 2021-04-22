@@ -46,6 +46,7 @@ def parse_timezone_string(value) -> pytz.tzinfo.BaseTzInfo:
 
 
 class TimeZoneField(models.Field):
+    empty_strings_allowed = False
     description = _("A pytz timezone instance")
 
     def __init__(self, verbose_name=None, choices=None, **kwargs):

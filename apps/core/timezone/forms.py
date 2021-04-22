@@ -30,6 +30,9 @@ def naive_to_aware(value, instance: TimezoneAwareMixin):
     if settings.USE_TZ and value is not None and timezone.is_naive(value):
         try:
             instance_tz = instance.get_timezone()
+            if not instance_tz:
+                # TODO: raise custom exception
+                raise ObjectDoesNotExist
         except ObjectDoesNotExist:
             # Can't retrieve timezone until timezone aware field is empty
             instance_tz = pytz.UTC

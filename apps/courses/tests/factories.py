@@ -191,6 +191,7 @@ class AssignmentFactory(factory.django.DjangoModelFactory):
     submission_type = AssignmentSubmissionFormats.ONLINE
     title = factory.Sequence(lambda n: "Test assignment %03d" % n)
     text = "This is a text for a test assignment"
+    time_zone = factory.LazyAttribute(lambda o: o.course.main_branch.get_timezone())
     passing_score = 10
     maximum_score = 80
     weight = 1
