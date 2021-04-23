@@ -94,7 +94,6 @@ class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     list_display = ['meta_course', 'semester', 'main_branch',
                     'is_published_in_video']
     inlines = (CourseBranchInline, CourseTeacherInline,)
-    # readonly_fields = ('group_mode',)
     raw_id_fields = ('meta_course',)
 
     class Media:
