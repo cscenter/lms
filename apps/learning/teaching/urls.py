@@ -23,8 +23,8 @@ urlpatterns = [
     path('full-calendar/', CalendarFullView.as_view(), name='calendar_full'),
     path('courses/', include([
         path('', CourseListView.as_view(), name='course_list'),
-        path('<int:course_pk>/groups/', StudentGroupFilterListView.as_view(), name='student_group_list'),
-        path('<int:course_pk>/group/', include([
+        path('<int:course_pk>/groups/', include([
+            path('', StudentGroupFilterListView.as_view(), name='student_group_list'),
             path('create/', StudentGroupCreateView.as_view(), name='student_group_create'),
             path('<int:pk>/update/', StudentGroupUpdateView.as_view(), name='student_group_update'),
             path('<int:pk>/delete/', StudentGroupDeleteView.as_view(), name='student_group_delete'),
