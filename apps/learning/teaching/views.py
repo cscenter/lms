@@ -308,12 +308,12 @@ class StudentGroupDetailView(TeacherOnlyMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['assignees'] = StudentGroupAssignee.objects.filter(student_group_id=self.kwargs.get("group_pk"))
+        context['group_assignees'] = StudentGroupAssignee.objects.filter(student_group_id=self.kwargs.get("group_pk"))
         context['course'] = Course.objects.get(id=self.kwargs.get("course_pk"))
         context['group_id'] = self.kwargs.get("group_pk")
         context['course_id'] = self.kwargs.get("course_pk")
         context['student_id'] = self.kwargs.get("pk")
-        context['enrollment'] = Enrollment.objects.filter(student_group_id=self.kwargs.get("group_pk")) \
+        context['enrollments'] = Enrollment.objects.filter(student_group_id=self.kwargs.get("group_pk")) \
             .order_by('student__last_name')
         return context
 
@@ -361,7 +361,6 @@ class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
         elif assignee is None:
             for assign in assignee_test:
                 assign.delete()
-            pass
 
         return super().form_valid(form)
 
