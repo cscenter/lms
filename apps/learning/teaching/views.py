@@ -282,10 +282,10 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
                 .order_by('-semester__index', 'meta_course__name'))
 
 
-class StudentGroupFilterListView(TeacherOnlyMixin, generic.ListView):
+class StudentGroupListView(TeacherOnlyMixin, generic.ListView):
     model = StudentGroup
     context_object_name = 'student_group_list'
-    template_name = "lms/teaching/student_group_filter_list.jinja2"
+    template_name = "lms/teaching/student_group_list.jinja2"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
