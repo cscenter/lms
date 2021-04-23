@@ -16,24 +16,12 @@
         <hr>
         </div>
         <div class="col-xs-12">
-            <h3>Ответственные</h3>
-            {% if assignees %}
-                <table>
-                    <tr height="10px"> </tr>
-                    {% for assignee in assignees %}
-                        <tr>
-                            <td class="align-middle">
-                                {% if assignee.assignee.teacher.first_name == "" and assignee.assignee.teacher.last_name == "" %}
-                                    {{ assignee.assignee.teacher.username }}
-                                {% else %}
-                                    {{ assignee.assignee.teacher.last_name }} {{ assignee.assignee.teacher.first_name }}
-                                {% endif %}
-                            </td>
-                            <td width="20px"></td>
-                        </tr>
-                        <tr height="10px"> </tr>
-                    {% endfor %}
-                </table>
+            <span>{% if group_assignees.count() == 1 %}<b>Ответственный:</b> {% else %}<b>Ответственные:</b> {% endif %}</span>
+            {% if group_assignees %}
+                {% for group_assignee in group_assignees %}
+                    {{group_assignee.assignee.teacher.last_name + ' ' + group_assignee.assignee.teacher.first_name}}{%
+                            if not loop.last %}, {% endif %}
+                {% endfor %}
             {% else %}
                 Список ответственных пуст... :(
             {% endif %}
@@ -41,17 +29,17 @@
         </div>
         <div class="col-xs-12">
             <h3>Список студентов группы</h3>
-            {% if enrollment %}
+            {% if enrollments %}
                 <table class="table table-borderless">
                     <tr height="10px"> </tr>
-                    {% for student in enrollment %}
+                    {% for enrollment in enrollments %}
                         <tr>
                             <td width="50%" class="align-middle">
-                                    {{ student.student }}
+                                <a href="{{ url("user_detail", pk=enrollment.student.id) }}">{{ enrollment.student }}</a>
                             </td>
                             <td>
                                 <a href="{{ url("teaching:student_group_student_update", course_pk=course_id,
-                                    group_pk=group_id, pk=student.student.id) }}">Сменить группу</a>
+                                    group_pk=group_id, pk=enrollment.student.id) }}">Сменить группу</a>
                             </td>
                         </tr>
                     {% endfor %}
