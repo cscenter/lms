@@ -166,7 +166,7 @@ class TestimonialList(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        areas = {a.code: a.name for a in AcademicDiscipline.objects.all()}
+        areas = {a.pk: a.name for a in AcademicDiscipline.objects.all()}
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
