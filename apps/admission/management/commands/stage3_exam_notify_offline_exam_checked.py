@@ -1,13 +1,15 @@
-from django.core.management.base import BaseCommand
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
+
+from django.core.management.base import BaseCommand
 
 from admission.constants import ChallengeStatuses
 from admission.models import Applicant, Exam
 from admission.services import get_email_from
 from core.jinja2.filters import pluralize
-from ._utils import EmailTemplateMixin, CurrentCampaignMixin
+
+from ._utils import CurrentCampaignMixin, EmailTemplateMixin
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):

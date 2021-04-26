@@ -1,14 +1,18 @@
 import datetime
 
 import pytest
-from post_office.models import Email, STATUS as EMAIL_STATUS
+from post_office.models import STATUS as EMAIL_STATUS
+from post_office.models import Email
 
-from admission.constants import INTERVIEW_FEEDBACK_TEMPLATE, \
-    INVITATION_EXPIRED_IN_HOURS, InterviewSections
-from admission.services import create_invitation
-from admission.tests.factories import InterviewFactory, InterviewerFactory, \
-    CommentFactory, InterviewStreamFactory, ApplicantFactory
+from admission.constants import (
+    INTERVIEW_FEEDBACK_TEMPLATE, INVITATION_EXPIRED_IN_HOURS, InterviewSections
+)
 from admission.models import Interview, InterviewInvitation
+from admission.services import create_invitation
+from admission.tests.factories import (
+    ApplicantFactory, CommentFactory, InterviewerFactory, InterviewFactory,
+    InterviewStreamFactory
+)
 from admission.utils import get_next_process
 from learning.settings import Branches
 

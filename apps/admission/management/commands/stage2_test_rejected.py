@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
-
-from django.core.management.base import BaseCommand
-from django.db import transaction
-from django.db.models import Q
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
-from ._utils import CurrentCampaignMixin, EmailTemplateMixin
-from admission.models import Test, Applicant
+from django.core.management.base import BaseCommand
+from django.db import transaction
+from django.db.models import Q
+
+from admission.models import Applicant
 from admission.services import get_email_from
+
+from ._utils import CurrentCampaignMixin, EmailTemplateMixin
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):

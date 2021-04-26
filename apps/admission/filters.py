@@ -3,17 +3,18 @@ import datetime
 
 import django_filters
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, Row, Field
+from crispy_forms.layout import Div, Field, Layout, Row, Submit
+
 from django import forms
 from django.conf import settings
 from django.forms import SelectMultiple
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from admission.forms import ResultsModelForm
+from admission.models import Applicant, Campaign, Interview
 from core.models import University
 from core.widgets import DateTimeRangeWidget
-from admission.forms import ResultsModelForm
-from admission.models import Applicant, Interview, Campaign
 
 
 # Fields

@@ -1,11 +1,12 @@
 from django.conf.urls import include
-from django.urls import re_path, path
+from django.urls import path, re_path
 
-from admission.views import InterviewListView, InterviewDetailView, \
-    ApplicantListView, ApplicantDetailView, \
-    ApplicantStatusUpdateView, InterviewResultsView, ApplicantCreateStudentView, \
-    InterviewResultsDispatchView, InterviewAssignmentDetailView, \
-    InterviewCommentView, import_campaign_testing_results
+from admission.views import (
+    ApplicantCreateStudentView, ApplicantDetailView, ApplicantListView,
+    ApplicantStatusUpdateView, InterviewAssignmentDetailView, InterviewCommentView,
+    InterviewDetailView, InterviewListView, InterviewResultsDispatchView,
+    InterviewResultsView, import_campaign_testing_results
+)
 
 app_name = 'admission'
 

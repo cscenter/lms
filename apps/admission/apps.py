@@ -8,7 +8,5 @@ class AdmissionConfig(AppConfig):
 
     def ready(self):
         # Register app permissions and roles
-        from . import permissions
-        from . import roles
         # Register signals
-        from . import signals
+        from . import permissions, roles, signals  # pylint: disable=unused-import

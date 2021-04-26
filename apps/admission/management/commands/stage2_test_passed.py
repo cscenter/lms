@@ -1,13 +1,17 @@
-from django.core.exceptions import ValidationError
-from django.core.management.base import BaseCommand
-from django.db import transaction
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
+from django.core.exceptions import ValidationError
+from django.core.management.base import BaseCommand
+from django.db import transaction
+
 from admission.models import Applicant
 from admission.services import get_email_from
-from ._utils import CurrentCampaignMixin, EmailTemplateMixin, validate_campaign_passing_score
+
+from ._utils import (
+    CurrentCampaignMixin, EmailTemplateMixin, validate_campaign_passing_score
+)
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):

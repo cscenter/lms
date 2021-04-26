@@ -2,8 +2,9 @@ import pytest
 
 from admission.constants import InterviewSections
 from admission.reports import AdmissionApplicantsReport, AdmissionExamReport
-from admission.tests.factories import CampaignFactory, ApplicantFactory, \
-    CommentFactory, InterviewFactory, ExamFactory
+from admission.tests.factories import (
+    ApplicantFactory, CampaignFactory, CommentFactory, ExamFactory, InterviewFactory
+)
 from learning.settings import Branches
 
 

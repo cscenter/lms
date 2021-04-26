@@ -2,28 +2,26 @@
 
 import datetime
 import uuid
-from typing import Optional, NamedTuple
+from typing import NamedTuple, Optional
 
-from django.conf import settings
-from django.core import checks
-from django.core.exceptions import ValidationError, FieldDoesNotExist
-from django.core.validators import MinValueValidator, \
-    MaxValueValidator
-from django.db import models, transaction
-from django.db.models import query, Q
-from django.utils import timezone, numberformat
-from django.utils.encoding import smart_str
-from django.utils.formats import date_format, time_format
-from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
 from post_office.models import EmailTemplate
 
+from django.conf import settings
+from django.core import checks
+from django.core.exceptions import FieldDoesNotExist, ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models, transaction
+from django.db.models import Q, query
+from django.utils import numberformat, timezone
+from django.utils.encoding import smart_str
+from django.utils.formats import date_format, time_format
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
+
 from admission.constants import ChallengeStatuses, InterviewFormats, InterviewSections
-from admission.utils import slot_range, get_next_process
-from grading.api.yandex_contest import RegisterStatus, \
-    Error as YandexContestError
+from admission.utils import get_next_process, slot_range
 from core.db.fields import ScoreField
 from core.models import Branch, Location
 from core.timezone import TimezoneAwareMixin
@@ -31,6 +29,8 @@ from core.timezone.fields import TimezoneAwareDateTimeField
 from core.urls import reverse
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
+from grading.api.yandex_contest import Error as YandexContestError
+from grading.api.yandex_contest import RegisterStatus
 from learning.settings import AcademicDegreeLevels
 from users.constants import Roles
 

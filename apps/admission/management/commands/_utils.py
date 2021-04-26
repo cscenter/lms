@@ -1,12 +1,13 @@
 import ast
-from typing import List, Iterable
+from typing import Iterable
+
+from post_office.models import EmailTemplate
+from post_office.utils import get_email_template
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.management import CommandError
 from django.db.models import Q
-from post_office.models import EmailTemplate
-from post_office.utils import get_email_template
 
 from admission.models import Campaign, Contest
 

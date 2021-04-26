@@ -1,5 +1,6 @@
+from djchoices import C, ChoiceItem, DjangoChoices
+
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, ChoiceItem, C
 
 WHERE_DID_YOU_LEARN = (
     ('uni', 'плакат в университете'),

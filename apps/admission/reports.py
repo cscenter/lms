@@ -1,17 +1,15 @@
-# -*- coding: utf-8 -*-
-
 import datetime
 from collections import OrderedDict
-from copy import copy
+
+from pandas import DataFrame
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Prefetch
 from django.utils import formats
 from django.utils.encoding import force_str
 from django.utils.numberformat import format
-from pandas import DataFrame
 
-from admission.models import Applicant, Interview, Comment, Exam
+from admission.models import Applicant, Comment, Exam, Interview
 from core.reports import ReportFileOutput
 from core.urls import reverse
 

@@ -1,12 +1,14 @@
 from collections import Counter
 
-from django.core.management.base import BaseCommand
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
-from admission.management.commands._utils import CurrentCampaignMixin, \
-    EmailTemplateMixin, CustomizeQueryMixin
+from django.core.management.base import BaseCommand
+
+from admission.management.commands._utils import (
+    CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin
+)
 from admission.models import Applicant
 from admission.services import get_email_from
 

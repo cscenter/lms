@@ -5,13 +5,13 @@ import pytz
 from bs4 import BeautifulSoup
 
 from admission.constants import InterviewSections
-from admission.tests.factories import InterviewFactory, \
-    InterviewStreamFactory, InterviewInvitationFactory
+from admission.tests.factories import (
+    InterviewFactory, InterviewInvitationFactory, InterviewStreamFactory
+)
 from core.admin import get_admin_url
 from core.models import Branch
+from core.tests.factories import BranchFactory, LocationFactory
 from core.urls import reverse
-from core.tests.factories import LocationFactory, BranchFactory
-
 # FIXME: этот тест нужно переписать на tz aware datetime field, изначально тест и был так написан, но потом был удалён invitation.stream
 from learning.settings import Branches
 

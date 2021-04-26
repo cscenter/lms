@@ -1,9 +1,10 @@
 import pytest
 
 from admission.constants import InterviewSections
-from admission.models import Contest, Applicant
-from admission.tests.factories import CampaignFactory, ContestFactory, \
-    ApplicantFactory, InterviewInvitationFactory
+from admission.models import Applicant, Contest
+from admission.tests.factories import (
+    ApplicantFactory, CampaignFactory, ContestFactory, InterviewInvitationFactory
+)
 
 
 @pytest.mark.django_db

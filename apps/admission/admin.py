@@ -1,25 +1,28 @@
 from dal_select2.widgets import Select2Multiple
+from import_export.admin import ExportMixin, ImportExportMixin
+from import_export.formats.base_formats import CSV
+from prettyjson import PrettyJSONWidget
+
 from django.contrib import admin
 from django.db import models
 from django.db.models import TextField
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from import_export.admin import ExportMixin, ImportExportMixin
-from import_export.formats.base_formats import CSV
-from prettyjson import PrettyJSONWidget
 
 from admission.forms import InterviewStreamChangeForm
-from admission.import_export import OnlineTestRecordResource, \
-    ExamRecordResource
-from admission.models import Campaign, Interview, Applicant, Test, \
-    Exam, Comment, InterviewAssignment, Contest, InterviewSlot, InterviewStream, \
-    InterviewInvitation, InterviewFormat
+from admission.import_export import ExamRecordResource, OnlineTestRecordResource
+from admission.models import (
+    Applicant, Campaign, Comment, Contest, Exam, Interview, InterviewAssignment,
+    InterviewFormat, InterviewInvitation, InterviewSlot, InterviewStream, Test
+)
 from admission.roles import Roles
 from admission.services import EmailQueueService
 from core.admin import meta
 from core.timezone.fields import TimezoneAwareDateTimeField
-from core.timezone.forms import TimezoneAwareAdminForm, \
-    TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
+from core.timezone.forms import (
+    TimezoneAwareAdminForm, TimezoneAwareAdminSplitDateTimeWidget,
+    TimezoneAwareSplitDateTimeField
+)
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from users.models import User

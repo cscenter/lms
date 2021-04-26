@@ -2,24 +2,28 @@ from datetime import datetime, timedelta
 from operator import attrgetter
 from typing import List, Optional, Tuple
 
-from django.conf import settings
-from django.db import transaction
-from django.db.models import Q
-from django.utils import timezone, formats, translation
-from django.utils.formats import date_format
 from post_office import mail
-from post_office.models import EmailTemplate, Email, STATUS as EMAIL_STATUS
+from post_office.models import STATUS as EMAIL_STATUS
+from post_office.models import Email, EmailTemplate
 from post_office.utils import get_email_template
 
-from admission.constants import INVITATION_EXPIRED_IN_HOURS, \
-    INTERVIEW_FEEDBACK_TEMPLATE, InterviewFormats
-from admission.models import InterviewStream, InterviewInvitation, \
-    Applicant, Campaign, Exam, Interview, InterviewSlot
+from django.db import transaction
+from django.db.models import Q
+from django.utils import timezone, translation
+from django.utils.formats import date_format
+
+from admission.constants import (
+    INTERVIEW_FEEDBACK_TEMPLATE, INVITATION_EXPIRED_IN_HOURS, InterviewFormats
+)
+from admission.models import (
+    Applicant, Campaign, Exam, Interview, InterviewInvitation, InterviewSlot,
+    InterviewStream
+)
 from admission.utils import logger
-from grading.api.yandex_contest import YandexContestAPI
 from core.timezone.constants import DATE_FORMAT_RU
+from grading.api.yandex_contest import YandexContestAPI
 from learning.services import create_student_profile, get_student_profile
-from users.models import User, StudentProfile, StudentTypes
+from users.models import StudentTypes, User
 
 
 def get_email_from(campaign: Campaign):

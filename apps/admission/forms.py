@@ -1,26 +1,22 @@
-# -*- coding: utf-8 -*-
-
-from datetime import datetime
-
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, Field
+from crispy_forms.layout import Div, Field, Layout, Submit
+from django_filters.conf import settings as filters_settings
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import SelectMultiple
 from django.forms.models import ModelForm
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django_filters.conf import settings as filters_settings
 
-from admission.constants import InterviewSections
-from admission.models import Interview, Comment, Applicant, \
-    InterviewAssignment, InterviewSlot, InterviewStream
+from admission.models import (
+    Applicant, Comment, Interview, InterviewAssignment, InterviewSlot, InterviewStream
+)
+from core.models import Branch
 from core.timezone import now_local
 from core.urls import reverse
 from core.views import ReadOnlyFieldsMixin
 from core.widgets import UbereditorWidget
-from core.models import Branch
 
 
 class InterviewForm(forms.ModelForm):

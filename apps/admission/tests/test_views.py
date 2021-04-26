@@ -2,24 +2,28 @@ import datetime
 
 import pytest
 from bs4 import BeautifulSoup
-from django.utils import timezone, formats
-from django.utils.timezone import now
 from post_office.models import Email
 
-from admission.constants import INVITATION_EXPIRED_IN_HOURS, InterviewFormats, InterviewSections
+from django.utils import formats, timezone
+from django.utils.timezone import now
+
+from admission.constants import (
+    INVITATION_EXPIRED_IN_HOURS, InterviewFormats, InterviewSections
+)
 from admission.forms import InterviewFromStreamForm
 from admission.models import Applicant, Interview, InterviewInvitation
 from admission.services import get_meeting_time
-from admission.tests.factories import ApplicantFactory, InterviewFactory, \
-    CampaignFactory, InterviewerFactory, CommentFactory, \
-    InterviewInvitationFactory, InterviewStreamFactory, InterviewFormatFactory
+from admission.tests.factories import (
+    ApplicantFactory, CampaignFactory, CommentFactory, InterviewerFactory,
+    InterviewFactory, InterviewFormatFactory, InterviewInvitationFactory,
+    InterviewStreamFactory
+)
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.urls import reverse
 from learning.settings import Branches
-from users.tests.factories import UserFactory, CuratorFactory
-
+from users.tests.factories import CuratorFactory, UserFactory
 
 # TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
 # TODO: Проверить время отправки напоминания, время/дату собеседования
@@ -207,7 +211,6 @@ def test_autoupdate_applicant_status_from_final():
 @pytest.mark.django_db
 def test_interview_results_dispatch_view(client, settings, assert_redirect,
                                          assert_login_redirect):
-    from admission.models import Campaign
     # Not enough permissions if you are not a curator
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)

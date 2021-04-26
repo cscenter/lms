@@ -4,9 +4,9 @@ from decimal import Decimal
 
 from django.core.management import BaseCommand
 
-from admission.models import Applicant, Test, Campaign, Contest
-from grading.api.yandex_contest import YandexContestAPI, \
-    YandexContestAPIException
+from admission.models import Applicant, Campaign, Contest, Test
+from grading.api.yandex_contest import YandexContestAPI, YandexContestAPIException
+
 from ._utils import CurrentCampaignMixin
 
 

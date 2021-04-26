@@ -2,12 +2,14 @@ from django.core.exceptions import ValidationError
 from django.core.management import BaseCommand, CommandError
 
 from admission.constants import ChallengeStatuses
-from admission.models import Applicant, Exam, Contest
-from grading.api.yandex_contest import YandexContestAPI, \
-    RegisterStatus, ContestAPIError
-from ._utils import CurrentCampaignMixin, CustomizeQueryMixin, \
-    EmailTemplateMixin, APPROVAL_DIALOG, validate_campaign_passing_score, validate_campaign_contests
+from admission.models import Applicant, Contest, Exam
+from grading.api.yandex_contest import ContestAPIError, RegisterStatus, YandexContestAPI
+
 from ...services import EmailQueueService
+from ._utils import (
+    APPROVAL_DIALOG, CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin,
+    validate_campaign_contests, validate_campaign_passing_score
+)
 
 
 # TODO: filter by status instead of online test exam results?
