@@ -303,15 +303,17 @@ class StudentGroupDetailView(TeacherOnlyMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['group_assignees'] = StudentGroupAssignee.objects\
-            .filter(student_group_id=self.kwargs.get("group_pk"))
-        context['course'] = Course.objects.get(id=self.kwargs.get("course_pk"))
-        context['group_id'] = self.kwargs.get("group_pk")
-        context['course_id'] = self.kwargs.get("course_pk")
-        context['student_id'] = self.kwargs.get("pk")
-        context['enrollments'] = Enrollment.objects\
-            .filter(student_group_id=self.kwargs.get("group_pk"))\
-            .order_by('student__last_name')
+        context_update = {
+            'group_assignees': StudentGroupAssignee.objects.filter(student_group_id=self.kwargs.get("group_pk")),
+            'course': Course.objects.get(id=self.kwargs.get("course_pk")),
+            'group_id': self.kwargs.get("group_pk"),
+            'course_id': self.kwargs.get("course_pk"),
+            'student_id': self.kwargs.get("pk"),
+            'enrollments': Enrollment.objects \
+                .filter(student_group_id=self.kwargs.get("group_pk")) \
+                .order_by('student__last_name')
+        }
+        context.update(context_update)
         return context
 
     def get_object(self, queryset=None):
