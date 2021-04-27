@@ -14,16 +14,13 @@
         </table>
         <form method="post">
             {% csrf_token %}
-            {% if delete %}
-            <input disabled='disabled' type="submit" class="btn btn-primary" value="Удалить"
-                   placeholder="группа связана с заданием - удаление невозможно">
-            {% else %}
+            {% if not delete %}
             <input type="submit" class="btn btn-primary" value="Удалить">
             {% endif %}
-            <button type="button" class="btn" onclick="history.go(-1);">Отмена</button>
             {% if delete %}
-            <p style="color:red">Группа связана с заданием. Удаление невозможно!</p>
+            <p style="color:red"> Группа связана с заданием или в неё записаны студенты. Удаление невозможно! </p>
             {% endif %}
+            <button type="button" class="btn" onclick="history.go(-1);">Отмена</button>
         </form>
     </div>
 {% endblock content %}
