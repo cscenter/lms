@@ -308,12 +308,14 @@ class StudentGroupDetailView(TeacherOnlyMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['group_assignees'] = StudentGroupAssignee.objects.filter(student_group_id=self.kwargs.get("group_pk"))
+        context['group_assignees'] = StudentGroupAssignee.objects\
+            .filter(student_group_id=self.kwargs.get("group_pk"))
         context['course'] = Course.objects.get(id=self.kwargs.get("course_pk"))
         context['group_id'] = self.kwargs.get("group_pk")
         context['course_id'] = self.kwargs.get("course_pk")
         context['student_id'] = self.kwargs.get("pk")
-        context['enrollments'] = Enrollment.objects.filter(student_group_id=self.kwargs.get("group_pk")) \
+        context['enrollments'] = Enrollment.objects\
+            .filter(student_group_id=self.kwargs.get("group_pk"))\
             .order_by('student__last_name')
         return context
 
@@ -333,34 +335,36 @@ class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['reverse_param'] = {'course_pk': self.kwargs['course_pk'], 'group_pk': self.kwargs['pk']}
+        kwargs['reverse_param'] = {'course_pk': self.kwargs['course_pk'],
+                                   'group_pk': self.kwargs['pk']}
         return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'].fields['assignee'].queryset = CourseTeacher.objects.filter(course_id=self.kwargs['course_pk'])
+        context['form'].fields['assignee'].queryset = CourseTeacher.objects\
+            .filter(course_id=self.kwargs['course_pk'])
         return context
 
     def form_valid(self, form):
         self.object = form.save()
 
         assignee = form.cleaned_data['assignee']
-        assignee_in = StudentGroupAssignee.objects.filter(student_group_id=self.object.id).values('assignee',
-                                                                                                  'student_group')
-        assignee_test = StudentGroupAssignee.objects.filter(student_group_id=self.object.id)
+        assignees_in_student_group = StudentGroupAssignee.objects\
+            .filter(student_group_id=self.object.id)
 
-        # create new object in base
-        if assignee is not None and assignee.id not in [i['assignee'] for i in assignee_in]:
+        # create new bound object with StudentGroup in StudentGroupAssignee
+        if assignee is not None and assignee.id not in [i['assignee'] for i in assignees_in_student_group
+                                                        .values('assignee', 'student_group')]:
             new_assignees = StudentGroupAssignee(
                 student_group=self.object,
                 assignee=assignee
             )
             new_assignees.save()
 
-        # clear all objects in base
+        # clear all bound objects with StudentGroup in StudentGroupAssignee
         elif assignee is None:
-            for assign in assignee_test:
-                assign.delete()
+            for assignees_for_delete in assignees_in_student_group:
+                assignees_for_delete.delete()
 
         return super().form_valid(form)
 
@@ -389,7 +393,8 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'].fields['assignee'].queryset = CourseTeacher.objects.filter(course_id=self.kwargs['course_pk'])
+        context['form'].fields['assignee'].queryset = CourseTeacher.objects\
+            .filter(course_id=self.kwargs['course_pk'])
         return context
 
     def form_valid(self, form):
@@ -430,16 +435,19 @@ class StudentGroupStudentUpdateView(TeacherOnlyMixin, generic.UpdateView):
     form_class = StudentEnrollmentForm
 
     def get_success_url(self):
-        return reverse("teaching:student_group_detail", kwargs={'course_pk': self.kwargs['course_pk'], 'group_pk': self.kwargs['group_pk']})
+        return reverse("teaching:student_group_detail", kwargs={'course_pk': self.kwargs['course_pk'],
+                                                                'group_pk': self.kwargs['group_pk']})
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['reverse_param'] = {'course_pk': self.kwargs['course_pk'], 'group_pk': self.kwargs['group_pk']}
+        kwargs['reverse_param'] = {'course_pk': self.kwargs['course_pk'],
+                                   'group_pk': self.kwargs['group_pk']}
         return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'].fields['student_group'].queryset = StudentGroup.objects.filter(course_id=self.kwargs['course_pk'])
+        context['form'].fields['student_group'].queryset = StudentGroup.objects\
+            .filter(course_id=self.kwargs['course_pk'])
         return context
 
 
