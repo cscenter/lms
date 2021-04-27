@@ -19,6 +19,7 @@ from learning.models import GraduateProfile, StudentAssignment, \
 from courses.models import Course, CourseTeacher
 from .models import AssignmentComment
 from django.urls import reverse
+from django.forms import ModelChoiceField
 
 
 class SubmitLink(BaseInput):
@@ -281,14 +282,20 @@ class CourseEnrollmentForm(forms.Form):
         self.helper.layout.append(Submit('enroll', 'Записаться на курс'))
 
 
+class StudentGroupModelChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f"{obj.teacher}"
+
+
 class StudentGroupForm(forms.ModelForm):
     class Meta:
         model = StudentGroup
         fields = ('name', 'assignee')
 
-    assignee = forms.ModelChoiceField(queryset=CourseTeacher.objects.select_related('teacher'),
-                                      label='Ответственный',
-                                      required=False)
+    assignee = StudentGroupModelChoiceField(
+        queryset=CourseTeacher.objects.select_related('teacher'),
+        label='Ответственный',
+        required=False)
 
     def __init__(self, *args, **kwargs):
         reverse_param = kwargs.pop('reverse_param', None)
@@ -311,9 +318,10 @@ class StudentGroupAddForm(forms.ModelForm):
             'course': forms.HiddenInput(),
         }
 
-    assignee = forms.ModelChoiceField(queryset=CourseTeacher.objects.select_related('teacher'),
-                                      label='Ответственный',
-                                      required=False)
+    assignee = StudentGroupModelChoiceField(
+        queryset=CourseTeacher.objects.select_related('teacher'),
+        label='Ответственный',
+        required=False)
 
     def __init__(self, *args, **kwargs):
         reverse_param = kwargs.pop('reverse_param', None)
