@@ -417,7 +417,8 @@ class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
         context = super().get_context_data(**kwargs)
         context['delete'] = False
         assignee_group = AssignmentGroup.objects.filter(group_id=self.kwargs['pk'])
-        if assignee_group:
+        students_in_group = Enrollment.objects.filter(student_group_id=self.kwargs.get("pk"))
+        if assignee_group or students_in_group:
             context['delete'] = True
         return context
 
