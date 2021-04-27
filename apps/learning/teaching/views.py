@@ -285,7 +285,7 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
 class StudentGroupListView(TeacherOnlyMixin, generic.ListView):
     model = StudentGroup
     context_object_name = 'student_group_list'
-    template_name = "lms/teaching/student_group_list.jinja2"
+    template_name = "lms/teaching/student_group_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -299,7 +299,7 @@ class StudentGroupListView(TeacherOnlyMixin, generic.ListView):
 class StudentGroupDetailView(TeacherOnlyMixin, generic.DetailView):
     model = StudentGroup
     context_object_name = 'student_group_detail'
-    template_name = "lms/teaching/student_group_view.jinja2"
+    template_name = "lms/teaching/student_group_view.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -319,7 +319,7 @@ class StudentGroupDetailView(TeacherOnlyMixin, generic.DetailView):
 class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
     model = StudentGroup
     context_object_name = 'student_group_update'
-    template_name = "lms/teaching/student_group_update.jinja2"
+    template_name = "lms/teaching/student_group_update.html"
     form_class = StudentGroupForm
 
     def get_success_url(self):
@@ -363,7 +363,7 @@ class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
 class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
     model = StudentGroup
     context_object_name = 'student_group_create'
-    template_name = "lms/teaching/student_group_add.jinja2"
+    template_name = "lms/teaching/student_group_add.html"
     form_class = StudentGroupAddForm
 
     def get_success_url(self):
@@ -403,7 +403,7 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
 class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
     model = StudentGroup
     context_object_name = 'student_group_delete'
-    template_name = "lms/teaching/student_group_delete.jinja2"
+    template_name = "lms/teaching/student_group_delete.html"
 
     def get_success_url(self):
         return reverse("teaching:student_group_list", kwargs={'course_pk': self.kwargs['course_pk']})
@@ -420,7 +420,7 @@ class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
 class StudentGroupStudentUpdateView(TeacherOnlyMixin, generic.UpdateView):
     model = Enrollment
     context_object_name = 'student_group_student_update'
-    template_name = "lms/teaching/student_group_student_update.jinja2"
+    template_name = "lms/teaching/student_group_student_update.html"
     form_class = StudentEnrollmentForm
 
     def get_success_url(self):
