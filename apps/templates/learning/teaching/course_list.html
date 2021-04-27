@@ -23,14 +23,14 @@
                                     <td>
                                         <ul class="list-unstyled margin-bottom-0">
                                             {% for teacher in course.teachers.all %}
-                                                <li><a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_full_name }}</a></li>
+                                                <li><a href="{{teacher.teacher_profile_url}}">{{ teacher.get_full_name }}</a></li>
                                             {% endfor %}
                                         </ul>
                                     </td>
                                     <td>
                                         <a href="{{ course.get_create_news_url }}">{% trans "Add news" %}</a><br>
                                         {% if course.group_mode == "manual" %}
-                                            <a href="/teaching/courses/{{ course.id }}/groups/">Группы студентов</a>
+                                            <a href="{{course.get_course_groups_url}}">Группы студентов</a>
                                         {% endif %}
                                     </td>
                                 </tr>

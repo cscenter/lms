@@ -19,8 +19,8 @@
             <span>{% if group_assignees.count() == 1 %}<b>Ответственный:</b> {% else %}<b>Ответственные:</b> {% endif %}</span>
             {% if group_assignees %}
                 {% for group_assignee in group_assignees %}
-                    {{group_assignee.assignee.teacher.last_name + ' ' + group_assignee.assignee.teacher.first_name}}{%
-                            if not loop.last %}, {% endif %}
+                    {{group_assignee.assignee.teacher.last_name + ' '
+                            + group_assignee.assignee.teacher.first_name}}{%if not loop.last %},{% endif %}
                 {% endfor %}
             {% else %}
                 Список ответственных пуст... :(
