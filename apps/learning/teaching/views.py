@@ -380,10 +380,7 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
 
     def get_initial(self, **kwargs):
         initial = super().get_initial()
-        course = Course.objects.get(id=self.kwargs['course_pk'])
-        initial['course'] = course
         initial['type'] = 'manual'
-        initial['enrollment_key'] = token_urlsafe(18)
         return initial
 
     def get_form_kwargs(self):
@@ -398,6 +395,7 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
         return context
 
     def form_valid(self, form):
+        form.instance.course = Course.objects.get(id=self.kwargs['course_pk'])
         self.object = form.save()
 
         assignee = form.cleaned_data['assignee']
@@ -407,6 +405,7 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
                 assignee=assignee
             )
             new_assignees.save()
+
         return super().form_valid(form)
 
 

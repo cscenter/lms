@@ -312,10 +312,7 @@ class StudentGroupForm(forms.ModelForm):
 class StudentGroupAddForm(forms.ModelForm):
     class Meta:
         model = StudentGroup
-        fields = ('course', 'name', 'assignee')
-        widgets = {
-            'course': forms.HiddenInput(),
-        }
+        fields = ('name', 'assignee')
 
     assignee = StudentGroupModelChoiceField(
         queryset=CourseTeacher.objects.select_related('teacher'),
