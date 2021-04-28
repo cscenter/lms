@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from announcements.models import Announcement, AnnouncementTag, \
     AnnouncementEventDetails
+from core.widgets import CKEditorWidget
 
 
 @admin.register(AnnouncementTag)
@@ -21,7 +22,8 @@ class AnnouncementForm(forms.ModelForm):
         widgets = {
             'tags': TaggitSelect2(
                 url='announcements_tags_autocomplete',
-                attrs={"data-width": 'style'})
+                attrs={"data-width": 'style'}),
+            'description': CKEditorWidget(),
         }
 
 
