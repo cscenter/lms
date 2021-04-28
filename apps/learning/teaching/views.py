@@ -44,7 +44,7 @@ from learning.utils import humanize_duration
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView
 from users.mixins import TeacherOnlyMixin
-from secrets import token_urlsafe
+from django.db.transaction import atomic
 
 
 def set_query_parameter(url, param_name, param_value):
@@ -347,26 +347,29 @@ class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
             .filter(course_id=self.kwargs['course_pk'])
         return context
 
+    @atomic
     def form_valid(self, form):
-        self.object = form.save()
 
-        assignee = form.cleaned_data['assignee']
-        assignees_in_student_group = StudentGroupAssignee.objects\
-            .filter(student_group_id=self.object.id)
+        with atomic():
+            self.object = form.save()
 
-        # create new bound object with StudentGroup in StudentGroupAssignee
-        if assignee is not None and assignee.id not in [i['assignee'] for i in assignees_in_student_group
-                                                        .values('assignee', 'student_group')]:
-            new_assignees = StudentGroupAssignee(
-                student_group=self.object,
-                assignee=assignee
-            )
-            new_assignees.save()
+            assignee = form.cleaned_data['assignee']
+            assignees_in_student_group = StudentGroupAssignee.objects\
+                .filter(student_group_id=self.object.id)
 
-        # clear all bound objects with StudentGroup in StudentGroupAssignee
-        elif assignee is None:
-            for assignees_for_delete in assignees_in_student_group:
-                assignees_for_delete.delete()
+            # create new bound object with StudentGroup in StudentGroupAssignee
+            if assignee is not None and assignee.id not in [i['assignee'] for i in assignees_in_student_group
+                                                            .values('assignee', 'student_group')]:
+                new_assignees = StudentGroupAssignee(
+                    student_group=self.object,
+                    assignee=assignee
+                )
+                new_assignees.save()
+
+            # clear all bound objects with StudentGroup in StudentGroupAssignee
+            elif assignee is None:
+                for assignees_for_delete in assignees_in_student_group:
+                    assignees_for_delete.delete()
 
         return super().form_valid(form)
 
@@ -396,17 +399,19 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
             .filter(course_id=self.kwargs['course_pk'])
         return context
 
+    @atomic
     def form_valid(self, form):
-        form.instance.course = Course.objects.get(id=self.kwargs['course_pk'])
-        self.object = form.save()
+        with atomic():
+            form.instance.course = Course.objects.get(id=self.kwargs['course_pk'])
+            self.object = form.save()
 
-        assignee = form.cleaned_data['assignee']
-        if assignee:
-            new_assignees = StudentGroupAssignee(
-                student_group=self.object,
-                assignee=assignee
-            )
-            new_assignees.save()
+            assignee = form.cleaned_data['assignee']
+            if assignee:
+                new_assignees = StudentGroupAssignee(
+                    student_group=self.object,
+                    assignee=assignee
+                )
+                new_assignees.save()
 
         return super().form_valid(form)
 
