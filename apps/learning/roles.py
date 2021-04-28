@@ -1,6 +1,7 @@
+from djchoices import C, DjangoChoices
+
 from django.apps import apps
 from django.utils.translation import gettext_lazy as _
-from djchoices import C, DjangoChoices
 
 from auth.permissions import Role
 from auth.registry import role_registry
@@ -14,22 +15,20 @@ from info_blocks.permissions import ViewInternships
 from users.permissions import (
     CreateCertificateOfParticipation, ViewCertificateOfParticipation
 )
+
 from .permissions import (
     CreateAssignmentComment, CreateAssignmentCommentAsLearner,
     CreateAssignmentCommentAsTeacher, CreateAssignmentSolution,
     CreateOwnAssignmentSolution, EditGradebook, EditOwnAssignmentExecutionTime,
-    EditOwnGradebook, EditOwnStudentAssignment, EditStudentAssignment,
-    EnrollInCourse,
+    EditOwnGradebook, EditOwnStudentAssignment, EditStudentAssignment, EnrollInCourse,
     EnrollInCourseByInvitation, LeaveCourse, ViewAssignmentAttachment,
     ViewAssignmentAttachmentAsLearner, ViewAssignmentAttachmentAsTeacher,
     ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner,
     ViewAssignmentCommentAttachmentAsTeacher, ViewCourseNews, ViewCourseReviews,
     ViewCourses, ViewEnrollments, ViewFAQ, ViewGradebook, ViewLibrary,
     ViewOwnEnrollments, ViewOwnGradebook, ViewOwnStudentAssignment,
-    ViewOwnStudentAssignments, ViewRelatedEnrollments,
-    ViewRelatedStudentAssignment,
-    ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList,
-    ViewStudyMenu,
+    ViewOwnStudentAssignments, ViewRelatedEnrollments, ViewRelatedStudentAssignment,
+    ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList, ViewStudyMenu,
     ViewTeachingMenu
 )
 
