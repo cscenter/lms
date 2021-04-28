@@ -47,7 +47,7 @@ jobs:
         - pytest -c compsciclub_ru/pytest.ini --create-db --cov=./compsciclub_ru/apps/
         - pytest -c lk_yandexdataschool_ru/pytest.ini --create-db --cov=./lk_yandexdataschool_ru/apps/
     - stage: test
-      name: Check Imports Order with isort
+      name: Checks Imports Order
       python: "3.8"
       install:
         - pip3 install isort
