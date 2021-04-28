@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime
 from io import StringIO
 from unittest.mock import MagicMock
@@ -6,27 +5,30 @@ from urllib.parse import urlparse
 
 import pytest
 import pytz
+from subdomains.utils import get_domain
+
 from django.contrib.sites.models import Site
 from django.core import mail, management
-from subdomains.utils import get_domain
 
 from core.models import SiteConfiguration
 from core.tests.factories import BranchFactory
-from core.tests.settings import TEST_DOMAIN, TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID, ANOTHER_DOMAIN
+from core.tests.settings import (
+    ANOTHER_DOMAIN, ANOTHER_DOMAIN_ID, TEST_DOMAIN, TEST_DOMAIN_ID
+)
 from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse
 from courses.admin import AssignmentAdmin
-from courses.models import CourseTeacher, Assignment, \
-    AssignmentSubmissionFormats
-from courses.tests.factories import CourseFactory, AssignmentFactory, \
-    CourseNewsFactory
+from courses.models import Assignment, AssignmentSubmissionFormats, CourseTeacher
+from courses.tests.factories import AssignmentFactory, CourseFactory, CourseNewsFactory
 from learning.models import AssignmentNotification, CourseNewsNotification
-from learning.services import course_failed_by_student, get_student_profile, \
-    EnrollmentService
-from learning.settings import StudentStatuses, GradeTypes, Branches
+from learning.services import (
+    EnrollmentService, course_failed_by_student, get_student_profile
+)
+from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import *
-from notifications.management.commands.notify import \
+from notifications.management.commands.notify import (
     get_assignment_notification_context, get_course_news_notification_context
+)
 from users.tests.factories import *
 
 

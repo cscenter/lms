@@ -1,14 +1,14 @@
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
 from datetime import datetime
 from itertools import groupby
 from operator import attrgetter
 from typing import NamedTuple
 
-from django.db.models import Prefetch, Count
+from django.db.models import Count, Prefetch
 from django.utils import formats
 
 from core.reports import ReportFileOutput
-from surveys.constants import FieldType, CHOICE_FIELD_TYPES
+from surveys.constants import CHOICE_FIELD_TYPES, FieldType
 from surveys.models import CourseSurvey, Field, FieldChoice, FieldEntry
 
 

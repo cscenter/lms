@@ -3,25 +3,25 @@ import datetime
 import pytest
 import pytz
 from bs4 import BeautifulSoup
-from django.utils import timezone, formats
+
+from django.utils import formats, timezone
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.urls import reverse
-from courses.tests.factories import SemesterFactory, CourseFactory, \
-    AssignmentFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from courses.utils import get_current_term_pair
 from learning.permissions import ViewOwnStudentAssignments
-from learning.services import CourseRole, course_access_role, \
-    get_student_profile
-from learning.settings import GradeTypes, StudentStatuses, Branches
+from learning.services import CourseRole, course_access_role, get_student_profile
+from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import *
 from learning.tests.factories import EnrollmentFactory, StudentAssignmentFactory
 from projects.constants import ProjectTypes
-from projects.tests.factories import ReportingPeriodFactory, \
-    ProjectStudentFactory, ProjectFactory
+from projects.tests.factories import (
+    ProjectFactory, ProjectStudentFactory, ReportingPeriodFactory
+)
 from users.tests.factories import *
 from users.tests.factories import StudentFactory, StudentProfileFactory
 

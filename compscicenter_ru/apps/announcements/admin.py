@@ -1,12 +1,12 @@
 from dal_select2.widgets import Select2Multiple
 from dal_select2_taggit.widgets import TaggitSelect2
+
 from django import forms
 from django.contrib import admin
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from announcements.models import Announcement, AnnouncementTag, \
-    AnnouncementEventDetails
+from announcements.models import Announcement, AnnouncementEventDetails, AnnouncementTag
 from core.widgets import CKEditorWidget
 
 

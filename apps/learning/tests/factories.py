@@ -1,26 +1,23 @@
-# -*- coding: utf-8 -*-
-
 import datetime
 
 import factory
+
 from django.conf import settings
 from django.utils import timezone
 
 from core.tests.factories import BranchFactory, LocationFactory, SiteFactory
 from courses.models import StudentGroupTypes
 from courses.tests.factories import *
-from learning.models import StudentAssignment, \
-    AssignmentComment, Enrollment, AssignmentNotification, \
-    CourseNewsNotification, Event, GraduateProfile, Invitation, \
-    CourseInvitation, StudentGroup, EnrollmentPeriod, AssignmentSubmissionTypes, \
-    StudentGroupAssignee
-from learning.services import StudentGroupService, get_student_profile, \
-    recreate_assignments_for_student
+from learning.models import (
+    AssignmentComment, AssignmentNotification, AssignmentSubmissionTypes,
+    CourseInvitation, CourseNewsNotification, Enrollment, EnrollmentPeriod, Event,
+    GraduateProfile, Invitation, StudentAssignment, StudentGroup, StudentGroupAssignee
+)
+from learning.services import StudentGroupService, recreate_assignments_for_student
 from learning.settings import StudentStatuses
 from users.constants import Roles
 from users.models import UserGroup
-from users.tests.factories import UserFactory, StudentFactory, \
-    StudentProfileFactory, TeacherFactory
+from users.tests.factories import StudentFactory, StudentProfileFactory, UserFactory
 
 __all__ = ('StudentGroupFactory', 'StudentAssignmentFactory',
            'AssignmentCommentFactory', 'EnrollmentPeriodFactory',

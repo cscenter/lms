@@ -1,9 +1,10 @@
 import factory
 import pytest
+
 from django.forms import model_to_dict
 
-from courses.tests.factories import CourseFactory, CourseNewsFactory
 from courses.models import CourseNews
+from courses.tests.factories import CourseFactory, CourseNewsFactory
 from users.tests.factories import TeacherFactory
 
 

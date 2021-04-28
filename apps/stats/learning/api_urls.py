@@ -1,7 +1,9 @@
 from django.urls import re_path
 
-from .views import CourseParticipantsStatsByYear, AssignmentsStats, \
-    EnrollmentsStats, CourseParticipantsStatsByType
+from .views import (
+    AssignmentsStats, CourseParticipantsStatsByType, CourseParticipantsStatsByYear,
+    EnrollmentsStats
+)
 
 urlpatterns = [
     re_path(r'^participants/(?P<course_id>\d+)/groups/$', CourseParticipantsStatsByType.as_view(), name='stats_learning_participants_group'),

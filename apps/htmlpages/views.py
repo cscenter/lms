@@ -1,11 +1,12 @@
 from django.conf import settings
-from htmlpages.models import HtmlPage
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import Http404, HttpResponse, HttpResponsePermanentRedirect
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django.template import loader
 from django.utils.safestring import mark_safe
 from django.views.decorators.csrf import csrf_protect
+
+from htmlpages.models import HtmlPage
 
 DEFAULT_TEMPLATE = 'htmlpages/default.html'
 

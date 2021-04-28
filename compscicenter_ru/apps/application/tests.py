@@ -2,10 +2,11 @@ from datetime import timedelta
 
 import factory
 import pytest
+
 from django.db import models
 from django.utils import timezone
 
-from admission.tests.factories import CampaignFactory, ApplicantFactory
+from admission.tests.factories import ApplicantFactory, CampaignFactory
 from application.api.serializers import ApplicationFormSerializer
 from application.views import SESSION_LOGIN_KEY
 from core.tests.factories import BranchFactory, UniversityFactory

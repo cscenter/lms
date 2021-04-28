@@ -1,7 +1,8 @@
-from django.utils.timezone import now
 from sorl.thumbnail import get_thumbnail
 
-from core.utils import render_markdown_and_cache, get_youtube_video_id
+from django.utils.timezone import now
+
+from core.utils import get_youtube_video_id, render_markdown_and_cache
 
 
 def markdown(value, fragment_name, expires_in=0, *vary_on):

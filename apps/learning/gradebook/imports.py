@@ -1,10 +1,9 @@
 import csv
 import logging
 from decimal import Decimal
-from typing import Optional, List, IO, Dict
+from typing import IO, Dict, List, Optional
 
 from django.core.exceptions import ValidationError
-from django.core.files.uploadedfile import UploadedFile
 from django.utils.translation import gettext_lazy as _
 
 from courses.models import Assignment

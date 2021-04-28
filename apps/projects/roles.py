@@ -1,11 +1,15 @@
+from djchoices import C, DjangoChoices
+
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, C
 
 from auth.permissions import Role
 from auth.registry import role_registry
-from .permissions import ViewProjectsMenu, UpdateOwnReportComment, \
-    UpdateReportComment, ViewReportAttachment, ViewReportAttachmentAsReviewer, \
-    ViewReportCommentAttachment, ViewReportCommentAttachmentAsReviewer
+
+from .permissions import (
+    UpdateOwnReportComment, UpdateReportComment, ViewProjectsMenu, ViewReportAttachment,
+    ViewReportAttachmentAsReviewer, ViewReportCommentAttachment,
+    ViewReportCommentAttachmentAsReviewer
+)
 
 
 class Roles(DjangoChoices):

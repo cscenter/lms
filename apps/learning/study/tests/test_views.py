@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import pytest
 from bs4 import BeautifulSoup
+
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import smart_bytes
@@ -10,18 +11,15 @@ from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.models import AssignmentSubmissionFormats, CourseTeacher
-from courses.tests.factories import SemesterFactory, CourseFactory, \
-    AssignmentFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from courses.utils import get_current_term_pair
-from learning.models import StudentAssignment, AssignmentNotification, \
-    AssignmentComment
-from learning.permissions import ViewOwnStudentAssignment, ViewCourses
+from learning.models import AssignmentComment, AssignmentNotification, StudentAssignment
+from learning.permissions import ViewCourses, ViewOwnStudentAssignment
 from learning.settings import Branches
-from learning.tests.factories import EnrollmentFactory, \
-    StudentAssignmentFactory, AssignmentCommentFactory
-from users.tests.factories import TeacherFactory, StudentFactory, \
-    StudentProfileFactory
-
+from learning.tests.factories import (
+    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
+)
+from users.tests.factories import StudentFactory, StudentProfileFactory, TeacherFactory
 
 # TODO: test ViewOwnAssignment in test_permissions.py
 

@@ -1,9 +1,9 @@
 import datetime
 
-from babel.dates import get_timezone_location
-from crispy_forms.bootstrap import TabHolder, Tab
+from crispy_forms.bootstrap import Tab, TabHolder
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div
+from crispy_forms.layout import Div, Layout
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -11,17 +11,16 @@ from django.utils.translation import gettext_lazy as _
 from core.forms import CANCEL_SAVE_PAIR
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
-from core.timezone.forms import TimezoneAwareSplitDateTimeField, \
-    TimezoneAwareModelForm
-from core.widgets import UbereditorWidget, DateInputTextWidget, \
-    TimeInputTextWidget
+from core.timezone.forms import TimezoneAwareModelForm, TimezoneAwareSplitDateTimeField
+from core.widgets import DateInputTextWidget, TimeInputTextWidget, UbereditorWidget
 from courses.constants import ClassTypes
-from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
-    Assignment, LearningSpace, AssignmentSubmissionFormats, \
-    CourseGroupModes
+from courses.models import (
+    Assignment, AssignmentSubmissionFormats, Course, CourseClass, CourseGroupModes,
+    CourseNews, LearningSpace, MetaCourse
+)
 from courses.services import CourseService
 from grading.models import CheckingSystem
-from grading.services import CheckerURLError, CheckerService
+from grading.services import CheckerService, CheckerURLError
 
 __all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
            'CourseClassForm', 'AssignmentForm')

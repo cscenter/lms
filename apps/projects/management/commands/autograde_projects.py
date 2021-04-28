@@ -2,15 +2,12 @@
 import logging
 
 from django.conf import settings
-from django.core.management import BaseCommand
-from django.core.management import CommandError
+from django.core.management import BaseCommand, CommandError
 
 from courses.models import Semester
 from learning.services import get_student_profile
-from projects.models import ProjectStudent, ReportingPeriod, \
-    ReportingPeriodKey
 from projects.constants import ProjectGradeTypes
-
+from projects.models import ProjectStudent, ReportingPeriod, ReportingPeriodKey
 
 logger = logging.getLogger(__name__)
 

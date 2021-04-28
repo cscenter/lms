@@ -2,11 +2,10 @@ import datetime
 
 import pytest
 
-from courses.calendar import MonthFullWeeksEventsCalendar, \
-    WeekEventsCalendar, CalendarEventFactory
-from courses.tests.factories import CourseClassFactory, CourseFactory
-
-
+from courses.calendar import (
+    CalendarEventFactory, MonthFullWeeksEventsCalendar, WeekEventsCalendar
+)
+from courses.tests.factories import CourseClassFactory
 # TODO: test CourseClassQuerySet manager
 # TODO: test utils.get_boundaries
 from courses.utils import MonthPeriod

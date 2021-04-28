@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import datetime
 from datetime import timedelta
 from decimal import Decimal
@@ -7,29 +5,29 @@ from unittest import mock
 
 import pytest
 import pytz
-from django.core.exceptions import ValidationError
 
-from core.tests.factories import SiteFactory, BranchFactory, LocationFactory
-from core.tests.utils import CSCTestCase
+from django.core.exceptions import ValidationError
 from django.utils.encoding import smart_str
 
-from learning.settings import Branches
-from learning.tests.factories import StudentAssignmentFactory, \
-    AssignmentCommentFactory, \
-    EnrollmentFactory, AssignmentNotificationFactory, \
-    CourseNewsNotificationFactory, EnrollmentPeriodFactory
-from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
-    CourseFactory, \
-    CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
-    AssignmentFactory, LearningSpaceFactory
-from learning.models import StudentAssignment, AssignmentNotification, \
-    AssignmentComment, EnrollmentPeriod, AssignmentSubmissionTypes
-from courses.models import Semester, CourseNews, CourseReview, \
-    AssignmentSubmissionFormats
+from core.tests.factories import BranchFactory, LocationFactory, SiteFactory
+from core.tests.utils import CSCTestCase
 from courses.constants import SemesterTypes
-from courses.utils import get_term_starts_at
-from users.tests.factories import UserFactory, StudentFactory, \
-    TeacherFactory
+from courses.models import AssignmentSubmissionFormats, CourseNews, Semester
+from courses.tests.factories import (
+    AssignmentFactory, CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
+    CourseNewsFactory, LearningSpaceFactory, MetaCourseFactory, SemesterFactory
+)
+from learning.models import (
+    AssignmentComment, AssignmentNotification, AssignmentSubmissionTypes,
+    EnrollmentPeriod, StudentAssignment
+)
+from learning.settings import Branches
+from learning.tests.factories import (
+    AssignmentCommentFactory, AssignmentNotificationFactory,
+    CourseNewsNotificationFactory, EnrollmentFactory, EnrollmentPeriodFactory,
+    StudentAssignmentFactory
+)
+from users.tests.factories import StudentFactory, TeacherFactory, UserFactory
 
 
 class CommonTests(CSCTestCase):
@@ -135,6 +133,7 @@ class StudentAssignmentTests(CSCTestCase):
 
     def test_student_assignment_state(self):
         import datetime
+
         from django.utils import timezone
         student = StudentFactory()
         a_online = AssignmentFactory.create(

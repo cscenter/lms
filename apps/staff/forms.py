@@ -1,6 +1,7 @@
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Div, Row
+from crispy_forms.layout import Div, Layout, Row, Submit
+
 from django import forms
 from django.utils.translation import gettext_lazy as _
 

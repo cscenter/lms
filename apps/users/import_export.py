@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import tablib
-from import_export import resources, fields, widgets
+from import_export import fields, resources, widgets
 
 from .models import User
 

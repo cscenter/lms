@@ -2,18 +2,19 @@ import datetime
 
 import factory
 import pytz
+
 from django.conf import settings
 from django.utils import timezone
 
-from core.tests.factories import LocationFactory, BranchFactory
-from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
-    CourseNews, CourseClass, CourseClassAttachment, Assignment, \
-    AssignmentAttachment, LearningSpace, CourseReview, \
-    AssignmentSubmissionFormats, CourseBranch
+from core.tests.factories import BranchFactory, LocationFactory
 from courses.constants import MaterialVisibilityTypes
+from courses.models import (
+    Assignment, AssignmentAttachment, AssignmentSubmissionFormats, Course, CourseBranch,
+    CourseClass, CourseClassAttachment, CourseNews, CourseReview, CourseTeacher,
+    LearningSpace, MetaCourse, Semester
+)
 from courses.services import CourseService
 from courses.utils import get_current_term_pair, get_term_by_index
-from learning.models import EnrollmentPeriod
 from learning.services import AssignmentService
 from users.tests.factories import TeacherFactory
 

@@ -1,8 +1,7 @@
 import factory
 import pytz
 
-from announcements.models import Announcement, AnnouncementTag, \
-    AnnouncementEventDetails
+from announcements.models import Announcement, AnnouncementEventDetails, AnnouncementTag
 
 __all__ = ('AnnouncementTagFactory', 'AnnouncementFactory',
            'AnnouncementEventDetailsFactory')

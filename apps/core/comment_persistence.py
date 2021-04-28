@@ -2,12 +2,11 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import json
 import hashlib
+import json
 import re
 
 from django.core.cache import cache
-
 
 HASH_LEN = 16 + 1
 HASH_N = 100

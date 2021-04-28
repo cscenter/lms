@@ -11,10 +11,11 @@ from code_reviews.ldap import get_ldap_username
 from code_reviews.models import GerritChange
 from core.models import Branch
 from courses.models import Course, CourseTeacher
-from learning.models import Enrollment, StudentAssignment, AssignmentComment, \
-    AssignmentSubmissionTypes
+from learning.models import (
+    AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
+)
 from learning.services import StudentGroupService
-from users.models import User, StudentProfile
+from users.models import StudentProfile, User
 
 logger = logging.getLogger(__name__)
 

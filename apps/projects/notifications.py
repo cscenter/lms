@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 
 from core.urls import reverse
-from projects.models import ReportComment, Report
 from notifications import NotificationTypes
 from notifications.decorators import register
 from notifications.service import NotificationService
+from projects.models import Report, ReportComment
 from users.constants import GenderTypes
-from users.models import User
 
 # XXX: `reverse` depends on settings.SITE_ID. Make sure to send notifications with correct settings.
 # FIXME: fix domain for reverse

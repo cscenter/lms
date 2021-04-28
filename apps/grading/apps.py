@@ -5,4 +5,4 @@ class ContestsConfig(AppConfig):
     name = 'grading'
 
     def ready(self):
-        from . import signals
+        from . import signals  # pylint: disable=unused-import

@@ -2,7 +2,7 @@ import pytest
 
 from core.models import Branch, SiteConfiguration
 from core.tests.factories import BranchFactory, SiteFactory
-from core.tests.settings import TEST_DOMAIN_ID, TEST_DOMAIN
+from core.tests.settings import TEST_DOMAIN, TEST_DOMAIN_ID
 
 
 @pytest.mark.django_db

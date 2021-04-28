@@ -2,15 +2,19 @@ import pytest
 
 from core.utils import instance_memoize
 from courses.constants import MaterialVisibilityTypes
-from courses.permissions import EditCourseClass, CreateAssignment, \
-    EditAssignment, ViewCourseClassMaterials
-from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
-    CourseFactory
+from courses.permissions import (
+    CreateAssignment, EditAssignment, EditCourseClass, ViewCourseClassMaterials
+)
+from courses.tests.factories import (
+    CourseClassFactory, CourseFactory, CourseTeacherFactory
+)
 from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
 from users.models import User
-from users.tests.factories import UserFactory, TeacherFactory, CuratorFactory, \
-    StudentFactory, InvitedStudentFactory, VolunteerFactory
+from users.tests.factories import (
+    CuratorFactory, InvitedStudentFactory, StudentFactory, TeacherFactory, UserFactory,
+    VolunteerFactory
+)
 
 
 @pytest.mark.django_db

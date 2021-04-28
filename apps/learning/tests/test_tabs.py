@@ -1,21 +1,23 @@
 import datetime
 
 import pytest
+
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
 
 from courses.models import CourseNews, CourseReview
 from courses.services import CourseService
-from courses.tests.factories import SemesterFactory, CourseNewsFactory, \
-    CourseTeacherFactory, CourseFactory, MetaCourseFactory, AssignmentFactory, \
-    CourseReviewFactory
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseNewsFactory, CourseReviewFactory,
+    MetaCourseFactory, SemesterFactory
+)
 from learning.models import EnrollmentPeriod
-from learning.settings import GradeTypes, Branches
+from learning.settings import Branches, GradeTypes
 from learning.tabs import CourseReviewsTab
 from learning.tests.factories import EnrollmentFactory
-from users.tests.factories import StudentFactory, TeacherFactory, \
-    VolunteerFactory, CuratorFactory
-
+from users.tests.factories import (
+    CuratorFactory, StudentFactory, TeacherFactory, VolunteerFactory
+)
 
 # TODO: тест для видимости таб из под разных ролей. (прятать табу во вьюхе, если нет содержимого)
 

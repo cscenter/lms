@@ -1,17 +1,16 @@
 from itertools import chain
 
 import pytest
-from django.contrib.sites.models import Site
 from icalendar import Calendar, Event
 
+from django.contrib.sites.models import Site
+
 from core.urls import reverse
-from courses.tests.factories import CourseFactory, CourseClassFactory, \
-    AssignmentFactory
+from courses.tests.factories import AssignmentFactory, CourseClassFactory, CourseFactory
 from learning.settings import Branches
 from learning.tests.factories import EnrollmentFactory, EventFactory
 from users.constants import Roles
 from users.tests.factories import StudentFactory
-
 
 # TODO: убедиться, что для заданий/занятий учитывается таймзона пользователя из URL календаря, а не залогиненного
 # TODO: для событий - пока залогиненного

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from notifications import NotificationTypes
-from notifications.service import NotificationService
 from notifications.registry import registry as notification_registry
+from notifications.service import NotificationService
 
 
 def register(notification_type):

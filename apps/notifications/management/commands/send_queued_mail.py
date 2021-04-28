@@ -1,5 +1,6 @@
-from django.utils.decorators import method_decorator
 from post_office.management.commands.send_queued_mail import Command as BaseCommand
+
+from django.utils.decorators import method_decorator
 
 from core.locks import distributed_lock, get_shared_connection
 

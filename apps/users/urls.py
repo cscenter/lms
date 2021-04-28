@@ -1,10 +1,10 @@
 from django.urls import path, re_path
 
 from learning.views import EventDetailView
-from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
-    ICalEventsView
-from users.views import UserDetailView, UserUpdateView, \
-    ProfileImageUpdate
+from learning.views.icalendar import (
+    ICalAssignmentsView, ICalClassesView, ICalEventsView
+)
+from users.views import ProfileImageUpdate, UserDetailView, UserUpdateView
 
 urlpatterns = [
     path('users/<int:pk>/', UserDetailView.as_view(), name='user_detail'),

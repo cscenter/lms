@@ -3,12 +3,14 @@ import posixpath
 import re
 from urllib.parse import unquote, urldefrag
 
+from storages.backends.s3boto3 import S3Boto3Storage
+
 from django.conf import settings
 from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
-from django.core.files.storage import get_storage_class, FileSystemStorage
+from django.core.files.storage import FileSystemStorage, get_storage_class
 from django.utils.functional import LazyObject
+
 from .static_compress import CompressMixin
-from storages.backends.s3boto3 import S3Boto3Storage
 
 
 # Static files

@@ -7,6 +7,5 @@ class AdmissionConfig(AppConfig):
     verbose_name = _("Admission")
 
     def ready(self):
-        # Register app permissions and roles
-        # Register signals
+        # Register app permissions, roles and signals
         from . import permissions, roles, signals  # pylint: disable=unused-import

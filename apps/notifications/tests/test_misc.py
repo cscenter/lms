@@ -4,7 +4,6 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 from core.tests.utils import CSCTestCase
-
 from users.tests.factories import UserFactory
 
 try:
@@ -14,13 +13,14 @@ except ImportError:
     # Django <= 1.6
     from django.test.utils import override_settings
 
-from django.conf import settings
-from django.utils.timezone import utc, localtime
-from django.utils import timezone
 import pytz
 
-from notifications.signals import notify
+from django.conf import settings
+from django.utils import timezone
+from django.utils.timezone import localtime, utc
+
 from notifications.models import Notification
+from notifications.signals import notify
 
 
 class NotificationTest(CSCTestCase):

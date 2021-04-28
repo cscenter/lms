@@ -2,6 +2,7 @@
 
 import logging
 import posixpath
+
 import webdav.client as wc
 
 from django.conf import settings

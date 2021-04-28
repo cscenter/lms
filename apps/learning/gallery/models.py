@@ -3,13 +3,14 @@
 import logging
 import os
 
-from django.conf import settings
-from django.db import models
-from django.utils.translation import gettext_lazy as _
 from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
 from sorl.thumbnail import ImageField, get_thumbnail
 from sorl.thumbnail.helpers import ThumbnailError
+
+from django.conf import settings
+from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from courses.models import Course, Semester
 

@@ -1,12 +1,12 @@
-from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
+
+from django.utils.translation import gettext_lazy as _
 
 from api.utils import DynamicFieldsModelSerializer
 from core.api.serializers import BranchSerializer
-from courses.api.serializers import CourseSerializer, AssignmentSerializer
-from learning.models import CourseNewsNotification, StudentAssignment, \
-    Enrollment
-from users.models import User, StudentProfile
+from courses.api.serializers import AssignmentSerializer, CourseSerializer
+from learning.models import CourseNewsNotification, Enrollment, StudentAssignment
+from users.models import StudentProfile, User
 
 
 class UserSerializer(DynamicFieldsModelSerializer):

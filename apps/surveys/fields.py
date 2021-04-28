@@ -1,7 +1,8 @@
 from django import forms
 
-from surveys.widgets import SurveyFreeAnswer, OptionalChoiceWidget, \
-    SurveyCheckboxSelectMultiple
+from surveys.widgets import (
+    OptionalChoiceWidget, SurveyCheckboxSelectMultiple, SurveyFreeAnswer
+)
 
 
 class SurveyChoiceField(forms.ChoiceField):

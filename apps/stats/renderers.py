@@ -1,8 +1,9 @@
 import json
 
-from django.conf import settings
 from rest_framework.renderers import BrowsableAPIRenderer
 from rest_pandas import PandasCSVRenderer, PandasJSONRenderer
+
+from django.conf import settings
 
 
 class PandasListIndentJSONRenderer(PandasJSONRenderer):

@@ -1,4 +1,4 @@
-from typing import NamedTuple, Iterable
+from typing import Iterable, NamedTuple
 
 from django.conf import settings
 from django.db.models import Q
@@ -7,14 +7,15 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views import generic
 
-from learning.icalendar import generate_icalendar, \
-    TeacherAssignmentICalendarEvent, \
-    StudyEventICalendarEvent, \
-    StudentAssignmentICalendarEvent, TeacherClassICalendarEvent, \
-    StudentClassICalendarEvent
+from learning.icalendar import (
+    StudentAssignmentICalendarEvent, StudentClassICalendarEvent,
+    StudyEventICalendarEvent, TeacherAssignmentICalendarEvent,
+    TeacherClassICalendarEvent, generate_icalendar
+)
 from learning.models import StudentAssignment
-from learning.services import get_student_classes, get_teacher_classes, \
-    get_study_events, get_teacher_assignments
+from learning.services import (
+    get_student_classes, get_study_events, get_teacher_assignments, get_teacher_classes
+)
 from users.models import User
 
 

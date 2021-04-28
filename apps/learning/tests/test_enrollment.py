@@ -2,6 +2,7 @@ import datetime
 
 import pytest
 from bs4 import BeautifulSoup
+
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
@@ -12,17 +13,18 @@ from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse
 from courses.models import CourseBranch
-from courses.tests.factories import SemesterFactory, CourseFactory, \
-    AssignmentFactory
-from learning.models import Enrollment, StudentAssignment, StudentGroup, \
-    EnrollmentPeriod
-from learning.services import EnrollmentService, CourseCapacityFull, \
-    StudentGroupService, get_student_profile
-from learning.settings import StudentStatuses, Branches
-from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
-from users.tests.factories import StudentFactory, InvitedStudentFactory, \
-    StudentProfileFactory
-
+from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
+from learning.models import (
+    Enrollment, EnrollmentPeriod, StudentAssignment, StudentGroup
+)
+from learning.services import (
+    CourseCapacityFull, EnrollmentService, StudentGroupService, get_student_profile
+)
+from learning.settings import Branches, StudentStatuses
+from learning.tests.factories import CourseInvitationFactory, EnrollmentFactory
+from users.tests.factories import (
+    InvitedStudentFactory, StudentFactory, StudentProfileFactory
+)
 
 # TODO: запись кем-то без группы INVITED.
 # TODO: после регистрации у чуваков есть необходимые поля и группы. Нужно ли тестить отправку email? вроде как асинхронно высылается, значит надо (мб моки уже есть в текстах клуба, хз)

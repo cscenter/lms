@@ -1,4 +1,5 @@
 import pytest
+
 from django.utils.translation import gettext_lazy as _
 
 from grading.api.yandex_contest import SubmissionVerdict

@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-from grading.models import CheckingSystem, Submission, Checker
+
 from core.admin import meta
+from grading.models import Checker, CheckingSystem, Submission
 
 
 class CheckingSystemAdmin(admin.ModelAdmin):

@@ -1,16 +1,19 @@
 import logging
 from typing import NamedTuple
 
+from django_rq import job
+
 from django.apps import apps
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, get_connection
 from django.template import loader
 from django.utils import translation
-from django_rq import job
 
-from auth.settings import EMAIL_RESTORE_PASSWORD_SUBJECT, \
-    EMAIL_RESTORE_PASSWORD_BODY, EMAIL_ACTIVATION_SUBJECT, EMAIL_ACTIVATION_BODY
-from core.urls import reverse, replace_hostname
+from auth.settings import (
+    EMAIL_ACTIVATION_BODY, EMAIL_ACTIVATION_SUBJECT, EMAIL_RESTORE_PASSWORD_BODY,
+    EMAIL_RESTORE_PASSWORD_SUBJECT
+)
+from core.urls import replace_hostname, reverse
 
 logger = logging.getLogger(__name__)
 

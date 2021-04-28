@@ -1,12 +1,14 @@
-from django.urls import path, include
+from django.urls import include, path
 from django.views.generic.base import RedirectView
 
-from learning.study.views import TimetableView, \
-    StudentAssignmentDetailView, StudentAssignmentListView, \
-    CalendarFullView, CalendarPersonalView, CourseListView, \
-    StudentAssignmentCommentCreateView, StudentAssignmentSolutionCreateView
-from learning.views import AssignmentAttachmentDownloadView, \
-    AssignmentCommentAttachmentDownloadView
+from learning.study.views import (
+    CalendarFullView, CalendarPersonalView, CourseListView,
+    StudentAssignmentCommentCreateView, StudentAssignmentDetailView,
+    StudentAssignmentListView, StudentAssignmentSolutionCreateView, TimetableView
+)
+from learning.views import (
+    AssignmentAttachmentDownloadView, AssignmentCommentAttachmentDownloadView
+)
 from learning.views.views import AssignmentSubmissionAttachmentDownloadView
 
 app_name = 'study'

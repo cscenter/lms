@@ -1,6 +1,6 @@
-from django.urls import include, path
+from django.urls import path
 
-from stats.views import StatsIndexView, StatsLearningView, StatsAdmissionView
+from stats.views import StatsAdmissionView, StatsIndexView, StatsLearningView
 
 app_name = 'stats'
 

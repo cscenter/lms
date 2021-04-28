@@ -7,12 +7,13 @@ from django.core.management import BaseCommand
 from django.utils.decorators import method_decorator
 
 from core.locks import distributed_lock, get_shared_connection
-from core.timezone import now_local
 from core.models import Branch
-from projects.constants import REPORTING_NOTIFY_BEFORE_START, \
-    REPORTING_NOTIFY_BEFORE_DEADLINE
-from projects.models import ReportingPeriod
+from core.timezone import now_local
 from notifications import NotificationTypes
+from projects.constants import (
+    REPORTING_NOTIFY_BEFORE_DEADLINE, REPORTING_NOTIFY_BEFORE_START
+)
+from projects.models import ReportingPeriod
 
 
 class Command(BaseCommand):

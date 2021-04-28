@@ -8,10 +8,11 @@ import time
 from copy import deepcopy
 from functools import wraps
 
-from django.core.cache import caches
-from django.core.cache.backends.locmem import LocMemCache
 from django_rq.queues import get_connection, get_redis_connection
 from redis.exceptions import LockError
+
+from django.core.cache import caches
+from django.core.cache.backends.locmem import LocMemCache
 
 logger = logging.getLogger(__name__)
 

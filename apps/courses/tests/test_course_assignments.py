@@ -1,5 +1,6 @@
 import factory
 import pytest
+
 from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
 
@@ -8,8 +9,8 @@ from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.models import Assignment
 from courses.permissions import CreateAssignment, EditAssignment
-from courses.tests.factories import CourseFactory, AssignmentFactory
-from users.tests.factories import TeacherFactory, CuratorFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory
+from users.tests.factories import CuratorFactory, TeacherFactory
 
 
 @pytest.mark.django_db

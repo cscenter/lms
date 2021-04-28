@@ -1,7 +1,7 @@
 import rules
 
-from auth.permissions import add_perm, Permission
-from projects.models import ReportComment, ProjectStudent, Report
+from auth.permissions import Permission, add_perm
+from projects.models import ProjectStudent, Report, ReportComment
 
 
 @add_perm

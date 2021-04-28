@@ -3,18 +3,19 @@ import re
 
 import pytest
 import pytz
+
 from django.core.exceptions import ValidationError
 
 from core.models import Branch
 from core.tests.factories import BranchFactory
-from core.tests.settings import TEST_DOMAIN, ANOTHER_DOMAIN
-from courses.constants import SemesterTypes, TeacherRoles, \
-    MaterialVisibilityTypes
-from courses.models import Assignment, CourseTeacher, Course, CourseClass
-from courses.tests.factories import CourseNewsFactory, SemesterFactory, \
-    CourseFactory, \
-    CourseClassFactory, CourseClassAttachmentFactory, MetaCourseFactory, \
-    AssignmentFactory, AssignmentAttachmentFactory, CourseTeacherFactory
+from core.tests.settings import ANOTHER_DOMAIN, TEST_DOMAIN
+from courses.constants import MaterialVisibilityTypes, SemesterTypes
+from courses.models import Assignment, Course, CourseClass, CourseTeacher
+from courses.tests.factories import (
+    AssignmentAttachmentFactory, AssignmentFactory, CourseClassAttachmentFactory,
+    CourseClassFactory, CourseFactory, CourseNewsFactory, CourseTeacherFactory,
+    MetaCourseFactory, SemesterFactory
+)
 from courses.utils import TermPair
 from learning.settings import Branches
 
@@ -59,6 +60,7 @@ def test_course_teacher_get_most_priority_role_prefetch(django_assert_num_querie
 @pytest.mark.django_db
 def test_semester_starts_ends():
     import datetime
+
     from django.utils import timezone
     spring_2015_date = (datetime.datetime(2015, 4, 8, 0, 0, 0)
                         .replace(tzinfo=timezone.utc))
@@ -161,6 +163,7 @@ def test_in_current_term(client):
     In the near future only one course should be "ongoing".
     """
     import datetime
+
     from django.utils import timezone
     future_year = datetime.datetime.now().year + 20
     some_year = future_year - 5
@@ -257,6 +260,7 @@ def test_assignment_clean():
 @pytest.mark.django_db
 def test_assignment_is_not_exceeded():
     import datetime
+
     from django.utils import timezone
     a = AssignmentFactory()
     assert not a.deadline_is_exceeded

@@ -1,12 +1,13 @@
 from dal import autocomplete
-from django.contrib import admin
-
-from django.db import models as db_models
 from modeltranslation.admin import TranslationAdmin
 
+from django.contrib import admin
+from django.db import models as db_models
+
 from core.widgets import AdminRichTextAreaWidget
-from study_programs.models import StudyProgramCourseGroup, AcademicDiscipline, \
-    StudyProgram
+from study_programs.models import (
+    AcademicDiscipline, StudyProgram, StudyProgramCourseGroup
+)
 
 
 @admin.register(AcademicDiscipline)

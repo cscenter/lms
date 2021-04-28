@@ -4,15 +4,15 @@ from distutils.util import strtobool
 
 import django_filters
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, Row
+from crispy_forms.layout import Div, Layout, Row, Submit
+
 from django.conf import settings
-from django.db.models import Case, Count, F, When, Value, Sum, IntegerField
-from django.db.models import Q
+from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Branch
-from projects.constants import ProjectTypes, ProjectGradeTypes
+from projects.constants import ProjectGradeTypes, ProjectTypes
 from projects.models import Project, ProjectStudent
 from users.constants import Roles
 from users.models import User

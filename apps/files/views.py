@@ -1,11 +1,13 @@
 import os
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
+
+from nbformat.validator import NotebookValidationError
 
 from django.conf import settings
-from django.http import HttpResponseNotFound, HttpResponseBadRequest, \
-    HttpResponseRedirect
+from django.http import (
+    HttpResponseBadRequest, HttpResponseNotFound, HttpResponseRedirect
+)
 from django.views import generic
-from nbformat.validator import NotebookValidationError
 
 from auth.mixins import PermissionRequiredMixin
 from files.response import XAccelRedirectFileResponse

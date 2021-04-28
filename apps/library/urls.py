@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import path
 
-from .views import BookListView, BookDetailView
+from .views import BookDetailView, BookListView
 
 app_name = 'library'
 urlpatterns = [

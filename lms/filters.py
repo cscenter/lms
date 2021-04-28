@@ -1,15 +1,16 @@
 import re
 
+from django_filters import ChoiceFilter, Filter, FilterSet
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.forms import SlugField, forms
 from django.http import QueryDict
-from django_filters import FilterSet, ChoiceFilter, Filter
 
 from core.models import Branch
 from courses.constants import SemesterTypes
 from courses.models import Course
-from courses.utils import get_term_index, get_current_term_pair
+from courses.utils import get_current_term_pair, get_term_index
 
 
 class BranchCodeFilter(ChoiceFilter):

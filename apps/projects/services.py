@@ -1,7 +1,8 @@
 from typing import Dict
 
-from projects.models import ProjectStudent, ReportingPeriod, \
-    ReportingPeriodKey, Project, Report
+from projects.models import (
+    Project, ProjectStudent, Report, ReportingPeriod, ReportingPeriodKey
+)
 
 
 def get_project_reporting_periods(student, term) -> Dict[ProjectStudent, ReportingPeriod]:

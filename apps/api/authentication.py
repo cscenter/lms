@@ -1,15 +1,14 @@
 import binascii
 from hmac import compare_digest
 
+from rest_framework.authentication import BaseAuthentication, get_authorization_header
+
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from rest_framework.authentication import (
-    BaseAuthentication, get_authorization_header,
-)
 
 from api.errors import AuthenticationFailed, InvalidToken
-from api.services import hash_token, TokenService
-from api.settings import AUTH_HEADER, TOKEN_KEY_LENGTH, AUTO_REFRESH
+from api.services import TokenService, hash_token
+from api.settings import AUTH_HEADER, AUTO_REFRESH, TOKEN_KEY_LENGTH
 
 UserModel = get_user_model()
 

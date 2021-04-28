@@ -1,7 +1,8 @@
 from django.utils.translation import gettext_lazy as _
 
-from grading.api.yandex_contest import YANDEX_CONTEST_DOMAIN, \
-    YANDEX_CONTEST_PROBLEM_REGEX, YANDEX_CONTEST_PROBLEM_URL
+from grading.api.yandex_contest import (
+    YANDEX_CONTEST_DOMAIN, YANDEX_CONTEST_PROBLEM_REGEX, YANDEX_CONTEST_PROBLEM_URL
+)
 
 
 def get_yandex_contest_problem_url(contest_id, problem_id):

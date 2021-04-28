@@ -1,17 +1,18 @@
 from collections import OrderedDict
-from urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit
+from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
+
+from django_filters.views import FilterMixin
+from vanilla import TemplateView
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
-from django_filters.views import FilterMixin
-from vanilla import TemplateView
 
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
@@ -19,22 +20,25 @@ from core.urls import reverse
 from core.utils import render_markdown
 from courses.calendar import TimetableEvent
 from courses.constants import SemesterTypes
-from courses.models import Course, Assignment, CourseTeacher
+from courses.models import Assignment, Course, CourseTeacher
 from courses.permissions import ViewAssignment
 from courses.services import get_teacher_branches
-from courses.utils import get_current_term_pair, MonthPeriod, \
-    extended_month_date_range
+from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
 from learning.api.serializers import AssignmentScoreSerializer
-from learning.calendar import get_teacher_calendar_events, get_all_calendar_events
-from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm, \
-    AssignmentCommentForm
+from learning.calendar import get_all_calendar_events, get_teacher_calendar_events
+from learning.forms import (
+    AssignmentCommentForm, AssignmentModalCommentForm, AssignmentScoreForm
+)
 from learning.gradebook.views import GradeBookListBaseView
-from learning.models import AssignmentComment, StudentAssignment, Enrollment, \
-    AssignmentSubmissionTypes
-from learning.permissions import CreateAssignmentComment, ViewStudentAssignment, \
-    EditOwnStudentAssignment, ViewStudentAssignmentList
-from learning.services import get_teacher_classes, AssignmentService
+from learning.models import (
+    AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
+)
+from learning.permissions import (
+    CreateAssignmentComment, EditOwnStudentAssignment, ViewStudentAssignment,
+    ViewStudentAssignmentList
+)
+from learning.services import AssignmentService, get_teacher_classes
 from learning.teaching.filters import AssignmentStudentsFilter
 from learning.utils import humanize_duration
 from learning.views import AssignmentSubmissionBaseView

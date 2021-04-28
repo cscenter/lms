@@ -2,9 +2,10 @@ import base64
 import json
 import logging
 from enum import IntEnum
-from urllib.parse import urljoin, quote_plus
+from urllib.parse import quote_plus, urljoin
 
 import requests
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 

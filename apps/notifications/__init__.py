@@ -102,6 +102,7 @@ from notifications.constants import NOTIFICATION_TYPES
 
 def autodiscover():
     from django.conf import settings
+
     from notifications.registry import registry
 
     autodiscover_modules('notifications', register_to=registry)

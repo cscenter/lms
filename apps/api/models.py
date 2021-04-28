@@ -1,7 +1,8 @@
+from model_utils.models import TimeStampedModel
+
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from model_utils.models import TimeStampedModel
 
 from .settings import DIGEST_MAX_LENGTH, TOKEN_KEY_LENGTH
 

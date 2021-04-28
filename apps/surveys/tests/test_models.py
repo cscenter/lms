@@ -5,8 +5,8 @@ import pytest
 from core.timezone import now_local
 from courses.tests.factories import CourseFactory
 from learning.settings import Branches
-from surveys.constants import STATUS_PUBLISHED, STATUS_DRAFT
-from surveys.models import CourseSurvey, Field, FieldChoice, Form
+from surveys.constants import STATUS_DRAFT, STATUS_PUBLISHED
+from surveys.models import CourseSurvey, Field, FieldChoice
 from surveys.tests.factories import CourseSurveyFactory
 
 

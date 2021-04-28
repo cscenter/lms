@@ -1,21 +1,20 @@
 import os
 
-from crispy_forms.bootstrap import StrictButton, InlineRadios, FormActions
+from crispy_forms.bootstrap import FormActions, StrictButton
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Layout, Submit, Hidden, \
-    Div, HTML, BaseInput, Row
+from crispy_forms.layout import HTML, BaseInput, Div, Field, Hidden, Layout, Submit
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from grading.services import SubmissionService, CheckerService
 from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
-from core.timezone.constants import TIME_FORMAT_RU
 from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
-from learning.models import GraduateProfile, StudentAssignment, \
-    AssignmentSubmissionTypes
+from grading.services import CheckerService, SubmissionService
+from learning.models import AssignmentSubmissionTypes, GraduateProfile
+
 from .models import AssignmentComment
 
 

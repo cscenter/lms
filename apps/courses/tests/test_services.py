@@ -1,12 +1,13 @@
 import pytest
+
 from django.core.exceptions import ValidationError
 
 from core.tests.factories import BranchFactory
 from core.tests.settings import TEST_DOMAIN_ID
 from courses.models import CourseBranch
 from courses.services import CourseService
-from courses.tests.factories import CourseFactory, CourseClassFactory
-from learning.services import get_teacher_classes, get_classes
+from courses.tests.factories import CourseClassFactory, CourseFactory
+from learning.services import get_classes, get_teacher_classes
 from users.tests.factories import TeacherFactory
 
 

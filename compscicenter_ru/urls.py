@@ -1,3 +1,5 @@
+from loginas import urls as loginas_urls
+
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include
@@ -6,16 +8,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, re_path
 from django.views.generic import RedirectView, TemplateView
-from loginas import urls as loginas_urls
 
-from announcements.views import AnnouncementTagAutocomplete, \
-    AnnouncementDetailView
+from announcements.views import AnnouncementDetailView, AnnouncementTagAutocomplete
 from compscicenter_ru import views
-from core.views import MarkdownRenderView, MarkdownHowToHelpView
+from core.views import MarkdownHowToHelpView, MarkdownRenderView
 from courses.urls import RE_COURSE_PUBLIC_URI
 from htmlpages.views import flatpage
-from library.views import BookTagAutocomplete
 from info_blocks.views import InfoBlockTagAutocomplete
+from library.views import BookTagAutocomplete
 
 admin.site.enable_nav_sidebar = False
 admin.autodiscover()

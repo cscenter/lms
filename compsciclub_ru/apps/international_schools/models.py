@@ -1,7 +1,8 @@
+from model_utils.models import TimeStampedModel
+
 from django.db import models
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
-from model_utils.models import TimeStampedModel
 
 
 class InternationalSchool(TimeStampedModel):

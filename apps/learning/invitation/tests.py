@@ -1,8 +1,8 @@
 import datetime
 
 import pytest
+
 from django.contrib.sites.models import Site
-from django.utils import timezone
 from django.utils.timezone import now
 
 from auth.tasks import ActivationEmailContext
@@ -10,13 +10,14 @@ from core.tests.factories import SiteFactory
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory
 from learning.invitation.forms import InvitationRegistrationForm
-from learning.invitation.views import InvitationURLParamsMixin, \
-    complete_student_profile, student_profile_is_valid
+from learning.invitation.views import (
+    InvitationURLParamsMixin, complete_student_profile, student_profile_is_valid
+)
 from learning.roles import Roles
 from learning.tests.factories import CourseInvitationFactory
 from users.constants import GenderTypes
 from users.models import User
-from users.tests.factories import UserFactory, StudentFactory
+from users.tests.factories import UserFactory
 
 
 @pytest.mark.django_db

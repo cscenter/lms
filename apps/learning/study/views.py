@@ -1,39 +1,42 @@
 from typing import Iterable
 
-from django.apps import apps
-from django.contrib import messages
-from django.db.models import Q, Prefetch
-from django.utils.translation import gettext_lazy as _
-from django.views import generic
 from isoweek import Week
 from vanilla import TemplateView
+
+from django.apps import apps
+from django.contrib import messages
+from django.db.models import Prefetch, Q
+from django.utils.translation import gettext_lazy as _
+from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.urls import reverse
 from courses.calendar import CalendarEvent, TimetableEvent
-from courses.constants import SemesterTypes
-from courses.models import Semester, Course, CourseTeacher
-from courses.utils import get_current_term_pair, MonthPeriod, \
-    extended_month_date_range
-from courses.views import WeekEventsView, MonthEventsCalendarView
+from courses.models import Course, CourseTeacher, Semester
+from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
+from courses.views import MonthEventsCalendarView, WeekEventsView
 from info_blocks.constants import CurrentInfoBlockTags
 from info_blocks.models import InfoBlock
 from info_blocks.permissions import ViewInternships
 from learning import utils
-from learning.calendar import get_student_calendar_events, get_all_calendar_events
+from learning.calendar import get_all_calendar_events, get_student_calendar_events
 from learning.forms import AssignmentCommentForm
-from learning.models import StudentAssignment, Enrollment, \
-    AssignmentSubmissionTypes, AssignmentComment
-from learning.permissions import ViewOwnStudentAssignments, \
-    ViewOwnStudentAssignment, ViewCourses, \
-    CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution, EnrollPermissionObject
+from learning.models import (
+    AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
+)
+from learning.permissions import (
+    CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution,
+    EnrollPermissionObject, ViewCourses, ViewOwnStudentAssignment,
+    ViewOwnStudentAssignments
+)
 from learning.roles import Roles
 from learning.services import get_student_classes, get_student_profile
-from learning.study.services import get_solution_form, get_draft_solution
+from learning.study.services import get_draft_solution, get_solution_form
 from learning.views import AssignmentSubmissionBaseView
-from learning.views.views import AssignmentCommentUpsertView, \
-    AssignmentSubmissionUpsertView
+from learning.views.views import (
+    AssignmentCommentUpsertView, AssignmentSubmissionUpsertView
+)
 
 
 class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):

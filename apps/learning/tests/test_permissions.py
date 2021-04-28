@@ -8,25 +8,25 @@ from core.timezone import now_local
 from core.utils import instance_memoize
 from courses.models import Course, CourseBranch, CourseTeacher
 from courses.services import CourseService
-from courses.tests.factories import CourseFactory, SemesterFactory, \
-    AssignmentFactory
-from learning.models import StudentAssignment, EnrollmentPeriod
-from learning.permissions import CreateAssignmentComment, \
-    CreateAssignmentCommentAsTeacher, \
-    CreateAssignmentCommentAsLearner, ViewRelatedStudentAssignment, \
-    ViewStudentAssignment, EditOwnStudentAssignment, \
-    EditOwnAssignmentExecutionTime, EnrollInCourse, EnrollPermissionObject, \
-    InvitationEnrollPermissionObject, ViewAssignmentCommentAttachment, \
-    ViewOwnGradebook, ViewGradebook, EditGradebook
-from learning.services import get_student_profile, CourseRole, \
-    course_access_role
-from learning.settings import StudentStatuses, GradeTypes, Branches
-from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory, \
-    AssignmentCommentFactory, StudentAssignmentFactory
-from users.constants import Roles
-from users.models import ExtendedAnonymousUser, User, StudentTypes
-from users.tests.factories import CuratorFactory, TeacherFactory, \
-    StudentFactory, UserFactory, StudentProfileFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
+from learning.models import EnrollmentPeriod, StudentAssignment
+from learning.permissions import (
+    CreateAssignmentComment, CreateAssignmentCommentAsLearner,
+    CreateAssignmentCommentAsTeacher, EditGradebook, EditOwnAssignmentExecutionTime,
+    EditOwnStudentAssignment, EnrollInCourse, EnrollPermissionObject,
+    InvitationEnrollPermissionObject, ViewAssignmentCommentAttachment, ViewGradebook,
+    ViewOwnGradebook, ViewRelatedStudentAssignment, ViewStudentAssignment
+)
+from learning.services import CourseRole, course_access_role
+from learning.settings import Branches, GradeTypes, StudentStatuses
+from learning.tests.factories import (
+    AssignmentCommentFactory, CourseInvitationFactory, EnrollmentFactory,
+    StudentAssignmentFactory
+)
+from users.models import ExtendedAnonymousUser, StudentTypes, User
+from users.tests.factories import (
+    CuratorFactory, StudentFactory, StudentProfileFactory, TeacherFactory, UserFactory
+)
 
 
 def delete_enrollment_cache(user: User, course: Course):

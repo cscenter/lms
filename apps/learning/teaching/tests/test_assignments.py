@@ -5,30 +5,33 @@ import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.utils import formats
 from django.utils.encoding import smart_bytes
 
-from grading.constants import CheckingSystemTypes
-from grading.models import Checker
-from grading.tests.factories import CheckingSystemFactory, CheckerFactory
-from grading.utils import get_yandex_contest_problem_url
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.models import AssignmentSubmissionFormats, Assignment
-from courses.tests.factories import AssignmentFactory, CourseFactory, \
-    CourseTeacherFactory, SemesterFactory, CourseNewsFactory
-from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, CourseNewsNotification, AssignmentComment, \
-    StudentGroup
+from courses.models import Assignment, AssignmentSubmissionFormats
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseNewsFactory, CourseTeacherFactory,
+    SemesterFactory
+)
+from grading.constants import CheckingSystemTypes
+from grading.models import Checker
+from grading.tests.factories import CheckerFactory, CheckingSystemFactory
+from grading.utils import get_yandex_contest_problem_url
+from learning.models import (
+    AssignmentComment, AssignmentNotification, CourseNewsNotification, Enrollment,
+    StudentAssignment, StudentGroup
+)
 from learning.settings import Branches
-from learning.tests.factories import StudentAssignmentFactory, \
-    EnrollmentFactory, AssignmentCommentFactory
-from users.tests.factories import TeacherFactory, StudentFactory, \
-    StudentProfileFactory
-
+from learning.tests.factories import (
+    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
+)
+from users.tests.factories import StudentFactory, StudentProfileFactory, TeacherFactory
 
 # TODO: Преподавание -> Задания, добавить тест для deadline_local
 

@@ -1,21 +1,22 @@
-from django.db.models import Prefetch, Case, When, Value, F, CharField
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_pandas import PandasView
 
+from django.db.models import Case, CharField, F, Prefetch, Value, When
+
 from api.permissions import CuratorAccessPermission
-from api.utils import inline_serializer, get_serializer_fields
+from api.utils import get_serializer_fields, inline_serializer
 from courses.models import Assignment
 from learning.api.serializers import StudentProfileSerializer, UserSerializer
-from learning.models import StudentAssignment, \
-    Enrollment
+from learning.models import Enrollment, StudentAssignment
 from learning.settings import StudentStatuses
 from stats.renderers import ListRenderersMixin
 from users.models import StudentProfile
-from .pandas_serializers import StudentsTotalByYearPandasSerializer, \
-    StudentsTotalByTypePandasSerializer
+
+from .pandas_serializers import (
+    StudentsTotalByTypePandasSerializer, StudentsTotalByYearPandasSerializer
+)
 from .serializers import StudentAssignmentsSerializer
 
 

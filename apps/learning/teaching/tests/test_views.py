@@ -1,21 +1,18 @@
 import pytest
-from django.core.files.uploadedfile import SimpleUploadedFile
+
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
 from courses.permissions import ViewAssignment
-from courses.tests.factories import CourseFactory, SemesterFactory, \
-    AssignmentFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from learning.models import StudentAssignment
-from learning.permissions import ViewStudentAssignment, \
-    ViewStudentAssignmentList
+from learning.permissions import ViewStudentAssignment, ViewStudentAssignmentList
 from learning.settings import Branches
-from learning.tests.factories import EnrollmentFactory, \
-    AssignmentCommentFactory, StudentAssignmentFactory
-from users.constants import Roles
-from users.tests.factories import UserFactory, TeacherFactory, \
-    StudentFactory, CuratorFactory
+from learning.tests.factories import (
+    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
+)
+from users.tests.factories import CuratorFactory, StudentFactory, TeacherFactory
 
 
 @pytest.mark.django_db
@@ -23,7 +20,7 @@ def test_teaching_index_page_smoke(client):
     """Just to make sure this view doesn't return 50x error"""
     response = client.get(reverse("teaching:base"))
     assert response.status_code == 302
-    
+
 
 @pytest.mark.django_db
 def test_student_assignment_list_view_permissions(client, lms_resolver,

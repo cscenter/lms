@@ -8,10 +8,12 @@ from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from courses.models import StudentGroupTypes, CourseGroupModes
-from learning.models import GraduateProfile, Invitation, CourseInvitation, \
-    StudentAssignment, StudentGroup
+from courses.models import CourseGroupModes
+from learning.models import (
+    CourseInvitation, GraduateProfile, Invitation, StudentAssignment
+)
 from users.models import StudentStatusLog
+
 from .models import AssignmentComment, Enrollment, Event
 from .services import StudentGroupService
 from .settings import StudentStatuses

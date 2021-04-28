@@ -5,10 +5,9 @@ import pytz
 
 from core.tests.factories import BranchFactory
 from courses.models import CourseBranch
-from courses.tests.factories import CourseTeacherFactory, AssignmentFactory, \
-    CourseFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory
 from learning.settings import Branches
-from users.tests.factories import TeacherFactory, StudentFactory
+from users.tests.factories import StudentFactory, TeacherFactory
 
 
 @pytest.mark.django_db

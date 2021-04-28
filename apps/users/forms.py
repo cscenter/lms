@@ -1,14 +1,16 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Div
+from crispy_forms.layout import Div, Layout, Submit
+
 from django import forms
-from django.contrib.auth.forms import UserCreationForm as _UserCreationForm, \
-    UserChangeForm as _UserChangeForm
+from django.contrib.auth.forms import UserChangeForm as _UserChangeForm
+from django.contrib.auth.forms import UserCreationForm as _UserCreationForm
 from django.utils.translation import gettext_lazy as _
 
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.utils import is_club_site
 from core.widgets import UbereditorWidget
-from .models import User, CertificateOfParticipation
+
+from .models import CertificateOfParticipation, User
 
 
 class UserProfileForm(forms.ModelForm):

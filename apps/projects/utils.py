@@ -1,4 +1,4 @@
-from io import BytesIO, SEEK_SET, SEEK_END
+from io import SEEK_END, SEEK_SET, BytesIO
 
 
 class ResponseStream:

@@ -1,5 +1,6 @@
+from djchoices import C, DjangoChoices
+
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, C
 
 from auth.permissions import Role
 from auth.registry import role_registry

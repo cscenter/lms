@@ -3,8 +3,8 @@ import datetime
 import pytest
 
 from core.tests.factories import BranchFactory
-from courses.models import Course, CourseClass, CourseBranch
-from courses.tests.factories import CourseFactory, CourseClassFactory
+from courses.models import Course, CourseBranch, CourseClass
+from courses.tests.factories import CourseClassFactory, CourseFactory
 from learning.settings import Branches
 
 

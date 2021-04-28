@@ -1,29 +1,28 @@
 import csv
 import itertools
 
+from vanilla import FormView
+
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.db.models import Prefetch, Q
-from django.http import HttpResponseRedirect, HttpResponse, \
-    HttpResponseForbidden, HttpResponseBadRequest
-from django.shortcuts import redirect, get_object_or_404
+from django.db.models import Prefetch
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
-from vanilla import FormView
 
 from auth.mixins import PermissionRequiredMixin
 from courses.constants import SemesterTypes
-from courses.models import Course, Semester, Assignment, \
-    AssignmentSubmissionFormats
+from courses.models import Assignment, Course, Semester
 from courses.utils import get_current_term_pair
 from courses.views.mixins import CourseURLParamsMixin
 from learning.gradebook import GradeBookFormFactory, gradebook_data
-from learning.gradebook.imports import import_assignment_scores, \
-    get_course_students_by_stepik_id, get_course_students_by_yandex_login, \
-    get_course_students
-from learning.permissions import ViewOwnGradebook, EditGradebook
-from users.mixins import TeacherOnlyMixin
+from learning.gradebook.imports import (
+    get_course_students, get_course_students_by_stepik_id,
+    get_course_students_by_yandex_login, import_assignment_scores
+)
+from learning.permissions import EditGradebook, ViewOwnGradebook
 
 __all__ = [
     "GradeBookView",

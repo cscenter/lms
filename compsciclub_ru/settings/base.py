@@ -1,7 +1,8 @@
 # Read project environment into os.environ before importing base configuration
 import sys
-import environ
 import warnings
+
+import environ
 
 env = environ.Env()
 # Try to read .env file, if it's not present, assume that application

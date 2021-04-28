@@ -1,5 +1,5 @@
-from django.contrib.auth.mixins import PermissionRequiredMixin as _PermissionRequiredMixin
-
+from django.contrib.auth.mixins import \
+    PermissionRequiredMixin as _PermissionRequiredMixin
 
 # FIXME: statically check that perms registered in all_permissions?
 

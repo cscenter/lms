@@ -1,19 +1,20 @@
 import pytest
 
-from core.tests.factories import BranchFactory, SiteFactory
+from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.urls import reverse
-from courses.models import StudentGroupTypes, CourseBranch, CourseTeacher
-from courses.tests.factories import CourseFactory, AssignmentFactory, \
-    SemesterFactory, CourseTeacherFactory
-from learning.models import StudentGroup, StudentAssignment, Enrollment
-from learning.services import StudentGroupService
+from courses.models import CourseBranch, CourseTeacher, StudentGroupTypes
+from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
+from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.settings import Branches, GradeTypes
-from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory, \
-    AssignmentCommentFactory, StudentGroupAssigneeFactory, \
-    StudentAssignmentFactory
-from users.tests.factories import StudentFactory, CuratorFactory, \
-    InvitedStudentFactory, StudentProfileFactory, TeacherFactory
+from learning.tests.factories import (
+    AssignmentCommentFactory, CourseInvitationFactory, EnrollmentFactory,
+    StudentAssignmentFactory, StudentGroupAssigneeFactory
+)
+from users.tests.factories import (
+    CuratorFactory, InvitedStudentFactory, StudentFactory, StudentProfileFactory,
+    TeacherFactory
+)
 
 
 @pytest.mark.django_db

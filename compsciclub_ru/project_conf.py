@@ -5,4 +5,4 @@ class ProjectConfig(AppConfig):
     name = 'compsciclub_ru'
 
     def ready(self):
-        from . import permissions
+        from . import permissions  # pylint: disable=unused-import

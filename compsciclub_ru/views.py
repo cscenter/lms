@@ -2,6 +2,11 @@ import datetime
 from functools import partial
 
 import pytz
+from django_ical.views import ICalFeed
+from registration import signals
+from registration.backends.default.views import RegistrationView
+from vanilla import DetailView
+
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import caches
@@ -10,31 +15,25 @@ from django.db.models import Prefetch, Q
 from django.utils import timezone
 from django.utils.timezone import now
 from django.views import generic
-from django_ical.views import ICalFeed
-from registration import signals
-from registration.backends.default.views import RegistrationView
-from vanilla import DetailView
 
 import core.utils
-from auth.tasks import send_activation_email, ActivationEmailContext
-from compscicenter_ru.utils import course_public_url, course_class_public_url
+from auth.tasks import ActivationEmailContext, send_activation_email
+from compscicenter_ru.utils import course_class_public_url, course_public_url
 from core.exceptions import Redirect
 from core.models import Branch
 from core.urls import reverse
 from courses.calendar import CalendarEventFactory
 from courses.constants import SemesterTypes, TeacherRoles
-from courses.models import Course, Semester, CourseClass, CourseTeacher, \
-    MetaCourse
+from courses.models import Course, CourseClass, CourseTeacher, MetaCourse, Semester
 from courses.services import group_teachers
-from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
-from courses.utils import get_current_term_pair, MonthPeriod, \
-    extended_month_date_range
+from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
+from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
 from courses.views.mixins import CoursePublicURLParamsMixin
 from learning.gallery.models import Image
-from learning.services import get_classes, create_student_profile
+from learning.services import create_student_profile, get_classes
 from users.constants import Roles
-from users.models import User, StudentTypes
+from users.models import StudentTypes, User
 
 _TIME_ZONE = pytz.timezone('Europe/Moscow')
 

@@ -5,13 +5,14 @@ https://github.com/edx/edx-platform/blob/a439d5164c07e4695181b15244e8e5c7681421c
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Optional, NamedTuple, Dict
+from typing import Dict, NamedTuple, Optional
 
 from django.db.models import Count
-from django.utils.translation import gettext_noop, gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_noop
 
 from courses.services import CourseService
-from courses.tabs_registry import registry, register
+from courses.tabs_registry import register, registry
 
 # TODO: default tab implementation for `assignments` and `classes` + tests
 
