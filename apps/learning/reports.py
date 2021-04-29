@@ -630,6 +630,11 @@ class ProgressReportFull(ProgressReport):
                     'academic_disciplines',
                     'graduate_profile__academic_disciplines'))
 
+    def get_courses_headers(self, meta_courses):
+        if not meta_courses:
+            return []
+        return [f"{course.name}, оценка" for course in meta_courses.values()]
+
     def _generate_headers(self, **kwargs):
         return [
             'ID',
@@ -671,11 +676,11 @@ class ProgressReportFull(ProgressReport):
             'Имя',
             'Отчество',
             'Профиль на сайте',
-            # 'Пол - удалён',
+            'Пол',
             'Почта',
             'Телефон',
             'Работа',  # up
-            'Яндекс',  # up
+            'Яндекс ID',  # up
             'Stepik ID',  # up
             'Github Login',  # up
             'ВУЗ',
@@ -683,10 +688,10 @@ class ProgressReportFull(ProgressReport):
             'Год поступления',
             'Год программы обучения',
             'Номер семестра обучения',  # new
-            # 'Год выпуска - удалён',
-            # 'Яндекс ID - перемещён',
-            # 'Stepik ID - перемещён',
-            # 'Github Login - перемещён',
+            'Год выпуска',
+            # 'Яндекс ID',
+            # 'Stepik ID',
+            # 'Github Login',
             'Официальный студент',
             'Номер диплома о высшем образовании',
             'Направления обучения',
@@ -694,7 +699,7 @@ class ProgressReportFull(ProgressReport):
             'Комментарий',
             'Дата последнего изменения комментария',
             # 'Работа - перемещён',
-            # 'Анкеты - удалён',
+            'Анкеты',
             'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
             'Пройдено семестров практики(закончили, успех)',
             'Пройдено семестров НИР (закончили, успех)',
@@ -703,6 +708,56 @@ class ProgressReportFull(ProgressReport):
             *self.get_courses_headers(meta_courses),    # new
             *self.generate_shad_courses_headers(shads_max),  # new
             *self.generate_online_courses_headers(online_max),  # new
+        ]
+
+    def _export_row_update(self, student_profile, **kwargs):
+        try:
+            disciplines = student_profile.graduate_profile.academic_disciplines.all()
+            graduation_year = student_profile.graduate_profile.graduation_year
+        except GraduateProfile.DoesNotExist:
+            disciplines = student_profile.academic_disciplines.all()
+            graduation_year = ""
+
+        student = student_profile.user
+        return [
+            student.pk,
+            student_profile.branch.name,
+            student.last_name,
+            student.first_name,
+            student.patronymic,
+            student.get_absolute_url(),  # Профиль на сайте
+            student.get_gender_display(),  # Пол
+            student.email,
+            student.phone,
+            student.workplace,  # Работа
+            student.yandex_login,  # Яндекс ID
+            student.stepic_id if student.stepic_id else "",  # Stepik ID
+            student.github_login if student.github_login else "",  # Github Login
+            student_profile.university,  # ВУЗ
+            student_profile.get_level_of_education_on_admission_display(),  # Курс (на момент поступления)
+            student_profile.year_of_admission,  # Год послутления
+            student_profile.year_of_curriculum if student_profile.year_of_curriculum else "",
+            # >>> Добавить # Номер семестра обучения
+            graduation_year,  # Год выпуска
+            # student.yandex_login,  # Яндекс ID
+            # student.stepic_id if student.stepic_id else "",  # Stepik ID
+            # student.github_login if student.github_login else "",  # Github Login
+            'да' if student_profile.is_official_student else 'нет',  # Официальный студент
+            student_profile.diploma_number if student_profile.diploma_number else "",  # Номер диплома
+            " и ".join(s.name for s in disciplines),  # Направления обучения
+            student_profile.get_status_display(),  # Статус
+            student_profile.comment,  # Комментарий
+            student_profile.get_comment_changed_at_display(),  # Дата последнего изменения комментария
+            # student.workplace,  # Работа
+            self.links_to_application_forms(student),  # Анкеты
+            student_profile.total_success_passed,  # Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего
+            student_profile.success_practice,  # Пройдено семестров практики(закончили, успех)
+            student_profile.success_research,  # Пройдено семестров НИР (закончили, успех)
+
+            # >>> Добавить 'Проекты за семестр "%s"' % self.target_semester,  # new
+            # >>> Добавить *self.get_courses_headers(meta_courses),  # new
+            # >>> Добавить *self.generate_shad_courses_headers(shads_max),  # new
+            # >>> Добавить *self.generate_online_courses_headers(online_max),  # new
         ]
 
     def _export_row(self, student_profile, **kwargs):
