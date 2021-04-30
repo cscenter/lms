@@ -804,19 +804,26 @@ class YandexContestIntegration(models.Model):
 
 class ApplicantRandomizeContestMixin:
     def compute_contest_id(self, contest_type, group_size=1) -> Optional[int]:
-        """
-        Selects contest id in a round-robin manner but allows group applicants
-        to complicate brute-forcing all available contests.
-        """
+        """Selects contest id in a round-robin manner."""
+        campaign_id = self.applicant.campaign_id
         contests = list(Contest.objects
-                        .filter(campaign_id=self.applicant.campaign_id,
-                                type=contest_type)
+                        .filter(campaign_id=campaign_id, type=contest_type)
                         .values_list("contest_id", flat=True)
                         .order_by("contest_id"))
         if contests:
-            # All applicants are ordered by registration time (or PK)
-            applicant_number = self.applicant.id
-            return get_next_process(applicant_number, contests, group_size)
+            if contest_type == Contest.TYPE_EXAM:
+                manager = Exam.objects
+            elif contest_type == Contest.TYPE_TEST:
+                manager = Test.objects
+            else:
+                raise ValueError("Unknown contest type")
+            qs = manager.filter(applicant__campaign_id=campaign_id)
+            if self.pk is None:
+                serial_number = qs.count() + 1
+            else:
+                # Assume records are ordered by PK
+                serial_number = qs.filter(pk__lte=self.pk).count()
+            return get_next_process(serial_number, contests, group_size)
 
 
 class Test(TimeStampedModel, YandexContestIntegration,

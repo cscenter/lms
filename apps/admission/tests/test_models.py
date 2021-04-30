@@ -14,15 +14,14 @@ def test_compute_contest_id():
     contests = ContestFactory.create_batch(3, campaign=campaign,
                                            type=Contest.TYPE_TEST)
     c1, c2, c3 = sorted(contests, key=lambda x: x.contest_id)
+    assert ApplicantFactory(campaign=campaign).online_test.compute_contest_id(Contest.TYPE_TEST, group_size=3) == c1.contest_id
     a = ApplicantFactory(campaign=campaign)
-    a.id = 1
-    assert a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=5) == c1.contest_id
-    a.id = 2
-    assert a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=5) == c1.contest_id
-    a.id = 6
-    assert a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=5) == c2.contest_id
-    a.id = 8
-    assert a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=5) == c2.contest_id
+    assert a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=3) == c1.contest_id
+    assert a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=1) == c2.contest_id
+    a = ApplicantFactory(campaign=campaign)
+    assert a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=3) == c1.contest_id
+    assert a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=1) == c3.contest_id
+    assert ApplicantFactory(campaign=campaign).online_test.compute_contest_id(Contest.TYPE_TEST, group_size=3) == c2.contest_id
 
 
 @pytest.mark.django_db
