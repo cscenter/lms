@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime
 
 import django_filters
@@ -52,10 +51,12 @@ class ApplicantFilter(django_filters.FilterSet):
                   .filter(branch__site_id=settings.SITE_ID)
                   .select_related("branch")
                   .order_by("-year", "branch__order").all()))
-    status = ApplicantStatusFilter(choices=Applicant.STATUS,
-                                   label=_("Status"))
-    last_name = django_filters.CharFilter(lookup_expr='icontains',
-                                          label=_("Surname"))
+    status = django_filters.ChoiceFilter(
+        label=_("Status"),
+        choices=Applicant.STATUS)
+    last_name = django_filters.CharFilter(
+        label=_("Surname"),
+        lookup_expr='icontains')
 
     class Meta:
         model = Applicant
