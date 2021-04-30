@@ -81,9 +81,9 @@ class Command(CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin, Bas
                             break
                         self.stdout.write(f"API request error for applicant {a}. Code: {e.code}. Message: {e.message}")
                         continue
-                    if send_email and exam.status != ChallengeStatuses.NEW:
-                        e, created = EmailQueueService.new_exam_invitation(a)
-                        emails_generated += created
+                if send_email and exam.status != ChallengeStatuses.NEW:
+                    e, created = EmailQueueService.new_exam_invitation(a)
+                    emails_generated += created
             self.stdout.write(f"\tNew exam records: {new_records}")
             self.stdout.write(f"\tTotal: {total}")
             if send_email:
