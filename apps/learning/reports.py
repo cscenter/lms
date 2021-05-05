@@ -563,13 +563,24 @@ class OfficialDiplomasReport(ProgressReport):
 
 
 class ProgressReportFull(ProgressReport):
-    def generate(self, queryset=None) -> DataFrame:
-        student_profiles = queryset or self.get_queryset()
-        headers = self._generate_headers()
-        data = [self._export_row(sp) for sp in student_profiles]
-        return DataFrame.from_records(columns=headers, data=data, index='ID')
+    # def generate(self, queryset=None) -> DataFrame:
+    #     student_profiles = queryset or self.get_queryset()
+    #     headers = self._generate_headers()
+    #     data = [self._export_row(sp) for sp in student_profiles]
+    #     return DataFrame.from_records(columns=headers, data=data, index='ID')
 
     def get_queryset(self, base_queryset=None):
+        enrollments_prefetch = get_enrollments_progress(
+            lookup='user__enrollment_set',
+        )
+        shad_courses_prefetch = get_shad_courses_progress(
+            lookup='user__shadcourserecord_set',
+        )
+        online_courses_prefetch = Prefetch('user__onlinecourserecord_set',
+                                           to_attr='online_courses')
+        projects_prefetch = get_projects_progress(
+            lookup='user__projectstudent_set')
+
         if base_queryset is None:
             base_queryset = (StudentProfile.objects
                              .filter(type__in=[StudentTypes.REGULAR,
@@ -628,6 +639,10 @@ class ProgressReportFull(ProgressReport):
                     Prefetch('user__applicant_set',
                              queryset=Applicant.objects.only('pk', 'user_id')),
                     'academic_disciplines',
+                    enrollments_prefetch,
+                    shad_courses_prefetch,
+                    online_courses_prefetch,
+                    projects_prefetch,
                     'graduate_profile__academic_disciplines'))
 
     def get_courses_headers(self, meta_courses):
@@ -635,7 +650,7 @@ class ProgressReportFull(ProgressReport):
             return []
         return [f"{course.name}, оценка" for course in meta_courses.values()]
 
-    def _generate_headers(self, **kwargs):
+    def _generate_headers_old(self, **kwargs):
         return [
             'ID',
             'Отделение',
@@ -667,8 +682,8 @@ class ProgressReportFull(ProgressReport):
             'Пройдено семестров НИР (закончили, успех)',
         ]
 
-    def _generate_headers_update(self, *, courses, meta_courses, shads_max, online_max,
-                                 projects_max):
+    def _generate_headers(self, *, courses, meta_courses, shads_max, online_max,
+                          projects_max, **kwargs):
         return [
             'ID',
             'Отделение',
@@ -704,19 +719,36 @@ class ProgressReportFull(ProgressReport):
             'Пройдено семестров практики(закончили, успех)',
             'Пройдено семестров НИР (закончили, успех)',
 
-            'Проекты за семестр "%s"' % self.target_semester,  # new
+            # 'Проекты за семестр "%s"' % self.target_semester,  # new
             *self.get_courses_headers(meta_courses),    # new
             *self.generate_shad_courses_headers(shads_max),  # new
             *self.generate_online_courses_headers(online_max),  # new
         ]
 
-    def _export_row_update(self, student_profile, **kwargs):
+    def _export_courses(self, student, courses, meta_courses) -> List[str]:
+        values = [''] * len(meta_courses)
+        for i, meta_course_id in enumerate(meta_courses):
+            if meta_course_id in student.unique_enrollments:
+                enrollment = student.unique_enrollments[meta_course_id]
+                values[i] = self.grade_getter(enrollment).lower()
+        return values
+
+    def _export_row(self, student_profile, *, courses, meta_courses, shads_max, online_max,
+                          projects_max, **kwargs):
         try:
             disciplines = student_profile.graduate_profile.academic_disciplines.all()
             graduation_year = student_profile.graduate_profile.graduation_year
         except GraduateProfile.DoesNotExist:
             disciplines = student_profile.academic_disciplines.all()
             graduation_year = ""
+
+        if student_profile.year_of_curriculum:
+            curriculum_term_index = get_term_index(
+                student_profile.year_of_curriculum,
+                SemesterTypes.AUTUMN)
+            term_order = self.target_semester.index - curriculum_term_index + 1
+        else:
+            term_order = "-"
 
         student = student_profile.user
         return [
@@ -737,7 +769,7 @@ class ProgressReportFull(ProgressReport):
             student_profile.get_level_of_education_on_admission_display(),  # Курс (на момент поступления)
             student_profile.year_of_admission,  # Год послутления
             student_profile.year_of_curriculum if student_profile.year_of_curriculum else "",
-            # >>> Добавить # Номер семестра обучения
+            term_order,# >>> Добавить # Номер семестра обучения
             graduation_year,  # Год выпуска
             # student.yandex_login,  # Яндекс ID
             # student.stepic_id if student.stepic_id else "",  # Stepik ID
@@ -754,13 +786,13 @@ class ProgressReportFull(ProgressReport):
             student_profile.success_practice,  # Пройдено семестров практики(закончили, успех)
             student_profile.success_research,  # Пройдено семестров НИР (закончили, успех)
 
-            # >>> Добавить 'Проекты за семестр "%s"' % self.target_semester,  # new
-            # >>> Добавить *self.get_courses_headers(meta_courses),  # new
-            # >>> Добавить *self.generate_shad_courses_headers(shads_max),  # new
-            # >>> Добавить *self.generate_online_courses_headers(online_max),  # new
+            # "\r\n".join(student.projects_eq_target_semester),  # >>> Добавить 'Проекты за семестр "%s"' % self.target_semester,  # new
+            *self._export_courses(student, courses, meta_courses), # >>> Добавить *self.get_courses_headers(meta_courses),  # new
+            *self._export_shad_courses(student, shads_max),  # >>> Добавить *self.generate_shad_courses_headers(shads_max),  # new
+            *self._export_online_courses(student, online_max),  # >>> Добавить *self.generate_online_courses_headers(online_max),  # new
         ]
 
-    def _export_row(self, student_profile, **kwargs):
+    def _export_row_old(self, student_profile, **kwargs):
         try:
             disciplines = student_profile.graduate_profile.academic_disciplines.all()
             graduation_year = student_profile.graduate_profile.graduation_year
