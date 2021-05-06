@@ -194,6 +194,28 @@ def test_new_comment_on_assignment_page(client, assert_redirect):
 
 
 @pytest.mark.django_db
+def test_that_first_loaded_solution_form(client):
+    student_profile = StudentProfileFactory()
+    student = student_profile.user
+    course = CourseFactory(main_branch=student_profile.branch,
+                           semester=SemesterFactory.create_current(),
+                           ask_ttc=False)
+    EnrollmentFactory(student_profile=student_profile,
+                      student=student,
+                      course=course)
+    assignment = AssignmentFactory(course=course)
+    student_assignment = (StudentAssignment.objects
+                          .get(assignment=assignment, student=student))
+    student_url = student_assignment.get_student_url()
+    client.login(student)
+    response = client.get(student_url)
+    assert smart_bytes('id="solution-form-wrapper" class="csc-well"') in response.content
+    assert smart_bytes('id="comment-form-wrapper" class="csc-well hidden"') in response.content
+    assert smart_bytes('button id="add-solution" class="btn btn-lg btn-link active"') in response.content
+    assert smart_bytes('button id="add-comment" class="btn btn-lg btn-link"') in response.content
+
+
+@pytest.mark.django_db
 def test_add_solution(client):
     student_profile = StudentProfileFactory()
     student = student_profile.user
