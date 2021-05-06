@@ -57,7 +57,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                     score = 0 if a["online_test__score"] is None else int(a["online_test__score"])
                     assert score < testing_passing_score
                     context = {
-                        'LOGIN': a["yandex_login"],
+                        'YANDEX_LOGIN': a["yandex_login"],
                         'TEST_SCORE': score,
                         'TEST_CONTEST_ID': a["online_test__yandex_contest_id"],
                     }

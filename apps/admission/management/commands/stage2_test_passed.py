@@ -75,7 +75,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
                     context = {
-                        'LOGIN': a["yandex_login"],
+                        'YANDEX_LOGIN': a["yandex_login"],
                         'TEST_SCORE': int(a["online_test__score"]),
                         'TEST_CONTEST_ID': a["online_test__yandex_contest_id"],
                         'EXAM_CONTEST_ID': a["exam__yandex_contest_id"],

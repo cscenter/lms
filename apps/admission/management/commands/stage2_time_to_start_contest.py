@@ -3,18 +3,16 @@ from post_office.utils import get_email_template
 from django.core.management.base import BaseCommand
 
 from admission.constants import ChallengeStatuses
-from admission.models import Test
+from admission.models import Exam
 from admission.services import EmailQueueService
 
 from ._utils import CurrentCampaignMixin, EmailTemplateMixin
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
-    help = """
-    Send notification to those who applied but haven't yet started the contest.
-    """
+    help = """Sends reminder that is a time to start exam yandex contest."""
 
-    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-testing-reminder"
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-exam-reminder"
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
@@ -26,7 +24,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             self.stdout.write(str(campaign))
             template_name = self.get_template_name(campaign, template_name_pattern)
             template = get_email_template(template_name)
-            queryset = (Test.objects
+            queryset = (Exam.objects
                         .filter(applicant__campaign_id=campaign.pk,
                                 applicant__is_unsubscribed=False,
                                 score__isnull=True,
@@ -40,6 +38,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                 template=template,
                 participants=queryset.iterator()
             )
+
             self.stdout.write("total: {}".format(queryset.count()))
             self.stdout.write("new: {}".format(generated))
         self.stdout.write("Done")

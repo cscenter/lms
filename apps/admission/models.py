@@ -491,7 +491,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
              .update(is_unsubscribed=True))
 
     def _assign_testing(self):
-        testing = Test(applicant=self, status=Test.NEW)
+        testing = Test(applicant=self, status=ChallengeStatuses.NEW)
         testing.save()
 
     def created_local(self, tz=None):
@@ -829,10 +829,6 @@ class ApplicantRandomizeContestMixin:
 class Test(TimeStampedModel, YandexContestIntegration,
            ApplicantRandomizeContestMixin):
     CONTEST_TYPE = Contest.TYPE_TEST
-
-    NEW = ChallengeStatuses.NEW
-    REGISTERED = ChallengeStatuses.REGISTERED
-    MANUAL = ChallengeStatuses.MANUAL
 
     applicant = models.OneToOneField(
         Applicant,

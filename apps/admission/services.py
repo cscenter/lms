@@ -338,3 +338,23 @@ class EmailQueueService:
                  to=interview.applicant.email)
          .exclude(status=EMAIL_STATUS.sent)
          .delete())
+
+    @staticmethod
+    def time_to_start_yandex_contest(*, campaign: Campaign,
+                                     template: EmailTemplate, participants):
+        email_from = get_email_from(campaign)
+        generated = 0
+        for participant in participants:
+            recipients = [participant["applicant__email"]]
+            if not Email.objects.filter(to=recipients, template=template).exists():
+                mail.send(recipients,
+                          sender=email_from,
+                          template=template,
+                          context={
+                              "CONTEST_ID": participant["yandex_contest_id"],
+                              "YANDEX_LOGIN": participant["applicant__yandex_login"],
+                          },
+                          render_on_delivery=True,
+                          backend='ses')
+                generated += 1
+        return generated
