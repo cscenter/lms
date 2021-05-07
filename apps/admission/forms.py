@@ -143,12 +143,36 @@ class InterviewAssignmentsForm(forms.ModelForm):
         self.helper.form_class = self.prefix
 
 
+# choices_csc = (
+#     ("", ""),
+#     (-2, "не брать ни сейчас, ни потом"),
+#     (-1, "не брать сейчас"),
+#     (0, "нейтрально"),
+#     (1, "можно взять"),
+#     (2, "точно нужно взять"))
+#
+# choices_yds = (
+#     ("", ""),
+#     (1, "не брать ни сейчас, ни потом"),
+#     (2, "не брать сейчас"),
+#     (3, "нейтрально"),
+#     (4, "можно взять"),
+#     (5, "точно нужно взять"))
+
+
 class InterviewCommentForm(forms.ModelForm):
     use_required_attribute = False
 
+    scale = forms.ChoiceField(choices=(
+                    # ("", ""),
+                    (1, "Computer Science Center"),
+                    (2, "Yandex Data School")), label='Шкала баллов')
+                    # (1, "1, 2, 3, 4, 5"),
+                    # (2, "-2,-1, 0, 1, 2")),)
+
     class Meta:
         model = Comment
-        fields = ["text", "score", "interview", "interviewer"]
+        fields = ["text", "scale", "score", "interview", "interviewer"]
         widgets = {
             'interview': forms.HiddenInput(),
             'interviewer': forms.HiddenInput(),
@@ -174,6 +198,7 @@ class InterviewCommentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
+            Div('scale'),
             Div('score'),
             Div('text'),
             'interview', 'interviewer',
