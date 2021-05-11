@@ -2,12 +2,13 @@
 FIXME: What the heck is going on here? Handler looks totally broken.
 """
 import logging
-
 from io import BytesIO
+
 from PIL import Image
 
-from django.core.files.uploadhandler import MemoryFileUploadHandler, \
-    StopUpload, TemporaryFileUploadHandler
+from django.core.files.uploadhandler import (
+    MemoryFileUploadHandler, StopUpload, TemporaryFileUploadHandler
+)
 
 logger = logging.getLogger(__name__)
 

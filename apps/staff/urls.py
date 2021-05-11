@@ -1,22 +1,22 @@
 from django.urls import include, path, re_path, register_converter
 
 from courses.urls import RE_COURSE_URI
-from learning.gradebook.views import GradeBookView, GradeBookCSVView, \
-    ImportAssignmentScoresByStepikIDView, \
-    ImportAssignmentScoresByYandexLoginView, \
-    ImportAssignmentScoresByEnrollmentIDView
+from learning.gradebook.views import (
+    GradeBookCSVView, GradeBookView, ImportAssignmentScoresByEnrollmentIDView,
+    ImportAssignmentScoresByStepikIDView, ImportAssignmentScoresByYandexLoginView
+)
 from staff.api.views import StudentSearchJSONView
-from staff.views import HintListView, StudentSearchView, ExportsView, \
-    FutureGraduateStatsView, FutureGraduateDiplomasTeXView, \
-    FutureGraduateDiplomasCSVView, ProgressReportFullView, \
-    OfficialDiplomasListView, OfficialDiplomasCSVView, OfficialDiplomasTeXView, \
-    ProgressReportForSemesterView, AdmissionApplicantsReportView, \
-    StudentFacesView, InterviewerFacesView, autograde_projects, \
-    CourseParticipantsIntersectionView, WillGraduateStatsReportView, \
-    SurveySubmissionsReportView, \
-    SurveySubmissionsStatsView, GradeBookListView, create_alumni_profiles, \
-    InvitationStudentsProgressReportView, StudentSearchCSVView, \
-    AdmissionExamReportView
+from staff.views import (
+    AdmissionApplicantsReportView, AdmissionExamReportView,
+    CourseParticipantsIntersectionView, ExportsView, FutureGraduateDiplomasCSVView,
+    FutureGraduateDiplomasTeXView, FutureGraduateStatsView, GradeBookListView,
+    HintListView, InterviewerFacesView, InvitationStudentsProgressReportView,
+    OfficialDiplomasCSVView, OfficialDiplomasListView, OfficialDiplomasTeXView,
+    ProgressReportForSemesterView, ProgressReportFullView, StudentFacesView,
+    StudentSearchCSVView, StudentSearchView, SurveySubmissionsReportView,
+    SurveySubmissionsStatsView, WillGraduateStatsReportView, autograde_projects,
+    create_alumni_profiles
+)
 
 app_name = 'staff'
 

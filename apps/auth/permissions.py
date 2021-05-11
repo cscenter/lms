@@ -1,10 +1,10 @@
-from abc import ABCMeta, abstractmethod
-from typing import Type, Dict, Set, Optional, Iterable, Union, NewType
+from abc import abstractmethod
+from typing import Dict, Iterable, Optional, Set, Type, Union
 
 from rest_framework.permissions import BasePermission
-from rules import RuleSet, Predicate, always_true
+from rules import Predicate, RuleSet, always_true
 
-from .errors import PermissionNotRegistered, AuthPermissionError
+from .errors import AuthPermissionError, PermissionNotRegistered
 
 PermissionId = str
 

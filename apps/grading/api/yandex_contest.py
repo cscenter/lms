@@ -1,7 +1,6 @@
-import io
 import logging
 import re
-from enum import IntEnum, Enum
+from enum import Enum, IntEnum
 
 import requests
 

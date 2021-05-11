@@ -1,11 +1,12 @@
+from model_utils.models import TimeStampedModel
+from taggit.managers import TaggableManager
+from taggit.models import TagBase, TaggedItemBase
+
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
-from model_utils.models import TimeStampedModel
-from taggit.managers import TaggableManager
-from taggit.models import TagBase, TaggedItemBase
 
 from core.utils import ru_en_mapping
 from info_blocks.managers import InfoBlockDefaultManager

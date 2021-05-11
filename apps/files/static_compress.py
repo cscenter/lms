@@ -1,12 +1,13 @@
+import errno
 import gzip
 import os
 from os.path import getatime, getctime, getmtime
 
 import brotli
-import errno
+from zopfli import gzip as zopfli
+
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.base import ContentFile
-from zopfli import gzip as zopfli
 
 __all__ = ["CompressMixin", "BrotliCompressor", "ZlibCompressor", "ZopfliCompressor"]
 

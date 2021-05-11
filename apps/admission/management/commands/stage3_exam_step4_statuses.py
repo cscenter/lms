@@ -4,6 +4,7 @@ from django.core.management import BaseCommand, CommandError
 from django.db.models import Q
 
 from admission.models import Applicant
+
 from ._utils import CurrentCampaignMixin
 
 

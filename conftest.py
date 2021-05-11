@@ -1,18 +1,21 @@
 from urllib.parse import urlparse
 
 import pytest
-from django.apps import apps
-from django.conf import settings
-from django.contrib.sites.models import Site
-from django.urls import resolve
 from post_office.models import EmailTemplate
 from pytest_django.lazy_django import skip_if_no_django
 
+from django.apps import apps
+from django.contrib.sites.models import Site
+from django.urls import resolve
+
 from core.models import SiteConfiguration
-from core.tests.factories import BranchFactory, CityFactory, \
-    SiteConfigurationFactory, SiteFactory
-from core.tests.settings import TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID, TEST_DOMAIN, ANOTHER_DOMAIN
-from core.tests.utils import TestClient, CSCTestCase
+from core.tests.factories import (
+    BranchFactory, CityFactory, SiteConfigurationFactory, SiteFactory
+)
+from core.tests.settings import (
+    ANOTHER_DOMAIN, ANOTHER_DOMAIN_ID, TEST_DOMAIN, TEST_DOMAIN_ID
+)
+from core.tests.utils import CSCTestCase, TestClient
 from learning.settings import Branches
 from notifications.models import Type
 from users.tests.factories import CuratorFactory
@@ -89,8 +92,8 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
                 "domain": domain,
                 "name": domain
             })
-        from django.db import connection
         from django.core.management.color import no_style
+        from django.db import connection
         sequence_sql = connection.ops.sequence_reset_sql(no_style(), [Site])
         with connection.cursor() as cursor:
             for sql in sequence_sql:
@@ -145,8 +148,9 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
 
         if apps.is_installed('admission'):
             # Create email templates
-            from admission.constants import INTERVIEW_FEEDBACK_TEMPLATE, \
-                APPOINTMENT_INVITATION_TEMPLATE
+            from admission.constants import (
+                APPOINTMENT_INVITATION_TEMPLATE, INTERVIEW_FEEDBACK_TEMPLATE
+            )
             template_names = (
                 APPOINTMENT_INVITATION_TEMPLATE,
                 INTERVIEW_FEEDBACK_TEMPLATE,

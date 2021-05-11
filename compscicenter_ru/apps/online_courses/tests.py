@@ -1,4 +1,5 @@
 import pytest
+
 from core.urls import reverse
 
 # TODO: tests for recent/passed courses

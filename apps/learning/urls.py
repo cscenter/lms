@@ -2,11 +2,13 @@ from django.conf.urls import include
 from django.urls import path, re_path
 
 from courses.urls import RE_COURSE_URI
-from learning.study.views import UsefulListView, InternshipListView, \
-    HonorCodeView
+from learning.study.views import HonorCodeView, InternshipListView, UsefulListView
 from learning.views import CourseInvitationEnrollView
-from .views import CourseNewsNotificationUpdate, \
-    CourseStudentsView, CourseEnrollView, CourseUnenrollView
+
+from .views import (
+    CourseEnrollView, CourseNewsNotificationUpdate, CourseStudentsView,
+    CourseUnenrollView
+)
 
 urlpatterns = [
     path("courses/", include([

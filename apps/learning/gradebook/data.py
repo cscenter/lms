@@ -4,15 +4,14 @@ from decimal import Decimal
 from typing import Dict
 
 import numpy as np
+
 from django.conf import settings
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
 
 from core.db.utils import normalize_score
-from courses.models import Course, Assignment
-from learning.models import StudentAssignment, Enrollment
+from courses.models import Assignment, Course
+from learning.models import Enrollment, StudentAssignment
 from learning.settings import GradeTypes
-
 
 __all__ = ('GradebookStudent', 'StudentProgress', 'GradeBookData',
            'gradebook_data')

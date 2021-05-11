@@ -1,15 +1,17 @@
 from typing import Iterable
 
+from rest_framework import serializers
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.views import generic
-from rest_framework import serializers
 
 from api.utils import requires_context
-from core.timezone import now_local, get_now_utc
-from courses.calendar import MonthFullWeeksEventsCalendar, \
-    WeekEventsCalendar, CalendarEvent
+from core.timezone import get_now_utc, now_local
+from courses.calendar import (
+    CalendarEvent, MonthFullWeeksEventsCalendar, WeekEventsCalendar
+)
 
 __all__ = ('MonthEventsCalendarView', 'WeekEventsView')
 

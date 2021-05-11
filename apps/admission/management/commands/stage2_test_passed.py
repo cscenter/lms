@@ -1,13 +1,17 @@
-from django.core.exceptions import ValidationError
-from django.core.management.base import BaseCommand
-from django.db import transaction
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
+from django.core.exceptions import ValidationError
+from django.core.management.base import BaseCommand
+from django.db import transaction
+
 from admission.models import Applicant
 from admission.services import get_email_from
-from ._utils import CurrentCampaignMixin, EmailTemplateMixin, validate_campaign_passing_score
+
+from ._utils import (
+    CurrentCampaignMixin, EmailTemplateMixin, validate_campaign_passing_score
+)
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
@@ -71,7 +75,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
                     context = {
-                        'LOGIN': a["yandex_login"],
+                        'YANDEX_LOGIN': a["yandex_login"],
                         'TEST_SCORE': int(a["online_test__score"]),
                         'TEST_CONTEST_ID': a["online_test__yandex_contest_id"],
                         'EXAM_CONTEST_ID': a["exam__yandex_contest_id"],

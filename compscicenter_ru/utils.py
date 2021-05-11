@@ -1,6 +1,7 @@
 from typing import List
 
 import attr
+
 from django.conf import settings
 
 from core.urls import reverse

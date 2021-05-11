@@ -1,17 +1,18 @@
 import pytest
 from bs4 import BeautifulSoup
+
 from django.forms import inlineformset_factory
 
 from core.admin import get_admin_url
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.urls import reverse
-from courses.admin import CourseTeacherInline, CourseBranchInline
+from courses.admin import CourseBranchInline, CourseTeacherInline
 from courses.constants import MaterialVisibilityTypes
-from courses.models import Assignment, AssignmentSubmissionFormats, Course, \
-    CourseTeacher, CourseBranch
-from courses.tests.factories import CourseFactory, SemesterFactory, \
-    MetaCourseFactory
+from courses.models import (
+    Assignment, AssignmentSubmissionFormats, Course, CourseBranch, CourseTeacher
+)
+from courses.tests.factories import CourseFactory, MetaCourseFactory, SemesterFactory
 from learning.settings import Branches, GradingSystems
 from users.tests.factories import CuratorFactory, TeacherFactory
 

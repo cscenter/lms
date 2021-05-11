@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import logging
 import smtplib
 import time
@@ -6,7 +5,8 @@ from datetime import datetime
 from functools import partial
 from typing import Dict
 
-from django.apps import apps
+from django_ses import SESBackend
+
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, get_connection
 from django.core.mail.backends import smtp
@@ -15,17 +15,14 @@ from django.template.loader import render_to_string
 from django.utils import translation
 from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
-from django.utils.html import strip_tags, linebreaks
+from django.utils.html import linebreaks, strip_tags
 from django.utils.module_loading import import_string
-from django_ses import SESBackend
 
 from core.locks import distributed_lock, get_shared_connection
-from core.models import SiteConfiguration, Branch
+from core.models import Branch, SiteConfiguration
 from core.urls import replace_hostname
 from courses.models import Course
-from learning.models import AssignmentNotification, \
-    CourseNewsNotification
-from notifications import NotificationTypes as notification_types
+from learning.models import AssignmentNotification, CourseNewsNotification
 from users.models import User
 
 logger = logging.getLogger(__name__)

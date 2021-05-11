@@ -1,8 +1,7 @@
 from django.contrib.auth import views
 from django.urls import path
 
-from auth.views import LoginView, LogoutView, pass_reset_view, \
-    pass_reset_confirm_view
+from auth.views import LoginView, LogoutView, pass_reset_confirm_view, pass_reset_view
 
 app_name = 'auth'
 

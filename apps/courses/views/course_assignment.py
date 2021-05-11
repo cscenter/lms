@@ -1,9 +1,8 @@
-import os
+from vanilla import CreateView, DeleteView, UpdateView
 
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
-from vanilla import CreateView, UpdateView, DeleteView
 
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse

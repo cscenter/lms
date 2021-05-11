@@ -1,11 +1,12 @@
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from courses.models import Assignment, AssignmentSubmissionFormats
+from grading.constants import CheckingSystemTypes, SubmissionStatus
 from grading.models import Submission
-from grading.constants import SubmissionStatus, CheckingSystemTypes
-from grading.tasks import add_new_submission_to_checking_system, \
-    retrieve_yandex_contest_checker_compilers
-from courses.models import AssignmentSubmissionFormats, Assignment
+from grading.tasks import (
+    add_new_submission_to_checking_system, retrieve_yandex_contest_checker_compilers
+)
 
 
 @receiver(post_save, sender=Assignment)

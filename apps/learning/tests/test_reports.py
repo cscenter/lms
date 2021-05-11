@@ -1,28 +1,30 @@
-# -*- coding: utf-8 -*-
 import datetime
 
 import pytest
-from django.utils.encoding import smart_bytes
 from pandas import DataFrame
+
+from django.utils.encoding import smart_bytes
 
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN
-from courses.utils import get_term_by_index
-from learning.reports import FutureGraduateDiplomasReport, ProgressReportFull, \
-    ProgressReportForSemester, ProgressReport, OfficialDiplomasReport
-from learning.settings import GradingSystems, StudentStatuses, GradeTypes, \
-    Branches
-from learning.tests.factories import SemesterFactory, CourseFactory, \
-    EnrollmentFactory, GraduateProfileFactory
-from projects.constants import ProjectTypes, ProjectGradeTypes
+from learning.reports import (
+    FutureGraduateDiplomasReport, OfficialDiplomasReport, ProgressReport,
+    ProgressReportForSemester, ProgressReportFull
+)
+from learning.settings import Branches, GradeTypes, GradingSystems, StudentStatuses
+from learning.tests.factories import (
+    CourseFactory, EnrollmentFactory, GraduateProfileFactory, SemesterFactory
+)
+from projects.constants import ProjectGradeTypes, ProjectTypes
 from projects.models import Project
-from projects.tests.factories import ProjectFactory, SupervisorFactory, \
-    ProjectStudentFactory
-from users.constants import Roles
-from users.tests.factories import SHADCourseRecordFactory, \
-    OnlineCourseRecordFactory, TeacherFactory, StudentFactory, \
-    StudentProfileFactory
+from projects.tests.factories import (
+    ProjectFactory, ProjectStudentFactory, SupervisorFactory
+)
+from users.tests.factories import (
+    OnlineCourseRecordFactory, SHADCourseRecordFactory, StudentFactory,
+    StudentProfileFactory, TeacherFactory
+)
 
 
 def check_value_for_header(report, header, row_index, expected_value):

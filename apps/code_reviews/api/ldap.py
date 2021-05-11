@@ -2,12 +2,13 @@ import logging
 import platform
 import sys
 from contextlib import contextmanager
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
 
 import ldap
+from ldap.modlist import addModlist
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from ldap.modlist import addModlist
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@ from django.conf import settings
 from django.dispatch import Signal
 from django.utils import timezone
 
-from notifications.registry import registry, NotRegistered
+from notifications.registry import NotRegistered, registry
 
 notify = Signal(providing_args=[
     'type', 'recipient', 'actor', 'verb', 'action_object',
@@ -19,9 +19,10 @@ def notify_handler(type, **kwargs):
     Dispatch data to appropriate signal handler based on notification type
     """
     from django.contrib.contenttypes.models import ContentType
+
     from notifications import NotificationTypes
     from notifications.models import Notification
-    from users.models import User, Group
+    from users.models import Group, User
 
     if not isinstance(type, NotificationTypes):
         raise ValueError("Notification type must be an instance "

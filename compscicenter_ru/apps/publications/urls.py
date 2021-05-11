@@ -1,7 +1,9 @@
 from django.urls import path
 
-from .views import ProjectPublicationView, RecordedEventView, ProjectsListView, \
-    ProjectPracticeView, ProjectResearchWorkView
+from .views import (
+    ProjectPracticeView, ProjectPublicationView, ProjectResearchWorkView,
+    ProjectsListView, RecordedEventView
+)
 
 urlpatterns = [
     path('projects/', ProjectsListView.as_view(), name="public_projects"),

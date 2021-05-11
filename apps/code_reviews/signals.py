@@ -3,8 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from code_reviews.constants import GROUPS_IMPORT_TO_GERRIT
-from code_reviews.tasks import create_account_in_gerrit, \
-    update_password_in_gerrit
+from code_reviews.tasks import create_account_in_gerrit, update_password_in_gerrit
 from users.models import User
 
 

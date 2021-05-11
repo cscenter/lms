@@ -1,12 +1,13 @@
-from django.db.models import Q
 from post_office import mail
 
-from courses.models import CourseClass
-from courses.constants import ClassTypes
+from django.db.models import Q
+
 from core.timezone import now_local
+from courses.constants import ClassTypes
+from courses.models import CourseClass
 from learning.models import Enrollment
-from surveys.constants import FormTemplates, STATUS_DRAFT, STATUS_TEMPLATE
-from surveys.models import Form, FieldChoice, CourseSurvey
+from surveys.constants import STATUS_DRAFT, STATUS_TEMPLATE, FormTemplates
+from surveys.models import CourseSurvey, FieldChoice, Form
 
 OFFLINE_COURSES_Q = ['lectures_assessment', 'attendance_frequency']
 

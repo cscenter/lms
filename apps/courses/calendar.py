@@ -3,19 +3,20 @@ from abc import ABC
 from calendar import Calendar
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import List, Iterable, NewType, Callable
+from typing import Callable, Iterable, List, NewType
 
 import attr
 from dateutil.relativedelta import relativedelta
-from dateutil.rrule import rrule, DAILY
+from dateutil.rrule import DAILY, rrule
+from isoweek import Week
+
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
-from isoweek import Week
 
 from core.timezone import Timezone
 from core.utils import chunks
 from courses.constants import MONDAY_WEEKDAY, WEEKDAY_TITLES
-from courses.models import CourseClass, LearningSpace, Course
+from courses.models import Course, CourseClass, LearningSpace
 from courses.utils import MonthPeriod, extended_month_date_range
 
 __all__ = ('CalendarEvent', 'TimetableEvent', 'CalendarEventFactory',

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import factory
 import pytz
-from django.conf import settings
-from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 
-from core.models import City, Branch, Location, SiteConfiguration, University
+from django.conf import settings
+from django.contrib.sites.models import Site
+
+from core.models import Branch, City, Location, SiteConfiguration, University
 from core.tests.settings import TEST_DOMAIN
 from learning.settings import Branches
 

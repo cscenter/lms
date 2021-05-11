@@ -7,4 +7,4 @@ class CodeReviewsConfig(AppConfig):
     verbose_name = _("Code Review")
 
     def ready(self):
-        from . import signals
+        from . import signals  # pylint: disable=unused-import

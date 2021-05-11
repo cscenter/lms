@@ -1,6 +1,7 @@
 from dal import autocomplete
 
 from users.mixins import CuratorOnlyMixin
+
 from .models import InfoBlockTag
 
 

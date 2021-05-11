@@ -3,7 +3,7 @@
 from django.core.management import BaseCommand
 
 from learning.models import Enrollment
-from learning.settings import StudentStatuses, GradeTypes
+from learning.settings import GradeTypes, StudentStatuses
 from users.constants import Roles
 from users.models import User
 

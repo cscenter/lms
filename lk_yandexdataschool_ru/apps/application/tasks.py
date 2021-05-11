@@ -1,10 +1,13 @@
+from django_rq import job
+
 from django.conf import settings
 from django.utils import translation
-from django_rq import job
 
 from admission.models import Applicant
 from admission.tasks import register_in_yandex_contest
-from lk_yandexdataschool_ru.apps.application.api.serializers import ApplicantYandexFormSerializer
+from lk_yandexdataschool_ru.apps.application.api.serializers import (
+    ApplicantYandexFormSerializer
+)
 
 
 @job('high')

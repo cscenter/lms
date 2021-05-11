@@ -2,7 +2,6 @@ from typing import Optional
 
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist
-from django.db.models import Model
 
 from .typing import Timezone
 

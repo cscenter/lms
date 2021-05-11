@@ -6,25 +6,27 @@ import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
+
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
-from core.tests.factories import LocationFactory, BranchFactory
+from core.tests.factories import BranchFactory, LocationFactory
 from core.timezone import now_local
 from core.urls import reverse
 from courses.constants import MaterialVisibilityTypes
 from courses.forms import CourseClassForm
 from courses.models import CourseClass
-from courses.tests.factories import CourseClassFactory, CourseFactory, \
-    SemesterFactory, CourseClassAttachmentFactory, \
-    LearningSpaceFactory
+from courses.tests.factories import (
+    CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
+    LearningSpaceFactory, SemesterFactory
+)
 from learning.models import StudentGroup
 from learning.services import EnrollmentService, StudentGroupService
 from learning.tests.factories import EnrollmentFactory
-from users.tests.factories import TeacherFactory, StudentProfileFactory, CuratorFactory
+from users.tests.factories import CuratorFactory, StudentProfileFactory, TeacherFactory
 
 
 @pytest.mark.django_db

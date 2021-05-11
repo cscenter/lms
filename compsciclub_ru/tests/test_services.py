@@ -2,7 +2,7 @@ import pytest
 
 from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN
-from courses.tests.factories import SemesterFactory, CourseFactory, CourseClassFactory
+from courses.tests.factories import CourseClassFactory, CourseFactory, SemesterFactory
 from learning.services import get_classes
 from learning.settings import Branches
 

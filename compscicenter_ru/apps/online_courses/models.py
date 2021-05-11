@@ -1,11 +1,12 @@
 from typing import NamedTuple
 
+from model_utils.models import TimeFramedModel, TimeStampedModel
+from sorl.thumbnail import ImageField
+
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
-from model_utils.models import TimeStampedModel, TimeFramedModel
-from sorl.thumbnail import ImageField
 
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
 

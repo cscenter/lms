@@ -1,9 +1,10 @@
+from django_filters import ChoiceFilter, Filter
+from django_filters.constants import EMPTY_VALUES
+from django_filters.rest_framework import FilterSet
+
 from django import forms
 from django.conf import settings
 from django.db.models import Q
-from django_filters import Filter, ChoiceFilter
-from django_filters.constants import EMPTY_VALUES
-from django_filters.rest_framework import FilterSet
 
 from core.models import Branch
 from courses.constants import SemesterTypes

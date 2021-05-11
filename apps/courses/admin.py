@@ -1,25 +1,29 @@
 from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
-from django import forms
+from modeltranslation.admin import TranslationAdmin
+
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
 from django.forms import BaseInlineFormSet
 from django.utils.translation import gettext_lazy as _
-from modeltranslation.admin import TranslationAdmin
 
 from core.admin import meta
 from core.models import Branch
 from core.timezone.fields import TimezoneAwareDateTimeField
-from core.timezone.forms import TimezoneAwareAdminForm, \
-    TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
-from core.utils import is_club_site, admin_datetime
+from core.timezone.forms import (
+    TimezoneAwareAdminForm, TimezoneAwareAdminSplitDateTimeWidget,
+    TimezoneAwareSplitDateTimeField
+)
+from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from courses.models import CourseTeacher, Course, CourseClassAttachment, \
-    Assignment, MetaCourse, Semester, CourseClass, CourseNews, \
-    AssignmentAttachment, LearningSpace, CourseReview, CourseBranch
+from courses.models import (
+    Assignment, AssignmentAttachment, Course, CourseBranch, CourseClass,
+    CourseClassAttachment, CourseNews, CourseReview, CourseTeacher, LearningSpace,
+    MetaCourse, Semester
+)
 from courses.services import CourseService
-from learning.models import AssignmentGroup, StudentGroup, EnrollmentPeriod
+from learning.models import AssignmentGroup, EnrollmentPeriod, StudentGroup
 from learning.services import AssignmentService
 
 

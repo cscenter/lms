@@ -1,27 +1,24 @@
-# -*- coding: utf-8 -*-
-
 import logging
 from itertools import groupby
 from typing import Optional
 
-from django.apps import apps
+from django_filters.views import BaseFilterView, FilterMixin
+from extra_views.formsets import BaseModelFormSetView
+from vanilla.model_views import CreateView
+
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
-from django.db.models import Prefetch, Count, Window, F, Q
+from django.db.models import Count, F, Prefetch, Q, Window
 from django.db.models.functions import FirstValue, Lead
 from django.forms import modelformset_factory
-from django.http import Http404, HttpResponse, HttpResponseForbidden, \
-    HttpResponseRedirect
+from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect
 from django.http.response import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
-from django.views import generic, View
-from django.views.generic.edit import FormMixin, BaseUpdateView, ModelFormMixin
-from django_filters.views import BaseFilterView, FilterMixin
-from extra_views.formsets import BaseModelFormSetView
-from vanilla.model_views import CreateView
+from django.views import View, generic
+from django.views.generic.edit import BaseUpdateView, FormMixin, ModelFormMixin
 
 from auth.mixins import PermissionRequiredMixin
 from core import comment_persistence
@@ -35,19 +32,24 @@ from files.views import ProtectedFileDownloadView
 from notifications import NotificationTypes
 from notifications.signals import notify
 from projects.constants import ProjectTypes
-from projects.filters import ProjectsFilter, CurrentTermProjectsFilter
-from projects.forms import ReportCommentForm, ReportReviewForm, \
-    ReportStatusForm, ReportSummarizeForm, ReportForm, \
-    ReportCuratorAssessmentForm, StudentResultsModelForm, PracticeCriteriaForm, \
-    ReportCommentModalForm
-from projects.models import Project, ProjectStudent, Report, \
-    ReportComment, Review, ReportingPeriod, ReportingPeriodKey, PracticeCriteria
-from projects.permissions import UpdateReportComment, ViewReportAttachment, \
-    ViewReportCommentAttachment
+from projects.filters import CurrentTermProjectsFilter, ProjectsFilter
+from projects.forms import (
+    PracticeCriteriaForm, ReportCommentForm, ReportCommentModalForm,
+    ReportCuratorAssessmentForm, ReportForm, ReportReviewForm, ReportStatusForm,
+    ReportSummarizeForm, StudentResultsModelForm
+)
+from projects.models import (
+    PracticeCriteria, Project, ProjectStudent, Report, ReportComment, ReportingPeriod,
+    ReportingPeriodKey, Review
+)
+from projects.permissions import (
+    UpdateReportComment, ViewReportAttachment, ViewReportCommentAttachment
+)
 from projects.services import autocomplete_review_stage
-from users.constants import Roles, GenderTypes
-from users.mixins import ProjectReviewerGroupOnlyMixin, StudentOnlyMixin, \
-    CuratorOnlyMixin
+from users.constants import GenderTypes, Roles
+from users.mixins import (
+    CuratorOnlyMixin, ProjectReviewerGroupOnlyMixin, StudentOnlyMixin
+)
 from users.models import User
 
 __all__ = (

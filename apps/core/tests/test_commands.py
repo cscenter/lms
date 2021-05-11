@@ -1,4 +1,5 @@
 import pytest
+
 from django.core import management
 
 from core.models import SiteConfiguration

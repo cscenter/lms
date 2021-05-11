@@ -3,11 +3,13 @@ from datetime import timedelta
 from typing import Optional
 
 import django_rq
-from django.db import transaction
 from django_rq import job
 
-from grading.api.yandex_contest import YandexContestAPI, Unavailable, \
-    ContestAPIError, SubmissionVerdict
+from django.db import transaction
+
+from grading.api.yandex_contest import (
+    ContestAPIError, SubmissionVerdict, Unavailable, YandexContestAPI
+)
 
 logger = logging.getLogger(__name__)
 

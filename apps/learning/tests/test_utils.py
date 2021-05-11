@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 from core.tests.utils import CSCTestCase
-
 from learning.utils import split_on_condition
 
 

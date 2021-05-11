@@ -1,16 +1,18 @@
 import binascii
 import random
 from os import urandom as generate_bytes
-from typing import List, Tuple
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
+
 from django.utils import timezone
 from django.utils.encoding import force_bytes
 
 from api.models import Token
-from api.settings import TOKEN_TTL, MIN_REFRESH_INTERVAL, \
-    AUTH_TOKEN_CHARACTER_LENGTH, SECURE_HASH_ALGORITHM, TOKEN_KEY_LENGTH
+from api.settings import (
+    AUTH_TOKEN_CHARACTER_LENGTH, MIN_REFRESH_INTERVAL, SECURE_HASH_ALGORITHM,
+    TOKEN_KEY_LENGTH, TOKEN_TTL
+)
 
 
 def create_token_string():

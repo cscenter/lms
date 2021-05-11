@@ -4,9 +4,8 @@ import pytest
 from auth.mixins import PermissionRequiredMixin
 from courses.models import MetaCourse
 from courses.permissions import ChangeMetaCourse
-from courses.tests.factories import MetaCourseFactory, CourseFactory
-from users.constants import Roles
-from users.tests.factories import UserFactory, CuratorFactory
+from courses.tests.factories import CourseFactory, MetaCourseFactory
+from users.tests.factories import CuratorFactory, UserFactory
 
 
 @pytest.mark.django_db

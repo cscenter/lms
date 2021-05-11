@@ -2,20 +2,20 @@ from django.core.exceptions import ValidationError
 from django.core.management import BaseCommand, CommandError
 
 from admission.constants import ChallengeStatuses
-from admission.models import Applicant, Exam, Contest
-from grading.api.yandex_contest import YandexContestAPI, \
-    RegisterStatus, ContestAPIError
-from ._utils import CurrentCampaignMixin, CustomizeQueryMixin, \
-    EmailTemplateMixin, APPROVAL_DIALOG, validate_campaign_passing_score, validate_campaign_contests
-from ...services import EmailQueueService
+from admission.models import Applicant, Contest, Exam
+from admission.services import EmailQueueService
+from grading.api.yandex_contest import ContestAPIError, RegisterStatus, YandexContestAPI
+
+from ._utils import (
+    APPROVAL_DIALOG, CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin,
+    validate_campaign_contests, validate_campaign_passing_score
+)
 
 
-# TODO: filter by status instead of online test exam results?
-class Command(CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin,
-              BaseCommand):
+class Command(CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin, BaseCommand):
     help = """
-    For those who passed testing (score >= passing_score) create 
-    exam record and register in yandex contest.
+    Create exam record and register in yandex contest those who are
+    permitted to exam stage. Optionally send email notification.
     """
 
     def add_arguments(self, parser):
@@ -26,6 +26,10 @@ class Command(CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin,
             help='Send notification with details')
 
     def handle(self, *args, **options):
+        """
+        Note:
+            This command should be safe for subsequent calls.
+        """
         campaigns = self.get_current_campaigns(options, confirm=False)
 
         send_email = options['send_email']
@@ -60,29 +64,26 @@ class Command(CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin,
             new_records = 0
             emails_generated = 0
             applicants = (manager.filter(campaign_id=campaign.pk,
-                                         online_test__score__gte=campaign.online_test_passing_score))
+                                         # TODO: Add test instead (compare total records with status)
+                                         # online_test__score__gte=campaign.online_test_passing_score,
+                                         status=Applicant.PERMIT_TO_EXAM))
             for a in applicants:
-                exam, created = Exam.objects.get_or_create(
-                    applicant=a,
-                    defaults={"status": ChallengeStatuses.NEW})
-                if created:
-                    new_records += 1
+                exam, created = Exam.objects.get_or_create(applicant=a,
+                                                           defaults={"status": ChallengeStatuses.NEW})
+                new_records += created
                 total += 1
-                if created or exam.status == ChallengeStatuses.NEW:
+                if exam.status == ChallengeStatuses.NEW:
                     try:
                         exam.register_in_contest(api)
                     except ContestAPIError as e:
                         if e.code == RegisterStatus.BAD_TOKEN:
                             self.stdout.write(f"Bad campaign token {campaign}")
                             break
-                        self.stdout.write(
-                            f"API request error for applicant {a}. "
-                            f"Code: {e.code}. Message: {e.message}"
-                        )
+                        self.stdout.write(f"API request error for applicant {a}. Code: {e.code}. Message: {e.message}")
                         continue
-                    if send_email and exam.status != ChallengeStatuses.NEW:
-                        e, created = EmailQueueService.new_exam_invitation(a)
-                        emails_generated += created
+                if send_email and exam.status != ChallengeStatuses.NEW:
+                    e, created = EmailQueueService.new_exam_invitation(a)
+                    emails_generated += created
             self.stdout.write(f"\tNew exam records: {new_records}")
             self.stdout.write(f"\tTotal: {total}")
             if send_email:

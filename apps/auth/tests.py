@@ -2,10 +2,11 @@ import pytest
 import rules
 
 from auth.backends import RBACModelBackend, RBACPermissions
-from auth.permissions import add_perm, perm_registry, Permission, Role
-from auth.registry import role_registry, role_registry
+from auth.permissions import Permission, Role, perm_registry
+from auth.registry import role_registry
 from users.tests.factories import UserFactory
-from .errors import AlreadyRegistered, PermissionNotRegistered
+
+from .errors import PermissionNotRegistered
 
 
 class Permission1(Permission):

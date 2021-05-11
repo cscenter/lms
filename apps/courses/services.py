@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple
 from babel.dates import get_timezone_location
 
 from courses.constants import TeacherRoles
-from courses.models import CourseReview, Course, CourseBranch
+from courses.models import Course, CourseBranch, CourseReview
 from courses.utils import get_terms_in_range
 
 

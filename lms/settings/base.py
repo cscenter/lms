@@ -1,8 +1,9 @@
 import logging
 import warnings
 
-import django
 import environ
+
+import django
 
 from core.settings.base import *
 

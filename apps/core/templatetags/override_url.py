@@ -2,7 +2,6 @@ from django.template import Library
 
 from core.urls import reverse
 
-
 register = Library()
 
 UNSET = object()

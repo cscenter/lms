@@ -1,17 +1,18 @@
-from django.conf import settings
-from django.core.cache import caches, InvalidCacheBackendError
-from django.utils.encoding import force_bytes
 from rest_framework import serializers
 
+from django.conf import settings
+from django.core.cache import InvalidCacheBackendError, caches
+from django.utils.encoding import force_bytes
+
 from api.utils import make_api_fragment_key
+from compscicenter_ru.utils import course_public_url
 from core.api.serializers import BranchSerializer
 from core.utils import render_markdown
 from courses.api.serializers import CourseSerializer
 from courses.models import Course, CourseTeacher
-from compscicenter_ru.utils import course_public_url
 from learning.models import GraduateProfile
 from users.api.serializers import PhotoSerializerField
-from users.models import User, StudentProfile
+from users.models import StudentProfile, User
 
 
 class CourseRelatedField(serializers.RelatedField):

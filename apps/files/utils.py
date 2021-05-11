@@ -2,11 +2,11 @@ import os
 from typing import Optional
 
 import requests
-from django.apps import apps
+from nbconvert import HTMLExporter
+
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models.fields.files import FieldFile
-from nbconvert import HTMLExporter
 
 from files.tasks import logger
 

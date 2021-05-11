@@ -1,27 +1,27 @@
-# -*- coding: utf-8 -*-
 import math
 import os
 from decimal import Decimal
-from typing import NamedTuple, Dict
+from typing import Dict, NamedTuple
+
+from djchoices import C, DjangoChoices
+from model_utils.models import TimeStampedModel
 
 from django.apps import apps
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
-from django.db.models import Q, F
-from django.utils import timezone, formats
+from django.db.models import F, Q
+from django.utils import formats, timezone
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, C
-from model_utils.models import TimeStampedModel
 
 from core.db.fields import ScoreField
 from core.db.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch
-from core.timezone import now_local, TimezoneAwareMixin
+from core.timezone import TimezoneAwareMixin, now_local
 from core.urls import reverse
 from core.utils import hashids
 from courses.constants import SemesterTypes
@@ -29,10 +29,11 @@ from courses.models import Semester
 from courses.utils import get_current_term_pair
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
-from learning.settings import Branches
 from notifications.signals import notify
-from projects.constants import ProjectTypes, EDITING_REPORT_COMMENT_AVAIL, ProjectGradeTypes
-from users.constants import Roles, GenderTypes
+from projects.constants import (
+    EDITING_REPORT_COMMENT_AVAIL, ProjectGradeTypes, ProjectTypes
+)
+from users.constants import GenderTypes, Roles
 
 CURATOR_SCORE_FIELDS = [
     "score_quality",

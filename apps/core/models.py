@@ -1,19 +1,19 @@
 from base64 import urlsafe_b64encode
-from typing import NamedTuple, Dict, Union, NewType, List
+from typing import Dict, List, NamedTuple, NewType, Union
 
-import pytz
 from bitfield import BitField
 from cryptography.fernet import Fernet
+
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
-from django.utils.encoding import smart_str, force_bytes, force_str
+from django.utils.encoding import force_bytes, force_str, smart_str
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from core.db.fields import TimeZoneField
 from core.db.models import ConfigurationModel
-from core.timezone import Timezone, TimezoneAwareMixin
+from core.timezone import TimezoneAwareMixin
 from core.urls import reverse
 
 

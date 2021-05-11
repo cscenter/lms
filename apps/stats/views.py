@@ -1,24 +1,24 @@
 import json
 
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from django.conf import settings
 from django.db.models import Q
 from django.utils.timezone import now
 from django.views import generic
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
-from admission.models import Campaign, Interview, Comment
+from admission.models import Campaign, Comment, Interview
 from core.models import Branch
 from core.utils import bucketize
 from courses.constants import SemesterTypes
 from courses.models import Course, Semester
 from courses.utils import get_term_index
-from learning.settings import StudentStatuses, GradeTypes
+from learning.settings import GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
-from users.constants import Roles
 from users.managers import get_enrollments_progress, get_projects_progress
 from users.mixins import CuratorOnlyMixin
-from users.models import User, StudentProfile
+from users.models import StudentProfile
 
 
 class StatsIndexView(CuratorOnlyMixin, generic.TemplateView):

@@ -1,10 +1,11 @@
-import fakeredis
 import pytest
+
 from django.core.files.base import ContentFile
 
 from courses.constants import ClassTypes, MaterialVisibilityTypes
-from courses.tests.factories import CourseFactory, CourseClassFactory, \
-    CourseClassAttachmentFactory
+from courses.tests.factories import (
+    CourseClassAttachmentFactory, CourseClassFactory, CourseFactory
+)
 
 
 @pytest.mark.django_db

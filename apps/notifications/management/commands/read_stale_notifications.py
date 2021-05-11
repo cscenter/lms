@@ -2,9 +2,8 @@
 
 from django.core.management.base import BaseCommand
 
-from learning.models import AssignmentNotification, \
-    CourseNewsNotification
 from courses.models import Semester
+from learning.models import AssignmentNotification, CourseNewsNotification
 
 
 class Command(BaseCommand):

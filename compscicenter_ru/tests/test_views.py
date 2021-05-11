@@ -1,6 +1,7 @@
 import datetime
 
 import pytest
+
 from django.contrib.sites.models import Site
 from django.core.cache import cache
 
@@ -11,8 +12,9 @@ from core.urls import reverse
 from courses.services import CourseService
 from learning.models import GraduateProfile
 from learning.settings import Branches
-from learning.tests.factories import GraduateProfileFactory, MetaCourseFactory, \
-    CourseFactory
+from learning.tests.factories import (
+    CourseFactory, GraduateProfileFactory, MetaCourseFactory
+)
 from study_programs.tests.factories import AcademicDisciplineFactory
 
 

@@ -1,7 +1,8 @@
-from django_filters import FilterSet, ChoiceFilter
+from django_filters import ChoiceFilter, FilterSet
+
 from django.utils.translation import gettext_lazy as _
 
-from learning.models import StudentAssignment, StudentGroup, Enrollment
+from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.services import StudentGroupService
 
 filter_by_score = (

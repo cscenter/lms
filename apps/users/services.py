@@ -1,6 +1,6 @@
 import datetime
 from collections import defaultdict
-from typing import List, Dict
+from typing import Dict, List
 
 from django.contrib.sites.models import Site
 from django.core.cache import cache
@@ -8,8 +8,8 @@ from django.db import transaction
 from django.utils.timezone import now
 
 from learning.models import GraduateProfile
-from learning.settings import GradeTypes, StudentStatuses
-from users.models import OnlineCourseRecord, StudentProfile, User
+from learning.settings import StudentStatuses
+from users.models import OnlineCourseRecord, StudentProfile
 
 AccountId = int
 
@@ -26,9 +26,10 @@ def get_student_progress(queryset,
         until_term: Get records before this term (inclusive)
     """
 
-    from .models import SHADCourseRecord
     from learning.models import Enrollment
     from projects.models import ProjectStudent
+
+    from .models import SHADCourseRecord
 
     users = set(queryset.values_list('user_id', flat=True))
     progress: Dict[AccountId, Dict] = defaultdict(dict)

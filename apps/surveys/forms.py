@@ -5,8 +5,7 @@ from django.db import transaction
 from django.db.models import Prefetch
 
 from surveys.constants import FIELD_CLASSES, FieldType
-from surveys.models import FieldEntry, FormSubmission, Form, Field, FieldChoice, \
-    CourseSurvey
+from surveys.models import CourseSurvey, Field, FieldChoice, FieldEntry, FormSubmission
 
 
 class FormBuilder(forms.ModelForm):

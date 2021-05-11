@@ -2,16 +2,17 @@ from io import StringIO as OutputIO
 from unittest.mock import MagicMock
 
 import pytest
+
 from django.core import mail, management
 
 from core.tests.factories import BranchFactory
 from learning.models import AssignmentNotification
-from learning.tests.factories import AssignmentNotificationFactory, \
-    CourseNewsNotificationFactory, EnrollmentFactory, CourseFactory
-from notifications.management.commands.notify import \
-    resolve_course_participant_branch
-from users.tests.factories import StudentFactory, TeacherFactory, \
-    CuratorFactory
+from learning.tests.factories import (
+    AssignmentNotificationFactory, CourseFactory, CourseNewsNotificationFactory,
+    EnrollmentFactory
+)
+from notifications.management.commands.notify import resolve_course_participant_branch
+from users.tests.factories import CuratorFactory, StudentFactory, TeacherFactory
 
 
 @pytest.mark.django_db

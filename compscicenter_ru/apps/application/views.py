@@ -2,6 +2,13 @@
 
 from functools import wraps
 
+from social_core.actions import do_auth
+from social_core.exceptions import MissingBackend, SocialAuthBaseException
+from social_core.storage import UserMixin
+from social_core.utils import user_is_authenticated
+from social_django.models import DjangoStorage
+from social_django.strategy import DjangoStrategy
+
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.db.models import F
@@ -11,12 +18,6 @@ from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
-from social_core.actions import do_auth
-from social_core.exceptions import MissingBackend, SocialAuthBaseException
-from social_core.storage import UserMixin
-from social_core.utils import user_is_authenticated
-from social_django.models import DjangoStorage
-from social_django.strategy import DjangoStrategy
 
 from admission.constants import WHERE_DID_YOU_LEARN
 from admission.models import Applicant, Campaign

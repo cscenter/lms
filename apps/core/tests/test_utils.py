@@ -2,7 +2,7 @@ import pytest
 
 from core.models import Branch
 from core.tests.factories import BranchFactory
-from core.utils import get_youtube_video_id, queryset_iterator, instance_memoize
+from core.utils import get_youtube_video_id, instance_memoize, queryset_iterator
 
 
 def test_get_youtube_video_id():

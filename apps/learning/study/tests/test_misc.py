@@ -3,27 +3,25 @@ import datetime
 import pytest
 import pytz
 from bs4 import BeautifulSoup
-from django.utils import timezone, formats
+
+from django.utils import formats, timezone
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.urls import reverse
-from courses.tests.factories import SemesterFactory, CourseFactory, \
-    AssignmentFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from courses.utils import get_current_term_pair
-from learning.permissions import ViewOwnStudentAssignments, ViewCourses
-from learning.services import EnrollmentService, CourseRole, course_access_role, \
-    get_student_profile
-from learning.settings import GradeTypes, StudentStatuses, Branches
+from learning.permissions import ViewOwnStudentAssignments
+from learning.services import CourseRole, course_access_role, get_student_profile
+from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import *
 from learning.tests.factories import EnrollmentFactory, StudentAssignmentFactory
 from projects.constants import ProjectTypes
-from projects.tests.factories import ReportingPeriodFactory, \
-    ProjectStudentFactory, ProjectFactory
-from users.constants import Roles
-from users.models import UserGroup
+from projects.tests.factories import (
+    ProjectFactory, ProjectStudentFactory, ReportingPeriodFactory
+)
 from users.tests.factories import *
 from users.tests.factories import StudentFactory, StudentProfileFactory
 
@@ -194,7 +192,7 @@ def test_course_list(client, settings):
     course_spb = CourseFactory(semester=s, main_branch__code=Branches.SPB)
     course_nsk = CourseFactory(semester=s, main_branch__code=Branches.NSK)
     response = client.get(reverse('study:course_list'))
-    assert len(response.context['ongoing_rest']) == 1
+    assert len(response.context_data['ongoing_rest']) == 1
 
 
 @pytest.mark.django_db
@@ -425,71 +423,3 @@ def test_course_list_student_with_inactive_status(inactive_status, client):
     client.login(active_student)
     response = client.get(url)
     assert response.status_code == 200
-
-
-@pytest.mark.django_db
-def test_student_courses_list(client, lms_resolver, assert_login_redirect):
-    url = reverse('study:course_list')
-    resolver = lms_resolver(url)
-    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
-    assert resolver.func.view_class.permission_required == ViewCourses.name
-    student_profile_spb = StudentProfileFactory(branch__code=Branches.SPB)
-    student_spb = student_profile_spb.user
-    client.login(student_spb)
-    response = client.get(url)
-    assert response.status_code == 200
-    assert len(response.context['ongoing_rest']) == 0
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['archive_enrolled']) == 0
-    current_term = get_current_term_pair(student_spb.time_zone)
-    current_term_spb = SemesterFactory(year=current_term.year,
-                                       type=current_term.type)
-    cos = CourseFactory.create_batch(4, semester=current_term_spb,
-                                     main_branch=student_profile_spb.branch)
-    cos_available = cos[:2]
-    cos_enrolled = cos[2:]
-    prev_year = current_term.year - 1
-    cos_archived = CourseFactory.create_batch(
-        3, semester__year=prev_year)
-    for co in cos_enrolled:
-        EnrollmentFactory.create(student=student_spb,
-                                 student_profile=student_profile_spb,
-                                 course=co)
-    for co in cos_archived:
-        EnrollmentFactory.create(student=student_spb,
-                                 student_profile=student_profile_spb,
-                                 course=co)
-    response = client.get(url)
-    assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
-    assert set(cos_enrolled) == set(response.context['ongoing_enrolled'])
-    assert len(cos_archived) == len(response.context['archive_enrolled'])
-    assert set(cos_archived) == set(response.context['archive_enrolled'])
-    assert len(cos_available) == len(response.context['ongoing_rest'])
-    assert set(cos_available) == set(response.context['ongoing_rest'])
-    # Add courses from other branch
-    current_term_nsk = SemesterFactory.create_current(for_branch=Branches.NSK)
-    co_nsk = CourseFactory.create(semester=current_term_nsk,
-                                  main_branch__code=Branches.NSK)
-    response = client.get(url)
-    assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
-    assert len(cos_available) == len(response.context['ongoing_rest'])
-    assert len(cos_archived) == len(response.context['archive_enrolled'])
-    # Test for student from nsk
-    student_profile_nsk = StudentProfileFactory(branch__code=Branches.NSK)
-    student_nsk = student_profile_nsk.user
-    client.login(student_nsk)
-    CourseFactory.create(semester__year=prev_year,
-                         main_branch=student_profile_nsk.branch)
-    response = client.get(url)
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['ongoing_rest']) == 1
-    assert set(response.context['ongoing_rest']) == {co_nsk}
-    assert len(response.context['archive_enrolled']) == 0
-    # Add open reading, it should be available on compscicenter.ru
-    co_open = CourseFactory.create(semester=current_term_nsk,
-                                   main_branch=student_profile_nsk.branch)
-    response = client.get(url)
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['ongoing_rest']) == 2
-    assert set(response.context['ongoing_rest']) == {co_nsk, co_open}
-    assert len(response.context['archive_enrolled']) == 0

@@ -2,13 +2,13 @@ import datetime
 import logging
 from typing import Optional
 
+from vanilla import GenericModelView, TemplateView
+
 from django.contrib import messages
 from django.db.models import Prefetch
-from django.http import Http404, JsonResponse, \
-    HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views import generic
-from vanilla import TemplateView, GenericModelView
 
 from core import comment_persistence
 from core.utils import hashids
@@ -17,11 +17,13 @@ from courses.models import AssignmentAttachment, CourseTeacher
 from courses.views.mixins import CourseURLParamsMixin
 from files.views import ProtectedFileDownloadView
 from learning.forms import AssignmentCommentForm
-from learning.models import StudentAssignment, AssignmentComment, \
-    AssignmentNotification, Event, CourseNewsNotification, \
-    AssignmentSubmissionTypes, SubmissionAttachment
-from learning.permissions import ViewAssignmentCommentAttachment, \
-    ViewAssignmentAttachment
+from learning.models import (
+    AssignmentComment, AssignmentNotification, AssignmentSubmissionTypes,
+    CourseNewsNotification, Event, StudentAssignment, SubmissionAttachment
+)
+from learning.permissions import (
+    ViewAssignmentAttachment, ViewAssignmentCommentAttachment
+)
 from learning.study.services import get_draft_comment
 from users.mixins import TeacherOnlyMixin
 

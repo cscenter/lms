@@ -2,14 +2,17 @@ import datetime
 
 import pytest
 
-from courses.tests.factories import CourseFactory, CourseClassFactory
-from surveys.constants import FieldType, STATUS_PUBLISHED
-from surveys.tests.factories import CourseSurveyFactory, FieldFactory, \
-    FieldEntryFactory, FieldChoiceFactory, FormSubmissionFactory
+from courses.tests.factories import CourseClassFactory, CourseFactory
+from surveys.constants import STATUS_PUBLISHED, FieldType
 from surveys.forms import FormBuilder
-from surveys.models import FormSubmission, FieldEntry, Field
-from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats, \
-    PollOptionResult
+from surveys.models import Field, FieldEntry, FormSubmission
+from surveys.reports import (
+    PollOptionResult, SurveySubmissionsReport, SurveySubmissionsStats
+)
+from surveys.tests.factories import (
+    CourseSurveyFactory, FieldChoiceFactory, FieldEntryFactory, FieldFactory,
+    FormSubmissionFactory
+)
 
 
 @pytest.mark.django_db

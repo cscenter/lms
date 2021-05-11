@@ -3,13 +3,12 @@
 from collections import OrderedDict
 from decimal import Decimal
 
-from import_export import resources, fields, widgets
+from import_export import fields, resources, widgets
 from import_export.instance_loaders import CachedInstanceLoader
 from import_export.widgets import IntegerWidget
 
 from admission.constants import ChallengeStatuses
-from admission.models import Test, Exam
-
+from admission.models import Exam, Test
 
 # XXX: Not tested with django-import-export==1.0.1
 

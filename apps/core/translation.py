@@ -1,5 +1,6 @@
-from modeltranslation.translator import register, TranslationOptions
-from .models import City, Branch
+from modeltranslation.translator import TranslationOptions, register
+
+from .models import Branch, City
 
 
 @register(City)

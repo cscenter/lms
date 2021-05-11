@@ -1,16 +1,19 @@
 from datetime import datetime
 
 import pytz
-from django.core.management.base import BaseCommand, CommandError
-from django.utils import formats
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
+from django.core.management.base import BaseCommand, CommandError
+from django.utils import formats
+
 from admission.models import Applicant
 from admission.services import get_email_from
-from ._utils import CurrentCampaignMixin, EmailTemplateMixin, \
-    CustomizeQueryMixin, validate_template
+
+from ._utils import (
+    CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin, validate_template
+)
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin,

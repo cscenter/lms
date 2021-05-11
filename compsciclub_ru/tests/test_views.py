@@ -1,6 +1,7 @@
 
 import pytest
 from bs4 import BeautifulSoup
+
 from django.contrib.sites.models import Site
 from django.utils.encoding import smart_bytes
 
@@ -8,8 +9,7 @@ from compsciclub_ru.views import ClubClassesFeed
 from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN, TEST_DOMAIN
 from core.urls import reverse
-from courses.tests.factories import CourseClassFactory, SemesterFactory, \
-    CourseFactory
+from courses.tests.factories import CourseClassFactory, CourseFactory, SemesterFactory
 from learning.settings import Branches
 from users.tests.factories import TeacherFactory
 

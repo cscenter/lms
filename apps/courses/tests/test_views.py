@@ -4,27 +4,28 @@ from typing import Optional
 import pytest
 import pytz
 from bs4 import BeautifulSoup
+
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.utils import formats
 
-from auth.mixins import PermissionRequiredMixin
 from auth.permissions import perm_registry
-from core.models import Branch
-from core.tests.factories import LocationFactory, BranchFactory
+from core.tests.factories import BranchFactory, LocationFactory
 from core.urls import reverse
 from courses.constants import MaterialVisibilityTypes
 from courses.permissions import ViewCourseClassMaterials
-from courses.tests.factories import CourseFactory, CourseNewsFactory, \
-    AssignmentFactory, CourseClassFactory, CourseTeacherFactory, \
-    CourseClassAttachmentFactory
+from courses.tests.factories import (
+    AssignmentFactory, CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
+    CourseNewsFactory
+)
 from files.response import XAccelRedirectFileResponse
 from files.views import ProtectedFileDownloadView
 from learning.settings import Branches
 from users.constants import Roles
-from users.tests.factories import TeacherFactory, CuratorFactory, UserFactory, \
-    StudentProfileFactory, StudentFactory
+from users.tests.factories import (
+    CuratorFactory, StudentFactory, StudentProfileFactory, TeacherFactory, UserFactory
+)
 
 
 def get_timezone_gmt_offset(tz: pytz.timezone) -> Optional[datetime.timedelta]:

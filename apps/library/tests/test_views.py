@@ -1,4 +1,5 @@
 import pytest
+
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
@@ -6,8 +7,7 @@ from core.tests.factories import BranchFactory
 from core.urls import reverse
 from learning.settings import Branches
 from library.tests.factories import BorrowFactory, StockFactory
-from users.tests.factories import UserFactory, StudentFactory, CuratorFactory
-
+from users.tests.factories import CuratorFactory, StudentFactory, UserFactory
 
 # TODO: borrows tests. Например. Убедиться, что нельзя удалить книгу, если её кто-то занял из резерва.
 

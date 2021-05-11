@@ -3,6 +3,7 @@
 from django.core.management import BaseCommand
 
 from admission.models import Applicant
+
 from ._utils import CurrentCampaignMixin
 
 

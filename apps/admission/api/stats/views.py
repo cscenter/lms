@@ -1,24 +1,26 @@
 import logging
 
-from django.db.models import Count, When, IntegerField, Case, Q
-from django.db.models.functions import TruncDate
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_pandas import PandasView
 from rest_pandas.serializers import SimpleSerializer
 
-from admission.models import Applicant, Test, Exam, Campaign
+from django.db.models import Case, Count, IntegerField, Q, When
+from django.db.models.functions import TruncDate
+
+from admission.models import Applicant, Campaign, Exam, Test
 from api.permissions import CuratorAccessPermission
 from core.db.functions import TruncDateInTZ
 from core.timezone import now_local
-from .pandas_serializers import \
-    CampaignResultsTimelineSerializer, \
-    ScoreByUniversitiesSerializer, ScoreByCoursesSerializer, \
-    CampaignResultsByUniversitiesSerializer, \
-    CampaignResultsByEducationLevelSerializer, ApplicationSubmissionPandasSerializer
-from .serializers import StageByYearSerializer
 from stats.renderers import ListRenderersMixin
+
+from .pandas_serializers import (
+    ApplicationSubmissionPandasSerializer, CampaignResultsByEducationLevelSerializer,
+    CampaignResultsByUniversitiesSerializer, CampaignResultsTimelineSerializer,
+    ScoreByCoursesSerializer, ScoreByUniversitiesSerializer
+)
+from .serializers import StageByYearSerializer
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
+from djchoices import C, ChoiceItem, DjangoChoices
+
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, ChoiceItem
 
 WHERE_DID_YOU_LEARN = (
     ('uni', 'плакат в университете'),
@@ -26,3 +27,10 @@ class ChallengeStatuses(DjangoChoices):
 class InterviewFormats(DjangoChoices):
     OFFLINE = ChoiceItem('offline', _("Offline"))
     ONLINE = ChoiceItem('online', _("Online"))
+
+
+class InterviewSections(DjangoChoices):
+    ALL_IN_ONE = C('all_in_1', _("Common"))
+    MATH = C('math', _("Math"))
+    PROGRAMMING = C('code', _("Coding"))
+    MOTIVATION = C('mv', _("Motivation"))

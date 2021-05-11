@@ -4,9 +4,7 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand
 
-
-from learning.models import AssignmentNotification, \
-    CourseNewsNotification
+from learning.models import AssignmentNotification, CourseNewsNotification
 
 
 def report(s):

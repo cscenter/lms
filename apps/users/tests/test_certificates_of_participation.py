@@ -1,20 +1,20 @@
 import re
 
-import factory
 import pytest
 from bs4 import BeautifulSoup
+
 from django.conf import settings
 from django.utils.translation import gettext as _
 
 from core.urls import reverse
-from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
-    CourseFactory
+from courses.tests.factories import CourseFactory, MetaCourseFactory, SemesterFactory
 from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
 from users.models import CertificateOfParticipation
-from users.tests.factories import UserFactory, \
-    CertificateOfParticipationFactory, \
-    StudentFactory, CuratorFactory, StudentProfileFactory
+from users.tests.factories import (
+    CertificateOfParticipationFactory, CuratorFactory, StudentFactory,
+    StudentProfileFactory
+)
 
 
 @pytest.mark.django_db

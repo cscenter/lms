@@ -3,8 +3,7 @@ import datetime
 import pytest
 
 from announcements.models import Announcement
-from announcements.tests.factories import AnnouncementTagFactory, \
-    AnnouncementFactory
+from announcements.tests.factories import AnnouncementFactory, AnnouncementTagFactory
 
 
 @pytest.mark.django_db

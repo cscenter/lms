@@ -1,6 +1,5 @@
 from django import forms
 
-
 # FIXME: Хочется на весь сайт использовать эти виджеты, но не трогать админку
 
 class SurveyTextarea(forms.Textarea):

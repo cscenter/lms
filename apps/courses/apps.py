@@ -7,9 +7,7 @@ class CoursesConfig(AppConfig):
     verbose_name = _("Courses")
 
     def ready(self):
-        # Register app signals
-        from . import signals
-        # Register app permissions
-        from . import permissions
-        # Register tabs
-        from . import tabs
+        # Register permissions, signals and tabs
+        from . import permissions  # pylint: disable=unused-import
+        from . import signals  # pylint: disable=unused-import
+        from . import tabs  # pylint: disable=unused-import

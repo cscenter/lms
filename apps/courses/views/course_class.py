@@ -1,15 +1,15 @@
 import datetime
-import os
 from typing import Optional
+
+from vanilla import CreateView, DeleteView, UpdateView
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
-from django.http import HttpResponseRedirect, HttpResponseForbidden, Http404
-from django.shortcuts import redirect, get_object_or_404
+from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
-from vanilla import CreateView, UpdateView, DeleteView
 
 from core.exceptions import Redirect
 from core.urls import reverse, reverse_lazy

@@ -1,17 +1,19 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Iterable, Callable
+from typing import Callable, Iterable
 
 import pytz
 from dateutil.relativedelta import relativedelta
-from django.contrib.sites.models import Site
-from django.utils import timezone
-from icalendar import vText, vUri, Calendar, Event as ICalEvent, \
-    Timezone, TimezoneStandard
+from icalendar import Calendar
+from icalendar import Event as ICalEvent
+from icalendar import Timezone, TimezoneStandard, vText, vUri
 from icalendar.prop import vInline
 
-from courses.models import CourseClass, Assignment
-from learning.models import StudentAssignment, Event
+from django.contrib.sites.models import Site
+from django.utils import timezone
+
+from courses.models import Assignment, CourseClass
+from learning.models import Event, StudentAssignment
 from users.models import User
 
 

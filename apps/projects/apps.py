@@ -7,8 +7,5 @@ class ProjectsConfig(AppConfig):
     verbose_name = _("Student Projects")
 
     def ready(self):
-        # Register app permissions and roles
-        from . import permissions
-        from . import roles
-        # Register signals
-        from . import signals
+        # Register app permissions, roles and signals
+        from . import permissions, roles, signals  # pylint: disable=unused-import

@@ -1,8 +1,9 @@
 import re
 
+from django_jinja.management.commands.makemessages import strip_whitespaces
+
 from django.core.management.commands import makemessages
 from django.utils.translation import template as trans_real
-from django_jinja.management.commands.makemessages import strip_whitespaces
 
 EXTRA_KEYWORDS = [
     '--keyword=_p:1c,2'  # alias for pgettext_lazy

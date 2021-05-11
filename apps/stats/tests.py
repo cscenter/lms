@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 import pytest
 import pytz
+
 from django.conf import settings
 
 from admission.tests.factories import ApplicantFactory, CampaignFactory

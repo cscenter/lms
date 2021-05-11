@@ -1,11 +1,13 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from surveys.widgets import SurveyTextInput, \
-    SurveyTextarea, SurveyCheckboxInput, SurveyRadioSelect, \
-    SurveyCheckboxSelectMultiple, SurveyNumberInput
-from surveys.fields import SurveyChoiceField, SurveyMultipleChoiceField, \
-    SurveyMultipleChoiceFreeAnswerField
+from surveys.fields import (
+    SurveyChoiceField, SurveyMultipleChoiceField, SurveyMultipleChoiceFreeAnswerField
+)
+from surveys.widgets import (
+    SurveyCheckboxInput, SurveyCheckboxSelectMultiple, SurveyNumberInput,
+    SurveyRadioSelect, SurveyTextarea, SurveyTextInput
+)
 
 STATUS_DRAFT = 0
 STATUS_PUBLISHED = 1

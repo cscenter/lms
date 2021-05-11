@@ -3,27 +3,28 @@ import io
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from operator import attrgetter
-from typing import List, Dict, Set
+from typing import Dict, List, Set
+
+from pandas import DataFrame, ExcelWriter
 
 from django.conf import settings
-from django.db.models import Q, Prefetch, Count, Case, When, F, \
-    IntegerField
+from django.db.models import Case, Count, F, IntegerField, Prefetch, Q, When
 from django.http import HttpResponse
 from django.utils import formats
-from pandas import DataFrame, ExcelWriter
 
 from admission.models import Applicant
 from core.reports import ReportFileOutput
 from courses.constants import SemesterTypes
-from courses.models import Semester, Course, CourseTeacher, MetaCourse
+from courses.models import Course, CourseTeacher, MetaCourse, Semester
 from courses.utils import get_term_index
 from learning.models import AssignmentComment, Enrollment, GraduateProfile
-from learning.settings import StudentStatuses, GradeTypes
-from projects.constants import ProjectTypes, ProjectGradeTypes
-from projects.models import ReportComment, ProjectStudent, Project
-from users.managers import get_enrollments_progress, get_shad_courses_progress, \
-    get_projects_progress
-from users.models import User, SHADCourseRecord, StudentProfile, StudentTypes
+from learning.settings import GradeTypes, StudentStatuses
+from projects.constants import ProjectGradeTypes, ProjectTypes
+from projects.models import Project, ProjectStudent, ReportComment
+from users.managers import (
+    get_enrollments_progress, get_projects_progress, get_shad_courses_progress
+)
+from users.models import SHADCourseRecord, StudentProfile, StudentTypes, User
 
 
 def dataframe_to_response(df: DataFrame, output_format: str, filename: str):

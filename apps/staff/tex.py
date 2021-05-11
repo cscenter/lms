@@ -1,9 +1,8 @@
 from datetime import date
-from typing import NamedTuple, List
+from typing import List, NamedTuple
 
 from core.templatetags.core_tags import tex
-from learning.settings import GradeTypes
-from projects.constants import ProjectTypes, ProjectGradeTypes
+from projects.constants import ProjectGradeTypes, ProjectTypes
 from study_programs.models import AcademicDiscipline
 
 

@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 import pytest
+
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
-from core.urls import reverse_lazy, reverse
+from core.urls import reverse, reverse_lazy
 from courses.tests.factories import SemesterFactory
 from learning.settings import Branches
 from notifications.models import Notification
-from projects.constants import ProjectTypes, ProjectGradeTypes
-from projects.forms import ReportForm, PracticeCriteriaForm, \
-    ReportReviewForm
-from projects.models import Report, ProjectStudent, Review, \
-    PracticeCriteria, Project
-from projects.tests.factories import ProjectFactory, ReportFactory, \
-    ReportingPeriodFactory, ReviewFactory, \
-    review_form_data_factory, ReportCommentFactory, ProjectReviewerFactory
+from projects.constants import ProjectGradeTypes, ProjectTypes
+from projects.forms import PracticeCriteriaForm, ReportForm, ReportReviewForm
+from projects.models import PracticeCriteria, Project, ProjectStudent, Report, Review
+from projects.tests.factories import (
+    ProjectFactory, ProjectReviewerFactory, ReportCommentFactory, ReportFactory,
+    ReportingPeriodFactory, ReviewFactory, review_form_data_factory
+)
 from users.constants import Roles
-from users.tests.factories import StudentFactory, UserFactory, CuratorFactory
+from users.tests.factories import CuratorFactory, StudentFactory, UserFactory
 
 URL_REPORTS = reverse_lazy("projects:report_list_reviewers")
 URL_PROJECTS = reverse_lazy("projects:current_term_projects")
@@ -395,8 +395,7 @@ def test_reportpage_permissions(client, curator):
 @pytest.mark.django_db
 def test_reportpage_update_permissions():
     """Check report updating restricted to curators only"""
-    from projects.views import (ReportUpdateStatusView,
-        ReportCuratorAssessmentView)
+    from projects.views import ReportCuratorAssessmentView, ReportUpdateStatusView
     from users.mixins import CuratorOnlyMixin
     assert issubclass(ReportCuratorAssessmentView, CuratorOnlyMixin)
     assert issubclass(ReportUpdateStatusView, CuratorOnlyMixin)
@@ -567,8 +566,8 @@ def test_review_notifications(client, curator, assert_login_redirect):
 
 @pytest.mark.django_db
 def test_reportpage_summarize_notifications(client, curator):
-    from users.mixins import CuratorOnlyMixin
     from projects.views import ReportCuratorSummarizeView
+    from users.mixins import CuratorOnlyMixin
     assert issubclass(ReportCuratorSummarizeView, CuratorOnlyMixin)
     curator.add_group(Roles.PROJECT_REVIEWER)
     curator2 = CuratorFactory.create()

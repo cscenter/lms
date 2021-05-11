@@ -1,4 +1,5 @@
 from braces.views import LoginRequiredMixin
+
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import views

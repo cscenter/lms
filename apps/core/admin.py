@@ -1,5 +1,8 @@
 from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
+from modeltranslation.admin import TranslationAdmin
+from taggit.models import Tag
+
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import Group
@@ -7,15 +10,14 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.db.models import Model
 from django.db.models.query import QuerySet
-from django.urls import reverse, NoReverseMatch
+from django.urls import NoReverseMatch, reverse
 from django.utils.encoding import force_str
-from django.utils.translation import gettext_lazy as _, gettext_noop
-from modeltranslation.admin import TranslationAdmin
-from taggit.models import Tag
+from django.utils.translation import gettext_lazy as _
 
 from core.models import Location, University
 from core.widgets import AdminRichTextAreaWidget
-from .models import City, Branch
+
+from .models import Branch, City
 
 # Hide applications in the admin
 admin.site.unregister(Group)

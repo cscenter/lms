@@ -1,15 +1,17 @@
 import pytest
+
 from django.core.exceptions import ValidationError
 
 from core.tests.factories import BranchFactory
-from core.tests.settings import TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID
+from core.tests.settings import ANOTHER_DOMAIN_ID, TEST_DOMAIN_ID
 from core.utils import instance_memoize
-from courses.tests.factories import SemesterFactory, CourseFactory
+from courses.tests.factories import CourseFactory, SemesterFactory
 from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
 from users.constants import Roles
-from users.tests.factories import StudentFactory, CuratorFactory, UserFactory, \
-    UserGroupFactory, StudentProfileFactory
+from users.tests.factories import (
+    CuratorFactory, StudentFactory, StudentProfileFactory, UserFactory, UserGroupFactory
+)
 
 
 @pytest.mark.django_db

@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
-
 import factory
+
 from django.conf import settings
 
 from core.tests.factories import BranchFactory
-from learning.settings import GradeTypes, Branches
-from users.constants import Roles, GenderTypes
-from users.models import User, SHADCourseRecord, CertificateOfParticipation, \
-    OnlineCourseRecord, UserGroup, StudentProfile, StudentTypes
+from learning.settings import GradeTypes
+from users.constants import GenderTypes, Roles
+from users.models import (
+    CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
+    StudentTypes, User, UserGroup
+)
 
 __all__ = ('User', 'SHADCourseRecord', 'CertificateOfParticipation',
            'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',

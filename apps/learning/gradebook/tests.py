@@ -2,14 +2,15 @@ import csv
 import datetime
 import io
 from decimal import Decimal
-from io import StringIO, BytesIO
+from io import BytesIO, StringIO
 
 import pytest
 import pytz
 from bs4 import BeautifulSoup
+
 from django.contrib import messages
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.utils.encoding import smart_bytes, force_bytes
+from django.utils.encoding import force_bytes, smart_bytes
 from django.utils.translation import gettext_lazy
 
 from auth.mixins import PermissionRequiredMixin
@@ -17,19 +18,17 @@ from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.models import AssignmentSubmissionFormats
-from courses.tests.factories import CourseFactory, \
-    AssignmentFactory
-from learning.gradebook import gradebook_data, BaseGradebookForm, \
-    GradeBookFormFactory
-from learning.gradebook.imports import import_assignment_scores, \
-    get_course_students_by_stepik_id
-from learning.models import StudentAssignment, Enrollment
+from courses.tests.factories import AssignmentFactory, CourseFactory
+from learning.gradebook import BaseGradebookForm, GradeBookFormFactory, gradebook_data
+from learning.gradebook.imports import (
+    get_course_students_by_stepik_id, import_assignment_scores
+)
+from learning.models import Enrollment, StudentAssignment
 from learning.permissions import ViewOwnGradebook
 from learning.services import get_student_profile
-from learning.settings import StudentStatuses, GradeTypes, Branches
+from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import EnrollmentFactory
-from users.tests.factories import TeacherFactory, StudentFactory
-
+from users.tests.factories import StudentFactory, TeacherFactory
 
 # TODO: test redirect to gradebook for teachers if only 1 course in current term
 

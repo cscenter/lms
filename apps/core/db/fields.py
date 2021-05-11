@@ -1,12 +1,12 @@
 from datetime import timedelta
 
 import pytz
+
 from django.core import checks
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import DecimalField, JSONField
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core import forms
@@ -46,6 +46,7 @@ def parse_timezone_string(value) -> pytz.tzinfo.BaseTzInfo:
 
 
 class TimeZoneField(models.Field):
+    empty_strings_allowed = False
     description = _("A pytz timezone instance")
 
     def __init__(self, verbose_name=None, choices=None, **kwargs):

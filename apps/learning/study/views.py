@@ -1,39 +1,42 @@
 from typing import Iterable
 
-from django.apps import apps
-from django.contrib import messages
-from django.db.models import Q, Prefetch
-from django.utils.translation import gettext_lazy as _
-from django.views import generic
 from isoweek import Week
 from vanilla import TemplateView
+
+from django.apps import apps
+from django.contrib import messages
+from django.db.models import Prefetch, Q
+from django.utils.translation import gettext_lazy as _
+from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.urls import reverse
 from courses.calendar import CalendarEvent, TimetableEvent
-from courses.constants import SemesterTypes
-from courses.models import Semester, Course, CourseTeacher
-from courses.utils import get_current_term_pair, MonthPeriod, \
-    extended_month_date_range
-from courses.views import WeekEventsView, MonthEventsCalendarView
+from courses.models import Course, CourseTeacher, Semester
+from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
+from courses.views import MonthEventsCalendarView, WeekEventsView
 from info_blocks.constants import CurrentInfoBlockTags
 from info_blocks.models import InfoBlock
 from info_blocks.permissions import ViewInternships
 from learning import utils
-from learning.calendar import get_student_calendar_events, get_all_calendar_events
+from learning.calendar import get_all_calendar_events, get_student_calendar_events
 from learning.forms import AssignmentCommentForm
-from learning.models import StudentAssignment, Enrollment, \
-    AssignmentSubmissionTypes, AssignmentComment
-from learning.permissions import ViewOwnStudentAssignments, \
-    ViewOwnStudentAssignment, ViewCourses, \
-    CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution
+from learning.models import (
+    AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
+)
+from learning.permissions import (
+    CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution,
+    EnrollPermissionObject, ViewCourses, ViewOwnStudentAssignment,
+    ViewOwnStudentAssignments
+)
 from learning.roles import Roles
 from learning.services import get_student_classes, get_student_profile
-from learning.study.services import get_solution_form, get_draft_solution
+from learning.study.services import get_draft_solution, get_solution_form
 from learning.views import AssignmentSubmissionBaseView
-from learning.views.views import AssignmentCommentUpsertView, \
-    AssignmentSubmissionUpsertView
+from learning.views.views import (
+    AssignmentCommentUpsertView, AssignmentSubmissionUpsertView
+)
 
 
 class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
@@ -220,59 +223,51 @@ class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
 class CourseListView(PermissionRequiredMixin, generic.TemplateView):
     model = Course
     context_object_name = 'course_list'
-    template_name = "learning/study/course_list.html"
+    template_name = "lms/study/course_list.html"
     permission_required = ViewCourses.name
 
     def get_context_data(self, **kwargs):
-        # Student enrollments
         auth_user = self.request.user
         student_enrollments = (Enrollment.active
                                .filter(student_id=auth_user)
                                .select_related("course")
-                               .only('id', 'grade', 'course_id',
-                                     'course__grading_type'))
-        student_enrolled_in = {e.course_id: e for e in student_enrollments}
-        # 1. Union courses from current term and which student enrolled in
-        tz = auth_user.time_zone
-        current_term = get_current_term_pair(tz)
+                               .only('id', 'grade', 'course_id', 'course__grading_type'))
+        student_enrollments = {e.course_id: e for e in student_enrollments}
+        # Get current term course offerings available in student branch
+        # and all courses that student enrolled in
+        student_profile = get_student_profile(auth_user, self.request.site)
+        current_term = get_current_term_pair(auth_user.time_zone)
         current_term_index = current_term.index
+        in_student_branch = Q(coursebranch__branch=student_profile.branch_id)
         in_current_term = Q(semester__index=current_term_index)
-        enrolled_in = Q(id__in=list(student_enrolled_in))
+        enrolled_in = Q(id__in=list(student_enrollments))
         prefetch_teachers = Prefetch('course_teachers',
                                      queryset=CourseTeacher.get_queryset())
-        student_profile = get_student_profile(auth_user, self.request.site)
-        course_offerings = (Course.objects
-                            .available_in(student_profile.branch_id)
-                            .filter(in_current_term | enrolled_in)
-                            .select_related('meta_course', 'semester',
-                                            'main_branch')
-                            .order_by('-semester__index',
-                                      'meta_course__name', 'pk')
-                            .prefetch_related(prefetch_teachers,
-                                              "branches",
-                                              "semester__enrollmentperiod_set"))
-        # 2. And split them by type.
-        ongoing_enrolled, ongoing_rest, archive_enrolled = [], [], []
-        for course in course_offerings:
+        courses = (Course.objects
+                   .filter((in_student_branch & in_current_term) | enrolled_in)
+                   .select_related('meta_course', 'semester', 'main_branch')
+                   .distinct()
+                   .order_by('-semester__index', 'meta_course__name', 'pk')
+                   .prefetch_related(prefetch_teachers,
+                                     "branches",  # it needs for checking permissions
+                                     "semester__enrollmentperiod_set"))
+        # Group collected courses
+        ongoing_enrolled, ongoing_rest, archive = [], [], []
+        for course in courses:
             if course.semester.index == current_term_index:
-                if course.pk in student_enrolled_in:
-                    # TODO: add `enrollments` to context and get grades explicitly in tmpl
-                    course.enrollment = student_enrolled_in[course.pk]
+                if course.pk in student_enrollments:
                     ongoing_enrolled.append(course)
                 else:
                     ongoing_rest.append(course)
             else:
-                course.enrollment = student_enrolled_in[course.pk]
-                archive_enrolled.append(course)
+                archive.append(course)
         context = {
+            "enrollments": student_enrollments,
             "ongoing_rest": ongoing_rest,
             "ongoing_enrolled": ongoing_enrolled,
-            "archive_enrolled": archive_enrolled,
-            # FIXME: what about custom template tag for this?
-            # TODO: Add util method
-            "current_term": "{} {}".format(
-                SemesterTypes.values[current_term.type],
-                current_term.year).capitalize()
+            "archive": archive,
+            "current_term": current_term.label.capitalize(),
+            "EnrollPermissionObject": EnrollPermissionObject
         }
         return context
 
