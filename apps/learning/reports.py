@@ -166,6 +166,16 @@ class ProgressReport:
         return False
 
     @staticmethod
+    def get_term_order(self, student_profile):
+        if student_profile.year_of_curriculum:
+            curriculum_term_index = get_term_index(
+                student_profile.year_of_curriculum,
+                SemesterTypes.AUTUMN)
+            return self.target_semester.index - curriculum_term_index + 1
+        else:
+            return "-"
+
+    @staticmethod
     def get_courses_headers(meta_courses):
         if not meta_courses:
             return []
@@ -700,13 +710,7 @@ class ProgressReportFull(ProgressReport):
             disciplines = student_profile.academic_disciplines.all()
             graduation_year = ""
 
-        if student_profile.year_of_curriculum:
-            curriculum_term_index = get_term_index(
-                student_profile.year_of_curriculum,
-                SemesterTypes.AUTUMN)
-            term_order = self.target_semester.index - curriculum_term_index + 1
-        else:
-            term_order = "-"
+        term_order = self.get_term_order(self, student_profile)
 
         student = student_profile.user
         return [
@@ -922,13 +926,9 @@ class ProgressReportForSemester(ProgressReport):
             student.enrollments_eq_target_semester +
             student.shad_eq_target_semester
         )
-        if student_profile.year_of_curriculum:
-            curriculum_term_index = get_term_index(
-                student_profile.year_of_curriculum,
-                SemesterTypes.AUTUMN)
-            term_order = self.target_semester.index - curriculum_term_index + 1
-        else:
-            term_order = "-"
+
+        term_order = self.get_term_order(self, student_profile)
+
         return [
             student.pk,
             student_profile.branch.name,
