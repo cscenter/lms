@@ -2,7 +2,6 @@ from datetime import timedelta
 
 import pytest
 from bs4 import BeautifulSoup
-from urllib.request import urlopen
 
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
