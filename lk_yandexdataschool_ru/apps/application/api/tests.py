@@ -1,18 +1,18 @@
-import json
 from datetime import date
-from unittest.mock import MagicMock
 
 import pytest
-from django.utils.timezone import now
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
+from django.utils.timezone import now
 
 from admission.models import Contest
 from admission.tests.factories import CampaignFactory, ContestFactory
 from core.models import University
-from core.tests.factories import BranchFactory, UniversityFactory
+from core.tests.factories import BranchFactory
 from core.urls import reverse
 from learning.settings import AcademicDegreeLevels
+
 from .fields import AliasedChoiceField
 from .serializers import ApplicantYandexFormSerializer
 

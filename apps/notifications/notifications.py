@@ -1,6 +1,6 @@
+from notifications import NotificationTypes
 from notifications.decorators import register
 from notifications.service import NotificationService
-from notifications import NotificationTypes
 
 
 @register(notification_type=NotificationTypes.EMPTY)

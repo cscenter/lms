@@ -1,14 +1,14 @@
 import logging
 
+from django_rq import job
+
 from django.apps import apps
 from django.conf import settings
-from django_rq import job
 
 from code_reviews.api.gerrit import Gerrit
 from code_reviews.api.ldap import init_client
 from code_reviews.gerrit import get_or_create_change, list_change_files
-from code_reviews.ldap import get_ldap_username, user_to_ldap_entry, \
-    get_password_hash
+from code_reviews.ldap import get_ldap_username, get_password_hash, user_to_ldap_entry
 from learning.models import AssignmentComment, AssignmentSubmissionTypes
 from users.models import User
 

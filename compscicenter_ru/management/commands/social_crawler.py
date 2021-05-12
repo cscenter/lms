@@ -3,13 +3,14 @@ import logging
 from datetime import datetime
 from typing import NamedTuple
 
+from requests import RequestException
+
 from django.conf import settings
 from django.core.cache import caches
 from django.core.management.base import BaseCommand
-from requests import RequestException
 
 from api.providers.instagram import InstagramAPI, InstagramAPIException
-from api.providers.vk import VkOpenAPI, CSCENTER_GROUP_ID, VkAPIException
+from api.providers.vk import CSCENTER_GROUP_ID, VkAPIException, VkOpenAPI
 from compscicenter_ru.views import IndexView
 from core.models import SiteConfiguration
 

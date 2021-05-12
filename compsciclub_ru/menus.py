@@ -1,7 +1,6 @@
-from menu import Menu
-
 from core.menu import MenuItem
 from core.urls import reverse_lazy
+from menu import Menu
 
 compsciclub_ru_menu = [
     MenuItem(

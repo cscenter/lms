@@ -1,12 +1,12 @@
 from typing import Optional
 
+from model_utils.fields import AutoCreatedField, AutoLastModifiedField
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from model_utils.fields import AutoCreatedField, AutoLastModifiedField
 
-from grading.api.yandex_contest import SubmissionVerdict, \
-    YANDEX_SUBMISSION_REPORT_URL
+from grading.api.yandex_contest import YANDEX_SUBMISSION_REPORT_URL, SubmissionVerdict
 from grading.constants import CheckingSystemTypes, SubmissionStatus
 from learning.models import AssignmentComment
 

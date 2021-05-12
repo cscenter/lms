@@ -1,9 +1,10 @@
+from vanilla import CreateView, DeleteView, UpdateView
+
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
-from django.db import transaction, IntegrityError
-from django.shortcuts import redirect, get_object_or_404
+from django.db import IntegrityError, transaction
+from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
-from vanilla import CreateView, UpdateView, DeleteView
 
 from core.exceptions import Redirect
 from core.views import ProtectedFormMixin

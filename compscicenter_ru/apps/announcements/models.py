@@ -1,9 +1,10 @@
+from model_utils.models import TimeStampedModel
+from taggit.managers import TaggableManager
+from taggit.models import TagBase, TaggedItemBase
+
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from model_utils.models import TimeStampedModel
-from taggit.managers import TaggableManager
-from taggit.models import TaggedItemBase, TagBase
 
 from core.models import Location
 from core.urls import reverse

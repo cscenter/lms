@@ -7,4 +7,4 @@ class UsersConfig(AppConfig):
     verbose_name = _("Users")
 
     def ready(self):
-        from . import signals
+        from . import signals  # pylint: disable=unused-import

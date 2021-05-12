@@ -5,30 +5,33 @@ import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.utils import formats
 from django.utils.encoding import smart_bytes
 
-from grading.constants import CheckingSystemTypes
-from grading.models import Checker
-from grading.tests.factories import CheckingSystemFactory, CheckerFactory
-from grading.utils import get_yandex_contest_problem_url
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.models import AssignmentSubmissionFormats, Assignment
-from courses.tests.factories import AssignmentFactory, CourseFactory, \
-    CourseTeacherFactory, SemesterFactory, CourseNewsFactory
-from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, CourseNewsNotification, AssignmentComment, \
-    StudentGroup
+from courses.models import Assignment, AssignmentSubmissionFormats
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseNewsFactory, CourseTeacherFactory,
+    SemesterFactory
+)
+from grading.constants import CheckingSystemTypes
+from grading.models import Checker
+from grading.tests.factories import CheckerFactory, CheckingSystemFactory
+from grading.utils import get_yandex_contest_problem_url
+from learning.models import (
+    AssignmentComment, AssignmentNotification, CourseNewsNotification, Enrollment,
+    StudentAssignment, StudentGroup
+)
 from learning.settings import Branches
-from learning.tests.factories import StudentAssignmentFactory, \
-    EnrollmentFactory, AssignmentCommentFactory
-from users.tests.factories import TeacherFactory, StudentFactory, \
-    StudentProfileFactory
-
+from learning.tests.factories import (
+    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
+)
+from users.tests.factories import StudentFactory, StudentProfileFactory, TeacherFactory
 
 # TODO: Преподавание -> Задания, добавить тест для deadline_local
 
@@ -43,6 +46,7 @@ def test_assignment_public_form(settings, client):
         "submission_type": AssignmentSubmissionFormats.ONLINE,
         "title": "title",
         "text": "text",
+        "time_zone": "Europe/Moscow",
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00",
         "passing_score": "3",
@@ -63,7 +67,7 @@ def test_assignment_public_form(settings, client):
     assert assignment.deadline_at_local().utcoffset() == tz_diff
     # Check widget shows local time
     response = client.get(assignment.get_update_url())
-    widget_html = response.context['form']['deadline_at'].as_widget()
+    widget_html = response.context_data['form']['deadline_at'].as_widget()
     widget = BeautifulSoup(widget_html, "html.parser")
     time_input = widget.find('input', {"name": 'deadline_at_1'})
     assert time_input.get('value') == '00:00'
@@ -72,6 +76,7 @@ def test_assignment_public_form(settings, client):
                               meta_course=course_spb.meta_course,
                               teachers=[teacher])
     add_url = co_in_nsk.get_create_assignment_url()
+    form_data['time_zone'] = 'Asia/Novosibirsk'
     response = client.post(add_url, form_data, follow=True)
     assert response.status_code == 200
     assert Assignment.objects.count() == 2
@@ -88,6 +93,7 @@ def test_assignment_detail_deadline_l10n(settings, client):
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     teacher = TeacherFactory()
     assignment = AssignmentFactory(deadline_at=dt,
+                                   time_zone=pytz.timezone('Europe/Moscow'),
                                    course__main_branch__code=Branches.SPB,
                                    course__teachers=[teacher])
     url_for_teacher = assignment.get_teacher_url()
@@ -192,6 +198,7 @@ def test_create_assignment_public_form_restricted_to_settings(client):
         "submission_type": AssignmentSubmissionFormats.ONLINE,
         "title": "title",
         "text": "text",
+        "time_zone": "Europe/Moscow",
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00",
         "passing_score": "3",
@@ -228,13 +235,15 @@ def test_course_assignment_form_create_with_checking_system(client, mocker):
         type=CheckingSystemTypes.YANDEX
     )
     checking_system_url = get_yandex_contest_problem_url(15, 'D')
-    form.update({'course': co.pk,
-                 # 'attached_file': None,
-                 'submission_type': AssignmentSubmissionFormats.CODE_REVIEW,
-                 'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time,
-                 'checking_system': checking_system.pk,
-                 'checker_url': checking_system_url})
+    form.update({
+        'course': co.pk,
+        'submission_type': AssignmentSubmissionFormats.CODE_REVIEW,
+        'time_zone': 'Europe/Moscow',
+        'deadline_at_0': deadline_date,
+        'deadline_at_1': deadline_time,
+        'checking_system': checking_system.pk,
+        'checker_url': checking_system_url
+    })
     url = co.get_create_assignment_url()
     client.login(teacher)
     response = client.post(url, form)
@@ -247,14 +256,17 @@ def test_course_assignment_form_create_with_checking_system(client, mocker):
 @pytest.mark.django_db
 def test_course_assignment_form_update_remove_checking_system(client):
     teacher = TeacherFactory()
-    co = CourseFactory.create(teachers=[teacher])
+    course = CourseFactory.create(teachers=[teacher])
     checker = CheckerFactory()
-    a = AssignmentFactory(course=co)
+    a = AssignmentFactory(course=course)
     form = model_to_dict(a)
     del form['ttc']
     del form['checker']
-    form.update({'submission_type': AssignmentSubmissionFormats.ONLINE})
-    url = co.get_create_assignment_url()
+    form.update({
+        'time_zone': 'Europe/Moscow',
+        'submission_type': AssignmentSubmissionFormats.ONLINE
+    })
+    url = course.get_create_assignment_url()
     client.login(teacher)
     response = client.post(url, form)
     assert Assignment.objects.count() == 1
@@ -273,6 +285,7 @@ def test_create_assignment_public_form_code_review_without_checker(client):
         "submission_type": AssignmentSubmissionFormats.CODE_REVIEW,
         "title": "title",
         "text": "text",
+        "time_zone": "Europe/Moscow",
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00",
         "passing_score": "3",
@@ -298,6 +311,7 @@ def test_create_assignment_public_form_code_review_with_yandex_checker(client, m
         "submission_type": AssignmentSubmissionFormats.CODE_REVIEW,
         "title": "title",
         "text": "text",
+        "time_zone": "Europe/Moscow",
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00",
         "passing_score": "3",

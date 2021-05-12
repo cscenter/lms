@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import factory
-from django.conf import settings
-from django.contrib.sites.models import Site
+import pytz
 from post_office.models import EmailTemplate
 
-from core.models import City, Branch, Location, SiteConfiguration, University
+from django.conf import settings
+from django.contrib.sites.models import Site
+
+from core.models import Branch, City, Location, SiteConfiguration, University
 from core.tests.settings import TEST_DOMAIN
 from learning.settings import Branches
 
@@ -53,9 +55,9 @@ class CityFactory(factory.django.DjangoModelFactory):
     @factory.lazy_attribute
     def time_zone(self):
         if self.code == Branches.NSK:
-            return 'Asia/Novosibirsk'
+            return pytz.timezone('Asia/Novosibirsk')
         else:
-            return 'Europe/Moscow'
+            return pytz.timezone('Europe/Moscow')
 
 
 class EmailTemplateFactory(factory.django.DjangoModelFactory):
@@ -80,8 +82,7 @@ class BranchFactory(factory.django.DjangoModelFactory):
     def time_zone(self):
         if self.code != Branches.DISTANCE:
             return self.city.time_zone
-        else:
-            return 'Europe/Moscow'
+        return pytz.timezone('Europe/Moscow')
 
     class Meta:
         model = Branch

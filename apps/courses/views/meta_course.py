@@ -1,14 +1,10 @@
-from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
-from core.models import Branch
-from core.views import ProtectedFormMixin
 from courses.forms import CourseForm
 from courses.models import Course, MetaCourse
 from courses.permissions import ChangeMetaCourse
-from users.mixins import CuratorOnlyMixin
 
 __all__ = ('MetaCourseDetailView', 'MetaCourseUpdateView')
 

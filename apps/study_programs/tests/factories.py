@@ -1,8 +1,9 @@
 import factory
 
 from core.tests.factories import BranchFactory
-from study_programs.models import AcademicDiscipline, StudyProgram, \
-    StudyProgramCourseGroup
+from study_programs.models import (
+    AcademicDiscipline, StudyProgram, StudyProgramCourseGroup
+)
 
 
 class AcademicDisciplineFactory(factory.django.DjangoModelFactory):

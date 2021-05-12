@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from courses.models import Semester, CourseTeacher, Assignment
+from courses.models import Assignment, CourseTeacher, Semester
 from learning.models import EnrollmentPeriod
 
 

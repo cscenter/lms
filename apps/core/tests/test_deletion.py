@@ -1,5 +1,6 @@
 import pytest
-from django.db import models, connection, router
+
+from django.db import connection, models, router
 
 from core.db.models import SoftDeletionModel
 from core.services import SoftDeleteService

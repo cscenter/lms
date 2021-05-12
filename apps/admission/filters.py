@@ -1,19 +1,19 @@
-# -*- coding: utf-8 -*-
 import datetime
 
 import django_filters
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, Submit, Row, Field
+from crispy_forms.layout import Div, Field, Layout, Row, Submit
+
 from django import forms
 from django.conf import settings
 from django.forms import SelectMultiple
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from admission.forms import ResultsModelForm
+from admission.models import Applicant, Campaign, Interview
 from core.models import University
 from core.widgets import DateTimeRangeWidget
-from admission.forms import ResultsModelForm
-from admission.models import Applicant, Interview, Campaign
 
 
 # Fields
@@ -51,10 +51,12 @@ class ApplicantFilter(django_filters.FilterSet):
                   .filter(branch__site_id=settings.SITE_ID)
                   .select_related("branch")
                   .order_by("-year", "branch__order").all()))
-    status = ApplicantStatusFilter(choices=Applicant.STATUS,
-                                   label=_("Status"))
-    last_name = django_filters.CharFilter(lookup_expr='icontains',
-                                          label=_("Surname"))
+    status = django_filters.ChoiceFilter(
+        label=_("Status"),
+        choices=Applicant.STATUS)
+    last_name = django_filters.CharFilter(
+        label=_("Surname"),
+        lookup_expr='icontains')
 
     class Meta:
         model = Applicant

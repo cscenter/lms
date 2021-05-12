@@ -1,23 +1,23 @@
 from collections import OrderedDict
 from itertools import groupby
 
+from django_filters.views import FilterMixin
+from rest_framework.renderers import JSONRenderer
+from vanilla import TemplateView
+
 from django.db.models import Prefetch
 from django.http import HttpResponseRedirect
 from django.utils.translation import pgettext_lazy
 from django.views import View
-from django_filters.views import FilterMixin
-from rest_framework.renderers import JSONRenderer
-from vanilla import TemplateView
 
 from core.exceptions import Redirect
 from core.urls import reverse
 from courses.constants import SemesterTypes
 from courses.models import Course, CourseTeacher
-from courses.utils import get_current_term_pair, TermPair
+from courses.utils import TermPair, get_current_term_pair
 from lms.api.serializers import OfferingsCourseSerializer
 from lms.filters import CoursesFilter
-from lms.utils import PublicRouteException, PublicRoute, \
-    group_terms_by_academic_year
+from lms.utils import PublicRoute, PublicRouteException, group_terms_by_academic_year
 
 
 class IndexView(View):

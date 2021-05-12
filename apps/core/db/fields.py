@@ -1,12 +1,12 @@
 from datetime import timedelta
 
 import pytz
+
 from django.core import checks
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import DecimalField, JSONField
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core import forms
@@ -46,6 +46,7 @@ def parse_timezone_string(value) -> pytz.tzinfo.BaseTzInfo:
 
 
 class TimeZoneField(models.Field):
+    empty_strings_allowed = False
     description = _("A pytz timezone instance")
 
     def __init__(self, verbose_name=None, choices=None, **kwargs):
@@ -53,7 +54,6 @@ class TimeZoneField(models.Field):
         # The Area and Location names have a maximum length of 14 characters.
         # In some cases the Location is itself represented as a compound name, so max_length is 42 characters
         kwargs['max_length'] = 42
-        kwargs['null'] = True  # Stores empty values as null
         self._default_choices = not choices
         if not choices:
             # `pytz.common_timezones` is a list of useful, current timezones.
@@ -77,7 +77,6 @@ class TimeZoneField(models.Field):
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
         del kwargs["max_length"]
-        del kwargs["null"]
         if self._default_choices:
             del kwargs['choices']
         else:

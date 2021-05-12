@@ -1,5 +1,5 @@
-from grading.constants import YandexCompilers, CheckingSystemTypes
-from grading.models import Submission, Checker
+from grading.constants import CheckingSystemTypes, YandexCompilers
+from grading.models import Checker, Submission
 from grading.utils import resolve_problem_id
 
 

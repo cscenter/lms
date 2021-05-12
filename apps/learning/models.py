@@ -1,9 +1,14 @@
-# -*- coding: utf-8 -*-
 import datetime
 import logging
 import os
 import os.path
 from secrets import token_urlsafe
+
+from djchoices import C, ChoiceItem, DjangoChoices
+from model_utils.fields import MonitorField
+from model_utils.managers import QueryManager
+from model_utils.models import TimeStampedModel
+from sorl.thumbnail import ImageField
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -15,33 +20,27 @@ from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, ChoiceItem, C
-from model_utils.fields import MonitorField
-from model_utils.managers import QueryManager
-from model_utils.models import TimeStampedModel
-from sorl.thumbnail import ImageField
 
-from core.db.fields import ScoreField, PrettyJSONField
+from core.db.fields import PrettyJSONField, ScoreField
 from core.db.mixins import DerivableFieldsMixin
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
 from core.db.models import SoftDeletionModel
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
 from core.timezone import TimezoneAwareMixin, now_local
 from core.urls import reverse
 from core.utils import hashids
-from courses.models import Course, CourseNews, Assignment, StudentGroupTypes, \
-    Semester, AssignmentSubmissionFormats
+from courses.models import Assignment, Course, CourseNews, Semester, StudentGroupTypes
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
-from learning.managers import EnrollmentDefaultManager, \
-    EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
-    GraduateProfileActiveManager, AssignmentCommentPublishedManager, \
-    GraduateProfileDefaultManager
-from learning.settings import GradingSystems, GradeTypes, ENROLLMENT_DURATION
+from learning.managers import (
+    AssignmentCommentPublishedManager, EnrollmentActiveManager,
+    EnrollmentDefaultManager, EventQuerySet, GraduateProfileActiveManager,
+    GraduateProfileDefaultManager, StudentAssignmentManager
+)
+from learning.settings import ENROLLMENT_DURATION, GradeTypes, GradingSystems
 from learning.utils import humanize_duration
 from users.constants import ThumbnailSizes
 from users.models import StudentProfile
-from users.thumbnails import ThumbnailMixin, \
-    get_thumbnail_or_stub, get_stub_factory
+from users.thumbnails import ThumbnailMixin, get_stub_factory, get_thumbnail_or_stub
 
 logger = logging.getLogger(__name__)
 
@@ -711,8 +710,10 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
         return instance
 
     def save(self, **kwargs):
-        from learning.services import update_student_assignment_derivable_fields, \
-            trigger_auto_assign_for_student_assignment
+        from learning.services import (
+            trigger_auto_assign_for_student_assignment,
+            update_student_assignment_derivable_fields
+        )
         from learning.tasks import generate_notifications_about_new_submission
         created = self.pk is None
         is_published_before = getattr(self, '_loaded_is_published', False)

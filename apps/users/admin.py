@@ -1,3 +1,5 @@
+from import_export.admin import ImportMixin
+
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as _UserAdmin
@@ -5,17 +7,18 @@ from django.core.exceptions import ValidationError
 from django.db import models as db_models
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-from import_export.admin import ImportMixin
 
-from core.admin import meta, BaseModelAdmin
+from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
 from core.widgets import AdminRichTextAreaWidget
 from users.constants import Roles
-from users.forms import UserCreationForm, UserChangeForm
+from users.forms import UserChangeForm, UserCreationForm
+
 from .import_export import UserRecordResource
-from .models import User, CertificateOfParticipation, \
-    OnlineCourseRecord, SHADCourseRecord, UserGroup, \
-    StudentProfile, StudentStatusLog, StudentTypes
+from .models import (
+    CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
+    StudentStatusLog, StudentTypes, User, UserGroup
+)
 
 
 class OnlineCourseRecordAdmin(admin.StackedInline):

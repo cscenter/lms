@@ -1,17 +1,31 @@
-# -*- coding: utf-8 -*-
-
-from django.core.management.base import BaseCommand
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
+from django.core.management.base import BaseCommand
+
 from admission.models import Applicant
 from admission.services import get_email_from
-from ._utils import EmailTemplateMixin, CurrentCampaignMixin
+
+from ._utils import CurrentCampaignMixin, EmailTemplateMixin
+
+
+class ExamResultStatus:
+    FAIL = "fail"
+    SUCCESS = "success"
+
+
+def get_exam_results_template_pattern(applicant, patterns):
+    if applicant.status == Applicant.INTERVIEW_TOBE_SCHEDULED:
+        return patterns[ExamResultStatus.SUCCESS]
+    else:
+        return patterns[ExamResultStatus.FAIL]
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     help = """Generate emails about exam results."""
+
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-exam-{status}"
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
@@ -21,22 +35,23 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             help="Send emails only to those who didn't pass to the next stage")
 
     def handle(self, *args, **options):
-        campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
-
-        email_types = ["exam-fail"]
+        campaigns = self.get_current_campaigns(options, confirm=False)
+        # Collect all template patterns, then validate them
+        template_name_patterns = {}
+        result_statuses = [ExamResultStatus.FAIL]
         if not options["fail_only"]:
-            email_types.append("exam-success")
-        self.validate_templates(campaigns, types=email_types)
+            result_statuses.append(ExamResultStatus.SUCCESS)
+        for status in result_statuses:
+            pattern = options['template_pattern'] or self.TEMPLATE_PATTERN
+            pattern = pattern.replace("{status}", status)
+            template_name_patterns[status] = pattern
+        self.validate_templates(campaigns, template_name_patterns.values())
 
         for campaign in campaigns:
             self.stdout.write("{}:".format(campaign))
             email_from = get_email_from(campaign)
-            statuses = [
-                Applicant.REJECTED_BY_EXAM,
-            ]
+
+            statuses = [Applicant.REJECTED_BY_EXAM]
             if not options["fail_only"]:
                 statuses.append(Applicant.INTERVIEW_TOBE_SCHEDULED)
             applicants = (Applicant.objects
@@ -49,7 +64,9 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             for a in applicants.iterator():
                 total += 1
                 succeed += int(a.status == Applicant.INTERVIEW_TOBE_SCHEDULED)
-                template = self.get_template(a, campaign)
+                pattern = get_exam_results_template_pattern(a, template_name_patterns)
+                template_name = self.get_template_name(campaign, pattern)
+                template = get_email_template(template_name)
                 recipients = [a.email]
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
@@ -73,12 +90,3 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             self.stdout.write("Fail: {}".format(total - succeed))
             self.stdout.write("Emails generated: {}".format(generated))
         self.stdout.write("Done")
-
-    def get_template(self, applicant, campaign):
-        if applicant.status == Applicant.INTERVIEW_TOBE_SCHEDULED:
-            template_type = "exam-success"
-        else:
-            template_type = "exam-fail"
-        template_name = self.get_template_name(campaign, type=template_type)
-        return get_email_template(template_name)
-

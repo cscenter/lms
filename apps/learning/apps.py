@@ -7,12 +7,7 @@ class LearningConfig(AppConfig):
     verbose_name = _("Learning")
 
     def ready(self):
-        # Register checks
-        from . import checks
-        # Register app signals
-        from . import signals
-        # Register app permissions and roles
-        from . import permissions
-        from . import roles
-        # Register tabs
-        from . import tabs
+        # Register checks, signals, permissions and roles, tabs
+        from . import (  # pylint: disable=unused-import
+            checks, permissions, roles, signals, tabs
+        )

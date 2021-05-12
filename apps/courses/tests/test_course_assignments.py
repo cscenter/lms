@@ -1,5 +1,6 @@
 import factory
 import pytest
+
 from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
 
@@ -8,8 +9,8 @@ from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.models import Assignment
 from courses.permissions import CreateAssignment, EditAssignment
-from courses.tests.factories import CourseFactory, AssignmentFactory
-from users.tests.factories import TeacherFactory, CuratorFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory
+from users.tests.factories import CuratorFactory, TeacherFactory
 
 
 @pytest.mark.django_db
@@ -30,15 +31,17 @@ def test_course_assignment_form_create(client):
     import datetime
     teacher = TeacherFactory()
     CourseFactory.create_batch(3, teachers=[teacher])
-    co = CourseFactory.create(teachers=[teacher])
+    course = CourseFactory.create(teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
-    form.update({'course': co.pk,
-                 # 'attached_file': None,
-                 'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time})
-    url = co.get_create_assignment_url()
+    form.update({
+        'course': course.pk,
+        'deadline_at_0': deadline_date,
+        'deadline_at_1': deadline_time,
+        'time_zone': 'Europe/Moscow',
+    })
+    url = course.get_create_assignment_url()
     client.login(teacher)
     response = client.post(url, form)
     assert response.status_code == 302
@@ -71,20 +74,22 @@ def test_course_assignment_update_view_security(client, assert_login_redirect,
 def test_course_assignment_update(client, assert_redirect):
     teacher = TeacherFactory()
     client.login(teacher)
-    co = CourseFactory.create(teachers=[teacher])
-    a = AssignmentFactory.create(course=co)
+    course = CourseFactory.create(teachers=[teacher])
+    a = AssignmentFactory.create(course=course)
     form = model_to_dict(a)
     del form['ttc']
     del form['checker']
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     new_title = a.title + " foo42bar"
-    form.update({'title': new_title,
-                 'course': co.pk,
-                 # 'attached_file': None,
-                 'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time})
-    # Make sure new title is not presented on /teaching/assignments/
+    form.update({
+        'title': new_title,
+        'course': course.pk,
+        'time_zone': 'Europe/Moscow',
+        'deadline_at_0': deadline_date,
+        'deadline_at_1': deadline_time,
+    })
+    # Make sure new title is not present on /teaching/assignments/
     list_url = reverse('teaching:assignment_list')
     response = client.get(list_url)
     assert response.status_code == 200
@@ -124,15 +129,15 @@ def test_course_assignment_delete_security(client, assert_login_redirect):
 @pytest.mark.django_db
 def test_course_assignment_delete(client, assert_redirect):
     teacher = TeacherFactory()
-    co = CourseFactory.create(teachers=[teacher])
-    a = AssignmentFactory.create(course=co)
-    delete_url = a.get_delete_url()
+    course = CourseFactory(teachers=[teacher])
+    assignment = AssignmentFactory(course=course)
+    delete_url = assignment.get_delete_url()
     client.login(teacher)
     response = client.get(delete_url)
     assert response.status_code == 200
-    assert smart_bytes(a.title) in response.content
+    assert smart_bytes(assignment.title) in response.content
     teaching_assignment_list = reverse('teaching:assignment_list')
     assert_redirect(client.post(delete_url), teaching_assignment_list)
     response = client.get(teaching_assignment_list)
     assert response.status_code == 200
-    assert smart_bytes(a.title) not in response.content
+    assert smart_bytes(assignment.title) not in response.content

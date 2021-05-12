@@ -3,10 +3,11 @@ from decimal import Decimal
 import pytest
 
 from core.urls import reverse
-from courses.tests.factories import CourseFactory, AssignmentFactory
-from learning.api.serializers import MyCourseSerializer, \
-    MyCourseAssignmentSerializer, EnrollmentSerializer, MyEnrollmentSerializer, \
+from courses.tests.factories import AssignmentFactory, CourseFactory
+from learning.api.serializers import (
+    MyCourseAssignmentSerializer, MyCourseSerializer, MyEnrollmentSerializer,
     StudentAssignmentSerializer
+)
 from learning.models import StudentAssignment
 from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import TeacherFactory

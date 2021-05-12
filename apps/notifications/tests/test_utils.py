@@ -1,4 +1,5 @@
 import pytest
+
 from django.contrib.sites.models import Site
 
 from core.models import SiteConfiguration

@@ -1,9 +1,9 @@
 import datetime
 
-from babel.dates import get_timezone_location
-from crispy_forms.bootstrap import TabHolder, Tab
+from crispy_forms.bootstrap import Tab, TabHolder
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div
+from crispy_forms.layout import Div, Layout
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -11,16 +11,16 @@ from django.utils.translation import gettext_lazy as _
 from core.forms import CANCEL_SAVE_PAIR
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
-from core.timezone.forms import TimezoneAwareSplitDateTimeField, \
-    TimezoneAwareModelForm
-from core.widgets import UbereditorWidget, DateInputTextWidget, \
-    TimeInputTextWidget
+from core.timezone.forms import TimezoneAwareModelForm, TimezoneAwareSplitDateTimeField
+from core.widgets import DateInputTextWidget, TimeInputTextWidget, UbereditorWidget
 from courses.constants import ClassTypes
-from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
-    Assignment, LearningSpace, AssignmentSubmissionFormats, \
-    CourseGroupModes
+from courses.models import (
+    Assignment, AssignmentSubmissionFormats, Course, CourseClass, CourseGroupModes,
+    CourseNews, LearningSpace, MetaCourse
+)
+from courses.services import CourseService
 from grading.models import CheckingSystem
-from grading.services import CheckerURLError, CheckerService
+from grading.services import CheckerService, CheckerURLError
 
 __all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
            'CourseClassForm', 'AssignmentForm')
@@ -210,12 +210,7 @@ class CourseClassForm(forms.ModelForm):
                                          .filter(branch__in=course.branches.all())
                                          .distinct()
                                          .order_by('name'))
-        time_zones = set()
-        for branch in course.branches.all():
-            tz = branch.get_timezone()
-            if tz:
-                time_zones.add((str(tz), get_timezone_location(tz, locale=locale, return_city=True)))
-        self.fields['time_zone'].choices = list(time_zones)
+        self.fields['time_zone'].choices = CourseService.get_time_zones(course, locale=locale)
         field_restrict_to = self.fields['restricted_to']
         field_restrict_to.choices = StudentGroupService.get_choices(course)
         self.instance.course = course
@@ -283,6 +278,9 @@ class AssignmentForm(TimezoneAwareModelForm):
         input_date_formats=[DATE_FORMAT_RU],
         input_time_formats=[TIME_FORMAT_RU],
     )
+    time_zone = forms.ChoiceField(
+        label=_("Time Zone"),
+        required=True)
     attachments = forms.FileField(
         label=_("Attached files"),
         required=False,
@@ -325,12 +323,12 @@ class AssignmentForm(TimezoneAwareModelForm):
                     "https://contest.yandex.ru/contest/3/problems/A/")
     )
 
-    def __init__(self, *args, **kwargs):
-        course = kwargs.pop('course', None)
-        assert course is not None
-        super().__init__(*args, **kwargs)
-        self.fields['ttc'].required = course.ask_ttc
+    def __init__(self, course, locale="en", **kwargs):
+        super().__init__(**kwargs)
         self.instance.course = course
+        self.fields['ttc'].required = course.ask_ttc
+        self.fields['time_zone'].choices = CourseService.get_time_zones(course, locale=locale)
+        # Student groups
         field_restrict_to = self.fields['restricted_to']
         if course.group_mode == CourseGroupModes.BRANCH:
             field_restrict_to.label = _("Available to Branches")
@@ -343,7 +341,7 @@ class AssignmentForm(TimezoneAwareModelForm):
 
     class Meta:
         model = Assignment
-        fields = ('title', 'text', 'deadline_at', 'attachments',
+        fields = ('title', 'text', 'deadline_at', 'time_zone', 'attachments',
                   'submission_type', 'passing_score', 'maximum_score',
                   'weight', 'ttc', 'restricted_to')
 

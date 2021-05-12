@@ -1,5 +1,6 @@
+from rest_framework import fields, serializers
+
 from django.conf import settings
-from rest_framework import serializers, fields
 
 from learning.settings import Branches
 

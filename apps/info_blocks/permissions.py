@@ -1,4 +1,4 @@
-from auth.permissions import add_perm, Permission
+from auth.permissions import Permission, add_perm
 from learning.permissions import has_active_status
 
 

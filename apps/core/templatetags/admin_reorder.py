@@ -1,5 +1,5 @@
-from django.template import Node, NodeList, Template, Context, Variable, Library
 from django.conf import settings
+from django.template import Library, Node
 
 register = Library()
 

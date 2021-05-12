@@ -2,23 +2,24 @@ from datetime import timedelta
 
 import pytest
 from bs4 import BeautifulSoup
+
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
+from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.models import AssignmentSubmissionFormats, CourseTeacher
-from courses.tests.factories import SemesterFactory, CourseFactory, \
-    AssignmentFactory
-from learning.models import StudentAssignment, AssignmentNotification, \
-    AssignmentComment
-from learning.permissions import ViewOwnStudentAssignment
-from learning.tests.factories import EnrollmentFactory, \
-    StudentAssignmentFactory, AssignmentCommentFactory
-from users.tests.factories import TeacherFactory, StudentFactory, \
-    StudentProfileFactory
-
+from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
+from courses.utils import get_current_term_pair
+from learning.models import AssignmentComment, AssignmentNotification, StudentAssignment
+from learning.permissions import ViewCourses, ViewOwnStudentAssignment
+from learning.settings import Branches
+from learning.tests.factories import (
+    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
+)
+from users.tests.factories import StudentFactory, StudentProfileFactory, TeacherFactory
 
 # TODO: test ViewOwnAssignment in test_permissions.py
 
@@ -348,3 +349,99 @@ def test_assignment_comment_author_cannot_be_modified_by_user(client):
     comment = AssignmentComment.objects.first()
     assert comment.author == student1
     assert comment.student_assignment == sa1
+
+
+@pytest.mark.django_db
+def test_student_courses_list(client, lms_resolver, assert_login_redirect):
+    url = reverse('study:course_list')
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == ViewCourses.name
+    student_profile_spb = StudentProfileFactory(branch__code=Branches.SPB)
+    student_spb = student_profile_spb.user
+    client.login(student_spb)
+    response = client.get(url)
+    assert response.status_code == 200
+    assert len(response.context_data['ongoing_rest']) == 0
+    assert len(response.context_data['ongoing_enrolled']) == 0
+    assert len(response.context_data['archive']) == 0
+    current_term = get_current_term_pair(student_spb.time_zone)
+    current_term_spb = SemesterFactory(year=current_term.year,
+                                       type=current_term.type)
+    cos = CourseFactory.create_batch(4, semester=current_term_spb,
+                                     main_branch=student_profile_spb.branch)
+    cos_available = cos[:2]
+    cos_enrolled = cos[2:]
+    prev_year = current_term.year - 1
+    cos_archived = CourseFactory.create_batch(3, semester__year=prev_year)
+    for co in cos_enrolled:
+        EnrollmentFactory.create(student=student_spb,
+                                 student_profile=student_profile_spb,
+                                 course=co)
+    for co in cos_archived:
+        EnrollmentFactory.create(student=student_spb,
+                                 student_profile=student_profile_spb,
+                                 course=co)
+    response = client.get(url)
+    assert len(cos_enrolled) == len(response.context_data['ongoing_enrolled'])
+    assert set(cos_enrolled) == set(response.context_data['ongoing_enrolled'])
+    assert len(cos_archived) == len(response.context_data['archive'])
+    assert set(cos_archived) == set(response.context_data['archive'])
+    assert len(cos_available) == len(response.context_data['ongoing_rest'])
+    assert set(cos_available) == set(response.context_data['ongoing_rest'])
+    # Add courses from other branch
+    current_term_nsk = SemesterFactory.create_current(for_branch=Branches.NSK)
+    co_nsk = CourseFactory.create(semester=current_term_nsk,
+                                  main_branch__code=Branches.NSK)
+    response = client.get(url)
+    assert len(cos_enrolled) == len(response.context_data['ongoing_enrolled'])
+    assert len(cos_available) == len(response.context_data['ongoing_rest'])
+    assert len(cos_archived) == len(response.context_data['archive'])
+    # Test for student from nsk
+    student_profile_nsk = StudentProfileFactory(branch__code=Branches.NSK)
+    student_nsk = student_profile_nsk.user
+    client.login(student_nsk)
+    CourseFactory.create(semester__year=prev_year,
+                         main_branch=student_profile_nsk.branch)
+    response = client.get(url)
+    assert len(response.context_data['ongoing_enrolled']) == 0
+    assert len(response.context_data['ongoing_rest']) == 1
+    assert set(response.context_data['ongoing_rest']) == {co_nsk}
+    assert len(response.context_data['archive']) == 0
+    # Add open reading, it should be available on compscicenter.ru
+    co_open = CourseFactory.create(semester=current_term_nsk,
+                                   main_branch=student_profile_nsk.branch)
+    response = client.get(url)
+    assert len(response.context_data['ongoing_enrolled']) == 0
+    assert len(response.context_data['ongoing_rest']) == 2
+    assert set(response.context_data['ongoing_rest']) == {co_nsk, co_open}
+    assert len(response.context_data['archive']) == 0
+
+
+@pytest.mark.django_db
+def test_course_list_course_not_in_student_branch(client, lms_resolver, assert_login_redirect):
+    url = reverse('study:course_list')
+    student_profile_spb = StudentProfileFactory(branch__code=Branches.SPB)
+    student_spb = student_profile_spb.user
+    client.login(student_spb)
+    response = client.get(url)
+    assert len(response.context_data['ongoing_enrolled']) == 0
+    current_term = SemesterFactory.create_current(for_branch=student_profile_spb.branch.code)
+    course = CourseFactory(semester=current_term, main_branch=BranchFactory())
+    # Student could be enrolled in with admin UI to the course
+    # they don't has permissions
+    EnrollmentFactory(course=course,
+                      student_profile=student_profile_spb,
+                      student=student_spb)
+    # It still should be visible in the ongoing or archive courses
+    response = client.get(url)
+    assert len(response.context_data['ongoing_enrolled']) == 1
+    prev_term = SemesterFactory.create_prev(current_term)
+    course = CourseFactory(semester=prev_term, main_branch=BranchFactory())
+    EnrollmentFactory(course=course,
+                      student_profile=student_profile_spb,
+                      student=student_spb)
+    response = client.get(url)
+    assert len(response.context_data['ongoing_enrolled']) == 1
+    assert len(response.context_data['archive']) == 1
+    assert response.context_data['archive'] == [course]

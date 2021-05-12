@@ -1,39 +1,35 @@
-# -*- coding: utf-8 -*-
-
-from django.core.management.base import BaseCommand, CommandError
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
-from admission.models import Campaign, Applicant
+from django.core.management.base import BaseCommand, CommandError
+
+from admission.models import Applicant, Campaign
 from admission.services import get_email_from
+
 from ._utils import CurrentCampaignMixin, EmailTemplateMixin
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
-    TEMPLATE_REGEXP = "admission-{year}-{branch_code}-{type}"
-    TEMPLATE_TYPE = "invite-former-applicants"
     help = """
     Those who didn't pass admission campaign in the past N years (2 by default)
     and didn't apply for the current, have a chance to submit an application
     form until deadline.
     """
 
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-invite-former-applicants"
+
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument(
             '--years', type=int, default=2,
-            help='How many previous years should be taken into account '
-                 'relative to the current campaign.')
+            help='How many years before the current campaign should be taken into account.')
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
-        self.validate_templates(campaigns, types=[self.TEMPLATE_TYPE],
-                                validate_campaign_settings=False)
+        template_name_pattern = options['template_pattern']
+        self.validate_templates(campaigns, [template_name_pattern])
 
         number_of_years = options["years"]
         if number_of_years < 1:
@@ -42,9 +38,10 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
         for campaign in campaigns:
             self.stdout.write(f"Process campaign {campaign}")
             in_range = [campaign.year - number_of_years, campaign.year - 1]
-            self._generate_notifications(campaign, in_range)
+            template_name = self.get_template_name(campaign, template_name_pattern)
+            self._generate_notifications(campaign, in_range, template_name)
 
-    def _generate_notifications(self, current_campaign, in_range):
+    def _generate_notifications(self, current_campaign, in_range, template_name):
         email_from = get_email_from(current_campaign)
         prev_campaigns = list(Campaign.objects
                               .filter(branch=current_campaign.branch,
@@ -59,9 +56,6 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             if input('Continue? [y/n] ') != "y":
                 return
 
-        template_name = self.get_template_name(current_campaign,
-                                               type=self.TEMPLATE_TYPE)
-        template = get_email_template(template_name)
         exclude_statuses = [Applicant.ACCEPT,
                             Applicant.ACCEPT_IF,
                             Applicant.VOLUNTEER,
@@ -75,12 +69,16 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                                              user__isnull=False)
                                     .distinct()
                                     .values_list('email', flat=True))
-        sent = 0
-        already_applied = 0
+        total = 0
+        generated = 0
+        template = get_email_template(template_name)
         for email in failed_in_prev_campaigns:
-            current_campaign_participant = Applicant.objects.filter(
-                campaign_id=current_campaign.pk, email=email)
-            if not current_campaign_participant.exists():
+            total += 1
+            is_already_applied = (Applicant.objects
+                                  .filter(campaign_id=current_campaign.pk,
+                                          email=email)
+                                  .exists())
+            if not is_already_applied:
                 recipients = [email]
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
@@ -95,9 +93,6 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                         context={},
                         backend='ses',
                     )
-                    sent += 1
-            else:
-                already_applied += 1
-        self.stdout.write(f"Emails generated {sent}. "
-                          f"Already applied for admission: {already_applied}")
+                    generated += 1
+        self.stdout.write(f"Total: {total}\nGenerated {generated}\nAlready applied: {total - generated}")
 

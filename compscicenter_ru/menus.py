@@ -1,9 +1,9 @@
 from django.conf import settings
 from django.utils.translation import pgettext_lazy
-from menu import Menu
 
 from core.menu import MenuItem
 from core.urls import reverse, reverse_lazy
+from menu import Menu
 
 PRIVATE = settings.LMS_SUBDOMAIN
 PUBLIC_DOMAIN = reverse('index')[:-1]  # remove trailing slash

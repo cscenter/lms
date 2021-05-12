@@ -1,16 +1,19 @@
 from datetime import datetime
 
 import pytz
-from django.core.management.base import BaseCommand, CommandError
-from django.utils import formats
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
+from django.core.management.base import BaseCommand, CommandError
+from django.utils import formats
+
 from admission.models import Applicant
 from admission.services import get_email_from
-from ._utils import CurrentCampaignMixin, EmailTemplateMixin, \
-    CustomizeQueryMixin
+
+from ._utils import (
+    CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin, validate_template
+)
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin,
@@ -23,7 +26,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin,
         ./manage.py email_to_applicants --branch=spb --template=admission-2019-try-online -f online_test__score__in=[5,6]
     """
     help = """Send notification to current campaigns applicants"""
-    TEMPLATE_REGEXP = "{type}"
+    TEMPLATE_PATTERN = "{type}"
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
@@ -38,19 +41,13 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin,
             '--scheduled_time', type=str,
             help='Scheduled time in UTC [YYYY-MM-DD HH:MM]')
 
-    def get_template_name(self, campaign, template):
-        return template
-
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
-        template_name = options['template']
+        template_name = options['template_pattern']
         if not template_name:
-            raise CommandError(f"Provide email template name")
-        self.validate_templates(campaigns, types=[template_name])
+            raise CommandError("Provide email template name")
+        validate_template(template_name)
 
         scheduled_time = options['scheduled_time']
         time_display = 'now'

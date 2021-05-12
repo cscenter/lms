@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 from surveys.forms import FormBuilder
 from surveys.templatetags.form_utils import render_form
-from surveys.tests.factories import FieldFactory, CourseSurveyFactory
+from surveys.tests.factories import CourseSurveyFactory, FieldFactory
 
 
 @pytest.mark.django_db

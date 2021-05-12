@@ -4,8 +4,9 @@ from functools import wraps
 from typing import Iterable, Type
 from urllib.parse import quote
 
-from django.utils.encoding import force_bytes
 from rest_framework import serializers
+
+from django.utils.encoding import force_bytes
 
 API_FRAGMENT_KEY_TEMPLATE = 'api.cache.%s.%s'
 

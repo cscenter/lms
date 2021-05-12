@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
 from django.apps import apps
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import transaction
 from django.contrib.auth import get_user_model
-from django.db.models.signals import pre_save, post_save
+from django.db import transaction
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 
-from projects.constants import ProjectGradeTypes
-from projects.models import ProjectStudent, Report, Project, Review, \
-    ReportComment
-from users.constants import Roles
 from notifications import NotificationTypes
 from notifications.signals import notify
+from projects.constants import ProjectGradeTypes
+from projects.models import Project, ProjectStudent, Report, ReportComment
+from users.constants import Roles
 
 _UNSAVED_FILE_SUPERVISOR_PRESENTATION = 'unsaved_supervisor_presentation'
 _UNSAVED_FILE_PRESENTATION = 'unsaved_presentation'
@@ -57,9 +54,10 @@ def post_save_project_student(sender, instance, *args, **kwargs):
 
 @receiver(post_save, sender=Project)
 def post_save_project(sender, instance, created, *args, **kwargs):
-    from projects.tasks import (
-        download_presentation_from_yandex_disk_supervisor as job_ya_supervisor,
-        download_presentation_from_yandex_disk_students as job_ya_students)
+    from projects.tasks import \
+        download_presentation_from_yandex_disk_students as job_ya_students
+    from projects.tasks import \
+        download_presentation_from_yandex_disk_supervisor as job_ya_supervisor
     if created:
         save = False
         if hasattr(instance, _UNSAVED_FILE_SUPERVISOR_PRESENTATION):

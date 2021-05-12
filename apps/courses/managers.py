@@ -1,8 +1,9 @@
 from typing import List
 
 from django.db import models
-from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
-    Value, IntegerField, F
+from django.db.models import (
+    Case, Count, F, IntegerField, Prefetch, Q, Subquery, Value, When, query
+)
 from django.utils import timezone
 
 from courses.constants import MaterialVisibilityTypes

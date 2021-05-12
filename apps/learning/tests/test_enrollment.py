@@ -2,6 +2,7 @@ import datetime
 
 import pytest
 from bs4 import BeautifulSoup
+
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
@@ -12,17 +13,18 @@ from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse
 from courses.models import CourseBranch
-from courses.tests.factories import SemesterFactory, CourseFactory, \
-    AssignmentFactory
-from learning.models import Enrollment, StudentAssignment, StudentGroup, \
-    EnrollmentPeriod
-from learning.services import EnrollmentService, CourseCapacityFull, \
-    StudentGroupService, get_student_profile
-from learning.settings import StudentStatuses, Branches
-from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
-from users.tests.factories import StudentFactory, InvitedStudentFactory, \
-    StudentProfileFactory
-
+from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
+from learning.models import (
+    Enrollment, EnrollmentPeriod, StudentAssignment, StudentGroup
+)
+from learning.services import (
+    CourseCapacityFull, EnrollmentService, StudentGroupService, get_student_profile
+)
+from learning.settings import Branches, StudentStatuses
+from learning.tests.factories import CourseInvitationFactory, EnrollmentFactory
+from users.tests.factories import (
+    InvitedStudentFactory, StudentFactory, StudentProfileFactory
+)
 
 # TODO: запись кем-то без группы INVITED.
 # TODO: после регистрации у чуваков есть необходимые поля и группы. Нужно ли тестить отправку email? вроде как асинхронно высылается, значит надо (мб моки уже есть в текстах клуба, хз)
@@ -272,9 +274,9 @@ def test_unenrollment(client, settings, assert_redirect):
     assert not enrollment.is_deleted
     # Check ongoing courses on student courses page are not empty
     response = client.get(reverse("study:course_list"))
-    assert len(response.context['ongoing_rest']) == 0
-    assert len(response.context['ongoing_enrolled']) == 1
-    assert len(response.context['archive_enrolled']) == 0
+    assert len(response.context_data['ongoing_rest']) == 0
+    assert len(response.context_data['ongoing_enrolled']) == 1
+    assert len(response.context_data['archive']) == 0
     # Check `back` url on unenroll action
     url = course.get_unenroll_url() + "?back=study:course_list"
     assert_redirect(client.post(url, form),
@@ -284,9 +286,9 @@ def test_unenrollment(client, settings, assert_redirect):
                                           assignment__course=course))
     # Check courses on student courses page are empty
     response = client.get(reverse("study:course_list"))
-    assert len(response.context['ongoing_rest']) == 1
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['archive_enrolled']) == 0
+    assert len(response.context_data['ongoing_rest']) == 1
+    assert len(response.context_data['ongoing_enrolled']) == 0
+    assert len(response.context_data['archive']) == 0
 
 
 @pytest.mark.django_db

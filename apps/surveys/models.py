@@ -1,25 +1,25 @@
 import json
 from datetime import datetime
-from typing import Optional, Tuple, List, Dict
+from typing import Dict, List, Optional, Tuple
+
+from post_office.models import EmailTemplate
 
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
 from django.utils import formats
 from django.utils.functional import cached_property
-from django.utils.timezone import now, localtime
+from django.utils.timezone import localtime, now
 from django.utils.translation import gettext_lazy as _
-from post_office import mail
-from post_office.models import EmailTemplate
 
-from core.timezone import now_local, TimezoneAwareMixin
+from core.timezone import TimezoneAwareMixin, now_local
 from core.timezone.fields import TimezoneAwareDateTimeField
 from core.urls import reverse
 from courses.models import Course
-from learning.models import Enrollment
-from surveys.constants import FIELD_TYPES, MULTIPLE_CHOICE_FIELD_TYPES, \
-    FieldType, FieldVisibility, STATUS_PUBLISHED, \
-    STATUSES, FIELD_WIDGETS, STATUS_DRAFT, CHOICE_FIELD_TYPES
+from surveys.constants import (
+    CHOICE_FIELD_TYPES, FIELD_TYPES, FIELD_WIDGETS, MULTIPLE_CHOICE_FIELD_TYPES,
+    STATUS_DRAFT, STATUS_PUBLISHED, STATUSES, FieldType, FieldVisibility
+)
 
 
 class FormManager(models.Manager):

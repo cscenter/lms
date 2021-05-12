@@ -1,11 +1,14 @@
-from typing import Optional, Type
+from typing import Optional
 
+from courses.models import AssignmentSubmissionFormats
 from grading.constants import CheckingSystemTypes
-from courses.models import Assignment, AssignmentSubmissionFormats
-from learning.forms import AssignmentSolutionBaseForm, \
-    AssignmentSolutionDefaultForm, AssignmentSolutionYandexContestForm
-from learning.models import AssignmentComment, StudentAssignment, \
-    AssignmentSubmissionTypes
+from learning.forms import (
+    AssignmentSolutionBaseForm, AssignmentSolutionDefaultForm,
+    AssignmentSolutionYandexContestForm
+)
+from learning.models import (
+    AssignmentComment, AssignmentSubmissionTypes, StudentAssignment
+)
 from users.models import User
 
 

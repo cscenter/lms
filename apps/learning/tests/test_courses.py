@@ -5,10 +5,9 @@ import pytz
 
 from core.tests.factories import BranchFactory
 from courses.models import CourseBranch
-from courses.tests.factories import CourseTeacherFactory, AssignmentFactory, \
-    CourseFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory
 from learning.settings import Branches
-from users.tests.factories import TeacherFactory, StudentFactory
+from users.tests.factories import StudentFactory, TeacherFactory
 
 
 @pytest.mark.django_db
@@ -29,14 +28,6 @@ def test_course_detail_view_timezone(settings, client):
     assignments_tab_url = course_spb.get_url_for_tab("assignments")
     response = client.get(assignments_tab_url)
     assert response.status_code == 302
-    # Show assignments in the timezone of the course if authenticated user
-    # is not participated in a course as a teacher/student/etc and course
-    # is available in one branch only
-    for u in [student_spb, student_nsk, teacher_nsk]:
-        client.login(u)
-        response = client.get(assignments_tab_url)
-        assert response.status_code == 200
-        assert response.context_data["tz_override"] is None
     CourseBranch(course=course_spb, branch=branch_nsk).save()
     client.logout()
     # Any authenticated user (this teacher is not actual teacher of the course)
@@ -52,9 +43,3 @@ def test_course_detail_view_timezone(settings, client):
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
     assert response.context_data["tz_override"] == branch_spb.get_timezone()
-    # Actual teacher of the course
-    CourseTeacherFactory(course=course_spb, teacher=teacher_nsk)
-    client.login(teacher_nsk)
-    response = client.get(assignments_tab_url)
-    assert response.status_code == 200
-    assert response.context_data["tz_override"] is None

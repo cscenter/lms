@@ -1,7 +1,7 @@
 from dal import autocomplete
-from django.contrib.auth.mixins import PermissionRequiredMixin, \
-    LoginRequiredMixin
 from django_jinja.views.generic import DetailView
+
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 from announcements.models import Announcement, AnnouncementTag
 

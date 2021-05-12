@@ -1,6 +1,6 @@
 import pytest
 
-from core.tests.settings import TEST_DOMAIN, ANOTHER_DOMAIN, TEST_DOMAIN_ID
+from core.tests.settings import ANOTHER_DOMAIN, TEST_DOMAIN, TEST_DOMAIN_ID
 from info_blocks.models import InfoBlock
 from info_blocks.tests.factories import InfoBlockFactory, InfoBlockTagFactory
 

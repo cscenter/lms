@@ -1,8 +1,9 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views import generic
 from vanilla import DetailView
 
-from core.models import Location, Branch
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import generic
+
+from core.models import Branch, Location
 from courses.models import Course, CourseTeacher
 from learning.roles import Roles
 from users.models import User

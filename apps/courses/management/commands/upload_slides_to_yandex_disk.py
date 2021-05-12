@@ -3,6 +3,7 @@
 import datetime
 
 import django_rq
+
 from django.conf import settings
 from django.core.management import BaseCommand, CommandError
 

@@ -3,8 +3,7 @@ from post_office.models import Email
 
 from admission.models import Contest
 from admission.tasks import register_in_yandex_contest
-from admission.tests.factories import ApplicantFactory, ContestFactory, \
-    CampaignFactory
+from admission.tests.factories import ApplicantFactory, CampaignFactory, ContestFactory
 
 
 @pytest.mark.django_db

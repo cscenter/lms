@@ -5,30 +5,30 @@ import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
+
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
 from auth.mixins import PermissionRequiredMixin
-from grading.constants import CheckingSystemTypes
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.models import Assignment, AssignmentAttachment, \
-    AssignmentSubmissionFormats
-from courses.tests.factories import SemesterFactory, CourseFactory, \
-    AssignmentFactory, AssignmentAttachmentFactory
-from learning.models import StudentAssignment, Enrollment
+from courses.models import Assignment, AssignmentAttachment, AssignmentSubmissionFormats
+from courses.tests.factories import (
+    AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, SemesterFactory
+)
+from learning.models import StudentAssignment
 from learning.permissions import ViewAssignmentAttachment
-from learning.settings import StudentStatuses, GradeTypes, Branches
-from learning.tests.factories import EnrollmentFactory, \
-    AssignmentCommentFactory, \
-    StudentAssignmentFactory
 from learning.services import course_failed_by_student, get_student_profile
+from learning.settings import Branches, GradeTypes, StudentStatuses
+from learning.tests.factories import (
+    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
+)
 from projects.tests.factories import ProjectReviewerFactory
-from users.tests.factories import TeacherFactory, \
-    StudentFactory, VolunteerFactory, CuratorFactory
-
+from users.tests.factories import (
+    CuratorFactory, StudentFactory, TeacherFactory, VolunteerFactory
+)
 
 # TODO: assignment submission page - comments localisation, assignment created localization
 
@@ -159,10 +159,13 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     tmp_file = tmpdir.mkdir("attachment").join("attachment.txt")
     tmp_file.write("content")
-    form.update({'course': course.pk,
-                 'attachments': tmp_file.open(),
-                 'deadline_at_0': deadline_date,
-                 'deadline_at_1': deadline_time})
+    form.update({
+        'course': course.pk,
+        'attachments': tmp_file.open(),
+        'time_zone': 'Europe/Moscow',
+        'deadline_at_0': deadline_date,
+        'deadline_at_1': deadline_time
+    })
     url = course.get_create_assignment_url()
     client.post(url, form)
     assert Assignment.objects.count() == 1
@@ -243,6 +246,7 @@ def test_create_assignment_admin_form(client):
         'passing_score': 0,
         'maximum_score': 5,
         'weight': 1,
+        'time_zone': 'Europe/Moscow',
         'deadline_at_0': str(a.deadline_at.date()),
         'deadline_at_1': '00:00'
     }

@@ -1,44 +1,40 @@
-# -*- coding: utf-8 -*-
 
 import json
 import os
 from collections import OrderedDict
 
-from babel.dates import get_timezone_gmt
 from django.apps import apps
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Prefetch, Count, prefetch_related_objects, Q
-from django.http import HttpResponseBadRequest, \
-    JsonResponse, HttpResponseForbidden
+from django.db.models import Count, Prefetch, Q, prefetch_related_objects
+from django.http import HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from django.utils.translation import gettext_lazy as _
 
 from auth.mixins import PermissionRequiredMixin
+from core.timezone.utils import get_gmt
 from core.urls import reverse
-from core.timezone.utils import get_now_utc, get_gmt
 from core.views import ProtectedFormMixin
-from courses.models import Course, Semester, CourseTeacher
-from files.handlers import MemoryImageUploadHandler, \
-    TemporaryImageUploadHandler
+from courses.models import Course, CourseTeacher, Semester
+from files.handlers import MemoryImageUploadHandler, TemporaryImageUploadHandler
 from learning.forms import TestimonialForm
-from learning.models import StudentAssignment, \
-    Enrollment
+from learning.models import Enrollment, StudentAssignment
 from learning.services import get_student_profile
 from learning.settings import GradeTypes
 from study_programs.models import StudyProgram
 from users.compat import get_graduate_profile as get_graduate_profile_compat
 from users.models import SHADCourseRecord
-from users.thumbnails import get_user_thumbnail, photo_thumbnail_cropbox, \
-    CropboxData
-from .forms import UserProfileForm, CertificateOfParticipationCreateForm
-from .models import User, CertificateOfParticipation
-from .permissions import CreateCertificateOfParticipation, \
-    ViewCertificateOfParticipation
+from users.thumbnails import CropboxData, get_user_thumbnail, photo_thumbnail_cropbox
+
+from .forms import CertificateOfParticipationCreateForm, UserProfileForm
+from .models import CertificateOfParticipation, User
+from .permissions import (
+    CreateCertificateOfParticipation, ViewCertificateOfParticipation
+)
 from .services import get_graduate_profile
 
 

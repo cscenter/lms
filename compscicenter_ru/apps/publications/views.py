@@ -1,16 +1,16 @@
+from vanilla import TemplateView
+
 from django.core.cache import cache
 from django.db.models import Prefetch, prefetch_related_objects
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView
-from vanilla import TemplateView
 
-from compscicenter_ru.utils import TabList, Tab
+from compscicenter_ru.utils import Tab, TabList
 from core.utils import bucketize
 from projects.constants import ProjectTypes
-
 from projects.models import Project
-from users.compat import get_graduate_profile
 from publications.models import ProjectPublication, RecordedEvent
+from users.compat import get_graduate_profile
 from users.models import User
 
 

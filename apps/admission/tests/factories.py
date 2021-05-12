@@ -3,18 +3,22 @@ import random
 
 import factory
 import pytz
-from django.db.models.signals import post_save
-from django.utils import timezone
 from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime
 
-from admission.constants import WHERE_DID_YOU_LEARN, \
-    APPOINTMENT_INVITATION_TEMPLATE, InterviewFormats
-from admission.models import Campaign, Applicant, Contest, Test, \
-    Exam, InterviewAssignment, Interview, Comment, \
-    InterviewSlot, InterviewStream, InterviewInvitation, InterviewFormat
+from django.db.models.signals import post_save
+from django.utils import timezone
+
+from admission.constants import (
+    APPOINTMENT_INVITATION_TEMPLATE, WHERE_DID_YOU_LEARN, InterviewFormats
+)
+from admission.models import (
+    Applicant, Campaign, Comment, Contest, Exam, Interview, InterviewAssignment,
+    InterviewFormat, InterviewInvitation, InterviewSlot, InterviewStream, Test
+)
 from admission.signals import post_save_interview
-from core.tests.factories import BranchFactory, LocationFactory, \
-    EmailTemplateFactory, UniversityFactory
+from core.tests.factories import (
+    BranchFactory, EmailTemplateFactory, LocationFactory, UniversityFactory
+)
 from learning.settings import AcademicDegreeLevels
 from users.constants import Roles
 from users.tests.factories import UserFactory, add_user_groups

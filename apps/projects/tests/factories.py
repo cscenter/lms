@@ -1,14 +1,16 @@
 import factory
-from factory.fuzzy import FuzzyInteger, FuzzyChoice
+from factory.fuzzy import FuzzyInteger
 
+from core.tests.factories import BranchFactory
 from courses.tests.factories import SemesterFactory
 from projects.constants import ProjectTypes
-from projects.forms import ReportReviewForm, PracticeCriteriaForm
-from projects.models import Project, ProjectStudent, Report, Review, \
-    ReportingPeriod, PracticeCriteria, Supervisor, ReportComment
-from core.tests.factories import BranchFactory
+from projects.forms import PracticeCriteriaForm, ReportReviewForm
+from projects.models import (
+    PracticeCriteria, Project, ProjectStudent, Report, ReportComment, ReportingPeriod,
+    Review, Supervisor
+)
 from users.constants import GenderTypes, Roles
-from users.tests.factories import UserFactory, StudentFactory, add_user_groups
+from users.tests.factories import StudentFactory, UserFactory, add_user_groups
 
 
 class ProjectReviewerFactory(UserFactory):

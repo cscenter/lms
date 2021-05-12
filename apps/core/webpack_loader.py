@@ -1,5 +1,6 @@
-from django.contrib.staticfiles.storage import staticfiles_storage
 from webpack_loader.loader import WebpackLoader
+
+from django.contrib.staticfiles.storage import staticfiles_storage
 
 
 class BundleDirectoryWebpackLoader(WebpackLoader):

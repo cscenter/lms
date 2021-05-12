@@ -1,6 +1,7 @@
-from django.utils import formats
 from rest_framework import serializers
 from rest_framework.fields import TimeField
+
+from django.utils import formats
 
 from admission.models import InterviewSlot
 

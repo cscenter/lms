@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from core.tests.factories import SiteFactory, BranchFactory
+from core.tests.factories import SiteFactory
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
 from study_programs.tests.factories import AcademicDisciplineFactory

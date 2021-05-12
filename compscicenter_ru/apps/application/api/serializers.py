@@ -1,7 +1,8 @@
-from django.conf import settings
 from rest_framework import serializers
 from rest_framework.fields import empty
 from rest_framework.validators import UniqueTogetherValidator
+
+from django.conf import settings
 
 from admission.constants import WHERE_DID_YOU_LEARN
 from admission.models import Applicant, Campaign

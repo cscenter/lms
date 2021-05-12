@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from core.api.serializers import BranchSerializer
 from core.utils import render_markdown_and_cache
-from courses.models import Course, Semester, CourseTeacher, Assignment
+from courses.models import Assignment, Course, CourseTeacher, Semester
 
 
 class SemesterSerializer(serializers.ModelSerializer):

@@ -1,3 +1,5 @@
+from loginas import urls as loginas_urls
+
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include
@@ -5,15 +7,15 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from django.views.generic import TemplateView
-from loginas import urls as loginas_urls
 
-from core.views import MarkdownRenderView, MarkdownHowToHelpView
+from core.views import MarkdownHowToHelpView, MarkdownRenderView
 from courses.views import TeacherDetailView
-from library.views import BookTagAutocomplete
 from info_blocks.views import InfoBlockTagAutocomplete
-from lms.views import IndexView, CourseOfferingsView
-from users.views import CertificateOfParticipationCreateView, \
-    CertificateOfParticipationDetailView
+from library.views import BookTagAutocomplete
+from lms.views import CourseOfferingsView, IndexView
+from users.views import (
+    CertificateOfParticipationCreateView, CertificateOfParticipationDetailView
+)
 
 admin.site.enable_nav_sidebar = False
 admin.autodiscover()
@@ -81,6 +83,7 @@ if settings.DEBUG:
 
 if apps.is_installed('announcements'):
     from announcements.views import AnnouncementTagAutocomplete
+
     # URLs for tags autocomplete for announcements, specific for CS Center site
     urlpatterns += [
         path("narnia/announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(),

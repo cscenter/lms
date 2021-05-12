@@ -3,17 +3,20 @@ from io import StringIO
 
 import pytest
 import pytz
+
 from django.core import management
 from django.core.management import CommandError
 
 from courses.tests.factories import SemesterFactory
 from notifications import NotificationTypes
-from projects.constants import ProjectTypes, \
-    REPORTING_NOTIFY_BEFORE_START, REPORTING_NOTIFY_BEFORE_DEADLINE
-from projects.models import ProjectStudent, ReportingPeriod
-from projects.tests.factories import ReportingPeriodFactory, \
-    ProjectStudentFactory, ProjectFactory
 from notifications.models import Notification
+from projects.constants import (
+    REPORTING_NOTIFY_BEFORE_DEADLINE, REPORTING_NOTIFY_BEFORE_START, ProjectTypes
+)
+from projects.models import ProjectStudent, ReportingPeriod
+from projects.tests.factories import (
+    ProjectFactory, ProjectStudentFactory, ReportingPeriodFactory
+)
 
 
 @pytest.mark.django_db

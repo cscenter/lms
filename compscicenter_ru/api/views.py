@@ -1,11 +1,12 @@
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
+
 from django.conf import settings
 from django.db.models import Prefetch, Q
 from django.http import HttpResponseBadRequest
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.generics import ListAPIView
-from rest_framework.response import Response
 
 from api.pagination import StandardPagination
 from core.models import Branch
@@ -16,10 +17,12 @@ from learning.models import GraduateProfile
 from study_programs.models import AcademicDiscipline
 from users.constants import Roles
 from users.models import User
-from .filters import CoursesPublicFilter, AlumniFilter
-from .serializers import SiteCourseSerializer, TeacherSerializer, \
-    CourseVideoSerializer, AlumniSerializer, TestimonialCardSerializer, \
-    CoursePublicSerializer
+
+from .filters import AlumniFilter, CoursesPublicFilter
+from .serializers import (
+    AlumniSerializer, CoursePublicSerializer, CourseVideoSerializer,
+    SiteCourseSerializer, TeacherSerializer, TestimonialCardSerializer
+)
 
 
 class SiteCourseList(ListAPIView):
@@ -166,7 +169,7 @@ class TestimonialList(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        areas = {a.code: a.name for a in AcademicDiscipline.objects.all()}
+        areas = {a.pk: a.name for a in AcademicDiscipline.objects.all()}
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)

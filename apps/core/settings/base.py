@@ -33,7 +33,6 @@ INSTALLED_APPS = [
     'registration',
     'sorl.thumbnail',
     'crispy_forms',
-    'formtools',
     'simple_history',
     'import_export',
     'bootstrap_pagination',

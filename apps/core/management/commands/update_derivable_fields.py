@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 import ast
 
 from django.core.management.base import AppCommand, CommandError
 
 from core.db.mixins import DerivableFieldsMixin
-from courses.models import Course, CourseClassAttachment
 
 
 class Command(AppCommand):

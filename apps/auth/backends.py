@@ -1,8 +1,9 @@
 import logging
 
-from django.contrib.auth import get_user_model
 from social_core.backends.oauth import BaseOAuth2
 from social_core.utils import handle_http_errors
+
+from django.contrib.auth import get_user_model
 
 from .registry import role_registry
 

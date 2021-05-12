@@ -11,8 +11,8 @@ class SQLFormatter(logging.Formatter):
         # Check if Pygments is available for coloring
         try:
             import pygments
-            from pygments.lexers import SqlLexer
             from pygments.formatters import TerminalTrueColorFormatter
+            from pygments.lexers import SqlLexer
         except ImportError:
             pygments = None
 

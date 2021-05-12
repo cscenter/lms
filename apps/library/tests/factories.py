@@ -1,10 +1,10 @@
 import datetime
 
 import factory
-from factory.fuzzy import FuzzyInteger, FuzzyDate
+from factory.fuzzy import FuzzyDate, FuzzyInteger
 
 from core.tests.factories import BranchFactory
-from library.models import Book, Stock, Borrow
+from library.models import Book, Borrow, Stock
 from users.tests.factories import UserFactory
 
 

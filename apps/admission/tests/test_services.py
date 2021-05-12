@@ -3,9 +3,8 @@ import pytest
 from admission.constants import ChallengeStatuses
 from admission.models import Exam
 from admission.services import EmailQueueService, create_student_from_applicant
-from admission.tests.factories import CampaignFactory, ApplicantFactory, \
-    ExamFactory
-from core.tests.factories import EmailTemplateFactory, BranchFactory
+from admission.tests.factories import ApplicantFactory, CampaignFactory, ExamFactory
+from core.tests.factories import BranchFactory, EmailTemplateFactory
 from users.models import StudentTypes
 
 

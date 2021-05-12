@@ -1,6 +1,8 @@
 from sorl.thumbnail import get_thumbnail
 
-from core.utils import render_markdown_and_cache, get_youtube_video_id
+from django.utils.timezone import now
+
+from core.utils import get_youtube_video_id, render_markdown_and_cache
 
 
 def markdown(value, fragment_name, expires_in=0, *vary_on):
@@ -42,3 +44,17 @@ def thumbnail(path, geometry, **options):
 
 def youtube_video_id(url):
     return get_youtube_video_id(url)
+
+
+def date_soon_css(d):
+    days_diff = (d.date() - now().date()).days
+    if days_diff < 0:
+        return "past"
+    elif days_diff == 0:
+        return "today"
+    elif days_diff == 1:
+        return "tomorrow"
+    elif days_diff == 2:
+        return "day-after-tomorrow"
+    else:
+        return "in-future"

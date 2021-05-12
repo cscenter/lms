@@ -4,9 +4,9 @@ from decimal import Decimal
 
 from django.core.management import BaseCommand
 
-from admission.models import Applicant, Test, Campaign, Contest
-from grading.api.yandex_contest import YandexContestAPI, \
-    YandexContestAPIException
+from admission.models import Applicant, Campaign, Contest, Test
+from grading.api.yandex_contest import YandexContestAPI, YandexContestAPIException
+
 from ._utils import CurrentCampaignMixin
 
 
@@ -28,9 +28,6 @@ class Command(CurrentCampaignMixin, BaseCommand):
     def handle(self, *args, **options):
         csv_path = options["csv"]
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
         # Collect map "yandex_login -> participant_id" from monitor
         participants = {}

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime
 from io import StringIO
 from unittest.mock import MagicMock
@@ -6,32 +5,35 @@ from urllib.parse import urlparse
 
 import pytest
 import pytz
+from subdomains.utils import get_domain
+
 from django.contrib.sites.models import Site
 from django.core import mail, management
-from subdomains.utils import get_domain
 
 from core.models import SiteConfiguration
 from core.tests.factories import BranchFactory
-from core.tests.settings import TEST_DOMAIN, TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID, ANOTHER_DOMAIN
+from core.tests.settings import (
+    ANOTHER_DOMAIN, ANOTHER_DOMAIN_ID, TEST_DOMAIN, TEST_DOMAIN_ID
+)
 from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse
 from courses.admin import AssignmentAdmin
-from courses.models import CourseTeacher, Assignment, \
-    AssignmentSubmissionFormats
-from courses.tests.factories import CourseFactory, AssignmentFactory, \
-    CourseNewsFactory
+from courses.models import Assignment, AssignmentSubmissionFormats, CourseTeacher
+from courses.tests.factories import AssignmentFactory, CourseFactory, CourseNewsFactory
 from learning.models import AssignmentNotification, CourseNewsNotification
-from learning.services import course_failed_by_student, get_student_profile, \
-    EnrollmentService
-from learning.settings import StudentStatuses, GradeTypes, Branches
+from learning.services import (
+    EnrollmentService, course_failed_by_student, get_student_profile
+)
+from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import *
-from notifications.management.commands.notify import \
+from notifications.management.commands.notify import (
     get_assignment_notification_context, get_course_news_notification_context
+)
 from users.tests.factories import *
 
 
 def _get_unread(client, url):
-    return client.get(url).context['request'].unread_notifications_cache
+    return client.get(url).wsgi_request.unread_notifications_cache
 
 
 @pytest.mark.django_db
@@ -52,6 +54,7 @@ def test_view_new_assignment(client):
         'passing_score': 0,
         'maximum_score': 5,
         'weight': 1,
+        'time_zone': 'Europe/Moscow',
         'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
         'deadline_at_1': '00:00'
     }
@@ -162,6 +165,7 @@ def test_assignment_setup_assignees_public_form(client):
         'passing_score': 0,
         'maximum_score': 5,
         'weight': '1.00',
+        'time_zone': 'Europe/Moscow',
         'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
         'deadline_at_1': '00:00'
     }
@@ -205,6 +209,7 @@ def test_assignment_setup_assignees_admin_form(client):
         'passing_score': 0,
         'maximum_score': 5,
         'weight': 1,
+        'time_zone': 'Europe/Moscow',
         'deadline_at_0': str(a.deadline_at.date()),
         'deadline_at_1': '00:00'
     }
@@ -314,7 +319,9 @@ def test_new_assignment_notification_context_timezone(settings, mocker):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    assignment = AssignmentFactory(course__main_branch=branch_spb, deadline_at=dt)
+    assignment = AssignmentFactory(course__main_branch=branch_spb,
+                                   time_zone=pytz.timezone('Europe/Moscow'),
+                                   deadline_at=dt)
     student = StudentFactory(branch=branch_spb)
     sa = StudentAssignmentFactory(assignment=assignment, student=student)
     dt_local = assignment.deadline_at_local()
@@ -413,26 +420,15 @@ def test_changed_assignment_deadline_notifications_timezone(settings, mocker):
     settings.LANGUAGE_CODE = 'ru'
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
-    student = StudentFactory(branch=branch_spb)
+    student = StudentFactory(branch=branch_nsk)
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    assignment = AssignmentFactory(course__main_branch=branch_spb, deadline_at=dt)
+    assignment = AssignmentFactory(course__main_branch=branch_spb,
+                                   time_zone=pytz.timezone('Asia/Novosibirsk'),
+                                   deadline_at=dt)
     sa = StudentAssignmentFactory(assignment=assignment, student=student)
     dt_local = assignment.deadline_at_local()
-    assert dt_local.hour == 18
-    dt_str = "18:00 04 февраля"
-    AssignmentNotificationFactory(is_about_deadline=True, user=sa.student,
-                                  student_assignment=sa)
-    out = StringIO()
-    mail.outbox = []
-    management.call_command("notify", stdout=out)
-    assert len(mail.outbox) == 1
-    assert dt_str in mail.outbox[0].body
-    # If student is enrolled in the course, show assignments in the
-    # timezone of the student.
-    student.time_zone = branch_nsk.time_zone
-    student.save()
-    sa.assignment.course.main_branch = branch_nsk
-    sa.assignment.course.save()
+    assert dt_local.hour == 22
+    # Shows deadline in the time zone of the student
     AssignmentNotificationFactory(is_about_deadline=True, user=sa.student,
                                   student_assignment=sa)
     out = StringIO()
@@ -440,6 +436,16 @@ def test_changed_assignment_deadline_notifications_timezone(settings, mocker):
     management.call_command("notify", stdout=out)
     assert len(mail.outbox) == 1
     assert "22:00 04 февраля" in mail.outbox[0].body
+    # Change student time zone
+    student.time_zone = branch_spb.time_zone
+    student.save()
+    AssignmentNotificationFactory(is_about_deadline=True, user=sa.student,
+                                  student_assignment=sa)
+    out = StringIO()
+    mail.outbox = []
+    management.call_command("notify", stdout=out)
+    assert len(mail.outbox) == 1
+    assert "18:00 04 февраля" in mail.outbox[0].body
 
 
 @pytest.mark.django_db

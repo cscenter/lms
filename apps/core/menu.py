@@ -3,7 +3,9 @@ from importlib import import_module
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from menu import Menu as _Menu, MenuItem as _MenuItem
+
+from menu import Menu as _Menu
+from menu import MenuItem as _MenuItem
 
 
 class Menu(_Menu):

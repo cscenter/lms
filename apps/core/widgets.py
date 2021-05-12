@@ -1,8 +1,9 @@
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
-from django import forms
-from django.contrib.staticfiles.storage import staticfiles_storage
 from django_filters.widgets import RangeWidget
 from webpack_loader import utils
+
+from django import forms
+from django.contrib.staticfiles.storage import staticfiles_storage
 
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 

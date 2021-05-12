@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 
 from admission.models import InterviewSlot
 from api.permissions import CuratorAccessPermission
+
 from .serializers import InterviewSlotSerializer
 
 
