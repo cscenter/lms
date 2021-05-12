@@ -1,17 +1,16 @@
 import logging
-import os
 import posixpath
-import shutil
 from datetime import timedelta
 from io import BytesIO
 
 import django_rq
 import requests
+from django_rq import job
+
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.fields.files import FieldFile
-from django_rq import job
 
 from api.providers.yandex_disk import YandexDiskRestAPI
 

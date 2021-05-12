@@ -13,6 +13,7 @@ from courses.models import StudentGroupTypes, CourseGroupModes
 from learning.models import GraduateProfile, Invitation, CourseInvitation, \
     StudentAssignment, StudentGroup, StudentGroupAssignee, AssignmentGroup
 from users.models import StudentStatusLog
+
 from .models import AssignmentComment, Enrollment, Event
 from .services import StudentGroupService
 from .settings import StudentStatuses

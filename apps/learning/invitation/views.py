@@ -1,26 +1,28 @@
 
+from registration import signals
+from registration.backends.default.views import ActivationView, RegistrationView
+from vanilla import TemplateView, UpdateView
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
 from django.contrib.sites.shortcuts import get_current_site
 from django.db import transaction
-from django.http import HttpResponseRedirect, Http404
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
-from registration import signals
-from registration.backends.default.views import RegistrationView, ActivationView
-from vanilla import TemplateView, UpdateView
 
-from auth.tasks import send_activation_email, ActivationEmailContext
+from auth.tasks import ActivationEmailContext, send_activation_email
 from auth.views import LoginView
 from core.urls import reverse
 from courses.utils import date_to_term_pair, get_current_term_pair
-from learning.invitation.forms import InvitationLoginForm, \
-    InvitationRegistrationForm, CompleteAccountForm
+from learning.invitation.forms import (
+    CompleteAccountForm, InvitationLoginForm, InvitationRegistrationForm
+)
 from learning.models import Invitation
 from learning.services import create_student_profile
-from users.models import User, StudentTypes, StudentProfile
+from users.models import StudentProfile, StudentTypes, User
 
 
 def student_profile_is_valid(user: User, site: Site, invitation):

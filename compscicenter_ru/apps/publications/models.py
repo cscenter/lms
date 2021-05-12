@@ -1,18 +1,19 @@
 import os
 
+from model_utils.models import TimeStampedModel
+from sorl.thumbnail import ImageField
+
 from django.conf import settings
 from django.db import models
 from django.utils.encoding import smart_str
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from model_utils.models import TimeStampedModel
-from sorl.thumbnail import ImageField
 
 from core.urls import reverse
 from core.utils import ru_en_mapping
 from projects.constants import ProjectTypes
 from projects.models import Project, Supervisor
-from users.constants import ThumbnailSizes, GenderTypes
+from users.constants import GenderTypes, ThumbnailSizes
 from users.thumbnails import UserThumbnailMixin
 
 

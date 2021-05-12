@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist
 
@@ -5,19 +7,11 @@ from .typing import Timezone
 
 
 class TimezoneAwareMixin:
-    """
-    `TIMEZONE_AWARE_FIELD_NAME = SELF_AWARE` is a special case when
-    current model knows how to get timezone without using __mro__ call chain
-    """
-    SELF_AWARE = object()
-
-    def get_timezone(self) -> Timezone:
-        related_model = getattr(self, self.get_tz_aware_field_name())
-        return related_model.get_timezone()
-
-    @classmethod
-    def get_tz_aware_field_name(cls):
-        return getattr(cls, cls.TIMEZONE_AWARE_FIELD_NAME).field.name
+    def get_timezone(self) -> Optional[Timezone]:
+        related_field = getattr(self, self.TIMEZONE_AWARE_FIELD_NAME)
+        if isinstance(related_field, TimezoneAwareMixin):
+            return related_field.get_timezone()
+        return related_field
 
     @classmethod
     def check(cls, **kwargs):
@@ -38,62 +32,51 @@ class TimezoneAwareMixin:
                     id='timezone.E001',
                 ))
         else:
+            if 'get_timezone' in cls.__dict__:
+                errors.append(
+                    checks.Warning(
+                        f"class {cls.__name__} overrides `get_timezone` method",
+                        hint=f'Remove `get_timezone` method from {cls} to restore default behavior',
+                        obj=cls,
+                        id='timezone.E005',
+                    ))
+            tz_aware_field = None
             tz_aware_field_name = cls.TIMEZONE_AWARE_FIELD_NAME
-            if tz_aware_field_name is not TimezoneAwareMixin.SELF_AWARE:
-                if 'get_timezone' in cls.__dict__:
+            try:
+                tz_aware_field = cls._meta.get_field(tz_aware_field_name)
+            except FieldDoesNotExist:
+                errors.append(
+                    checks.Error(
+                        f"`{tz_aware_field_name}` is not a valid name for timezone aware field",
+                        hint=f'Make sure `{cls.__name__}.TIMEZONE_AWARE_FIELD_NAME` value matches the real field name',
+                        obj=cls,
+                        id='timezone.E002',
+                    ))
+            if tz_aware_field is not None:
+                related_model = tz_aware_field.related_model
+                if related_model is not None and not issubclass(related_model, TimezoneAwareMixin):
                     errors.append(
                         checks.Error(
-                            f"class {cls.__name__} overrides `get_timezone` method",
-                            hint=f'Remove `get_timezone` method from {cls} or mark this class as time zone self aware',
+                            f"`{cls}`.{tz_aware_field} is not a subclass of TimezoneAwareMixin",
+                            hint=f'Make {tz_aware_field} a subclass of TimezoneAwareMixin',
                             obj=cls,
-                            id='timezone.E005',
+                            id='timezone.E003',
                         ))
-                tz_aware_field = None
-                try:
-                    tz_aware_field = cls._meta.get_field(tz_aware_field_name)
-                except FieldDoesNotExist:
-                    errors.append(
-                        checks.Error(
-                            f"`{tz_aware_field_name}` is not a valid name for timezone aware field",
-                            hint=f'Make sure `{cls.__name__}.TIMEZONE_AWARE_FIELD_NAME` value matches the real field name',
-                            obj=cls,
-                            id='timezone.E002',
-                        ))
-                if tz_aware_field is not None:
-                    if not issubclass(tz_aware_field.related_model, TimezoneAwareMixin):
-                        errors.append(
-                            checks.Error(
-                                f"`{cls}`.{tz_aware_field} is not a subclass of TimezoneAwareMixin",
-                                hint=f'Make {tz_aware_field} a subclass of TimezoneAwareMixin',
-                                obj=cls,
-                                id='timezone.E003',
-                            ))
-                    errors.extend(cls._check_get_timezone_mro())
-            else:
-                if 'get_timezone' not in cls.__dict__:
-                    errors.append(
-                        checks.Error(
-                            f"`{cls.__name__}` class is timezone self aware, but get_timezone method not found",
-                            hint=f'Define `get_timezone` method on {cls}',
-                            obj=cls,
-                            id='timezone.E004',
-                        ))
+                errors.extend(cls._check_get_timezone_mro())
         return errors
 
     @classmethod
     def _check_get_timezone_mro(cls):
-        """
-        Detect cycles and make sure `get_timezone` is terminated on
-        self aware model
-        """
+        """Detect cycles and make sure `get_timezone` is terminated."""
         errors = []
         next_cls = cls
         next_field_name = next_cls.TIMEZONE_AWARE_FIELD_NAME
-        while next_field_name is not TimezoneAwareMixin.SELF_AWARE:
+        next_field = next_cls._meta.get_field(next_field_name)
+        while next_field.related_model is not None:
             try:
-                next_field = next_cls._meta.get_field(next_field_name)
                 next_cls = next_field.related_model
                 next_field_name = next_cls.TIMEZONE_AWARE_FIELD_NAME
+                next_field = next_cls._meta.get_field(next_field_name)
             except (FieldDoesNotExist, AttributeError):
                 errors.append(
                     checks.Error(
@@ -116,7 +99,7 @@ class TimezoneAwareMixin:
                 errors.append(
                     checks.Error(
                         f"`{cls.__name__}` is not terminated properly",
-                        hint=f'Define SELF_AWARE model in mro call chain for {cls}',
+                        hint=f'Define TIMEZONE_AWARE_FIELD_NAME in mro call chain for {cls} that resolves to time zone',
                         obj=cls,
                         id='timezone.E008',
                     ))

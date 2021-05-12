@@ -3,6 +3,7 @@
 from django.core.management import BaseCommand
 
 from admission.models import Applicant
+
 from ._utils import CurrentCampaignMixin
 
 
@@ -11,9 +12,6 @@ class Command(CurrentCampaignMixin, BaseCommand):
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
         for campaign in campaigns:
             self.stdout.write(f"Processing {campaign}")

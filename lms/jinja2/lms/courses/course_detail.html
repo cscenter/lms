@@ -131,7 +131,7 @@
                             <tr>
                                 <td>
                                     <div class="assignment-deadline">
-                                        {% set assignment_deadline_at_local =  assignment.deadline_at_local(tz_override) %}
+                                        {% set assignment_deadline_at_local = assignment.deadline_at_local(tz_override) %}
                                         {{ assignment_deadline_at_local|date("d E") }}<br>
                                         <span class="text-muted">{{ assignment_deadline_at_local|time("H:i") }}</span>
                                     </div>

@@ -5,13 +5,15 @@ from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.urls import reverse
-from courses.calendar import WeekEventsCalendar, MonthFullWeeksEventsCalendar
+from courses.calendar import MonthFullWeeksEventsCalendar, WeekEventsCalendar
 from courses.tests.factories import CourseClassFactory, CourseFactory
 from learning.settings import Branches
 from learning.tests.factories import EnrollmentFactory, GraduateFactory
 from learning.tests.utils import flatten_calendar_month_events
-from users.tests.factories import TeacherFactory, StudentFactory, \
-    CuratorFactory, VolunteerFactory, StudentProfileFactory
+from users.tests.factories import (
+    CuratorFactory, StudentFactory, StudentProfileFactory, TeacherFactory,
+    VolunteerFactory
+)
 
 
 def flatten_events(calendar: WeekEventsCalendar):

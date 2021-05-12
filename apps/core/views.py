@@ -2,12 +2,13 @@
 
 import types
 
+from vanilla import CreateView
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
 from django.http import JsonResponse
 from django.utils.encoding import smart_str
 from django.views import generic
-from vanilla import CreateView
 
 from .utils import render_markdown
 

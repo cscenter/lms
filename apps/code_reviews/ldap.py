@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 import base64
-import io
 from typing import Optional
 
 import ldif
+
 from django.conf import settings
 from django.utils.encoding import force_bytes
 
-from users.models import User
 from code_reviews.constants import GROUPS_IMPORT_TO_GERRIT
+from users.models import User
 
 
 def get_ldap_username(user: User):

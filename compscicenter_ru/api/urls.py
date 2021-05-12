@@ -1,7 +1,8 @@
-from django.urls import path, include
+from django.urls import include, path
 
 from application.api.views import ApplicantCreateAPIView
 from publications.api.views import RecordedEventList
+
 from . import views as v
 
 app_name = 'public-api'

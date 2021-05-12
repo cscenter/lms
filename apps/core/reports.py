@@ -1,12 +1,13 @@
 import csv
 import io
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from datetime import datetime
+
+from xlsxwriter import Workbook
 
 from django.http import HttpResponse
 from django.utils import formats
 from django.utils.encoding import force_str
-from xlsxwriter import Workbook
 
 
 class ReportFileOutput(ABC):

@@ -1,16 +1,13 @@
-from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.db.models import Count, Case, When, Q, Value, F
-from django.forms import SelectMultiple, forms
-from django_filters import MultipleChoiceFilter
-from django_filters.constants import EMPTY_VALUES
 from django_filters.fields import MultipleChoiceField
-from django_filters.rest_framework import BaseInFilter, NumberFilter, \
-    FilterSet, CharFilter
+from django_filters.rest_framework import (
+    BaseInFilter, CharFilter, FilterSet, NumberFilter
+)
 
-from learning.settings import StudentStatuses, GradeTypes
-from users.constants import Roles
-from users.models import User, StudentProfile
+from django.db.models import Case, Count, F, Q, Value, When
+from django.forms import SelectMultiple
+
+from learning.settings import GradeTypes, StudentStatuses
+from users.models import StudentProfile
 
 
 class NumberInFilter(BaseInFilter, NumberFilter):

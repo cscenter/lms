@@ -3,11 +3,13 @@ from datetime import timedelta
 from typing import Optional
 
 import django_rq
-from django.db import transaction
 from django_rq import job
 
-from grading.api.yandex_contest import YandexContestAPI, Unavailable, \
-    ContestAPIError, SubmissionVerdict
+from django.db import transaction
+
+from grading.api.yandex_contest import (
+    ContestAPIError, SubmissionVerdict, Unavailable, YandexContestAPI
+)
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +57,7 @@ def retrieve_yandex_contest_checker_compilers(checker_id, *, retries):
         logger.error(f"Yandex.Contest api request error "
                      f"[checker_id = {checker_id}]")
         raise
-    problems = {problem['shortName']: problem for problem in json_data}
+    problems = {problem['alias']: problem for problem in json_data}
     if problem_id in problems:
         problem = problems[problem_id]
         checker.settings['compilers'] = problem['compilers']

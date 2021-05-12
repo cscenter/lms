@@ -1,5 +1,6 @@
+from djchoices import C, DjangoChoices
+
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, C
 
 BASE_THUMBNAIL_WIDTH = 176
 BASE_THUMBNAIL_HEIGHT = 246

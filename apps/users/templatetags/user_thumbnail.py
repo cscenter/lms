@@ -1,9 +1,9 @@
-from django import template
-from django.template import Library
-from django.template import TemplateSyntaxError
-from django.utils.encoding import smart_str
 from sorl.thumbnail.images import DummyImageFile
-from sorl.thumbnail.templatetags.thumbnail import kw_pat, ThumbnailNodeBase
+from sorl.thumbnail.templatetags.thumbnail import ThumbnailNodeBase, kw_pat
+
+from django import template
+from django.template import Library, TemplateSyntaxError
+from django.utils.encoding import smart_str
 
 register = Library()
 

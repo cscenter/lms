@@ -1,5 +1,6 @@
-from django.contrib.contenttypes.models import ContentType
 from django_rq import job
+
+from django.contrib.contenttypes.models import ContentType
 
 
 @job('default')

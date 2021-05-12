@@ -1,7 +1,8 @@
 # Read project environment into os.environ before importing base configuration
 import sys
-import environ
 import warnings
+
+import environ
 
 env = environ.Env()
 # Try to read .env file, if it's not present, assume that application
@@ -27,6 +28,8 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[".compsciclub.ru"])
 WSGI_APPLICATION = 'compsciclub_ru.wsgi.application'
 ROOT_URLCONF = 'compsciclub_ru.urls'
 LMS_CURATOR_EMAIL = None
+if YANDEX_METRIKA_ID is None:
+    YANDEX_METRIKA_ID = 32180204
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF
 }
@@ -66,6 +69,7 @@ LOGO_PATH = 'v1/img/club/logo.svg'
 for template in TEMPLATES:
     if "Jinja2" in template["BACKEND"]:
         template["DIRS"] = [str(PROJECT_DIR / "jinja2")] + template["DIRS"]
+        template["OPTIONS"]["constants"]["YANDEX_METRIKA_ID"] = YANDEX_METRIKA_ID
         template["OPTIONS"]["globals"]["get_branches"] = "compsciclub_ru.context_processors.get_branches"
         update_constants = [
             ("ESTABLISHED", ESTABLISHED),

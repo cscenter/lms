@@ -4,7 +4,8 @@ from django.dispatch import receiver
 from learning.services import get_student_profile
 from lms.utils import PublicRoute
 from users.constants import Roles
-from .models import UserGroup, User, StudentProfile, StudentTypes
+
+from .models import StudentProfile, StudentTypes, User, UserGroup
 
 
 @receiver(post_save, sender=UserGroup)

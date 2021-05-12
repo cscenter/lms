@@ -2,21 +2,20 @@ import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
+
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
-from core.tests.factories import LocationFactory, BranchFactory
+from core.tests.factories import BranchFactory, LocationFactory
 from core.urls import reverse
-from courses.calendar import CalendarEventFactory
-from courses.tests.factories import CourseFactory, CourseClassFactory
+from courses.tests.factories import CourseClassFactory, CourseFactory
 from learning.settings import Branches
-from learning.tests.factories import EventFactory, \
-    EnrollmentFactory, GraduateFactory
-from learning.tests.utils import flatten_calendar_month_events, compare_calendar_events_with_models
-from users.tests.factories import StudentFactory, TeacherFactory, \
-    StudentProfileFactory
-
+from learning.tests.factories import EnrollmentFactory, EventFactory, GraduateFactory
+from learning.tests.utils import (
+    compare_calendar_events_with_models, flatten_calendar_month_events
+)
+from users.tests.factories import StudentFactory, StudentProfileFactory, TeacherFactory
 
 # TODO: add test: kzn courses not shown on center site and spb on kzn
 # TODO: add test: summer courses not shown on club site on main page

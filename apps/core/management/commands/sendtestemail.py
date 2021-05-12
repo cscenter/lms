@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, unicode_literals
-
-import quopri
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import BaseCommand
 from django.utils.encoding import force_str
-from django.utils.html import strip_tags, linebreaks
+from django.utils.html import strip_tags
 
 
 class Command(BaseCommand):

@@ -1,3 +1,5 @@
+from loginas import urls as loginas_urls
+
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
@@ -6,19 +8,19 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, re_path
 from django.views.generic import TemplateView
-from loginas import urls as loginas_urls
 
-from compsciclub_ru.views import CalendarClubScheduleView, IndexView, \
-    TeachersView, \
-    TeacherDetailView, AsyncEmailRegistrationView, ClubClassesFeed, \
-    CoursesListView, CourseDetailView, CourseClassDetailView, \
-    MetaCourseDetailView
+from compsciclub_ru.views import (
+    AsyncEmailRegistrationView, CalendarClubScheduleView, ClubClassesFeed,
+    CourseClassDetailView, CourseDetailView, CoursesListView, IndexView,
+    MetaCourseDetailView, TeacherDetailView, TeachersView
+)
 from core.views import MarkdownHowToHelpView, MarkdownRenderView
-from courses.urls import RE_COURSE_URI, RE_COURSE_PUBLIC_URI
+from courses.urls import RE_COURSE_PUBLIC_URI, RE_COURSE_URI
 from htmlpages import views
 from international_schools.views import InternationalSchoolsListView
-from learning.views import CourseNewsNotificationUpdate, CourseEnrollView, \
-    CourseUnenrollView, EventDetailView
+from learning.views import (
+    CourseEnrollView, CourseNewsNotificationUpdate, CourseUnenrollView, EventDetailView
+)
 
 admin.autodiscover()
 

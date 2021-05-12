@@ -1,7 +1,8 @@
-from crispy_forms.layout import Button, Submit, Div
+from crispy_forms.layout import Button, Div, Submit
+from prettyjson import PrettyJSONWidget
+
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from prettyjson import PrettyJSONWidget
 
 CANCEL_BUTTON = Button('cancel', _('Cancel'),
                        onclick='history.go(-1);',

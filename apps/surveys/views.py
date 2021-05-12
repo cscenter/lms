@@ -1,9 +1,10 @@
 import pytz
+from vanilla import TemplateView
+
 from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.generic import FormView
-from vanilla import TemplateView
 
 from core.exceptions import Redirect
 from core.urls import reverse

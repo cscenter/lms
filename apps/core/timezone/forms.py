@@ -1,16 +1,18 @@
 import datetime
 
 import pytz
+
 from django import forms
 from django.conf import settings
 from django.contrib.admin import widgets
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.widgets import DateInputTextWidget, TimeInputTextWidget
-from .models import TimezoneAwareMixin
+
 from .fields import TimezoneAwareDateTimeField
+from .models import TimezoneAwareMixin
 
 
 def aware_to_naive(value, instance: TimezoneAwareMixin):
@@ -30,6 +32,9 @@ def naive_to_aware(value, instance: TimezoneAwareMixin):
     if settings.USE_TZ and value is not None and timezone.is_naive(value):
         try:
             instance_tz = instance.get_timezone()
+            if not instance_tz:
+                # TODO: raise custom exception
+                raise ObjectDoesNotExist
         except ObjectDoesNotExist:
             # Can't retrieve timezone until timezone aware field is empty
             instance_tz = pytz.UTC
@@ -52,9 +57,7 @@ class TimezoneAwareSplitDateTimeWidget(forms.SplitDateTimeWidget):
     template_name = "widgets/timezone_aware_split_datetime.html"  # bootstrap 3
 
     def __init__(self, attrs=None):
-        widgets = [DateInputTextWidget, TimeInputTextWidget]
-        # Note that we're calling MultiWidget, not SplitDateTimeWidget, because
-        # we want to define widgets.
+        widgets = (DateInputTextWidget, TimeInputTextWidget)
         forms.MultiWidget.__init__(self, widgets, attrs)
 
     def decompress(self, value):
@@ -113,7 +116,7 @@ class TimezoneAwareModelForm(forms.ModelForm):
         Update value for all related datetime fields if timezone aware field
         was changed.
         """
-        if self.instance.get_tz_aware_field_name() in self.changed_data:
+        if self.instance.TIMEZONE_AWARE_FIELD_NAME in self.changed_data:
             tz = self.instance.get_timezone()
             for field_name, form_field in self.fields.items():
                 if isinstance(form_field, TimezoneAwareFormField):

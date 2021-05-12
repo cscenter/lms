@@ -14,6 +14,7 @@ from core.models import LATEX_MARKDOWN_ENABLED
 from core.timezone.constants import TIME_FORMAT_RU
 from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
+from grading.services import CheckerService, SubmissionService
 from learning.models import GraduateProfile, StudentAssignment, \
     AssignmentSubmissionTypes, StudentGroup, StudentGroupAssignee, Enrollment
 from courses.models import Course, CourseTeacher

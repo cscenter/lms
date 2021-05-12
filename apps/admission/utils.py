@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import List, Any
+from typing import Any, List
 
 from django.utils import timezone
 

@@ -93,7 +93,7 @@ def get_course_assignments(course, user, user_role=None) -> List[Assignment]:
     attachments = Prefetch("assignmentattachment_set",
                            queryset=AssignmentAttachment.objects.order_by())
     assignments = (course.assignment_set
-                   .only("title", "course_id", "submission_type", "deadline_at")
+                   .only("title", "course_id", "submission_type", "deadline_at", "time_zone")
                    .prefetch_related(attachments)
                    .order_by('deadline_at', 'title'))
     student_roles = (CourseRole.STUDENT_REGULAR,

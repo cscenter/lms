@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
-
 import factory
+
 from django.conf import settings
 
 from core.tests.factories import BranchFactory
-from learning.settings import GradeTypes, Branches
-from users.constants import Roles, GenderTypes
-from users.models import User, SHADCourseRecord, CertificateOfParticipation, \
-    OnlineCourseRecord, UserGroup, StudentProfile, StudentTypes
+from learning.settings import GradeTypes
+from users.constants import GenderTypes, Roles
+from users.models import (
+    CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
+    StudentTypes, User, UserGroup
+)
 
 __all__ = ('User', 'SHADCourseRecord', 'CertificateOfParticipation',
            'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',
@@ -32,7 +33,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
     last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
     branch = None
-    time_zone = factory.LazyAttribute(lambda user: user.branch._timezone if user.branch is not None else settings.DEFAULT_TIMEZONE)
+    time_zone = factory.LazyAttribute(lambda user: user.branch.time_zone if user.branch is not None else settings.DEFAULT_TIMEZONE)
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
@@ -127,7 +128,7 @@ class StudentProfileFactory(factory.django.DjangoModelFactory):
 
     type = StudentTypes.REGULAR
     user = factory.SubFactory(UserFactory,
-                              time_zone=factory.SelfAttribute('..branch._timezone'))
+                              time_zone=factory.SelfAttribute('..branch.time_zone'))
     branch = factory.SubFactory(BranchFactory,
                                 code=settings.DEFAULT_BRANCH_CODE)
     year_of_admission = factory.SelfAttribute('user.date_joined.year')

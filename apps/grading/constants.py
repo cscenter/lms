@@ -1,5 +1,6 @@
+from djchoices import C, ChoiceItem, DjangoChoices
+
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, C, ChoiceItem
 
 
 class YandexCompilers(DjangoChoices):

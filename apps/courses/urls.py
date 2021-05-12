@@ -2,10 +2,10 @@ from django.conf.urls import include
 from django.urls import path, re_path
 
 from courses import views
-
 from courses.constants import SemesterTypes
-from courses.views.course_class import CourseClassAttachmentDownloadView, \
-    CourseClassSlidesDownloadView
+from courses.views.course_class import (
+    CourseClassAttachmentDownloadView, CourseClassSlidesDownloadView
+)
 
 _terms = r"|".join(slug for slug, _ in SemesterTypes.choices)
 re_semester_slug = r"(?P<semester_year>\d{4})-(?P<semester_type>" + _terms + r")"

@@ -1,10 +1,12 @@
 import pytest
+
 from django.db.models import Q
 
-from courses.tests.factories import MetaCourseFactory, CourseFactory
+from courses.tests.factories import MetaCourseFactory
 from study_programs.services import get_study_programs
-from study_programs.tests.factories import StudyProgramFactory, \
-    StudyProgramCourseGroupFactory, AcademicDisciplineFactory
+from study_programs.tests.factories import (
+    AcademicDisciplineFactory, StudyProgramCourseGroupFactory, StudyProgramFactory
+)
 
 
 @pytest.mark.django_db

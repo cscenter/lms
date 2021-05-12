@@ -1,6 +1,7 @@
-from crispy_forms.bootstrap import FormActions, FieldWithButtons, StrictButton
+from crispy_forms.bootstrap import FieldWithButtons, FormActions, StrictButton
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Div, HTML
+from crispy_forms.layout import HTML, Div, Layout, Submit
+
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
@@ -8,8 +9,9 @@ from core import comment_persistence
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.urls import reverse_lazy
 from core.widgets import UbereditorWidget
-from projects.models import ReportComment, Review, Report, \
-    ProjectStudent, PracticeCriteria
+from projects.models import (
+    PracticeCriteria, ProjectStudent, Report, ReportComment, Review
+)
 
 
 class StudentResultsModelForm(forms.ModelForm):

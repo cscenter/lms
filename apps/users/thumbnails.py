@@ -1,12 +1,13 @@
+from sorl.thumbnail import get_thumbnail
+from sorl.thumbnail.images import BaseImageFile, DummyImageFile
+
 from django import forms
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist, ValidationError
 from django.db.models import ImageField
-from sorl.thumbnail import get_thumbnail
-from sorl.thumbnail.images import BaseImageFile, DummyImageFile
 
-from users.constants import ThumbnailSizes, GenderTypes
+from users.constants import GenderTypes, ThumbnailSizes
 
 
 # TODO: add validation for unbound coords and width=img.width

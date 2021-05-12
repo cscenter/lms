@@ -6,7 +6,7 @@ import pytest
 from core.tests.factories import BranchFactory
 from core.tests.settings import TEST_DOMAIN
 from core.timezone import now_local
-from courses.tests.factories import SemesterFactory, CourseFactory
+from courses.tests.factories import CourseFactory, SemesterFactory
 from learning.models import Enrollment
 from learning.settings import Branches
 from users.tests.factories import StudentFactory

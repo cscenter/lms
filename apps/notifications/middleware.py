@@ -3,7 +3,6 @@ from threading import local
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import cached_property
 
-
 _thread_locals = local()
 _installed_middleware = False
 

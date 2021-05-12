@@ -3,8 +3,9 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
 from core.widgets import CKEditorWidget
-from publications.models import ProjectPublication, ProjectPublicationAuthor, \
-    RecordedEvent, Speaker
+from publications.models import (
+    ProjectPublication, ProjectPublicationAuthor, RecordedEvent, Speaker
+)
 
 
 class ProjectAdminInline(admin.TabularInline):

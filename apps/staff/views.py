@@ -2,19 +2,18 @@
 import datetime
 from collections import defaultdict
 
-from django.conf import settings
-from django.contrib import messages
-from django.core.management import CommandError
-from django.core.management import call_command
-from django.db.models import Prefetch, Count
-from django.http import HttpResponseBadRequest
-from django.http import HttpResponseRedirect
-from django.http.response import HttpResponseForbidden, Http404
-from django.shortcuts import get_object_or_404, get_list_or_404
-from django.utils.translation import gettext_lazy as _
-from django.views import generic, View
 from django_filters.views import BaseFilterView
 from vanilla import TemplateView
+
+from django.conf import settings
+from django.contrib import messages
+from django.core.management import CommandError, call_command
+from django.db.models import Count, Prefetch
+from django.http import HttpResponseBadRequest, HttpResponseRedirect
+from django.http.response import Http404, HttpResponseForbidden
+from django.shortcuts import get_list_or_404, get_object_or_404
+from django.utils.translation import gettext_lazy as _
+from django.views import View, generic
 
 import core.utils
 from admission.models import Campaign, Interview
@@ -26,12 +25,13 @@ from courses.constants import SemesterTypes
 from courses.models import Course, Semester
 from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook.views import GradeBookListBaseView
-from learning.models import Enrollment, Invitation, GraduateProfile
-from learning.reports import FutureGraduateDiplomasReport, ProgressReportFull, \
-    ProgressReportForSemester, WillGraduateStatsReport, \
-    ProgressReportForInvitation, dataframe_to_response, OfficialDiplomasReport
-from learning.settings import AcademicDegreeLevels, StudentStatuses, \
-    GradeTypes
+from learning.models import Enrollment, GraduateProfile, Invitation
+from learning.reports import (
+    FutureGraduateDiplomasReport, OfficialDiplomasReport, ProgressReportForInvitation,
+    ProgressReportForSemester, ProgressReportFull, WillGraduateStatsReport,
+    dataframe_to_response
+)
+from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
 from staff.forms import GraduationForm
 from staff.models import Hint
@@ -42,9 +42,10 @@ from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
-from users.models import User, StudentProfile, StudentTypes
-from users.services import get_student_progress, create_graduate_profiles, \
-    get_graduate_profile
+from users.models import StudentProfile, StudentTypes, User
+from users.services import (
+    create_graduate_profiles, get_graduate_profile, get_student_progress
+)
 
 
 class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):

@@ -2,18 +2,18 @@ from datetime import date
 
 import pytest
 from bs4 import BeautifulSoup
+
 from django.utils.encoding import smart_bytes
 
 from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN
 from core.urls import reverse
-from courses.tests.factories import SemesterFactory, CourseFactory
-from learning.settings import StudentStatuses, GradeTypes
-from learning.tests.factories import GraduateProfileFactory, EnrollmentFactory
+from courses.tests.factories import CourseFactory, SemesterFactory
+from learning.settings import GradeTypes, StudentStatuses
+from learning.tests.factories import EnrollmentFactory, GraduateProfileFactory
 from projects.constants import ProjectGradeTypes
 from projects.tests.factories import ProjectFactory
-from users.tests.factories import StudentFactory, CuratorFactory, \
-    StudentProfileFactory
+from users.tests.factories import CuratorFactory, StudentProfileFactory
 
 
 @pytest.mark.django_db

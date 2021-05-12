@@ -1,4 +1,5 @@
 from django.conf import settings
+
 # FIXME: Normalize template paths
 EMAIL_RESTORE_PASSWORD_SUBJECT = getattr(settings, 'EMAIL_RESTORE_PASSWORD_SUBJECT', 'registration/password_reset_subject.txt')
 EMAIL_RESTORE_PASSWORD_BODY = getattr(settings, 'EMAIL_RESTORE_PASSWORD_BODY', 'emails/password_reset.html')

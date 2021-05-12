@@ -1,12 +1,13 @@
+from model_utils.models import TimeStampedModel
+from sorl.thumbnail import ImageField
+
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
-from django.db.models import query, Prefetch
+from django.db.models import Prefetch, query
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
-from model_utils.models import TimeStampedModel
-from sorl.thumbnail import ImageField
 
 from core.models import Branch
 from courses.models import MetaCourse

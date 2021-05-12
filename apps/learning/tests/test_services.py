@@ -3,23 +3,28 @@ from datetime import timedelta
 import pytest
 
 from core.tests.factories import BranchFactory, SiteFactory
-from core.tests.settings import TEST_DOMAIN, ANOTHER_DOMAIN, ANOTHER_DOMAIN_ID
-from courses.models import StudentGroupTypes, CourseGroupModes, CourseBranch, \
-    CourseTeacher
-from courses.tests.factories import CourseFactory, AssignmentFactory, \
-    CourseTeacherFactory
-from learning.models import StudentGroup, StudentAssignment, \
-    AssignmentNotification, Enrollment, StudentGroupAssignee, AssignmentComment
-from learning.services import StudentGroupService, GroupEnrollmentKeyError, \
-    AssignmentService, create_student_profile, StudentProfileError, \
-    create_notifications_about_new_submission
+from core.tests.settings import ANOTHER_DOMAIN, ANOTHER_DOMAIN_ID, TEST_DOMAIN
+from courses.models import (
+    CourseBranch, CourseGroupModes, CourseTeacher, StudentGroupTypes
+)
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseTeacherFactory
+)
+from learning.models import (
+    AssignmentNotification, Enrollment, StudentAssignment, StudentGroup
+)
+from learning.services import (
+    AssignmentService, GroupEnrollmentKeyError, StudentGroupService,
+    StudentProfileError, create_notifications_about_new_submission,
+    create_student_profile
+)
 from learning.settings import Branches, StudentStatuses
-from learning.tests.factories import StudentGroupFactory, EnrollmentFactory, \
-    AssignmentNotificationFactory, StudentAssignmentFactory, \
-    StudentGroupAssigneeFactory, AssignmentCommentFactory
+from learning.tests.factories import (
+    AssignmentCommentFactory, AssignmentNotificationFactory, EnrollmentFactory,
+    StudentAssignmentFactory, StudentGroupAssigneeFactory, StudentGroupFactory
+)
 from users.models import StudentTypes, UserGroup
-from users.tests.factories import StudentFactory, UserFactory, \
-    StudentProfileFactory
+from users.tests.factories import StudentFactory, StudentProfileFactory, UserFactory
 
 
 @pytest.mark.django_db

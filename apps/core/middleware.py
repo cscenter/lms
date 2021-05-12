@@ -1,8 +1,7 @@
 import logging
 
 from django.conf import settings
-from django.http.response import HttpResponseRedirect, \
-    HttpResponseNotFound
+from django.http.response import HttpResponseRedirect
 
 from core.exceptions import Redirect
 from core.models import Branch

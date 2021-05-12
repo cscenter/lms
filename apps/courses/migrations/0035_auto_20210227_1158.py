@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='courseclass',
             name='time_zone',
-            field=core.db.fields.TimeZoneField(verbose_name='Time Zone'),
+            field=core.db.fields.TimeZoneField(verbose_name='Time Zone', null=True),
         ),
     ]

@@ -1,7 +1,9 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
+
+from babel.dates import get_timezone_location
 
 from courses.constants import TeacherRoles
-from courses.models import CourseReview, Course, CourseBranch
+from courses.models import Course, CourseBranch, CourseReview
 from courses.utils import get_terms_in_range
 
 
@@ -84,6 +86,17 @@ class CourseService:
         return (course.courseclass_set
                 .select_related("venue", "venue__location")
                 .order_by("date", "starts_at"))
+
+    @staticmethod
+    def get_time_zones(course, locale="en") -> List[Tuple[str, str]]:
+        """Returns list of unique course time zones."""
+        time_zones = set()
+        for branch in course.branches.all():
+            tz = branch.get_timezone()
+            if tz:
+                label = get_timezone_location(tz, locale=locale, return_city=True)
+                time_zones.add((str(tz), label))
+        return list(time_zones)
 
 
 def get_teacher_branches(user, start_date, end_date):

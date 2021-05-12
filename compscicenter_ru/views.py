@@ -5,48 +5,47 @@ import random
 from enum import Enum
 from typing import NamedTuple, Optional
 
+from djchoices import C, DjangoChoices
+from vanilla import DetailView, TemplateView
+
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
-from django.db.models import Q, Max, Prefetch, F, Count, \
-    prefetch_related_objects, Min
+from django.db.models import Count, F, Max, Min, Prefetch, Q, prefetch_related_objects
 from django.http import Http404
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
-from djchoices import DjangoChoices, C
-from vanilla import TemplateView, DetailView
 
 from announcements.models import Announcement
-from compscicenter_ru.utils import Tab, TabList, course_public_url, course_class_public_url
+from compscicenter_ru.utils import (
+    Tab, TabList, course_class_public_url, course_public_url
+)
 from core.exceptions import Redirect
 from core.models import Branch
 from core.urls import reverse
 from core.utils import bucketize
 from courses.constants import SemesterTypes, TeacherRoles
-from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
-    CourseClass
-from courses.permissions import ViewCourseClassMaterials, \
-    can_view_private_materials
-from courses.services import group_teachers, CourseService
-from courses.utils import get_current_term_pair, \
-    get_term_index
+from courses.models import Course, CourseClass, CourseTeacher, MetaCourse, Semester
+from courses.permissions import ViewCourseClassMaterials, can_view_private_materials
+from courses.services import CourseService, group_teachers
+from courses.utils import get_current_term_pair, get_term_index
+from courses.views.mixins import CoursePublicURLParamsMixin
 from faq.models import Question
 from learning.models import Enrollment, GraduateProfile
 from learning.roles import Roles
 from learning.services import course_access_role
 from learning.settings import Branches, GradeTypes
 from online_courses.models import OnlineCourse, OnlineCourseTuple
-from projects.constants import ProjectTypes, ProjectGradeTypes
+from projects.constants import ProjectGradeTypes, ProjectTypes
 from projects.models import ProjectStudent
 from stats.views import AlumniStats
-from study_programs.models import StudyProgram, AcademicDiscipline
+from study_programs.models import AcademicDiscipline, StudyProgram
 from study_programs.services import get_study_programs
 from users.constants import SHADCourseGradeTypes
-from users.models import User, SHADCourseRecord
-from courses.views.mixins import CoursePublicURLParamsMixin
+from users.models import SHADCourseRecord, User
 
 # FIXME: remove?
 TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'

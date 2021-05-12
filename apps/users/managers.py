@@ -2,9 +2,7 @@ from typing import List
 
 from django.conf import settings
 from django.contrib.auth.models import UserManager
-from django.db.models import Prefetch, query, Q
-
-from learning.settings import GradeTypes
+from django.db.models import Prefetch, Q, query
 
 
 # FIXME: return only queryset for all `get_*_progress` methods

@@ -1,4 +1,4 @@
-from django.urls import re_path, path, include
+from django.urls import include, path, re_path
 
 from admission import views as v
 

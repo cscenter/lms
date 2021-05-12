@@ -1,7 +1,7 @@
 from operator import attrgetter
 
 from django.db import transaction
-from django.db.models import sql, signals
+from django.db.models import signals, sql
 from django.db.models.deletion import Collector
 from django.utils import timezone
 

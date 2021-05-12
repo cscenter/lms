@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from notifications.models import Type, Notification
+from notifications.models import Notification, Type
 
 
 @admin.register(Type)

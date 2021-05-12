@@ -1,19 +1,18 @@
-# -*- coding: utf-8 -*-
 import datetime
 import math
 
 import pytest
 
 from core.models import Branch
-from courses.tests.factories import SemesterFactory
-from projects.constants import ProjectTypes, ProjectGradeTypes
-from projects.models import ReportingPeriod, \
-    ReportingPeriodKey, PracticeCriteria
-from projects.tests.factories import ReportFactory, ReviewFactory, \
-    ReportingPeriodFactory, ProjectStudentFactory, ProjectFactory, \
-    ProjectReviewerFactory
-from learning.settings import Branches
 from core.tests.factories import BranchFactory
+from courses.tests.factories import SemesterFactory
+from learning.settings import Branches
+from projects.constants import ProjectGradeTypes, ProjectTypes
+from projects.models import ReportingPeriod, ReportingPeriodKey
+from projects.tests.factories import (
+    ProjectReviewerFactory, ProjectStudentFactory, ReportFactory,
+    ReportingPeriodFactory, ReviewFactory
+)
 
 
 @pytest.mark.django_db

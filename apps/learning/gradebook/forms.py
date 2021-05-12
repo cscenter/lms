@@ -9,7 +9,7 @@ from django.utils.encoding import force_str
 
 from core.forms import ScoreField
 from learning.gradebook.data import GradeBookData
-from learning.models import StudentAssignment, Enrollment
+from learning.models import Enrollment, StudentAssignment
 
 __all__ = ('ConflictError', 'BaseGradebookForm', 'AssignmentScore',
            'EnrollmentFinalGrade', 'GradeBookFormFactory')

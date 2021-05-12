@@ -1,9 +1,8 @@
-import os
+from vanilla import CreateView, DeleteView, UpdateView
 
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
-from vanilla import CreateView, UpdateView, DeleteView
 
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
@@ -22,14 +21,15 @@ __all__ = ('AssignmentCreateView', 'AssignmentUpdateView',
 class AssignmentCreateUpdateMixin(CourseURLParamsMixin,
                                   PermissionRequiredMixin):
     model = Assignment
-    form_class = AssignmentForm
-    template_name = "courses/course_assignment_form.html"
+    template_name = "lms/courses/course_assignment_form.html"
 
     def get_permission_object(self):
         return self.course
 
     def get_form(self, **kwargs):
-        return AssignmentForm(course=self.course, **kwargs)
+        return AssignmentForm(course=self.course,
+                              locale=self.request.LANGUAGE_CODE,
+                              **kwargs)
 
     def get_success_url(self):
         return self.object.get_teacher_url()
@@ -48,6 +48,12 @@ class AssignmentCreateUpdateMixin(CourseURLParamsMixin,
 
 class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
     permission_required = CreateAssignment.name
+
+    def get_form(self, **kwargs):
+        kwargs['initial'] = {
+            "time_zone": self.course.main_branch.get_timezone() or None
+        }
+        return super().get_form(**kwargs)
 
     def post_save(self, assignment):
         AssignmentService.bulk_create_student_assignments(assignment)

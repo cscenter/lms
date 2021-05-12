@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 from dal_select2.widgets import Select2Multiple
+from import_export.admin import ExportMixin
+
 from django.contrib import admin
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
-from import_export.admin import ExportMixin
 
 from core.admin import meta
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import queryset_iterator
 from projects.import_export import ProjectStudentAdminRecordResource
-from projects.models import Project, ProjectStudent, Report, Review, \
-    ReportComment, Supervisor, ReportingPeriod, PracticeCriteria
+from projects.models import (
+    PracticeCriteria, Project, ProjectStudent, Report, ReportComment, ReportingPeriod,
+    Review, Supervisor
+)
 from users.constants import Roles
 from users.models import User
 

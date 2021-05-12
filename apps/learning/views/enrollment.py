@@ -1,21 +1,26 @@
+from vanilla import FormView, GenericView
+
 from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
-from vanilla import FormView, GenericView
 
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.urls import reverse
 from courses.views.mixins import CourseURLParamsMixin
 from learning.forms import CourseEnrollmentForm
-from learning.models import Enrollment, CourseInvitation
-from learning.permissions import EnrollInCourse, EnrollInCourseByInvitation, \
-    EnrollPermissionObject, InvitationEnrollPermissionObject
-from learning.services import EnrollmentService, AlreadyEnrolled, \
-    CourseCapacityFull, StudentGroupService, GroupEnrollmentKeyError
+from learning.models import CourseInvitation, Enrollment
+from learning.permissions import (
+    EnrollInCourse, EnrollInCourseByInvitation, EnrollPermissionObject,
+    InvitationEnrollPermissionObject
+)
+from learning.services import (
+    AlreadyEnrolled, CourseCapacityFull, EnrollmentService, GroupEnrollmentKeyError,
+    StudentGroupService
+)
 
 
 class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):

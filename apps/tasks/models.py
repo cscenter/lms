@@ -1,14 +1,15 @@
-from datetime import timedelta
-from hashlib import sha1
 import json
 import logging
+from datetime import timedelta
+from hashlib import sha1
+
+from model_utils.fields import AutoLastModifiedField
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Q
-from django.utils import timezone, formats
-from model_utils.fields import AutoLastModifiedField
+from django.utils import formats, timezone
 
 logger = logging.getLogger(__name__)
 

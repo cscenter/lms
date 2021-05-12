@@ -1,14 +1,13 @@
 import datetime
 
 import pytest
+
 from django.utils import timezone
 
 from projects.constants import EDITING_REPORT_COMMENT_AVAIL
-from projects.tests.factories import ProjectReviewerFactory, \
-    ReportCommentFactory
+from projects.tests.factories import ProjectReviewerFactory, ReportCommentFactory
 from users.constants import Roles
-from users.models import User
-from users.tests.factories import UserFactory, CuratorFactory
+from users.tests.factories import CuratorFactory, UserFactory
 
 
 @pytest.mark.django_db

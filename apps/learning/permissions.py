@@ -2,14 +2,13 @@ import logging
 from typing import NamedTuple
 
 import rules
+
 from django.conf import settings
 
-from auth.permissions import add_perm, Permission
-from courses.models import Course, CourseTeacher, Assignment, \
-    AssignmentSubmissionFormats
-from learning.models import StudentAssignment, CourseInvitation
-from learning.services import course_failed_by_student, CourseRole, \
-    course_access_role
+from auth.permissions import Permission, add_perm
+from courses.models import Assignment, AssignmentSubmissionFormats, Course
+from learning.models import CourseInvitation, StudentAssignment
+from learning.services import CourseRole, course_access_role, course_failed_by_student
 from learning.settings import StudentStatuses
 from users.models import StudentProfile, User
 
@@ -394,7 +393,7 @@ class LeaveCourse(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, course: Course):
-        # Student could unenroll before enrollment deadline
+        """Student could leave the course before enrollment deadline."""
         if not course.enrollment_is_open:
             return False
         enrollment = user.get_enrollment(course)

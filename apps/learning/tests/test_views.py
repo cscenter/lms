@@ -1,18 +1,18 @@
-# -*- coding: utf-8 -*-
 import datetime
 import logging
 
 import pytest
-from django.utils.encoding import smart_bytes
 from testfixtures import LogCapture
+
+from django.utils.encoding import smart_bytes
 
 from core.timezone import now_local
 from core.urls import reverse
 from courses.tests.factories import *
 from learning.tests.factories import *
-from users.tests.factories import StudentFactory, TeacherFactory, \
-    CuratorFactory, UserFactory
-
+from users.tests.factories import (
+    CuratorFactory, StudentFactory, TeacherFactory, UserFactory
+)
 
 # TODO: Написать тест, который проверяет, что по-умолчанию в форму
 # редактирования описания ПРОЧТЕНИЯ подставляется описание из курса. И описание прочтения, если оно уже есть.

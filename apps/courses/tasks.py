@@ -1,7 +1,8 @@
 import posixpath
 
-from django.apps import apps
 from django_rq import job
+
+from django.apps import apps
 
 from .slides import upload_slides
 

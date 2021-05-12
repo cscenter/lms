@@ -1,17 +1,16 @@
+import itertools
 import os
 import re
 
-import itertools
+from multiselectfield.db.fields import MSFList
+
 from django.core.cache import InvalidCacheBackendError, caches
 from django.core.cache.utils import make_template_fragment_key
-from django.template import (
-    Library, Node, TemplateSyntaxError, VariableDoesNotExist,
-)
+from django.template import Library, Node, TemplateSyntaxError, VariableDoesNotExist
 from django.template.base import TextNode
 from django.utils.numberformat import format
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
-from multiselectfield.db.fields import MSFList
 
 from ..admin import get_admin_url
 from ..utils import render_markdown
@@ -231,8 +230,9 @@ def can_enroll_in_course(user, course, student_profile):
 
 @register.simple_tag
 def can_enroll_in_course_by_invitation(user, course_invitation, student_profile):
-    from learning.permissions import EnrollInCourseByInvitation, \
-        InvitationEnrollPermissionObject
+    from learning.permissions import (
+        EnrollInCourseByInvitation, InvitationEnrollPermissionObject
+    )
     perm_obj = InvitationEnrollPermissionObject(course_invitation,
                                                 student_profile)
     return user.has_perm(EnrollInCourseByInvitation.name, perm_obj)

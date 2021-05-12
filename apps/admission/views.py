@@ -1,60 +1,65 @@
-# -*- coding: utf-8 -*-
-
 import uuid
 from collections import Counter
-from datetime import timedelta, datetime
+from datetime import timedelta
 from typing import Optional
 from urllib import parse
 
 from braces.views import UserPassesTestMixin
-from django.conf import settings
-from django.contrib import messages
-from django.core.exceptions import ImproperlyConfigured
-from django.db import transaction, IntegrityError
-from django.db.models import Avg, Value, Prefetch
-from django.db.models.functions import Coalesce
-from django.db.transaction import atomic
-from django.http import HttpResponseRedirect, JsonResponse
-from django.http.response import HttpResponseForbidden, HttpResponseBadRequest, \
-    Http404, HttpResponse
-from django.shortcuts import get_object_or_404
-from django.utils import timezone, formats
-from django.utils.translation import gettext_lazy as _
-from django.views import generic
-from django.views.generic.base import TemplateResponseMixin, RedirectView
-from django.views.generic.edit import BaseCreateView, \
-    ModelFormMixin
 from django_filters.views import BaseFilterView, FilterMixin
 from extra_views.formsets import BaseModelFormSetView
 
-from admission.filters import ApplicantFilter, InterviewsFilter, \
-    InterviewsCuratorFilter, ResultsFilter
-from admission.forms import InterviewCommentForm, \
-    ApplicantReadOnlyForm, InterviewForm, ApplicantStatusForm, \
-    ResultsModelForm, InterviewAssignmentsForm, InterviewFromStreamForm
-from admission.models import Interview, Comment, Contest, Applicant, Campaign, \
-    InterviewAssignment, InterviewSlot, \
-    InterviewInvitation, Test, Exam
-from admission.services import create_invitation, create_student_from_applicant, \
-    EmailQueueService, UsernameError, get_meeting_time
+from django.conf import settings
+from django.contrib import messages
+from django.core.exceptions import ImproperlyConfigured
+from django.db import IntegrityError, transaction
+from django.db.models import Avg, Prefetch, Value
+from django.db.models.functions import Coalesce
+from django.db.transaction import atomic
+from django.http import HttpResponseRedirect, JsonResponse
+from django.http.response import (
+    Http404, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
+)
+from django.shortcuts import get_object_or_404
+from django.utils import formats, timezone
+from django.utils.translation import gettext_lazy as _
+from django.views import generic
+from django.views.generic.base import RedirectView, TemplateResponseMixin
+from django.views.generic.edit import BaseCreateView, ModelFormMixin
+
+from admission.filters import (
+    ApplicantFilter, InterviewsCuratorFilter, InterviewsFilter, ResultsFilter
+)
+from admission.forms import (
+    ApplicantReadOnlyForm, ApplicantStatusForm, InterviewAssignmentsForm,
+    InterviewCommentForm, InterviewForm, InterviewFromStreamForm, ResultsModelForm
+)
+from admission.models import (
+    Applicant, Campaign, Comment, Contest, Exam, Interview, InterviewAssignment,
+    InterviewInvitation, InterviewSlot, Test
+)
+from admission.services import (
+    EmailQueueService, UsernameError, create_invitation, create_student_from_applicant,
+    get_meeting_time
+)
 from core.models import Branch
 from core.timezone import now_local
 from core.urls import reverse
-from core.utils import render_markdown, bucketize
+from core.utils import bucketize, render_markdown
 from tasks.models import Task
 from users.mixins import CuratorOnlyMixin
 from users.models import User
+
 from .tasks import import_testing_results
 
 
 class ApplicantContextMixin:
     @staticmethod
     def get_applicant_context(request, applicant_id):
-        applicant = get_object_or_404(
-            Applicant.objects
-                     .select_related("exam", "campaign", "campaign__branch",
-                                     "online_test", "university")
-                     .filter(pk=applicant_id))
+        qs = (Applicant.objects
+              .select_related("exam", "campaign__branch",
+                              "online_test", "university")
+              .filter(pk=applicant_id))
+        applicant = get_object_or_404(qs)
         contest_ids = []
         try:
             online_test = applicant.online_test
@@ -420,16 +425,16 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
 
     def get_context_data(self, **kwargs):
         interview_id = self.kwargs['pk']
-        interview = get_object_or_404(
-            Interview.objects
-                .filter(pk=interview_id)
-                .prefetch_related(
-                    "interviewers",
-                    "assignments",
-                    Prefetch("comments",
-                             queryset=(Comment.objects
-                                       .select_related("interviewer")))))
+        qs = (Interview.objects
+              .filter(pk=interview_id)
+              .prefetch_related("interviewers",
+                                "assignments",
+                                Prefetch("comments",
+                                         queryset=(Comment.objects
+                                                   .select_related("interviewer")))))
+        interview = get_object_or_404(qs)
         context = self.get_applicant_context(self.request, interview.applicant_id)
+        interview.applicant = context['applicant']
         context.update({
             "interview": interview,
             "assignments_form": InterviewAssignmentsForm(instance=interview),

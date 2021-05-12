@@ -5,41 +5,43 @@ from random import choice
 from string import ascii_lowercase, digits
 from typing import Optional, Set
 
-import pytz
+from djchoices import C, DjangoChoices
+from model_utils.fields import AutoLastModifiedField, MonitorField
+from model_utils.models import TimeStampedModel
+from sorl.thumbnail import ImageField
+
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import AnonymousUser, PermissionsMixin, \
-    _user_has_perm
+from django.contrib.auth.models import AnonymousUser, PermissionsMixin, _user_has_perm
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator, MinValueValidator
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
-from django.db.models import prefetch_related_objects, Q
+from django.db.models import Q, prefetch_related_objects
 from django.utils import timezone
-from django.utils.encoding import smart_str, force_bytes
+from django.utils.encoding import force_bytes, smart_str
 from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, C
-from model_utils.fields import MonitorField, AutoLastModifiedField
-from model_utils.models import TimeStampedModel
-from sorl.thumbnail import ImageField
 
 from api.services import generate_hash
 from api.settings import DIGEST_MAX_LENGTH
 from auth.permissions import perm_registry
 from core.db.fields import TimeZoneField
-from core.timezone import Timezone, TimezoneAwareMixin
+from core.timezone import TimezoneAwareMixin
 from core.timezone.constants import DATETIME_FORMAT_RU
 from core.urls import reverse
-from core.utils import is_club_site, ru_en_mapping, instance_memoize
-from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeLevels
+from core.utils import instance_memoize, is_club_site, ru_en_mapping
+from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from learning.utils import is_negative_grade
 from lms.utils import PublicRoute
-from users.constants import Roles, \
-    SHADCourseGradeTypes, GenderTypes, Roles as UserRoles
+from users.constants import GenderTypes
+from users.constants import Roles
+from users.constants import Roles as UserRoles
+from users.constants import SHADCourseGradeTypes
 from users.thumbnails import UserThumbnailMixin
+
 from .managers import CustomUserManager
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
@@ -225,7 +227,7 @@ def user_photo_upload_to(instance: "User", filename):
 
 class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
            UserThumbnailMixin, AbstractBaseUser):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
+    TIMEZONE_AWARE_FIELD_NAME = "time_zone"
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
@@ -294,7 +296,7 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         related_name="+",  # Disable backwards relation
         on_delete=models.PROTECT,
         null=True, blank=True)
-    time_zone = TimeZoneField(_("Time Zone"))
+    time_zone = TimeZoneField(_("Time Zone"), null=True)
     bio = models.TextField(
         _("CSCUser|note"),
         help_text=_("LaTeX+Markdown is enabled"),
@@ -391,10 +393,6 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
     def remove_group(self, role, site_id: int = None):
         sid = site_id or settings.SITE_ID
         self.groups.filter(user=self, role=role, site_id=sid).delete()
-
-    def get_timezone(self) -> Timezone:
-        # This method is needed for TimezoneAwareMixin
-        return self.time_zone
 
     @staticmethod
     def generate_random_username(length=30,

@@ -1,42 +1,44 @@
 import os.path
-from typing import NamedTuple
 from datetime import datetime, timedelta
+from typing import NamedTuple
 
 import pytz
 from bitfield import BitField
+from djchoices import C, DjangoChoices
+from model_utils import FieldTracker
+from model_utils.models import TimeStampedModel
+from sorl.thumbnail import ImageField
+
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Prefetch, Case, When, IntegerField, Value, Count
+from django.db.models import Case, Count, IntegerField, Prefetch, Value, When
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, C
-from model_utils import FieldTracker
-from model_utils.models import TimeStampedModel
-from sorl.thumbnail import ImageField
 
-from core.db.mixins import DerivableFieldsMixin
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, Location, Branch
-from core.timezone import now_local, Timezone, TimezoneAwareMixin
-from core.timezone.fields import TimezoneAwareDateTimeField
 from core.db.fields import TimeZoneField
+from core.db.mixins import DerivableFieldsMixin
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
+from core.timezone import Timezone, TimezoneAwareMixin, now_local
+from core.timezone.fields import TimezoneAwareDateTimeField
 from core.urls import reverse
-from core.utils import hashids, get_youtube_video_id, instance_memoize
-from courses.constants import TeacherRoles, \
-    MaterialVisibilityTypes
-from courses.utils import get_current_term_pair, TermPair
+from core.utils import get_youtube_video_id, hashids, instance_memoize
+from courses.constants import MaterialVisibilityTypes, TeacherRoles
+from courses.utils import TermPair, get_current_term_pair
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
-from learning.settings import GradingSystems, GradeTypes
+from learning.settings import GradeTypes, GradingSystems
 from learning.utils import humanize_duration
-from .constants import SemesterTypes, ClassTypes
-from .managers import CourseTeacherManager, AssignmentManager, \
-    CourseClassManager, CourseDefaultManager
+
+from .constants import ClassTypes, SemesterTypes
+from .managers import (
+    AssignmentManager, CourseClassManager, CourseDefaultManager, CourseTeacherManager
+)
 
 
 class LearningSpace(TimezoneAwareMixin, models.Model):
@@ -775,7 +777,7 @@ class ClassMaterial(NamedTuple):
 
 
 class CourseClass(TimezoneAwareMixin, TimeStampedModel):
-    TIMEZONE_AWARE_FIELD_NAME = 'course'  # or venue?
+    TIMEZONE_AWARE_FIELD_NAME = 'time_zone'
 
     course = models.ForeignKey(
         Course,
@@ -792,7 +794,6 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
     date = models.DateField(_("Date"))
     starts_at = models.TimeField(_("Starts at"))
     ends_at = models.TimeField(_("Ends at"))
-    # TODO: fill values, add default, then make required
     time_zone = TimeZoneField(_("Time Zone"))
 
     name = models.CharField(_("CourseClass|Name"), max_length=255)
@@ -842,7 +843,7 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
         return smart_str(self.name)
 
     def clean(self):
-        super(CourseClass, self).clean()
+        super().clean()
         # ends_at should be later than starts_at
         if self.starts_at and self.ends_at and self.starts_at >= self.ends_at:
             raise ValidationError(_("Class should end after it started"))
@@ -1047,13 +1048,14 @@ class AssignmentSubmissionFormats(DjangoChoices):
 
 
 class Assignment(TimezoneAwareMixin, TimeStampedModel):
-    TIMEZONE_AWARE_FIELD_NAME = 'course'
+    TIMEZONE_AWARE_FIELD_NAME = 'time_zone'
 
     course = models.ForeignKey(
         Course,
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
     deadline_at = TimezoneAwareDateTimeField(_("Assignment|deadline"))
+    time_zone = TimeZoneField(_("Time Zone"))
     # TODO: rename to solution_format
     submission_type = models.CharField(
         verbose_name=_("Submission Type"),
@@ -1127,12 +1129,12 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
 
     def deadline_at_local(self, tz=None):
         if not tz:
-            tz = self.get_timezone()
+            tz = self.time_zone
         return timezone.localtime(self.deadline_at, timezone=tz)
 
     def created_local(self, tz=None):
         if not tz:
-            tz = self.get_timezone()
+            tz = self.time_zone
         return timezone.localtime(self.created, timezone=tz)
 
     def get_teacher_url(self):

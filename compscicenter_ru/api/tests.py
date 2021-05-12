@@ -1,14 +1,14 @@
 import datetime
 
 import pytest
+
 from django.utils.timezone import now
 
 from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN_ID
 from core.urls import reverse
 from courses.models import CourseTeacher
-from courses.tests.factories import SemesterFactory, CourseFactory, \
-    CourseTeacherFactory
+from courses.tests.factories import CourseFactory, CourseTeacherFactory, SemesterFactory
 from learning.tests.factories import GraduateProfileFactory
 from users.constants import Roles
 from users.tests.factories import TeacherFactory

@@ -1,11 +1,12 @@
-from typing import List, Iterator
+from typing import Iterator, List
 
 from django.db.models import Q
 
 from courses.calendar import CalendarEvent, CalendarEventFactory
 from courses.services import get_teacher_branches
-from learning.services import get_student_classes, get_teacher_classes, \
-    get_classes, get_study_events
+from learning.services import (
+    get_classes, get_student_classes, get_study_events, get_teacher_classes
+)
 from users.models import StudentProfile
 
 

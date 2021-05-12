@@ -1,14 +1,14 @@
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
-from courses.models import Assignment, CourseNews, CourseTeacher, Course, \
-    CourseBranch, CourseGroupModes
-from learning.models import AssignmentNotification, \
-    StudentAssignment, Enrollment, CourseNewsNotification, AssignmentComment, \
-    AssignmentSubmissionTypes
+from courses.models import (
+    Assignment, Course, CourseBranch, CourseGroupModes, CourseNews, CourseTeacher
+)
+from learning.models import (
+    AssignmentComment, AssignmentNotification, AssignmentSubmissionTypes,
+    CourseNewsNotification, Enrollment, StudentAssignment
+)
 from learning.services import StudentGroupService, update_course_learners_count
-
-
 # FIXME: post_delete нужен? Что лучше - удалять StudentGroup + SET_NULL у Enrollment или делать soft-delete?
 # FIXME: группу лучше удалить, т.к. она будет предлагаться для новых заданий, хотя типа уже удалена.
 from learning.tasks import convert_assignment_submission_ipynb_file_to_html

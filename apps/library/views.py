@@ -4,7 +4,8 @@ from vanilla import DetailView, ListView
 from auth.mixins import PermissionRequiredMixin
 from learning.permissions import ViewLibrary
 from users.mixins import CuratorOnlyMixin
-from .models import Stock, Borrow, BookTag
+
+from .models import BookTag, Borrow, Stock
 
 
 class BookTagAutocomplete(CuratorOnlyMixin, autocomplete.Select2QuerySetView):

@@ -1,19 +1,17 @@
-from rest_framework.generics import ListAPIView, UpdateAPIView, \
-    get_object_or_404
+from rest_framework.generics import ListAPIView, UpdateAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 
 from api.authentication import TokenAuthentication
 from api.permissions import CuratorAccessPermission
-from courses.models import Course, Assignment
+from courses.models import Assignment, Course
 from courses.permissions import CreateAssignment
-from learning.api.serializers import CourseNewsNotificationSerializer, \
-    StudentAssignmentSerializer, MyCourseSerializer, \
-    MyCourseAssignmentSerializer, EnrollmentSerializer, MyEnrollmentSerializer, \
-    StudentAssignmentAssigneeSerializer
-from learning.models import CourseNewsNotification, StudentAssignment, \
-    Enrollment
-from learning.permissions import EditStudentAssignment, \
-    ViewEnrollments
+from learning.api.serializers import (
+    CourseNewsNotificationSerializer, MyCourseAssignmentSerializer, MyCourseSerializer,
+    MyEnrollmentSerializer, StudentAssignmentAssigneeSerializer,
+    StudentAssignmentSerializer
+)
+from learning.models import CourseNewsNotification, Enrollment, StudentAssignment
+from learning.permissions import EditStudentAssignment, ViewEnrollments
 
 
 class CourseNewsUnreadNotificationsView(ListAPIView):

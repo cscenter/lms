@@ -1,6 +1,4 @@
-
-from django.conf import settings
-from import_export import resources, fields, widgets
+from import_export import fields, resources
 
 from projects.models import ProjectStudent
 

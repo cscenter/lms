@@ -1,7 +1,7 @@
 from django.apps import apps
 from django.conf import settings
-from django.core.checks import register, Error
 from django.contrib.admin.checks import _contains_subclass
+from django.core.checks import Error, register
 
 
 class Tags:

@@ -1,34 +1,36 @@
+from djchoices import C, DjangoChoices
+
 from django.apps import apps
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, C
 
 from auth.permissions import Role
 from auth.registry import role_registry
-
-from courses.permissions import ChangeMetaCourse, ViewCourseContacts, \
-    ViewCourseAssignments, CreateAssignment, CreateOwnAssignment, \
-    EditCourseClass, EditOwnCourseClass, DeleteOwnCourseClass, \
-    DeleteCourseClass, EditAssignment, EditOwnAssignment, \
-    ViewCourseClassMaterials, ViewAssignment, ViewOwnAssignment, \
-    ViewCourse
-from users.permissions import CreateCertificateOfParticipation, \
-    ViewCertificateOfParticipation
-from .permissions import CreateAssignmentComment, \
-    CreateAssignmentCommentAsTeacher, CreateAssignmentCommentAsLearner, \
-    ViewStudyMenu, ViewCourseNews, ViewCourseReviews, ViewOwnEnrollments, \
-    ViewOwnStudentAssignments, ViewOwnStudentAssignment, ViewCourses, \
-    ViewSchedule, ViewFAQ, \
-    ViewLibrary, EnrollInCourse, EnrollInCourseByInvitation, \
-    LeaveCourse, ViewTeachingMenu, ViewOwnGradebook, ViewGradebook, \
-    ViewStudentAssignment, ViewRelatedStudentAssignment, EditStudentAssignment, \
-    EditOwnStudentAssignment, ViewEnrollments, ViewRelatedEnrollments, \
-    EditOwnAssignmentExecutionTime, ViewStudentAssignmentList, \
-    ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner, \
-    ViewAssignmentCommentAttachmentAsTeacher, ViewAssignmentAttachment, \
-    ViewAssignmentAttachmentAsLearner, ViewAssignmentAttachmentAsTeacher, \
-    EditGradebook, EditOwnGradebook, CreateAssignmentSolution, \
-    CreateOwnAssignmentSolution
+from courses.permissions import (
+    ChangeMetaCourse, CreateAssignment, CreateOwnAssignment, DeleteCourseClass,
+    DeleteOwnCourseClass, EditAssignment, EditCourseClass, EditOwnAssignment,
+    EditOwnCourseClass, ViewAssignment, ViewCourse, ViewCourseAssignments,
+    ViewCourseClassMaterials, ViewCourseContacts, ViewOwnAssignment
+)
 from info_blocks.permissions import ViewInternships
+from users.permissions import (
+    CreateCertificateOfParticipation, ViewCertificateOfParticipation
+)
+
+from .permissions import (
+    CreateAssignmentComment, CreateAssignmentCommentAsLearner,
+    CreateAssignmentCommentAsTeacher, CreateAssignmentSolution,
+    CreateOwnAssignmentSolution, EditGradebook, EditOwnAssignmentExecutionTime,
+    EditOwnGradebook, EditOwnStudentAssignment, EditStudentAssignment, EnrollInCourse,
+    EnrollInCourseByInvitation, LeaveCourse, ViewAssignmentAttachment,
+    ViewAssignmentAttachmentAsLearner, ViewAssignmentAttachmentAsTeacher,
+    ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner,
+    ViewAssignmentCommentAttachmentAsTeacher, ViewCourseNews, ViewCourseReviews,
+    ViewCourses, ViewEnrollments, ViewFAQ, ViewGradebook, ViewLibrary,
+    ViewOwnEnrollments, ViewOwnGradebook, ViewOwnStudentAssignment,
+    ViewOwnStudentAssignments, ViewRelatedEnrollments, ViewRelatedStudentAssignment,
+    ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList, ViewStudyMenu,
+    ViewTeachingMenu
+)
 
 
 # TODO: Add description to each role
@@ -188,9 +190,10 @@ default_role.add_permission(ViewCourseClassMaterials)
 #  like student, teacher, curator with `core` (or `lms`) app, then move
 #  code below to the `projects` app
 if apps.is_installed('projects'):
-    from projects.permissions import ViewReportAttachment, \
-        ViewReportAttachmentAsLearner, ViewReportCommentAttachment, \
-        ViewReportCommentAttachmentAsLearner
+    from projects.permissions import (
+        ViewReportAttachment, ViewReportAttachmentAsLearner,
+        ViewReportCommentAttachment, ViewReportCommentAttachmentAsLearner
+    )
 
     curator_role = role_registry[Roles.CURATOR]
     curator_role.add_permission(ViewReportAttachment)

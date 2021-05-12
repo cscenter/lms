@@ -3,23 +3,25 @@ import copy
 import factory
 import pytest
 from bs4 import BeautifulSoup
+
 from django.conf import settings
 from django.forms.models import model_to_dict
-from django.utils.encoding import smart_str, smart_bytes
+from django.utils.encoding import smart_bytes, smart_str
 
 from core.admin import get_admin_url
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.tests.factories import CourseFactory
-from learning.settings import GradeTypes, Branches
+from learning.settings import Branches, GradeTypes
 from learning.tests.factories import GraduateProfileFactory
-from users.constants import Roles, GenderTypes
+from users.constants import GenderTypes, Roles
 from users.forms import UserCreationForm
 from users.models import User, UserGroup
-from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
-    add_user_groups, StudentFactory, CuratorFactory, \
-    OnlineCourseRecordFactory, StudentProfileFactory
+from users.tests.factories import (
+    CuratorFactory, OnlineCourseRecordFactory, SHADCourseRecordFactory, StudentFactory,
+    StudentProfileFactory, UserFactory, add_user_groups
+)
 
 
 @pytest.mark.django_db
@@ -115,7 +117,7 @@ def test_logout_redirect_works(client):
 
 
 @pytest.mark.django_db
-def test_yandex_login_from_email(client):
+def test_yandex_login_from_email(client, settings):
     """
     yandex_login can be exctracted from email if email is on @yandex.ru
     """

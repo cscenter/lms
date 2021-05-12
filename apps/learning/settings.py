@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-import pytz
-from django.conf import settings
-from django.db.models import Case, When, Value, IntegerField
+from djchoices import C, DjangoChoices
 
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from djchoices import DjangoChoices, C
 
 # This setting helps calculate the last day of enrollment period if
 # a custom value wasn't provided on model saving.

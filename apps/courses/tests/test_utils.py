@@ -3,10 +3,12 @@ import datetime
 import pytest
 import pytz
 
-from courses.constants import SemesterTypes, MONDAY_WEEKDAY, SUNDAY_WEEKDAY
-from courses.utils import get_term_index, get_term_by_index, \
-    get_current_term_pair, TermPair, TermIndexError, \
-    get_start_of_week, get_end_of_week, MonthPeriod, extended_month_date_range
+from courses.constants import MONDAY_WEEKDAY, SUNDAY_WEEKDAY, SemesterTypes
+from courses.utils import (
+    MonthPeriod, TermIndexError, TermPair, extended_month_date_range,
+    get_current_term_pair, get_end_of_week, get_start_of_week, get_term_by_index,
+    get_term_index
+)
 
 
 def test_get_term_index(mocker):

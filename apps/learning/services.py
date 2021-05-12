@@ -2,14 +2,15 @@ import logging
 from datetime import timedelta
 from enum import Enum, auto
 from itertools import islice
-from typing import List, Iterable, Union, Optional
+from typing import Iterable, List, Optional, Union
 
 from django.contrib.sites.models import Site
 from django.core.files.uploadedfile import UploadedFile
-from django.db import transaction, router
-from django.db.models import Q, OuterRef, Value, F, TextField, QuerySet, \
-    Subquery, Count, Avg
-from django.db.models.functions import Concat, Coalesce
+from django.db import router, transaction
+from django.db.models import (
+    Avg, Count, F, OuterRef, Q, QuerySet, Subquery, TextField, Value
+)
+from django.db.models.functions import Coalesce, Concat
 from django.db.models.signals import post_save
 from django.utils.timezone import now
 
@@ -18,15 +19,18 @@ from core.services import SoftDeleteService
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
 from courses.managers import CourseClassQuerySet
-from courses.models import Course, Assignment, AssignmentAttachment, \
-    StudentGroupTypes, CourseClass, CourseTeacher, CourseGroupModes
-from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, StudentGroup, Event, AssignmentSubmissionTypes, \
-    CourseNewsNotification, StudentGroupAssignee, AssignmentComment
+from courses.models import (
+    Assignment, AssignmentAttachment, Course, CourseClass, CourseGroupModes,
+    CourseTeacher, StudentGroupTypes
+)
+from learning.models import (
+    AssignmentComment, AssignmentNotification, AssignmentSubmissionTypes,
+    CourseNewsNotification, Enrollment, Event, StudentAssignment, StudentGroup,
+    StudentGroupAssignee
+)
 from learning.settings import StudentStatuses
 from users.constants import Roles
-from users.models import User, StudentProfile, StudentTypes
-
+from users.models import StudentProfile, StudentTypes, User
 
 logger = logging.getLogger(__name__)
 

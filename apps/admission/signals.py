@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
-from django.db.models.signals import post_save, m2m_changed, post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
-from admission.models import Applicant, Interview, Comment, Campaign
+from admission.models import Applicant, Campaign, Comment, Interview
 from admission.services import EmailQueueService
 
 APPLICANT_FINAL_STATES = (Applicant.ACCEPT,
@@ -40,66 +38,38 @@ def post_save_interview(sender, instance, created, *args, **kwargs):
 def post_delete_interview(sender, instance, *args, **kwargs):
     interview = instance
     applicant = interview.applicant
-    Applicant.objects.filter(pk=applicant.pk).update(
-        status=Applicant.INTERVIEW_TOBE_SCHEDULED)
+    (Applicant.objects
+     .filter(pk=applicant.pk)
+     .update(status=Applicant.INTERVIEW_TOBE_SCHEDULED))
     EmailQueueService.remove_interview_reminder(interview)
     EmailQueueService.remove_interview_feedback_emails(interview)
 
 
-# FIXME: Doesn't work through admin interface, what about tests on public?
-@receiver(m2m_changed, sender=Interview.interviewers.through)
-def interview_interviewers_m2m_changed(sender, instance, action, *args, **kwargs):
-    """
-    We are struggling with two cases:
-        * We only remove some interviewers
-        * We remove and add some interviewers. In that case `post_remove`
-        will be called first, then `post_add`
-    """
-    if action == "post_remove":
-        __sync_applicant_status(instance, check_comments=True)
-        instance.__post_remove_called_before = True
-        instance.__status_was_changed_by_sync_method_call = True
-    elif action == "post_add":
-        # Previous `post_remove` call could accidentally update interview and
-        # applicant status to `complete` state. Fix this if need.
-        # FIXME: Кажется, что нужно проверять 2 вещи - что-то было удалено и статус изменился со времени вызова `post_remove`, т.е. он был неверно подкорректирован.
-        # TODO: add test
-        pass
-
-
 @receiver(post_save, sender=Comment)
 def post_save_interview_comment(sender, instance, created, *args, **kwargs):
-    """
-    Set interview and applicant status to `completed` if all interviewers
-    leave a comment.
-    Add curator to interviewers if he leave a comment and not in a list yet.
-    """
     if not created:
         return
     comment = instance
     interview = comment.interview
-    interviewers = interview.interviewers.all()
-    __sync_applicant_status(interview, check_comments=True)
-    if interview.status == Interview.COMPLETED:
-        EmailQueueService.generate_interview_feedback_email(interview)
-    if comment.interviewer not in interviewers and comment.interviewer.is_curator:
+    interviewers = list(interview.interviewers.all())
+    # Adds curator to interviewers if they leave a comment
+    # but not in a list of interviewers.
+    is_assigned_interviewer = comment.interviewer not in interviewers
+    if is_assigned_interviewer and comment.interviewer.is_curator:
         interview.interviewers.add(comment.interviewer)
+    # If all interviewers have left comments mark interview as completed
+    comment_authors = {c.interviewer_id for c in interview.comments.all()}
+    if set(i.pk for i in interviewers).issubset(comment_authors):
+        interview.status = Interview.COMPLETED
+        interview.save(update_fields=['status'])
 
 
-def __sync_applicant_status(interview, check_comments=False):
+def __sync_applicant_status(interview):
     """Keep in sync interview and applicant statuses."""
     if interview.applicant.status in APPLICANT_FINAL_STATES:
         return
-    new_status = object()
     if interview.status in [Interview.APPROVAL, Interview.APPROVED]:
-        if check_comments and len(
-                interview.interviewers.all()) == interview.comments.count():
-            interview.status = Interview.COMPLETED
-            Interview.objects.filter(pk=interview.pk).update(
-                status=interview.status)
-            new_status = Applicant.INTERVIEW_COMPLETED
-        else:
-            new_status = Applicant.INTERVIEW_SCHEDULED
+        new_status = Applicant.INTERVIEW_SCHEDULED
     elif interview.status in [Interview.CANCELED, Interview.DEFERRED]:
         new_status = Applicant.INTERVIEW_TOBE_SCHEDULED
     elif interview.status == Interview.COMPLETED:
@@ -108,5 +78,6 @@ def __sync_applicant_status(interview, check_comments=False):
         raise ValueError("Unknown interview status")
     if interview.applicant.status != new_status:
         interview.applicant.status = new_status
-        Applicant.objects.filter(pk=interview.applicant.pk).update(
-            status=interview.applicant.status)
+        (Applicant.objects
+         .filter(pk=interview.applicant.pk)
+         .update(status=interview.applicant.status))

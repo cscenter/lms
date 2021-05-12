@@ -1,44 +1,30 @@
-from django.core.exceptions import ValidationError
-from django.core.management import CommandError
-from django.core.management.base import BaseCommand
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
+from django.core.management.base import BaseCommand
+
 from admission.models import Applicant
-from ._utils import CurrentCampaignMixin, EmailTemplateMixin
 from admission.services import get_email_from
+
+from ._utils import CurrentCampaignMixin, EmailTemplateMixin
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
-    TEMPLATE_REGEXP = "admission-{year}-{branch_code}-stage1-open-day"
     help = """Generate notification about open day for those who submitted an application form."""
 
-    def add_arguments(self, parser):
-        super().add_arguments(parser)
-        parser.add_argument(
-            '--template', type=str,
-            help='Post Office template name common for all campaigns')
+    TEMPLATE_PATTERN = "admission-{year}-{branch_code}-stage1-open-day"
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
-        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
-            self.stdout.write("Canceled")
-            return
 
-        common_template = options['template']
-        if common_template:
-            try:
-                self.check_template_exists(common_template)
-            except ValidationError as e:
-                raise CommandError(e.message)
-        else:
-            self.validate_templates(campaigns, types=['open-day'], validate_campaign_settings=False)
+        template_name_pattern = options['template_pattern']
+        self.validate_templates(campaigns, [template_name_pattern])
 
         for campaign in campaigns:
             self.stdout.write(f"Process campaign {campaign}")
-            tpl_name = common_template or self.get_template_name(campaign)
-            self._generate_notifications(campaign, tpl_name)
+            template_name = self.get_template_name(campaign, template_name_pattern)
+            self._generate_notifications(campaign, template_name)
 
     def _generate_notifications(self, campaign, template_name):
         email_from = get_email_from(campaign)

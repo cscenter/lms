@@ -7,8 +7,9 @@ import pytz
 from core.tests.factories import EmailTemplateFactory
 from courses.tests.factories import CourseFactory
 from surveys.constants import FieldType
-from surveys.models import CourseSurvey, Form, Field, FormSubmission, \
-    FieldEntry, FieldChoice
+from surveys.models import (
+    CourseSurvey, Field, FieldChoice, FieldEntry, Form, FormSubmission
+)
 
 
 class FormFactory(factory.django.DjangoModelFactory):

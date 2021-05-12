@@ -1,5 +1,5 @@
 
-from core.locks import cache_lock, acquire_cache_lock
+from core.locks import acquire_cache_lock, cache_lock
 
 
 def test_do_not_release_after_timeout():

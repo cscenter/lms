@@ -1,4 +1,5 @@
 import pytest
+
 from django.urls import reverse
 
 from info_blocks.tests.factories import InfoBlockTagFactory

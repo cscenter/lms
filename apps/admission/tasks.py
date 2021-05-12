@@ -1,14 +1,16 @@
 import logging
 
-from django.apps import apps
-from django.db.models import Q
-from django.utils import translation, timezone
 from django_rq import job
 
-from admission.models import Test, Contest
+from django.apps import apps
+from django.db.models import Q
+from django.utils import timezone, translation
+
+from admission.models import Contest, Test
 from admission.services import EmailQueueService
-from grading.api.yandex_contest import YandexContestAPI, RegisterStatus, \
-    ContestAPIError, ResponseStatus
+from grading.api.yandex_contest import (
+    ContestAPIError, RegisterStatus, ResponseStatus, YandexContestAPI
+)
 
 logger = logging.getLogger(__name__)
 

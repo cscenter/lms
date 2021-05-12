@@ -1,7 +1,9 @@
 from django import forms
 from django.conf import settings
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
+
 from htmlpages.models import HtmlPage
-from django.utils.translation import gettext, gettext_lazy as _
 
 
 class HtmlpageForm(forms.ModelForm):

@@ -1,0 +1,127 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block body_attrs %} class="gray"{% endblock body_attrs %}
+
+{% block content %}
+  <div class="container _students-courses-list">
+    <div class="nav-tabs-inverse">
+      <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
+        <li class="active" role="presentation">
+          <a data-toggle="tab" href="#current" aria-controls="current" role="tab" aria-expanded="true">{{ current_term }}</a>
+        </li>
+        {% if archive %}
+          <li role="presentation">
+            <a data-toggle="tab" href="#archive" aria-controls="archive" role="tab" aria-expanded="false">Пройденные курсы</a>
+          </li>
+        {% endif %}
+      </ul>
+
+      <div class="tab-content">
+        <div class="tab-pane active" id="current" role="tabpanel">
+          {% if ongoing_enrolled or ongoing_rest %}
+            <table class="table" width="100%">
+              <thead>
+              <tr>
+                <th></th>
+                <th class="actions"></th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for course in ongoing_enrolled %}
+                <tr class="{{ "unread" if course.has_unread() else "noop" }}">
+                  <td>
+                    <a href="{{ course.get_absolute_url() }}" class="title">{{ course.meta_course.name }}</a>
+                    {%- if request.site.pk != course.main_branch.site_id and course.is_club_course -%}
+                      <span>, курс CS клуба</span>{% endif %}
+                    &nbsp;&nbsp;
+                    {% with enrollment = enrollments[course.pk] %}
+                      <span class="badge assignment-status {{ course.grading_system.css_class }} {{ enrollment.grade }}">
+                        {{ enrollment.grade_honest }}
+                      </span>
+                      <br>
+                    {% endwith %}
+                    {% trans %}Professors{% endtrans %}:
+                    {% for course_teacher in course.course_teachers.all() %}
+                      <a href="{{ course_teacher.teacher.teacher_profile_url() }}">{{ course_teacher.teacher.get_abbreviated_name() }}</a>
+                      {% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                  </td>
+                  <td>
+                    {% if course.survey_url %}
+                      <a class=" btn btn-sm btn-block btn-success" href="{{ course.survey_url }}" target="_blank">
+                        {% trans %}Start survey!{% endtrans %}
+                      </a>
+                    {% endif %}
+                    {# FIXME: Additional db hit while we already fetched all student enrollments #}
+                    {% if request.user.has_perm("learning.leave_course", course) %}
+                      <a href="{{ course.get_unenroll_url() }}?back=study:course_list" class=" btn btn-sm btn-block btn-warning">
+                        {% trans %}Leave course{% endtrans %}
+                      </a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+
+              {% for course in ongoing_rest %}
+                <tr class="{{ "unread" if course.has_unread() else "noop" }}">
+                  <td>
+                    <a class="title" href="{{ course.get_absolute_url() }}">{{ course.meta_course.name }}</a>
+                    {%- if request.site.pk != course.main_branch.site_id and course.is_club_course -%}
+                      <span>, курс CS клуба</span>{% endif %}<br>
+                    {% trans %}Professors{% endtrans %}:
+                    {% for course_teacher in course.course_teachers.all() %}
+                      <a href="{{ course_teacher.teacher.teacher_profile_url() }}">{{ course_teacher.teacher.get_abbreviated_name() }}</a>
+                      {% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                  </td>
+                  <td>
+                    {% set permission_object = EnrollPermissionObject(course, request.user.get_student_profile()) %}
+                    {% if request.user.has_perm("learning.enroll_in_course", permission_object) %}
+                      <a href="{{ course.get_enroll_url() }}" class="btn btn-default btn-sm btn-block">
+                        {% trans %}Enroll{% endtrans %}
+                      </a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            Список курсов на <b>{{ current_term.lower() }}</b> пуст.
+          {% endif %}
+        </div>
+
+        {% if archive %}
+          <div class="tab-pane" id="archive" role="tabpanel">
+            <table class="table _archive" width="100%">
+              <thead>
+              <tr>
+                <th></th>
+                <th width="10%">{% trans %}Grade{% endtrans %}</th>
+                <th width="15%">{% trans %}Semester{% endtrans %}</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for course in archive %}
+                <tr class="{{ "unread" if course.has_unread() else "noop" }}">
+                  <td>
+                    <a href="{{ course.get_absolute_url() }}">{{ course.meta_course.name }}</a>
+                  </td>
+                  <td>
+                    {% with enrollment = enrollments[course.pk] %}
+                      <span class="badge assignment-status {{ course.grading_system.css_class }} {{ enrollment.grade }}">
+                      {{ enrollment.grade_honest }}
+                    </span>
+                    {% endwith %}
+                  </td>
+                  <td>{{ course.semester }}</td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock content %}

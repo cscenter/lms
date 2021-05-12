@@ -1,24 +1,29 @@
 from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
-from django import forms
+from modeltranslation.admin import TranslationAdmin
+
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
 from django.forms import BaseInlineFormSet
 from django.utils.translation import gettext_lazy as _
-from modeltranslation.admin import TranslationAdmin
 
+from core.admin import meta
 from core.models import Branch
 from core.timezone.fields import TimezoneAwareDateTimeField
-from core.timezone.forms import TimezoneAwareAdminForm, \
-    TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
-from core.utils import is_club_site, admin_datetime
+from core.timezone.forms import (
+    TimezoneAwareAdminForm, TimezoneAwareAdminSplitDateTimeWidget,
+    TimezoneAwareSplitDateTimeField
+)
+from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from courses.models import CourseTeacher, Course, CourseClassAttachment, \
-    Assignment, MetaCourse, Semester, CourseClass, CourseNews, \
-    AssignmentAttachment, LearningSpace, CourseReview, CourseBranch
+from courses.models import (
+    Assignment, AssignmentAttachment, Course, CourseBranch, CourseClass,
+    CourseClassAttachment, CourseNews, CourseReview, CourseTeacher, LearningSpace,
+    MetaCourse, Semester
+)
 from courses.services import CourseService
-from learning.models import AssignmentGroup, StudentGroup, EnrollmentPeriod
+from learning.models import AssignmentGroup, EnrollmentPeriod, StudentGroup
 from learning.services import AssignmentService
 
 
@@ -195,8 +200,8 @@ class AssignmentAdmin(admin.ModelAdmin):
         },
     }
     raw_id_fields = ('course', 'checker')
-    list_display = ['id', 'title', 'course', 'created_local',
-                    'deadline_at_local']
+    list_display = ['id', 'title', 'course', 'created_utc',
+                    'deadline_at_utc']
     search_fields = ['course__meta_course__name']
 
     def get_readonly_fields(self, request, obj=None):
@@ -224,15 +229,13 @@ class AssignmentAdmin(admin.ModelAdmin):
             AssignmentService.bulk_create_student_assignments(form.instance)
             AssignmentService.setup_assignees(form.instance)
 
-    def created_local(self, obj):
-        return admin_datetime(obj.created_local())
-    created_local.admin_order_field = 'created'
-    created_local.short_description = _("Created")
+    @meta(_("Created"), admin_order_field='created')
+    def created_utc(self, obj):
+        return admin_datetime(obj.created)
 
-    def deadline_at_local(self, obj):
-        return admin_datetime(obj.deadline_at_local())
-    deadline_at_local.admin_order_field = 'deadline_at'
-    deadline_at_local.short_description = _("Assignment|deadline")
+    @meta(_("Assignment|deadline"), admin_order_field='deadline_at')
+    def deadline_at_utc(self, obj):
+        return admin_datetime(obj.deadline_at)
 
 
 admin.site.register(CourseReview, CourseReviewAdmin)

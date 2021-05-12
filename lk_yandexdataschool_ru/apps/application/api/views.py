@@ -1,10 +1,11 @@
 import json
 
-from django.conf import settings
-from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
 from rest_framework.permissions import AllowAny
 from rest_framework.status import HTTP_201_CREATED
 from rest_framework.views import APIView
+
+from django.conf import settings
+from django.http import HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
 
 from lk_yandexdataschool_ru.apps.application.tasks import register_new_application_form
 

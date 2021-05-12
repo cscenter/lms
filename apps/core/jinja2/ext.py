@@ -1,13 +1,13 @@
 import logging
 
+from jinja2.ext import Extension
+
 from django.conf import settings
 from django.urls import NoReverseMatch
 from django.utils.html import strip_spaces_between_tags
-from jinja2 import nodes
-from jinja2.ext import Extension
 
 from core.urls import reverse
-
+from jinja2 import nodes
 
 logger = logging.getLogger(__name__)
 

@@ -1,4 +1,5 @@
 from auth.permissions import Role
+
 from .errors import AlreadyRegistered, NotRegistered
 
 

@@ -1,8 +1,9 @@
+from vanilla import DetailView
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
 from django.db.models import Prefetch
 from django.views import generic
-from vanilla import DetailView
 
 from core.exceptions import Redirect
 from core.utils import is_club_site
@@ -12,7 +13,7 @@ from courses.forms import CourseEditDescrForm
 from courses.models import Course, CourseTeacher
 from courses.permissions import can_view_private_materials
 from courses.services import group_teachers
-from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
+from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import CourseNewsNotification
 from learning.services import course_access_role
@@ -70,13 +71,7 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
 
     def _get_additional_context(self, course, **kwargs):
         request_user = self.request.user
-        is_actual_teacher = course.is_actual_teacher(request_user.pk)
-        # For correspondence course try to override timezone
-        tz_override = None
-        # FIXME: cache additional branch count?
-        if not is_actual_teacher and len(course.branches.all()) > 1:
-            tz_override = request_user.time_zone
-
+        tz_override = request_user.time_zone
         if request_user.has_perm("study.view_own_enrollments"):
             request_user_enrollment = request_user.get_enrollment(course.pk)
         else:
@@ -84,6 +79,7 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
         # Attach unread notifications count if authenticated user is in
         # a mailing list
         unread_news = None
+        is_actual_teacher = course.is_actual_teacher(request_user.pk)
         if request_user_enrollment or is_actual_teacher:
             unread_news = (CourseNewsNotification.unread
                            .filter(course_offering_news__course=course,

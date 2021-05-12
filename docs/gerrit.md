@@ -17,7 +17,7 @@ import datetime
 today = datetime.datetime.now().strftime('%d%m%y')
 file_path = settings.ROOT_DIR / f"{today}.ldif"
 # Save dump into repository root dir
-export(file_path=file_path, domain_component="dc=review,dc=compscicenter,dc=ru")
+export(file_path=file_path, site_id=1)
 ```
 
 ```bash

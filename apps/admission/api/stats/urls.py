@@ -1,13 +1,13 @@
 from django.urls import path, re_path
 
-from .views import CampaignsStagesByYears, \
-    CampaignStatsApplicantsResults, CampaignStatsStudentsResults, \
-    CampaignStatsTestingScoreByUniversities, \
-    CampaignStatsExamScoreByUniversities, \
-    CampaignStagesByUniversities, CampaignStagesByCourses, \
-    CampaignStatsTestingScoreByCourses, CampaignStatsExamScoreByCourses, \
-    CampaignResultsByUniversities, CampaignResultsByCourses, \
-    ApplicationSubmission, ApplicationFormSubmissionByDays
+from .views import (
+    ApplicationFormSubmissionByDays, ApplicationSubmission, CampaignResultsByCourses,
+    CampaignResultsByUniversities, CampaignsStagesByYears, CampaignStagesByCourses,
+    CampaignStagesByUniversities, CampaignStatsApplicantsResults,
+    CampaignStatsExamScoreByCourses, CampaignStatsExamScoreByUniversities,
+    CampaignStatsStudentsResults, CampaignStatsTestingScoreByCourses,
+    CampaignStatsTestingScoreByUniversities
+)
 
 urlpatterns = [
     # Stages

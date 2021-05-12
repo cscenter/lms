@@ -1,29 +1,25 @@
-# -*- coding: utf-8 -*-
-
 import datetime
 import uuid
-from typing import Optional, NamedTuple
+from typing import NamedTuple, Optional
 
-from django.conf import settings
-from django.core import checks
-from django.core.exceptions import ValidationError, FieldDoesNotExist
-from django.core.validators import MinValueValidator, \
-    MaxValueValidator
-from django.db import models, transaction
-from django.db.models import query, Q
-from django.utils import timezone, numberformat
-from django.utils.encoding import smart_str
-from django.utils.formats import date_format, time_format
-from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
 from post_office.models import EmailTemplate
 
-from admission.constants import ChallengeStatuses, InterviewFormats
-from admission.utils import slot_range, get_next_process
-from grading.api.yandex_contest import RegisterStatus, \
-    Error as YandexContestError
+from django.conf import settings
+from django.core import checks
+from django.core.exceptions import FieldDoesNotExist, ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models, transaction
+from django.db.models import Q, query
+from django.utils import numberformat, timezone
+from django.utils.encoding import smart_str
+from django.utils.formats import date_format, time_format
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
+
+from admission.constants import ChallengeStatuses, InterviewFormats, InterviewSections
+from admission.utils import get_next_process, slot_range
 from core.db.fields import ScoreField
 from core.models import Branch, Location
 from core.timezone import TimezoneAwareMixin
@@ -31,6 +27,8 @@ from core.timezone.fields import TimezoneAwareDateTimeField
 from core.urls import reverse
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
+from grading.api.yandex_contest import Error as YandexContestError
+from grading.api.yandex_contest import RegisterStatus
 from learning.settings import AcademicDegreeLevels
 from users.constants import Roles
 
@@ -493,7 +491,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
              .update(is_unsubscribed=True))
 
     def _assign_testing(self):
-        testing = Test(applicant=self, status=Test.NEW)
+        testing = Test(applicant=self, status=ChallengeStatuses.NEW)
         testing.save()
 
     def created_local(self, tz=None):
@@ -806,28 +804,31 @@ class YandexContestIntegration(models.Model):
 
 class ApplicantRandomizeContestMixin:
     def compute_contest_id(self, contest_type, group_size=1) -> Optional[int]:
-        """
-        Selects contest id in a round-robin manner but allows group applicants
-        to complicate brute-forcing all available contests.
-        """
+        """Selects contest id in a round-robin manner."""
+        campaign_id = self.applicant.campaign_id
         contests = list(Contest.objects
-                        .filter(campaign_id=self.applicant.campaign_id,
-                                type=contest_type)
+                        .filter(campaign_id=campaign_id, type=contest_type)
                         .values_list("contest_id", flat=True)
                         .order_by("contest_id"))
         if contests:
-            # All applicants are ordered by registration time (or PK)
-            applicant_number = self.applicant.id
-            return get_next_process(applicant_number, contests, group_size)
+            if contest_type == Contest.TYPE_EXAM:
+                manager = Exam.objects
+            elif contest_type == Contest.TYPE_TEST:
+                manager = Test.objects
+            else:
+                raise ValueError("Unknown contest type")
+            qs = manager.filter(applicant__campaign_id=campaign_id)
+            if self.pk is None:
+                serial_number = qs.count() + 1
+            else:
+                # Assume records are ordered by PK
+                serial_number = qs.filter(pk__lte=self.pk).count()
+            return get_next_process(serial_number, contests, group_size)
 
 
 class Test(TimeStampedModel, YandexContestIntegration,
            ApplicantRandomizeContestMixin):
     CONTEST_TYPE = Contest.TYPE_TEST
-
-    NEW = ChallengeStatuses.NEW
-    REGISTERED = ChallengeStatuses.REGISTERED
-    MANUAL = ChallengeStatuses.MANUAL
 
     applicant = models.OneToOneField(
         Applicant,
@@ -998,12 +999,21 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
     )
     TRANSITION_STATUSES = [DEFERRED, CANCELED, APPROVAL]
 
-    date = TimezoneAwareDateTimeField(_("When"))
     applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
         related_name="interview")
+    section = models.CharField(
+        choices=InterviewSections,
+        verbose_name=_("Interview|Section"),
+        max_length=15)
+    date = TimezoneAwareDateTimeField(_("When"))
+    status = models.CharField(
+        choices=STATUSES,
+        default=APPROVAL,
+        verbose_name=_("Interview|Status"),
+        max_length=15)
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
@@ -1012,11 +1022,6 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         'InterviewAssignment',
         verbose_name=_("Interview|Assignments"),
         blank=True)
-    status = models.CharField(
-        choices=STATUSES,
-        default=APPROVAL,
-        verbose_name=_("Interview|Status"),
-        max_length=15)
     secret_code = models.UUIDField(
         verbose_name=_("Secret code"),
         editable=False,
@@ -1029,6 +1034,14 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
     class Meta:
         verbose_name = _("Interview")
         verbose_name_plural = _("Interviews")
+
+    def __str__(self):
+        return smart_str(self.applicant)
+
+    def save(self, **kwargs):
+        created = self.pk is None
+        self.full_clean()
+        super().save(**kwargs)
 
     def date_local(self, tz=None):
         if not tz:
@@ -1066,9 +1079,6 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
 
     def get_average_score_display(self, decimal_pos=2):
         return numberformat.format(self.average_score, ".", decimal_pos)
-
-    def __str__(self):
-        return smart_str(self.applicant)
 
 
 class Comment(TimeStampedModel):
@@ -1113,6 +1123,10 @@ class InterviewStream(TimezoneAwareMixin, TimeStampedModel):
         verbose_name=_("Campaign"),
         on_delete=models.CASCADE,
         related_name="interview_streams")
+    section = models.CharField(
+        choices=InterviewSections,
+        verbose_name=_("Interview|Section"),
+        max_length=15)
     format = models.CharField(
         verbose_name=_("Interview Format"),
         choices=InterviewFormats.choices,

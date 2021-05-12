@@ -10,7 +10,7 @@ from django.utils.timezone import now
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
 from users.constants import Roles
-from users.models import User, StudentProfile, StudentTypes, StudentStatusLog
+from users.models import StudentProfile, StudentStatusLog, StudentTypes, User
 
 
 class Command(BaseCommand):

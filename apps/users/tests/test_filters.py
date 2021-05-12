@@ -6,15 +6,14 @@ from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN_ID
 from core.urls import reverse_lazy
 from courses.constants import SemesterTypes
-from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
-    CourseFactory
-from learning.settings import StudentStatuses, GradeTypes, Branches
+from courses.tests.factories import CourseFactory, MetaCourseFactory, SemesterFactory
+from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import EnrollmentFactory, GraduateFactory
 from study_programs.tests.factories import AcademicDisciplineFactory
-from users.constants import Roles
 from users.models import StudentTypes
-from users.tests.factories import UserFactory, VolunteerFactory, \
-    StudentFactory, CuratorFactory
+from users.tests.factories import (
+    CuratorFactory, StudentFactory, UserFactory, VolunteerFactory
+)
 
 
 @pytest.fixture(scope="module")
