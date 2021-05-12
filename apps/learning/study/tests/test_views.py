@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import pytest
 from bs4 import BeautifulSoup
+from urllib.request import urlopen
 
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -210,10 +211,15 @@ def test_that_first_loaded_solution_form(client):
     student_url = student_assignment.get_student_url()
     client.login(student)
     response = client.get(student_url)
-    assert smart_bytes('id="solution-form-wrapper" class="csc-well"') in response.content
-    assert smart_bytes('id="comment-form-wrapper" class="csc-well hidden"') in response.content
-    assert smart_bytes('button id="add-solution" class="btn btn-lg btn-link active"') in response.content
-    assert smart_bytes('button id="add-comment" class="btn btn-lg btn-link"') in response.content
+    rendered = BeautifulSoup(response.content, "html.parser")
+    button_solution_find = rendered.find(id="add-solution")
+    button_comment_find = rendered.find(id="add-comment")
+    form_solution_find = rendered.find(id="solution-form-wrapper")
+    form_comment_find = rendered.find(id="comment-form-wrapper")
+    assert 'active' in button_solution_find.attrs['class']
+    assert 'active' not in button_comment_find.attrs['class']
+    assert 'hidden' not in form_solution_find.attrs['class']
+    assert 'hidden' in form_comment_find.attrs['class']
 
 
 @pytest.mark.django_db
