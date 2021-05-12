@@ -195,7 +195,7 @@ def test_new_comment_on_assignment_page(client, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_that_first_loaded_solution_form(client):
+def test_solution_form_is_visible_by_default(client):
     student_profile = StudentProfileFactory()
     student = student_profile.user
     course = CourseFactory(main_branch=student_profile.branch,
