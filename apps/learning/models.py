@@ -109,10 +109,10 @@ class StudentGroupAssignee(models.Model):
         verbose_name = _("Student Group Assignee")
         verbose_name_plural = _("Student Group Assignees")
         constraints = [
-            models.UniqueConstraint(fields=['student_group', 'assignee'], condition=Q(assignment=None),
-                                    name='unique_assignee_without_assignment'),
-            models.UniqueConstraint(fields=['student_group', 'assignee', 'assignment'], condition=~Q(assignment=None),
-                                    name='unique_assignee_with_assignment'),
+            models.UniqueConstraint(fields=['student_group', 'assignee'], condition=Q(assignment__isnull=True),
+                                    name='unique_assignee_per_student_group'),
+            models.UniqueConstraint(fields=['student_group', 'assignee', 'assignment'],
+                                    condition=~Q(assignment__isnull=True), name='unique_assignee_per_assignment'),
         ]
 
     def __str__(self):
