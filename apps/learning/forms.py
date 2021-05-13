@@ -19,7 +19,7 @@ from learning.models import GraduateProfile, StudentAssignment, \
     AssignmentSubmissionTypes, StudentGroup, StudentGroupAssignee, Enrollment
 from courses.models import Course, CourseTeacher
 from .models import AssignmentComment
-from django.urls import reverse
+from core.urls import reverse
 from django.forms import ModelChoiceField
 
 
