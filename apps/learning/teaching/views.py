@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
+from django.db.transaction import atomic
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
@@ -26,27 +27,26 @@ from courses.services import get_teacher_branches
 from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
 from learning.api.serializers import AssignmentScoreSerializer
-from learning.calendar import get_teacher_calendar_events, get_all_calendar_events
+from learning.calendar import get_all_calendar_events, get_teacher_calendar_events
 from learning.forms import (
-    AssignmentModalCommentForm, AssignmentScoreForm, AssignmentCommentForm,
-    StudentGroupForm, StudentGroupAddForm, StudentEnrollmentForm
+    AssignmentCommentForm, AssignmentModalCommentForm, AssignmentScoreForm,
+    StudentEnrollmentForm, StudentGroupAddForm, StudentGroupForm
 )
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import (
-    AssignmentComment, StudentAssignment, Enrollment, AssignmentSubmissionTypes,
-    StudentGroup, StudentGroupAssignee, AssignmentGroup
+    AssignmentComment, AssignmentGroup, AssignmentSubmissionTypes, Enrollment,
+    StudentAssignment, StudentGroup, StudentGroupAssignee
 )
 from learning.permissions import (
-    CreateAssignmentComment, ViewStudentAssignment, EditOwnStudentAssignment,
+    CreateAssignmentComment, EditOwnStudentAssignment, ViewStudentAssignment,
     ViewStudentAssignmentList
 )
-from learning.services import get_teacher_classes, AssignmentService
+from learning.services import AssignmentService, get_teacher_classes
 from learning.teaching.filters import AssignmentStudentsFilter
 from learning.utils import humanize_duration
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView
 from users.mixins import TeacherOnlyMixin
-from django.db.transaction import atomic
 
 
 def set_query_parameter(url, param_name, param_value):

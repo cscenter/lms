@@ -10,7 +10,8 @@ from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
 from users.constants import Roles
 from users.tests.factories import (
-    CuratorFactory, StudentFactory, StudentProfileFactory, UserFactory, UserGroupFactory
+    CuratorFactory, StudentFactory, StudentProfileFactory, UserFactory,
+    UserGroupFactory
 )
 
 

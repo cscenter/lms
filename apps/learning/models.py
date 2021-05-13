@@ -14,7 +14,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import Sum, Q
+from django.db.models import Q, Sum
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
@@ -28,9 +28,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
 from core.timezone import TimezoneAwareMixin, now_local
 from core.urls import reverse
 from core.utils import hashids
-from courses.models import (
-    Assignment, Course, CourseNews, Semester, StudentGroupTypes
-)
+from courses.models import Assignment, Course, CourseNews, Semester, StudentGroupTypes
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
 from learning.managers import (

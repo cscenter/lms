@@ -2,20 +2,14 @@ from django.urls import include, path, re_path
 from django.views.generic.base import RedirectView
 
 from courses.urls import RE_COURSE_URI
-from learning.gradebook import views as gv
-from learning.teaching.views import TimetableView as TeacherTimetable, \
-    AssignmentCommentUpdateView, AssignmentDetailView, AssignmentListView, \
-    CalendarFullView, CalendarPersonalView, CourseListView, \
-    StudentAssignmentDetailView, GradeBookListView, \
-    StudentAssignmentCommentCreateView, \
-    StudentGroupDetailView, StudentGroupUpdateView, StudentGroupCreateView, \
-    StudentGroupDeleteView, StudentGroupListView, StudentGroupStudentUpdateView
 from learning.api.views import CourseNewsUnreadNotificationsView
 from learning.gradebook import views as gv
 from learning.teaching.views import (
     AssignmentCommentUpdateView, AssignmentDetailView, AssignmentListView,
     CalendarFullView, CalendarPersonalView, CourseListView, GradeBookListView,
-    StudentAssignmentCommentCreateView, StudentAssignmentDetailView
+    StudentAssignmentCommentCreateView, StudentAssignmentDetailView,
+    StudentGroupCreateView, StudentGroupDeleteView, StudentGroupDetailView,
+    StudentGroupListView, StudentGroupStudentUpdateView, StudentGroupUpdateView
 )
 from learning.teaching.views import TimetableView as TeacherTimetable
 

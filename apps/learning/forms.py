@@ -1,28 +1,30 @@
 import os
 
-from crispy_forms.bootstrap import StrictButton, InlineRadios, FormActions
+from crispy_forms.bootstrap import FormActions, InlineRadios, StrictButton
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Layout, Submit, Hidden, \
-    Div, HTML, BaseInput, Row, Reset, Button
+from crispy_forms.layout import (
+    HTML, BaseInput, Button, Div, Field, Hidden, Layout, Reset, Row, Submit
+)
+
 from django import forms
 from django.core.exceptions import ValidationError
+from django.forms import ModelChoiceField
 from django.utils.translation import gettext_lazy as _
 
-from grading.services import SubmissionService, CheckerService
 from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.timezone.constants import TIME_FORMAT_RU
+from core.urls import reverse
 from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
+from courses.models import Course, CourseTeacher
 from grading.services import CheckerService, SubmissionService
 from learning.models import (
-    GraduateProfile, StudentAssignment, AssignmentSubmissionTypes,
-    StudentGroup, StudentGroupAssignee, Enrollment
+    AssignmentSubmissionTypes, Enrollment, GraduateProfile, StudentAssignment,
+    StudentGroup, StudentGroupAssignee
 )
-from courses.models import Course, CourseTeacher
+
 from .models import AssignmentComment
-from core.urls import reverse
-from django.forms import ModelChoiceField
 
 
 class SubmitLink(BaseInput):

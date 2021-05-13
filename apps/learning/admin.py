@@ -1,17 +1,19 @@
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericTabularInline
 from django.db import models as db_models
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-from django.contrib.contenttypes.admin import GenericTabularInline
 
 from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from courses.models import StudentGroupTypes, CourseGroupModes
-from learning.models import GraduateProfile, Invitation, CourseInvitation, \
-    StudentAssignment, StudentGroup, StudentGroupAssignee, AssignmentGroup
+from courses.models import CourseGroupModes, StudentGroupTypes
+from learning.models import (
+    AssignmentGroup, CourseInvitation, GraduateProfile, Invitation, StudentAssignment,
+    StudentGroup, StudentGroupAssignee
+)
 from users.models import StudentStatusLog
 
 from .models import AssignmentComment, Enrollment, Event
