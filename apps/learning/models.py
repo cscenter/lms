@@ -28,7 +28,9 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
 from core.timezone import TimezoneAwareMixin, now_local
 from core.urls import reverse
 from core.utils import hashids
-from courses.models import Assignment, Course, CourseNews, Semester, StudentGroupTypes
+from courses.models import (
+    Assignment, Course, CourseNews, Semester, StudentGroupTypes
+)
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
 from learning.managers import (

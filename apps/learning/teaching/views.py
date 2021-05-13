@@ -27,13 +27,19 @@ from courses.utils import MonthPeriod, extended_month_date_range, get_current_te
 from courses.views.calendar import MonthEventsCalendarView
 from learning.api.serializers import AssignmentScoreSerializer
 from learning.calendar import get_teacher_calendar_events, get_all_calendar_events
-from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm, \
-    AssignmentCommentForm, StudentGroupForm, StudentGroupAddForm, StudentEnrollmentForm
+from learning.forms import (
+    AssignmentModalCommentForm, AssignmentScoreForm, AssignmentCommentForm,
+    StudentGroupForm, StudentGroupAddForm, StudentEnrollmentForm
+)
 from learning.gradebook.views import GradeBookListBaseView
-from learning.models import AssignmentComment, StudentAssignment, Enrollment, \
-    AssignmentSubmissionTypes, StudentGroup, StudentGroupAssignee, AssignmentGroup
-from learning.permissions import CreateAssignmentComment, ViewStudentAssignment, \
-    EditOwnStudentAssignment, ViewStudentAssignmentList
+from learning.models import (
+    AssignmentComment, StudentAssignment, Enrollment, AssignmentSubmissionTypes,
+    StudentGroup, StudentGroupAssignee, AssignmentGroup
+)
+from learning.permissions import (
+    CreateAssignmentComment, ViewStudentAssignment, EditOwnStudentAssignment,
+    ViewStudentAssignmentList
+)
 from learning.services import get_teacher_classes, AssignmentService
 from learning.teaching.filters import AssignmentStudentsFilter
 from learning.utils import humanize_duration
