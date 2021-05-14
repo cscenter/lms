@@ -166,16 +166,6 @@ class ProgressReport:
         return False
 
     @staticmethod
-    def get_term_order(self, student_profile):
-        if student_profile.year_of_curriculum:
-            curriculum_term_index = get_term_index(
-                student_profile.year_of_curriculum,
-                SemesterTypes.AUTUMN)
-            return self.target_semester.index - curriculum_term_index + 1
-        else:
-            return "-"
-
-    @staticmethod
     def get_courses_headers(meta_courses):
         if not meta_courses:
             return []
@@ -676,7 +666,6 @@ class ProgressReportFull(ProgressReport):
             'Курс (на момент поступления)',
             'Год поступления',
             'Год программы обучения',
-            'Номер семестра обучения',
             'Год выпуска',
             'Официальный студент',
             'Номер диплома о высшем образовании',
@@ -710,8 +699,6 @@ class ProgressReportFull(ProgressReport):
             disciplines = student_profile.academic_disciplines.all()
             graduation_year = ""
 
-        term_order = self.get_term_order(self, student_profile)
-
         student = student_profile.user
         return [
             student.pk,
@@ -727,11 +714,10 @@ class ProgressReportFull(ProgressReport):
             student.yandex_login,
             student.stepic_id if student.stepic_id else "",
             student.github_login if student.github_login else "",
-            student_profile.university,  # ВУЗ
+            student_profile.university,
             student_profile.get_level_of_education_on_admission_display(),
             student_profile.year_of_admission,
             student_profile.year_of_curriculum if student_profile.year_of_curriculum else "",
-            term_order,
             graduation_year,
             'да' if student_profile.is_official_student else 'нет',
             student_profile.diploma_number if student_profile.diploma_number else "",
@@ -926,8 +912,13 @@ class ProgressReportForSemester(ProgressReport):
             student.enrollments_eq_target_semester +
             student.shad_eq_target_semester
         )
-
-        term_order = self.get_term_order(self, student_profile)
+        if student_profile.year_of_curriculum:
+            curriculum_term_index = get_term_index(
+                student_profile.year_of_curriculum,
+                SemesterTypes.AUTUMN)
+            term_order = self.target_semester.index - curriculum_term_index + 1
+        else:
+            term_order = "-"
 
         return [
             student.pk,
