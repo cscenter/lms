@@ -32,33 +32,6 @@ def check_value_for_header(report, header, row_index, expected_value):
     assert header in report.columns
     assert report.loc[row_index, header] == expected_value
 
-# @pytest.mark.django_db
-# def test_report_update_full_csv_export():
-#
-#     teacher1, teacher2, teacher3 = TeacherFactory.create_batch(3)
-#     student1, student2, student3 = StudentFactory.create_batch(3)
-#
-#     semester_full = SemesterFactory.create_current()
-#     course1, course2, course3 = CourseFactory.create_batch(3,
-#                                                semester=semester_full,
-#                                                teachers=[teacher1,
-#                                                          teacher2,
-#                                                          teacher3]
-#                                                )
-#     enroll_1_1 = EnrollmentFactory(student=student1, course=course1, grade=GradeTypes.GOOD)
-#     enroll_1_2 = EnrollmentFactory(student=student1, course=course2, grade=GradeTypes.GOOD)
-#     EnrollmentFactory(student=student1, course=course3, grade=GradeTypes.GOOD)
-#
-#     EnrollmentFactory(student=student2, course=course1, grade=GradeTypes.GOOD)
-#     EnrollmentFactory(student=student2, course=course2, grade=GradeTypes.GOOD)
-#
-#     EnrollmentFactory(student=student3, course=course2, grade=GradeTypes.GOOD)
-#     EnrollmentFactory(student=student3, course=course3, grade=GradeTypes.GOOD)
-#
-#     report_csv = ProgressReportFull(grade_getter="grade_honest")
-#     progress_report = report_csv.generate()
-#     assert progress_report.index[0] == student1.pk
-
 
 @pytest.mark.django_db
 def test_report_common():
