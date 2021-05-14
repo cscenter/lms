@@ -14,7 +14,8 @@ from learning.reports import (
 )
 from learning.settings import Branches, GradeTypes, GradingSystems, StudentStatuses
 from learning.tests.factories import (
-    CourseFactory, EnrollmentFactory, GraduateProfileFactory, SemesterFactory
+    CourseFactory, EnrollmentFactory, GraduateProfileFactory, SemesterFactory,
+    StudentAssignmentFactory
 )
 from projects.constants import ProjectGradeTypes, ProjectTypes
 from projects.models import Project
@@ -31,9 +32,41 @@ def check_value_for_header(report, header, row_index, expected_value):
     assert header in report.columns
     assert report.loc[row_index, header] == expected_value
 
+# @pytest.mark.django_db
+# def test_report_update_full_csv_export():
+#
+#     teacher1, teacher2, teacher3 = TeacherFactory.create_batch(3)
+#     student1, student2, student3 = StudentFactory.create_batch(3)
+#
+#     semester_full = SemesterFactory.create_current()
+#     course1, course2, course3 = CourseFactory.create_batch(3,
+#                                                semester=semester_full,
+#                                                teachers=[teacher1,
+#                                                          teacher2,
+#                                                          teacher3]
+#                                                )
+#     enroll_1_1 = EnrollmentFactory(student=student1, course=course1, grade=GradeTypes.GOOD)
+#     enroll_1_2 = EnrollmentFactory(student=student1, course=course2, grade=GradeTypes.GOOD)
+#     EnrollmentFactory(student=student1, course=course3, grade=GradeTypes.GOOD)
+#
+#     EnrollmentFactory(student=student2, course=course1, grade=GradeTypes.GOOD)
+#     EnrollmentFactory(student=student2, course=course2, grade=GradeTypes.GOOD)
+#
+#     EnrollmentFactory(student=student3, course=course2, grade=GradeTypes.GOOD)
+#     EnrollmentFactory(student=student3, course=course3, grade=GradeTypes.GOOD)
+#
+#     report_csv = ProgressReportFull(grade_getter="grade_honest")
+#     progress_report = report_csv.generate()
+#     assert progress_report.index[0] == student1.pk
+
 
 @pytest.mark.django_db
 def test_report_common():
+    def get_progress_report():
+        return ProgressReportFull(grade_getter="grade_honest").generate()
+
+    STATIC_HEADERS_CNT = len(get_progress_report().columns)
+
     teacher = TeacherFactory.create()
     s = SemesterFactory.create_current()
     co1, co2, co3 = CourseFactory.create_batch(3, semester=s,
@@ -44,14 +77,32 @@ def test_report_common():
     EnrollmentFactory(student=student2, course=co2, grade=GradeTypes.NOT_GRADED)
     shad1 = SHADCourseRecordFactory(student=student1, grade=GradeTypes.GOOD)
     shad2 = SHADCourseRecordFactory(student=student2, grade=GradeTypes.GOOD)
-    p = ProjectFactory.create(students=[student1], semester=s)
-    supervisor = SupervisorFactory()
-    p.supervisors.add(supervisor.pk)
-    ps = p.projectstudent_set.all()[0]  # 1 student attached
-    ps.final_grade = ProjectGradeTypes.EXCELLENT
-    ps.save()
+
     report_factory = ProgressReportFull(grade_getter="grade_honest")
     progress_report = report_factory.generate()
+    assert len(progress_report.columns) == (STATIC_HEADERS_CNT +
+                                            len({c.meta_course_id: c.meta_course for c in (co1, co2)}) +
+                                            len(report_factory.generate_shad_courses_headers(1)) +
+                                            len(report_factory.generate_online_courses_headers(0)))
+
+    # Check shad courses headers and values
+    assert 'ШАД, курс 2, название' not in progress_report.columns
+    check_value_for_header(progress_report, 'ШАД, курс 1, название',
+                           student1.pk, shad1.name)
+    check_value_for_header(progress_report, 'ШАД, курс 1, преподаватели',
+                           student1.pk, shad1.teachers)
+    check_value_for_header(progress_report, 'ШАД, курс 1, оценка',
+                           student1.pk, shad1.grade_display.lower())
+    check_value_for_header(progress_report, 'ШАД, курс 1, название',
+                           student2.pk, shad2.name)
+    check_value_for_header(progress_report, 'ШАД, курс 1, преподаватели',
+                           student2.pk, shad2.teachers)
+    check_value_for_header(progress_report, 'ШАД, курс 1, оценка',
+                           student2.pk, shad2.grade_display.lower())
+
+    # No added online-courses, but it should be displayed in progress
+    assert 'Онлайн-курс 1, название' not in progress_report.columns
+
     assert progress_report.index[0] == student1.pk
     assert progress_report.index[1] == student2.pk
     assert progress_report.index[2] == student3.pk
