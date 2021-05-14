@@ -16,7 +16,7 @@ from grading.services import CheckerService, SubmissionService
 from learning.models import AssignmentSubmissionTypes, GraduateProfile
 
 from .models import AssignmentComment
-from django.urls import reverse
+from core.urls import reverse
 from django.forms import ModelChoiceField
 
 
