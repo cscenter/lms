@@ -207,14 +207,6 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                 context["invitation"] = invitation
         return context
 
-    def get(self, request, *args, **kwargs):
-        applicant_id = self.kwargs[self.pk_url_kwarg]
-        try:
-            interview = Interview.objects.get(applicant_id=applicant_id)
-            return HttpResponseRedirect(interview.get_absolute_url())
-        except Interview.DoesNotExist:
-            return super().get(request, *args, **kwargs)
-
     def post(self, request, *args, **kwargs):
         """Get data for interview from stream form"""
         if not request.user.is_curator:
