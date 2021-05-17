@@ -641,19 +641,25 @@ class ProgressReportFull(ProgressReport):
                     projects_prefetch,
                     'graduate_profile__academic_disciplines'))
 
-    def get_courses_headers(self, meta_courses):
-
-        meta_course_sites: Dict[int, str] = {}
-        meta_courses_ids = [course.id for course in meta_courses.values()]
-        course_list = Course.objects.filter(meta_course__in=meta_courses_ids)
-        for course in course_list:
-            meta_course_sites[course.meta_course.id] = str(course.main_branch.site)
+    def get_courses_headers(self, courses, meta_courses):
 
         if not meta_courses:
             return []
-        return ([f"[CS клуб] {course.name}, оценка"
-                 if 'compsciclub.ru' in meta_course_sites[course.id]
-                 else f"{course.name}, оценка" for course in meta_courses.values()])
+
+        meta_course_is_club: Dict[int, bool] = {}
+
+        def cs_club_prefix(meta_course_id):
+            return "[CS клуб] " if meta_course_is_club[meta_course_id] else ""
+
+        for course in courses.values():
+            key = course.meta_course_id
+            if key in meta_course_is_club:
+                if meta_course_is_club[key] != course.is_club_course:
+                    meta_course_is_club[key] = False
+            else:
+                meta_course_is_club[key] = course.is_club_course
+
+        return [f"{cs_club_prefix(course.id)}{course.name}, оценка" for course in meta_courses.values()]
 
     def _generate_headers(self, *, courses, meta_courses, shads_max, online_max,
                           projects_max, **kwargs):
@@ -686,7 +692,7 @@ class ProgressReportFull(ProgressReport):
             'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
             'Пройдено семестров практики(закончили, успех)',
             'Пройдено семестров НИР (закончили, успех)',
-            *self.get_courses_headers(meta_courses),
+            *self.get_courses_headers(courses, meta_courses),
             *self.generate_shad_courses_headers(shads_max),
             *self.generate_online_courses_headers(online_max),
         ]
