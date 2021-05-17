@@ -1,9 +1,10 @@
 import pytest
+from django.core.exceptions import ValidationError
 
 from admission.constants import InterviewSections
-from admission.models import Applicant, Contest
+from admission.models import Applicant, Contest, Interview
 from admission.tests.factories import (
-    ApplicantFactory, CampaignFactory, ContestFactory, InterviewInvitationFactory
+    ApplicantFactory, CampaignFactory, ContestFactory, InterviewInvitationFactory, InterviewFactory
 )
 
 
@@ -25,6 +26,15 @@ def test_compute_contest_id():
 
 
 @pytest.mark.django_db
+def test_unique_interview_section_per_applicant():
+    applicant = ApplicantFactory()
+    InterviewFactory(applicant=applicant, section=InterviewSections.MATH)
+    interview = Interview(applicant=applicant, section=InterviewSections.MATH)
+    with pytest.raises(ValidationError):
+        interview.full_clean()
+
+
+@pytest.mark.django_db
 def test_interview_invitation_create():
     """Make sure Applicant status auto updated"""
     a = ApplicantFactory(status=Applicant.PERMIT_TO_EXAM)
@@ -36,7 +46,7 @@ def test_interview_invitation_create():
     a.refresh_from_db()
     assert a.status == Applicant.INTERVIEW_SCHEDULED
     a.status = Applicant.PENDING
-    a.interview.delete()
+    a.interviews.all().delete()
     a.save()
     invitation = InterviewInvitationFactory(applicant=a, interview=None)
     a.refresh_from_db()

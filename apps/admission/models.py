@@ -999,11 +999,11 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
     )
     TRANSITION_STATUSES = [DEFERRED, CANCELED, APPROVAL]
 
-    applicant = models.OneToOneField(
+    applicant = models.ForeignKey(
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
-        related_name="interview")
+        related_name="interviews")
     section = models.CharField(
         choices=InterviewSections,
         verbose_name=_("Interview|Section"),
@@ -1034,6 +1034,10 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
     class Meta:
         verbose_name = _("Interview")
         verbose_name_plural = _("Interviews")
+        constraints = [
+            models.UniqueConstraint(fields=('applicant', 'section'),
+                                    name='unique_interview_section_per_applicant'),
+        ]
 
     def __str__(self):
         return smart_str(self.applicant)
