@@ -642,9 +642,18 @@ class ProgressReportFull(ProgressReport):
                     'graduate_profile__academic_disciplines'))
 
     def get_courses_headers(self, meta_courses):
+
+        meta_course_sites: Dict[int, str] = {}
+        meta_courses_ids = [course.id for course in meta_courses.values()]
+        course_list = Course.objects.filter(meta_course__in=meta_courses_ids)
+        for course in course_list:
+            meta_course_sites[course.meta_course.id] = str(course.main_branch.site)
+
         if not meta_courses:
             return []
-        return [f"{course.name}, оценка" for course in meta_courses.values()]
+        return ([f"[CS клуб] {course.name}, оценка"
+                 if 'compsciclub.ru' in meta_course_sites[course.id]
+                 else f"{course.name}, оценка" for course in meta_courses.values()])
 
     def _generate_headers(self, *, courses, meta_courses, shads_max, online_max,
                           projects_max, **kwargs):
