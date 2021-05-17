@@ -309,14 +309,15 @@ class StudentGroupDetailView(TeacherOnlyMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context_update = {
-            'group_assignees': StudentGroupAssignee.objects.filter(student_group_id=self.kwargs.get("group_pk")),
+            'group_assignees': (StudentGroupAssignee.objects
+                                .filter(student_group_id=self.kwargs.get("group_pk"))),
             'course': Course.objects.get(id=self.kwargs.get("course_pk")),
             'group_id': self.kwargs.get("group_pk"),
             'course_id': self.kwargs.get("course_pk"),
             'student_id': self.kwargs.get("pk"),
-            'enrollments': Enrollment.objects \
-                .filter(student_group_id=self.kwargs.get("group_pk")) \
-                .order_by('student__last_name')
+            'enrollments': (Enrollment.objects
+                            .filter(student_group_id=self.kwargs.get("group_pk"))
+                            .order_by('student__last_name'))
         }
         context.update(context_update)
         return context
@@ -332,8 +333,9 @@ class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
     form_class = StudentGroupForm
 
     def get_success_url(self):
-        return reverse("teaching:student_group_detail", kwargs={'course_pk': self.kwargs['course_pk'],
-                                                                'group_pk': self.kwargs['pk']})
+        return reverse("teaching:student_group_detail", kwargs={
+            'course_pk': self.kwargs['course_pk'],
+            'group_pk': self.kwargs['pk']})
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -343,8 +345,8 @@ class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'].fields['assignee'].queryset = CourseTeacher.objects\
-            .filter(course_id=self.kwargs['course_pk'])
+        context['form'].fields['assignee'].queryset = (CourseTeacher.objects
+                                                       .filter(course_id=self.kwargs['course_pk']))
         return context
 
     @atomic
@@ -354,8 +356,8 @@ class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
             self.object = form.save()
 
             assignee = form.cleaned_data['assignee']
-            assignees_in_student_group = StudentGroupAssignee.objects\
-                .filter(student_group_id=self.object.id)
+            assignees_in_student_group = (StudentGroupAssignee.objects
+                                          .filter(student_group_id=self.object.id))
 
             # create new bound object with StudentGroup in StudentGroupAssignee
             if assignee is not None and assignee.id not in [i['assignee'] for i in assignees_in_student_group
@@ -381,7 +383,8 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
     form_class = StudentGroupAddForm
 
     def get_success_url(self):
-        return reverse("teaching:student_group_list", kwargs={'course_pk': self.kwargs['course_pk']})
+        return reverse("teaching:student_group_list",
+                       kwargs={'course_pk': self.kwargs['course_pk']})
 
     def get_initial(self, **kwargs):
         initial = super().get_initial()
@@ -395,8 +398,8 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'].fields['assignee'].queryset = CourseTeacher.objects\
-            .filter(course_id=self.kwargs['course_pk'])
+        context['form'].fields['assignee'].queryset = (CourseTeacher.objects
+                                                       .filter(course_id=self.kwargs['course_pk']))
         return context
 
     @atomic
@@ -422,13 +425,16 @@ class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
     template_name = "lms/teaching/student_group_delete.html"
 
     def get_success_url(self):
-        return reverse("teaching:student_group_list", kwargs={'course_pk': self.kwargs['course_pk']})
+        return reverse("teaching:student_group_list",
+                       kwargs={'course_pk': self.kwargs['course_pk']})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['delete'] = False
-        assignee_group = AssignmentGroup.objects.filter(group_id=self.kwargs['pk'])
-        students_in_group = Enrollment.objects.filter(student_group_id=self.kwargs.get("pk"))
+        assignee_group = (AssignmentGroup.objects
+                          .filter(group_id=self.kwargs['pk']))
+        students_in_group = (Enrollment.objects
+                             .filter(student_group_id=self.kwargs.get("pk")))
         if assignee_group or students_in_group:
             context['delete'] = True
         return context
@@ -441,8 +447,9 @@ class StudentGroupStudentUpdateView(TeacherOnlyMixin, generic.UpdateView):
     form_class = StudentEnrollmentForm
 
     def get_success_url(self):
-        return reverse("teaching:student_group_detail", kwargs={'course_pk': self.kwargs['course_pk'],
-                                                                'group_pk': self.kwargs['group_pk']})
+        return reverse("teaching:student_group_detail",
+                       kwargs={'course_pk': self.kwargs['course_pk'],
+                               'group_pk': self.kwargs['group_pk']})
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -452,8 +459,8 @@ class StudentGroupStudentUpdateView(TeacherOnlyMixin, generic.UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'].fields['student_group'].queryset = StudentGroup.objects\
-            .filter(course_id=self.kwargs['course_pk'])
+        context['form'].fields['student_group'].queryset = (StudentGroup.objects
+                                                            .filter(course_id=self.kwargs['course_pk']))
         return context
 
 
