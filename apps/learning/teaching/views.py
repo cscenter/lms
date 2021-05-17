@@ -314,7 +314,6 @@ class StudentGroupDetailView(TeacherOnlyMixin, generic.DetailView):
             'course': Course.objects.get(id=self.kwargs.get("course_pk")),
             'group_id': self.kwargs.get("group_pk"),
             'course_id': self.kwargs.get("course_pk"),
-            'student_id': self.kwargs.get("pk"),
             'enrollments': (Enrollment.objects
                             .filter(student_group_id=self.kwargs.get("group_pk"))
                             .order_by('student__last_name'))
