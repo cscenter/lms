@@ -1088,7 +1088,6 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
 class Comment(TimeStampedModel):
     MIN_SCORE = -2
     MAX_SCORE = 2
-    UNREACHABLE_COMMENT_SCORE = MIN_SCORE - 1
 
     interview = models.ForeignKey(
         Interview,

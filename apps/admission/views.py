@@ -12,7 +12,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from django.db import IntegrityError, transaction
-from django.db.models import Avg, Prefetch, Value
+from django.db.models import Avg, Prefetch, Value, Count
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import HttpResponseRedirect, JsonResponse
@@ -616,7 +616,8 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
             Applicant.objects
             # TODO: Carefully restrict by status to optimize query
             .filter(campaign=self.selected_campaign)
-            .exclude(interview__isnull=True)
+            .annotate(interviews_count=Count("interviews"))
+            .filter(interviews_count__gt=0)
             .select_related("exam", "online_test", "university")
             .prefetch_related(
                 Prefetch(
@@ -630,11 +631,12 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
 
         def cpm_interview_best_score(form):
             a = form.instance
-            exam_score = a.exam.score if hasattr(a, "exam") else -1
-            if a.interview.average_score is None:
-                return Comment.UNREACHABLE_COMMENT_SCORE, exam_score
-            else:
-                return a.interview.average_score, exam_score
+            exam_score = a.exam.score if hasattr(a, "exam") and a.exam.score else -1
+            interviews_average_score_sum = 0
+            for interview in a.interviews.all():
+                if interview.average_score is not None:
+                    interviews_average_score_sum += interview.average_score
+            return interviews_average_score_sum, exam_score
 
         formset.forms.sort(key=cpm_interview_best_score, reverse=True)
         stats = Counter()
