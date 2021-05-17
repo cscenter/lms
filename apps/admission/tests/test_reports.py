@@ -29,7 +29,6 @@ def test_report_smoke():
     CommentFactory(score=1, interview=interview)
     report = AdmissionApplicantsReport(campaign=campaign)
     assert len(report.data) == 1
-    check_value_for_header(report, 'Результаты интервью', 0, '1.00')
 
 
 @pytest.mark.django_db
