@@ -141,7 +141,7 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             .filter(campaign__branch__in=branches)
             .select_related("exam", "online_test", "campaign", "university",
                             "campaign__branch")
-            .prefetch_related("interview")
+            .prefetch_related("interviews")
             .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1)),
                       test__score_coalesce=Coalesce('online_test__score',
                                                     Value(-1)))
@@ -628,7 +628,7 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
             .select_related("exam", "online_test", "university")
             .prefetch_related(
                 Prefetch(
-                    'interview',
+                    'interviews',
                     queryset=(Interview.objects
                               .annotate(_average_score=Avg('comments__score'))),
                 ),

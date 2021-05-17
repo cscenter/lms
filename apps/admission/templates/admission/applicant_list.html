@@ -61,7 +61,6 @@
                 {% for applicant in applicants %}
                     <tr>
                         <td class="applicant">
-                            {% if applicant.interview.in_transition_state %}<span class="label label-warning">{{ applicant.interview.get_status_display }}</span><br>{% endif %}
                             <a href="{%  url "admission:applicant_detail" applicant.pk %}">{{ applicant.full_name }}</a>
                             {% if request.user.is_curator %}
                                 {% if applicant.user_id %}
