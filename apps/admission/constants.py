@@ -1,6 +1,6 @@
 from djchoices import C, ChoiceItem, DjangoChoices
 
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 WHERE_DID_YOU_LEARN = (
     ('uni', 'плакат в университете'),
@@ -30,7 +30,7 @@ class InterviewFormats(DjangoChoices):
 
 
 class InterviewSections(DjangoChoices):
-    ALL_IN_ONE = C('all_in_1', _("Common"))
-    MATH = C('math', _("Math"))
-    PROGRAMMING = C('code', _("Coding"))
-    MOTIVATION = C('mv', _("Motivation"))
+    ALL_IN_ONE = C('all_in_1', pgettext_lazy("section", "Common"))
+    MATH = C('math', pgettext_lazy("section", "Math"))
+    PROGRAMMING = C('code', pgettext_lazy("section", "Coding"))
+    MOTIVATION = C('mv', pgettext_lazy("section", "Motivation"))
