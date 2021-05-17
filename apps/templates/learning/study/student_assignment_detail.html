@@ -98,9 +98,8 @@
         </ul>
       {% endif %}
         <div class="mt-30 assignment-actions">
-            <button id="add-solution" {% if solution_form %}class="btn btn-lg btn-link active"{% endif %}>Добавить решение</button>
-            <button id="add-comment" {% if not solution_form %}class="btn btn-lg btn-link active"{% else %}class="btn btn-lg btn-link"
-            {% endif %}>Написать комментарий</button>
+            {% if solution_form %}<button id="add-solution" class="btn btn-lg btn-link active">Добавить решение</button>{% endif %}
+            <button id="add-comment" class="btn btn-lg btn-link {% if not solution_form %}active{% endif %}">Написать комментарий</button>
         </div>
         <div id="comment-form-wrapper" {% if solution_form %}class="hidden"{% endif %}>
             {% crispy comment_form %}
