@@ -6,8 +6,8 @@ from pandas import DataFrame
 from django.utils.encoding import smart_bytes
 
 from core.models import Branch
-from core.tests.factories import BranchFactory
-from core.tests.settings import ANOTHER_DOMAIN
+from core.tests.factories import BranchFactory, SiteFactory
+from core.tests.settings import ANOTHER_DOMAIN, CLUB_SITE
 from learning.reports import (
     FutureGraduateDiplomasReport, OfficialDiplomasReport, ProgressReport,
     ProgressReportForSemester, ProgressReportFull
@@ -52,7 +52,8 @@ def test_report_common():
     shad2 = SHADCourseRecordFactory(student=student2, grade=GradeTypes.GOOD)
 
     # generate club course
-    branch_club = BranchFactory(site__domain=ANOTHER_DOMAIN)
+    site_club = SiteFactory(domain=CLUB_SITE)
+    branch_club = BranchFactory(site__domain=site_club)
     course_club = CourseFactory(main_branch=branch_club)
     EnrollmentFactory(student=student1, course=course_club, grade=GradeTypes.GOOD)
 
