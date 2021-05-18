@@ -1,10 +1,12 @@
 import pytest
+
 from django.core.exceptions import ValidationError
 
 from admission.constants import InterviewSections
 from admission.models import Applicant, Contest, Interview
 from admission.tests.factories import (
-    ApplicantFactory, CampaignFactory, ContestFactory, InterviewInvitationFactory, InterviewFactory
+    ApplicantFactory, CampaignFactory, ContestFactory, InterviewFactory,
+    InterviewInvitationFactory
 )
 
 

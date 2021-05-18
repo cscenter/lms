@@ -2,8 +2,8 @@ from django.urls import path, re_path
 
 from .views import (
     ApplicationFormSubmissionByDays, ApplicationSubmission, CampaignResultsByCourses,
-    CampaignResultsByUniversities, CampaignStagesByYears, CampaignStagesByCourses,
-    CampaignStagesByUniversities, CampaignStatsApplicantsResults,
+    CampaignResultsByUniversities, CampaignStagesByCourses,
+    CampaignStagesByUniversities, CampaignStagesByYears, CampaignStatsApplicantsResults,
     CampaignStatsExamScoreByCourses, CampaignStatsExamScoreByUniversities,
     CampaignStatsStudentsResults, CampaignStatsTestingScoreByCourses,
     CampaignStatsTestingScoreByUniversities

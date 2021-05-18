@@ -316,13 +316,9 @@ def test_add_solution_for_assignment_without_solutions(client):
     assert response.status_code == 403
     response = client.get(student_url)
     assert smart_bytes(form_data['solution-text']) not in response.content
-
-    # check load without solution
-    rendered = BeautifulSoup(response.content, "html.parser")
-    button_solution_find = rendered.find(id="add-solution")
-    form_solution_find = rendered.find(id="solution-form-wrapper")
-    assert button_solution_find is None
-    assert form_solution_find is None
+    html = BeautifulSoup(response.content, "html.parser")
+    assert html.find(id="add-solution") is None
+    assert html.find(id="solution-form-wrapper") is None
 
 
 @pytest.mark.django_db

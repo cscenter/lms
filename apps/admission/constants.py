@@ -1,6 +1,7 @@
 from djchoices import C, ChoiceItem, DjangoChoices
 
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 WHERE_DID_YOU_LEARN = (
     ('uni', 'плакат в университете'),

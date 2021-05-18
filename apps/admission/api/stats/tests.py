@@ -1,4 +1,5 @@
 import pytest
+
 from django.conf import settings
 
 from admission.tests.factories import CampaignFactory
