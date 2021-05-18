@@ -29,8 +29,8 @@ TestingCountAnnotation = Count(
          output_field=IntegerField()))
 ExaminationCountAnnotation = Count(Case(When(exam__isnull=False, then=1),
                                         output_field=IntegerField()))
-InterviewingCountAnnotation = Count(Case(When(interview__isnull=False, then=1),
-                                         output_field=IntegerField()))
+InterviewsCountAnnotation = Count(Case(When(interviews__isnull=False, then=1),
+                                       output_field=IntegerField()))
 
 STATUSES = [Applicant.ACCEPT,
             Applicant.ACCEPT_IF,
@@ -39,7 +39,7 @@ STATUSES = [Applicant.ACCEPT,
             Applicant.THEY_REFUSED]
 
 
-class CampaignsStagesByYears(ReadOnlyModelViewSet):
+class CampaignStagesByYears(ReadOnlyModelViewSet):
     """Admission stages by years for provided branch."""
     permission_classes = [CuratorAccessPermission]
 
@@ -48,10 +48,10 @@ class CampaignsStagesByYears(ReadOnlyModelViewSet):
         applicants = (Applicant.objects
                       .filter(campaign__branch=branch_id)
                       .values('campaign_id', 'campaign__year')
-                      .annotate(application_form=Count("campaign_id"),
+                      .annotate(application_form=Count("pk"),
                                 testing=TestingCountAnnotation,
                                 examination=ExaminationCountAnnotation,
-                                interviewing=InterviewingCountAnnotation)
+                                interviewing=InterviewsCountAnnotation)
                       # Under the assumption that campaign year is unique
                       .order_by('campaign__year'))
         return Response(applicants)
@@ -70,7 +70,7 @@ class CampaignStagesByUniversities(ReadOnlyModelViewSet):
                 .annotate(application_form=Count("campaign_id"),
                           testing=TestingCountAnnotation,
                           examination=ExaminationCountAnnotation,
-                          interviewing=InterviewingCountAnnotation))
+                          interviewing=InterviewsCountAnnotation))
 
 
 class CampaignStagesByCourses(ReadOnlyModelViewSet):
@@ -86,7 +86,7 @@ class CampaignStagesByCourses(ReadOnlyModelViewSet):
                 .annotate(application_form=Count("campaign_id"),
                           testing=TestingCountAnnotation,
                           examination=ExaminationCountAnnotation,
-                          interviewing=InterviewingCountAnnotation)
+                          interviewing=InterviewsCountAnnotation)
                 .order_by("level_of_education"))
 
 

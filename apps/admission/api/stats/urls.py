@@ -2,7 +2,7 @@ from django.urls import path, re_path
 
 from .views import (
     ApplicationFormSubmissionByDays, ApplicationSubmission, CampaignResultsByCourses,
-    CampaignResultsByUniversities, CampaignsStagesByYears, CampaignStagesByCourses,
+    CampaignResultsByUniversities, CampaignStagesByYears, CampaignStagesByCourses,
     CampaignStagesByUniversities, CampaignStatsApplicantsResults,
     CampaignStatsExamScoreByCourses, CampaignStatsExamScoreByUniversities,
     CampaignStatsStudentsResults, CampaignStatsTestingScoreByCourses,
@@ -11,9 +11,7 @@ from .views import (
 
 urlpatterns = [
     # Stages
-    re_path(r'^branches/(?P<branch_id>\w+)/stages/$',
-            CampaignsStagesByYears.as_view({'get': 'list'}),
-            name='stats_admission_campaigns_stages_by_year'),
+    re_path(r'^branches/(?P<branch_id>\w+)/stages/$', CampaignStagesByYears.as_view({'get': 'list'}), name='stats_admission_campaign_stages_by_years'),
     re_path(r'^campaigns/(?P<campaign_id>\d+)/stages/by-university/$',
             CampaignStagesByUniversities.as_view({'get': 'list'}),
             name='stats_admission_campaign_stages_by_university'),
