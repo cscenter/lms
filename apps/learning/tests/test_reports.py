@@ -3,8 +3,8 @@ import datetime
 import pytest
 from pandas import DataFrame
 
-from django.utils.encoding import smart_bytes
 from django.contrib.sites.models import Site
+from django.utils.encoding import smart_bytes
 
 from core.models import Branch
 from core.settings.base import CLUB_SITE_ID
@@ -61,10 +61,12 @@ def test_report_common():
 
     report_factory = ProgressReportFull(grade_getter="grade_honest")
     progress_report = report_factory.generate()
-    assert len(progress_report.columns) == (STATIC_HEADERS_CNT +
-                                            len({c.meta_course_id: c.meta_course for c in (co1, co2, course_club)}) +
-                                            len(report_factory.generate_shad_courses_headers(1)) +
-                                            len(report_factory.generate_online_courses_headers(0)))
+    assert len(progress_report.columns) == (
+        STATIC_HEADERS_CNT +
+        len({c.meta_course_id: c.meta_course for c in (co1, co2, course_club)}) +
+        len(report_factory.generate_shad_courses_headers(1)) +
+        len(report_factory.generate_online_courses_headers(0))
+    )
 
     # Checking caption '[CS клуб]' in club courses headers
     header_with_caption = '[CS клуб] ' + course_club.name + ', оценка'
