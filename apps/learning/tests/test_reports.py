@@ -4,10 +4,12 @@ import pytest
 from pandas import DataFrame
 
 from django.utils.encoding import smart_bytes
+from django.contrib.sites.models import Site
 
 from core.models import Branch
+from core.settings.base import CLUB_SITE_ID
 from core.tests.factories import BranchFactory, SiteFactory
-from core.tests.settings import ANOTHER_DOMAIN, CLUB_SITE
+from core.tests.settings import ANOTHER_DOMAIN
 from learning.reports import (
     FutureGraduateDiplomasReport, OfficialDiplomasReport, ProgressReport,
     ProgressReportForSemester, ProgressReportFull
@@ -52,7 +54,7 @@ def test_report_common():
     shad2 = SHADCourseRecordFactory(student=student2, grade=GradeTypes.GOOD)
 
     # generate club course
-    site_club = SiteFactory(domain=CLUB_SITE)
+    site_club = SiteFactory(domain=Site.objects.get(id=CLUB_SITE_ID))
     branch_club = BranchFactory(site__domain=site_club)
     course_club = CourseFactory(main_branch=branch_club)
     EnrollmentFactory(student=student1, course=course_club, grade=GradeTypes.GOOD)
