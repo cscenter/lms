@@ -195,6 +195,33 @@ def test_new_comment_on_assignment_page(client, assert_redirect):
 
 
 @pytest.mark.django_db
+def test_solution_form_is_visible_by_default(client):
+    student_profile = StudentProfileFactory()
+    student = student_profile.user
+    course = CourseFactory(main_branch=student_profile.branch,
+                           semester=SemesterFactory.create_current(),
+                           ask_ttc=False)
+    EnrollmentFactory(student_profile=student_profile,
+                      student=student,
+                      course=course)
+    assignment = AssignmentFactory(course=course)
+    student_assignment = (StudentAssignment.objects
+                          .get(assignment=assignment, student=student))
+    student_url = student_assignment.get_student_url()
+    client.login(student)
+    response = client.get(student_url)
+    rendered = BeautifulSoup(response.content, "html.parser")
+    button_solution_find = rendered.find(id="add-solution")
+    button_comment_find = rendered.find(id="add-comment")
+    form_solution_find = rendered.find(id="solution-form-wrapper")
+    form_comment_find = rendered.find(id="comment-form-wrapper")
+    assert 'active' in button_solution_find.attrs['class']
+    assert 'active' not in button_comment_find.attrs['class']
+    assert 'hidden' not in form_solution_find.attrs['class']
+    assert 'hidden' in form_comment_find.attrs['class']
+
+
+@pytest.mark.django_db
 def test_add_solution(client):
     student_profile = StudentProfileFactory()
     student = student_profile.user
@@ -289,6 +316,13 @@ def test_add_solution_for_assignment_without_solutions(client):
     assert response.status_code == 403
     response = client.get(student_url)
     assert smart_bytes(form_data['solution-text']) not in response.content
+
+    # check load without solution
+    rendered = BeautifulSoup(response.content, "html.parser")
+    button_solution_find = rendered.find(id="add-solution")
+    form_solution_find = rendered.find(id="solution-form-wrapper")
+    assert button_solution_find is None
+    assert form_solution_find is None
 
 
 @pytest.mark.django_db

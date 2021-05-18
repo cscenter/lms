@@ -97,17 +97,16 @@
         {% endfor %}
         </ul>
       {% endif %}
-
         <div class="mt-30 assignment-actions">
-            <button id="add-comment" class="btn btn-lg btn-link active">Написать комментарий</button>
-            {% if solution_form %}<button id="add-solution" class="btn btn-lg btn-link">Добавить решение</button>{% endif %}
+            {% if solution_form %}<button id="add-solution" class="btn btn-lg btn-link active">Добавить решение</button>{% endif %}
+            <button id="add-comment" class="btn btn-lg btn-link {% if not solution_form %}active{% endif %}">Написать комментарий</button>
         </div>
-        <div id="comment-form-wrapper" class="csc-well">
+        <div id="comment-form-wrapper" {% if solution_form %}class="hidden"{% endif %}>
             {% crispy comment_form %}
         </div>
         {% if solution_form %}
-            <div id="solution-form-wrapper" class="csc-well hidden">
-                {% crispy solution_form %}
+            <div id="solution-form-wrapper" class="csc-well">
+                 {% crispy solution_form %}
             </div>
         {% endif %}
     </div>
