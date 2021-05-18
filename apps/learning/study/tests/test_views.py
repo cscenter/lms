@@ -317,6 +317,13 @@ def test_add_solution_for_assignment_without_solutions(client):
     response = client.get(student_url)
     assert smart_bytes(form_data['solution-text']) not in response.content
 
+    # check load without solution
+    rendered = BeautifulSoup(response.content, "html.parser")
+    button_solution_find = rendered.find(id="add-solution")
+    form_solution_find = rendered.find(id="solution-form-wrapper")
+    assert button_solution_find is None
+    assert form_solution_find is None
+
 
 @pytest.mark.django_db
 def test_assignment_comment_author_should_be_resolved(client):
