@@ -1129,7 +1129,7 @@ class InterviewStream(TimezoneAwareMixin, TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="interview_streams")
     section = models.CharField(
-        choices=InterviewSections,
+        choices=InterviewSections.choices,
         verbose_name=_("Interview|Section"),
         max_length=15)
     format = models.CharField(
@@ -1311,11 +1311,8 @@ class InterviewInvitation(TimeStampedModel):
                  .filter(pk=self.applicant_id)
                  .update(status=Applicant.INTERVIEW_TOBE_SCHEDULED))
 
-    def __unicode__(self):
-        return str(self.applicant)
-
     def __str__(self):
-        return self.__unicode__()
+        return str(self.applicant)
 
     @property
     def is_expired(self):

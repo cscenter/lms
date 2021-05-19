@@ -1,0 +1,128 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block title %}Приглашения на собеседования{% endblock title %}
+
+{% block body_attrs %} class="gray" data-init-sections="selectpickers,tooltips"{% endblock body_attrs %}
+
+{% block javascripts %}
+  <script src="{{ static('v1/js/vendor/reverse.js') }}"></script>
+  {{ render_bundle('admission', config='V1', extension='js') }}
+{% endblock javascripts %}
+
+{% block content %}
+  <div class="interview-results-page">
+    {{ crispy(interview_stream_filter_form) }}
+
+    <div class="nav-tabs-horizontal nav-tabs-inverse">
+      <ul class="nav nav-tabs nav-tabs-solid" role="tablist">
+        <li class="active">
+          <a data-toggle="tab" href="#interview-invitations">Отправленные приглашения</a>
+        </li>
+        <li>
+          <a data-toggle="tab" href="#interview-streams">Потоки собеседований</a>
+        </li>
+      </ul>
+      <div class="tab-content active">
+        <div class="tab-pane active" id="interview-invitations">
+          {{ crispy(interview_invitation_filter_form) }}
+          <table class="table">
+            <thead>
+            <tr>
+              <th>Поступающий</th>
+              <th>Секция</th>
+              <th>Дата</th>
+              <th>Время</th>
+              <th>Собеседующие</th>
+              <th style="width: 60px;">Статус</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for invitation in interview_invitations %}
+              {% set applicant = invitation.applicant %}
+              <tr>
+                <td class="applicant">
+                  <a href="{{ applicant.get_absolute_url() }}">{{ applicant.full_name }}</a>
+                  {% if applicant.preferred_study_programs %}
+                    <br>{{ applicant.preferred_study_programs|map('upper')|join(", ") }}
+                  {% endif %}
+                </td>
+                <td>
+                  {% for section in invitation.sections %}
+                    {% if invitation.sections|length > 1 and section.occupied %}<b>{{ section.name }}</b>{% else %}
+                      {{ section.name }}{% endif %}{% if not loop.last and invitation.sections|length > 1 %}, {% endif %}
+                  {% endfor %}
+                </td>
+                <td> {{ invitation.interview.date|default("-", True) }} </td>
+                <td> {{ invitation.interview.time|default("-", True) }} </td>
+                <td class="members" style="width:auto">
+                  <ul>
+                    {% for interviewer in invitation.interview.interviewers %}
+                      <li>
+                        <a target="_blank" href="{{ interviewer.url }}">
+                          {% if interviewer.photo %}
+                            <a target="_blank" href="{{ interviewer.url }}">
+                              <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.full_name }}"
+                                   alt="{{ interviewer.full_name }}" src="{{ interviewer.photo }}" width="40" />
+                            </a>
+                          {% else %}
+                            <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.full_name }}">
+                              {{ interviewer.full_name|slice(":1") }}</div>
+                          {% endif %}
+                        </a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </td>
+                <td> <span class="badge badge-{{ invitation.status.code }}">{{ invitation.status.label }}</span></td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="tab-pane" id="interview-streams">
+          <table class="table">
+            <thead>
+            <tr>
+              <th>Поток</th>
+              <th>Адрес</th>
+              <th>Секция</th>
+              <th>Приняли</th>
+              <th>Ожидают</th>
+              <th>Собеседующие</th>
+            </tr>
+            </thead>
+            <tbody>
+              {% for interview_stream in interview_streams %}
+                <tr>
+                  <td>
+                    {{ interview_stream.date|date("j E Y") }}<br>
+                    {{ interview_stream.start_at|date("H:i") }}-{{ interview_stream.end_at|date("H:i") }}
+                  </td>
+                  <td>{{ interview_stream.venue.address|default("-", True) }}</td>
+                  <td>{{ interview_stream.get_section_display() }}</td>
+                  <td>#</td>
+                  <td>#</td>
+                  <td class='members' style='width: auto'>
+                    {% for interviewer in interview_stream.interviewers.all() %}
+                        {% with im = interviewer.get_thumbnail(interviewer.ThumbnailSize.INTERVIEW_LIST, use_stub=False) -%}
+                          {% if im %}
+                            <a target="_blank" href="{{ interviewer.get_absolute_url() }}">
+                                  <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name() }}"
+                                       alt="{{ interviewer.get_full_name() }}" src="{{ im.url }}" width="40" /></a>
+                          {% else %}
+                            <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name() }}">
+                              {{ interviewer.get_full_name()|slice(":1") }}
+                            </div>
+                          {% endif %}
+                        {% endwith -%}
+                    {% endfor %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

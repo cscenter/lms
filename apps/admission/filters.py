@@ -6,12 +6,16 @@ from crispy_forms.layout import Div, Field, Layout, Row, Submit
 
 from django import forms
 from django.conf import settings
+from django.db.models import Q
 from django.forms import SelectMultiple
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from admission.constants import InterviewInvitationStatuses, InterviewSections
 from admission.forms import ResultsModelForm
-from admission.models import Applicant, Campaign, Interview
+from admission.models import (
+    Applicant, Campaign, Interview, InterviewInvitation, InterviewStream
+)
 from core.models import University
 from core.widgets import DateTimeRangeWidget
 
@@ -40,6 +44,16 @@ class InterviewStatusFilter(django_filters.ChoiceFilter):
             return self.get_method(qs)(**{
                 f"{self.field_name}__in": self.AGREED_STATUSES
             })
+        return super().filter(qs, value)
+
+
+class InterviewInvitationStatusFilter(django_filters.ChoiceFilter):
+    def filter(self, qs, value):
+        if value == InterviewInvitationStatuses.EXPIRED:
+            return self.get_method(qs)(
+                Q(status=value) |
+                (Q(status=InterviewInvitationStatuses.CREATED) & Q(expired_at__lte=timezone.now()))
+            )
         return super().filter(qs, value)
 
 
@@ -75,6 +89,84 @@ class ApplicantFilter(django_filters.FilterSet):
                     Div("last_name", css_class="col-xs-4"),
                     Div(Submit('', _('Filter'),
                                css_class="btn-block -inline-submit"),
+                        css_class="col-xs-2"),
+                ))
+        return self._form
+
+
+class InterviewStreamFilter(django_filters.FilterSet):
+    campaign = django_filters.ModelChoiceFilter(
+        label=_("Campaign"),
+        queryset=(Campaign.objects
+                  .filter(branch__site_id=settings.SITE_ID)
+                  .select_related("branch")
+                  .order_by("-year", "branch__order").all()),
+        empty_label=None)
+    section = django_filters.ChoiceFilter(
+        label=_("Interview Section"),
+        choices=InterviewSections.choices)
+
+    class Meta:
+        model = InterviewStream
+        fields = ['campaign', 'section']
+
+    @property
+    def form(self):
+        if not hasattr(self, '_form'):
+            self._form = super(InterviewStreamFilter, self).form
+            self._form.helper = FormHelper()
+            self._form.helper.form_method = "GET"
+            self._form.helper.layout = Layout(
+                Row(
+                    Div("campaign", css_class="col-xs-3"),
+                    Div("section", css_class="col-xs-3"),
+                    Div(Submit('', _('Filter'),
+                               css_class="btn-block -inline-submit"),
+                        css_class="col-xs-2"),
+                ))
+        return self._form
+
+
+class InterviewInvitationFilter(django_filters.FilterSet):
+    last_name = django_filters.CharFilter(
+        label=_("Last Name"),
+        required=False,
+        field_name='applicant__last_name',
+        lookup_expr='icontains')
+    streams = django_filters.ModelMultipleChoiceFilter(
+        label=_("Interview Streams"),
+        queryset=InterviewStream.objects.get_queryset(),
+        widget=SelectMultiple(attrs={"size": 1,
+                                     "class": "multiple-select bs-select-hidden"
+                                     }),
+        required=False)
+    status = InterviewInvitationStatusFilter(
+        label=_("Status"),
+        choices=InterviewInvitationStatuses.choices,
+        required=False
+    )
+
+    class Meta:
+        model = InterviewInvitation
+        fields = ['last_name', 'streams', 'status']
+
+    def __init__(self, streams, **kwargs):
+        super().__init__(**kwargs)
+        self.filters['streams'].queryset = streams
+
+    @property
+    def form(self):
+        if not hasattr(self, '_form'):
+            self._form = super().form
+            self._form.helper = FormHelper()
+            self._form.helper.form_method = "POST"
+            self._form.helper.layout = Layout(
+                Row(
+                    Div("last_name", css_class="col-xs-3"),
+                    Div("streams", css_class="col-xs-4"),
+                    Div("status", css_class="col-xs-3"),
+                    Div(Submit('filter-interview-invitation', _('Show'),
+                               css_class="btn btn-primary btn-outline btn-block -inline-submit"),
                         css_class="col-xs-2"),
                 ))
         return self._form
@@ -141,7 +233,7 @@ class InterviewsBaseFilter(django_filters.FilterSet):
         choices=Interview.STATUSES,
         label=_("Status"),
         help_text="",
-        widget=SelectMultiple(attrs={"size": 1, "class": "bs-select-hidden"}))
+        widget=SelectMultiple(attrs={"size": 1, "class": "multiple-select bs-select-hidden"}))
 
     class Meta:
         model = Interview

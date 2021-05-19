@@ -46,3 +46,14 @@ class InterviewInvitationStatuses(DjangoChoices):
     # sync with actual checking for expiration time
     EXPIRED = C('expired', _("Expired"))
     ACCEPTED = C('accepted', _("Accepted"))
+
+    @classmethod
+    def get_code(cls, value):
+        if value == cls.DECLINED:
+            return "danger"
+        elif value == cls.EXPIRED:
+            return "info"
+        elif value == cls.ACCEPTED:
+            return "success"
+        else:
+            return "default"

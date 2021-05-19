@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-31 08:07+0000\n"
-"PO-Revision-Date: 2021-05-31 08:09+0000\n"
+"POT-Creation-Date: 2021-06-03 14:35+0000\n"
+"PO-Revision-Date: 2021-06-03 14:35+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -20,16 +20,16 @@ msgstr ""
 "X-Translated-Using: django-rosetta 0.9.6\n"
 
 #: apps/admission/admin.py:32 apps/admission/admin.py:83
-#: apps/admission/filters.py:49 apps/admission/filters.py:160
-#: apps/admission/models.py:111 apps/admission/models.py:943
-#: apps/admission/models.py:1128
+#: apps/admission/filters.py:52 apps/admission/filters.py:88
+#: apps/admission/filters.py:240 apps/admission/models.py:111
+#: apps/admission/models.py:943 apps/admission/models.py:1128
 msgid "Campaign"
 msgstr "Набор"
 
 #: apps/admission/admin.py:85 apps/admission/admin.py:345
 #: apps/admission/models.py:472 apps/admission/models.py:837
 #: apps/admission/models.py:878 apps/admission/models.py:1006
-#: apps/admission/models.py:1271
+#: apps/admission/models.py:1272
 msgid "Applicant"
 msgstr "Поступающий"
 
@@ -52,11 +52,11 @@ msgstr "Дата"
 
 #: apps/admission/admin.py:264 apps/admission/models.py:1037
 #: apps/admission/models.py:1096 apps/admission/models.py:1224
-#: apps/admission/models.py:1289
+#: apps/admission/models.py:1291
 msgid "Interview"
 msgstr "Интервью"
 
-#: apps/admission/admin.py:341 apps/admission/constants.py:44
+#: apps/admission/admin.py:341 apps/admission/constants.py:48
 msgid "Accepted"
 msgstr "Принято"
 
@@ -122,76 +122,93 @@ msgctxt "section"
 msgid "Motivation"
 msgstr "Мотивация"
 
-#: apps/admission/constants.py:41
+#: apps/admission/constants.py:42
 msgid "No Response"
 msgstr "Нет ответа"
 
-#: apps/admission/constants.py:42
+#: apps/admission/constants.py:43
 msgid "Declined"
 msgstr "Отклонено"
 
-#: apps/admission/constants.py:43
-#| msgid "Expired at"
+#: apps/admission/constants.py:47
 msgid "Expired"
 msgstr "Истекло"
 
-#: apps/admission/filters.py:31
+#: apps/admission/filters.py:34
 msgid "Approved and completed"
 msgstr "Согласованные и завершенные"
 
-#: apps/admission/filters.py:55 apps/admission/filters.py:142
-#: apps/admission/filters.py:175 apps/admission/models.py:642
-#: apps/admission/models.py:1277
+#: apps/admission/filters.py:58 apps/admission/filters.py:132
+#: apps/admission/filters.py:222 apps/admission/filters.py:255
+#: apps/admission/models.py:642 apps/admission/models.py:1278
 msgid "Status"
 msgstr "Статус"
 
-#: apps/admission/filters.py:58 apps/admission/models.py:296
+#: apps/admission/filters.py:61 apps/admission/models.py:296
 msgid "Surname"
 msgstr "Фамилия"
 
-#: apps/admission/filters.py:76 apps/admission/filters.py:91
-#: apps/admission/filters.py:108 apps/admission/filters.py:200
+#: apps/admission/filters.py:79 apps/admission/filters.py:112
+#: apps/admission/filters.py:171 apps/admission/filters.py:188
+#: apps/admission/filters.py:280
 msgid "Filter"
 msgstr "Фильтровать"
 
-#: apps/admission/filters.py:176 apps/admission/models.py:168
+#: apps/admission/filters.py:95
+msgid "Interview Section"
+msgstr "Секция"
+
+#: apps/admission/filters.py:121
+#| msgid "Last name"
+msgid "Last Name"
+msgstr "Фамилия"
+
+#: apps/admission/filters.py:125
+msgid "Interview Streams"
+msgstr "Потоки собеседований"
+
+#: apps/admission/filters.py:156
+msgid "Show"
+msgstr "Показать"
+
+#: apps/admission/filters.py:256 apps/admission/models.py:168
 #: apps/admission/models.py:182
 msgid "University"
 msgstr "Вуз"
 
-#: apps/admission/forms.py:45
+#: apps/admission/forms.py:47
 msgid "Create interview"
 msgstr "Создать собеседование"
 
-#: apps/admission/forms.py:63 apps/admission/models.py:1169
-#: apps/admission/models.py:1281
+#: apps/admission/forms.py:65 apps/admission/models.py:1169
+#: apps/admission/models.py:1282
 msgid "Interview streams"
 msgstr "Потоки собеседований"
 
-#: apps/admission/forms.py:114
+#: apps/admission/forms.py:116
 msgid "Send"
 msgstr "Отправить"
 
-#: apps/admission/forms.py:140
+#: apps/admission/forms.py:142
 msgid "Update assignments list"
 msgstr "Обновить список заданий"
 
-#: apps/admission/forms.py:168
+#: apps/admission/forms.py:170
 msgid "Укажите оценку перед сохранением."
 msgstr ""
 
-#: apps/admission/forms.py:178
+#: apps/admission/forms.py:180
 msgid "Save"
 msgstr "Сохранить"
 
-#: apps/admission/forms.py:197
+#: apps/admission/forms.py:199
 msgid ""
 "Sorry, but you should be in interviewers list to create or update comment."
 msgstr ""
 "Вы не входите в список собеседующих данное интервью и не можете оставить "
 "комментарий."
 
-#: apps/admission/forms.py:240
+#: apps/admission/forms.py:242
 msgid "Update"
 msgstr "Обновить"
 
@@ -860,7 +877,7 @@ msgstr "Собеседующие"
 msgid "Interview|Assignments"
 msgstr "Задания для интервью"
 
-#: apps/admission/models.py:1028 apps/admission/models.py:1284
+#: apps/admission/models.py:1028 apps/admission/models.py:1285
 msgid "Secret code"
 msgstr "Секретный код"
 
@@ -948,15 +965,15 @@ msgstr "Слот для собеседования"
 msgid "Interview slots"
 msgstr "Слоты для собеседований"
 
-#: apps/admission/models.py:1286
+#: apps/admission/models.py:1288
 msgid "Expired at"
 msgstr "Истекает"
 
-#: apps/admission/models.py:1298
+#: apps/admission/models.py:1300
 msgid "Interview invitation"
 msgstr "Приглашение на собеседование"
 
-#: apps/admission/models.py:1299
+#: apps/admission/models.py:1301
 msgid "Interview invitations"
 msgstr "Приглашения на собеседования"
 
@@ -964,12 +981,11 @@ msgstr "Приглашения на собеседования"
 msgid "Interviewer [Admission]"
 msgstr "Собеседующий [Набор]"
 
-#: apps/admission/services.py:166
-#| msgid "Interview slot"
+#: apps/admission/services.py:187
 msgid "Interview slot not found"
 msgstr "Слот для собеседования не найден"
 
-#: apps/admission/services.py:169
+#: apps/admission/services.py:190
 msgid "Interview slot is not associated with the invitation"
 msgstr "Слот для собеседования не связан с указанным приглашением"
 
@@ -981,11 +997,11 @@ msgstr "Пожалуйста, исправьте ошибку ниже."
 msgid "Please correct the errors below."
 msgstr "Пожалуйста, исправьте ошибки ниже."
 
-#: apps/admission/views.py:383
+#: apps/admission/views.py:503
 msgid "Current campaign"
 msgstr "Активный набор"
 
-#: apps/admission/views.py:393
+#: apps/admission/views.py:513
 msgid "All campaigns"
 msgstr "Все наборы"
 
@@ -1091,9 +1107,6 @@ msgstr "Все наборы"
 
 #~ msgid "Second name"
 #~ msgstr "Фамилия"
-
-#~ msgid "Last name"
-#~ msgstr "Отчество"
 
 #~ msgid "Campaign {}"
 #~ msgstr "Набор {}"

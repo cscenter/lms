@@ -28,9 +28,11 @@ from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.generic.base import RedirectView, TemplateResponseMixin
 from django.views.generic.edit import BaseCreateView, ModelFormMixin
+from django.views.generic.list import BaseListView
 
 from admission.filters import (
-    ApplicantFilter, InterviewsCuratorFilter, InterviewsFilter, ResultsFilter
+    ApplicantFilter, InterviewInvitationFilter, InterviewsCuratorFilter,
+    InterviewsFilter, InterviewStreamFilter, ResultsFilter
 )
 from admission.forms import (
     ApplicantReadOnlyForm, ApplicantStatusForm, InterviewAssignmentsForm,
@@ -38,7 +40,7 @@ from admission.forms import (
 )
 from admission.models import (
     Applicant, Campaign, Comment, Contest, Exam, Interview, InterviewAssignment,
-    InterviewInvitation, InterviewSlot, Test
+    InterviewInvitation, InterviewSlot, InterviewStream, Test
 )
 from admission.services import (
     EmailQueueService, UsernameError, create_invitation, create_student_from_applicant,
@@ -46,13 +48,15 @@ from admission.services import (
 )
 from core.models import Branch
 from core.timezone import now_local
+from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from core.utils import render_markdown
 from tasks.models import Task
+from users.api.serializers import PhotoSerializerField
 from users.mixins import CuratorOnlyMixin
 from users.models import User
 
-from .constants import InterviewInvitationStatuses
+from .constants import InterviewInvitationStatuses, InterviewSections
 from .selectors import get_interview_invitation, get_occupied_slot
 from .tasks import import_testing_results
 
@@ -130,6 +134,133 @@ def import_campaign_testing_results(request, campaign_id: int):
             import_testing_results.delay(task_id=task.pk)
         return HttpResponse(status=201)
     return HttpResponseForbidden()
+
+
+def get_interview_invitation_sections(invitation: InterviewInvitation):
+    occupied = invitation.interview.section if invitation.interview_id else None
+    sections = set()
+    for stream in invitation.streams.all():
+        sections.add(stream.section)
+    return [{'name': InterviewSections.values[s], 'occupied': s == occupied} for s in sections]
+
+
+class InterviewerSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='user_detail')
+    full_name = serializers.CharField(source='get_full_name')
+    photo = PhotoSerializerField(User.ThumbnailSize.INTERVIEW_LIST,
+                                 thumbnail_options={"use_stab": False})
+
+    class Meta:
+        model = User
+        fields = ("url", "full_name", "photo")
+
+
+class InterviewSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField(source='date_local', format=DATE_FORMAT_RU)
+    time = serializers.DateTimeField(source='date_local', format=TIME_FORMAT_RU)
+    interviewers = InterviewerSerializer(many=True)
+
+    class Meta:
+        model = Interview
+        fields = ("date", "time", "interviewers")
+
+
+def get_interview_stream_filterset(input_serializer: serializers.Serializer):
+    filters = {'campaign': input_serializer.validated_data['campaign']}
+    if input_serializer.validated_data['section']:
+        filters['section'] = input_serializer.validated_data['section']
+    interview_stream_filterset = InterviewStreamFilter(
+        data=input_serializer.validated_data,
+        queryset=(InterviewStream.objects
+                  .filter(**filters)
+                  .order_by('-date', '-start_at')))
+    # Set action attribute on filterset form
+    url = reverse("admission:interviews:invitations:list")
+    form_action = f"{url}?campaign={input_serializer.data['campaign']}&section={input_serializer.data['section']}"
+    interview_stream_filterset.form.helper.form_action = form_action
+    return interview_stream_filterset
+
+
+class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseListView):
+    model = InterviewStream
+    template_name = "lms/admission/interview_invitation_list.html"
+    paginate_by = 50
+
+    class InputSerializer(serializers.Serializer):
+        campaign = serializers.PrimaryKeyRelatedField(
+            required=True,
+            queryset=(Campaign.objects
+                      .filter(branch__site_id=settings.SITE_ID)
+                      .select_related("branch")
+                      .order_by("-year", "branch__order").all()))
+        section = serializers.ChoiceField(choices=InterviewSections.choices,
+                                          required=True,
+                                          allow_blank=True)
+
+    def get(self, request, *args, **kwargs):
+        serializer = self.InputSerializer(data=request.GET)
+        if not serializer.is_valid(raise_exception=False):
+            campaign = get_default_campaign_for_user(self.request.user)
+            campaign_id = campaign.id if campaign else ""
+            url = reverse("admission:interviews:invitations:list")
+            url = f"{url}?campaign={campaign_id}&section="
+            return HttpResponseRedirect(redirect_to=url)
+        context = self.get_context_data(input_serializer=serializer, **kwargs)
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        return self.get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        input_serializer = kwargs['input_serializer']
+        interview_stream_filterset = get_interview_stream_filterset(input_serializer)
+        interview_streams = (interview_stream_filterset.qs
+                             .select_related('venue')
+                             .prefetch_related('interviewers'))
+        # Fetch filtered invitations
+        filters = {"applicant__campaign": input_serializer.validated_data['campaign']}
+        if input_serializer.validated_data['section']:
+            filters["streams__section"] = input_serializer.validated_data['section']
+        invitation_queryset = (InterviewInvitation.objects
+                               .select_related('interview', 'applicant')
+                               .filter(**filters)
+                               .prefetch_related('streams', 'interview__interviewers')
+                               .order_by('applicant__last_name',
+                                         'applicant_id',
+                                         'pk'))
+        interview_filterset = InterviewInvitationFilter(interview_stream_filterset.qs,
+                                                        data=self.request.POST or None,
+                                                        prefix="interview-invitation",
+                                                        queryset=invitation_queryset)
+
+        interview_invitations = []
+        for invitation in interview_filterset.qs.distinct():
+            applicant = invitation.applicant
+            interview = invitation.interview
+            # Avoid additional queries on fetching time zone
+            if invitation.interview_id:
+                interview.applicant = applicant
+                interview.applicant.campaign = input_serializer.validated_data['campaign']
+            # TODO: add serializer
+            student_invitation = {
+                'applicant': applicant,
+                'sections': get_interview_invitation_sections(invitation),
+                'interview': InterviewSerializer(interview, context={'request': self.request}).data,
+                'status': {
+                    'value': invitation.status,
+                    'label': invitation.get_status_display(),
+                    'code': InterviewInvitationStatuses.get_code(invitation.status),
+                },
+            }
+            interview_invitations.append(student_invitation)
+
+        context = {
+            "interview_stream_filter_form": interview_stream_filterset.form,
+            "interview_invitation_filter_form": interview_filterset.form,
+            "interview_invitations": interview_invitations,
+            "interview_streams": interview_streams
+        }
+        return context
 
 
 class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
@@ -312,7 +443,8 @@ class InterviewAssignmentDetailView(CuratorOnlyMixin, generic.DetailView):
 
 
 def get_default_campaign_for_user(user: User) -> Optional[Campaign]:
-    active_campaigns = list(Campaign.objects.filter(current=True, branch__site_id=settings.SITE_ID)
+    active_campaigns = list(Campaign.objects
+                            .filter(current=True, branch__site_id=settings.SITE_ID)
                             .only("pk", "branch_id")
                             .order_by('branch__order'))
     try:

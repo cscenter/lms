@@ -4,8 +4,8 @@ from django.urls import path
 from admission.views import (
     ApplicantCreateStudentView, ApplicantDetailView, ApplicantListView,
     ApplicantStatusUpdateView, InterviewAssignmentDetailView, InterviewCommentView,
-    InterviewDetailView, InterviewListView, InterviewResultsDispatchView,
-    InterviewResultsView, import_campaign_testing_results
+    InterviewDetailView, InterviewInvitationListView, InterviewListView,
+    InterviewResultsDispatchView, InterviewResultsView, import_campaign_testing_results
 )
 
 app_name = 'admission'
@@ -17,6 +17,10 @@ applicant_patterns = [
     path('status/<int:pk>/', ApplicantStatusUpdateView.as_view(), name='update_status'),
 ]
 
+interview_invitation_patterns = [
+    path('', InterviewInvitationListView.as_view(), name='list'),
+]
+
 interview_patterns = [
     path('', InterviewListView.as_view(), name='list'),
     path('<int:pk>/', InterviewDetailView.as_view(), name='detail'),
@@ -25,15 +29,18 @@ interview_patterns = [
 ]
 
 results_patterns = [
-    path('results/', InterviewResultsDispatchView.as_view(), name='dispatch'),
-    path('results/<str:branch_code>/', InterviewResultsView.as_view(), name='list'),
+    path('', InterviewResultsDispatchView.as_view(), name='dispatch'),
+    path('<str:branch_code>/', InterviewResultsView.as_view(), name='list'),
 ]
 
 urlpatterns = [
     path('admission/', include([
         path('<int:campaign_id>/testing/import/', import_campaign_testing_results, name='import_testing_results'),
         path('applicants/', include((applicant_patterns, 'applicants'))),
-        path('interviews/', include((interview_patterns, 'interviews'))),
+        path('interviews/', include(([
+            path('', include(interview_patterns)),
+            path('invitations/', include((interview_invitation_patterns, 'invitations'))),
+        ], 'interviews'))),
         path('results/', include((results_patterns, 'results'))),
     ])),
 ]
