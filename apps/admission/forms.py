@@ -9,7 +9,6 @@ from django.forms import SelectMultiple
 from django.forms.models import ModelForm
 from django.utils.translation import gettext_lazy as _
 
-from admission.constants import InterviewInvitationStatuses
 from admission.models import (
     Applicant, Comment, Interview, InterviewAssignment, InterviewInvitation,
     InterviewSlot, InterviewStream
@@ -56,6 +55,29 @@ class InterviewForm(forms.ModelForm):
             'interviewers': slot.stream.interviewers.all(),
             'date': slot.datetime_local
         }
+
+
+class InterviewStreamInvitationForm(forms.Form):
+    prefix = "interview_stream_invitation"
+
+    streams = forms.ModelMultipleChoiceField(
+        label=_("Interview streams"),
+        queryset=InterviewStream.objects.get_queryset(),
+        widget=SelectMultiple(attrs={"size": 1, "class": "bs-select-hidden"}),
+        required=True)
+
+    def __init__(self, stream, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['streams'].queryset = stream
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Div('streams', css_class='col-xs-8'),
+                Div(Submit('create-invitation', _('Пригласить на собеседование'),
+                           css_class="btn btn-primary btn-outline "
+                                     "btn-block -inline-submit"),
+                    css_class="col-xs-4"),
+            ))
 
 
 class InterviewFromStreamForm(forms.Form):

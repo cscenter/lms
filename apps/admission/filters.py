@@ -127,6 +127,13 @@ class InterviewStreamFilter(django_filters.FilterSet):
         return self._form
 
 
+class RequiredSectionInterviewStreamFilter(InterviewStreamFilter):
+    section = django_filters.ChoiceFilter(
+        label=_("Interview Section"),
+        choices=InterviewSections.choices,
+        empty_label=None)
+
+
 class InterviewInvitationFilter(django_filters.FilterSet):
     last_name = django_filters.CharFilter(
         label=_("Last Name"),
