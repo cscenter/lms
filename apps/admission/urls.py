@@ -42,5 +42,7 @@ urlpatterns = [
             path('invitations/', include((interview_invitation_patterns, 'invitations'))),
         ], 'interviews'))),
         path('results/', include((results_patterns, 'results'))),
+        path('send_invitations/', SendInvitationListView.as_view(), name='send_interview_invitations'),
+        path('status_invitations/', StatusInvitationListView.as_view(), name='status_interview_invitations'),
     ])),
 ]
