@@ -1,6 +1,6 @@
 import uuid
 from collections import Counter
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Optional
 from urllib import parse
 
@@ -30,15 +30,17 @@ from django.views.generic.base import RedirectView, TemplateResponseMixin
 from django.views.generic.edit import BaseCreateView, ModelFormMixin
 
 from admission.filters import (
-    ApplicantFilter, InterviewsCuratorFilter, InterviewsFilter, ResultsFilter
+    ApplicantFilter, ApplicantInvitationFilter, InterviewsCuratorFilter,
+    InterviewsFilter, ResultsFilter
 )
 from admission.forms import (
     ApplicantReadOnlyForm, ApplicantStatusForm, InterviewAssignmentsForm,
-    InterviewCommentForm, InterviewForm, InterviewFromStreamForm, ResultsModelForm
+    InterviewCommentForm, InterviewForm, InterviewFromStreamForm,
+    InterviewInvitationFilterForm, InterviewStreamInvitationForm, ResultsModelForm
 )
 from admission.models import (
     Applicant, Campaign, Comment, Contest, Exam, Interview, InterviewAssignment,
-    InterviewInvitation, InterviewSlot, Test
+    InterviewInvitation, InterviewSlot, InterviewStream, Test
 )
 from admission.services import (
     EmailQueueService, UsernameError, create_invitation, create_student_from_applicant,
@@ -130,6 +132,142 @@ def import_campaign_testing_results(request, campaign_id: int):
             import_testing_results.delay(task_id=task.pk)
         return HttpResponse(status=201)
     return HttpResponseForbidden()
+
+
+class SendInvitationListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
+    context_object_name = 'send_interview_invitations'
+    model = InterviewStream
+    template_name = "admission/send_interview_invitations.html"
+    filterset_class = ApplicantInvitationFilter
+    paginate_by = 50
+
+    def get(self, request, *args, **kwargs):
+        """Sets filter defaults and redirects"""
+        user = self.request.user
+        if user.is_curator and "campaign" not in self.request.GET:
+            campaign = get_default_campaign_for_user(user)
+            campaign_id = campaign.id if campaign else ""
+            if "section" not in self.request.GET:
+                section_name = 'all_in_1'
+                pass
+            url = reverse("admission:send_interview_invitations")
+            url = f"{url}?campaign={campaign_id}&section={section_name}&status="
+            return HttpResponseRedirect(redirect_to=url)
+
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        campaign = context['filter'].form.cleaned_data.get('campaign')
+        if campaign is not None:
+            # branch = campaign.branch
+            applicant_queryset = Applicant.objects.filter(campaign=campaign)
+        else:
+            # branch = campaign.branch
+            applicant_queryset = Applicant.objects.all()
+        context["applicants"] = applicant_queryset
+        context["interview_stream_form"] = InterviewStreamInvitationForm(
+            stream=context["send_interview_invitations"])
+        return context
+
+
+class StatusInvitationListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
+    context_object_name = 'status_interview_invitations'
+    model = InterviewStream
+    template_name = "admission/status_interview_invitations.html"
+    filterset_class = ApplicantInvitationFilter
+    paginate_by = 50
+
+    def get(self, request, *args, **kwargs):
+        """Sets filter defaults and redirects"""
+        user = self.request.user
+        print("GET", self.request.GET)
+        if user.is_curator and "campaign" not in self.request.GET:
+            campaign = get_default_campaign_for_user(user)
+            campaign_id = campaign.id if campaign else ""
+            url = reverse("admission:status_interview_invitations")
+            url = f"{url}?campaign=&status="
+            return HttpResponseRedirect(redirect_to=url)
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Get data for interview from stream form"""
+        if not request.user.is_curator:
+            return self.handle_no_permission(request)
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        campaign = context['filter'].form.cleaned_data.get('campaign')
+        section = context['filter'].form.cleaned_data.get('section')
+
+        interview_invitation_filter = {'last_name': '', 'streams': '', 'status': ''}
+        if self.request.POST:
+            interview_invitation_filter = {
+                'last_name': self.request.POST['status_interview_invitation-last_name'],
+                'streams': self.request.POST['status_interview_invitation-streams']
+                if 'status_interview_invitation-streams' in self.request.POST else '',
+                'status': self.request.POST['status_interview_invitation-status'],
+            }
+
+        if campaign is not None:
+            applicant_queryset = Applicant.objects.filter(campaign=campaign)
+        else:
+            applicant_queryset = Applicant.objects.all()
+
+        student_interview_invitations = []
+        student_invitations = (InterviewInvitation.objects
+                               .filter(streams__in=context['status_interview_invitations'])
+                               .filter(applicant__last_name__icontains=interview_invitation_filter['last_name'])
+                               .filter(status__icontains=interview_invitation_filter['status'])
+                               )
+
+        for invitation in student_invitations:
+            applicant = applicant_queryset.all().get(id=invitation.applicant_id)
+            interview = invitation.interview
+
+            sections = [stream.section for stream in invitation.streams.all()]
+            if len(set(sections)) != 1:
+                continue
+            invitation_section = sections[0]
+            true_section = (interview is not None and interview.section
+                            and interview.section == invitation_section)
+            if true_section:
+                interview = invitation.interview
+
+            interviewers = ([{'name': i.get_full_name() if true_section else '',
+                              'link': i.get_absolute_url() if true_section else '',
+                              'image': i.photo_data['url'] if true_section and i.photo_data else ''}
+                             for i in interview.interviewers.all()]
+                            if true_section else None)
+
+            student_invitation = {
+                'applicant': applicant.full_name,
+                'applicant_url': applicant.get_absolute_url(),
+                'study_programs': (', '.join([p.upper()
+                                              for p in applicant.preferred_study_programs])
+                                   if applicant.preferred_study_programs else '-'),
+                'section': invitation_section,
+                'date': interview.date.strftime('%d.%m.%y') if interview is not None else '-',
+                'time': interview.date.strftime('%H:%M') if interview is not None else '-',
+                'interviewers': interviewers,
+                'status': invitation.get_status_display(),
+            }
+
+            student_interview_invitations.append(student_invitation)
+
+        context["applicants"] = applicant_queryset
+        context["interview_stream_form"] = InterviewStreamInvitationForm(
+            stream=context["status_interview_invitations"])
+
+        context["student_interview_invitations"] = sorted(student_interview_invitations,
+                                                          key=lambda x: x['applicant'])
+        context["student_invitations"] = student_invitations
+        context["InterviewInvitationFilterForm"] = InterviewInvitationFilterForm(
+            stream=context["status_interview_invitations"]
+        )
+
+        return context
 
 
 class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):

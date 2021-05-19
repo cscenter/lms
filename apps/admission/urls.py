@@ -5,7 +5,8 @@ from admission.views import (
     ApplicantCreateStudentView, ApplicantDetailView, ApplicantListView,
     ApplicantStatusUpdateView, InterviewAssignmentDetailView, InterviewCommentView,
     InterviewDetailView, InterviewListView, InterviewResultsDispatchView,
-    InterviewResultsView, import_campaign_testing_results
+    InterviewResultsView, SendInvitationListView, StatusInvitationListView,
+    import_campaign_testing_results
 )
 
 app_name = 'admission'
@@ -35,5 +36,7 @@ urlpatterns = [
         path('applicants/', include((applicant_patterns, 'applicants'))),
         path('interviews/', include((interview_patterns, 'interviews'))),
         path('results/', include((results_patterns, 'results'))),
+        path('send_invitations/', SendInvitationListView.as_view(), name='send_interview_invitations'),
+        path('status_invitations/', StatusInvitationListView.as_view(), name='status_interview_invitations'),
     ])),
 ]

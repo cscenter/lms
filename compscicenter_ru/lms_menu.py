@@ -76,6 +76,10 @@ top_menu = [
         children=[
             MenuItem(pgettext_lazy("menu", "Собеседования"), '/admission/interviews/', weight=10),
             MenuItem(pgettext_lazy("menu", "Анкеты"), '/admission/applicants/', weight=20, for_staff=True),
+            MenuItem(pgettext_lazy("menu", "Приглашения на собеседование"),
+                     '/admission/send_invitations/', weight=20, for_staff=True),
+            MenuItem(pgettext_lazy("menu", "Отправленные приглашения"),
+                     '/admission/status_invitations/', weight=20, for_staff=True),
             MenuItem(pgettext_lazy("menu", "Результаты"), '/admission/results/', weight=30, for_staff=True),
         ],
         permissions=(

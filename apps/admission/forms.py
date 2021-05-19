@@ -1,6 +1,6 @@
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Div, Field, Layout, Submit
+from crispy_forms.layout import Div, Field, Layout, Row, Submit
 from django_filters.conf import settings as filters_settings
 
 from django import forms
@@ -9,8 +9,10 @@ from django.forms import SelectMultiple
 from django.forms.models import ModelForm
 from django.utils.translation import gettext_lazy as _
 
+from admission.constants import InterviewInvitationStatuses
 from admission.models import (
-    Applicant, Comment, Interview, InterviewAssignment, InterviewSlot, InterviewStream
+    Applicant, Comment, Interview, InterviewAssignment, InterviewInvitation,
+    InterviewSlot, InterviewStream
 )
 from core.models import Branch
 from core.timezone import now_local
@@ -54,6 +56,68 @@ class InterviewForm(forms.ModelForm):
             'interviewers': slot.stream.interviewers.all(),
             'date': slot.datetime_local
         }
+
+
+class InterviewStreamInvitationForm(forms.Form):
+    prefix = "interview_stream_invitation"
+
+    streams = forms.ModelMultipleChoiceField(
+        label=_("Interview streams"),
+        queryset=InterviewStream.objects.get_queryset(),
+        widget=SelectMultiple(attrs={"size": 1, "class": "bs-select-hidden"}),
+        required=True)
+
+    # def __init__(self, branch: Branch, *args, **kwargs):
+    def __init__(self, stream, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['streams'].queryset = stream
+        self.helper = FormHelper(self)
+        self.helper.form_method = "GET"
+        self.helper.layout = Layout(
+            Row(
+                Div('streams', css_class='col-xs-8'),
+                Div(Submit('create-invitation', _('Пригласить на собеседование'),
+                           css_class="btn btn-primary btn-outline "
+                                     "btn-block -inline-submit"),
+                    css_class="col-xs-4"),
+            ))
+
+
+class InterviewInvitationFilterForm(forms.Form):
+    prefix = "status_interview_invitation"
+    blank_choice = (('', '---------'),)
+
+    last_name = forms.CharField(
+        label="Фамилия",
+        required=False
+        )
+    streams = forms.ModelMultipleChoiceField(
+        label=_("Interview streams"),
+        queryset=InterviewStream.objects.get_queryset(),
+        widget=SelectMultiple(attrs={"size": 1, "class": "bs-select-hidden"}),
+        required=False)
+
+    status = forms.ChoiceField(
+        label=_("Статус"),
+        choices=(blank_choice + InterviewInvitationStatuses.choices),
+        required=False
+    )
+
+    def __init__(self, stream, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['streams'].queryset = stream
+        self.helper = FormHelper(self)
+        self.helper.form_method = "POST"
+        self.helper.layout = Layout(
+            Row(
+                Div('last_name', css_class='col-xs-3'),
+                Div('streams', css_class='col-xs-4'),
+                Div('status', css_class='col-xs-3'),
+                Div(Submit('filter-interview-invitation', _('Показать'),
+                           css_class="btn btn-primary btn-outline "
+                                     "btn-block -inline-submit"),
+                    css_class="col-xs-2"),
+            ))
 
 
 class InterviewFromStreamForm(forms.Form):

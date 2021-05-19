@@ -10,8 +10,9 @@ from django.forms import SelectMultiple
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from admission.constants import InterviewSections
 from admission.forms import ResultsModelForm
-from admission.models import Applicant, Campaign, Interview
+from admission.models import Applicant, Campaign, Interview, InterviewStream
 from core.models import University
 from core.widgets import DateTimeRangeWidget
 
@@ -73,6 +74,40 @@ class ApplicantFilter(django_filters.FilterSet):
                     Div("campaign", css_class="col-xs-3"),
                     Div("status", css_class="col-xs-3"),
                     Div("last_name", css_class="col-xs-4"),
+                    Div(Submit('', _('Filter'),
+                               css_class="btn-block -inline-submit"),
+                        css_class="col-xs-2"),
+                ))
+        return self._form
+
+
+class ApplicantInvitationFilter(django_filters.FilterSet):
+    campaign = django_filters.ModelChoiceFilter(
+        label=_("Campaign"),
+        queryset=(Campaign.objects
+                  .filter(branch__site_id=settings.SITE_ID)
+                  .select_related("branch")
+                  .order_by("-year", "branch__order").all()),
+        empty_label=None)
+    section = django_filters.ChoiceFilter(
+        label=_("Секция"),
+        choices=InterviewSections.choices,
+        empty_label=None)
+
+    class Meta:
+        model = InterviewStream
+        fields = ['campaign', 'section']
+
+    @property
+    def form(self):
+        if not hasattr(self, '_form'):
+            self._form = super(ApplicantInvitationFilter, self).form
+            self._form.helper = FormHelper()
+            self._form.helper.form_method = "GET"
+            self._form.helper.layout = Layout(
+                Row(
+                    Div("campaign", css_class="col-xs-3"),
+                    Div("section", css_class="col-xs-3"),
                     Div(Submit('', _('Filter'),
                                css_class="btn-block -inline-submit"),
                         css_class="col-xs-2"),
