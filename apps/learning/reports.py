@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import io
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
@@ -121,28 +120,35 @@ class ProgressReport:
         unique_courses: Dict[int, Course] = {}
         for c in self.get_courses_queryset(students):
             unique_courses[c.pk] = c
-
         unique_meta_courses: Dict[int, MetaCourse] = {}
         # Aggregate max number of courses for each type. Result headers
         # depend on these values.
         shads_max, online_max, projects_max = 0, 0, 0
         for student_profile in student_profiles:
-            student = student_profile.user
-            self.process_row(student, unique_courses, unique_meta_courses)
-            shads_max = max(shads_max, len(student.shads))
-            online_max = max(online_max, len(student.online_courses))
-            projects_max = max(projects_max, len(student.projects_progress))
+            student_account = student_profile.user
+            self.process_row(student_account, unique_courses, unique_meta_courses)
+            shads_max = max(shads_max, len(student_account.shads))
+            online_max = max(online_max, len(student_account.online_courses))
+            projects_max = max(projects_max, len(student_account.projects_progress))
+
+        # Alphabetically sort meta courses by name
+        meta_course_names = [(mc.name, mc.pk) for mc in unique_meta_courses.values()]
+        meta_course_names.sort()
+        meta_courses: Dict[int, MetaCourse] = {}
+        for _, pk in meta_course_names:
+            meta_courses[pk] = unique_meta_courses[pk]
 
         headers = self._generate_headers(courses=unique_courses,
-                                         meta_courses=unique_meta_courses,
+                                         meta_courses=meta_courses,
                                          shads_max=shads_max,
                                          online_max=online_max,
                                          projects_max=projects_max)
+
         data = []
         for student_profile in student_profiles:
             row = self._export_row(student_profile,
                                    courses=unique_courses,
-                                   meta_courses=unique_meta_courses,
+                                   meta_courses=meta_courses,
                                    shads_max=shads_max,
                                    online_max=online_max,
                                    projects_max=projects_max)
@@ -715,21 +721,21 @@ class ProgressReportFull(ProgressReport):
             disciplines = student_profile.academic_disciplines.all()
             graduation_year = ""
 
-        student = student_profile.user
+        student_account = student_profile.user
         return [
-            student.pk,
+            student_account.pk,
             student_profile.branch.name,
-            student.last_name,
-            student.first_name,
-            student.patronymic,
-            student.get_absolute_url(),
-            student.get_gender_display(),
-            student.email,
-            student.phone,
-            student.workplace,
-            student.yandex_login,
-            student.stepic_id if student.stepic_id else "",
-            student.github_login if student.github_login else "",
+            student_account.last_name,
+            student_account.first_name,
+            student_account.patronymic,
+            student_account.get_absolute_url(),
+            student_account.get_gender_display(),
+            student_account.email,
+            student_account.phone,
+            student_account.workplace,
+            student_account.yandex_login,
+            student_account.stepic_id if student_account.stepic_id else "",
+            student_account.github_login if student_account.github_login else "",
             student_profile.university,
             student_profile.get_level_of_education_on_admission_display(),
             student_profile.year_of_admission,
@@ -741,13 +747,13 @@ class ProgressReportFull(ProgressReport):
             student_profile.get_status_display(),
             student_profile.comment,
             student_profile.get_comment_changed_at_display(),
-            self.links_to_application_forms(student),
+            self.links_to_application_forms(student_account),
             student_profile.total_success_passed,
             student_profile.success_practice,
             student_profile.success_research,
-            *self._export_courses(student, courses, meta_courses),
-            *self._export_shad_courses(student, shads_max),
-            *self._export_online_courses(student, online_max),
+            *self._export_courses(student_account, courses, meta_courses),
+            *self._export_shad_courses(student_account, shads_max),
+            *self._export_online_courses(student_account, online_max),
         ]
 
     def get_filename(self):
