@@ -103,12 +103,13 @@ class ProgressReport:
         course_teachers = CourseTeacher.get_prefetch()
         qs = (Course.objects
               .filter(pk__in=unique_courses)
-              .select_related('meta_course', 'semester')
+              .select_related('meta_course', 'semester', 'main_branch')
               .only('semester_id',
                     'meta_course_id',
                     'grading_type',
                     'meta_course__name',
-                    'meta_course__name_ru',)
+                    'meta_course__name_ru',
+                    'main_branch__site_id')
               .prefetch_related(course_teachers))
         return qs
 
