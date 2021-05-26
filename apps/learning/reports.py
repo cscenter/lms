@@ -659,7 +659,7 @@ class ProgressReportFull(ProgressReport):
             else:
                 meta_course_is_club[key] = course.is_club_course
 
-        return [f"{cs_club_prefix(course.id)}{course.name}, оценка" for course in meta_courses.values()]
+        return [f"{cs_club_prefix(course.id)}{course.name}" for course in meta_courses.values()]
 
     def _generate_headers(self, *, courses, meta_courses, shads_max, online_max,
                           projects_max, **kwargs):

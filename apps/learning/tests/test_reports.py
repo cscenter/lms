@@ -7,7 +7,6 @@ from django.contrib.sites.models import Site
 from django.utils.encoding import smart_bytes
 
 from core.models import Branch
-from core.settings.base import CLUB_SITE_ID
 from core.tests.factories import BranchFactory, SiteFactory
 from core.tests.settings import ANOTHER_DOMAIN
 from learning.reports import (
@@ -36,7 +35,7 @@ def check_value_for_header(report, header, row_index, expected_value):
 
 
 @pytest.mark.django_db
-def test_report_common():
+def test_report_common(settings):
     def get_progress_report():
         return ProgressReportFull(grade_getter="grade_honest").generate()
 
@@ -54,7 +53,7 @@ def test_report_common():
     shad2 = SHADCourseRecordFactory(student=student2, grade=GradeTypes.GOOD)
 
     # generate club course
-    site_club = SiteFactory(domain=Site.objects.get(id=CLUB_SITE_ID))
+    site_club = SiteFactory(domain=Site.objects.get(id=settings.CLUB_SITE_ID))
     branch_club = BranchFactory(site__domain=site_club)
     course_club = CourseFactory(main_branch=branch_club)
     EnrollmentFactory(student=student1, course=course_club, grade=GradeTypes.GOOD)
@@ -68,9 +67,8 @@ def test_report_common():
         len(report_factory.generate_online_courses_headers(0))
     )
 
-    # Checking caption '[CS клуб]' in club courses headers
-    header_with_caption = '[CS клуб] ' + course_club.name + ', оценка'
-    assert header_with_caption in progress_report.columns
+    # Check '[CS клуб]' prefix
+    assert '[CS клуб] ' + course_club.name in progress_report.columns
 
     # Check shad courses headers and values
     assert 'ШАД, курс 2, название' not in progress_report.columns
