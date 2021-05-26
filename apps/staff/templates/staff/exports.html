@@ -14,7 +14,7 @@
                 <div class="list-group-item">
                     <h4 class="list-group-item-heading">Полная</h4>
                     Скачать в формате <a href="{% url 'staff:students_progress_report' 'csv' %}">CSV</a> или <a href="{% url 'staff:students_progress_report' 'xlsx' %}">XLSX</a><br><br>
-                    Группы: Студент центра, Вольнослушатель, Выпускник.<br>
+                    Группы: Студент, Вольнослушатель, Выпускник.<br>
                 </div>
                 <div class="list-group-item">
                     <h4 class="list-group-item-heading">За семестр</h4>
@@ -22,7 +22,7 @@
                     <a target="_blank" href="{% url 'staff:students_progress_report_for_term' current_term.year current_term.type 'xlsx'  %}">XLSX</a><br>
                     {% trans prev_term.type|title %} {{ prev_term.year }}: <a target="_blank" href="{% url 'staff:students_progress_report_for_term' prev_term.year prev_term.type 'csv'  %}">CSV</a> или
                     <a target="_blank" href="{% url 'staff:students_progress_report_for_term' prev_term.year prev_term.type 'xlsx'  %}">XLSX</a><br><br>
-                    Группы: Студент центра, Вольнослушатель<br>
+                    Группы: Студент, Вольнослушатель<br>
                     Не учитываются студенты со статусом "Отчислен".<br>
                     Включены курсы для целевого семестра (центр, клуб, ШАД, онлайн-курсы).<br>
                     * для курсов клуба и центра данные о преподавателях не включены.<br>
