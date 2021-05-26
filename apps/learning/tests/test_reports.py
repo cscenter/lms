@@ -3,10 +3,12 @@ import datetime
 import pytest
 from pandas import DataFrame
 
+from django.contrib.sites.models import Site
 from django.utils.encoding import smart_bytes
 
 from core.models import Branch
-from core.tests.factories import BranchFactory
+from core.settings.base import CLUB_SITE_ID
+from core.tests.factories import BranchFactory, SiteFactory
 from core.tests.settings import ANOTHER_DOMAIN
 from learning.reports import (
     FutureGraduateDiplomasReport, OfficialDiplomasReport, ProgressReport,
@@ -51,12 +53,24 @@ def test_report_common():
     shad1 = SHADCourseRecordFactory(student=student1, grade=GradeTypes.GOOD)
     shad2 = SHADCourseRecordFactory(student=student2, grade=GradeTypes.GOOD)
 
+    # generate club course
+    site_club = SiteFactory(domain=Site.objects.get(id=CLUB_SITE_ID))
+    branch_club = BranchFactory(site__domain=site_club)
+    course_club = CourseFactory(main_branch=branch_club)
+    EnrollmentFactory(student=student1, course=course_club, grade=GradeTypes.GOOD)
+
     report_factory = ProgressReportFull(grade_getter="grade_honest")
     progress_report = report_factory.generate()
-    assert len(progress_report.columns) == (STATIC_HEADERS_CNT +
-                                            len({c.meta_course_id: c.meta_course for c in (co1, co2)}) +
-                                            len(report_factory.generate_shad_courses_headers(1)) +
-                                            len(report_factory.generate_online_courses_headers(0)))
+    assert len(progress_report.columns) == (
+        STATIC_HEADERS_CNT +
+        len({c.meta_course_id: c.meta_course for c in (co1, co2, course_club)}) +
+        len(report_factory.generate_shad_courses_headers(1)) +
+        len(report_factory.generate_online_courses_headers(0))
+    )
+
+    # Checking caption '[CS клуб]' in club courses headers
+    header_with_caption = '[CS клуб] ' + course_club.name + ', оценка'
+    assert header_with_caption in progress_report.columns
 
     # Check shad courses headers and values
     assert 'ШАД, курс 2, название' not in progress_report.columns
