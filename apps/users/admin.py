@@ -217,7 +217,7 @@ class StudentProfileAdmin(BaseModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         if obj is not None and obj.pk:
             # TODO: add user change url
-            return ['type', 'site', 'branch', 'year_of_admission',
+            return ['type', 'site', 'year_of_admission',
                     'level_of_education_on_admission',
                     'comment_changed_at', 'comment_last_author',]
         return []
