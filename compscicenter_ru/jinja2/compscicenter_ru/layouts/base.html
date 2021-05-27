@@ -32,16 +32,15 @@
     {% block menu %}
     <div class="navbar-container">
         {% block top_banner %}
-            {%- if not is_admission_disabled -%}
-              <a href="/syllabus/on-campus/robotics/" class="top-banner-wrapper green-bg">
-                <div class="container">
-                  <div class="top-banner">
-                    <img class="mr-2 d-none d-lg-inline-block" src="/static/v2/img/icons/top-banner-robotics.svg" alt="Направление роботы">
-                    <div>Открылось новое направление обучения – Robotics</div>
-                  </div>
-                </div>
-              </a>
-            {%- endif -%}
+          <a href="https://10years.compscicenter.ru/index.html" class="top-banner-wrapper" style="background-color: #a353ff">
+            <div class="container">
+              <div class="top-banner">
+                <img class="mr-4 d-none d-lg-inline-block" src="{{ static("v2/img/icons/top-banner-party-1.svg") }}" alt="">
+                <div>Computer Science Center празднует 10 лет!</div>
+                <img class="ml-4 d-none d-lg-inline-block" src="{{ static("v2/img/icons/top-banner-party-2.svg") }}" alt="">
+              </div>
+            </div>
+          </a>
         {% endblock top_banner %}
         {%- include "compscicenter_ru/layouts/_top_menu.html" %}
     </div>
