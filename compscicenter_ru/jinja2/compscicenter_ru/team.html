@@ -2,6 +2,141 @@
 
 {% block title %}Команда {{ super() }}{% endblock title %}
 
+{% macro person_card(name, member_of, position, image_url='', page_url='' ) %}
+  {% if page_url %}
+    <a href="{{ page_url }}" target="_blank" rel="noopener nofollow" class="card _user mb-6" itemscope itemtype="https://schema.org/Person">
+  {% else -%}
+    <div class="card _user mb-6" itemscope itemtype="https://schema.org/Person">
+  {% endif -%}
+  <div class="card__img">
+    <img src="{{ static(image_url) }}" alt="{{ name }}" itemprop="image">
+  </div>
+  <div class="card__title" itemprop="name">
+    {{ name }}
+  </div>
+  {% if member_of %}
+    <div class="card__subtitle" itemprop="memberOf">
+      {{ member_of }}
+    </div>
+  {% endif -%}
+  {% if position %}
+    <div class="card__subtitle" itemprop="jobTitle">
+      {{ position }}
+    </div>
+  {% endif -%}
+  {% if page_url %}
+    </a>
+  {% else -%}
+    </div>
+  {% endif -%}
+{%- endmacro %}
+
+{% set council = [
+  {
+    "name": "Андрей Иванов",
+    "member_of": "JetBrains",
+    "image_url": "v2/img/pages/team/ivanov_a.jpg"
+  },
+  {
+    "name": "Александр Куликов",
+    "member_of": "ПОМИ РАН, CS клуб",
+    "image_url": "v2/img/pages/team/kylikov_a.jpg",
+    "page_url": "http://logic.pdmi.ras.ru/~kulikov/"
+  },
+  {
+    "name": "Евгения Куликова",
+    "member_of": "Яндекс",
+    "image_url": "v2/img/pages/team/kylikova_e.jpg"
+  }
+] %}
+
+{% set employees_spb = [
+  {
+    "name": "Александр Авдюшенко",
+    "image_url": "v2/img/pages/team/avdushenko_a.jpg",
+    "job_title": "Куратор"
+  },
+  {
+    "name": "Екатерина Артамонова",
+    "image_url": "v2/img/pages/team/artamonova_e.jpg",
+    "job_title": "Куратор"
+  },
+  {
+    "name": "Алексей Белозёров",
+    "image_url": "v2/img/pages/team/belozerov_a.jpg",
+    "job_title": "Оператор и монтажёр"
+  },
+  {
+    "name": "Сергей Жеревчук",
+    "image_url": "v2/img/pages/team/zherevchuk_sv.jpg",
+    "job_title": "Разработчик"
+  },
+  {
+    "name": "Андрей Комендантов",
+    "image_url": "v2/img/pages/team/komendantov_a.jpg",
+    "job_title": "Разработчик"
+  },
+  {
+    "name": "Екатерина Лебедева",
+    "image_url": "v2/img/pages/team/lebedeva_ekaterina.jpg",
+    "job_title": "Куратор"
+  },
+  {
+    "name": "Святослав Михайлов",
+    "image_url": "v2/img/pages/team/mikhaylov_s.jpg",
+    "job_title": "Дизайнер"
+  },
+  {
+    "name": "Екатерина Михайлова",
+    "image_url": "v2/img/pages/team/mikhaylova_e.jpg",
+    "job_title": "Дизайнер"
+  },
+  {
+    "name": "Альбина Нуртдинова",
+    "image_url": "v2/img/pages/team/nurtdinova_a.jpg",
+    "job_title": "Куратор"
+  },
+  {
+    "name": "Кристина Смольникова",
+    "image_url": "v2/img/pages/team/smolnikova_k.jpg",
+    "job_title": "Куратор"
+  },
+  {
+    "name": "Екатерина Широкова",
+    "image_url": "v2/img/pages/team/shirokova_e.jpg",
+    "job_title": "Куратор"
+  }
+] %}
+
+{% set employees_nsk = [
+  {
+    "name": "Анастасия Волошина",
+    "image_url": "v2/img/pages/team/voloshina_a.jpg",
+    "job_title": "Куратор"
+  },
+  {
+    "name": "Алина Комиссарова",
+    "image_url": "v2/img/pages/team/komissarova_a.jpg",
+    "job_title": "Куратор"
+  },
+  {
+    "name": "Елена Лебедева",
+    "image_url": "v2/img/pages/team/lebedeva_elena.jpg",
+    "job_title": "Куратор"
+  },
+  {
+    "name": "Александра Михайлова",
+    "image_url": "v2/img/pages/team/mikhaylova_a.jpg",
+    "job_title": "Оператор и монтажёр"
+  },
+  {
+    "name": "Павел Наумов",
+    "image_url": "v2/img/pages/team/naumov_p.jpg",
+    "job_title": "Оператор и монтажёр"
+  }
+] %}
+
+
 {% block content %}
 <div class="container page-content">
     <div class="row content-center">
@@ -15,27 +150,13 @@
 
         <div class="col-lg-12">
             <div class="card-deck _team">
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/ivanov_a.jpg') }}" alt="Андрей Иванов">
-                    </div>
-                    <div class="card__title">Андрей Иванов</div>
-                    <div class="card__subtitle">JetBrains</div>
-                </div>
-                <a target="_blank" rel="noopener" href="http://logic.pdmi.ras.ru/~kulikov/" class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/kylikov_a.jpg') }}" alt="Александр Куликов">
-                    </div>
-                    <div class="card__title">Александр Куликов</div>
-                    <div class="card__subtitle">ПОМИ РАН, CS клуб</div>
-                </a>
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/kylikova_e.jpg') }}" alt="Евгения Куликова">
-                    </div>
-                    <div class="card__title">Евгения Куликова</div>
-                    <div class="card__subtitle">Яндекс</div>
-                </div>
+              {% for person in council -%}
+                {{ person_card(name=person["name"],
+                               member_of=person["member_of"],
+                               position="",
+                               image_url=person["image_url"],
+                               page_url=person.get("page_url", "")) }}
+              {% endfor -%}
             </div>
         </div>
 
@@ -45,83 +166,13 @@
 
         <div class="col-lg-12">
             <div class="card-deck _team">
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/avdushenko_a.jpg') }}" alt="Александр Авдюшенко">
-                    </div>
-                    <div class="card__title">Александр Авдюшенко</div>
-                    <div class="card__subtitle">Куратор</div>
-                </div>
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/artamonova_e.jpg') }}" alt="Екатерина Артамонова">
-                    </div>
-                    <div class="card__title">Екатерина Артамонова</div>
-                    <div class="card__subtitle">Куратор</div>
-                </div>
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/belozerov_a.jpg') }}" alt="Алексей Белозёров">
-                    </div>
-                    <div class="card__title">Алексей Белозёров</div>
-                    <div class="card__subtitle">Оператор и монтажёр</div>
-                </div>
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/zherevchuk_sv.jpg') }}" alt="Сергей Жеревчук">
-                    </div>
-                    <div class="card__title">Сергей Жеревчук</div>
-                    <div class="card__subtitle">Разработчик</div>
-                </div>
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/lebedeva_ekaterina.jpg') }}" alt="Екатерина Лебедева">
-                    </div>
-                    <div class="card__title">Екатерина Лебедева</div>
-                    <div class="card__subtitle">Куратор</div>
-                </div>
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/mikhaylov_s.jpg') }}" alt="Святослав Михайлов">
-                    </div>
-                    <div class="card__title">Святослав Михайлов</div>
-                    <div class="card__subtitle">Дизайнер</div>
-                </div>
-                <div class="card _user mb-6">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/nurtdinova_a.jpg') }}" alt="Альбина Нуртдинова">
-                    </div>
-                    <div class="card__title">Альбина Нуртдинова</div>
-                    <div class="card__subtitle">Куратор</div>
-                </div>
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/smolnikova_k.jpg') }}" alt="Кристина Смольникова">
-                    </div>
-                    <div class="card__title">Кристина Смольникова</div>
-                    <div class="card__subtitle">Куратор</div>
-                </div>
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/shirokova_e.jpg') }}" alt="Екатерина Широкова">
-                    </div>
-                    <div class="card__title">Екатерина Широкова</div>
-                    <div class="card__subtitle">Куратор</div>
-                </div>
-                <div class="card _user mb-6" itemscope itemtype="https://schema.org/Person">
-                  <div class="card__img">
-                    <img src="{{ static('v2/img/pages/team/mikhaylova_e.jpg') }}" itemprop="image" alt="Екатерина Михайлова">
-                  </div>
-                  <div class="card__title" itemprop="name">Екатерина Михайлова</div>
-                  <div class="card__subtitle" itemprop="jobTitle">Дизайнер</div>
-                </div>
-                <div class="card _user mb-6" itemscope itemtype="https://schema.org/Person">
-                  <div class="card__img">
-                    <img src="{{ static('v2/img/pages/team/komendantov_a.jpg') }}" itemprop="image" alt="Андрей Комендантов">
-                  </div>
-                  <div class="card__title" itemprop="name">Андрей Комендантов</div>
-                  <div class="card__subtitle" itemprop="jobTitle">Разработчик</div>
-                </div>
+              {% for person in employees_spb -%}
+                {{ person_card(name=person["name"],
+                               member_of="",
+                               position=person["job_title"],
+                               image_url=person["image_url"],
+                               page_url="") }}
+              {% endfor -%}
             </div>
         </div>
 
@@ -130,41 +181,13 @@
         </div>
         <div class="col-lg-12">
             <div class="card-deck _team">
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/lebedeva_elena.jpg') }}" alt="Елена Лебедева">
-                    </div>
-                    <div class="card__title">Елена Лебедева</div>
-                    <div class="card__subtitle">Куратор</div>
-                </div>
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/mikhaylova_a.jpg') }}" alt="Александра Михайлова">
-                    </div>
-                    <div class="card__title">Александра Михайлова</div>
-                    <div class="card__subtitle">Оператор и монтажёр</div>
-                </div>
-                <div class="card _user">
-                    <div class="card__img">
-                        <img src="{{ static('v2/img/pages/team/komissarova_a.jpg') }}" alt="Алина Комиссарова">
-                    </div>
-                    <div class="card__title">Алина Комиссарова</div>
-                    <div class="card__subtitle">Куратор</div>
-                </div>
-                <div class="card _user mb-6" itemscope itemtype="https://schema.org/Person">
-                  <div class="card__img">
-                    <img src="{{ static('v2/img/pages/team/voloshina_a.jpg') }}" itemprop="image" alt="Анастасия Волошина">
-                  </div>
-                  <div class="card__title" itemprop="name">Анастасия Волошина</div>
-                  <div class="card__subtitle" itemprop="jobTitle">Куратор</div>
-                </div>
-                <div class="card _user mb-6" itemscope itemtype="https://schema.org/Person">
-                  <div class="card__img">
-                    <img src="{{ static('v2/img/pages/team/naumov_p.jpg') }}" itemprop="image" alt="Павел Наумов">
-                  </div>
-                  <div class="card__title" itemprop="name">Павел Наумов</div>
-                  <div class="card__subtitle" itemprop="jobTitle">Оператор и монтажёр</div>
-                </div>
+              {% for person in employees_nsk -%}
+                {{ person_card(name=person["name"],
+                               member_of="",
+                               position=person["job_title"],
+                               image_url=person["image_url"],
+                               page_url="") }}
+              {% endfor -%}
             </div>
         </div>
     </div>
