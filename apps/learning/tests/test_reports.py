@@ -9,20 +9,19 @@ from django.utils.encoding import smart_bytes
 from core.models import Branch
 from core.tests.factories import BranchFactory, SiteFactory
 from core.tests.settings import ANOTHER_DOMAIN
+from courses.tests.factories import MetaCourseFactory
 from learning.reports import (
     FutureGraduateDiplomasReport, OfficialDiplomasReport, ProgressReport,
-    ProgressReportForSemester, ProgressReportFull
+    ProgressReportForSemester, ProgressReportFull, generate_online_courses_headers,
+    generate_projects_headers, generate_shad_courses_headers
 )
 from learning.settings import Branches, GradeTypes, GradingSystems, StudentStatuses
 from learning.tests.factories import (
-    CourseFactory, EnrollmentFactory, GraduateProfileFactory, SemesterFactory,
-    StudentAssignmentFactory
+    CourseFactory, EnrollmentFactory, GraduateProfileFactory, SemesterFactory
 )
 from projects.constants import ProjectGradeTypes, ProjectTypes
 from projects.models import Project
-from projects.tests.factories import (
-    ProjectFactory, ProjectStudentFactory, SupervisorFactory
-)
+from projects.tests.factories import ProjectFactory, ProjectStudentFactory
 from users.tests.factories import (
     OnlineCourseRecordFactory, SHADCourseRecordFactory, StudentFactory,
     StudentProfileFactory, TeacherFactory
@@ -63,8 +62,8 @@ def test_report_common(settings):
     assert len(progress_report.columns) == (
         STATIC_HEADERS_CNT +
         len({c.meta_course_id: c.meta_course for c in (co1, co2, course_club)}) +
-        len(report_factory.generate_shad_courses_headers(1)) +
-        len(report_factory.generate_online_courses_headers(0))
+        len(generate_shad_courses_headers(1)) +
+        len(generate_online_courses_headers(0))
     )
 
     # Check '[CS клуб]' prefix
@@ -92,14 +91,14 @@ def test_report_common(settings):
     assert progress_report.index[1] == student2.pk
     assert progress_report.index[2] == student3.pk
     # Check project headers and associated values
-    project_headers = report_factory.generate_projects_headers(1)
+    project_headers = generate_projects_headers(1)
     assert project_headers[0] == 'Проект 1, название'
     assert project_headers[1] == 'Проект 1, оценка'
     assert project_headers[2] == 'Проект 1, руководители'
     assert project_headers[3] == 'Проект 1, семестр'
     assert 'Проект 2, название' not in project_headers
     # Check shad courses headers/values consistency
-    shad_headers = report_factory.generate_shad_courses_headers(1)
+    shad_headers = generate_shad_courses_headers(1)
     assert shad_headers[0] == 'ШАД, курс 1, название'
     assert shad_headers[1] == 'ШАД, курс 1, преподаватели'
     assert shad_headers[2] == 'ШАД, курс 1, оценка'
@@ -275,7 +274,7 @@ def test_report_for_target_term():
     check_value_for_header(progress_report, success_total_eq_ts_header,
                            student1.pk, 1)
     # Hide shad courses from semester less than target semester
-    shad_headers = ProgressReport.generate_shad_courses_headers(1)
+    shad_headers = generate_shad_courses_headers(1)
     assert not any(h in progress_report.columns for h in shad_headers)
     # Add not_graded shad course for current semester. We show it for
     # target semester, but it's not counted in stats
@@ -563,3 +562,23 @@ def test_report_official_diplomas_csv(settings):
     progress_report = get_report()
     # +1 headers for one valid project
     assert len(progress_report.columns) == STATIC_HEADERS_CNT + 2
+
+
+@pytest.mark.django_db
+def test_export_highest_or_max_grade(settings):
+    report = ProgressReportFull(on_course_duplicate='store_max')
+    student = StudentFactory()
+    meta_course = MetaCourseFactory()
+    term_current = SemesterFactory.create_current()
+    term_prev = SemesterFactory.create_prev(term_current)
+    term_prev2 = SemesterFactory.create_prev(term_prev)
+    course1 = CourseFactory(meta_course=meta_course, semester=term_prev2)
+    course2 = CourseFactory(meta_course=meta_course, semester=term_prev)
+    course3 = CourseFactory(meta_course=meta_course, semester=term_current)
+    EnrollmentFactory(student=student, course=course1, grade=GradeTypes.EXCELLENT)
+    EnrollmentFactory(student=student, course=course2, grade=GradeTypes.GOOD)
+    EnrollmentFactory(student=student, course=course3, grade=GradeTypes.NOT_GRADED)
+    df = report.generate()
+    assert df[meta_course.name].iloc[0] == GradeTypes.EXCELLENT
+    df = ProgressReportFull(on_course_duplicate='store_last').generate()
+    assert df[meta_course.name].iloc[0] == GradeTypes.GOOD

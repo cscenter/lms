@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import datetime
 from collections import defaultdict
 
@@ -68,7 +67,9 @@ class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):
         report = ProgressReportFull(grade_getter="grade_honest")
         custom_qs = report.get_queryset(base_queryset=queryset)
         df = report.generate(queryset=custom_qs)
-        return dataframe_to_response(df, 'csv', report.get_filename())
+        today = datetime.datetime.now().strftime('%d.%m.%Y')
+        file_name = f"sheet_{today}"
+        return dataframe_to_response(df, 'csv', file_name)
 
 
 class StudentSearchView(CuratorOnlyMixin, TemplateView):
@@ -331,14 +332,17 @@ class FutureGraduateDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
         branch = get_object_or_404(Branch.objects.filter(pk=branch_id))
         report = FutureGraduateDiplomasReport(branch)
         df = report.generate()
-        return dataframe_to_response(df, 'csv', report.get_filename())
+        today = datetime.datetime.now()
+        file_name = "diplomas_{}".format(today.year)
+        return dataframe_to_response(df, 'csv', file_name)
 
 
 class ProgressReportFullView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, output_format, *args, **kwargs):
         report = ProgressReportFull(grade_getter="grade_honest")
-        filename = report.get_filename()
-        return dataframe_to_response(report.generate(), output_format, filename)
+        today = datetime.datetime.now().strftime('%d.%m.%Y')
+        file_name = f"sheet_{today}"
+        return dataframe_to_response(report.generate(), output_format, file_name)
 
 
 class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
@@ -356,8 +360,8 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
         except (KeyError, ValueError):
             return HttpResponseBadRequest()
         report = ProgressReportForSemester(semester)
-        filename = report.get_filename()
-        return dataframe_to_response(report.generate(), output_format, filename)
+        file_name = "sheet_{}_{}".format(semester.year, semester.type)
+        return dataframe_to_response(report.generate(), output_format, file_name)
 
 
 class InvitationStudentsProgressReportView(CuratorOnlyMixin, View):
@@ -365,8 +369,10 @@ class InvitationStudentsProgressReportView(CuratorOnlyMixin, View):
         invitation = get_object_or_404(Invitation.objects
                                        .filter(pk=invitation_id))
         report = ProgressReportForInvitation(invitation)
+        term = invitation.semester
+        file_name = f"sheet_{term.year}_{term.type}"
         return dataframe_to_response(report.generate(), output_format,
-                                     report.get_filename())
+                                     file_name)
 
 
 class AdmissionApplicantsReportView(CuratorOnlyMixin, generic.base.View):
@@ -646,7 +652,9 @@ class OfficialDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
         if not site_aware_queryset.count():
             raise Http404
         df = report.generate(site_aware_queryset)
-        return dataframe_to_response(df, 'csv', report.get_filename())
+        date_issued = diploma_issued_on.isoformat().replace('-', '_')
+        file_name = "official_diplomas_{}".format(date_issued)
+        return dataframe_to_response(df, 'csv', file_name)
 
 
 class OfficialDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):

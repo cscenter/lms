@@ -73,7 +73,7 @@ urlpatterns = [
         path('csv/', FutureGraduateDiplomasCSVView.as_view(), name='exports_future_graduates_diplomas_csv'),
     ])),
     path('reports/students-progress/', include([
-        re_path(r'^(?P<output_format>csv|xlsx)/$', ProgressReportFullView.as_view(), name='students_progress_report'),
+        re_path(r'^(?P<output_format>csv|xlsx)/(?P<on_duplicate>max|last)/$', ProgressReportFullView.as_view(), name='students_progress_report'),
         re_path(r'^terms/(?P<term_year>\d+)/(?P<term_type>\w+)/(?P<output_format>csv|xlsx)/$', ProgressReportForSemesterView.as_view(), name='students_progress_report_for_term'),
         re_path(r'^invitations/(?P<invitation_id>\d+)/(?P<output_format>csv|xlsx)/$', InvitationStudentsProgressReportView.as_view(), name='students_progress_report_for_invitation'),
     ])),

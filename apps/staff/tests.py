@@ -52,7 +52,7 @@ def test_staff_diplomas_view_should_contain_club_courses(curator, client, settin
 @pytest.mark.django_db
 def test_view_student_progress_report_full_download_csv(client):
     url = reverse("staff:students_progress_report",
-                  kwargs={'output_format': 'csv'})
+                  kwargs={'output_format': 'csv', 'on_duplicate': 'last'})
     curator = CuratorFactory()
     client.login(curator)
     response = client.get(url)

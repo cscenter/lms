@@ -6,101 +6,137 @@
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
 
 {% block content %}
-<div class="container">
+  <div class="container">
     <div class="row">
-        <div class="col-xs-12">
-            <h2>Ведомости успеваемости</h2>
-            <div class="list-group">
-                <div class="list-group-item">
-                    <h4 class="list-group-item-heading">Полная</h4>
-                    Скачать в формате <a href="{% url 'staff:students_progress_report' 'csv' %}">CSV</a> или <a href="{% url 'staff:students_progress_report' 'xlsx' %}">XLSX</a><br><br>
-                    Группы: Студент, Вольнослушатель, Выпускник.<br>
-                </div>
-                <div class="list-group-item">
-                    <h4 class="list-group-item-heading">За семестр</h4>
-                    {% trans current_term.type|title %} {{ current_term.year }}: <a target="_blank" href="{% url 'staff:students_progress_report_for_term' current_term.year current_term.type 'csv'  %}">CSV</a> или
-                    <a target="_blank" href="{% url 'staff:students_progress_report_for_term' current_term.year current_term.type 'xlsx'  %}">XLSX</a><br>
-                    {% trans prev_term.type|title %} {{ prev_term.year }}: <a target="_blank" href="{% url 'staff:students_progress_report_for_term' prev_term.year prev_term.type 'csv'  %}">CSV</a> или
-                    <a target="_blank" href="{% url 'staff:students_progress_report_for_term' prev_term.year prev_term.type 'xlsx'  %}">XLSX</a><br><br>
-                    Группы: Студент, Вольнослушатель<br>
-                    Не учитываются студенты со статусом "Отчислен".<br>
-                    Включены курсы для целевого семестра (центр, клуб, ШАД, онлайн-курсы).<br>
-                    * для курсов клуба и центра данные о преподавателях не включены.<br>
-                </div>
-                <div class="list-group-item">
-                    <h4 class="list-group-item-heading">Приглашенные студенты</h4>
-                    {% for branch, branch_invitations in invitations.items %}
-                        {{ branch }}
-                            <ul>
-                            {% for invitation in branch_invitations %}
-                                <li>
-                                    <a target="_blank" href="{% url 'staff:students_progress_report_for_invitation' invitation.pk 'csv'  %}">{{ invitation.name }}</a>
-                                </li>
-                            {% endfor %}
-                            </ul>
-                    {% endfor %}
+      <div class="col-xs-12">
+        <h2>Ведомости успеваемости</h2>
+        <div class="list-group">
+          <div class="list-group-item">
+            <h4 class="list-group-item-heading">Полная</h4>
+            Группы: Студент, Вольнослушатель, Выпускник.<br>
+            <table class="table table-condensed">
+              <thead>
+                <tr>
+                  <th>Тип</th>
+                  <th>Формат</th>
+                </tr>
+              </thead>
+              <tr>
+                <td>Самая высокая оценка за курс</td>
+                <td>
+                  <a href="{% url 'staff:students_progress_report' 'csv' 'max' %}">CSV</a>,
+                  <a href="{% url 'staff:students_progress_report' 'xlsx' 'max' %}">XLSX</a>
+                </td>
+              </tr>
+              <tr>
+                <td>Последняя положительная оценка за курс</td>
+                <td>
+                  <a href="{% url 'staff:students_progress_report' 'csv' 'last' %}">CSV</a>,
+                  <a href="{% url 'staff:students_progress_report' 'xlsx' 'last' %}">XLSX</a>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="list-group-item">
+            <h4 class="list-group-item-heading">За семестр</h4>
+            {% trans current_term.type|title %} {{ current_term.year }}: <a target="_blank"
+                                                                            href="{% url 'staff:students_progress_report_for_term' current_term.year current_term.type 'csv' %}">CSV</a>
+            или
+            <a target="_blank"
+               href="{% url 'staff:students_progress_report_for_term' current_term.year current_term.type 'xlsx' %}">XLSX</a><br>
+            {% trans prev_term.type|title %} {{ prev_term.year }}: <a target="_blank"
+                                                                      href="{% url 'staff:students_progress_report_for_term' prev_term.year prev_term.type 'csv' %}">CSV</a>
+            или
+            <a target="_blank" href="{% url 'staff:students_progress_report_for_term' prev_term.year prev_term.type 'xlsx' %}">XLSX</a><br><br>
+            Группы: Студент, Вольнослушатель<br>
+            Не учитываются студенты со статусом "Отчислен".<br>
+            Включены курсы для целевого семестра (центр, клуб, ШАД, онлайн-курсы).<br>
+            * для курсов клуба и центра данные о преподавателях не включены.<br>
+          </div>
+          <div class="list-group-item">
+            <h4 class="list-group-item-heading">Приглашенные студенты</h4>
+            {% for branch, branch_invitations in invitations.items %}
+              {{ branch }}
+              <ul>
+                {% for invitation in branch_invitations %}
+                  <li>
+                    <a target="_blank"
+                       href="{% url 'staff:students_progress_report_for_invitation' invitation.pk 'csv' %}">{{ invitation.name }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endfor %}
 
-                </div>
-            </div>
-            <h2>Проекты</h2>
-            <div class="list-group">
-                <div class="list-group-item">
-                    <h4 class="list-group-item-heading">Оценки по проектам, {% trans current_term.type %} {{ current_term.year }}</h4>
-                    <p><a href="{%  url 'staff:autograde_projects' %}" class="btn btn-primary btn-wide">Выставить</a></p>
-                    <p>Условия, при которых будет сделана попытка посчитать оценку:</p>
-                    <ul>
-                        <li>Оценка ещё не выставлена ("Без оценки")</li>
-                        <li>Для внешнего проекта указана оценка за презентацию</li>
-                        <li>Для внутреннего - оценка за презентацию и оценка руководителя</li>
-                        <li>Для каждого финального отчетного периода (семестр, тип проекта, отделение студента) выставлены настройки с оценками</li>
-                    </ul>
-                </div>
-            </div>
-            <a name="will-graduate"></a><h2 class="content-title">Будущий выпуск</h2>
-            <div class="list-group">
-                <div  class="list-group-item">
-                    <p>Форма генерирует профили выпускников и переводит профили студента в статус "Выпускник".</p>
-                    {% crispy alumni_profiles_form %}
-                    {% for branch in branches %}
-                        <b>{{ branch.name }}</b>: <a href="{% url 'staff:exports_future_graduates_diplomas_tex' branch.pk %}">TeX</a> или <a href="{% url 'staff:exports_future_graduates_diplomas_csv' branch.pk %}">CSV</a><br><a href="{% url 'staff:export_future_graduates_stats' branch.pk %}">Статистика</a><br>
-                    {% endfor %}
-                </div>
-            </div>
-            <h2 class="content-title">Официальные дипломы</h2>
-            <div class="list-group">
-                <div class="list-group-item list-unstyled">
-                    {% if official_diplomas_dates %}
-                        {% for date in official_diplomas_dates %}
-                            <li>
-                                от {{ date }}:
-                                <a href="{% url 'staff:exports_official_diplomas_csv' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">CSV</a>,
-                                <a href="{% url 'staff:exports_official_diplomas_tex' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">TeX</a>,
-                                <a href="{% url 'staff:exports_official_diplomas_list' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">список</a>
-                            </li>
-                        {% endfor %}
-                    {% else %}
-                        <p class="mb-0">В этом блоке будут показаны сведения о выданных официальных дипломах.</p>
-                    {% endif %}
-                </div>
-            </div>
-            <h2>Набор</h2>
-
-                    <table class="table table-bordered bg-white">
-                    <tr>
-                        <th>Кампания по набору</th>
-                        <th>Анкеты</th>
-                        <th>Результаты экзамена</th>
-                    </tr>
-                    {% for campaign in campaigns %}
-                        <tr>
-                        <td>{{ campaign }}</td>
-                        <td><a target="_blank" href="{% url 'staff:exports_report_admission_applicants' campaign.pk 'csv' %}">csv</a>,  <a target="_blank" href="{% url 'staff:exports_report_admission_applicants' campaign.pk 'xlsx' %}">xlsx</a></td>
-                        <td><a target="_blank" href="{% url 'staff:exports_report_admission_exam' campaign.pk 'csv' %}">csv</a>, <a target="_blank" href="{% url 'staff:exports_report_admission_exam' campaign.pk 'xlsx' %}">xlsx</a></td>
-                        </tr>
-                    {% endfor %}
-
-                    </table>
+          </div>
         </div>
+        <h2>Проекты</h2>
+        <div class="list-group">
+          <div class="list-group-item">
+            <h4 class="list-group-item-heading">Оценки по проектам, {% trans current_term.type %} {{ current_term.year }}</h4>
+            <p><a href="{% url 'staff:autograde_projects' %}" class="btn btn-primary btn-wide">Выставить</a></p>
+            <p>Условия, при которых будет сделана попытка посчитать оценку:</p>
+            <ul>
+              <li>Оценка ещё не выставлена ("Без оценки")</li>
+              <li>Для внешнего проекта указана оценка за презентацию</li>
+              <li>Для внутреннего - оценка за презентацию и оценка руководителя</li>
+              <li>Для каждого финального отчетного периода (семестр, тип проекта, отделение студента) выставлены настройки с оценками</li>
+            </ul>
+          </div>
+        </div>
+        <a name="will-graduate"></a>
+        <h2 class="content-title">Будущий выпуск</h2>
+        <div class="list-group">
+          <div class="list-group-item">
+            <p>Форма генерирует профили выпускников и переводит профили студента в статус "Выпускник".</p>
+            {% crispy alumni_profiles_form %}
+            {% for branch in branches %}
+              <b>{{ branch.name }}</b>: <a href="{% url 'staff:exports_future_graduates_diplomas_tex' branch.pk %}">TeX</a> или
+              <a href="{% url 'staff:exports_future_graduates_diplomas_csv' branch.pk %}">CSV</a><br>
+              <a href="{% url 'staff:export_future_graduates_stats' branch.pk %}">Статистика</a><br>
+            {% endfor %}
+          </div>
+        </div>
+        <h2 class="content-title">Официальные дипломы</h2>
+        <div class="list-group">
+          <div class="list-group-item list-unstyled">
+            {% if official_diplomas_dates %}
+              {% for date in official_diplomas_dates %}
+                <li>
+                  от {{ date }}:
+                  <a
+                    href="{% url 'staff:exports_official_diplomas_csv' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">CSV</a>,
+                  <a
+                    href="{% url 'staff:exports_official_diplomas_tex' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">TeX</a>,
+                  <a
+                    href="{% url 'staff:exports_official_diplomas_list' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">список</a>
+                </li>
+              {% endfor %}
+            {% else %}
+              <p class="mb-0">В этом блоке будут показаны сведения о выданных официальных дипломах.</p>
+            {% endif %}
+          </div>
+        </div>
+        <h2>Набор</h2>
+
+        <table class="table table-bordered bg-white">
+          <tr>
+            <th>Кампания по набору</th>
+            <th>Анкеты</th>
+            <th>Результаты экзамена</th>
+          </tr>
+          {% for campaign in campaigns %}
+            <tr>
+              <td>{{ campaign }}</td>
+              <td><a target="_blank" href="{% url 'staff:exports_report_admission_applicants' campaign.pk 'csv' %}">csv</a>, <a
+                target="_blank" href="{% url 'staff:exports_report_admission_applicants' campaign.pk 'xlsx' %}">xlsx</a></td>
+              <td><a target="_blank" href="{% url 'staff:exports_report_admission_exam' campaign.pk 'csv' %}">csv</a>, <a target="_blank"
+                                                                                                                          href="{% url 'staff:exports_report_admission_exam' campaign.pk 'xlsx' %}">xlsx</a>
+              </td>
+            </tr>
+          {% endfor %}
+
+        </table>
+      </div>
     </div>
-</div>
+  </div>
 {% endblock content %}

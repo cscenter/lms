@@ -13,12 +13,9 @@ def get_enrollments_progress(lookup='enrollment_set',
     filters = filters or []
     queryset = (Enrollment.active
                 .filter(*filters)
-                .select_related('course',
-                                'course__meta_course',
+                .select_related('course__meta_course',
                                 'course__semester')
-                .only('pk', 'created', 'student_id', 'course_id',
-                      'grade')
-                .order_by('course__semester__index'))
+                .only('pk', 'created', 'student_id', 'course_id', 'grade'))
     return Prefetch(lookup, queryset=queryset, to_attr=to_attr)
 
 
