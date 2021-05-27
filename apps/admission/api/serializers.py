@@ -6,7 +6,7 @@ from django.utils import formats
 from admission.models import InterviewSlot
 
 
-class InterviewSlotSerializer(serializers.ModelSerializer):
+class InterviewSlotBaseSerializer(serializers.ModelSerializer):
     start_at = TimeField(format="%H:%M", input_formats=None)
     stream = serializers.SerializerMethodField()
 

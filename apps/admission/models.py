@@ -1276,11 +1276,7 @@ class InterviewInvitation(TimeStampedModel):
     secret_code = models.UUIDField(
         verbose_name=_("Secret code"),
         default=uuid.uuid4)
-    expired_at = models.DateTimeField(
-        _("Expired at"),
-        # FIXME: get timezone from applicant
-        help_text=_("Time in UTC since information about the timezone "
-                    "stored in m2m relationship"))
+    expired_at = models.DateTimeField(_("Expired at"))
     interview = models.ForeignKey(
         Interview,
         verbose_name=_("Interview"),
@@ -1321,7 +1317,7 @@ class InterviewInvitation(TimeStampedModel):
         return bool(self.interview_id)
 
     def get_absolute_url(self):
-        return reverse("appointment:choosing_interview_date", kwargs={
+        return reverse("appointment:select_time_slot", kwargs={
             "year": self.applicant.campaign.year,
             "secret_code": str(self.secret_code).replace("-", "")
         })

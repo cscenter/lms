@@ -76,4 +76,3 @@ def get_serializer_fields(serializer: Type[serializers.Serializer], fields: Iter
     """
     return {field_name: copy.deepcopy(field_instance) for field_name, field_instance
             in serializer().get_fields().items() if field_name in fields}
-

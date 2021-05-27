@@ -1,0 +1,30 @@
+{% extends "lms/layouts/v2_base.html" %}
+{% block menu %}{% endblock menu %}
+{% block content %}
+  <div class="container my-10">
+    <div class="row content-center no-gutters">
+      <div class='col-lg-8'>
+        {% if interview %}
+          <div id='appointment__card' class="card border-xs-0 grey-bg">
+            <div class="card__header _big">
+              <h2 class="mb-2">Ждём вас на собеседование</h2>
+              <b>Дата и время</b>: {{ interview.date_local()|date("d E") }} в {{ interview.date_local()|date("H:i") }}
+              <br />
+              {% if interview.slot.stream.venue.directions %}
+                <b>Как добраться</b><br>
+                {% with venue = interview.slot.stream.venue %}
+                  {{ venue.directions|markdown("venue_directions", 3600, venue.pk, venue.modified) }}
+                {% endwith %}
+              {% endif %}
+            </div>
+          </div>
+        {% elif invitation.is_expired %}
+          Приглашение больше не актуально.
+        {% else %}
+          <div id="Appointment" data-init='{{ app_data|tojson|safe }}' class="__react-root"></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+{% block footer %}{% endblock footer %}

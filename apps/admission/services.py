@@ -1,16 +1,19 @@
 from datetime import datetime, timedelta
 from operator import attrgetter
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from post_office import mail
 from post_office.models import STATUS as EMAIL_STATUS
 from post_office.models import Email, EmailTemplate
 from post_office.utils import get_email_template
+from rest_framework.exceptions import APIException, NotFound
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone, translation
 from django.utils.formats import date_format
+from django.utils.translation import gettext_lazy as _
 
 from admission.constants import (
     INTERVIEW_FEEDBACK_TEMPLATE, INVITATION_EXPIRED_IN_HOURS, InterviewFormats
@@ -21,6 +24,7 @@ from admission.models import (
 )
 from admission.utils import logger
 from core.timezone.constants import DATE_FORMAT_RU
+from core.utils import bucketize
 from grading.api.yandex_contest import YandexContestAPI
 from learning.services import create_student_profile, get_student_profile
 from users.models import StudentTypes, User
@@ -126,6 +130,66 @@ def create_student_from_applicant(applicant):
                                                          maxsplit=1)[-1]
     user.save()
     return user
+
+
+def get_streams(invitation: InterviewInvitation) -> Dict[InterviewStream, List[InterviewSlot]]:
+    """
+    Returns streams related to the invitation where
+    slots are sorted by time in ASC order.
+    """
+    slots = (InterviewSlot.objects
+             .filter(stream__interview_invitations=invitation)
+             .select_related("stream__interview_format",
+                             "stream__venue__city")
+             .order_by("stream__date", "start_at"))
+    return bucketize(slots, key=lambda s: s.stream)
+
+
+# TODO: change exception type
+class InterviewCreateError(APIException):
+    pass
+
+
+def create_interview_from_slot(invitation: InterviewInvitation, slot_id: int) -> Interview:
+    if invitation.is_accepted:
+        # Interview was created but reassigned to another participant
+        if invitation.applicant_id != invitation.interview.applicant_id:
+            code = "corrupted"
+        else:
+            code = "accepted"  # by invited participant
+        raise ValidationError("Приглашение уже принято", code=code)
+    elif invitation.is_expired:
+        raise ValidationError("Приглашение больше не актуально", code="expired")
+    try:
+        slot = InterviewSlot.objects.get(pk=slot_id)
+    except InterviewSlot.DoesNotExist:
+        raise NotFound(_("Interview slot not found"))
+    # TODO: What if slot is occupied
+    if slot.stream_id not in (s.id for s in invitation.streams.all()):
+        raise ValidationError(_("Interview slot is not associated with the invitation"))
+
+    interview = Interview(applicant=invitation.applicant,
+                          status=Interview.APPROVED,
+                          section=slot.stream.section,
+                          date=slot.datetime_local)
+    with transaction.atomic():
+        sid = transaction.savepoint()
+        interview.save()
+        is_slot_has_taken = InterviewSlot.objects.lock(slot, interview)
+        if not is_slot_has_taken:
+            transaction.savepoint_rollback(sid)
+            raise InterviewCreateError("Извините, но слот уже был занят другим участником. "
+                                       "Выберите другое время и повторите попытку.", code="slot_occupied")
+        interview.interviewers.set(slot.stream.interviewers.all())
+        EmailQueueService.generate_interview_confirmation(interview, slot.stream)
+        EmailQueueService.generate_interview_reminder(interview, slot.stream)
+        # Mark invitation as accepted
+        (InterviewInvitation.objects
+         .filter(pk=invitation.pk)
+         .update(interview_id=interview.id,
+                 modified=timezone.now()))
+        transaction.savepoint_commit(sid)
+        return interview
 
 
 def get_meeting_time(meeting_at: datetime, stream: InterviewStream):

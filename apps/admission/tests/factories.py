@@ -9,7 +9,8 @@ from django.db.models.signals import post_save
 from django.utils import timezone
 
 from admission.constants import (
-    APPOINTMENT_INVITATION_TEMPLATE, WHERE_DID_YOU_LEARN, InterviewFormats
+    APPOINTMENT_INVITATION_TEMPLATE, WHERE_DID_YOU_LEARN, InterviewFormats,
+    InterviewSections
 )
 from admission.models import (
     Applicant, Campaign, Comment, Contest, Exam, Interview, InterviewAssignment,
