@@ -16,7 +16,8 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import (
-    INTERVIEW_FEEDBACK_TEMPLATE, INVITATION_EXPIRED_IN_HOURS, InterviewFormats
+    INTERVIEW_FEEDBACK_TEMPLATE, INVITATION_EXPIRED_IN_HOURS, InterviewFormats,
+    InterviewInvitationStatuses
 )
 from admission.models import (
     Applicant, Campaign, Exam, Interview, InterviewInvitation, InterviewSlot,
@@ -150,7 +151,15 @@ class InterviewCreateError(APIException):
     pass
 
 
-def create_interview_from_slot(invitation: InterviewInvitation, slot_id: int) -> Interview:
+def decline_interview_invitation(invitation: InterviewInvitation):
+    if invitation.is_expired:
+        raise ValidationError("Interview Invitation is expired", code="expired")
+    invitation.status = InterviewInvitationStatuses.DECLINED
+    invitation.save(update_fields=['status'])
+
+
+def accept_interview_invitation(invitation: InterviewInvitation, slot_id: int) -> Interview:
+    """Creates interview, occupies slot and sends confirmation via email"""
     if invitation.is_accepted:
         # Interview was created but reassigned to another participant
         if invitation.applicant_id != invitation.interview.applicant_id:
@@ -187,6 +196,7 @@ def create_interview_from_slot(invitation: InterviewInvitation, slot_id: int) ->
         (InterviewInvitation.objects
          .filter(pk=invitation.pk)
          .update(interview_id=interview.id,
+                 status=InterviewInvitationStatuses.ACCEPTED,
                  modified=timezone.now()))
         transaction.savepoint_commit(sid)
         return interview

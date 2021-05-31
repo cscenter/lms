@@ -17,13 +17,13 @@ def test_appointment_create_interview(client):
         end_at=datetime.time(16, 0),
     )
     invitation = InterviewInvitationFactory(interview=None, streams=[slot.stream])
-    url = reverse("appointment:interview_appointment_slots", kwargs={
+    url = reverse("appointment:api:interview_appointment_slots", kwargs={
         "year": invitation.applicant.campaign.year,
         "secret_code": uuid4().hex,
         "slot_id": slot.pk})
     response = client.post(url)
     assert response.status_code == 404
-    url = reverse("appointment:interview_appointment_slots", kwargs={
+    url = reverse("appointment:api:interview_appointment_slots", kwargs={
             "year": invitation.applicant.campaign.year,
             "secret_code": invitation.secret_code.hex,
             "slot_id": slot.pk})

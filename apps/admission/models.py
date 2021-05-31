@@ -1255,6 +1255,7 @@ class InterviewSlot(TimeStampedModel):
 
 
 class InterviewInvitationQuerySet(query.QuerySet):
+    # FIXME: move to selectors
     def for_applicant(self, applicant):
         """Returns last active invitation for requested user"""
         today = timezone.now()
@@ -1282,7 +1283,8 @@ class InterviewInvitation(TimeStampedModel):
         related_name="interview_invitations")
     secret_code = models.UUIDField(
         verbose_name=_("Secret code"),
-        default=uuid.uuid4)
+        default=uuid.uuid4,
+        unique=True)
     expired_at = models.DateTimeField(_("Expired at"))
     interview = models.ForeignKey(
         Interview,

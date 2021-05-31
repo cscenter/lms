@@ -8,12 +8,13 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from admission.constants import (
-    INVITATION_EXPIRED_IN_HOURS, ChallengeStatuses, InterviewFormats, InterviewSections
+    INVITATION_EXPIRED_IN_HOURS, ChallengeStatuses, InterviewFormats,
+    InterviewInvitationStatuses, InterviewSections
 )
 from admission.models import Exam, Interview
 from admission.services import (
-    EmailQueueService, create_interview_from_slot, create_student_from_applicant,
-    get_meeting_time, get_streams
+    EmailQueueService, accept_interview_invitation, create_student_from_applicant,
+    decline_interview_invitation, get_meeting_time, get_streams
 )
 from admission.tests.factories import (
     ApplicantFactory, CampaignFactory, ExamFactory, InterviewFactory,
@@ -68,7 +69,7 @@ def test_create_student_from_applicant(settings):
 
 
 @pytest.mark.django_db
-def test_create_interview_from_slot():
+def test_accept_interview_invitation():
     dt = timezone.now() + datetime.timedelta(days=3)
     slot = InterviewSlotFactory(
         interview=None,
@@ -80,23 +81,23 @@ def test_create_interview_from_slot():
     invitation1 = InterviewInvitationFactory(interview=None, streams=[slot.stream])
     invitation2 = InterviewInvitationFactory(interview=None)
     with pytest.raises(NotFound) as e:
-        create_interview_from_slot(invitation1, slot_id=0)
+        accept_interview_invitation(invitation1, slot_id=0)
     with pytest.raises(ValidationError) as e:
-        create_interview_from_slot(invitation2, slot_id=slot.pk)
+        accept_interview_invitation(invitation2, slot_id=slot.pk)
     assert "not associated" in e.value.message
     interview1 = InterviewFactory(section=InterviewSections.ALL_IN_ONE)
     invitation1.interview = interview1
     with pytest.raises(ValidationError) as e:
-        create_interview_from_slot(invitation1, slot_id=slot.pk)
+        accept_interview_invitation(invitation1, slot_id=slot.pk)
     assert e.value.code == 'corrupted'
     interview2 = InterviewFactory(section=InterviewSections.ALL_IN_ONE,
                                   applicant=invitation1.applicant)
     invitation1.interview = interview2
     with pytest.raises(ValidationError) as e:
-        create_interview_from_slot(invitation1, slot_id=slot.pk)
+        accept_interview_invitation(invitation1, slot_id=slot.pk)
     assert e.value.code == 'accepted'
     invitation1.interview = None
-    create_interview_from_slot(invitation1, slot_id=slot.pk)
+    accept_interview_invitation(invitation1, slot_id=slot.pk)
     assert Interview.objects.count() == 3
     interview = Interview.objects.exclude(pk__in=[interview1.pk, interview2.pk]).get()
     assert interview.date.date() == dt.date()
@@ -105,6 +106,30 @@ def test_create_interview_from_slot():
     invitation1.refresh_from_db()
     assert invitation1.interview_id == interview.id
     # TODO: occupy slot
+
+
+@pytest.mark.django_db
+def test_decline_interview_invitation():
+    dt = timezone.now() + datetime.timedelta(days=3)
+    slot = InterviewSlotFactory(
+        interview=None,
+        stream__section=InterviewSections.MATH,
+        stream__date=dt.date(),
+        start_at=datetime.time(14, 0),
+        end_at=datetime.time(16, 0),
+    )
+    invitation = InterviewInvitationFactory(interview=None, streams=[slot.stream])
+    assert invitation.status == InterviewInvitationStatuses.CREATED
+    decline_interview_invitation(invitation)
+    invitation.refresh_from_db()
+    assert invitation.status == InterviewInvitationStatuses.DECLINED
+    # Invite is expired but status is not synced yet
+    invitation.expired_at = timezone.now() - datetime.timedelta(days=3)
+    invitation.status = InterviewInvitationStatuses.CREATED
+    invitation.save()
+    with pytest.raises(ValidationError) as e:
+        decline_interview_invitation(invitation)
+    assert e.value.code == 'expired'
 
 
 @pytest.mark.django_db

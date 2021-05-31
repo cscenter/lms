@@ -9,7 +9,6 @@ from braces.views import UserPassesTestMixin
 from django_filters.views import BaseFilterView, FilterMixin
 from extra_views.formsets import BaseModelFormSetView
 from rest_framework import serializers
-from rest_framework.fields import TimeField
 from vanilla import TemplateView
 
 from django.conf import settings
@@ -20,9 +19,7 @@ from django.db.models import Avg, Count, Prefetch, Value
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import HttpResponseNotFound, HttpResponseRedirect, JsonResponse
-from django.http.response import (
-    Http404, HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
-)
+from django.http.response import Http404, HttpResponse, HttpResponseForbidden
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from django.urls import reverse as django_reverse
@@ -50,12 +47,13 @@ from admission.services import (
 from core.models import Branch
 from core.timezone import now_local
 from core.urls import reverse
-from core.utils import bucketize, render_markdown
+from core.utils import render_markdown
 from tasks.models import Task
 from users.mixins import CuratorOnlyMixin
 from users.models import User
 
-from .selectors import get_interview_invitation, get_occupied_slot
+from .constants import InterviewInvitationStatuses
+from .selectors import get_active_interview_invitation, get_occupied_slot
 from .tasks import import_testing_results
 
 
@@ -207,7 +205,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         context["status_form"] = ApplicantStatusForm(instance=applicant)
         if 'form' not in kwargs:
             invitation = InterviewInvitation.objects.for_applicant(applicant)
-            if not invitation:
+            if not invitation or invitation.status == InterviewInvitationStatuses.DECLINED:
                 branch = applicant.campaign.branch
                 context["form"] = InterviewFromStreamForm(branch=branch)
             else:
@@ -722,7 +720,7 @@ class AppointmentSlotSerializer(serializers.ModelSerializer):
 
 def get_slot_occupation_url(invitation: InterviewInvitation):
     """`use-http` on client waits for relative path."""
-    url = django_reverse("appointment:interview_appointment_slots", kwargs={
+    url = django_reverse("appointment:api:interview_appointment_slots", kwargs={
         "year": invitation.applicant.campaign.year,
         "secret_code": invitation.secret_code.hex,
         "slot_id": 42})
@@ -742,13 +740,17 @@ class InterviewAppointmentView(TemplateView):
         if not serializer.is_valid(raise_exception=False):
             return HttpResponseNotFound()
 
-        invitation = get_interview_invitation(**serializer.validated_data)
+        invitation = get_active_interview_invitation(**serializer.validated_data)
         if not invitation:
             raise Http404
 
         tz_msk = pytz.timezone("Europe/Moscow")
         invitation_deadline = formats.date_format(invitation.expired_at.astimezone(tz_msk),
-                                                  "d E H:i")
+                                                  "j E H:i")
+        decline_invitation_url = django_reverse("appointment:api:interview_appointment", kwargs={
+            "year": invitation.applicant.campaign.year,
+            "secret_code": invitation.secret_code.hex
+        })
 
         context = {
             "invitation": invitation,
@@ -756,7 +758,8 @@ class InterviewAppointmentView(TemplateView):
             "app_data": {
                 "props": {
                     "invitationDeadline": invitation_deadline,
-                    "endpoint": get_slot_occupation_url(invitation),
+                    "endpointSlotOccupation": get_slot_occupation_url(invitation),
+                    "endpointDeclineInvitation": decline_invitation_url,
                     "csrfToken": get_token(request)
                 }
             }
