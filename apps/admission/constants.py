@@ -35,3 +35,10 @@ class InterviewSections(DjangoChoices):
     MATH = C('math', pgettext_lazy("section", "Math"))
     PROGRAMMING = C('code', pgettext_lazy("section", "Coding"))
     MOTIVATION = C('mv', pgettext_lazy("section", "Motivation"))
+
+
+class InterviewInvitationStatuses(DjangoChoices):
+    CREATED = C('created', _("No Response"))
+    DECLINED = C('declined', _("Declined"))
+    EXPIRED = C('expired', _("Expired"))
+    ACCEPTED = C('accepted', _("Accepted"))

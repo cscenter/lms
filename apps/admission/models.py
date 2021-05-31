@@ -18,7 +18,9 @@ from django.utils.formats import date_format, time_format
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from admission.constants import ChallengeStatuses, InterviewFormats, InterviewSections
+from admission.constants import (
+    ChallengeStatuses, InterviewFormats, InterviewInvitationStatuses, InterviewSections
+)
 from admission.utils import get_next_process, slot_range
 from core.db.fields import ScoreField
 from core.models import Branch, Location
@@ -1269,6 +1271,11 @@ class InterviewInvitation(TimeStampedModel):
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
         related_name="interview_invitations")
+    status = models.CharField(
+        choices=InterviewInvitationStatuses.choices,
+        default=InterviewInvitationStatuses.CREATED,
+        verbose_name=_("Status"),
+        max_length=10)
     streams = models.ManyToManyField(
         InterviewStream,
         verbose_name=_("Interview streams"),
