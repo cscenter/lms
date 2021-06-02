@@ -36,7 +36,7 @@ urlpatterns = [
         path('applicants/', include((applicant_patterns, 'applicants'))),
         path('interviews/', include((interview_patterns, 'interviews'))),
         path('results/', include((results_patterns, 'results'))),
-        path('send_invitations/', SendInvitationListView.as_view(), name='send_interview_invitations'),
+        path('interviews/invitations/add/', SendInvitationListView.as_view(), name='send_interview_invitations'),
         path('status_invitations/', StatusInvitationListView.as_view(), name='status_interview_invitations'),
     ])),
 ]
