@@ -38,7 +38,7 @@ pytest-pythonpath = "*"
 [packages]
 # Core
 pytz = "*"
-Django = "==3.1.7"
+Django = "==3.1.12"
 django-environ = "*"
 rules = "*"
 # DB
@@ -46,7 +46,7 @@ psycopg2-binary = "==2.8.6"
 django-prettyjson = "==0.4.1"
 # Images
 sorl-thumbnail = "==12.7.0"
-python-magic = "==0.4.22"
+python-magic = "==0.4.23"
 Pillow = "==8.2.0"
 # Forms
 django-crispy-forms = "==1.11.2"
@@ -54,7 +54,7 @@ django-crispy-forms = "==1.11.2"
 beautifulsoup4 = "*"
 # i18n/l10n
 django-rosetta = "*"
-django-modeltranslation = "==0.17.1"
+django-modeltranslation = "==0.17.2"
 babel = "*"
 # AWS
 boto3 = "*"
@@ -70,7 +70,7 @@ sentry-sdk = "*"
 social-auth-core = "==4.1.0"
 social-auth-app-django = "==4.0.0"
 # Task manager
-rq = "==1.8.0"
+rq = "==1.8.1"
 django-rq = "==2.4.1"
 rq-scheduler = ">=0.9"
 # Security
@@ -92,9 +92,11 @@ numpy = "==1.20.2"
 icalendar = "==4.0.7"
 django-ical = "==1.7.1"
 python-dateutil = "==2.8.1"
+# TODO: remove Jinja2 dependency after updating django-jinja
 django-jinja = "==2.7.0"
+Jinja2 = "==2.11.3"
 python-ldap = "==3.3.1"
-attrs = "==20.3.0"
+attrs = "==21.2.0"
 django-choices = "==1.7.1"
 django-vanilla-views = "==2.0.0"
 django-autocomplete-light = "==3.8.2"
