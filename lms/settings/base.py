@@ -174,7 +174,7 @@ TEMPLATES = [
         "NAME": "jinja2",
         "OPTIONS": {
             "match_extension": None,
-            "match_regex": r"^(?!admin/).*",
+            "match_regex": r"^(?!admin/|django/).*",
             "filters": {
                 "markdown": "core.jinja2.filters.markdown",
                 "pluralize": "core.jinja2.filters.pluralize",
