@@ -65,7 +65,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 elif field.name == 'level_of_education':
                     value = applicant.get_level_of_education_display()
                 elif field.name == 'id':
-                    value = reverse("admission:applicant_detail", args=[value])
+                    value = reverse("admission:applicants:detail", args=[value])
                 elif field.name == 'created':
                     value = formats.date_format(applicant.created,
                                                 "SHORT_DATE_FORMAT")

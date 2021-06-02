@@ -71,7 +71,7 @@ top_menu = [
         css_classes='for-teachers'),
     MenuItem(
         pgettext_lazy("menu", "Набор"),
-        reverse('admission:interviews'),
+        reverse('admission:interviews:list'),
         weight=30,
         children=[
             MenuItem(pgettext_lazy("menu", "Собеседования"), '/admission/interviews/', weight=10),

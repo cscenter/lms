@@ -185,7 +185,7 @@ def test_interview_list(settings, client, curator):
     localized = msk_interview_date_in_utc.astimezone(msk_tz)
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == '18:00'  # expected UTC+3
-    url = reverse("admission:interviews") + "?campaign="
+    url = reverse("admission:interviews:list") + "?campaign="
     response = client.get(url)
     assert response.status_code == 200
     html = BeautifulSoup(response.content, "html.parser")
@@ -203,7 +203,7 @@ def test_interview_list(settings, client, curator):
     localized = interview_date_in_utc.astimezone(tz)
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "19:00"  # expected UTC + 7
-    url = reverse("admission:interviews") + "?campaign="
+    url = reverse("admission:interviews:list") + "?campaign="
     response = client.get(url)
     assert response.status_code == 200
     html = BeautifulSoup(response.content, "html.parser")

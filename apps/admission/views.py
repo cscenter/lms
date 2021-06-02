@@ -158,7 +158,7 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         if user.is_curator and "campaign" not in self.request.GET:
             campaign = get_default_campaign_for_user(user)
             campaign_id = campaign.id if campaign else ""
-            url = reverse("admission:applicants")
+            url = reverse("admission:applicants:list")
             url = f"{url}?campaign={campaign_id}&status="
             return HttpResponseRedirect(redirect_to=url)
         return super().get(request, *args, **kwargs)
@@ -240,7 +240,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
     def get_success_url(self):
         messages.success(self.request, "Собеседование успешно добавлено",
                          extra_tags='timeout')
-        return reverse("admission:interview_detail", args=[self.object.pk])
+        return reverse("admission:interviews:detail", args=[self.object.pk])
 
     def create_interview_from_slot(self, applicant, stream_form, slot):
         data = InterviewForm.build_data(applicant, slot)
@@ -294,7 +294,7 @@ class ApplicantStatusUpdateView(CuratorOnlyMixin, generic.UpdateView):
     def get_success_url(self):
         messages.success(self.request, "Статус успешно обновлён",
                          extra_tags='timeout')
-        return reverse("admission:applicant_detail", args=[self.object.pk])
+        return reverse("admission:applicants:detail", args=[self.object.pk])
 
 
 # FIXME: rewrite with rest framework
@@ -354,7 +354,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                 'date_from': date,
                 'date_to': date
             }, doseq=True)
-            url = "{}?{}".format(reverse("admission:interviews"), params)
+            url = "{}?{}".format(reverse("admission:interviews:list"), params)
             return HttpResponseRedirect(redirect_to=url)
         return super().get(request, *args, **kwargs)
 
@@ -493,7 +493,7 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
     def get_success_url(self):
         messages.success(self.request, "Комментарий успешно сохранён",
                          extra_tags='timeout')
-        return reverse("admission:interview_detail",
+        return reverse("admission:interviews:detail",
                        args=[self.object.interview_id])
 
     def form_invalid(self, form):
@@ -539,7 +539,7 @@ class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
             branch_code = settings.DEFAULT_BRANCH_CODE
         if branch_code not in branches:
             branch_code = next(branches.iterator(), settings.DEFAULT_BRANCH_CODE)
-        return reverse("admission:branch_interview_results", kwargs={
+        return reverse("admission:results:list", kwargs={
             "branch_code": branch_code,
         })
 
@@ -581,7 +581,7 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
         except StopIteration:
             messages.error(self.request,
                            "Активная кампания по набору не найдена")
-            return HttpResponseRedirect(reverse("admission:applicants"))
+            return HttpResponseRedirect(reverse("admission:applicants:list"))
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
@@ -682,13 +682,13 @@ class ApplicantCreateStudentView(CuratorOnlyMixin, generic.View):
     @atomic
     def post(self, request, *args, **kwargs):
         applicant_pk = kwargs.get("pk")
-        back_url = reverse("admission:applicants")
+        back_url = reverse("admission:applicants:list")
         try:
             applicant = Applicant.objects.get(pk=applicant_pk)
         except Applicant.DoesNotExist:
             messages.error(self.request, "Анкета не найдена",
                            extra_tags='timeout')
-            return HttpResponseRedirect(reverse("admission:applicants"))
+            return HttpResponseRedirect(reverse("admission:applicants:list"))
         try:
             user = create_student_from_applicant(applicant)
         except User.MultipleObjectsReturned:

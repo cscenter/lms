@@ -53,7 +53,7 @@ def test_simple_interviews_list(client, curator, settings):
     interview2.save()
     interview3.date = today_local_nsk + datetime.timedelta(days=2)
     interview3.save()
-    response = client.get(reverse('admission:interviews'))
+    response = client.get(reverse('admission:interviews:list'))
     # For curator set default filters and redirect
     assert response.status_code == 302
     assert f"campaign={campaign.pk}" in response.url
@@ -63,7 +63,7 @@ def test_simple_interviews_list(client, curator, settings):
     assert f"date_to={today_local_nsk_date}" in response.url
 
     def format_url(campaign_id, date_from: str, date_to: str):
-        return (reverse('admission:interviews') +
+        return (reverse('admission:interviews:list') +
                 f"?campaign={campaign_id}&status={Interview.COMPLETED}&"
                 f"status={Interview.APPROVED}&"
                 f"date_from={date_from}&date_to={date_to}")
@@ -217,7 +217,7 @@ def test_interview_results_dispatch_view(client, settings, assert_redirect,
     branch_default = BranchFactory(code=settings.DEFAULT_BRANCH_CODE)
     user = UserFactory(is_staff=False, branch=branch_spb)
     client.login(user)
-    url = reverse('admission:interview_results_dispatch')
+    url = reverse('admission:results:dispatch')
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[-1]
     assert status_code == 302
@@ -227,20 +227,20 @@ def test_interview_results_dispatch_view(client, settings, assert_redirect,
     client.login(curator)
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[0]
-    assert redirect_url == reverse("admission:branch_interview_results",
+    assert redirect_url == reverse("admission:results:list",
                                    kwargs={"branch_code": branch_default.code})
     # And then to the applicants list page
     redirect_url, status_code = response.redirect_chain[1]
-    assert redirect_url == reverse("admission:applicants")
+    assert redirect_url == reverse("admission:applicants:list")
     # Add inactive campaign
     campaign_nsk = CampaignFactory.create(branch=branch_nsk, current=False)
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[1]
-    assert redirect_url == reverse("admission:applicants")
+    assert redirect_url == reverse("admission:applicants:list")
     # Test redirection to the first active campaign
     campaign_nsk.current = True
     campaign_nsk.save()
-    results_nsk = reverse("admission:branch_interview_results",
+    results_nsk = reverse("admission:results:list",
                           kwargs={"branch_code": branch_nsk.code})
     response = client.get(url)
     assert_redirect(response, results_nsk)
@@ -254,7 +254,7 @@ def test_interview_results_dispatch_view(client, settings, assert_redirect,
     campaign_nsk.save()
     campaign_spb.current = True
     campaign_spb.save()
-    results_spb = reverse("admission:branch_interview_results",
+    results_spb = reverse("admission:results:list",
                           kwargs={"branch_code": branch_spb.code})
     assert_redirect(client.get(url), results_spb)
 
@@ -268,7 +268,7 @@ def test_interview_comment_create(curator, client, settings):
         "interview": interview.pk,
         "interviewer": curator.pk
     }
-    url = reverse("admission:interview_comment", args=[interview.pk])
+    url = reverse("admission:interviews:comment", args=[interview.pk])
     response = client.post(url, form, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
     assert response.status_code == 400  # invalid form: empty score
     form['score'] = 2
@@ -357,7 +357,7 @@ def test_create_student_from_applicant(client, curator, assert_redirect):
     applicant = ApplicantFactory()
     client.login(curator)
     assert not applicant.user_id
-    response = client.post(reverse("admission:applicant_create_student",
+    response = client.post(reverse("admission:applicants:create_student",
                                    kwargs={"pk": applicant.pk}))
     assert response.status_code == 302
     applicant.refresh_from_db()
@@ -367,7 +367,7 @@ def test_create_student_from_applicant(client, curator, assert_redirect):
     # Student who was expelled in the first semester still could reapply
     # on general terms
     applicant_reapplied = ApplicantFactory(email=applicant.email)
-    response = client.post(reverse("admission:applicant_create_student",
+    response = client.post(reverse("admission:applicants:create_student",
                                    kwargs={"pk": applicant_reapplied.pk}))
     assert response.status_code == 302
     applicant_reapplied.refresh_from_db()

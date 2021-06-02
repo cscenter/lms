@@ -14,7 +14,7 @@ class PublicRoute(Enum):
     Mapping for some public url codes to internal route names.
     """
     PROJECTS = ('projects', 'Проекты', 'projects:report_list_reviewers')
-    ADMISSION = ('admission', 'Набор', 'admission:interviews')
+    ADMISSION = ('admission', 'Набор', 'admission:interviews:list')
     LEARNING = ('learning', 'Обучение', 'study:assignment_list')
     TEACHING = ('teaching', 'Преподавание', 'teaching:assignment_list')
     STAFF = ('staff', 'Курирование', 'staff:student_search')

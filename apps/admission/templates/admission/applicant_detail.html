@@ -56,7 +56,7 @@
         </div>
         <div class="tab-pane" id="similar-applicants" role="tabpanel">
             {% for applicant in similar_applicants %}
-                <a target="_blank" href="{% url "admission:applicant_detail" applicant.pk %}">{{ applicant.full_name }} ({{ applicant.campaign }})</a><br>
+                <a target="_blank" href="{% url "admission:applicants:detail" applicant.pk %}">{{ applicant.full_name }} ({{ applicant.campaign }})</a><br>
             {% empty %}
                 Похожие анкеты не найдены.
             {% endfor %}

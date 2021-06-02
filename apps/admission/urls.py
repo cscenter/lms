@@ -1,5 +1,5 @@
 from django.conf.urls import include
-from django.urls import path, re_path
+from django.urls import path
 
 from admission.views import (
     ApplicantCreateStudentView, ApplicantDetailView, ApplicantListView,
@@ -10,18 +10,30 @@ from admission.views import (
 
 app_name = 'admission'
 
+applicant_patterns = [
+    path('', ApplicantListView.as_view(), name='list'),
+    path('<int:pk>/', ApplicantDetailView.as_view(), name='detail'),
+    path('<int:pk>/create_student', ApplicantCreateStudentView.as_view(), name='create_student'),
+    path('status/<int:pk>/', ApplicantStatusUpdateView.as_view(), name='update_status'),
+]
+
+interview_patterns = [
+    path('', InterviewListView.as_view(), name='list'),
+    path('<int:pk>/', InterviewDetailView.as_view(), name='detail'),
+    path('interviews/<int:pk>/comment', InterviewCommentView.as_view(), name='comment'),
+    path('assignments/<int:pk>/', InterviewAssignmentDetailView.as_view(), name='assignment'),
+]
+
+results_patterns = [
+    path('results/', InterviewResultsDispatchView.as_view(), name='dispatch'),
+    path('results/<str:branch_code>/', InterviewResultsView.as_view(), name='list'),
+]
+
 urlpatterns = [
-    re_path(r'^admission/', include([
-        path('applicants/', ApplicantListView.as_view(), name='applicants'),
-        re_path(r'^applicants/(?P<pk>\d+)/$', ApplicantDetailView.as_view(), name='applicant_detail'),
-        re_path(r'^applicants/(?P<pk>\d+)/create_student$', ApplicantCreateStudentView.as_view(), name='applicant_create_student'),
-        path('applicants/import/<int:campaign_id>/testing/', import_campaign_testing_results, name='import_testing_results'),
-        re_path(r'^applicants/status/(?P<pk>\d+)/$', ApplicantStatusUpdateView.as_view(), name='applicant_status_update'),
-        re_path(r'^interviews/$', InterviewListView.as_view(), name='interviews'),
-        re_path(r'^interviews/assignments/(?P<pk>\d+)/$', InterviewAssignmentDetailView.as_view(), name='interview_assignment_detail'),
-        re_path(r'^interviews/(?P<pk>\d+)/$', InterviewDetailView.as_view(), name='interview_detail'),
-        path('interviews/<int:pk>/comment', InterviewCommentView.as_view(), name='interview_comment'),
-        re_path(r'^results/$', InterviewResultsDispatchView.as_view(), name='interview_results_dispatch'),
-        re_path(r'^results/(?P<branch_code>\w+)/$', InterviewResultsView.as_view(), name='branch_interview_results'),
+    path('admission/', include([
+        path('<int:campaign_id>/testing/import/', import_campaign_testing_results, name='import_testing_results'),
+        path('applicants/', include((applicant_patterns, 'applicants'))),
+        path('interviews/', include((interview_patterns, 'interviews'))),
+        path('results/', include((results_patterns, 'results'))),
     ])),
 ]

@@ -183,7 +183,7 @@ class InterviewCommentForm(forms.ModelForm):
         initial["interview"] = self.interview_id
         initial["interviewer"] = self.interviewer
         kwargs["initial"] = initial
-        self.helper.form_action = reverse("admission:interview_comment",
+        self.helper.form_action = reverse("admission:interviews:comment",
                                           kwargs={"pk": self.interview_id})
         super().__init__(*args, **kwargs)
         self.fields['score'].label = "Моя оценка"
@@ -239,7 +239,7 @@ class ApplicantStatusForm(forms.ModelForm):
         self.helper.layout.append(
             FormActions(Submit('update', _('Update')), css_class="pull-right"))
         self.helper.form_action = "{}{}".format(
-            reverse("admission:applicant_status_update", args=[self.instance.pk]),
+            reverse("admission:applicants:update_status", args=[self.instance.pk]),
             "#update-status-form")
 
 

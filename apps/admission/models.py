@@ -523,7 +523,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
         return ""
 
     def get_absolute_url(self):
-        return reverse('admission:applicant_detail', args=[self.pk])
+        return reverse('admission:applicants:detail', args=[self.pk])
 
     def __str__(self):
         if self.campaign_id:
@@ -1059,7 +1059,7 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
             raise ValidationError("You can't change status without date set up")
 
     def get_absolute_url(self):
-        return reverse('admission:interview_detail', args=[self.pk])
+        return reverse('admission:interviews:detail', args=[self.pk])
 
     def get_public_assignments_url(self):
         return reverse(
