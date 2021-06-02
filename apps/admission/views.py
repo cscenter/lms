@@ -529,7 +529,9 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
 class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         """Based on user settings, get preferred page address and redirect"""
-        branches = (Campaign.objects.filter(current=True)
+        branches = (Campaign.objects
+                    .filter(current=True,
+                            branch__site_id=settings.SITE_ID)
                     .values_list("branch__code", flat=True))
         if self.request.user.branch_id is not None:
             branch_code = self.request.user.branch.code
