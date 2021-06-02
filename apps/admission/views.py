@@ -53,7 +53,7 @@ from users.mixins import CuratorOnlyMixin
 from users.models import User
 
 from .constants import InterviewInvitationStatuses
-from .selectors import get_active_interview_invitation, get_occupied_slot
+from .selectors import get_interview_invitation, get_occupied_slot
 from .tasks import import_testing_results
 
 
@@ -740,8 +740,8 @@ class InterviewAppointmentView(TemplateView):
         if not serializer.is_valid(raise_exception=False):
             return HttpResponseNotFound()
 
-        invitation = get_active_interview_invitation(**serializer.validated_data)
-        if not invitation:
+        invitation = get_interview_invitation(**serializer.validated_data)
+        if not invitation or invitation.is_expired or invitation.is_declined:
             raise Http404
 
         tz_msk = pytz.timezone("Europe/Moscow")
@@ -784,6 +784,7 @@ class InterviewAppointmentView(TemplateView):
                     },
                     "venue": {
                         "name": stream.venue.name,
+                        "address": stream.venue.address,
                         "description": stream.venue.description,
                     },
                     "slots": [AppointmentSlotSerializer(instance=s).data for s in slots]

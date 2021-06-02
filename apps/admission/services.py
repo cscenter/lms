@@ -154,12 +154,20 @@ class InterviewCreateError(APIException):
 def decline_interview_invitation(invitation: InterviewInvitation):
     if invitation.is_expired:
         raise ValidationError("Interview Invitation is expired", code="expired")
+    is_unprocessed_invitation = (invitation.status == InterviewInvitationStatuses.CREATED)
+    if not is_unprocessed_invitation:
+        raise ValidationError("Status transition is not supported", code="malformed")
     invitation.status = InterviewInvitationStatuses.DECLINED
     invitation.save(update_fields=['status'])
 
 
 def accept_interview_invitation(invitation: InterviewInvitation, slot_id: int) -> Interview:
-    """Creates interview, occupies slot and sends confirmation via email"""
+    """
+    Creates interview, occupies slot and sends confirmation via email.
+
+    It is allowed to accept only ongoing unprocessed invitation.
+    """
+    # Checks for more detailed errors
     if invitation.is_accepted:
         # Interview was created but reassigned to another participant
         if invitation.applicant_id != invitation.interview.applicant_id:
@@ -169,6 +177,10 @@ def accept_interview_invitation(invitation: InterviewInvitation, slot_id: int) -
         raise ValidationError("Приглашение уже принято", code=code)
     elif invitation.is_expired:
         raise ValidationError("Приглашение больше не актуально", code="expired")
+    is_unprocessed_invitation = (invitation.status == InterviewInvitationStatuses.CREATED)
+    if not is_unprocessed_invitation:
+        raise ValidationError(f"You can't accept invitation with {invitation.status} status", code="malformed")
+
     try:
         slot = InterviewSlot.objects.get(pk=slot_id)
     except InterviewSlot.DoesNotExist:

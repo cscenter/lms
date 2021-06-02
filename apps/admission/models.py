@@ -1325,6 +1325,10 @@ class InterviewInvitation(TimeStampedModel):
     def is_accepted(self):
         return bool(self.interview_id)
 
+    @property
+    def is_declined(self):
+        return self.status == InterviewInvitationStatuses.DECLINED
+
     def get_absolute_url(self):
         return reverse("appointment:select_time_slot", kwargs={
             "year": self.applicant.campaign.year,

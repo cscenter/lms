@@ -8,7 +8,7 @@ from admission.api.views import (
 app_name = 'appointment'
 
 api_urls = [
-    re_path(r'^appointment/(?P<year>\d{4})/(?P<secret_code>\w+)/$', AppointmentInterviewInvitationApi.as_view(), name='interview_appointment_invite'),
+    re_path(r'^appointment/(?P<year>\d{4})/(?P<secret_code>\w+)/$', AppointmentInterviewInvitationApi.as_view(), name='interview_appointment'),
     re_path(r'^appointment/(?P<year>\d{4})/(?P<secret_code>\w+)/(?P<slot_id>\d+)/$', AppointmentInterviewCreateApi.as_view(), name='interview_appointment_slots'),
 ]
 

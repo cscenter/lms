@@ -45,6 +45,6 @@ class ApiErrorsMixin:
         e = exc
         if isinstance(exc, tuple(self.cast_exceptions.keys())):
             drf_exception_class = self.cast_exceptions[exc.__class__]
-            code = exc.code if isinstance(exc, ValidationError) else None
+            code = getattr(exc, "code", None)
             e = drf_exception_class(detail=get_error_message(exc), code=code)
         return super().handle_exception(e)

@@ -5,6 +5,7 @@ from django.db.models import Q
 
 from admission.constants import InterviewInvitationStatuses
 from admission.models import InterviewInvitation, InterviewSlot
+from core.timezone import get_now_utc
 
 
 def get_occupied_slot(*, invitation: InterviewInvitation) -> Optional[InterviewSlot]:
@@ -30,14 +31,20 @@ def get_interview_invitation(*, year: int, secret_code: uuid4,
                         secret_code=secret_code,
                         applicant__campaign__year=year)
                 .select_related("applicant__campaign")
-                .prefetch_related("streams")
                 .get())
     except InterviewInvitation.DoesNotExist:
         return None
 
 
-def get_active_interview_invitation(*, year: int, secret_code: uuid4) -> Optional[InterviewInvitation]:
-    # FIXME: filter by expired_at
-    filters = [Q(status=InterviewInvitationStatuses.CREATED)]
+def get_ongoing_interview_invitation(*, year: int, secret_code: uuid4) -> Optional[InterviewInvitation]:
+    """
+    *Ongoing* means that interview invitation is not expired or declined and
+    the participant could accept or decline it before the deadline if they
+    haven't already done so.
+    """
+    filters = [
+        Q(expired_at__gt=get_now_utc()),
+        ~Q(status=InterviewInvitationStatuses.DECLINED)
+    ]
     return get_interview_invitation(year=year, secret_code=secret_code,
                                     filters=filters)

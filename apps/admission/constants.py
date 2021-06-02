@@ -38,7 +38,11 @@ class InterviewSections(DjangoChoices):
 
 
 class InterviewInvitationStatuses(DjangoChoices):
+    # This status means applicant did not perform any action on this invitation
     CREATED = C('created', _("No Response"))
     DECLINED = C('declined', _("Declined"))
+    # TODO: auto-update status for expired invitation: rq task or in a lazy manner (but where?)
+    # Note: explicit status for expired invitation is out of
+    # sync with actual checking for expiration time
     EXPIRED = C('expired', _("Expired"))
     ACCEPTED = C('accepted', _("Accepted"))

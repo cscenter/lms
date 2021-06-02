@@ -7,9 +7,7 @@ from rest_framework.views import APIView
 from django.http import Http404
 
 from admission.models import InterviewSlot
-from admission.selectors import (
-    get_active_interview_invitation, get_interview_invitation
-)
+from admission.selectors import get_ongoing_interview_invitation
 from admission.services import accept_interview_invitation, decline_interview_invitation
 from api.permissions import CuratorAccessPermission
 from api.views import APIBaseView
@@ -39,6 +37,7 @@ class InterviewSlots(APIView):
 
 
 class AppointmentInterviewInvitationApi(APIBaseView):
+    """View to decline interview invitation"""
     permission_classes = (AllowAny,)
 
     class InputSerializer(serializers.Serializer):
@@ -48,7 +47,8 @@ class AppointmentInterviewInvitationApi(APIBaseView):
     def put(self, request, *args, **kwargs):
         serializer = self.InputSerializer(data=kwargs)
         serializer.is_valid(raise_exception=True)
-        invitation = get_active_interview_invitation(**serializer.validated_data)
+
+        invitation = get_ongoing_interview_invitation(**serializer.validated_data)
         if not invitation:
             raise Http404
 
@@ -58,6 +58,7 @@ class AppointmentInterviewInvitationApi(APIBaseView):
 
 
 class AppointmentInterviewCreateApi(APIBaseView):
+    """View to accept interview invitation"""
     permission_classes = (AllowAny,)
 
     class InputSerializer(serializers.Serializer):
@@ -68,8 +69,8 @@ class AppointmentInterviewCreateApi(APIBaseView):
     def post(self, request, *args, **kwargs):
         serializer = self.InputSerializer(data=kwargs)
         serializer.is_valid(raise_exception=True)
-        invitation = get_interview_invitation(year=serializer.validated_data['year'],
-                                              secret_code=serializer.validated_data['secret_code'])
+        invitation = get_ongoing_interview_invitation(year=serializer.validated_data['year'],
+                                                      secret_code=serializer.validated_data['secret_code'])
         if not invitation:
             raise Http404
 
