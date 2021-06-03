@@ -67,12 +67,10 @@ class InterviewStreamInvitationForm(forms.Form):
         widget=SelectMultiple(attrs={"size": 1, "class": "bs-select-hidden"}),
         required=True)
 
-    # def __init__(self, branch: Branch, *args, **kwargs):
     def __init__(self, stream, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['streams'].queryset = stream
         self.helper = FormHelper(self)
-        self.helper.form_method = "GET"
         self.helper.layout = Layout(
             Row(
                 Div('streams', css_class='col-xs-8'),

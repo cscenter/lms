@@ -43,10 +43,10 @@
                 <th style="width: 60px;">Экз.</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="checkStudent">
                 {% for applicant in applicants %}
-                    <tr id="checkStudent">
-                        <td><input class="form-check-input" type="checkbox" value="" id=""></td>
+                    <tr>
+                        <td><input name='applicant-select' class="form-check-input" type="checkbox" value="{{applicant.id}}" id="id_{{applicant.id}}"></td>
                         <td class="applicant">
                             <a href="{%  url "admission:applicants:detail" applicant.pk %}">{{ applicant.full_name }}</a>
                             {% if applicant.university_other %}{{ applicant.university_other }}{% else %}{% if applicant.university.abbr %}{{ applicant.university.abbr }}{% else %}{{ applicant.university.name }}{% endif %}{% endif %}

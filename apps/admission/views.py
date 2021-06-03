@@ -200,6 +200,79 @@ def get_interview_stream_filterset(input_serializer: serializers.Serializer):
     return interview_stream_filterset
 
 
+class SendInvitationListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
+    context_object_name = 'send_interview_invitations'
+    model = InterviewStream
+    template_name = "admission/send_interview_invitations.html"
+    filterset_class = ApplicantInvitationFilter
+    paginate_by = 50
+
+    def post(self, request, *args, **kwargs):
+        """Get data for interview from stream form"""
+        user = self.request.user
+
+        if not request.user.is_curator:
+            return self.handle_no_permission(request)
+
+        campaign = self.request.POST.getlist('campaign')
+        section = self.request.POST.getlist('section')
+        ids = self.request.POST.getlist('ids[]')
+        streams = self.request.POST.getlist('streams[]')
+
+        # Create interview invitations
+        if (user.is_curator and
+            len(list(ids)) != 0 and len(list(streams)) != 0 and
+            'campaign' in self.request.GET and
+            'section' in self.request.GET):
+
+            with transaction.atomic():
+                for applicant_id in list(ids):
+                    applicant = Applicant.objects.get(id=applicant_id)
+
+                    new_interview_invitation = InterviewInvitation()
+                    new_interview_invitation.applicant = applicant
+                    new_interview_invitation.expired_at = datetime.now() + timedelta(days=2, hours=3)
+                    new_interview_invitation.save()
+                    for stream in list(streams):
+                        new_interview_invitation.streams.add(InterviewStream.objects.get(id=stream))
+                    new_interview_invitation.save()
+
+        return super().get(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        """Sets filter defaults and redirects"""
+        user = self.request.user
+
+        if user.is_curator and 'campaign' not in self.request.GET:
+            campaign = get_default_campaign_for_user(user)
+            campaign_id = campaign.id if campaign else ""
+            if "section" not in self.request.GET:
+                section_name = 'all_in_1'
+            url = reverse("admission:send_interview_invitations")
+            url = f"{url}?campaign={campaign_id}&section={section_name}"
+            return HttpResponseRedirect(redirect_to=url)
+
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        campaign = context['filter'].form.cleaned_data.get('campaign')
+        section = context['filter'].form.cleaned_data.get('section')
+
+        branch = campaign.branch
+        applicant_queryset = Applicant.objects.filter(campaign=campaign)
+        today = now_local(branch.get_timezone()).date()
+        interview_streams = (InterviewStream.objects
+                             .filter(campaign__branch=branch,
+                                     section=section,
+                                     date__gt=today)
+                             .select_related("venue"))
+        context["applicants"] = applicant_queryset
+        context["interview_stream_form"] = InterviewStreamInvitationForm(
+            stream=interview_streams)
+        return context
+
+    
 class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseListView):
     model = InterviewStream
     template_name = "lms/admission/interview_invitation_list.html"
