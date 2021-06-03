@@ -30,6 +30,7 @@ from django.views.generic.base import RedirectView, TemplateResponseMixin
 from django.views.generic.edit import BaseCreateView, ModelFormMixin
 from django.views.generic.list import BaseListView
 
+from admission.constants import INVITATION_EXPIRED_IN_HOURS
 from admission.filters import (
     ApplicantFilter, InterviewInvitationFilter, InterviewsCuratorFilter,
     InterviewsFilter, InterviewStreamFilter, ResultsFilter
@@ -219,6 +220,9 @@ class SendInvitationListView(CuratorOnlyMixin, BaseFilterView, generic.ListView)
         ids = self.request.POST.getlist('ids[]')
         streams = self.request.POST.getlist('streams[]')
 
+        expired_in_hours = INVITATION_EXPIRED_IN_HOURS
+        expired_at = timezone.now() + timedelta(hours=expired_in_hours)
+
         # Create interview invitations
         if (user.is_curator and
             len(list(ids)) != 0 and len(list(streams)) != 0 and
@@ -231,7 +235,7 @@ class SendInvitationListView(CuratorOnlyMixin, BaseFilterView, generic.ListView)
 
                     new_interview_invitation = InterviewInvitation()
                     new_interview_invitation.applicant = applicant
-                    new_interview_invitation.expired_at = datetime.now() + timedelta(days=2, hours=3)
+                    new_interview_invitation.expired_at = expired_at
                     new_interview_invitation.save()
                     for stream in list(streams):
                         new_interview_invitation.streams.add(InterviewStream.objects.get(id=stream))
