@@ -264,13 +264,26 @@ class SendInvitationListView(CuratorOnlyMixin, BaseFilterView, generic.ListView)
         section = context['filter'].form.cleaned_data.get('section')
 
         branch = campaign.branch
-        applicant_queryset = Applicant.objects.filter(campaign=campaign)
+
         today = now_local(branch.get_timezone()).date()
         interview_streams = (InterviewStream.objects
                              .filter(campaign__branch=branch,
                                      section=section,
                                      date__gt=today)
                              .select_related("venue"))
+
+        interview_invitations = (InterviewInvitation.objects
+                                 .filter(expired_at__gte=today,
+                                         streams__in=interview_streams))
+
+        applicant_id = set()
+        for interview_invitation in interview_invitations:
+            applicant_id.add(interview_invitation.applicant.id)
+
+        applicant_queryset = (Applicant.objects
+                              .filter(campaign=campaign)
+                              .exclude(id__in=list(applicant_id)))
+
         context["applicants"] = applicant_queryset
         context["interview_stream_form"] = InterviewStreamInvitationForm(
             stream=interview_streams)
