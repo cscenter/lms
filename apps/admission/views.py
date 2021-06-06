@@ -33,7 +33,8 @@ from django.views.generic.list import BaseListView
 from admission.constants import INVITATION_EXPIRED_IN_HOURS
 from admission.filters import (
     ApplicantFilter, InterviewInvitationFilter, InterviewsCuratorFilter,
-    InterviewsFilter, InterviewStreamFilter, ResultsFilter
+    InterviewsFilter, InterviewStreamFilter, InterviewStreamSendInvitationFilter,
+    ResultsFilter
 )
 from admission.forms import (
     ApplicantReadOnlyForm, ApplicantStatusForm, InterviewAssignmentsForm,
@@ -204,8 +205,8 @@ def get_interview_stream_filterset(input_serializer: serializers.Serializer):
 class SendInvitationListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
     context_object_name = 'send_interview_invitations'
     model = InterviewStream
-    template_name = "admission/send_interview_invitations.html"
-    filterset_class = ApplicantInvitationFilter
+    template_name = "lms/admission/send_interview_invitations.html"
+    filterset_class = InterviewStreamSendInvitationFilter
     paginate_by = 50
 
     def post(self, request, *args, **kwargs):
@@ -252,7 +253,7 @@ class SendInvitationListView(CuratorOnlyMixin, BaseFilterView, generic.ListView)
             campaign_id = campaign.id if campaign else ""
             if "section" not in self.request.GET:
                 section_name = 'all_in_1'
-            url = reverse("admission:send_interview_invitations")
+            url = reverse("admission:interviews:invitations:send")
             url = f"{url}?campaign={campaign_id}&section={section_name}"
             return HttpResponseRedirect(redirect_to=url)
 
