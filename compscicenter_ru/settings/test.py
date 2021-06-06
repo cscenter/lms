@@ -28,8 +28,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "travis_ci_test",
-        "USER": "csc",
-        "PASSWORD": "FooBar",
+        "USER": "postgres",
+        "PASSWORD": "",
         "HOST": "localhost",
         "PORT": ""
     }
