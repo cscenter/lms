@@ -10,8 +10,8 @@ from core.urls import reverse
 from courses.admin import CourseBranchInline, CourseTeacherInline
 from courses.constants import MaterialVisibilityTypes
 from courses.models import (
-    Assignment, AssignmentSubmissionFormats, Course, CourseBranch, CourseTeacher,
-	CourseGroupModes
+    Assignment, AssignmentSubmissionFormats, Course, CourseBranch, CourseGroupModes,
+    CourseTeacher
 )
 from courses.tests.factories import CourseFactory, MetaCourseFactory, SemesterFactory
 from learning.settings import Branches, GradingSystems

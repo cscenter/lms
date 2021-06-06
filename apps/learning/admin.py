@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericTabularInline
 from django.db import models as db_models
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -9,7 +10,7 @@ from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from courses.models import StudentGroupTypes, CourseGroupModes
+from courses.models import CourseGroupModes, StudentGroupTypes
 from learning.models import (
     CourseInvitation, GraduateProfile, Invitation, StudentAssignment,
     StudentGroup, StudentGroupAssignee, AssignmentGroup

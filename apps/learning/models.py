@@ -14,7 +14,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import Sum, Q
+from django.db.models import Q, Sum
 from django.utils import timezone
 from django.utils.encoding import smart_str
 from django.utils.functional import cached_property

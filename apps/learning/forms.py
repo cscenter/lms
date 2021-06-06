@@ -6,18 +6,19 @@ from crispy_forms.layout import HTML, BaseInput, Div, Field, Hidden, Layout, Sub
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.forms import ModelChoiceField
 from django.utils.translation import gettext_lazy as _
 
 from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
+from core.urls import reverse
 from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
+from courses.models import Course, CourseTeacher
 from grading.services import CheckerService, SubmissionService
 from learning.models import AssignmentSubmissionTypes, GraduateProfile
 
 from .models import AssignmentComment
-from core.urls import reverse
-from django.forms import ModelChoiceField
 
 
 class SubmitLink(BaseInput):
