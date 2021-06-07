@@ -54,7 +54,7 @@ jobs:
       script:
         - isort . --check-only
     - stage: build
-      name: "Build Docker Images and upload to ECR"
+      name: "Trigger Docker images build and upload to ECR"
       script: sh trigger-travis.sh cscenter lms-provisioning $TRAVIS_ACCESS_TOKEN $TRAVIS_BUILD_NUMBER
       # Note that for tags, git does not store the branch from which a commit was tagged
       if: type = push AND tag IS present
