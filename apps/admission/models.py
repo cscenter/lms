@@ -770,10 +770,8 @@ class YandexContestIntegration(models.Model):
                 status, json_data = api.standings(contest.contest_id, **paging)
                 # XXX: Assignments order on a scoreboard could differ from
                 # the similar contest problems API call response
-                if "titles" not in contest.details:
-                    titles = [t["name"] for t in json_data["titles"]]
-                    contest.details["titles"] = titles
-                    contest.save(update_fields=("details",))
+                contest.details["titles"] = [t["name"] for t in json_data["titles"]]
+                contest.save(update_fields=("details",))
                 page_total = 0
                 for row in json_data['rows']:
                     scoreboard_total += 1
