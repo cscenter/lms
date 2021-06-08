@@ -202,7 +202,7 @@ def get_interview_stream_filterset(input_serializer: serializers.Serializer):
     return interview_stream_filterset
 
 
-class SendInvitationListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
+class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
     context_object_name = 'send_interview_invitations'
     model = InterviewStream
     template_name = "lms/admission/send_interview_invitations.html"
