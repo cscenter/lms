@@ -127,7 +127,7 @@ class InterviewStreamFilter(django_filters.FilterSet):
         return self._form
 
 
-class InterviewStreamSendInvitationFilter(InterviewStreamFilter):
+class RequiredSectionInterviewStreamFilter(InterviewStreamFilter):
     section = django_filters.ChoiceFilter(
         label=_("Interview Section"),
         choices=InterviewSections.choices,

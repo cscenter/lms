@@ -33,7 +33,7 @@ from django.views.generic.list import BaseListView
 from admission.constants import INVITATION_EXPIRED_IN_HOURS
 from admission.filters import (
     ApplicantFilter, InterviewInvitationFilter, InterviewsCuratorFilter,
-    InterviewsFilter, InterviewStreamFilter, InterviewStreamSendInvitationFilter,
+    InterviewsFilter, InterviewStreamFilter, RequiredSectionInterviewStreamFilter,
     ResultsFilter
 )
 from admission.forms import (
@@ -206,7 +206,7 @@ class SendInvitationListView(CuratorOnlyMixin, BaseFilterView, generic.ListView)
     context_object_name = 'send_interview_invitations'
     model = InterviewStream
     template_name = "lms/admission/send_interview_invitations.html"
-    filterset_class = InterviewStreamSendInvitationFilter
+    filterset_class = RequiredSectionInterviewStreamFilter
     paginate_by = 50
 
     def post(self, request, *args, **kwargs):
