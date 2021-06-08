@@ -39,7 +39,7 @@ from admission.filters import (
 from admission.forms import (
     ApplicantReadOnlyForm, ApplicantStatusForm, InterviewAssignmentsForm,
     InterviewCommentForm, InterviewForm, InterviewFromStreamForm,
-    InterviewInvitationFilterForm, InterviewStreamInvitationForm, ResultsModelForm
+    InterviewStreamInvitationForm, ResultsModelForm
 )
 from admission.models import (
     Applicant, Campaign, Comment, Contest, Exam, Interview, InterviewAssignment,
