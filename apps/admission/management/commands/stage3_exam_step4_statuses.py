@@ -32,7 +32,14 @@ class Command(CurrentCampaignMixin, BaseCommand):
         assert len(campaigns) == 1
         campaign = campaigns[0]
 
+        applicants = Applicant.objects.filter(campaign=campaign.pk)
+
         self.stdout.write("Минимальный шаг оценки - 0.01")
+        without_status_total = applicants.filter(status__isnull=True).count()
+        self.stdout.write(f"Applicants without status: {without_status_total}")
+        in_pending_state_total = applicants.filter(status=Applicant.PENDING).count()
+        self.stdout.write(f"There are {in_pending_state_total} applicants with PENDING status.")
+
         if not campaign.exam_passing_score:
             raise CommandError(f"Set exam passing score for {campaign}")
         exam_score_pass = Decimal(campaign.exam_passing_score)
@@ -47,14 +54,6 @@ class Command(CurrentCampaignMixin, BaseCommand):
                                    f"Campaign.exam_score_pass value")
             self.stdout.write(f"От {reject_value} до {exam_score_pass} (не "
                               f"включая крайние значения) - в ожидании решения.")
-
-        applicants = Applicant.objects.filter(campaign=campaign.pk)
-
-        without_status_total = applicants.filter(status__isnull=True).count()
-        self.stdout.write(f"Applicants without status: {without_status_total}")
-
-        in_pending_state_total = applicants.filter(status=Applicant.PENDING).count()
-        self.stdout.write(f"There are {in_pending_state_total} applicants with PENDING status.")
 
         if input(f"{reject_value} и меньше - отказ по результатам экзамена. "
                  f"Продолжить? [y/n] ") != "y":
