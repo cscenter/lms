@@ -24,7 +24,10 @@
         {% endif %}</h2>
     </div>
     <div class="date">Дата собеседования: {{ interview.date_local|default:"Не назначена" }}</div>
-    <div class="additional-info">Статус собеседования: {{ interview.get_status_display|default_if_none:"<не указан>" }}</div>
+    <div class="additional-info">
+      Секция: {{ interview.get_section_display }}<br>
+      Статус собеседования: {{ interview.get_status_display|default_if_none:"<не указан>" }}<br>
+    </div>
     <div class="nav-tabs-horizontal nav-tabs-inverse">
       <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
         <li class="active" role="presentation">
@@ -54,11 +57,13 @@
         </div>
         <div class="tab-pane" id="applicant" role="tabpanel">
             <dl>
-                {% if user.is_curator %}
+              {% if user.is_curator %}
+                <dt>Номер анкеты:</dt>
+                <dd><a href="{{ applicant_form.instance.get_absolute_url }}" target="_blank">#{{ applicant_form.instance.pk }}</a></dd>
                 <dt>Статус анкеты:</dt>
                 <dd>{{ applicant_form.instance.get_status_display|default_if_none:"<не указано>" }}</dd>
-                {% endif %}
-            {% include "admission/_applicant_form.html" with applicant_form=applicant_form %}
+              {% endif %}
+              {% include "admission/_applicant_form.html" with applicant_form=applicant_form %}
             </dl>
         </div>
         <div class="tab-pane" id="test-results" role="tabpanel">
