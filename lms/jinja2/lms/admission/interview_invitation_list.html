@@ -54,8 +54,8 @@
                 </td>
                 <td> {{ invitation.interview.date|default("-", True) }} </td>
                 <td> {{ invitation.interview.time|default("-", True) }} </td>
-                <td class="members" style="width:auto">
-                  <ul>
+                <td style="width:auto">
+                  <ul class='members'>
                     {% for interviewer in invitation.interview.interviewers %}
                       <li>
                         <a target="_blank" href="{{ interviewer.url }}">
@@ -102,20 +102,24 @@
                   <td>{{ interview_stream.get_section_display() }}</td>
                   <td>#</td>
                   <td>#</td>
-                  <td class='members' style='width: auto'>
-                    {% for interviewer in interview_stream.interviewers.all() %}
-                        {% with im = interviewer.get_thumbnail(interviewer.ThumbnailSize.INTERVIEW_LIST, use_stub=False) -%}
-                          {% if im %}
-                            <a target="_blank" href="{{ interviewer.get_absolute_url() }}">
-                                  <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name() }}"
-                                       alt="{{ interviewer.get_full_name() }}" src="{{ im.url }}" width="40" /></a>
-                          {% else %}
-                            <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name() }}">
-                              {{ interviewer.get_full_name()|slice(":1") }}
-                            </div>
-                          {% endif %}
-                        {% endwith -%}
-                    {% endfor %}
+                  <td>
+                    <ul class='members'>
+                      {% for interviewer in interview_stream.interviewers.all() %}
+                        <li>
+                          {% with im = interviewer.get_thumbnail(interviewer.ThumbnailSize.INTERVIEW_LIST, use_stub=False) -%}
+                            {% if im %}
+                              <a target="_blank" href="{{ interviewer.get_absolute_url() }}">
+                                <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name() }}"
+                                     alt="{{ interviewer.get_full_name() }}" src="{{ im.url }}" width="40" /></a>
+                            {% else %}
+                              <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name() }}">
+                                {{ interviewer.get_full_name()|slice(":1") }}
+                              </div>
+                            {% endif %}
+                          {% endwith -%}
+                        </li>
+                      {% endfor %}
+                    </ul>
                   </td>
                 </tr>
               {% endfor %}

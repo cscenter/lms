@@ -1314,7 +1314,8 @@ class InterviewInvitation(TimeStampedModel):
 
     @property
     def is_expired(self):
-        return timezone.now() >= self.expired_at
+        return (self.status == InterviewInvitationStatuses.EXPIRED or
+                timezone.now() >= self.expired_at)
 
     @property
     def is_accepted(self):

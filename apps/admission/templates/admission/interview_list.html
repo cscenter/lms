@@ -48,8 +48,8 @@
                             <a href="{{ interview.get_absolute_url }}">{{ interview.applicant.full_name }}</a><br>
                             Секция - {{ interview.get_section_display }}
                         </td>
-                        <td class="members">
-                            <ul>
+                        <td style="width: 35%">
+                            <ul class="members">
                                 {% for interviewer in interview.interviewers.all %}
                                 <li>
                                     {% if interviewer.photo %}
