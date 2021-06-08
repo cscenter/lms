@@ -73,8 +73,7 @@
                                 {% endif %}
                             {% endif %}<br>
                             {% if applicant.university_other %}{{ applicant.university_other }}{% else %}{% if applicant.university.abbr %}{{ applicant.university.abbr }}{% else %}{{ applicant.university.name }}{% endif %}{% endif %}
-                            {% if applicant.course %}<br>{{ applicant.get_course_display }}{% endif %}
-
+                            {% if applicant.level_of_education %}<br>{{ applicant.get_level_of_education_display }}{% endif %}
                         </td>
                         <td>{{ applicant.campaign.branch.name }},&nbsp;{{ applicant.campaign.year }}</td>
                         <td>{% if applicant.preferred_study_programs %}
