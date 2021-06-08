@@ -218,27 +218,26 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
 
         campaign = self.request.POST.getlist('campaign')
         section = self.request.POST.getlist('section')
-        ids = self.request.POST.getlist('ids[]')
-        streams = self.request.POST.getlist('streams[]')
+        ids = list(self.request.POST.getlist('ids[]'))
+        streams = list(self.request.POST.getlist('streams[]'))
 
         expired_in_hours = INVITATION_EXPIRED_IN_HOURS
         expired_at = timezone.now() + timedelta(hours=expired_in_hours)
 
         # Create interview invitations
-        if (user.is_curator and
-            len(list(ids)) != 0 and len(list(streams)) != 0 and
+        if (user.is_curator and ids and streams and
             'campaign' in self.request.GET and
             'section' in self.request.GET):
 
             with transaction.atomic():
-                for applicant_id in list(ids):
+                for applicant_id in ids:
                     applicant = Applicant.objects.get(id=applicant_id)
 
                     new_interview_invitation = InterviewInvitation()
                     new_interview_invitation.applicant = applicant
                     new_interview_invitation.expired_at = expired_at
                     new_interview_invitation.save()
-                    for stream in list(streams):
+                    for stream in streams:
                         new_interview_invitation.streams.add(InterviewStream.objects.get(id=stream))
                     new_interview_invitation.save()
 
