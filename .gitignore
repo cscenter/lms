@@ -14,6 +14,7 @@ static/
 local/
 .cache/
 .pytest_cache/
+.mypy_cache/
 coverage_html/
 .coverage
 .env
