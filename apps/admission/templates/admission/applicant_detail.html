@@ -4,6 +4,7 @@
 {% load crispy_forms_tags %}
 {% load static %}
 {% load markdown from core_tags %}
+{% load floatdot from core_tags %}
 {% load lookup from core_tags %}
 {% load render_bundle from webpack_loader %}
 
@@ -68,27 +69,26 @@
         </div>
         <div class="tab-pane" id="interviews" role="tabpanel">
           {% if applicant.interviews.all %}
-            <table class="table table-bordered mb-40">
-              <tr class="active">
-                <th>Секция</th>
-                <th>Дата</th>
-                <th>Статус</th>
-              </tr>
-              {% for interview in applicant.interviews.all %}
-                <tr>
-                  <td><a href='{{ interview.get_absolute_url }}'>{{ interview.get_section_display }}</a></td>
-                  <td>{{ interview.date_local }}</td>
-                  <td>{{ interview.get_status_display }}</td>
-                </tr>
-              {% endfor %}
-            </table>
+            {% for interview in applicant.interviews.all %}
+              <div class="interview mb-20">
+                <a class="h3" href="{{ interview.get_absolute_url }}">{{ interview.get_section_display }}</a>
+                <div class="font-size-16 my-10">
+                  Дата: {{ interview.date_local|default:"Не назначена" }}<br>
+                  Статус: {{ interview.get_status_display|default_if_none:"<не указан>" }}<br>
+                  {% if interview.average_score %}Средний балл: {{ interview.average_score|floatdot:2 }}{% endif %}
+                </div>
+                {% for comment in interview.comments.all %}
+                    {% include "admission/_interview_comment.html" with comment=comment user=comment.interviewer only%}
+                {% endfor %}
+              </div>
+            {% endfor %}
           {% endif %}
           {% if request.user.is_curator and applicant.campaign.current %}
             <h3>Назначить собеседование</h3>
             {% if form %}
               {% crispy form %}
             {% else %}
-              <a href="{{ invitation.get_absolute_url }}">Приглашение</a> создано {{ invitation.created|date:"d E" }}.<br>
+              <a href="{5 invitation.get_absolute_url }}">Приглашение</a> создано {{ invitation.created|date:"d E" }}.<br>
             {% endif %}
             <div class="clearfix"></div>
           {% endif %}

@@ -32,6 +32,7 @@
             <thead>
               <tr>
                   <th>Время</th>
+                  <th>Секция</th>
                   <th>Поступающий</th>
                   <th>Собеседующие</th>
                   <th>{% if not filter.form.status.value or filter.form.status.value == "completed" or filter.form.status.value == "agreed" %}Средний&nbsp;балл{% endif %}</th>
@@ -44,9 +45,9 @@
                             <div class="time">{{ interview.date_local|date:"H:i" }}</div>
                             {{ interview.date_local|date:"d E" }}
                         </td>
+                        <td class="nowrap">{{ interview.get_section_display }}</td>
                         <td class="applicant">
-                            <a href="{{ interview.get_absolute_url }}">{{ interview.applicant.full_name }}</a><br>
-                            Секция - {{ interview.get_section_display }}
+                            <a href="{{ interview.get_absolute_url }}">{{ interview.applicant.full_name }}</a>
                         </td>
                         <td style="width: 35%">
                             <ul class="members">

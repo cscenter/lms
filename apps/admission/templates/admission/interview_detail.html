@@ -6,7 +6,6 @@
 {% load markdown from core_tags %}
 {% load floatdot from core_tags %}
 {% load render_bundle from webpack_loader %}
-{% load user_thumbnail from user_thumbnail %}
 
 {% block title %} Набор {{ applicant.campaign }} - {{ applicant.full_name }}{% endblock title %}
 
@@ -109,25 +108,7 @@
                     </li>
                   </ul>
                 {% for comment in interview.comments.all %}
-                    <div class="comment media">
-                        <div class="media-left">
-                            {% with user=comment.interviewer %}
-                            {% if user.photo %}
-                                {% user_thumbnail user user.ThumbnailSize.SQUARE_SMALL as im %}
-                                    <img alt="{{ user.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                                {% enduser_thumbnail %}
-                            {% else %}
-                                <div class="square" data-toggle="tooltip" data-placement="top" title="{{ user.get_full_name }}">{{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}</div>
-                            {% endif %}
-                            {% endwith %}
-                        </div>
-                    <div class="comment-body media-body">
-                      <span class="fio">{{ comment.interviewer.get_full_name }}</span> / Оценка: <b>{{ comment.score }}</b>
-                      <div class="comment-content ubertext">
-                          {% markdown 0 "interview_comment" %}{{ comment.text }}{% endmarkdown %}
-                      </div>
-                    </div>
-                  </div>
+                    {% include "admission/_interview_comment.html" with comment=comment user=comment.interviewer only%}
                 {% endfor %}
             {% else %}
                 {% if request.user.is_curator %}

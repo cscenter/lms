@@ -1,0 +1,21 @@
+{% load markdown from core_tags %}
+{% load user_thumbnail from user_thumbnail %}
+
+<div class="comment media">
+  <div class="media-left">
+    {% if user.photo %}
+      {% user_thumbnail user user.ThumbnailSize.SQUARE_SMALL as im %}
+        <img alt="{{ user.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+      {% enduser_thumbnail %}
+    {% else %}
+      <div class="square" data-toggle="tooltip" data-placement="top" title="{{ user.get_full_name }}">
+        {{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}</div>
+    {% endif %}
+  </div>
+  <div class="comment-body media-body">
+    <span class="fio">{{ user.get_full_name }}</span> / Оценка: <b>{{ comment.score }}</b>
+    <div class="comment-content ubertext">
+      {% markdown 0 "interview_comment" %}{{ comment.text }}{% endmarkdown %}
+    </div>
+  </div>
+</div>
