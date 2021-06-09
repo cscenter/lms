@@ -216,30 +216,20 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
         if not request.user.is_curator:
             return self.handle_no_permission(request)
 
-        campaign = self.request.POST.getlist('campaign')
-        section = self.request.POST.getlist('section')
-        ids = list(self.request.POST.getlist('ids[]'))
-        streams = list(self.request.POST.getlist('streams[]'))
+        applicant_ids = list(self.request.POST.getlist('ids[]'))
+        streams_ids = list(self.request.POST.getlist('streams[]'))
 
-        expired_in_hours = INVITATION_EXPIRED_IN_HOURS
-        expired_at = timezone.now() + timedelta(hours=expired_in_hours)
+        applicants_all = Applicant.objects.all()
+        streams_all = InterviewStream.objects.all()
+        print(applicants_all)
+        print(streams_all)
 
         # Create interview invitations
-        if (user.is_curator and ids and streams and
+        if (user.is_curator and applicant_ids and streams_ids and
             'campaign' in self.request.GET and
             'section' in self.request.GET):
 
-            with transaction.atomic():
-                for applicant_id in ids:
-                    applicant = Applicant.objects.get(id=applicant_id)
-
-                    new_interview_invitation = InterviewInvitation()
-                    new_interview_invitation.applicant = applicant
-                    new_interview_invitation.expired_at = expired_at
-                    new_interview_invitation.save()
-                    for stream in streams:
-                        new_interview_invitation.streams.add(InterviewStream.objects.get(id=stream))
-                    new_interview_invitation.save()
+            self.create_invitation(applicant_ids, streams_ids, applicants_all, streams_all)
 
         return super().get(request, *args, **kwargs)
 
@@ -282,12 +272,38 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
 
         applicant_queryset = (Applicant.objects
                               .filter(campaign=campaign)
-                              .exclude(id__in=list(applicant_id)))
+                              .select_related("exam", "online_test", "campaign", "university",
+                                              "campaign__branch")
+                              .prefetch_related("interviews")
+                              .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1)),
+                                        test__score_coalesce=Coalesce('online_test__score',
+                                                                      Value(-1)))
+                              .exclude(id__in=list(applicant_id))
+                              .order_by("-exam__score_coalesce", "-test__score_coalesce", "-pk"))
 
         context["applicants"] = applicant_queryset
         context["interview_stream_form"] = InterviewStreamInvitationForm(
             stream=interview_streams)
         return context
+
+    def create_invitation(self, applicant_ids, streams_ids, applicants_all, streams_all):
+        with transaction.atomic():
+            try:
+                for applicant_id in applicant_ids:
+                    applicant = applicants_all.get(id=applicant_id)
+                    streams = []
+                    for stream_id in streams_ids:
+                        streams.append(streams_all.get(id=stream_id))
+
+                    create_invitation(streams, applicant, atomic=False)
+
+                messages.success(
+                    self.request,
+                    "Приглашение успешно создано и должно быть отправлено в "
+                    "течение 5 минут.",
+                    extra_tags='timeout')
+            except IntegrityError:
+                messages.error(self.request, "Приглашение не было создано.")
 
     
 class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseListView):
