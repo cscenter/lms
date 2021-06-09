@@ -15,7 +15,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from django.db import IntegrityError, transaction
-from django.db.models import Avg, Count, Prefetch, Value
+from django.db.models import Avg, Case, Count, Prefetch, Sum, Value, When
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import HttpResponseNotFound, HttpResponseRedirect, JsonResponse
@@ -47,7 +47,7 @@ from admission.services import (
     get_meeting_time, get_streams
 )
 from core.models import Branch
-from core.timezone import now_local
+from core.timezone import get_now_utc, now_local
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from core.utils import render_markdown
@@ -173,7 +173,7 @@ def get_interview_stream_filterset(input_serializer: serializers.Serializer):
         data=input_serializer.validated_data,
         queryset=(InterviewStream.objects
                   .filter(**filters)
-                  .order_by('-date', '-start_at')))
+                  .order_by('-date', '-start_at', 'pk')))
     # Set action attribute on filterset form
     url = reverse("admission:interviews:invitations:list")
     form_action = f"{url}?campaign={input_serializer.data['campaign']}&section={input_serializer.data['section']}"
@@ -214,8 +214,15 @@ class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseL
     def get_context_data(self, **kwargs):
         input_serializer = kwargs['input_serializer']
         interview_stream_filterset = get_interview_stream_filterset(input_serializer)
+        invitations_waiting_for_response = Count(Case(
+            When(interview_invitations__expired_at__lte=get_now_utc(), then=Value(None)),
+            When(interview_invitations__status=InterviewInvitationStatuses.CREATED, then=Value(1)),
+            default=Value(None)
+        ))
         interview_streams = (interview_stream_filterset.qs
                              .select_related('venue')
+                             .annotate(invitations_total=invitations_waiting_for_response)
+                             .defer('venue__description', 'venue__directions')
                              .prefetch_related('interviewers'))
         # Fetch filtered invitations
         filters = {"applicant__campaign": input_serializer.validated_data['campaign']}

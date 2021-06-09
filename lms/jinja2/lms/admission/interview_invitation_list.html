@@ -84,10 +84,10 @@
             <thead>
             <tr>
               <th>Поток</th>
-              <th>Адрес</th>
               <th>Секция</th>
-              <th>Приняли</th>
-              <th>Ожидают</th>
+              <th>Адрес</th>
+              <th>Свободных слотов</th>
+              <th>Приглашений без&nbsp;ответа</th>
               <th>Собеседующие</th>
             </tr>
             </thead>
@@ -98,10 +98,10 @@
                     {{ interview_stream.date|date("j E Y") }}<br>
                     {{ interview_stream.start_at|date("H:i") }}-{{ interview_stream.end_at|date("H:i") }}
                   </td>
-                  <td>{{ interview_stream.venue.address|default("-", True) }}</td>
                   <td>{{ interview_stream.get_section_display() }}</td>
-                  <td>#</td>
-                  <td>#</td>
+                  <td>{{ interview_stream.venue.address|default("-", True) }}</td>
+                  <td>{{ interview_stream.slots_free_count }}/{{ interview_stream.slots_count }}</td>
+                  <td>{{ interview_stream.invitations_total }}</td>
                   <td>
                     <ul class='members'>
                       {% for interviewer in interview_stream.interviewers.all() %}

@@ -11,7 +11,8 @@ from django.core import checks
 from django.core.exceptions import FieldDoesNotExist, ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
-from django.db.models import Q, query
+from django.db.models import Count, OuterRef, Q, Subquery, Value, query
+from django.db.models.functions import Coalesce
 from django.utils import numberformat, timezone
 from django.utils.encoding import smart_str
 from django.utils.formats import date_format, time_format
@@ -23,6 +24,7 @@ from admission.constants import (
 )
 from admission.utils import get_next_process, slot_range
 from core.db.fields import ScoreField
+from core.db.mixins import DerivableFieldsMixin
 from core.models import Branch, Location
 from core.timezone import TimezoneAwareMixin
 from core.timezone.fields import TimezoneAwareDateTimeField
@@ -1117,7 +1119,7 @@ class Comment(TimeStampedModel):
                                            self.interview.applicant.full_name))
 
 
-class InterviewStream(TimezoneAwareMixin, TimeStampedModel):
+class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'venue'
     formats = InterviewFormats
 
@@ -1161,6 +1163,13 @@ class InterviewStream(TimezoneAwareMixin, TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
         limit_choices_to={'group__role': Roles.INTERVIEWER})
+    slots_count = models.PositiveIntegerField(editable=False, default=0)
+    slots_occupied_count = models.PositiveIntegerField(editable=False, default=0)
+
+    derivable_fields = [
+        'slots_count',
+        'slots_occupied_count'
+    ]
 
     class Meta:
         verbose_name = _("Interview stream")
@@ -1173,12 +1182,19 @@ class InterviewStream(TimezoneAwareMixin, TimeStampedModel):
                                       format=self.format))
         super().save(**kwargs)
         if created:
-            # Generate slots from stream settings
+            # Generate slots
             step = datetime.timedelta(minutes=self.duration)
             slots = [InterviewSlot(start_at=start_at, end_at=end_at, stream=self)
                      for start_at, end_at
                      in slot_range(self.start_at, self.end_at, step)]
             InterviewSlot.objects.bulk_create(slots)
+            # It's possible to avoid query below by separating slots bulk
+            # creation and objects initialization, but let's store them in
+            # one place
+            self.slots_count = len(slots)
+            (InterviewStream.objects
+             .filter(pk=self.pk)
+             .update(slots_count=self.slots_count))
 
     def __str__(self):
         return "{}, {}-{}".format(
@@ -1206,6 +1222,35 @@ class InterviewStream(TimezoneAwareMixin, TimeStampedModel):
             if diff < self.duration:
                 raise ValidationError(
                     _("Stream duration can't be less than slot duration"))
+
+    def _compute_slots_count(self):
+        total = Subquery(InterviewSlot.objects
+                         .filter(stream_id=OuterRef('id'))
+                         .values('stream')
+                         .annotate(total=Count("*"))
+                         .values("total"))
+        (InterviewStream.objects
+         .filter(pk=self.pk)
+         .update(slots_count=Coalesce(total, Value(0))))
+        # Avoid triggering .save()
+        return False
+
+    def _compute_slots_occupied_count(self):
+        total = Subquery(InterviewSlot.objects
+                         .filter(stream_id=OuterRef('id'),
+                                 interview__isnull=False)
+                         .values('stream')
+                         .annotate(total=Count("*"))
+                         .values("total"))
+        (InterviewStream.objects
+         .filter(pk=self.pk)
+         .update(slots_occupied_count=Coalesce(total, Value(0))))
+        # Avoid triggering .save()
+        return False
+
+    @property
+    def slots_free_count(self):
+        return self.slots_count - self.slots_occupied_count
 
 
 class InterviewSlotQuerySet(query.QuerySet):
@@ -1330,3 +1375,9 @@ class InterviewInvitation(TimeStampedModel):
             "year": self.applicant.campaign.year,
             "secret_code": str(self.secret_code).replace("-", "")
         })
+
+    def get_status_display(self):
+        status = self.status
+        if self.is_expired:
+            status = InterviewInvitationStatuses.EXPIRED
+        return InterviewInvitationStatuses.values[status]

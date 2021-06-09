@@ -108,6 +108,28 @@ def test_accept_interview_invitation():
     # TODO: occupy slot
 
 
+@pytest.mark.django_db(transaction=True)
+def test_accept_interview_invitation_slots_occupied():
+    stream = InterviewStreamFactory(
+        section=InterviewSections.MATH,
+        start_at=datetime.time(14, 10),
+        end_at=datetime.time(14, 30),
+        duration=20,
+        date=(timezone.now() + datetime.timedelta(days=3)).date())
+    slot = InterviewSlotFactory(
+        interview=None,
+        stream=stream,
+        start_at=datetime.time(14, 0),
+        end_at=datetime.time(16, 0),
+    )
+    stream.refresh_from_db()
+    assert stream.slots_occupied_count == 0
+    invitation = InterviewInvitationFactory(interview=None, streams=[slot.stream])
+    accept_interview_invitation(invitation, slot_id=slot.pk)
+    stream.refresh_from_db()
+    assert stream.slots_occupied_count == 1
+
+
 @pytest.mark.django_db
 def test_decline_interview_invitation():
     dt = timezone.now() + datetime.timedelta(days=3)

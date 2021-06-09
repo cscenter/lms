@@ -202,6 +202,7 @@ def accept_interview_invitation(invitation: InterviewInvitation, slot_id: int) -
             raise InterviewCreateError("Извините, но слот уже был занят другим участником. "
                                        "Выберите другое время и повторите попытку.", code="slot_occupied")
         interview.interviewers.set(slot.stream.interviewers.all())
+        transaction.on_commit(lambda: slot.stream.compute_fields('slots_occupied_count'))
         EmailQueueService.generate_interview_confirmation(interview, slot.stream)
         EmailQueueService.generate_interview_reminder(interview, slot.stream)
         # Mark invitation as accepted

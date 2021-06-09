@@ -1,7 +1,7 @@
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
-from admission.models import Applicant, Campaign, Comment, Interview
+from admission.models import Applicant, Campaign, Comment, Interview, InterviewSlot
 from admission.services import EmailQueueService
 
 APPLICANT_FINAL_STATES = (Applicant.ACCEPT,
@@ -31,6 +31,25 @@ def post_save_interview(sender, instance, created, *args, **kwargs):
         EmailQueueService.remove_interview_feedback_emails(interview)
     elif interview.status == Interview.COMPLETED:
         EmailQueueService.generate_interview_feedback_email(interview)
+
+
+def __sync_applicant_status(interview):
+    """Keep in sync interview and applicant statuses."""
+    if interview.applicant.status in APPLICANT_FINAL_STATES:
+        return
+    if interview.status in [Interview.APPROVAL, Interview.APPROVED]:
+        new_status = Applicant.INTERVIEW_SCHEDULED
+    elif interview.status in [Interview.CANCELED, Interview.DEFERRED]:
+        new_status = Applicant.INTERVIEW_TOBE_SCHEDULED
+    elif interview.status == Interview.COMPLETED:
+        new_status = Applicant.INTERVIEW_COMPLETED
+    else:
+        raise ValueError("Unknown interview status")
+    if interview.applicant.status != new_status:
+        interview.applicant.status = new_status
+        (Applicant.objects
+         .filter(pk=interview.applicant.pk)
+         .update(status=interview.applicant.status))
 
 
 # TODO: add tests
@@ -64,20 +83,14 @@ def post_save_interview_comment(sender, instance, created, *args, **kwargs):
         interview.save(update_fields=['status'])
 
 
-def __sync_applicant_status(interview):
-    """Keep in sync interview and applicant statuses."""
-    if interview.applicant.status in APPLICANT_FINAL_STATES:
-        return
-    if interview.status in [Interview.APPROVAL, Interview.APPROVED]:
-        new_status = Applicant.INTERVIEW_SCHEDULED
-    elif interview.status in [Interview.CANCELED, Interview.DEFERRED]:
-        new_status = Applicant.INTERVIEW_TOBE_SCHEDULED
-    elif interview.status == Interview.COMPLETED:
-        new_status = Applicant.INTERVIEW_COMPLETED
-    else:
-        raise ValueError("Unknown interview status")
-    if interview.applicant.status != new_status:
-        interview.applicant.status = new_status
-        (Applicant.objects
-         .filter(pk=interview.applicant.pk)
-         .update(status=interview.applicant.status))
+@receiver(post_save, sender=InterviewSlot)
+def post_save_interview_slot(sender, instance, created, *args, **kwargs):
+    if created:
+        instance.stream.compute_fields('slots_count')
+    instance.stream.compute_fields('slots_occupied_count')
+
+
+@receiver(post_delete, sender=InterviewSlot)
+def post_delete_interview_slot(sender, instance, *args, **kwargs):
+    instance.stream.compute_fields('slots_count')
+    instance.stream.compute_fields('slots_occupied_count')
