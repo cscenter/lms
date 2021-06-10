@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Dict
+from typing import Dict, Optional
 
 import numpy as np
 
@@ -10,7 +10,7 @@ from django.utils.functional import cached_property
 
 from core.db.utils import normalize_score
 from courses.models import Assignment, Course
-from learning.models import Enrollment, StudentAssignment
+from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.settings import GradeTypes
 
 __all__ = ('GradebookStudent', 'StudentProgress', 'GradeBookData',
@@ -50,8 +50,10 @@ class GradebookStudent:
         return self._enrollment.student_profile
 
     @property
-    def student_group(self):
-        return self._enrollment.student_group
+    def student_group(self) -> Optional[StudentGroup]:
+        if self._enrollment.student_group_id:
+            return self._enrollment.student_group
+        return None
 
 
 @dataclass

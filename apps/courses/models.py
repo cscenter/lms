@@ -225,6 +225,9 @@ class StudentGroupTypes(DjangoChoices):
 
 
 class CourseGroupModes(DjangoChoices):
+    # Enrollment.student_group is nullable, so keep this mode
+    # here even if it's not really supported
+    NO_GROUPS = C('no_groups', _('No Groups'))
     # TODO: add `manual with enrollment key`?
     MANUAL = C('manual', _('Manual'))
     BRANCH = C('branch', _('Branch'))
