@@ -137,7 +137,6 @@ COURSE_FORM_TEMPLATES = [
 TEMPLATES = {
     FormTemplates.COMMON: [
         {
-            "id": 1,
             "label": "Материал курса для вас новый?",
             "order": 100,
             "required": True,
@@ -164,7 +163,6 @@ TEMPLATES = {
             ]
         },
         {
-            "id": 2,
             "label": "Расскажите, где вы изучали эту тему раньше?",
             "show_label": False,
             "order": 200,
@@ -189,7 +187,6 @@ TEMPLATES = {
             ]
         },
         {
-            "id": 3,
             "label": "Что вы думаете о том, как проходят очные лекции?",
             "order": 300,
             "required": True,
@@ -220,7 +217,6 @@ TEMPLATES = {
             ]
         },
         {
-            "id": 4,
             "label": "Возможно, некоторые темы остались непонятными. Отметьте занятия, на которых что-то осталось неясно, и напишите подробнее в поле для ответа",
             "order": 400,
             "required": False,
@@ -243,7 +239,6 @@ TEMPLATES = {
             ]
         },
         {
-            "id": 5,
             "label": "Как вам кажется, прочитанный материал пригодится вам в будущем на работе? (Или, быть может, уже пригодился)",
             "order": 500,
             "required": True,
@@ -265,7 +260,6 @@ TEMPLATES = {
             ]
         },
         {
-            "id": 6,
             "label": "Вам понятно, как выставляется оценка по этому курсу?",
             "order": 600,
             "required": True,
@@ -295,7 +289,6 @@ TEMPLATES = {
             ]
         },
         {
-            "id": 7,
             "label": "Дополнительные комментарии",
             "order": 70000,
             "required": False,
@@ -303,7 +296,6 @@ TEMPLATES = {
             "visibility": FieldVisibility.VISIBLE,
         },
         {
-            "id": 8,
             "label": "Если хотите, представьтесь, пожалуйста",
             "order": 80000,
             "required": False,
@@ -314,7 +306,6 @@ TEMPLATES = {
     ],
     FormTemplates.VIDEO_SEMINAR: [
         {
-            "id": 9,
             "label": "Как часто вы посещаете занятия?",
             "order": 700,
             "required": False,
@@ -347,7 +338,6 @@ TEMPLATES = {
     ],
     FormTemplates.VIDEO_NO_SEMINAR: [
         {
-            "id": 10,
             "label": "Как часто вы посещаете занятия?",
             "order": 700,
             "required": False,
@@ -376,7 +366,6 @@ TEMPLATES = {
     ],
     FormTemplates.SEMINAR: [
         {
-            "id": 11,
             "label": "Практические занятия соответствуют прочитанным лекциям?",
             "order": 800,
             "required": False,
@@ -399,7 +388,6 @@ TEMPLATES = {
             ]
         },
         {
-            "id": 12,
             "label": "Расскажите свои впечатления от семинаров",
             "show_label": False,
             "placeholder": "Расскажите свои впечатления от семинаров. Если занятия проходят в разных группах, то не забывайте указывать имена преподавателей",
@@ -425,7 +413,6 @@ TEMPLATES = {
     ],
     FormTemplates.SEMINAR_HOMEWORK: [
         {
-            "id": 13,
             "label": "Участие в семинарах помогает выполнять домашние задания?",
             "order": 1000,
             "required": False,
@@ -444,7 +431,6 @@ TEMPLATES = {
             ]
         },
         {
-            "id": 14,
             "label": "Какими материалами вы пользуетесь для выполнения заданий?",
             "show_label": False,
             "placeholder": "Какими материалами вы пользуетесь для выполнения заданий?",
@@ -470,7 +456,6 @@ TEMPLATES = {
     ],
     FormTemplates.HOMEWORK: [
         {
-            "id": 15,
             "label": "Оцените, пожалуйста, сколько часов в неделю вы тратите на выполнение домашних заданий",
             "order": 1200,
             "required": False,
@@ -496,7 +481,6 @@ TEMPLATES = {
             ]
         },
         {
-            "id": 16,
             "label": "Задания соответствуют прочитанному материалу?",
             "order": 1300,
             "required": False,
@@ -526,7 +510,6 @@ TEMPLATES = {
             ]
         },
         {
-            "id": 17,
             "label": "Вас устраивает скорость проверки домашних заданий?",
             "order": 1400,
             "required": False,
@@ -545,7 +528,6 @@ TEMPLATES = {
             ]
         },
         {
-            "id": 18,
             "label": "Поясните свой ответ",
             "show_label": False,
             "placeholder": "Поясните свой ответ",
@@ -571,7 +553,6 @@ TEMPLATES = {
     ],
     FormTemplates.ONLINE_COURSE: [
         {
-            "id": 19,
             "label": "Что вы думаете про совмещение с онлайн-курсом?",
             "order": 1600,
             "required": False,

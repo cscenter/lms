@@ -108,8 +108,7 @@ def test_accept_interview_invitation():
     # TODO: occupy slot
 
 
-# @pytest.mark.django_db(transaction=True)
-@pytest.mark.skip("FIXME: remove data initialization from survey app")
+@pytest.mark.django_db(transaction=True)
 def test_accept_interview_invitation_slots_occupied():
     stream = InterviewStreamFactory(
         section=InterviewSections.MATH,

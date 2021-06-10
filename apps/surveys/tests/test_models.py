@@ -7,6 +7,7 @@ from courses.tests.factories import CourseFactory
 from learning.settings import Branches
 from surveys.constants import STATUS_DRAFT, STATUS_PUBLISHED
 from surveys.models import CourseSurvey, Field, FieldChoice
+from surveys.services import create_course_survey_templates
 from surveys.tests.factories import CourseSurveyFactory
 
 
@@ -63,6 +64,7 @@ def test_get_active():
 
 @pytest.mark.django_db
 def test_final_survey_builder_field_label():
+    create_course_survey_templates()
     course = CourseFactory(main_branch__code=Branches.SPB)
     cs = CourseSurveyFactory(course=course, type=CourseSurvey.MIDDLE,
                              # Create form with a form builder
@@ -79,6 +81,7 @@ def test_final_survey_builder_field_label():
 
 @pytest.mark.django_db
 def test_final_survey_builder_field_choice_label():
+    create_course_survey_templates()
     course = CourseFactory(main_branch__code=Branches.SPB)
     cs = CourseSurveyFactory(course=course, type=CourseSurvey.MIDDLE,
                              # Create form with a form builder

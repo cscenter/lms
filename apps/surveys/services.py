@@ -1,4 +1,8 @@
+import copy
+from textwrap import dedent
+
 from post_office import mail
+from post_office.models import EmailTemplate
 
 from django.db.models import Q
 
@@ -6,8 +10,8 @@ from core.timezone import now_local
 from courses.constants import ClassTypes
 from courses.models import CourseClass
 from learning.models import Enrollment
-from surveys.constants import STATUS_DRAFT, STATUS_TEMPLATE, FormTemplates
-from surveys.models import CourseSurvey, FieldChoice, Form
+from surveys.constants import STATUS_DRAFT, STATUS_TEMPLATE, TEMPLATES, FormTemplates
+from surveys.models import CourseSurvey, Field, FieldChoice, Form
 
 OFFLINE_COURSES_Q = ['lectures_assessment', 'attendance_frequency']
 
@@ -152,3 +156,69 @@ def course_form_builder(survey: CourseSurvey):
                                     choice.save()
                                 next_index += len(classes)
     return form
+
+
+def create_course_survey_templates():
+    form_templates = copy.deepcopy(TEMPLATES)
+    for form_template, fields in form_templates.items():
+        form, created = Form.objects.get_or_create(
+            status=STATUS_TEMPLATE,
+            slug=form_template,
+            defaults={"title": form_template})
+        if created:
+            for field in fields:
+                choices = []
+                if "choices" in field:
+                    choices = field["choices"]
+                    del field["choices"]
+                field, _ = Field.objects.get_or_create(form_id=form.id,
+                                                       label=field["label"],
+                                                       defaults=field)
+                for index, choice in enumerate(choices, start=1):
+                    if "order" not in choice:
+                        choice["order"] = index * 10
+                    FieldChoice.objects.get_or_create(field_id=field.id,
+                                                      label=choice["label"],
+                                                      defaults=choice)
+
+
+def create_survey_email_templates():
+    email_templates = [
+        {
+            "name": "survey-middle",
+            "subject": "Курс «{{ COURSE_NAME }}» - промежуточный опрос",
+            "description": "Уведомление студентам курса о публикации опроса",
+            "content": dedent("""\
+                Добрый день! 
+
+                На сайте появился промежуточный опрос по курсу «{{ COURSE_NAME }}»: {{ SURVEY_URL }}. Пожалуйста, ответьте на вопросы максимально подробно в течение недели. Ваши ответы помогут кураторам выяснить проблемы и решить их уже в этом семестре. 
+
+                Доступ к ответам есть только у кураторов. Если вы не подпишетесь, мы не узнаем, кто именно заполнил анкету. 
+
+                Спасибо!
+
+                Кураторы центра
+
+                Это письмо отправлено автоматически и не требует ответа.""")
+        },
+        {
+            "name": "survey-final",
+            "subject": "Курс «{{ COURSE_NAME }}» - финальный опрос",
+            "description": "Уведомление студентам курса о публикации опроса",
+            "content": dedent("""\
+                Добрый день! 
+
+                На сайте появился финальный опрос по курсу «{{ COURSE_NAME }}»: {{ SURVEY_URL }}. Пожалуйста, ответьте на вопросы максимально подробно в течение недели. Ваши ответы помогут кураторам выяснить проблемы и решить их уже в этом семестре. 
+
+                Доступ к ответам есть только у кураторов. Если вы не подпишетесь, мы не узнаем, кто именно заполнил анкету. 
+
+                Спасибо!
+
+                Кураторы центра
+
+                Это письмо отправлено автоматически и не требует ответа.""")
+        }
+    ]
+    for template in email_templates:
+        EmailTemplate.objects.get_or_create(name=template["name"],
+                                            defaults=template)

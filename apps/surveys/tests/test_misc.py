@@ -9,6 +9,9 @@ from surveys.models import Field, FieldEntry, FormSubmission
 from surveys.reports import (
     PollOptionResult, SurveySubmissionsReport, SurveySubmissionsStats
 )
+from surveys.services import (
+    create_course_survey_templates, create_survey_email_templates
+)
 from surveys.tests.factories import (
     CourseSurveyFactory, FieldChoiceFactory, FieldEntryFactory, FieldFactory,
     FormSubmissionFactory
@@ -200,6 +203,8 @@ def test_report_survey(client):
 
 @pytest.mark.django_db
 def test_conditional_logic_prefill_class(mocker):
+    create_course_survey_templates()
+    create_survey_email_templates()
     # Fix year and term
     mocked_timezone = mocker.patch('django.utils.timezone.now')
     today_fixed = datetime.datetime(2018, month=3, day=8, hour=13, minute=0,
