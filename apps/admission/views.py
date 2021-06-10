@@ -264,7 +264,8 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
 
         interview_invitations = (InterviewInvitation.objects
                                  .filter(expired_at__gte=today,
-                                         streams__in=interview_streams))
+                                         streams__in=interview_streams)
+                                 .exclude(status=InterviewInvitationStatuses.DECLINED))
 
         applicant_id = set()
         for interview_invitation in interview_invitations:
