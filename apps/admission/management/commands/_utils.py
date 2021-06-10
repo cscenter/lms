@@ -113,7 +113,7 @@ class EmailTemplateMixin:
             msg = "\n".join((e.message for e in errors))
             raise CommandError(f"Validation errors\n{msg}")
 
-        self.stdout.write("\nThese templates will be used in command:")
+        self.stdout.write("\nTemplates will be used in a command:")
         self.stdout.write("\n".join(f"\t{t}" for t in templates))
         self.stdout.write("")
 

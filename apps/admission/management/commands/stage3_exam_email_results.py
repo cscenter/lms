@@ -57,6 +57,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             applicants = (Applicant.objects
                           .filter(campaign=campaign.pk,
                                   status__in=statuses)
+                          .select_related("exam")
                           .only("email", "status"))
             succeed = 0
             total = 0
@@ -71,7 +72,8 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
                     context = {
-                        'BRANCH': campaign.branch.name
+                        'BRANCH': campaign.branch.name,
+                        'CONTEST_ID': a.exam and a.exam.yandex_contest_id,
                     }
                     mail.send(
                         recipients,
