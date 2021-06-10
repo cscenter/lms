@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load tz %}
 {% load thumbnail %}
 {% load crispy_forms_tags %}
 {% load static %}
@@ -17,7 +18,7 @@
   {% render_bundle 'admission' 'js' 'V1' %}
 {% endblock javascripts %}
 
-{% block content %}
+{% block content %}{% localtime off %}
   <div class="container">
     <div class="page-header">
       <h2 class="page-title">{{ applicant.full_name }}{% if request.user.is_curator %}
@@ -105,4 +106,4 @@
 
   {% include "admission/_interview_assignment_modal.html" %}
 
-{% endblock content %}
+{% endlocaltime %}{% endblock content %}
