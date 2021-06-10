@@ -30,7 +30,6 @@ from django.views.generic.base import RedirectView, TemplateResponseMixin
 from django.views.generic.edit import BaseCreateView, ModelFormMixin
 from django.views.generic.list import BaseListView
 
-from admission.constants import INVITATION_EXPIRED_IN_HOURS
 from admission.filters import (
     ApplicantFilter, InterviewInvitationFilter, InterviewsCuratorFilter,
     InterviewsFilter, InterviewStreamFilter, RequiredSectionInterviewStreamFilter,
@@ -221,17 +220,16 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
 
         applicants_all = Applicant.objects.all()
         streams_all = InterviewStream.objects.all()
-        print(applicants_all)
-        print(streams_all)
 
         # Create interview invitations
         if (user.is_curator and applicant_ids and streams_ids and
             'campaign' in self.request.GET and
             'section' in self.request.GET):
 
-            self.create_invitation(applicant_ids, streams_ids, applicants_all, streams_all)
-
-        return super().get(request, *args, **kwargs)
+            response = self.create_invitation(applicant_ids, streams_ids, applicants_all, streams_all)
+        else:
+            response = ''
+        return response
 
     def get(self, request, *args, **kwargs):
         """Sets filter defaults and redirects"""
@@ -241,7 +239,7 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
             campaign = get_default_campaign_for_user(user)
             campaign_id = campaign.id if campaign else ""
             if "section" not in self.request.GET:
-                section_name = 'all_in_1'
+                section_name = InterviewSections.ALL_IN_ONE
             url = reverse("admission:interviews:invitations:send")
             url = f"{url}?campaign={campaign_id}&section={section_name}"
             return HttpResponseRedirect(redirect_to=url)
@@ -267,9 +265,9 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
                                          streams__in=interview_streams)
                                  .exclude(status=InterviewInvitationStatuses.DECLINED))
 
-        applicant_id = set()
+        applicant_ids = set()
         for interview_invitation in interview_invitations:
-            applicant_id.add(interview_invitation.applicant.id)
+            applicant_ids.add(interview_invitation.applicant.id)
 
         applicant_queryset = (Applicant.objects
                               .filter(campaign=campaign)
@@ -279,7 +277,7 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
                               .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1)),
                                         test__score_coalesce=Coalesce('online_test__score',
                                                                       Value(-1)))
-                              .exclude(id__in=list(applicant_id))
+                              .exclude(id__in=list(applicant_ids))
                               .order_by("-exam__score_coalesce", "-test__score_coalesce", "-pk"))
 
         context["applicants"] = applicant_queryset
@@ -300,11 +298,12 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
 
                 messages.success(
                     self.request,
-                    "Приглашение успешно создано и должно быть отправлено в "
+                    "Приглашения успешно созданы и должны быть отправлены в "
                     "течение 5 минут.",
                     extra_tags='timeout')
             except IntegrityError:
-                messages.error(self.request, "Приглашение не было создано.")
+                messages.error(self.request, "Приглашения не были созданы.")
+        return HttpResponseRedirect('')
 
     
 class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseListView):

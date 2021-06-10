@@ -3,7 +3,6 @@
 {% block title %}Отправка приглашений{% endblock title %}
 
 {% block body_attrs %} class="gray" data-init-sections="send_interview_invitations"{% endblock body_attrs %}
-{#{% block body_attrs %} class="gray" data-init-sections="selectpickers,tooltips"{% endblock body_attrs %}#}
 
 {% block javascripts %}
   <script src="{{ static('v1/js/vendor/reverse.js') }}"></script>
@@ -25,7 +24,7 @@
           <table class="table">
             <thead>
               <tr>
-                <th><input class="form-check-input" type="checkbox" value="" id="checkAllStudent"></th>
+                <th><input class="form-check-input" type="checkbox" value="" id="check-all-student"></th>
                 <th>Поступающий</th>
                 <th>Заметка</th>
                 <th>Направление</th>
@@ -33,11 +32,12 @@
                 <th style="width: 60px;">Экз.</th>
               </tr>
             </thead>
-            <tbody id="checkStudent">
+            <tbody id="check-student">
                {% if applicants|length > 0 %}
                   {% for applicant in applicants %}
                       <tr>
-                          <td><input name='applicant-select' class="form-check-input" type="checkbox" value="{{applicant.id}}" id="id_{{applicant.id}}"></td>
+                          <td><input name='applicant-select' class="form-check-input" type="checkbox"
+                                     value="{{applicant.id}}" id="id_{{applicant.id}}"></td>
                           <td class="applicant">
                               <a href="{{ applicant.get_absolute_url() }}">{{ applicant.full_name }}</a>
                               {% if applicant.university_other %}{{ applicant.university_other }}
@@ -70,10 +70,6 @@
               {% endif %}
             </tbody>
           </table>
-
-{#        {% if is_paginated %}#}
-{#            {{ bootstrap_paginate page_obj range=10 show_prev_next="false" show_first_last="true" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>" }}#}
-{#        {% endif %}#}
         </div>
       </div>
     </div>
