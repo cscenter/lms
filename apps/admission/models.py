@@ -1378,6 +1378,6 @@ class InterviewInvitation(TimeStampedModel):
 
     def get_status_display(self):
         status = self.status
-        if self.is_expired:
+        if self.status == InterviewInvitationStatuses.CREATED and self.is_expired:
             status = InterviewInvitationStatuses.EXPIRED
         return InterviewInvitationStatuses.values[status]
