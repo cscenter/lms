@@ -156,13 +156,31 @@ class InterviewerSerializer(serializers.ModelSerializer):
 
 
 class InterviewSerializer(serializers.ModelSerializer):
-    date = serializers.DateTimeField(source='date_local', format=DATE_FORMAT_RU)
-    time = serializers.DateTimeField(source='date_local', format=TIME_FORMAT_RU)
+    date = serializers.SerializerMethodField()
+    time = serializers.SerializerMethodField()
     interviewers = InterviewerSerializer(many=True)
 
     class Meta:
         model = Interview
         fields = ("date", "time", "interviewers")
+
+    def get_date(self, obj: Interview):
+        """
+        Returns date part in a local time zone.
+
+        Note:
+            serializers.DateTimeField enforces time zone to the UTC.
+        """
+        return obj.date_local().strftime(DATE_FORMAT_RU)
+
+    def get_time(self, obj: Interview):
+        """
+        Returns time part in a local time zone.
+
+        Note:
+            serializers.DateTimeField enforces time zone to the UTC.
+        """
+        return obj.date_local().strftime(TIME_FORMAT_RU)
 
 
 def get_interview_stream_filterset(input_serializer: serializers.Serializer):
