@@ -73,7 +73,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                                             template=template).exists():
                     context = {
                         'BRANCH': campaign.branch.name,
-                        'CONTEST_ID': a.exam and a.exam.yandex_contest_id,
+                        'CONTEST_ID': a.exam_id and a.exam.yandex_contest_id,
                     }
                     mail.send(
                         recipients,
