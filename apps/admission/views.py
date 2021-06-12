@@ -14,6 +14,7 @@ from vanilla import TemplateView
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db import IntegrityError, transaction
 from django.db.models import Avg, Case, Count, Prefetch, Sum, Value, When
 from django.db.models.functions import Coalesce
@@ -206,7 +207,6 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
     model = InterviewStream
     template_name = "lms/admission/send_interview_invitations.html"
     filterset_class = RequiredSectionInterviewStreamFilter
-    paginate_by = 50
 
     def post(self, request, *args, **kwargs):
         """Get data for interview from stream form"""
@@ -217,8 +217,14 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
 
         applicant_ids = list(self.request.POST.getlist('ids[]'))
         streams_ids = list(self.request.POST.getlist('streams[]'))
+        campaign_id = self.request.GET.get('campaign', 1)
+        section = self.request.GET.get('section', 1)
 
-        applicants_all = Applicant.objects.all()
+        applicants_all = (Applicant.objects
+                          .filter(campaign=campaign_id)
+                          .select_related("exam", "online_test", "campaign", "university",
+                                          "campaign__branch"))
+
         streams_all = InterviewStream.objects.all()
 
         # Create interview invitations
@@ -243,7 +249,6 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
             url = reverse("admission:interviews:invitations:send")
             url = f"{url}?campaign={campaign_id}&section={section_name}"
             return HttpResponseRedirect(redirect_to=url)
-
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -279,10 +284,33 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
                                                                       Value(-1)))
                               .exclude(id__in=list(applicant_ids))
                               .order_by("-exam__score_coalesce", "-test__score_coalesce", "-pk"))
+        
+        paginator = Paginator(applicant_queryset, 50)
 
-        context["applicants"] = applicant_queryset
-        context["interview_stream_form"] = InterviewStreamInvitationForm(
-            stream=interview_streams)
+        page = self.request.GET.get('p', 1)
+
+        try:
+            applicants = paginator.page(page)
+        except PageNotAnInteger:
+            applicants = paginator.page(1)
+        except EmptyPage:
+            applicants = paginator.page(paginator.num_pages)
+
+        full_url = reverse("admission:interviews:invitations:send")
+        full_url = f"{full_url}?campaign={campaign.id}&section={section}"
+
+        context_update = {
+            'applicants': applicants,
+            'p': page,
+            'applicants_all': applicant_queryset,
+            'campaign_id': campaign,
+            'section': section,
+            'full_url': full_url,
+            'interview_stream_form': InterviewStreamInvitationForm(
+                stream=interview_streams)
+        }
+        context.update(context_update)
+
         return context
 
     def create_invitation(self, applicant_ids, streams_ids, applicants_all, streams_all):

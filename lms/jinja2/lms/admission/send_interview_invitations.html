@@ -16,7 +16,7 @@
     <div class="page-content">
       <div class="panel">
         <div class="panel-heading">
-          <h3 class="panel-title">Ожидают приглашения / {{ applicants|length }}</h3>
+          <h3 class="panel-title">Ожидают приглашения / {{ applicants_all|length }}</h3>
         </div>
 
         <div class="panel-body form-check">
@@ -70,6 +70,27 @@
               {% endif %}
             </tbody>
           </table>
+          {% if applicants.has_other_pages %}
+            <ul class="pagination">
+              {% if applicants.has_previous() %}
+                <li><a href="{{full_url}}&p={{ applicants.previous_page_number() }}">&laquo;</a></li>
+              {% else %}
+                <li class="disabled"><span>&laquo;</span></li>
+              {% endif %}
+              {% for i in applicants.paginator.page_range %}
+                {% if applicants.number == i %}
+                  <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                {% else %}
+                  <li><a href="{{full_url}}&p={{ i }}">{{ i }}</a></li>
+                {% endif %}
+              {% endfor %}
+              {% if applicants.has_next() %}
+                <li><a href="{{full_url}}&p={{ applicants.next_page_number() }}">&raquo;</a></li>
+              {% else %}
+                <li class="disabled"><span>&raquo;</span></li>
+              {% endif %}
+            </ul>
+          {% endif %}
         </div>
       </div>
     </div>
