@@ -7,7 +7,7 @@ from admission.models import InterviewSlot
 
 
 class InterviewSlotBaseSerializer(serializers.ModelSerializer):
-    start_at = TimeField(format="%H:%M", input_formats=None)
+    start_at = TimeField(format="%H:%M")
     stream = serializers.SerializerMethodField()
 
     class Meta:

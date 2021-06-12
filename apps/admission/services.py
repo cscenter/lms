@@ -304,10 +304,10 @@ class EmailQueueService:
     # noinspection DuplicatedCode
     @staticmethod
     def generate_interview_confirmation(interview: Interview,
-                                        stream: InterviewStream):
+                                        stream: InterviewStream) -> Optional[Email]:
         interview_format = stream.interview_format
         if interview_format.confirmation_template_id is None:
-            return
+            return None
         campaign = interview.applicant.campaign
         meeting_at = get_meeting_time(interview.date_local(), stream)
         with translation.override('ru'):
@@ -333,7 +333,7 @@ class EmailQueueService:
 
     @staticmethod
     def generate_interview_reminder(interview: Interview,
-                                    stream: InterviewStream) -> Optional[Email]:
+                                    stream: InterviewStream) -> None:
         today = timezone.now()
         interview_format = stream.interview_format
         scheduled_time = interview.date - interview_format.remind_before_start
@@ -351,7 +351,7 @@ class EmailQueueService:
             if stream.with_assignments and is_online:
                 public_url = interview.get_public_assignments_url()
                 context['ASSIGNMENTS_LINK'] = public_url
-            return mail.send(
+            mail.send(
                 [interview.applicant.email],
                 scheduled_time=scheduled_time,
                 sender=get_email_from(campaign),
@@ -364,7 +364,7 @@ class EmailQueueService:
             )
 
     @staticmethod
-    def remove_interview_reminder(interview: Interview):
+    def remove_interview_reminder(interview: Interview) -> None:
         slots = (InterviewSlot.objects
                  .filter(interview=interview)
                  .select_related('stream', 'stream__interview_format'))
@@ -377,7 +377,7 @@ class EmailQueueService:
              .delete())
 
     @staticmethod
-    def generate_interview_feedback_email(interview) -> Optional[Email]:
+    def generate_interview_feedback_email(interview) -> None:
         if interview.status != interview.COMPLETED:
             return
         # Fail silently if template not found
@@ -405,7 +405,7 @@ class EmailQueueService:
                  .filter(**email_identifiers)
                  .update(scheduled_time=scheduled_time))
         except Email.DoesNotExist:
-            return mail.send(
+            mail.send(
                 recipients,
                 scheduled_time=scheduled_time,
                 sender='info@compscicenter.ru',

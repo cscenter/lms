@@ -24,8 +24,9 @@ from django.utils.translation import gettext_lazy as _
 from core.db.fields import TimeZoneField
 from core.db.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
-from core.timezone import Timezone, TimezoneAwareMixin, now_local
+from core.timezone import TimezoneAwareMixin, now_local
 from core.timezone.fields import TimezoneAwareDateTimeField
+from core.timezone.typing import Timezone
 from core.urls import reverse
 from core.utils import get_youtube_video_id, hashids, instance_memoize
 from courses.constants import MaterialVisibilityTypes, TeacherRoles

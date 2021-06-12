@@ -10,7 +10,8 @@ from dateutil import parser as dparser
 from django.conf import settings
 from django.utils import timezone
 
-from core.timezone import Timezone, now_local
+from core.timezone import now_local
+from core.timezone.typing import Timezone
 from courses.constants import (
     AUTUMN_TERM_START, MONDAY_WEEKDAY, SPRING_TERM_START, SUMMER_TERM_START,
     SemesterTypes

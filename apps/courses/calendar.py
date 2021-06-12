@@ -13,7 +13,7 @@ from isoweek import Week
 from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
-from core.timezone import Timezone
+from core.timezone.typing import Timezone
 from core.utils import chunks
 from courses.constants import MONDAY_WEEKDAY, WEEKDAY_TITLES
 from courses.models import Course, CourseClass, LearningSpace

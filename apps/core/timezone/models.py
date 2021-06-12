@@ -5,6 +5,8 @@ from django.core.exceptions import FieldDoesNotExist
 
 from .typing import Timezone
 
+__all__ = ['TimezoneAwareMixin']
+
 
 class TimezoneAwareMixin:
     def get_timezone(self) -> Optional[Timezone]:

@@ -22,7 +22,7 @@ class InterviewSlots(APIView):
     permission_classes = [CuratorAccessPermission]
 
     def get(self, request, *args, **kwargs):
-        slots = []
+        slots = InterviewSlot.objects.none()
         if "streams[]" in request.GET:
             try:
                 streams = [int(v) for v in request.GET.getlist("streams[]")]
