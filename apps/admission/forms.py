@@ -4,6 +4,8 @@ from crispy_forms.layout import Div, Field, Layout, Row, Submit
 from django_filters.conf import settings as filters_settings
 
 from django import forms
+from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.forms import SelectMultiple
 from django.forms.models import ModelForm
@@ -143,48 +145,35 @@ class InterviewAssignmentsForm(forms.ModelForm):
         self.helper.form_class = self.prefix
 
 
-# choices_csc = (
-#     ("", ""),
-#     (-2, "не брать ни сейчас, ни потом"),
-#     (-1, "не брать сейчас"),
-#     (0, "нейтрально"),
-#     (1, "можно взять"),
-#     (2, "точно нужно взять"))
-#
-# choices_yds = (
-#     ("", ""),
-#     (1, "не брать ни сейчас, ни потом"),
-#     (2, "не брать сейчас"),
-#     (3, "нейтрально"),
-#     (4, "можно взять"),
-#     (5, "точно нужно взять"))
+choices_csc = (
+    ("", ""),
+    (-2, "не брать ни сейчас, ни потом"),
+    (-1, "не брать сейчас"),
+    (0, "нейтрально"),
+    (1, "можно взять"),
+    (2, "точно нужно взять"))
+
+choices_yds = (
+    ("", ""),
+    (1, "не брать ни сейчас, ни потом"),
+    (2, "не брать сейчас"),
+    (3, "нейтрально"),
+    (4, "можно взять"),
+    (5, "точно нужно взять"))
 
 
 class InterviewCommentForm(forms.ModelForm):
     use_required_attribute = False
 
-    scale = forms.ChoiceField(choices=(
-                    # ("", ""),
-                    (1, "Computer Science Center"),
-                    (2, "Yandex Data School")), label='Шкала баллов')
-                    # (1, "1, 2, 3, 4, 5"),
-                    # (2, "-2,-1, 0, 1, 2")),)
-
     class Meta:
         model = Comment
-        fields = ["text", "scale", "score", "interview", "interviewer"]
+        fields = ["text", "score", "interview", "interviewer"]
         widgets = {
             'interview': forms.HiddenInput(),
             'interviewer': forms.HiddenInput(),
             'score': forms.Select(
-                choices=(
-                    ("", ""),
-                    (-2, "не брать ни сейчас, ни потом"),
-                    (-1, "не брать сейчас"),
-                    (0, "нейтрально"),
-                    (1, "можно взять"),
-                    (2, "точно нужно взять")),
-            ),
+                choices=choices_yds if 'yandexdataschool' in Site.objects
+                .get(id=settings.SITE_ID).domain else choices_csc),
             'text': UbereditorWidget(attrs={
                 'data-local-persist': 'true',
             })
@@ -198,7 +187,6 @@ class InterviewCommentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div('scale'),
             Div('score'),
             Div('text'),
             'interview', 'interviewer',

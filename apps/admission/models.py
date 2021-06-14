@@ -1089,7 +1089,7 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
 
 class Comment(TimeStampedModel):
     MIN_SCORE = -2
-    MAX_SCORE = 2
+    MAX_SCORE = 5
 
     interview = models.ForeignKey(
         Interview,
