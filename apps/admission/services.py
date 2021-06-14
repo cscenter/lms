@@ -36,6 +36,12 @@ def get_email_from(campaign: Campaign):
     return campaign.branch.default_email_from
 
 
+def __invitation_save(invitation, streams):
+    invitation.save()
+    invitation.streams.add(*streams)
+    EmailQueueService.generate_interview_invitation(invitation)
+
+
 def create_invitation(streams: List[InterviewStream], applicant: Applicant, atomic=True):
     """Create invitation and send email to applicant."""
     streams = list(streams)  # Queryset -> list
@@ -52,16 +58,13 @@ def create_invitation(streams: List[InterviewStream], applicant: Applicant, atom
     invitation = InterviewInvitation(applicant=applicant,
                                      expired_at=expired_at)
 
-    def invitation_save():
-        invitation.save()
-        invitation.streams.add(*streams)
-        EmailQueueService.generate_interview_invitation(invitation)
-
     if atomic:
         with transaction.atomic():
-            invitation_save()
+
+            __invitation_save(invitation, streams)
     else:
-        invitation_save()
+
+        __invitation_save(invitation, streams)
 
 
 def import_campaign_contest_results(*, campaign: Campaign, model_class):
