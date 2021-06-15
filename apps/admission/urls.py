@@ -4,7 +4,7 @@ from django.urls import path
 from admission.views import (
     ApplicantCreateStudentView, ApplicantDetailView, ApplicantListView,
     ApplicantStatusUpdateView, InterviewAssignmentDetailView, InterviewCommentView,
-    InterviewDetailView, InterviewInvitationListView, InterviewInvitationSendView,
+    InterviewDetailView, InterviewInvitationListView, InterviewInvitationCreateView,
     InterviewListView, InterviewResultsDispatchView, InterviewResultsView,
     import_campaign_testing_results
 )
@@ -20,7 +20,7 @@ applicant_patterns = [
 
 interview_invitation_patterns = [
     path('', InterviewInvitationListView.as_view(), name='list'),
-    path('send', InterviewInvitationSendView.as_view(), name='send'),
+    path('send', InterviewInvitationCreateView.as_view(), name='send'),
 ]
 
 interview_patterns = [

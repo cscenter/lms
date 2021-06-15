@@ -9,7 +9,7 @@ from post_office.utils import get_email_template
 from rest_framework.exceptions import APIException, NotFound
 
 from django.core.exceptions import ValidationError
-from django.db import transaction
+from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone, translation
 from django.utils.formats import date_format
@@ -24,6 +24,7 @@ from admission.models import (
     InterviewStream
 )
 from admission.utils import logger
+from core.timezone import get_now_utc
 from core.timezone.constants import DATE_FORMAT_RU
 from core.utils import bucketize
 from grading.api.yandex_contest import YandexContestAPI
@@ -36,10 +37,48 @@ def get_email_from(campaign: Campaign):
     return campaign.branch.default_email_from
 
 
-def __invitation_save(invitation, streams):
+def get_ongoing_interview_streams() -> models.QuerySet[InterviewStream]:
+    """
+    Returns interview streams to which participants can be invited.
+    """
+    return (InterviewStream.objects
+            .filter(date__gt=get_now_utc().date()))
+
+
+def get_applicants_for_invitation(*, campaign: Campaign,
+                                  section: str) -> models.QuerySet[Applicant]:
+    """
+    Returns all campaign participants available for invitation to the interview
+    of the target section.
+    """
+    # Waiting for participant response to the sent invitation
+    with_active_invitation = (InterviewInvitation.objects
+                              .filter(expired_at__gt=get_now_utc(),
+                                      status=InterviewInvitationStatuses.NO_RESPONSE,
+                                      applicant__campaign=campaign,
+                                      streams__section=section,
+                                      )
+                              .values('applicant_id')
+                              .distinct())
+    # Participants with scheduled interview
+    # FIXME: how to handle DEFERRED/CANCELED/etc statuses?
+    with_interview = (Interview.objects
+                      .filter(applicant__campaign=campaign,
+                              section=section)
+                      .values('applicant_id'))
+
+    queryset = (Applicant.objects
+                .filter(campaign=campaign,
+                        status=Applicant.INTERVIEW_TOBE_SCHEDULED)
+                .exclude(pk__in=with_active_invitation)
+                .exclude(pk__in=with_interview))
+    return queryset
+
+
+def _save_invitation(invitation: InterviewInvitation, streams: List[InterviewStream]):
     invitation.save()
     invitation.streams.add(*streams)
-    EmailQueueService.generate_interview_invitation(invitation)
+    EmailQueueService.generate_interview_invitation(invitation, streams)
 
 
 def create_invitation(streams: List[InterviewStream], applicant: Applicant, atomic=True):
@@ -57,14 +96,11 @@ def create_invitation(streams: List[InterviewStream], applicant: Applicant, atom
     expired_at = min(expired_at, first_day_interview)
     invitation = InterviewInvitation(applicant=applicant,
                                      expired_at=expired_at)
-
     if atomic:
         with transaction.atomic():
-
-            __invitation_save(invitation, streams)
+            _save_invitation(invitation, streams)
     else:
-
-        __invitation_save(invitation, streams)
+        _save_invitation(invitation, streams)
 
 
 def import_campaign_contest_results(*, campaign: Campaign, model_class):
@@ -164,7 +200,7 @@ class InterviewCreateError(APIException):
 def decline_interview_invitation(invitation: InterviewInvitation):
     if invitation.is_expired:
         raise ValidationError("Interview Invitation is expired", code="expired")
-    is_unprocessed_invitation = (invitation.status == InterviewInvitationStatuses.CREATED)
+    is_unprocessed_invitation = (invitation.status == InterviewInvitationStatuses.NO_RESPONSE)
     if not is_unprocessed_invitation:
         raise ValidationError("Status transition is not supported", code="malformed")
     invitation.status = InterviewInvitationStatuses.DECLINED
@@ -187,7 +223,7 @@ def accept_interview_invitation(invitation: InterviewInvitation, slot_id: int) -
         raise ValidationError("Приглашение уже принято", code=code)
     elif invitation.is_expired:
         raise ValidationError("Приглашение больше не актуально", code="expired")
-    is_unprocessed_invitation = (invitation.status == InterviewInvitationStatuses.CREATED)
+    is_unprocessed_invitation = (invitation.status == InterviewInvitationStatuses.NO_RESPONSE)
     if not is_unprocessed_invitation:
         raise ValidationError(f"You can't accept invitation with {invitation.status} status", code="malformed")
 
@@ -282,9 +318,10 @@ class EmailQueueService:
         ), True
 
     @staticmethod
-    def generate_interview_invitation(interview_invitation) -> Email:
-        streams = []
-        for stream in interview_invitation.streams.select_related("venue").all():
+    def generate_interview_invitation(interview_invitation: InterviewInvitation,
+                                      streams: List[InterviewStream]) -> Email:
+        streams_context = []
+        for stream in streams:
             with translation.override('ru'):
                 date = date_format(stream.date, "j E")
             s = {
@@ -295,12 +332,12 @@ class EmailQueueService:
                 "WITH_ASSIGNMENTS": stream.with_assignments,
                 "DIRECTIONS": stream.venue.directions,
             }
-            streams.append(s)
+            streams_context.append(s)
         campaign = interview_invitation.applicant.campaign
         context = {
             "BRANCH": campaign.branch.name,
             "SECRET_LINK": interview_invitation.get_absolute_url(),
-            "STREAMS": streams
+            "STREAMS": streams_context
         }
         return mail.send(
             [interview_invitation.applicant.email],

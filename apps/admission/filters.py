@@ -52,7 +52,7 @@ class InterviewInvitationStatusFilter(django_filters.ChoiceFilter):
         if value == InterviewInvitationStatuses.EXPIRED:
             return self.get_method(qs)(
                 Q(status=value) |
-                (Q(status=InterviewInvitationStatuses.CREATED) & Q(expired_at__lte=timezone.now()))
+                (Q(status=InterviewInvitationStatuses.NO_RESPONSE) & Q(expired_at__lte=timezone.now()))
             )
         return super().filter(qs, value)
 

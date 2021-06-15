@@ -58,18 +58,17 @@ class InterviewForm(forms.ModelForm):
 
 
 class InterviewStreamInvitationForm(forms.Form):
-    prefix = "interview_stream_invitation"
-
     streams = forms.ModelMultipleChoiceField(
         label=_("Interview streams"),
-        queryset=InterviewStream.objects.get_queryset(),
-        widget=SelectMultiple(attrs={"size": 1, "class": "bs-select-hidden"}),
+        queryset=InterviewStream.objects.none(),
+        widget=SelectMultiple(attrs={"size": 1, "class": "bs-select-hidden multiple-select"}),
         required=True)
 
-    def __init__(self, stream, *args, **kwargs):
+    def __init__(self, streams, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['streams'].queryset = stream
+        self.fields['streams'].queryset = streams
         self.helper = FormHelper(self)
+        self.helper.form_tag = False
         self.helper.layout = Layout(
             Row(
                 Div('streams', css_class='col-xs-8'),

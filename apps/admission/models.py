@@ -210,6 +210,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
     REJECTED_BY_CHEATING = 'rejected_cheating'
     # TODO: rename interview codes here and in DB. Replace values type?
     INTERVIEW_TOBE_SCHEDULED = 'interview_phase'  # permitted to interview
+    # FIXME: remove
     INTERVIEW_SCHEDULED = 'interview_assigned'
     INTERVIEW_COMPLETED = 'interview_completed'
     REJECTED_BY_INTERVIEW = 'rejected_interview'
@@ -1317,7 +1318,7 @@ class InterviewInvitation(TimeStampedModel):
         related_name="interview_invitations")
     status = models.CharField(
         choices=InterviewInvitationStatuses.choices,
-        default=InterviewInvitationStatuses.CREATED,
+        default=InterviewInvitationStatuses.NO_RESPONSE,
         verbose_name=_("Status"),
         max_length=10)
     streams = models.ManyToManyField(
@@ -1378,6 +1379,6 @@ class InterviewInvitation(TimeStampedModel):
 
     def get_status_display(self):
         status = self.status
-        if self.status == InterviewInvitationStatuses.CREATED and self.is_expired:
+        if self.status == InterviewInvitationStatuses.NO_RESPONSE and self.is_expired:
             status = InterviewInvitationStatuses.EXPIRED
         return InterviewInvitationStatuses.values[status]

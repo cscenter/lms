@@ -2,7 +2,7 @@
 
 {% block title %}Отправка приглашений{% endblock title %}
 
-{% block body_attrs %} class="gray" data-init-sections="send_interview_invitations"{% endblock body_attrs %}
+{% block body_attrs %} class="gray" data-init-sections="selectpickers,send_interview_invitations"{% endblock body_attrs %}
 
 {% block javascripts %}
   <script src="{{ static('v1/js/vendor/reverse.js') }}"></script>
@@ -10,89 +10,95 @@
 {% endblock javascripts %}
 
 {% block content %}
-<div class="admission-list-page">
-    {{ crispy(filter.form) }}
+  <div class="admission-list-page">
+    {{ crispy(stream_filter_form) }}
 
     <div class="page-content">
       <div class="panel">
         <div class="panel-heading">
-          <h3 class="panel-title">Ожидают приглашения / {{ applicants_all|length }}</h3>
+          <h3 class="panel-title">Ожидают приглашения / {{ paginator.count }}</h3>
         </div>
 
-        <div class="panel-body form-check">
-          {{ crispy(interview_stream_form) }}
-          <table class="table">
-            <thead>
+        <form action="" method="POST">
+          <div class="panel-body form-check">
+
+            {{ crispy(stream_form) }}
+
+            <table class="table">
+              <thead>
               <tr>
-                <th><input class="form-check-input" type="checkbox" value="" id="check-all-student"></th>
+                <th></th>
                 <th>Поступающий</th>
                 <th>Заметка</th>
                 <th>Направление</th>
                 <th style="width: 60px;">Тест</th>
                 <th style="width: 60px;">Экз.</th>
               </tr>
-            </thead>
-            <tbody id="check-student">
-               {% if applicants|length > 0 %}
-                  {% for applicant in applicants %}
-                      <tr>
-                          <td><input name='applicant-select' class="form-check-input" type="checkbox"
-                                     value="{{applicant.id}}" id="id_{{applicant.id}}"></td>
-                          <td class="applicant">
-                              <a href="{{ applicant.get_absolute_url() }}">{{ applicant.full_name }}</a>
-                              {% if applicant.university_other %}{{ applicant.university_other }}
-                              {% else %}
-                                {% if applicant.university.abbr %}{{ applicant.university.abbr }}
-                                  {% else %}
-                                    {% if applicant.university.name %}{{ applicant.university.name }}{% endif %}
-                                {% endif %}
-                              {% endif %}
-                              {% if applicant.course %}<br>{{ applicant.get_course_display }}{% endif %}
-
-                          </td>
-                          <td>{% if applicant.admin_note %}{{ applicant.admin_note }}{% else %}-{% endif %}</td>
-                          <td>{% if applicant.preferred_study_programs %}
-                              {% for p in applicant.preferred_study_programs %}{{ p|upper }}{% if not loop.last %}, {% endif %}{% endfor %}
-                              {% else %}-{% endif %}
-                          </td>
-                          <td>{% if applicant.online_test and applicant.online_test.score_display != "-" and applicant.online_test.score %}
-                            {{ applicant.online_test.score }}{% else %}-{% endif %}
-                          </td>
-                          <td>{% if applicant.exam and applicant.exam.score_display != '-' and applicant.exam.score %}
-                            {{ applicant.exam.score }}{% else %}-{% endif %}
-                          </td>
-                      </tr>
-                  {% endfor %}
-              {% else %}
+              </thead>
+              <tbody id="check-student">
+              {% if applicants|length > 0 %}
+                {% for applicant in applicants %}
                   <tr>
-                      <td colspan="6" class="empty-results">Измените параметры поиска.</td>
+                    <td>
+                      <input type="checkbox" name='ids' class="form-check-input"
+                             value="{{ applicant.id }}" />
+                    </td>
+                    <td class="applicant">
+                      <a href="{{ applicant.get_absolute_url() }}">{{ applicant.full_name }}</a><br>
+                      {% if applicant.university_other %}{{ applicant.university_other }}
+                      {% elif applicant.university.abbr %}{{ applicant.university.abbr }}
+                      {% elif applicant.university.name %}{{ applicant.university.name }}
+                      {% endif %}
+                    </td>
+                    <td>{% if applicant.admin_note %}{{ applicant.admin_note }}{% else %}-{% endif %}</td>
+                    <td>
+                      {% if applicant.preferred_study_programs %}
+                        {% for p in applicant.preferred_study_programs %}{{ p|upper }}{% if not loop.last %}, {% endif %}{% endfor %}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if applicant.online_test and applicant.online_test.score_display != "-" and applicant.online_test.score %}
+                      {{ applicant.online_test.score }}{% else %}-{% endif %}
+                    </td>
+                    <td>
+                      {% if applicant.exam and applicant.exam.score_display != '-' and applicant.exam.score %}
+                      {{ applicant.exam.score }}{% else %}-{% endif %}
+                    </td>
                   </tr>
-              {% endif %}
-            </tbody>
-          </table>
-          {% if applicants.has_other_pages %}
-            <ul class="pagination">
-              {% if applicants.has_previous() %}
-                <li><a href="{{full_url}}&p={{ applicants.previous_page_number() }}">&laquo;</a></li>
+                {% endfor %}
               {% else %}
-                <li class="disabled"><span>&laquo;</span></li>
+                <tr>
+                  <td colspan="6" class="empty-results">Измените параметры поиска.</td>
+                </tr>
               {% endif %}
-              {% for i in applicants.paginator.page_range %}
-                {% if applicants.number == i %}
-                  <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+              </tbody>
+            </table>
+            {% if is_paginated %}
+              <ul class="pagination">
+                {% if page.has_previous() %}
+                  <li><a href="{{ paginator_url }}&page={{ page.previous_page_number() }}">&laquo;</a></li>
                 {% else %}
-                  <li><a href="{{full_url}}&p={{ i }}">{{ i }}</a></li>
+                  <li class="disabled"><span>&laquo;</span></li>
                 {% endif %}
-              {% endfor %}
-              {% if applicants.has_next() %}
-                <li><a href="{{full_url}}&p={{ applicants.next_page_number() }}">&raquo;</a></li>
-              {% else %}
-                <li class="disabled"><span>&raquo;</span></li>
-              {% endif %}
-            </ul>
-          {% endif %}
-        </div>
+                {% for i in paginator.page_range %}
+                  {% if page.number == i %}
+                    <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                  {% else %}
+                    <li><a href="{{ paginator_url }}&page={{ i }}">{{ i }}</a></li>
+                  {% endif %}
+                {% endfor %}
+                {% if page.has_next() %}
+                  <li><a href="{{ paginator_url }}&page={{ page.next_page_number() }}">&raquo;</a></li>
+                {% else %}
+                  <li class="disabled"><span>&raquo;</span></li>
+                {% endif %}
+              </ul>
+            {% endif %}
+          </div>
+        </form>
       </div>
     </div>
-</div>
+  </div>
 {% endblock content %}

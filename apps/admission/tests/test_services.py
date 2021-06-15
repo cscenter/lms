@@ -11,10 +11,11 @@ from admission.constants import (
     INVITATION_EXPIRED_IN_HOURS, ChallengeStatuses, InterviewFormats,
     InterviewInvitationStatuses, InterviewSections
 )
-from admission.models import Exam, Interview
+from admission.models import Applicant, Exam, Interview
 from admission.services import (
     EmailQueueService, accept_interview_invitation, create_student_from_applicant,
-    decline_interview_invitation, get_meeting_time, get_streams
+    decline_interview_invitation, get_applicants_for_invitation, get_meeting_time,
+    get_ongoing_interview_streams, get_streams
 )
 from admission.tests.factories import (
     ApplicantFactory, CampaignFactory, ExamFactory, InterviewFactory,
@@ -22,6 +23,7 @@ from admission.tests.factories import (
     InterviewStreamFactory
 )
 from core.tests.factories import BranchFactory, EmailTemplateFactory
+from core.timezone import get_now_utc
 from users.models import StudentTypes
 
 
@@ -141,13 +143,13 @@ def test_decline_interview_invitation():
         end_at=datetime.time(16, 0),
     )
     invitation = InterviewInvitationFactory(interview=None, streams=[slot.stream])
-    assert invitation.status == InterviewInvitationStatuses.CREATED
+    assert invitation.status == InterviewInvitationStatuses.NO_RESPONSE
     decline_interview_invitation(invitation)
     invitation.refresh_from_db()
     assert invitation.status == InterviewInvitationStatuses.DECLINED
     # Invite is expired but status is not synced yet
     invitation.expired_at = timezone.now() - datetime.timedelta(days=3)
-    invitation.status = InterviewInvitationStatuses.CREATED
+    invitation.status = InterviewInvitationStatuses.NO_RESPONSE
     invitation.save()
     with pytest.raises(ValidationError) as e:
         decline_interview_invitation(invitation)
@@ -214,3 +216,77 @@ def test_get_meeting_time():
     stream.save()
     meeting_at = get_meeting_time(slot.datetime_local, stream)
     assert meeting_at.time() == datetime.time(hour=14, minute=10)
+
+
+@pytest.mark.django_db
+def test_ongoing_interview_streams():
+    today_utc = get_now_utc()
+    tomorrow = today_utc + datetime.timedelta(days=1)
+    assert get_ongoing_interview_streams().count() == 0
+    stream = InterviewStreamFactory(start_at=datetime.time(14, 10),
+                                    end_at=datetime.time(14, 30),
+                                    duration=20,
+                                    date=today_utc.date())
+    stream = InterviewStreamFactory(start_at=datetime.time(14, 10),
+                                    end_at=datetime.time(14, 30),
+                                    duration=20,
+                                    date=tomorrow.date())
+    assert get_ongoing_interview_streams().count() == 1
+
+
+@pytest.mark.django_db
+def test_get_applicants_for_invitation():
+    campaign1, campaign2 = CampaignFactory.create_batch(2)
+    applicant1 = ApplicantFactory(campaign=campaign1)
+    applicant2 = ApplicantFactory(campaign=campaign2)
+    assert get_applicants_for_invitation(campaign=campaign1,
+                                         section=InterviewSections.ALL_IN_ONE).count() == 0
+    applicant3 = ApplicantFactory(campaign=campaign1, status=Applicant.INTERVIEW_TOBE_SCHEDULED)
+    assert get_applicants_for_invitation(campaign=campaign1,
+                                         section=InterviewSections.ALL_IN_ONE).count() == 1
+    # Participant is already interviewed on another section
+    InterviewFactory(applicant=applicant3, section=InterviewSections.MATH)
+    assert get_applicants_for_invitation(campaign=campaign1,
+                                         section=InterviewSections.ALL_IN_ONE).count() == 1
+    InterviewFactory(applicant=applicant3, section=InterviewSections.ALL_IN_ONE)
+    assert get_applicants_for_invitation(campaign=campaign1,
+                                         section=InterviewSections.ALL_IN_ONE).count() == 0
+    # Expired invitation for target section
+    applicant4 = ApplicantFactory(campaign=campaign1, status=Applicant.INTERVIEW_TOBE_SCHEDULED)
+    yesterday_utc = get_now_utc() - datetime.timedelta(days=1)
+    next_week_utc = get_now_utc() + datetime.timedelta(weeks=1)
+    stream = InterviewStreamFactory(section=InterviewSections.ALL_IN_ONE,
+                                    start_at=datetime.time(14, 10),
+                                    end_at=datetime.time(14, 30),
+                                    duration=20,
+                                    date=yesterday_utc.date())
+    invitation = InterviewInvitationFactory(interview=None,
+                                            applicant=applicant4,
+                                            expired_at=yesterday_utc,
+                                            streams=[stream])
+    assert get_applicants_for_invitation(campaign=campaign1,
+                                         section=InterviewSections.ALL_IN_ONE).count() == 1
+    # Active invitation for another section
+    stream = InterviewStreamFactory(section=InterviewSections.MATH,
+                                    start_at=datetime.time(14, 10),
+                                    end_at=datetime.time(14, 30),
+                                    duration=20,
+                                    date=next_week_utc.date())
+    invitation = InterviewInvitationFactory(interview=None,
+                                            applicant=applicant4,
+                                            expired_at=next_week_utc,
+                                            streams=[stream])
+    assert get_applicants_for_invitation(campaign=campaign1,
+                                         section=InterviewSections.ALL_IN_ONE).count() == 1
+    # Active invitation
+    stream = InterviewStreamFactory(section=InterviewSections.ALL_IN_ONE,
+                                    start_at=datetime.time(14, 10),
+                                    end_at=datetime.time(14, 30),
+                                    duration=20,
+                                    date=next_week_utc.date())
+    invitation = InterviewInvitationFactory(interview=None,
+                                            applicant=applicant4,
+                                            expired_at=next_week_utc,
+                                            streams=[stream])
+    assert get_applicants_for_invitation(campaign=campaign1,
+                                         section=InterviewSections.ALL_IN_ONE).count() == 0

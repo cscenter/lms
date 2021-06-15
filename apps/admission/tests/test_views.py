@@ -18,6 +18,7 @@ from admission.tests.factories import (
     InterviewFactory, InterviewFormatFactory, InterviewInvitationFactory,
     InterviewStreamFactory
 )
+from admission.views import InterviewInvitationCreateView
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.timezone import now_local

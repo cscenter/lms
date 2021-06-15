@@ -1,6 +1,7 @@
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
+from admission.constants import InterviewSections
 from admission.models import Applicant, Campaign, Comment, Interview, InterviewSlot
 from admission.services import EmailQueueService
 
@@ -25,7 +26,8 @@ def post_save_campaign(sender, instance, created, *args, **kwargs):
 @receiver(post_save, sender=Interview)
 def post_save_interview(sender, instance, created, *args, **kwargs):
     interview = instance
-    __sync_applicant_status(interview)
+    if interview.section == InterviewSections.ALL_IN_ONE:
+        __sync_applicant_status(interview)
     if interview.status in [Interview.CANCELED, Interview.DEFERRED]:
         EmailQueueService.remove_interview_reminder(interview)
         EmailQueueService.remove_interview_feedback_emails(interview)
