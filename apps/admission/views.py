@@ -276,9 +276,6 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
 
         applicant_queryset = (Applicant.objects
                               .filter(campaign=campaign)
-                              .select_related("exam", "online_test", "campaign", "university",
-                                              "campaign__branch")
-                              .prefetch_related("interviews")
                               .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1)),
                                         test__score_coalesce=Coalesce('online_test__score',
                                                                       Value(-1)))
@@ -289,12 +286,7 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
 
         page = self.request.GET.get('p', 1)
 
-        try:
-            applicants = paginator.page(page)
-        except PageNotAnInteger:
-            applicants = paginator.page(1)
-        except EmptyPage:
-            applicants = paginator.page(paginator.num_pages)
+        applicants = paginator.get_page(page)
 
         full_url = reverse("admission:interviews:invitations:send")
         full_url = f"{full_url}?campaign={campaign.id}&section={section}"
@@ -318,11 +310,8 @@ class InterviewInvitationSendView(CuratorOnlyMixin, BaseFilterView, generic.List
             try:
                 for applicant_id in applicant_ids:
                     applicant = applicants_all.get(id=applicant_id)
-                    streams = []
-                    for stream_id in streams_ids:
-                        streams.append(streams_all.get(id=stream_id))
-
-                    create_invitation(streams, applicant, atomic=False)
+                    streams = list(streams_all.filter(id__in=streams_ids))
+                    create_invitation(list(streams), applicant, atomic=False)
 
                 messages.success(
                     self.request,
