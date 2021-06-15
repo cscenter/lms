@@ -42,7 +42,7 @@ def test_get_next_process():
 
 @pytest.mark.django_db
 def test_create_invitation(mocker):
-    mocked_timezone = mocker.patch('django.utils.timezone.now')
+    mocked_timezone = mocker.patch('admission.services.get_now_utc')
     now_utc = datetime.datetime(2018, month=3, day=8, hour=13, minute=0,
                                 tzinfo=datetime.timezone.utc)
     mocked_timezone.return_value = now_utc

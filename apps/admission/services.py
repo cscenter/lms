@@ -41,6 +41,10 @@ def get_ongoing_interview_streams() -> models.QuerySet[InterviewStream]:
     """
     Returns interview streams to which participants can be invited.
     """
+    # XXX: It could return streams that already expired since
+    # we get time zone from the venue, e.g. venue time zone is NSK,
+    # if create invitation at June 15 22:00 MSK it will expire at June 16 00:00
+    # or 15 June 17:00 in UTC time zone (or 15 June 21 MSK)
     return (InterviewStream.objects
             .filter(date__gt=get_now_utc().date()))
 
@@ -92,8 +96,12 @@ def create_invitation(streams: List[InterviewStream], applicant: Applicant, atom
     # Calculate deadline for invitation. It can't be later than 00:00
     # of the first interview day
     expired_in_hours = INVITATION_EXPIRED_IN_HOURS
-    expired_at = timezone.now() + timedelta(hours=expired_in_hours)
+    now_utc = get_now_utc()
+    expired_at = now_utc + timedelta(hours=expired_in_hours)
     expired_at = min(expired_at, first_day_interview)
+    # FIXME: add test
+    if expired_at <= now_utc:
+        raise ValidationError("Invitation already expired", code="expired")
     invitation = InterviewInvitation(applicant=applicant,
                                      expired_at=expired_at)
     if atomic:

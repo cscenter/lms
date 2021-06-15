@@ -8,7 +8,7 @@
           <div id='appointment__card' class="card border-xs-0 grey-bg">
             <div class="card__header _big">
               <h2 class="mb-2">Ждём вас на собеседование</h2>
-              <b>Дата и время</b>: {{ interview.date_local()|date("j E") }} в {{ interview.date_local()|date("H:i") }}
+              <b>Дата и время</b>: {{ interview.date_local()|date("j E") }}, в {{ interview.date_local()|date("H:i") }}
               <br />
               {% if interview.slot.stream.venue.directions %}
                 <b>Как добраться</b><br>

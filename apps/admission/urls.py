@@ -4,7 +4,7 @@ from django.urls import path
 from admission.views import (
     ApplicantCreateStudentView, ApplicantDetailView, ApplicantListView,
     ApplicantStatusUpdateView, InterviewAssignmentDetailView, InterviewCommentView,
-    InterviewDetailView, InterviewInvitationListView, InterviewInvitationCreateView,
+    InterviewDetailView, InterviewInvitationCreateView, InterviewInvitationListView,
     InterviewListView, InterviewResultsDispatchView, InterviewResultsView,
     import_campaign_testing_results
 )
