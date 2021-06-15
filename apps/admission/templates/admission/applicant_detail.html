@@ -89,7 +89,7 @@
             {% if form %}
               {% crispy form %}
             {% else %}
-              <a href="{5 invitation.get_absolute_url }}">Приглашение</a> создано {{ invitation.created|date:"d E" }}.<br>
+              <a href="{{ invitation.get_absolute_url }}">Приглашение</a> создано {{ invitation.created|date:"d E" }}.<br>
             {% endif %}
             <div class="clearfix"></div>
           {% endif %}
