@@ -272,7 +272,6 @@ def test_interview_comment_create(curator, client, settings):
     response = client.post(url, form, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
     assert response.status_code == 400  # invalid form: empty score
     form['score'] = 2
-    form['scale'] = 1
     response = client.post(url, form, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
     assert response.status_code == 200
 
