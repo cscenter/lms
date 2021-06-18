@@ -7,6 +7,7 @@ from multiselectfield import MultiSelectField
 from post_office.models import EmailTemplate
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist, ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -20,7 +21,8 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import (
-    ChallengeStatuses, InterviewFormats, InterviewInvitationStatuses, InterviewSections
+    ChallengeStatuses, CscScaleComment, InterviewFormats, InterviewInvitationStatuses,
+    InterviewSections, ShadScaleComment
 )
 from admission.utils import get_next_process, slot_range
 from core.db.fields import ScoreField
@@ -1086,10 +1088,17 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
     def get_average_score_display(self, decimal_pos=2):
         return numberformat.format(self.average_score, ".", decimal_pos)
 
+    @staticmethod
+    def rating_system():
+        if 'yandexdataschool' in Site.objects.get(id=settings.SITE_ID).domain:
+            scale_rating = ShadScaleComment
+        else:
+            scale_rating = CscScaleComment
+
+        return scale_rating
+
 
 class Comment(TimeStampedModel):
-    MIN_SCORE = -2
-    MAX_SCORE = 5
 
     interview = models.ForeignKey(
         Interview,
@@ -1106,8 +1115,7 @@ class Comment(TimeStampedModel):
         blank=True,
         null=True)
     score = models.SmallIntegerField(
-        verbose_name=_("Score"),
-        validators=[MinValueValidator(MIN_SCORE), MaxValueValidator(MAX_SCORE)])
+        verbose_name=_("Score"))
 
     class Meta:
         verbose_name = _("Comment")

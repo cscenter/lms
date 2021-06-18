@@ -145,23 +145,6 @@ class InterviewAssignmentsForm(forms.ModelForm):
         self.helper.form_class = self.prefix
 
 
-choices_csc = (
-    ("", ""),
-    (-2, "не брать ни сейчас, ни потом"),
-    (-1, "не брать сейчас"),
-    (0, "нейтрально"),
-    (1, "можно взять"),
-    (2, "точно нужно взять"))
-
-choices_yds = (
-    ("", ""),
-    (1, "не брать ни сейчас, ни потом"),
-    (2, "не брать сейчас"),
-    (3, "нейтрально"),
-    (4, "можно взять"),
-    (5, "точно нужно взять"))
-
-
 class InterviewCommentForm(forms.ModelForm):
     use_required_attribute = False
 
@@ -172,8 +155,8 @@ class InterviewCommentForm(forms.ModelForm):
             'interview': forms.HiddenInput(),
             'interviewer': forms.HiddenInput(),
             'score': forms.Select(
-                choices=choices_yds if 'yandexdataschool' in Site.objects
-                .get(id=settings.SITE_ID).domain else choices_csc),
+                choices=Interview.rating_system().choices
+            ),
             'text': UbereditorWidget(attrs={
                 'data-local-persist': 'true',
             })
