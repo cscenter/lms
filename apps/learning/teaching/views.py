@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q
-from django.db.transaction import atomic
+from django.db import transaction
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
@@ -349,10 +349,8 @@ class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
                                                        .filter(course_id=self.kwargs['course_pk']))
         return context
 
-    @atomic
     def form_valid(self, form):
-
-        with atomic():
+        with transaction.atomic():
             self.object = form.save()
 
             assignee = form.cleaned_data['assignee']
@@ -402,9 +400,8 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
                                                        .filter(course_id=self.kwargs['course_pk']))
         return context
 
-    @atomic
     def form_valid(self, form):
-        with atomic():
+        with transaction.atomic():
             form.instance.course = Course.objects.get(id=self.kwargs['course_pk'])
             self.object = form.save()
 
