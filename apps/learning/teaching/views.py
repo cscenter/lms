@@ -358,13 +358,16 @@ class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
                                           .filter(student_group_id=self.object.id))
 
             # create new bound object with StudentGroup in StudentGroupAssignee
-            if assignee is not None and assignee.id not in [i['assignee'] for i in assignees_in_student_group
-                                                            .values('assignee', 'student_group')]:
-                new_assignees = StudentGroupAssignee(
+            list_assignees_in_student_group = (
+                [i['assignee'] for i in assignees_in_student_group
+                    .values('assignee', 'student_group')]
+            )
+            if assignee is not None and assignee.id not in list_assignees_in_student_group:
+                new_assignee = StudentGroupAssignee(
                     student_group=self.object,
                     assignee=assignee
                 )
-                new_assignees.save()
+                new_assignee.save()
 
             # clear all bound objects with StudentGroup in StudentGroupAssignee
             elif assignee is None:
