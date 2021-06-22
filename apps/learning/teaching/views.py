@@ -7,8 +7,8 @@ from vanilla import TemplateView
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import Q
 from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
