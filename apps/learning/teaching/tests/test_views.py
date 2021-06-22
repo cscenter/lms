@@ -13,7 +13,8 @@ from learning.models import StudentAssignment
 from learning.permissions import ViewStudentAssignment, ViewStudentAssignmentList
 from learning.settings import Branches
 from learning.tests.factories import (
-    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
+    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory,
+    StudentGroupAssigneeFactory, StudentGroupFactory
 )
 from users.tests.factories import CuratorFactory, StudentFactory, TeacherFactory
 
@@ -322,4 +323,30 @@ def test_gradebook_list(client, mocker, assert_redirect):
     assert_redirect(response, course.get_gradebook_url())
     course2 = CourseFactory(semester=semester, teachers=[teacher])
     response = client.get(gradebooks_url)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_change_student_between_groups(client):
+    teacher = TeacherFactory()
+    student = StudentFactory()
+    student2 = StudentFactory()
+    course = CourseFactory.create(teachers=[teacher])
+    student_assignment = StudentAssignmentFactory(student=student,
+                                                  assignment__course=course)
+    student_group_1 = StudentGroupFactory.create(course=course)
+    # student_group_assignee_1 = StudentGroupAssigneeFactory.create(student_group=student_group_1)
+    # EnrollmentFactory.create(student=student, course=course, student_group=student_group_1)
+    # EnrollmentFactory.create(student=student, course=course)
+
+    # student_group_2 = StudentGroupFactory.create(course=course)
+    # student_group_assignee_2 = StudentGroupAssigneeFactory.create(student_group=student_group_2)
+    # EnrollmentFactory.create(student_group=student_group_2, course=course, student=student2)
+
+    client.login(teacher)
+    change_student_url = reverse("teaching:student_group_student_update",
+                                 kwargs={'course_pk': course.id,
+                                         'group_pk': student_group_1.id,
+                                         'pk': student.id})
+    response = client.get(change_student_url)
     assert response.status_code == 200
