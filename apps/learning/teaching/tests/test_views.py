@@ -10,7 +10,9 @@ from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
 from courses.models import CourseGroupModes, StudentGroupTypes
 from courses.permissions import ViewAssignment
-from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseTeacherFactory, SemesterFactory
+)
 from learning.models import StudentAssignment
 from learning.permissions import ViewStudentAssignment, ViewStudentAssignmentList
 from learning.settings import Branches
@@ -406,4 +408,28 @@ def test_student_groups_list(client):
     assert len(soup.find_all(id="student_group")) == 2
 
 
+# FIXME: check enrollment factory
+@pytest.mark.django_db
+def test_student_groups_detail(client):
+    teacher = TeacherFactory()
+    student = StudentFactory()
+    course = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    student_group = StudentGroupFactory.create(course=course)
+    student_assignment = StudentAssignmentFactory(student=student,
+                                                  assignment__course=course)
+    # EnrollmentFactory.create(student_group=student_group, course=course, student=student)
+    # assignee = CourseTeacherFactory(course=course, teacher=teacher)
+    # group_assignee = StudentGroupAssigneeFactory(student_group=student_group, assignee=assignee)
+
+    client.login(teacher)
+    student_group_list = reverse("teaching:student_group_detail",
+                                 kwargs={
+                                     'course_pk': course.id,
+                                     'group_pk': student_group.id})
+
+    response = client.get(student_group_list)
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    # assert soup.find(text=student_group.name) is not None
+    # assert soup.find(text=student.last_name) is not None
 
