@@ -7,7 +7,7 @@ from django.conf import settings
 
 from auth.permissions import Permission, add_perm
 from courses.models import Assignment, AssignmentSubmissionFormats, Course
-from learning.models import CourseInvitation, StudentAssignment
+from learning.models import CourseInvitation, StudentAssignment, StudentGroup
 from learning.services import CourseRole, course_access_role, course_failed_by_student
 from learning.settings import StudentStatuses
 from users.models import StudentProfile, User
@@ -400,3 +400,25 @@ class LeaveCourse(Permission):
         if not enrollment:
             return False
         return True
+
+
+@add_perm
+class ViewStudentGroupList(Permission):
+    name = "teaching.view_student_group_list"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_group: StudentGroup):
+        return (user in student_group.course.teachers.all()
+                or user.is_curator)
+
+
+@add_perm
+class ViewStudentGroupDetail(Permission):
+    name = "teaching.view_student_group_detail"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_group: StudentGroup):
+        return (user in student_group.course.teachers.all()
+                or user.is_curator)
