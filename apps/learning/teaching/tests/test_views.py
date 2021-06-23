@@ -8,7 +8,7 @@ from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
-from courses.models import CourseGroupModes
+from courses.models import CourseGroupModes, StudentGroupTypes
 from courses.permissions import ViewAssignment
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from learning.models import StudentAssignment
@@ -328,36 +328,37 @@ def test_gradebook_list(client, mocker, assert_redirect):
     assert response.status_code == 200
 
 
-# @pytest.mark.django_db
-# def test_change_student_between_groups(client):
-#     teacher = TeacherFactory()
-#     student = StudentFactory()
-#     student2 = StudentFactory()
-#     semester = SemesterFactory.create_current()
-#     course = CourseFactory.create(semester=semester, teachers=[teacher])
-#     student_assignment = StudentAssignmentFactory(student=student,
-#                                                   assignment__course=course)
-#     enroll_1 = EnrollmentFactory.create(student=student, course=course)
-#     student_group_1 = StudentGroupFactory.create(course=course)
-#     enroll_1.student_group = student_group_1
-#     # student_group_assignee_1 = StudentGroupAssigneeFactory.create(student_group=student_group_1)
-#     # EnrollmentFactory.create(student=student, course=course, student_group=student_group_1)
-#     # EnrollmentFactory.create(student=student, course=course)
-#
-#     # student_group_2 = StudentGroupFactory.create(course=course)
-#     # student_group_assignee_2 = StudentGroupAssigneeFactory.create(student_group=student_group_2)
-#     # EnrollmentFactory.create(student_group=student_group_2, course=course, student=student2)
-#
-#     client.login(teacher)
-#     print(course.id, student_group_1.id, student.id)
-#     change_student_url = reverse("teaching:student_group_student_update",
-#                                  kwargs={'course_pk': str(course.id),
-#                                          'group_pk': str(student_group_1.id),
-#                                          'pk': str(student.id)})
-#     # change_student_url = reverse("teaching:course_list")
-#     print(change_student_url)
-#     response = client.get(change_student_url)
-#     assert response.status_code == 200
+# FIXME: fix changing student group
+@pytest.mark.django_db
+def test_change_student_between_groups(client):
+    teacher = TeacherFactory()
+    student = StudentFactory()
+    student2 = StudentFactory()
+    semester = SemesterFactory.create_current()
+    course = CourseFactory.create(semester=semester, teachers=[teacher])
+    student_assignment = StudentAssignmentFactory(student=student,
+                                                  assignment__course=course)
+    # enroll_1 = EnrollmentFactory.create(student=student, course=course)
+    student_group_1 = StudentGroupFactory.create(course=course)
+    # enroll_1.student_group = student_group_1
+    # student_group_assignee_1 = StudentGroupAssigneeFactory.create(student_group=student_group_1)
+    # EnrollmentFactory.create(student=student, course=course, student_group=student_group_1)
+    # EnrollmentFactory.create(student=student, course=course)
+
+    # student_group_2 = StudentGroupFactory.create(course=course)
+    # student_group_assignee_2 = StudentGroupAssigneeFactory.create(student_group=student_group_2)
+    # EnrollmentFactory.create(student_group=student_group_2, course=course, student=student2)
+
+    client.login(teacher)
+    print(course.id, student_group_1.id, student.id)
+    change_student_url = reverse("teaching:student_group_student_update",
+                                 kwargs={'course_pk': str(course.id),
+                                         'group_pk': str(student_group_1.id),
+                                         'pk': str(student.id)})
+    # change_student_url = reverse("teaching:course_list")
+    print(change_student_url)
+    response = client.get(change_student_url)
+    # assert response.status_code == 200
 
 
 @pytest.mark.django_db
@@ -369,15 +370,40 @@ def test_student_group_manual_link(client):
         return soup
 
     teacher = TeacherFactory()
+
+    # check without student group link
     course_branch_group = CourseFactory.create(teachers=[teacher])
-    student_group_branch = StudentGroupFactory.create(course=course_branch_group)
+    StudentGroupFactory.create(course=course_branch_group)
     client.login(teacher)
     soup = update_request()
     assert soup.find(id='student_manual_group') is None
 
+    # check with student group link
     course_manual_group = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
-    student_group_manual = StudentGroupFactory.create(course=course_manual_group)
+    StudentGroupFactory.create(course=course_manual_group)
     soup = update_request()
     assert soup.find(id='student_manual_group') is not None
+
+
+@pytest.mark.django_db
+def test_student_groups_list(client):
+    teacher = TeacherFactory()
+    student = StudentFactory()
+    course = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    student_group = StudentGroupFactory.create(course=course)
+    student_group_1 = StudentGroupFactory.create(course=course)
+    # student_group_branch = StudentGroupFactory.create(course=course, type=StudentGroupTypes.BRANCH)
+
+    client.login(teacher)
+    student_group_list = reverse("teaching:student_group_list",
+                                 kwargs={'course_pk': str(course.id)})
+    response = client.get(student_group_list)
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    assert soup.find(text=student_group.name) is not None
+    assert soup.find(text=student_group_1.name) is not None
+    # assert soup.find(text=student_group_branch.name) is None
+    assert len(soup.find_all(id="student_group")) == 2
+
 
 

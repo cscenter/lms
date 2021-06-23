@@ -20,7 +20,7 @@
                         {% for group in student_group_list %}
                             <tr>
                                 <td class="align-middle" width="50%">
-                                    <a href="{{ url("teaching:student_group_detail", course_pk=group.course.id,
+                                    <a id="student_group" href="{{ url("teaching:student_group_detail", course_pk=group.course.id,
                                         group_pk=group.id) }}">{{ group.name }}</a></td>
                                 <td class="align-middle">
                                     <a href="{{ url("teaching:student_group_update", course_pk=group.course.id,
