@@ -60,16 +60,16 @@ class InterviewInvitationStatuses(DjangoChoices):
 
 
 class ShadScaleComment(DjangoChoices):
-    ONE = ChoiceItem(1, _("не брать ни сейчас, ни потом"))
-    TWO = ChoiceItem(2, _("не брать сейчас"))
-    THREE = ChoiceItem(3, _("нейтрально"))
-    FOUR = ChoiceItem(4, _("можно взять"))
-    FIVE = ChoiceItem(5, _("точно нужно взять"))
+    ONE = ChoiceItem(1, _("не брать ни сейчас, ни потом (1)"))
+    TWO = ChoiceItem(2, _("не брать сейчас (2)"))
+    THREE = ChoiceItem(3, _("нейтрально (3)"))
+    FOUR = ChoiceItem(4, _("можно взять (4)"))
+    FIVE = ChoiceItem(5, _("точно нужно взять (5)"))
 
 
 class CscScaleComment(DjangoChoices):
-    MINUS_TWO = ChoiceItem(-2, _("не брать ни сейчас, ни потом"))
-    MINUS_ONE = ChoiceItem(-1, _("не брать сейчас"))
-    ZERO = ChoiceItem(0, _("нейтрально"))
-    PLUS_ONE = ChoiceItem(1, _("можно взять"))
-    PLUS_TWO = ChoiceItem(2, _("точно нужно взять"))
+    MINUS_TWO = ChoiceItem(-2, _("не брать ни сейчас, ни потом (-2)"))
+    MINUS_ONE = ChoiceItem(-1, _("не брать сейчас (-1)"))
+    ZERO = ChoiceItem(0, _("нейтрально (0)"))
+    PLUS_ONE = ChoiceItem(1, _("можно взять (1)"))
+    PLUS_TWO = ChoiceItem(2, _("точно нужно взять (2)"))
