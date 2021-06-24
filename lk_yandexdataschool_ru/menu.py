@@ -101,7 +101,10 @@ top_menu = [
         reverse('admission:applicants:list'),
         weight=50,
         children=[
-            MenuItem(pgettext_lazy("menu", "Анкеты"), '/admission/applicants/', weight=20, for_staff=True),
+            MenuItem(pgettext_lazy("menu", "Анкеты"), '/admission/applicants/', weight=10, for_staff=True),
+            MenuItem(pgettext_lazy("menu", "Отправка приглашений"), url=reverse("admission:interviews:invitations:send"), weight=20, for_staff=True),
+            MenuItem(pgettext_lazy("menu", "Приглашения"), url=reverse("admission:interviews:invitations:list"), weight=20, for_staff=True),
+            MenuItem(pgettext_lazy("menu", "Собеседования"), '/admission/interviews/', weight=20),
         ],
         permissions=(
             "learning.view_admission_menu",
