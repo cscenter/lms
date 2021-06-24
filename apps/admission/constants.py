@@ -33,7 +33,7 @@ class InterviewFormats(DjangoChoices):
 class InterviewSections(DjangoChoices):
     ALL_IN_ONE = C('all_in_1', pgettext_lazy("section", "Common Section"))
     MATH = C('math', pgettext_lazy("section", "Math"))
-    PROGRAMMING = C('code', pgettext_lazy("section", "Coding"))
+    PROGRAMMING = C('code', pgettext_lazy("section", "Code"))
     MOTIVATION = C('mv', pgettext_lazy("section", "Motivation"))
 
 
