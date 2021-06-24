@@ -79,15 +79,7 @@ def get_applicants_for_invitation(*, campaign: Campaign,
     return queryset
 
 
-def _save_invitation(invitation: InterviewInvitation, streams: List[InterviewStream]):
-    invitation.save()
-    invitation.streams.add(*streams)
-    EmailQueueService.generate_interview_invitation(invitation, streams)
-
-
-def create_invitation(streams: List[InterviewStream], applicant: Applicant, atomic=True):
-    """Create invitation and send email to applicant."""
-    streams = list(streams)  # Queryset -> list
+def create_invitation(streams: List[InterviewStream], applicant: Applicant) -> InterviewInvitation:
     first_stream = min(streams, key=attrgetter('date'))
     tz = first_stream.get_timezone()
     first_day_interview_naive = datetime.combine(first_stream.date,
@@ -102,13 +94,10 @@ def create_invitation(streams: List[InterviewStream], applicant: Applicant, atom
     # FIXME: add test
     if expired_at <= now_utc:
         raise ValidationError("Invitation already expired", code="expired")
-    invitation = InterviewInvitation(applicant=applicant,
-                                     expired_at=expired_at)
-    if atomic:
-        with transaction.atomic():
-            _save_invitation(invitation, streams)
-    else:
-        _save_invitation(invitation, streams)
+    invitation = InterviewInvitation(applicant=applicant, expired_at=expired_at)
+    invitation.save()
+    invitation.streams.add(*streams)
+    return invitation
 
 
 def import_campaign_contest_results(*, campaign: Campaign, model_class):
