@@ -295,7 +295,8 @@ class InterviewSlotsInline(admin.TabularInline):
 class InterviewStreamAdmin(admin.ModelAdmin):
     form = InterviewStreamChangeForm
     list_select_related = ('campaign', 'campaign__branch')
-    list_display = ["date", "campaign"]
+    list_display = ["date", "start_at", "end_at", "campaign"]
+    ordering = ["-date", "-start_at"]
     list_filter = [CampaignListFilter]
     inlines = [InterviewSlotsInline]
     formfield_overrides = {
