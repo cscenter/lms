@@ -335,6 +335,7 @@ class EmailQueueService:
             s = {
                 "CITY": stream.venue.city.name,
                 "FORMAT": stream.format,
+                "SECTION": stream.get_section_display(),
                 "DATE": date,
                 "VENUE": stream.venue.name,
                 "WITH_ASSIGNMENTS": stream.with_assignments,
@@ -369,6 +370,7 @@ class EmailQueueService:
             date = date_format(meeting_at, "j E")
         context = {
             "BRANCH": campaign.branch.name,
+            "SECTION": interview.get_section_display(),
             "DATE": date,
             "TIME": meeting_at.strftime("%H:%M"),
             "DIRECTIONS": stream.venue.directions
@@ -398,6 +400,7 @@ class EmailQueueService:
             meeting_at = get_meeting_time(interview.date_local(), stream)
             context = {
                 "BRANCH": campaign.branch.name,
+                "SECTION": interview.get_section_display(),
                 "DATE": meeting_at.strftime(DATE_FORMAT_RU),
                 "TIME": meeting_at.strftime("%H:%M"),
                 "DIRECTIONS": stream.venue.directions
@@ -467,6 +470,7 @@ class EmailQueueService:
                 template=template,
                 context={
                     "BRANCH": interview.applicant.campaign.branch.name,
+                    "SECTION": interview.get_section_display(),
                 },
                 # Render on delivery, we have no really big amount of
                 # emails to think about saving CPU time
