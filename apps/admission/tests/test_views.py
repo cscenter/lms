@@ -97,6 +97,9 @@ def test_interviews_invitation_list(client, settings):
     applicant_3 = ApplicantFactory(status=Applicant.INTERVIEW_SCHEDULED, campaign=campaign)
     applicant_4 = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign)
 
+    stream_all = InterviewStreamFactory(campaign=campaign, section=InterviewSections.ALL_IN_ONE)
+    stream_math = InterviewStreamFactory(campaign=campaign, section=InterviewSections.MATH)
+
     interview_all_in_one = InterviewFactory(applicant=applicant_2, section=InterviewSections.ALL_IN_ONE)
     interview_math = InterviewFactory(applicant=applicant_4, section=InterviewSections.MATH)
 
@@ -116,6 +119,9 @@ def test_interviews_invitation_list(client, settings):
     assert soup.find(text=applicant_3.full_name) is None
     assert soup.find(text=applicant_4.full_name) is not None
 
+    assert soup.find(text=stream_all) is not None
+    assert soup.find(text=stream_math) is None
+
     # Section InterviewSections.MATH
     interview_invitation_url_math = (interview_invitation_url +
                                            f"?campaign={campaign.id}&section="
@@ -127,6 +133,9 @@ def test_interviews_invitation_list(client, settings):
     assert soup.find(text=applicant_2.full_name) is None
     assert soup.find(text=applicant_3.full_name) is None
     assert soup.find(text=applicant_4.full_name) is None
+
+    assert soup.find(text=stream_all) is None
+    assert soup.find(text=stream_math) is not None
 
 
 @pytest.mark.django_db
