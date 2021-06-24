@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-06-24 09:19+0000\n"
-"PO-Revision-Date: 2021-06-24 09:21+0000\n"
+"PO-Revision-Date: 2021-06-24 17:16+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -621,7 +621,7 @@ msgstr "Выберите направления обучения, которые
 #: apps/admission/models.py:424
 #| msgid "Study program (DM note)"
 msgid "Study Program Notes"
-msgstr "Комментарии к обучающим программам"
+msgstr "Комментарии к направлениям обучения"
 
 #: apps/admission/models.py:427
 msgid "Study program (DM note)"
