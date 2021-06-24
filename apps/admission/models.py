@@ -881,6 +881,7 @@ class Exam(TimeStampedModel, YandexContestIntegration,
         related_name="exam")
     score = ScoreField(
         verbose_name=_("Score"),
+        decimal_places=3,
         # Avoid loading empty values with admin interface
         null=True,
         blank=True)
