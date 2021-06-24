@@ -263,7 +263,8 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
             for applicant in applicants:
                 applicant.campaign = campaign
                 invitation = create_invitation(streams, applicant)
-                EmailQueueService.generate_interview_invitation(invitation, streams)
+                EmailQueueService.generate_interview_invitation(invitation, streams,
+                                                                url_builder=request.build_absolute_uri)
         messages.success(request, "Приглашения успешно созданы",
                          extra_tags='timeout')
         url = reverse("admission:interviews:invitations:send")
@@ -542,7 +543,8 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         try:
             with transaction.atomic():
                 invitation = create_invitation(list(streams), applicant)
-                EmailQueueService.generate_interview_invitation(invitation, streams)
+                EmailQueueService.generate_interview_invitation(invitation, streams,
+                                                                url_builder=self.request.build_absolute_uri)
             messages.success(
                 self.request,
                 "Приглашение успешно создано и должно быть отправлено в "

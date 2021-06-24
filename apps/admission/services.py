@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from operator import attrgetter
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 from post_office import mail
 from post_office.models import STATUS as EMAIL_STATUS
@@ -316,7 +316,8 @@ class EmailQueueService:
 
     @staticmethod
     def generate_interview_invitation(interview_invitation: InterviewInvitation,
-                                      streams: List[InterviewStream]) -> Email:
+                                      streams: List[InterviewStream],
+                                      url_builder: Callable[[str], str] = None) -> Email:
         streams_context = []
         for stream in streams:
             with translation.override('ru'):
@@ -332,9 +333,12 @@ class EmailQueueService:
             }
             streams_context.append(s)
         campaign = interview_invitation.applicant.campaign
+        secret_link = interview_invitation.get_absolute_url()
+        if url_builder:
+            secret_link = url_builder(secret_link)
         context = {
             "BRANCH": campaign.branch.name,
-            "SECRET_LINK": interview_invitation.get_absolute_url(),
+            "SECRET_LINK": secret_link,
             "STREAMS": streams_context
         }
         return mail.send(
