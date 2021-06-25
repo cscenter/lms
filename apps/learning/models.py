@@ -40,7 +40,7 @@ from learning.settings import ENROLLMENT_DURATION, GradeTypes, GradingSystems
 from learning.utils import humanize_duration
 from users.constants import ThumbnailSizes
 from users.models import StudentProfile
-from users.thumbnails import ThumbnailMixin, get_stub_factory, get_thumbnail_or_stub
+from users.thumbnails import ThumbnailMixin, get_stub_factory, get_thumbnail
 
 logger = logging.getLogger(__name__)
 
@@ -1007,15 +1007,13 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
         return reverse('student_profile', args=[self.student_profile.user_id],
                        subdomain=None)
 
-    def get_thumbnail(self, geometry=ThumbnailSizes.BASE, **options):
-        thumbnail_options = {
+    def get_thumbnail(self, geometry=ThumbnailSizes.BASE, svg=False, **options):
+        stub_factory = get_stub_factory(self.student_profile.user.gender,
+                                        official=False, svg=svg)
+        kwargs = {
             "cropbox": None,
+            "stub_factory": stub_factory,
             **options
         }
-        stub_factory = get_stub_factory(self.student_profile.user.gender,
-                                        official=False)
-        return get_thumbnail_or_stub(
-            path_to_img=self.photo,
-            geometry=geometry,
-            stub_factory=stub_factory,
-            **thumbnail_options)
+        return get_thumbnail(path_to_img=self.photo, geometry=geometry,
+                             **kwargs)

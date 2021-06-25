@@ -1,4 +1,6 @@
-from sorl.thumbnail import get_thumbnail
+from typing import Optional
+
+from sorl.thumbnail import get_thumbnail as sorl_get_thumbnail
 from sorl.thumbnail.images import BaseImageFile, DummyImageFile
 
 from django import forms
@@ -145,10 +147,22 @@ class BoyStubImage(BaseStubImage):
         return staticfiles_storage.url(f"v2/img/placeholder/boy{self._suffix}.png")
 
 
+class BoyStubImageSVG(BaseStubImage):
+    @property
+    def url(self):
+        return staticfiles_storage.url(f"v2/img/placeholder/boy{self._suffix}.svg")
+
+
 class GirlStubImage(BaseStubImage):
     @property
     def url(self):
         return staticfiles_storage.url(f"v2/img/placeholder/girl{self._suffix}.png")
+
+
+class GirlStubImageSVG(BaseStubImage):
+    @property
+    def url(self):
+        return staticfiles_storage.url(f"v2/img/placeholder/girl{self._suffix}.svg")
 
 
 class ManStubImage(BaseStubImage):
@@ -163,11 +177,17 @@ class WomanStubImage(BaseStubImage):
         return staticfiles_storage.url(f"v2/img/placeholder/woman{self._suffix}.png")
 
 
-def get_stub_factory(gender, official=True):
+def get_stub_factory(gender, official=True, svg=False):
     if gender == GenderTypes.MALE:
-        factory = ManStubImage if official else BoyStubImage
+        if official:
+            factory = ManStubImage
+        else:
+            factory = BoyStubImageSVG if svg else BoyStubImage
     elif gender == GenderTypes.FEMALE:
-        factory = WomanStubImage if official else GirlStubImage
+        if official:
+            factory = WomanStubImage
+        else:
+            factory = GirlStubImageSVG if svg else GirlStubImage
     else:
         factory = BaseStubImage
     return factory
@@ -182,19 +202,27 @@ def get_user_thumbnail(user, geometry, use_stub=True,
         factory = get_stub_factory(user.gender, official=stub_official)
     else:
         factory = None
-    return get_thumbnail_or_stub(path_to_img, geometry, stub_factory=factory,
-                                 **options)
+    return get_thumbnail(path_to_img, geometry, stub_factory=factory, **options)
 
 
-def get_thumbnail_or_stub(path_to_img, geometry, stub_factory=None, **options):
+def get_thumbnail(path_to_img, geometry, stub_factory=None, **options) -> Optional[BaseImageFile]:
+    """
+    Returns an image thumbnail if path to the image is correct and the
+    image exists along that path.
+    Otherwise it returns None or the result of *stub_factory* if stub factory
+    is specified.
+    """
     if "crop" not in options:
         options["crop"] = "center top"
     if path_to_img:
         # Could return DummyImageFile instance
-        thumbnail = get_thumbnail(path_to_img, geometry, **options)
+        thumbnail = sorl_get_thumbnail(path_to_img, geometry, **options)
     else:
         thumbnail = None
-    thumbnail_is_missed = not thumbnail or isinstance(thumbnail, DummyImageFile)
-    if thumbnail_is_missed and stub_factory:
-        thumbnail = stub_factory(geometry=geometry)
+    thumbnail_is_missing = not thumbnail or isinstance(thumbnail, DummyImageFile)
+    if thumbnail_is_missing:
+        if stub_factory:
+            thumbnail = stub_factory(geometry=geometry)
+        else:
+            thumbnail = None  # DummyImageFile -> None
     return thumbnail
