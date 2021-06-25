@@ -1,0 +1,112 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% import "compscicenter_ru/macros/_cards.jinja2" as macros_cards %}
+{% import "compscicenter_ru/alumni/_macros.jinja2" as macros_alumni %}
+
+{% block body_attrs %}class="mb-0"{% endblock body_attrs %}
+
+{% block menu %}
+  <div class="navbar-container">
+    <nav class="navbar navbar-main{% if theme_class %} {{ theme_class }}{% endif %}">
+      <div class="container">
+        <a class="navbar-logo" href="/">{{ macros.csc_logo() }}</a>
+        <div class="menu-desktop-wrapper">
+          <ul class="ui navbar-nav">
+            <li class="nav-item"><a class="nav-link _active" href="/{{ graduation_year }}/">Выпускники {{ graduation_year }}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#stats">Статистика</a></li>
+            {% if testimonials -%}
+              <li class="nav-item"><a class="nav-link" href="#testimonials">Отзывы</a></li>
+            {%- endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </div>
+{% endblock menu %}
+
+{% block content %}
+  <div class="container page-content">
+    <h1 class="text-center">Выпуск {{ graduation_year }} в лицах</h1>
+    <div class="card-deck _users">
+      {% for graduate_profile in graduates -%}
+        {{ macros_cards.graduate_card_link(graduate_profile) }}
+      {% endfor -%}
+    </div>
+  </div>
+
+  <div class="grey-bg pt-4" id="stats">
+    <div class="container page-content">
+      <h1 class="text-center">Статистика</h1>
+      <div class="row">
+        <div class="col-lg-6 mt-10 mb-sm-5 text-center">
+          <div class="row">
+            <div class="col-6">
+              <p class="infographic-count">154</p>
+              <p>Преподавателя</p>
+            </div>
+            <div class="col-6">
+              <p class="infographic-count">48</p>
+              <p>Курсов</p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6">
+              <p class="infographic-count">10&nbsp;773</p>
+              <p>Часов в&nbsp;аудиториях и&nbsp;zoom</p>
+            </div>
+            <div class="col-6">
+              <p class="infographic-count">86</p>
+              <p>Уникальных проектов</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6 mt-8 mt-sm-0 mb-sm-5 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="90%" height="420" viewBox="0 0 740 660">
+            <g fill="none" fill-rule="evenodd">
+              <g fill-rule="nonzero" stroke="#374148">
+                <path fill="#8899A4"
+                      d="M318.962 563.928c145.492 25.654 284.272-71.714 309.974-217.477 25.702-145.764-71.407-284.726-216.898-310.38-145.492-25.654-284.272 71.714-309.974 217.478-25.702 145.763 71.406 284.725 216.898 310.38zm13.382-75.89C228.687 469.761 159.5 370.756 177.812 266.905 196.124 163.055 295 93.684 398.656 111.961 502.313 130.24 571.5 229.243 553.188 333.094 534.876 436.944 436 506.316 332.344 488.038z" />
+                <path fill="#07C39F"
+                      d="M416.877 11.242C257.167-16.92 104.839 89.88 76.643 249.785 48.448 409.69 155.061 562.148 314.771 590.309c6.998 1.234 17.52 2.512 31.57 3.835l11.888-128.762c-9.338-.743-16.343-1.526-21.015-2.35-89.503-15.782-149.25-101.22-133.449-190.832 15.801-89.612 101.167-149.463 190.67-133.682l22.442-127.276z" />
+                <path fill="#4A90E2"
+                      d="M609.283 429.888c13.457-25.403 22.926-52.89 28.01-81.718 26.532-150.474-73.651-293.915-223.766-320.384l-16.361 92.787c98.992 17.455 165.057 112.047 147.56 211.276-3.365 19.087-9.604 37.195-18.46 53.912l-4.055 6.39 83.222 43.427 3.85-5.69z" />
+              </g>
+              <text fill="#374148" font-family="FiraSans-Regular, Fira Sans" font-size="148">
+                <tspan x="257" y="340">420</tspan>
+              </text>
+              <text fill="#07C39F" font-family="FiraSans-Regular, Fira Sans" font-size="78">
+                <tspan x="0" y="532">214</tspan>
+              </text>
+              <text fill="#4A90E2" font-family="FiraSans-Regular, Fira Sans" font-size="78">
+                <tspan x="609" y="109">131</tspan>
+              </text>
+              <text fill="#8899A4" font-family="FiraSans-Regular, Fira Sans" font-size="78">
+                <tspan x="562" y="564">75</tspan>
+              </text>
+              <text fill="#374148" font-family="FiraSans-Regular, Fira Sans" font-size="26">
+                <tspan x="270" y="380">оценок по курсам</tspan>
+              </text>
+              <text fill="#374148" font-family="FiraSans-Regular, Fira Sans" font-size="22">
+                <tspan x="24" y="563">отлично</tspan>
+              </text>
+              <text fill="#374148" font-family="FiraSans-Regular, Fira Sans" font-size="22">
+                <tspan x="637" y="140">хорошо</tspan>
+              </text>
+              <text fill="#374148" font-family="FiraSans-Regular, Fira Sans" font-size="22">
+                <tspan x="578" y="595">зачёт</tspan>
+              </text>
+            </g>
+          </svg>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if testimonials %}
+    {{ macros_alumni.testimonial_grid(testimonials) }}
+  {% endif %}
+
+{% endblock content %}
+
+{% block footer %}{% endblock footer %}
