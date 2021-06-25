@@ -10,7 +10,7 @@
   <div class="container my-10">
     <div class="row">
       <div class="col-md-4">
-        {% set thumbnail = graduate_profile.get_thumbnail(graduate_profile.ThumbnailSize.BASE, svg=True) %}
+        {% set thumbnail = graduate_profile.get_thumbnail(graduate_profile.ThumbnailSize.GRADUATE, svg=True) %}
         <img class="img-fluid sticky pt-sm-8 px-0 pr-lg-6"
              src="{{ thumbnail.url }}"
              alt="{{ student.get_short_name() }}" />

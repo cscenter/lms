@@ -24,6 +24,7 @@ class ThumbnailSizes(DjangoChoices):
     INTERVIEW_LIST = C('100x100')
     # On center site only
     TEACHER_LIST = C("220x308")
+    GRADUATE = C("344x482")
 
 
 class Roles(DjangoChoices):
