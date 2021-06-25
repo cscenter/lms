@@ -64,7 +64,9 @@ class ApplicantFilter(django_filters.FilterSet):
         queryset=(Campaign.objects
                   .filter(branch__site_id=settings.SITE_ID)
                   .select_related("branch")
-                  .order_by("-year", "branch__order").all()))
+                  .order_by("-year", "branch__order").all()),
+        required=True,
+        empty_label=None)
     status = django_filters.ChoiceFilter(
         label=_("Status"),
         choices=Applicant.STATUS)

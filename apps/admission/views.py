@@ -6,7 +6,7 @@ from urllib import parse
 
 import pytz
 from braces.views import UserPassesTestMixin
-from django_filters.views import BaseFilterView, FilterMixin
+from django_filters.views import BaseFilterView, FilterMixin, FilterView
 from extra_views.formsets import BaseModelFormSetView
 from rest_framework import serializers
 from vanilla import GenericModelView, TemplateView
@@ -398,7 +398,7 @@ class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseL
         return context
 
 
-class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
+class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
     context_object_name = 'applicants'
     model = Applicant
     template_name = "admission/applicant_list.html"
@@ -419,15 +419,22 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             .order_by("-exam__score_coalesce", "-test__score_coalesce", "-pk"))
 
     def get(self, request, *args, **kwargs):
-        """Sets filter defaults and redirects"""
-        user = self.request.user
-        if user.is_curator and "campaign" not in self.request.GET:
-            campaign = get_default_campaign_for_user(user)
-            campaign_id = campaign.id if campaign else ""
+        filterset_class = self.get_filterset_class()
+        self.filterset = self.get_filterset(filterset_class)
+
+        if not self.filterset.is_valid():
+            campaign = get_default_campaign_for_user(request.user)
+            if not campaign:
+                messages.info(request, "No active campaigns")
+                return HttpResponseRedirect(redirect_to='/')
             url = reverse("admission:applicants:list")
-            url = f"{url}?campaign={campaign_id}&status="
+            url = f"{url}?campaign={campaign.pk}&status="
             return HttpResponseRedirect(redirect_to=url)
-        return super().get(request, *args, **kwargs)
+
+        self.object_list = self.filterset.qs
+        context = self.get_context_data(filter=self.filterset,
+                                        object_list=self.object_list)
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

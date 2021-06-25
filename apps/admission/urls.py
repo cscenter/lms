@@ -3,10 +3,10 @@ from django.urls import path
 
 from admission.views import (
     ApplicantCreateStudentView, ApplicantDetailView, ApplicantListView,
-    ApplicantStatusUpdateView, InterviewAssignmentDetailView, InterviewCommentUpsertView,
-    InterviewDetailView, InterviewInvitationCreateView, InterviewInvitationListView,
-    InterviewListView, InterviewResultsDispatchView, InterviewResultsView,
-    import_campaign_testing_results
+    ApplicantStatusUpdateView, InterviewAssignmentDetailView,
+    InterviewCommentUpsertView, InterviewDetailView, InterviewInvitationCreateView,
+    InterviewInvitationListView, InterviewListView, InterviewResultsDispatchView,
+    InterviewResultsView, import_campaign_testing_results
 )
 
 app_name = 'admission'
