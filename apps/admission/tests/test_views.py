@@ -88,53 +88,38 @@ def test_simple_interviews_list(client, curator, settings):
 
 
 @pytest.mark.django_db
-def test_interviews_invitation_list(client, settings):
-    branch_spb = Branch.objects.get(code=Branches.SPB, site_id=settings.SITE_ID)
+def test_interview_invitations_create_view(client, settings):
     curator = CuratorFactory()
-    campaign = CampaignFactory(current=True, branch=branch_spb)
+    client.login(curator)
+    base_url = reverse('admission:interviews:invitations:send')
+    campaign = CampaignFactory(current=True, branch=BranchFactory(code=Branches.SPB))
     applicant = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign)
     applicant_2 = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign)
     applicant_3 = ApplicantFactory(status=Applicant.INTERVIEW_SCHEDULED, campaign=campaign)
     applicant_4 = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign)
-
-    stream_all = InterviewStreamFactory(campaign=campaign, section=InterviewSections.ALL_IN_ONE)
+    stream_all_in_one = InterviewStreamFactory(campaign=campaign, section=InterviewSections.ALL_IN_ONE)
     stream_math = InterviewStreamFactory(campaign=campaign, section=InterviewSections.MATH)
-
     interview_all_in_one = InterviewFactory(applicant=applicant_2, section=InterviewSections.ALL_IN_ONE)
     interview_math = InterviewFactory(applicant=applicant_4, section=InterviewSections.MATH)
-
-    # Section InterviewSections.ALL_IN_ONE
-    client.login(curator)
-    interview_invitation_url = f"{reverse('admission:interviews:invitations:send')}"
-
-    interview_invitation_url_all_in_one = (interview_invitation_url +
-                                           f"?campaign={campaign.id}&section="
-                                           f"{InterviewSections.ALL_IN_ONE}")
-
-    response = client.get(interview_invitation_url_all_in_one)
+    # Filter applicants by common section
+    url_all_in_one = f"{base_url}?campaign={campaign.id}&section={InterviewSections.ALL_IN_ONE}"
+    response = client.get(url_all_in_one)
     soup = BeautifulSoup(response.content, "html.parser")
-
     assert soup.find(text=applicant.full_name) is not None
     assert soup.find(text=applicant_2.full_name) is None
     assert soup.find(text=applicant_3.full_name) is None
     assert soup.find(text=applicant_4.full_name) is not None
-
-    assert soup.find(text=stream_all) is not None
+    assert soup.find(text=stream_all_in_one) is not None
     assert soup.find(text=stream_math) is None
-
-    # Section InterviewSections.MATH
-    interview_invitation_url_math = (interview_invitation_url +
-                                           f"?campaign={campaign.id}&section="
-                                           f"{InterviewSections.MATH}")
-    response = client.get(interview_invitation_url_math)
+    # Filter applicants by InterviewSections.MATH section
+    url_math = f"{base_url}?campaign={campaign.id}&section={InterviewSections.MATH}"
+    response = client.get(url_math)
     soup = BeautifulSoup(response.content, "html.parser")
-
     assert soup.find(text=applicant.full_name) is not None
     assert soup.find(text=applicant_2.full_name) is None
     assert soup.find(text=applicant_3.full_name) is None
     assert soup.find(text=applicant_4.full_name) is None
-
-    assert soup.find(text=stream_all) is None
+    assert soup.find(text=stream_all_in_one) is None
     assert soup.find(text=stream_math) is not None
 
 
