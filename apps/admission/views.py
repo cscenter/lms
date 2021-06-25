@@ -9,7 +9,7 @@ from braces.views import UserPassesTestMixin
 from django_filters.views import BaseFilterView, FilterMixin
 from extra_views.formsets import BaseModelFormSetView
 from rest_framework import serializers
-from vanilla import TemplateView
+from vanilla import GenericModelView, TemplateView
 
 from django.conf import settings
 from django.contrib import messages
@@ -69,7 +69,7 @@ class ApplicantContextMixin:
     @staticmethod
     def get_applicant_context(request, applicant_id):
         qs = (Applicant.objects
-              .select_related("exam", "campaign__branch",
+              .select_related("exam", "campaign__branch__site",
                               "online_test", "university")
               .filter(pk=applicant_id))
         applicant = get_object_or_404(qs)
@@ -702,19 +702,19 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         interview = get_object_or_404(qs)
         context = self.get_applicant_context(self.request, interview.applicant_id)
         interview.applicant = context['applicant']
-        context.update({
-            "interview": interview,
-            "assignments_form": InterviewAssignmentsForm(instance=interview),
-        })
         show_all_comments = self.request.user.is_curator
         form_kwargs = {
-            "interview_id": interview.pk,
-            "interviewer": self.request.user.pk
+            "interview": interview,
+            "interviewer": self.request.user
         }
         for comment in interview.comments.all():
             if comment.interviewer == self.request.user:
                 show_all_comments = True
                 form_kwargs["instance"] = comment
+        context.update({
+            "interview": interview,
+            "assignments_form": InterviewAssignmentsForm(instance=interview),
+        })
         context["show_all_comments"] = show_all_comments
         context["comment_form"] = InterviewCommentForm(**form_kwargs)
         return context
@@ -735,23 +735,32 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         return HttpResponseRedirect(url)
 
 
-class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
+# FIXME: rewrite as API view
+class InterviewCommentUpsertView(InterviewerOnlyMixin, GenericModelView):
     """Update/Insert view for interview comment"""
-    form_class = InterviewCommentForm
     http_method_names = ['post', 'put']
 
-    def get_object(self, queryset=None):
-        if queryset is None:
-            queryset = self.get_queryset()
-        try:
-            obj = queryset.get()
-            return obj
-        except (AttributeError, queryset.model.DoesNotExist):
-            return None
+    def post(self, request, *args, **kwargs):
+        qs = (Interview.objects
+              .select_related('applicant__campaign__branch__site')
+              .filter(pk=self.kwargs['pk']))
+        interview = get_object_or_404(qs)
+        comment = self.object = self.get_object()
+        form = InterviewCommentForm(data=request.POST,
+                                    instance=comment,
+                                    interview=interview,
+                                    interviewer=self._get_interviewer())
+        if form.is_valid():
+            return self.form_valid(form)
+        return self.form_invalid(form)
 
-    def get_queryset(self):
-        return Comment.objects.filter(interview=self.kwargs["pk"],
-                                      interviewer=self.request.user)
+    def get_object(self, queryset=None):
+        try:
+            return (Comment.objects
+                    .get(interview=self.kwargs["pk"],
+                         interviewer=self.request.user))
+        except Comment.DoesNotExist:
+            return None
 
     @transaction.atomic
     def form_valid(self, form):
@@ -760,28 +769,19 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
             return JsonResponse({"success": "true"})
         return super().form_valid(form)
 
-    def get_success_url(self):
-        messages.success(self.request, "Комментарий успешно сохранён",
-                         extra_tags='timeout')
-        return reverse("admission:interviews:detail",
-                       args=[self.object.interview_id])
-
     def form_invalid(self, form):
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            # TODO: return 400 status code?
             msg = "<br>".join(m for ms in form.errors.values() for m in ms)
             r = JsonResponse({"errors": msg})
             r.status_code = 400
             return r
         return super().form_invalid(form)
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({
-            "interviewer": self._get_interviewer(),
-            "interview_id": self.kwargs["pk"]
-        })
-        return kwargs
+    def get_success_url(self):
+        messages.success(self.request, "Комментарий успешно сохранён",
+                         extra_tags='timeout')
+        return reverse("admission:interviews:detail",
+                       args=[self.object.interview_id])
 
     def _get_interviewer(self):
         interview_id = self.kwargs["pk"]

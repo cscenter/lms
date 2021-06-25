@@ -57,3 +57,19 @@ class InterviewInvitationStatuses(DjangoChoices):
             return "success"
         else:
             return "default"
+
+
+class DefaultInterviewRatingSystem(DjangoChoices):
+    MINUS_TWO = ChoiceItem(-2, "не брать ни сейчас, ни потом (-2)")
+    MINUS_ONE = ChoiceItem(-1, "не брать сейчас (-1)")
+    ZERO = ChoiceItem(0, "нейтрально (0)")
+    PLUS_ONE = ChoiceItem(1, "можно взять (1)")
+    PLUS_TWO = ChoiceItem(2, "точно нужно взять (2)")
+
+
+class YandexDataSchoolInterviewRatingSystem(DjangoChoices):
+    ONE = ChoiceItem(1, "не брать ни сейчас, ни потом (1)")
+    TWO = ChoiceItem(2, "не брать сейчас (2)")
+    THREE = ChoiceItem(3, "нейтрально (3)")
+    FOUR = ChoiceItem(4, "можно взять (4)")
+    FIVE = ChoiceItem(5, "точно нужно взять (5)")

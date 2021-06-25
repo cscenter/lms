@@ -3,7 +3,7 @@ from django.urls import path
 
 from admission.views import (
     ApplicantCreateStudentView, ApplicantDetailView, ApplicantListView,
-    ApplicantStatusUpdateView, InterviewAssignmentDetailView, InterviewCommentView,
+    ApplicantStatusUpdateView, InterviewAssignmentDetailView, InterviewCommentUpsertView,
     InterviewDetailView, InterviewInvitationCreateView, InterviewInvitationListView,
     InterviewListView, InterviewResultsDispatchView, InterviewResultsView,
     import_campaign_testing_results
@@ -26,7 +26,7 @@ interview_invitation_patterns = [
 interview_patterns = [
     path('', InterviewListView.as_view(), name='list'),
     path('<int:pk>/', InterviewDetailView.as_view(), name='detail'),
-    path('interviews/<int:pk>/comment', InterviewCommentView.as_view(), name='comment'),
+    path('interviews/<int:pk>/comment', InterviewCommentUpsertView.as_view(), name='comment'),
     path('assignments/<int:pk>/', InterviewAssignmentDetailView.as_view(), name='assignment'),
 ]
 

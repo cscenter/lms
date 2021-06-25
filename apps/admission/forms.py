@@ -10,8 +10,7 @@ from django.forms.models import ModelForm
 from django.utils.translation import gettext_lazy as _
 
 from admission.models import (
-    Applicant, Comment, Interview, InterviewAssignment, InterviewInvitation,
-    InterviewSlot, InterviewStream
+    Applicant, Comment, Interview, InterviewAssignment, InterviewSlot, InterviewStream
 )
 from core.models import Branch
 from core.timezone import now_local
@@ -173,15 +172,7 @@ class InterviewCommentForm(forms.ModelForm):
         widgets = {
             'interview': forms.HiddenInput(),
             'interviewer': forms.HiddenInput(),
-            'score': forms.Select(
-                choices=(
-                    ("", ""),
-                    (-2, "не брать ни сейчас, ни потом"),
-                    (-1, "не брать сейчас"),
-                    (0, "нейтрально"),
-                    (1, "можно взять"),
-                    (2, "точно нужно взять")),
-            ),
+            'score': forms.Select(),
             'text': UbereditorWidget(attrs={
                 'data-local-persist': 'true',
             })
@@ -192,25 +183,27 @@ class InterviewCommentForm(forms.ModelForm):
             },
         }
 
-    def __init__(self, *args, **kwargs):
-        self.helper = FormHelper()
+    def __init__(self, interview: Interview, interviewer, **kwargs):
+        self.interview = interview
+        self.interviewer = interviewer
+        kwargs["initial"] = {
+            **kwargs.get("initial", {}),
+            "interview": self.interview,
+            "interviewer": self.interviewer
+        }
+        super().__init__(**kwargs)
+        self.fields['score'].label = "Моя оценка"
+        self.fields['score'].widget.choices = interview.rating_system.choices
+        self.fields['text'].label = "Комментарий"
+        self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Div('score'),
             Div('text'),
             'interview', 'interviewer',
             FormActions(Submit('save', _('Save'))),
         )
-        self.interviewer = kwargs.pop("interviewer", None)
-        self.interview_id = kwargs.pop("interview_id", None)
-        initial = kwargs.get("initial", {})
-        initial["interview"] = self.interview_id
-        initial["interviewer"] = self.interviewer
-        kwargs["initial"] = initial
         self.helper.form_action = reverse("admission:interviews:comment",
-                                          kwargs={"pk": self.interview_id})
-        super().__init__(*args, **kwargs)
-        self.fields['score'].label = "Моя оценка"
-        self.fields['text'].label = "Комментарий"
+                                          kwargs={"pk": self.interview.pk})
 
     def clean_interviewer(self):
         interviewer = self.cleaned_data['interviewer']
@@ -223,7 +216,7 @@ class InterviewCommentForm(forms.ModelForm):
 
     def clean_interview(self):
         interview = self.cleaned_data['interview']
-        if interview.pk != self.interview_id:
+        if interview != self.interview:
             raise ValidationError("Submitted interview id not match GET-value")
         return interview
 
