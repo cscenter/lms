@@ -277,6 +277,24 @@ def test_interview_comment_create(curator, client, settings):
 
 
 @pytest.mark.django_db
+def test_interview_comment_availability_score(curator, client):
+    interview = InterviewFactory(section=InterviewSections.ALL_IN_ONE)
+    client.login(curator)
+
+    url = reverse("admission:interviews:comment", args=[interview.pk])
+
+    response = client.get(url)
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert soup.find(id="id_score") is not None
+    assert soup.find(text='не брать ни сейчас, ни потом') is not None
+    assert soup.find(text='не брать сейчас') is not None
+    assert soup.find(text='нейтрально') is not None
+    assert soup.find(text='можно взять') is not None
+    assert soup.find(text='точно нужно взять') is not None
+
+
+
+@pytest.mark.django_db
 def test_create_invitation(curator, client, settings):
     """Create invitation from single stream"""
     settings.LANGUAGE_CODE = 'ru'
