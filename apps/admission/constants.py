@@ -12,9 +12,6 @@ WHERE_DID_YOU_LEARN = (
 
 INVITATION_EXPIRED_IN_HOURS = 27
 
-# Email templates
-INTERVIEW_FEEDBACK_TEMPLATE = "admission-interview-feedback"
-
 
 class ChallengeStatuses(DjangoChoices):
     NEW = ChoiceItem('new', _("Not registered in the contest"))

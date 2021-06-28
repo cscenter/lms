@@ -16,8 +16,7 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import (
-    INTERVIEW_FEEDBACK_TEMPLATE, INVITATION_EXPIRED_IN_HOURS, InterviewFormats,
-    InterviewInvitationStatuses
+    INVITATION_EXPIRED_IN_HOURS, InterviewFormats, InterviewInvitationStatuses
 )
 from admission.models import (
     Applicant, Campaign, Exam, Interview, InterviewInvitation, InterviewSlot,
@@ -431,12 +430,8 @@ class EmailQueueService:
     def generate_interview_feedback_email(interview: Interview) -> None:
         if interview.status != interview.COMPLETED:
             return
-        # Fail silently if template not found
-        template_name = INTERVIEW_FEEDBACK_TEMPLATE
-        try:
-            template = EmailTemplate.objects.get(name=template_name)
-        except EmailTemplate.DoesNotExist:
-            logger.error("Template with name {} not found".format(template_name))
+        campaign = interview.applicant.campaign
+        if not campaign.template_interview_feedback_id:
             return
         interview_date = interview.date_local()
         # It will be send immediately if time is expired
@@ -447,7 +442,7 @@ class EmailQueueService:
             # Update scheduled_time if a feedback task in a queue is
             # not completed
             email_identifiers = {
-                "template__name": INTERVIEW_FEEDBACK_TEMPLATE,
+                "template_id": campaign.template_interview_feedback_id,
                 "to": recipients
             }
             email = Email.objects.get(**email_identifiers)
@@ -456,11 +451,12 @@ class EmailQueueService:
                  .filter(**email_identifiers)
                  .update(scheduled_time=scheduled_time))
         except Email.DoesNotExist:
+            email_from = get_email_from(campaign)
             mail.send(
                 recipients,
                 scheduled_time=scheduled_time,
-                sender='info@compscicenter.ru',
-                template=template,
+                sender=email_from,
+                template=campaign.template_interview_feedback,
                 context={
                     "BRANCH": interview.applicant.campaign.branch.name,
                     "SECTION": interview.get_section_display(),
@@ -472,9 +468,10 @@ class EmailQueueService:
             )
 
     @staticmethod
-    def remove_interview_feedback_emails(interview):
+    def remove_interview_feedback_emails(interview: Interview):
+        campaign = interview.applicant.campaign
         (Email.objects
-         .filter(template__name=INTERVIEW_FEEDBACK_TEMPLATE,
+         .filter(template_id=campaign.template_interview_feedback_id,
                  to=interview.applicant.email)
          .exclude(status=EMAIL_STATUS.sent)
          .delete())

@@ -4,9 +4,7 @@ import pytest
 from post_office.models import STATUS as EMAIL_STATUS
 from post_office.models import Email, EmailTemplate
 
-from admission.constants import (
-    INTERVIEW_FEEDBACK_TEMPLATE, INVITATION_EXPIRED_IN_HOURS, InterviewSections
-)
+from admission.constants import INVITATION_EXPIRED_IN_HOURS, InterviewSections
 from admission.models import Interview, InterviewInvitation
 from admission.services import create_invitation
 from admission.tests.factories import (
@@ -70,12 +68,28 @@ def test_create_invitation(mocker):
 
 
 @pytest.mark.django_db
-def test_generate_interview_feedback_email():
-    EmailTemplate.objects.update_or_create(name=INTERVIEW_FEEDBACK_TEMPLATE)
-    email_qs = Email.objects.filter(template__name=INTERVIEW_FEEDBACK_TEMPLATE)
+def test_generate_interview_feedback_email_campaign_no_feedback_template():
+    """
+    No email is sent if an interview feedback email template is not specified.
+    """
     interview = InterviewFactory(status=Interview.APPROVED,
                                  section=InterviewSections.ALL_IN_ONE,
-                                 applicant__campaign__branch__code=Branches.SPB)
+                                 applicant__campaign__branch__code=Branches.SPB,
+                                 applicant__campaign__template_interview_feedback=None)
+    assert Email.objects.count() == 0
+    interview.status = Interview.COMPLETED
+    interview.save()
+    assert Email.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_generate_interview_feedback_email():
+    email_template, _ = EmailTemplate.objects.update_or_create(name='interview-feedback-template')
+    email_qs = Email.objects.filter(template=email_template)
+    interview = InterviewFactory(status=Interview.APPROVED,
+                                 section=InterviewSections.ALL_IN_ONE,
+                                 applicant__campaign__branch__code=Branches.SPB,
+                                 applicant__campaign__template_interview_feedback=email_template)
     assert Email.objects.count() == 0
     interview.status = Interview.COMPLETED
     interview.save()
