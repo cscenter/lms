@@ -428,7 +428,7 @@ class EmailQueueService:
              .delete())
 
     @staticmethod
-    def generate_interview_feedback_email(interview) -> None:
+    def generate_interview_feedback_email(interview: Interview) -> None:
         if interview.status != interview.COMPLETED:
             return
         # Fail silently if template not found

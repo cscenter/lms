@@ -8,9 +8,7 @@ from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime
 from django.db.models.signals import post_save
 from django.utils import timezone
 
-from admission.constants import (
-    APPOINTMENT_INVITATION_TEMPLATE, WHERE_DID_YOU_LEARN, InterviewFormats
-)
+from admission.constants import WHERE_DID_YOU_LEARN, InterviewFormats
 from admission.models import (
     Applicant, Campaign, Comment, Contest, Exam, Interview, InterviewAssignment,
     InterviewFormat, InterviewInvitation, InterviewSlot, InterviewStream, Test
@@ -45,8 +43,6 @@ class CampaignFactory(factory.django.DjangoModelFactory):
                                           tzinfo=timezone.utc)
     application_ends_at = factory.Faker('future_datetime', end_date="+30d",
                                         tzinfo=timezone.utc)
-    # FIXME: generate registration template name
-    template_appointment = APPOINTMENT_INVITATION_TEMPLATE
 
 
 class ApplicantFactory(factory.django.DjangoModelFactory):

@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 from post_office.models import STATUS as EMAIL_STATUS
-from post_office.models import Email
+from post_office.models import Email, EmailTemplate
 
 from admission.constants import (
     INTERVIEW_FEEDBACK_TEMPLATE, INVITATION_EXPIRED_IN_HOURS, InterviewSections
@@ -71,6 +71,7 @@ def test_create_invitation(mocker):
 
 @pytest.mark.django_db
 def test_generate_interview_feedback_email():
+    EmailTemplate.objects.update_or_create(name=INTERVIEW_FEEDBACK_TEMPLATE)
     email_qs = Email.objects.filter(template__name=INTERVIEW_FEEDBACK_TEMPLATE)
     interview = InterviewFactory(status=Interview.APPROVED,
                                  section=InterviewSections.ALL_IN_ONE,
