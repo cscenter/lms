@@ -333,6 +333,11 @@ def test_gradebook_list(client, mocker, assert_redirect):
 # FIXME: fix changing student group
 @pytest.mark.django_db
 def test_change_student_between_groups(client):
+
+    """
+    Checking the correctness of the student's student group change
+    """
+    
     teacher = TeacherFactory()
     student = StudentFactory()
     student2 = StudentFactory()
@@ -365,6 +370,11 @@ def test_change_student_between_groups(client):
 
 @pytest.mark.django_db
 def test_student_group_manual_link(client):
+
+    """
+    Checking correct displaying link on student group in teacher course list
+    """
+
     def update_request():
         course_list = reverse("teaching:course_list")
         response = client.get(course_list)
@@ -389,6 +399,11 @@ def test_student_group_manual_link(client):
 
 @pytest.mark.django_db
 def test_student_groups_list(client):
+
+    """
+    Checking correct displaying student groups in teacher group list
+    """
+
     teacher = TeacherFactory()
     student = StudentFactory()
     course = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
@@ -411,6 +426,11 @@ def test_student_groups_list(client):
 # FIXME: check enrollment factory
 @pytest.mark.django_db
 def test_student_groups_detail(client):
+
+    """
+    Checking correct displaying student and assignees in group
+    """
+
     teacher = TeacherFactory()
     student = StudentFactory()
     course = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
