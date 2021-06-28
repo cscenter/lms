@@ -112,6 +112,15 @@ class Campaign(TimezoneAwareMixin, models.Model):
         help_text=_("Template name for interview invitation email"),
         validators=[validate_email_template_name],
         max_length=255)
+    template_interview_feedback = models.ForeignKey(
+        EmailTemplate,
+        verbose_name=_("Interview Feedback Template"),
+        help_text=_("Leave blank if there is no need to send a feedback email. "
+                    "Email will be sent at the time of interview status change, "
+                    "but not earlier than 21:00 of the day of the interview"),
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True)
 
     class Meta:
         verbose_name = _("Campaign")
@@ -1130,7 +1139,7 @@ class Comment(TimeStampedModel):
 
 class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'venue'
-    formats = InterviewFormats
+    formats = InterviewFormats  # TODO: remove
 
     campaign = models.ForeignKey(
         Campaign,
