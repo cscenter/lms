@@ -1052,7 +1052,8 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         Location,
         verbose_name=_("Interview venue"),
         on_delete=models.PROTECT,
-        related_name="interview")
+        related_name="interview",
+        default=1)
 
     class Meta:
         verbose_name = _("Interview")
