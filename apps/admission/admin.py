@@ -292,7 +292,6 @@ class InterviewSlotsInline(admin.TabularInline):
         return False
 
 
-# TODO: Как проверять, что потоки не пересекаются? Если совпадает место?
 class InterviewStreamAdmin(admin.ModelAdmin):
     form = InterviewStreamChangeForm
     list_select_related = ('campaign', 'campaign__branch')
