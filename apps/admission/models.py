@@ -1048,6 +1048,12 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         blank=True,
         null=True)
 
+    venue = models.ForeignKey(
+        Location,
+        verbose_name=_("Interview venue"),
+        on_delete=models.PROTECT,
+        related_name="interview")
+
     class Meta:
         verbose_name = _("Interview")
         verbose_name_plural = _("Interviews")
