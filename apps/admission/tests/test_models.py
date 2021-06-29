@@ -5,11 +5,30 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from admission.constants import InterviewSections
-from admission.models import Applicant, Contest, Interview
+from admission.models import Applicant, Contest, Interview, InterviewSlot
 from admission.tests.factories import (
     ApplicantFactory, CampaignFactory, ContestFactory, InterviewFactory,
     InterviewInvitationFactory, InterviewSlotFactory, InterviewStreamFactory
 )
+
+
+@pytest.mark.django_db
+def test_creat_interview_with_venue():
+    applicant = ApplicantFactory()
+    interview = InterviewFactory(applicant=applicant, section=InterviewSections.MATH)
+    assert not interview.venue
+    stream = InterviewStreamFactory(start_at=datetime.time(12, 10),
+                                    end_at=datetime.time(18, 50),
+                                    duration=10)
+    InterviewSlotFactory(interview=interview,
+                         stream=stream,
+                         start_at=datetime.time(15, 0),
+                         end_at=datetime.time(16, 0))
+    location = InterviewSlot.objects.get(interview=interview).stream.venue
+    interview.venue = location
+    interview_venue = InterviewFactory(applicant=applicant, section=InterviewSections.ALL_IN_ONE, venue=location)
+    assert interview.venue.id == location.id
+    assert interview_venue.venue.id == location.id
 
 
 @pytest.mark.django_db
