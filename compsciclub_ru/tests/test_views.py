@@ -9,6 +9,7 @@ from compsciclub_ru.views import ClubClassesFeed
 from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN, TEST_DOMAIN
 from core.urls import reverse
+from courses.constants import SemesterTypes
 from courses.tests.factories import CourseClassFactory, CourseFactory, SemesterFactory
 from learning.settings import Branches
 from users.tests.factories import TeacherFactory
@@ -21,6 +22,11 @@ def test_index_view_course_list(client, settings):
     show courses made by CS Club only
     """
     current_semester = SemesterFactory.create_current()
+    # Summer courses are not shown on index page :<
+    # TODO: Discuss this moment
+    if current_semester.type == SemesterTypes.SUMMER:
+        current_semester.type = SemesterTypes.AUTUMN
+        current_semester.save()
     earlier_semester = SemesterFactory.create(year=2019, type='autumn')
 
     branch_spb_center = BranchFactory(code=Branches.SPB,
@@ -55,16 +61,16 @@ def test_course_list(client, settings):
     """
     Сlub students can see all Club or CS Center courses that have been shared with their branch
     """
-    current_semester = SemesterFactory.create_current()
+    semester = SemesterFactory.create(year=2020, type='autumn')
     branch_spb_center = BranchFactory(code=Branches.SPB,
                                       site__domain=ANOTHER_DOMAIN)
     branch_spb_club = BranchFactory(code=Branches.SPB,
                                     site__domain=TEST_DOMAIN)
-    course_center_private = CourseFactory(semester=current_semester,
+    course_center_private = CourseFactory(semester=semester,
                                           main_branch=branch_spb_center)
-    course_center_public = CourseFactory(semester=current_semester,
+    course_center_public = CourseFactory(semester=semester,
                                          main_branch=branch_spb_center)
-    course_club_kzn_shared = CourseFactory(semester=current_semester,
+    course_club_kzn_shared = CourseFactory(semester=semester,
                                            main_branch__code="kzn")
 
     # Courses were shared with CS Club
