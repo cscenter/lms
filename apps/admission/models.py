@@ -1031,6 +1031,13 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         default=APPROVAL,
         verbose_name=_("Interview|Status"),
         max_length=15)
+    venue = models.ForeignKey(
+        Location,
+        verbose_name=_("Venue"),
+        on_delete=models.PROTECT,
+        related_name="+",
+        blank=False,
+        null=True)
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),

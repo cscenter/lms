@@ -234,6 +234,7 @@ def accept_interview_invitation(invitation: InterviewInvitation, slot_id: int) -
     interview = Interview(applicant=invitation.applicant,
                           status=Interview.APPROVED,
                           section=slot.stream.section,
+                          venue=slot.stream.venue,
                           date=slot.datetime_local)
     with transaction.atomic():
         sid = transaction.savepoint()

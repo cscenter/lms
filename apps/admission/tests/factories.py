@@ -126,6 +126,9 @@ class InterviewFactory(factory.django.DjangoModelFactory):
     # TODO: replace with FuzzyDate
     date = (datetime.datetime.now().replace(tzinfo=pytz.UTC)
             + datetime.timedelta(days=3))
+    venue = factory.SubFactory(
+        LocationFactory,
+        city=factory.SelfAttribute('..applicant.campaign.branch.city'))
 
     @factory.post_generation
     def interviewers(self, create, extracted, **kwargs):
