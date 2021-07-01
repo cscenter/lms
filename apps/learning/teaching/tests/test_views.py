@@ -1,4 +1,7 @@
+import datetime
+
 import pytest
+import pytz
 
 from django.utils.encoding import smart_bytes
 
@@ -301,7 +304,12 @@ def test_student_assignment_detail_view_context_next_unchecked(client):
 
 
 @pytest.mark.django_db
-def test_gradebook_list(client, assert_redirect):
+def test_gradebook_list(client, mocker, assert_redirect):
+    # This test will fail if current term is of a summer type since we
+    # omit summer semesters in the gradebook list view
+    mocked = mocker.patch('courses.utils.now_local')
+    msk_tz = pytz.timezone("Europe/Moscow")
+    mocked.return_value = msk_tz.localize(datetime.datetime(2021, 5, 1, 12, 0))
     teacher = TeacherFactory()
     client.login(teacher)
     gradebooks_url = reverse("teaching:gradebook_list")
