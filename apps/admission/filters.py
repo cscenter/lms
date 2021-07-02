@@ -11,7 +11,7 @@ from django.forms import SelectMultiple
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from admission.constants import InterviewInvitationStatuses, InterviewSections
+from admission.constants import CuratorFilterOwnInterview, InterviewInvitationStatuses, InterviewSections
 from admission.forms import ApplicantFinalStatusForm
 from admission.models import (
     Applicant, Campaign, Interview, InterviewInvitation, InterviewStream
@@ -210,6 +210,9 @@ class InterviewsCuratorFilterForm(forms.Form):
                            css_class="btn-block -inline-submit"),
                     css_class="col-xs-2"),
             ),
+            Row(
+                Div('my_interview', css_class="col-xs-3")
+            )
         )
         super().__init__(*args, **kwargs)
 
@@ -264,6 +267,10 @@ class InterviewsCuratorFilter(InterviewsBaseFilter):
                   .select_related("branch")
                   .order_by("-branch_id", "-year").all()),
         help_text="")
+
+    my_interview = django_filters.ChoiceFilter(choices=CuratorFilterOwnInterview.choices,
+                                               label='Показывать мои интервью',
+                                               empty_label=None)
 
     class Meta(InterviewsBaseFilter.Meta):
         form = InterviewsCuratorFilterForm
