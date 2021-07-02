@@ -105,3 +105,8 @@ class YandexDataSchoolInterviewRatingSystem(DjangoChoices):
     THREE = ChoiceItem(3, "нейтрально (3)")
     FOUR = ChoiceItem(4, "можно взять (4)")
     FIVE = ChoiceItem(5, "точно нужно взять (5)")
+
+
+class CuratorFilterOwnInterview(DjangoChoices):
+    ONE = ChoiceItem(1, "Да")
+    TWO = ChoiceItem(0, "Нет")
