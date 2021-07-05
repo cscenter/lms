@@ -211,7 +211,9 @@ class InterviewsCuratorFilterForm(forms.Form):
                     css_class="col-xs-2"),
             ),
             Row(
-                Div('my_interviews', css_class="col-xs-3")
+                Div('', css_class="col-xs-3"),
+                Div('', css_class="col-xs-3"),
+                Div('my_interviews', css_class="col-xs-4")
             )
         )
         super().__init__(*args, **kwargs)
@@ -268,8 +270,8 @@ class InterviewsCuratorFilter(InterviewsBaseFilter):
                   .order_by("-branch_id", "-year").all()),
         help_text="")
 
-    my_interviews = django_filters.ChoiceFilter(choices=CuratorFilterOwnInterview.choices,
-                                               label='Показывать мои интервью',
+    my_interviews = django_filters.ChoiceFilter(choices=FilterOwnInterview.choices,
+                                               label='',
                                                empty_label=None)
 
     class Meta(InterviewsBaseFilter.Meta):
