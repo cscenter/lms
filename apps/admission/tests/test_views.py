@@ -91,7 +91,7 @@ def test_simple_interviews_list(client, curator, settings):
     assert soup.find(id="venue") is not None
 
     # Checking filtering for curator their interviews
-    url = format_url(campaign.pk, today_local_nsk_date, "") + f"&my_interview=1"
+    url = format_url(campaign.pk, today_local_nsk_date, "") + f"&my_interviews=1"
     response = client.get(url)
     assert len(response.context["interviews"]) == 0
 
