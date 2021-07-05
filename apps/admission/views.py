@@ -616,13 +616,13 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             else:
                 today_local = now_local(campaign.branch.get_timezone())
             date = formats.date_format(today_local, "SHORT_DATE_FORMAT")
-            my_interview = CuratorFilterOwnInterview.ONE
+            my_interviews = CuratorFilterOwnInterview.ONE
             params = parse.urlencode({
                 'campaign': campaign.pk,
                 'status': [Interview.COMPLETED, Interview.APPROVED],
                 'date_from': date,
                 'date_to': date,
-                'my_interview': my_interview
+                'my_interviews': my_interviews
             }, doseq=True)
             url = "{}?{}".format(reverse("admission:interviews:list"), params)
             return HttpResponseRedirect(redirect_to=url)
@@ -644,7 +644,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             }
         else:
             kwargs_data = kwargs['data'].copy()
-            kwargs_data.pop('my_interview', None)
+            kwargs_data.pop('my_interviews', None)
             kwargs["data"] = kwargs_data
 
         return kwargs
@@ -665,9 +665,9 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             except ValueError:
                 context["results_title"] = _("All campaigns")
 
-        if 'my_interview' in self.request.GET:
+        if 'my_interviews' in self.request.GET:
             context_filter = context['filter'].form.data.copy()
-            context_filter['my_interview'] = self.request.GET['my_interview']
+            context_filter['my_interviews'] = self.request.GET['my_interviews']
             context['filter'].form.data = context_filter
 
         return context
@@ -676,9 +676,9 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         branches = Branch.objects.for_site(site_id=settings.SITE_ID)
         user = self.request.user
 
-        my_interview = None
-        if 'my_interview' in self.request.GET:
-            my_interview = self.request.GET['my_interview']
+        my_interviews = None
+        if 'my_interviews' in self.request.GET:
+            my_interviews = self.request.GET['my_interviews']
 
         q = (Interview.objects
              .filter(applicant__campaign__branch__in=branches)
@@ -687,7 +687,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
              .prefetch_related("interviewers")
              .annotate(average=Coalesce(Avg('comments__score'), Value(0)))
              .order_by("date", "pk"))
-        if not self.request.user.is_curator or my_interview == '1':
+        if not self.request.user.is_curator or my_interviews == '1':
             # To interviewers show interviews from current campaigns where
             # they participate.
             try:
