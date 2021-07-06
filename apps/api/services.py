@@ -55,6 +55,7 @@ class TokenService:
     @staticmethod
     def renew(token: Token):
         current_expiry = token.expire_at
+        assert current_expiry is not None
         new_expiry = timezone.now() + TOKEN_TTL
         token.expire_at = new_expiry
         # Throttle refreshing of token to avoid db writes
