@@ -125,8 +125,8 @@ django-simple-menu = "*"
 # XXX: UI problems with ckeditor widget in 6.0.0 release
 django-ckeditor = "==5.9.0"
 django-simple-history = "*"
-# XXX: wrong implementation for Django >= 1.11 in ver 1.2.1
-django-static-compress = "==1.2.1"
+# XXX: wrong implementation for Django >= 1.11
+django-static-compress = "==2.0.0"
 webdavclient3 = "*"
 
 [requires]

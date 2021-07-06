@@ -3,6 +3,8 @@ import posixpath
 import re
 from urllib.parse import unquote, urldefrag
 
+from static_compress import \
+    CompressedManifestStaticFilesStorage as _CompressedManifestStaticFilesStorage
 from storages.backends.s3boto3 import S3Boto3Storage
 
 from django.conf import settings
@@ -10,12 +12,11 @@ from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
 from django.core.files.storage import FileSystemStorage, get_storage_class
 from django.utils.functional import LazyObject
 
-from .static_compress import CompressMixin
-
 
 # Static files
-class CompressedManifestStaticFilesStorage(CompressMixin, ManifestStaticFilesStorage):
-    pass
+class CompressedManifestStaticFilesStorage(_CompressedManifestStaticFilesStorage):
+    def _get_dest_path(self, path):
+        return self.stored_name(path)
 
 
 class CloudFrontManifestStaticFilesStorage(ManifestStaticFilesStorage):

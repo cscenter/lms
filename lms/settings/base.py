@@ -78,6 +78,7 @@ STATICFILES_FINDERS = [
 STATIC_ROOT = env.str('DJANGO_STATIC_ROOT', default=str(ROOT_DIR / "static"))
 STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'files.storage.CompressedManifestStaticFilesStorage'
+STATIC_COMPRESS_METHODS = ["gz+zlib"]
 
 WEBPACK_ENVIRONMENT = env.str('WEBPACK_ENVIRONMENT', default="prod")
 WEBPACK_LOADER = {
