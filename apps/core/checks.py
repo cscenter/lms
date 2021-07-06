@@ -1,6 +1,6 @@
 from django.apps import apps
 from django.conf import settings
-from django.contrib.admin.checks import _contains_subclass
+from django.contrib.admin.checks import _contains_subclass  # type: ignore
 from django.core.checks import Error, register
 
 

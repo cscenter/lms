@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING, Iterable, Mapping, Set
 
 from django.core import checks
 from django.db import models
@@ -9,19 +10,25 @@ from core.tasks import compute_model_fields
 logger = logging.getLogger(__name__)
 
 
-class DerivableFieldsMixin:
+if TYPE_CHECKING:
+    ModelMixinBase = models.Model
+else:
+    ModelMixinBase = object
+
+
+class DerivableFieldsMixin(ModelMixinBase):
     """
     Before computing derivable field value make sure that any data this
     field depends on didn't cache (e.g. related queryset could be cached
     with .prefetch_related)
     """
     # TODO: Make as an abstract property
-    derivable_fields = []
-    prefetch_before_compute_fields = {}
+    derivable_fields: Iterable[str] = []
+    prefetch_before_compute_fields: Mapping[str, Iterable[str]] = {}
 
     @classmethod
     def prefetch_before_compute(cls, *derivable_fields):
-        prefetch_fields = set()
+        prefetch_fields: Set[str] = set()
 
         for field in derivable_fields:
             fields = cls.prefetch_before_compute_fields.get(field)
@@ -40,7 +47,7 @@ class DerivableFieldsMixin:
             logger.exception(e)
         return False
 
-    def compute_fields(self, *derivable_fields, prefetch=False,
+    def compute_fields(self, *derivable_fields: str, prefetch=False,
                        commit=True) -> bool:
         """
         Use async version to avoid caching problem with `.prefetch_related`
@@ -57,9 +64,8 @@ class DerivableFieldsMixin:
                 prefetch_related_objects((self,), *prefetch_fields)
 
         derived_fields = []
-        derivable_fields = derivable_fields or self.derivable_fields
 
-        for field in derivable_fields:
+        for field in derivable_fields or self.derivable_fields:
             compute_method_name = '_compute_{}'.format(field)
 
             if self._call_compute_method(compute_method_name):
@@ -92,7 +98,8 @@ class DerivableFieldsMixin:
         from collections.abc import Iterable
         errors = []
         if not issubclass(cls, models.Model):
-            errors.append(
+            # TODO: Remove this once mypy is enforced in the CI.
+            errors.append(  # type: ignore[unreachable]
                 checks.Error(
                     f'`{cls.__name__} is a subclass of DerivableFieldsMixin '
                     f'and must be a subclass of django.db.models.Model as well',

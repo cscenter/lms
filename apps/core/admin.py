@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
 from modeltranslation.admin import TranslationAdmin
@@ -28,8 +30,8 @@ admin.site.unregister(Tag)
 
 
 class BaseModelAdmin(admin.ModelAdmin):
-    list_select_related = []
-    list_prefetch_related = []
+    list_select_related: Sequence[str] = []
+    list_prefetch_related: Sequence[str] = []
 
     def get_prefetch_related(self):
         return self.list_prefetch_related

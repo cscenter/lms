@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import types
+from typing import TYPE_CHECKING, Iterable, Union
 
 from vanilla import CreateView
 
+from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
 from django.http import JsonResponse
@@ -12,12 +14,20 @@ from django.views import generic
 
 from .utils import render_markdown
 
+if TYPE_CHECKING:
+    FormMixinBase = forms.ModelForm
 
-class ReadOnlyFieldsMixin:
-    readonly_fields = ()
+    class ViewMixinBase(generic.View, generic.detail.SingleObjectMixin):
+        ...
+else:
+    FormMixinBase = ViewMixinBase = object
+
+
+class ReadOnlyFieldsMixin(FormMixinBase):
+    readonly_fields: Union[str, Iterable[str]] = ()
 
     def __init__(self, *args, **kwargs):
-        super(ReadOnlyFieldsMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         for field in (field for name, field in self.fields.items()
                       if self._pred(name)):
             field.widget.attrs['disabled'] = 'true'
@@ -29,17 +39,17 @@ class ReadOnlyFieldsMixin:
         return field_name in self.readonly_fields
 
     def clean(self):
-        cleaned_data = super(ReadOnlyFieldsMixin,self).clean()
+        cleaned_data = super().clean()
         for field in self.readonly_fields:
             cleaned_data[field] = getattr(self.instance, field)
         return cleaned_data
 
 
-class ProtectedFormMixin:
+class ProtectedFormMixin(ViewMixinBase):
     def __init__(self, *args, **kwargs):
         self._cached_object = None
         # Note(lebedev): no point in calling 'super' here.
-        super(ProtectedFormMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def is_form_allowed(self, user, obj):
         raise NotImplementedError(
@@ -69,8 +79,7 @@ class ProtectedFormMixin:
         if not self.is_form_allowed(request.user, obj):
             return redirect_to_login(request.get_full_path())
         else:
-            return (super(ProtectedFormMixin, self)
-                    .dispatch(request, *args, **kwargs))
+            return super().dispatch(request, *args, **kwargs)
 
 
 class MarkdownRenderView(LoginRequiredMixin, generic.base.View):

@@ -18,5 +18,6 @@ class CoreConfig(AppConfig):
         from core.db.fields import ScoreField  # isort:skip
         field_mapping = ModelSerializer.serializer_field_mapping
         field_mapping.update({
-            ScoreField: fields.ScoreField
+            # TODO: mypy should be able to type check this. Investigate and remove the ignore.
+            ScoreField: fields.ScoreField  # type: ignore[dict-item]
         })

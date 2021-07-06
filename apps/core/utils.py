@@ -1,6 +1,7 @@
 import datetime
 from functools import partial
 from itertools import zip_longest
+from typing import Any, Dict, List
 from urllib.parse import parse_qs, urlparse
 
 import bleach
@@ -275,7 +276,7 @@ def bucketize(iterable, key=None, value_transform=None):
         key = lambda x: x
     if value_transform is None:
         value_transform = lambda x: x
-    buckets = {}
+    buckets: Dict[Any, List[Any]] = {}
     for val in iterable:
         bucket_key = key(val)
         buckets.setdefault(bucket_key, []).append(value_transform(val))
