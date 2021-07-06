@@ -9,6 +9,7 @@ ansible/
 media/
 apps/coverage/
 .idea/
+.vscode/
 csc3/
 static/
 local/

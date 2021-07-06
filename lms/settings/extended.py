@@ -2,6 +2,8 @@
 Settings that are not used by club site
 """
 
+from typing import Any, List
+
 from .base import *
 
 INSTALLED_APPS += [
@@ -47,7 +49,7 @@ LOCALE_PATHS += [
 SOCIAL_AUTH_YANDEXRU_KEY = env.str('SOCIAL_AUTH_YANDEXRU_KEY')
 SOCIAL_AUTH_YANDEXRU_SECRET = env.str('SOCIAL_AUTH_YANDEXRU_SECRET')
 # Prevent calling pipeline for this backend
-SOCIAL_AUTH_YANDEXRU_PIPELINE = []
+SOCIAL_AUTH_YANDEXRU_PIPELINE: List[Any] = []
 
 # Code review integration
 LDAP_CLIENT_URI = env.str('LDAP_CLIENT_URI', default="ldap://review.compscicenter.ru:389")
