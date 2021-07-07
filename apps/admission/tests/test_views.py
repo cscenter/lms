@@ -86,6 +86,10 @@ def test_simple_interviews_list(client, curator, settings):
     assert len(response.context["interviews"]) == 2
     assert interview3 not in response.context["interviews"]
 
+    # Checking the display of the venue in the interview table
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert soup.find(id="venue") is not None
+
 
 @pytest.mark.django_db
 def test_interview_invitations_create_view(client, settings):
