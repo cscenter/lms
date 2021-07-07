@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Sequence
 
 import pytz
 

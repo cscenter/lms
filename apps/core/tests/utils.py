@@ -34,7 +34,8 @@ class TestClient(Client):
         return response.data['secret_token']
 
     def _base_environ(self, **request):
-        env = super()._base_environ(**request)
+        # TODO: Client in django-stubs does not define _base_environ.
+        env = super()._base_environ(**request)  # type: ignore
         if 'SERVER_NAME' not in request:
             # Override default server name `testserver`
             env['SERVER_NAME'] = TEST_DOMAIN

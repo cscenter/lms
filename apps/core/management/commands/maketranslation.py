@@ -11,7 +11,8 @@ EXTRA_KEYWORDS = [
 
 
 class Command(makemessages.Command):
-    xgettext_options = makemessages.Command.xgettext_options + EXTRA_KEYWORDS
+    # TODO: Command in django-stubs lacks xgettext_options.
+    xgettext_options = makemessages.Command.xgettext_options + EXTRA_KEYWORDS  # type: ignore[attr-defined]
 
     def add_arguments(self, parser):
         super(Command, self).add_arguments(parser)
@@ -25,7 +26,7 @@ class Command(makemessages.Command):
         xgettext_keywords = options.pop('xgettext_keywords')
         if xgettext_keywords:
             self.xgettext_options = (
-                makemessages.Command.xgettext_options[:] +
+                makemessages.Command.xgettext_options[:] +  # type: ignore[attr-defined]
                 ['--keyword=%s' % kwd for kwd in xgettext_keywords]
             )
         # super(Command, self).handle(*args, **options)
@@ -47,9 +48,9 @@ class Command(makemessages.Command):
             trans_real.plural_re.pattern + '|' + r"""^-?\s*pluralize(?:\s+.+|-?$)""")
         trans_real.constant_re = re.compile(r""".*?_\(((?:".*?(?<!\\)")|(?:'.*?(?<!\\)')).*?\)""")
 
-        def my_templatize(src, origin=None, **kwargs):
+        def my_templatize(src, *args, **kwargs):
             new_src = strip_whitespaces(src)
-            return old_templatize(new_src, origin, **kwargs)
+            return old_templatize(new_src, *args, **kwargs)
 
         trans_real.templatize = my_templatize
 

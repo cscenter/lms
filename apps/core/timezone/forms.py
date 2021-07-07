@@ -1,3 +1,8 @@
+# The widget classes in this file call violate Python method calling
+# conventions. Specifically, the call .decompress() with a self of an
+# unrelated type. This is illegal under mypy.
+# type: ignore
+
 import datetime
 
 import pytz
