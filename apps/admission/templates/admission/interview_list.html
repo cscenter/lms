@@ -67,9 +67,7 @@
                                 {% endfor %}
                             </ul>
                         </td>
-                        <td>
-                          <div id="venue">{% if interview.venue %}{{ interview.venue }}{% endif %}</div>
-                        </td>
+                        <td name="venue">{% if interview.venue %}{{ interview.venue }}{% endif %}</td>
                         <td>
                             {% if interview.status == "completed" %}
                                 {{ interview.average|floatdot:2 }}

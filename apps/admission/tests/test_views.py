@@ -88,7 +88,11 @@ def test_simple_interviews_list(client, curator, settings):
 
     # Checking the display of the venue in the interview table
     soup = BeautifulSoup(response.content, "html.parser")
-    assert soup.find(id="venue") is not None
+    name_list = soup.find_all('td', {'name': 'venue'})
+    assert len(name_list) == 2
+    venue_list = [venue.text for venue in name_list]
+    assert interview1.venue.name in venue_list
+    assert interview2.venue.name in venue_list
 
 
 @pytest.mark.django_db
