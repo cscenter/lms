@@ -132,6 +132,13 @@ django-simple-history = "*"
 # XXX: wrong implementation for Django >= 1.11
 django-static-compress = "==2.0.0"
 webdavclient3 = "*"
+mypy = "==0.812"
+django-stubs = "*"
+types-pytz = "*"
+types-bleach = "*"
+types-python-dateutil = "*"
+types-requests = "*"
+djangorestframework-stubs = "*"
 
 [requires]
 python_version = "3.8"
