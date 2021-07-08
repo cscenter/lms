@@ -199,7 +199,7 @@ class InterviewAssigneeAdminInline(admin.TabularInline):
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "user":
-            kwargs["queryset"] = User.objects.filter(group__role=Roles.INTERVIEWER)
+            kwargs["queryset"] = User.objects.filter(group__role=Roles.INTERVIEWER).distinct()
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
