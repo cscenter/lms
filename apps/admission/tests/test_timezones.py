@@ -10,7 +10,7 @@ from admission.tests.factories import (
 )
 from core.admin import get_admin_url
 from core.models import Branch
-from core.tests.factories import BranchFactory, LocationFactory
+from core.tests.factories import BranchFactory, CityFactory, LocationFactory
 from core.urls import reverse
 # FIXME: этот тест нужно переписать на tz aware datetime field, изначально тест и был так написан, но потом был удалён invitation.stream
 from learning.settings import Branches
@@ -54,18 +54,18 @@ def test_model(settings):
 
 @pytest.mark.django_db
 def test_get_timezone(settings):
-    branch_nsk = BranchFactory(code=Branches.NSK)
+    tz_msk = pytz.timezone('Europe/Moscow')
+    venue = LocationFactory(city=CityFactory(time_zone=tz_msk))
     date = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    interview = InterviewFactory(applicant__campaign__branch=branch_nsk,
-                                 section=InterviewSections.ALL_IN_ONE,
+    interview = InterviewFactory(section=InterviewSections.ALL_IN_ONE,
+                                 venue=venue,
                                  date=date)
-    assert interview.get_timezone() == branch_nsk.get_timezone()
-    branch_spb = Branch.objects.get(code=Branches.SPB, site_id=settings.SITE_ID)
-    interview.applicant.campaign.branch = branch_spb
-    interview.applicant.campaign.save()
+    assert interview.get_timezone() == tz_msk
+    tz_nsk = pytz.timezone('Asia/Novosibirsk')
+    venue.city.time_zone = tz_nsk
+    venue.city.save()
     interview.refresh_from_db()
-    branch_spb = BranchFactory(code=Branches.SPB)
-    assert interview.get_timezone() == branch_spb.get_timezone()
+    assert interview.get_timezone() == tz_nsk
 
 
 @pytest.mark.skip("Нужно обязательно переписать этот тест на другое поле, которое точно не изменится :<")
@@ -174,15 +174,16 @@ def test_interview_list(settings, client, curator):
     settings.LANGUAGE_CODE = 'ru'
     # Add interview for msk timezone
     date_at = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    tz_msk = pytz.timezone('Europe/Moscow')
+    venue = LocationFactory(city__time_zone=tz_msk)
     interview = InterviewFactory(date=date_at,
                                  section=InterviewSections.ALL_IN_ONE,
-                                 applicant__campaign__branch__code=Branches.SPB)
-    assert interview.applicant.campaign.branch.code == Branches.SPB
+                                 venue=venue)
+    assert interview.get_timezone() == tz_msk
     # We set naive datetime which should been interpreted as UTC
     assert interview.date.hour == 15
     msk_interview_date_in_utc = interview.date
-    msk_tz = interview.get_timezone()
-    localized = msk_interview_date_in_utc.astimezone(msk_tz)
+    localized = msk_interview_date_in_utc.astimezone(tz_msk)
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == '18:00'  # expected UTC+3
     url = reverse("admission:interviews:list") + "?campaign="
@@ -192,12 +193,14 @@ def test_interview_list(settings, client, curator):
 
     assert html.find('div', {"class": "time"}, text=time_str) is not None
     # Add interview for nsk timezone
+    tz_nsk = pytz.timezone('Asia/Novosibirsk')
+    venue.city.time_zone = tz_nsk
+    venue.city.save(update_fields=['time_zone'])
     interview = InterviewFactory(date=datetime.datetime(2017, 1, 1, 12, 0, 0, 0, tzinfo=pytz.UTC),
-                                 section=InterviewSections.ALL_IN_ONE)
-    branch_nsk = Branch.objects.get(code=Branches.NSK, site_id=settings.SITE_ID)
-    interview.applicant.campaign.branch_id = branch_nsk
-    interview.applicant.campaign.save()
+                                 section=InterviewSections.ALL_IN_ONE,
+                                 venue=venue)
     interview.refresh_from_db()
+    assert interview.get_timezone() == tz_nsk
     interview_date_in_utc = interview.date
     tz = interview.get_timezone()
     localized = interview_date_in_utc.astimezone(tz)
@@ -214,14 +217,16 @@ def test_interview_list(settings, client, curator):
 def test_interview_detail(settings, client, curator):
     settings.LANGUAGE_CODE = 'ru'
     client.login(curator)
+    tz_nsk = pytz.timezone('Asia/Novosibirsk')
+    city = CityFactory(time_zone=tz_nsk)
+    venue = LocationFactory(city=city)
     # Add interview for msk timezone
     dt_at = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     interview = InterviewFactory(date=dt_at,
                                  section=InterviewSections.ALL_IN_ONE,
-                                 applicant__campaign__branch__code=Branches.NSK)
+                                 venue=venue)
     date_in_utc = interview.date
-    branch_nsk = BranchFactory(code=Branches.NSK)
-    localized = date_in_utc.astimezone(branch_nsk.get_timezone())
+    localized = date_in_utc.astimezone(tz_nsk)
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "22:00"
     response = client.get(interview.get_absolute_url())
@@ -229,10 +234,9 @@ def test_interview_detail(settings, client, curator):
     assert any(time_str in s.string for s in
                html.find_all('div', {"class": "date"}))
     # Make sure timezone doesn't cached on view lvl
-    branch_spb = Branch.objects.get(code=Branches.SPB, site_id=settings.SITE_ID)
-    interview.applicant.campaign.branch = branch_spb
-    interview.applicant.campaign.save()
-    localized = date_in_utc.astimezone(branch_spb.get_timezone())
+    city.time_zone = pytz.timezone('Europe/Moscow')
+    city.save(update_fields=['time_zone'])
+    localized = date_in_utc.astimezone(city.time_zone)
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "18:00"
     response = client.get(interview.get_absolute_url())

@@ -1000,7 +1000,7 @@ class InterviewFormat(models.Model):
 
 
 class Interview(TimezoneAwareMixin, TimeStampedModel):
-    TIMEZONE_AWARE_FIELD_NAME = 'applicant'
+    TIMEZONE_AWARE_FIELD_NAME = 'venue'
 
     APPROVAL = 'approval'
     APPROVED = 'waiting'
