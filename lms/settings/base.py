@@ -202,7 +202,6 @@ TEMPLATES: List[Dict[str, Any]] = [
                 "messages": "core.jinja2.globals.messages",
                 "get_menu": "core.jinja2.globals.generate_menu",
                 "crispy": "core.jinja2.globals.crispy",
-                "pagination": "core.jinja2.globals.pagination",
                 # FIXME: move from django template tags
                 "can_enroll_in_course": "core.templatetags.core_tags.can_enroll_in_course",
             },
