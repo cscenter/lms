@@ -7,7 +7,7 @@ from django.conf import settings
 
 from auth.permissions import Permission, add_perm
 from courses.models import Assignment, AssignmentSubmissionFormats, Course
-from learning.models import CourseInvitation, StudentAssignment
+from learning.models import CourseInvitation, StudentAssignment, StudentGroup
 from learning.services import CourseRole, course_access_role, course_failed_by_student
 from learning.settings import StudentStatuses
 from users.models import StudentProfile, User
@@ -400,3 +400,93 @@ class LeaveCourse(Permission):
         if not enrollment:
             return False
         return True
+
+
+@add_perm
+class ViewStudentGroupList(Permission):
+    """
+    Checking permissions for StudentGroupListView
+    """
+
+    name = "teaching.view_student_group_list"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, course: Course):
+        return (user in course.teachers.all()
+                or user.is_curator)
+
+
+@add_perm
+class ViewStudentGroupDetail(Permission):
+    """
+    Checking permissions for StudentGroupDetailView
+    """
+
+    name = "teaching.view_student_group_detail"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_group: StudentGroup):
+        return (user in student_group.course.teachers.all()
+                or user.is_curator)
+
+
+@add_perm
+class ViewStudentGroupUpdate(Permission):
+    """
+    Checking permissions for StudentGroupUpdateView
+    """
+
+    name = "teaching.view_student_group_update"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_group: StudentGroup):
+        return (user in student_group.course.teachers.all()
+                or user.is_curator)
+
+
+@add_perm
+class ViewStudentGroupDelete(Permission):
+    """
+    Checking permissions for StudentGroupDeleteView
+    """
+
+    name = "teaching.view_student_group_delete"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_group: StudentGroup):
+        return (user in student_group.course.teachers.all()
+                or user.is_curator)
+
+
+@add_perm
+class ViewStudentGroupCreate(Permission):
+    """
+    Checking permissions for StudentGroupCreateView
+    """
+
+    name = "teaching.view_student_group_create"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_group: StudentGroup):
+        return (user in student_group.course.teachers.all()
+                or user.is_curator)
+
+
+@add_perm
+class ViewStudentGroupStudentUpdate(Permission):
+    """
+    Checking permissions for StudentGroupStudentUpdateView
+    """
+
+    name = "teaching.view_student_group_student_update"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_group: StudentGroup):
+        return (user in student_group.course.teachers.all()
+                or user.is_curator)
