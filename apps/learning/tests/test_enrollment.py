@@ -132,6 +132,7 @@ def test_enrollment_inactive_student(inactive_status, client, settings):
     assert response.status_code == 200
     assert smart_bytes(_("Enroll in")) in response.content
     student_profile = get_student_profile(student, settings.SITE_ID)
+    assert student_profile is not None
     student_profile.status = inactive_status
     student_profile.save()
     response = client.get(course.get_absolute_url())
@@ -184,15 +185,18 @@ def test_enrollment_reason_entry(client):
     client.post(course.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
     date = today.strftime(DATE_FORMAT_RU)
-    assert Enrollment.objects.first().reason_entry == f'{date}\nfoo\n\n'
+    e = Enrollment.objects.first()
+    assert e is not None and e.reason_entry == f'{date}\nfoo\n\n'
     client.post(course.get_unenroll_url(), form)
     assert Enrollment.active.count() == 0
-    assert Enrollment.objects.first().reason_entry == f'{date}\nfoo\n\n'
+    e = Enrollment.objects.first()
+    assert e is not None and e.reason_entry == f'{date}\nfoo\n\n'
     # Enroll for the second time, first entry reason should be saved
     form['reason'] = 'bar'
     client.post(course.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
-    assert Enrollment.objects.first().reason_entry == f'{date}\nbar\n\n{date}\nfoo\n\n'
+    e = Enrollment.objects.first()
+    assert e is not None and e.reason_entry == f'{date}\nbar\n\n{date}\nfoo\n\n'
 
 
 @pytest.mark.django_db
@@ -206,11 +210,13 @@ def test_enrollment_leave_reason(client):
     form = {'course_pk': co.pk}
     client.post(co.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
-    assert Enrollment.objects.first().reason_entry == ''
+    e = Enrollment.objects.first()
+    assert e is not None and e.reason_entry == ''
     form['reason'] = 'foo'
     client.post(co.get_unenroll_url(), form)
     assert Enrollment.active.count() == 0
     e = Enrollment.objects.first()
+    assert e is not None
     assert today.strftime(DATE_FORMAT_RU) in e.reason_leave
     assert 'foo' in e.reason_leave
     # Enroll for the second time and leave with another reason
@@ -220,11 +226,13 @@ def test_enrollment_leave_reason(client):
     client.post(co.get_unenroll_url(), form)
     assert Enrollment.active.count() == 0
     e = Enrollment.objects.first()
+    assert e is not None
     assert 'foo' in e.reason_leave
     assert 'bar' in e.reason_leave
     co_other = CourseFactory.create(semester=current_semester)
     client.post(co_other.get_enroll_url(), {})
     e_other = Enrollment.active.filter(course=co_other).first()
+    assert e_other is not None
     assert not e_other.reason_entry
     assert not e_other.reason_leave
 
@@ -255,11 +263,13 @@ def test_unenrollment(client, settings, assert_redirect):
     assert smart_bytes(course) in response.content
     assert Enrollment.objects.count() == 1
     enrollment = Enrollment.objects.first()
+    assert enrollment is not None
     assert not enrollment.is_deleted
     client.post(course.get_unenroll_url(), form)
     assert Enrollment.active.filter(student=student, course=course).count() == 0
     assert Enrollment.objects.count() == 1
     enrollment = Enrollment.objects.first()
+    assert enrollment is not None
     enrollment_id = enrollment.pk
     assert enrollment.is_deleted
     # Make sure student progress won't been deleted
@@ -270,7 +280,7 @@ def test_unenrollment(client, settings, assert_redirect):
     client.post(course.get_enroll_url(), form)
     assert Enrollment.objects.count() == 1
     enrollment = Enrollment.objects.first()
-    assert enrollment.pk == enrollment_id
+    assert enrollment is not None and enrollment.pk == enrollment_id
     assert not enrollment.is_deleted
     # Check ongoing courses on student courses page are not empty
     response = client.get(reverse("study:course_list"))

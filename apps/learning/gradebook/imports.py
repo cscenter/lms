@@ -20,8 +20,8 @@ CSVColumnValue = str
 
 def validate_headers(reader: csv.DictReader,
                      required_headers: List[CSVColumnName]):
-    headers = reader.fieldnames
-    errors = []
+    headers = reader.fieldnames or []
+    errors: List[str] = []
     for header in required_headers:
         if header not in headers:
             errors.append(_("Header '{}' not found").format(header))

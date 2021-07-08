@@ -1,3 +1,7 @@
+# MyPy does not like ad-hoc attributes on methods, so we disabled the
+# corresponding check for the whole file here.
+# type: ignore[attr-defined]
+
 from django.conf import settings
 from django.contrib import admin
 from django.db import models as db_models

@@ -204,6 +204,7 @@ def test_gradebook_data(settings):
     assert data.students[e5.student_id].total_score == 0
     # Check grid for student with inactive status
     student_profile = get_student_profile(e5.student, settings.SITE_ID)
+    assert student_profile is not None
     student_profile.status = StudentStatuses.EXPELLED
     student_profile.save()
     a_new = AssignmentFactory(course=co, passing_score=3, maximum_score=7)
@@ -582,12 +583,12 @@ def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
                                  required_headers=['stepic_id', 'score'],
                                  enrolled_students=with_stepik_id,
                                  lookup_column_name='stepic_id')
-        a_s = StudentAssignment.objects.get(student=student,
-                                            assignment=assignment)
-        if hasattr(expected_score, "replace"):
+        a_s: StudentAssignment = StudentAssignment.objects.get(
+            student=student, assignment=assignment)
+        if isinstance(expected_score, str):
             # remove quotes and replace comma
             expected_score = expected_score.replace('"', '').replace(",", ".")
-        assert a_s.score == Decimal(expected_score)
+        assert a_s.score == Decimal(expected_score)  # type: ignore[arg-type]
 
 
 @pytest.mark.django_db
@@ -783,4 +784,3 @@ id,header2,score
     response = client.post(import_csv_url, form, follow=True)
     assert StudentAssignment.objects.get(student=e2.student).score == 100
     assert StudentAssignment.objects.get(student=e4.student).score is None
-

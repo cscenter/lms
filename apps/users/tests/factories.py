@@ -1,7 +1,10 @@
+from typing import Optional
+
 import factory
 
 from django.conf import settings
 
+from core.models import Branch
 from core.tests.factories import BranchFactory
 from learning.settings import GradeTypes
 from users.constants import GenderTypes, Roles
@@ -32,7 +35,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
     first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
     last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
-    branch = None
+    branch: Optional[Branch] = None
     time_zone = factory.LazyAttribute(lambda user: user.branch.time_zone if user.branch is not None else settings.DEFAULT_TIMEZONE)
 
     @factory.post_generation

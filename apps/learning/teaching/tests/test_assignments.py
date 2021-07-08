@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+from typing import Any, Dict
 
 import factory
 import pytest
@@ -58,6 +59,7 @@ def test_assignment_public_form(settings, client):
     assert response.status_code == 200
     assert Assignment.objects.count() == 1
     assignment = Assignment.objects.first()
+    assert assignment is not None
     # DB stores datetime values in UTC
     assert assignment.deadline_at.day == 28
     assert assignment.deadline_at.hour == 21
@@ -81,7 +83,7 @@ def test_assignment_public_form(settings, client):
     assert response.status_code == 200
     assert Assignment.objects.count() == 2
     assignment_last = Assignment.objects.order_by("pk").last()
-    assert assignment_last.course_id == co_in_nsk.pk
+    assert assignment_last is not None and assignment_last.course_id == co_in_nsk.pk
     tz_diff = datetime.timedelta(hours=7)  # UTC+7 for nsk timezone
     assert assignment_last.deadline_at_local().utcoffset() == tz_diff
     assert assignment_last.deadline_at.hour == 17
@@ -132,6 +134,7 @@ def test_student_assignment_submission_score(client):
     sa.assignment.save()
     assert sa.score is None
     student = sa.student
+    form: Dict[str, Any]
     form = {"score": 0, "grading_form": True}
     client.login(teacher)
     response = client.post(sa.get_teacher_url(), form, follow=True)
@@ -344,6 +347,7 @@ def test_student_assignment_detail_view_add_comment(client):
     teacher_url = a_s.get_teacher_url()
     create_comment_url = reverse("teaching:assignment_comment_create",
                                  kwargs={"pk": a_s.pk})
+    form_data: Dict[str, Any]
     form_data = {
         'comment-text': "Test comment without file"
     }
@@ -392,7 +396,7 @@ def test_student_assignment_draft_comment(client, assert_redirect):
     recipients_count = 1
     assert AssignmentNotification.objects.count() == 1
     n = AssignmentNotification.objects.first()
-    assert n.is_about_creation
+    assert n is not None and n.is_about_creation
     # Publish new comment
     AssignmentNotification.objects.all().delete()
     form_data = {

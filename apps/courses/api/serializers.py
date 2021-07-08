@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from rest_framework import serializers
 
 from core.api.serializers import BranchSerializer
@@ -39,8 +41,9 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('id', 'name', 'url', 'semester', 'teachers', 'branch',
-                  'materials')
+        fields: Sequence[str] = (
+            'id', 'name', 'url', 'semester', 'teachers', 'branch', 'materials'
+        )
 
     def get_name(self, obj: Course):
         return obj.meta_course.name
@@ -62,8 +65,10 @@ class AssignmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Assignment
-        fields = ('pk', 'deadline_at', 'title', 'text', 'ttc',
-                  'passing_score', 'maximum_score', 'weight', 'solution_format')
+        fields: Sequence[str] = (
+            'pk', 'deadline_at', 'title', 'text', 'ttc',
+            'passing_score', 'maximum_score', 'weight', 'solution_format'
+        )
 
     def get_text(self, obj: Assignment):
         return render_markdown_and_cache(obj.text, "assignment_text", 3600,

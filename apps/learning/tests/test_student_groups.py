@@ -189,7 +189,7 @@ def test_auto_assign_teacher_to_student_assignment():
                                         author=teacher)
     student_assignment.refresh_from_db()
     assert student_assignment.assignee is None
-    assert student_assignment.trigger_auto_assign is True
+    assert student_assignment.trigger_auto_assign
     enrollment = Enrollment.objects.get(student=comment1.student_assignment.student)
     course_teacher = CourseTeacher.objects.get(course=course)
     StudentGroupAssigneeFactory(student_group=enrollment.student_group,
@@ -197,7 +197,7 @@ def test_auto_assign_teacher_to_student_assignment():
     comment2 = AssignmentCommentFactory(student_assignment=student_assignment,
                                         author=student)
     student_assignment.refresh_from_db()
-    assert student_assignment.trigger_auto_assign is False
+    assert not student_assignment.trigger_auto_assign
     assert student_assignment.assignee == course_teacher
     enrollment.is_deleted = True
     enrollment.save()

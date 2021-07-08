@@ -222,6 +222,7 @@ class EnrollmentPeriod(TimeStampedModel):
                 raise ValidationError(msg)
 
     def __contains__(self, date: datetime.date):
+        assert not (self.starts_on is None or self.ends_on is None)
         return self.starts_on <= date <= self.ends_on
 
 
@@ -292,7 +293,7 @@ class Enrollment(TimezoneAwareMixin, TimeStampedModel):
     def clean(self):
         if self.student_profile_id and self.student_profile.user_id != self.student_id:
             raise ValidationError(_("Student profile does not match selected user"))
-        if self.student_group_id and self.student_group.course_id != self.course_id:
+        if self.student_group_id and self.student_group.course_id != self.course_id:  # type: ignore[union-attr]
             raise ValidationError({"student_group": _("Student group must refer to one of the "
                                                       "student groups of the selected course")})
 
@@ -497,7 +498,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         choices=CommentAuthorTypes.choices,
         default=CommentAuthorTypes.NOBODY)
 
-    objects = StudentAssignmentManager()
+    objects = StudentAssignmentManager()  # type: ignore[assignment]
 
     derivable_fields = [
         'execution_time',
@@ -705,7 +706,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
 
     @classmethod
     def from_db(cls, db, field_names, values):
-        instance = super().from_db(db, field_names, values)
+        instance: AssignmentComment = super().from_db(db, field_names, values)
         instance._loaded_is_published = instance.is_published
         return instance
 
@@ -865,7 +866,7 @@ class CourseNewsNotification(TimeStampedModel):
     is_notified = models.BooleanField(_("User is notified"),
                                       default=False)
 
-    objects = models.Manager()
+    objects: models.Manager = models.Manager()
     unread = QueryManager(is_unread=True)
 
     class Meta:

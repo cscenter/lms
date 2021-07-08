@@ -1,11 +1,13 @@
 from collections import OrderedDict
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
 
 import numpy as np
 
 from django.conf import settings
+from django.db import models
+from django.db.models import query
 from django.utils.functional import cached_property
 
 from core.db.utils import normalize_score
@@ -189,6 +191,7 @@ def gradebook_data(course: Course) -> GradeBookData:
         enrolled_students[e.student_id] = GradebookStudent(e, index)
     # Collect course assignments
     assignments = OrderedDict()
+    queryset: models.QuerySet
     queryset = (Assignment.objects
                 .filter(course_id=course.pk)
                 .only("pk",
@@ -230,7 +233,7 @@ def gradebook_data(course: Course) -> GradeBookData:
         for s in student_submissions:
             if s is not None and s.weight_score is not None:
                 total_score += s.weight_score
-        total_score = normalize_score(total_score)
+        total_score = cast(Decimal, normalize_score(total_score))
         setattr(gradebook_student, "total_score", total_score)
     show_weight = any(ga.assignment.weight < 1 for ga in assignments.values())
     return GradeBookData(course=course,

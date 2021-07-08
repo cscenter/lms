@@ -101,7 +101,7 @@ def test_student_assignment_first_student_comment_at(curator):
     co = CourseFactory.create(teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
     assignment = AssignmentFactory.create(course=co)
-    sa = StudentAssignment.objects.get(assignment=assignment)
+    sa: StudentAssignment = StudentAssignment.objects.get(assignment=assignment)
     assert sa.first_student_comment_at is None
     AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
     sa.refresh_from_db()
@@ -112,7 +112,7 @@ def test_student_assignment_first_student_comment_at(curator):
     AssignmentCommentFactory.create(student_assignment=sa, author=student)
     sa.refresh_from_db()
     assert sa.first_student_comment_at is not None
-    first_student_comment_at = sa.first_student_comment_at
+    first_student_comment_at = sa.first_student_comment_at  # type: ignore[unreachable]
     # Make sure it doesn't changed
     AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
     sa.refresh_from_db()
@@ -223,6 +223,7 @@ def test_assignment_attachment_inactive_student(inactive_status, client,
     response = client.get(task_attachment_url)
     assert response.status_code == 200
     student_profile = get_student_profile(student_spb, settings.SITE_ID)
+    assert student_profile is not None
     student_profile.status = inactive_status
     student_profile.save()
     response = client.get(task_attachment_url)

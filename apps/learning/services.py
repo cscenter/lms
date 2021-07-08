@@ -2,7 +2,7 @@ import logging
 from datetime import timedelta
 from enum import Enum, auto
 from itertools import islice
-from typing import Iterable, List, Optional, Union
+from typing import Any, Iterable, List, Optional, Sequence, Union, cast
 
 from django.contrib.sites.models import Site
 from django.core.files.uploadedfile import UploadedFile
@@ -42,7 +42,7 @@ class StudentProfileError(Exception):
 # FIXME: get profile for Invited students from the current term ONLY
 # FIXME: store term of registration or get date range for the term of registration
 def get_student_profile(user: User, site, profile_type=None,
-                        filters: List[Q] = None) -> Optional[StudentProfile]:
+                        filters: Optional[List[Q]] = None) -> Optional[StudentProfile]:
     """
     Returns the most actual student profile on site for user.
 
@@ -175,7 +175,7 @@ class StudentGroupService:
 
     @staticmethod
     def resolve(course: Course, student: User, site: Union[Site, int],
-                enrollment_key: str = None):
+                enrollment_key: Optional[str] = None):
         """
         Returns the target or associated student group for the course. Assumed
         that student is not enrolled in the course.
@@ -246,8 +246,9 @@ class StudentGroupService:
         return student_group.name
 
     @staticmethod
-    def get_assignees(student_group,
-                      assignment: Assignment = None) -> List[CourseTeacher]:
+    def get_assignees(
+        student_group,
+        assignment: Optional[Assignment] = None) -> List[CourseTeacher]:
         default_and_overridden = Q(assignment__isnull=True)
         if assignment:
             default_and_overridden |= Q(assignment=assignment)
@@ -308,8 +309,9 @@ class AssignmentService:
 
     # TODO: send notification to teachers except assignment publisher
     @classmethod
-    def bulk_create_student_assignments(cls, assignment: Assignment,
-                                        for_groups: Iterable[Union[int, None]] = None):
+    def bulk_create_student_assignments(
+        cls, assignment: Assignment,
+        for_groups: Optional[Iterable[Optional[int]]] = None):
         """
         Generates individual assignments to store student progress.
         By default it creates record for each enrolled student who's not
@@ -371,8 +373,9 @@ class AssignmentService:
             AssignmentNotification.objects.bulk_create(batch, batch_size)
 
     @staticmethod
-    def bulk_remove_student_assignments(assignment: Assignment,
-                                        for_groups: Iterable[Union[int, None]] = None):
+    def bulk_remove_student_assignments(
+        assignment: Assignment,
+        for_groups: Optional[Iterable[Optional[int]]] = None):
         filters = [Q(assignment=assignment)]
         if for_groups is not None:
             filters_ = [Q(course_id=assignment.course_id)]
@@ -431,7 +434,7 @@ class AssignmentService:
         return stats['mean']
 
     @classmethod
-    def get_median_execution_time(cls, assignment: Assignment):
+    def get_median_execution_time(cls, assignment: Assignment) -> Optional[timedelta]:
         queryset = (StudentAssignment.objects
                     .filter(assignment=assignment)
                     .exclude(execution_time__isnull=True))
@@ -445,7 +448,8 @@ class AssignmentService:
             return values[count // 2]
         else:
             mid = count // 2
-            return sum(values[mid - 1:mid + 1], timedelta()) / 2
+            # TODO: Change the query so that null durations are filtered out.
+            return sum(values[mid - 1:mid + 1], timedelta()) / 2  # type: ignore
 
 
 class EnrollmentError(Exception):
@@ -570,10 +574,10 @@ def create_notifications_about_new_submission(submission: AssignmentComment):
                                    student_assignment=student_assignment)
         notifications.append(n)
     else:
-        assignees = []
+        assignees: List[Any] = []
         assignment = student_assignment.assignment
         if student_assignment.assignee_id:
-            assignees.append(student_assignment.assignee.teacher_id)
+            assignees.append(student_assignment.assignee.teacher_id)  # type: ignore[union-attr]
         else:
             # There is no teacher assigned, check student group assignees
             try:
@@ -670,12 +674,11 @@ def trigger_auto_assign_for_student_assignment(submission: AssignmentComment):
     student_assignment.save(update_fields=update_fields)
 
 
-def get_student_classes(user, filters: List[Q] = None,
+def get_student_classes(user, filters: Optional[List[Q]] = None,
                         with_venue=False) -> CourseClassQuerySet:
     # Student could be manually enrolled in the course without
     # checking branch compatibility, skip filtering by branch
-    branch_list = []
-    qs = (get_classes(branch_list, filters)
+    qs = (get_classes([], filters)
           .for_student(user)
           .order_by("-date", "-starts_at"))
     if with_venue:
@@ -683,16 +686,15 @@ def get_student_classes(user, filters: List[Q] = None,
     return qs
 
 
-def get_teacher_classes(user, filters: List[Q] = None,
+def get_teacher_classes(user, filters: Optional[List[Q]] = None,
                         with_venue=False) -> CourseClassQuerySet:
-    branch_list = []
-    qs = get_classes(branch_list, filters).for_teacher(user)
+    qs = get_classes([], filters).for_teacher(user)
     if with_venue:
         qs = qs.select_related('venue', 'venue__location')
     return qs
 
 
-def get_classes(branch_list, filters: List[Q] = None) -> CourseClassQuerySet:
+def get_classes(branch_list, filters: Optional[List[Q]] = None) -> CourseClassQuerySet:
     filters = filters or []
     return (CourseClass.objects
             .filter(*filters)
@@ -700,7 +702,7 @@ def get_classes(branch_list, filters: List[Q] = None) -> CourseClassQuerySet:
             .select_calendar_data())
 
 
-def get_study_events(filters: List[Q] = None) -> QuerySet:
+def get_study_events(filters: Optional[List[Q]] = None) -> QuerySet:
     filters = filters or []
     return (Event.objects
             .filter(*filters)

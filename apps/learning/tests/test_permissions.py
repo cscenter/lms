@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 
 import pytest
 
@@ -365,7 +366,7 @@ def test_update_assignment_execution_time():
     student_other = StudentFactory()
     teacher = TeacherFactory()
     user = UserFactory()
-    no_permission = [teacher, user, student_other, curator]
+    no_permission: List[UserFactory] = [teacher, user, student_other, curator]
     for u in no_permission:
         assert not u.has_perm(permission_name, sa)
     # Permission denied until student assignment without a score
@@ -404,4 +405,3 @@ def test_edit_gradebook():
     curator = CuratorFactory()
     assert curator.has_perm(EditGradebook.name)
     assert not curator.has_perm(ViewOwnGradebook.name, course)
-

@@ -1,4 +1,6 @@
 
+from typing import TYPE_CHECKING
+
 from registration import signals
 from registration.backends.default.views import ActivationView, RegistrationView
 from vanilla import TemplateView, UpdateView
@@ -12,6 +14,7 @@ from django.db import transaction
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
+from django.views import generic
 
 from auth.tasks import ActivationEmailContext, send_activation_email
 from auth.views import LoginView
@@ -51,7 +54,13 @@ def complete_student_profile(user: User, site: Site, invitation: Invitation):
                                    invitation=invitation)
 
 
-class InvitationURLParamsMixin:
+if TYPE_CHECKING:
+    ViewMixinBase = generic.View
+else:
+    ViewMixinBase = object
+
+
+class InvitationURLParamsMixin(ViewMixinBase):
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         qs = (Invitation.objects
@@ -149,7 +158,7 @@ class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
             "activation_key": new_user.registrationprofile.activation_key
         }, subdomain=settings.LMS_SUBDOMAIN)
         context = ActivationEmailContext(
-            site_name=site.name,
+            site_name=site.name,  # type: ignore[arg-type]
             activation_url=self.request.build_absolute_uri(activation_url),
             language_code=self.request.LANGUAGE_CODE)
         send_activation_email.delay(context, new_user.registrationprofile.pk)

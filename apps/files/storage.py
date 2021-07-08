@@ -9,7 +9,7 @@ from storages.backends.s3boto3 import S3Boto3Storage
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import ManifestStaticFilesStorage
-from django.core.files.storage import FileSystemStorage, get_storage_class
+from django.core.files.storage import FileSystemStorage, Storage, get_storage_class
 from django.utils.functional import LazyObject
 
 
@@ -132,7 +132,7 @@ class PrivateMediaS3Storage(S3Boto3Storage):
     querystring_expire = 10  # in seconds
 
 
-class PrivateFilesStorage(LazyObject):
+class PrivateFilesStorage(Storage, LazyObject):
     def _setup(self):
         import_path = settings.PRIVATE_FILE_STORAGE
         self._wrapped = get_storage_class(import_path=import_path)()

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Any, Dict, cast
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from django_filters.views import FilterMixin
@@ -85,7 +86,7 @@ class AssignmentListView(PermissionRequiredMixin, FilterMixin, TemplateView):
             .order_by('student__last_name', 'student__first_name'))
 
     def get_context_data(self, **kwargs):
-        context = {}
+        context: Dict[str, Any] = {}
         data = self.get_assignment_with_navigation_data()
         assignment, assignments, courses, terms = data
         filters = {}
@@ -172,7 +173,7 @@ class AssignmentListView(PermissionRequiredMixin, FilterMixin, TemplateView):
                             "empty course list."),
                           extra_tags='timeout')
             raise Redirect(to=reverse("teaching:course_list"))
-        terms = set(c.semester for c in courses)  # remove duplicates
+        terms: Any = set(c.semester for c in courses)  # remove duplicates
         terms = sorted(terms, key=lambda t: -t.index)  # restore DESC order
         # Try to get course for the requested term
         query_term_index = self._get_requested_term_index(terms)
@@ -333,7 +334,7 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
     permission_required = ViewAssignment.name
 
     def get_permission_object(self):
-        self.object = self.get_object()
+        self.object = cast(Assignment, self.get_object())
         return self.object.course
 
     def get(self, request, *args, **kwargs):

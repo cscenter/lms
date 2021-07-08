@@ -54,7 +54,7 @@ def test_teacher_calendar(client):
         CourseClassFactory
         .create_batch(5, course__teachers=[other_teacher],
                       date=this_month_date.date()))
-    location = LocationFactory(city_id=teacher_spb.branch.city_id)
+    location = LocationFactory(city_id=teacher_spb.branch.city_id)  # type: ignore[union-attr]
     events = EventFactory.create_batch(2, date=this_month_date.date(),
                                        venue=location)
     # teacher should see only his own classes and non-course events

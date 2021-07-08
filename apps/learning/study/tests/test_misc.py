@@ -150,6 +150,7 @@ def test_access_student_assignment_inactive_student(inactive_status, client,
     enrollment.save()
     assert course_access_role(course=active_course, user=student) == CourseRole.STUDENT_REGULAR
     student_profile = get_student_profile(student, settings.SITE_ID)
+    assert student_profile is not None
     assert student_profile.branch == active_course.main_branch
     student_profile.status = inactive_status
     student_profile.save()

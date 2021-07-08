@@ -1,3 +1,5 @@
+from typing import Optional, Sequence
+
 from rest_framework import serializers
 
 from django.utils.translation import gettext_lazy as _
@@ -23,8 +25,10 @@ class StudentProfileSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = StudentProfile
-        fields = ('id', 'type', 'status', 'branch', 'year_of_admission', 'year_of_curriculum',
-                  'student', 'short_name')
+        fields: Sequence[str] = (
+            'id', 'type', 'status', 'branch', 'year_of_admission',
+            'year_of_curriculum', 'student', 'short_name'
+        )
 
     def get_short_name(self, student_profile):
         return student_profile.user.get_short_name()
@@ -35,7 +39,7 @@ class EnrollmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Enrollment
-        fields = ('id', 'grade', 'student_profile',)
+        fields: Sequence[str] = ('id', 'grade', 'student_profile',)
 
 
 class CourseNewsNotificationSerializer(serializers.ModelSerializer):
@@ -47,14 +51,16 @@ class CourseNewsNotificationSerializer(serializers.ModelSerializer):
 
 
 class StudentAssignmentSerializer(serializers.ModelSerializer):
+    instance: Optional[StudentAssignment]
     state = serializers.SerializerMethodField()
 
     class Meta:
         model = StudentAssignment
-        fields = ('pk', 'score', 'state', 'student_id')
+        fields: Sequence[str] = ('pk', 'score', 'state', 'student_id')
         read_only_fields = ['state', 'student_id']
 
     def validate_score(self, value):
+        assert self.instance is not None
         max_score = self.instance.assignment.maximum_score
         if value and value > max_score:
             msg = _("Score can't be larger than %s") % max_score
@@ -75,6 +81,7 @@ class StudentAssignmentAssigneeSerializer(StudentAssignmentSerializer):
         fields = ('pk', 'assignee',)
 
     def validate_assignee(self, value):
+        assert self.instance is not None
         teachers = self.instance.assignment.course.course_teachers.all()
         valid_values = {t for t in teachers if not t.roles.spectator}
         if value and value not in valid_values:

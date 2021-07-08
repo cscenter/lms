@@ -115,8 +115,8 @@ class Album(MPTTModel):
             logger.info('Can\'t crate thumbnail from image {}'.format(img),
                         exc_info=settings.DEBUG)
             return ''
-    admin_thumbnail.short_description = _('Head')
-    admin_thumbnail.allow_tags = True
+    admin_thumbnail.short_description = _('Head')  # type: ignore[attr-defined]
+    admin_thumbnail.allow_tags = True  # type: ignore[attr-defined]
 
     def get_head(self):
         if not self.head:
@@ -124,4 +124,3 @@ class Album(MPTTModel):
             if self.head:
                 self.save()
         return self.head
-

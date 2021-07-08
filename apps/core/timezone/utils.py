@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from babel.dates import get_timezone_gmt
 
@@ -10,7 +11,8 @@ from core.timezone.typing import Timezone
 __all__ = ['now_local', 'get_now_utc', 'get_gmt']
 
 
-def now_local(tz: Timezone) -> datetime:
+# TODO: Does None actually make sense as a value here?
+def now_local(tz: Optional[Timezone]) -> datetime:
     return timezone.localtime(timezone.now(), timezone=tz)
 
 

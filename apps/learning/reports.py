@@ -1,7 +1,7 @@
 import io
 from abc import ABCMeta, abstractmethod
 from operator import attrgetter
-from typing import Dict, List, Set
+from typing import Dict, Iterable, List, Set
 
 from pandas import DataFrame, ExcelWriter
 
@@ -313,7 +313,7 @@ class FutureGraduateDiplomasReport(ProgressReport):
 
     def _generate_headers(self, *, courses, meta_courses, shads_max, online_max,
                           projects_max):
-        course_headers = []
+        course_headers: Iterable[str] = []
         if meta_courses:
             meta_course_is_club = is_club_course_map(courses)
 
@@ -647,7 +647,7 @@ class ProgressReportFull(ProgressReport):
 
     def _generate_headers(self, *, courses, meta_courses, shads_max, online_max,
                           projects_max, **kwargs):
-        course_headers = []
+        course_headers: Iterable[str] = []
         if meta_courses:
             meta_course_is_club = is_club_course_map(courses)
 

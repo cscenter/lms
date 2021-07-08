@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Any, Dict
 
 import pytest
 from bs4 import BeautifulSoup
@@ -92,6 +93,7 @@ def test_student_assignment_detail_view_comment(client):
     student_url = student_assignment.get_student_url()
     create_comment_url = reverse("study:assignment_comment_create",
                                  kwargs={"pk": student_assignment.pk})
+    form_data: Dict[str, Any]
     form_data = {
         'comment-text': "Test comment without file"
     }
@@ -139,9 +141,10 @@ def test_new_comment_on_assignment_page(client, assert_redirect):
     recipients_count = 2
     assert AssignmentNotification.objects.count() == 1
     n = AssignmentNotification.objects.first()
-    assert n.is_about_creation
+    assert n is not None and n.is_about_creation
     # Publish new comment
     AssignmentNotification.objects.all().delete()
+    form_data: Dict[str, Any]
     form_data = {
         'comment-text': "Test comment with file",
         'comment-attached_file': SimpleUploadedFile("attachment1.txt", b"attachment1_content")
@@ -237,6 +240,7 @@ def test_add_solution(client):
     student_url = student_assignment.get_student_url()
     create_solution_url = reverse("study:assignment_solution_create",
                                   kwargs={"pk": student_assignment.pk})
+    form_data: Dict[str, Any]
     form_data = {
         'solution-text': "Test comment without file"
     }
@@ -334,6 +338,7 @@ def test_assignment_comment_author_should_be_resolved(client):
     client.post(create_comment_url, form_data)
     assert AssignmentComment.objects.count() == 1
     comment = AssignmentComment.objects.first()
+    assert comment is not None
     assert comment.author == student
     assert comment.student_assignment == sa
 
@@ -345,7 +350,7 @@ def test_assignment_comment_author_cannot_be_modified_by_user(client):
     sa2 = StudentAssignmentFactory(student=student2)
     create_comment_url = reverse("study:assignment_comment_create",
                                  kwargs={"pk": sa1.pk})
-    form_data = {
+    form_data: Dict[str, Any] = {
         'comment-text': "Test comment with file",
         # Attempt to explicitly override system fields via POST data
         'author': student2.pk,
@@ -355,6 +360,7 @@ def test_assignment_comment_author_cannot_be_modified_by_user(client):
     client.post(create_comment_url, form_data)
     assert AssignmentComment.objects.count() == 1
     comment = AssignmentComment.objects.first()
+    assert comment is not None
     assert comment.author == student1
     assert comment.student_assignment == sa1
 

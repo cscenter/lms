@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.views import generic
 
 from learning.icalendar import (
-    StudentAssignmentICalendarEvent, StudentClassICalendarEvent,
+    ICalendarEvent, StudentAssignmentICalendarEvent, StudentClassICalendarEvent,
     StudyEventICalendarEvent, TeacherAssignmentICalendarEvent,
     TeacherClassICalendarEvent, generate_icalendar
 )
@@ -71,6 +71,7 @@ class ICalClassesView(UserICalendarView):
         )
 
     def get_calendar_events(self, user, site, url_builder, tz):
+        event_factory: ICalendarEvent
         event_factory = StudentClassICalendarEvent(tz, url_builder, site)
         # FIXME: filter out past course classes?
         for course_class in get_student_classes(user, with_venue=True):
@@ -91,6 +92,7 @@ class ICalAssignmentsView(UserICalendarView):
             file_name="assignments.ics")
 
     def get_calendar_events(self, user, site, url_builder, tz):
+        event_factory: ICalendarEvent
         event_factory = TeacherAssignmentICalendarEvent(tz, url_builder, site)
         for assignment in get_teacher_assignments(user).with_future_deadline():
             yield event_factory.create(assignment, user)

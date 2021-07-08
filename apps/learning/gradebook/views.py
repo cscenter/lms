@@ -86,6 +86,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
         cls = self.get_form_class()
         # Set initial data for all GET-requests
         if not data and "initial" not in kwargs:
+            assert self.data is not None
             initial = GradeBookFormFactory.transform_to_initial(self.data)
             kwargs["initial"] = initial
         return cls(data=data, files=files, **kwargs)
@@ -122,6 +123,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
             params = {"url_name": "staff:gradebook"}
         else:
             params = {}
+        assert self.data is not None
         return self.data.course.get_gradebook_url(**params)
 
     def form_invalid(self, form):
@@ -131,6 +133,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
         """
         msg = _("Gradebook hasn't been saved.")
         messages.error(self.request, msg)
+        assert self.data is not None
         initial = GradeBookFormFactory.transform_to_initial(self.data)
         data = form.data.copy()
         for k, v in initial.items():

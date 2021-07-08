@@ -46,10 +46,12 @@ class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
     """
     permission_required = "study.view_schedule"
 
-    def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
+    def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable[CalendarEvent]:
         start_date, end_date = extended_month_date_range(month_period, expand=1)
         user = self.request.user
         student_profile = get_student_profile(user, self.request.site)
+        if student_profile is None:
+            return []
         branches = [student_profile.branch_id]
         return get_all_calendar_events(branch_list=branches, start_date=start_date,
                                        end_date=end_date, time_zone=user.time_zone)
@@ -63,11 +65,11 @@ class CalendarPersonalView(CalendarFullView):
     calendar_type = "student"
     template_name = "lms/courses/calendar.html"
 
-    def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
+    def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable[CalendarEvent]:
         start_date, end_date = extended_month_date_range(month_period, expand=1)
         student_profile = get_student_profile(self.request.user,
                                               self.request.site)
-        if not student_profile:
+        if student_profile is None:
             return []
         return get_student_calendar_events(student_profile=student_profile,
                                            start_date=start_date,

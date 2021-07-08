@@ -270,6 +270,7 @@ def test_new_assignment_generate_notifications(settings):
     AssignmentNotification.objects.all().delete()
     student = enrollments[1].student
     student_profile = get_student_profile(student, settings.SITE_ID)
+    assert student_profile is not None
     student_profile.status = StudentStatuses.EXPELLED
     student_profile.save()
     assignment = AssignmentFactory(course=course)
@@ -292,6 +293,7 @@ def test_new_assignment_notification_context(client, settings):
     assignment = AssignmentFactory(course=course)
     assert AssignmentNotification.objects.count() == 1
     an = AssignmentNotification.objects.first()
+    assert an is not None
     site_settings = SiteConfiguration.objects.get(site_id=settings.SITE_ID)
     participant_branch = enrollment.student_profile.branch
     context = get_assignment_notification_context(an, participant_branch,
@@ -404,6 +406,7 @@ def test_changed_assignment_deadline_generate_notifications(settings):
     e1, e2 = EnrollmentFactory.create_batch(2, course=co)
     s1 = e1.student
     s1_profile = get_student_profile(e1.student, settings.SITE_ID)
+    assert s1_profile is not None
     s1_profile.status = StudentStatuses.EXPELLED
     s1_profile.save()
     a = AssignmentFactory(course=co)

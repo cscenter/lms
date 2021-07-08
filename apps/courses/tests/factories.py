@@ -1,4 +1,5 @@
 import datetime
+from decimal import Decimal
 
 import factory
 import pytz
@@ -195,7 +196,7 @@ class AssignmentFactory(factory.django.DjangoModelFactory):
     time_zone = factory.LazyAttribute(lambda o: o.course.main_branch.get_timezone())
     passing_score = 10
     maximum_score = 80
-    weight = 1
+    weight: Decimal = 1
 
     @factory.post_generation
     def restricted_to(self, create, extracted, **kwargs):

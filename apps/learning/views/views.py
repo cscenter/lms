@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from vanilla import GenericModelView, TemplateView
 
@@ -38,13 +38,21 @@ __all__ = (
 )
 
 
-class StudentAssignmentURLParamsMixin:
+if TYPE_CHECKING:
+    ViewMixinBase = generic.View
+else:
+    ViewMixinBase = object
+
+
+class StudentAssignmentURLParamsMixin(ViewMixinBase):
     """
     Fetches student assignment by URL params and attaches it to the view kwargs.
     """
+    student_assignment: StudentAssignment
+
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        self.student_assignment: StudentAssignment = get_object_or_404(
+        self.student_assignment = get_object_or_404(
             self.get_student_assignment_queryset())
 
     def get_student_assignment_queryset(self):

@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import List
+from typing import Any, Dict, List
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -96,8 +96,9 @@ class CustomBoundField(BoundField):
         """
         widget = self.field.hidden_widget()
         return force_str(widget.render(self.html_initial_name,
-                                        self.field.hidden_initial_value,
-                                        attrs=attrs))
+                                       # TODO: django-stubs does not define hidden_initial_field.
+                                       self.field.hidden_initial_value,  # type: ignore[attr-defined]
+                                       attrs=attrs))
 
 
 class AssignmentScore(ScoreField):
@@ -159,7 +160,8 @@ class GradeBookFormFactory:
         but stores value provided to field constructor
         (see `CustomBoundField`) instead of the value provided to the form.
         """
-        cls_dict = fields = {}
+        fields: Dict[str, Any] = {}
+        cls_dict = {}
         for student_assignments in gradebook.submissions:
             for sa in student_assignments:
                 # Student have no submissions after withdrawal

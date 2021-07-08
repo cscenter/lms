@@ -17,15 +17,16 @@ from learning.models import Event, StudentAssignment
 from users.models import User
 
 
-def generate_vtimezone(tz: pytz.timezone):
+def generate_vtimezone(tz: pytz.BaseTzInfo):
     assert tz is not pytz.UTC
     tzc = Timezone()
     tzc.add('TZID', tz)
     tzc.add('X-LIC-LOCATION', tz)
     std_comp = TimezoneStandard()
-    std_comp.add('TZOFFSETFROM', tz._transition_info[-1][0])
-    std_comp.add('TZOFFSETTO', tz._transition_info[-1][0])
-    std_comp.add('TZNAME', tz._transition_info[-1][2])
+    transition_info = tz._transition_info[-1]  # type: ignore[attr-defined]
+    std_comp.add('TZOFFSETFROM', transition_info[0])
+    std_comp.add('TZOFFSETTO', transition_info[0])
+    std_comp.add('TZNAME', transition_info[2])
     std_comp.add('DTSTART', datetime.utcfromtimestamp(0))
     tzc.add_component(std_comp)
     return tzc
@@ -34,7 +35,7 @@ def generate_vtimezone(tz: pytz.timezone):
 def generate_icalendar(product_id: str,
                        name: str,
                        description: str,
-                       time_zone: pytz.timezone,
+                       time_zone: pytz.BaseTzInfo,
                        events: Iterable[ICalEvent]) -> Calendar:
     """
     Creates VTIMEZONE component like in a google calendar.
@@ -81,7 +82,7 @@ class ICalendarEvent(ABC):
         """
         return {}
 
-    def __init__(self, time_zone: pytz.timezone,
+    def __init__(self, time_zone: pytz.BaseTzInfo,
                  url_builder: Callable[[str], str],
                  site: Site):
         """

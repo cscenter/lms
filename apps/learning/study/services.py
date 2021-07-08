@@ -55,10 +55,10 @@ def get_solution_form(student_assignment: StudentAssignment,
         return None
     elif submission_format == AssignmentSubmissionFormats.EXTERNAL:
         # FIXME: return None
-        form = AssignmentSolutionDefaultForm(assignment, **kwargs)
+        return AssignmentSolutionDefaultForm(assignment, **kwargs)
     elif (submission_format == AssignmentSubmissionFormats.CODE_REVIEW
-          and assignment.checker_id and assignment.checker.checking_system.type == CheckingSystemTypes.YANDEX):
-        form = AssignmentSolutionYandexContestForm(assignment, **kwargs)
+          and assignment.checker_id
+          and assignment.checker.checking_system.type == CheckingSystemTypes.YANDEX):  # type: ignore[union-attr]
+        return AssignmentSolutionYandexContestForm(assignment, **kwargs)
     else:
-        form = AssignmentSolutionDefaultForm(assignment, **kwargs)
-    return form
+        return AssignmentSolutionDefaultForm(assignment, **kwargs)
