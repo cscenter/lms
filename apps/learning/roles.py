@@ -28,8 +28,10 @@ from .permissions import (
     ViewCourses, ViewEnrollments, ViewFAQ, ViewGradebook, ViewLibrary,
     ViewOwnEnrollments, ViewOwnGradebook, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments, ViewRelatedEnrollments, ViewRelatedStudentAssignment,
-    ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList, ViewStudyMenu,
-    ViewTeachingMenu
+    ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList,
+    ViewStudentGroupCreate, ViewStudentGroupDelete, ViewStudentGroupDetail,
+    ViewStudentGroupList, ViewStudentGroupStudentUpdate, ViewStudentGroupUpdate,
+    ViewStudyMenu, ViewTeachingMenu
 )
 
 
@@ -61,6 +63,12 @@ class Roles(DjangoChoices):
         CreateAssignmentSolution,
         ViewAssignmentAttachment,
         ViewAssignmentCommentAttachment,
+        ViewStudentGroupList,
+        ViewStudentGroupDetail,
+        ViewStudentGroupUpdate,
+        ViewStudentGroupDelete,
+        ViewStudentGroupCreate,
+        ViewStudentGroupStudentUpdate,
     ))
     STUDENT = C(1, _('Student'), priority=50, permissions=(
         ViewCourse,
@@ -137,6 +145,12 @@ class Roles(DjangoChoices):
         ViewAssignmentCommentAttachmentAsTeacher,
         ViewOwnGradebook,
         EditOwnGradebook,
+        ViewStudentGroupList,
+        ViewStudentGroupDetail,
+        ViewStudentGroupUpdate,
+        ViewStudentGroupDelete,
+        ViewStudentGroupCreate,
+        ViewStudentGroupStudentUpdate,
     ))
 
 
