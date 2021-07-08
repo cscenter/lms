@@ -98,7 +98,6 @@ class DerivableFieldsMixin(ModelMixinBase):
         from collections.abc import Iterable
         errors = []
         if not issubclass(cls, models.Model):
-            # TODO: Remove this once mypy is enforced in the CI.
             errors.append(  # type: ignore[unreachable]
                 checks.Error(
                     f'`{cls.__name__} is a subclass of DerivableFieldsMixin '
