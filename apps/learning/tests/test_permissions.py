@@ -12,12 +12,13 @@ from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFa
 from learning.models import EnrollmentPeriod, StudentAssignment
 from learning.permissions import (
     CreateAssignmentComment, CreateAssignmentCommentAsLearner,
-    CreateAssignmentCommentAsTeacher, EditGradebook, EditOwnAssignmentExecutionTime,
-    EditOwnStudentAssignment, EnrollInCourse, EnrollPermissionObject,
-    InvitationEnrollPermissionObject, ViewAssignmentCommentAttachment, ViewGradebook,
-    ViewOwnGradebook, ViewRelatedStudentAssignment, ViewStudentAssignment,
-    ViewStudentGroupDelete, ViewStudentGroupDetail, ViewStudentGroupList,
-    ViewStudentGroupStudentUpdate, ViewStudentGroupUpdate
+    CreateAssignmentCommentAsTeacher, CreateStudentGroup, DeleteStudentGroup,
+    EditGradebook, EditOwnAssignmentExecutionTime, EditOwnStudentAssignment,
+    EnrollInCourse, EnrollPermissionObject, InvitationEnrollPermissionObject,
+    UpdateStudentGroup, UpdateStudentGroupChangeStudent,
+    ViewAssignmentCommentAttachment, ViewGradebook, ViewOwnGradebook,
+    ViewRelatedStudentAssignment, ViewStudentAssignment, ViewStudentGroupDetail,
+    ViewStudentGroupList
 )
 from learning.services import CourseRole, course_access_role
 from learning.settings import Branches, GradeTypes, StudentStatuses
@@ -36,7 +37,23 @@ def delete_enrollment_cache(user: User, course: Course):
 
 
 @pytest.mark.django_db
-def test_admission_for_curator_and_teacher_to_crud_student_groups():
+def test_access_to_view_student_groups_list():
+    user = UserFactory()
+    teacher = TeacherFactory()
+    curator = CuratorFactory()
+    student = StudentFactory()
+    s = SemesterFactory.create_current(for_branch=Branches.SPB)
+    course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+
+    assert ViewStudentGroupList.name in perm_registry
+    assert not user.has_perm(ViewStudentGroupList.name, course)
+    assert not student.has_perm(ViewStudentGroupList.name, course)
+    assert teacher.has_perm(ViewStudentGroupList.name, course)
+    assert curator.has_perm(ViewStudentGroupList.name, course)
+
+
+@pytest.mark.django_db
+def test_access_to_detail_view_student_group():
     user = UserFactory()
     teacher = TeacherFactory()
     curator = CuratorFactory()
@@ -47,14 +64,6 @@ def test_admission_for_curator_and_teacher_to_crud_student_groups():
     sg2 = StudentGroupFactory.create()
     EnrollmentFactory.create(student=student, course=course, student_group=sg1)
 
-    # Check admission to view student groups list
-    assert ViewStudentGroupList.name in perm_registry
-    assert not user.has_perm(ViewStudentGroupList.name, course)
-    assert not student.has_perm(ViewStudentGroupList.name, course)
-    assert teacher.has_perm(ViewStudentGroupList.name, course)
-    assert curator.has_perm(ViewStudentGroupList.name, course)
-
-    # Check admission to view student groups detail
     assert ViewStudentGroupDetail.name in perm_registry
     assert not user.has_perm(ViewStudentGroupDetail.name, sg1)
     assert not student.has_perm(ViewStudentGroupDetail.name, sg1)
@@ -63,32 +72,89 @@ def test_admission_for_curator_and_teacher_to_crud_student_groups():
     assert curator.has_perm(ViewStudentGroupDetail.name, sg1)
     assert curator.has_perm(ViewStudentGroupDetail.name, sg2)
 
-    # Check admission to view student groups update
-    assert ViewStudentGroupUpdate.name in perm_registry
-    assert not user.has_perm(ViewStudentGroupUpdate.name, sg1)
-    assert not student.has_perm(ViewStudentGroupUpdate.name, sg1)
-    assert teacher.has_perm(ViewStudentGroupUpdate.name, sg1)
-    assert not teacher.has_perm(ViewStudentGroupUpdate.name, sg2)
-    assert curator.has_perm(ViewStudentGroupUpdate.name, sg1)
-    assert curator.has_perm(ViewStudentGroupUpdate.name, sg2)
 
-    # Check admission to view student groups update
-    assert ViewStudentGroupDelete.name in perm_registry
-    assert not user.has_perm(ViewStudentGroupDelete.name, sg1)
-    assert not student.has_perm(ViewStudentGroupDelete.name, sg1)
-    assert teacher.has_perm(ViewStudentGroupDelete.name, sg1)
-    assert not teacher.has_perm(ViewStudentGroupDelete.name, sg2)
-    assert curator.has_perm(ViewStudentGroupDelete.name, sg1)
-    assert curator.has_perm(ViewStudentGroupDelete.name, sg2)
+@pytest.mark.django_db
+def test_access_to_update_student_group():
+    user = UserFactory()
+    teacher = TeacherFactory()
+    curator = CuratorFactory()
+    student = StudentFactory()
+    s = SemesterFactory.create_current(for_branch=Branches.SPB)
+    course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    sg1 = StudentGroupFactory.create(course=course)
+    sg2 = StudentGroupFactory.create()
+    EnrollmentFactory.create(student=student, course=course, student_group=sg1)
 
-    # Check admission to change student between student groups
-    assert ViewStudentGroupStudentUpdate.name in perm_registry
-    assert not user.has_perm(ViewStudentGroupStudentUpdate.name)
-    assert not student.has_perm(ViewStudentGroupStudentUpdate.name)
-    assert teacher.has_perm(ViewStudentGroupStudentUpdate.name, sg1)
-    assert not teacher.has_perm(ViewStudentGroupStudentUpdate.name, sg2)
-    assert curator.has_perm(ViewStudentGroupStudentUpdate.name, sg1)
-    assert curator.has_perm(ViewStudentGroupStudentUpdate.name, sg2)
+    assert UpdateStudentGroup.name in perm_registry
+    assert not user.has_perm(UpdateStudentGroup.name, sg1)
+    assert not student.has_perm(UpdateStudentGroup.name, sg1)
+    assert teacher.has_perm(UpdateStudentGroup.name, sg1)
+    assert not teacher.has_perm(UpdateStudentGroup.name, sg2)
+    assert curator.has_perm(UpdateStudentGroup.name, sg1)
+    assert curator.has_perm(UpdateStudentGroup.name, sg2)
+
+
+@pytest.mark.django_db
+def test_access_to_delete_student_group():
+    user = UserFactory()
+    teacher = TeacherFactory()
+    curator = CuratorFactory()
+    student = StudentFactory()
+    s = SemesterFactory.create_current(for_branch=Branches.SPB)
+    course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    sg1 = StudentGroupFactory.create(course=course)
+    sg2 = StudentGroupFactory.create()
+    EnrollmentFactory.create(student=student, course=course, student_group=sg1)
+
+    assert DeleteStudentGroup.name in perm_registry
+    assert not user.has_perm(DeleteStudentGroup.name, sg1)
+    assert not student.has_perm(DeleteStudentGroup.name, sg1)
+    assert teacher.has_perm(DeleteStudentGroup.name, sg1)
+    assert not teacher.has_perm(DeleteStudentGroup.name, sg2)
+    assert curator.has_perm(DeleteStudentGroup.name, sg1)
+    assert curator.has_perm(DeleteStudentGroup.name, sg2)
+
+
+@pytest.mark.django_db
+def test_access_to_create_student_group():
+    user = UserFactory()
+    teacher = TeacherFactory()
+    curator = CuratorFactory()
+    student = StudentFactory()
+    s = SemesterFactory.create_current(for_branch=Branches.SPB)
+    course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    sg1 = StudentGroupFactory.create(course=course)
+    sg2 = StudentGroupFactory.create()
+    EnrollmentFactory.create(student=student, course=course, student_group=sg1)
+
+    assert CreateStudentGroup.name in perm_registry
+    assert not user.has_perm(CreateStudentGroup.name, sg1)
+    assert not student.has_perm(CreateStudentGroup.name, sg1)
+    assert teacher.has_perm(CreateStudentGroup.name, sg1)
+    assert not teacher.has_perm(CreateStudentGroup.name, sg2)
+    assert curator.has_perm(CreateStudentGroup.name, sg1)
+    assert curator.has_perm(CreateStudentGroup.name, sg2)
+
+
+@pytest.mark.django_db
+def test_access_to_update_student_group_change_student():
+    user = UserFactory()
+    teacher = TeacherFactory()
+    curator = CuratorFactory()
+    student = StudentFactory()
+    s = SemesterFactory.create_current(for_branch=Branches.SPB)
+    course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    sg1 = StudentGroupFactory.create(course=course)
+    sg2 = StudentGroupFactory.create()
+    EnrollmentFactory.create(student=student, course=course, student_group=sg1)
+
+    assert UpdateStudentGroupChangeStudent.name in perm_registry
+    assert not user.has_perm(UpdateStudentGroupChangeStudent.name)
+    assert not student.has_perm(UpdateStudentGroupChangeStudent.name)
+    assert teacher.has_perm(UpdateStudentGroupChangeStudent.name, sg1)
+    assert not teacher.has_perm(UpdateStudentGroupChangeStudent.name, sg2)
+    assert curator.has_perm(UpdateStudentGroupChangeStudent.name, sg1)
+    assert curator.has_perm(UpdateStudentGroupChangeStudent.name, sg2)
 
 
 @pytest.mark.django_db

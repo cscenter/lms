@@ -19,9 +19,10 @@ from users.permissions import (
 from .permissions import (
     CreateAssignmentComment, CreateAssignmentCommentAsLearner,
     CreateAssignmentCommentAsTeacher, CreateAssignmentSolution,
-    CreateOwnAssignmentSolution, EditGradebook, EditOwnAssignmentExecutionTime,
-    EditOwnGradebook, EditOwnStudentAssignment, EditStudentAssignment, EnrollInCourse,
-    EnrollInCourseByInvitation, LeaveCourse, ViewAssignmentAttachment,
+    CreateOwnAssignmentSolution, CreateStudentGroup, DeleteStudentGroup, EditGradebook,
+    EditOwnAssignmentExecutionTime, EditOwnGradebook, EditOwnStudentAssignment,
+    EditStudentAssignment, EnrollInCourse, EnrollInCourseByInvitation, LeaveCourse,
+    UpdateStudentGroup, UpdateStudentGroupChangeStudent, ViewAssignmentAttachment,
     ViewAssignmentAttachmentAsLearner, ViewAssignmentAttachmentAsTeacher,
     ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner,
     ViewAssignmentCommentAttachmentAsTeacher, ViewCourseNews, ViewCourseReviews,
@@ -29,9 +30,7 @@ from .permissions import (
     ViewOwnEnrollments, ViewOwnGradebook, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments, ViewRelatedEnrollments, ViewRelatedStudentAssignment,
     ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList,
-    ViewStudentGroupCreate, ViewStudentGroupDelete, ViewStudentGroupDetail,
-    ViewStudentGroupList, ViewStudentGroupStudentUpdate, ViewStudentGroupUpdate,
-    ViewStudyMenu, ViewTeachingMenu
+    ViewStudentGroupDetail, ViewStudentGroupList, ViewStudyMenu, ViewTeachingMenu
 )
 
 
@@ -65,10 +64,10 @@ class Roles(DjangoChoices):
         ViewAssignmentCommentAttachment,
         ViewStudentGroupList,
         ViewStudentGroupDetail,
-        ViewStudentGroupUpdate,
-        ViewStudentGroupDelete,
-        ViewStudentGroupCreate,
-        ViewStudentGroupStudentUpdate,
+        UpdateStudentGroup,
+        DeleteStudentGroup,
+        CreateStudentGroup,
+        UpdateStudentGroupChangeStudent,
     ))
     STUDENT = C(1, _('Student'), priority=50, permissions=(
         ViewCourse,
@@ -147,10 +146,10 @@ class Roles(DjangoChoices):
         EditOwnGradebook,
         ViewStudentGroupList,
         ViewStudentGroupDetail,
-        ViewStudentGroupUpdate,
-        ViewStudentGroupDelete,
-        ViewStudentGroupCreate,
-        ViewStudentGroupStudentUpdate,
+        UpdateStudentGroup,
+        DeleteStudentGroup,
+        CreateStudentGroup,
+        UpdateStudentGroupChangeStudent,
     ))
 
 

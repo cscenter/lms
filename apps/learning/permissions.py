@@ -405,7 +405,7 @@ class LeaveCourse(Permission):
 @add_perm
 class ViewStudentGroupList(Permission):
     """
-    Checking permissions for StudentGroupListView
+    Access is granted for curator and teacher in course teachers list
     """
 
     name = "teaching.view_student_group_list"
@@ -420,7 +420,7 @@ class ViewStudentGroupList(Permission):
 @add_perm
 class ViewStudentGroupDetail(Permission):
     """
-    Checking permissions for StudentGroupDetailView
+    Access is granted for curator and teacher in course teachers list
     """
 
     name = "teaching.view_student_group_detail"
@@ -433,12 +433,12 @@ class ViewStudentGroupDetail(Permission):
 
 
 @add_perm
-class ViewStudentGroupUpdate(Permission):
+class UpdateStudentGroup(Permission):
     """
-    Checking permissions for StudentGroupUpdateView
+    Access is granted for curator and teacher in course teachers list
     """
 
-    name = "teaching.view_student_group_update"
+    name = "teaching.update_student_group"
 
     @staticmethod
     @rules.predicate
@@ -448,12 +448,12 @@ class ViewStudentGroupUpdate(Permission):
 
 
 @add_perm
-class ViewStudentGroupDelete(Permission):
+class DeleteStudentGroup(Permission):
     """
-    Checking permissions for StudentGroupDeleteView
+    Access is granted for curator and teacher in course teachers list
     """
 
-    name = "teaching.view_student_group_delete"
+    name = "teaching.delete_student_group"
 
     @staticmethod
     @rules.predicate
@@ -463,12 +463,12 @@ class ViewStudentGroupDelete(Permission):
 
 
 @add_perm
-class ViewStudentGroupCreate(Permission):
+class CreateStudentGroup(Permission):
     """
-    Checking permissions for StudentGroupCreateView
+    Access is granted for curator and teacher in course teachers list
     """
 
-    name = "teaching.view_student_group_create"
+    name = "teaching.create_student_group"
 
     @staticmethod
     @rules.predicate
@@ -478,12 +478,12 @@ class ViewStudentGroupCreate(Permission):
 
 
 @add_perm
-class ViewStudentGroupStudentUpdate(Permission):
+class UpdateStudentGroupChangeStudent(Permission):
     """
-    Checking permissions for StudentGroupStudentUpdateView
+    Access is granted for curator and teacher in course teachers list
     """
 
-    name = "teaching.view_student_group_student_update"
+    name = "teaching.update_student_group_change_student"
 
     @staticmethod
     @rules.predicate
