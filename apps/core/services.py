@@ -1,11 +1,18 @@
 from operator import attrgetter
+from typing import TYPE_CHECKING, Any
 
 from django.db import transaction
 from django.db.models import signals, sql
-from django.db.models.deletion import Collector
 from django.utils import timezone
 
 from core.db.models import SoftDeletionModel
+
+if TYPE_CHECKING:
+    # TODO: Remove once Collector in django-stubs has attribute types.
+    Collector = Any
+else:
+    from django.db.models.deletion import Collector
+
 
 
 class SoftDeleteService:

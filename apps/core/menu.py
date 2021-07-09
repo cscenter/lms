@@ -1,5 +1,6 @@
 import re
 from importlib import import_module
+from typing import Iterable, Optional, Sequence
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -27,11 +28,12 @@ class MenuItem(_MenuItem):
         The last one in case of ambiguity.
     """
     for_staff = False
-    permissions = None
+    visible: bool
+    permissions: Optional[Sequence[str]] = None
     # Additional check that item should be selected
     # Affects the parent visibility if `MENU_SELECT_PARENTS` setting is enabled
-    selected_patterns = None
-    excluded_patterns = None
+    selected_patterns: Optional[Iterable[str]] = None
+    excluded_patterns: Optional[Iterable[str]] = None
 
     def __init__(self, title, url, **kwargs):
         super().__init__(title, url, **kwargs)

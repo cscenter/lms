@@ -23,8 +23,9 @@ def test_timezone_field_choices():
     x = TimeZoneField()
     assert {tz for tz, _ in x.choices} == pytz.common_timezones_set
     x = TimeZoneField(choices=[('Europe/Moscow', 'Europe/Moscow2')])
-    assert len(x.choices) == 1
-    assert x.choices[0][0] == 'Europe/Moscow'
+    # TODO: django-stubs defines Field.choices as Iterable[...], fix that.
+    assert len(x.choices) == 1  # type: ignore[arg-type]
+    assert x.choices[0][0] == 'Europe/Moscow'  # type: ignore[index]
     x = TimeZoneField(name='x', choices=[('foo', 'Europe/Moscow2')])
     errors = x.check()
     assert len(errors) == 1
@@ -47,4 +48,3 @@ def test_timezone_field_get_prep_value():
     tz = pytz.timezone('Europe/Moscow')
     assert x.get_prep_value(tz) == str(tz)
     assert x.get_prep_value('Europe/Moscow') == str(tz)
-

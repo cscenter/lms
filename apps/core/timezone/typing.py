@@ -1,5 +1,4 @@
-from typing import NewType
-
 import pytz
 
-Timezone = NewType('Timezone', pytz.timezone)
+# TODO: Inline this alias.
+Timezone = pytz.BaseTzInfo

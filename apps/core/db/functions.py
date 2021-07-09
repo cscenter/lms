@@ -1,4 +1,4 @@
-from django.db.models import DateField
+from django.db.models import DateField, Field
 from django.db.models.functions.datetime import TruncBase
 
 
@@ -17,7 +17,7 @@ class TruncDateInTZ(TruncBase):
     """
     kind = 'date'
     lookup_name = 'date'
-    output_field = DateField()
+    output_field: Field = DateField()
 
     def as_sql(self, compiler, connection):
         # Cast to date rather than truncate to date.

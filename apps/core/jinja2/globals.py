@@ -54,7 +54,8 @@ def pagination(page, request, **kwargs):
     current_page = page.number
 
     if range_length is None:
-        range_min = 1
+        # TODO: This looks like a refactoring artifact. Remove this branch.
+        range_min = 1  # type: ignore[unreachable]
         range_max = page_count
     else:
         if range_length > page_count:

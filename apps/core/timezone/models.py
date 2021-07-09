@@ -1,14 +1,23 @@
-from typing import Optional
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Type, cast
 
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist
+from django.db import models
 
 from .typing import Timezone
 
 __all__ = ['TimezoneAwareMixin']
 
 
-class TimezoneAwareMixin:
+if TYPE_CHECKING:
+    ModelMixinBase = models.Model
+else:
+    ModelMixinBase = object
+
+
+class TimezoneAwareMixin(ModelMixinBase):
+    TIMEZONE_AWARE_FIELD_NAME: ClassVar[str]  # Must be defined in subclasses.
+
     def get_timezone(self) -> Optional[Timezone]:
         related_field = getattr(self, self.TIMEZONE_AWARE_FIELD_NAME)
         if isinstance(related_field, TimezoneAwareMixin):
@@ -23,7 +32,7 @@ class TimezoneAwareMixin:
 
     @classmethod
     def _check_tz_aware_field_declared(cls):
-        errors = []
+        errors: List[checks.CheckMessage] = []
         if not hasattr(cls, "TIMEZONE_AWARE_FIELD_NAME"):
             errors.append(
                 checks.Error(
@@ -70,13 +79,13 @@ class TimezoneAwareMixin:
     @classmethod
     def _check_get_timezone_mro(cls):
         """Detect cycles and make sure `get_timezone` is terminated."""
-        errors = []
+        errors: List[checks.CheckMessage] = []
         next_cls = cls
         next_field_name = next_cls.TIMEZONE_AWARE_FIELD_NAME
         next_field = next_cls._meta.get_field(next_field_name)
         while next_field.related_model is not None:
             try:
-                next_cls = next_field.related_model
+                next_cls = cast(Type[TimezoneAwareMixin], next_field.related_model)
                 next_field_name = next_cls.TIMEZONE_AWARE_FIELD_NAME
                 next_field = next_cls._meta.get_field(next_field_name)
             except (FieldDoesNotExist, AttributeError):

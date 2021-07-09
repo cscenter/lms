@@ -10,8 +10,11 @@ def compute_model_fields(content_type_id, object_id, compute_fields):
     content_type = ContentType.objects.get_for_id(content_type_id)
     model = content_type.model_class()
 
+    if model is None:
+        return
+
     if issubclass(model, DerivableFieldsMixin):
-        queryset = model._base_manager
+        queryset = model._base_manager  # type: ignore
 
         prefetch_fields = model.prefetch_before_compute(*compute_fields)
         if prefetch_fields:

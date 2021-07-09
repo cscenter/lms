@@ -15,7 +15,7 @@ class Command(BaseCommand):
     help = """
     Generates emails from csv and add them to `post_office` mailing queue.
 
-    Provide `email` column header in csv. 
+    Provide `email` column header in csv.
     Other columns will be added to email context.
     """
 
@@ -63,6 +63,7 @@ class Command(BaseCommand):
 
         with open(file_path, "r") as f:
             reader = csv.DictReader(f)
+            assert reader.fieldnames is not None
             if "email" not in reader.fieldnames:
                 raise CommandError("Add `email` header")
             if not template_name and "template_name" not in reader.fieldnames:

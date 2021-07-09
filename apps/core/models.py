@@ -244,6 +244,7 @@ class Branch(TimezoneAwareMixin, models.Model):
         Branch.objects.clear_cache()
 
     def natural_key(self):
+        assert self.site_id is not None
         return BranchNaturalKey(self.code, self.site_id)
 
     @cached_property

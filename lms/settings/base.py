@@ -1,5 +1,7 @@
 import logging
 import warnings
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import environ
 
@@ -26,7 +28,7 @@ REVERSE_TO_LMS_URL_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
 
 # Default scheme for `core.urls.reverse`
 DEFAULT_URL_SCHEME = env.str("REVERSE_URL_SCHEME", default="https")
-LMS_SUBDOMAIN = None
+LMS_SUBDOMAIN: Optional[str] = None
 
 SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', default=True)
 SESSION_COOKIE_DOMAIN = env.str('DJANGO_SESSION_COOKIE_DOMAIN', default=None)
@@ -38,7 +40,7 @@ CSRF_COOKIE_NAME = env.str('DJANGO_CSRF_COOKIE_NAME', default='csrftoken')
 
 # Upload Settings
 USE_CLOUD_STORAGE = env.bool('USE_CLOUD_STORAGE', default=True)
-AWS_DEFAULT_ACL = None  # All files will inherit the bucket’s ACL
+AWS_DEFAULT_ACL: Optional[str] = None  # All files will inherit the bucket’s ACL
 if USE_CLOUD_STORAGE:
     DEFAULT_FILE_STORAGE = 'files.storage.PublicMediaS3Storage'
     AWS_PUBLIC_MEDIA_LOCATION = 'media'
@@ -164,12 +166,13 @@ LOGO_PATH = 'v1/img/center/logo.svg'
 # Provide zero value to disable counter rendering
 YANDEX_METRIKA_ID = env.int("YANDEX_METRIKA_ID", default=None)
 
-TEMPLATES = [
+DJANGO_ROOT_DIR = Path(django.__file__).parent
+TEMPLATES: List[Dict[str, Any]] = [
     {
         "BACKEND": "django_jinja.backend.Jinja2",
         "APP_DIRS": False,
         'DIRS': [
-            django.__path__[0] + '/forms/jinja2',
+            str(DJANGO_ROOT_DIR / "forms" / "jinja2"),
             str(ROOT_DIR / "lms" / "jinja2"),
         ],
         "NAME": "jinja2",
@@ -234,7 +237,7 @@ TEMPLATES = [
         'APP_DIRS': False,
         'DIRS': [
             str(SHARED_APPS_DIR / "templates"),
-            django.__path__[0] + '/forms/templates',
+            str(DJANGO_ROOT_DIR / "forms" / "templates"),
         ],
         'OPTIONS': {
             'loaders': [
@@ -290,4 +293,4 @@ RECAPTCHA_PRIVATE_KEY = env.str('RECAPTCHA_PRIVATE_KEY', default="6LeIxAcTAAAAAG
 RECAPTCHA_USE_SSL = True
 
 # Stub
-ADMIN_REORDER = []
+ADMIN_REORDER: List[Any] = []

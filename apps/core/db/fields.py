@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Sequence
 
 import pytz
 
@@ -38,7 +39,7 @@ class PrettyJSONField(JSONField):
         })
 
 
-def parse_timezone_string(value) -> pytz.tzinfo.BaseTzInfo:
+def parse_timezone_string(value) -> pytz.BaseTzInfo:
     try:
         return pytz.timezone(value)
     except pytz.UnknownTimeZoneError:
@@ -65,6 +66,7 @@ class TimeZoneField(models.Field):
             for tz_name in values:
                 # TODO: use babel.dates.get_timezone_gmt instead?
                 offset = now_utc.astimezone(pytz.timezone(tz_name)).utcoffset()
+                assert offset is not None
                 sign = "+" if offset >= zero_ else "-"
                 hh_mm = str(abs(offset)).zfill(8)[:-3]
                 label = f"GMT{sign}{hh_mm} {tz_name.replace('_', ' ')}"
@@ -92,7 +94,7 @@ class TimeZoneField(models.Field):
         return parse_timezone_string(value)
 
     def to_python(self, value):
-        if isinstance(value, pytz.tzinfo.BaseTzInfo):
+        if isinstance(value, pytz.BaseTzInfo):
             return value
         if value is None or value == '':
             return None
@@ -101,7 +103,7 @@ class TimeZoneField(models.Field):
     def get_prep_value(self, value):
         if value is None or value == '':
             return None
-        if isinstance(value, pytz.tzinfo.BaseTzInfo):
+        if isinstance(value, pytz.BaseTzInfo):
             return value.zone
         return str(value)
 
@@ -114,7 +116,8 @@ class TimeZoneField(models.Field):
         super().validate(value_str, model_instance)
 
     def _check_choices(self):
-        errors = super()._check_choices()
+        # TODO: Remove the ignore once Field in django-stubs has _check_choices.
+        errors = super()._check_choices()  # type: ignore
         if not errors:
             for value, label in self.choices:
                 if value not in pytz.all_timezones_set:
