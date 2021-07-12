@@ -403,90 +403,91 @@ class LeaveCourse(Permission):
 
 
 @add_perm
-class ViewStudentGroupList(Permission):
+class ViewStudentGroup(Permission):
     """
-    Access is granted for curator and teacher in course teachers list
+    Access is granted for view of student group
     """
 
     name = "teaching.view_student_group_list"
 
+
+@add_perm
+class ViewStudentGroupAsTeacher(Permission):
+    """
+    Access is granted for view of student group for teacher in course teachers
+    """
+
+    name = "teaching.view_student_group_list_as_teacher"
+
     @staticmethod
     @rules.predicate
     def rule(user, course: Course):
-        return (user in course.teachers.all()
-                or user.is_curator)
-
-
-@add_perm
-class ViewStudentGroupDetail(Permission):
-    """
-    Access is granted for curator and teacher in course teachers list
-    """
-
-    name = "teaching.view_student_group_detail"
-
-    @staticmethod
-    @rules.predicate
-    def rule(user, student_group: StudentGroup):
-        return (user in student_group.course.teachers.all()
-                or user.is_curator)
+        return user in course.teachers.all()
 
 
 @add_perm
 class UpdateStudentGroup(Permission):
     """
-    Access is granted for curator and teacher in course teachers list
+    Access is granted for update student group
     """
 
     name = "teaching.update_student_group"
 
+
+@add_perm
+class UpdateStudentGroupAsTeacher(Permission):
+    """
+    Access is granted for update student group for teacher in course teachers
+    """
+
+    name = "teaching.update_student_group_as_teacher"
+
     @staticmethod
     @rules.predicate
     def rule(user, student_group: StudentGroup):
-        return (user in student_group.course.teachers.all()
-                or user.is_curator)
+        return user in student_group.course.teachers.all()
 
 
 @add_perm
 class DeleteStudentGroup(Permission):
     """
-    Access is granted for curator and teacher in course teachers list
+    Access is granted for delete student group
     """
 
     name = "teaching.delete_student_group"
 
+
+@add_perm
+class DeleteStudentGroupAsTeacher(Permission):
+    """
+    Access is granted for delete student group for teacher in course teachers
+    """
+
+    name = "teaching.delete_student_group_as_teacher"
+
     @staticmethod
     @rules.predicate
     def rule(user, student_group: StudentGroup):
-        return (user in student_group.course.teachers.all()
-                or user.is_curator)
+        return user in student_group.course.teachers.all()
 
 
 @add_perm
 class CreateStudentGroup(Permission):
     """
-    Access is granted for curator and teacher in course teachers list
+    Access is granted for create student group
     """
-
     name = "teaching.create_student_group"
-
-    @staticmethod
-    @rules.predicate
-    def rule(user, student_group: StudentGroup):
-        return (user in student_group.course.teachers.all()
-                or user.is_curator)
 
 
 @add_perm
-class UpdateStudentGroupChangeStudent(Permission):
+class CreateStudentGroupAsTeacher(Permission):
     """
-    Access is granted for curator and teacher in course teachers list
+    Access is granted for create student group for teacher in course teachers
     """
 
-    name = "teaching.update_student_group_change_student"
+    name = "teaching.create_student_group_as_teacher"
 
     @staticmethod
     @rules.predicate
     def rule(user, student_group: StudentGroup):
-        return (user in student_group.course.teachers.all()
-                or user.is_curator)
+        return user in student_group.course.teachers.all()
