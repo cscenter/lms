@@ -4,26 +4,28 @@
 {% set menu_theme="__transparent-theme" %}
 
 {% block sprites %}
-    <script type="text/javascript">
-        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/index.svg") }}");
-    </script>
+  <script type="text/javascript">
+    window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/index.svg") }}");
+  </script>
 {% endblock sprites %}
 
-{% block before_navbar_container %}<div class="cover cover-index-page">{% endblock before_navbar_container %}
+{% block before_navbar_container %}
+  <div class="cover cover-index-page">{% endblock before_navbar_container %}
 {% block after_navbar_container %}
-    <div class="container">
-        <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
-        <p class="cover__text">
-          Очные вечерние курсы в&nbsp;Санкт-Петербурге и&nbsp;в&nbsp;Новосибирске по&nbsp;четырём направлениям: Computer
-          Science, Data Science, Robotics, Software Engineering. Дистанционное обучение и&nbsp;онлайн-курсы для жителей других городов.
-          Школа по&nbsp;управлению продуктами.
-        </p>
-        <div class="ui buttons">
-            <a href="{{ url('application:form') }}" class="btn _big _primary _m-wide">Поступить</a>
-            <a href="{{ url('history') }}" class="btn _big _white _opacity-10 _m-wide">О центре</a>
-        </div>
+  <div class="container">
+    <img class="img-fluid d-md-none pt-6 px-8 px-md-0" src="/static/v2/img/pages/index/mascots-mobile.svg" alt="Маскоты центра за учёбой" />
+    <h1 class="cover__title pt-6 pt-md-10">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
+    <p class="cover__text">
+      Очные вечерние курсы в&nbsp;Санкт-Петербурге и&nbsp;в&nbsp;Новосибирске по&nbsp;четырём направлениям: Computer
+      Science, Data Science, Robotics, Software Engineering. Дистанционное обучение и&nbsp;онлайн-курсы для жителей других городов.
+      Школа по&nbsp;управлению продуктами.
+    </p>
+    <div class="ui buttons">
+      <a href="{{ url('application:form') }}" class="btn _big _primary _m-wide">Поступить</a>
+      <a href="{{ url('history') }}" class="btn _big _white _opacity-10 _m-wide">О центре</a>
     </div>
-</div> {# -- div.cover #}
+  </div>
+  </div> {# -- div.cover #}
 {% endblock after_navbar_container %}
 
 {% block content %}
@@ -200,36 +202,36 @@
     </div>
   </div>
 
-<div class="container pt-4 pb-8">
+  <div class="container pt-4 pb-8">
     <div class="about-csc__organizers my-10">
       <div class="row">
         <div class="col-md-auto mb-10">
           <h3>Организаторы</h3>
-          <a target="_blank"  href="https://jetbrains.ru/students"
+          <a target="_blank" href="https://jetbrains.ru/students"
              title="JetBrains">{{ macros.svg_image('logo-jetbrains') }}</a>
-          <a target="_blank"  href="https://yandexdataschool.ru/"
+          <a target="_blank" href="https://yandexdataschool.ru/"
              title="Яндекс ШАД">{{ macros.svg_image('logo-shad') }}</a>
-          <a target="_blank"  href="https://compsciclub.ru/"
+          <a target="_blank" href="https://compsciclub.ru/"
              title="Computer Science Club">{{ macros.svg_image('logo-csclub') }}</a>
         </div>
         <div class="col-md-auto offset-lg-1 mb-10">
           <h3>Спонсоры</h3>
-          <a target="_blank"  href="https://jetbrains.ru/students"
+          <a target="_blank" href="https://jetbrains.ru/students"
              title="JetBrains">{{ macros.svg_image('logo-jetbrains') }}</a>
-          <a target="_blank"  href="https://yandex.ru/"
+          <a target="_blank" href="https://yandex.ru/"
              title="Яндекс">{{ macros.svg_image('logo-yandex') }}</a>
-          <a target="_blank"  href="https://www.gazprom-neft.ru/"
+          <a target="_blank" href="https://www.gazprom-neft.ru/"
              title="Газпромнефть">{{ macros.svg_image('logo-gazprom') }}</a>
         </div>
         <div class="col-12">
           <h3>Сотрудничество</h3>
-          <a target="_blank"  href="http://239.ru/"
+          <a target="_blank" href="http://239.ru/"
              title="ФМЛ №239">{{ macros.svg_image('logo-fml239') }}</a>
           <a href="/partners/itmo/"
              title="Университет ИТМО">{{ macros.svg_image('logo-itmo') }}</a>
           <a href="/partners/mkn-spbgu/"
              title="Факультет математики и компьютерных наук СПБГУ">{{ macros.svg_image('logo-mkn') }}</a>
-          <a target="_blank"  href="https://www.nsu.ru/n/"
+          <a target="_blank" href="https://www.nsu.ru/n/"
              title="Новосибирский Государственный Университет">{{ macros.svg_image('logo-ngu') }}</a>
         </div>
       </div>
@@ -237,98 +239,101 @@
   </div>
 
   {% if announcements %}
-      <script type="text/javascript">
-          (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
-      </script>
-      {% with %}
-          {% if announcements|length % 2 == 0 %}
-              {% set card_type = "v2" %}
-          {% elif announcements|length % 3 == 0 %}
-              {% set card_type = "v3" %}
-          {% else %}
-              {% set card_type = "h" %}
-          {% endif %}
-          <div class="grey-bg py-6">
-            <div class="container py-10">
-                <h2 class="text-center mb-10">Мероприятия</h2>
-                <div class="card-deck{% if card_type == 'v2' %} _two{% elif card_type == 'v3' %} _three{% endif %}">
-                    {% for announcement in announcements %}
-                        {% if card_type == 'h' %}
-                            {{ announcement_macros.announcement_horizontal(announcement) }}
-                        {% else %}
-                            {{ announcement_macros.announcement_vertical(announcement, card_type=card_type) }}
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
+    <script type="text/javascript">
+      (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+    </script>
+    {% with %}
+      {% if announcements|length % 2 == 0 %}
+        {% set card_type = "v2" %}
+      {% elif announcements|length % 3 == 0 %}
+        {% set card_type = "v3" %}
+      {% else %}
+        {% set card_type = "h" %}
+      {% endif %}
+      <div class="grey-bg py-6">
+        <div class="container py-10">
+          <h2 class="text-center mb-10">Мероприятия</h2>
+          <div class="card-deck{% if card_type == 'v2' %} _two{% elif card_type == 'v3' %} _three{% endif %}">
+            {% for announcement in announcements %}
+              {% if card_type == 'h' %}
+                {{ announcement_macros.announcement_horizontal(announcement) }}
+              {% else %}
+                {{ announcement_macros.announcement_vertical(announcement, card_type=card_type) }}
+              {% endif %}
+            {% endfor %}
           </div>
-      {% endwith %}
+        </div>
+      </div>
+    {% endwith %}
   {% endif %}
 
-    <div class="csc-online-education py-6">
-        <div class="container py-10">
-            <h2 class="text-center mb-10">Онлайн-образование</h2>
-            <div class="card-deck _online-education">
-                {% for course in online_courses %}
-                    <a class="card _horizontal-mobile _no-border" href="{{ course.link }}" target="_blank" >
-                        {% if course.avatar_url -%}
-                            <div class="card__img _darken"><img src="{{ course.avatar_url }}" alt="{{ course.name }}"></div>
-                        {%- endif %}
-                        <div class="card__content">
-                            <h4 class="card__title">{{ course.name }}</h4>
-                            <div class="card__subtitle">{{ course.tag }}</div>
-                        </div>
-                    </a>
-                {% endfor %}
+  <div class="csc-online-education py-6">
+    <div class="container py-10">
+      <h2 class="text-center mb-10">Онлайн-образование</h2>
+      <div class="card-deck _online-education">
+        {% for course in online_courses %}
+          <a class="card _horizontal-mobile _no-border" href="{{ course.link }}" target="_blank">
+            {% if course.avatar_url -%}
+              <div class="card__img _darken"><img src="{{ course.avatar_url }}" alt="{{ course.name }}"></div>
+            {%- endif %}
+            <div class="card__content">
+              <h4 class="card__title">{{ course.name }}</h4>
+              <div class="card__subtitle">{{ course.tag }}</div>
             </div>
+          </a>
+        {% endfor %}
+      </div>
 
-            <div class="text-center">
-                <a href="{{ url('online_courses:list') }}" class="btn _outline _rounded _gray _small">Все материалы</a>
-            </div>
-        </div>
+      <div class="text-center">
+        <a href="{{ url('online_courses:list') }}" class="btn _outline _rounded _gray _small">Все материалы</a>
+      </div>
     </div>
+  </div>
 
-    <div class="csc-student-reviews grey-bg py-6">
-        <div class="container py-10">
-            <h2 class="text-center mb-10">Отзывы студентов</h2>
-            <div class="card-columns _testimonials">
-                {% for graduate_profile in testimonials %}
-                    {{ macros_cards.testimonial_card(graduate_profile) }}
-                {% endfor %}
+  <div class="csc-student-reviews grey-bg py-6">
+    <div class="container py-10">
+      <h2 class="text-center mb-10">Отзывы студентов</h2>
+      <div class="card-columns _testimonials">
+        {% for graduate_profile in testimonials %}
+          {{ macros_cards.testimonial_card(graduate_profile) }}
+        {% endfor %}
 
-                <a href="{{ url('testimonials') }}" class="btn _small _outline _rounded _gray mt-3">Все отзывы</a>
-            </div>
-        </div>
+        <a href="{{ url('testimonials') }}" class="btn _small _outline _rounded _gray mt-3">Все отзывы</a>
+      </div>
     </div>
+  </div>
 
 
-    <div class="social-media-posts py-6">
-        <div class="container py-10">
-            <h2 class="text-center text-sm-left mb-10">#compscicenter</h2>
-            <div class="row">
-                {% if instagram_posts %}
-                    <div class="col-lg">
-                        {% for post in instagram_posts %}
-                            <a href="{{ post.post_url }}" target="_blank"  class="social-media social-media--instagram social-media--full-size" style="background-image:url('{{ post.thumbnail }}')">
-                                <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/instagram.svg') }}" width="34" alt="">
-                                <div class="social-media__text">{{ post.text }}</div>
-                                <p class="social-media__date social-media__date--light">{{ post.date|date("j b") }}</p>
-                            </a>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                <div class="col-lg">
-                    {% if vk_news %}
-                        {% for post in vk_news %}
-                            <a href="{{ post.post_url }}" target="_blank" rel="noopener nofollow" class="social-media social-media--vk social-media--half-size">
-                                <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/vk.svg') }}" width="40" alt="">
-                                <div class="social-media__text social-media__text--dark">{{ post.text }}</div>
-                                <p class="social-media__date">{{ post.date|date("j b") }}</p>
-                            </a>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
+  <div class="social-media-posts py-6">
+    <div class="container py-10">
+      <h2 class="text-center text-sm-left mb-10">#compscicenter</h2>
+      <div class="row">
+        {% if instagram_posts %}
+          <div class="col-lg">
+            {% for post in instagram_posts %}
+              <a href="{{ post.post_url }}" target="_blank" class="social-media social-media--instagram social-media--full-size"
+                 style="background-image:url('{{ post.thumbnail }}')">
+                <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/instagram.svg') }}" width="34"
+                     alt="">
+                <div class="social-media__text">{{ post.text }}</div>
+                <p class="social-media__date social-media__date--light">{{ post.date|date("j b") }}</p>
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="col-lg">
+          {% if vk_news %}
+            {% for post in vk_news %}
+              <a href="{{ post.post_url }}" target="_blank" rel="noopener nofollow"
+                 class="social-media social-media--vk social-media--half-size">
+                <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/vk.svg') }}" width="40" alt="">
+                <div class="social-media__text social-media__text--dark">{{ post.text }}</div>
+                <p class="social-media__date">{{ post.date|date("j b") }}</p>
+              </a>
+            {% endfor %}
+          {% endif %}
         </div>
+      </div>
     </div>
+  </div>
 {% endblock content %}
