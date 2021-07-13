@@ -408,7 +408,7 @@ class ViewStudentGroup(Permission):
     Access is granted for view of student group
     """
 
-    name = "teaching.view_student_group_list"
+    name = "teaching.view_student_group"
 
 
 @add_perm
@@ -421,7 +421,7 @@ class ViewStudentGroupAsTeacher(Permission):
 
     @staticmethod
     @rules.predicate
-    def rule(user, course: Course):
+    def rule(user: User, course: Course):
         return user in course.teachers.all()
 
 
@@ -437,14 +437,14 @@ class UpdateStudentGroup(Permission):
 @add_perm
 class UpdateStudentGroupAsTeacher(Permission):
     """
-    Access is granted for update student group for teacher in course teachers
+    Access is granted for updating of student group for course teachers
     """
 
     name = "teaching.update_student_group_as_teacher"
 
     @staticmethod
     @rules.predicate
-    def rule(user, student_group: StudentGroup):
+    def rule(user: User, student_group: StudentGroup):
         return user in student_group.course.teachers.all()
 
 
@@ -467,7 +467,7 @@ class DeleteStudentGroupAsTeacher(Permission):
 
     @staticmethod
     @rules.predicate
-    def rule(user, student_group: StudentGroup):
+    def rule(user: User, student_group: StudentGroup):
         return user in student_group.course.teachers.all()
 
 
@@ -489,5 +489,5 @@ class CreateStudentGroupAsTeacher(Permission):
 
     @staticmethod
     @rules.predicate
-    def rule(user, student_group: StudentGroup):
+    def rule(user: User, student_group: StudentGroup):
         return user in student_group.course.teachers.all()
