@@ -408,16 +408,16 @@ class ViewStudentGroup(Permission):
     Access is granted for view of student group
     """
 
-    name = "teaching.view_student_group"
+    name = "learning.view_student_group"
 
 
 @add_perm
 class ViewStudentGroupAsTeacher(Permission):
     """
-    Access is granted for view of student group for teacher in course teachers
+    Access is granted for displaying of student group for course teachers
     """
 
-    name = "teaching.view_student_group_list_as_teacher"
+    name = "teaching.view_student_group_as_teacher"
 
     @staticmethod
     @rules.predicate
@@ -428,7 +428,7 @@ class ViewStudentGroupAsTeacher(Permission):
 @add_perm
 class UpdateStudentGroup(Permission):
     """
-    Access is granted for update student group
+    Access is granted for update of student group
     """
 
     name = "teaching.update_student_group"
@@ -451,7 +451,7 @@ class UpdateStudentGroupAsTeacher(Permission):
 @add_perm
 class DeleteStudentGroup(Permission):
     """
-    Access is granted for delete student group
+    Access is granted for delete of student group
     """
 
     name = "teaching.delete_student_group"
@@ -460,7 +460,7 @@ class DeleteStudentGroup(Permission):
 @add_perm
 class DeleteStudentGroupAsTeacher(Permission):
     """
-    Access is granted for delete student group for teacher in course teachers
+    Access is granted for delete of student group for course teachers
     """
 
     name = "teaching.delete_student_group_as_teacher"
@@ -474,7 +474,7 @@ class DeleteStudentGroupAsTeacher(Permission):
 @add_perm
 class CreateStudentGroup(Permission):
     """
-    Access is granted for create student group
+    Access is granted for create of student group
     """
     name = "teaching.create_student_group"
 
@@ -482,7 +482,7 @@ class CreateStudentGroup(Permission):
 @add_perm
 class CreateStudentGroupAsTeacher(Permission):
     """
-    Access is granted for create student group for teacher in course teachers
+    Access is granted for create of student group for course teachers
     """
 
     name = "teaching.create_student_group_as_teacher"
