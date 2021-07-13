@@ -86,10 +86,6 @@ def test_simple_interviews_list(client, curator, settings):
     assert len(response.context["interviews"]) == 2
     assert interview3 not in response.context["interviews"]
 
-    # Checking the display of the venue in the interview table
-    soup = BeautifulSoup(response.content, "html.parser")
-    assert soup.find(id="venue") is not None
-
     # Checking filtering for curator their interviews
     url = format_url(campaign.pk, today_local_nsk_date, "") + f"&my_interviews=1"
     response = client.get(url)
