@@ -35,7 +35,6 @@
                   <th>Секция</th>
                   <th>Поступающий</th>
                   <th>Собеседующие</th>
-                  <th>Адрес</th>
                   <th>{% if not filter.form.status.value or filter.form.status.value == "completed" or filter.form.status.value == "agreed" %}Средний&nbsp;балл{% endif %}</th>
               </tr>
             </thead>
@@ -66,9 +65,6 @@
                                 </li>
                                 {% endfor %}
                             </ul>
-                        </td>
-                        <td>
-                          <div id="venue">{% if interview.venue %}{{ interview.venue }}{% endif %}</div>
                         </td>
                         <td>
                             {% if interview.status == "completed" %}
