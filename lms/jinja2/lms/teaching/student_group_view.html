@@ -15,7 +15,7 @@
                 </div>
         <hr>
         </div>
-        <div class="col-xs-12">
+        <div id="teacher_list" class="col-xs-12">
             <span>{% if group_assignees.count() == 1 %}<b>Ответственный:</b> {% else %}<b>Ответственные:</b> {% endif %}</span>
             {% if group_assignees %}
                 {% for group_assignee in group_assignees %}
@@ -27,7 +27,7 @@
             {% endif %}
         <hr>
         </div>
-        <div class="col-xs-12">
+        <div id="student_list" class="col-xs-12">
             <h3>Список студентов группы</h3>
             {% if enrollments %}
                 <table class="table table-borderless">

@@ -1,8 +1,8 @@
 import datetime
 
 import pytest
-from bs4 import BeautifulSoup
 import pytz
+from bs4 import BeautifulSoup
 
 from django.utils.encoding import smart_bytes
 
@@ -330,44 +330,6 @@ def test_gradebook_list(client, mocker, assert_redirect):
     assert response.status_code == 200
 
 
-# FIXME: fix changing student group
-@pytest.mark.django_db
-def test_change_student_between_groups(client):
-
-    """
-    Checking the correctness of the student's student group change
-    """
-    
-    teacher = TeacherFactory()
-    student = StudentFactory()
-    student2 = StudentFactory()
-    semester = SemesterFactory.create_current()
-    course = CourseFactory.create(semester=semester, teachers=[teacher])
-    student_assignment = StudentAssignmentFactory(student=student,
-                                                  assignment__course=course)
-    # enroll_1 = EnrollmentFactory.create(student=student, course=course)
-    student_group_1 = StudentGroupFactory.create(course=course)
-    # enroll_1.student_group = student_group_1
-    # student_group_assignee_1 = StudentGroupAssigneeFactory.create(student_group=student_group_1)
-    # EnrollmentFactory.create(student=student, course=course, student_group=student_group_1)
-    # EnrollmentFactory.create(student=student, course=course)
-
-    # student_group_2 = StudentGroupFactory.create(course=course)
-    # student_group_assignee_2 = StudentGroupAssigneeFactory.create(student_group=student_group_2)
-    # EnrollmentFactory.create(student_group=student_group_2, course=course, student=student2)
-
-    client.login(teacher)
-    print(course.id, student_group_1.id, student.id)
-    change_student_url = reverse("teaching:student_group_student_update",
-                                 kwargs={'course_pk': str(course.id),
-                                         'group_pk': str(student_group_1.id),
-                                         'pk': str(student.id)})
-    # change_student_url = reverse("teaching:course_list")
-    print(change_student_url)
-    response = client.get(change_student_url)
-    # assert response.status_code == 200
-
-
 @pytest.mark.django_db
 def test_student_group_manual_link(client):
 
@@ -409,7 +371,6 @@ def test_student_groups_list(client):
     course = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
     student_group = StudentGroupFactory.create(course=course)
     student_group_1 = StudentGroupFactory.create(course=course)
-    # student_group_branch = StudentGroupFactory.create(course=course, type=StudentGroupTypes.BRANCH)
 
     client.login(teacher)
     student_group_list = reverse("teaching:student_group_list",
@@ -419,7 +380,6 @@ def test_student_groups_list(client):
 
     assert soup.find(text=student_group.name) is not None
     assert soup.find(text=student_group_1.name) is not None
-    # assert soup.find(text=student_group_branch.name) is None
     assert len(soup.find_all(id="student_group")) == 2
 
 
@@ -432,24 +392,26 @@ def test_student_groups_detail(client):
     """
 
     teacher = TeacherFactory()
+    curator = CuratorFactory()
     student = StudentFactory()
-    course = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
-    student_group = StudentGroupFactory.create(course=course)
-    student_assignment = StudentAssignmentFactory(student=student,
-                                                  assignment__course=course)
-    # EnrollmentFactory.create(student_group=student_group, course=course, student=student)
-    # assignee = CourseTeacherFactory(course=course, teacher=teacher)
-    # group_assignee = StudentGroupAssigneeFactory(student_group=student_group, assignee=assignee)
+    student1 = StudentFactory()
+    s = SemesterFactory.create_current(for_branch=Branches.SPB)
+    course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    sg1 = StudentGroupFactory.create(course=course)
+    sg2 = StudentGroupFactory.create()
+    EnrollmentFactory.create(student=student, course=course, student_group=sg1)
+    course_teacher = CourseTeacherFactory()
+    StudentGroupAssigneeFactory(assignee=course_teacher, student_group=sg1)
 
     client.login(teacher)
     student_group_list = reverse("teaching:student_group_detail",
                                  kwargs={
                                      'course_pk': course.id,
-                                     'group_pk': student_group.id})
+                                     'group_pk': sg1.id})
 
     response = client.get(student_group_list)
     soup = BeautifulSoup(response.content, "html.parser")
-
-    # assert soup.find(text=student_group.name) is not None
-    # assert soup.find(text=student.last_name) is not None
+    assert sg1.name in soup.find('h2').text
+    assert student.last_name in soup.find(id="student_list").text
+    assert course_teacher.teacher.last_name in soup.find(id="teacher_list").text
 
