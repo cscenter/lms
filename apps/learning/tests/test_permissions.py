@@ -44,6 +44,7 @@ def test_access_to_view_student_group():
     student = StudentFactory()
     s = SemesterFactory.create_current(for_branch=Branches.SPB)
     course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    course_other = CourseFactory.create(semester=s, group_mode=CourseGroupModes.MANUAL)
     sg1 = StudentGroupFactory.create(course=course)
     sg2 = StudentGroupFactory.create()
     EnrollmentFactory.create(student=student, course=course, student_group=sg1)
@@ -53,6 +54,7 @@ def test_access_to_view_student_group():
     assert not user.has_perm(ViewStudentGroup.name, course)
     assert not student.has_perm(ViewStudentGroup.name, course)
     assert teacher.has_perm(ViewStudentGroup.name, course)
+    assert not teacher.has_perm(ViewStudentGroup.name, course_other)
     assert curator.has_perm(ViewStudentGroup.name, course)
 
 
