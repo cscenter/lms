@@ -19,17 +19,19 @@ from users.permissions import (
 from .permissions import (
     CreateAssignmentComment, CreateAssignmentCommentAsLearner,
     CreateAssignmentCommentAsTeacher, CreateAssignmentSolution,
-    CreateOwnAssignmentSolution, EditGradebook, EditOwnAssignmentExecutionTime,
-    EditOwnGradebook, EditOwnStudentAssignment, EditStudentAssignment, EnrollInCourse,
-    EnrollInCourseByInvitation, LeaveCourse, ViewAssignmentAttachment,
+    CreateOwnAssignmentSolution, CreateStudentGroup, CreateStudentGroupAsTeacher,
+    DeleteStudentGroup, DeleteStudentGroupAsTeacher, EditGradebook,
+    EditOwnAssignmentExecutionTime, EditOwnGradebook, EditOwnStudentAssignment,
+    EditStudentAssignment, EnrollInCourse, EnrollInCourseByInvitation, LeaveCourse,
+    UpdateStudentGroup, UpdateStudentGroupAsTeacher, ViewAssignmentAttachment,
     ViewAssignmentAttachmentAsLearner, ViewAssignmentAttachmentAsTeacher,
     ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner,
     ViewAssignmentCommentAttachmentAsTeacher, ViewCourseNews, ViewCourseReviews,
     ViewCourses, ViewEnrollments, ViewFAQ, ViewGradebook, ViewLibrary,
     ViewOwnEnrollments, ViewOwnGradebook, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments, ViewRelatedEnrollments, ViewRelatedStudentAssignment,
-    ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList, ViewStudyMenu,
-    ViewTeachingMenu
+    ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList, ViewStudentGroup,
+    ViewStudentGroupAsTeacher, ViewStudyMenu, ViewTeachingMenu
 )
 
 
@@ -61,6 +63,10 @@ class Roles(DjangoChoices):
         CreateAssignmentSolution,
         ViewAssignmentAttachment,
         ViewAssignmentCommentAttachment,
+        ViewStudentGroup,
+        UpdateStudentGroup,
+        DeleteStudentGroup,
+        CreateStudentGroup,
     ))
     STUDENT = C(1, _('Student'), priority=50, permissions=(
         ViewCourse,
@@ -137,6 +143,10 @@ class Roles(DjangoChoices):
         ViewAssignmentCommentAttachmentAsTeacher,
         ViewOwnGradebook,
         EditOwnGradebook,
+        ViewStudentGroupAsTeacher,
+        UpdateStudentGroupAsTeacher,
+        DeleteStudentGroupAsTeacher,
+        CreateStudentGroupAsTeacher,
     ))
 
 
@@ -165,6 +175,10 @@ teacher_role.add_relation(ViewAssignment, ViewOwnAssignment)
 teacher_role.add_relation(ViewEnrollments, ViewRelatedEnrollments)
 teacher_role.add_relation(ViewGradebook, ViewOwnGradebook)
 teacher_role.add_relation(EditGradebook, EditOwnGradebook)
+teacher_role.add_relation(ViewStudentGroup, ViewStudentGroupAsTeacher)
+teacher_role.add_relation(CreateStudentGroup, CreateStudentGroupAsTeacher)
+teacher_role.add_relation(DeleteStudentGroup, DeleteStudentGroupAsTeacher)
+teacher_role.add_relation(UpdateStudentGroup, UpdateStudentGroupAsTeacher)
 
 
 for role in (Roles.STUDENT, Roles.VOLUNTEER, Roles.INVITED):
