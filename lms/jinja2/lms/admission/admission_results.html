@@ -1,0 +1,109 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block title %}Результаты набора {{ selected_campaign.branch }}{% endblock title %}
+{% block body_attrs %} class="gray"{% endblock body_attrs %}
+
+{% block content %}
+  <div class="interview-results-page">
+    {{ crispy(filter.form) }}
+    <div class="nav-tabs-horizontal nav-tabs-inverse">
+      <ul class="nav nav-tabs nav-tabs-solid" role="tablist">
+        {% for campaign in active_campaigns %}
+          <li role="presentation" {% if selected_campaign.branch == campaign.branch %} class="active"{% endif %}>
+            <a href="{{ url("admission:results:list", branch_code=campaign.branch.code) }}">{{ campaign }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+      <div class="tab-content">
+        {% if formset|length > 0 %}
+          {% if not filter.data.status %}
+            <ul class="list-unstyled">
+              <li>Всего: {{ formset.total_form_count() }}</li>
+              {% for status, cnt in stats %}
+                <li>{{ status }}: {{ cnt }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+
+          <form action="" method="post"{% if formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
+            {{ formset.management_form }}
+            {% if formset.errors %}
+              <p class="errornote">
+                {% if formset.total_error_count == 1 %}{% trans %}Please correct the error below.{% endtrans %}{% else %}
+                  {% trans %}Please correct the errors below.{% endtrans %}{% endif %}
+              </p>
+              {{ formset.non_form_errors }}
+            {% endif %}
+
+            <table class="table">
+              <thead>
+              <tr>
+                <th>#</th>
+                <th>Поступающий</th>
+                <th>Тест</th>
+                <th>Экз.</th>
+                <th>Собеседования</th>
+                <th>Итог</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for form in formset %}
+                {% set applicant = form.instance %}
+                  <tr>
+                    <td>{{ loop.index }}</td>
+                    <td class="applicant">
+                      <a href="{{ url("admission:applicants:detail", pk=applicant.pk) }}">{{ applicant.full_name }}</a><br>
+                      {{ applicant.university }}
+                    </td>
+                    <td>
+                      {% if applicant.online_test is defined %}
+                        {{ applicant.online_test.score|default("-", True) }}/{{ selected_campaign.online_test_max_score }}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if applicant.exam is defined %}
+                        {{ applicant.exam and applicant.exam.score|default("-", True) }}/{{ selected_campaign.exam_max_score }}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% for interview in applicant.interviews.all() %}
+                        <a class="nowrap" href="{{ interview.get_absolute_url() }}">
+                          {{ interview.get_section_display() }}:
+                          {% if interview.status == interview.COMPLETED %}
+                            {% if interview.average_score != None %}
+                              {{ interview.get_average_score_display() }}
+                            {% else %}
+                              не найдено
+                            {% endif %}
+                          {% elif interview.status == interview.APPROVED %}
+                            назначено на {{ interview.date_local()|date("j E") }}
+                          {% else %}
+                            {{ interview.get_status_display()|lower }}
+                          {% endif %}
+                        </a>
+                      {% endfor %}
+                    </td>
+                    <td>
+                      {{ form.status }}
+                      {{ form.status.errors }}
+                      {% for hidden in form.hidden_fields() %}
+                        {{ hidden }}
+                      {% endfor %}
+                    </td>
+                  </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary btn-outline">Сохранить</button>
+          </form>
+        {% else %}
+          Измените параметры поиска, либо для выбранного набора ещё нет прошедших собеседование.
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock content %}

@@ -844,7 +844,7 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
     We can have multiple interviews for applicant
     """
     context_object_name = 'interviews'
-    template_name = "admission/interview_results.html"
+    template_name = "lms/admission/admission_results.html"
     model = Applicant
     form_class = ResultsModelForm
     filterset_class = ResultsFilter
@@ -907,6 +907,7 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
                 Prefetch(
                     'interviews',
                     queryset=(Interview.objects
+                              .select_related('venue__city')
                               .annotate(_average_score=Avg('comments__score'))),
                 ),
             ))
