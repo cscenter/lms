@@ -403,21 +403,35 @@ class LeaveCourse(Permission):
 
 
 @add_perm
+class CreateStudentGroup(Permission):
+    """Allows to create any student group."""
+    name = "learning.create_student_group"
+
+
+@add_perm
+class CreateStudentGroupAsTeacher(Permission):
+    """Allows course teacher to create student group of this course."""
+
+    name = "teaching.create_student_group"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user: User, student_group: StudentGroup):
+        return user in student_group.course.teachers.all()
+
+
+@add_perm
 class ViewStudentGroup(Permission):
-    """
-    Access is granted for view of student group
-    """
+    """Allows to view any student group."""
 
     name = "learning.view_student_group"
 
 
 @add_perm
 class ViewStudentGroupAsTeacher(Permission):
-    """
-    Access is granted for displaying of student group for course teachers
-    """
+    """Allows course teacher to view student group of this course."""
 
-    name = "teaching.view_student_group_as_teacher"
+    name = "teaching.view_student_group"
 
     @staticmethod
     @rules.predicate
@@ -427,20 +441,16 @@ class ViewStudentGroupAsTeacher(Permission):
 
 @add_perm
 class UpdateStudentGroup(Permission):
-    """
-    Access is granted for update of student group
-    """
+    """Allows to update any student group."""
 
-    name = "teaching.update_student_group"
+    name = "learning.update_student_group"
 
 
 @add_perm
 class UpdateStudentGroupAsTeacher(Permission):
-    """
-    Access is granted for updating of student group for course teachers
-    """
+    """Allows course teacher to update student group of this course."""
 
-    name = "teaching.update_student_group_as_teacher"
+    name = "teaching.update_student_group"
 
     @staticmethod
     @rules.predicate
@@ -450,42 +460,16 @@ class UpdateStudentGroupAsTeacher(Permission):
 
 @add_perm
 class DeleteStudentGroup(Permission):
-    """
-    Access is granted for delete of student group
-    """
+    """Allows to delete any student group."""
 
-    name = "teaching.delete_student_group"
+    name = "learning.delete_student_group"
 
 
 @add_perm
 class DeleteStudentGroupAsTeacher(Permission):
-    """
-    Access is granted for delete of student group for course teachers
-    """
+    """Allows course teacher to delete student group of this course."""
 
-    name = "teaching.delete_student_group_as_teacher"
-
-    @staticmethod
-    @rules.predicate
-    def rule(user: User, student_group: StudentGroup):
-        return user in student_group.course.teachers.all()
-
-
-@add_perm
-class CreateStudentGroup(Permission):
-    """
-    Access is granted for create of student group
-    """
-    name = "teaching.create_student_group"
-
-
-@add_perm
-class CreateStudentGroupAsTeacher(Permission):
-    """
-    Access is granted for create of student group for course teachers
-    """
-
-    name = "teaching.create_student_group_as_teacher"
+    name = "teaching.delete_student_group"
 
     @staticmethod
     @rules.predicate
