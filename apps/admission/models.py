@@ -22,8 +22,8 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import (
-    ChallengeStatuses, DefaultInterviewRatingSystem, InterviewFormats,
-    InterviewInvitationStatuses, InterviewSections,
+    ApplicantStatuses, ChallengeStatuses, DefaultInterviewRatingSystem,
+    InterviewFormats, InterviewInvitationStatuses, InterviewSections,
     YandexDataSchoolInterviewRatingSystem
 )
 from admission.utils import get_next_process, slot_range
@@ -234,23 +234,8 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
     ACCEPT_IF = 'accept_if'
     VOLUNTEER = 'volunteer'
     THEY_REFUSED = 'they_refused'
-    STATUS = (
-        (REJECTED_BY_TEST, _('Rejected by test')),
-        (PERMIT_TO_EXAM, _('Permitted to the exam')),
-        (REJECTED_BY_EXAM, _('Rejected by exam')),
-        (REJECTED_BY_CHEATING, _('Cheating')),
-        (PENDING, _('Pending')),
-        (INTERVIEW_TOBE_SCHEDULED, _('Can be interviewed')),
-        (INTERVIEW_SCHEDULED, _('Interview assigned')),
-        (INTERVIEW_COMPLETED, _('Interview completed')),
-        (REJECTED_BY_INTERVIEW, _('Rejected by interview')),
-        (ACCEPT_PAID, _('Accept on paid')),
-        (WAITING_FOR_PAYMENT, _('Waiting for Payment')),
-        (ACCEPT, _('Accept')),
-        (ACCEPT_IF, _('Accept with condition')),
-        (VOLUNTEER, _("Applicant|Volunteer")),
-        (THEY_REFUSED, _("He or she refused")),
-    )
+
+    STATUS = ApplicantStatuses.choices
     # One of the statuses below could be set after interviewing
     INTERVIEW_RESULTS = {
         ACCEPT,

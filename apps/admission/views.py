@@ -60,7 +60,7 @@ from users.api.serializers import PhotoSerializerField
 from users.mixins import CuratorOnlyMixin
 from users.models import User
 
-from .constants import InterviewInvitationStatuses, InterviewSections
+from .constants import ApplicantStatuses, InterviewInvitationStatuses, InterviewSections
 from .selectors import get_interview_invitation, get_occupied_slot
 from .tasks import import_testing_results
 
@@ -895,13 +895,10 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
         return kwargs
 
     def get_queryset(self):
-        """Sort data by average interview score"""
         return (
             Applicant.objects
-            # TODO: Carefully restrict by status to optimize query
-            .filter(campaign=self.selected_campaign)
-            .annotate(interviews_count=Count("interviews"))
-            .filter(interviews_count__gt=0)
+            .filter(campaign=self.selected_campaign,
+                    status__in=ApplicantStatuses.RESULTS_STATUSES)
             .select_related("exam", "online_test", "university")
             .prefetch_related(
                 Prefetch(

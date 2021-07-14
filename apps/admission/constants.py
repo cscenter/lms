@@ -13,6 +13,38 @@ WHERE_DID_YOU_LEARN = (
 INVITATION_EXPIRED_IN_HOURS = 27
 
 
+class ApplicantStatuses(DjangoChoices):
+    REJECTED_BY_TEST = C('rejected_test', _('Rejected by test'))
+    PERMIT_TO_EXAM = C('permit_to_exam', _('Permitted to the exam'))
+    REJECTED_BY_EXAM = C('rejected_exam', _('Rejected by exam'))
+    REJECTED_BY_CHEATING = C('rejected_cheating', _('Cheating'))
+    PENDING = C('pending', _('Pending'))
+    # TODO: rename interview codes here and in DB.
+    INTERVIEW_TOBE_SCHEDULED = C('interview_phase', _('Can be interviewed'))  # permitted to interview
+    INTERVIEW_SCHEDULED = C('interview_assigned', _('Interview assigned'))
+    INTERVIEW_COMPLETED = C('interview_completed', _('Interview completed'))
+    REJECTED_BY_INTERVIEW = C('rejected_interview', _('Rejected by interview'))
+    ACCEPT_PAID = C('accept_paid', _('Accept on paid'))
+    WAITING_FOR_PAYMENT = C('waiting_for_payment', _('Waiting for Payment'))
+    ACCEPT = C('accept', _('Accept'))
+    ACCEPT_IF = C('accept_if', _('Accept with condition'))
+    VOLUNTEER = C('volunteer', _("Applicant|Volunteer"))
+    THEY_REFUSED = C('they_refused', _("He or she refused"))
+
+    # Participants who have reached the interview stage
+    RESULTS_STATUSES = {
+        INTERVIEW_TOBE_SCHEDULED.value,
+        INTERVIEW_SCHEDULED.value,
+        INTERVIEW_COMPLETED.value,
+        ACCEPT_PAID.value,
+        WAITING_FOR_PAYMENT.value,
+        ACCEPT.value,
+        ACCEPT_IF.value,
+        VOLUNTEER.value,
+        THEY_REFUSED.value
+    }
+
+
 class ChallengeStatuses(DjangoChoices):
     NEW = ChoiceItem('new', _("Not registered in the contest"))
     # Results could be imported from a contest
