@@ -328,7 +328,7 @@ class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseL
     def get(self, request, *args, **kwargs):
         serializer = self.InputSerializer(data=request.GET)
         if not serializer.is_valid(raise_exception=False):
-            campaign = get_default_campaign_for_user(self.request.user)
+            campaign = get_default_campaign_for_user(request.user)
             campaign_id = campaign.id if campaign else ""
             url = reverse("admission:interviews:invitations:list")
             url = f"{url}?campaign={campaign_id}&section="
@@ -357,7 +357,7 @@ class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseL
         if input_serializer.validated_data['section']:
             filters["streams__section"] = input_serializer.validated_data['section']
         invitation_queryset = (InterviewInvitation.objects
-                               .select_related('interview', 'applicant')
+                               .select_related('interview__venue__city', 'applicant')
                                .filter(**filters)
                                .prefetch_related('streams', 'interview__interviewers')
                                .order_by('applicant__last_name',
