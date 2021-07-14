@@ -272,7 +272,7 @@ class InterviewsCuratorFilter(InterviewsBaseFilter):
 
 class ResultsFilter(django_filters.FilterSet):
     status = ApplicantStatusFilter(empty_label=None,
-                                   choices=ResultsModelForm.RESULTS_CHOICES,
+                                   choices=ResultsModelForm.FINAL_CHOICES,
                                    label=_("Status"))
     university = django_filters.ChoiceFilter(label=_("University"))
 

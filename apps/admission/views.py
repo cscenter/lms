@@ -672,8 +672,8 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         branches = Branch.objects.for_site(site_id=settings.SITE_ID)
         q = (Interview.objects
              .filter(applicant__campaign__branch__in=branches)
-             .select_related("applicant", "applicant__campaign",
-                             "applicant__campaign__branch")
+             .select_related("applicant__campaign__branch",
+                             "venue__city")
              .prefetch_related("interviewers")
              .annotate(average=Coalesce(Avg('comments__score'), Value(0)))
              .order_by("date", "pk"))
@@ -851,7 +851,9 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
 
     def dispatch(self, request, *args, **kwargs):
         self.active_campaigns = (Campaign.objects
-                                 .filter(current=True, branch__site_id=settings.SITE_ID))
+                                 .filter(current=True,
+                                         branch__site_id=settings.SITE_ID)
+                                 .select_related('branch'))
         try:
             self.selected_campaign = next(c for c in self.active_campaigns
                                           if c.branch_id == request.branch.pk)

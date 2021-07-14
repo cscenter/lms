@@ -53,7 +53,11 @@
                     <td>{{ loop.index }}</td>
                     <td class="applicant">
                       <a href="{{ url("admission:applicants:detail", pk=applicant.pk) }}">{{ applicant.full_name }}</a><br>
-                      {{ applicant.university }}
+                      {% if applicant.university_other %}
+                        {{ applicant.university_other }}
+                      {% elif applicant.university %}
+                        {% if applicant.university.abbr %}{{ applicant.university.abbr }}{% else %}{{ applicant.university.name }}{% endif %}
+                      {% endif %}
                     </td>
                     <td>
                       {% if applicant.online_test is defined %}
@@ -84,7 +88,7 @@
                           {% else %}
                             {{ interview.get_status_display()|lower }}
                           {% endif %}
-                        </a>
+                        </a><br>
                       {% endfor %}
                     </td>
                     <td>

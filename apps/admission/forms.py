@@ -263,7 +263,7 @@ class ApplicantStatusForm(forms.ModelForm):
 
 
 class ResultsModelForm(ModelForm):
-    RESULTS_CHOICES = (
+    FINAL_CHOICES = (
         ('', filters_settings.EMPTY_CHOICE_LABEL),
         (Applicant.ACCEPT, "Берём"),
         (Applicant.VOLUNTEER, "Берём в вольные слушатели"),
@@ -278,7 +278,7 @@ class ResultsModelForm(ModelForm):
         model = Applicant
         fields = ("status",)
 
-    status = forms.ChoiceField(choices=RESULTS_CHOICES,
+    status = forms.ChoiceField(choices=FINAL_CHOICES,
                                required=False,
                                initial="")
 
