@@ -22,7 +22,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import (
-    ApplicantStatuses, ChallengeStatuses, DefaultInterviewRatingSystem,
+    ApplicantStatuses, ChallengeStatuses, ContestTypes, DefaultInterviewRatingSystem,
     InterviewFormats, InterviewInvitationStatuses, InterviewSections,
     YandexDataSchoolInterviewRatingSystem
 )
@@ -533,6 +533,19 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
         else:
             return smart_str(self.full_name)
 
+    def get_testing_record(self) -> Optional["Test"]:
+        try:
+            return self.online_test
+        except Test.DoesNotExist:
+            return None
+
+    def get_exam_record(self) -> Optional["Exam"]:
+        try:
+            return self.exam
+        except Exam.DoesNotExist:
+            return None
+
+    # FIXME: filter by site
     def get_similar(self):
         conditions = [
             Q(email=self.email),
@@ -571,14 +584,13 @@ def validate_json_container(value):
         )
 
 
+# TODO: add Contest provider (yandex/stepic), then change YandexContestIntegration.yandex_contest_id to FK
 class Contest(models.Model):
     FILE_PATH_TEMPLATE = "contest/{contest_id}/assignments/{filename}"
-    TYPE_TEST = 1
-    TYPE_EXAM = 2
-    TYPES = (
-        (TYPE_TEST, _("Testing")),
-        (TYPE_EXAM, _("Exam")),
-    )
+    TYPE_TEST = ContestTypes.TEST
+    TYPE_EXAM = ContestTypes.EXAM
+    # TODO: replace with ContestTypes
+    TYPES = ContestTypes.choices
     campaign = models.ForeignKey(
         Campaign,
         verbose_name=_("Contest|Campaign"),
@@ -586,7 +598,7 @@ class Contest(models.Model):
         related_name="contests")
     type = models.IntegerField(
         _("Type"),
-        choices=TYPES)
+        choices=ContestTypes.choices)
     contest_id = models.CharField(
         _("Contest #ID"),
         help_text=_("Applicant|yandex_contest_id"),

@@ -1,7 +1,7 @@
 import uuid
 from collections import Counter
 from datetime import timedelta
-from typing import Optional
+from typing import Any, Dict, Optional
 from urllib import parse
 
 import pytz
@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
-from django.db.models import Avg, Case, Count, Prefetch, Value, When
+from django.db.models import Avg, Case, Count, Prefetch, Q, Value, When
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import HttpResponseNotFound, HttpResponseRedirect, JsonResponse
@@ -54,57 +54,55 @@ from core.models import Branch
 from core.timezone import get_now_utc, now_local
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from core.utils import render_markdown
+from core.utils import bucketize, render_markdown
 from tasks.models import Task
 from users.api.serializers import PhotoSerializerField
 from users.mixins import CuratorOnlyMixin
 from users.models import User
 
-from .constants import ApplicantStatuses, InterviewInvitationStatuses, InterviewSections
+from .constants import (
+    ApplicantStatuses, ContestTypes, InterviewInvitationStatuses, InterviewSections
+)
 from .selectors import get_interview_invitation, get_occupied_slot
 from .tasks import import_testing_results
 
 
-class ApplicantContextMixin:
-    @staticmethod
-    def get_applicant_context(request, applicant_id):
-        qs = (Applicant.objects
-              .select_related("exam", "campaign__branch__site",
-                              "online_test", "university")
-              .filter(pk=applicant_id))
-        applicant = get_object_or_404(qs)
-        contest_ids = []
-        try:
-            online_test = applicant.online_test
-            contest_ids.append(online_test.yandex_contest_id)
-        except Test.DoesNotExist:
-            online_test = None
-        try:
-            exam = applicant.exam
-            contest_ids.append(applicant.exam.yandex_contest_id)
-        except Exam.DoesNotExist:
-            exam = None
-        contest_ids = [c for c in contest_ids if c]
-        # get contests description
-        contests = {}
-        if contest_ids:
-            contests_qs = Contest.objects.filter(contest_id__in=contest_ids)
-            for c in contests_qs:
-                if c.type == Contest.TYPE_TEST:
-                    contests["test"] = c
-                elif c.type == Contest.TYPE_EXAM:
-                    contests["exam"] = c
-        context = {
-            "applicant": applicant,
-            "applicant_form": ApplicantReadOnlyForm(request=request,
-                                                    instance=applicant),
-            "campaign": applicant.campaign,
-            "contests": contests,
-            "exam": exam,
-            "online_test": online_test,
-            "similar_applicants": applicant.get_similar(),
-        }
-        return context
+def get_applicant_context(request, applicant_id) -> Dict[str, Any]:
+    branches = Branch.objects.for_site(site_id=settings.SITE_ID)
+    qs = (Applicant.objects
+          .select_related("exam", "campaign__branch__site",
+                          "online_test", "university")
+          .filter(campaign__branch__in=branches,
+                  pk=applicant_id))
+    applicant = get_object_or_404(qs)
+    online_test = applicant.get_testing_record()
+    exam = applicant.get_exam_record()
+    # Fetch contest records
+    contest_pks = []
+    if online_test and online_test.yandex_contest_id:
+        contest_pks.append(online_test.yandex_contest_id)
+    if exam and exam.yandex_contest_id:
+        contest_pks.append(exam.yandex_contest_id)
+    contests = {}
+    if contest_pks:
+        filters = [
+            Q(contest_id__in=contest_pks),
+            Q(campaign_id=applicant.campaign_id)
+        ]
+        queryset = Contest.objects.filter(*filters)
+        contests = bucketize(queryset, key=lambda o: o.type)
+    context = {
+        "applicant": applicant,
+        "applicant_form": ApplicantReadOnlyForm(request=request,
+                                                instance=applicant),
+        "campaign": applicant.campaign,
+        "contests": contests,
+        "ContestTypes": ContestTypes,
+        "exam": exam,
+        "online_test": online_test,
+        "similar_applicants": applicant.get_similar(),
+    }
+    return context
 
 
 class InterviewerOnlyMixin(UserPassesTestMixin):
@@ -457,23 +455,16 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
         return context
 
 
-class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
-                          TemplateResponseMixin, BaseCreateView):
+class ApplicantDetailView(InterviewerOnlyMixin, TemplateResponseMixin,
+                          BaseCreateView):
 
     form_class = InterviewForm
     template_name = "admission/applicant_detail.html"
 
-    def get_queryset(self):
-        applicant_id = self.kwargs.get(self.pk_url_kwarg, None)
-        return (Applicant.objects
-                .select_related("exam", "online_test", "campaign",
-                                "campaign__branch")
-                .get(pk=applicant_id))
-
     def get_context_data(self, **kwargs):
         applicant_id = self.kwargs[self.pk_url_kwarg]
         context = kwargs
-        context.update(self.get_applicant_context(self.request, applicant_id))
+        context.update(get_applicant_context(self.request, applicant_id))
         applicant = context["applicant"]
         context["status_form"] = ApplicantForm(instance=applicant)
         if 'form' not in kwargs:
@@ -693,21 +684,24 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         return q
 
 
-class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
-                          generic.TemplateView):
+class InterviewDetailView(InterviewerOnlyMixin, generic.TemplateView):
     template_name = "admission/interview_detail.html"
 
+    def get_queryset(self):
+        branches = Branch.objects.for_site(site_id=settings.SITE_ID)
+        return (Interview.objects
+                .filter(pk=self.kwargs['pk'],
+                        applicant__campaign__branch__in=branches))
+
     def get_context_data(self, **kwargs):
-        interview_id = self.kwargs['pk']
-        qs = (Interview.objects
-              .filter(pk=interview_id)
+        qs = (self.get_queryset()
               .prefetch_related("interviewers",
                                 "assignments",
                                 Prefetch("comments",
                                          queryset=(Comment.objects
                                                    .select_related("interviewer")))))
         interview = get_object_or_404(qs)
-        context = self.get_applicant_context(self.request, interview.applicant_id)
+        context = get_applicant_context(self.request, interview.applicant_id)
         interview.applicant = context['applicant']
         show_all_comments = self.request.user.is_curator
         form_kwargs = {
@@ -730,8 +724,7 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         """Update list of assignments"""
         if not request.user.is_curator:
             return HttpResponseForbidden()
-        interview = get_object_or_404(Interview.objects
-                                      .filter(pk=self.kwargs["pk"]))
+        interview = get_object_or_404(self.get_queryset())
         form = InterviewAssignmentsForm(instance=interview,
                                         data=self.request.POST)
         if form.is_valid():

@@ -45,6 +45,11 @@ class ApplicantStatuses(DjangoChoices):
     }
 
 
+class ContestTypes(DjangoChoices):
+    TEST = C(1, _("Testing"))
+    EXAM = C(2, _("Exam"))
+
+
 class ChallengeStatuses(DjangoChoices):
     NEW = ChoiceItem('new', _("Not registered in the contest"))
     # Results could be imported from a contest
