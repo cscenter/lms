@@ -247,13 +247,13 @@ class ApplicantReadOnlyForm(ReadOnlyFieldsMixin, forms.ModelForm):
             del self.fields['admin_note']
 
 
-class ApplicantStatusForm(forms.ModelForm):
+class ApplicantForm(forms.ModelForm):
     class Meta:
         model = Applicant
         fields = ("admin_note", "status")
 
     def __init__(self, *args, **kwargs):
-        super(ApplicantStatusForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.layout.append(
             FormActions(Submit('update', _('Update')), css_class="pull-right"))
@@ -262,7 +262,19 @@ class ApplicantStatusForm(forms.ModelForm):
             "#update-status-form")
 
 
-class ResultsModelForm(ModelForm):
+class ApplicantFinalStatusField(forms.ChoiceField):
+    def has_changed(self, initial, data) -> bool:
+        has_changed = super().has_changed(initial, data)
+        # Empty `status` value means we didn't set any final status and
+        # the previous status should be preserved - make it inside
+        # ModelForm where instance is accessible, e.g. inside
+        # `clean_status` hook
+        if has_changed and not data:
+            return False
+        return has_changed
+
+
+class ApplicantFinalStatusForm(ModelForm):
     FINAL_CHOICES = (
         ('', filters_settings.EMPTY_CHOICE_LABEL),
         (Applicant.ACCEPT, "Берём"),
@@ -278,16 +290,22 @@ class ResultsModelForm(ModelForm):
         model = Applicant
         fields = ("status",)
 
-    status = forms.ChoiceField(choices=FINAL_CHOICES,
-                               required=False,
-                               initial="")
+    status = ApplicantFinalStatusField(choices=FINAL_CHOICES,
+                                       required=False,
+                                       initial="")
 
-    def clean_status(self):
+    def clean_status(self) -> str:
         """Remains old status if none was provided"""
         new_status = self.cleaned_data["status"]
         if not new_status:
             return self.instance.status
         return new_status
+
+    def save(self, commit=True) -> Applicant:
+        instance = super().save(commit=False)
+        instance.save(update_fields=['status'])
+        self.save_m2m()
+        return instance
 
 
 class InterviewStreamChangeForm(ModelForm):

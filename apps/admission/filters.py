@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import InterviewInvitationStatuses, InterviewSections
-from admission.forms import ResultsModelForm
+from admission.forms import ApplicantFinalStatusForm
 from admission.models import (
     Applicant, Campaign, Interview, InterviewInvitation, InterviewStream
 )
@@ -272,7 +272,7 @@ class InterviewsCuratorFilter(InterviewsBaseFilter):
 
 class ResultsFilter(django_filters.FilterSet):
     status = ApplicantStatusFilter(empty_label=None,
-                                   choices=ResultsModelForm.FINAL_CHOICES,
+                                   choices=ApplicantFinalStatusForm.FINAL_CHOICES,
                                    label=_("Status"))
     university = django_filters.ChoiceFilter(label=_("University"))
 

@@ -6,7 +6,7 @@ from urllib import parse
 
 import pytz
 from braces.views import UserPassesTestMixin
-from django_filters.views import BaseFilterView, FilterMixin, FilterView
+from django_filters.views import BaseFilterView, FilterMixin
 from extra_views.formsets import BaseModelFormSetView
 from rest_framework import serializers
 from vanilla import GenericModelView, TemplateView
@@ -37,9 +37,9 @@ from admission.filters import (
     ResultsFilter
 )
 from admission.forms import (
-    ApplicantReadOnlyForm, ApplicantStatusForm, InterviewAssignmentsForm,
-    InterviewCommentForm, InterviewForm, InterviewFromStreamForm,
-    InterviewStreamInvitationForm, ResultsModelForm
+    ApplicantFinalStatusForm, ApplicantForm, ApplicantReadOnlyForm,
+    InterviewAssignmentsForm, InterviewCommentForm, InterviewForm,
+    InterviewFromStreamForm, InterviewStreamInvitationForm
 )
 from admission.models import (
     Applicant, Campaign, Comment, Contest, Exam, Interview, InterviewAssignment,
@@ -475,7 +475,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         context = kwargs
         context.update(self.get_applicant_context(self.request, applicant_id))
         applicant = context["applicant"]
-        context["status_form"] = ApplicantStatusForm(instance=applicant)
+        context["status_form"] = ApplicantForm(instance=applicant)
         if 'form' not in kwargs:
             invitation = InterviewInvitation.objects.for_applicant(applicant)
             if not invitation or invitation.status == InterviewInvitationStatuses.DECLINED:
@@ -564,7 +564,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
 
 
 class ApplicantStatusUpdateView(CuratorOnlyMixin, generic.UpdateView):
-    form_class = ApplicantStatusForm
+    form_class = ApplicantForm
     model = Applicant
 
     def get_success_url(self):
@@ -840,13 +840,10 @@ class BranchFromURLViewMixin:
 class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
                            BranchFromURLViewMixin, TemplateResponseMixin,
                            BaseModelFormSetView):
-    """
-    We can have multiple interviews for applicant
-    """
     context_object_name = 'interviews'
     template_name = "lms/admission/admission_results.html"
     model = Applicant
-    form_class = ResultsModelForm
+    form_class = ApplicantFinalStatusForm
     filterset_class = ResultsFilter
 
     def dispatch(self, request, *args, **kwargs):
@@ -912,19 +909,8 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
             ))
 
     def get_context_data(self, filter, formset, **kwargs):
-
-        def cpm_interview_best_score(form):
-            a = form.instance
-            exam_score = a.exam.score if hasattr(a, "exam") and a.exam.score else -1
-            interviews_average_score_sum = 0
-            for interview in a.interviews.all():
-                if interview.average_score is not None:
-                    interviews_average_score_sum += interview.average_score
-            return interviews_average_score_sum, exam_score
-
-        formset.forms.sort(key=cpm_interview_best_score, reverse=True)
         stats = Counter()
-        received_statuses = {
+        final_statuses = {
             Applicant.ACCEPT,
             Applicant.ACCEPT_IF,
             Applicant.VOLUNTEER,
@@ -933,16 +919,26 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
         }
         received = 0
         for form in formset.forms:
-            # Select the highest interview score to sort by
             applicant = form.instance
             stats.update((applicant.status,))
-            if applicant.status in received_statuses:
+            if applicant.status in final_statuses:
                 received += 1
-
         stats = [(Applicant.get_name_by_status_code(s), cnt) for
                  s, cnt in stats.items()]
         if received:
             stats.append(("Планируем принять всего", received))
+
+        def cpm_interviews_score_sum(form):
+            a = form.instance
+            exam_score = a.exam.score if hasattr(a, "exam") and a.exam.score else -1
+            interviews_average_score_sum = 0
+            for interview in a.interviews.all():
+                if interview.average_score is not None:
+                    interviews_average_score_sum += interview.average_score
+            return interviews_average_score_sum, exam_score
+
+        formset.forms.sort(key=cpm_interviews_score_sum, reverse=True)
+
         context = {
             "filter": filter,
             "formset": formset,
