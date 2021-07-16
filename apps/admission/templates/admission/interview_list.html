@@ -45,11 +45,14 @@
                             <div class="time">{{ interview.date_local|date:"H:i" }}</div>
                             {{ interview.date_local|date:"d E" }}
                         </td>
-                        <td class="nowrap">{{ interview.get_section_display }}</td>
+                        <td class="nowrap">
+                          {{ interview.get_section_display }}
+                        </td>
                         <td class="applicant">
                             <a href="{{ interview.get_absolute_url }}">{{ interview.applicant.full_name }}</a>
+                            {% if interview.venue %}<br><span class="text-muted">{{ interview.venue }}</span>{% endif %}
                         </td>
-                        <td style="width: 35%">
+                        <td>
                             <ul class="members">
                                 {% for interviewer in interview.interviewers.all %}
                                 <li>
