@@ -642,10 +642,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                 "date_from": today,
                 "date_to": today
             }
-        else:
-            kwargs_data = kwargs['data'].copy()
-            kwargs_data.pop('my_interviews', None)
-            kwargs["data"] = kwargs_data
+        kwargs['request'] = self.request
 
         return kwargs
 
@@ -665,20 +662,11 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             except ValueError:
                 context["results_title"] = _("All campaigns")
 
-        if 'my_interviews' in self.request.GET:
-            context_filter = context['filter'].form.data.copy()
-            context_filter['my_interviews'] = self.request.GET['my_interviews']
-            context['filter'].form.data = context_filter
-
         return context
 
     def get_queryset(self):
         branches = Branch.objects.for_site(site_id=settings.SITE_ID)
         user = self.request.user
-
-        my_interviews = None
-        if 'my_interviews' in self.request.GET:
-            my_interviews = self.request.GET['my_interviews']
 
         q = (Interview.objects
              .filter(applicant__campaign__branch__in=branches)
@@ -687,7 +675,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
              .prefetch_related("interviewers")
              .annotate(average=Coalesce(Avg('comments__score'), Value(0)))
              .order_by("date", "pk"))
-        if not self.request.user.is_curator or my_interviews == '1':
+        if not self.request.user.is_curator:
             # To interviewers show interviews from current campaigns where
             # they participate.
             try:

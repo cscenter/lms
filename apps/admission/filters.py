@@ -57,6 +57,14 @@ class InterviewInvitationStatusFilter(django_filters.ChoiceFilter):
         return super().filter(qs, value)
 
 
+class CuratorOwnInterviewFilter(django_filters.ChoiceFilter):
+    def filter(self, qs, value, **kwargs):
+        if value == '1':
+            return qs.filter(interviewers__in=[self.parent.request.user])
+        else:
+            return qs
+        
+
 # Filters
 class ApplicantFilter(django_filters.FilterSet):
     campaign = django_filters.ModelChoiceFilter(
@@ -270,9 +278,10 @@ class InterviewsCuratorFilter(InterviewsBaseFilter):
                   .order_by("-branch_id", "-year").all()),
         help_text="")
 
-    my_interviews = django_filters.ChoiceFilter(choices=FilterOwnInterview.choices,
-                                               label='',
-                                               empty_label=None)
+    my_interviews = CuratorOwnInterviewFilter(choices=FilterOwnInterview.choices,
+                                              label='',
+                                              empty_label=None
+                                              )
 
     class Meta(InterviewsBaseFilter.Meta):
         form = InterviewsCuratorFilterForm
