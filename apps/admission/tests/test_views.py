@@ -86,6 +86,10 @@ def test_simple_interviews_list(client, curator, settings):
     assert len(response.context["interviews"]) == 2
     assert interview3 not in response.context["interviews"]
 
+    # Checking filtering for curator their interviews
+    url = format_url(campaign.pk, today_local_nsk_date, "") + f"&my_interviews=1"
+    response = client.get(url)
+    assert len(response.context["interviews"]) == 0
 
 @pytest.mark.django_db
 def test_interview_invitations_create_view(client, settings):

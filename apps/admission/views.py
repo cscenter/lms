@@ -61,7 +61,8 @@ from users.mixins import CuratorOnlyMixin
 from users.models import User
 
 from .constants import (
-    ApplicantStatuses, ContestTypes, InterviewInvitationStatuses, InterviewSections
+    ApplicantStatuses, ContestTypes, FilterOwnInterview, InterviewInvitationStatuses,
+    InterviewSections
 )
 from .selectors import get_interview_invitation, get_occupied_slot
 from .tasks import import_testing_results
@@ -616,11 +617,13 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             else:
                 today_local = now_local(campaign.branch.get_timezone())
             date = formats.date_format(today_local, "SHORT_DATE_FORMAT")
+            my_interviews = FilterOwnInterview.ALL_INTERVIEW
             params = parse.urlencode({
                 'campaign': campaign.pk,
                 'status': [Interview.COMPLETED, Interview.APPROVED],
                 'date_from': date,
-                'date_to': date
+                'date_to': date,
+                'my_interviews': my_interviews
             }, doseq=True)
             url = "{}?{}".format(reverse("admission:interviews:list"), params)
             return HttpResponseRedirect(redirect_to=url)
@@ -640,6 +643,8 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                 "date_from": today,
                 "date_to": today
             }
+        kwargs['request'] = self.request
+
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -657,10 +662,12 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                         context["results_title"] = name
             except ValueError:
                 context["results_title"] = _("All campaigns")
+
         return context
 
     def get_queryset(self):
         branches = Branch.objects.for_site(site_id=settings.SITE_ID)
+
         q = (Interview.objects
              .filter(applicant__campaign__branch__in=branches)
              .select_related("applicant__campaign__branch",
