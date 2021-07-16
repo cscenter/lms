@@ -42,8 +42,8 @@ from admission.forms import (
     InterviewFromStreamForm, InterviewStreamInvitationForm
 )
 from admission.models import (
-    Applicant, Campaign, Comment, Contest, Exam, Interview, InterviewAssignment,
-    InterviewInvitation, InterviewSlot, InterviewStream, Test
+    Applicant, Campaign, Comment, Contest, Interview, InterviewAssignment,
+    InterviewInvitation, InterviewSlot, InterviewStream
 )
 from admission.services import (
     EmailQueueService, UsernameError, create_invitation, create_student_from_applicant,
@@ -61,8 +61,7 @@ from users.mixins import CuratorOnlyMixin
 from users.models import User
 
 from .constants import (
-    ApplicantStatuses, ContestTypes, FilterOwnInterview, InterviewInvitationStatuses,
-    InterviewSections
+    ApplicantStatuses, ContestTypes, InterviewInvitationStatuses, InterviewSections
 )
 from .selectors import get_interview_invitation, get_occupied_slot
 from .tasks import import_testing_results
@@ -617,13 +616,11 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             else:
                 today_local = now_local(campaign.branch.get_timezone())
             date = formats.date_format(today_local, "SHORT_DATE_FORMAT")
-            my_interviews = FilterOwnInterview.ALL_INTERVIEW
             params = parse.urlencode({
                 'campaign': campaign.pk,
                 'status': [Interview.COMPLETED, Interview.APPROVED],
                 'date_from': date,
-                'date_to': date,
-                'my_interviews': my_interviews
+                'date_to': date
             }, doseq=True)
             url = "{}?{}".format(reverse("admission:interviews:list"), params)
             return HttpResponseRedirect(redirect_to=url)
@@ -636,6 +633,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
 
     def get_filterset_kwargs(self, filterset_class):
         kwargs = super().get_filterset_kwargs(filterset_class)
+        kwargs['request'] = self.request
         if not kwargs["data"]:
             today = formats.date_format(timezone.now(), "SHORT_DATE_FORMAT")
             kwargs["data"] = {
@@ -643,8 +641,6 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                 "date_from": today,
                 "date_to": today
             }
-        kwargs['request'] = self.request
-
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -662,12 +658,10 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                         context["results_title"] = name
             except ValueError:
                 context["results_title"] = _("All campaigns")
-
         return context
 
     def get_queryset(self):
         branches = Branch.objects.for_site(site_id=settings.SITE_ID)
-
         q = (Interview.objects
              .filter(applicant__campaign__branch__in=branches)
              .select_related("applicant__campaign__branch",

@@ -11,9 +11,7 @@ from django.forms import SelectMultiple
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from admission.constants import (
-    FilterOwnInterview, InterviewInvitationStatuses, InterviewSections
-)
+from admission.constants import InterviewInvitationStatuses, InterviewSections
 from admission.forms import ApplicantFinalStatusForm
 from admission.models import (
     Applicant, Campaign, Interview, InterviewInvitation, InterviewStream
@@ -58,14 +56,6 @@ class InterviewInvitationStatusFilter(django_filters.ChoiceFilter):
             )
         return super().filter(qs, value)
 
-
-class CuratorOwnInterviewFilter(django_filters.ChoiceFilter):
-    def filter(self, qs, value, **kwargs):
-        if value == '1':
-            return qs.filter(interviewers__in=[self.parent.request.user])
-        else:
-            return qs
-        
 
 # Filters
 class ApplicantFilter(django_filters.FilterSet):
@@ -221,9 +211,7 @@ class InterviewsCuratorFilterForm(forms.Form):
                     css_class="col-xs-2"),
             ),
             Row(
-                Div('', css_class="col-xs-3"),
-                Div('', css_class="col-xs-3"),
-                Div('my_interviews', css_class="col-xs-4")
+                Div('my_interviews', css_class="col-xs-3")
             )
         )
         super().__init__(*args, **kwargs)
@@ -280,14 +268,23 @@ class InterviewsCuratorFilter(InterviewsBaseFilter):
                   .order_by("-branch_id", "-year").all()),
         help_text="")
 
-    my_interviews = CuratorOwnInterviewFilter(choices=FilterOwnInterview.choices,
-                                              label='',
-                                              empty_label=None
-                                              )
+    my_interviews = django_filters.ChoiceFilter(
+        label='Показать',
+        empty_label=None,  # hide empty choice
+        choices=[
+            ('1', "Мои собеседования"),
+            ('', "Все собеседования"),
+        ],
+        method='display_own_interviews')
 
     class Meta(InterviewsBaseFilter.Meta):
         form = InterviewsCuratorFilterForm
         fields = ['campaign', 'status', 'date']
+
+    def display_own_interviews(self, queryset, name, value):
+        if value == '1':
+            return queryset.filter(interviewers=self.request.user)
+        return queryset
 
 
 class ResultsFilter(django_filters.FilterSet):
