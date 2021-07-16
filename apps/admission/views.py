@@ -667,7 +667,6 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
 
     def get_queryset(self):
         branches = Branch.objects.for_site(site_id=settings.SITE_ID)
-        user = self.request.user
 
         q = (Interview.objects
              .filter(applicant__campaign__branch__in=branches)
