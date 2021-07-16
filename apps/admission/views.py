@@ -61,7 +61,8 @@ from users.mixins import CuratorOnlyMixin
 from users.models import User
 
 from .constants import (
-    ApplicantStatuses, ContestTypes, CuratorFilterOwnInterview, InterviewInvitationStatuses, InterviewSections
+    ApplicantStatuses, ContestTypes, FilterOwnInterview, InterviewInvitationStatuses,
+    InterviewSections
 )
 from .selectors import get_interview_invitation, get_occupied_slot
 from .tasks import import_testing_results

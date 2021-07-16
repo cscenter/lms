@@ -11,7 +11,9 @@ from django.forms import SelectMultiple
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from admission.constants import CuratorFilterOwnInterview, InterviewInvitationStatuses, InterviewSections
+from admission.constants import (
+    FilterOwnInterview, InterviewInvitationStatuses, InterviewSections
+)
 from admission.forms import ApplicantFinalStatusForm
 from admission.models import (
     Applicant, Campaign, Interview, InterviewInvitation, InterviewStream
