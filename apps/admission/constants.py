@@ -36,6 +36,7 @@ class ApplicantStatuses(DjangoChoices):
         INTERVIEW_TOBE_SCHEDULED.value,
         INTERVIEW_SCHEDULED.value,
         INTERVIEW_COMPLETED.value,
+        REJECTED_BY_INTERVIEW.value,
         ACCEPT_PAID.value,
         WAITING_FOR_PAYMENT.value,
         ACCEPT.value,
