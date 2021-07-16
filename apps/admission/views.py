@@ -617,7 +617,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             else:
                 today_local = now_local(campaign.branch.get_timezone())
             date = formats.date_format(today_local, "SHORT_DATE_FORMAT")
-            my_interviews = FilterOwnInterview.MY_INTERVIEW
+            my_interviews = FilterOwnInterview.ALL_INTERVIEW
             params = parse.urlencode({
                 'campaign': campaign.pk,
                 'status': [Interview.COMPLETED, Interview.APPROVED],
