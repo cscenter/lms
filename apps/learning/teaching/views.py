@@ -39,8 +39,9 @@ from learning.models import (
     StudentAssignment, StudentGroup, StudentGroupAssignee
 )
 from learning.permissions import (
-    CreateAssignmentComment, EditOwnStudentAssignment, ViewStudentAssignment,
-    ViewStudentAssignmentList
+    CreateAssignmentComment, CreateStudentGroup, DeleteStudentGroup,
+    EditOwnStudentAssignment, UpdateStudentGroup, ViewStudentAssignment,
+    ViewStudentAssignmentList, ViewStudentGroup
 )
 from learning.services import AssignmentService, get_teacher_classes
 from learning.teaching.filters import AssignmentStudentsFilter
@@ -290,10 +291,14 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
                 .order_by('-semester__index', 'meta_course__name'))
 
 
-class StudentGroupListView(TeacherOnlyMixin, generic.ListView):
+class StudentGroupListView(PermissionRequiredMixin, generic.ListView):
     model = StudentGroup
     context_object_name = 'student_group_list'
     template_name = "lms/teaching/student_group_list.html"
+    permission_required = ViewStudentGroup.name
+
+    def get_permission_object(self):
+        return Course.objects.get(id=self.kwargs.get("course_pk"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -304,10 +309,14 @@ class StudentGroupListView(TeacherOnlyMixin, generic.ListView):
         return StudentGroup.objects.filter(course_id=self.kwargs.get("course_pk"))
 
 
-class StudentGroupDetailView(TeacherOnlyMixin, generic.DetailView):
+class StudentGroupDetailView(PermissionRequiredMixin, generic.DetailView):
     model = StudentGroup
     context_object_name = 'student_group_detail'
     template_name = "lms/teaching/student_group_view.html"
+    permission_required = ViewStudentGroup.name
+
+    def get_permission_object(self):
+        return Course.objects.get(id=self.kwargs.get("course_pk"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -328,11 +337,15 @@ class StudentGroupDetailView(TeacherOnlyMixin, generic.DetailView):
         return StudentGroup.objects.get(id=self.kwargs.get("group_pk"))
 
 
-class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
+class StudentGroupUpdateView(PermissionRequiredMixin, generic.UpdateView):
     model = StudentGroup
     context_object_name = 'student_group_update'
     template_name = "lms/teaching/student_group_update.html"
     form_class = StudentGroupForm
+    permission_required = UpdateStudentGroup.name
+
+    def get_permission_object(self):
+        return StudentGroup.objects.get(id=self.kwargs.get("pk"))
 
     def get_success_url(self):
         return reverse("teaching:student_group_detail", kwargs={
@@ -379,11 +392,15 @@ class StudentGroupUpdateView(TeacherOnlyMixin, generic.UpdateView):
         return super().form_valid(form)
 
 
-class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
+class StudentGroupCreateView(PermissionRequiredMixin, generic.CreateView):
     model = StudentGroup
     context_object_name = 'student_group_create'
     template_name = "lms/teaching/student_group_add.html"
     form_class = StudentGroupAddForm
+    permission_required = CreateStudentGroup.name
+
+    def get_permission_object(self):
+        return Course.objects.get(id=self.kwargs.get("course_pk"))
 
     def get_success_url(self):
         return reverse("teaching:student_group_list",
@@ -421,10 +438,14 @@ class StudentGroupCreateView(TeacherOnlyMixin, generic.CreateView):
         return super().form_valid(form)
 
 
-class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
+class StudentGroupDeleteView(PermissionRequiredMixin, generic.DeleteView):
     model = StudentGroup
     context_object_name = 'student_group_delete'
     template_name = "lms/teaching/student_group_delete.html"
+    permission_required = DeleteStudentGroup.name
+
+    def get_permission_object(self):
+        return StudentGroup.objects.get(id=self.kwargs.get("pk"))
 
     def get_success_url(self):
         return reverse("teaching:student_group_list",
@@ -442,11 +463,15 @@ class StudentGroupDeleteView(TeacherOnlyMixin, generic.DeleteView):
         return context
 
 
-class StudentGroupStudentUpdateView(TeacherOnlyMixin, generic.UpdateView):
+class StudentGroupStudentUpdateView(PermissionRequiredMixin, generic.UpdateView):
     model = Enrollment
     context_object_name = 'student_group_student_update'
     template_name = "lms/teaching/student_group_student_update.html"
     form_class = StudentEnrollmentForm
+    permission_required = UpdateStudentGroup.name
+
+    def get_permission_object(self):
+        return StudentGroup.objects.get(id=self.kwargs.get("pk"))
 
     def get_success_url(self):
         return reverse("teaching:student_group_detail",
