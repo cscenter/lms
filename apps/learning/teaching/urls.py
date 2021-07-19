@@ -7,7 +7,9 @@ from learning.gradebook import views as gv
 from learning.teaching.views import (
     AssignmentCommentUpdateView, AssignmentDetailView, AssignmentListView,
     CalendarFullView, CalendarPersonalView, CourseListView, GradeBookListView,
-    StudentAssignmentCommentCreateView, StudentAssignmentDetailView
+    StudentAssignmentCommentCreateView, StudentAssignmentDetailView,
+    StudentGroupCreateView, StudentGroupDeleteView, StudentGroupDetailView,
+    StudentGroupListView, StudentGroupStudentUpdateView, StudentGroupUpdateView
 )
 from learning.teaching.views import TimetableView as TeacherTimetable
 
@@ -21,16 +23,11 @@ urlpatterns = [
     path('courses/', include([
         path('', CourseListView.as_view(), name='course_list'),
         path('<int:course_pk>/groups/', include([
-            path('', StudentGroupFilterListView.as_view(), name='student_group_list'),
+            path('', StudentGroupListView.as_view(), name='student_group_list'),
             path('create/', StudentGroupCreateView.as_view(), name='student_group_create'),
             path('<int:pk>/update/', StudentGroupUpdateView.as_view(), name='student_group_update'),
             path('<int:pk>/delete/', StudentGroupDeleteView.as_view(), name='student_group_delete'),
             path('<int:group_pk>/', StudentGroupDetailView.as_view(), name='student_group_detail'),
-            path('<int:group_pk>/assignee/', include([
-                path('add/', StudentGroupAssigneeCreateView.as_view(), name='student_group_assignee_create'),
-                path('<int:pk>/delete/', StudentGroupAssigneeDeleteView.as_view(), name='student_group_assignee_delete'),
-                path('<int:pk>/update/', StudentGroupAssigneeUpdateView.as_view(), name='student_group_assignee_update'),
-            ])),
             path('<int:group_pk>/student/<int:pk>/update/', StudentGroupStudentUpdateView.as_view(), name='student_group_student_update'),
 
         ])),

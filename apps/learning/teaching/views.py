@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import Q
+from django.db.transaction import atomic
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
@@ -29,11 +30,13 @@ from courses.views.calendar import MonthEventsCalendarView
 from learning.api.serializers import AssignmentScoreSerializer
 from learning.calendar import get_all_calendar_events, get_teacher_calendar_events
 from learning.forms import (
-    AssignmentCommentForm, AssignmentModalCommentForm, AssignmentScoreForm
+    AssignmentCommentForm, AssignmentModalCommentForm, AssignmentScoreForm,
+    StudentEnrollmentForm, StudentGroupAddForm, StudentGroupForm
 )
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import (
-    AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
+    AssignmentComment, AssignmentGroup, AssignmentSubmissionTypes, Enrollment,
+    StudentAssignment, StudentGroup, StudentGroupAssignee
 )
 from learning.permissions import (
     CreateAssignmentComment, EditOwnStudentAssignment, ViewStudentAssignment,
@@ -45,7 +48,6 @@ from learning.utils import humanize_duration
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView
 from users.mixins import TeacherOnlyMixin
-from django.db.transaction import atomic
 
 
 def set_query_parameter(url, param_name, param_value):

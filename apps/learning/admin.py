@@ -4,7 +4,6 @@ from django.contrib.contenttypes.admin import GenericTabularInline
 from django.db import models as db_models
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-from django.contrib.contenttypes.admin import GenericTabularInline
 
 from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
@@ -12,8 +11,8 @@ from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseGroupModes, StudentGroupTypes
 from learning.models import (
-    CourseInvitation, GraduateProfile, Invitation, StudentAssignment,
-    StudentGroup, StudentGroupAssignee, AssignmentGroup
+    AssignmentGroup, CourseInvitation, GraduateProfile, Invitation, StudentAssignment,
+    StudentGroup, StudentGroupAssignee
 )
 from users.models import StudentStatusLog
 
@@ -178,6 +177,7 @@ class StudentGroupAssigneeInline(admin.TabularInline):
     model = StudentGroupAssignee
     list_display = ('assignee',)
     exclude = ('assignment',)
+
 
 class StudentGroupAdmin(BaseModelAdmin):
     list_display = ('name', 'course', 'type')

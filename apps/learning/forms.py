@@ -2,7 +2,9 @@ import os
 
 from crispy_forms.bootstrap import FormActions, StrictButton
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import HTML, BaseInput, Div, Field, Hidden, Layout, Submit
+from crispy_forms.layout import (
+    HTML, BaseInput, Button, Div, Field, Hidden, Layout, Submit
+)
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -16,7 +18,9 @@ from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
 from courses.models import Course, CourseTeacher
 from grading.services import CheckerService, SubmissionService
-from learning.models import AssignmentSubmissionTypes, GraduateProfile
+from learning.models import (
+    AssignmentSubmissionTypes, Enrollment, GraduateProfile, StudentGroup
+)
 
 from .models import AssignmentComment
 
