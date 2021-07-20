@@ -105,6 +105,7 @@ top_menu = [
             MenuItem(pgettext_lazy("menu", "Анкеты"), '/admission/applicants/', weight=10, for_staff=True),
             MenuItem(pgettext_lazy("menu", "Отправка приглашений"), url=reverse("admission:interviews:invitations:send"), weight=20, for_staff=True),
             MenuItem(pgettext_lazy("menu", "Приглашения"), url=reverse("admission:interviews:invitations:list"), weight=20, for_staff=True),
+            MenuItem(pgettext_lazy("menu", "Результаты"), reverse("admission:results:dispatch"), weight=30, for_staff=True),
         ],
         permissions=(
             "learning.view_admission_menu",
