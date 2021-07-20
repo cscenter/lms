@@ -415,3 +415,50 @@ def test_student_groups_detail(client):
     assert student.last_name in soup.find(id="student_list").text
     assert course_teacher.teacher.last_name in soup.find(id="teacher_list").text
 
+
+@pytest.mark.django_db
+def test_change_student_between_groups(client):
+    """
+    Checking the correctness of the student's student group change
+    """
+
+    teacher = TeacherFactory()
+    curator = CuratorFactory()
+    student1 = StudentFactory()
+    student2 = StudentFactory()
+    s = SemesterFactory.create_current(for_branch=Branches.SPB)
+    course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    sg1 = StudentGroupFactory.create(course=course)
+    sg2 = StudentGroupFactory.create(course=course)
+    enrollment1 = EnrollmentFactory.create(student=student1, course=course, student_group=sg1)
+    enrollment2 = EnrollmentFactory.create(student=student2, course=course, student_group=sg2)
+    course_teacher = CourseTeacherFactory()
+    StudentGroupAssigneeFactory(assignee=course_teacher, student_group=sg1)
+
+    client.login(teacher)
+
+    # check student1
+    change_group_for_student_url = reverse("teaching:student_group_student_update",
+                                           kwargs={'course_pk': str(course.id),
+                                                   'group_pk': str(sg1.id),
+                                                   'pk': str(enrollment1.id),
+                                                   'student_pk': str(enrollment1.student.id)})
+    response = client.get(change_group_for_student_url)
+    assert response.status_code == 200
+    soup = BeautifulSoup(response.content, "html.parser")
+    find_groups_name = soup.find(id='div_id_student_group').text
+    assert sg1.name in find_groups_name
+    assert sg2.name in find_groups_name
+
+    # check student2
+    change_group_for_student_url = reverse("teaching:student_group_student_update",
+                                           kwargs={'course_pk': str(course.id),
+                                                   'group_pk': str(sg2.id),
+                                                   'pk': str(enrollment2.id),
+                                                   'student_pk': str(enrollment2.student.id)})
+    response = client.get(change_group_for_student_url)
+    assert response.status_code == 200
+    soup = BeautifulSoup(response.content, "html.parser")
+    find_groups_name = soup.find(id='div_id_student_group').text
+    assert sg1.name in find_groups_name
+    assert sg2.name in find_groups_name
