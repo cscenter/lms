@@ -50,24 +50,32 @@
                         </td>
                         <td class="applicant">
                             <a href="{{ interview.get_absolute_url }}">{{ interview.applicant.full_name }}</a>
-                            {% if interview.venue %}<br><span class="text-muted">{{ interview.venue }}</span>{% endif %}
                         </td>
                         <td>
-                            <ul class="members">
+                            <ul class="members hidden-print">
                                 {% for interviewer in interview.interviewers.all %}
                                 <li>
                                     {% if interviewer.photo %}
                                         {% user_thumbnail interviewer interviewer.ThumbnailSize.INTERVIEW_LIST as im %}
                                             <a target="_blank" href="{{ interviewer.get_absolute_url }}">
                                                 <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name }}" alt="{{ interviewer.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                                <span style="position: absolute; text-indent: -10000px;">{{ interviewer.get_full_name }}</span>
                                             </a>
                                         {% enduser_thumbnail %}
                                     {% else %}
-                                        <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name }}">{{ interviewer.first_name|slice:":1" }}{{ interviewer.last_name|slice:":1" }}</div>
+                                        <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name }}">
+                                          {{ interviewer.first_name|slice:":1" }} {{ interviewer.last_name|slice:":1" }}
+                                          <span style="position: absolute; text-indent: -10000px;">{{ interviewer.get_full_name }}</span>
+                                        </div>
                                     {% endif %}
                                 </li>
                                 {% endfor %}
                             </ul>
+                            <div class="visible-print-block">
+                              {% for interviewer in interview.interviewers.all %}
+                                {{ interviewer.get_full_name }}
+                              {% endfor %}
+                            </div>
                         </td>
                         <td>
                             {% if interview.status == "completed" %}
