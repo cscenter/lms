@@ -224,8 +224,7 @@ def init_project_for_course(course, skip_users=False):
                 .select_related("teacher"))
     # Creates separated self-owned group for project reviewers
     reviewers_group_name = get_reviewers_group_name(course)
-    reviewers_group_members = [get_ldap_username(t.teacher, escape=False)
-                               for t in teachers]
+    reviewers_group_members = [get_ldap_username(t.teacher) for t in teachers]
     reviewers_group_res = client.create_group(reviewers_group_name, {
         "members": reviewers_group_members
     })
@@ -353,7 +352,7 @@ def add_test_student_to_project(client: Gerrit, course: Course,
 
 
 def create_user_group(client: Gerrit, user: User):
-    user_group = get_ldap_username(user, escape=False)
+    user_group = get_ldap_username(user)
     group_res = client.create_single_user_group(user_group)
     if not group_res.created:
         if not group_res.already_exists:

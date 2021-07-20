@@ -2,6 +2,7 @@ import base64
 from typing import Optional
 
 import ldif
+from ldap.dn import escape_dn_chars
 
 from django.conf import settings
 from django.utils.encoding import force_bytes
@@ -10,26 +11,13 @@ from code_reviews.constants import GROUPS_IMPORT_TO_GERRIT
 from users.models import User
 
 
-def get_ldap_username(user: User, escape=True):
+def get_ldap_username(user: User):
     """
     Portable Filename Character Set (according to POSIX.1-2017) is used for
     username since @ in a username can be misleading when you are connecting
     over ssh. `foo@localhost.ru@domain.ltd` really looks weird.
     """
-    user_name = user.email.replace("@", ".")
-    # Escape special chars with one backslash
-    if escape:
-        user_name = user_name.translate(str.maketrans({
-            "+": "\\+",
-            ";": "\\;",
-            ",": "\\,",
-            "\\": "\\\\",
-            "\"": "\\\"",
-            "<": "\\<",
-            ">": "\\>",
-            "#": "\\#",
-        }))
-    return user_name
+    return user.email.replace("@", ".")
 
 
 def get_password_hash(user) -> Optional[bytes]:
@@ -68,7 +56,8 @@ def user_to_ldap_entry(user: User, domain_component=settings.LDAP_DB_SUFFIX):
     dn = f"uid={uid},ou=users,{domain_component}"
     password_hash = get_password_hash(user)
     return {
-        'dn': dn,
+        # Escape special chars with one backslash
+        'dn': escape_dn_chars(dn),
         'objectClass': [b'inetOrgPerson', b'simpleSecurityObject'],
         'uid': [force_bytes(uid)],
         'employeeNumber': [force_bytes(user.pk)],
