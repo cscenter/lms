@@ -53,11 +53,13 @@ def user_to_ldap_entry(user: User, domain_component=settings.LDAP_DB_SUFFIX):
             since it's not used as a part of `modlist`
     """
     uid = get_ldap_username(user)
-    dn = f"uid={uid},ou=users,{domain_component}"
+    # XXX: It's unsafe to escape the whole dn value since open LDAP
+    # returns `invalid DN` in that case
+    dn = f"uid={escape_dn_chars(uid)},ou=users,{domain_component}"
     password_hash = get_password_hash(user)
     return {
         # Escape special chars with one backslash
-        'dn': escape_dn_chars(dn),
+        'dn': dn,
         'objectClass': [b'inetOrgPerson', b'simpleSecurityObject'],
         'uid': [force_bytes(uid)],
         'employeeNumber': [force_bytes(user.pk)],
