@@ -471,7 +471,7 @@ class StudentGroupStudentUpdateView(PermissionRequiredMixin, generic.UpdateView)
     permission_required = UpdateStudentGroup.name
 
     def get_permission_object(self):
-        return StudentGroup.objects.get(id=self.kwargs.get("pk"))
+        return StudentGroup.objects.get(id=self.kwargs.get("group_pk"))
 
     def get_success_url(self):
         return reverse("teaching:student_group_detail",

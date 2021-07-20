@@ -355,4 +355,4 @@ class StudentEnrollmentForm(forms.ModelForm):
         self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
                                      .format(reverse("teaching:student_group_detail",
                                                      kwargs={'course_pk': reverse_param['course_pk'],
-            'group_pk': reverse_param['group_pk']}))))
+                                                             'group_pk': reverse_param['group_pk']}))))
