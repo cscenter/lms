@@ -2,51 +2,52 @@
 {% block content %}
     <div class="container">
         <div class="row">
-        <div class="col-xs-12 h2-and-buttons">
-                <h2><a href="{{ url("teaching:student_group_list", course_pk=course_id) }}">
-                    <span class="fa fa-angle-left"> </span></a>
-                    {{ student_group_detail.name }}
-                <br><small>{{ course }}<br></small></h2>
-                <div class="btn-toolbar">
-                    <a href="{{ url("teaching:student_group_update", course_pk=course_id, pk=group_id) }}"
-                       class="btn btn-primary" role="button">Редактировать</a>
-                    <a href="{{ url("teaching:student_group_delete", course_pk=course_id, pk=group_id) }}"
-                       class="btn btn-danger" role="button">Удалить</a>
-                </div>
-        <hr>
-        </div>
-        <div id="teacher_list" class="col-xs-12">
-            <span>{% if group_assignees.count() == 1 %}<b>Ответственный:</b> {% else %}<b>Ответственные:</b> {% endif %}</span>
-            {% if group_assignees %}
-                {% for group_assignee in group_assignees %}
-                    {{group_assignee.assignee.teacher.last_name + ' '
-                            + group_assignee.assignee.teacher.first_name}}{%if not loop.last %},{% endif %}
-                {% endfor %}
-            {% else %}
-                Список ответственных пуст... :(
-            {% endif %}
-        <hr>
-        </div>
-        <div id="student_list" class="col-xs-12">
-            <h3>Список студентов группы</h3>
-            {% if enrollments %}
-                <table class="table table-borderless">
-                    <tr height="10px"> </tr>
-                    {% for enrollment in enrollments %}
-                        <tr>
-                            <td width="50%" class="align-middle">
-                                <a href="{{ url("user_detail", pk=enrollment.student.id) }}">{{ enrollment.student }}</a>
-                            </td>
-                            <td>
-                                <a href="{{ url("teaching:student_group_student_update", course_pk=course_id,
-                                    group_pk=group_id, pk=enrollment.id, student_pk=enrollment.student.id) }}">Сменить группу</a>
-                            </td>
-                        </tr>
+            <div class="col-xs-12 h2-and-buttons">
+                    <h2><a href="{{ url("teaching:student_group_list", course_pk=course_id) }}">
+                        <span class="fa fa-angle-left"> </span></a>
+                        {{ student_group_detail.name }}
+                    <br><small>{{ course }}<br></small></h2>
+                    <div class="btn-toolbar">
+                        <a href="{{ url("teaching:student_group_update", course_pk=course_id, pk=group_id) }}"
+                           class="btn btn-primary" role="button">Редактировать</a>
+                        <a href="{{ url("teaching:student_group_delete", course_pk=course_id, pk=group_id) }}"
+                           class="btn btn-danger" role="button">Удалить</a>
+                    </div>
+            <hr>
+            </div>
+            <div id="teacher_list" class="col-xs-12">
+                <span>{% if group_assignees.count() == 1 %}<b>Ответственный:</b> {% else %}<b>Ответственные:</b> {% endif %}</span>
+                {% if group_assignees %}
+                    {% for group_assignee in group_assignees %}
+                        {{group_assignee.assignee.teacher.last_name + ' '
+                                + group_assignee.assignee.teacher.first_name}}{%if not loop.last %},{% endif %}
                     {% endfor %}
-                </table>
-            {% else %}
-                Список студентов группы пуст... :(
-            {% endif %}
+                {% else %}
+                    Список ответственных пуст... :(
+                {% endif %}
+            <hr>
+            </div>
+            <div id="student_list" class="col-xs-12">
+                <h3>Список студентов группы</h3>
+                {% if enrollments %}
+                    <table class="table table-borderless">
+                        <tr height="10px"> </tr>
+                        {% for enrollment in enrollments %}
+                            <tr>
+                                <td width="50%" class="align-middle">
+                                    <a href="{{ url("user_detail", pk=enrollment.student.id) }}">{{ enrollment.student }}</a>
+                                </td>
+                                <td>
+                                    <a href="{{ url("teaching:student_group_student_update", course_pk=course_id,
+                                        group_pk=group_id, pk=enrollment.id, student_pk=enrollment.student.id) }}">Сменить группу</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    Список студентов группы пуст... :(
+                {% endif %}
+            </div>
         </div>
     </div>
 {% endblock content %}
