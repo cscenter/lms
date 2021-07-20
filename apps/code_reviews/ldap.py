@@ -16,7 +16,18 @@ def get_ldap_username(user: User):
     username since @ in a username can be misleading when you are connecting
     over ssh. `foo@localhost.ru@domain.ltd` really looks weird.
     """
-    return user.email.replace("@", ".")
+    user_name = user.email.replace("@", ".")
+    # Escape special chars with one backslash
+    return user_name.translate(str.maketrans({
+        "+": "\\+",
+        ";": "\\;",
+        ",": "\\,",
+        "\\": "\\\\",
+        "\"": "\\\"",
+        "<": "\\<",
+        ">": "\\>",
+        "#": "\\#",
+    }))
 
 
 def get_password_hash(user) -> Optional[bytes]:
