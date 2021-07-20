@@ -10,7 +10,7 @@ from code_reviews.constants import GROUPS_IMPORT_TO_GERRIT
 from users.models import User
 
 
-def get_ldap_username(user: User):
+def get_ldap_username(user: User, escape=True):
     """
     Portable Filename Character Set (according to POSIX.1-2017) is used for
     username since @ in a username can be misleading when you are connecting
@@ -18,16 +18,18 @@ def get_ldap_username(user: User):
     """
     user_name = user.email.replace("@", ".")
     # Escape special chars with one backslash
-    return user_name.translate(str.maketrans({
-        "+": "\\+",
-        ";": "\\;",
-        ",": "\\,",
-        "\\": "\\\\",
-        "\"": "\\\"",
-        "<": "\\<",
-        ">": "\\>",
-        "#": "\\#",
-    }))
+    if escape:
+        user_name = user_name.translate(str.maketrans({
+            "+": "\\+",
+            ";": "\\;",
+            ",": "\\,",
+            "\\": "\\\\",
+            "\"": "\\\"",
+            "<": "\\<",
+            ">": "\\>",
+            "#": "\\#",
+        }))
+    return user_name
 
 
 def get_password_hash(user) -> Optional[bytes]:
