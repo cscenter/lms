@@ -39,7 +39,7 @@
                             </td>
                             <td>
                                 <a href="{{ url("teaching:student_group_student_update", course_pk=course_id,
-                                    group_pk=group_id, pk=enrollment.student.id) }}">Сменить группу</a>
+                                    group_pk=group_id, pk=enrollment.id, student_pk=enrollment.student.id) }}">Сменить группу</a>
                             </td>
                         </tr>
                     {% endfor %}

@@ -28,7 +28,8 @@ urlpatterns = [
             path('<int:pk>/update/', StudentGroupUpdateView.as_view(), name='student_group_update'),
             path('<int:pk>/delete/', StudentGroupDeleteView.as_view(), name='student_group_delete'),
             path('<int:group_pk>/', StudentGroupDetailView.as_view(), name='student_group_detail'),
-            path('<int:group_pk>/student/<int:pk>/update/', StudentGroupStudentUpdateView.as_view(), name='student_group_student_update'),
+            path('<int:group_pk>/enrollment/<int:pk>/student/<int:student_pk>/update/',
+                 StudentGroupStudentUpdateView.as_view(), name='student_group_student_update'),
 
         ])),
 
