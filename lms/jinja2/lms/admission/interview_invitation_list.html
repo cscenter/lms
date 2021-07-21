@@ -95,7 +95,7 @@
             <tbody>
               {% for interview_stream in interview_streams %}
                 <tr>
-                  <td>
+                  <td class="nowrap">
                     {{ interview_stream.date|date("j E Y") }}<br>
                     {{ interview_stream.start_at|date("H:i") }}-{{ interview_stream.end_at|date("H:i") }}
                   </td>
