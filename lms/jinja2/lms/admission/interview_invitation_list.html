@@ -1,5 +1,7 @@
 {% extends "lms/layouts/v1_base.html" %}
 
+{% import "lms/macros/_global.jinja2" as macros_global %}
+
 {% block title %}Приглашения на собеседования{% endblock title %}
 
 {% block body_attrs %} class="gray" data-init-sections="selectpickers,tooltips"{% endblock body_attrs %}
@@ -78,6 +80,7 @@
             {% endfor %}
             </tbody>
           </table>
+          {{ macros_global.pagination(paginator, is_paginated, page, paginator_url) }}
         </div>
         <div class="tab-pane" id="interview-streams">
           <table class="table">

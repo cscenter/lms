@@ -386,11 +386,24 @@ class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseL
                 },
             }
             interview_invitations.append(student_invitation)
+    
+        campaign = input_serializer.validated_data['campaign']
+        section = input_serializer.validated_data['section']
+        paginator = Paginator(interview_invitations, 50)
+        page_number = self.request.GET.get('page')
+        page = paginator.get_page(page_number)
+        is_paginated = page.has_other_pages()
+        paginator_url = reverse("admission:interviews:invitations:list")
+        paginator_url = f"{paginator_url}?campaign={campaign.id}&section={section}"
 
         context = {
             "interview_stream_filter_form": interview_stream_filterset.form,
             "interview_invitation_filter_form": interview_filterset.form,
-            "interview_invitations": interview_invitations,
+            "interview_invitations": page.object_list,
+            'is_paginated': is_paginated,
+            'paginator_url': paginator_url,
+            'paginator': paginator,
+            'page': page,
             "interview_streams": interview_streams
         }
         return context
