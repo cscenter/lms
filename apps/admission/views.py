@@ -293,7 +293,6 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         paginator = Paginator(applicants, 50)
         page_number = self.request.GET.get('page')
         page = paginator.get_page(page_number)
-        is_paginated = page.has_other_pages()
         paginator_url = reverse("admission:interviews:invitations:send")
         paginator_url = f"{paginator_url}?campaign={campaign.id}&section={section}"
 
@@ -301,7 +300,6 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
             'stream_filter_form': interview_stream_filterset.form,
             'stream_form': InterviewStreamInvitationForm(streams=interview_stream_filterset.qs),
             'applicants': page.object_list,
-            'is_paginated': is_paginated,
             'paginator_url': paginator_url,
             'paginator': paginator,
             'page': page,
@@ -337,7 +335,7 @@ class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseL
     def post(self, request, *args, **kwargs):
         return self.get(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> Dict[str, Any]:
         input_serializer = kwargs['input_serializer']
         interview_stream_filterset = get_interview_stream_filterset(input_serializer)
         invitations_waiting_for_response = Count(Case(
@@ -366,8 +364,16 @@ class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseL
                                                         prefix="interview-invitation",
                                                         queryset=invitation_queryset)
 
+        paginator = Paginator(interview_filterset.qs.distinct(), 50)
+        page_number = self.request.GET.get('page')
+        page = paginator.get_page(page_number)
+        campaign = input_serializer.validated_data['campaign']
+        section = input_serializer.validated_data['section']
+        paginator_url = reverse("admission:interviews:invitations:list")
+        paginator_url = f"{paginator_url}?campaign={campaign.id}&section={section}"
+
         interview_invitations = []
-        for invitation in interview_filterset.qs.distinct():
+        for invitation in page.object_list:
             applicant = invitation.applicant
             interview = invitation.interview
             # Avoid additional queries on fetching time zone
@@ -386,21 +392,11 @@ class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseL
                 },
             }
             interview_invitations.append(student_invitation)
-    
-        campaign = input_serializer.validated_data['campaign']
-        section = input_serializer.validated_data['section']
-        paginator = Paginator(interview_invitations, 50)
-        page_number = self.request.GET.get('page')
-        page = paginator.get_page(page_number)
-        is_paginated = page.has_other_pages()
-        paginator_url = reverse("admission:interviews:invitations:list")
-        paginator_url = f"{paginator_url}?campaign={campaign.id}&section={section}"
 
         context = {
             "interview_stream_filter_form": interview_stream_filterset.form,
             "interview_invitation_filter_form": interview_filterset.form,
-            "interview_invitations": page.object_list,
-            'is_paginated': is_paginated,
+            "interview_invitations": interview_invitations,
             'paginator_url': paginator_url,
             'paginator': paginator,
             'page': page,

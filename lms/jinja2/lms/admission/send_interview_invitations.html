@@ -1,7 +1,5 @@
 {% extends "lms/layouts/v1_base.html" %}
 
-{% import "lms/macros/_global.jinja2" as macros_global %}
-
 {% block title %}Отправка приглашений{% endblock title %}
 
 {% block body_attrs %} class="gray" data-init-sections="selectpickers,send_interview_invitations"{% endblock body_attrs %}
@@ -77,7 +75,7 @@
               {% endif %}
               </tbody>
             </table>
-            {{ macros_global.pagination(paginator, is_paginated, page, paginator_url) }}
+            {{ macros.pagination(paginator, page, paginator_url) }}
           </div>
         </form>
       </div>

@@ -1,7 +1,7 @@
+{% import "lms/macros/_global.jinja2" as macros %}
 {% set LANGUAGE_CODE = request.LANGUAGE_CODE %}
 {% set BRANCH_LIST = get_branches(request)['BRANCH_LIST'] %}
 {% set available_languages = [{'code': 'ru', 'name_local': 'Русский'}, {'code': 'en', 'name_local': 'English'}] %}
-
 <!DOCTYPE html>
 <html>
   <head>

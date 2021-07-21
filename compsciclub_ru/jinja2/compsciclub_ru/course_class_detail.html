@@ -1,7 +1,5 @@
 {% extends "lms/layouts/v1_base.html" %}
 
-{% import "lms/macros/_global.jinja2" as macros -%}
-
 {% set tz = request.user.time_zone or request.branch.get_timezone() %}
 
 {% block content %}
