@@ -40,7 +40,7 @@
     </svg>
 {%- endmacro %}
 
-{% macro pagination_page(paginator, is_paginated, page, paginator_url) -%}
+{% macro pagination(paginator, is_paginated, page, paginator_url) -%}
     {% if is_paginated %}
         <ul class="pagination">
               {% if page.has_previous() %}
