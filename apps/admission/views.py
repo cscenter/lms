@@ -53,6 +53,7 @@ from admission.services import (
 from core.models import Branch
 from core.timezone import get_now_utc, now_local
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
+from core.typings import AuthenticatedHttpRequest
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
 from tasks.models import Task
@@ -406,6 +407,7 @@ class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseL
 
 
 class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
+    request: AuthenticatedHttpRequest
     context_object_name = 'applicants'
     model = Applicant
     template_name = "admission/applicant_list.html"
@@ -425,7 +427,7 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
                                                     Value(-1)))
             .order_by("-exam__score_coalesce", "-test__score_coalesce", "-pk"))
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: AuthenticatedHttpRequest, *args, **kwargs):
         filterset_class = self.get_filterset_class()
         self.filterset = self.get_filterset(filterset_class)
 
