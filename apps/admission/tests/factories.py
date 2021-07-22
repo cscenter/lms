@@ -10,8 +10,9 @@ from django.utils import timezone
 
 from admission.constants import WHERE_DID_YOU_LEARN, InterviewFormats
 from admission.models import (
-    Applicant, Campaign, Comment, Contest, Exam, Interview, InterviewAssignment,
-    InterviewFormat, InterviewInvitation, InterviewSlot, InterviewStream, Test
+    Acceptance, Applicant, Campaign, Comment, Contest, Exam, Interview,
+    InterviewAssignment, InterviewFormat, InterviewInvitation, InterviewSlot,
+    InterviewStream, Test
 )
 from admission.signals import post_save_interview
 from core.tests.factories import (
@@ -217,3 +218,11 @@ class InterviewInvitationFactory(factory.django.DjangoModelFactory):
         if extracted:
             for stream in extracted:
                 self.streams.add(stream)
+
+
+class AcceptanceFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Acceptance
+
+    applicant = factory.SubFactory(ApplicantFactory)
+

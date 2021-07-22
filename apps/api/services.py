@@ -1,7 +1,9 @@
 import binascii
 import random
+import secrets
+import string
 from os import urandom as generate_bytes
-from typing import Tuple
+from typing import Sequence, Tuple
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -16,13 +18,17 @@ from api.settings import (
 )
 
 
-def create_token_string() -> str:
+def generate_random_string(length: int, *, alphabet: Sequence[str]) -> str:
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
+
+def create_token_string(length: int = AUTH_TOKEN_CHARACTER_LENGTH) -> str:
     return binascii.hexlify(
-        generate_bytes(int(AUTH_TOKEN_CHARACTER_LENGTH / 2))
+        generate_bytes(length // 2)
     ).decode()
 
 
-def hash_token(token) -> str:
+def hash_token(token: str) -> str:
     """
     Calculates the hash of a token.
 

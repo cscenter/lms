@@ -3,6 +3,7 @@ from typing import Dict, List, NamedTuple, NewType, Union
 
 from bitfield import BitField
 from cryptography.fernet import Fernet
+from model_utils.fields import AutoCreatedField, AutoLastModifiedField
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -319,3 +320,25 @@ class University(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class TimestampedModel(models.Model):
+    """
+    Slightly modified version of model_utils.models.TimeStampedModel
+    """
+    created_at = AutoCreatedField(_('created'))
+    modified_at = AutoLastModifiedField(_('modified'))
+
+    def save(self, *args, **kwargs):
+        """
+        Overriding the save method in order to make sure that
+        modified field is updated even if it is not given as
+        a parameter to the update field argument.
+        """
+        update_fields = kwargs.get('update_fields', None)
+        if update_fields:
+            kwargs['update_fields'] = set(update_fields).union({'modified_at'})
+        super().save(*args, **kwargs)
+
+    class Meta:
+        abstract = True

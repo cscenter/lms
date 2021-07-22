@@ -12,8 +12,9 @@ from django.utils.translation import gettext_lazy as _
 from admission.forms import InterviewStreamChangeForm
 from admission.import_export import ExamRecordResource, OnlineTestRecordResource
 from admission.models import (
-    Applicant, Campaign, Comment, Contest, Exam, Interview, InterviewAssignment,
-    InterviewFormat, InterviewInvitation, InterviewSlot, InterviewStream, Test
+    Acceptance, Applicant, Campaign, Comment, Contest, Exam, Interview,
+    InterviewAssignment, InterviewFormat, InterviewInvitation, InterviewSlot,
+    InterviewStream, Test
 )
 from admission.roles import Roles
 from admission.services import EmailQueueService
@@ -352,6 +353,27 @@ class InterviewInvitationAdmin(admin.ModelAdmin):
         return obj.applicant.campaign.branch
 
 
+class AcceptanceAdmin(admin.ModelAdmin):
+    list_display = ('applicant_name', 'get_campaign', 'status')
+    list_filter = ['status', 'applicant__campaign']
+    raw_id_fields = ("applicant",)
+    list_select_related = ('applicant__campaign',)
+    search_fields = ['applicant__last_name']
+
+    @meta(_("Applicant"))
+    def applicant_name(self, obj):
+        return obj.applicant.full_name
+
+    @meta(_("Campaign"))
+    def get_campaign(self, obj):
+        return obj.applicant.campaign
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj is None or obj.pk is None:
+            return []
+        return ['confirmation_code']
+
+
 admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Applicant, ApplicantAdmin)
 admin.site.register(Test, OnlineTestAdmin)
@@ -364,3 +386,4 @@ admin.site.register(Comment, InterviewCommentAdmin)
 admin.site.register(InterviewStream, InterviewStreamAdmin)
 admin.site.register(InterviewSlot, InterviewSlotAdmin)
 admin.site.register(InterviewInvitation, InterviewInvitationAdmin)
+admin.site.register(Acceptance, AcceptanceAdmin)

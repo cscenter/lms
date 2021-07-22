@@ -1,4 +1,5 @@
 import datetime
+import string
 import uuid
 from typing import NamedTuple, Optional, Type
 
@@ -8,15 +9,14 @@ from multiselectfield import MultiSelectField
 from post_office.models import EmailTemplate
 
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist, ValidationError
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models import Count, OuterRef, Q, Subquery, Value, query
 from django.db.models.functions import Coalesce
 from django.utils import numberformat, timezone
-from django.utils.encoding import smart_str
+from django.utils.encoding import force_bytes, smart_str
 from django.utils.formats import date_format, time_format
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -27,9 +27,11 @@ from admission.constants import (
     YandexDataSchoolInterviewRatingSystem
 )
 from admission.utils import get_next_process, slot_range
+from api.services import generate_hash, generate_random_string
+from api.settings import DIGEST_MAX_LENGTH
 from core.db.fields import ScoreField
 from core.db.mixins import DerivableFieldsMixin
-from core.models import Branch, Location
+from core.models import Branch, Location, TimestampedModel
 from core.timezone import TimezoneAwareMixin
 from core.timezone.fields import TimezoneAwareDateTimeField
 from core.urls import reverse
@@ -85,6 +87,10 @@ class Campaign(TimezoneAwareMixin, models.Model):
     application_ends_at = TimezoneAwareDateTimeField(
         _("Application Ends on"),
         help_text=_("Last day for submitting application"))
+    confirmation_ends_at = TimezoneAwareDateTimeField(
+        _("Confirmation Ends on"),
+        help_text=_("Deadline for accepting invitation to create student profile"),
+        blank=True, null=True)
     access_token = models.CharField(
         _("Access Token"),
         help_text=_("Yandex.Contest Access Token"),
@@ -1403,3 +1409,56 @@ class InterviewInvitation(TimeStampedModel):
         if self.status == InterviewInvitationStatuses.NO_RESPONSE and self.is_expired:
             status = InterviewInvitationStatuses.EXPIRED
         return InterviewInvitationStatuses.values[status]
+
+
+class Acceptance(TimestampedModel):
+    WAITING = 'new'
+    CONFIRMED = 'confirmed'
+    status = models.CharField(
+        verbose_name=_("Status"),
+        max_length=12,
+        choices=[
+            (WAITING, _("Waiting for Confirmation")),
+            (CONFIRMED, _("Confirmed")),
+        ],
+        default=WAITING)
+    applicant = models.OneToOneField(
+        Applicant,
+        verbose_name=_("Applicant"),
+        on_delete=models.PROTECT,
+        related_name="+")
+    access_key = models.CharField(
+        max_length=DIGEST_MAX_LENGTH,
+        editable=False,
+        db_index=True)
+    confirmation_code = models.CharField(
+        verbose_name=_("Confirmation Code"),
+        max_length=24,
+        editable=False)
+
+    class Meta:
+        verbose_name = _("Acceptance for Studies")
+        verbose_name_plural = _("Acceptances for Studies")
+
+    def __str__(self):
+        return f"{self.applicant.full_name}"
+
+    def save(self, **kwargs):
+        created = self.pk is None
+        if created:
+            self.access_key = generate_hash(b'acceptance', force_bytes(self.applicant.email))
+            self.confirmation_code = generate_random_string(8, alphabet=string.digits)
+        super().save(**kwargs)
+
+    @property
+    def deadline_at(self) -> datetime.datetime:
+        ends_at: Optional[datetime.datetime] = self.applicant.campaign.confirmation_ends_at
+        if not ends_at:
+            return timezone.now()
+        return ends_at
+
+    def get_absolute_url(self):
+        return reverse('admission:acceptance:confirmation', kwargs={
+            "year": self.applicant.campaign.year,
+            "access_key": self.access_key,
+        })
