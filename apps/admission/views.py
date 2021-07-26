@@ -65,7 +65,7 @@ from .constants import (
     ApplicantStatuses, ContestTypes, InterviewInvitationStatuses, InterviewSections
 )
 from .selectors import get_interview_invitation, get_occupied_slot
-from .tasks import import_testing_results
+from .tasks import import_campaign_contest_results
 
 
 def get_applicant_context(request, applicant_id) -> Dict[str, Any]:
@@ -113,7 +113,7 @@ class InterviewerOnlyMixin(UserPassesTestMixin):
         return user.is_interviewer or user.is_curator
 
 
-def import_campaign_testing_results(request, campaign_id: int):
+def import_campaign_testing_results(request, campaign_id: int, contest_type: int):
     """
     Creates new task for importing testing results from yandex contests.
     Make sure `current` campaigns are already exist in DB before add new task.
@@ -121,7 +121,8 @@ def import_campaign_testing_results(request, campaign_id: int):
     if request.method == "POST" and request.user.is_curator:
         task = Task.build(
             task_name="admission.tasks.import_testing_results",
-            kwargs={"campaign_id": campaign_id},
+            kwargs={"campaign_id": campaign_id,
+                    "contest_type": contest_type},
             creator=request.user)
         same_task_in_queue = (Task.objects
                               # Add new task even if the same task is locked
@@ -134,7 +135,7 @@ def import_campaign_testing_results(request, campaign_id: int):
         if not same_task_in_queue.exists():
             task.save()
             # FIXME: potential deadlock if using task id instead of (task_name, task_params)
-            import_testing_results.delay(task_id=task.pk)
+            import_campaign_contest_results.delay(task_id=task.pk)
         return HttpResponse(status=201)
     return HttpResponseForbidden()
 
@@ -448,11 +449,13 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         campaign = context['filter'].form.cleaned_data.get('campaign')
-        testing_results = {"campaign": campaign}
+        testing_results = {"campaign": campaign,
+                           "contest_type": ContestTypes.TEST}
         if campaign and campaign.current and self.request.user.is_curator:
             task_name = "admission.tasks.import_testing_results"
             latest_task = (Task.objects
-                           .get_task(task_name, kwargs={"campaign_id": campaign.pk})
+                           .get_task(task_name, kwargs={"campaign_id": campaign.pk,
+                                                        "contest_type": ContestTypes.TEST})
                            .order_by("-id")
                            .first())
             if latest_task:
