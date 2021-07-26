@@ -113,14 +113,16 @@ class InterviewerOnlyMixin(UserPassesTestMixin):
         return user.is_interviewer or user.is_curator
 
 
-def import_campaign_testing_results(request, campaign_id: int, contest_type: int):
+def import_campaign_contest_results_view(request, campaign_id: int, contest_type: int):
     """
-    Creates new task for importing testing results from yandex contests.
+    Creates new task for importing testing and exam results from yandex contests.
     Make sure `current` campaigns are already exist in DB before add new task.
     """
     if request.method == "POST" and request.user.is_curator:
         task = Task.build(
-            task_name="admission.tasks.import_testing_results",
+            task_name=("admission.tasks.import_testing_results"
+                       if contest_type == ContestTypes.TEST
+                       else "admission.tasks.import_exam_results"),
             kwargs={"campaign_id": campaign_id,
                     "contest_type": contest_type},
             creator=request.user)
@@ -451,21 +453,43 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
         campaign = context['filter'].form.cleaned_data.get('campaign')
         testing_results = {"campaign": campaign,
                            "contest_type": ContestTypes.TEST}
+        exam_results = {"campaign": campaign,
+                        "contest_type": ContestTypes.EXAM}
         if campaign and campaign.current and self.request.user.is_curator:
-            task_name = "admission.tasks.import_testing_results"
-            latest_task = (Task.objects
-                           .get_task(task_name, kwargs={"campaign_id": campaign.pk,
-                                                        "contest_type": ContestTypes.TEST})
-                           .order_by("-id")
-                           .first())
-            if latest_task:
+            task_test_name = "admission.tasks.import_testing_results"
+
+            latest_task_test = (Task.objects
+                                .get_task(task_test_name, kwargs={"campaign_id": campaign.pk,
+                                                                  "contest_type": ContestTypes.TEST})
+                                .order_by("-id")
+                                .first())
+
+            if latest_task_test:
                 tz = self.request.user.time_zone
-                testing_results["latest_task"] = {
+                testing_results["latest_task_test"] = {
                     # TODO: humanize
-                    "date": latest_task.created_at_local(tz),
-                    "status": latest_task.status
+                    "date": latest_task_test.created_at_local(tz),
+                    "status": latest_task_test.status
                 }
+
+            task_exam_name = "admission.tasks.import_exam_results"
+
+            latest_task_exam = (Task.objects
+                                .get_task(task_exam_name, kwargs={"campaign_id": campaign.pk,
+                                                                  "contest_type": ContestTypes.EXAM})
+                                .order_by("-id")
+                                .first())
+
+            if latest_task_exam:
+                tz = self.request.user.time_zone
+                exam_results["latest_task_exam"] = {
+                    "date": latest_task_exam.created_at_local(tz),
+                    "status": latest_task_exam.status
+                }
+
         context["import_testing_results"] = testing_results
+        context["import_exam_results"] = exam_results
+
         return context
 
 
