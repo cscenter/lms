@@ -7,7 +7,7 @@ from django.core.mail import send_mail
 from django.db.models import Q
 from django.utils import timezone, translation
 
-from admission.models import Contest, Test
+from admission.models import Contest, Exam, Test
 from admission.services import EmailQueueService
 from grading.api.yandex_contest import (
     ContestAPIError, RegisterStatus, ResponseStatus, YandexContestAPI
@@ -53,7 +53,7 @@ def register_in_yandex_contest(applicant_id, language_code):
 # FIXME: надо отлавливать все timeout'ы при запросе, т.к. в этом случае поле processed_at не будет обновлено и будет попадать в очередь задач на исполнение
 # TODO: What if rq.timeouts.JobTimeoutException?
 @job('default')
-def import_testing_results(*, task_id):
+def import_campaign_contest_results(*, task_id):
     Campaign = apps.get_model('admission', 'Campaign')
     Task = apps.get_model('tasks', 'Task')
     try:
@@ -71,10 +71,22 @@ def import_testing_results(*, task_id):
     for campaign in active_campaigns:
         logger.info(f"Campaign id = {campaign.pk}")
         api = YandexContestAPI(access_token=campaign.access_token)
-        for contest in campaign.contests.filter(type=Contest.TYPE_TEST):
+
+        if task_kwargs['contest_type'] not in Contest.TYPES.values:
+            raise ContestAPIError
+
+        contest_type = (Contest.TYPE_TEST
+                        if task_kwargs['contest_type'] == Contest.TYPE_TEST 
+                        else Contest.TYPE_EXAM)
+
+        for contest in campaign.contests.filter(type=contest_type):
             logger.info(f"Starting processing contest {contest.pk}")
             try:
-                on_scoreboard, updated = Test.import_results(api, contest)
+                # TODO: refactor this code without if
+                if task_kwargs['contest_type'] == Contest.TYPE_TEST:
+                    on_scoreboard, updated = Test.import_results(api, contest)
+                else:
+                    on_scoreboard, updated = Exam.import_results(api, contest)
             except ContestAPIError as e:
                 if e.code == ResponseStatus.BAD_TOKEN:
                     notify_admin_bad_token(campaign.pk)
