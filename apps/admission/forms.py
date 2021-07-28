@@ -5,18 +5,24 @@ from django_filters.conf import settings as filters_settings
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.forms import SelectMultiple
 from django.forms.models import ModelForm
 from django.utils.translation import gettext_lazy as _
 
 from admission.models import (
-    Applicant, Comment, Interview, InterviewAssignment, InterviewSlot, InterviewStream
+    Acceptance, Applicant, Comment, Interview, InterviewAssignment, InterviewSlot,
+    InterviewStream
+)
+from admission.services import (
+    AccountData, StudentProfileData, create_student, validate_verification_code
 )
 from core.models import Branch
 from core.timezone import now_local
 from core.urls import reverse
 from core.views import ReadOnlyFieldsMixin
 from core.widgets import UbereditorWidget
+from users.models import User
 
 
 class InterviewForm(forms.ModelForm):
@@ -312,3 +318,114 @@ class InterviewStreamChangeForm(ModelForm):
     class Meta:
         model = InterviewSlot
         fields = "__all__"
+
+
+class ConfirmationAuthorizationForm(forms.Form):
+    prefix = "auth"
+
+    authorization_code = forms.CharField(label=_("Code"), required=True)
+
+    def __init__(self, instance: Acceptance, *args, **kwargs):
+        self.instance = instance
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Div(
+                Div(
+                    Div('authorization_code', css_class='col-xs-6'),
+                    css_class='row'
+                ),
+                FormActions(Submit('create', _('Send')))
+            ))
+
+    def clean_authorization_code(self) -> str:
+        code = self.cleaned_data['authorization_code']
+        if code and code != self.instance.confirmation_code:
+            raise ValidationError(_("Authorization code is invalid."))
+        return code
+
+
+class ConfirmationForm(forms.ModelForm):
+    prefix = "confirmation"
+
+    authorization_code = forms.CharField(
+        required=True,
+        widget=forms.HiddenInput())
+    email_code = forms.CharField(
+        label="Email Confirmation Code",
+        help_text="Нажмите «Прислать код», затем введите код из сообщения, отправленного на email.",
+        required=True,
+        widget=forms.TextInput(attrs={"placeholder": "Код подтверждения"}))
+    # Student Profile data
+    university = forms.CharField(label=_("University"), required=False)
+    birthday = forms.DateField(label=_("Birthday"), required=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "email",
+            "email_code",
+            "time_zone",
+            "gender",
+            "birthday",
+            "photo",
+            "phone",
+            "workplace",
+            "university",
+            "private_contacts",
+            # Read-only fields (some of them are not a part of User model)
+            "yandex_login",
+            "codeforces_login",
+            "stepic_id",
+            "github_login",
+        ]
+
+    def __init__(self, acceptance: Acceptance, **kwargs):
+        self.acceptance = acceptance
+        applicant = acceptance.applicant
+        initial = {
+            "authorization_code": acceptance.confirmation_code,
+            "email": applicant.email,
+            "time_zone": applicant.campaign.get_timezone(),
+            "phone": applicant.phone,
+            "yandex_login": applicant.yandex_login,
+            "stepic_id": applicant.stepic_id,
+            "github_login": applicant.github_login,
+            "workplace": applicant.workplace,
+            "university": applicant.get_university_display(),
+            "birthday": applicant.birth_date,
+        }
+        kwargs["initial"] = initial
+        super().__init__(**kwargs)
+        self.fields['photo'].required = True
+        self.fields['photo'].help_text = "Изображение в формате JPG или PNG (мин. 250х350px). Размер файла не более 3Mb"
+        self.fields['yandex_login'].disabled = True
+        self.fields['phone'].required = True
+        self.fields['private_contacts'].help_text = ""
+        self.helper = FormHelper(self)
+        self.helper.form_tag = False
+
+    def clean_authorization_code(self):
+        code = self.cleaned_data.get('authorization_code')
+        if code != self.acceptance.confirmation_code:
+            raise ValidationError(_("Authorization code is not valid"))
+
+    def clean(self):
+        email = self.cleaned_data.get('email')
+        email_code = self.cleaned_data.get('email_code')
+        if email and email_code:
+            is_valid_email_code = validate_verification_code(self.acceptance.applicant,
+                                                             email,
+                                                             email_code)
+            if not is_valid_email_code:
+                self.add_error("email_code", _("Email verification code is not valid"))
+
+    def save(self, commit=True) -> User:
+        account_data = AccountData.from_dict(self.cleaned_data)
+        student_profile_data = StudentProfileData(
+            birthday=self.cleaned_data['birthday'],
+            university=self.cleaned_data['university']
+        )
+        with transaction.atomic():
+            user = create_student(self.acceptance, account_data, student_profile_data)
+        return user

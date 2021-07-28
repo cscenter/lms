@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 from django.db.models import Q
 
 from admission.constants import InterviewInvitationStatuses
-from admission.models import InterviewInvitation, InterviewSlot
+from admission.models import Acceptance, InterviewInvitation, InterviewSlot
 from core.timezone import get_now_utc
 
 UUID4 = UUID
@@ -25,7 +25,7 @@ def get_occupied_slot(*, invitation: InterviewInvitation) -> Optional[InterviewS
 
 
 def get_interview_invitation(*, year: int, secret_code: UUID4,
-                             filters: List[Q] = None) -> Optional[InterviewInvitation]:
+                             filters: Optional[List[Q]] = None) -> Optional[InterviewInvitation]:
     filters = filters or []
     try:
         return (InterviewInvitation.objects
@@ -50,3 +50,17 @@ def get_ongoing_interview_invitation(*, year: int, secret_code: UUID4) -> Option
     ]
     return get_interview_invitation(year=year, secret_code=secret_code,
                                     filters=filters)
+
+
+def get_acceptance(*, year: int, access_key: str,
+                   filters: Optional[List[Q]] = None) -> Optional[Acceptance]:
+    filters = filters or []
+    try:
+        return (Acceptance.objects
+                .filter(*filters,
+                        access_key=access_key,
+                        applicant__campaign__year=year)
+                .select_related('applicant__campaign__branch')
+                .get())
+    except Acceptance.DoesNotExist:
+        return None

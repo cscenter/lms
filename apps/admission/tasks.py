@@ -3,6 +3,7 @@ import logging
 from django_rq import job
 
 from django.apps import apps
+from django.core.mail import send_mail
 from django.db.models import Q
 from django.utils import timezone, translation
 

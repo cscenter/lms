@@ -1,0 +1,21 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block title %}Процедура поступления завершена{% endblock title %}
+{% block body_attrs %} class="gray"{% endblock body_attrs %}
+{% block menu %}{% endblock menu %}
+
+{% block content %}
+  <div class="container my-40">
+    <div class="col-xs-12 bg-white p-20">
+      <div class="row">
+        <div class="col-xs-offset-2 col-xs-8">
+          <h3 class="mb-30">Профиль успешно создан</h3>
+          <div class="mb-20">
+            Мы не спрашивали пароль при регистрации, поэтому сбросьте его через <a class="nowrap" href="/password_reset/">форму сброса пароля</a>, когда будете готовы начать пользоваться сайтом.<br>
+            Увидимся в новом учебном году!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

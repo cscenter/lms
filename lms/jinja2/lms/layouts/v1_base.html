@@ -45,7 +45,7 @@
   </head>
 
   <body {% block body_attrs %}{% endblock body_attrs %}>
-    {%- include "lms/layouts/_top_menu.html" -%}
+    {% block menu %}{%- include "lms/layouts/_top_menu.html" -%}{% endblock menu %}
 
     {% block content %}
     <div class="container">
@@ -60,7 +60,7 @@
     <div class="footer">
       <div class="container">
         <div class="row">
-          <div class="col-xs-12 text-center">{{ request.site.name }}, {{ ESTABLISHED }}–20 {{ _("гг.") }}</div>
+          <div class="col-xs-12 text-center">{{ request.site.name }}, {{ ESTABLISHED }}–21 {{ _("гг.") }}</div>
         </div>
       </div>
     </div>

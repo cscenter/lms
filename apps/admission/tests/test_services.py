@@ -5,26 +5,30 @@ import pytz
 from rest_framework.exceptions import NotFound
 
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.utils import timezone
 
 from admission.constants import (
     INVITATION_EXPIRED_IN_HOURS, ChallengeStatuses, InterviewFormats,
     InterviewInvitationStatuses, InterviewSections
 )
-from admission.models import Applicant, Exam, Interview
+from admission.models import Acceptance, Applicant, Exam, Interview
 from admission.services import (
     EmailQueueService, accept_interview_invitation, create_student_from_applicant,
-    decline_interview_invitation, get_applicants_for_invitation, get_meeting_time,
-    get_ongoing_interview_streams, get_streams
+    decline_interview_invitation, get_acceptance_ready_to_confirm,
+    get_applicants_for_invitation, get_meeting_time, get_ongoing_interview_streams,
+    get_streams
 )
 from admission.tests.factories import (
-    ApplicantFactory, CampaignFactory, ExamFactory, InterviewFactory,
+    AcceptanceFactory, ApplicantFactory, CampaignFactory, ExamFactory, InterviewFactory,
     InterviewFormatFactory, InterviewInvitationFactory, InterviewSlotFactory,
     InterviewStreamFactory
 )
-from core.tests.factories import BranchFactory, EmailTemplateFactory
+from core.models import Branch
+from core.tests.factories import BranchFactory, EmailTemplateFactory, SiteFactory
 from core.timezone import get_now_utc
 from users.models import StudentTypes
+from users.tests.factories import UserFactory
 
 
 @pytest.mark.django_db
@@ -290,3 +294,46 @@ def test_get_applicants_for_invitation():
                                             streams=[stream])
     assert get_applicants_for_invitation(campaign=campaign1,
                                          section=InterviewSections.ALL_IN_ONE).count() == 0
+
+
+@pytest.mark.django_db
+def test_get_acceptance_ready_to_confirm(settings):
+    branch1 = BranchFactory(site__domain='test.domain1')
+    future_dt = get_now_utc() + datetime.timedelta(days=5)
+    campaign1 = CampaignFactory(year=2011, branch=branch1,
+                                confirmation_ends_at=future_dt)
+    campaign2 = CampaignFactory(year=2011,
+                                branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
+                                confirmation_ends_at=future_dt)
+    acceptance1 = AcceptanceFactory(status=Acceptance.WAITING, applicant__campaign=campaign1)
+    acceptance2 = AcceptanceFactory(status=Acceptance.WAITING, applicant__campaign=campaign2)
+    branches = Branch.objects.for_site(site_id=settings.SITE_ID)
+    assert get_acceptance_ready_to_confirm(year=2011, access_key=acceptance1.access_key,
+                                           filters=[Q(applicant__campaign__branch__in=branches)]) is None
+    assert get_acceptance_ready_to_confirm(year=2011, access_key=acceptance2.access_key,
+                                           filters=[Q(applicant__campaign__branch__in=branches)]) == acceptance2
+    # Test deadline
+    acceptance2.applicant.campaign.confirmation_ends_at = None
+    acceptance2.applicant.campaign.save()
+    with pytest.raises(ValidationError) as e:
+        get_acceptance_ready_to_confirm(year=2011, access_key=acceptance2.access_key,
+                                        filters=[Q(applicant__campaign__branch__in=branches)])
+    assert e.value.code == "expired"
+    # Already confirmed
+    acceptance2.applicant.campaign.confirmation_ends_at = future_dt
+    acceptance2.applicant.campaign.save()
+    acceptance2.status = Acceptance.CONFIRMED
+    acceptance2.save()
+    with pytest.raises(ValidationError) as e:
+        get_acceptance_ready_to_confirm(year=2011, access_key=acceptance2.access_key,
+                                        filters=[Q(applicant__campaign__branch__in=branches)])
+    assert e.value.code == "malformed"
+    # Applicant is associated with a user account
+    acceptance2.status = Acceptance.WAITING
+    acceptance2.save()
+    acceptance2.applicant.user_id = UserFactory()
+    acceptance2.applicant.save()
+    with pytest.raises(ValidationError) as e:
+        get_acceptance_ready_to_confirm(year=2011, access_key=acceptance2.access_key,
+                                        filters=[Q(applicant__campaign__branch__in=branches)])
+    assert e.value.code == "confirmed"

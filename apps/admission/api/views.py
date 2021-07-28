@@ -4,13 +4,20 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from django.conf import settings
+from django.db.models import Q
 from django.http import Http404
 
 from admission.models import InterviewSlot
 from admission.selectors import get_ongoing_interview_invitation
-from admission.services import accept_interview_invitation, decline_interview_invitation
+from admission.services import (
+    accept_interview_invitation, decline_interview_invitation,
+    get_acceptance_ready_to_confirm, send_email_verification_code
+)
 from api.permissions import CuratorAccessPermission
 from api.views import APIBaseView
+from core.http import HttpRequest
+from core.models import Branch
 
 from .serializers import InterviewSlotBaseSerializer
 
@@ -78,3 +85,30 @@ class AppointmentInterviewCreateApi(APIBaseView):
                                     slot_id=serializer.validated_data['slot_id'])
 
         return Response(status=status.HTTP_201_CREATED)
+
+
+class ConfirmationSendEmailVerificationCodeApi(APIBaseView):
+    """Sends verification code to email"""
+    permission_classes = (AllowAny,)
+
+    class InputSerializer(serializers.Serializer):
+        year = serializers.IntegerField()
+        access_key = serializers.CharField()
+        email = serializers.EmailField()
+
+    def post(self, request: HttpRequest, *args, **kwargs):
+        serializer = self.InputSerializer(data=request.POST)
+        serializer.is_valid(raise_exception=True)
+
+        branches = Branch.objects.for_site(site_id=settings.SITE_ID)
+        acceptance = get_acceptance_ready_to_confirm(year=serializer.validated_data['year'],
+                                                     access_key=serializer.validated_data['access_key'],
+                                                     filters=[Q(applicant__campaign__branch__in=branches)])
+        if not acceptance:
+            raise Http404
+
+        send_email_verification_code(email_to=serializer.validated_data['email'],
+                                     site=request.site,
+                                     applicant=acceptance.applicant)
+
+        return Response(status=status.HTTP_201_CREATED, data={})

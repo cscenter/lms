@@ -1,0 +1,108 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% import "lms/macros/_forms.jinja2" as forms %}
+
+{% block title %}Завершение процедуры поступления{% endblock title %}
+{% block body_attrs %} class="gray" data-init-sections="create-profile"{% endblock body_attrs %}
+{% block menu %}{% endblock menu %}
+
+{% block content %}
+  <div class="container my-40">
+    <div class="row">
+      {% if authorization_form %}
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Форма авторизации</h3>
+          </div>
+          <div class="panel-body">
+            <p>На этой странице будут показаны ваши персональные данные, поэтому необходимо пройти этап авторизации.<br>
+              Введите код приглашения из письма, чтобы продолжить.</p>
+            {{ crispy(authorization_form) }}
+          </div>
+        </div>
+      {% else %}
+        {% set form=confirmation_form %}
+        {% set applicant=form.acceptance.applicant %}
+        <script type="text/javascript">
+          window.emailVerificationData = {
+            year: "{{ applicant.campaign.year }}",
+            access_key: "{{ form.acceptance.access_key }}",
+          }
+        </script>
+        <div class="col-xs-12 bg-white p-20">
+          <div class="row">
+            <div class="col-xs-offset-2 col-xs-8">
+              <h3 class="mb-30">Создание профиля</h3>
+              <div class="mb-20">
+                <p>Поздравляем вас с поступлением и приглашаем создать профиль на сайте <span class="nowrap"><b>{{ request.site.name }}</b></span>. Подтвердите почту,
+                проверьте информацию из анкеты и добавьте ту, которой не хватает.</p>
+                ФИО: {{ applicant.full_name }}<br>
+                Отделение: {{ applicant.campaign.branch.name }}
+              </div>
+              <form action="" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ forms.field(form['authorization_code']) }}
+                {{ form.non_field_errors() }}
+                <fieldset class="mb-20">
+                  <div class="row">
+                    <div class="col-xs-12">
+                      {{ forms.field(form['email'], append_button='<button class="btn btn-primary" id="confirm-email" type="button">Прислать код</button>') }}
+                    </div>
+                  </div>
+                  <div class="row"  id="confirm-email-code">
+                    <div class="col-xs-7">
+                      {{ forms.field(form['email_code'], hide_label=True) }}
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xs-6">{{ forms.field(form['gender']) }}</div>
+                    <div class="col-xs-6">
+                      {{ forms.field(form['birthday'], prepend_text='<i class="fa fa-calendar"></i>', input_classes='datepicker') }}
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xs-12">{{ forms.field(form['photo']) }}</div>
+                    <div class="col-xs-12">{{ forms.field(form['time_zone']) }}</div>
+                    <div class="col-xs-12">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xs-12">{{ forms.field(form['university']) }}</div>
+                    <div class="col-xs-12">{{ forms.field(form['workplace']) }}</div>
+                  </div>
+                </fieldset>
+
+                <fieldset class="mb-20">
+                  <legend>Дополнительные контакты</legend>
+                  <p>Номер телефона увидят только кураторы и будут использовать в крайнем случае.<br>
+                    В поле "Контактная информация" вставьте ссылки на соц. сети, номер телефона и другие контакты, которыми вы бы хотели
+                    поделиться с другими студентами и преподавателями.</p>
+                  <div class="row">
+                    <div class="col-xs-12">{{ forms.field(form['phone']) }}</div>
+                    <div class="col-xs-12">{{ forms.field(form['private_contacts']) }}</div>
+                  </div>
+                </fieldset>
+
+                <fieldset class="mb-20">
+                  <legend>Системы сдачи заданий</legend>
+                  <div class="row">
+                    <div class="col-xs-6">{{ forms.field(form['yandex_login']) }}</div>
+                    <div class="col-xs-6">{{ forms.field(form['codeforces_login']) }}</div>
+                    <div class="col-xs-6">{{ forms.field(form['stepic_id']) }}</div>
+                    <div class="col-xs-6">{{ forms.field(form['github_login']) }}</div>
+                  </div>
+                </fieldset>
+
+                <div class="form-group mt-20">
+                  <div class="controls ">
+                    <button type="submit" class="btn btn-primary">Подтвердить и продолжить</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock content %}

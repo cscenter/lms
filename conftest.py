@@ -1,11 +1,13 @@
+import os.path
+from io import BytesIO
 from urllib.parse import urlparse
 
 import pytest
-from post_office.models import EmailTemplate
+from PIL import Image
 from pytest_django.lazy_django import skip_if_no_django
 
-from django.apps import apps
 from django.contrib.sites.models import Site
+from django.core.files import File
 from django.urls import resolve
 
 from core.models import SiteConfiguration
@@ -59,6 +61,18 @@ def curator():
                           first_name='Global',
                           username='curator',
                           last_name='Curator')
+
+
+@pytest.fixture(scope="session")
+def test_image():
+    def get_image_file(name='test.png', size=(50, 50), color=(256, 0, 0)):
+        file_obj = BytesIO()
+        _, ext = name.rsplit(".", maxsplit=1)
+        image = Image.new("RGBA", size=size, color=color)
+        image.save(file_obj, ext)
+        file_obj.seek(0)
+        return File(file_obj, name=name)
+    return get_image_file
 
 
 @pytest.fixture(scope="function")

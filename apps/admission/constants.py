@@ -11,6 +11,7 @@ WHERE_DID_YOU_LEARN = (
 )
 
 INVITATION_EXPIRED_IN_HOURS = 27
+EMAIL_VERIFICATION_CODE_TEMPLATE = 'emails/admission/email_verification_code.txt'
 
 
 class ApplicantStatuses(DjangoChoices):
@@ -106,3 +107,6 @@ class YandexDataSchoolInterviewRatingSystem(DjangoChoices):
     THREE = ChoiceItem(3, "нейтрально (3)")
     FOUR = ChoiceItem(4, "можно взять (4)")
     FIVE = ChoiceItem(5, "точно нужно взять (5)")
+
+
+SESSION_CONFIRMATION_CODE_KEY = 'admission_confirmation_code'

@@ -3,7 +3,7 @@
 {%- endmacro %}
 
 
-{% macro field(bound_field, hide_label=False, prepend_text="", wrapper_classes="", popover_help_text="", label_classes="", input_classes="") -%}
+{% macro field(bound_field, hide_label=False, prepend_text="", append_button="", wrapper_classes="", popover_help_text="", label_classes="", input_classes="") -%}
     {% if bound_field.is_hidden %}
         {{ bound_field|safe }}
     {% else %}
@@ -20,6 +20,11 @@
                         <span class="input-group-addon">{{ prepend_text }}</span>
                         {{ bound_field|with_classes('form-control ' + input_classes) }}
                     </div>
+                {%- elif append_button -%}
+                  <div class="input-group">
+                    {{ bound_field|with_classes('form-control ' + input_classes) }}
+                    <span class="input-group-btn">{{ append_button }}</span>
+                  </div>
                 {%- else -%}
                     {{ bound_field|with_classes('form-control ' + input_classes) }}
                 {%- endif %}

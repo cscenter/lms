@@ -13,7 +13,7 @@ from vanilla import GenericModelView, TemplateView
 
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
 from django.db.models import Avg, Case, Count, Prefetch, Q, Value, When
@@ -38,22 +38,24 @@ from admission.filters import (
 )
 from admission.forms import (
     ApplicantFinalStatusForm, ApplicantForm, ApplicantReadOnlyForm,
-    InterviewAssignmentsForm, InterviewCommentForm, InterviewForm,
-    InterviewFromStreamForm, InterviewStreamInvitationForm
+    ConfirmationAuthorizationForm, ConfirmationForm, InterviewAssignmentsForm,
+    InterviewCommentForm, InterviewForm, InterviewFromStreamForm,
+    InterviewStreamInvitationForm
 )
 from admission.models import (
-    Applicant, Campaign, Comment, Contest, Interview, InterviewAssignment,
+    Acceptance, Applicant, Campaign, Comment, Contest, Interview, InterviewAssignment,
     InterviewInvitation, InterviewSlot, InterviewStream
 )
 from admission.services import (
-    EmailQueueService, UsernameError, create_invitation, create_student_from_applicant,
-    get_applicants_for_invitation, get_meeting_time, get_ongoing_interview_streams,
-    get_streams
+    AccountData, EmailQueueService, StudentProfileData, UsernameError,
+    create_invitation, create_student, create_student_from_applicant,
+    get_acceptance_ready_to_confirm, get_applicants_for_invitation, get_meeting_time,
+    get_ongoing_interview_streams, get_streams
 )
+from core.http import AuthenticatedHttpRequest, HttpRequest
 from core.models import Branch
 from core.timezone import get_now_utc, now_local
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
-from core.typings import AuthenticatedHttpRequest
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
 from tasks.models import Task
@@ -62,7 +64,8 @@ from users.mixins import CuratorOnlyMixin
 from users.models import User
 
 from .constants import (
-    ApplicantStatuses, ContestTypes, InterviewInvitationStatuses, InterviewSections
+    SESSION_CONFIRMATION_CODE_KEY, ApplicantStatuses, ContestTypes,
+    InterviewInvitationStatuses, InterviewSections
 )
 from .selectors import get_interview_invitation, get_occupied_slot
 from .tasks import import_testing_results
@@ -1109,3 +1112,67 @@ class InterviewAppointmentAssignmentsView(generic.TemplateView):
             "is_open": starts_at <= today <= ends_at,
         }
         return context
+
+
+class ConfirmationOfAcceptanceForStudiesView(TemplateView):
+    """
+    After sending Confirmation of Acceptance for Studies to participant
+    we expect they confirm it from their side and complete registration on site.
+    """
+    acceptance: Acceptance
+    template_name = "lms/admission/confirmation_of_acceptance.html"
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
+        super().setup(request, *args, **kwargs)
+        campaign_year: int = kwargs['year']
+        access_key: str = kwargs['access_key']
+        try:
+            branches = Branch.objects.for_site(site_id=settings.SITE_ID)
+            acceptance = get_acceptance_ready_to_confirm(year=campaign_year,
+                                                         access_key=access_key,
+                                                         filters=[Q(applicant__campaign__branch__in=branches)])
+        except ValidationError:
+            raise Http404
+        if not acceptance:
+            raise Http404
+        self.acceptance = acceptance
+
+    def get(self, request: HttpRequest, *args, **kwargs):
+        confirmation_code: str = request.session.get(SESSION_CONFIRMATION_CODE_KEY)
+        is_authorized = confirmation_code and self.acceptance.confirmation_code == confirmation_code
+        if not is_authorized:
+            authorization_form = ConfirmationAuthorizationForm(instance=self.acceptance)
+            context = {"authorization_form": authorization_form}
+        else:
+            confirmation_form = ConfirmationForm(acceptance=self.acceptance)
+            context = {"confirmation_form": confirmation_form}
+        return self.render_to_response(context)
+
+    def post(self, request: HttpRequest, *args, **kwargs):
+        confirmation_code: str = request.session.get(SESSION_CONFIRMATION_CODE_KEY)
+        is_authorized = confirmation_code and self.acceptance.confirmation_code == confirmation_code
+        if not is_authorized:
+            # Check authorization form
+            authorization_form = ConfirmationAuthorizationForm(instance=self.acceptance,
+                                                               data=request.POST)
+            if authorization_form.is_valid():
+                # Save confirmation code in user session and redirect
+                request.session[SESSION_CONFIRMATION_CODE_KEY] = authorization_form.cleaned_data['authorization_code']
+                return HttpResponseRedirect(redirect_to=request.path_info)
+            else:
+                context = {"authorization_form": authorization_form}
+                return self.render_to_response(context)
+        else:
+            confirmation_form = ConfirmationForm(acceptance=self.acceptance,
+                                                 data=request.POST,
+                                                 files=request.FILES)
+            if confirmation_form.is_valid():
+                confirmation_form.save()
+                return HttpResponseRedirect(redirect_to=reverse("admission:acceptance:confirmation_done"))
+            else:
+                context = {"confirmation_form": confirmation_form}
+                return self.render_to_response(context)
+
+
+class ConfirmationOfAcceptanceForStudiesDoneView(TemplateView):
+    template_name = "lms/admission/confirmation_of_acceptance_done.html"

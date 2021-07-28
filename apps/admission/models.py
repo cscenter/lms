@@ -551,6 +551,13 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
         except Exam.DoesNotExist:
             return None
 
+    def get_university_display(self) -> Optional[str]:
+        if self.university_other:
+            return self.university_other
+        elif self.university_id:
+            return self.university.abbr or self.university.name
+        return None
+
     # FIXME: filter by site
     def get_similar(self):
         conditions = [
@@ -822,6 +829,8 @@ class YandexContestIntegration(models.Model):
 
 
 class ApplicantRandomizeContestMixin:
+    applicant: Applicant
+
     def compute_contest_id(self, contest_type, group_size=1) -> Optional[int]:
         """Selects contest id in a round-robin manner."""
         campaign_id = self.applicant.campaign_id
@@ -829,20 +838,21 @@ class ApplicantRandomizeContestMixin:
                         .filter(campaign_id=campaign_id, type=contest_type)
                         .values_list("contest_id", flat=True)
                         .order_by("contest_id"))
-        if contests:
-            if contest_type == Contest.TYPE_EXAM:
-                manager = Exam.objects
-            elif contest_type == Contest.TYPE_TEST:
-                manager = Test.objects
-            else:
-                raise ValueError("Unknown contest type")
-            qs = manager.filter(applicant__campaign_id=campaign_id)
-            if self.pk is None:
-                serial_number = qs.count() + 1
-            else:
-                # Assume records are ordered by PK
-                serial_number = qs.filter(pk__lte=self.pk).count()
-            return get_next_process(serial_number, contests, group_size)
+        if not contests:
+            return None
+        if contest_type == Contest.TYPE_EXAM:
+            manager = Exam.objects
+        elif contest_type == Contest.TYPE_TEST:
+            manager = Test.objects
+        else:
+            raise ValueError("Unknown contest type")
+        qs = manager.filter(applicant__campaign_id=campaign_id)
+        if self.pk is None:
+            serial_number = qs.count() + 1
+        else:
+            # Assume records are ordered by PK
+            serial_number = qs.filter(pk__lte=self.pk).count()
+        return get_next_process(serial_number, contests, group_size)
 
 
 class Test(TimeStampedModel, YandexContestIntegration,
@@ -1414,6 +1424,8 @@ class InterviewInvitation(TimeStampedModel):
 class Acceptance(TimestampedModel):
     WAITING = 'new'
     CONFIRMED = 'confirmed'
+    CONFIRMATION_CODE_LENGTH = 16
+
     status = models.CharField(
         verbose_name=_("Status"),
         max_length=12,
@@ -1432,7 +1444,7 @@ class Acceptance(TimestampedModel):
         editable=False,
         db_index=True)
     confirmation_code = models.CharField(
-        verbose_name=_("Confirmation Code"),
+        verbose_name=_("Authorization Code"),
         max_length=24,
         editable=False)
 
@@ -1447,18 +1459,23 @@ class Acceptance(TimestampedModel):
         created = self.pk is None
         if created:
             self.access_key = generate_hash(b'acceptance', force_bytes(self.applicant.email))
-            self.confirmation_code = generate_random_string(8, alphabet=string.digits)
+            self.confirmation_code = generate_random_string(self.CONFIRMATION_CODE_LENGTH,
+                                                            alphabet=string.hexdigits)
         super().save(**kwargs)
+
+    def get_absolute_url(self):
+        return reverse('admission:acceptance:confirmation_form', kwargs={
+            "year": self.applicant.campaign.year,
+            "access_key": self.access_key,
+        })
 
     @property
     def deadline_at(self) -> datetime.datetime:
         ends_at: Optional[datetime.datetime] = self.applicant.campaign.confirmation_ends_at
         if not ends_at:
-            return timezone.now()
+            return timezone.now() - datetime.timedelta(hours=2)
         return ends_at
 
-    def get_absolute_url(self):
-        return reverse('admission:acceptance:confirmation', kwargs={
-            "year": self.applicant.campaign.year,
-            "access_key": self.access_key,
-        })
+    @property
+    def is_expired(self):
+        return timezone.now() >= self.deadline_at

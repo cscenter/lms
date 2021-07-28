@@ -1,9 +1,11 @@
 from django.conf.urls import include
-from django.urls import path
+from django.urls import path, re_path
 
+from admission.api.views import ConfirmationSendEmailVerificationCodeApi
 from admission.views import (
     ApplicantCreateStudentView, ApplicantDetailView, ApplicantListView,
-    ApplicantStatusUpdateView, InterviewAssignmentDetailView,
+    ApplicantStatusUpdateView, ConfirmationOfAcceptanceForStudiesDoneView,
+    ConfirmationOfAcceptanceForStudiesView, InterviewAssignmentDetailView,
     InterviewCommentUpsertView, InterviewDetailView, InterviewInvitationCreateView,
     InterviewInvitationListView, InterviewListView, InterviewResultsDispatchView,
     InterviewResultsView, import_campaign_testing_results
@@ -35,6 +37,15 @@ results_patterns = [
     path('<str:branch_code>/', InterviewResultsView.as_view(), name='list'),
 ]
 
+acceptance_patterns = [
+    re_path(r'^(?P<year>\d{4})/(?P<access_key>\w+)/$', ConfirmationOfAcceptanceForStudiesView.as_view(), name='confirmation_form'),
+    path('done/', ConfirmationOfAcceptanceForStudiesDoneView.as_view(), name='confirmation_done'),
+]
+acceptance_api_patterns = [
+    # FIXME: consider to use year/access_key in this URL to make action on the resource
+    path('verify-email', ConfirmationSendEmailVerificationCodeApi.as_view(), name='email_verification_code'),
+]
+
 urlpatterns = [
     path('admission/', include([
         path('<int:campaign_id>/testing/import/', import_campaign_testing_results, name='import_testing_results'),
@@ -44,5 +55,10 @@ urlpatterns = [
             path('invitations/', include((interview_invitation_patterns, 'invitations'))),
         ], 'interviews'))),
         path('results/', include((results_patterns, 'results'))),
+        path('confirmation/', include((acceptance_patterns, 'acceptance'))),
     ])),
+
+    path('api/admission/', include(([
+        path('confirmation/', include((acceptance_api_patterns, 'acceptance'))),
+    ], 'api')))
 ]

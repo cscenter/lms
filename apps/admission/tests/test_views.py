@@ -8,20 +8,21 @@ from django.utils import formats, timezone
 from django.utils.timezone import now
 
 from admission.constants import (
-    INVITATION_EXPIRED_IN_HOURS, InterviewFormats, InterviewSections
+    INVITATION_EXPIRED_IN_HOURS, SESSION_CONFIRMATION_CODE_KEY, InterviewFormats,
+    InterviewSections
 )
 from admission.forms import InterviewFromStreamForm
-from admission.models import Applicant, Interview, InterviewInvitation
+from admission.models import Acceptance, Applicant, Interview, InterviewInvitation
 from admission.services import get_meeting_time
 from admission.tests.factories import (
-    ApplicantFactory, CampaignFactory, CommentFactory, InterviewerFactory,
-    InterviewFactory, InterviewFormatFactory, InterviewInvitationFactory,
-    InterviewStreamFactory
+    AcceptanceFactory, ApplicantFactory, CampaignFactory, CommentFactory,
+    InterviewerFactory, InterviewFactory, InterviewFormatFactory,
+    InterviewInvitationFactory, InterviewStreamFactory
 )
 from admission.views import InterviewInvitationCreateView
 from core.models import Branch
-from core.tests.factories import BranchFactory
-from core.timezone import now_local
+from core.tests.factories import BranchFactory, SiteFactory
+from core.timezone import get_now_utc, now_local
 from core.urls import reverse
 from learning.settings import Branches
 from users.tests.factories import CuratorFactory, UserFactory
@@ -414,3 +415,74 @@ def test_create_student_from_applicant(client, curator, assert_redirect):
     applicant_reapplied.refresh_from_db()
     assert applicant_reapplied.user_id == applicant.user_id
     assert_redirect(response, admin_url)
+
+
+@pytest.mark.django_db
+def test_confirmation_of_acceptance_for_studies_view_setup(client, settings):
+    future_dt = get_now_utc() + datetime.timedelta(days=5)
+    campaign1 = CampaignFactory(year=2011, branch=BranchFactory(site__domain='test.domain1'),
+                                confirmation_ends_at=future_dt)
+    campaign2 = CampaignFactory(year=2011,
+                                branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
+                                confirmation_ends_at=future_dt)
+    acceptance1 = AcceptanceFactory(status=Acceptance.WAITING, applicant__campaign=campaign1)
+    acceptance2 = AcceptanceFactory(status=Acceptance.WAITING, applicant__campaign=campaign2)
+    response = client.get(acceptance1.get_absolute_url())
+    assert response.status_code == 404
+    response = client.get(acceptance2.get_absolute_url())
+    assert response.status_code == 200
+    acceptance2.status = Acceptance.CONFIRMED
+    acceptance2.save()
+    response = client.get(acceptance2.get_absolute_url())
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_confirmation_of_acceptance_for_studies_view_get_context(client, settings):
+    session = client.session
+    future_dt = get_now_utc() + datetime.timedelta(days=5)
+    campaign = CampaignFactory(year=2011,
+                               branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
+                               confirmation_ends_at=future_dt)
+    acceptance = AcceptanceFactory(status=Acceptance.WAITING, applicant__campaign=campaign)
+    assert SESSION_CONFIRMATION_CODE_KEY not in session
+    response = client.get(acceptance.get_absolute_url())
+    assert response.status_code == 200
+    assert "authorization_form" in response.context_data
+    assert "confirmation_form" not in response.context_data
+    session[SESSION_CONFIRMATION_CODE_KEY] = 'wrong_key'
+    session.save()
+    response = client.get(acceptance.get_absolute_url())
+    assert response.status_code == 200
+    assert "authorization_form" in response.context_data
+    session[SESSION_CONFIRMATION_CODE_KEY] = acceptance.confirmation_code
+    session.save()
+    response = client.get(acceptance.get_absolute_url())
+    assert response.status_code == 200
+    assert "authorization_form" not in response.context_data
+    assert "confirmation_form" in response.context_data
+
+
+@pytest.mark.django_db
+def test_confirmation_of_acceptance_for_studies_view_authorization(client, settings):
+    future_dt = get_now_utc() + datetime.timedelta(days=5)
+    campaign = CampaignFactory(year=2011,
+                               branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
+                               confirmation_ends_at=future_dt)
+    acceptance = AcceptanceFactory(status=Acceptance.WAITING, applicant__campaign=campaign)
+    assert SESSION_CONFIRMATION_CODE_KEY not in client.session
+    response = client.get(acceptance.get_absolute_url())
+    assert response.status_code == 200
+    assert "authorization_form" in response.context_data
+    response = client.post(acceptance.get_absolute_url(), data={
+        "auth-authorization_code": "wrong"
+    })
+    assert response.status_code == 200
+    response = client.post(acceptance.get_absolute_url(), data={
+        "auth-authorization_code": acceptance.confirmation_code
+    })
+    assert response.status_code == 302
+    assert SESSION_CONFIRMATION_CODE_KEY in response.wsgi_request.session
+    response = client.get(acceptance.get_absolute_url())
+    assert response.status_code == 200
+    assert "confirmation_form" in response.context_data
