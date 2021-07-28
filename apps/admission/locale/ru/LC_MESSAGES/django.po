@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-07-28 07:54+0000\n"
-"PO-Revision-Date: 2021-07-28 07:54+0000\n"
+"PO-Revision-Date: 2021-07-28 14:58+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -368,7 +368,7 @@ msgstr "Дедлайн отправки анкеты"
 
 #: apps/admission/models.py:91
 msgid "Confirmation Ends on"
-msgstr "Подтверждения поступления заканчивается"
+msgstr "Подтверждение поступления заканчивается"
 
 #: apps/admission/models.py:92
 msgid "Deadline for accepting invitation to create student profile"

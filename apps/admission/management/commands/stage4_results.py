@@ -1,10 +1,13 @@
+import datetime
 from collections import Counter
+from typing import Optional
 from urllib.parse import urlparse
 
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
+from django.core.management import CommandError
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -15,6 +18,10 @@ from admission.models import Acceptance, Applicant
 from admission.services import get_email_from
 from core.timezone import get_now_utc
 
+INVITE_TO_REGISTRATION = {
+    Applicant.ACCEPT
+}
+
 
 class Command(EmailTemplateMixin, CustomizeQueryMixin,
               CurrentCampaignMixin, BaseCommand):
@@ -23,70 +30,69 @@ class Command(EmailTemplateMixin, CustomizeQueryMixin,
     Generates emails with final decision based on applicant status.
 
     Example:
-        ./manage.py stage4_results --branch=nsk -f="status__in=['volunteer']"
+        ./manage.py stage4_results --branch=nsk --template-pattern="csc-admission-{year}-{branch_code}-results-{status}" -f="status__in=['volunteer']"
     """
 
-    def add_arguments(self, parser):
-        super().add_arguments(parser)
-        parser.add_argument(
-            '--from', type=str,
-            help='Overrides default `From` header')
-
     def handle(self, *args, **options):
-        campaigns = self.get_current_campaigns(options, branch_is_required=True)
-
-        sender = options["from"]
+        campaigns = self.get_current_campaigns(options, confirm=False, branch_is_required=True)
+        campaign = campaigns[0]
+        confirmation_ends_at: Optional[datetime.datetime] = campaign.confirmation_ends_at
+        if not confirmation_ends_at:
+            raise CommandError(f"Deadline for confirmation of acceptance for studies is not defined.")
+        if confirmation_ends_at < get_now_utc():
+            raise CommandError(f"Deadline for confirmation of acceptance for studies is exceeded.")
 
         manager = self.get_manager(Applicant, options)
+        applicants = manager.filter(campaign_id=campaign.pk)
 
-        for campaign in campaigns:
-            self.stdout.write(f"{campaign}:")
-            if not campaign.confirmation_ends_at:
-                self.stdout.write(f"Deadline for confirmation of acceptance for studies is not defined. Skip")
-                continue
-            if campaign.confirmation_ends_at < get_now_utc():
-                self.stdout.write(f"Deadline for confirmation of acceptance for studies is exceeded. Skip")
-                continue
-            applicants = manager.filter(campaign_id=campaign.pk)
+        statuses = applicants.values_list('status', flat=True).distinct()
+        self.stdout.write(f"Participants with final statuses were found:")
+        self.stdout.write("\n".join(statuses))
+        template_name_patterns = {}
+        for status in statuses:
+            pattern = options['template_pattern'] or self.TEMPLATE_PATTERN
+            pattern = pattern.replace("{status}", status)
+            template_name_patterns[status] = pattern
+        self.validate_templates(campaigns, template_name_patterns.values(), confirm=False)
 
-            template_name_patterns = {}
-            statuses = applicants.values_list('status', flat=True).distinct()
-            for status in statuses:
-                pattern = options['template_pattern'] or self.TEMPLATE_PATTERN
-                pattern = pattern.replace("{status}", status)
-                template_name_patterns[status] = pattern
-            self.validate_templates(campaigns, template_name_patterns.values())
+        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
+            raise CommandError("Error asking for approval. Canceled")
 
-            email_from = sender or get_email_from(campaign)
-            stats = Counter()
-            for a in applicants.order_by('status').iterator():
-                if not Acceptance.objects.filter(applicant=a).exists():
-                    template_name = template_name_patterns[a.status]
-                    template = get_email_template(template_name)
-                    recipients = [a.email]
-                    acceptance = Acceptance(applicant=a)
-                    registration_url = urlparse(acceptance.get_absolute_url())
-                    with transaction.atomic():
-                        # FIXME: move to service if it needs to validate email
-                        # FIXME: what status is valid for creating acceptance record?
-                        acceptance.save()
-                        mail.send(
-                            recipients,
-                            sender=email_from,
-                            template=template,
-                            # If emails rendered on delivery, they will store
-                            # value of the template id. It makes
-                            # `Email.objects.exists()` work correctly.
-                            render_on_delivery=True,
-                            context={
-                                "REGISTRATION_RELATIVE_URL": registration_url.path,
-                                "CONFIRMATION_CODE": acceptance.confirmation_code
-                            },
-                            backend='ses',
-                        )
-                        stats[a.status] += 1
-            for status, generated in stats.items():
-                self.stdout.write(f"Status: {status}. Generated: {generated}")
+        email_from = get_email_from(campaign)
+        stats = Counter()
+        for applicant in applicants.order_by('status').iterator():
+            recipients = [applicant.email]
+            template_pattern = template_name_patterns[applicant.status]
+            template_name = self.get_template_name(campaign, template_pattern)
+            template = get_email_template(template_name)
+            is_notified = Email.objects.filter(to=recipients, template=template).exists()
+            if applicant.status in INVITE_TO_REGISTRATION:
+                is_notified = is_notified and Acceptance.objects.filter(applicant=applicant).exists()
+            if not is_notified:
+                with transaction.atomic():
+                    if applicant.status in INVITE_TO_REGISTRATION:
+                        acceptance, _ = Acceptance.objects.get_or_create(applicant=applicant)
+                        registration_url = urlparse(acceptance.get_absolute_url())
+                        context = {
+                            "REGISTRATION_RELATIVE_URL": registration_url.path,
+                            "AUTH_CODE": acceptance.confirmation_code
+                        }
+                    else:
+                        context = {}
+                    mail.send(
+                        recipients,
+                        sender=email_from,
+                        template=template,
+                        # If emails rendered on delivery, they will store
+                        # value of the template id. It makes
+                        # `Email.objects.exists()` work correctly.
+                        render_on_delivery=True,
+                        context=context,
+                        backend='ses',
+                    )
+                    stats[applicant.status] += 1
+        for status, generated in stats.items():
+            self.stdout.write(f"Status: {status}. Generated: {generated}")
 
 
 

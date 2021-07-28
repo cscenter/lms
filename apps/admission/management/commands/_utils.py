@@ -1,5 +1,5 @@
 import ast
-from typing import Iterable
+from typing import Iterable, List
 
 from post_office.models import EmailTemplate
 from post_office.utils import get_email_template
@@ -46,7 +46,7 @@ class CurrentCampaignMixin:
             '--branch', type=str,
             help='Branch code to restrict current campaigns')
 
-    def get_current_campaigns(self, options, confirm=True, branch_is_required=False):
+    def get_current_campaigns(self, options, confirm=True, branch_is_required=False) -> List[Campaign]:
         branch_code = options["branch"]
         if not branch_code and branch_is_required:
             available = (Campaign.objects

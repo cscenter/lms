@@ -357,7 +357,7 @@ class AcceptanceAdmin(admin.ModelAdmin):
     list_display = ('applicant_name', 'get_campaign', 'status')
     list_filter = ['status', 'applicant__campaign']
     raw_id_fields = ("applicant",)
-    list_select_related = ('applicant__campaign',)
+    list_select_related = ('applicant__campaign__branch',)
     search_fields = ['applicant__last_name']
 
     @meta(_("Applicant"))

@@ -10,7 +10,6 @@ from post_office.models import Email, EmailTemplate
 from post_office.utils import get_email_template
 from rest_framework.exceptions import APIException, NotFound
 
-from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
@@ -31,7 +30,6 @@ from admission.models import (
 from admission.selectors import get_acceptance
 from admission.tokens import email_code_generator
 from admission.utils import logger
-from core.models import Branch
 from core.timezone import get_now_utc
 from core.timezone.constants import DATE_FORMAT_RU
 from core.utils import bucketize
