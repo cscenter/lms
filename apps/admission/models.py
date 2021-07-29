@@ -1,7 +1,8 @@
 import datetime
 import string
 import uuid
-from typing import NamedTuple, Optional, Type
+from decimal import Decimal
+from typing import Any, ClassVar, NamedTuple, Optional, Type, Union
 
 from djchoices import DjangoChoices
 from model_utils.models import TimeStampedModel
@@ -554,7 +555,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
     def get_university_display(self) -> Optional[str]:
         if self.university_other:
             return self.university_other
-        elif self.university_id:
+        elif self.university:
             return self.university.abbr or self.university.name
         return None
 
@@ -647,6 +648,9 @@ class YandexContestImportResults(NamedTuple):
 
 
 class YandexContestIntegration(models.Model):
+    CONTEST_TYPE: ClassVar[int]
+    applicant: Any
+
     yandex_contest_id = models.CharField(
         _("Contest #ID"),
         help_text=_("Applicant|yandex_contest_id"),
@@ -829,7 +833,8 @@ class YandexContestIntegration(models.Model):
 
 
 class ApplicantRandomizeContestMixin:
-    applicant: Applicant
+    pk: Optional[int]
+    applicant: Any
 
     def compute_contest_id(self, contest_type, group_size=1) -> Optional[int]:
         """Selects contest id in a round-robin manner."""
@@ -1035,7 +1040,7 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         on_delete=models.PROTECT,
         related_name="interviews")
     section = models.CharField(
-        choices=InterviewSections,
+        choices=InterviewSections.choices,
         verbose_name=_("Interview|Section"),
         max_length=15)
     date = TimezoneAwareDateTimeField(_("When"))
@@ -1108,17 +1113,20 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         return self.status in self.TRANSITION_STATUSES
 
     @property
-    def average_score(self):
+    def average_score(self) -> Optional[Union[float, Decimal]]:
         # `_average_score` can be calculated with query annotation to improve
         # performance
         if hasattr(self, "_average_score"):
-            return self._average_score
+            return self._average_score  # type: ignore[has-type]
         scores = [comment.score for comment in self.comments.all()]
         if scores:
             self._average_score = float(sum(scores)) / len(scores)
             return self._average_score
+        return None
 
     def get_average_score_display(self, decimal_pos=2):
+        if self.average_score is None:
+            return "N/A"
         return numberformat.format(self.average_score, ".", decimal_pos)
 
     @property

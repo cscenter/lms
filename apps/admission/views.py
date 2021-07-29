@@ -1,7 +1,7 @@
 import uuid
 from collections import Counter
 from datetime import timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 from urllib import parse
 
 import pytz
@@ -1035,7 +1035,7 @@ class InterviewAppointmentView(TemplateView):
             "secret_code": invitation.secret_code.hex
         })
 
-        context = {
+        context: Dict[str, Any] = {
             "invitation": invitation,
             "interview": None,
             "app_data": {
@@ -1138,7 +1138,8 @@ class ConfirmationOfAcceptanceForStudiesView(TemplateView):
         self.acceptance = acceptance
 
     def get(self, request: HttpRequest, *args, **kwargs):
-        confirmation_code: str = request.session.get(SESSION_CONFIRMATION_CODE_KEY)
+        context: Dict[str, Any]
+        confirmation_code = request.session.get(SESSION_CONFIRMATION_CODE_KEY)
         is_authorized = confirmation_code and self.acceptance.confirmation_code == confirmation_code
         if not is_authorized:
             authorization_form = ConfirmationAuthorizationForm(instance=self.acceptance)
@@ -1149,7 +1150,8 @@ class ConfirmationOfAcceptanceForStudiesView(TemplateView):
         return self.render_to_response(context)
 
     def post(self, request: HttpRequest, *args, **kwargs):
-        confirmation_code: str = request.session.get(SESSION_CONFIRMATION_CODE_KEY)
+        context: Dict[str, Any]
+        confirmation_code = request.session.get(SESSION_CONFIRMATION_CODE_KEY)
         is_authorized = confirmation_code and self.acceptance.confirmation_code == confirmation_code
         if not is_authorized:
             # Check authorization form

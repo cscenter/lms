@@ -1,17 +1,22 @@
 import ast
-from typing import Iterable, List
+from typing import TYPE_CHECKING, Iterable, List, Optional
 
 from post_office.models import EmailTemplate
 from post_office.utils import get_email_template
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.management import CommandError
+from django.core.management import BaseCommand, CommandError
 from django.db.models import Q
 
 from admission.models import Campaign, Contest
 
 APPROVAL_DIALOG = "There is no undo. Only 'y' will be accepted to confirm.\n\nEnter a value: "
+
+if TYPE_CHECKING:
+    BaseCommandMixin = BaseCommand
+else:
+    BaseCommandMixin = object
 
 
 def validate_template(template_name: str):
@@ -37,7 +42,7 @@ def validate_campaign_contests(campaign, contest_type):
         raise ValidationError(f"Contests of type {contest_type} not found for campaign {campaign}")
 
 
-class CurrentCampaignMixin:
+class CurrentCampaignMixin(BaseCommandMixin):
     CURRENT_CAMPAIGNS_AGREE = APPROVAL_DIALOG
 
     def add_arguments(self, parser):
@@ -53,8 +58,8 @@ class CurrentCampaignMixin:
                          .filter(current=True,
                                  branch__site_id=settings.SITE_ID)
                          .select_related('branch'))
-            campaigns = [c.branch.code for c in available]
-            msg = f"Provide the code of the campaign branch. Options: {campaigns}"
+            cs = [c.branch.code for c in available]
+            msg = f"Provide the code of the campaign branch. Options: {cs}"
             raise CommandError(msg)
 
         filter_params = [Q(current=True), Q(branch__site_id=settings.SITE_ID)]
@@ -74,7 +79,7 @@ class CurrentCampaignMixin:
         return campaigns
 
 
-class HandleErrorsMixin:
+class HandleErrorsMixin(BaseCommandMixin):
     @staticmethod
     def handle_errors(result):
         if result.has_errors():
@@ -85,7 +90,7 @@ class HandleErrorsMixin:
                     print("line {} - {}".format(line + 1, error.error))
 
 
-class EmailTemplateMixin:
+class EmailTemplateMixin(BaseCommandMixin):
     TEMPLATE_PATTERN = "admission-{year}-{branch_code}-{suffix}"
 
     def add_arguments(self, parser):
@@ -120,7 +125,8 @@ class EmailTemplateMixin:
         if confirm and input(APPROVAL_DIALOG) != "y":
             raise CommandError("Error asking for approval. Canceled")
 
-    def get_template_name(self, campaign, pattern: str = None, **kwargs):
+    def get_template_name(self, campaign: Campaign,
+                          pattern: Optional[str] = None, **kwargs) -> str:
         pattern = pattern or self.TEMPLATE_PATTERN
         return pattern.format(
             year=campaign.year,
@@ -129,7 +135,7 @@ class EmailTemplateMixin:
         )
 
 
-class CustomizeQueryMixin:
+class CustomizeQueryMixin(BaseCommandMixin):
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument('-m', dest='custom_manager', type=str,

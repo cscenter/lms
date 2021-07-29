@@ -86,7 +86,7 @@ def test_accept_interview_invitation():
     )
     invitation1 = InterviewInvitationFactory(interview=None, streams=[slot.stream])
     invitation2 = InterviewInvitationFactory(interview=None)
-    with pytest.raises(NotFound) as e:
+    with pytest.raises(NotFound) as e:  # type: ExceptionInfo[Any]
         accept_interview_invitation(invitation1, slot_id=0)
     with pytest.raises(ValidationError) as e:
         accept_interview_invitation(invitation2, slot_id=slot.pk)

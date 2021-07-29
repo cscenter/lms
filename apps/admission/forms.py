@@ -19,6 +19,7 @@ from admission.services import (
 )
 from core.models import Branch
 from core.timezone import now_local
+from core.timezone.typing import Timezone
 from core.urls import reverse
 from core.views import ReadOnlyFieldsMixin
 from core.widgets import UbereditorWidget
@@ -124,7 +125,9 @@ class InterviewFromStreamForm(forms.Form):
             self.fields['slot'].queryset = (InterviewSlot.objects
                                             .select_related("stream")
                                             .filter(stream_id__in=stream_ids))
-        today = now_local(branch.get_timezone()).date()
+        tz = branch.get_timezone()
+        assert tz is not None
+        today = now_local(tz).date()
         self.fields['streams'].queryset = (InterviewStream.objects
                                            .filter(campaign__branch=branch,
                                                    date__gt=today)

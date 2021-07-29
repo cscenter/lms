@@ -2,7 +2,7 @@
 import csv
 from decimal import Decimal
 
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, CommandError
 
 from admission.models import Applicant, Campaign, Contest, Test
 from grading.api.yandex_contest import YandexContestAPI, YandexContestAPIException
@@ -31,7 +31,8 @@ class Command(CurrentCampaignMixin, BaseCommand):
 
         # Collect map "yandex_login -> participant_id" from monitor
         participants = {}
-        campaign = Campaign.objects.filter(id__in=campaigns).first()
+        campaign = Campaign.objects.filter(id__in=campaigns).get()
+
         api = YandexContestAPI(access_token=campaign.access_token)
         for contest in campaign.contests.filter(type=Contest.TYPE_TEST).all():
             contest_id = contest.contest_id

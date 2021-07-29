@@ -59,7 +59,7 @@ class Command(EmailTemplateMixin, CustomizeQueryMixin,
             raise CommandError("Error asking for approval. Canceled")
 
         email_from = get_email_from(campaign)
-        stats = Counter()
+        stats = Counter()  # TODO: Why mypy needs type here?
         for applicant in applicants.order_by('status').iterator():
             recipients = [applicant.email]
             template_pattern = template_name_patterns[applicant.status]

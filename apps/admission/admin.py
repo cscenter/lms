@@ -80,9 +80,9 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
             readonly_fields.append("contest_participant_id")
         return readonly_fields
 
+    @meta(_("Campaign"))
     def get_campaign(self, obj):
         return obj.applicant.campaign
-    get_campaign.short_description = _("Campaign")
 
     @meta(_("Applicant"), admin_order_field="applicant__last_name")
     def get_applicant(self, obj):
@@ -148,10 +148,9 @@ class ApplicantAdmin(admin.ModelAdmin):
                      'first_name', 'last_name', 'email', 'phone')
     raw_id_fields = ('user',)
 
+    @meta(_("Created"), admin_order_field="created")
     def created_local(self, obj):
         return admin_datetime(obj.created_local())
-    created_local.admin_order_field = 'created'
-    created_local.short_description = _("Created")
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'campaign':
@@ -227,10 +226,9 @@ class InterviewAdmin(admin.ModelAdmin):
                          .order_by("last_name"))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    @meta(_("Date"), admin_order_field="date")
     def get_date_local(self, obj):
         return admin_datetime(obj.date_local())
-    get_date_local.admin_order_field = 'date'
-    get_date_local.short_description = _("Date")
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
