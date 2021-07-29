@@ -63,26 +63,37 @@ class LDAPClient:
         dn = entry.pop('dn')
         return self.connection.add_s(dn, addModlist(entry))
 
-    def set_password(self, user, *, new_password, old_password=None) -> bool:
+    def set_password(self, uid, *, new_password, old_password=None) -> bool:
         """
         Provide `old_password` if you are trying to change password not from
         rootdn user. Uses sync method version for changing password.
         """
         try:
-            dn = f'uid={user},ou=users,{self._suffix}'
+            dn = f'uid={uid},ou=users,{self._suffix}'
             self.connection.passwd_s(dn, old_password, new_password)
             return True
         except ldap.LDAPError as e:
-            logger.error(f"Unable to change password for {user}. {e}")
+            logger.error(f"Unable to change password for {uid}. {e}")
         return False
 
-    def set_password_hash(self, uid, password_hash) -> bool:
+    def set_password_hash(self, uid, password_hash: bytes) -> bool:
         """
         Modify `userPassword` attribute in synchronous mode for provided user
         """
         try:
             dn = f'uid={uid},ou=users,{self._suffix}'
             mod_list = [(ldap.MOD_REPLACE, 'userPassword', password_hash)]
+            self.connection.modify_s(dn, modlist=mod_list)
+            return True
+        except ldap.LDAPError as e:
+            logger.error(f"Unable to change password for {uid}. {e}")
+        return False
+
+    def modify_attribute(self, uid: str, name: str, value: bytes) -> bool:
+        """Performs an LDAP modify operation on a user entry's attribute"""
+        dn = f'uid={uid},ou=users,{self._suffix}'
+        mod_list = [(ldap.MOD_REPLACE, name, value)]
+        try:
             self.connection.modify_s(dn, modlist=mod_list)
             return True
         except ldap.LDAPError as e:

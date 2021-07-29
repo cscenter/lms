@@ -1,5 +1,5 @@
 import base64
-from typing import Optional
+from typing import Dict, List, Optional, Union
 
 import ldif
 from ldap.dn import escape_dn_chars
@@ -11,7 +11,7 @@ from code_reviews.constants import GROUPS_IMPORT_TO_GERRIT
 from users.models import User
 
 
-def get_ldap_username(user: User):
+def get_ldap_username(user: User) -> str:
     """
     Portable Filename Character Set (according to POSIX.1-2017) is used for
     username since @ in a username can be misleading when you are connecting
@@ -20,7 +20,7 @@ def get_ldap_username(user: User):
     return user.email.replace("@", ".")
 
 
-def get_password_hash(user) -> Optional[bytes]:
+def get_password_hash(user) -> bytes:
     """
     Converts Django's password hash representation to LDAP compatible
     hasher format. Supports pbkdf2 hasher only.
@@ -44,17 +44,18 @@ def get_password_hash(user) -> Optional[bytes]:
     return h.encode("utf-8")
 
 
-def user_to_ldap_entry(user: User, domain_component=settings.LDAP_DB_SUFFIX):
+def user_to_ldap_entry(user: User, domain_component=settings.LDAP_DB_SUFFIX) -> Dict[str, List[Union[bytes, str]]]:
     """
-    Converts user object into LDIF entry.
+    Generates LDIF entry from the user object. Attribute values of the
+    *domain_component* must be escaped.
+
     Notes:
-        Each added attribute needs to be added as a list.
-        Each value of this list should be forced to bytes except `dn`
-            since it's not used as a part of `modlist`
+        Each attribute needs to be added as a list.
+        Each value of the list should be forced to bytes except `dn`
+            since it's not used as a part of a `modlist`
     """
     uid = get_ldap_username(user)
-    # XXX: It's unsafe to escape the whole dn value since open LDAP
-    # returns `invalid DN` in that case
+    # Attribute values of the DN should be escaped
     dn = f"uid={escape_dn_chars(uid)},ou=users,{domain_component}"
     password_hash = get_password_hash(user)
     return {
@@ -73,7 +74,7 @@ def user_to_ldap_entry(user: User, domain_component=settings.LDAP_DB_SUFFIX):
 
 
 # FIXME: у некоторых пользователей нет пароля, надо их импортировать и посмотреть, создастся ли для них аккаунт и не будет ли там падать с 500й, если пробовать входить по пустому паролю или любому невалидному.
-def export(file_path, site_id=settings.SITE_ID):
+def export(file_path, site_id=settings.SITE_ID) -> None:
     """
     Exports account data in a LDIF format for users having at least one
     of the **GROUPS_IMPORT_TO_GERRIT** groups.

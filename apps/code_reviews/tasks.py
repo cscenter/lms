@@ -2,7 +2,6 @@ import logging
 
 from django_rq import job
 
-from django.apps import apps
 from django.conf import settings
 
 from code_reviews.api.gerrit import Gerrit
@@ -39,7 +38,6 @@ def update_password_in_gerrit(*, user_id: int):
     Update LDAP password hash in review.compscicenter.ru when user
     successfully changed his password with reset or change form.
     """
-    User = apps.get_model('users', 'User')
     try:
         user = User.objects.get(pk=user_id)
     except User.DoesNotExist:
@@ -47,7 +45,7 @@ def update_password_in_gerrit(*, user_id: int):
         return
     password_hash = get_password_hash(user)
     if not password_hash:
-        logger.error(f"Empty hash for user_id={user_id}")
+        logger.info(f"Empty hash for user_id={user_id}")
         return
     username = get_ldap_username(user)
     # TODO: What if connection fail when code review system is not available?
