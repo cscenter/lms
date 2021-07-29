@@ -34,14 +34,14 @@
     <div class="collapse" id="import_results">
         {% if import_testing_results.campaign %}
           <div class="pb-10">
-              <a href="{% url 'admission:import_contest_results' import_testing_results.campaign.pk import_testing_results.contest_type %}" class="btn btn-default _btn-import-testings-results mr-10">
+              <a href="{% url 'admission:import_contest_results' import_testing_results.campaign.pk import_testing_results.contest_type %}" id='import_testing_result' class="btn btn-default _btn-import-testings-results mr-10">
                   <i class="fa fa-refresh" aria-hidden="true"></i> Результаты теста
               </a>{% if import_testing_results.latest_task_test %} Задача добавлена {{ import_testing_results.latest_task_test.date }} [{{ import_testing_results.latest_task_test.status }}]{% endif %}
           </div>
         {% endif %}
         {% if import_exam_results.campaign %}
         <div class="pb-10">
-            <a href="{% url 'admission:import_contest_results' import_exam_results.campaign.pk import_exam_results.contest_type %}" class="btn btn-default _btn-import-testings-results mr-10">
+            <a href="{% url 'admission:import_contest_results' import_exam_results.campaign.pk import_exam_results.contest_type %}" id='import_exam_result' class="btn btn-default _btn-import-exam-results mr-10">
                 <i class="fa fa-refresh" aria-hidden="true"></i> Результаты экзамена
             </a>{% if import_exam_results.latest_task_exam %} Задача добавлена {{ import_exam_results.latest_task_exam.date }} [{{ import_exam_results.latest_task_exam.status }}]{% endif %}
         </div>
