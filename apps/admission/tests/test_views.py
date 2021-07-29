@@ -414,3 +414,32 @@ def test_create_student_from_applicant(client, curator, assert_redirect):
     applicant_reapplied.refresh_from_db()
     assert applicant_reapplied.user_id == applicant.user_id
     assert_redirect(response, admin_url)
+
+
+@pytest.mark.django_db
+def test_import_buttons_on_applicants_list_page(client):
+
+    curator = CuratorFactory()
+    campaign = CampaignFactory(current=True, branch=BranchFactory(code=Branches.SPB))
+    applicant = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign)
+    applicant_2 = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign)
+    applicant_3 = ApplicantFactory(status=Applicant.INTERVIEW_SCHEDULED, campaign=campaign)
+    applicant_4 = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign)
+    applicant_5 = ApplicantFactory(status=Applicant.INTERVIEW_SCHEDULED, campaign=campaign)
+
+    client.login(curator)
+    base_url = reverse("admission:applicants:list")
+    base_url = f"{base_url}?campaign={campaign.id}&status="
+    response = client.get(base_url)
+    assert response.status_code == 200
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert soup.find(text=applicant.full_name) is not None
+    assert soup.find(text=applicant_2.full_name) is not None
+    assert soup.find(text=applicant_3.full_name) is not None
+    assert soup.find(text=applicant_4.full_name) is not None
+    assert soup.find(text=applicant_5.full_name) is not None
+
+    assert soup.find(id='import_testing_result') is not None
+    assert soup.find(id='import_exam_result') is not None
+
+

@@ -29,7 +29,7 @@ def test_register_in_yandex_contest_success(mocker):
 
 
 @pytest.mark.django_db
-def test_import_contest_result(client, mocker):
+def test_import_contest_testing_result(client, mocker):
     mocked_api = mocker.patch('admission.models.YandexContestIntegration.import_results')
     scoreboard_total = 10
     updated_total = 1
@@ -39,7 +39,7 @@ def test_import_contest_result(client, mocker):
     client.login(curator)
     campaign = CampaignFactory()
 
-    url = reverse('admission:import_testing_results', kwargs={'campaign_id': campaign.id, 
+    url = reverse('admission:import_contest_results', kwargs={'campaign_id': campaign.id,
                                                               'contest_type': ContestTypes.TEST})
     response = client.post(url)
     assert response.status_code == 201
@@ -47,6 +47,30 @@ def test_import_contest_result(client, mocker):
     latest_task = (Task.objects
                    .get_task(task_name, kwargs={"campaign_id": campaign.id,
                                                 "contest_type": ContestTypes.TEST})
+                   .order_by("-id")
+                   .first())
+    assert latest_task.is_completed
+
+
+@pytest.mark.django_db
+def test_import_contest_exam_result(client, mocker):
+    mocked_api = mocker.patch('admission.models.YandexContestIntegration.import_results')
+    scoreboard_total = 10
+    updated_total = 1
+    mocked_api.return_value = YandexContestImportResults(on_scoreboard=scoreboard_total,
+                                                         updated=updated_total)
+    curator = CuratorFactory()
+    client.login(curator)
+    campaign = CampaignFactory()
+
+    url = reverse('admission:import_contest_results', kwargs={'campaign_id': campaign.id,
+                                                              'contest_type': ContestTypes.EXAM})
+    response = client.post(url)
+    assert response.status_code == 201
+    task_name = "admission.tasks.import_exam_results"
+    latest_task = (Task.objects
+                   .get_task(task_name, kwargs={"campaign_id": campaign.id,
+                                                "contest_type": ContestTypes.EXAM})
                    .order_by("-id")
                    .first())
     assert latest_task.is_completed
