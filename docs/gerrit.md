@@ -86,6 +86,24 @@ You may need to fix author and committer
 git -c "user.name=admin" -c "user.email=webmaster@compscicenter.ru" commit --amend --reuse-message=HEAD --author="admin <webmaster@compscicenter.ru>"
 ```
 
+### Update/Delete user from gerrit
+
+Make sure user has `Access Database` capability (under global capabilities in the "All-Projects.git" configuration)
+
+```bash
+git clone ssh://<user>@<gerrit host>:29418/All-Users
+git fetch origin refs/meta/external-ids:refs/meta/external-ids
+git checkout refs/meta/external-ids
+# Search references by user email
+grep -r "teststudent@compscienter.ru" .
+# Remove records and commit
+git rm 398cd83a701a63c77dfc1998f76524561208c879 9b622a00bcd48295d545ba946afdd91df8b0ed61
+git commit -m "Remove account foobar"
+git push origin HEAD:refs/meta/external-ids
+```
+
+P.S. In case you have write permission issues try to run the same commands from the remote machine under "gerrit" user (OR investigate the problem and set correct chmod)
+
 
 ### Update gerrit user
 
