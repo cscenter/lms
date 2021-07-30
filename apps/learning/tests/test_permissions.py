@@ -110,18 +110,18 @@ def test_access_to_create_student_group():
     student = StudentFactory()
     s = SemesterFactory.create_current(for_branch=Branches.SPB)
     course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
-    sg1 = StudentGroupFactory.create(course=course)
-    sg2 = StudentGroupFactory.create()
-    EnrollmentFactory.create(student=student, course=course, student_group=sg1)
+    course1 = CourseFactory.create(semester=s, group_mode=CourseGroupModes.MANUAL)
 
     assert CreateStudentGroup.name in perm_registry
     assert CreateStudentGroupAsTeacher.name in perm_registry
-    assert not user.has_perm(CreateStudentGroup.name, sg1)
-    assert not student.has_perm(CreateStudentGroup.name, sg1)
-    assert teacher.has_perm(CreateStudentGroup.name, sg1)
-    assert not teacher.has_perm(CreateStudentGroup.name, sg2)
-    assert curator.has_perm(CreateStudentGroup.name, sg1)
-    assert curator.has_perm(CreateStudentGroup.name, sg2)
+    assert not user.has_perm(CreateStudentGroup.name, course)
+    assert not user.has_perm(CreateStudentGroup.name, course1)
+    assert not student.has_perm(CreateStudentGroup.name, course)
+    assert not student.has_perm(CreateStudentGroup.name, course1)
+    assert teacher.has_perm(CreateStudentGroup.name, course)
+    assert not teacher.has_perm(CreateStudentGroup.name, course1)
+    assert curator.has_perm(CreateStudentGroup.name, course)
+    assert curator.has_perm(CreateStudentGroup.name, course1)
 
 
 @pytest.mark.django_db

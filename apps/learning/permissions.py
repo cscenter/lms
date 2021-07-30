@@ -416,8 +416,8 @@ class CreateStudentGroupAsTeacher(Permission):
 
     @staticmethod
     @rules.predicate
-    def rule(user: User, student_group: StudentGroup):
-        return user in student_group.course.teachers.all()
+    def rule(user: User, course: Course):
+        return user in course.teachers.all()
 
 
 @add_perm
