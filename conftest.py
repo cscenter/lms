@@ -64,15 +64,15 @@ def curator():
 
 
 @pytest.fixture(scope="session")
-def test_image():
-    def get_image_file(name='test.png', size=(50, 50), color=(256, 0, 0)):
+def get_test_image():
+    def wrapper(name='test.png', size=(50, 50), color=(256, 0, 0)):
         file_obj = BytesIO()
         _, ext = name.rsplit(".", maxsplit=1)
         image = Image.new("RGBA", size=size, color=color)
         image.save(file_obj, ext)
         file_obj.seek(0)
         return File(file_obj, name=name)
-    return get_image_file
+    return wrapper
 
 
 @pytest.fixture(scope="function")

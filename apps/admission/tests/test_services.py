@@ -1,10 +1,14 @@
+import dataclasses
 import datetime
+import io
+from typing import BinaryIO, cast
 
 import pytest
 import pytz
 from rest_framework.exceptions import NotFound
 
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
 from django.utils import timezone
 
@@ -14,10 +18,10 @@ from admission.constants import (
 )
 from admission.models import Acceptance, Applicant, Exam, Interview
 from admission.services import (
-    EmailQueueService, accept_interview_invitation, create_student_from_applicant,
-    decline_interview_invitation, get_acceptance_ready_to_confirm,
-    get_applicants_for_invitation, get_meeting_time, get_ongoing_interview_streams,
-    get_streams
+    AccountData, EmailQueueService, StudentProfileData, accept_interview_invitation,
+    create_student, create_student_from_applicant, decline_interview_invitation,
+    get_acceptance_ready_to_confirm, get_applicants_for_invitation, get_meeting_time,
+    get_ongoing_interview_streams, get_or_create_student_profile, get_streams
 )
 from admission.tests.factories import (
     AcceptanceFactory, ApplicantFactory, CampaignFactory, ExamFactory, InterviewFactory,
@@ -27,8 +31,10 @@ from admission.tests.factories import (
 from core.models import Branch
 from core.tests.factories import BranchFactory, EmailTemplateFactory, SiteFactory
 from core.timezone import get_now_utc
+from learning.services import get_student_profile
+from users.constants import GenderTypes
 from users.models import StudentTypes
-from users.tests.factories import UserFactory
+from users.tests.factories import StudentProfileFactory, UserFactory
 
 
 @pytest.mark.django_db
@@ -337,3 +343,94 @@ def test_get_acceptance_ready_to_confirm(settings):
         get_acceptance_ready_to_confirm(year=2011, access_key=acceptance2.access_key,
                                         filters=[Q(applicant__campaign__branch__in=branches)])
     assert e.value.code == "confirmed"
+
+
+ACCOUNT_DATA = AccountData(email='test@example.com',
+                           time_zone=pytz.timezone('Europe/Moscow'),
+                           gender=GenderTypes.FEMALE,
+                           photo=SimpleUploadedFile("test.txt", b"content"),
+                           phone='+71234567',
+                           workplace='vk',
+                           private_contacts='tiktok.com/git_lover',
+                           codeforces_login='handle1',
+                           stepic_id='42',
+                           github_login='git_lover')
+STUDENT_PROFILE_DATA = StudentProfileData(university='University1',
+                                          birthday=datetime.date(2000, 1, 1))
+
+
+@pytest.mark.django_db
+def test_create_student(settings, get_test_image):
+    future_dt = get_now_utc() + datetime.timedelta(days=5)
+    campaign = CampaignFactory(year=2011,
+                               branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
+                               confirmation_ends_at=future_dt)
+    acceptance = AcceptanceFactory(status=Acceptance.WAITING,
+                                   applicant__campaign=campaign,
+                                   applicant__yandex_login='login1',
+                                   applicant__university_other='University2')
+    applicant = acceptance.applicant
+    user = create_student(acceptance, ACCOUNT_DATA, STUDENT_PROFILE_DATA)
+    assert user.pk
+    applicant.refresh_from_db()
+    assert user.first_name == applicant.first_name
+    assert user.last_name == applicant.last_name
+    assert user.patronymic == applicant.patronymic
+    assert user.yandex_login == 'login1'
+    assert applicant.user == user
+    acceptance.refresh_from_db()
+    assert acceptance.status == Acceptance.CONFIRMED
+    student_profile = get_student_profile(
+        user=user, site=campaign.branch.site,
+        profile_type=StudentTypes.REGULAR,
+        filters=[Q(year_of_admission=campaign.year)])
+    assert student_profile is not None
+    assert student_profile.birthday == STUDENT_PROFILE_DATA.birthday
+    assert student_profile.university == STUDENT_PROFILE_DATA.university
+    assert student_profile.year_of_admission == campaign.year
+    assert student_profile.type == StudentTypes.REGULAR
+
+
+@pytest.mark.django_db
+def test_get_or_create_student_profile(settings, get_test_image):
+    branch = BranchFactory(site=SiteFactory(pk=settings.SITE_ID))
+    campaign1 = CampaignFactory(year=2011, branch=branch)
+    campaign2 = CampaignFactory(year=2012, branch=branch)
+    student_profile = StudentProfileFactory(type=StudentTypes.REGULAR,
+                                            branch=campaign1.branch,
+                                            year_of_admission=campaign1.year)
+    user = student_profile.user
+    sp1 = get_or_create_student_profile(campaign1, user)
+    assert sp1 == student_profile
+    sp2 = get_or_create_student_profile(campaign2, user)
+    assert sp2 != sp1
+    # Don't allow overwrite data relative to campaign
+    sp2.delete()
+    branch1 = BranchFactory()
+    sp2 = get_or_create_student_profile(campaign2, user, data={
+        "year_of_admission": 1998,
+        "branch": branch1,
+        "user": UserFactory(),
+        "profile_type": StudentTypes.VOLUNTEER,
+    })
+    assert sp2.year_of_admission == campaign2.year
+    assert sp2.branch == campaign2.branch
+    assert sp2.user == user
+    assert sp2.type == StudentTypes.VOLUNTEER
+
+
+@pytest.mark.django_db
+def test_create_student_email_case_insensitive(settings, get_test_image):
+    future_dt = get_now_utc() + datetime.timedelta(days=5)
+    campaign = CampaignFactory(year=2011,
+                               branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
+                               confirmation_ends_at=future_dt)
+    acceptance = AcceptanceFactory(status=Acceptance.WAITING,
+                                   applicant__campaign=campaign,
+                                   applicant__yandex_login='login1')
+    user1 = UserFactory(email=ACCOUNT_DATA.email)
+    assert user1.email == 'test@example.com'
+    # Merging data into existing account since email address must be case insensitive
+    account_data1 = dataclasses.replace(ACCOUNT_DATA, email='TEST@example.com')
+    user2 = create_student(acceptance, account_data1, STUDENT_PROFILE_DATA)
+    assert user2.pk == user1.pk

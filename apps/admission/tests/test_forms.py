@@ -12,7 +12,7 @@ from users.constants import GenderTypes
 
 
 @pytest.mark.django_db
-def test_confirmation_form_validation(settings, test_image):
+def test_confirmation_form_validation(settings, get_test_image):
     future_dt = get_now_utc() + datetime.timedelta(days=5)
     campaign = CampaignFactory(year=2011,
                                branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
@@ -30,7 +30,7 @@ def test_confirmation_form_validation(settings, test_image):
         "birthday": datetime.date(2011, 1, 1),
         "phone": "+7",
     }
-    files = {"photo": test_image(name='test.png')}
+    files = {"photo": get_test_image(name='test.png')}
     form = ConfirmationForm(acceptance=acceptance, data=form_data, prefix=False, files=files)
     assert not form.is_valid()
     form_data['email_code'] = email_code_generator.make_token("test2@example.com", acceptance.applicant)

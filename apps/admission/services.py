@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass, fields
 from datetime import date, datetime, timedelta
 from operator import attrgetter
-from typing import Any, BinaryIO, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pytz
 from post_office import mail
@@ -12,6 +12,7 @@ from rest_framework.exceptions import APIException, NotFound
 
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import UploadedFile
 from django.db import models, transaction
 from django.db.models import Q
 from django.template.loader import render_to_string
@@ -262,12 +263,12 @@ def validate_verification_code(applicant: Applicant, email: str, verification_co
     return email_code_generator.check_token(email, applicant, verification_code)
 
 
-@dataclass
+@dataclass(frozen=True)
 class AccountData:
     email: str
     time_zone: pytz.BaseTzInfo
     gender: str
-    photo: BinaryIO
+    photo: UploadedFile
     phone: str
     workplace: str
     private_contacts: str
@@ -282,7 +283,7 @@ class AccountData:
         return cls(**valid_data)
 
 
-@dataclass
+@dataclass(frozen=True)
 class StudentProfileData:
     university: str
     birthday: date
@@ -299,10 +300,10 @@ def _get_username_from_email(email: str):
     return username
 
 
-def create_student_profile_for_applicant(applicant: Applicant, user: User,
-                                         data: Optional[Dict[str, Any]] = None) -> StudentProfile:
-    branch = applicant.campaign.branch
-    campaign_year = applicant.campaign.year
+def get_or_create_student_profile(campaign: Campaign, user: User,
+                                  data: Optional[Dict[str, Any]] = None) -> StudentProfile:
+    branch = campaign.branch
+    campaign_year = campaign.year
     student_profile = get_student_profile(
         user=user, site=branch.site,
         profile_type=StudentTypes.REGULAR,
@@ -310,18 +311,16 @@ def create_student_profile_for_applicant(applicant: Applicant, user: User,
     # Don't override existing student profile for this campaign since it could
     # be already changed
     if student_profile is None:
-        overwrite_data = data or {}
-        data = {
+        profile_fields = {
+            "profile_type": StudentTypes.REGULAR,
             "year_of_curriculum": campaign_year,
-            "level_of_education_on_admission": applicant.level_of_education,
-            "university": applicant.university.name,
-            **overwrite_data
+            **(data or {}),
+            # Fields below are not allowed to be overwritten
+            "user": user,
+            "branch": branch,
+            "year_of_admission": campaign_year,
         }
-        create_student_profile(
-            user=user, branch=branch,
-            profile_type=StudentTypes.REGULAR,
-            year_of_admission=campaign_year,
-            **data)
+        student_profile = create_student_profile(**profile_fields)
     return student_profile
 
 
@@ -337,7 +336,7 @@ def create_student(acceptance: Acceptance, account_data: AccountData,
     email = account_data.email
     applicant = acceptance.applicant
     try:
-        user = User.objects.get(email=email)
+        user = User.objects.get(email__iexact=email)
     except User.DoesNotExist:
         user = User.objects.create_user(
             username=_get_username_from_email(email),
@@ -354,7 +353,12 @@ def create_student(acceptance: Acceptance, account_data: AccountData,
     for name in account_fields:
         setattr(user, name, getattr(account_data, name))
     user.save()
-    create_student_profile_for_applicant(applicant, user, data=asdict(student_profile_data))
+    student_data = {
+        "level_of_education_on_admission": applicant.level_of_education,
+        "university": applicant.university.name,
+        **asdict(student_profile_data)
+    }
+    get_or_create_student_profile(applicant.campaign, user, data=student_data)
     applicant.user = user
     applicant.save(update_fields=['user'])
     acceptance.status = Acceptance.CONFIRMED
@@ -397,7 +401,12 @@ def create_student_from_applicant(applicant: Applicant):
         user.github_login = applicant.github_login.split("github.com/",
                                                          maxsplit=1)[-1]
     user.save()
-    create_student_profile_for_applicant(applicant, user)
+    student_data = {
+        "year_of_curriculum": applicant.campaign.year,
+        "level_of_education_on_admission": applicant.level_of_education,
+        "university": applicant.university.name,
+    }
+    get_or_create_student_profile(applicant.campaign, user, data=student_data)
     return user
 
 
