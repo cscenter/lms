@@ -2,18 +2,21 @@ import datetime
 
 import pytest
 import pytz
+from bs4 import BeautifulSoup
 
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
+from courses.models import CourseGroupModes
 from courses.permissions import ViewAssignment
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from learning.models import StudentAssignment
 from learning.permissions import ViewStudentAssignment, ViewStudentAssignmentList
 from learning.settings import Branches
 from learning.tests.factories import (
-    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
+    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory,
+    StudentGroupFactory
 )
 from users.tests.factories import CuratorFactory, StudentFactory, TeacherFactory
 
@@ -323,3 +326,25 @@ def test_gradebook_list(client, mocker, assert_redirect):
     course2 = CourseFactory(semester=semester, teachers=[teacher])
     response = client.get(gradebooks_url)
     assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_student_groups_list(client):
+
+    """
+    Checking correct displaying student groups in teacher group list
+    """
+
+    teacher = TeacherFactory()
+    course = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    student_group = StudentGroupFactory.create(course=course)
+    student_group_1 = StudentGroupFactory.create(course=course)
+
+    client.login(teacher)
+    student_group_list = reverse("teaching:student_group_list",
+                                 kwargs={'course_pk': str(course.id)})
+    response = client.get(student_group_list)
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    assert soup.find(text=student_group.name) is not None
+    assert soup.find(text=student_group_1.name) is not None
