@@ -1,9 +1,5 @@
-# The widget classes in this file call violate Python method calling
-# conventions. Specifically, the call .decompress() with a self of an
-# unrelated type. This is illegal under mypy.
-# type: ignore
-
 import datetime
+from typing import Any
 
 import pytz
 
@@ -59,6 +55,7 @@ def naive_to_aware(value, instance: TimezoneAwareMixin):
 
 
 class TimezoneAwareSplitDateTimeWidget(forms.SplitDateTimeWidget):
+    instance: Any
     template_name = "widgets/timezone_aware_split_datetime.html"  # bootstrap 3
 
     def __init__(self, attrs=None):
@@ -74,8 +71,10 @@ class TimezoneAwareSplitDateTimeWidget(forms.SplitDateTimeWidget):
 
 class TimezoneAwareAdminSplitDateTimeWidget(widgets.AdminSplitDateTime):
     def decompress(self, value):
-        # noinspection PyCallByClass
-        return TimezoneAwareSplitDateTimeWidget.decompress(self, value)
+        # The violates Python method calling conventions.
+        # Specifically, the call with a self of an unrelated type is
+        # illegal under mypy.
+        return TimezoneAwareSplitDateTimeWidget.decompress(self, value)  # type: ignore[arg-type]
 
 
 class TimezoneAwareFormField(forms.Field):
@@ -114,7 +113,7 @@ class TimezoneAwareModelForm(forms.ModelForm):
                             f"must be subclassed from {TimezoneAwareMixin}")
         for field_name, form_field in self.fields.items():
             if isinstance(form_field, TimezoneAwareFormField):
-                form_field.widget.instance = self.instance
+                form_field.widget.instance = self.instance  # type: ignore[union-attr]
 
     def save(self, commit=True):
         """
@@ -138,7 +137,7 @@ class TimezoneAwareAdminForm(TimezoneAwareModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, form_field in self.fields.items():
-            model_field = self._meta.model._meta.get_field(field_name)
+            model_field = self._meta.model._meta.get_field(field_name)  # type: ignore[attr-defined]
             if isinstance(model_field, TimezoneAwareDateTimeField):
                 if not isinstance(form_field, TimezoneAwareSplitDateTimeField):
                     raise TypeError(f"`{field_name}` must be subclassed from "
