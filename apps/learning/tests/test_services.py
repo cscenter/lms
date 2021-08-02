@@ -250,6 +250,35 @@ def test_assignment_service_create_student_assignments(settings):
     assert StudentAssignment.objects.get(assignment=assignment).student_id == student_profile_spb.user_id
 
 
+@pytest.mark.parametrize("inactive_status", [StudentStatuses.ACADEMIC_LEAVE,
+                                             StudentStatuses.ACADEMIC_LEAVE_SECOND,
+                                             StudentStatuses.EXPELLED])
+@pytest.mark.django_db
+def test_assignment_service_create_student_assignments_inactive_status(inactive_status, settings):
+    """
+    Inactive student profile status prevents from generating assignment
+    record for student.
+    """
+    branch = BranchFactory()
+    course = CourseFactory(main_branch=branch,
+                           group_mode=StudentGroupTypes.BRANCH,
+                           branches=[branch])
+    assignment = AssignmentFactory(course=course)
+    student_profile = StudentProfileFactory(branch=branch)
+    EnrollmentFactory(course=course,
+                      student_profile=student_profile,
+                      student=student_profile.user)
+    StudentAssignment.objects.all().delete()
+    AssignmentService.bulk_create_student_assignments(assignment)
+    assert StudentAssignment.objects.count() == 1
+    # Set inactive status
+    StudentAssignment.objects.all().delete()
+    student_profile.status = inactive_status
+    student_profile.save()
+    AssignmentService.bulk_create_student_assignments(assignment)
+    assert StudentAssignment.objects.count() == 0
+
+
 @pytest.mark.django_db
 def test_assignment_service_remove_student_assignments():
     branch_spb = BranchFactory(code=Branches.SPB)

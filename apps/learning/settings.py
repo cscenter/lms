@@ -34,11 +34,12 @@ class AcademicDegreeLevels(DjangoChoices):
 class StudentStatuses(DjangoChoices):
     EXPELLED = C('expelled', _("StudentInfo|Expelled"))
     ACADEMIC_LEAVE = C('academic', _("StudentStatus|Academic leave"))
+    ACADEMIC_LEAVE_SECOND = C('academic_2', _("Second academic leave"))
     REINSTATED = C('reinstated', _("StudentInfo|Reinstalled"))
     WILL_GRADUATE = C('will_graduate', _("StudentInfo|Will graduate"))
     GRADUATE = C('graduate', _("StudentInfo|Graduate"))
 
-    inactive_statuses = {EXPELLED.value, ACADEMIC_LEAVE.value}
+    inactive_statuses = {EXPELLED.value, ACADEMIC_LEAVE.value, ACADEMIC_LEAVE_SECOND.value}
 
     @classmethod
     def is_inactive(cls, status):
