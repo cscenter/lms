@@ -329,6 +329,35 @@ def test_gradebook_list(client, mocker, assert_redirect):
 
 
 @pytest.mark.django_db
+def test_student_group_manual_link(client):
+
+    """
+    Checking correct displaying link on student group in teacher course list
+    """
+
+    def update_request():
+        course_list = reverse("teaching:course_list")
+        response = client.get(course_list)
+        soup = BeautifulSoup(response.content, "html.parser")
+        return soup
+
+    teacher = TeacherFactory()
+
+    # check without student group link
+    course_branch_group = CourseFactory.create(teachers=[teacher])
+    StudentGroupFactory.create(course=course_branch_group)
+    client.login(teacher)
+    soup = update_request()
+    assert soup.find(id='student_manual_group') is None
+
+    # check with student group link
+    course_manual_group = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    StudentGroupFactory.create(course=course_manual_group)
+    soup = update_request()
+    assert soup.find(id='student_manual_group') is not None
+
+
+@pytest.mark.django_db
 def test_student_groups_list(client):
 
     """
