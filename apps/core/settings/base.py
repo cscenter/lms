@@ -63,6 +63,8 @@ INSTALLED_APPS = [
     'library.apps.LibraryConfig',
 ]
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # i18n, l10n
 LANGUAGE_CODE = 'ru'
 LANGUAGES = [

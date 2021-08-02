@@ -52,6 +52,7 @@ from admission.services import (
     get_acceptance_ready_to_confirm, get_applicants_for_invitation, get_meeting_time,
     get_ongoing_interview_streams, get_streams
 )
+from core.db.fields import ScoreField
 from core.http import AuthenticatedHttpRequest, HttpRequest
 from core.models import Branch
 from core.timezone import get_now_utc, now_local
@@ -290,7 +291,7 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
                                                     section=section)
                       .select_related("exam", "online_test", "campaign", "university",
                                       "campaign__branch")
-                      .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1)),
+                      .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1, output_field=ScoreField())),
                                 test__score_coalesce=Coalesce('online_test__score', Value(-1)))
                       .order_by("-exam__score_coalesce", "-test__score_coalesce", "-pk"))
 
@@ -425,7 +426,7 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
             .select_related("exam", "online_test", "campaign", "university",
                             "campaign__branch")
             .prefetch_related("interviews")
-            .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1)),
+            .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1, output_field=ScoreField())),
                       test__score_coalesce=Coalesce('online_test__score',
                                                     Value(-1)))
             .order_by("-exam__score_coalesce", "-test__score_coalesce", "-pk"))
@@ -681,7 +682,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
              .select_related("applicant__campaign__branch",
                              "venue__city")
              .prefetch_related("interviewers")
-             .annotate(average=Coalesce(Avg('comments__score'), Value(0)))
+             .annotate(average=Coalesce(Avg('comments__score'), Value(0.0)))
              .order_by("date", "pk"))
         if not self.request.user.is_curator:
             # To interviewers show interviews from current campaigns where

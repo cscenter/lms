@@ -5,10 +5,13 @@ from django.utils import timezone
 
 from notifications.registry import NotRegistered, registry
 
-notify = Signal(providing_args=[
-    'type', 'recipient', 'actor', 'verb', 'action_object',
-    'target', 'description', 'timestamp', 'level'
-])
+# The providing_args argument is deprecated. Let's store it in a comment for
+# documentation purposes.
+# providing_args=[
+#     'type', 'recipient', 'actor', 'verb', 'action_object',
+#     'target', 'description', 'timestamp', 'level'
+# ]
+notify = Signal()
 
 
 EXTRA_DATA = getattr(settings, 'NOTIFICATIONS_USE_JSONFIELD', False)
