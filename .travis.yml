@@ -8,7 +8,7 @@ env:
 jobs:
   include:
     - stage: test
-      python: "3.8"
+      python: "3.9"
       services:
         - redis
       addons:
@@ -48,7 +48,7 @@ jobs:
         - pytest -c lk_yandexdataschool_ru/pytest.ini --create-db --cov=./lk_yandexdataschool_ru/apps/
     - stage: test
       name: Checks Imports Order
-      python: "3.8"
+      python: "3.9"
       install:
         - pip3 install isort
       script:
