@@ -32,11 +32,12 @@ from learning.forms import (
 )
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import (
-    AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
+    AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment,
+    StudentGroup
 )
 from learning.permissions import (
     CreateAssignmentComment, EditOwnStudentAssignment, ViewStudentAssignment,
-    ViewStudentAssignmentList
+    ViewStudentAssignmentList, ViewStudentGroup
 )
 from learning.services import AssignmentService, get_teacher_classes
 from learning.teaching.filters import AssignmentStudentsFilter
@@ -284,6 +285,24 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
                 .select_related('meta_course', 'semester')
                 .prefetch_related('teachers')
                 .order_by('-semester__index', 'meta_course__name'))
+
+
+class StudentGroupListView(PermissionRequiredMixin, generic.ListView):
+    model = StudentGroup
+    context_object_name = 'student_group_list'
+    template_name = "lms/teaching/student_group_list.html"
+    permission_required = ViewStudentGroup.name
+
+    def get_permission_object(self):
+        return Course.objects.get(id=self.kwargs.get("course_pk"))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course'] = Course.objects.get(id=self.kwargs.get("course_pk"))
+        return context
+
+    def get_queryset(self):
+        return StudentGroup.objects.filter(course_id=self.kwargs.get("course_pk"))
 
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<

@@ -485,6 +485,10 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         return reverse('course_news_notifications_read', kwargs=self.url_kwargs,
                        subdomain=settings.LMS_SUBDOMAIN)
 
+    def get_student_groups_url(self):
+        return reverse('teaching:student_group_list', kwargs={'course_pk': self.url_kwargs['course_id']},
+                       subdomain=settings.LMS_SUBDOMAIN)
+
     def has_unread(self):
         from notifications.middleware import get_unread_notifications_cache
         cache = get_unread_notifications_cache()
