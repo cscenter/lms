@@ -25,6 +25,7 @@ class ApplicantStatuses(DjangoChoices):
     INTERVIEW_SCHEDULED = C('interview_assigned', _('Interview assigned'))
     INTERVIEW_COMPLETED = C('interview_completed', _('Interview completed'))
     REJECTED_BY_INTERVIEW = C('rejected_interview', _('Rejected by interview'))
+    REJECTED_BY_INTERVIEW_WITH_BONUS = C('rejected_with_bonus', _('Rejected by interview. Offered a bonus'))
     ACCEPT_PAID = C('accept_paid', _('Accept on paid'))
     WAITING_FOR_PAYMENT = C('waiting_for_payment', _('Waiting for Payment'))
     ACCEPT = C('accept', _('Accept'))
@@ -38,6 +39,7 @@ class ApplicantStatuses(DjangoChoices):
         INTERVIEW_SCHEDULED.value,
         INTERVIEW_COMPLETED.value,
         REJECTED_BY_INTERVIEW.value,
+        REJECTED_BY_INTERVIEW_WITH_BONUS.value,
         ACCEPT_PAID.value,
         WAITING_FOR_PAYMENT.value,
         ACCEPT.value,

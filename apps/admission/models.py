@@ -224,23 +224,24 @@ ApplicantSubscribedManager = _ApplicantSubscribedManager.from_queryset(
 class Applicant(TimezoneAwareMixin, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'campaign'
 
-    REJECTED_BY_TEST = 'rejected_test'
-    PERMIT_TO_EXAM = 'permit_to_exam'
-    REJECTED_BY_EXAM = 'rejected_exam'
-    REJECTED_BY_CHEATING = 'rejected_cheating'
+    # TODO: access applicant statuses with .STATUS.<code> instead
+    REJECTED_BY_TEST = ApplicantStatuses.REJECTED_BY_TEST
+    PERMIT_TO_EXAM = ApplicantStatuses.PERMIT_TO_EXAM
+    REJECTED_BY_EXAM = ApplicantStatuses.REJECTED_BY_EXAM
+    REJECTED_BY_CHEATING = ApplicantStatuses.REJECTED_BY_CHEATING
     # TODO: rename interview codes here and in DB. Replace values type?
-    INTERVIEW_TOBE_SCHEDULED = 'interview_phase'  # permitted to interview
+    INTERVIEW_TOBE_SCHEDULED = ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED  # permitted to interview
     # FIXME: remove
-    INTERVIEW_SCHEDULED = 'interview_assigned'
-    INTERVIEW_COMPLETED = 'interview_completed'
-    REJECTED_BY_INTERVIEW = 'rejected_interview'
-    PENDING = 'pending'
-    ACCEPT = 'accept'
-    ACCEPT_PAID = 'accept_paid'
-    WAITING_FOR_PAYMENT = 'waiting_for_payment'
-    ACCEPT_IF = 'accept_if'
-    VOLUNTEER = 'volunteer'
-    THEY_REFUSED = 'they_refused'
+    INTERVIEW_SCHEDULED = ApplicantStatuses.INTERVIEW_SCHEDULED
+    INTERVIEW_COMPLETED = ApplicantStatuses.INTERVIEW_COMPLETED
+    REJECTED_BY_INTERVIEW = ApplicantStatuses.REJECTED_BY_INTERVIEW
+    PENDING = ApplicantStatuses.PENDING
+    ACCEPT = ApplicantStatuses.ACCEPT
+    ACCEPT_PAID = ApplicantStatuses.ACCEPT_PAID
+    WAITING_FOR_PAYMENT = ApplicantStatuses.WAITING_FOR_PAYMENT
+    ACCEPT_IF = ApplicantStatuses.ACCEPT_IF
+    VOLUNTEER = ApplicantStatuses.VOLUNTEER
+    THEY_REFUSED = ApplicantStatuses.THEY_REFUSED
 
     STATUS = ApplicantStatuses.choices
     # One of the statuses below could be set after interviewing
@@ -249,6 +250,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel):
         ACCEPT_PAID,
         ACCEPT_IF,
         REJECTED_BY_INTERVIEW,
+        ApplicantStatuses.REJECTED_BY_INTERVIEW_WITH_BONUS,
         VOLUNTEER,
         WAITING_FOR_PAYMENT
     }

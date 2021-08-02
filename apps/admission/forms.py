@@ -10,6 +10,7 @@ from django.forms import SelectMultiple
 from django.forms.models import ModelForm
 from django.utils.translation import gettext_lazy as _
 
+from admission.constants import ApplicantStatuses
 from admission.models import (
     Acceptance, Applicant, Comment, Interview, InterviewAssignment, InterviewSlot,
     InterviewStream
@@ -19,7 +20,6 @@ from admission.services import (
 )
 from core.models import Branch
 from core.timezone import now_local
-from core.timezone.typing import Timezone
 from core.urls import reverse
 from core.views import ReadOnlyFieldsMixin
 from core.widgets import UbereditorWidget
@@ -286,13 +286,14 @@ class ApplicantFinalStatusField(forms.ChoiceField):
 class ApplicantFinalStatusForm(ModelForm):
     FINAL_CHOICES = (
         ('', filters_settings.EMPTY_CHOICE_LABEL),
-        (Applicant.ACCEPT, "Берём"),
-        (Applicant.VOLUNTEER, "Берём в вольные слушатели"),
-        (Applicant.ACCEPT_IF, "Берём с условием"),
-        (Applicant.ACCEPT_PAID, "Платное"),
-        (Applicant.WAITING_FOR_PAYMENT, "Ожидаем оплаты"),
-        (Applicant.REJECTED_BY_INTERVIEW, "Не берём"),
-        (Applicant.THEY_REFUSED, "Отказался"),
+        (ApplicantStatuses.ACCEPT, "Берём"),
+        (ApplicantStatuses.VOLUNTEER, "Берём в вольные слушатели"),
+        (ApplicantStatuses.ACCEPT_IF, "Берём с условием"),
+        (ApplicantStatuses.ACCEPT_PAID, "Платное"),
+        (ApplicantStatuses.WAITING_FOR_PAYMENT, "Ожидаем оплаты"),
+        (ApplicantStatuses.REJECTED_BY_INTERVIEW, "Не берём"),
+        (ApplicantStatuses.REJECTED_BY_INTERVIEW_WITH_BONUS, "Не берём, предложили билет"),
+        (ApplicantStatuses.THEY_REFUSED, "Отказался"),
     )
 
     class Meta:
