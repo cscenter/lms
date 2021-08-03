@@ -29,7 +29,7 @@ def test_register_in_yandex_contest_success(mocker):
 
 
 @pytest.mark.django_db
-def test_import_contest_result(client, mocker):
+def test_import_contest_results(client, mocker):
     mocked_api = mocker.patch('admission.models.YandexContestIntegration.import_results')
     scoreboard_total = 10
     updated_total = 1
