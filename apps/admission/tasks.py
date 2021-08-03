@@ -71,6 +71,9 @@ def import_campaign_contest_results(*, task_id):
         logger.info(f"Campaign id = {campaign.pk}")
         api = YandexContestAPI(access_token=campaign.access_token)
 
+        if task_kwargs['contest_type'] not in Contest.TYPES.values:
+            raise ContestAPIError
+
         contest_type = (Contest.TYPE_TEST
                         if task_kwargs['contest_type'] == Contest.TYPE_TEST 
                         else Contest.TYPE_EXAM)
@@ -78,6 +81,7 @@ def import_campaign_contest_results(*, task_id):
         for contest in campaign.contests.filter(type=contest_type):
             logger.info(f"Starting processing contest {contest.pk}")
             try:
+                # TODO: refactor this code without if
                 if task_kwargs['contest_type'] == Contest.TYPE_TEST:
                     on_scoreboard, updated = Test.import_results(api, contest)
                 else:
