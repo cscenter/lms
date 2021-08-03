@@ -21,6 +21,8 @@ class CourseURLParamsMixin:
         Previously friendly URL prefix was used to retrieve course record,
         now `settings.RE_COURSE_URI` contains course PK to avoid url collisions.
     """
+    course: Course
+
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.course: Course = get_object_or_404(
