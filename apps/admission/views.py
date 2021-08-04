@@ -47,10 +47,11 @@ from admission.models import (
     InterviewInvitation, InterviewSlot, InterviewStream
 )
 from admission.services import (
-    AccountData, EmailQueueService, StudentProfileData, UsernameError,
-    create_invitation, create_student, create_student_from_applicant,
-    get_acceptance_ready_to_confirm, get_applicants_for_invitation, get_meeting_time,
-    get_ongoing_interview_streams, get_streams
+    AccountData, ContestResultsImportState, EmailQueueService, StudentProfileData,
+    UsernameError, create_invitation, create_student, create_student_from_applicant,
+    get_acceptance_ready_to_confirm, get_applicants_for_invitation,
+    get_latest_contest_results_task, get_meeting_time, get_ongoing_interview_streams,
+    get_streams
 )
 from core.db.fields import ScoreField
 from core.http import AuthenticatedHttpRequest, HttpRequest
@@ -115,33 +116,6 @@ class InterviewerOnlyMixin(UserPassesTestMixin):
 
     def test_func(self, user):
         return user.is_interviewer or user.is_curator
-
-
-def import_campaign_testing_results(request, campaign_id: int, contest_type: int):
-    """
-    Creates new task for importing testing results from yandex contests.
-    Make sure `current` campaigns are already exist in DB before add new task.
-    """
-    if request.method == "POST" and request.user.is_curator:
-        task = Task.build(
-            task_name="admission.tasks.import_testing_results",
-            kwargs={"campaign_id": campaign_id,
-                    "contest_type": contest_type},
-            creator=request.user)
-        same_task_in_queue = (Task.objects
-                              # Add new task even if the same task is locked
-                              # and in progress since it could fail in the process
-                              .filter(locked_by__isnull=True,
-                                      processed_at__isnull=True,
-                                      task_name=task.task_name,
-                                      task_params=task.task_params,
-                                      task_hash=task.task_hash))
-        if not same_task_in_queue.exists():
-            task.save()
-            # FIXME: potential deadlock if using task id instead of (task_name, task_params)
-            import_campaign_contest_results.delay(task_id=task.pk)
-        return HttpResponse(status=201)
-    return HttpResponseForbidden()
 
 
 def get_interview_invitation_sections(invitation: InterviewInvitation):
@@ -453,23 +427,16 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         campaign = context['filter'].form.cleaned_data.get('campaign')
-        testing_results = {"campaign": campaign,
-                           "contest_type": ContestTypes.TEST}
         if campaign and campaign.current and self.request.user.is_curator:
-            task_name = "admission.tasks.import_testing_results"
-            latest_task = (Task.objects
-                           .get_task(task_name, kwargs={"campaign_id": campaign.pk,
-                                                        "contest_type": ContestTypes.TEST})
-                           .order_by("-id")
-                           .first())
-            if latest_task:
+            testing_results = {"campaign": campaign,
+                               "contest_type": ContestTypes.TEST}
+            task_testing = get_latest_contest_results_task(campaign, ContestTypes.TEST)
+            if task_testing:
                 tz = self.request.user.time_zone
-                testing_results["latest_task"] = {
-                    # TODO: humanize
-                    "date": latest_task.created_at_local(tz),
-                    "status": latest_task.status
-                }
-        context["import_testing_results"] = testing_results
+                testing_results["latest_task"] = ContestResultsImportState(
+                    date=task_testing.created_at_local(tz),
+                    status=task_testing.status)
+            context["import_testing_results"] = testing_results
         return context
 
 

@@ -1,14 +1,16 @@
 from django.conf.urls import include
 from django.urls import path, re_path
 
-from admission.api.views import ConfirmationSendEmailVerificationCodeApi
+from admission.api.views import (
+    CampaignCreateContestResultsImportTask, ConfirmationSendEmailVerificationCodeApi
+)
 from admission.views import (
     ApplicantCreateStudentView, ApplicantDetailView, ApplicantListView,
     ApplicantStatusUpdateView, ConfirmationOfAcceptanceForStudiesDoneView,
     ConfirmationOfAcceptanceForStudiesView, InterviewAssignmentDetailView,
     InterviewCommentUpsertView, InterviewDetailView, InterviewInvitationCreateView,
     InterviewInvitationListView, InterviewListView, InterviewResultsDispatchView,
-    InterviewResultsView, import_campaign_testing_results
+    InterviewResultsView
 )
 
 app_name = 'admission'
@@ -48,8 +50,7 @@ acceptance_api_patterns = [
 
 urlpatterns = [
     path('admission/', include([
-        path('<int:campaign_id>/contest/<int:contest_type>/import/', import_campaign_testing_results,
-             name='import_testing_results'),
+        path('<int:campaign_id>/contest/<int:contest_type>/import/', CampaignCreateContestResultsImportTask.as_view(), name='import_testing_results'),
         path('applicants/', include((applicant_patterns, 'applicants'))),
         path('interviews/', include(([
             path('', include(interview_patterns)),

@@ -1,3 +1,5 @@
+from typing import Any
+
 from rest_framework import serializers, status
 from rest_framework.exceptions import ParseError
 from rest_framework.permissions import AllowAny
@@ -11,14 +13,17 @@ from django.http import Http404
 from admission.models import InterviewSlot
 from admission.selectors import get_ongoing_interview_invitation
 from admission.services import (
-    accept_interview_invitation, decline_interview_invitation,
-    get_acceptance_ready_to_confirm, send_email_verification_code
+    accept_interview_invitation, create_contest_results_import_task,
+    decline_interview_invitation, get_acceptance_ready_to_confirm,
+    send_email_verification_code
 )
+from admission.tasks import import_campaign_contest_results
 from api.permissions import CuratorAccessPermission
 from api.views import APIBaseView
 from core.http import HttpRequest
 from core.models import Branch
 
+from ..constants import ContestTypes
 from .serializers import InterviewSlotBaseSerializer
 
 
@@ -112,3 +117,26 @@ class ConfirmationSendEmailVerificationCodeApi(APIBaseView):
                                      applicant=acceptance.applicant)
 
         return Response(status=status.HTTP_201_CREATED, data={})
+
+
+class CampaignCreateContestResultsImportTask(APIBaseView):
+    """Creates new task for importing results from yandex contests."""
+
+    permission_classes = [CuratorAccessPermission]
+
+    class InputSerializer(serializers.Serializer):
+        campaign_id = serializers.IntegerField()
+        contest_type = serializers.ChoiceField(choices=ContestTypes.choices)
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        serializer = self.InputSerializer(data=kwargs)
+        serializer.is_valid(raise_exception=True)
+
+        task = create_contest_results_import_task(
+            campaign=serializer.validated_data['campaign_id'],
+            contest_type=serializer.validated_data['contest_type'],
+            author=request.user
+        )
+        # FIXME: Potentially we could duplicate task in a redis (e.g. with a subsequent calls to this API). How to avoid this? compare created/modified times?
+        import_campaign_contest_results.delay(task_id=task.pk)
+        return Response(status=status.HTTP_201_CREATED, data={'id': task.pk})

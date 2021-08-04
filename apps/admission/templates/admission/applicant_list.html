@@ -29,7 +29,7 @@
 <div class="admission-list-page">
     {% crispy filter.form %}
 
-{% if import_testing_results.campaign %}
+{% if import_testing_results %}
     <a href="#import_testing_results" data-toggle="collapse" aria-expanded="false" class="dashed pb-10" style="display: inline-block; text-decoration: dashed!important;">Импорт результатов</a><br>
     <div class="collapse" id="import_testing_results">
         <div class="pb-10">

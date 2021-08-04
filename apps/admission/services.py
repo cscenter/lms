@@ -21,8 +21,8 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import (
-    EMAIL_VERIFICATION_CODE_TEMPLATE, INVITATION_EXPIRED_IN_HOURS, InterviewFormats,
-    InterviewInvitationStatuses
+    EMAIL_VERIFICATION_CODE_TEMPLATE, INVITATION_EXPIRED_IN_HOURS, ContestTypes,
+    InterviewFormats, InterviewInvitationStatuses
 )
 from admission.models import (
     Acceptance, Applicant, Campaign, Exam, Interview, InterviewInvitation,
@@ -36,6 +36,7 @@ from core.timezone.constants import DATE_FORMAT_RU
 from core.utils import bucketize
 from grading.api.yandex_contest import YandexContestAPI
 from learning.services import create_student_profile, get_student_profile
+from tasks.models import Task
 from users.models import StudentProfile, StudentTypes, User
 
 
@@ -107,13 +108,61 @@ def create_invitation(streams: List[InterviewStream], applicant: Applicant) -> I
     return invitation
 
 
+# TODO: Doesn't look really useful, move contest/campaign data to this dataclass?
+@dataclass
+class ContestResultsImportState:
+    date: datetime
+    status: str
+
+
+IMPORT_CONTEST_RESULTS_TASK_NAME = "admission.tasks.import_campaign_contest_results"
+
+
+# TODO: add tests
+def create_contest_results_import_task(campaign: int, contest_type: int,
+                                       author: User) -> Task:
+    # Don't save a new record if an unprocessed task with the same
+    # parameters exists
+    task = Task.build(
+        task_name=IMPORT_CONTEST_RESULTS_TASK_NAME,
+        kwargs={"campaign_id": campaign,
+                "contest_type": contest_type},
+        creator=author)
+    same_task_in_a_queue = (Task.objects
+                            .unlocked(get_now_utc())
+                            .filter(processed_at__isnull=True,
+                                    task_name=task.task_name,
+                                    task_params=task.task_params,
+                                    task_hash=task.task_hash)
+                            .order_by('-id')
+                            .first())
+    if same_task_in_a_queue is None:
+        task.save()
+    else:
+        task = same_task_in_a_queue
+    return task
+
+
+# TODO: add test
+def get_latest_contest_results_task(campaign: Campaign,
+                                    contest_type: int) -> Optional[Task]:
+    if contest_type not in ContestTypes.values:
+        raise ValidationError("Unknown contest type", code="invalid")
+    return (Task.objects
+            .get_task(IMPORT_CONTEST_RESULTS_TASK_NAME,
+                      kwargs={"campaign_id": campaign.pk,
+                              "contest_type": contest_type})
+            .order_by("-id")
+            .first())
+
+
 def import_campaign_contest_results(*, campaign: Campaign, model_class):
     api = YandexContestAPI(access_token=campaign.access_token)
     on_scoreboard_total = 0
     updated_total = 0
     for contest in campaign.contests.filter(type=model_class.CONTEST_TYPE):
         logger.debug(f"Starting processing contest {contest.pk}")
-        on_scoreboard, updated = model_class.import_results(api, contest)
+        on_scoreboard, updated = model_class.import_results(api=api, contest=contest)
         on_scoreboard_total += on_scoreboard
         updated_total += updated
         logger.debug(f"Scoreboard total = {on_scoreboard}")

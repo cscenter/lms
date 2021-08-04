@@ -1,5 +1,5 @@
 from typing import List, Optional
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from django.db.models import Q
 

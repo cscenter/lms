@@ -3,9 +3,13 @@ from uuid import uuid4
 
 import pytest
 
-from admission.constants import InterviewSections
-from admission.tests.factories import InterviewInvitationFactory, InterviewSlotFactory
+from admission.constants import ContestTypes, InterviewSections
+from admission.services import get_latest_contest_results_task
+from admission.tests.factories import (
+    CampaignFactory, InterviewInvitationFactory, InterviewSlotFactory
+)
 from core.urls import reverse
+from users.tests.factories import CuratorFactory, UserFactory
 
 
 @pytest.mark.django_db
@@ -36,3 +40,34 @@ def test_appointment_create_interview(client):
     assert response.status_code == 400
     assert 'errors' in response.json()
     assert any(m['code'] == "accepted" for m in response.json()['errors'])
+
+
+@pytest.mark.django_db
+def test_campaign_create_contest_results_import_task(client):
+    campaign = CampaignFactory(current=True)
+    url = reverse('admission:import_testing_results', kwargs={'campaign_id': campaign.id,
+                                                              'contest_type': ContestTypes.TEST})
+    # Need any auth
+    response = client.post(url)
+    assert response.status_code == 401
+    # No permissions
+    client.login(UserFactory())
+    response = client.post(url)
+    assert response.status_code == 403
+    # Validation Error
+    client.login(CuratorFactory())
+    wrong_contest_type = len(ContestTypes.values) + 1
+    assert wrong_contest_type not in ContestTypes.values
+    wrong_url = reverse('admission:import_testing_results', kwargs={'campaign_id': campaign.id,
+                                                                    'contest_type': wrong_contest_type})
+    response = client.post(wrong_url)
+    assert response.status_code == 400
+    json_data = response.json()
+    assert 'errors' in json_data
+    assert any(error['field'] == 'contest_type' for error in json_data['errors'])
+    # Correct case
+    response = client.post(url)
+    assert response.status_code == 201
+    latest_task = get_latest_contest_results_task(campaign, ContestTypes.TEST)
+    assert response.json()['id'] == latest_task.pk
+    assert latest_task.is_completed

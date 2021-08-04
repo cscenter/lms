@@ -2,6 +2,7 @@ import json
 import logging
 from datetime import timedelta
 from hashlib import sha1
+from typing import Optional
 
 from model_utils.fields import AutoLastModifiedField
 
@@ -10,6 +11,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Q
 from django.utils import formats, timezone
+
+from core.timezone import get_now_utc
 
 logger = logging.getLogger(__name__)
 
@@ -86,10 +89,10 @@ class Task(models.Model):
     def __str__(self):
         return u'{}'.format(self.verbose_name or self.task_name)
 
-    def save(self, *args, **kwargs):
+    def save(self, **kwargs):
         # force NULL rather than empty string
         self.locked_by = self.locked_by or None
-        return super(Task, self).save(*args, **kwargs)
+        return super().save(**kwargs)
 
     @property
     def is_failed(self):
@@ -99,12 +102,18 @@ class Task(models.Model):
     def is_completed(self):
         return self.processed_at is not None
 
+    @property
+    def is_locked(self):
+        max_run_time = Task.MAX_RUN_TIME
+        expires_at = get_now_utc() - timedelta(seconds=max_run_time)
+        return self.locked_by is not None or self.locked_at >= expires_at
+
     def created_at_local(self, tz):
         dt = timezone.localtime(self.created, timezone=tz)
         return formats.date_format(dt, "SHORT_DATETIME_FORMAT")
 
     @property
-    def status(self):
+    def status(self) -> str:
         if self.is_completed:
             return "error" if self.is_failed else "ok"
         elif self.locked_at:
@@ -119,7 +128,7 @@ class Task(models.Model):
         kwargs = dict((str(k), v) for k, v in kwargs.items())
         return args, kwargs
 
-    def lock(self, locked_by):
+    def lock(self, locked_by) -> Optional["Task"]:
         now = timezone.now()
         unlocked = Task.objects.unlocked(now).filter(pk=self.pk)
         updated = unlocked.update(locked_by=locked_by, locked_at=now)
