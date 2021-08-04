@@ -35,7 +35,7 @@ from .models import CertificateOfParticipation, User
 from .permissions import (
     CreateCertificateOfParticipation, ViewCertificateOfParticipation
 )
-from .services import get_graduate_profile
+from .services import get_graduate_profile, get_student_status_history
 
 
 class UserDetailView(LoginRequiredMixin, generic.DetailView):
@@ -154,6 +154,8 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
                         .filter(year=student_profile.year_of_curriculum,
                                 branch_id=student_profile.branch_id))
             graduate_profile = get_graduate_profile(student_profile)
+            if u.is_curator:
+                context['student_status_history'] = get_student_status_history(student_profile)
         context['syllabus'] = syllabus
         context['student_profile'] = student_profile
         context['graduate_profile'] = graduate_profile

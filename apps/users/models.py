@@ -845,6 +845,7 @@ class StudentStatusLog(models.Model):
     student_profile = models.ForeignKey(
         StudentProfile,
         verbose_name=_("Student"),
+        related_name="status_history",
         on_delete=models.CASCADE)
     entry_author = models.ForeignKey(
         User,
@@ -854,6 +855,12 @@ class StudentStatusLog(models.Model):
     class Meta:
         ordering = ['-pk']
         verbose_name_plural = _("Student Status Log")
+
+    def get_status_display(self):
+        if self.status:
+            return StudentStatuses.values[self.status]
+        # Empty status means studies in progress
+        return _("Studying")
 
 
 class OnlineCourseRecord(TimeStampedModel):

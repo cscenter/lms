@@ -1,22 +1,23 @@
 import datetime
 from collections import defaultdict
-from typing import Dict, List
+from typing import Any, Dict, List, Optional
 
 from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.db import transaction
 from django.utils.timezone import now
 
+from courses.models import Semester
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
-from users.models import OnlineCourseRecord, StudentProfile
+from users.models import OnlineCourseRecord, StudentProfile, StudentStatusLog
 
 AccountId = int
 
 
 def get_student_progress(queryset,
-                         exclude_grades: List[str] = None,
-                         until_term: "Semester" = None):
+                         exclude_grades: Optional[List[str]] = None,
+                         until_term: Optional[Semester] = None) -> Dict[AccountId, Any]:
     """
     Prefetch student progress: courses, shad/online courses and projects
 
@@ -90,7 +91,13 @@ def get_student_progress(queryset,
     return progress
 
 
-def create_graduate_profiles(site: Site, graduated_on: datetime.date):
+def get_student_status_history(student_profile: StudentProfile) -> List[StudentStatusLog]:
+    return (StudentStatusLog.objects
+            .filter(student_profile=student_profile)
+            .order_by('-status_changed_at', '-pk'))
+
+
+def create_graduate_profiles(site: Site, graduated_on: datetime.date) -> None:
     """
     Generate graduate profile for students with `will graduate` status. Update
     student profile status to `graduate` if graduation date already passed.
@@ -135,7 +142,7 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date):
     cache.delete(cache_key)
 
 
-def get_graduate_profile(student_profile: StudentProfile):
+def get_graduate_profile(student_profile: StudentProfile) -> Optional[GraduateProfile]:
     return (GraduateProfile.active
             .filter(student_profile=student_profile)
             .prefetch_related('academic_disciplines')
