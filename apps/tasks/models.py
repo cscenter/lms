@@ -17,7 +17,8 @@ from core.timezone import get_now_utc
 logger = logging.getLogger(__name__)
 
 
-def _get_task_hash(task_name: str, task_params: str):
+def _get_task_hash(task_name: str, task_params: Dict[str, Any]):
+    task_params = json.dumps(task_params)
     s = "%s%s" % (task_name, task_params)
     return sha1(s.encode('utf-8')).hexdigest()
 
@@ -43,7 +44,7 @@ class TaskManager(models.Manager):
 
     def get_task(self, task_name, kwargs=None):
         kwargs = kwargs or {}
-        task_params = json.dumps(kwargs, sort_keys=True)
+        task_params = {k: v for k, v in sorted(kwargs.items())}
         task_hash = _get_task_hash(task_name, task_params)
         qs = self.get_queryset()
         return qs.filter(task_hash=task_hash)
@@ -60,7 +61,10 @@ class Task(models.Model):
     # the "name" of the task/function to be run
     task_name = models.CharField(max_length=190, db_index=True)
     # the json encoded parameters to pass to the task
-    task_params = models.TextField()  # TODO: replace with JSONField
+    task_params = models.JSONField(
+        verbose_name="Task Parameters",
+        blank=True,
+        default=dict)
     # a sha1 hash of the name and params, to lookup already scheduled tasks
     task_hash = models.CharField(max_length=40, db_index=True)
 
@@ -124,12 +128,6 @@ class Task(models.Model):
         else:
             return "waiting"
 
-    def params(self) -> Dict[str, Any]:
-        kwargs = json.loads(self.task_params)
-        # need to coerce kwargs keys to str
-        kwargs = dict((str(k), v) for k, v in kwargs.items())
-        return kwargs
-
     def lock(self, locked_by) -> Optional["Task"]:
         now = timezone.now()
         unlocked = Task.objects.unlocked(now).filter(pk=self.pk)
@@ -147,7 +145,8 @@ class Task(models.Model):
     @classmethod
     def build(cls, task_name, kwargs=None, verbose_name=None, creator=None) -> "Task":
         kwargs = kwargs or {}
-        task_params = json.dumps(kwargs, sort_keys=True)
+        # Recreate task params with sorted keys
+        task_params = {k: v for k, v in sorted(kwargs.items())}
         task_hash = _get_task_hash(task_name, task_params)
         return cls(
             task_name=task_name,
