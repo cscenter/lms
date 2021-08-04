@@ -40,25 +40,22 @@
     </svg>
 {%- endmacro %}
 
+
 {% macro pagination(paginator, page, base_url) -%}
 {% if page.has_other_pages() -%}
   <ul class="pagination">
     {% if page.has_previous() %}
-      <li><a href="{{ base_url }}&page={{ page.previous_page_number() }}">&laquo;</a></li>
-    {% else %}
-      <li class="disabled"><span>&laquo;</span></li>
+      <li><a href="{{ base_url }}&page=1"><i class="fa fa-angle-double-left"></i></a></li>
     {% endif %}
-    {% for i in paginator.page_range %}
+    {% for i in paginator.get_elided_page_range(page.number, on_each_side=5, on_ends=0) %}
       {% if page.number == i %}
         <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
-      {% else %}
+      {% elif i != paginator.ELLIPSIS %}
         <li><a href="{{ base_url }}&page={{ i }}">{{ i }}</a></li>
       {% endif %}
     {% endfor %}
     {% if page.has_next() %}
-      <li><a href="{{ base_url }}&page={{ page.next_page_number() }}">&raquo;</a></li>
-    {% else %}
-      <li class="disabled"><span>&raquo;</span></li>
+      <li><a href="{{ base_url }}&page={{ paginator.num_pages }}"><i class="fa fa-angle-double-right"></i></a></li>
     {% endif %}
   </ul>
 {%- endif %}
