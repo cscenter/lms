@@ -59,7 +59,7 @@ def import_campaign_contest_results(*, task_id) -> None:
         logger.error(f"Task with id = {task_id} not found.")
         return None
 
-    _, task_kwargs = task.params()
+    task_kwargs = task.params()
     contest_type = task_kwargs.get('contest_type')
     if not contest_type or contest_type not in ContestTypes.values:
         task.error = "Unknown contest type"

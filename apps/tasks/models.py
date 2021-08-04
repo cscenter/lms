@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import timedelta
 from hashlib import sha1
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from model_utils.fields import AutoLastModifiedField
 
@@ -15,6 +15,11 @@ from django.utils import formats, timezone
 from core.timezone import get_now_utc
 
 logger = logging.getLogger(__name__)
+
+
+def _get_task_hash(task_name: str, task_params: str):
+    s = "%s%s" % (task_name, task_params)
+    return sha1(s.encode('utf-8')).hexdigest()
 
 
 class TaskManager(models.Manager):
@@ -36,17 +41,15 @@ class TaskManager(models.Manager):
         locked = Q(locked_by__isnull=False) | Q(locked_at__gte=expires_at)
         return qs.filter(locked)
 
-    def get_task(self, task_name, args=None, kwargs=None):
-        args = args or ()
+    def get_task(self, task_name, kwargs=None):
         kwargs = kwargs or {}
-        task_params = json.dumps((args, kwargs), sort_keys=True)
-        s = "%s%s" % (task_name, task_params)
-        task_hash = sha1(s.encode('utf-8')).hexdigest()
+        task_params = json.dumps(kwargs, sort_keys=True)
+        task_hash = _get_task_hash(task_name, task_params)
         qs = self.get_queryset()
         return qs.filter(task_hash=task_hash)
 
-    def drop_task(self, task_name, args=None, kwargs=None):
-        return self.get_task(task_name, args, kwargs).delete()
+    def drop_task(self, task_name, kwargs=None):
+        return self.get_task(task_name, kwargs).delete()
 
 
 class Task(models.Model):
@@ -121,12 +124,11 @@ class Task(models.Model):
         else:
             return "waiting"
 
-    def params(self):
-        # FIXME: Deny args for task params, use only kwargs
-        args, kwargs = json.loads(self.task_params)
+    def params(self) -> Dict[str, Any]:
+        kwargs = json.loads(self.task_params)
         # need to coerce kwargs keys to str
         kwargs = dict((str(k), v) for k, v in kwargs.items())
-        return args, kwargs
+        return kwargs
 
     def lock(self, locked_by) -> Optional["Task"]:
         now = timezone.now()
@@ -143,13 +145,10 @@ class Task(models.Model):
         self.save()
 
     @classmethod
-    def build(cls, task_name, args=None, kwargs=None,
-              verbose_name=None, creator=None):
-        args = args or ()
+    def build(cls, task_name, kwargs=None, verbose_name=None, creator=None) -> "Task":
         kwargs = kwargs or {}
-        task_params = json.dumps((args, kwargs), sort_keys=True)
-        s = "%s%s" % (task_name, task_params)
-        task_hash = sha1(s.encode('utf-8')).hexdigest()
+        task_params = json.dumps(kwargs, sort_keys=True)
+        task_hash = _get_task_hash(task_name, task_params)
         return cls(
             task_name=task_name,
             task_params=task_params,
