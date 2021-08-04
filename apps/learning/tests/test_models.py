@@ -7,12 +7,15 @@ import pytest
 import pytz
 
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.utils.encoding import smart_str
 
 from core.tests.factories import BranchFactory, LocationFactory, SiteFactory
 from core.tests.utils import CSCTestCase
 from courses.constants import SemesterTypes
-from courses.models import AssignmentSubmissionFormats, CourseNews, Semester
+from courses.models import (
+    AssignmentSubmissionFormats, CourseGroupModes, CourseNews, Semester
+)
 from courses.tests.factories import (
     AssignmentFactory, CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
     CourseNewsFactory, LearningSpaceFactory, MetaCourseFactory, SemesterFactory
@@ -24,8 +27,9 @@ from learning.models import (
 from learning.settings import Branches
 from learning.tests.factories import (
     AssignmentCommentFactory, AssignmentNotificationFactory,
-    CourseNewsNotificationFactory, EnrollmentFactory, EnrollmentPeriodFactory,
-    StudentAssignmentFactory
+    CourseNewsNotificationFactory, CourseTeacherFactory, EnrollmentFactory,
+    EnrollmentPeriodFactory, StudentAssignmentFactory, StudentGroupAssigneeFactory,
+    StudentGroupFactory
 )
 from users.tests.factories import StudentFactory, TeacherFactory, UserFactory
 
@@ -367,3 +371,34 @@ def test_student_assignment_execution_time():
     # Recalculate on removing solution through admin interface
     solution2.delete()
     assert student_assignment.execution_time == timedelta(hours=2)
+
+
+@pytest.mark.django_db
+def test_student_group_assignee_constrains():
+    
+    teacher = TeacherFactory()
+    student = StudentFactory()
+    course = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    assignee = CourseTeacherFactory(teacher=teacher, course=course)
+    # assignment = AssignmentFactory(course=course)
+
+    student_group = StudentGroupFactory.create(course=course)
+    student_group_1 = StudentGroupFactory.create(course=course)
+
+    # test unique constraint with student_group, assignee, assignment
+    student_group_assignee_1 = StudentGroupAssigneeFactory(student_group=student_group,
+                                                           assignee=assignee,
+                                                           # assignment=assignment
+                                                           )
+
+    # with pytest.raises(IntegrityError) as e:
+        # student_group_assignee_2 = StudentGroupAssigneeFactory(student_group=student_group,
+        #                                                        assignee=assignee,
+        #                                                        # assignment=assignment
+        #                                                        )
+
+
+
+    # with pytest.raises(IntegrityError) as e:
+    #     pass
+
