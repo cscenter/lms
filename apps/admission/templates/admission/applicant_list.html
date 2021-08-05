@@ -29,14 +29,23 @@
 <div class="admission-list-page">
     {% crispy filter.form %}
 
-{% if import_testing_results %}
-    <a href="#import_testing_results" data-toggle="collapse" aria-expanded="false" class="dashed pb-10" style="display: inline-block; text-decoration: dashed!important;">Импорт результатов</a><br>
-    <div class="collapse" id="import_testing_results">
+{% if import_testing_results.campaign or import_exam_results.campaign %}
+    <a href="#import_results" data-toggle="collapse" aria-expanded="false" class="dashed pb-10" style="display: inline-block; text-decoration: dashed!important;">Импорт результатов</a><br>
+    <div class="collapse" id="import_results">
+        {% if import_testing_results.campaign %}
+          <div class="pb-10">
+              <a href="{% url 'admission:import_contest_results' import_testing_results.campaign.pk import_testing_results.contest_type %}" id='import_testing_result' class="btn btn-default _btn-import-contest-results mr-10">
+                  <i class="fa fa-refresh" aria-hidden="true"></i> Результаты теста
+              </a>{% if import_testing_results.latest_task %} Задача добавлена {{ import_testing_results.latest_task.date }} [{{ import_testing_results.latest_task.status }}]{% endif %}
+          </div>
+        {% endif %}
+        {% if import_exam_results.campaign %}
         <div class="pb-10">
-            <a href="{% url 'admission:import_testing_results' import_testing_results.campaign.pk import_testing_results.contest_type %}" class="btn btn-default _btn-import-testings-results mr-10">
-                <i class="fa fa-refresh" aria-hidden="true"></i> Результаты теста
-            </a>{% if import_testing_results.latest_task %} Задача добавлена {{ import_testing_results.latest_task.date }} [{{ import_testing_results.latest_task.status }}]{% endif %}
+            <a href="{% url 'admission:import_contest_results' import_exam_results.campaign.pk import_exam_results.contest_type %}" id='import_exam_result' class="btn btn-default _btn-import-contest-results mr-10">
+                <i class="fa fa-refresh" aria-hidden="true"></i> Результаты экзамена
+            </a>{% if import_exam_results.latest_task %} Задача добавлена {{ import_exam_results.latest_task.date }} [{{ import_exam_results.latest_task.status }}]{% endif %}
         </div>
+        {% endif %}
     </div>
 {% endif %}
 
