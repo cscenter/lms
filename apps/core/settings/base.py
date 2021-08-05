@@ -106,7 +106,8 @@ REST_FRAMEWORK = {
     'UNAUTHENTICATED_USER': 'users.models.ExtendedAnonymousUser',
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
-    )
+    ),
+    'DATE_INPUT_FORMATS': ['iso-8601', '%d.%m.%Y']
 }
 
 

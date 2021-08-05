@@ -17,6 +17,7 @@ from django.views import View, generic
 import core.utils
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionApplicantsReport, AdmissionExamReport
+from core.http import HttpRequest
 from core.models import Branch
 from core.urls import reverse
 from core.utils import bucketize
@@ -533,14 +534,16 @@ def autograde_projects(request):
     return HttpResponseRedirect(reverse("staff:exports"))
 
 
-def create_alumni_profiles(request):
+# FIXME: replace with staff.api.views.CreateAlumniProfiles (already tested) - needs to write js part
+def create_alumni_profiles(request: HttpRequest):
     if not request.user.is_curator:
         return HttpResponseForbidden()
 
     form = GraduationForm(data=request.POST)
     if form.is_valid():
         graduated_on = form.cleaned_data['graduated_on']
-        create_graduate_profiles(request.site, graduated_on)
+        create_graduate_profiles(request.site, graduated_on,
+                                 created_by=request.user)
         messages.success(request, f"Операция выполнена успешно.")
     else:
         messages.error(request, str('Неверный формат даты выпуска'))

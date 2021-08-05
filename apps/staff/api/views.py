@@ -1,11 +1,18 @@
+from typing import Any
+
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import serializers, status
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
 
 from api.permissions import CuratorAccessPermission
+from api.views import APIBaseView
+from core.http import HttpRequest
 from learning.api.serializers import StudentProfileSerializer
 from users.filters import StudentFilter
 from users.models import StudentProfile
+from users.services import create_graduate_profiles
 
 
 class StudentOffsetPagination(LimitOffsetPagination):
@@ -34,3 +41,19 @@ class StudentSearchJSONView(ListAPIView):
                 .order_by('user__last_name',
                           'user__first_name',
                           'user_id'))
+
+
+class CreateAlumniProfiles(APIBaseView):
+    permission_classes = [CuratorAccessPermission]
+
+    class InputSerializer(serializers.Serializer):
+        graduated_on = serializers.DateField()
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        serializer = self.InputSerializer(data=request.POST)
+        serializer.is_valid(raise_exception=True)
+
+        graduated_on = serializer.validated_data['graduated_on']
+        create_graduate_profiles(request.site, graduated_on, created_by=request.user)
+
+        return Response(status=status.HTTP_201_CREATED)
