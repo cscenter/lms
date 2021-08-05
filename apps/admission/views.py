@@ -436,6 +436,17 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
                 testing_results["latest_task"] = ContestResultsImportState(
                     date=task_testing.created_at_local(tz),
                     status=task_testing.status)
+
+            exam_results = {"campaign": campaign,
+                            "contest_type": ContestTypes.EXAM}
+            task_exam = get_latest_contest_results_task(campaign, ContestTypes.EXAM)
+            if task_exam:
+                tz = self.request.user.time_zone
+                exam_results["latest_task"] = ContestResultsImportState(
+                    date=task_exam.created_at_local(tz),
+                    status=task_exam.status)
+
+            context["import_exam_results"] = exam_results
             context["import_testing_results"] = testing_results
         return context
 
