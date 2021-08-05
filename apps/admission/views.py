@@ -428,15 +428,22 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
         context = super().get_context_data(**kwargs)
         campaign = context['filter'].form.cleaned_data.get('campaign')
         if campaign and campaign.current and self.request.user.is_curator:
-            testing_results = {"campaign": campaign,
-                               "contest_type": ContestTypes.TEST}
-            task_testing = get_latest_contest_results_task(campaign, ContestTypes.TEST)
-            if task_testing:
-                tz = self.request.user.time_zone
-                testing_results["latest_task"] = ContestResultsImportState(
-                    date=task_testing.created_at_local(tz),
-                    status=task_testing.status)
-            context["import_testing_results"] = testing_results
+            contest = dict()
+            contest['testing_results'] = {"campaign": campaign, "contest_type": ContestTypes.TEST}
+            contest['exam_results'] = {"campaign": campaign, "contest_type": ContestTypes.EXAM}
+            contest['task_testing'] = get_latest_contest_results_task(campaign, ContestTypes.TEST)
+            contest['task_exam'] = get_latest_contest_results_task(campaign, ContestTypes.EXAM)
+            contest['task_types'] = [['task_testing', 'testing_results'], ['task_exam', 'exam_results']]
+
+            for task in contest['task_types']:
+                if contest[task[0]]:
+                    tz = self.request.user.time_zone
+                    contest[task[1]]['latest_task'] = ContestResultsImportState(
+                        date=contest[task[0]].created_at_local(tz),
+                        status=contest[task[0]].status)
+
+            context["import_exam_results"] = contest['exam_results']
+            context["import_testing_results"] = contest['testing_results']
         return context
 
 
