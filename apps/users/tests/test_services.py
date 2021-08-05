@@ -7,7 +7,7 @@ from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
 from study_programs.tests.factories import AcademicDisciplineFactory
 from users.services import create_graduate_profiles
-from users.tests.factories import StudentProfileFactory
+from users.tests.factories import CuratorFactory, StudentProfileFactory
 
 
 @pytest.mark.django_db
@@ -26,7 +26,8 @@ def test_create_graduate_profiles():
                                branch__site=site2)
     assert GraduateProfile.objects.count() == 0
     graduated_on = datetime.date(year=2019, month=11, day=3)
-    create_graduate_profiles(site1, graduated_on)
+    curator = CuratorFactory()
+    create_graduate_profiles(site1, graduated_on, created_by=curator)
     assert GraduateProfile.objects.count() == 2
     assert GraduateProfile.objects.filter(is_active=True).exists()
     graduate_profiles = list(GraduateProfile.objects.order_by('student_profile_id'))

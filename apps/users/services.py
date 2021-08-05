@@ -10,7 +10,8 @@ from django.utils.timezone import now
 from courses.models import Semester
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
-from users.models import OnlineCourseRecord, StudentProfile, StudentStatusLog
+from users.constants import Roles
+from users.models import OnlineCourseRecord, StudentProfile, StudentStatusLog, User
 
 AccountId = int
 
@@ -97,7 +98,8 @@ def get_student_status_history(student_profile: StudentProfile) -> List[StudentS
             .order_by('-status_changed_at', '-pk'))
 
 
-def create_graduate_profiles(site: Site, graduated_on: datetime.date) -> None:
+def create_graduate_profiles(site: Site, graduated_on: datetime.date,
+                             created_by: Optional[User] = None) -> None:
     """
     Generate graduate profile for students with `will graduate` status. Update
     student profile status to `graduate` if graduation date already passed.
@@ -107,9 +109,10 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date) -> None:
                                 branch__site=site)
                         .prefetch_related('academic_disciplines'))
     update_student_status = now().date() >= graduated_on
+    if update_student_status and not created_by:
+        created_by = User.objects.has_role(Roles.CURATOR).order_by('pk').first()
     for student_profile in student_profiles:
         with transaction.atomic():
-            # Get or create profile without using transaction mechanism
             try:
                 graduate = (GraduateProfile.objects
                             .select_for_update()
@@ -136,7 +139,10 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date) -> None:
                 (StudentProfile.objects
                  .filter(pk=student_profile.pk)
                  .update(status=StudentStatuses.GRADUATE))
-                # TODO: add student status log record
+                log_entry = StudentStatusLog(status=StudentStatuses.GRADUATE,
+                                             student_profile=student_profile,
+                                             entry_author=created_by)
+                log_entry.save()
     cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
     cache_key = cache_key_pattern.format(site_id=site.pk)
     cache.delete(cache_key)

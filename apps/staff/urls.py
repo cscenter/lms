@@ -5,7 +5,7 @@ from learning.gradebook.views import (
     GradeBookCSVView, GradeBookView, ImportAssignmentScoresByEnrollmentIDView,
     ImportAssignmentScoresByStepikIDView, ImportAssignmentScoresByYandexLoginView
 )
-from staff.api.views import StudentSearchJSONView
+from staff.api.views import CreateAlumniProfiles, StudentSearchJSONView
 from staff.views import (
     AdmissionApplicantsReportView, AdmissionExamReportView,
     CourseParticipantsIntersectionView, ExportsView, FutureGraduateDiplomasCSVView,
@@ -57,7 +57,7 @@ urlpatterns = [
     path('faces/', StudentFacesView.as_view(), name='student_faces'),
     path('faces/interviewers/', InterviewerFacesView.as_view(), name='interviewer_faces'),
 
-    path('commands/create-alumni-profiles/', create_alumni_profiles, name='create_alumni_profiles'),
+    path('commands/create-alumni-profiles/', create_alumni_profiles, name='create_alumni_profiles'),  # deprecated
     path('commands/autograde-projects/', autograde_projects, name='autograde_projects'),
 
     path('course-participants/', CourseParticipantsIntersectionView.as_view(), name='course_participants_intersection'),
@@ -89,6 +89,10 @@ urlpatterns = [
 
 
     path('warehouse/', HintListView.as_view(), name='staff_warehouse'),
+
+    path('api/staff/', include(([
+        path('alumni-profiles/', CreateAlumniProfiles.as_view(), name='create_alumni_profiles'),
+    ], 'api')))
 ]
 
 
