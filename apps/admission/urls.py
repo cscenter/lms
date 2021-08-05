@@ -50,7 +50,6 @@ acceptance_api_patterns = [
 
 urlpatterns = [
     path('admission/', include([
-        path('<int:campaign_id>/contest/<int:contest_type>/import/', CampaignCreateContestResultsImportTask.as_view(), name='import_testing_results'),
         path('applicants/', include((applicant_patterns, 'applicants'))),
         path('interviews/', include(([
             path('', include(interview_patterns)),
@@ -62,5 +61,6 @@ urlpatterns = [
 
     path('api/admission/', include(([
         path('confirmation/', include((acceptance_api_patterns, 'acceptance'))),
+        path('<int:campaign_id>/contest/<int:contest_type>/import/', CampaignCreateContestResultsImportTask.as_view(), name='import_testing_results'),
     ], 'api')))
 ]

@@ -110,7 +110,7 @@ class Task(models.Model):
         return self.processed_at is not None
 
     @property
-    def is_locked(self):
+    def is_locked(self) -> bool:
         max_run_time = Task.MAX_RUN_TIME
         expires_at = get_now_utc() - timedelta(seconds=max_run_time)
         return self.locked_by is not None or self.locked_at >= expires_at
