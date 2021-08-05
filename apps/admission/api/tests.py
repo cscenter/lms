@@ -45,8 +45,8 @@ def test_appointment_create_interview(client):
 @pytest.mark.django_db
 def test_campaign_create_contest_results_import_task(client):
     campaign = CampaignFactory(current=True)
-    url = reverse('admission:import_testing_results', kwargs={'campaign_id': campaign.id,
-                                                              'contest_type': ContestTypes.TEST})
+    url = reverse('admission:api:import_testing_results', kwargs={'campaign_id': campaign.id,
+                                                                  'contest_type': ContestTypes.TEST})
     # Need any auth
     response = client.post(url)
     assert response.status_code == 401
@@ -58,8 +58,8 @@ def test_campaign_create_contest_results_import_task(client):
     client.login(CuratorFactory())
     wrong_contest_type = len(ContestTypes.values) + 1
     assert wrong_contest_type not in ContestTypes.values
-    wrong_url = reverse('admission:import_testing_results', kwargs={'campaign_id': campaign.id,
-                                                                    'contest_type': wrong_contest_type})
+    wrong_url = reverse('admission:api:import_testing_results', kwargs={'campaign_id': campaign.id,
+                                                                        'contest_type': wrong_contest_type})
     response = client.post(wrong_url)
     assert response.status_code == 400
     json_data = response.json()
