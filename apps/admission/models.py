@@ -1133,7 +1133,8 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
 
     @property
     def rating_system(self) -> Type[DjangoChoices]:
-        if self.applicant.campaign.branch.site.name == 'Yandex Data School':
+        # TODO: consider to move rating systems to DB
+        if self.applicant.campaign.branch.site.name == 'Yandex School of Data Analysis':
             return YandexDataSchoolInterviewRatingSystem
         return DefaultInterviewRatingSystem
 
