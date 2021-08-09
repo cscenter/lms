@@ -4,7 +4,7 @@
     {{ block.super }}
     <li><a id="loginas-link" href="#">Log in as user</a></li>
 
-    <form method="post" id="loginas-form" action="{% url 'loginas-user-login' object_id %}" stype="display:none">
+    <form method="post" id="loginas-form" action="{% url 'admin:loginas-user-login' object_id %}" stype="display:none">
         {% csrf_token %}
     </form>
     <script>

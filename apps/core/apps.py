@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+from django.contrib.admin.apps import AdminConfig
 from django.utils.translation import gettext_lazy as _
 
 
@@ -21,3 +22,7 @@ class CoreConfig(AppConfig):
             # TODO: mypy should be able to type check this. Investigate and remove the ignore.
             ScoreField: fields.ScoreField  # type: ignore[dict-item]
         })
+
+
+class CustomAdminConfig(AdminConfig):
+    default_site = 'core.admin_site.BaseAdminSite'

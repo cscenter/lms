@@ -15,7 +15,7 @@ class InfoBlockAdminForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'tags': autocomplete.TaggitSelect2(
-                url='info_blocks_tags_autocomplete',
+                url='admin:info_blocks_tags_autocomplete',
                 attrs={"data-width": 'style'})
         }
 

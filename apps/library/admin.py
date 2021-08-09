@@ -31,7 +31,7 @@ class BookAdminForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'tags': TaggitSelect2(
-                url='library_tags_autocomplete',
+                url='admin:library_tags_autocomplete',
                 attrs={"data-width": 'style'})
         }
 

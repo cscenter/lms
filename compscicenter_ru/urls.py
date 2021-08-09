@@ -1,5 +1,3 @@
-from loginas import urls as loginas_urls
-
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include
@@ -9,15 +7,12 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.views.generic import RedirectView, TemplateView
 
-from announcements.views import AnnouncementDetailView, AnnouncementTagAutocomplete
+from announcements.views import AnnouncementDetailView
 from compscicenter_ru import views
 from core.views import MarkdownHowToHelpView, MarkdownRenderView
 from courses.urls import RE_COURSE_PUBLIC_URI
 from htmlpages.views import flatpage
-from info_blocks.views import InfoBlockTagAutocomplete
-from library.views import BookTagAutocomplete
 
-admin.site.enable_nav_sidebar = False
 admin.autodiscover()
 
 urlpatterns = i18n_patterns(
@@ -76,16 +71,10 @@ urlpatterns += [
         ]))
     ])),
 
-    # URLs for autocompletion of tags, available only for curators
-    path("narnia/announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="announcements_tags_autocomplete"),
-    path("narnia/library/tags-autocomplete/", BookTagAutocomplete.as_view(), name="library_tags_autocomplete"),
-    path("narnia/info_blocks/tags-autocomplete/", InfoBlockTagAutocomplete.as_view(), name="info_blocks_tags_autocomplete"),
-
     # Used in admin interface
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
     path('narnia/', admin.site.urls),
-    path('narnia/', include(loginas_urls)),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

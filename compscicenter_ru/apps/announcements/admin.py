@@ -21,7 +21,7 @@ class AnnouncementForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'tags': TaggitSelect2(
-                url='announcements_tags_autocomplete',
+                url='admin:announcements_tags_autocomplete',
                 attrs={"data-width": 'style'}),
             'description': CKEditorWidget(),
         }

@@ -1,5 +1,3 @@
-from loginas import urls as loginas_urls
-
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include, url
@@ -75,8 +73,6 @@ urlpatterns += [
     ])),
 
     path('narnia/', admin.site.urls),
-    path('narnia/', include(loginas_urls)),
-    path('narnia/django-rq/', include('django_rq.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

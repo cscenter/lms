@@ -14,7 +14,7 @@ def test_autocomplete_tags_should_be_sorted(client):
     tag2 = InfoBlockTagFactory(name="aaa")
 
     client.login(curator)
-    response = client.get(reverse('info_blocks_tags_autocomplete'))
+    response = client.get(reverse('admin:info_blocks_tags_autocomplete'))
     assert response.status_code == 200
     tags = extract_tags_from_response(response)
     # Tags should be sorted
@@ -29,7 +29,7 @@ def test_autocomplete_should_support_lookup(client):
     tag2 = InfoBlockTagFactory(name="aaa")
 
     client.login(curator)
-    response = client.get(reverse('info_blocks_tags_autocomplete'), {'q': 'a'})
+    response = client.get(reverse('admin:info_blocks_tags_autocomplete'), {'q': 'a'})
     assert response.status_code == 200
     tags = extract_tags_from_response(response)
     assert ['aaa'] == tags

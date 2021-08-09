@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'modeltranslation',  # insert before admin
     'dal',
     'dal_select2',
-    'django.contrib.admin',
+    'core.apps.CustomAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
