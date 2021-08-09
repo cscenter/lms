@@ -31,7 +31,12 @@ class CKEditorWidget(CKEditorUploadingWidget):
     To avoid this behavior append webpack paths at runtime.
     """
     def _set_config(self):
-        super()._set_config()
+        from django.urls import reverse
+        super(CKEditorUploadingWidget, self)._set_config()  # set language
+        if 'filebrowserUploadUrl' not in self.config:
+            self.config.setdefault('filebrowserUploadUrl', reverse('admin:ckeditor_upload'))
+        if 'filebrowserBrowseUrl' not in self.config:
+            self.config.setdefault('filebrowserBrowseUrl', reverse('admin:ckeditor_browse'))
         css = self.config.get('contentsCss', [])
         for f in utils.get_files('main', 'css', config='V2'):
             css.append(f["url"])

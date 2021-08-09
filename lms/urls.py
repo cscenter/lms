@@ -47,11 +47,9 @@ urlpatterns = [
     path('stats/', include("stats.urls")),
     path('surveys/', include("surveys.urls")),
     path('', include('projects.urls')),
-
     path('', include('admission.urls')),
 
     path('narnia/', admin.site.urls),
-    path('ckeditor/', include('ckeditor_uploader.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
