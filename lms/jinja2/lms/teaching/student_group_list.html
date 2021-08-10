@@ -6,6 +6,11 @@
                 <h2><a href="{{ url("teaching:course_list") }}"><span class="fa fa-angle-left"> </span></a>
                     Студенческие группы
                 <br><small>{{ course }}<br></small></h2>
+                <div class="btn-toolbar">
+                    <a href="{{ url("teaching:student_group_create", course_pk=course.id) }}"
+                       class="btn btn-primary btn-outline btn-block" style="width: 215px;
+                       padding: 12px 10px" role="button">Добавить группу</a>
+                </div>
             <hr>
             </div>
             <div class="col-xs-12">
@@ -14,7 +19,16 @@
                         <tr class="active"><h3>Название</h3></tr>
                         {% for group in student_group_list %}
                             <tr>
-                                <td class="align-middle" width="50%">{{ group.name }}</td>
+                                <td class="align-middle" width="50%">
+                                    <a id="student_group" href="{{ url("teaching:student_group_detail", course_pk=group.course.id,
+                                        group_pk=group.id) }}">{{ group.name }}</a></td>
+                                <td class="align-middle">
+                                    <a href="{{ url("teaching:student_group_update", course_pk=group.course.id,
+                                        pk=group.id) }}">Редактировать</a>
+                                    <span>&emsp;</span>
+                                    <a style="color:black" href="{{ url("teaching:student_group_delete",
+                                        course_pk=group.course.id, pk=group.id) }}">Удалить</a>
+                                </td>
                             </tr>
                         {% endfor %}
                     </table>
