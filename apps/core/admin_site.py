@@ -24,9 +24,6 @@ class BaseAdminSite(AdminSite):
                 path('logout/', user_logout, name='loginas-logout'),
             ])
 
-        if apps.is_installed('django_rq'):
-            url_patterns.append(path('django-rq/', include('django_rq.urls')))
-
         if apps.is_installed('announcements'):
             from announcements.views import AnnouncementTagAutocomplete
             url_patterns += [
