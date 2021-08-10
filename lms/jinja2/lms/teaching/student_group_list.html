@@ -7,7 +7,7 @@
                     Студенческие группы
                 <br><small>{{ course }}<br></small></h2>
                 <div class="btn-toolbar">
-                    <a href="{{ url("teaching:student_group_create", course_pk=course.id) }}"
+                    <a href="{{ course.create_manual_student_groups() }}"
                        class="btn btn-primary btn-outline btn-block" style="width: 215px;
                        padding: 12px 10px" role="button">Добавить группу</a>
                 </div>
@@ -20,14 +20,11 @@
                         {% for group in student_group_list %}
                             <tr>
                                 <td class="align-middle" width="50%">
-                                    <a id="student_group" href="{{ url("teaching:student_group_detail", course_pk=group.course.id,
-                                        group_pk=group.id) }}">{{ group.name }}</a></td>
+                                    <a id="student_group" href="{{ group.student_group_detail() }}">{{ group.name }}</a></td>
                                 <td class="align-middle">
-                                    <a href="{{ url("teaching:student_group_update", course_pk=group.course.id,
-                                        pk=group.id) }}">Редактировать</a>
+                                    <a href="{{ group.student_group_update() }}">Редактировать</a>
                                     <span>&emsp;</span>
-                                    <a style="color:black" href="{{ url("teaching:student_group_delete",
-                                        course_pk=group.course.id, pk=group.id) }}">Удалить</a>
+                                    <a style="color:black" href="{{ group.student_group_delete() }}">Удалить</a>
                                 </td>
                             </tr>
                         {% endfor %}

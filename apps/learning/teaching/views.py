@@ -295,15 +295,15 @@ class StudentGroupListView(PermissionRequiredMixin, generic.ListView):
     permission_required = ViewStudentGroup.name
 
     def get_permission_object(self):
-        return Course.objects.get(id=self.kwargs.get("course_pk"))
+        return Course.objects.get(id=self.kwargs.get("course_id"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['course'] = Course.objects.get(id=self.kwargs.get("course_pk"))
+        context['course'] = Course.objects.get(id=self.kwargs.get("course_id"))
         return context
 
     def get_queryset(self):
-        return StudentGroup.objects.filter(course_id=self.kwargs.get("course_pk"))
+        return StudentGroup.objects.filter(course_id=self.kwargs.get("course_id"))
 
 
 class StudentGroupDetailView(PermissionRequiredMixin, generic.DetailView):
@@ -313,25 +313,25 @@ class StudentGroupDetailView(PermissionRequiredMixin, generic.DetailView):
     permission_required = ViewStudentGroup.name
 
     def get_permission_object(self):
-        return Course.objects.get(id=self.kwargs.get("course_pk"))
+        return Course.objects.get(id=self.kwargs.get("course_id"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context_update = {
             'group_assignees': (StudentGroupAssignee.objects
-                                .filter(student_group_id=self.kwargs.get("group_pk"))),
-            'course': Course.objects.get(id=self.kwargs.get("course_pk")),
-            'group_id': self.kwargs.get("group_pk"),
-            'course_id': self.kwargs.get("course_pk"),
+                                .filter(student_group_id=self.kwargs.get("pk"))),
+            'course': Course.objects.get(id=self.kwargs.get("course_id")),
+            'group_id': self.kwargs.get("pk"),
+            'course_id': self.kwargs.get("course_id"),
             'enrollments': (Enrollment.objects
-                            .filter(student_group_id=self.kwargs.get("group_pk"))
+                            .filter(student_group_id=self.kwargs.get("pk"))
                             .order_by('student__last_name'))
         }
         context.update(context_update)
         return context
 
     def get_object(self, queryset=None):
-        return StudentGroup.objects.get(id=self.kwargs.get("group_pk"))
+        return StudentGroup.objects.get(id=self.kwargs.get("pk"))
 
     
 class StudentGroupUpdateView(TemplateView):

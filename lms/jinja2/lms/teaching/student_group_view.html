@@ -3,14 +3,14 @@
     <div class="container">
         <div class="row">
             <div class="col-xs-12 h2-and-buttons">
-                    <h2><a href="{{ url("teaching:student_group_list", course_pk=course_id) }}">
+                    <h2><a href="{{ course.get_student_groups_url() }}">
                         <span class="fa fa-angle-left"> </span></a>
                         {{ student_group_detail.name }}
                     <br><small>{{ course }}<br></small></h2>
                     <div class="btn-toolbar">
-                        <a href="{{ url("teaching:student_group_update", course_pk=course_id, pk=group_id) }}"
+                        <a href="{{ student_group_detail.student_group_update() }}"
                            class="btn btn-primary" role="button">Редактировать</a>
-                        <a href="{{ url("teaching:student_group_delete", course_pk=course_id, pk=group_id) }}"
+                        <a href="{{ student_group_detail.student_group_delete() }}"
                            class="btn btn-danger" role="button">Удалить</a>
                     </div>
             <hr>
@@ -38,8 +38,7 @@
                                     <a href="{{ enrollment.student.get_absolute_url() }}">{{ enrollment.student }}</a>
                                 </td>
                                 <td>
-                                    <a href="{{ url("teaching:student_group_student_update", course_pk=course_id,
-                                        group_pk=group_id, pk=enrollment.id, student_pk=enrollment.student.id) }}">Сменить группу</a>
+                                    <a href="{{ enrollment.change_student_between_student_groups() }}">Сменить группу</a>
                                 </td>
                             </tr>
                         {% endfor %}

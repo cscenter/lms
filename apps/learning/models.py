@@ -89,6 +89,29 @@ class StudentGroup(TimeStampedModel):
             self.enrollment_key = token_urlsafe(18)  # 24 chars in base64
         super().save(**kwargs)
 
+    @property
+    def url_kwargs(self) -> dict:
+        """
+        Keyword arguments for the `teaching.urls.RE_COURSE_URI` pattern.
+        """
+        return {
+            "pk": self.id,
+            "course_id": self.course.pk,
+            "course_slug": self.course.meta_course.slug,
+            "main_branch_id": self.course.main_branch.pk,
+            "semester_year": self.course.semester.year,
+            "semester_type": self.course.semester.type,
+        }
+
+    def student_group_detail(self):
+        return reverse("teaching:student_group_detail", kwargs=self.url_kwargs)
+
+    def student_group_update(self):
+        return reverse("teaching:student_group_update", kwargs=self.url_kwargs)
+
+    def student_group_delete(self):
+        return reverse("teaching:student_group_delete", kwargs=self.url_kwargs)
+
 
 class StudentGroupAssignee(models.Model):
     student_group = models.ForeignKey(
@@ -312,6 +335,25 @@ class Enrollment(TimezoneAwareMixin, TimeStampedModel):
                 self.grade == self.GRADES.CREDIT):
             return _("Satisfactory")
         return self.GRADES.values[self.grade]
+
+    @property
+    def url_kwargs(self) -> dict:
+        """
+        Keyword arguments for the `teaching.urls.RE_COURSE_URI` pattern.
+        """
+        return {
+            "pk": self.id,
+            "group_pk": self.student_group.id,
+            "student_pk": self.student.id,
+            "course_id": self.course.pk,
+            "course_slug": self.course.meta_course.slug,
+            "main_branch_id": self.course.main_branch.pk,
+            "semester_year": self.course.semester.year,
+            "semester_type": self.course.semester.type,
+        }
+
+    def change_student_between_student_groups(self):
+        return reverse("teaching:change_student_between_student_groups", kwargs=self.url_kwargs)
 
 
 class CourseInvitation(models.Model):

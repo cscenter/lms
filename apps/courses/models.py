@@ -486,7 +486,11 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
                        subdomain=settings.LMS_SUBDOMAIN)
 
     def get_student_groups_url(self):
-        return reverse('teaching:student_group_list', kwargs={'course_pk': self.url_kwargs['course_id']},
+        return reverse('teaching:student_group_list', kwargs=self.url_kwargs,
+                       subdomain=settings.LMS_SUBDOMAIN)
+
+    def create_manual_student_groups(self):
+        return reverse('teaching:student_group_create', kwargs=self.url_kwargs,
                        subdomain=settings.LMS_SUBDOMAIN)
 
     def has_unread(self):
