@@ -15,8 +15,8 @@ from learning.models import StudentAssignment
 from learning.permissions import ViewStudentAssignment, ViewStudentAssignmentList
 from learning.settings import Branches
 from learning.tests.factories import (
-    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory,
-    StudentGroupFactory
+    AssignmentCommentFactory, CourseTeacherFactory, EnrollmentFactory,
+    StudentAssignmentFactory, StudentGroupAssigneeFactory, StudentGroupFactory
 )
 from users.tests.factories import CuratorFactory, StudentFactory, TeacherFactory
 
@@ -335,7 +335,7 @@ def test_student_group_manual_link(client):
     Checking correct displaying link on student group in teacher course list
     """
 
-    def update_request():
+    def soup_request():
         course_list = reverse("teaching:course_list")
         response = client.get(course_list)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -347,14 +347,15 @@ def test_student_group_manual_link(client):
     course_branch_group = CourseFactory.create(teachers=[teacher])
     StudentGroupFactory.create(course=course_branch_group)
     client.login(teacher)
-    soup = update_request()
-    assert soup.find(id='student_manual_group') is None
+    soup = soup_request()
+    assert soup.find(class_='test_student_manual_group') is None
 
     # check with student group link
-    course_manual_group = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    course_manual_group = CourseFactory.create(teachers=[teacher],
+                                               group_mode=CourseGroupModes.MANUAL)
     StudentGroupFactory.create(course=course_manual_group)
-    soup = update_request()
-    assert soup.find(id='student_manual_group') is not None
+    soup = soup_request()
+    assert soup.find(class_='test_student_manual_group') is not None
 
 
 @pytest.mark.django_db
@@ -365,7 +366,8 @@ def test_student_groups_list(client):
     """
 
     teacher = TeacherFactory()
-    course = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    course = CourseFactory.create(teachers=[teacher],
+                                  group_mode=CourseGroupModes.MANUAL)
     student_group = StudentGroupFactory.create(course=course)
     student_group_1 = StudentGroupFactory.create(course=course)
 
@@ -377,3 +379,36 @@ def test_student_groups_list(client):
 
     assert soup.find(text=student_group.name) is not None
     assert soup.find(text=student_group_1.name) is not None
+
+
+@pytest.mark.django_db
+def test_student_groups_detail(client):
+
+    """
+    Checking correct displaying student and assignees in group
+    """
+
+    teacher = TeacherFactory()
+    curator = CuratorFactory()
+    student = StudentFactory()
+    student1 = StudentFactory()
+    s = SemesterFactory.create_current(for_branch=Branches.SPB)
+    course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    sg1 = StudentGroupFactory.create(course=course)
+    sg2 = StudentGroupFactory.create()
+    EnrollmentFactory.create(student=student, course=course, student_group=sg1)
+    course_teacher = CourseTeacherFactory()
+    StudentGroupAssigneeFactory(assignee=course_teacher, student_group=sg1)
+
+    client.login(teacher)
+    student_group_list = reverse("teaching:student_group_detail",
+                                 kwargs={
+                                     'course_pk': course.id,
+                                     'group_pk': sg1.id})
+
+    response = client.get(student_group_list)
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert sg1.name in soup.find('h2').text
+    assert student.last_name in soup.find(id="student_list").text
+    assert student1.last_name not in soup.find(id="student_list").text
+    assert course_teacher.teacher.last_name in soup.find(id="teacher_list").text

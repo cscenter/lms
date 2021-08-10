@@ -30,7 +30,7 @@
                                     <td>
                                         <a href="{{ course.get_create_news_url }}">{% trans "Add news" %}</a>
                                         {% if course.group_mode == "manual" %}
-                                            <a id="student_manual_group" href="{{course.get_student_groups_url}}">Группы студентов</a>
+                                            <a class="test_student_manual_group" href="{{course.get_student_groups_url}}">Группы студентов</a>
                                         {% endif %}
                                     </td>
                                 </tr>
