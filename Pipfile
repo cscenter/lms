@@ -56,7 +56,7 @@ sorl-thumbnail = "==12.7.0"
 python-magic = "==0.4.24"
 Pillow = "==8.3.1"
 # Forms
-django-crispy-forms = "==1.11.2"
+django-crispy-forms = "==1.12.0"
 # Parsing
 beautifulsoup4 = "*"
 # i18n/l10n
@@ -67,7 +67,7 @@ babel = "*"
 boto3 = "*"
 boto = "*"
 # Mailing
-django-ses = "==1.0.3"
+django-ses = "==2.2.1"
 django-post_office = "==3.5.3"
 # Markdown
 hoep = {editable = true,git = "git://github.com/pacahon/Hoep.git",ref = "0d4c0507dcb34d1b63a099c8b08656b66394bc37"}
@@ -75,13 +75,13 @@ hoep = {editable = true,git = "git://github.com/pacahon/Hoep.git",ref = "0d4c050
 sentry-sdk = "*"
 # Oauth2
 social-auth-core = "==4.1.0"
-social-auth-app-django = "==4.0.0"
+social-auth-app-django = "==5.0.0"
 # Task manager
-rq = "==1.8.1"
+rq = "==1.9.0"
 django-rq = "==2.4.1"
 rq-scheduler = ">=0.9"
 # Security
-bleach = "==3.3.1"
+bleach = "==4.0.0"
 cryptography = "*"
 # API
 djangorestframework = "==3.12.4"
@@ -93,11 +93,11 @@ django-storages = "==1.11.1"
 django-dbbackup = "==3.3.0"
 django-import-export = "==2.5.0"
 tablib = "==3.0.0"
-nbconvert = "==6.0.7"
+nbconvert = "==6.1.0"
 django-js-reverse = "==0.9.1"
 numpy = "==1.21.1"
 icalendar = "==4.0.7"
-django-ical = "==1.7.1"
+django-ical = "==1.8.0"
 python-dateutil = "==2.8.2"
 # TODO: remove Jinja2 dependency after updating django-jinja and webpack-loader
 Django-jinja = "==2.7.0"
