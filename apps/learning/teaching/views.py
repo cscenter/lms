@@ -33,10 +33,11 @@ from learning.forms import (
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import (
     AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment,
-    StudentGroup
+    StudentGroup, StudentGroupAssignee
 )
 from learning.permissions import (
-    CreateAssignmentComment, EditOwnStudentAssignment, ViewStudentAssignment,
+    CreateAssignmentComment, CreateStudentGroup, DeleteStudentGroup,
+    EditOwnStudentAssignment, UpdateStudentGroup, ViewStudentAssignment,
     ViewStudentAssignmentList, ViewStudentGroup
 )
 from learning.services import AssignmentService, get_teacher_classes
@@ -303,6 +304,50 @@ class StudentGroupListView(PermissionRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         return StudentGroup.objects.filter(course_id=self.kwargs.get("course_pk"))
+
+
+class StudentGroupDetailView(PermissionRequiredMixin, generic.DetailView):
+    model = StudentGroup
+    context_object_name = 'student_group_detail'
+    template_name = "lms/teaching/student_group_view.html"
+    permission_required = ViewStudentGroup.name
+
+    def get_permission_object(self):
+        return Course.objects.get(id=self.kwargs.get("course_pk"))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context_update = {
+            'group_assignees': (StudentGroupAssignee.objects
+                                .filter(student_group_id=self.kwargs.get("group_pk"))),
+            'course': Course.objects.get(id=self.kwargs.get("course_pk")),
+            'group_id': self.kwargs.get("group_pk"),
+            'course_id': self.kwargs.get("course_pk"),
+            'enrollments': (Enrollment.objects
+                            .filter(student_group_id=self.kwargs.get("group_pk"))
+                            .order_by('student__last_name'))
+        }
+        context.update(context_update)
+        return context
+
+    def get_object(self, queryset=None):
+        return StudentGroup.objects.get(id=self.kwargs.get("group_pk"))
+
+    
+class StudentGroupUpdateView(TemplateView):
+    template_name = "stub template path"
+
+
+class StudentGroupCreateView(TemplateView):
+    template_name = "stub template path"
+
+
+class StudentGroupDeleteView(TemplateView):
+    template_name = "stub template path"
+
+
+class StudentGroupStudentUpdateView(TemplateView):
+    template_name = "stub template path"
 
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
