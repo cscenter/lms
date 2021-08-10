@@ -47,7 +47,7 @@ from admission.models import (
     InterviewInvitation, InterviewSlot, InterviewStream
 )
 from admission.services import (
-    AccountData, ContestResultsImportState, EmailQueueService, StudentProfileData,
+    AccountData, CampaignContestsImportState, EmailQueueService, StudentProfileData,
     UsernameError, create_invitation, create_student, create_student_from_applicant,
     get_acceptance_ready_to_confirm, get_applicants_for_invitation,
     get_latest_contest_results_task, get_meeting_time, get_ongoing_interview_streams,
@@ -58,6 +58,7 @@ from core.http import AuthenticatedHttpRequest, HttpRequest
 from core.models import Branch
 from core.timezone import get_now_utc, now_local
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
+from core.timezone.typing import Timezone
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
 from tasks.models import Task
@@ -385,11 +386,23 @@ class InterviewInvitationListView(CuratorOnlyMixin, TemplateResponseMixin, BaseL
         return context
 
 
+def get_contest_results_import_info(campaign: Campaign) -> Dict[str, CampaignContestsImportState]:
+    data = {}
+    contest_types = [ContestTypes.TEST, ContestTypes.EXAM]
+    for contest_type in contest_types:
+        task = get_latest_contest_results_task(campaign, contest_type)
+        info = CampaignContestsImportState(campaign=campaign,
+                                           contest_type=contest_type,
+                                           latest_task=task)
+        data[contest_type] = info
+    return data
+
+
 class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
     request: AuthenticatedHttpRequest
     context_object_name = 'applicants'
     model = Applicant
-    template_name = "admission/applicant_list.html"
+    template_name = "lms/admission/applicant_list.html"
     filterset_class = ApplicantFilter
     paginate_by = 50
 
@@ -428,22 +441,8 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
         context = super().get_context_data(**kwargs)
         campaign = context['filter'].form.cleaned_data.get('campaign')
         if campaign and campaign.current and self.request.user.is_curator:
-            contest = dict()
-            contest['testing_results'] = {"campaign": campaign, "contest_type": ContestTypes.TEST}
-            contest['exam_results'] = {"campaign": campaign, "contest_type": ContestTypes.EXAM}
-            contest['task_testing'] = get_latest_contest_results_task(campaign, ContestTypes.TEST)
-            contest['task_exam'] = get_latest_contest_results_task(campaign, ContestTypes.EXAM)
-            contest['task_types'] = [['task_testing', 'testing_results'], ['task_exam', 'exam_results']]
-
-            for task in contest['task_types']:
-                if contest[task[0]]:
-                    tz = self.request.user.time_zone
-                    contest[task[1]]['latest_task'] = ContestResultsImportState(
-                        date=contest[task[0]].created_at_local(tz),
-                        status=contest[task[0]].status)
-
-            context["import_exam_results"] = contest['exam_results']
-            context["import_testing_results"] = contest['testing_results']
+            context['import_tasks'] = get_contest_results_import_info(campaign)
+            context['ContestTypes'] = ContestTypes
         return context
 
 

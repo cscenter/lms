@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass, fields
 from datetime import date, datetime, timedelta
 from operator import attrgetter
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
 
 import pytz
 from post_office import mail
@@ -108,11 +108,11 @@ def create_invitation(streams: List[InterviewStream], applicant: Applicant) -> I
     return invitation
 
 
-# TODO: Doesn't look really useful, move contest/campaign data to this dataclass?
 @dataclass
-class ContestResultsImportState:
-    date: datetime
-    status: str
+class CampaignContestsImportState:
+    campaign: Campaign
+    contest_type: str
+    latest_task: Optional[Task] = None
 
 
 IMPORT_CONTEST_RESULTS_TASK_NAME = "admission.tasks.import_campaign_contest_results"
@@ -162,7 +162,7 @@ def import_campaign_contest_results(*, campaign: Campaign, model_class):
     updated_total = 0
     for contest in campaign.contests.filter(type=model_class.CONTEST_TYPE):
         logger.debug(f"Starting processing contest {contest.pk}")
-        on_scoreboard, updated = model_class.import_results(api=api, contest=contest)
+        on_scoreboard, updated = model_class.import_scores(api=api, contest=contest)
         on_scoreboard_total += on_scoreboard
         updated_total += updated
         logger.debug(f"Scoreboard total = {on_scoreboard}")

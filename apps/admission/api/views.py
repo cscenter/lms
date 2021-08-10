@@ -119,8 +119,8 @@ class ConfirmationSendEmailVerificationCodeApi(APIBaseView):
         return Response(status=status.HTTP_201_CREATED, data={})
 
 
-class CampaignCreateContestResultsImportTask(APIBaseView):
-    """Creates new task for importing results from yandex contests."""
+class CampaignCreateContestScoresImportTask(APIBaseView):
+    """Creates a new task for importing scores from yandex contests."""
 
     permission_classes = [CuratorAccessPermission]
 

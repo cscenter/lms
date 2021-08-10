@@ -781,7 +781,7 @@ class YandexContestIntegration(models.Model):
                 setattr(self, k, v)
 
     @classmethod
-    def import_results(cls, *, api, contest: Contest) -> YandexContestImportResults:
+    def import_scores(cls, *, api, contest: Contest) -> YandexContestImportResults:
         """
         Imports contest results page by page.
 

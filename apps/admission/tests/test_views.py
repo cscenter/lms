@@ -489,41 +489,26 @@ def test_confirmation_of_acceptance_for_studies_view_authorization(client, setti
 
 
 @pytest.mark.django_db
-def test_import_buttons_on_applicants_list_page(client):
-
-    curator = CuratorFactory()
-    campaign = CampaignFactory(current=True, branch=BranchFactory(code=Branches.SPB))
-
-    client.login(curator)
+def test_applicant_list_view_buttons_for_importing_contest_scores(client, settings):
+    branch = BranchFactory(site=SiteFactory(pk=settings.SITE_ID))
+    campaign = CampaignFactory(current=True, branch=branch)
+    client.login(CuratorFactory())
     base_url = reverse("admission:applicants:list")
-    base_url = f"{base_url}?campaign={campaign.id}&status="
-    response = client.get(base_url)
+    response = client.get(f"{base_url}?campaign={campaign.id}&status=")
     assert response.status_code == 200
     soup = BeautifulSoup(response.content, "html.parser")
-
-    assert soup.find(id='import_testing_result') is not None
-    assert soup.find(id='import_exam_result') is not None
+    assert soup.find(class_='_btn-import-contest-results') is not None
 
 
 @pytest.mark.django_db
-def test_displaying_applicants_list(client):
-
-    curator = CuratorFactory()
-    campaign = CampaignFactory(current=True, branch=BranchFactory(code=Branches.SPB))
-    applicant = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign)
-    applicant_2 = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign)
-    applicant_3 = ApplicantFactory(status=Applicant.INTERVIEW_SCHEDULED, campaign=campaign)
-    applicant_4 = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign)
-    applicant_5 = ApplicantFactory(status=Applicant.INTERVIEW_SCHEDULED, campaign=campaign)
-
-    client.login(curator)
+def test_applicant_list_view_smoke(client, settings):
+    branch = BranchFactory(site=SiteFactory(pk=settings.SITE_ID))
+    campaign = CampaignFactory(current=True, branch=branch)
+    applicant1, applicant2 = ApplicantFactory.create_batch(2, campaign=campaign)
+    client.login(CuratorFactory())
     base_url = reverse("admission:applicants:list")
-    base_url = f"{base_url}?campaign={campaign.id}&status="
-    response = client.get(base_url)
+    response = client.get(f"{base_url}?campaign={campaign.id}&status=")
     assert response.status_code == 200
     soup = BeautifulSoup(response.content, "html.parser")
-    assert soup.find(text=applicant.full_name) is not None
-    assert soup.find(text=applicant_2.full_name) is not None
-    assert soup.find(text=applicant_3.full_name) is not None
-    assert soup.find(text=applicant_4.full_name) is not None
-    assert soup.find(text=applicant_5.full_name) is not None
+    assert soup.find(text=applicant1.full_name) is not None
+    assert soup.find(text=applicant2.full_name) is not None

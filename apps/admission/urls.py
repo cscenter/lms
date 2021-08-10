@@ -2,7 +2,7 @@ from django.conf.urls import include
 from django.urls import path, re_path
 
 from admission.api.views import (
-    CampaignCreateContestResultsImportTask, ConfirmationSendEmailVerificationCodeApi
+    CampaignCreateContestScoresImportTask, ConfirmationSendEmailVerificationCodeApi
 )
 from admission.views import (
     ApplicantCreateStudentView, ApplicantDetailView, ApplicantListView,
@@ -61,6 +61,6 @@ urlpatterns = [
 
     path('api/admission/', include(([
         path('confirmation/', include((acceptance_api_patterns, 'acceptance'))),
-        path('<int:campaign_id>/contest/<int:contest_type>/import/', CampaignCreateContestResultsImportTask.as_view(), name='import_testing_results'),
+        path('<int:campaign_id>/contest/<int:contest_type>/import/', CampaignCreateContestScoresImportTask.as_view(), name='import_contest_scores'),
     ], 'api')))
 ]

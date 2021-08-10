@@ -8,8 +8,7 @@ from admission.services import (
 )
 from admission.tasks import import_campaign_contest_results, register_in_yandex_contest
 from admission.tests.factories import ApplicantFactory, CampaignFactory, ContestFactory
-from core.urls import reverse
-from users.tests.factories import CuratorFactory, UserFactory
+from users.tests.factories import UserFactory
 
 
 @pytest.mark.django_db
@@ -31,8 +30,8 @@ def test_register_in_yandex_contest_success(mocker):
 
 
 @pytest.mark.django_db
-def test_import_contest_results(client, mocker):
-    mocked = mocker.patch('admission.models.YandexContestIntegration.import_results')
+def test_import_contest_scores(client, mocker):
+    mocked = mocker.patch('admission.models.YandexContestIntegration.import_scores')
     mocked.return_value = YandexContestImportResults(on_scoreboard=10, updated=1)
     campaign = CampaignFactory(current=True)
     contest_testing = ContestFactory(campaign=campaign, type=ContestTypes.TEST)

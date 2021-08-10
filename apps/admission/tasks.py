@@ -83,7 +83,7 @@ def import_campaign_contest_results(*, task_id) -> None:
             else:
                 raise ValueError(f"contest type {contest_type} is not supported")
             try:
-                on_scoreboard, updated = model_class.import_results(api=api, contest=contest)
+                on_scoreboard, updated = model_class.import_scores(api=api, contest=contest)
             except ContestAPIError as e:
                 if e.code == ResponseStatus.BAD_TOKEN:
                     notify_admin_bad_token(campaign.pk)
