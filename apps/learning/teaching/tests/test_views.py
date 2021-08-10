@@ -372,8 +372,7 @@ def test_student_groups_list(client):
     student_group_1 = StudentGroupFactory.create(course=course)
 
     client.login(teacher)
-    student_group_list = reverse("teaching:student_group_list",
-                                 kwargs={'course_pk': str(course.id)})
+    student_group_list = course.get_student_groups_url()
     response = client.get(student_group_list)
     soup = BeautifulSoup(response.content, "html.parser")
 
@@ -401,10 +400,7 @@ def test_student_groups_detail(client):
     StudentGroupAssigneeFactory(assignee=course_teacher, student_group=sg1)
 
     client.login(teacher)
-    student_group_list = reverse("teaching:student_group_detail",
-                                 kwargs={
-                                     'course_pk': course.id,
-                                     'group_pk': sg1.id})
+    student_group_list = sg1.student_group_detail()
 
     response = client.get(student_group_list)
     soup = BeautifulSoup(response.content, "html.parser")
