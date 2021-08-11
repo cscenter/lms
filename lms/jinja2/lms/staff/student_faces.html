@@ -1,0 +1,32 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block body_attrs %} data-init-sections="lazy-img"{% endblock body_attrs %}
+
+{% block content %}
+  <div class="container">
+    {{ crispy(filter_form) }}
+
+    <a href="{{ request.get_full_path() }}&print=Y" target="_blank">Версия для печати</a>
+
+    <div class="c-student-faces">
+      {% if student_profiles %}
+        {% for student_profile in student_profiles %}
+          {% with account_profile=student_profile.user %}
+            <div class="student">
+              <a href="{{ account_profile.get_absolute_url() }}">
+                {% with im = account_profile.get_thumbnail(account_profile.ThumbnailSize.SQUARE, use_stub=True) -%}
+                  <img alt="{{ account_profile.get_full_name() }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"/><br>
+                {% endwith -%}
+                <figcaption {% if account_profile.status in StudentStatuses.inactive_status %}class="expelled"{% endif %}>
+                  {{ account_profile.last_name }} {{ account_profile.first_name }}
+                </figcaption>
+              </a>
+            </div>
+          {% endwith %}
+        {% endfor %}
+      {% else %}
+        <div class="empty">Профили не найдены. Задайте другие параметры поиска.</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock content %}

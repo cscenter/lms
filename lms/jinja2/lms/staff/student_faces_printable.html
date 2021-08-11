@@ -1,0 +1,25 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block body_attrs %} data-init-sections="lazy-img"{% endblock body_attrs %}
+
+{% block content %}
+  {% if student_profiles %}
+    {% for chunk in student_profiles|batch(16) %}
+      <page size="A4" class="student-faces-printable">
+        {% for student_profile in chunk %}
+          {% set account_profile = student_profile.user %}
+          <div class="student">
+            {% with im = account_profile.get_thumbnail(account_profile.ThumbnailSize.BASE_PRINT, use_stub=True) -%}
+              <img src="{{ im.url }}" width="150" height="210" />
+            {% endwith -%}
+            <figcaption {% if account_profile.status in StudentStatuses.inactive_status %}class="expelled"{% endif %}>
+              {{ account_profile.last_name }} {{ account_profile.first_name }}
+            </figcaption>
+          </div>
+        {% endfor %}
+      </page>
+    {% endfor %}
+  {% else %}
+    <div class="empty">Профили не найдены. Задайте другие параметры поиска.</div>
+  {% endif %}
+{% endblock content %}

@@ -1,7 +1,10 @@
 import datetime
 from collections import defaultdict
+from typing import List
 
+from django_filters import FilterSet
 from django_filters.views import BaseFilterView
+from rest_framework import serializers
 from vanilla import TemplateView
 
 from django.conf import settings
@@ -33,9 +36,9 @@ from learning.reports import (
 )
 from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
+from staff.filters import StudentProfileFilter
 from staff.forms import GraduationForm
 from staff.models import Hint
-from staff.serializers import FacesQueryParams
 from staff.tex import generate_tex_student_profile_for_diplomas
 from study_programs.models import AcademicDiscipline
 from surveys.models import CourseSurvey
@@ -415,47 +418,52 @@ class HintListView(CuratorOnlyMixin, generic.ListView):
 
 class StudentFacesView(CuratorOnlyMixin, TemplateView):
     """Photo + names to memorize newbies"""
-    template_name = "staff/student_faces.html"
+    template_name = "lms/staff/student_faces.html"
 
-    def get(self, request, *args, **kwargs):
-        query_params = FacesQueryParams(data=request.GET)
-        if not query_params.is_valid():
-            return HttpResponseRedirect(request.path)
-        context = self.get_context_data(query_params, **kwargs)
-        return self.render_to_response(context)
-
-    def get_context_data(self, query_params, **kwargs):
-        branch_code = query_params.validated_data.get('branch',
-                                                      settings.DEFAULT_BRANCH_CODE)
-        branch = get_object_or_404(Branch.objects
-                                   .filter(code=branch_code,
-                                           site_id=settings.SITE_ID))
-        year_of_admission = query_params.validated_data.get('year')
-        if not year_of_admission:
-            year_of_admission = get_current_term_pair(
-                branch.get_timezone()).year
-        current_year = get_current_term_pair(branch.get_timezone()).year
-        context = {
-            'students': self.get_queryset(branch, year_of_admission),
-            "years": reversed(range(branch.established, current_year + 1)),
-            "current_year": year_of_admission,
-            "current_branch": branch,
-            "branches": Branch.objects.for_site(site_id=settings.SITE_ID)
-        }
-        return context
+    class InputSerializer(serializers.Serializer):
+        branch = serializers.ChoiceField(required=True, choices=())
+        year = serializers.IntegerField(label="Year of Admission",
+                                        required=True,
+                                        min_value=settings.ESTABLISHED)
+        type = serializers.ChoiceField(required=False, allow_blank=True,
+                                       choices=StudentTypes.choices)
 
     def get_template_names(self):
         if "print" in self.request.GET:
-            self.template_name = "staff/student_faces_printable.html"
-        return super(StudentFacesView, self).get_template_names()
+            self.template_name = "lms/staff/student_faces_printable.html"
+        return super().get_template_names()
 
-    def get_queryset(self, branch, year_of_admission):
-        qs = (User.objects
-              .filter(student_profiles__branch=branch,
-                      student_profiles__year_of_admission=year_of_admission)
-              .distinct('last_name', 'first_name', 'pk')
-              .order_by('last_name', 'first_name', 'pk')
-              .prefetch_related("groups"))
+    def get(self, request, *args, **kwargs):
+        site_branches = Branch.objects.for_site(site_id=settings.SITE_ID)
+        assert len(site_branches) > 0
+        serializer = self.InputSerializer(data=request.GET)
+        serializer.fields['branch'].choices = [(b.pk, b.name) for b in site_branches]
+        if not serializer.initial_data:
+            branch = site_branches[0]
+            current_term = get_current_term_pair(branch.get_timezone())
+            url = f"{request.path}?branch={branch.pk}&year={current_term.year}&type={StudentTypes.REGULAR}"
+            return HttpResponseRedirect(url)
+        # Filterset knows how to validate input data but we plan to use this
+        # serializer for the future api view
+        serializer.is_valid(raise_exception=False)
+        filter_set = StudentProfileFilter(site_branches,
+                                          data=self.request.GET,
+                                          queryset=self.get_queryset())
+        context = self.get_context_data(filter_set, **kwargs)
+        return self.render_to_response(context)
+
+    def get_context_data(self, filter_set: FilterSet, **kwargs):
+        context = {
+            'filter_form': filter_set.form,
+            'student_profiles': filter_set.qs,
+            'StudentStatuses': StudentStatuses,
+        }
+        return context
+
+    def get_queryset(self):
+        qs = (StudentProfile.objects
+              .select_related("user")
+              .order_by('user__last_name', 'user__first_name', 'pk'))
         if "print" in self.request.GET:
             qs = qs.exclude(status__in=StudentStatuses.inactive_statuses)
         return qs
