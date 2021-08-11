@@ -25,6 +25,7 @@ from courses.permissions import ViewAssignment
 from courses.services import get_teacher_branches
 from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
+from courses.views.mixins import CourseURLParamsMixin
 from learning.api.serializers import AssignmentScoreSerializer
 from learning.calendar import get_all_calendar_events, get_teacher_calendar_events
 from learning.forms import (
@@ -288,7 +289,7 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
                 .order_by('-semester__index', 'meta_course__name'))
 
 
-class StudentGroupListView(PermissionRequiredMixin, generic.ListView):
+class StudentGroupListView(PermissionRequiredMixin, CourseURLParamsMixin, generic.ListView):
     model = StudentGroup
     context_object_name = 'student_group_list'
     template_name = "lms/teaching/student_group_list.html"
@@ -306,7 +307,7 @@ class StudentGroupListView(PermissionRequiredMixin, generic.ListView):
         return StudentGroup.objects.filter(course_id=self.kwargs.get("course_id"))
 
 
-class StudentGroupDetailView(PermissionRequiredMixin, generic.DetailView):
+class StudentGroupDetailView(PermissionRequiredMixin, CourseURLParamsMixin, generic.DetailView):
     model = StudentGroup
     context_object_name = 'student_group_detail'
     template_name = "lms/teaching/student_group_view.html"
