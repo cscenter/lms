@@ -12,7 +12,10 @@ from courses.models import CourseGroupModes
 from courses.permissions import ViewAssignment
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from learning.models import StudentAssignment
-from learning.permissions import ViewStudentAssignment, ViewStudentAssignmentList
+from learning.permissions import (
+    ViewStudentAssignment, ViewStudentAssignmentList, ViewStudentGroup,
+    ViewStudentGroupAsTeacher
+)
 from learning.settings import Branches
 from learning.tests.factories import (
     AssignmentCommentFactory, CourseTeacherFactory, EnrollmentFactory,
@@ -408,3 +411,61 @@ def test_student_groups_detail(client):
     assert student.last_name in soup.find(id="student_list").text
     assert student1.last_name not in soup.find(id="student_list").text
     assert course_teacher.teacher.last_name in soup.find(id="teacher_list").text
+
+
+@pytest.mark.django_db
+def test_student_group_detail_view_permissions(client, assert_login_redirect):
+    from auth.permissions import perm_registry
+    teacher = TeacherFactory()
+    student = StudentFactory()
+    curator = CuratorFactory()
+    s = SemesterFactory.create_current(for_branch=Branches.SPB)
+    course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    sg1 = StudentGroupFactory.create(course=course)
+    course_other = CourseFactory()
+    StudentAssignmentFactory(student=student, assignment__course=course)
+    url = sg1.student_group_detail()
+    assert ViewStudentGroup.name in perm_registry
+    assert ViewStudentGroupAsTeacher.name in perm_registry
+    assert not student.has_perm(ViewStudentGroup.name, course)
+    assert teacher.has_perm(ViewStudentGroup.name, course)
+    assert not teacher.has_perm(ViewStudentGroup.name, course_other)
+    assert curator.has_perm(ViewStudentGroup.name, course)
+    assert_login_redirect(url, method='get')
+    client.login(student)
+    response = client.get(url)
+    assert response.status_code == 403
+    client.login(teacher)
+    response = client.get(url)
+    assert response.status_code == 200
+    client.login(curator)
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_student_groups_list_view_permissions(client, assert_login_redirect):
+    from auth.permissions import perm_registry
+    teacher = TeacherFactory()
+    student = StudentFactory()
+    curator = CuratorFactory()
+    course = CourseFactory(teachers=[teacher])
+    course_other = CourseFactory()
+    StudentAssignmentFactory(student=student, assignment__course=course)
+    url = course.get_student_groups_url()
+    assert ViewStudentGroup.name in perm_registry
+    assert ViewStudentGroupAsTeacher.name in perm_registry
+    assert not student.has_perm(ViewStudentGroup.name, course)
+    assert teacher.has_perm(ViewStudentGroup.name, course)
+    assert not teacher.has_perm(ViewStudentGroup.name, course_other)
+    assert curator.has_perm(ViewStudentGroup.name, course)
+    assert_login_redirect(url, method='get')
+    client.login(student)
+    response = client.get(url)
+    assert response.status_code == 403
+    client.login(teacher)
+    response = client.get(url)
+    assert response.status_code == 200
+    client.login(curator)
+    response = client.get(url)
+    assert response.status_code == 200
