@@ -78,7 +78,7 @@ def test_view_student_faces_smoke(client):
     curator = CuratorFactory()
     client.login(curator)
     response = client.get(reverse('staff:student_faces'))
-    assert response.status_code == 200
+    assert response.status_code == 302
 
 
 @pytest.mark.django_db
