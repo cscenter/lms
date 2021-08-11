@@ -334,9 +334,7 @@ def test_gradebook_list(client, mocker, assert_redirect):
 @pytest.mark.django_db
 def test_student_group_manual_link(client):
 
-    """
-    Checking correct displaying link on student group in teacher course list
-    """
+    """ Checking correct displaying link on student groups in Course list """
 
     def soup_request():
         course_list = reverse("teaching:course_list")
@@ -364,9 +362,7 @@ def test_student_group_manual_link(client):
 @pytest.mark.django_db
 def test_student_groups_list(client):
 
-    """
-    Checking correct displaying student groups in teacher group list
-    """
+    """ Checking correct displaying student groups in Course group list """
 
     teacher = TeacherFactory()
     course = CourseFactory.create(teachers=[teacher],
