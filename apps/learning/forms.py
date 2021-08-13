@@ -18,7 +18,9 @@ from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
 from courses.models import Course, CourseTeacher
 from grading.services import CheckerService, SubmissionService
-from learning.models import AssignmentSubmissionTypes, GraduateProfile, StudentGroup
+from learning.models import (
+    AssignmentSubmissionTypes, Enrollment, GraduateProfile, StudentGroup
+)
 
 from .models import AssignmentComment
 
@@ -307,7 +309,7 @@ class StudentGroupForm(forms.ModelForm):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Сохранить'))
         self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
-            .format(reverse_url)))
+                                     .format(reverse_url)))
 
 
 class StudentGroupAddForm(forms.ModelForm):
@@ -330,5 +332,23 @@ class StudentGroupAddForm(forms.ModelForm):
 
         self.helper.add_input(Submit('submit', 'Добавить'))
         self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
-            .format(reverse_url)))
+                                     .format(reverse_url)))
+
+
+class StudentEnrollmentForm(forms.ModelForm):
+    class Meta:
+        model = Enrollment
+        fields = ('student_group',)
+
+    def __init__(self, *args, **kwargs):
+        reverse_url = kwargs.pop('reverse_url', None)
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-StudentEnrollmentForm'
+        self.helper.form_class = 'blueForms'
+        self.helper.form_method = 'post'
+
+        self.helper.add_input(Submit('submit', 'Сохранить'))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
+                                     .format(reverse_url)))
 

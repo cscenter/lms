@@ -31,7 +31,7 @@ from learning.api.serializers import AssignmentScoreSerializer
 from learning.calendar import get_all_calendar_events, get_teacher_calendar_events
 from learning.forms import (
     AssignmentCommentForm, AssignmentModalCommentForm, AssignmentScoreForm,
-    StudentGroupAddForm, StudentGroupForm
+    StudentEnrollmentForm, StudentGroupAddForm, StudentGroupForm
 )
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import (
@@ -463,8 +463,31 @@ class StudentGroupDeleteView(PermissionRequiredMixin, generic.DeleteView):
         return context
 
 
-class StudentGroupStudentUpdateView(TemplateView):
-    template_name = "stub template path"
+class StudentGroupStudentUpdateView(PermissionRequiredMixin, generic.UpdateView):
+    model = Enrollment
+    context_object_name = 'student_group_student_update'
+    template_name = "lms/teaching/student_group_student_update.html"
+    form_class = StudentEnrollmentForm
+    permission_required = UpdateStudentGroup.name
+
+    def get_permission_object(self):
+        return StudentGroup.objects.get(id=self.kwargs.get("group_pk"))
+
+    def get_success_url(self):
+        sg = StudentGroup.objects.get(id=self.kwargs.get("group_pk"))
+        return sg.student_group_detail()
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        sg = StudentGroup.objects.get(id=self.kwargs.get("group_pk"))
+        kwargs['reverse_url'] = sg.student_group_detail()
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'].fields['student_group'].queryset = (StudentGroup.objects
+                                                            .filter(course_id=self.kwargs['course_id']))
+        return context
 
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
