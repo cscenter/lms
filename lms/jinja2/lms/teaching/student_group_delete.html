@@ -1,0 +1,26 @@
+{% extends "lms/layouts/v1_base.html" %}
+{% block content %}
+    <div class="container">
+        <h4> <b>Удаление группы </b></h4>
+        <table class="table table-borderless table-sm">
+            <tr>
+                <td width="150px">Название группы:</td>
+                <td><b>{{ student_group_delete.name }}</b></td>
+            </tr>
+            <tr>
+                <td>Курс:</td>
+                <td><b>{{ student_group_delete.course }}</b></td>
+            </tr>
+        </table>
+        <form method="post">
+            {% csrf_token %}
+            {% if not delete %}
+            <input type="submit" class="btn btn-primary" value="Удалить">
+            {% endif %}
+            {% if delete %}
+            <p style="color:red"> Группа связана с заданием или в неё записаны студенты. Удаление невозможно! </p>
+            {% endif %}
+            <button type="button" class="btn" onclick="history.go(-1);">Отмена</button>
+        </form>
+    </div>
+{% endblock content %}

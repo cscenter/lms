@@ -35,8 +35,8 @@ from learning.forms import (
 )
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import (
-    AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment,
-    StudentGroup, StudentGroupAssignee
+    AssignmentComment, AssignmentGroup, AssignmentSubmissionTypes, Enrollment,
+    StudentAssignment, StudentGroup, StudentGroupAssignee
 )
 from learning.permissions import (
     CreateAssignmentComment, CreateStudentGroup, DeleteStudentGroup,
@@ -438,8 +438,29 @@ class StudentGroupCreateView(PermissionRequiredMixin, generic.CreateView):
         return super().form_valid(form)
 
 
-class StudentGroupDeleteView(TemplateView):
-    template_name = "stub template path"
+class StudentGroupDeleteView(PermissionRequiredMixin, generic.DeleteView):
+    model = StudentGroup
+    context_object_name = 'student_group_delete'
+    template_name = "lms/teaching/student_group_delete.html"
+    permission_required = DeleteStudentGroup.name
+
+    def get_permission_object(self):
+        return StudentGroup.objects.get(id=self.kwargs.get("pk"))
+
+    def get_success_url(self):
+        course = Course.objects.get(id=self.kwargs.get("course_id"))
+        return course.get_student_groups_url()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['delete'] = False
+        assignee_group = (AssignmentGroup.objects
+                          .filter(group_id=self.kwargs['pk']))
+        students_in_group = (Enrollment.objects
+                             .filter(student_group_id=self.kwargs.get("pk")))
+        if assignee_group or students_in_group:
+            context['delete'] = True
+        return context
 
 
 class StudentGroupStudentUpdateView(TemplateView):
