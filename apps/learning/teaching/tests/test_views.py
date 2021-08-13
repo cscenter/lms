@@ -410,6 +410,46 @@ def test_student_groups_detail(client):
 
 
 @pytest.mark.django_db
+def test_change_student_between_groups(client):
+    """ Checking change student between student groups """
+
+    teacher = TeacherFactory()
+    curator = CuratorFactory()
+    student1 = StudentFactory()
+    student2 = StudentFactory()
+    s = SemesterFactory.create_current(for_branch=Branches.SPB)
+    course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    sg1 = StudentGroupFactory.create(course=course)
+    sg2 = StudentGroupFactory.create(course=course)
+    enrollment1 = EnrollmentFactory.create(student=student1, course=course, student_group=sg1)
+    enrollment2 = EnrollmentFactory.create(student=student2, course=course, student_group=sg2)
+    course_teacher = CourseTeacherFactory()
+    StudentGroupAssigneeFactory(assignee=course_teacher, student_group=sg1)
+
+    client.login(teacher)
+
+    # check student1
+    change_group_for_student_url = enrollment1.change_student_between_student_groups()
+
+    response = client.get(change_group_for_student_url)
+    assert response.status_code == 200
+    soup = BeautifulSoup(response.content, "html.parser")
+    find_groups_name = soup.find(id='div_id_student_group').text
+    assert sg1.name in find_groups_name
+    assert sg2.name in find_groups_name
+
+    # check student2
+    change_group_for_student_url = enrollment2.change_student_between_student_groups()
+
+    response = client.get(change_group_for_student_url)
+    assert response.status_code == 200
+    soup = BeautifulSoup(response.content, "html.parser")
+    find_groups_name = soup.find(id='div_id_student_group').text
+    assert sg1.name in find_groups_name
+    assert sg2.name in find_groups_name
+
+
+@pytest.mark.django_db
 def test_student_group_detail_view_permissions(client, assert_login_redirect):
     from auth.permissions import perm_registry
     teacher = TeacherFactory()
