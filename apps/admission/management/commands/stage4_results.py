@@ -11,6 +11,7 @@ from django.core.management import CommandError
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from admission.constants import ApplicantStatuses
 from admission.management.commands._utils import (
     CurrentCampaignMixin, CustomizeQueryMixin, EmailTemplateMixin
 )
@@ -19,7 +20,7 @@ from admission.services import get_email_from
 from core.timezone import get_now_utc
 
 INVITE_TO_REGISTRATION = {
-    Applicant.ACCEPT
+    ApplicantStatuses.ACCEPT,
 }
 
 
@@ -33,6 +34,16 @@ class Command(EmailTemplateMixin, CustomizeQueryMixin,
         ./manage.py stage4_results --branch=nsk --template-pattern="csc-admission-{year}-{branch_code}-results-{status}" -f="status__in=['volunteer']"
     """
 
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        parser.add_argument(
+            '--invite', dest='invite_to_registration',
+            type=str, action='store', nargs='*', metavar='STATUS',
+            default=INVITE_TO_REGISTRATION,
+            help='Invite participants with statuses to create student profile. '
+                 'Examples: --invite waiting_for_payment accept. Default: %(default)s)',
+            choices=ApplicantStatuses.values.keys())
+
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options, confirm=False, branch_is_required=True)
         campaign = campaigns[0]
@@ -41,6 +52,9 @@ class Command(EmailTemplateMixin, CustomizeQueryMixin,
             raise CommandError(f"Deadline for confirmation of acceptance for studies is not defined.")
         if confirmation_ends_at < get_now_utc():
             raise CommandError(f"Deadline for confirmation of acceptance for studies is exceeded.")
+
+        invite_to_registration = options['invite_to_registration']
+        self.stdout.write(f"Invite to create student profile [statuses]: {' '.join(invite_to_registration)}")
 
         manager = self.get_manager(Applicant, options)
         applicants = manager.filter(campaign_id=campaign.pk)
@@ -66,11 +80,11 @@ class Command(EmailTemplateMixin, CustomizeQueryMixin,
             template_name = self.get_template_name(campaign, template_pattern)
             template = get_email_template(template_name)
             is_notified = Email.objects.filter(to=recipients, template=template).exists()
-            if applicant.status in INVITE_TO_REGISTRATION:
+            if applicant.status in invite_to_registration:
                 is_notified = is_notified and Acceptance.objects.filter(applicant=applicant).exists()
             if not is_notified:
                 with transaction.atomic():
-                    if applicant.status in INVITE_TO_REGISTRATION:
+                    if applicant.status in invite_to_registration:
                         acceptance, _ = Acceptance.objects.get_or_create(applicant=applicant)
                         registration_url = urlparse(acceptance.get_absolute_url())
                         context = {
