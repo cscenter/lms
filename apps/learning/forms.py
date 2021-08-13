@@ -2,18 +2,23 @@ import os
 
 from crispy_forms.bootstrap import FormActions, StrictButton
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import HTML, BaseInput, Div, Field, Hidden, Layout, Submit
+from crispy_forms.layout import (
+    HTML, BaseInput, Button, Div, Field, Hidden, Layout, Submit
+)
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.forms import ModelChoiceField
 from django.utils.translation import gettext_lazy as _
 
 from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
+from core.urls import reverse
 from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
+from courses.models import Course, CourseTeacher
 from grading.services import CheckerService, SubmissionService
-from learning.models import AssignmentSubmissionTypes, GraduateProfile
+from learning.models import AssignmentSubmissionTypes, GraduateProfile, StudentGroup
 
 from .models import AssignmentComment
 
@@ -276,3 +281,30 @@ class CourseEnrollmentForm(forms.Form):
         super().__init__(**kwargs)
         self.helper = FormHelper(self)
         self.helper.layout.append(Submit('enroll', 'Записаться на курс'))
+
+
+class StudentGroupModelChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f"{obj.teacher}"
+
+
+class StudentGroupForm(forms.ModelForm):
+    class Meta:
+        model = StudentGroup
+        fields = ('name', 'assignee')
+
+    assignee = StudentGroupModelChoiceField(
+        queryset=CourseTeacher.objects.select_related('teacher'),
+        label='Ответственный',
+        required=False)
+
+    def __init__(self, *args, **kwargs):
+        reverse_url = kwargs.pop('reverse_url', None)
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-StudentGroupForm'
+        self.helper.form_class = 'blueForms'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Сохранить'))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
+            .format(reverse_url)))

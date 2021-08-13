@@ -7,6 +7,7 @@ from vanilla import TemplateView
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
@@ -29,7 +30,8 @@ from courses.views.mixins import CourseURLParamsMixin
 from learning.api.serializers import AssignmentScoreSerializer
 from learning.calendar import get_all_calendar_events, get_teacher_calendar_events
 from learning.forms import (
-    AssignmentCommentForm, AssignmentModalCommentForm, AssignmentScoreForm
+    AssignmentCommentForm, AssignmentModalCommentForm, AssignmentScoreForm,
+    StudentGroupForm
 )
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import (
@@ -335,8 +337,58 @@ class StudentGroupDetailView(PermissionRequiredMixin, CourseURLParamsMixin, gene
         return StudentGroup.objects.get(id=self.kwargs.get("pk"))
 
     
-class StudentGroupUpdateView(TemplateView):
-    template_name = "stub template path"
+class StudentGroupUpdateView(PermissionRequiredMixin, generic.UpdateView):
+    model = StudentGroup
+    context_object_name = 'student_group_update'
+    template_name = "lms/teaching/student_group_update.html"
+    form_class = StudentGroupForm
+    permission_required = UpdateStudentGroup.name
+
+    def get_permission_object(self):
+        return StudentGroup.objects.get(id=self.kwargs.get("pk"))
+
+    def get_success_url(self):
+        sg = StudentGroup.objects.get(id=self.kwargs.get("pk"))
+        return sg.student_group_detail()
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        sg = StudentGroup.objects.get(id=self.kwargs.get("pk"))
+        kwargs['reverse_url'] = sg.student_group_detail()
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'].fields['assignee'].queryset = (CourseTeacher.objects
+                                                       .filter(course_id=self.kwargs['course_id']))
+        return context
+
+    def form_valid(self, form):
+        with transaction.atomic():
+            self.object = form.save()
+
+            assignee = form.cleaned_data['assignee']
+            assignees_in_student_group = (StudentGroupAssignee.objects
+                                          .filter(student_group_id=self.object.id))
+
+            # create new bound object with StudentGroup in StudentGroupAssignee
+            list_assignees_in_student_group = (
+                [i['assignee'] for i in assignees_in_student_group
+                    .values('assignee', 'student_group')]
+            )
+            if assignee is not None and assignee.id not in list_assignees_in_student_group:
+                new_assignee = StudentGroupAssignee(
+                    student_group=self.object,
+                    assignee=assignee
+                )
+                new_assignee.save()
+
+            # clear all bound objects with StudentGroup in StudentGroupAssignee
+            elif assignee is None:
+                for assignees_for_delete in assignees_in_student_group:
+                    assignees_for_delete.delete()
+
+        return super().form_valid(form)
 
 
 class StudentGroupCreateView(TemplateView):
