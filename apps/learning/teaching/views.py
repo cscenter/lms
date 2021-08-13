@@ -31,7 +31,7 @@ from learning.api.serializers import AssignmentScoreSerializer
 from learning.calendar import get_all_calendar_events, get_teacher_calendar_events
 from learning.forms import (
     AssignmentCommentForm, AssignmentModalCommentForm, AssignmentScoreForm,
-    StudentGroupForm
+    StudentGroupAddForm, StudentGroupForm
 )
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import (
@@ -391,8 +391,51 @@ class StudentGroupUpdateView(PermissionRequiredMixin, generic.UpdateView):
         return super().form_valid(form)
 
 
-class StudentGroupCreateView(TemplateView):
-    template_name = "stub template path"
+class StudentGroupCreateView(PermissionRequiredMixin, generic.CreateView):
+    model = StudentGroup
+    context_object_name = 'student_group_create'
+    template_name = "lms/teaching/student_group_add.html"
+    form_class = StudentGroupAddForm
+    permission_required = CreateStudentGroup.name
+
+    def get_permission_object(self):
+        return Course.objects.get(id=self.kwargs.get("course_id"))
+
+    def get_success_url(self):
+        course = Course.objects.get(id=self.kwargs.get("course_id"))
+        return course.get_student_groups_url()
+
+    def get_initial(self, **kwargs):
+        initial = super().get_initial()
+        initial['type'] = 'manual'
+        return initial
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        course = Course.objects.get(id=self.kwargs.get("course_id"))
+        kwargs['reverse_url'] = course.get_student_groups_url()
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'].fields['assignee'].queryset = (CourseTeacher.objects
+                                                       .filter(course_id=self.kwargs['course_id']))
+        return context
+
+    def form_valid(self, form):
+        with transaction.atomic():
+            form.instance.course = Course.objects.get(id=self.kwargs['course_id'])
+            self.object = form.save()
+
+            assignee = form.cleaned_data['assignee']
+            if assignee:
+                new_assignees = StudentGroupAssignee(
+                    student_group=self.object,
+                    assignee=assignee
+                )
+                new_assignees.save()
+
+        return super().form_valid(form)
 
 
 class StudentGroupDeleteView(TemplateView):

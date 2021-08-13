@@ -308,3 +308,27 @@ class StudentGroupForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', 'Сохранить'))
         self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
             .format(reverse_url)))
+
+
+class StudentGroupAddForm(forms.ModelForm):
+    class Meta:
+        model = StudentGroup
+        fields = ('name', 'assignee')
+
+    assignee = StudentGroupModelChoiceField(
+        queryset=CourseTeacher.objects.select_related('teacher'),
+        label='Ответственный',
+        required=False)
+
+    def __init__(self, *args, **kwargs):
+        reverse_url = kwargs.pop('reverse_url', None)
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-StudentGroupAddForm'
+        self.helper.form_class = 'blueForms'
+        self.helper.form_method = 'post'
+
+        self.helper.add_input(Submit('submit', 'Добавить'))
+        self.helper.add_input(Button('cancel', 'Отмена', onclick='window.location.href="{}"'
+            .format(reverse_url)))
+
