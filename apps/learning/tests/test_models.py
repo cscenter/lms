@@ -375,30 +375,33 @@ def test_student_assignment_execution_time():
 
 @pytest.mark.django_db
 def test_student_group_assignee_constrains():
-    
     teacher = TeacherFactory()
     student = StudentFactory()
-    course = CourseFactory.create(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    course = CourseFactory.create(group_mode=CourseGroupModes.MANUAL)
     assignee = CourseTeacherFactory(teacher=teacher, course=course)
-    # assignment = AssignmentFactory(course=course)
+    assignment = AssignmentFactory(course=course)
 
     student_group = StudentGroupFactory.create(course=course)
     student_group_1 = StudentGroupFactory.create(course=course)
 
-    # test unique constraint with student_group, assignee, assignment
+    # test unique constraint with student_group, assignee
     student_group_assignee_1 = StudentGroupAssigneeFactory(student_group=student_group,
                                                            assignee=assignee,
-                                                           # assignment=assignment
                                                            )
 
-    # with pytest.raises(IntegrityError) as e:
-        # student_group_assignee_2 = StudentGroupAssigneeFactory(student_group=student_group,
-        #                                                        assignee=assignee,
-        #                                                        # assignment=assignment
-        #                                                        )
+    student_group_assignee_2 = StudentGroupAssigneeFactory(student_group=student_group,
+                                                           assignee=assignee,
+                                                           )
 
+    # test unique constraint with student_group, assignee, assignment
+    student_group_assignee_3 = StudentGroupAssigneeFactory(student_group=student_group,
+                                                           assignee=assignee,
+                                                           assignment=assignment
+                                                           )
 
-
-    # with pytest.raises(IntegrityError) as e:
-    #     pass
+    with pytest.raises(IntegrityError) as e:
+        student_group_assignee_4 = StudentGroupAssigneeFactory(student_group=student_group,
+                                                               assignee=assignee,
+                                                               assignment=assignment
+                                                               )
 
