@@ -7,15 +7,19 @@ import pytest
 import pytz
 
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 from django.utils.encoding import smart_str
 
 from core.tests.factories import BranchFactory, LocationFactory, SiteFactory
 from core.tests.utils import CSCTestCase
 from courses.constants import SemesterTypes
-from courses.models import AssignmentSubmissionFormats, CourseNews, Semester
+from courses.models import (
+    AssignmentSubmissionFormats, CourseGroupModes, CourseNews, Semester
+)
 from courses.tests.factories import (
     AssignmentFactory, CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
-    CourseNewsFactory, LearningSpaceFactory, MetaCourseFactory, SemesterFactory
+    CourseNewsFactory, CourseTeacherFactory, LearningSpaceFactory, MetaCourseFactory,
+    SemesterFactory
 )
 from learning.models import (
     AssignmentComment, AssignmentNotification, AssignmentSubmissionTypes,
@@ -25,7 +29,7 @@ from learning.settings import Branches
 from learning.tests.factories import (
     AssignmentCommentFactory, AssignmentNotificationFactory,
     CourseNewsNotificationFactory, EnrollmentFactory, EnrollmentPeriodFactory,
-    StudentAssignmentFactory
+    StudentAssignmentFactory, StudentGroupAssigneeFactory, StudentGroupFactory
 )
 from users.tests.factories import StudentFactory, TeacherFactory, UserFactory
 
@@ -367,3 +371,47 @@ def test_student_assignment_execution_time():
     # Recalculate on removing solution through admin interface
     solution2.delete()
     assert student_assignment.execution_time == timedelta(hours=2)
+
+
+@pytest.mark.django_db
+def test_student_group_assignee_model_constraint_unique_teacher_per_student_group():
+    course = CourseFactory(group_mode=CourseGroupModes.MANUAL)
+    course_teacher1, course_teacher2 = CourseTeacherFactory.create_batch(2, course=course)
+    student_group1, student_group2 = StudentGroupFactory.create_batch(2, course=course)
+
+    StudentGroupAssigneeFactory(student_group=student_group1, assignee=course_teacher1)
+    StudentGroupAssigneeFactory(student_group=student_group1, assignee=course_teacher2)
+    StudentGroupAssigneeFactory(student_group=student_group2, assignee=course_teacher1)
+    # Create savepoint here or subsequent calls to db after IntegrityError will
+    # fail with TransactionManagementError
+    with transaction.atomic():
+        with pytest.raises(IntegrityError) as e:
+            StudentGroupAssigneeFactory(student_group=student_group1,
+                                        assignee=course_teacher1)
+
+
+@pytest.mark.django_db
+def test_student_group_assignee_constraint_unique_teacher_per_student_group_per_assignment():
+    course = CourseFactory(group_mode=CourseGroupModes.MANUAL)
+    course_teacher1, course_teacher2 = CourseTeacherFactory.create_batch(2, course=course)
+    assignment = AssignmentFactory(course=course)
+    student_group = StudentGroupFactory(course=course)
+
+    StudentGroupAssigneeFactory(student_group=student_group, assignee=course_teacher1)
+    # Create savepoint here or subsequent calls to db after IntegrityError will
+    # fail with TransactionManagementError
+    with transaction.atomic():
+        with pytest.raises(IntegrityError) as e:
+            StudentGroupAssigneeFactory(student_group=student_group,
+                                        assignee=course_teacher1)
+    StudentGroupAssigneeFactory(student_group=student_group, assignee=course_teacher2,
+                                assignment=assignment)
+    # Make sure course teacher assigned on course level
+    # could be "overridden" on assignment level
+    StudentGroupAssigneeFactory(student_group=student_group, assignee=course_teacher1,
+                                assignment=assignment)
+    # Make sure we can't add course teacher on assignment level more than once
+    with transaction.atomic():
+        with pytest.raises(IntegrityError) as e:
+            StudentGroupAssigneeFactory(student_group=student_group, assignee=course_teacher1,
+                                        assignment=assignment)
