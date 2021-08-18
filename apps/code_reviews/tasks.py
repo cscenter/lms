@@ -7,7 +7,9 @@ from django.conf import settings
 from code_reviews.api.gerrit import Gerrit
 from code_reviews.api.ldap import init_client
 from code_reviews.gerrit import get_or_create_change, list_change_files
-from code_reviews.ldap import get_ldap_username, get_password_hash, user_to_ldap_entry
+from code_reviews.ldap import (
+    get_ldap_password_hash, get_ldap_username, user_to_ldap_entry
+)
 from learning.models import AssignmentComment, AssignmentSubmissionTypes
 from users.models import User
 
@@ -43,7 +45,7 @@ def update_password_in_gerrit(*, user_id: int):
     except User.DoesNotExist:
         logger.warning(f"User with id={user_id} not found")
         return
-    password_hash = get_password_hash(user)
+    password_hash = get_ldap_password_hash(user.password)
     if not password_hash:
         logger.info(f"Empty hash for user_id={user_id}")
         return

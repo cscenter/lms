@@ -1,5 +1,5 @@
 import base64
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Union
 
 import ldif
 from ldap.dn import escape_dn_chars
@@ -11,6 +11,16 @@ from code_reviews.constants import GROUPS_IMPORT_TO_GERRIT
 from users.models import User
 
 
+def adapted_base64(data: bytes) -> bytes:
+    """
+    Adapted base64 encode is identical to general base64 encode except
+    that it uses '.' instead of '+', and omits trailing padding '=' and
+    whitespace.
+    """
+    encoded = base64.b64encode(data, altchars=b'./')
+    return encoded.rstrip(b"=\n")
+
+
 def get_ldap_username(user: User) -> str:
     """
     Portable Filename Character Set (according to POSIX.1-2017) is used for
@@ -20,15 +30,15 @@ def get_ldap_username(user: User) -> str:
     return user.email.replace("@", ".")
 
 
-def get_password_hash(user) -> bytes:
+def get_ldap_password_hash(password_hash: str) -> bytes:
     """
     Converts Django's password hash representation to LDAP compatible
     hasher format. Supports pbkdf2 hasher only.
     """
-    if not user.password:
+    if not password_hash:
         return b''
     # Could easily fail on tests since md5 hasher returns only 3 parameters
-    algorithm, iterations, salt, hash = user.password.split('$', 3)
+    algorithm, iterations, salt, digest = password_hash.split('$', 3)
     if algorithm == "pbkdf2_sha256":
         ldap_hasher_code = "{PBKDF2-SHA256}"
     elif algorithm == "pbkdf2_sha512":
@@ -37,10 +47,11 @@ def get_password_hash(user) -> bytes:
         ldap_hasher_code = "{PBKDF2-SHA1}"
     else:
         return b''
-    # Works like `passlib.utils.binary.ab64_encode` except
-    # converting "+" to "."
-    ab64_salt = base64.b64encode(salt.encode("utf-8")).rstrip(b"=\n")
-    h = f"{ldap_hasher_code}{iterations}${ab64_salt.decode('utf-8')}${hash}"
+    adapted_salt = adapted_base64(salt.encode("utf-8")).decode('ascii')
+    # Digest key is already base64 encoded, decode it first
+    raw_digest = base64.b64decode(digest)
+    adapted_hash = adapted_base64(raw_digest).decode('ascii')
+    h = f"{ldap_hasher_code}{iterations}${adapted_salt}${adapted_hash}"
     return h.encode("utf-8")
 
 
@@ -57,7 +68,7 @@ def user_to_ldap_entry(user: User, domain_component=settings.LDAP_DB_SUFFIX) -> 
     uid = get_ldap_username(user)
     # Attribute values of the DN should be escaped
     dn = f"uid={escape_dn_chars(uid)},ou=users,{domain_component}"
-    password_hash = get_password_hash(user)
+    password_hash = get_ldap_password_hash(user.password)
     return {
         # Escape special chars with one backslash
         'dn': dn,

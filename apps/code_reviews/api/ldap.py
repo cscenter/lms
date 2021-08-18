@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from typing import Dict, List, Tuple
 
 import ldap
+from ldap.dn import escape_dn_chars
 from ldap.modlist import addModlist
 
 from django.conf import settings
@@ -69,7 +70,7 @@ class LDAPClient:
         rootdn user. Uses sync method version for changing password.
         """
         try:
-            dn = f'uid={uid},ou=users,{self._suffix}'
+            dn = f'uid={escape_dn_chars(uid)},ou=users,{self._suffix}'
             self.connection.passwd_s(dn, old_password, new_password)
             return True
         except ldap.LDAPError as e:
@@ -81,7 +82,7 @@ class LDAPClient:
         Modify `userPassword` attribute in synchronous mode for provided user
         """
         try:
-            dn = f'uid={uid},ou=users,{self._suffix}'
+            dn = f'uid={escape_dn_chars(uid)},ou=users,{self._suffix}'
             mod_list = [(ldap.MOD_REPLACE, 'userPassword', password_hash)]
             self.connection.modify_s(dn, modlist=mod_list)
             return True
@@ -91,7 +92,7 @@ class LDAPClient:
 
     def modify_attribute(self, uid: str, name: str, value: bytes) -> bool:
         """Performs an LDAP modify operation on a user entry's attribute"""
-        dn = f'uid={uid},ou=users,{self._suffix}'
+        dn = f'uid={escape_dn_chars(uid)},ou=users,{self._suffix}'
         mod_list = [(ldap.MOD_REPLACE, name, value)]
         try:
             self.connection.modify_s(dn, modlist=mod_list)
