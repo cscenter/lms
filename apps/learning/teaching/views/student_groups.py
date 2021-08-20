@@ -19,7 +19,6 @@ from learning.teaching.forms import StudentGroupCreateForm
 from learning.teaching.utils import get_create_student_group_url, get_student_groups_url
 
 
-# FIXME: убедиться, что студенты попадают в группу "Без группы" при поступлении на курс с типом manual. НАписать тест, если такого нет
 class StudentGroupListView(PermissionRequiredMixin, CourseURLParamsMixin, ListView):
     template_name = "lms/teaching/student_groups/student_group_list.html"
     permission_required = ViewStudentGroup.name
@@ -47,12 +46,14 @@ class StudentGroupListView(PermissionRequiredMixin, CourseURLParamsMixin, ListVi
         return context
 
     def get_queryset(self):
+        # TODO: move to selectors
         student_group_assignees = Prefetch(
             'student_group_assignees',
             queryset=StudentGroupAssignee.objects.select_related('assignee')
         )
         return (StudentGroup.objects
                 .filter(course=self.course)
+                .select_related('branch__site')
                 .prefetch_related(student_group_assignees)
                 .order_by('name'))
 

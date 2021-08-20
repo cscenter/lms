@@ -7,7 +7,7 @@ from django.conf import settings
 
 from auth.permissions import Permission, add_perm
 from courses.models import (
-    Assignment, AssignmentSubmissionFormats, Course, StudentGroupTypes
+    Assignment, AssignmentSubmissionFormats, Course, CourseGroupModes, StudentGroupTypes
 )
 from learning.models import (
     AssignmentGroup, CourseInvitation, Enrollment, StudentAssignment, StudentGroup
@@ -411,6 +411,11 @@ class CreateStudentGroup(Permission):
     """Allows to create any student group."""
     name = "learning.create_student_group"
 
+    @staticmethod
+    @rules.predicate
+    def rule(user: User, course: Course):
+        return course.group_mode != CourseGroupModes.NO_GROUPS
+
 
 @add_perm
 class CreateStudentGroupAsTeacher(Permission):
@@ -421,6 +426,8 @@ class CreateStudentGroupAsTeacher(Permission):
     @staticmethod
     @rules.predicate
     def rule(user: User, course: Course):
+        if course.group_mode == CourseGroupModes.NO_GROUPS:
+            return False
         return user in course.teachers.all()
 
 

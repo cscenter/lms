@@ -20,7 +20,7 @@
           <div class="list-group">
             {% for student_group in student_group_list %}
               <a href="{{ student_group.get_absolute_url() }}" class="list-group-item">
-                <h4 class="list-group-item-heading">{{ student_group.name }}</h4>
+                <h4 class="list-group-item-heading">{{ student_group.name }}{% if student_group.branch %} &mdash; {{ student_group.branch.site.name }}{% endif %}</h4>
                 <span class="text-muted">
                   {% if student_group.student_group_assignees.all()|length > 1 %}Ответственные:{% else %}Ответственный:{% endif %}
                   {% for responsible_teacher in student_group.student_group_assignees.all() -%}
