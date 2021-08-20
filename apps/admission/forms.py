@@ -206,6 +206,7 @@ class InterviewCommentForm(forms.ModelForm):
         score_choices = (('', filters_settings.EMPTY_CHOICE_LABEL),
                          *interview.rating_system.choices)
         self.fields['score'].widget.choices = score_choices
+        self.fields['score'].choices = interview.rating_system.choices
         self.fields['text'].label = "Комментарий"
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
