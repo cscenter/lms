@@ -10,8 +10,26 @@ from learning.teaching.views import (
     StudentAssignmentCommentCreateView, StudentAssignmentDetailView
 )
 from learning.teaching.views import TimetableView as TeacherTimetable
+from learning.teaching.views.student_groups import (
+    StudentGroupCreateView, StudentGroupDeleteView, StudentGroupDetailView,
+    StudentGroupListView, StudentGroupTransferStudentToAnotherGroupView,
+    StudentGroupUpdateView
+)
 
 app_name = 'teaching'
+
+student_group_patterns = [
+    re_path(RE_COURSE_URI, include([
+        path('student-groups/', include([
+            path('', StudentGroupListView.as_view(), name='list'),
+            path('create/', StudentGroupCreateView.as_view(), name='create'),
+            path('<int:pk>/update/', StudentGroupUpdateView.as_view(), name='update'),
+            path('<int:pk>/delete/', StudentGroupDeleteView.as_view(), name='delete'),
+            path('<int:pk>/', StudentGroupDetailView.as_view(), name='detail'),
+            path('<int:group_pk>/enrollment/<int:pk>/student/<int:student_pk>/update/', StudentGroupTransferStudentToAnotherGroupView.as_view(), name='transfer_student'),
+        ])),
+    ])),
+]
 
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name='teaching:assignment_list', permanent=False), name='base'),
@@ -20,6 +38,7 @@ urlpatterns = [
     path('full-calendar/', CalendarFullView.as_view(), name='calendar_full'),
     path('courses/', include([
         path('', CourseListView.as_view(), name='course_list'),
+        path('', include((student_group_patterns, 'student_groups'))),
         # TODO: separate api views?
         path("news/<int:news_pk>/stats", CourseNewsUnreadNotificationsView.as_view(), name="course_news_unread"),
     ])),

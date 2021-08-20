@@ -1,0 +1,53 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 h2-and-buttons">
+        <h2>
+          <a href="{{ get_student_groups_url(course) }}"><span class="fa fa-angle-left"></span></a>
+          {{ student_group.name }}<br>
+          <small>Студенческая группа (<a href="{{ course.get_absolute_url() }}">{{ course.name }}, {{ course.semester }}</a>)</small>
+        </h2>
+        <div class="btn-toolbar">
+          {% if request.user.has_perm(permissions.update_student_group, student_group) %}
+            <a href="{{ student_group.get_update_url() }}" class="btn btn-primary" role="button">Редактировать</a>
+          {% endif %}
+          {% if request.user.has_perm(permissions.delete_student_group, student_group) %}
+            <a href="{{ student_group.get_delete_url() }}" class="btn btn-danger" role="button">Удалить</a>
+          {% endif %}
+        </div>
+        <hr>
+      </div>
+      <div id="teacher_list" class="col-xs-12">
+        <span><b>{% if assigned_teachers|length > 1 %}Ответственные:{% else %}Ответственный:{% endif %}</b></span>
+        {% for responsible_teacher in assigned_teachers -%}
+          {{ responsible_teacher.teacher.get_short_name() }}{% if not loop.last %}, {% endif %}
+        {%- else -%}
+          не назначен
+        {%- endfor %}
+      </div>
+      <div id="student_list" class="col-xs-12">
+        <h3 class="mb-15">Студенты</h3>
+        {% if student_profiles %}
+          <table class="table table-borderless">
+            {% for student_profile in student_profiles %}
+              <tr>
+                <td width="50%" class="align-middle">
+                  <a
+                    href="{{ student_profile.user.get_absolute_url() }}">{{ student_profile.user.get_full_name(last_name_first=True) }}</a>
+                </td>
+                <td>
+                  <a href="{{ student_profile.change_student_between_student_groups }}">Сменить группу</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+        {% else %}
+          В группе нет добавленных студентов.
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+{% endblock content %}

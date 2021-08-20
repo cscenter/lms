@@ -6,8 +6,12 @@ import rules
 from django.conf import settings
 
 from auth.permissions import Permission, add_perm
-from courses.models import Assignment, AssignmentSubmissionFormats, Course
-from learning.models import CourseInvitation, StudentAssignment, StudentGroup
+from courses.models import (
+    Assignment, AssignmentSubmissionFormats, Course, StudentGroupTypes
+)
+from learning.models import (
+    AssignmentGroup, CourseInvitation, Enrollment, StudentAssignment, StudentGroup
+)
 from learning.services import CourseRole, course_access_role, course_failed_by_student
 from learning.settings import StudentStatuses
 from users.models import StudentProfile, User
@@ -429,7 +433,7 @@ class ViewStudentGroup(Permission):
 
 @add_perm
 class ViewStudentGroupAsTeacher(Permission):
-    """Allows course teacher to view student group of this course."""
+    """Allows course teacher to view student group(s) of the course."""
 
     name = "teaching.view_student_group"
 
@@ -460,9 +464,15 @@ class UpdateStudentGroupAsTeacher(Permission):
 
 @add_perm
 class DeleteStudentGroup(Permission):
-    """Allows to delete any student group."""
+    """Allows to delete any manually created student group."""
 
     name = "learning.delete_student_group"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user: User, student_group: StudentGroup):
+        # FIXME: Allow curators to delete any group if it has no active enrollments
+        return student_group.type == StudentGroupTypes.MANUAL
 
 
 @add_perm
@@ -474,4 +484,17 @@ class DeleteStudentGroupAsTeacher(Permission):
     @staticmethod
     @rules.predicate
     def rule(user: User, student_group: StudentGroup):
-        return user in student_group.course.teachers.all()
+        if student_group.type != StudentGroupTypes.MANUAL:
+            return False
+        if user not in student_group.course.teachers.all():
+            return False
+        # FIXME: The main problem that requirements below are implicit. We can't show user tips what to do to meet the requirements. + db queries are duplicated in permissions check and action method
+        # Disallow student group deletion if any assignment already
+        # restricted to this student group
+        restricted_to = (AssignmentGroup.objects
+                         .filter(group=student_group))
+        if restricted_to.exists():
+            return False
+        active_students_in_group = (Enrollment.active
+                                    .filter(student_group=student_group))
+        return not active_students_in_group.exists()

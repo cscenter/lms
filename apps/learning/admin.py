@@ -1,3 +1,5 @@
+from modeltranslation.admin import TranslationAdmin
+
 from django.conf import settings
 from django.contrib import admin
 from django.db import models as db_models
@@ -8,15 +10,61 @@ from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from courses.models import CourseGroupModes
+from courses.models import CourseGroupModes, CourseTeacher
 from learning.models import (
-    CourseInvitation, GraduateProfile, Invitation, StudentAssignment
+    CourseInvitation, GraduateProfile, Invitation, StudentAssignment, StudentGroup,
+    StudentGroupAssignee
 )
 from users.models import StudentStatusLog
 
 from .models import AssignmentComment, Enrollment, Event
 from .services import StudentGroupService
 from .settings import StudentStatuses
+
+
+class CourseTeacherAdmin(BaseModelAdmin):
+    list_display = ('teacher', 'course')
+    list_select_related = ['course__meta_course', 'course__semester', 'teacher']
+    list_filter = [
+        ('course__semester', AdminRelatedDropdownFilter)
+    ]
+    search_fields = ('teacher__last_name', 'course__meta_course__name')
+    raw_id_fields = ('course', 'teacher')
+
+    def has_module_permission(self, request) -> bool:
+        """Hides module from the index page"""
+        return False
+
+
+class StudentGroupAssigneeInline(admin.TabularInline):
+    model = StudentGroupAssignee
+    list_display = ('assignee',)
+    fields = ('assignee',)
+    raw_id_fields = ('assignee',)
+    extra = 0
+
+
+class StudentGroupAdmin(TranslationAdmin, BaseModelAdmin):
+    list_display = ('name', 'type', 'course', 'main_branch')
+    list_select_related = [
+        'course__meta_course',
+        'course__semester',
+        'course__main_branch__city'
+    ]
+    list_filter = [
+        ('course__semester', AdminRelatedDropdownFilter),
+        'course__main_branch'
+    ]
+    search_fields = ['course__meta_course__name']
+    raw_id_fields = ('course',)
+
+    inlines = [
+        StudentGroupAssigneeInline,
+    ]
+
+    @meta(_("Branch"))
+    def main_branch(self, obj: StudentGroup):
+        return obj.course.main_branch.name
 
 
 class AssignmentCommentAdmin(BaseModelAdmin):
@@ -171,6 +219,8 @@ class InvitationAdmin(BaseModelAdmin):
         return mark_safe(f"<a target='_blank' href='{url}'>Смотреть на сайте</a>")
 
 
+admin.site.register(CourseTeacher, CourseTeacherAdmin)
+admin.site.register(StudentGroup, StudentGroupAdmin)
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(Invitation, InvitationAdmin)

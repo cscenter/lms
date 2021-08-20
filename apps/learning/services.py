@@ -2,9 +2,10 @@ import logging
 from datetime import timedelta
 from enum import Enum, auto
 from itertools import islice
-from typing import Iterable, List, Optional, Union
+from typing import Any, Iterable, List, Optional, Tuple, Union
 
 from django.contrib.sites.models import Site
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.db import router, transaction
 from django.db.models import (
@@ -18,15 +19,16 @@ from core.models import Branch
 from core.services import SoftDeleteService
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
+from core.typings import assert_never
 from courses.managers import CourseClassQuerySet
 from courses.models import (
     Assignment, AssignmentAttachment, Course, CourseClass, CourseGroupModes,
     CourseTeacher, StudentGroupTypes
 )
 from learning.models import (
-    AssignmentComment, AssignmentNotification, AssignmentSubmissionTypes,
-    CourseNewsNotification, Enrollment, Event, StudentAssignment, StudentGroup,
-    StudentGroupAssignee
+    AssignmentComment, AssignmentGroup, AssignmentNotification,
+    AssignmentSubmissionTypes, CourseClassGroup, CourseNewsNotification, Enrollment,
+    Event, StudentAssignment, StudentGroup, StudentGroupAssignee
 )
 from learning.settings import StudentStatuses
 from users.constants import Roles
@@ -137,9 +139,13 @@ class GroupEnrollmentKeyError(StudentGroupError):
 
 class StudentGroupService:
     @staticmethod
-    def add(course: Course, **attrs):
+    def create(course: Course, branch: Optional[Branch] = None,
+               **attrs: Any) -> StudentGroup:
         if course.group_mode == CourseGroupModes.BRANCH:
-            branch = attrs.pop('branch')
+            if not branch:
+                raise ValidationError(f"Branch is mandatory for {course.group_mode} course group mode")
+            if branch not in course.branches.all():
+                raise ValidationError(f"Branch {branch} must be a course branch", code='malformed')
             group, _ = (StudentGroup.objects.get_or_create(
                 course_id=course.pk,
                 type=StudentGroupTypes.BRANCH,
@@ -153,28 +159,64 @@ class StudentGroupService:
         elif course.group_mode == CourseGroupModes.MANUAL:
             group_name = attrs.pop('name', None)
             if not group_name:
-                raise StudentGroupError('Provide a unique name for group')
-            group, _ = (StudentGroup.objects.get_or_create(
+                raise ValidationError('Provide a unique name for group', code='required')
+            new_group = StudentGroup(
+                **attrs,
                 course_id=course.pk,
                 type=StudentGroupTypes.MANUAL,
-                name=group_name,
-                defaults=attrs))
-            return group
+                name=group_name)
+            new_group.full_clean()
+            new_group.save()
+            return new_group
         else:
-            raise StudentGroupError("Student group mode is not supported")
+            raise StudentGroupError(f"Course group mode {course.group_mode} does not support student groups")
 
-    @staticmethod
-    def remove(course: Course, instance):
-        if course.group_mode == CourseGroupModes.BRANCH:
-            assert isinstance(instance, Branch)
-            StudentGroup.objects.filter(course_id=course.pk,
-                                        branch_id=instance.pk).delete()
-        else:
-            StudentGroup.objects.filter(course_id=course.pk,
-                                        pk=instance.pk).delete()
+    @classmethod
+    def remove(cls, student_group: StudentGroup):
+        # If this is the only one group presented in assignment restriction
+        # settings after deleting it the assignment would be considered as
+        # "available to all" - that's not really what we want to achieve.
+        # The same is applied to CourseClass restriction settings.
+        in_assignment_settings = (AssignmentGroup.objects
+                                  .filter(group=student_group))
+        in_class_settings = (CourseClassGroup.objects
+                             .filter(group=student_group))
+        active_students = (Enrollment.active
+                           .filter(student_group=student_group))
+        if student_group.type == StudentGroupTypes.BRANCH:
+            cast_to_manual = (active_students.exists() or
+                              in_assignment_settings.exists() or
+                              in_class_settings.exists())
+            if cast_to_manual:
+                student_group.type = StudentGroupTypes.MANUAL
+                student_group.branch = None
+                student_group.save()
+            else:
+                cls._move_unenrolled_students_to_default_group(student_group)
+                student_group.delete()
+        elif student_group.type == StudentGroupTypes.MANUAL:
+            if active_students.exists():
+                raise ValidationError("Students are attached to the student group")
+            if in_assignment_settings.exists():
+                raise ValidationError("Student group is a part of assignment restriction settings")
+            if in_class_settings.exists():
+                raise ValidationError("Student group is a part of class restriction settings")
 
-    @staticmethod
-    def resolve(course: Course, student: User, site: Union[Site, int],
+            cls._move_unenrolled_students_to_default_group(student_group)
+            student_group.delete()
+
+    @classmethod
+    def _move_unenrolled_students_to_default_group(cls, student_group: StudentGroup):
+        """Transfers students who left the course to the default system group"""
+        default_group = cls.get_or_create_default_group(student_group.course)
+        (Enrollment.objects
+         .filter(course_id=student_group.course_id,
+                 is_deleted=True,
+                 student_group=student_group)
+         .update(student_group=default_group))
+
+    @classmethod
+    def resolve(cls, course: Course, student: User, site: Union[Site, int],
                 enrollment_key: str = None):
         """
         Returns the target or associated student group for the course. Assumed
@@ -193,11 +235,7 @@ class StudentGroupService:
             # interface without meeting the branch requirements. In that case
             # add them to the special group
             if student_group is None:
-                student_group, _ = StudentGroup.objects.get_or_create(
-                    course=course,
-                    type=StudentGroupTypes.SYSTEM,
-                    branch_id__isnull=True,
-                    defaults={"name_en": "Others", "name_ru": "Другие"})
+                student_group = cls.get_or_create_default_group(course)
             return student_group
         elif course.group_mode == CourseGroupModes.MANUAL:
             if enrollment_key:
@@ -208,20 +246,33 @@ class StudentGroupService:
                 except StudentGroup.DoesNotExist:
                     raise GroupEnrollmentKeyError
             else:
-                # Вытаскивать по факту из уже записанного?
-                student_group, _ = StudentGroup.objects.get_or_create(
-                    course=course,
-                    type=StudentGroupTypes.SYSTEM,
-                    branch_id__isnull=True,
-                    defaults={
-                        "name_en": "Without Group",
-                        "name_ru": "Без группы"
-                    })
+                student_group = cls.get_or_create_default_group(course)
                 return student_group
         raise GroupEnrollmentKeyError
 
+    @staticmethod
+    def get_or_create_default_group(course: Course) -> StudentGroup:
+        """
+        Logically this student group means "No Group" or NULL in terms of DB.
+
+        Each student must be associated with a student group, but it's
+        impossible to always know the target group.
+        E.g. on enrollment it's impossible to always know in advance the
+        target group or on deleting group student must be transferred
+        to some group to meet the requirements.
+        """
+        student_group, _ = StudentGroup.objects.get_or_create(
+            course=course,
+            type=StudentGroupTypes.SYSTEM,
+            branch_id__isnull=True,
+            defaults={
+                "name_en": "Others",
+                "name_ru": "Другие"
+            })
+        return student_group
+
     @classmethod
-    def get_choices(cls, course: Course):
+    def get_choices(cls, course: Course) -> List[Tuple[str, str]]:
         choices = []
         qs = StudentGroup.objects.filter(course=course).order_by('pk')
         groups = list(qs)
@@ -240,13 +291,32 @@ class StudentGroupService:
         return choices
 
     @staticmethod
-    def _get_choice_label(student_group, sites_count):
+    def _get_choice_label(student_group: StudentGroup, sites_count: int) -> str:
         if student_group.type == StudentGroupTypes.BRANCH and sites_count > 1:
             return f"{student_group.name} [{student_group.branch.site}]"
         return student_group.name
 
+    # FIXME: add test
     @staticmethod
-    def get_assignees(student_group,
+    def add_assignees(student_group: StudentGroup, *,
+                      assignment: Assignment = None,
+                      teachers: List[CourseTeacher]) -> None:
+        """Assigns new responsible teachers to the student group."""
+        new_objects = []
+        for teacher in teachers:
+            fields = {
+                "student_group": student_group,
+                "assignee": teacher,
+                "assignment": assignment if assignment else None
+            }
+            new_objects.append(StudentGroupAssignee(**fields))
+        # Validate records before call .bulk_create()
+        for a in new_objects:
+            a.full_clean()
+        StudentGroupAssignee.objects.bulk_create(new_objects)
+
+    @staticmethod
+    def get_assignees(student_group: StudentGroup,
                       assignment: Assignment = None) -> List[CourseTeacher]:
         default_and_overridden = Q(assignment__isnull=True)
         if assignment:
@@ -255,12 +325,28 @@ class StudentGroupService:
                          .filter(default_and_overridden,
                                  student_group=student_group)
                          .select_related('assignee__teacher'))
-        # Default values could be overwritten by assignment specific
+        # Teachers assigned for the particular assignment fully override
+        # default list of teachers assigned on the course level
         if any(ga.assignment_id is not None for ga in assignees):
             # Remove defaults
             assignees = [ga for ga in assignees if ga.assignment_id]
         filtered = [ga.assignee for ga in assignees]
         return filtered
+
+    # TODO: add test
+    @staticmethod
+    def get_student_profiles(student_group: StudentGroup) -> List[StudentProfile]:
+        """
+        Returns student profiles of users enrolled in the course.
+
+        Note:
+            Profiles are sorted by the student's last name.
+        """
+        return list(StudentProfile.objects
+                    .filter(enrollment__is_deleted=False,
+                            enrollment__student_group=student_group)
+                    .select_related('user')
+                    .order_by('user__last_name'))
 
 
 class AssignmentService:
@@ -469,7 +555,7 @@ class EnrollmentService:
         return f'{today}\n{reason_text}\n\n'
 
     @classmethod
-    def enroll(cls, student: StudentProfile, course: Course,
+    def enroll(cls, student_profile: StudentProfile, course: Course,
                reason_entry='', **attrs):
         if reason_entry:
             new_record = cls._format_reason_record(reason_entry, course)
@@ -480,8 +566,8 @@ class EnrollmentService:
             # At this moment enrollment instance not in a consistent state -
             # it has no student group, etc
             enrollment, created = (Enrollment.objects.get_or_create(
-                student=student.user, course=course,
-                defaults={'is_deleted': True, 'student_profile': student}))
+                student=student_profile.user, course=course,
+                defaults={'is_deleted': True, 'student_profile': student_profile}))
             if not enrollment.is_deleted:
                 raise AlreadyEnrolled
             # Use sharable lock for concurrent enrollments if necessary to
@@ -498,7 +584,7 @@ class EnrollmentService:
                 filters.append(Q(course__capacity__gt=learners_count))
             attrs.update({
                 "is_deleted": False,
-                "student_profile": student,
+                "student_profile": student_profile,
                 "reason_entry": reason_entry
             })
             updated = (Enrollment.objects

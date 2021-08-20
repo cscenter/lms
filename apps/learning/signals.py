@@ -2,11 +2,12 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 from courses.models import (
-    Assignment, Course, CourseBranch, CourseGroupModes, CourseNews, CourseTeacher
+    Assignment, Course, CourseBranch, CourseGroupModes, CourseNews, CourseTeacher,
+    StudentGroupTypes
 )
 from learning.models import (
     AssignmentComment, AssignmentNotification, AssignmentSubmissionTypes,
-    CourseNewsNotification, Enrollment, StudentAssignment
+    CourseNewsNotification, Enrollment, StudentAssignment, StudentGroup
 )
 from learning.services import StudentGroupService, update_course_learners_count
 # FIXME: post_delete нужен? Что лучше - удалять StudentGroup + SET_NULL у Enrollment или делать soft-delete?
@@ -25,13 +26,18 @@ def manage_student_group_for_course_root_branch(sender, instance, created,
 def create_student_group_from_course_branch(sender, instance: CourseBranch,
                                             created, *args, **kwargs):
     if created and instance.course.group_mode == CourseGroupModes.BRANCH:
-        StudentGroupService.add(instance.course, branch=instance.branch)
+        StudentGroupService.create(instance.course, branch=instance.branch)
 
 
 @receiver(post_delete, sender=CourseBranch)
 def delete_student_group_if_course_branch_deleted(sender, instance: CourseBranch,
                                                   *args, **kwargs):
-    StudentGroupService.remove(instance.course, instance.branch)
+    student_groups = (StudentGroup.objects
+                      .filter(course=instance.course,
+                              branch=instance.branch,
+                              type=StudentGroupTypes.BRANCH))
+    for student_group in student_groups:
+        StudentGroupService.remove(student_group)
 
 
 @receiver(post_save, sender=Enrollment)

@@ -6,7 +6,9 @@ from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.utils import instance_memoize
-from courses.models import Course, CourseBranch, CourseGroupModes, CourseTeacher
+from courses.models import (
+    Course, CourseBranch, CourseGroupModes, CourseTeacher, StudentGroupTypes
+)
 from courses.services import CourseService
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from learning.models import EnrollmentPeriod, StudentAssignment
@@ -37,7 +39,7 @@ def delete_enrollment_cache(user: User, course: Course):
 
 
 @pytest.mark.django_db
-def test_access_to_view_student_group():
+def test_view_student_group():
     user = UserFactory()
     teacher = TeacherFactory()
     curator = CuratorFactory()
@@ -59,7 +61,7 @@ def test_access_to_view_student_group():
 
 
 @pytest.mark.django_db
-def test_access_to_update_student_group():
+def test_update_student_group():
     user = UserFactory()
     teacher = TeacherFactory()
     curator = CuratorFactory()
@@ -81,29 +83,34 @@ def test_access_to_update_student_group():
 
 
 @pytest.mark.django_db
-def test_access_to_delete_student_group():
+def test_delete_student_group():
     user = UserFactory()
     teacher = TeacherFactory()
     curator = CuratorFactory()
     student = StudentFactory()
-    s = SemesterFactory.create_current(for_branch=Branches.SPB)
-    course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
-    sg1 = StudentGroupFactory.create(course=course)
-    sg2 = StudentGroupFactory.create()
-    EnrollmentFactory.create(student=student, course=course, student_group=sg1)
-
+    semester = SemesterFactory.create_current(for_branch=Branches.SPB)
+    course1, course2 = CourseFactory.create_batch(2, semester=semester, teachers=[teacher])
+    sg1 = StudentGroupFactory(course=course1, type=StudentGroupTypes.MANUAL)
+    sg2 = StudentGroupFactory(course=course2, type=StudentGroupTypes.SYSTEM)
+    sg3 = StudentGroupFactory(type=StudentGroupTypes.MANUAL)
+    EnrollmentFactory(student=student, course=course1, student_group=sg1)
     assert DeleteStudentGroup.name in perm_registry
     assert DeleteStudentGroupAsTeacher.name in perm_registry
     assert not user.has_perm(DeleteStudentGroup.name, sg1)
     assert not student.has_perm(DeleteStudentGroup.name, sg1)
-    assert teacher.has_perm(DeleteStudentGroup.name, sg1)
-    assert not teacher.has_perm(DeleteStudentGroup.name, sg2)
+    assert not teacher.has_perm(DeleteStudentGroup.name, sg1), "has active student"
+    assert not teacher.has_perm(DeleteStudentGroup.name, sg2), "unsupported group mode"
+    assert not curator.has_perm(DeleteStudentGroup.name, sg2)
+    sg2.type = StudentGroupTypes.MANUAL
+    sg2.save()
+    assert teacher.has_perm(DeleteStudentGroup.name, sg2)
+    assert not teacher.has_perm(DeleteStudentGroup.name, sg3), "not a course teacher"
     assert curator.has_perm(DeleteStudentGroup.name, sg1)
     assert curator.has_perm(DeleteStudentGroup.name, sg2)
 
 
 @pytest.mark.django_db
-def test_access_to_create_student_group():
+def test_create_student_group():
     user = UserFactory()
     teacher = TeacherFactory()
     curator = CuratorFactory()

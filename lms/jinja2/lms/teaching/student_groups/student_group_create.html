@@ -1,0 +1,14 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block content %}
+  {% set course = form.instance.course %}
+  <div class="container">
+    <h2 class="content-title mb-20">
+      Добавление студенческой группы<br>
+      <small><a href="{{ course.get_absolute_url() }}">{{ course.name }}, {{ course.semester }}</a></small>
+    </h2>
+    <form method="POST">
+      {{ crispy(form) }}
+    </form>
+  </div>
+{% endblock content %}

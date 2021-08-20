@@ -1,15 +1,25 @@
 import pytest
+from bs4 import BeautifulSoup
 
+from django.utils.encoding import smart_bytes
+
+from auth.mixins import PermissionRequiredMixin
+from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.urls import reverse
-from courses.models import CourseBranch, CourseTeacher, StudentGroupTypes
+from courses.models import (
+    CourseBranch, CourseGroupModes, CourseTeacher, StudentGroupTypes
+)
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from learning.models import Enrollment, StudentAssignment, StudentGroup
+from learning.permissions import DeleteStudentGroup, ViewStudentGroup
+from learning.services import EnrollmentService, StudentGroupService
 from learning.settings import Branches, GradeTypes
+from learning.teaching.utils import get_student_groups_url
 from learning.tests.factories import (
     AssignmentCommentFactory, CourseInvitationFactory, EnrollmentFactory,
-    StudentAssignmentFactory, StudentGroupAssigneeFactory
+    StudentAssignmentFactory, StudentGroupAssigneeFactory, StudentGroupFactory
 )
 from users.tests.factories import (
     CuratorFactory, InvitedStudentFactory, StudentFactory, StudentProfileFactory,
@@ -52,17 +62,18 @@ def test_upsert_student_group_from_additional_branch(settings):
         field_name = f"name_{lang}"
         assert getattr(sg2, field_name) == getattr(branch_nsk, field_name)
     assert {sg1.branch_id, sg2.branch_id} == {branch_spb.pk, branch_nsk.pk}
-    # Update by removing branch
-    branch = BranchFactory()
+    # Remove course branch and add the new one
     course.branches.remove(branch_nsk)
+    groups = StudentGroup.objects.filter(course=course)
+    assert groups.count() == 2
+    assert StudentGroupService.get_or_create_default_group(course) in groups
+    branch = BranchFactory()
     CourseBranch(course=course, branch=branch).save()
     groups = StudentGroup.objects.filter(course=course)
-    assert len(groups) == 2
-    sg1, sg2 = groups
-    if sg1.branch != branch_spb:
-        sg1, sg2 = sg2, sg1
-    assert sg1.branch == branch_spb
-    assert sg2.branch == branch
+    assert len(groups) == 3
+    group_branches = [sg.branch for sg in groups]
+    assert branch_spb in group_branches
+    assert branch in group_branches
 
 
 @pytest.mark.django_db
@@ -206,3 +217,96 @@ def test_auto_assign_teacher_to_student_assignment():
     student_assignment.save()
     comment3 = AssignmentCommentFactory(student_assignment=student_assignment,
                                         author=student)
+
+
+@pytest.mark.django_db
+def test_view_student_group_list_permissions(client, lms_resolver):
+    teacher = TeacherFactory()
+    student = StudentFactory()
+    course = CourseFactory(teachers=[teacher])
+    url = get_student_groups_url(course)
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == ViewStudentGroup.name
+    assert resolver.func.view_class.permission_required in perm_registry
+    client.login(teacher)
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_view_student_group_list_smoke(client, lms_resolver):
+    teacher = TeacherFactory()
+    course = CourseFactory.create(teachers=[teacher],
+                                  group_mode=CourseGroupModes.MANUAL)
+    student_group1 = StudentGroupFactory(course=course)
+    student_group2 = StudentGroupFactory(course=course)
+
+    client.login(teacher)
+    url = get_student_groups_url(course)
+    response = client.get(url)
+    assert smart_bytes(student_group1.name) in response.content
+    assert smart_bytes(student_group2.name) in response.content
+
+
+@pytest.mark.django_db
+def test_view_student_group_detail_permissions(client, lms_resolver):
+    teacher = TeacherFactory()
+    student = StudentFactory()
+    course = CourseFactory(teachers=[teacher])
+    student_group = StudentGroupFactory(course=course)
+    student_group_other = StudentGroupFactory()
+    url = student_group.get_absolute_url()
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == ViewStudentGroup.name
+    assert resolver.func.view_class.permission_required in perm_registry
+    client.login(teacher)
+    response = client.get(url)
+    assert response.status_code == 200
+    # Student group PK is not associated with the course from friendly URL
+    url = reverse("teaching:student_groups:detail", kwargs={
+        "pk": student_group_other.pk,
+        **course.url_kwargs
+    })
+    response = client.get(url)
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_view_student_group_detail_smoke(client):
+    teacher = TeacherFactory()
+    student1, student2 = StudentFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    student_group1 = StudentGroupFactory(course=course)
+    EnrollmentFactory(student=student1, course=course, student_group=student_group1)
+    course_teacher = CourseTeacher.objects.filter(course=course).first()
+    StudentGroupAssigneeFactory(assignee=course_teacher, student_group=student_group1)
+    client.login(teacher)
+    url = student_group1.get_absolute_url()
+    response = client.get(url)
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert student_group1.name in soup.find('h2').text
+    assert smart_bytes(student1.last_name) in response.content
+    assert smart_bytes(student2.last_name) not in response.content
+    assert smart_bytes(teacher.last_name) in response.content
+
+
+@pytest.mark.django_db
+def test_view_student_group_delete(client):
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    student_group = StudentGroupFactory(course=course)
+    assert teacher.has_perm(DeleteStudentGroup.name, student_group)
+    enrollment = EnrollmentFactory(course=course, student_group=student_group)
+    EnrollmentService.leave(enrollment)
+    assert Enrollment.active.filter(course=course).count() == 0
+    assert Enrollment.objects.filter(course=course).count() == 1
+    # Student must be moved to the default course if student's course group
+    # was deleted after student left the course
+    StudentGroupService.remove(student_group)
+    enrollment.refresh_from_db()
+    assert enrollment.student_group == StudentGroupService.get_or_create_default_group(course)
+    # Re-enter the course
+    EnrollmentService.enroll(enrollment.student_profile, course)
+    enrollment.refresh_from_db()

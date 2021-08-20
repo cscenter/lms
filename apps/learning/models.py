@@ -45,9 +45,10 @@ from users.thumbnails import ThumbnailMixin, get_stub_factory, get_thumbnail
 logger = logging.getLogger(__name__)
 
 
+# FIXME: add constraint: 1 system group per course
 class StudentGroup(TimeStampedModel):
     type = models.CharField(
-        verbose_name=_("Type"),
+        verbose_name=_("Group Type"),
         max_length=100,
         choices=StudentGroupTypes.choices,
         default=StudentGroupTypes.BRANCH)
@@ -74,7 +75,8 @@ class StudentGroup(TimeStampedModel):
         null=True)
     enrollment_key = models.CharField(
         verbose_name=_("Enrollment key"),
-        max_length=128)
+        max_length=128,
+        blank=True)
 
     class Meta:
         verbose_name = _("Student Group")
@@ -89,6 +91,33 @@ class StudentGroup(TimeStampedModel):
             self.enrollment_key = token_urlsafe(18)  # 24 chars in base64
         super().save(**kwargs)
 
+    def clean(self):
+        if self.course_id and self.name:
+            groups_with_the_same_name = (StudentGroup.objects
+                                         .filter(name__iexact=self.name,
+                                                 course_id=self.course_id))
+            if groups_with_the_same_name.exists():
+                msg = _("A student group with the same name already exists in the course")
+                raise ValidationError(msg, code='unique')
+
+    def get_absolute_url(self):
+        return reverse("teaching:student_groups:detail", kwargs={
+            "pk": self.pk,
+            **self.course.url_kwargs
+        })
+
+    def get_update_url(self):
+        return reverse("teaching:student_groups:update", kwargs={
+            "pk": self.pk,
+            **self.course.url_kwargs
+        })
+
+    def get_delete_url(self):
+        return reverse("teaching:student_groups:delete", kwargs={
+            "pk": self.pk,
+            **self.course.url_kwargs
+        })
+
 
 class StudentGroupAssignee(models.Model):
     """
@@ -99,6 +128,7 @@ class StudentGroupAssignee(models.Model):
     student_group = models.ForeignKey(
         StudentGroup,
         verbose_name=_("Student Group"),
+        related_name="student_group_assignees",
         on_delete=models.CASCADE)
     assignee = models.ForeignKey(
         'courses.CourseTeacher',
@@ -126,12 +156,26 @@ class StudentGroupAssignee(models.Model):
         return "[StudentGroupAssignee] group: {} user: {} assignment: {}".format(
             self.student_group, self.assignee, self.assignment)
 
+    def clean(self):
+        if (self.assignee_id and self.student_group_id and
+                self.assignee.course_id != self.student_group.course_id):
+            raise ValidationError(_('User is not a course teacher of the selected student group'))
+        if (self.assignment_id and self.student_group_id and
+                self.assignment.course_id != self.student_group.course_id):
+            msg = _('Assignment was not found among the course assignments for the selected student group.')
+            raise ValidationError(msg)
+
 
 class AssignmentGroup(models.Model):
+    """
+    Course assignment can be restricted to a subset of student groups
+    available in the course. AssignmentGroup model stores these settings.
+    """
     assignment = models.ForeignKey(
         'courses.Assignment',
         verbose_name=_("Assignment"),
         on_delete=models.CASCADE)
+    # TODO: validate assignment.course_id == group.course_id
     group = models.ForeignKey(
         StudentGroup,
         verbose_name=_("Group"),

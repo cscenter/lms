@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Any, Dict
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from django_filters.views import FilterMixin
@@ -40,6 +41,7 @@ from learning.permissions import (
 )
 from learning.services import AssignmentService, get_teacher_classes
 from learning.teaching.filters import AssignmentStudentsFilter
+from learning.teaching.utils import get_student_groups_url
 from learning.utils import humanize_duration
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView
@@ -276,7 +278,7 @@ class CalendarPersonalView(CalendarFullView):
 class CourseListView(TeacherOnlyMixin, generic.ListView):
     model = Course
     context_object_name = 'course_list'
-    template_name = "learning/teaching/course_list.html"
+    template_name = "lms/teaching/course_list.html"
 
     def get_queryset(self):
         return (Course.objects
@@ -284,6 +286,11 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
                 .select_related('meta_course', 'semester')
                 .prefetch_related('teachers')
                 .order_by('-semester__index', 'meta_course__name'))
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context['get_student_groups_url'] = get_student_groups_url
+        return context
 
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<

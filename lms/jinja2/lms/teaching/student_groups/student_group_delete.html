@@ -1,0 +1,16 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block content %}
+  {% set course = student_group.course %}
+  <div class="container">
+    <h2 class="content-title mb-20">
+      Удаление студенческой группы «{{ student_group.name }}»<br>
+      <small><a href="{{ course.get_absolute_url() }}">{{ course.name }}, {{ course.semester }}</a></small>
+    </h2>
+    <form method="POST">
+      {% csrf_token %}
+      <input type="submit" class="btn btn-danger" value="Удалить">
+      <button type="button" class="btn" onclick="window.history.go(-1);">Отмена</button>
+    </form>
+  </div>
+{% endblock content %}

@@ -2,6 +2,8 @@ from datetime import timedelta
 
 import pytest
 
+from django.core.exceptions import ValidationError
+
 from core.tests.factories import BranchFactory, SiteFactory
 from core.tests.settings import ANOTHER_DOMAIN, ANOTHER_DOMAIN_ID, TEST_DOMAIN
 from courses.models import (
@@ -14,7 +16,7 @@ from learning.models import (
     AssignmentNotification, Enrollment, StudentAssignment, StudentGroup
 )
 from learning.services import (
-    AssignmentService, GroupEnrollmentKeyError, StudentGroupService,
+    AssignmentService, GroupEnrollmentKeyError, StudentGroupError, StudentGroupService,
     StudentProfileError, create_notifications_about_new_submission,
     create_student_profile
 )
@@ -81,6 +83,44 @@ def test_delete_student_profile():
     assert UserGroup.objects.filter(user=user).count() == 1
     permission_group = UserGroup.objects.get(user=user)
     assert permission_group.role == StudentTypes.to_permission_role(StudentTypes.INVITED)
+
+
+@pytest.mark.django_db
+def test_student_group_service_create_no_groups_mode(settings):
+    course = CourseFactory(group_mode=CourseGroupModes.NO_GROUPS)
+    with pytest.raises(StudentGroupError) as e:
+        StudentGroupService.create(course, branch=course.main_branch)
+
+
+@pytest.mark.django_db
+def test_student_group_service_create_with_branch_mode(settings):
+    branch1, branch2 = BranchFactory.create_batch(2)
+    course = CourseFactory(main_branch=branch1,
+                           group_mode=CourseGroupModes.BRANCH)
+    with pytest.raises(ValidationError) as e:
+        StudentGroupService.create(course)
+    with pytest.raises(ValidationError) as e:
+        StudentGroupService.create(course, branch=branch2)
+    assert e.value.code == 'malformed'
+    student_group1 = StudentGroupService.create(course, branch=branch1)
+    assert list(StudentGroup.objects.all()) == [student_group1]
+    StudentGroupService.create(course, branch=branch1)  # repeat
+    assert StudentGroup.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_student_group_service_create_manual_group(settings):
+    course1, course2 = CourseFactory.create_batch(2, group_mode=CourseGroupModes.MANUAL)
+    # Empty group name
+    with pytest.raises(ValidationError) as e:
+        StudentGroupService.create(course1)
+    assert e.value.code == 'required'
+    student_group = StudentGroupService.create(course1, name='test')
+    assert list(StudentGroup.objects.all()) == [student_group]
+    # Non unique student group name for the course
+    with pytest.raises(ValidationError) as e:
+        StudentGroupService.create(course1, name='test')
+    StudentGroupService.create(course2, name='test')
 
 
 @pytest.mark.django_db
