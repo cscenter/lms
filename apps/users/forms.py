@@ -84,7 +84,7 @@ class CertificateOfParticipationCreateForm(forms.ModelForm):
 class UserCreationForm(_UserCreationForm):
     class Meta:
         model = User
-        fields = ('username', 'email', 'branch', 'gender')
+        fields = ('username', 'email', 'branch', 'gender', 'time_zone')
 
 
 class UserChangeForm(_UserChangeForm):
