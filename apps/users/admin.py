@@ -90,7 +90,7 @@ class UserAdmin(_UserAdmin):
         (None, {
             'classes': ('wide',),
             'fields': ('username', 'email', 'password1', 'password2',
-                       'gender', 'branch'),
+                       'gender', 'time_zone', 'branch'),
         }),
     )
     form = UserChangeForm
