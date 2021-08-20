@@ -141,9 +141,9 @@ class StudentGroupService:
     @staticmethod
     def create(course: Course, branch: Optional[Branch] = None,
                **attrs: Any) -> StudentGroup:
-        if course.group_mode == CourseGroupModes.BRANCH:
-            if not branch:
-                raise ValidationError(f"Branch is mandatory for {course.group_mode} course group mode")
+        if course.group_mode == CourseGroupModes.NO_GROUPS:
+            raise StudentGroupError(f"Course group mode {course.group_mode} does not support student groups")
+        if branch is not None:
             if branch not in course.branches.all():
                 raise ValidationError(f"Branch {branch} must be a course branch", code='malformed')
             group, _ = (StudentGroup.objects.get_or_create(
@@ -156,7 +156,7 @@ class StudentGroupService:
                     **attrs,
                 }))
             return group
-        elif course.group_mode == CourseGroupModes.MANUAL:
+        else:
             group_name = attrs.pop('name', None)
             if not group_name:
                 raise ValidationError('Provide a unique name for group', code='required')
@@ -168,8 +168,6 @@ class StudentGroupService:
             new_group.full_clean()
             new_group.save()
             return new_group
-        else:
-            raise StudentGroupError(f"Course group mode {course.group_mode} does not support student groups")
 
     @classmethod
     def remove(cls, student_group: StudentGroup):
