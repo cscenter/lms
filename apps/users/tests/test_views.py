@@ -2,6 +2,7 @@ import copy
 
 import factory
 import pytest
+import pytz
 from bs4 import BeautifulSoup
 
 from django.conf import settings
@@ -183,6 +184,7 @@ def test_duplicate_check(client):
     form_data = {'username': user.username,
                  'email': user.email,
                  'gender': GenderTypes.MALE,
+                 'time_zone': pytz.utc,
                  'branch': branch.pk,
                  'password1': "test123foobar@!",
                  'password2': "test123foobar@!"}
