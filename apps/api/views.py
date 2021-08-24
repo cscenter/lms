@@ -50,5 +50,4 @@ def exception_handler(exc, context):
 class APIBaseView(ApiErrorsMixin, APIView):
     # TODO: remove when it will be safe to enable this handler in rest settings
     def get_exception_handler(self):
-        from api.views import exception_handler
         return exception_handler
