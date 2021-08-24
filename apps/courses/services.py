@@ -5,6 +5,7 @@ from babel.dates import get_timezone_location
 from courses.constants import TeacherRoles
 from courses.models import Course, CourseBranch, CourseReview
 from courses.utils import get_terms_in_range
+from learning.models import StudentGroup
 
 
 def group_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
@@ -97,6 +98,15 @@ class CourseService:
                 label = get_timezone_location(tz, locale=locale, return_city=True)
                 time_zones.add((str(tz), label))
         return list(time_zones)
+
+    @staticmethod
+    def get_student_groups(course: Course) -> List[StudentGroup]:
+        student_groups = list(StudentGroup.objects
+                              .filter(course=course)
+                              .order_by('pk'))
+        for s in student_groups:
+            s.course = course
+        return student_groups
 
 
 def get_teacher_branches(user, start_date, end_date):
