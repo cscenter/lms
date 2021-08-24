@@ -19,16 +19,19 @@ class Permission(BasePermission):
 
     def has_permission(self, request, view) -> bool:
         """
-        Django Rest Framework calls this for each view in `dispatch` method
+        Django Rest Framework internally calls this method in
+        `APIView.dispatch` method.
         """
         return True
 
     def has_object_permission(self, request, view, obj) -> bool:
         """
-        Will be called by DRF in `get_object` method.
+        This method called by Django Rest Framework in
+        `GenericAPIView.get_object` method.
 
-        Some permissions implicitly considered as `always True` and
-        haven't attached predicate rule
+        Carefully use DRF generic views with `APIPermissionRequiredMixin` to
+        avoid additional db hits.
+        XXX: consider to not use generic views at all for the new code.
         """
         return request.user.has_perm(self.name, obj)
 
