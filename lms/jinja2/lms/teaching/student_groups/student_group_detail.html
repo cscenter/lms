@@ -6,7 +6,7 @@
       <div class="col-xs-12 h2-and-buttons">
         <h2>
           <a href="{{ get_student_groups_url(course) }}"><span class="fa fa-angle-left"></span></a>
-          {{ student_group.name }}<br>
+          {{ student_group.get_name() }}<br>
           <small>Студенческая группа (<a href="{{ course.get_absolute_url() }}">{{ course.name }}, {{ course.semester }}</a>)</small>
         </h2>
         <div class="btn-toolbar">
@@ -33,12 +33,12 @@
           <table class="table table-borderless">
             {% for student_profile in student_profiles %}
               <tr>
-                <td width="50%" class="align-middle">
+                <td style="width: 40px;">
+                  <span class="text-muted">{{ loop.index }}</span>
+                </td>
+                <td class="align-middle">
                   <a
                     href="{{ student_profile.user.get_absolute_url() }}">{{ student_profile.user.get_full_name(last_name_first=True) }}</a>
-                </td>
-                <td>
-                  <a href="{{ student_profile.change_student_between_student_groups }}">Сменить группу</a>
                 </td>
               </tr>
             {% endfor %}

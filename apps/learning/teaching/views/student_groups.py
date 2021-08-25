@@ -1,7 +1,9 @@
 from typing import Any
 
-from vanilla import CreateView, DeleteView, DetailView, ListView, TemplateView
+from vanilla import CreateView, DeleteView, DetailView, ListView, UpdateView
 
+from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Prefetch
 from django.http import HttpResponseRedirect
@@ -15,7 +17,7 @@ from learning.permissions import (
     CreateStudentGroup, DeleteStudentGroup, UpdateStudentGroup, ViewStudentGroup
 )
 from learning.services import StudentGroupService
-from learning.teaching.forms import StudentGroupCreateForm
+from learning.teaching.forms import StudentGroupForm, StudentGroupStudentsTransferForm
 from learning.teaching.utils import get_create_student_group_url, get_student_groups_url
 
 
@@ -97,7 +99,7 @@ class StudentGroupCreateView(PermissionRequiredMixin, CourseURLParamsMixin, Crea
         return self.course
 
     def get_form(self, data=None, files=None, **kwargs):
-        return StudentGroupCreateForm(self.course, data=data, files=files, **kwargs)
+        return StudentGroupForm(self.course, data=data, files=files, **kwargs)
 
     def form_valid(self, form):
         with transaction.atomic():
@@ -110,8 +112,49 @@ class StudentGroupCreateView(PermissionRequiredMixin, CourseURLParamsMixin, Crea
         return HttpResponseRedirect(redirect_to)
 
 
-class StudentGroupUpdateView(TemplateView):
-    template_name = "stub template path"
+class StudentGroupUpdateView(PermissionRequiredMixin, CourseURLParamsMixin, UpdateView):
+    template_name = "lms/teaching/student_groups/student_group_update.html"
+    permission_required = UpdateStudentGroup.name
+    student_group: StudentGroup
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        queryset = (StudentGroup.objects
+                    .filter(pk=kwargs['pk'],
+                            course=self.course))
+        self.student_group = get_object_or_404(queryset)
+        self.student_group.course = self.course
+
+    def get_permission_object(self):
+        return self.student_group
+
+    def get_object(self):
+        return self.student_group
+
+    def get_form(self, data=None, files=None, **kwargs):
+        responsible_teachers = StudentGroupService.get_assignees(self.student_group)
+        if responsible_teachers:
+            kwargs["initial"] = {"assignee": responsible_teachers[0]}
+        return StudentGroupForm(self.course, data=data, files=files, **kwargs)
+
+    def form_valid(self, form):
+        with transaction.atomic():
+            student_group = self.student_group
+            StudentGroupService.update(student_group, name=form.cleaned_data['name'])
+            assignee = form.cleaned_data.get('assignee')
+            responsible_teachers = [assignee] if assignee else []
+            StudentGroupService.update_assignees(student_group,
+                                                 teachers=responsible_teachers)
+        redirect_to = self.student_group.get_absolute_url()
+        return HttpResponseRedirect(redirect_to)
+
+    def get_context_data(self, **kwargs: Any):
+        context = {
+            'transfer_form': StudentGroupStudentsTransferForm(self.student_group),
+            'student_profiles': StudentGroupService.get_student_profiles(self.student_group),
+            **kwargs
+        }
+        return context
 
 
 class StudentGroupDeleteView(PermissionRequiredMixin, CourseURLParamsMixin, DeleteView):
@@ -139,10 +182,9 @@ class StudentGroupDeleteView(PermissionRequiredMixin, CourseURLParamsMixin, Dele
 
     def post(self, request, *args, **kwargs):
         student_group = self.get_object()
-        StudentGroupService.remove(student_group)
+        try:
+            StudentGroupService.remove(student_group)
+        except ValidationError as e:
+            messages.error(request, str(e))
         redirect_to = get_student_groups_url(self.course)
         return HttpResponseRedirect(redirect_to)
-
-
-class StudentGroupTransferStudentToAnotherGroupView(TemplateView):
-    template_name = "stub template path"

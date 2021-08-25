@@ -19,12 +19,13 @@ from core.models import Branch
 from core.services import SoftDeleteService
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
-from core.typings import assert_never
+from core.utils import bucketize
 from courses.managers import CourseClassQuerySet
 from courses.models import (
     Assignment, AssignmentAttachment, Course, CourseClass, CourseGroupModes,
     CourseTeacher, StudentGroupTypes
 )
+from courses.services import CourseService
 from learning.models import (
     AssignmentComment, AssignmentGroup, AssignmentNotification,
     AssignmentSubmissionTypes, CourseClassGroup, CourseNewsNotification, Enrollment,
@@ -169,6 +170,14 @@ class StudentGroupService:
             new_group.save()
             return new_group
 
+    @staticmethod
+    def update(student_group: StudentGroup, *, name: str):
+        student_group.name = name
+        # Name uniqueness must be avoided for branch student group type,
+        # but it's not allowed to update this type of groups right now
+        student_group.full_clean()
+        student_group.save()
+
     @classmethod
     def remove(cls, student_group: StudentGroup):
         # If this is the only one group presented in assignment restriction
@@ -181,6 +190,7 @@ class StudentGroupService:
                              .filter(group=student_group))
         active_students = (Enrollment.active
                            .filter(student_group=student_group))
+        # XXX: This action will be triggered after removing course branch
         if student_group.type == StudentGroupTypes.BRANCH:
             cast_to_manual = (active_students.exists() or
                               in_assignment_settings.exists() or
@@ -272,29 +282,19 @@ class StudentGroupService:
     @classmethod
     def get_choices(cls, course: Course) -> List[Tuple[str, str]]:
         choices = []
-        qs = StudentGroup.objects.filter(course=course).order_by('pk')
-        groups = list(qs)
-        sites_count = 1
+        student_groups = CourseService.get_student_groups(course)
+        sites = set()
         if course.group_mode == CourseGroupModes.BRANCH:
-            sites = set()
-            for g in groups:
-                # Special case when student group manually added in admin
+            for g in student_groups:
                 if g.branch_id:
                     g.branch = Branch.objects.get_by_pk(g.branch_id)
                     sites.add(g.branch.site_id)
-            sites_count = len(sites)
-        for g in groups:
-            label = cls._get_choice_label(g, sites_count)
+        sites_count = len(sites)
+        for g in student_groups:
+            label = g.get_name(branch_details=sites_count > 1)
             choices.append((str(g.pk), label))
         return choices
 
-    @staticmethod
-    def _get_choice_label(student_group: StudentGroup, sites_count: int) -> str:
-        if student_group.type == StudentGroupTypes.BRANCH and sites_count > 1:
-            return f"{student_group.name} [{student_group.branch.site}]"
-        return student_group.name
-
-    # FIXME: add test
     @staticmethod
     def add_assignees(student_group: StudentGroup, *,
                       assignment: Assignment = None,
@@ -313,9 +313,40 @@ class StudentGroupService:
             a.full_clean()
         StudentGroupAssignee.objects.bulk_create(new_objects)
 
+    @classmethod
+    def update_assignees(cls, student_group: StudentGroup, *,
+                         teachers: List[CourseTeacher],
+                         assignment: Assignment = None) -> None:
+        """
+        Set default list of responsible teachers for the student group or
+        customize list of teachers for the *assignment* if value is provided.
+        """
+        current_assignees = set(StudentGroupAssignee.objects
+                                .filter(student_group=student_group,
+                                        assignment=assignment)
+                                .values_list('assignee_id', flat=True))
+        to_delete = []
+        new_assignee_ids = {course_teacher.pk for course_teacher in teachers}
+        for group_assignee_id in current_assignees:
+            if group_assignee_id not in new_assignee_ids:
+                to_delete.append(group_assignee_id)
+        (StudentGroupAssignee.objects
+         .filter(student_group=student_group,
+                 assignment=assignment,
+                 assignee__in=to_delete)
+         .delete())
+        to_add = [course_teacher for course_teacher in teachers
+                  if course_teacher.pk not in current_assignees]
+        cls.add_assignees(student_group, assignment=assignment, teachers=to_add)
+
     @staticmethod
     def get_assignees(student_group: StudentGroup,
                       assignment: Assignment = None) -> List[CourseTeacher]:
+        """
+        Returns list of responsible teachers. If *assignment* value is provided
+        could return list of teachers specific for this assignment or
+        default one for the student group.
+        """
         default_and_overridden = Q(assignment__isnull=True)
         if assignment:
             default_and_overridden |= Q(assignment=assignment)
@@ -331,7 +362,6 @@ class StudentGroupService:
         filtered = [ga.assignee for ga in assignees]
         return filtered
 
-    # TODO: add test
     @staticmethod
     def get_student_profiles(student_group: StudentGroup) -> List[StudentProfile]:
         """
@@ -345,6 +375,44 @@ class StudentGroupService:
                             enrollment__student_group=student_group)
                     .select_related('user')
                     .order_by('user__last_name'))
+
+    @staticmethod
+    def get_groups_available_for_student_transfer(student_group: StudentGroup) -> List[StudentGroup]:
+        """
+        Returns list of student groups where students of the current
+        *student_group* could be transferred to.
+        """
+        student_groups = list(StudentGroup.objects
+                              .filter(course_id=student_group.course_id)
+                              .exclude(pk=student_group.pk)
+                              .select_related('branch__site')
+                              .order_by('name'))
+        # Students transfer is allowed for the course groups with
+        # the same visibility settings as a source student group
+        available_groups = {sg.pk for sg in student_groups}
+        qs = (AssignmentGroup.objects
+              .filter(group__course_id=student_group.course_id))
+        assignment_settings = bucketize(qs, key=lambda ag: ag.assignment_id)
+        for bucket in assignment_settings.values():
+            groups = {ag.group_id for ag in bucket}
+            if student_group.pk not in groups:
+                groups = {sg.pk for sg in student_groups if sg.pk not in groups}
+            available_groups &= groups
+        return [sg for sg in student_groups if sg.pk in available_groups]
+
+    @classmethod
+    def transfer_students(cls, *, source: StudentGroup, destination: StudentGroup,
+                          student_profiles: List[int]) -> None:
+        if source.course_id != destination.course_id:
+            raise ValidationError("Invalid destination", code="invalid")
+        safe_transfer_to = cls.get_groups_available_for_student_transfer(source)
+        if destination not in safe_transfer_to:
+            raise ValidationError("Invalid destination", code="unsafe")
+        (Enrollment.objects
+         .filter(course=source.course,
+                 student_group=source,
+                 student_profile__in=student_profiles)
+         .update(student_group_id=destination))
 
 
 class AssignmentService:

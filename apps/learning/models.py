@@ -94,7 +94,9 @@ class StudentGroup(TimeStampedModel):
     def clean(self):
         if self.course_id and self.name:
             groups_with_the_same_name = (StudentGroup.objects
+                                         .exclude(pk=self.pk)
                                          .filter(name__iexact=self.name,
+                                                 branch_id=self.branch_id,
                                                  course_id=self.course_id))
             if groups_with_the_same_name.exists():
                 msg = _("A student group with the same name already exists in the course")
@@ -117,6 +119,11 @@ class StudentGroup(TimeStampedModel):
             "pk": self.pk,
             **self.course.url_kwargs
         })
+
+    def get_name(self, branch_details=True) -> str:
+        if self.type == StudentGroupTypes.BRANCH and branch_details:
+            return f"{self.name} [{self.branch.site}]"
+        return self.name
 
 
 class StudentGroupAssignee(models.Model):

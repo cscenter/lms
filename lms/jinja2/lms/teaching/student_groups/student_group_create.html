@@ -9,6 +9,12 @@
     </h2>
     <form method="POST">
       {{ crispy(form) }}
+      <div class="form-group">
+        <div class="controls ">
+          <input type="submit" name="submit" value="Добавить" class="btn btn-primary" id="submit-id-submit">
+          <input type="button" name="cancel" value="Отмена" class="btn btn btn-default" id="button-id-cancel" onclick="history.go(-1);">
+        </div>
+      </div>
     </form>
   </div>
 {% endblock content %}

@@ -1,0 +1,60 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% import "lms/macros/_forms.jinja2" as forms %}
+
+{% block content %}
+  {% set student_group = form.instance %}
+  {% set course = student_group.course %}
+  <div class="container">
+    <h2 class="content-title mb-20">
+      Обновление студенческой группы<br>
+      <small><a href="{{ course.get_absolute_url() }}">{{ course.name }}, {{ course.semester }}</a></small>
+    </h2>
+    <form method="POST" class="mb-40">
+      {{ crispy(form) }}
+      <div class="form-group">
+        <div class="controls ">
+          <input type="submit" name="submit" value="Обновить" class="btn btn-primary" id="submit-id-submit">
+          <input type="button" name="cancel" value="Отмена" class="btn btn btn-default" id="button-id-cancel" onclick="history.go(-1);">
+        </div>
+      </div>
+    </form>
+    {% if transfer_form['student_group'].field.choices|length > 0 and  student_profiles %}
+      <h2 class="mb-20">Перенести студентов</h2>
+      <form method="POST" action="{{ url('teaching:api:student-groups:transfer', source_student_group=student_group.pk) }}">
+        {% csrf_token %}
+        {{ transfer_form.non_field_errors() }}
+        <div class="row">
+          <div class="col-xs-8">
+            {{ forms.field(transfer_form['student_group']) }}
+          </div>
+          <div class="col-xs-4">
+            <input type="submit" name="change-student-group" value="Сменить группу"
+                   class="btn btn-primary btn btn-primary btn-outline btn-block -inline-submit" />
+          </div>
+        </div>
+
+        <table class="table table-borderless">
+          <thead>
+          <tr>
+            <th style="width: 40px">#</th>
+            <th>Студент</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% for student_profile in student_profiles %}
+            <tr>
+              <td class="align-middle">
+                <input type="checkbox" name="ids" class="form-check-input" value="{{ student_profile.pk }}" id="student_{{ loop.index }}" />
+              </td>
+              <td>
+                <label for="student_{{ loop.index }}" style="font-weight: normal;">{{ student_profile.user.get_full_name(last_name_first=True) }}</label>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </form>
+    {% endif %}
+  </div>
+{% endblock content %}

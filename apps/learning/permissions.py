@@ -466,6 +466,8 @@ class UpdateStudentGroupAsTeacher(Permission):
     @staticmethod
     @rules.predicate
     def rule(user: User, student_group: StudentGroup):
+        if student_group.type != StudentGroupTypes.MANUAL:
+            return False
         return user in student_group.course.teachers.all()
 
 
@@ -478,8 +480,8 @@ class DeleteStudentGroup(Permission):
     @staticmethod
     @rules.predicate
     def rule(user: User, student_group: StudentGroup):
-        # FIXME: Allow curators to delete any group if it has no active enrollments
         return student_group.type == StudentGroupTypes.MANUAL
+        # FIXME: is it safe to transfer students to the default group?
 
 
 @add_perm

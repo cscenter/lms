@@ -4,6 +4,7 @@ from django.views.generic.base import RedirectView
 from courses.urls import RE_COURSE_URI
 from learning.api.views import CourseNewsUnreadNotificationsView
 from learning.gradebook import views as gv
+from learning.teaching.api.student_groups import StudentGroupTransferStudentsView
 from learning.teaching.views import (
     AssignmentCommentUpdateView, AssignmentDetailView, AssignmentListView,
     CalendarFullView, CalendarPersonalView, CourseListView, GradeBookListView,
@@ -12,8 +13,7 @@ from learning.teaching.views import (
 from learning.teaching.views import TimetableView as TeacherTimetable
 from learning.teaching.views.student_groups import (
     StudentGroupCreateView, StudentGroupDeleteView, StudentGroupDetailView,
-    StudentGroupListView, StudentGroupTransferStudentToAnotherGroupView,
-    StudentGroupUpdateView
+    StudentGroupListView, StudentGroupUpdateView
 )
 
 app_name = 'teaching'
@@ -26,9 +26,12 @@ student_group_patterns = [
             path('<int:pk>/update/', StudentGroupUpdateView.as_view(), name='update'),
             path('<int:pk>/delete/', StudentGroupDeleteView.as_view(), name='delete'),
             path('<int:pk>/', StudentGroupDetailView.as_view(), name='detail'),
-            path('<int:group_pk>/enrollment/<int:pk>/student/<int:student_pk>/update/', StudentGroupTransferStudentToAnotherGroupView.as_view(), name='transfer_student'),
         ])),
     ])),
+]
+
+student_group_api_patterns = [
+    path('student-groups/<int:source_student_group>/transfer/', StudentGroupTransferStudentsView.as_view(), name='transfer'),
 ]
 
 urlpatterns = [
@@ -42,6 +45,9 @@ urlpatterns = [
         # TODO: separate api views?
         path("news/<int:news_pk>/stats", CourseNewsUnreadNotificationsView.as_view(), name="course_news_unread"),
     ])),
+    path('api/', include(([
+        path('', include((student_group_api_patterns, 'student-groups'))),
+    ], 'api'))),
     path('assignments/', include([
         path('', AssignmentListView.as_view(), name='assignment_list'),
         path('<int:pk>/', AssignmentDetailView.as_view(), name='assignment_detail'),
