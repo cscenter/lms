@@ -1,10 +1,9 @@
-from typing import Any, List
+from typing import Any
 
 from crispy_forms.helper import FormHelper
 
 from django import forms
 
-from core.urls import reverse
 from courses.models import Course, CourseTeacher, StudentGroupTypes
 from learning.models import StudentGroup
 from learning.services import StudentGroupService
@@ -48,7 +47,8 @@ class StudentGroupStudentsTransferForm(forms.Form):
     def __init__(self, student_group: StudentGroup, **kwargs: Any):
         super().__init__(**kwargs)
         student_groups = StudentGroupService.get_groups_available_for_student_transfer(student_group)
-        self.fields['student_group'].choices = [(sg.pk, sg.get_name(branch_details=True)) for sg in student_groups]
+        choices = ((sg.pk, sg.get_name(branch_details=True)) for sg in student_groups)
+        self.fields['student_group'].choices = [('', '-------'), *choices]
         self.helper = FormHelper(self)
         self.helper.form_tag = False
 

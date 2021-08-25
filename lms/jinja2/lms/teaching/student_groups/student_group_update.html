@@ -2,6 +2,13 @@
 
 {% import "lms/macros/_forms.jinja2" as forms %}
 
+{% block body_attrs %}data-init-sections="studentGroups"{% endblock body_attrs %}
+
+{% block javascripts %}
+  {{ render_bundle('teaching', config='V1', extension='js') }}
+{% endblock javascripts %}
+
+
 {% block content %}
   {% set student_group = form.instance %}
   {% set course = student_group.course %}
@@ -21,7 +28,7 @@
     </form>
     {% if transfer_form['student_group'].field.choices|length > 0 and  student_profiles %}
       <h2 class="mb-20">Перенести студентов</h2>
-      <form method="POST" action="{{ url('teaching:api:student-groups:transfer', source_student_group=student_group.pk) }}">
+      <form method="POST" action="{{ url('teaching:api:student-groups:transfer', source_student_group=student_group.pk) }}" name="transfer-students">
         {% csrf_token %}
         {{ transfer_form.non_field_errors() }}
         <div class="row">
