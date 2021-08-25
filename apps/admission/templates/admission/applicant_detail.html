@@ -79,7 +79,7 @@
                   {% if interview.average_score %}Средний балл: {{ interview.average_score|floatdot:2 }}{% endif %}
                 </div>
                 {% for comment in interview.comments.all %}
-                    {% include "admission/_interview_comment.html" with comment=comment user=comment.interviewer only%}
+                  {% include "admission/_interview_comment.html" with comment=comment user=comment.interviewer only %}
                 {% endfor %}
               </div>
             {% endfor %}

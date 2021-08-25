@@ -12,15 +12,15 @@
 {% block body_attrs %} class="gray admission-interview-page" data-init-sections="interview"{% endblock body_attrs %}
 
 {% block javascripts %}
-    {% render_bundle "admission" "js" "V1" %}
+  {% render_bundle "admission" "js" "V1" %}
 {% endblock javascripts %}
 
 {% block content %}{% localtime off %}
-<div class="container">
+  <div class="container">
     <div class="page-header">
-        <h2 class="page-title">{{ applicant.full_name }}{% if request.user.is_curator %}
-            <a href="{% url "admin:admission_interview_change" interview.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>
-        {% endif %}</h2>
+      <h2 class="page-title">{{ applicant.full_name }}{% if request.user.is_curator %}
+        <a href="{% url "admin:admission_interview_change" interview.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>
+      {% endif %}</h2>
     </div>
     <div class="date">Дата собеседования: {{ interview.date_local|default:"Не назначена" }}</div>
     <div class="additional-info">
@@ -35,99 +35,104 @@
         <li role="presentation" class="">
           <a data-toggle="tab" href="#applicant" aria-controls="applicant" role="tab" aria-expanded="false">Анкета поступающего</a>
         </li>
-          <li role="presentation" class="">
+        <li role="presentation" class="">
           <a data-toggle="tab" href="#test-results" aria-controls="test-results" role="tab" aria-expanded="false">Тест и экзамен</a>
         </li>
-          <li role="presentation" class="">
+        <li role="presentation" class="">
           <a data-toggle="tab" href="#assignments" aria-controls="assignments" role="tab" aria-expanded="false">Задачи</a>
         </li>
-          <li role="presentation" class="">
+        <li role="presentation" class="">
           <a data-toggle="tab" href="#comments" aria-controls="comments" role="tab" aria-expanded="false">Все комментарии</a>
         </li>
-          <li role="presentation" class="">
-          <a data-toggle="tab" href="#similar-applicants" aria-controls="similar-applicants" role="tab" aria-expanded="false">Похожие анкеты</a>
+        <li role="presentation" class="">
+          <a data-toggle="tab" href="#similar-applicants" aria-controls="similar-applicants" role="tab" aria-expanded="false">Похожие
+            анкеты</a>
         </li>
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="comment" role="tabpanel">
-            {{ form.errors }}
+          {{ form.errors }}
           {% crispy comment_form comment_form.helper %}
-            <div class="clearfix"></div>
+          <div class="clearfix"></div>
         </div>
         <div class="tab-pane" id="applicant" role="tabpanel">
-            <dl>
-              {% if user.is_curator %}
-                <dt>Номер анкеты:</dt>
-                <dd><a href="{{ applicant_form.instance.get_absolute_url }}" target="_blank">#{{ applicant_form.instance.pk }}</a></dd>
-                <dt>Статус анкеты:</dt>
-                <dd>{{ applicant_form.instance.get_status_display|default_if_none:"<не указано>" }}</dd>
-              {% endif %}
-              {% include "admission/_applicant_form.html" with applicant_form=applicant_form %}
-            </dl>
+          <dl>
+            {% if user.is_curator %}
+              <dt>Номер анкеты:</dt>
+              <dd><a href="{{ applicant_form.instance.get_absolute_url }}" target="_blank">#{{ applicant_form.instance.pk }}</a></dd>
+              <dt>Статус анкеты:</dt>
+              <dd>{{ applicant_form.instance.get_status_display|default_if_none:"<не указано>" }}</dd>
+            {% endif %}
+            {% include "admission/_applicant_form.html" with applicant_form=applicant_form %}
+          </dl>
         </div>
         <div class="tab-pane" id="test-results" role="tabpanel">
-            {% include "admission/_results_tab.html" %}
+          {% include "admission/_results_tab.html" %}
         </div>
         <div class="tab-pane" id="assignments" role="tabpanel">
-            <div class="interview-info visible-print-block">{{ applicant.full_name }}<br>{{ interview.date_local }}</div>
-                <div class="clear hidden-print mb-15">
-                    <a class="btn btn-default" target="_blank" href="{{ interview.get_public_assignments_url }}">Публичная ссылка на задания</a>
-                    {% if interview.assignments.all %}<button class="btn btn-default _print-without-solution">Печать условий</button> <div class="btn btn-default _print-with-solution">Печать решений</div>{% endif %}
-                </div>
-                {% if interview.assignments.all %}
-                    {% for assignment in interview.assignments.all %}
-                        <h3 class="hidden-print">{{ assignment.name }}</h3>
-                        <h3 class="visible-print-block">Задание {{ forloop.counter }}</h3>
-                        <div class="ubertext">
-                            {% markdown 0 "assignment" %}{{ assignment.description|safe }}{% endmarkdown %}
-                        </div>
-                        {% if assignment.solution %}
-                            <div class="ubertext solution"><b>Решение</b><br>{% markdown 0 "assignment_solution" %}{{ assignment.solution|safe }}{% endmarkdown %}</div>
-                        {% endif %}
-                        <hr>
-                    {% endfor %}
-                {% else %}
-                        <p>Список задач, предложенных перед прохождением собеседования, пуст.</p>
-                {% endif %}
-                {% if request.user.is_curator %}
-                    <a href="#assignments-edit-block" data-toggle="collapse" aria-expanded="false" class="collapse-link">Редактировать список</a>
-                    <div class="panel-collapse">
-                        <div class="collapse" id="assignments-edit-block">
-                            {% crispy assignments_form %}
-                        </div>
-                    </div>
-                    <div class="clearfix"></div>
-                {% endif %}
+          <div class="interview-info visible-print-block">{{ applicant.full_name }}<br>{{ interview.date_local }}</div>
+          <div class="clear hidden-print mb-15">
+            <a class="btn btn-default" target="_blank" href="{{ interview.get_public_assignments_url }}">Публичная ссылка на задания</a>
+            {% if interview.assignments.all %}
+              <button class="btn btn-default _print-without-solution">Печать условий</button>
+              <div class="btn btn-default _print-with-solution">Печать решений</div>{% endif %}
+          </div>
+          {% if interview.assignments.all %}
+            {% for assignment in interview.assignments.all %}
+              <h3 class="hidden-print">{{ assignment.name }}</h3>
+              <h3 class="visible-print-block">Задание {{ forloop.counter }}</h3>
+              <div class="ubertext">
+                {% markdown 0 "assignment" %}{{ assignment.description|safe }}{% endmarkdown %}
+              </div>
+              {% if assignment.solution %}
+                <div class="ubertext solution"><b>Решение</b><br>{% markdown 0 "assignment_solution" %}
+                  {{ assignment.solution|safe }}{% endmarkdown %}</div>
+              {% endif %}
+              <hr>
+            {% endfor %}
+          {% else %}
+            <p>Список задач, предложенных перед прохождением собеседования, пуст.</p>
+          {% endif %}
+          {% if request.user.is_curator %}
+            <a href="#assignments-edit-block" data-toggle="collapse" aria-expanded="false" class="collapse-link">Редактировать список</a>
+            <div class="panel-collapse">
+              <div class="collapse" id="assignments-edit-block">
+                {% crispy assignments_form %}
+              </div>
+            </div>
+            <div class="clearfix"></div>
+          {% endif %}
         </div>
         <div class="tab-pane" id="comments" role="tabpanel">
-            {% if show_all_comments and interview.comments.all %}
-                <ul class="score-info">
-                    <li>
-                      <div class="num text-info">{{ interview.average_score|floatdot:2 }}</div>
-                      <p>Средний балл</p>
-                    </li>
-                  </ul>
-                {% for comment in interview.comments.all %}
-                    {% include "admission/_interview_comment.html" with comment=comment user=comment.interviewer only%}
-                {% endfor %}
+          {% if show_all_comments and interview.comments.all %}
+            <ul class="score-info">
+              <li>
+                <div class="num text-info">{{ interview.average_score|floatdot:2 }}</div>
+                <p>Средний балл</p>
+              </li>
+            </ul>
+            {% for comment in interview.comments.all %}
+              {% include "admission/_interview_comment.html" with comment=comment user=comment.interviewer only %}
+            {% endfor %}
+          {% else %}
+            {% if request.user.is_curator %}
+              Комментариев пока нет.
             {% else %}
-                {% if request.user.is_curator %}
-                    Комментариев пока нет.
-                {% else  %}
-                    Нет комментариев или нужна предварительная оценка, чтобы посмотреть мнение остальных участников.
-                {% endif %}
+              Нет комментариев или нужна предварительная оценка, чтобы посмотреть мнение остальных участников.
             {% endif %}
+          {% endif %}
         </div>
         <div class="tab-pane" id="similar-applicants" role="tabpanel">
-            {% for applicant in similar_applicants %}
-                <a target="_blank" href="{% url "admission:applicants:detail" applicant.pk %}">{{ applicant.full_name }} ({{ applicant.campaign }})</a><br>
+          {% for applicant in similar_applicants %}
+            <a target="_blank" href="{% url "admission:applicants:detail" applicant.pk %}">{{ applicant.full_name }}
+              ({{ applicant.campaign }})</a><br>
             {% empty %}
-                Похожие анкеты не найдены.
-            {% endfor %}
+            Похожие анкеты не найдены.
+          {% endfor %}
         </div>
       </div>
     </div>
-</div>
+  </div>
 
-    {% include "admission/_interview_assignment_modal.html" %}
+  {% include "admission/_interview_assignment_modal.html" %}
 {% endlocaltime %}{% endblock content %}
