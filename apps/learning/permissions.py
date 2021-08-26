@@ -481,7 +481,6 @@ class DeleteStudentGroup(Permission):
     @rules.predicate
     def rule(user: User, student_group: StudentGroup):
         return student_group.type == StudentGroupTypes.MANUAL
-        # FIXME: is it safe to transfer students to the default group?
 
 
 @add_perm
