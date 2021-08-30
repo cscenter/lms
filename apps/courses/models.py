@@ -112,7 +112,7 @@ class Semester(models.Model):
         unique_together = ("year", "type")
 
     def __str__(self):
-        return "{0} {1}".format(SemesterTypes.values[self.type], self.year)
+        return self.name
 
     def __cmp__(self, other):
         return self.index - other.index
@@ -123,6 +123,10 @@ class Semester(models.Model):
     @property
     def slug(self):
         return "{0}-{1}".format(self.year, self.type)
+
+    @property
+    def name(self):
+        return "{0} {1}".format(SemesterTypes.values[self.type], self.year)
 
     @property
     def term_pair(self) -> TermPair:
