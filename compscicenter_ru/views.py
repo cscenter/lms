@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import math
 import random
 from enum import Enum
@@ -35,7 +33,6 @@ from courses.utils import get_current_term_pair, get_term_index
 from courses.views.mixins import CoursePublicURLParamsMixin
 from faq.models import Question
 from learning.models import Enrollment, GraduateProfile
-from learning.roles import Roles
 from learning.services import course_access_role
 from learning.settings import Branches, GradeTypes
 from online_courses.models import OnlineCourse, OnlineCourseTuple
@@ -44,7 +41,7 @@ from projects.models import ProjectStudent
 from stats.views import AlumniStats
 from study_programs.models import AcademicDiscipline, StudyProgram
 from study_programs.services import get_study_programs
-from users.constants import SHADCourseGradeTypes
+from users.constants import SHADCourseGradeTypes, Roles
 from users.models import SHADCourseRecord, User
 
 # FIXME: remove?

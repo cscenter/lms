@@ -5,7 +5,7 @@ from django.views import generic
 
 from core.models import Branch, Location
 from courses.models import Course, CourseTeacher
-from learning.roles import Roles
+from users.constants import Roles
 from users.models import User
 
 

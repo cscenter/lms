@@ -13,9 +13,8 @@ from learning.invitation.forms import InvitationRegistrationForm
 from learning.invitation.views import (
     InvitationURLParamsMixin, complete_student_profile, student_profile_is_valid
 )
-from learning.roles import Roles
 from learning.tests.factories import CourseInvitationFactory
-from users.constants import GenderTypes
+from users.constants import GenderTypes, Roles
 from users.models import User
 from users.tests.factories import UserFactory
 

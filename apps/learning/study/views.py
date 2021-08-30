@@ -30,13 +30,13 @@ from learning.permissions import (
     EnrollPermissionObject, ViewCourses, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments
 )
-from learning.roles import Roles
 from learning.services import get_student_classes, get_student_profile
 from learning.study.services import get_draft_solution, get_solution_form
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import (
     AssignmentCommentUpsertView, AssignmentSubmissionUpsertView
 )
+from users.constants import Roles
 
 
 class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
