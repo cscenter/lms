@@ -590,6 +590,7 @@ class AssignmentService:
         count = queryset.count()
         if not count:
             return None
+        # TODO: perf: combine with queryset.count()
         values = (queryset
                   .values_list('execution_time', flat=True)
                   .order_by('execution_time'))
