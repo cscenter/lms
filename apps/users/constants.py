@@ -43,16 +43,7 @@ class Roles(DjangoChoices):
     CURATOR_PROJECTS = C(10, _('Curator of projects'))
     INVITED = C(11, _('Invited User'))
     SERVICE_USER = C(12, _("Service User"))
-
-
-CSCENTER_ACCESS_ALLOWED = {
-    Roles.STUDENT,
-    Roles.VOLUNTEER,
-    Roles.TEACHER,
-    Roles.GRADUATE,
-    Roles.INTERVIEWER,
-    Roles.PROJECT_REVIEWER
-}
+    PARTNER = C(13, _("Master's Degree Student"))
 
 
 class SHADCourseGradeTypes(DjangoChoices):

@@ -35,7 +35,7 @@ class ProjectStudentInline(admin.TabularInline):
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
             kwargs["queryset"] = (User.objects
-                                  .has_role(Roles.STUDENT, Roles.VOLUNTEER,
+                                  .has_role(Roles.STUDENT, Roles.VOLUNTEER, Roles.PARTNER,
                                             Roles.GRADUATE)
                                   .distinct())
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)

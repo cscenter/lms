@@ -11,7 +11,7 @@ from .models import StudentProfile, StudentTypes, User, UserGroup
 @receiver(post_save, sender=UserGroup)
 def post_save_user_group(sender, instance: UserGroup, *args, **kwargs):
     """Copy branch value from the student profile"""
-    if instance.role in {Roles.STUDENT, Roles.VOLUNTEER, Roles.INVITED}:
+    if instance.role in {Roles.STUDENT, Roles.VOLUNTEER, Roles.PARTNER, Roles.INVITED}:
         profile_type = StudentTypes.from_permission_role(instance.role)
         student_profile = get_student_profile(instance.user, instance.site_id,
                                               profile_type=profile_type)

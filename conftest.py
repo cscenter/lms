@@ -1,4 +1,3 @@
-import os.path
 from io import BytesIO
 from urllib.parse import urlparse
 
@@ -8,6 +7,7 @@ from pytest_django.lazy_django import skip_if_no_django
 
 from django.contrib.sites.models import Site
 from django.core.files import File
+from django.test import TestCase
 from django.urls import resolve
 
 from core.models import SiteConfiguration
@@ -17,7 +17,7 @@ from core.tests.factories import (
 from core.tests.settings import (
     ANOTHER_DOMAIN, ANOTHER_DOMAIN_ID, TEST_DOMAIN, TEST_DOMAIN_ID
 )
-from core.tests.utils import CSCTestCase, TestClient
+from core.tests.utils import TestClient
 from learning.settings import Branches
 from notifications.models import Type
 from users.tests.factories import CuratorFactory
@@ -33,9 +33,13 @@ def client():
 @pytest.fixture(scope="session")
 def assert_redirect():
     """Uses customized TestCase.assertRedirects as a comparing tool."""
-    _TC = CSCTestCase()
+    _TC = TestCase()
 
     def wrapper(*args, **kwargs):
+        # `fetch_redirect_response` will be broken if `expected_url` has an
+        # absolute path since testing client always returns relative path
+        # for the `response.url` (see `assertRedirects` for details)
+        kwargs['fetch_redirect_response'] = False
         return _TC.assertRedirects(*args, **kwargs)
 
     return wrapper

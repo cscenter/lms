@@ -491,17 +491,17 @@ class AssignmentService:
             # Exclude enrollments without student group if assignment is
             # restricted to some groups
             filters.append(Q(student_group_id__in=restrict_to))
-        pks = list(Enrollment.active
-                   .filter(*filters)
-                   .values_list("student_id", flat=True))
+        students = list(Enrollment.active
+                        .filter(*filters)
+                        .values_list("student_id", flat=True))
         # Create/update records in separate steps to avoid tons of save points
         in_trash = set(StudentAssignment.trash
-                       .filter(assignment=assignment, student_id__in=pks)
+                       .filter(assignment=assignment, student__in=students)
                        .values_list('student_id', flat=True))
         if in_trash:
             cls._restore_student_assignments(assignment, in_trash)
         batch_size = 100
-        to_create = (sid for sid in pks if sid not in in_trash)
+        to_create = (sid for sid in students if sid not in in_trash)
         objs = (StudentAssignment(assignment=assignment, student_id=student_id)
                 for student_id in to_create)
         while True:
@@ -511,7 +511,7 @@ class AssignmentService:
             StudentAssignment.objects.bulk_create(batch, batch_size)
         # Generate notifications
         created = (StudentAssignment.objects
-                   .filter(assignment=assignment, student_id__in=pks)
+                   .filter(assignment=assignment, student_id__in=students)
                    .values_list('pk', 'student_id', named=True))
         objs = (notify_student_new_assignment(sa, commit=False) for sa
                 in created)

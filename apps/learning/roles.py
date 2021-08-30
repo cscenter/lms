@@ -94,6 +94,8 @@ class Roles(DjangoChoices):
     ))
     VOLUNTEER = C(4, _('Co-worker'), priority=50,
                   permissions=STUDENT.permissions)
+    PARTNER = C(13, _("Master's Degree Student"), priority=50,
+                permissions=STUDENT.permissions)
     INVITED = C(11, _('Invited User'), permissions=(
         ViewCourse,
         ViewStudyMenu,
@@ -181,7 +183,7 @@ teacher_role.add_relation(DeleteStudentGroup, DeleteStudentGroupAsTeacher)
 teacher_role.add_relation(UpdateStudentGroup, UpdateStudentGroupAsTeacher)
 
 
-for role in (Roles.STUDENT, Roles.VOLUNTEER, Roles.INVITED):
+for role in (Roles.STUDENT, Roles.VOLUNTEER, Roles.PARTNER, Roles.INVITED):
     student_role = role_registry[role]
     student_role.add_relation(ViewAssignmentAttachment,
                               ViewAssignmentAttachmentAsLearner)
@@ -213,7 +215,7 @@ if apps.is_installed('projects'):
     curator_role.add_permission(ViewReportAttachment)
     curator_role.add_permission(ViewReportCommentAttachment)
 
-    for role in (Roles.STUDENT, Roles.VOLUNTEER):
+    for role in (Roles.STUDENT, Roles.VOLUNTEER, Roles.PARTNER):
         student_role = role_registry[role]
         # Permissions
         student_role.add_permission(ViewReportAttachmentAsLearner)

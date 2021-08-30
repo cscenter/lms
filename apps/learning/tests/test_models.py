@@ -1,7 +1,7 @@
 import datetime
+import re
 from datetime import timedelta
 from decimal import Decimal
-from unittest import mock
 
 import pytest
 import pytz
@@ -11,7 +11,6 @@ from django.db import IntegrityError, transaction
 from django.utils.encoding import smart_str
 
 from core.tests.factories import BranchFactory, LocationFactory, SiteFactory
-from core.tests.utils import CSCTestCase
 from courses.constants import SemesterTypes
 from courses.models import (
     AssignmentSubmissionFormats, CourseGroupModes, CourseNews, Semester
@@ -31,179 +30,165 @@ from learning.tests.factories import (
     CourseNewsNotificationFactory, EnrollmentFactory, EnrollmentPeriodFactory,
     StudentAssignmentFactory, StudentGroupAssigneeFactory, StudentGroupFactory
 )
-from users.tests.factories import StudentFactory, TeacherFactory, UserFactory
+from users.tests.factories import StudentFactory, TeacherFactory
 
 
-class CommonTests(CSCTestCase):
-    @mock.patch("courses.tasks.maybe_upload_slides_yandex.delay")
-    def test_to_strings(self, _):
-        meta_course = MetaCourseFactory.build()
-        self.assertEqual(smart_str(meta_course), meta_course.name)
-        semester = Semester(year=2015, type='spring')
-        self.assertIn(smart_str(semester.year), smart_str(semester))
-        self.assertIn('spring', smart_str(semester))
-        co = CourseFactory.create()
-        self.assertIn(smart_str(co.meta_course), smart_str(co))
-        self.assertIn(smart_str(co.semester), smart_str(co))
-        con: CourseNews = CourseNewsFactory.create()
-        self.assertIn(smart_str(con.title), smart_str(con))
-        self.assertIn(smart_str(con.course), smart_str(con))
-        cc = CourseClassFactory.create()
-        self.assertIn(cc.name, smart_str(cc))
-        cca = (CourseClassAttachmentFactory
-               .create(material__filename="foobar.pdf"))
-        self.assertIn("foobar", smart_str(cca))
-        self.assertIn("pdf", smart_str(cca))
-        a = AssignmentFactory.create()
-        self.assertIn(a.title, smart_str(a))
-        self.assertIn(smart_str(a.course), smart_str(a))
-        as_ = StudentAssignmentFactory.create()
-        self.assertIn(smart_str(as_.student.get_full_name()), smart_str(as_))
-        self.assertIn(smart_str(as_.assignment), smart_str(as_))
-        ac = AssignmentCommentFactory.create()
-        self.assertIn(smart_str(ac.student_assignment.assignment),
-                      smart_str(ac))
-        self.assertIn(smart_str(ac.student_assignment
-                                 .student.get_full_name()),
-                      smart_str(ac))
-        e = EnrollmentFactory.create()
-        self.assertIn(smart_str(e.course), smart_str(e))
-        self.assertIn(smart_str(e.student.get_full_name()), smart_str(e))
-        an = AssignmentNotificationFactory.create()
-        self.assertIn(smart_str(an.user.get_full_name()), smart_str(an))
-        self.assertIn(smart_str(an.student_assignment), smart_str(an))
-        conn = CourseNewsNotificationFactory.create()
-        self.assertIn(smart_str(conn.user.get_full_name()), smart_str(conn))
-        self.assertIn(smart_str(conn.course_offering_news), smart_str(conn))
+@pytest.mark.django_db
+def test_models__str__(mocker):
+    mocked = mocker.patch("courses.tasks.maybe_upload_slides_yandex.delay")
+    meta_course = MetaCourseFactory.build()
+    assert smart_str(meta_course) == meta_course.name
+    semester = Semester(year=2015, type='spring')
+    assert smart_str(semester.year) in semester.name
+    assert 'spring' in semester.name
+    course = CourseFactory.create()
+    assert smart_str(course.meta_course) in str(course)
+    assert smart_str(course.semester) in str(course)
+    course_news: CourseNews = CourseNewsFactory.create()
+    assert smart_str(course_news.title) in str(course_news)
+    assert smart_str(course_news.course) in str(course_news)
+    course_class = CourseClassFactory()
+    assert course_class.name in str(course_class)
+    cca = (CourseClassAttachmentFactory.create(material__filename="foobar.pdf"))
+    assert "foobar" in str(cca)
+    assert "pdf" in str(cca)
+    assignment = AssignmentFactory()
+    assert assignment.title in str(assignment)
+    assert smart_str(assignment.course) in str(assignment)
+    student_assignment = StudentAssignmentFactory()
+    assert smart_str(student_assignment.student.get_full_name()) in smart_str(student_assignment)
+    assert smart_str(student_assignment.assignment) in str(student_assignment)
+    assignment_comment = AssignmentCommentFactory()
+    assert smart_str(assignment_comment.student_assignment.assignment) in str(assignment_comment)
+    assert smart_str(assignment_comment.student_assignment
+                     .student.get_full_name()) in str(assignment_comment)
+    enrollment = EnrollmentFactory()
+    assert smart_str(enrollment.course) in str(enrollment)
+    assert smart_str(enrollment.student.get_full_name()) in str(enrollment)
+    an = AssignmentNotificationFactory.create()
+    assert smart_str(an.user.get_full_name()) in str(an)
+    assert smart_str(an.student_assignment) in str(an)
+    conn = CourseNewsNotificationFactory.create()
+    assert smart_str(conn.user.get_full_name()) in str(conn)
+    assert smart_str(conn.course_offering_news) in str(conn)
 
 
-class StudentAssignmentTests(CSCTestCase):
-    def test_clean(self):
-        u1 = StudentFactory()
-        u2 = UserFactory.create(groups=[])
-        as_ = StudentAssignmentFactory.create(student=u1)
-        as_.student = u2
-        self.assertRaises(ValidationError, as_.clean)
-        as_.student = u1
-        as_.save()
-        as_.score = as_.assignment.maximum_score + 1
-        self.assertRaises(ValidationError, as_.clean)
-        as_.score = as_.assignment.maximum_score
-        as_.save()
-
-    def test_submission_is_sent(self):
-        u_student = StudentFactory()
-        u_teacher = TeacherFactory()
-        as_ = StudentAssignmentFactory(
-            student=u_student,
-            assignment__course__teachers=[u_teacher],
-            assignment__submission_type=AssignmentSubmissionFormats.ONLINE)
-        # teacher comments first
-        self.assertFalse(as_.submission_is_received)
-        AssignmentCommentFactory.create(student_assignment=as_,
-                                        author=u_teacher)
-        as_.refresh_from_db()
-        self.assertFalse(as_.submission_is_received)
-        AssignmentCommentFactory.create(student_assignment=as_,
-                                        author=u_student)
-        as_.refresh_from_db()
-        self.assertTrue(as_.submission_is_received)
-        # student comments first
-        as_ = StudentAssignmentFactory(
-            student=u_student,
-            assignment__course__teachers=[u_teacher],
-            assignment__submission_type=AssignmentSubmissionFormats.ONLINE)
-        as_.refresh_from_db()
-        self.assertFalse(as_.submission_is_received)
-        AssignmentCommentFactory.create(student_assignment=as_,
-                                        author=u_student)
-        as_.refresh_from_db()
-        self.assertTrue(as_.submission_is_received)
-        AssignmentCommentFactory.create(student_assignment=as_,
-                                        author=u_student)
-        as_.refresh_from_db()
-        self.assertTrue(as_.submission_is_received)
-        # assignment is offline
-        as_ = StudentAssignmentFactory(
-            student=u_student,
-            assignment__course__teachers=[u_teacher],
-            assignment__submission_type=AssignmentSubmissionFormats.NO_SUBMIT)
-        as_.refresh_from_db()
-        self.assertFalse(as_.submission_is_received)
-        AssignmentCommentFactory.create(student_assignment=as_,
-                                        author=u_student)
-        as_.refresh_from_db()
-        self.assertFalse(as_.submission_is_received)
-
-    def test_student_assignment_state(self):
-        import datetime
-
-        from django.utils import timezone
-        student = StudentFactory()
-        a_online = AssignmentFactory.create(
-            passing_score=5, maximum_score=10,
-            submission_type=AssignmentSubmissionFormats.ONLINE,
-            deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
-        )
-        ctx = {'student': student, 'assignment': a_online}
-        a_s = StudentAssignment(score=0, **ctx)
-        self.assertEqual(a_s.state.value, a_s.States.UNSATISFACTORY)
-        a_s = StudentAssignment(score=4, **ctx)
-        self.assertEqual(a_s.state.value, a_s.States.UNSATISFACTORY)
-        a_s = StudentAssignment(score=5, **ctx)
-        self.assertEqual(a_s.state.value, a_s.States.CREDIT)
-        a_s = StudentAssignment(score=8, **ctx)
-        self.assertEqual(a_s.state.value, a_s.States.GOOD)
-        a_s = StudentAssignment(score=10, **ctx)
-        self.assertEqual(a_s.state.value, a_s.States.EXCELLENT)
-        a_s = StudentAssignment(**ctx)
-        self.assertEqual(a_s.state.value, a_s.States.NOT_SUBMITTED)
-        a_offline = AssignmentFactory.create(
-            passing_score=5, maximum_score=10,
-            submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
-            deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
-        )
-        ctx['assignment'] = a_offline
-        a_s = StudentAssignment(**ctx)
-        self.assertEqual(a_s.state.value, a_s.States.NOT_CHECKED)
-
-    def test_state_display(self):
-        as_ = StudentAssignmentFactory(score=30,
-                                       assignment__maximum_score=50)
-        self.assertIn(smart_str(as_.assignment.maximum_score), as_.state_display)
-        self.assertIn(smart_str(as_.score), as_.state_display)
-        as_ = StudentAssignmentFactory(assignment__maximum_score=50)
-        self.assertEqual(StudentAssignment.States.labels.NOT_SUBMITTED,
-                         as_.state_display)
-
-    def test_state_short(self):
-        as_ = StudentAssignmentFactory(score=30,
-                                       assignment__maximum_score=50)
-        self.assertIn(smart_str(as_.assignment.maximum_score), as_.state_short)
-        self.assertIn(smart_str(as_.score), as_.state_short)
-        as_ = StudentAssignmentFactory(assignment__maximum_score=50)
-        state = StudentAssignment.States.get_choice(StudentAssignment.States.NOT_SUBMITTED)
-        self.assertEqual(state.abbr, as_.state_short)
+@pytest.mark.django_db
+def test_student_assignment_submission_is_sent():
+    u_student = StudentFactory()
+    u_teacher = TeacherFactory()
+    as_ = StudentAssignmentFactory(
+        student=u_student,
+        assignment__course__teachers=[u_teacher],
+        assignment__submission_type=AssignmentSubmissionFormats.ONLINE)
+    # teacher comments first
+    assert not as_.submission_is_received
+    AssignmentCommentFactory.create(student_assignment=as_,
+                                    author=u_teacher)
+    as_.refresh_from_db()
+    assert not as_.submission_is_received
+    AssignmentCommentFactory.create(student_assignment=as_,
+                                    author=u_student)
+    as_.refresh_from_db()
+    assert as_.submission_is_received
+    # student comments first
+    as_ = StudentAssignmentFactory(
+        student=u_student,
+        assignment__course__teachers=[u_teacher],
+        assignment__submission_type=AssignmentSubmissionFormats.ONLINE)
+    as_.refresh_from_db()
+    assert not as_.submission_is_received
+    AssignmentCommentFactory.create(student_assignment=as_,
+                                    author=u_student)
+    as_.refresh_from_db()
+    assert as_.submission_is_received
+    AssignmentCommentFactory.create(student_assignment=as_,
+                                    author=u_student)
+    as_.refresh_from_db()
+    assert as_.submission_is_received
+    # assignment is offline
+    as_ = StudentAssignmentFactory(
+        student=u_student,
+        assignment__course__teachers=[u_teacher],
+        assignment__submission_type=AssignmentSubmissionFormats.NO_SUBMIT)
+    as_.refresh_from_db()
+    assert not as_.submission_is_received
+    AssignmentCommentFactory.create(student_assignment=as_,
+                                    author=u_student)
+    as_.refresh_from_db()
+    assert not as_.submission_is_received
 
 
-class AssignmentCommentTests(CSCTestCase):
-    def test_attached_file(self):
-        ac = AssignmentCommentFactory.create(
-            attached_file__filename="foobar.pdf")
-        self.assertIn(smart_str(ac.student_assignment.assignment.pk),
-                      ac.attached_file.name)
-        self.assertIn(smart_str(ac.student_assignment.student.pk),
-                      ac.attached_file.name)
-        self.assertRegex(ac.attached_file.name, "/foobar(_[0-9a-zA-Z]+)?.pdf$")
-        self.assertRegex(ac.attached_file_name, "^foobar(_[0-9a-zA-Z]+)?.pdf$")
+@pytest.mark.django_db
+def test_student_assignment_state():
+    import datetime
+
+    from django.utils import timezone
+    student = StudentFactory()
+    a_online = AssignmentFactory.create(
+        passing_score=5, maximum_score=10,
+        submission_type=AssignmentSubmissionFormats.ONLINE,
+        deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
+    )
+    ctx = {'student': student, 'assignment': a_online}
+    sa = StudentAssignment(score=0, **ctx)
+    assert sa.state.value == sa.States.UNSATISFACTORY
+    sa = StudentAssignment(score=4, **ctx)
+    assert sa.state.value == sa.States.UNSATISFACTORY
+    sa = StudentAssignment(score=5, **ctx)
+    assert sa.state.value == sa.States.CREDIT
+    sa = StudentAssignment(score=8, **ctx)
+    assert sa.state.value == sa.States.GOOD
+    sa = StudentAssignment(score=10, **ctx)
+    assert sa.state.value == sa.States.EXCELLENT
+    sa = StudentAssignment(**ctx)
+    assert sa.state.value == sa.States.NOT_SUBMITTED
+    a_offline = AssignmentFactory.create(
+        passing_score=5, maximum_score=10,
+        submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
+        deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
+    )
+    ctx['assignment'] = a_offline
+    sa = StudentAssignment(**ctx)
+    assert sa.state.value == sa.States.NOT_CHECKED
 
 
-class AssignmentNotificationTests(CSCTestCase):
-    def test_clean(self):
-        an = AssignmentNotificationFactory.create(
-            user=StudentFactory(),
-            is_about_passed=True)
-        self.assertRaises(ValidationError, an.clean)
+@pytest.mark.django_db
+def test_student_assignment_state_display():
+    sa = StudentAssignmentFactory(score=30, assignment__maximum_score=50)
+    assert smart_str(sa.assignment.maximum_score) in sa.state_display
+    assert smart_str(sa.score) in sa.state_display
+    sa = StudentAssignmentFactory(assignment__maximum_score=50)
+    assert sa.state_display == StudentAssignment.States.labels.NOT_SUBMITTED
+
+
+@pytest.mark.django_db
+def test_student_assignment_state_short():
+    sa = StudentAssignmentFactory(score=30, assignment__maximum_score=50)
+    assert smart_str(sa.assignment.maximum_score) in sa.state_short
+    assert smart_str(sa.score) in sa.state_short
+    sa = StudentAssignmentFactory(assignment__maximum_score=50)
+    state = StudentAssignment.States.get_choice(StudentAssignment.States.NOT_SUBMITTED)
+    assert state.abbr in sa.state_short
+
+
+@pytest.mark.django_db
+def test_assignment_comment_attached_file():
+    assignment_comment = AssignmentCommentFactory.create(attached_file__filename="foobar.pdf")
+    file_name = assignment_comment.attached_file.name
+    assert smart_str(assignment_comment.student_assignment.assignment.pk) in file_name
+    assert smart_str(assignment_comment.student_assignment.student.pk) in file_name
+    assert re.compile(r"/foobar(_[0-9a-zA-Z]+)?.pdf$").search(file_name)
+    assert re.compile(r"^foobar(_[0-9a-zA-Z]+)?.pdf$").search(assignment_comment.attached_file_name)
+
+
+@pytest.mark.django_db
+def test_assignment_notification_validate():
+    an = AssignmentNotificationFactory.create(
+        user=StudentFactory(),
+        is_about_passed=True)
+    with pytest.raises(ValidationError):
+        an.clean()
 
 
 @pytest.mark.django_db

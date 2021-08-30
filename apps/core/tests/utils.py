@@ -1,7 +1,7 @@
 from urllib.parse import urlparse
 
 from django.conf import settings
-from django.test import Client, TestCase
+from django.test import Client
 from django.utils.functional import Promise
 
 from core.tests.settings import TEST_DOMAIN
@@ -91,31 +91,3 @@ class TestClient(Client):
     def put(self, path, *args, **kwargs):
         self._patch_extra(path, kwargs)
         return super().put(path, *args, **kwargs)
-
-
-class CSCTestCase(TestCase):
-    client_class = TestClient
-
-    def assertLoginRedirect(self, url):
-        # Cast `next` value to the relative path since
-        # after successful login we redirect to the same domain.
-        path = urlparse(url).path
-        expected_path = "{}?next={}".format(settings.LOGIN_URL, path)
-        self.assertRedirects(self.client.get(url), expected_path)
-
-    def assertPOSTLoginRedirect(self, url, form):
-        # Cast `next` value to the relative path since
-        # after successful login we redirect to the same domain.
-        path = urlparse(url).path
-        expected_path = "{}?next={}".format(settings.LOGIN_URL, path)
-        self.assertRedirects(self.client.post(url, form), expected_path)
-
-    def assertRedirects(self, response, expected_url, *args, **kwargs):
-        """
-        Note that `fetch_redirect_response` will be broken if
-        `expected_url` has absolute path since testing client always returns
-        relative path for `response.url` (see `assertRedirects` for details)
-        """
-        # FIXME:disable for abs path only?
-        kwargs['fetch_redirect_response'] = False
-        super().assertRedirects(response, expected_url, *args, **kwargs)

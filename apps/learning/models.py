@@ -570,10 +570,6 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         unique_together = [['assignment', 'student']]
 
     def clean(self):
-        has_perm = self.student.is_student or self.student.is_volunteer
-        if not has_perm:
-            raise ValidationError(_("Student field should point to "
-                                    "an actual student"))
         if self.score and self.score > self.assignment.maximum_score:
             raise ValidationError(_("Grade can't be larger than maximum "
                                     "one ({0})")

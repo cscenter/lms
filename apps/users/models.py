@@ -660,11 +660,14 @@ class StudentTypes(DjangoChoices):
     REGULAR = C('regular', _("Regular Student"), priority=300)
     VOLUNTEER = C('volunteer', _("Co-worker"), priority=200)
     INVITED = C('invited', _("Invited Student"), priority=100)
+    PARTNER = C('partner', _("Master's Degree Student"), priority=300)
 
     @classmethod
     def from_permission_role(cls, role):
         if role == Roles.STUDENT:
             return cls.REGULAR
+        elif role == Roles.PARTNER:
+            return cls.PARTNER
         elif role == Roles.VOLUNTEER:
             return cls.VOLUNTEER
         elif role == Roles.INVITED:
@@ -678,6 +681,8 @@ class StudentTypes(DjangoChoices):
             return Roles.VOLUNTEER
         elif profile_type == cls.INVITED:
             return Roles.INVITED
+        elif profile_type == cls.PARTNER:
+            return Roles.PARTNER
 
 
 class StudentProfile(TimeStampedModel):
