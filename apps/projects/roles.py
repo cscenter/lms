@@ -28,7 +28,7 @@ class Roles(DjangoChoices):
 
 
 for code, name in Roles.choices:
-    role_registry.register(Role(code=code, name=name,
+    role_registry.register(Role(id=code, code=code, description=name,
                                 permissions=Roles.get_choice(code).permissions))
 
 

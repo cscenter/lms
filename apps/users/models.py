@@ -782,7 +782,7 @@ class StudentProfile(TimeStampedModel):
         verbose_name = _("Student Profile")
         verbose_name_plural = _("Student Profiles")
         constraints = [
-            # User could pass distance branch and continue learning on-campus
+            # e.g. user completed distance branch and continue learning on-campus
             models.UniqueConstraint(
                 fields=('user', 'branch', 'year_of_admission'),
                 name='unique_regular_student_per_admission_campaign',

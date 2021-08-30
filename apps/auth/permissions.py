@@ -41,7 +41,7 @@ class PermissionRegistry:
     This registry is used to avoid name collision in the permission name.
     """
     def __init__(self):
-        self._dict: Dict[PermissionId, Permission] = {}
+        self._dict: Dict[PermissionId, Type[Permission]] = {}
 
     def test_rule(self, name, *args, **kwargs) -> bool:
         return name in self._dict and self._dict[name].rule.test(*args, **kwargs)
@@ -54,18 +54,15 @@ class PermissionRegistry:
     def set_permission(self, perm: Type[Permission]) -> None:
         self._dict[perm.name] = perm
 
-    def remove_permission(self, perm) -> None:
-        if isinstance(perm, PermissionId):
-            del self._dict[perm]
-        else:
-            del self._dict[perm.name]
+    def remove_permission(self, perm: Type[Permission]) -> None:
+        del self._dict[perm.name]
 
     def __contains__(self, perm) -> bool:
         if isinstance(perm, PermissionId):
             return perm in self._dict
         return perm.name in self._dict
 
-    def __getitem__(self, perm_name) -> Permission:
+    def __getitem__(self, perm_name: PermissionId) -> Type[Permission]:
         return self._dict[perm_name]
 
 
@@ -78,12 +75,14 @@ def add_perm(cls: Type[Permission]) -> Type[Permission]:
 
 
 class Role:
-    def __init__(self, *, code, name,
+    def __init__(self, *, id: Union[int, str], description: str,
                  permissions: Iterable[Type[Permission]],
+                 code: Optional[str] = None,
                  priority: int = 100,
                  relations: Dict = None):
-        self.code = code
-        self.name = name
+        self.id = id  # unique id stored in DB
+        self.code = code or str(id)  # unique name used for the role registry
+        self.description = description
         # `User.has_perm(...)` iterates over permissions (grouped by role)
         # until the first successful match by name, eval the permission
         # callback and returns the result.
@@ -94,7 +93,7 @@ class Role:
         self._permissions: RuleSet = RuleSet()
         for perm in permissions:
             if not issubclass(perm, Permission):
-                raise TypeError(f"{perm} is not subclass of Permission")
+                raise TypeError(f"{perm} is not a subclass of Permission")
             self.add_permission(perm)
         self._relations: Dict[PermissionId, Set[PermissionId]] = {}
         relations = relations or {}
@@ -149,7 +148,7 @@ class Role:
         return self._relations
 
     def __repr__(self):
-        return f"{self.__class__} [code: '{self.code}' name: {self.name}]"
+        return f"{self.__class__} [id: '{self.id}' description: {self.description}]"
 
     def add_relation(self, common_perm: Type[Permission],
                      specific_perm: Type[Permission]):
@@ -171,7 +170,7 @@ class Role:
             raise AuthPermissionError(f"Cannot add {specific_perm} as a child of itself")
         if child not in self._permissions:
             raise PermissionNotRegistered(f"{specific_perm} is not registered in a current role")
-        # FIXME: child must be object level permission only!
+        # FIXME: child must be an object level permission only!
         # FIXME: detect loop
         if parent in self._relations and child in self._relations[parent]:
             raise AuthPermissionError(f"The item {common_perm} already has a "

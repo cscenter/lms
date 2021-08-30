@@ -27,6 +27,11 @@ class ThumbnailSizes(DjangoChoices):
     GRADUATE = C("344x482")
 
 
+# FIXME: remove after deep refactoring:
+#  1. Create service method `assign_role(user)` that must validate role id (it's impossible to use role registry as a source for the UserGroup.role choices')
+#  2. Use this method to assign permission roles in the admin. (`auth.registry.role_registry` should be used for the admin form)
+#  3. For backward compatibility it's better to change role id type to string
+#  (after removing Role from the registry it's impossible to figure out what surrogate key means)
 class Roles(DjangoChoices):
     STUDENT = C(1, _('Student'))
     TEACHER = C(2, _('Teacher'))

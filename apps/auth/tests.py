@@ -61,8 +61,8 @@ def test_role(mocker):
     mocker.patch.dict(perm_registry._dict, clear=True)
     perm_registry.add_permission(Permission1)
     with pytest.raises(PermissionNotRegistered):
-        role = Role(code=1, name="TestRole", permissions=(PermissionReturnsTrue,))
-    role = Role(code=1, name="TestRole", permissions=(Permission1,))
+        role = Role(id=1, code='1', description="TestRole", permissions=(PermissionReturnsTrue,))
+    role = Role(id=1, code='1', description="TestRole", permissions=(Permission1,))
     assert role.has_permission(Permission1)
     assert not role.has_permission(PermissionReturnsTrue)
     with pytest.raises(PermissionNotRegistered):
@@ -72,7 +72,7 @@ def test_role(mocker):
 def test_role_relations(mocker):
     mocker.patch.dict(perm_registry._dict, clear=True)
     perm_registry.add_permission(Permission1)
-    role = Role(code=1, name="TestRole", permissions=(Permission1,))
+    role = Role(id=1, description="TestRole", permissions=(Permission1,))
     # TestPermission2 is not registered in global registry
     with pytest.raises(PermissionNotRegistered):
         role.add_relation(Permission1, PermissionReturnsTrue)
@@ -95,7 +95,7 @@ def test_backend(mocker):
     user = UserFactory()
     assert not backend.has_perm(user, PermissionReturnsTrue.name)
     perm_registry.add_permission(PermissionReturnsTrue)
-    role1 = Role(code='role', name="TestRole1", priority=10,
+    role1 = Role(id='role', description="TestRole1", priority=10,
                  permissions=(PermissionReturnsTrue,))
     role_registry.register(role1)
     assert not user.has_perm(PermissionReturnsTrue.name)
@@ -111,10 +111,10 @@ def test_rbac_backend_has_perm(mocker):
     perm_registry.add_permission(Permission1)
     perm_registry.add_permission(PermissionReturnsTrue)
     perm_registry.add_permission(Permission3)
-    role1 = Role(code='role1', name="TestRole1", priority=10,
+    role1 = Role(id='role1', description="TestRole1", priority=10,
                  permissions=(Permission1,))
     role_registry.register(role1)
-    role2 = Role(code='role2', name="TestRole2", priority=11,
+    role2 = Role(id='role2', description="TestRole2", priority=11,
                  permissions=(PermissionReturnsTrue,))
     role_registry.register(role2)
     user = UserFactory()
@@ -140,9 +140,9 @@ def test_rbac_backend_has_perm_role_priority(mocker):
     perm_registry.add_permission(PermissionReturnsTrue)
     perm_registry.add_permission(PermissionReturnsFalse)
     perm_registry.add_permission(Permission3)
-    role1 = Role(code='role1', name="TestRole1", priority=30,
+    role1 = Role(id='role1', description="TestRole1", priority=30,
                  permissions=[PermissionReturnsFalse])
-    role2 = Role(code='role2', name="TestRole2", priority=20,
+    role2 = Role(id='role2', description="TestRole2", priority=20,
                  permissions=[PermissionReturnsTrue])
     role1.add_relation(Permission1, PermissionReturnsFalse)
     role1.add_relation(Permission3, PermissionReturnsFalse)
@@ -153,7 +153,7 @@ def test_rbac_backend_has_perm_role_priority(mocker):
     user.roles = {'role1', 'role2'}
     # role2 has higher priority than role1
     assert RBACPermissions().has_perm(user, Permission1.name, Permission1.INVALID_VALUE)
-    role3 = Role(code='role3', name="TestRole3", priority=10,
+    role3 = Role(id='role3', description="TestRole3", priority=10,
                  permissions=[Permission3])
     role_registry.register(role3)
     user.roles = {'role1', 'role2'}

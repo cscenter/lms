@@ -152,7 +152,7 @@ class Roles(DjangoChoices):
 
 for code, name in Roles.choices:
     choice = Roles.get_choice(code)
-    role = Role(code=code, name=name,
+    role = Role(id=code, code=code, description=name,
                 priority=getattr(choice, 'priority', 100),
                 permissions=choice.permissions)
     role_registry.register(role)

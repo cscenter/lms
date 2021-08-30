@@ -37,13 +37,13 @@ class RolePermissionsRegistry:
         If a role isn't already registered, this will raise NotRegistered.
         """
         if role.code not in self._registry:
-            raise NotRegistered('The role name %s is not '
+            raise NotRegistered('The role %s is not '
                                 'registered' % role.code)
         del self._registry[role.code]
 
     def _register_default_role(self):
-        self.register(Role(code=self.DEFAULT_ROLE_CODE,
-                           name='Default Role',
+        self.register(Role(id=self.DEFAULT_ROLE_CODE,
+                           description='Default Role',
                            priority=1000,
                            permissions=[]))
 
