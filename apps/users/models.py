@@ -9,6 +9,7 @@ from djchoices import C, DjangoChoices
 from model_utils.fields import AutoLastModifiedField, MonitorField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
+from taggit.models import TagBase
 
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -685,6 +686,12 @@ class StudentTypes(DjangoChoices):
             return Roles.PARTNER
 
 
+class PartnerTag(TagBase):
+    class Meta:
+        verbose_name = _("Partner Tag")
+        verbose_name_plural = _("Partner Tags")
+
+
 class StudentProfile(TimeStampedModel):
     site = models.ForeignKey(Site,
                              verbose_name=_("Site"),
@@ -698,6 +705,12 @@ class StudentProfile(TimeStampedModel):
         verbose_name=_("Priority"),  # among other user profiles on site
         editable=False
     )
+    partner = models.ForeignKey(
+        PartnerTag,
+        verbose_name=_("Magistracy"),
+        related_name="student_profiles",
+        on_delete=models.PROTECT,
+        blank=True, null=True)
     user = models.ForeignKey(
         User,
         verbose_name=_("Student"),
