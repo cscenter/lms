@@ -110,6 +110,18 @@
               {% endfor %}
             </div>
           </div>
+          <div class="form-group">
+            <label>Магистратуры</label><br>
+            <div class="btn-group btn-group-sm" data-toggle="buttons">
+              {% for partner in partner_tags %}
+                <label class="btn btn-default">
+                  <input type="checkbox" name="partners"
+                         value="{{ partner.pk }}"
+                         autocomplete="off">{{ partner.name }}
+                </label>
+              {% endfor %}
+            </div>
+          </div>
         </form>
       </div>
       <div class="col-xs-4">

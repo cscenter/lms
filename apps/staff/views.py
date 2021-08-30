@@ -45,7 +45,7 @@ from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
-from users.models import StudentProfile, StudentTypes, User
+from users.models import PartnerTag, StudentProfile, StudentTypes, User
 from users.services import (
     create_graduate_profiles, get_graduate_profile, get_student_progress
 )
@@ -99,6 +99,7 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
                                 .distinct()),
             "types": StudentTypes.choices,
             "academic_disciplines": AcademicDiscipline.objects.all(),
+            "partner_tags": PartnerTag.objects.all(),
             "status": StudentStatuses.values,
             "cnt_enrollments": range(StudentFilter.ENROLLMENTS_MAX + 1)
         }
