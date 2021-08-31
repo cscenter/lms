@@ -21,8 +21,8 @@ from learning.invitation.forms import (
     CompleteAccountForm, InvitationLoginForm, InvitationRegistrationForm
 )
 from learning.models import Invitation
-from users.services import create_student_profile
 from users.models import StudentProfile, StudentTypes, User
+from users.services import create_student_profile
 
 
 def student_profile_is_valid(user: User, site: Site, invitation):

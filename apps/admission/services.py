@@ -35,10 +35,9 @@ from core.timezone import get_now_utc
 from core.timezone.constants import DATE_FORMAT_RU
 from core.utils import bucketize
 from grading.api.yandex_contest import YandexContestAPI
-
-from users.services import create_student_profile, get_student_profile
 from tasks.models import Task
 from users.models import StudentProfile, StudentTypes, User
+from users.services import create_student_profile, get_student_profile
 
 
 def get_email_from(campaign: Campaign):

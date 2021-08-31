@@ -28,8 +28,7 @@ from courses.models import (
 from courses.services import CourseService
 from learning.models import (
     AssignmentComment, AssignmentGroup, AssignmentNotification,
-    AssignmentSubmissionTypes, CourseClassGroup, CourseNewsNotification,
-    Enrollment,
+    AssignmentSubmissionTypes, CourseClassGroup, CourseNewsNotification, Enrollment,
     Event, StudentAssignment, StudentGroup, StudentGroupAssignee
 )
 from learning.settings import StudentStatuses

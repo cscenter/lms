@@ -41,7 +41,7 @@ from projects.models import ProjectStudent
 from stats.views import AlumniStats
 from study_programs.models import AcademicDiscipline, StudyProgram
 from study_programs.services import get_study_programs
-from users.constants import SHADCourseGradeTypes, Roles
+from users.constants import Roles, SHADCourseGradeTypes
 from users.models import SHADCourseRecord, User
 
 # FIXME: remove?

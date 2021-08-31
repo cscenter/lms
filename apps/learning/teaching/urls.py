@@ -8,9 +8,11 @@ from learning.teaching.api.student_groups import StudentGroupTransferStudentsVie
 from learning.teaching.views import (
     CalendarFullView, CalendarPersonalView, CourseListView, GradeBookListView
 )
-from learning.teaching.views.assignments import AssignmentListView, AssignmentCommentUpdateView, AssignmentDetailView, \
-    StudentAssignmentDetailView, StudentAssignmentCommentCreateView
 from learning.teaching.views import TimetableView as TeacherTimetable
+from learning.teaching.views.assignments import (
+    AssignmentCommentUpdateView, AssignmentDetailView, AssignmentListView,
+    StudentAssignmentCommentCreateView, StudentAssignmentDetailView
+)
 from learning.teaching.views.student_groups import (
     StudentGroupCreateView, StudentGroupDeleteView, StudentGroupDetailView,
     StudentGroupListView, StudentGroupUpdateView

@@ -23,13 +23,13 @@ from learning.services import (
     AssignmentService, EnrollmentService, GroupEnrollmentKeyError, StudentGroupError,
     StudentGroupService, create_notifications_about_new_submission
 )
-from users.services import create_student_profile, StudentProfileError
 from learning.settings import Branches, StudentStatuses
 from learning.tests.factories import (
     AssignmentCommentFactory, AssignmentNotificationFactory, EnrollmentFactory,
     StudentAssignmentFactory, StudentGroupAssigneeFactory, StudentGroupFactory
 )
 from users.models import StudentTypes, UserGroup
+from users.services import StudentProfileError, create_student_profile
 from users.tests.factories import StudentFactory, StudentProfileFactory, UserFactory
 
 

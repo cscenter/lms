@@ -32,9 +32,9 @@ from courses.views.calendar import MonthEventsCalendarView
 from courses.views.mixins import CoursePublicURLParamsMixin
 from learning.gallery.models import Image
 from learning.services import get_classes
-from users.services import create_student_profile
 from users.constants import Roles
 from users.models import StudentTypes, User
+from users.services import create_student_profile
 
 _TIME_ZONE = pytz.timezone('Europe/Moscow')
 
