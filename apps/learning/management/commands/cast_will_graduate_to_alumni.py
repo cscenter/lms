@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from datetime import datetime
 
 from django.conf import settings
@@ -10,7 +9,8 @@ from django.utils.timezone import now
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
 from users.constants import Roles
-from users.models import StudentProfile, StudentStatusLog, StudentTypes, User
+from users.models import StudentProfile, StudentTypes, User
+from users.services import update_student_status
 
 
 class Command(BaseCommand):
@@ -39,13 +39,8 @@ class Command(BaseCommand):
                         "graduated_on": graduated_on,
                         "details": {}
                     })
-                student_profile.status = StudentStatuses.GRADUATE
-                student_profile.save()
-                # Add new status log entry
-                log_entry = StudentStatusLog(status=StudentStatuses.GRADUATE,
-                                             student_profile=student_profile,
-                                             entry_author=admin)
-                log_entry.save()
+                update_student_status(student_profile, new_status=StudentStatuses.GRADUATE,
+                                      editor=admin)
         cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
         cache_key = cache_key_pattern.format(site_id=settings.SITE_ID)
         cache.delete(cache_key)

@@ -29,6 +29,7 @@ def post_delete_user_group(sender, instance: UserGroup, *args, **kwargs):
         User.objects.filter(pk=instance.user_id).update(index_redirect='')
 
 
+# FIXME: move to the service method
 @receiver(post_delete, sender=StudentProfile)
 def post_delete_student_profile(sender, instance: StudentProfile, **kwargs):
     deleted_profile = instance
@@ -47,6 +48,7 @@ def post_delete_student_profile(sender, instance: StudentProfile, **kwargs):
          .delete())
 
 
+# FIXME: move to the service method
 @receiver(post_save, sender=StudentProfile)
 def post_save_student_profile(sender, instance: StudentProfile, **kwargs):
     permission_role = StudentTypes.to_permission_role(instance.type)

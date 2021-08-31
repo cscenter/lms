@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 
 from django.contrib.sites.models import Site
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.utils.timezone import now
@@ -112,8 +113,8 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date,
                         .filter(status=StudentStatuses.WILL_GRADUATE,
                                 branch__site=site)
                         .prefetch_related('academic_disciplines'))
-    update_student_status = now().date() >= graduated_on
-    if update_student_status and not created_by:
+    is_update_student_status = now().date() >= graduated_on
+    if is_update_student_status and not created_by:
         created_by = User.objects.has_role(Roles.CURATOR).order_by('pk').first()
     for student_profile in student_profiles:
         with transaction.atomic():
@@ -139,14 +140,9 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date,
                                 graduateprofile_id=graduate.pk)
                 disciplines.append(d)
             model_class.objects.bulk_create(disciplines)
-            if update_student_status:
-                (StudentProfile.objects
-                 .filter(pk=student_profile.pk)
-                 .update(status=StudentStatuses.GRADUATE))
-                log_entry = StudentStatusLog(status=StudentStatuses.GRADUATE,
-                                             student_profile=student_profile,
-                                             entry_author=created_by)
-                log_entry.save()
+            if is_update_student_status:
+                update_student_status(student_profile, new_status=StudentStatuses.GRADUATE,
+                                      editor=created_by)
     cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
     cache_key = cache_key_pattern.format(site_id=site.pk)
     cache.delete(cache_key)
@@ -157,6 +153,10 @@ def get_graduate_profile(student_profile: StudentProfile) -> Optional[GraduatePr
             .filter(student_profile=student_profile)
             .prefetch_related('academic_disciplines')
             .first())
+
+
+class StudentProfileError(Exception):
+    pass
 
 
 def create_student_profile(*, user: User, branch: Branch, profile_type,
@@ -173,14 +173,10 @@ def create_student_profile(*, user: User, branch: Branch, profile_type,
             msg = "Year of curriculum is not set for the regular student"
             raise StudentProfileError(msg)
     # FIXME: Prevent creating 2 profiles for invited student in the same
-    # term through admin interface
+    #  term through the admin interface
     new_student_profile = StudentProfile(**profile_fields)
     new_student_profile.save()
     return new_student_profile
-
-
-class StudentProfileError(Exception):
-    pass
 
 
 # FIXME: get profile for Invited students from the current term ONLY
@@ -208,4 +204,18 @@ def get_student_profile(user: User, site, profile_type=None,
     if student_profile is not None:
         # It helps to invalidate cache on user model if profile were changed
         student_profile.user = user
+    return student_profile
+
+
+# FIXME: make it an implementation detail of the `student_profile_update` service method
+def update_student_status(student_profile: StudentProfile, *,
+                          new_status: str, editor: User) -> StudentProfile:
+    if new_status not in StudentStatuses.values:
+        raise ValidationError("Unknown Student Status", code="invalid")
+    student_profile.status = new_status
+    student_profile.save(update_fields=['status'])
+    log_entry = StudentStatusLog(status=new_status,
+                                 student_profile=student_profile,
+                                 entry_author=editor)
+    log_entry.save()
     return student_profile

@@ -1,10 +1,9 @@
-from modeltranslation.admin import TranslationAdmin
-
 from django.conf import settings
 from django.contrib import admin
 from django.db import models as db_models
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from modeltranslation.admin import TranslationAdmin
 
 from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
@@ -12,11 +11,11 @@ from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseGroupModes, CourseTeacher
 from learning.models import (
-    CourseInvitation, GraduateProfile, Invitation, StudentAssignment, StudentGroup,
+    CourseInvitation, GraduateProfile, Invitation, StudentAssignment,
+    StudentGroup,
     StudentGroupAssignee
 )
-from users.models import StudentStatusLog
-
+from users.services import update_student_status
 from .models import AssignmentComment, Enrollment, Event
 from .services import StudentGroupService
 from .settings import StudentStatuses
@@ -191,12 +190,8 @@ class GraduateProfileAdmin(BaseModelAdmin):
             is_active = form.cleaned_data['is_active']
             student_profile = obj.student_profile
             if is_active and student_profile.status != StudentStatuses.GRADUATE:
-                student_profile.status = StudentStatuses.GRADUATE
-                student_profile.save(update_fields=['status'])
-                log_entry = StudentStatusLog(status=StudentStatuses.GRADUATE,
-                                             student_profile=student_profile,
-                                             entry_author=request.user)
-                log_entry.save()
+                update_student_status(student_profile, new_status=StudentStatuses.GRADUATE,
+                                      editor=request.user)
 
 
 class CourseInlineAdmin(admin.TabularInline):

@@ -19,6 +19,7 @@ from .models import (
     CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
     StudentStatusLog, StudentTypes, User, UserGroup
 )
+from .services import update_student_status
 
 
 class OnlineCourseRecordAdmin(admin.StackedInline):
@@ -226,11 +227,9 @@ class StudentProfileAdmin(BaseModelAdmin):
         if "comment" in form.changed_data:
             obj.comment_last_author = request.user
         # Don't save initial status
-        if "status" in form.changed_data and obj.pk:
-            log_entry = StudentStatusLog(status=form.cleaned_data['status'],
-                                         student_profile=obj,
-                                         entry_author=request.user)
-            log_entry.save()
+        if change and "status" in form.changed_data:
+            update_student_status(obj, new_status=form.cleaned_data['status'],
+                                  editor=request.user)
         super().save_model(request, obj, form, change)
 
 
