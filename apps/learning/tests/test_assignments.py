@@ -20,12 +20,13 @@ from courses.tests.factories import (
 )
 from learning.models import StudentAssignment
 from learning.permissions import ViewAssignmentAttachment
-from learning.services import is_course_failed_by_student, get_student_profile
+from learning.services import is_course_failed_by_student
 from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
 )
 from projects.tests.factories import ProjectReviewerFactory
+from users.services import get_student_profile
 from users.tests.factories import (
     CuratorFactory, StudentFactory, TeacherFactory, VolunteerFactory
 )

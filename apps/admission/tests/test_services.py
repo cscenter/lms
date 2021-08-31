@@ -31,9 +31,10 @@ from admission.tests.factories import (
 from core.models import Branch
 from core.tests.factories import BranchFactory, EmailTemplateFactory, SiteFactory
 from core.timezone import get_now_utc
-from learning.services import get_student_profile
+
 from users.constants import GenderTypes
 from users.models import StudentTypes
+from users.services import get_student_profile
 from users.tests.factories import StudentProfileFactory, UserFactory
 
 

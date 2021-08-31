@@ -21,7 +21,7 @@ from learning.invitation.forms import (
     CompleteAccountForm, InvitationLoginForm, InvitationRegistrationForm
 )
 from learning.models import Invitation
-from learning.services import create_student_profile
+from users.services import create_student_profile
 from users.models import StudentProfile, StudentTypes, User
 
 

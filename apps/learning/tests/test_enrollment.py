@@ -18,10 +18,11 @@ from learning.models import (
     Enrollment, EnrollmentPeriod, StudentAssignment, StudentGroup
 )
 from learning.services import (
-    CourseCapacityFull, EnrollmentService, StudentGroupService, get_student_profile
+    CourseCapacityFull, EnrollmentService, StudentGroupService
 )
 from learning.settings import Branches, StudentStatuses
 from learning.tests.factories import CourseInvitationFactory, EnrollmentFactory
+from users.services import get_student_profile
 from users.tests.factories import (
     InvitedStudentFactory, StudentFactory, StudentProfileFactory
 )

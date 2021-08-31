@@ -1,11 +1,11 @@
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
-from learning.services import get_student_profile
 from lms.utils import PublicRoute
 from users.constants import Roles
 
 from .models import StudentProfile, StudentTypes, User, UserGroup
+from .services import get_student_profile
 
 
 @receiver(post_save, sender=UserGroup)

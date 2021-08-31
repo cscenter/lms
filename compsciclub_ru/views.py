@@ -31,7 +31,8 @@ from courses.utils import MonthPeriod, extended_month_date_range, get_current_te
 from courses.views.calendar import MonthEventsCalendarView
 from courses.views.mixins import CoursePublicURLParamsMixin
 from learning.gallery.models import Image
-from learning.services import create_student_profile, get_classes
+from learning.services import get_classes
+from users.services import create_student_profile
 from users.constants import Roles
 from users.models import StudentTypes, User
 

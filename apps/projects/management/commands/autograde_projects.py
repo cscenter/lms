@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 import logging
 
 from django.conf import settings
 from django.core.management import BaseCommand, CommandError
 
 from courses.models import Semester
-from learning.services import get_student_profile
 from projects.constants import ProjectGradeTypes
 from projects.models import ProjectStudent, ReportingPeriod, ReportingPeriodKey
+from users.services import get_student_profile
 
 logger = logging.getLogger(__name__)
 

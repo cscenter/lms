@@ -25,9 +25,9 @@ from learning.gradebook.imports import (
 )
 from learning.models import Enrollment, StudentAssignment
 from learning.permissions import ViewOwnGradebook
-from learning.services import get_student_profile
 from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import EnrollmentFactory
+from users.services import get_student_profile
 from users.tests.factories import StudentFactory, TeacherFactory
 
 # TODO: test redirect to gradebook for teachers if only 1 course in current term

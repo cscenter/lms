@@ -21,14 +21,13 @@ from courses.admin import AssignmentAdmin
 from courses.models import Assignment, AssignmentSubmissionFormats, CourseTeacher
 from courses.tests.factories import AssignmentFactory, CourseFactory, CourseNewsFactory
 from learning.models import AssignmentNotification, CourseNewsNotification
-from learning.services import (
-    EnrollmentService, get_student_profile, is_course_failed_by_student
-)
+from learning.services import EnrollmentService, is_course_failed_by_student
 from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import *
 from notifications.management.commands.notify import (
     get_assignment_notification_context, get_course_news_notification_context
 )
+from users.services import get_student_profile
 from users.tests.factories import *
 
 

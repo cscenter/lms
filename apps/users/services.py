@@ -5,13 +5,17 @@ from typing import Any, Dict, List, Optional
 from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.db import transaction
+from django.db.models import Q
 from django.utils.timezone import now
 
+from core.models import Branch
 from courses.models import Semester
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
 from users.constants import Roles
-from users.models import OnlineCourseRecord, StudentProfile, StudentStatusLog, User
+from users.models import (
+    OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User
+)
 
 AccountId = int
 
@@ -153,3 +157,55 @@ def get_graduate_profile(student_profile: StudentProfile) -> Optional[GraduatePr
             .filter(student_profile=student_profile)
             .prefetch_related('academic_disciplines')
             .first())
+
+
+def create_student_profile(*, user: User, branch: Branch, profile_type,
+                           year_of_admission, **fields) -> StudentProfile:
+    profile_fields = {
+        **fields,
+        "user": user,
+        "branch": branch,
+        "type": profile_type,
+        "year_of_admission": year_of_admission,
+    }
+    if profile_type == StudentTypes.REGULAR:
+        if "year_of_curriculum" not in profile_fields:
+            msg = "Year of curriculum is not set for the regular student"
+            raise StudentProfileError(msg)
+    # FIXME: Prevent creating 2 profiles for invited student in the same
+    # term through admin interface
+    new_student_profile = StudentProfile(**profile_fields)
+    new_student_profile.save()
+    return new_student_profile
+
+
+class StudentProfileError(Exception):
+    pass
+
+
+# FIXME: get profile for Invited students from the current term ONLY
+# FIXME: store term of registration or get date range for the term of registration
+def get_student_profile(user: User, site, profile_type=None,
+                        filters: List[Q] = None) -> Optional[StudentProfile]:
+    """
+    Returns the most actual student profile on site for user.
+
+    User could have multiple student profiles in different cases, e.g.:
+    * They passed distance branch in 2011 and then applied to the
+        offline branch in 2013
+    * Student didn't meet the requirements and was expelled in the first
+        semester but reapplied on general terms for the second time
+    * Regular student "came back" as invited
+    """
+    filters = filters or []
+    if profile_type is not None:
+        filters.append(Q(type=profile_type))
+    student_profile = (StudentProfile.objects
+                       .filter(*filters, user=user, site=site)
+                       .select_related('branch')
+                       .order_by('-year_of_admission', '-priority', '-pk')
+                       .first())
+    if student_profile is not None:
+        # It helps to invalidate cache on user model if profile were changed
+        student_profile.user = user
+    return student_profile

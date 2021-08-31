@@ -428,7 +428,7 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
 
     @instance_memoize
     def get_student_profile(self, site=settings.SITE_ID, **kwargs):
-        from learning.services import get_student_profile
+        from users.services import get_student_profile
         return get_student_profile(self, site, **kwargs)
 
     def get_student_profile_url(self, subdomain=None):

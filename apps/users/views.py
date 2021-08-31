@@ -23,7 +23,6 @@ from courses.models import Course, CourseTeacher, Semester
 from files.handlers import MemoryImageUploadHandler, TemporaryImageUploadHandler
 from learning.forms import TestimonialForm
 from learning.models import Enrollment, StudentAssignment
-from learning.services import get_student_profile
 from learning.settings import GradeTypes
 from study_programs.models import StudyProgram
 from users.compat import get_graduate_profile as get_graduate_profile_compat
@@ -35,7 +34,9 @@ from .models import CertificateOfParticipation, User
 from .permissions import (
     CreateCertificateOfParticipation, ViewCertificateOfParticipation
 )
-from .services import get_graduate_profile, get_student_status_history
+from .services import (
+    get_graduate_profile, get_student_profile, get_student_status_history
+)
 
 
 class UserDetailView(LoginRequiredMixin, generic.DetailView):
