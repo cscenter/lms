@@ -20,7 +20,7 @@ from courses.tests.factories import (
 )
 from learning.models import StudentAssignment
 from learning.permissions import ViewAssignmentAttachment
-from learning.services import course_failed_by_student, get_student_profile
+from learning.services import is_course_failed_by_student, get_student_profile
 from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
@@ -44,7 +44,7 @@ def test_security_course_detail(client):
                                    grade=GradeTypes.UNSATISFACTORY)
     a = AssignmentFactory(course=co)
     co.refresh_from_db()
-    assert course_failed_by_student(co, student)
+    assert is_course_failed_by_student(co, student)
     client.login(student)
     url = co.get_absolute_url()
     response = client.get(url)
@@ -54,12 +54,12 @@ def test_security_course_detail(client):
     enrollment.grade = GradeTypes.EXCELLENT
     enrollment.save()
     response = client.get(url)
-    assert not course_failed_by_student(co, student)
+    assert not is_course_failed_by_student(co, student)
     # Change course offering state to not completed
     co.completed_at = now().date() + datetime.timedelta(days=1)
     co.save()
     response = client.get(url)
-    assert not course_failed_by_student(co, student)
+    assert not is_course_failed_by_student(co, student)
 
 
 @pytest.mark.django_db

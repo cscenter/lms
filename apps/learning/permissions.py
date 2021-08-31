@@ -12,7 +12,7 @@ from courses.models import (
 from learning.models import (
     AssignmentGroup, CourseInvitation, Enrollment, StudentAssignment, StudentGroup
 )
-from learning.services import CourseRole, course_access_role, course_failed_by_student
+from learning.services import CourseRole, course_access_role, is_course_failed_by_student
 from learning.settings import StudentStatuses
 from users.models import StudentProfile, User
 
@@ -72,7 +72,7 @@ def learner_has_access_to_the_assignment(user: User,
     if not enrollment:
         return False
     student_profile = enrollment.student_profile
-    if student_profile.is_active and not course_failed_by_student(course, user):
+    if student_profile.is_active and not is_course_failed_by_student(course, user):
         return True
     # If student failed the course or was expelled at all, deny
     # access only when he has no submissions or positive

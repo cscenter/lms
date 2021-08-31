@@ -22,7 +22,7 @@ from courses.models import Assignment, AssignmentSubmissionFormats, CourseTeache
 from courses.tests.factories import AssignmentFactory, CourseFactory, CourseNewsFactory
 from learning.models import AssignmentNotification, CourseNewsNotification
 from learning.services import (
-    EnrollmentService, course_failed_by_student, get_student_profile
+    EnrollmentService, get_student_profile, is_course_failed_by_student
 )
 from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import *
@@ -87,7 +87,7 @@ def test_view_new_assignment(client):
     }
     # Post first comment on assignment
     AssignmentNotification.objects.all().delete()
-    assert not course_failed_by_student(course, student)
+    assert not is_course_failed_by_student(course, student)
     client.login(student)
     client.post(student_create_comment_url, student_comment_dict)
     assert 2 == (AssignmentNotification.objects
@@ -237,7 +237,7 @@ def test_assignment_submission_notifications_for_teacher(client):
     course_teacher1.save()
     # Leave a comment from student
     student = StudentFactory()
-    assert not course_failed_by_student(course, student)
+    assert not is_course_failed_by_student(course, student)
     client.login(student)
     assert Assignment.objects.count() == 0
     sa = StudentAssignmentFactory(student=student, assignment__course=course)

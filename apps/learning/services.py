@@ -114,7 +114,7 @@ def update_course_learners_count(course_id):
     )
 
 
-def course_failed_by_student(course: Course, student, enrollment=None) -> bool:
+def is_course_failed_by_student(course: Course, student, enrollment=None) -> bool:
     """Checks that student didn't fail the completed course"""
     from learning.models import Enrollment
     if course.is_club_course or not course.is_completed:
@@ -897,7 +897,7 @@ def course_access_role(*, course, user) -> CourseRole:
     role = CourseRole.NO_ROLE
     enrollment = user.get_enrollment(course.pk)
     if enrollment:
-        failed = course_failed_by_student(course, user, enrollment)
+        failed = is_course_failed_by_student(course, user, enrollment)
         student_status = enrollment.student_profile.status
         if not failed and not StudentStatuses.is_inactive(student_status):
             role = CourseRole.STUDENT_REGULAR
