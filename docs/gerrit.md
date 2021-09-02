@@ -70,11 +70,11 @@ Edit project.config
         copyAllScoresIfNoCodeChange = true
         defaultValue = 0
 [access "refs/heads/*"]
-        label-Verified = -1..+1 group Non-Interactive Users
+        label-Verified = -1..+1 group Service Users
 ```
 Make sure target group in a `groups` file (UUID can be viewed in gerrit UI)
 ```text
-e88b5ea24c4f9488b8908632c03bf517e0707474	Non-Interactive Users
+e88b5ea24c4f9488b8908632c03bf517e0707474	Service Users
 ```
 Now save changes
 ```bash
