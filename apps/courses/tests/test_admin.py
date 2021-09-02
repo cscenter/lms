@@ -10,7 +10,8 @@ from core.urls import reverse
 from courses.admin import CourseBranchInline, CourseTeacherInline
 from courses.constants import MaterialVisibilityTypes
 from courses.models import (
-    Assignment, AssignmentSubmissionFormats, Course, CourseBranch, CourseTeacher
+    Assignment, AssignmentSubmissionFormats, Course, CourseBranch, CourseGroupModes,
+    CourseTeacher
 )
 from courses.tests.factories import CourseFactory, MetaCourseFactory, SemesterFactory
 from learning.settings import Branches, GradingSystems
@@ -30,6 +31,7 @@ def _get_course_post_data(course=None):
         "meta_course": meta_course.pk,
         "main_branch": branch.pk,
         "semester": term.pk,
+        "group_mode": CourseGroupModes.BRANCH,
         "grading_type": GradingSystems.BASE,
         "capacity": 0,
         "language": "ru",

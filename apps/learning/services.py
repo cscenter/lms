@@ -204,6 +204,7 @@ class StudentGroupService:
             else:
                 student_group = cls.get_or_create_default_group(course)
                 return student_group
+        # FIXME: raise correct exception
         raise GroupEnrollmentKeyError
 
     @staticmethod

@@ -19,8 +19,8 @@ from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import (
     Assignment, AssignmentAttachment, Course, CourseBranch, CourseClass,
-    CourseClassAttachment, CourseNews, CourseReview, CourseTeacher, LearningSpace,
-    MetaCourse, Semester
+    CourseClassAttachment, CourseGroupModes, CourseNews, CourseReview, CourseTeacher,
+    LearningSpace, MetaCourse, Semester
 )
 from courses.services import CourseService
 from learning.models import AssignmentGroup, EnrollmentPeriod, StudentGroup
@@ -86,7 +86,20 @@ class CourseBranchInline(admin.TabularInline):
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
+class CourseAdminForm(TimezoneAwareAdminForm):
+    class Meta:
+        model = Course
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # We can select teachers only from related course offering
+        if 'group_mode' in cleaned_data and cleaned_data['group_mode'] == CourseGroupModes.NO_GROUPS:
+            self.add_error('group_mode', ValidationError("This mode is for internal use only"))
+
+
 class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
+    form = CourseAdminForm
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
@@ -102,7 +115,9 @@ class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
         }
 
     def get_readonly_fields(self, request, obj=None):
-        return ['group_mode']
+        if obj and obj.pk is not None:
+            return ['group_mode']
+        return []
 
 
 class LearningSpaceAdmin(admin.ModelAdmin):
