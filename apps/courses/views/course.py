@@ -10,13 +10,14 @@ from core.utils import is_club_site
 from core.views import ProtectedFormMixin
 from courses.constants import TeacherRoles
 from courses.forms import CourseEditDescrForm
-from courses.models import Course, CourseTeacher
+from courses.models import Course, CourseTeacher, CourseGroupModes
 from courses.permissions import can_view_private_materials
 from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import CourseNewsNotification
 from learning.services import course_access_role
+from learning.teaching.utils import get_student_groups_url
 from users.mixins import TeacherOnlyMixin
 
 __all__ = ('CourseDetailView', 'CourseEditView')
@@ -61,6 +62,8 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
             teachers[group].extend(ts)
         role = course_access_role(course=course, user=self.request.user)
         context = {
+            'CourseGroupModes': CourseGroupModes,
+            'get_student_groups_url': get_student_groups_url,
             'course': course,
             'course_tabs': tab_list,
             'teachers': teachers,
