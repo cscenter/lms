@@ -23,24 +23,24 @@ class Command(BaseCommand):
         graduated_on = datetime.strptime(graduated_on_str, "%d.%m.%Y").date()
         will_graduate_list = (StudentProfile.objects
                               .filter(type=StudentTypes.REGULAR,
-                                      status=StudentStatuses.WILL_GRADUATE))
+                                      status=StudentStatuses.WILL_GRADUATE,
+                                      site_id=settings.SITE_ID))
 
         admin = User.objects.get(pk=1)
         for student_profile in will_graduate_list:
             user_account = student_profile.user
             with transaction.atomic():
+                # TODO: update existing record is no other active student profiles with `Student` permission
                 user_account.remove_group(Roles.STUDENT)
                 user_account.add_group(Roles.GRADUATE)
-                # FIXME: use `creat_graduate_profiles` instead
+                # TODO: reuse `create_graduate_profiles` logic
                 GraduateProfile.objects.update_or_create(
                     student_profile=student_profile,
                     defaults={
-                        "is_active": True,
                         "graduated_on": graduated_on,
-                        "details": {}
                     })
                 update_student_status(student_profile, new_status=StudentStatuses.GRADUATE,
-                                      editor=admin)
+                                      editor=admin, status_changed_at=graduated_on)
         cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
         cache_key = cache_key_pattern.format(site_id=settings.SITE_ID)
         cache.delete(cache_key)

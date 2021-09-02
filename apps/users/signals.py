@@ -50,7 +50,9 @@ def post_delete_student_profile(sender, instance: StudentProfile, **kwargs):
 
 # FIXME: move to the service method
 @receiver(post_save, sender=StudentProfile)
-def post_save_student_profile(sender, instance: StudentProfile, **kwargs):
+def post_save_student_profile(sender, instance: StudentProfile, created, **kwargs):
+    if not created:
+        return
     permission_role = StudentTypes.to_permission_role(instance.type)
     UserGroup.objects.update_or_create(user_id=instance.user_id,
                                        site_id=instance.site_id,

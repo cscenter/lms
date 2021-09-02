@@ -112,6 +112,7 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date,
     student_profiles = (StudentProfile.objects
                         .filter(status=StudentStatuses.WILL_GRADUATE,
                                 branch__site=site)
+                        .select_related('user')
                         .prefetch_related('academic_disciplines'))
     is_update_student_status = now().date() >= graduated_on
     if is_update_student_status and not created_by:
@@ -130,19 +131,21 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date,
             graduate.graduated_on = graduated_on
             graduate.is_active = True
             graduate.save()
-            if not created:
-                graduate.academic_disciplines.clear()
-            # Bulk copy academic disciplines without creating new transactions
-            model_class = GraduateProfile.academic_disciplines.through
-            disciplines = []
-            for discipline in student_profile.academic_disciplines.all():
-                d = model_class(academicdiscipline_id=discipline.pk,
-                                graduateprofile_id=graduate.pk)
-                disciplines.append(d)
-            model_class.objects.bulk_create(disciplines)
+            if created:
+                # Copy academic disciplines from the student profile
+                model_class = GraduateProfile.academic_disciplines.through
+                disciplines = []
+                for discipline in student_profile.academic_disciplines.all():
+                    d = model_class(academicdiscipline_id=discipline.pk,
+                                    graduateprofile_id=graduate.pk)
+                    disciplines.append(d)
+                model_class.objects.bulk_create(disciplines)
             if is_update_student_status:
                 update_student_status(student_profile, new_status=StudentStatuses.GRADUATE,
-                                      editor=created_by)
+                                      editor=created_by, status_changed_at=graduated_on)
+                # FIXME: replace student permission with graduate if there is no other active student profiles
+                student_profile.user.remove_group(Roles.STUDENT)
+                student_profile.user.add_group(Roles.GRADUATE)
     cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
     cache_key = cache_key_pattern.format(site_id=site.pk)
     cache.delete(cache_key)
@@ -209,7 +212,8 @@ def get_student_profile(user: User, site, profile_type=None,
 
 # FIXME: make it an implementation detail of the `student_profile_update` service method
 def update_student_status(student_profile: StudentProfile, *,
-                          new_status: str, editor: User) -> StudentProfile:
+                          new_status: str, editor: User,
+                          status_changed_at: Optional[datetime.date] = None) -> StudentProfile:
     is_studying_status = ''
     if new_status not in StudentStatuses.values and new_status != is_studying_status:
         raise ValidationError("Unknown Student Status", code="invalid")
@@ -218,5 +222,9 @@ def update_student_status(student_profile: StudentProfile, *,
     log_entry = StudentStatusLog(status=new_status,
                                  student_profile=student_profile,
                                  entry_author=editor)
+
+    if status_changed_at:
+        log_entry.status_changed_at = status_changed_at
+
     log_entry.save()
     return student_profile

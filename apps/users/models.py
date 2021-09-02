@@ -386,7 +386,7 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
 
         super().save(**kwargs)
 
-    def add_group(self, role, site_id: int = None):
+    def add_group(self, role, site_id: Optional[int] = None) -> None:
         """Add new role associated with the current site by default"""
         site_id = site_id or settings.SITE_ID
         self.groups.get_or_create(user=self, role=role, site_id=site_id)

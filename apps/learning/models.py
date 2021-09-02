@@ -1023,6 +1023,7 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
     details = PrettyJSONField(
         verbose_name=_("Details"),
         blank=True,
+        default=dict
     )
     diploma_number = models.CharField(
         verbose_name=_("Diploma Number"),
