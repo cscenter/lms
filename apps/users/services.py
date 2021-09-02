@@ -210,7 +210,8 @@ def get_student_profile(user: User, site, profile_type=None,
 # FIXME: make it an implementation detail of the `student_profile_update` service method
 def update_student_status(student_profile: StudentProfile, *,
                           new_status: str, editor: User) -> StudentProfile:
-    if new_status not in StudentStatuses.values:
+    is_studying_status = ''
+    if new_status not in StudentStatuses.values and new_status != is_studying_status:
         raise ValidationError("Unknown Student Status", code="invalid")
     student_profile.status = new_status
     student_profile.save(update_fields=['status'])
