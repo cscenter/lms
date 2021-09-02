@@ -661,7 +661,7 @@ class StudentTypes(DjangoChoices):
     REGULAR = C('regular', _("Regular Student"), priority=300)
     VOLUNTEER = C('volunteer', _("Co-worker"), priority=200)
     INVITED = C('invited', _("Invited Student"), priority=100)
-    PARTNER = C('partner', _("Master's Degree Student"), priority=300)
+    PARTNER = C('partner', _("Master's Degree Student"), priority=400)
 
     @classmethod
     def from_permission_role(cls, role):
