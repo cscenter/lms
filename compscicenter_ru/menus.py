@@ -42,14 +42,14 @@ public_menu = [
         ]),
     MenuItem(
         pgettext_lazy("menu", "About"),
-        reverse_lazy('history'),
+        reverse_lazy('teachers'),
         weight=60,
         children=[
-            MenuItem(pgettext_lazy("menu", "History"), reverse_lazy('history'), weight=20),
+            MenuItem(pgettext_lazy("menu", "Teachers"), reverse_lazy('teachers'), weight=10),
+            MenuItem(pgettext_lazy("menu", "Alumni"), reverse_lazy('alumni'), weight=20, selected_patterns=[r"^/2016/$"]),
+            MenuItem(pgettext_lazy("menu", "Testimonials"), reverse_lazy('testimonials'), weight=30),
             MenuItem(pgettext_lazy("menu", "Team"), reverse_lazy('team'), weight=40),
-            MenuItem(pgettext_lazy("menu", "Teachers"), reverse_lazy('teachers'), weight=50),
-            MenuItem(pgettext_lazy("menu", "Alumni"), reverse_lazy('alumni'), weight=60, selected_patterns=[r"^/2016/$"]),
-            MenuItem(pgettext_lazy("menu", "Testimonials"), reverse_lazy('testimonials'), weight=70),
+            MenuItem(pgettext_lazy("menu", "History"), reverse_lazy('history'), weight=50),
         ],
         selected_patterns=[
             r"^/events/"
