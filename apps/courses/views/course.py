@@ -10,7 +10,7 @@ from core.utils import is_club_site
 from core.views import ProtectedFormMixin
 from courses.constants import TeacherRoles
 from courses.forms import CourseEditDescrForm
-from courses.models import Course, CourseTeacher, CourseGroupModes
+from courses.models import Course, CourseGroupModes, CourseTeacher
 from courses.permissions import can_view_private_materials
 from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
