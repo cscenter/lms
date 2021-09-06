@@ -17,6 +17,8 @@ def get_occupied_slot(*, invitation: InterviewInvitation) -> Optional[InterviewS
             .select_related("stream__interview_format",
                             "interview__applicant__campaign")
             .first())
+    if slot is None:
+        return None
     # Interview could be reassigned to another applicant
     # after the slot was occupied
     if slot.interview.applicant_id != invitation.applicant_id:

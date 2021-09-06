@@ -120,7 +120,7 @@ def test_logout_redirect_works(client):
 @pytest.mark.django_db
 def test_yandex_login_from_email(client, settings):
     """
-    yandex_login can be exctracted from email if email is on @yandex.ru
+    yandex_login can be extracted from email if email domain is @yandex.ru
     """
     branch = BranchFactory()
     user = User.objects.create_user("testuser1", "foo@bar.net",

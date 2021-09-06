@@ -22,7 +22,10 @@ from learning.invitation.forms import (
 )
 from learning.models import Invitation
 from users.models import StudentProfile, StudentTypes, User
-from users.services import create_student_profile
+from users.services import (
+    create_account, create_registration_profile, create_student_profile,
+    generate_username_from_email
+)
 
 
 def student_profile_is_valid(user: User, site: Site, invitation):
@@ -125,34 +128,34 @@ class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
         context = self.get_context_data()
         return self.render_to_response(context)
 
-    def register(self, form):
+    def register(self, form) -> User:
         site = get_current_site(self.request)
-        new_user_instance = form.save(commit=False)
-        new_user_instance.branch = self.invitation.branch
-        new_user = self.registration_profile.objects.create_inactive_user(
-            new_user=new_user_instance,
-            site=site,
-            send_email=False,
-            request=self.request,
-        )
-        signals.user_registered.send(sender=self.__class__,
-                                     user=new_user,
-                                     request=self.request)
-        new_student_profile = StudentProfile(
-            user=new_user,
-            branch=self.invitation.branch,
-            type=StudentTypes.INVITED,
-            year_of_admission=self.invitation.semester.academic_year)
-        new_student_profile.save()
+        invitation = self.invitation
+        data = form.cleaned_data
+        with transaction.atomic():
+            new_user = create_account(
+                username=data['username'],
+                password=data['password1'],
+                email=data['email'],
+                gender=data['gender'],
+                time_zone=invitation.branch.time_zone,
+                is_active=False,
+                first_name=data['first_name'],
+                last_name=data['last_name'],
+                patronymic=data.get('patronymic', ''))
+            registration_profile = create_registration_profile(user=new_user)
+            create_student_profile(user=new_user, branch=invitation.branch,
+                                   profile_type=StudentTypes.INVITED,
+                                   year_of_admission=invitation.semester.academic_year)
         activation_url = reverse("invitation:activate", kwargs={
-            "token": self.invitation.token,
-            "activation_key": new_user.registrationprofile.activation_key
+            "token": invitation.token,
+            "activation_key": registration_profile.activation_key
         }, subdomain=settings.LMS_SUBDOMAIN)
         context = ActivationEmailContext(
             site_name=site.name,
             activation_url=self.request.build_absolute_uri(activation_url),
             language_code=self.request.LANGUAGE_CODE)
-        send_activation_email.delay(context, new_user.registrationprofile.pk)
+        send_activation_email.delay(context, registration_profile.pk)
         return new_user
 
     def registration_allowed(self):

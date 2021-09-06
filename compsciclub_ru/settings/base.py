@@ -89,7 +89,6 @@ FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
 ACCOUNT_ACTIVATION_DAYS = 2
 INCLUDE_REGISTER_URL = False
 INCLUDE_AUTH_URLS = False
-REGISTRATION_FORM = 'compsciclub_ru.forms.RegistrationUniqueEmailAndUsernameForm'
 
 # Disable migrations
 MIGRATION_MODULES = {

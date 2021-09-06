@@ -69,7 +69,7 @@ def test_new_exam_invitation_email():
 
 @pytest.mark.django_db
 def test_create_student_from_applicant(settings):
-    branch = BranchFactory(time_zone='Asia/Yekaterinburg')
+    branch = BranchFactory(time_zone=pytz.timezone('Asia/Yekaterinburg'))
     campaign = CampaignFactory(branch=branch)
     applicant = ApplicantFactory(campaign=campaign)
     user = create_student_from_applicant(applicant)
@@ -376,6 +376,7 @@ def test_create_student(settings, get_test_image):
     assert user.first_name == applicant.first_name
     assert user.last_name == applicant.last_name
     assert user.patronymic == applicant.patronymic
+    assert user.gender == ACCOUNT_DATA.gender
     assert user.yandex_login == 'login1'
     assert applicant.user == user
     acceptance.refresh_from_db()

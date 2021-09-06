@@ -1,6 +1,8 @@
 import datetime
 from collections import defaultdict
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
+
+from registration.models import RegistrationProfile
 
 from django.contrib.sites.models import Site
 from django.core.cache import cache
@@ -10,10 +12,12 @@ from django.db.models import Q
 from django.utils.timezone import now
 
 from core.models import Branch
+from core.timezone import get_now_utc
+from core.timezone.typing import Timezone
 from courses.models import Semester
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
-from users.constants import Roles
+from users.constants import GenderTypes, Roles
 from users.models import (
     OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User
 )
@@ -228,3 +232,50 @@ def update_student_status(student_profile: StudentProfile, *,
 
     log_entry.save()
     return student_profile
+
+
+def create_account(*, username: str, password: str, email: str,
+                   gender: str, time_zone: Timezone,
+                   is_active: bool, **fields: Any) -> User:
+    if gender not in GenderTypes.values:
+        raise ValidationError("Unknown gender value", code="invalid")
+    new_user = User(username=username,
+                    email=email, gender=gender, time_zone=time_zone,
+                    is_active=is_active, date_joined=get_now_utc(),
+                    is_staff=False, is_superuser=False)
+    new_user.set_password(password)
+    valid_fields = {'first_name', 'last_name', 'patronymic', 'branch'}
+    for field_name, field_value in fields.items():
+        if field_name in valid_fields:
+            setattr(new_user, field_name, field_value)
+
+    new_user.full_clean()
+    new_user.save()
+
+    return new_user
+
+
+def create_registration_profile(*, user: User,
+                                activation_key: Optional[str] = None) -> RegistrationProfile:
+    if user.is_active:
+        raise ValidationError("Account is already activated", code="invalid")
+    registration_profile = RegistrationProfile(user=user, activated=False)
+    if activation_key is None:
+        registration_profile.create_new_activation_key(save=False)
+    registration_profile.full_clean()
+    registration_profile.save()
+    return registration_profile
+
+
+class UniqueUsernameError(Exception):
+    pass
+
+
+def generate_username_from_email(email: str, attempts: int = 10):
+    """Returns username generated from email or random if it's already exists."""
+    username = email.split("@", maxsplit=1)[0]
+    if User.objects.filter(username=username).exists():
+        username = User.generate_random_username(attempts=attempts)
+    if not username:
+        raise UniqueUsernameError(f"Имя '{username}' уже занято. Случайное имя сгенерировать не удалось")
+    return username

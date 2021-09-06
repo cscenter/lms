@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 
 from auth.forms import LoginForm
 from users.models import User
+from users.services import UniqueUsernameError, generate_username_from_email
 
 
 class InvitationLoginForm(LoginForm):
@@ -39,12 +40,11 @@ class InvitationRegistrationForm(RegistrationFormUniqueEmail):
     def clean(self):
         cleaned_data = super().clean()
         if "email" in cleaned_data:
-            email = cleaned_data["email"]
-            username = email.split("@", maxsplit=1)[0]
-            if User.objects.filter(username=username).exists():
-                username = User.generate_random_username(attempts=5)
-            if not username:
+            try:
+                username = generate_username_from_email(cleaned_data["email"], attempts=5)
+            except UniqueUsernameError:
                 raise forms.ValidationError("Username is not unique")
+            cleaned_data['username'] = username
             self.instance.username = username
         return cleaned_data
 

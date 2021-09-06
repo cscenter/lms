@@ -1,7 +1,7 @@
 import uuid
 from collections import Counter
 from datetime import timedelta
-from typing import Any, Dict, Optional, cast
+from typing import Any, Dict, Optional
 from urllib import parse
 
 import pytz
@@ -20,7 +20,7 @@ from django.db.models import Avg, Case, Count, Prefetch, Q, Value, When
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import HttpResponseNotFound, HttpResponseRedirect, JsonResponse
-from django.http.response import Http404, HttpResponse, HttpResponseForbidden
+from django.http.response import Http404, HttpResponseForbidden
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from django.urls import reverse as django_reverse
@@ -47,31 +47,28 @@ from admission.models import (
     InterviewInvitation, InterviewSlot, InterviewStream
 )
 from admission.services import (
-    AccountData, CampaignContestsImportState, EmailQueueService, StudentProfileData,
-    UsernameError, create_invitation, create_student, create_student_from_applicant,
-    get_acceptance_ready_to_confirm, get_applicants_for_invitation,
-    get_latest_contest_results_task, get_meeting_time, get_ongoing_interview_streams,
-    get_streams
+    CampaignContestsImportState, EmailQueueService, create_invitation,
+    create_student_from_applicant, get_acceptance_ready_to_confirm,
+    get_applicants_for_invitation, get_latest_contest_results_task, get_meeting_time,
+    get_ongoing_interview_streams, get_streams
 )
 from core.db.fields import ScoreField
 from core.http import AuthenticatedHttpRequest, HttpRequest
 from core.models import Branch
 from core.timezone import get_now_utc, now_local
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
-from core.timezone.typing import Timezone
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
-from tasks.models import Task
 from users.api.serializers import PhotoSerializerField
 from users.mixins import CuratorOnlyMixin
 from users.models import User
+from users.services import UniqueUsernameError
 
 from .constants import (
     SESSION_CONFIRMATION_CODE_KEY, ApplicantStatuses, ContestTypes,
     InterviewInvitationStatuses, InterviewSections
 )
 from .selectors import get_interview_invitation, get_occupied_slot
-from .tasks import import_campaign_contest_results
 
 
 def get_applicant_context(request, applicant_id) -> Dict[str, Any]:
@@ -954,7 +951,7 @@ class ApplicantCreateStudentView(CuratorOnlyMixin, generic.View):
                 self.request,
                 f"Найдено несколько пользователей с email {applicant.email}")
             return HttpResponseRedirect(back_url)
-        except UsernameError as e:
+        except UniqueUsernameError as e:
             messages.error(self.request, e.args[0])
             return HttpResponseRedirect(back_url)
         # Link applicant and user

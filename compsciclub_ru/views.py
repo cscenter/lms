@@ -19,6 +19,7 @@ from django.views import generic
 import core.utils
 from auth.tasks import ActivationEmailContext, send_activation_email
 from compscicenter_ru.utils import course_class_public_url, course_public_url
+from compsciclub_ru.forms import RegistrationUniqueEmailAndUsernameForm
 from core.exceptions import Redirect
 from core.models import Branch
 from core.urls import reverse
@@ -34,7 +35,9 @@ from learning.gallery.models import Image
 from learning.services import get_classes
 from users.constants import Roles
 from users.models import StudentTypes, User
-from users.services import create_student_profile
+from users.services import (
+    create_account, create_registration_profile, create_student_profile
+)
 
 _TIME_ZONE = pytz.timezone('Europe/Moscow')
 
@@ -52,34 +55,38 @@ class PublicURLContextMixin:
 
 class AsyncEmailRegistrationView(RegistrationView):
     """Send activation email using redis queue"""
-    def register(self, form):
+    form_class = RegistrationUniqueEmailAndUsernameForm
+
+    def register(self, form) -> User:
         site = get_current_site(self.request)
-        new_user = form.save(commit=False)
-        new_user.branch = self.request.branch
-        new_user.is_active = False
-        # Activation key expiration will be calculated from the date of join
-        new_user.date_joined = timezone.now()
-        new_user.time_zone = new_user.branch.time_zone
+        data = form.cleaned_data
+        branch = self.request.branch
         with transaction.atomic():
-            new_user.save()
+            new_user = create_account(
+                username=data['username'],
+                password=data['password1'],
+                email=data['email'],
+                gender=data['gender'],
+                time_zone=branch.time_zone,
+                is_active=False,
+                branch=branch)
+            registration_profile = create_registration_profile(user=new_user)
             create_student_profile(user=new_user,
                                    branch=new_user.branch,
                                    profile_type=StudentTypes.REGULAR,
                                    year_of_admission=new_user.date_joined.year,
                                    year_of_curriculum=new_user.date_joined.year)
-            self.registration_profile.objects.create_profile(new_user)
-
         signals.user_registered.send(sender=self.__class__,
                                      user=new_user,
                                      request=self.request)
         activation_url = reverse("registration_activate", kwargs={
-            "activation_key": new_user.registrationprofile.activation_key
+            "activation_key": registration_profile.activation_key
         })
         context = ActivationEmailContext(
             site_name=site.name,
             activation_url=self.request.build_absolute_uri(activation_url),
             language_code=self.request.LANGUAGE_CODE)
-        send_activation_email.delay(context, new_user.registrationprofile.pk)
+        send_activation_email.delay(context, registration_profile.pk)
         return new_user
 
 

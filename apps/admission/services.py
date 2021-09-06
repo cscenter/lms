@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass, fields
 from datetime import date, datetime, timedelta
 from operator import attrgetter
-from typing import Any, Callable, Dict, List, Literal, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pytz
 from post_office import mail
@@ -36,8 +36,12 @@ from core.timezone.constants import DATE_FORMAT_RU
 from core.utils import bucketize
 from grading.api.yandex_contest import YandexContestAPI
 from tasks.models import Task
+from users.constants import GenderTypes
 from users.models import StudentProfile, StudentTypes, User
-from users.services import create_student_profile, get_student_profile
+from users.services import (
+    create_account, create_student_profile, generate_username_from_email,
+    get_student_profile
+)
 
 
 def get_email_from(campaign: Campaign):
@@ -338,17 +342,6 @@ class StudentProfileData:
     birthday: date
 
 
-def _get_username_from_email(email: str):
-    """Returns username generated from email or random if it's already exists."""
-    username = email.split("@", maxsplit=1)[0]
-    if User.objects.filter(username=username).exists():
-        username = User.generate_random_username(attempts=10)
-    if not username:
-        raise UsernameError(f"Имя {username} уже занято. "
-                            f"Cлучайное имя сгенерировать не удалось")
-    return username
-
-
 def get_or_create_student_profile(campaign: Campaign, user: User,
                                   data: Optional[Dict[str, Any]] = None) -> StudentProfile:
     branch = campaign.branch
@@ -387,12 +380,13 @@ def create_student(acceptance: Acceptance, account_data: AccountData,
     try:
         user = User.objects.get(email__iexact=email)
     except User.DoesNotExist:
-        user = User.objects.create_user(
-            username=_get_username_from_email(email),
-            email=email,
-            time_zone=account_data.time_zone,
-            # User can't reset password if it's set to `None`
-            password=User.objects.make_random_password())
+        user = create_account(username=generate_username_from_email(email),
+                              # User can't reset password if it's set to `None`
+                              password=User.objects.make_random_password(),
+                              email=email,
+                              gender=account_data.gender,
+                              time_zone=account_data.time_zone,
+                              is_active=True)
     user.first_name = applicant.first_name
     user.last_name = applicant.last_name
     user.patronymic = applicant.patronymic if applicant.patronymic else ""
@@ -415,11 +409,6 @@ def create_student(acceptance: Acceptance, account_data: AccountData,
     return user
 
 
-class UsernameError(Exception):
-    """Raise this exception if fail to create a unique username"""
-    pass
-
-
 def create_student_from_applicant(applicant: Applicant):
     """
     Creates new model or override existent with data from application form.
@@ -428,12 +417,13 @@ def create_student_from_applicant(applicant: Applicant):
     try:
         user = User.objects.get(email=applicant.email)
     except User.DoesNotExist:
-        username = _get_username_from_email(applicant.email)
-        random_password = User.objects.make_random_password()
-        user = User.objects.create_user(username=username,
-                                        email=applicant.email,
-                                        time_zone=branch.time_zone,
-                                        password=random_password)
+        user = create_account(username=generate_username_from_email(applicant.email),
+                              # User can't reset password if it's set to `None`
+                              password=User.objects.make_random_password(),
+                              email=applicant.email,
+                              gender=GenderTypes.OTHER,
+                              time_zone=branch.time_zone,
+                              is_active=True)
     user.first_name = applicant.first_name
     user.last_name = applicant.last_name
     user.patronymic = applicant.patronymic if applicant.patronymic else ""
