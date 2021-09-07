@@ -25,8 +25,9 @@ def post_save_user_group(sender, instance: UserGroup, *args, **kwargs):
 def post_delete_user_group(sender, instance: UserGroup, *args, **kwargs):
     """Restore redirect defaults in case user is not a student anymore"""
     # FIXME: remove redirect at all or sync PublicRoute codes with `view_*_menu` permissions and check permissions intead
-    if (instance.role == Roles.STUDENT and
-            instance.user.index_redirect == PublicRoute.LEARNING.code):
+    student_roles = {Roles.STUDENT, Roles.VOLUNTEER, Roles.INVITED, Roles.PARTNER}
+    # FIXME: consider that user doesn't have other student roles (on site? on any site? Looks like we should remove index_redirect at all)
+    if instance.role in student_roles and instance.user.index_redirect == PublicRoute.LEARNING.code:
         User.objects.filter(pk=instance.user_id).update(index_redirect='')
 
 
