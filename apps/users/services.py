@@ -1,5 +1,6 @@
 import datetime
 from collections import defaultdict
+from enum import Enum, auto
 from typing import Any, Dict, List, Literal, Optional
 
 from registration.models import RegistrationProfile
@@ -11,6 +12,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils.timezone import now
 
+from auth.registry import role_registry
 from core.models import Branch
 from core.timezone import get_now_utc
 from core.timezone.typing import Timezone
@@ -19,7 +21,7 @@ from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
 from users.constants import GenderTypes, Roles
 from users.models import (
-    OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User
+    OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User, UserGroup
 )
 
 AccountId = int
@@ -176,14 +178,20 @@ def create_student_profile(*, user: User, branch: Branch, profile_type,
         "year_of_admission": year_of_admission,
     }
     if profile_type == StudentTypes.REGULAR:
+        # TODO: move to the .clean method
         if "year_of_curriculum" not in profile_fields:
             msg = "Year of curriculum is not set for the regular student"
             raise StudentProfileError(msg)
     # FIXME: Prevent creating 2 profiles for invited student in the same
     #  term through the admin interface
-    new_student_profile = StudentProfile(**profile_fields)
-    new_student_profile.save()
-    return new_student_profile
+    student_profile = StudentProfile(**profile_fields)
+    student_profile.full_clean()
+    student_profile.save()
+    # Append role permissions to the account if needed
+    permission_role = StudentTypes.to_permission_role(student_profile.type)
+    assign_role(account=student_profile.user, role=permission_role,
+                site=student_profile.site)
+    return student_profile
 
 
 # FIXME: get profile for Invited students from the current term ONLY
@@ -214,15 +222,25 @@ def get_student_profile(user: User, site, profile_type=None,
     return student_profile
 
 
-# FIXME: make it an implementation detail of the `student_profile_update` service method
+# TODO: try to make it an implementation detail of the `student_profile_update` service method
 def update_student_status(student_profile: StudentProfile, *,
                           new_status: str, editor: User,
                           status_changed_at: Optional[datetime.date] = None) -> StudentProfile:
     is_studying_status = ''
     if new_status not in StudentStatuses.values and new_status != is_studying_status:
         raise ValidationError("Unknown Student Status", code="invalid")
+    if student_profile.type == StudentTypes.INVITED:
+        forbidden_statuses = {StudentStatuses.GRADUATE, StudentStatuses.WILL_GRADUATE}
+        if new_status in forbidden_statuses:
+            raise ValidationError(f"Status {new_status} is forbidden for invited students", code="forbidden")
+
+    old_status = student_profile.tracker.previous('status')
     student_profile.status = new_status
     student_profile.save(update_fields=['status'])
+
+    assign_or_revoke_student_role(student_profile=student_profile,
+                                  old_status=old_status, new_status=new_status)
+
     log_entry = StudentStatusLog(status=new_status,
                                  student_profile=student_profile,
                                  entry_author=editor)
@@ -231,7 +249,83 @@ def update_student_status(student_profile: StudentProfile, *,
         log_entry.status_changed_at = status_changed_at
 
     log_entry.save()
+
     return student_profile
+
+
+def assign_or_revoke_student_role(*, student_profile: StudentProfile,
+                                  old_status: str, new_status: str) -> None:
+    """
+    Auto assign or remove permissions based on student status transition.
+
+    Assumes that *new_status* already saved in DB.
+    """
+    transition = StudentStatusTransition.resolve(old_status, new_status)
+    if transition == StudentStatusTransition.NEUTRAL:
+        return None
+    role = StudentTypes.to_permission_role(student_profile.type)
+    user = student_profile.user
+    site = student_profile.site
+    if transition == StudentStatusTransition.DEACTIVATION:
+        maybe_unassign_student_role(role, account=user, site=site)
+        if old_status == StudentStatuses.GRADUATE:
+            maybe_unassign_student_role(Roles.GRADUATE, account=user, site=site)
+    elif transition == StudentStatusTransition.ACTIVATION:
+        assign_role(account=user, role=role, site=site)
+        if old_status == StudentStatuses.GRADUATE:
+            maybe_unassign_student_role(Roles.GRADUATE, account=user, site=site)
+    elif transition == StudentStatusTransition.GRADUATION:
+        maybe_unassign_student_role(role, account=user, site=site)
+        assign_role(account=user, role=Roles.GRADUATE, site=site)
+
+
+def maybe_unassign_student_role(role: str, *, account: User, site: Site):
+    """
+    Removes permissions associated with a student *role* from the user account
+    if all student profiles related to the same role are inactive or
+    in a complete state (like GRADUATED)
+    """
+    if role not in role_registry:
+        raise ValidationError(f"Role {role} is not registered")
+    valid_roles = {Roles.STUDENT, Roles.GRADUATE, Roles.VOLUNTEER, Roles.INVITED, Roles.PARTNER}
+    if role not in valid_roles:
+        raise ValidationError(f"Role {role} is not a student role")
+    profile_type = StudentTypes.from_permission_role(role)
+    student_profiles = (StudentProfile.objects
+                        .filter(user=account, type=profile_type, site=site)
+                        .exclude(status=StudentStatuses.GRADUATE)
+                        .only('status'))
+    # TODO: has_active_student_profile?
+    if all(not sp.is_active for sp in student_profiles):
+        unassign_role(account=account, role=role, site=site)
+
+
+class StudentStatusTransition(Enum):
+    NEUTRAL = auto()  # active -> active, inactive -> inactive
+    ACTIVATION = auto()
+    DEACTIVATION = auto()
+    GRADUATION = auto()  # any -> graduated
+
+    @classmethod
+    def resolve(cls, old_status: str, new_status: str) -> "StudentStatusTransition":
+        """Returns transition type based on student old/new status values."""
+        # We use `not inactive` here to cover implicit `studying` status
+        was_active = old_status not in StudentStatuses.inactive_statuses
+        is_active_now = new_status not in StudentStatuses.inactive_statuses
+        if old_status == new_status:
+            return StudentStatusTransition.NEUTRAL
+        elif old_status == StudentStatuses.GRADUATE and is_active_now:
+            return StudentStatusTransition.ACTIVATION
+        elif old_status == StudentStatuses.GRADUATE and not is_active_now:
+            return StudentStatusTransition.DEACTIVATION
+        elif new_status == StudentStatuses.GRADUATE:
+            return StudentStatusTransition.GRADUATION
+        elif was_active and not is_active_now:
+            return StudentStatusTransition.DEACTIVATION
+        elif not was_active and is_active_now:
+            return StudentStatusTransition.ACTIVATION
+        else:
+            return StudentStatusTransition.NEUTRAL
 
 
 def create_account(*, username: str, password: str, email: str,
@@ -279,3 +373,15 @@ def generate_username_from_email(email: str, attempts: int = 10):
     if not username:
         raise UniqueUsernameError(f"Имя '{username}' уже занято. Случайное имя сгенерировать не удалось")
     return username
+
+
+def assign_role(*, account: User, role: str, site: Site):
+    if role not in Roles.values:
+        raise ValidationError(f"Role {role} is not registered", code="invalid")
+    UserGroup.objects.get_or_create(user=account, site=site, role=role)
+
+
+def unassign_role(*, account: User, role: str, site: Site):
+    if role not in Roles.values:
+        raise ValidationError(f"Role {role} is not registered", code="invalid")
+    UserGroup.objects.filter(user=account, site=site, role=role).delete()

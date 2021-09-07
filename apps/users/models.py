@@ -6,6 +6,7 @@ from string import ascii_lowercase, digits
 from typing import Optional, Set
 
 from djchoices import C, DjangoChoices
+from model_utils import FieldTracker
 from model_utils.fields import AutoLastModifiedField, MonitorField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
@@ -793,7 +794,9 @@ class StudentProfile(TimeStampedModel):
         editable=False,
         blank=True, null=True,
         related_name="student_profiles",
-        on_delete=models.PROTECT,)
+        on_delete=models.PROTECT)
+
+    tracker = FieldTracker(fields=['status'])
 
     class Meta:
         db_table = 'student_profiles'
@@ -816,6 +819,10 @@ class StudentProfile(TimeStampedModel):
         instance_memoize.delete_cache(self.user)
 
     def clean(self):
+        if self.type == StudentTypes.INVITED:
+            forbidden_statuses = {StudentStatuses.GRADUATE, StudentStatuses.WILL_GRADUATE}
+            if self.status in forbidden_statuses:
+                raise ValidationError(f"Status {self.status} is forbidden for invited students")
         # TODO: move to the service that creates model object, don't leave non-relational model fields here
         established = self.branch.established
         if self.year_of_admission and self.year_of_admission < established:

@@ -1,6 +1,8 @@
 import factory
+from factory import errors
 
 from django.conf import settings
+from django.db import IntegrityError
 
 from core.tests.factories import BranchFactory
 from learning.settings import GradeTypes
@@ -15,6 +17,8 @@ __all__ = ('User', 'SHADCourseRecord', 'CertificateOfParticipation',
            'StudentFactory', 'TeacherFactory', 'VolunteerFactory',
            'OnlineCourseRecordFactory',
            'SHADCourseRecordFactory', 'CertificateOfParticipationFactory')
+
+from users.services import assign_role, create_student_profile
 
 
 def add_user_groups(user, groups):
@@ -134,12 +138,20 @@ class StudentProfileFactory(factory.django.DjangoModelFactory):
     year_of_admission = factory.SelfAttribute('user.date_joined.year')
 
     @factory.post_generation
-    def academic_disciplines(self, create, extracted, **kwargs):
+    def academic_disciplines(self: StudentProfile, create, extracted, **kwargs):
         if not create:
             return
         if extracted:
             for academic_discipline in extracted:
                 self.academic_disciplines.add(academic_discipline)
+
+    @factory.post_generation
+    def add_permissions(self: StudentProfile, create, extracted, **kwargs):
+        if not create:
+            return
+        # FIXME: use `create_student_profile` service instead by overriding ._create factory method
+        permission_role = StudentTypes.to_permission_role(self.type)
+        assign_role(account=self.user, role=permission_role, site=self.site)
 
 
 class OnlineCourseRecordFactory(factory.django.DjangoModelFactory):

@@ -5,12 +5,13 @@ from lms.utils import PublicRoute
 from users.constants import Roles
 
 from .models import StudentProfile, StudentTypes, User, UserGroup
-from .services import get_student_profile
+from .services import get_student_profile, maybe_unassign_student_role
 
 
 @receiver(post_save, sender=UserGroup)
 def post_save_user_group(sender, instance: UserGroup, *args, **kwargs):
     """Copy branch value from the student profile"""
+    # FIXME: What if multiple profiles from different branches were found?
     if instance.role in {Roles.STUDENT, Roles.VOLUNTEER, Roles.PARTNER, Roles.INVITED}:
         profile_type = StudentTypes.from_permission_role(instance.role)
         student_profile = get_student_profile(instance.user, instance.site_id,
@@ -33,28 +34,6 @@ def post_delete_user_group(sender, instance: UserGroup, *args, **kwargs):
 @receiver(post_delete, sender=StudentProfile)
 def post_delete_student_profile(sender, instance: StudentProfile, **kwargs):
     deleted_profile = instance
-    # Other student profiles on the same site of the same type
-    other_profiles = (StudentProfile.objects
-                      .filter(user_id=deleted_profile.user_id,
-                              type=deleted_profile.type,
-                              site_id=deleted_profile.site_id))
-    # It is safe to remove permission group if all other profiles are inactive
-    if all(not p.is_active for p in other_profiles):
-        permission_role = StudentTypes.to_permission_role(deleted_profile.type)
-        (UserGroup.objects
-         .filter(user_id=instance.user_id,
-                 site_id=instance.site_id,
-                 role=permission_role)
-         .delete())
-
-
-# FIXME: move to the service method
-@receiver(post_save, sender=StudentProfile)
-def post_save_student_profile(sender, instance: StudentProfile, created, **kwargs):
-    if not created:
-        return
-    permission_role = StudentTypes.to_permission_role(instance.type)
-    UserGroup.objects.update_or_create(user_id=instance.user_id,
-                                       site_id=instance.site_id,
-                                       role=permission_role,
-                                       defaults={"branch": instance.branch})
+    role = StudentTypes.to_permission_role(deleted_profile.type)
+    maybe_unassign_student_role(role=role, account=deleted_profile.user,
+                                site=deleted_profile.site)
