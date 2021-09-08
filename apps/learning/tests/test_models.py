@@ -11,10 +11,8 @@ from django.db import IntegrityError, transaction
 from django.utils.encoding import smart_str
 
 from core.tests.factories import BranchFactory, LocationFactory, SiteFactory
-from courses.constants import SemesterTypes, AssignmentFormat
-from courses.models import (
-    CourseGroupModes, CourseNews, Semester
-)
+from courses.constants import AssignmentFormat, SemesterTypes
+from courses.models import CourseGroupModes, CourseNews, Semester
 from courses.tests.factories import (
     AssignmentFactory, CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
     CourseNewsFactory, CourseTeacherFactory, LearningSpaceFactory, MetaCourseFactory,

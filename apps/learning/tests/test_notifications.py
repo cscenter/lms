@@ -18,8 +18,8 @@ from core.tests.settings import (
 from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse
 from courses.admin import AssignmentAdmin
-from courses.models import Assignment, CourseTeacher
 from courses.constants import AssignmentFormat
+from courses.models import Assignment, CourseTeacher
 from courses.tests.factories import AssignmentFactory, CourseFactory, CourseNewsFactory
 from learning.models import AssignmentNotification, CourseNewsNotification
 from learning.services import EnrollmentService, is_course_failed_by_student

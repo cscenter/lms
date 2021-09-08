@@ -7,11 +7,11 @@ from django.conf import settings
 from django.utils import timezone
 
 from core.tests.factories import BranchFactory, LocationFactory
-from courses.constants import MaterialVisibilityTypes, AssignmentFormat
+from courses.constants import AssignmentFormat, MaterialVisibilityTypes
 from courses.models import (
-    Assignment, AssignmentAttachment, Course, CourseBranch,
-    CourseClass, CourseClassAttachment, CourseNews, CourseReview, CourseTeacher,
-    LearningSpace, MetaCourse, Semester
+    Assignment, AssignmentAttachment, Course, CourseBranch, CourseClass,
+    CourseClassAttachment, CourseNews, CourseReview, CourseTeacher, LearningSpace,
+    MetaCourse, Semester
 )
 from courses.services import CourseService
 from courses.utils import get_current_term_pair, get_term_by_index

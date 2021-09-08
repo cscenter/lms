@@ -1,9 +1,10 @@
+from modeltranslation.admin import TranslationAdmin
+
 from django.conf import settings
 from django.contrib import admin
 from django.db import models as db_models
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-from modeltranslation.admin import TranslationAdmin
 
 from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
@@ -11,10 +12,10 @@ from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseGroupModes, CourseTeacher
 from learning.models import (
-    CourseInvitation, GraduateProfile, Invitation, StudentAssignment,
-    StudentGroup,
+    CourseInvitation, GraduateProfile, Invitation, StudentAssignment, StudentGroup,
     StudentGroupAssignee
 )
+
 from .models import AssignmentComment, Enrollment, Event
 from .services import StudentGroupService
 

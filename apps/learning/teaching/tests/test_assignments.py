@@ -14,8 +14,8 @@ from django.utils.encoding import smart_bytes
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.models import Assignment
 from courses.constants import AssignmentFormat
+from courses.models import Assignment
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseNewsFactory, CourseTeacherFactory,
     SemesterFactory

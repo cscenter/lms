@@ -10,8 +10,8 @@ from django.utils.encoding import smart_bytes
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.urls import reverse
-from courses.models import CourseTeacher
 from courses.constants import AssignmentFormat
+from courses.models import CourseTeacher
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from courses.utils import get_current_term_pair
 from learning.models import AssignmentComment, AssignmentNotification, StudentAssignment
