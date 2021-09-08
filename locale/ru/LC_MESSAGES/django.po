@@ -8,15 +8,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-08-30 18:03+0000\n"
-"PO-Revision-Date: 2021-08-30 19:02+0000\n"
-"Last-Translator: b'  <pacabest@gmail.com>'\n"
+"POT-Creation-Date: 2021-09-08 17:45+0000\n"
+"PO-Revision-Date: 2021-09-08 17:48+0000\n"
+"Last-Translator: Сергей Жеревчук <pacabest@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Translated-Using: django-rosetta 0.9.6\n"
+"X-Translated-Using: django-rosetta 0.9.7\n"
 
 #: apps/api/admin.py:24
 #, python-format
@@ -51,10 +51,9 @@ msgid "Token is invalid or expired"
 msgstr ""
 
 #: apps/api/models.py:17
-#, fuzzy
 #| msgid "Access Groups"
 msgid "Access Key"
-msgstr "Группы"
+msgstr "Ключ доступа"
 
 #: apps/api/models.py:20
 #, python-format
@@ -63,7 +62,7 @@ msgstr ""
 
 #: apps/api/models.py:23 apps/learning/gallery/models.py:43
 #: apps/learning/models.py:867 apps/learning/models.py:911
-#: apps/users/models.py:154
+#: apps/users/models.py:155
 msgid "User"
 msgstr "Имя пользователя"
 
@@ -166,10 +165,9 @@ msgid "Enabled"
 msgstr ""
 
 #: apps/core/db/models.py:17
-#, fuzzy
 #| msgid "Change photo"
 msgid "Changed by"
-msgstr "Изменить фото"
+msgstr "Кем изменено"
 
 #: apps/core/forms.py:7
 #: apps/templates/forms/simple_delete_confirmation.html:22
@@ -249,8 +247,8 @@ msgstr "Местонахождение"
 
 #: apps/core/models.py:218 apps/faq/models.py:11 apps/faq/models.py:27
 #: apps/info_blocks/models.py:43 apps/learning/models.py:223
-#: apps/study_programs/models.py:19 apps/users/models.py:158
-#: apps/users/models.py:697
+#: apps/study_programs/models.py:19 apps/users/models.py:159
+#: apps/users/models.py:698
 msgid "Site"
 msgstr "Сайт"
 
@@ -268,12 +266,12 @@ msgstr "Общее описание, правила обучения"
 
 #: apps/core/models.py:236 apps/courses/models.py:56
 #: apps/courses/models.py:229 apps/courses/models.py:238
-#: apps/courses/models.py:555 apps/learning/admin.py:65
+#: apps/courses/models.py:555 apps/learning/admin.py:62
 #: apps/learning/gradebook/views.py:181 apps/learning/models.py:71
 #: apps/learning/models.py:428 apps/learning/models.py:939
 #: apps/library/models.py:66 apps/study_programs/models.py:61
 #: apps/templates/learning/invitation/complete_profile.html:23
-#: apps/users/models.py:164 apps/users/models.py:296 apps/users/models.py:721
+#: apps/users/models.py:165 apps/users/models.py:297 apps/users/models.py:722
 #: lms/jinja2/lms/courses/meta_detail.html:27
 msgid "Branch"
 msgstr "Отделение"
@@ -325,13 +323,12 @@ msgstr "Адреса"
 msgid "Name"
 msgstr "Имя"
 
-#: apps/core/models.py:318 apps/users/models.py:737
+#: apps/core/models.py:318 apps/users/models.py:738
 #: lms/templates/users/user_detail.html:272
 msgid "University"
 msgstr "Университет"
 
 #: apps/core/models.py:319
-#| msgid "University"
 msgid "Universities"
 msgstr "Университеты"
 
@@ -339,7 +336,7 @@ msgstr "Университеты"
 msgid "created"
 msgstr "Создан"
 
-#: apps/core/models.py:330 apps/grading/models.py:86 apps/users/models.py:285
+#: apps/core/models.py:330 apps/grading/models.py:86 apps/users/models.py:286
 msgid "modified"
 msgstr "изменено"
 
@@ -390,15 +387,12 @@ msgstr ""
 "Размер файла %(size)s недопустим. Максимальный размер файла "
 "%(allowed_size)s."
 
-#: apps/courses/admin.py:153 apps/courses/admin.py:235
-#: apps/users/models.py:853
+#: apps/courses/admin.py:168 apps/courses/admin.py:250
+#: apps/users/models.py:860
 msgid "Created"
 msgstr "Дата создания"
 
-#: apps/courses/admin.py:171
-#| msgid ""
-#| "Please, double check teacher list. Some users are not related to the "
-#| "selected course"
+#: apps/courses/admin.py:186
 msgid ""
 "Please, double check the list. Some users are not related to the selected "
 "course"
@@ -406,7 +400,7 @@ msgstr ""
 "Пожалуйста, перепроверьте список выбранных преподавателей. Кто-то из них не "
 "имеет отношения к выбранному прочтению курса."
 
-#: apps/courses/admin.py:239 apps/courses/models.py:1061
+#: apps/courses/admin.py:254 apps/courses/models.py:1052
 msgid "Assignment|deadline"
 msgstr "Срок сдачи"
 
@@ -443,64 +437,83 @@ msgstr "Суббота"
 msgid "Sunday"
 msgstr "Воскресенье"
 
-#: apps/courses/constants.py:30
+#: apps/courses/constants.py:29
 msgid "spring"
 msgstr "весна"
 
-#: apps/courses/constants.py:31
+#: apps/courses/constants.py:30
 msgid "summer"
 msgstr "лето"
 
-#: apps/courses/constants.py:32
+#: apps/courses/constants.py:31
 msgid "autumn"
 msgstr "осень"
 
-#: apps/courses/constants.py:36 lms/jinja2/lms/courses/course_detail.html:95
-#: lms/jinja2/lms/learning/timetable.html:55
+#: apps/courses/constants.py:35 lms/jinja2/lms/learning/timetable.html:55
 #: lms/jinja2/lms/teaching/timetable.html:53
 msgid "Lecture"
 msgstr "Лекция"
 
-#: apps/courses/constants.py:37 lms/jinja2/lms/courses/course_detail.html:95
+#: apps/courses/constants.py:36 lms/jinja2/lms/courses/course_detail.html:102
 #: lms/jinja2/lms/learning/timetable.html:57
 #: lms/jinja2/lms/teaching/timetable.html:55
 msgid "Seminar"
 msgstr "Семинар"
 
-#: apps/courses/constants.py:44
+#: apps/courses/constants.py:43
 msgid "Lecturer"
 msgstr "Лектор"
 
-#: apps/courses/constants.py:45
+#: apps/courses/constants.py:44
 msgid "Reviewer"
 msgstr "Проверяющий задания"
 
-#: apps/courses/constants.py:46
+#: apps/courses/constants.py:45
 msgid "Seminarian"
 msgstr "Семинарист"
 
-#: apps/courses/constants.py:47
+#: apps/courses/constants.py:46
 msgid "Spectator"
 msgstr "Наблюдатель"
 
-#: apps/courses/constants.py:51
+#: apps/courses/constants.py:50
 msgid "All Users"
 msgstr "Все пользователи"
 
-#: apps/courses/constants.py:52
+#: apps/courses/constants.py:51
 msgid "All Students"
 msgstr "Все студенты"
 
-#: apps/courses/constants.py:53
+#: apps/courses/constants.py:52
 msgid "Course Participants"
 msgstr "Слушатели курса"
+
+#: apps/courses/constants.py:56
+msgid "Online Submission"
+msgstr "Через сайт"
+
+#: apps/courses/constants.py:57 apps/grading/constants.py:54
+msgid "Yandex.Contest"
+msgstr "Яндекс.Контест"
+
+#: apps/courses/constants.py:58
+msgid "External Service"
+msgstr "Внешний сервис"
+
+#: apps/courses/constants.py:59
+msgid "Code Review Submission"
+msgstr "Задача с код-ревью"
+
+#: apps/courses/constants.py:60
+msgid "No Submission"
+msgstr "Без отправки решения"
 
 #: apps/courses/forms.py:51
 msgid "All groups"
 msgstr "Все группы"
 
 #: apps/courses/forms.py:58 apps/courses/models.py:183
-#: apps/users/models.py:889 apps/users/models.py:906
+#: apps/users/models.py:896 apps/users/models.py:913
 msgid "Course|name"
 msgstr "Название"
 
@@ -511,7 +524,7 @@ msgstr "Описание"
 #: apps/courses/forms.py:121 apps/courses/forms.py:270
 #: apps/info_blocks/models.py:40 apps/learning/gallery/models.py:34
 #: apps/templates/international_schools/international_schools.html:16
-#: lms/jinja2/lms/courses/course_detail.html:125
+#: lms/jinja2/lms/courses/course_detail.html:135
 msgid "Title"
 msgstr "Название"
 
@@ -524,7 +537,7 @@ msgid "Venue"
 msgstr "Место проведения"
 
 #: apps/courses/forms.py:152 apps/courses/models.py:795
-#: apps/notifications/models.py:92 apps/users/models.py:701
+#: apps/notifications/models.py:92 apps/users/models.py:702
 msgid "Type"
 msgstr "Тип"
 
@@ -576,8 +589,8 @@ msgid "Ends at"
 msgstr "Конец"
 
 #: apps/courses/forms.py:190 apps/courses/forms.py:282
-#: apps/courses/models.py:801 apps/courses/models.py:1062
-#: apps/users/models.py:300 lms/templates/users/user_detail.html:481
+#: apps/courses/models.py:801 apps/courses/models.py:1053
+#: apps/users/models.py:301 lms/templates/users/user_detail.html:481
 msgid "Time Zone"
 msgstr "Часовой пояс"
 
@@ -608,23 +621,23 @@ msgstr "Введите продолжительность в HH:MM формат�
 #: apps/templates/learning/teaching/assignment_detail.html:34
 #: apps/templates/learning/teaching/assignment_list.html:88
 #: apps/templates/learning/teaching/student_assignment_detail.html:151
-#: lms/jinja2/lms/courses/course_detail.html:124
+#: lms/jinja2/lms/courses/course_detail.html:134
 #: lms/jinja2/lms/study/assignment_list.html:24
 #: lms/jinja2/lms/study/assignment_list.html:86
 msgid "Deadline"
 msgstr "Срок сдачи"
 
-#: apps/courses/forms.py:290 apps/courses/models.py:1074
+#: apps/courses/forms.py:290 apps/courses/models.py:1065
 #: apps/templates/learning/study/student_assignment_detail.html:142
 #: apps/templates/learning/teaching/student_assignment_detail.html:157
 msgid "Passing score"
 msgstr "Проходной балл"
 
-#: apps/courses/forms.py:293 apps/courses/models.py:1078
+#: apps/courses/forms.py:293 apps/courses/models.py:1069
 msgid "Maximum score"
 msgstr "Максимальный балл"
 
-#: apps/courses/forms.py:296 apps/courses/models.py:1082
+#: apps/courses/forms.py:296 apps/courses/models.py:1073
 #: apps/templates/learning/teaching/assignment_detail.html:41
 #: apps/templates/learning/teaching/student_assignment_detail.html:160
 msgid "Assignment Weight"
@@ -636,11 +649,11 @@ msgid ""
 "the gradebook."
 msgstr "Вклад задания в сумму баллов по курсу."
 
-#: apps/courses/forms.py:303 apps/courses/models.py:1087
+#: apps/courses/forms.py:303 apps/courses/models.py:1078
 msgid "Time to Completion"
 msgstr "Время для завершения"
 
-#: apps/courses/forms.py:305 apps/courses/models.py:1089
+#: apps/courses/forms.py:305 apps/courses/models.py:1080
 msgid "Estimated amount of time required for the task to be completed"
 msgstr ""
 "Сколько, по вашему мнению, студенту потребуется времени, чтобы выполнить "
@@ -659,7 +672,7 @@ msgid "Restrict assignment to selected groups. Available to all by default."
 msgstr ""
 "Задание будет доступно только выбранным группам. По-умолчанию доступно всем."
 
-#: apps/courses/forms.py:315 apps/courses/models.py:1104
+#: apps/courses/forms.py:315 apps/courses/models.py:1095
 #: apps/grading/models.py:32 apps/grading/models.py:52
 msgid "Checking System"
 msgstr "Проверяющая система"
@@ -684,9 +697,9 @@ msgstr "Доступно отделениям"
 msgid "All Branches"
 msgstr "Все отделения"
 
-#: apps/courses/forms.py:369
-msgid "Non-empty URL for no checking system"
-msgstr "Указан непустой URL, хотя не выбрана проверяющая система"
+#: apps/courses/forms.py:361
+msgid "URL is specified but checking system is empty"
+msgstr "Для URL не указана проверяющая система"
 
 #: apps/courses/models.py:62
 msgid "The location name will be added to the end if provided"
@@ -730,8 +743,8 @@ msgstr "Системное поле. Используется для сорти�
 
 #: apps/courses/models.py:110 apps/courses/models.py:264
 #: apps/learning/gallery/models.py:83 apps/learning/models.py:227
-#: apps/learning/models.py:424 apps/users/admin.py:155
-#: apps/users/models.py:910 lms/jinja2/lms/courses/meta_detail.html:26
+#: apps/learning/models.py:424 apps/users/admin.py:156
+#: apps/users/models.py:917 lms/jinja2/lms/courses/meta_detail.html:26
 #: lms/jinja2/lms/courses/teacher_detail.html:32
 #: lms/jinja2/lms/study/course_list.html:101
 #: lms/jinja2/lms/teaching/course_list.html:11
@@ -781,7 +794,6 @@ msgid "Manual"
 msgstr "Ручной"
 
 #: apps/courses/models.py:235
-#| msgid "Groups"
 msgid "No Groups"
 msgstr "Без групп"
 
@@ -829,7 +841,7 @@ msgstr ""
 "Если оставить пустым, то ссылка будет генерироваться на основе последнего "
 "активного опроса."
 
-#: apps/courses/models.py:281 apps/users/models.py:890
+#: apps/courses/models.py:281 apps/users/models.py:897
 msgid "Online Course URL"
 msgstr "URL онлайн-курса"
 
@@ -899,18 +911,16 @@ msgid "Default visibility for class materials."
 msgstr "Видимость материалов занятий по-умолчанию"
 
 #: apps/courses/models.py:329
-#, fuzzy
 #| msgid "Slides"
 msgid "Public Slides"
-msgstr "Слайды"
+msgstr "Публичные слайды"
 
 #: apps/courses/models.py:333
-#, fuzzy
 #| msgid "Class attachments"
 msgid "Public Attachments"
-msgstr "Приложения к занятию"
+msgstr "Публичные приложения"
 
-#: apps/courses/models.py:355 apps/courses/models.py:1059
+#: apps/courses/models.py:355 apps/courses/models.py:1050
 #: apps/learning/gallery/models.py:49 apps/learning/models.py:60
 #: apps/learning/models.py:301 apps/learning/models.py:382
 #: lms/templates/users/user_detail.html:352
@@ -938,7 +948,7 @@ msgid "Course Teachers"
 msgstr "Преподаватели курса"
 
 #: apps/courses/models.py:681 apps/courses/models.py:710
-#: apps/learning/models.py:739 apps/users/models.py:870
+#: apps/learning/models.py:739 apps/users/models.py:877
 msgid "Author"
 msgstr "Автор"
 
@@ -990,12 +1000,12 @@ msgstr "Поддерживаются ссылки на YouTube и Яндекс.�
 msgid "Slides, attachments and other materials"
 msgstr "Слайды, приложенные файлы и др."
 
-#: apps/courses/models.py:831 apps/courses/models.py:1098
+#: apps/courses/models.py:831 apps/courses/models.py:1089
 #: lms/jinja2/lms/staff/student_search.html:59
 msgid "Groups"
 msgstr "Группы"
 
-#: apps/courses/models.py:838 apps/users/views.py:112
+#: apps/courses/models.py:838 apps/users/views.py:113
 msgid "Classes"
 msgstr "Занятия"
 
@@ -1027,72 +1037,56 @@ msgstr "Приложение к занятию"
 msgid "Class attachments"
 msgstr "Приложения к занятию"
 
-#: apps/courses/models.py:1046
-msgid "Online Submission"
-msgstr "Через сайт"
-
-#: apps/courses/models.py:1047
-msgid "External Service"
-msgstr "Внешний сервис"
-
-#: apps/courses/models.py:1048
-msgid "Code Review Submission"
-msgstr "Задача с код-ревью"
-
-#: apps/courses/models.py:1049
-msgid "No Submission"
-msgstr "Без отправки решения"
-
-#: apps/courses/models.py:1065
+#: apps/courses/models.py:1056
 #: apps/templates/learning/study/student_assignment_detail.html:139
 #: apps/templates/learning/teaching/assignment_detail.html:38
 #: apps/templates/learning/teaching/student_assignment_detail.html:154
-#: lms/jinja2/lms/courses/course_detail.html:126
+#: lms/jinja2/lms/courses/course_detail.html:136
 #: lms/jinja2/lms/study/assignment_list.html:28
 #: lms/jinja2/lms/study/assignment_list.html:90
 msgid "Submission Type"
 msgstr "Формат сдачи"
 
-#: apps/courses/models.py:1069
+#: apps/courses/models.py:1060
 msgid "Assignment|name"
 msgstr "Название"
 
-#: apps/courses/models.py:1071
+#: apps/courses/models.py:1062
 msgid "Assignment|text"
 msgstr "Текст"
 
-#: apps/courses/models.py:1092
+#: apps/courses/models.py:1083
 msgid "Assignment Assignees"
 msgstr "Ответственные за задание"
 
-#: apps/courses/models.py:1093
+#: apps/courses/models.py:1084
 msgid "Has lower priority than student group assignees"
 msgstr "Приоритет ниже, чем у ответственных за студенческие группы"
 
-#: apps/courses/models.py:1115 apps/courses/models.py:1203
+#: apps/courses/models.py:1106 apps/courses/models.py:1194
 #: apps/grading/admin.py:25 apps/learning/models.py:146
 #: apps/learning/models.py:183 lms/templates/users/user_detail.html:353
 msgid "Assignment"
 msgstr "Задание"
 
-#: apps/courses/models.py:1116 apps/users/views.py:113
+#: apps/courses/models.py:1107 apps/users/views.py:114
 #: lms/templates/users/user_detail.html:343
 msgid "Assignments"
 msgstr "Задания"
 
-#: apps/courses/models.py:1125
+#: apps/courses/models.py:1116
 msgid "Course modification is not allowed"
 msgstr "Изменение курса запрещено"
 
-#: apps/courses/models.py:1127
+#: apps/courses/models.py:1118
 msgid "Passing score should be less than (or equal to) maximum one"
 msgstr " Проходной балл должен быть меньше или равен максимальному баллу"
 
-#: apps/courses/models.py:1212
+#: apps/courses/models.py:1203
 msgid "Assignment attachment"
 msgstr "Приложение к заданию"
 
-#: apps/courses/models.py:1213
+#: apps/courses/models.py:1204
 msgid "Assignment attachments"
 msgstr "Приложения к заданиям"
 
@@ -1155,21 +1149,17 @@ msgstr "Ответ"
 msgid "Questions"
 msgstr "Вопросы"
 
-#: apps/grading/admin.py:29 apps/learning/admin.py:184
+#: apps/grading/admin.py:29 apps/learning/admin.py:181
 #: apps/learning/models.py:293 apps/learning/roles.py:71
 #: apps/templates/learning/study/student_assignment_detail.html:133
 #: apps/templates/learning/teaching/assignment_detail.html:76
 #: apps/templates/learning/teaching/assignment_list.html:99
 #: apps/templates/learning/teaching/student_assignment_detail.html:127
 #: apps/templates/projects/report.html:250 apps/users/constants.py:36
-#: apps/users/models.py:716 apps/users/models.py:865 apps/users/models.py:887
-#: apps/users/models.py:904 apps/users/models.py:936
+#: apps/users/models.py:717 apps/users/models.py:872 apps/users/models.py:894
+#: apps/users/models.py:911 apps/users/models.py:943
 msgid "Student"
 msgstr "Студент"
-
-#: apps/grading/constants.py:54
-msgid "Yandex.Contest"
-msgstr "Яндекс.Контест"
 
 #: apps/grading/constants.py:58 apps/grading/tests/test_models.py:11
 msgid "New"
@@ -1251,8 +1241,8 @@ msgstr "Убедитесь, что указаны следующие настр�
 msgid "Assignment Submission"
 msgstr "Посылка к заданию"
 
-#: apps/grading/models.py:93 apps/users/models.py:209 apps/users/models.py:726
-#: apps/users/models.py:861 lms/jinja2/lms/staff/student_search.html:69
+#: apps/grading/models.py:93 apps/users/models.py:210 apps/users/models.py:727
+#: apps/users/models.py:868 lms/jinja2/lms/staff/student_search.html:69
 msgid "Status"
 msgstr "Статус"
 
@@ -1321,27 +1311,27 @@ msgstr "Содержимое"
 msgid "Infoblock"
 msgstr "Инфоблок"
 
-#: apps/learning/admin.py:90
+#: apps/learning/admin.py:87
 msgid "Assignment|assigned_to"
 msgstr "Задано"
 
-#: apps/learning/admin.py:95
+#: apps/learning/admin.py:92
 msgid "Asssignment|name"
 msgstr "Название"
 
-#: apps/learning/admin.py:123 apps/learning/models.py:309
+#: apps/learning/admin.py:120 apps/learning/models.py:309
 msgid "Enrollment|grade changed"
 msgstr "Оценка изменена"
 
-#: apps/learning/admin.py:139
+#: apps/learning/admin.py:136
 msgid "Watchers"
 msgstr "Наблюдатели"
 
-#: apps/learning/admin.py:140
+#: apps/learning/admin.py:137
 msgid "Watcher"
 msgstr "Наблюдатель"
 
-#: apps/learning/admin.py:216
+#: apps/learning/admin.py:200
 msgid "Invitation Link"
 msgstr "Ссылка с приглашением"
 
@@ -1351,10 +1341,10 @@ msgid "Score can't be larger than %s"
 msgstr "Оценка не может быть больше %s"
 
 #: apps/learning/api/serializers.py:81
-#, fuzzy, python-format
+#, python-format
 #| msgid "Online course records"
 msgid "Invalid course teacher %s"
-msgstr "Записи об онлайн-курсах"
+msgstr "Невалидный преподаватель курса %s"
 
 #: apps/learning/apps.py:7
 msgid "Learning"
@@ -1524,11 +1514,10 @@ msgid "First name"
 msgstr "Имя"
 
 #: apps/learning/gradebook/views.py:180
-#| msgid "CSCUser|patronymic"
 msgid "Patronymic"
 msgstr "Отчество"
 
-#: apps/learning/gradebook/views.py:182 apps/users/models.py:168
+#: apps/learning/gradebook/views.py:182 apps/users/models.py:169
 msgid "Role"
 msgstr "Роль"
 
@@ -1537,11 +1526,11 @@ msgstr "Роль"
 msgid "Group"
 msgstr "Группа"
 
-#: apps/learning/gradebook/views.py:184 apps/users/models.py:306
+#: apps/learning/gradebook/views.py:184 apps/users/models.py:307
 msgid "Yandex Login"
 msgstr "Логин на Яндексе"
 
-#: apps/learning/gradebook/views.py:185 apps/users/models.py:315
+#: apps/learning/gradebook/views.py:185 apps/users/models.py:316
 msgid "Codeforces Handle"
 msgstr ""
 
@@ -1563,19 +1552,18 @@ msgid "<b>Not all records were processed. Import stopped by an error:</b><br>"
 msgstr ""
 "<b>Не все записи были обработаны. Импорт прекращён из-за ошибки:</b><br>"
 
-#: apps/learning/invitation/forms.py:36
+#: apps/learning/invitation/forms.py:37
 msgid "Submit"
 msgstr "Отправить"
 
-#: apps/learning/invitation/views.py:178
+#: apps/learning/invitation/views.py:181
 msgid "Учетная запись активирована."
 msgstr ""
 
 #: apps/learning/models.py:51
-#, fuzzy
 #| msgid "Group"
 msgid "Group Type"
-msgstr "Группа"
+msgstr "Тип группы"
 
 #: apps/learning/models.py:77
 msgid "Enrollment key"
@@ -1668,12 +1656,12 @@ msgstr ""
 "Последний день записи на курсы должен быть не раньше первого дня записи на "
 "курсы"
 
-#: apps/learning/models.py:297 apps/learning/models.py:996
-#: apps/users/models.py:800
+#: apps/learning/models.py:297 apps/learning/models.py:999
+#: apps/users/models.py:803
 msgid "Student Profile"
 msgstr "Профиль студента"
 
-#: apps/learning/models.py:304 apps/users/models.py:914
+#: apps/learning/models.py:304 apps/users/models.py:921
 msgid "Enrollment|grade"
 msgstr "Оценка"
 
@@ -1690,7 +1678,7 @@ msgid "Leave reason"
 msgstr "Причина ухода"
 
 #: apps/learning/models.py:329 apps/learning/models.py:437
-#: apps/users/models.py:792
+#: apps/users/models.py:793
 msgid "Invitation"
 msgstr "Приглашение"
 
@@ -1833,7 +1821,7 @@ msgstr "Персональные задания"
 msgid "Grade can't be larger than maximum one ({0})"
 msgstr "Оценка не может быть больше максимальной ({0})"
 
-#: apps/learning/models.py:712 apps/users/models.py:775
+#: apps/learning/models.py:712 apps/users/models.py:776
 #: lms/templates/users/user_detail.html:321
 msgid "Comment"
 msgstr "Комментарий"
@@ -1866,8 +1854,8 @@ msgstr "Опубликовано"
 msgid "AssignmentComment|text"
 msgstr "Текст"
 
-#: apps/learning/models.py:735 apps/users/models.py:303
-#: apps/users/models.py:326 apps/users/models.py:333
+#: apps/learning/models.py:735 apps/users/models.py:304
+#: apps/users/models.py:327 apps/users/models.py:334
 msgid "LaTeX+Markdown is enabled"
 msgstr "доступны LaTeX и Markdown"
 
@@ -1884,12 +1872,10 @@ msgid "Assignment-comments"
 msgstr "Комментарии к заданиям"
 
 #: apps/learning/models.py:840
-#| msgid "Assignment Submission"
 msgid "Assignment Submission Attachment"
 msgstr "Приложенный файл"
 
 #: apps/learning/models.py:841
-#| msgid "Assignment Submission"
 msgid "Assignment Submission Attachments"
 msgstr "Приложенные файлы"
 
@@ -1953,9 +1939,10 @@ msgstr "События"
 msgid "Event should end after it's start"
 msgstr "Конец события должен быть позже начала"
 
-#: apps/learning/models.py:1000 apps/study_programs/models.py:70
-msgid "Activity"
-msgstr "Активность"
+#: apps/learning/models.py:995
+#| msgid "Visibility Settings"
+msgid "Visibility"
+msgstr "Видимость"
 
 #: apps/learning/models.py:1003
 msgid "Graduated on"
@@ -1965,7 +1952,7 @@ msgstr "Дата выпуска"
 msgid "Graduation ceremony date"
 msgstr "Дата выпускного считается датой выпуска студента"
 
-#: apps/learning/models.py:1007 apps/users/models.py:772
+#: apps/learning/models.py:1007 apps/users/models.py:773
 msgid "Fields of study"
 msgstr "Направления обучения"
 
@@ -1997,27 +1984,27 @@ msgstr "Отзыв о CS центре"
 msgid "Details"
 msgstr "Детали"
 
-#: apps/learning/models.py:1028 apps/users/models.py:752
+#: apps/learning/models.py:1029 apps/users/models.py:753
 msgid "Diploma Number"
 msgstr "Номер диплома"
 
-#: apps/learning/models.py:1033
+#: apps/learning/models.py:1034
 msgid "Registration Number"
 msgstr "Регистрационный номер"
 
-#: apps/learning/models.py:1034
+#: apps/learning/models.py:1035
 msgid "Registration number in the registry of education"
 msgstr "Номер в федеральном реестре (ФРДО)"
 
-#: apps/learning/models.py:1039 apps/users/models.py:762
+#: apps/learning/models.py:1040 apps/users/models.py:763
 msgid "Diploma Issued on"
 msgstr "Дата выдачи диплома"
 
-#: apps/learning/models.py:1047
+#: apps/learning/models.py:1048
 msgid "Graduate Profile"
 msgstr "Профиль выпускника"
 
-#: apps/learning/models.py:1048
+#: apps/learning/models.py:1049
 msgid "Graduate Profiles"
 msgstr "Профили выпускников"
 
@@ -2026,12 +2013,12 @@ msgid "Curator"
 msgstr "Куратор"
 
 #: apps/learning/roles.py:95 apps/users/constants.py:39
-#: apps/users/models.py:662
+#: apps/users/models.py:663
 msgid "Co-worker"
 msgstr "Сотрудник"
 
 #: apps/learning/roles.py:97 apps/users/constants.py:46
-#: apps/users/models.py:664
+#: apps/users/models.py:665
 msgid "Master's Degree Student"
 msgstr "Студент магистратуры"
 
@@ -2159,11 +2146,11 @@ msgstr "Хорошо"
 msgid "Excellent"
 msgstr "Отлично"
 
-#: apps/learning/study/views.py:181
+#: apps/learning/study/views.py:182
 msgid "Comment successfully saved"
 msgstr "Комментарий успешно сохранен."
 
-#: apps/learning/study/views.py:203
+#: apps/learning/study/views.py:204
 msgid "Solution successfully saved"
 msgstr "Решение успешно сохранено."
 
@@ -2223,22 +2210,22 @@ msgstr "Оценка успешно сохранена."
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
-#: apps/learning/tests/test_assignments.py:52
+#: apps/learning/tests/test_assignments.py:54
 msgid "News"
 msgstr "Новости"
 
-#: apps/learning/tests/test_enrollment.py:87
-#: apps/learning/tests/test_enrollment.py:91
-#: apps/learning/tests/test_enrollment.py:111
-#: apps/learning/tests/test_enrollment.py:119
-#: lms/jinja2/lms/courses/course_detail.html:215
-#: lms/jinja2/lms/courses/course_detail.html:224
+#: apps/learning/tests/test_enrollment.py:86
+#: apps/learning/tests/test_enrollment.py:90
+#: apps/learning/tests/test_enrollment.py:110
+#: apps/learning/tests/test_enrollment.py:118
+#: lms/jinja2/lms/courses/course_detail.html:219
+#: lms/jinja2/lms/courses/course_detail.html:228
 msgid "Places available"
 msgstr "Осталось мест"
 
-#: apps/learning/tests/test_enrollment.py:102
-#: apps/learning/tests/test_enrollment.py:133
-#: apps/learning/tests/test_enrollment.py:138
+#: apps/learning/tests/test_enrollment.py:101
+#: apps/learning/tests/test_enrollment.py:132
+#: apps/learning/tests/test_enrollment.py:137
 msgid "Enroll in"
 msgstr "Записаться"
 
@@ -2434,6 +2421,10 @@ msgstr "Направления обучения"
 msgid "Area of Study"
 msgstr "Направление обучения"
 
+#: apps/study_programs/models.py:70
+msgid "Activity"
+msgstr "Активность"
+
 #: apps/study_programs/models.py:71
 msgid ""
 "Show on syllabus page. Other activity flags for selected branch and academic"
@@ -2561,11 +2552,10 @@ msgstr ""
 "Для добавления анонса школы свяжитесь с координатором клуба: Александр Куликов, alexander.s.kulikov@gmail.com."
 
 #: apps/templates/international_schools/international_schools.html:15
-#, fuzzy
 #| msgid "Deadline"
 msgctxt "international Schools"
 msgid "Deadline"
-msgstr "Срок сдачи"
+msgstr "Дедлайн"
 
 #: apps/templates/international_schools/international_schools.html:17
 msgid "Dates"
@@ -2735,7 +2725,7 @@ msgid "Continue"
 msgstr "Продолжить"
 
 #: apps/templates/learning/invitation/invitation_courses.html:32
-#: lms/jinja2/lms/courses/course_detail.html:207
+#: lms/jinja2/lms/courses/course_detail.html:211
 msgid "Unenroll from the course"
 msgstr "Отписаться от курса"
 
@@ -2920,56 +2910,56 @@ msgstr "Куратор в Computer Science центре"
 msgid "Reference|Detail|info"
 msgstr "Информация"
 
-#: apps/users/admin.py:54
+#: apps/users/admin.py:55
 msgid "Create Student Profile before adding student permissions"
 msgstr "Требуется создать профиль студента перед выдачей роли студента."
 
-#: apps/users/admin.py:59
+#: apps/users/admin.py:60
 msgid "Selected branch does not match branch {} from the student profile"
 msgstr ""
 
-#: apps/users/admin.py:65
+#: apps/users/admin.py:66
 msgid "You have to specify branch for user before adding teacher permissions"
 msgstr ""
 "Укажите отделение у пользователя перед тем, как выдать ему права "
 "преподавателя."
 
-#: apps/users/admin.py:69
+#: apps/users/admin.py:70
 msgid "Assign branch relative to the selected site"
 msgstr ""
 
-#: apps/users/admin.py:79 apps/users/admin.py:119
+#: apps/users/admin.py:80 apps/users/admin.py:120
 msgid "Permissions"
 msgstr "Разрешения"
 
-#: apps/users/admin.py:114
+#: apps/users/admin.py:115
 msgid "Personal info"
 msgstr "Персональная информация"
 
-#: apps/users/admin.py:121
+#: apps/users/admin.py:122
 msgid "External services"
 msgstr "Внешние сервисы"
 
-#: apps/users/admin.py:124
+#: apps/users/admin.py:125
 msgid "Important dates"
 msgstr "Важные даты"
 
-#: apps/users/admin.py:183
+#: apps/users/admin.py:184
 msgid ""
 "Regular student profile already exists for this admission campaign year."
 msgstr ""
 "Профиль регулярного студента уже существует для связанной кампании по "
 "набору."
 
-#: apps/users/admin.py:203
+#: apps/users/admin.py:204
 msgid "Official Student Info"
 msgstr "Официальный студент"
 
-#: apps/users/admin.py:207
+#: apps/users/admin.py:208
 msgid "Curator's note"
 msgstr "Заметка куратора"
 
-#: apps/users/admin.py:248
+#: apps/users/admin.py:247
 msgid "Anytask"
 msgstr ""
 
@@ -3013,7 +3003,7 @@ msgstr "Удовлетворительно"
 msgid "Tell something about yourself"
 msgstr "Расскажите что-нибудь о себе"
 
-#: apps/users/forms.py:58 apps/users/models.py:334
+#: apps/users/forms.py:58 apps/users/models.py:335
 msgid "will be shown only to logged-in users"
 msgstr "показывается только залогиненным пользователям"
 
@@ -3035,267 +3025,263 @@ msgstr ""
 "Укажите одно или несколько мест работы через запятую. Пример: JetBrains, "
 "Яндекс, ПОМИ РАН"
 
-#: apps/users/models.py:134
+#: apps/users/models.py:135
 msgid "name"
 msgstr "имя"
 
-#: apps/users/models.py:137
+#: apps/users/models.py:138
 msgid "group"
 msgstr "группа"
 
-#: apps/users/models.py:138
+#: apps/users/models.py:139
 msgid "groups"
 msgstr "Группы"
 
-#: apps/users/models.py:177
+#: apps/users/models.py:178
 msgid "Access Group"
 msgstr ""
 
-#: apps/users/models.py:178
+#: apps/users/models.py:179
 msgid "Access Groups"
 msgstr "Права доступа"
 
-#: apps/users/models.py:213
+#: apps/users/models.py:214
 msgid "Index Redirect Option"
 msgstr ""
 
-#: apps/users/models.py:241
-#, fuzzy
+#: apps/users/models.py:242
 #| msgid "Username"
 msgid "username"
-msgstr "Имя пользователя"
+msgstr "username"
 
-#: apps/users/models.py:244
+#: apps/users/models.py:245
 msgid "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
 msgstr ""
 
-#: apps/users/models.py:247
+#: apps/users/models.py:248
 msgid "A user with that username already exists."
 msgstr "Пользователь с таким именем уже существует."
 
-#: apps/users/models.py:250
-#| msgid "First name"
+#: apps/users/models.py:251
 msgid "first name"
 msgstr "Имя"
 
-#: apps/users/models.py:251
-#| msgid "Last Page"
+#: apps/users/models.py:252
 msgid "last name"
 msgstr "Фамилия"
 
-#: apps/users/models.py:253
+#: apps/users/models.py:254
 msgid "CSCUser|patronymic"
 msgstr "Отчество"
 
-#: apps/users/models.py:256
+#: apps/users/models.py:257
 msgid "email address"
 msgstr ""
 
-#: apps/users/models.py:258
+#: apps/users/models.py:259
 msgid "staff status"
 msgstr ""
 
-#: apps/users/models.py:260
+#: apps/users/models.py:261
 msgid "Designates whether the user can log into this admin site."
 msgstr ""
 
-#: apps/users/models.py:263
+#: apps/users/models.py:264
 msgid "active"
 msgstr ""
 
-#: apps/users/models.py:266
+#: apps/users/models.py:267
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
 msgstr ""
 
-#: apps/users/models.py:271
+#: apps/users/models.py:272
 msgid "superuser status"
 msgstr ""
 
-#: apps/users/models.py:274
+#: apps/users/models.py:275
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
 msgstr ""
 
-#: apps/users/models.py:278
+#: apps/users/models.py:279
 msgid "Gender"
 msgstr "Пол"
 
-#: apps/users/models.py:281 lms/templates/users/user_detail.html:147
+#: apps/users/models.py:282 lms/templates/users/user_detail.html:147
 msgid "Phone"
 msgstr "Телефон"
 
-#: apps/users/models.py:284
+#: apps/users/models.py:285
 msgid "date joined"
 msgstr ""
 
-#: apps/users/models.py:287
+#: apps/users/models.py:288
 msgid "CSCUser|photo"
 msgstr "Фото"
 
-#: apps/users/models.py:302
+#: apps/users/models.py:303
 msgid "CSCUser|note"
 msgstr "Дополнительно"
 
-#: apps/users/models.py:310
+#: apps/users/models.py:311
 msgid "Github Login"
 msgstr "Логин на github.com"
 
-#: apps/users/models.py:319
+#: apps/users/models.py:320
 msgid "stepik.org ID"
 msgstr "stepik.org ID"
 
-#: apps/users/models.py:322
+#: apps/users/models.py:323
 msgid "Anytask URL"
 msgstr ""
 
-#: apps/users/models.py:324
+#: apps/users/models.py:325
 msgid "Social Networks"
 msgstr "Социальные сети"
 
-#: apps/users/models.py:327
+#: apps/users/models.py:328
 msgid "will be shown to curators only"
 msgstr "будут показаны только кураторам"
 
-#: apps/users/models.py:331 lms/jinja2/lms/courses/teacher_detail.html:19
+#: apps/users/models.py:332 lms/jinja2/lms/courses/teacher_detail.html:19
 #: lms/templates/users/user_detail.html:535
 msgid "Contact information"
 msgstr "Контактная информация"
 
-#: apps/users/models.py:337 lms/templates/users/user_detail.html:157
+#: apps/users/models.py:338 lms/templates/users/user_detail.html:157
 msgid "Workplace"
 msgstr "Место работы"
 
-#: apps/users/models.py:347
+#: apps/users/models.py:348
 msgid "CSCUser|user"
 msgstr "Пользователь"
 
-#: apps/users/models.py:348
+#: apps/users/models.py:349
 msgid "CSCUser|users"
 msgstr "Пользователи"
 
-#: apps/users/models.py:661
+#: apps/users/models.py:662
 msgid "Regular Student"
 msgstr "Студент"
 
-#: apps/users/models.py:663
+#: apps/users/models.py:664
 msgid "Invited Student"
 msgstr "Приглашенный студент"
 
-#: apps/users/models.py:691
+#: apps/users/models.py:692
 msgid "Partner Tag"
 msgstr "Партнер"
 
-#: apps/users/models.py:692
+#: apps/users/models.py:693
 msgid "Partner Tags"
 msgstr "Партнеры"
 
-#: apps/users/models.py:705
+#: apps/users/models.py:706
 msgid "Priority"
 msgstr "Приоритет"
 
-#: apps/users/models.py:710
-#| msgid "1 course magistracy"
+#: apps/users/models.py:711
 msgid "Magistracy"
 msgstr "Магистратура"
 
-#: apps/users/models.py:730 lms/jinja2/lms/staff/student_search.html:35
+#: apps/users/models.py:731 lms/jinja2/lms/staff/student_search.html:35
 #: lms/templates/users/user_detail.html:264
 msgid "Student|admission year"
 msgstr "Год поступления"
 
-#: apps/users/models.py:732 lms/jinja2/lms/staff/student_search.html:47
+#: apps/users/models.py:733 lms/jinja2/lms/staff/student_search.html:47
 msgid "CSCUser|Curriculum year"
 msgstr "Год программы обучения"
 
-#: apps/users/models.py:741 lms/templates/users/user_detail.html:276
+#: apps/users/models.py:742 lms/templates/users/user_detail.html:276
 msgid "StudentInfo|University year"
 msgstr "Курс при поступлении"
 
-#: apps/users/models.py:746
+#: apps/users/models.py:747
 msgid "Official Student"
 msgstr "Официальный студент"
 
-#: apps/users/models.py:747
+#: apps/users/models.py:748
 msgid "Passport, consent for processing personal data, diploma (optional)"
 msgstr ""
 "Передал данные о паспорте, соглашение о персональных данных, диплом и т.д."
 
-#: apps/users/models.py:754
+#: apps/users/models.py:755
 msgid "Number of higher education diploma"
 msgstr "Номер диплома о высшем образовании"
 
-#: apps/users/models.py:758
+#: apps/users/models.py:759
 msgid "Birthday"
 msgstr "Дата рождения"
 
-#: apps/users/models.py:766
+#: apps/users/models.py:767
 msgid "Diploma Issued by"
 msgstr "Кем выдан диплом"
 
-#: apps/users/models.py:779
+#: apps/users/models.py:780
 msgid "Comment changed"
 msgstr "Комментарий изменён"
 
-#: apps/users/models.py:785
+#: apps/users/models.py:786
 msgid "Author of last edit"
 msgstr "Автор последней правки"
 
-#: apps/users/models.py:801
+#: apps/users/models.py:804
 msgid "Student Profiles"
 msgstr "Профили студентов"
 
-#: apps/users/models.py:822
+#: apps/users/models.py:829
 msgid "Value should be >= {} (year of the branch establishment)"
 msgstr ""
 
-#: apps/users/models.py:857
+#: apps/users/models.py:864
 msgid "Entry Added"
 msgstr "Дата изменения"
 
-#: apps/users/models.py:875
+#: apps/users/models.py:882
 msgid "Student Status Log"
 msgstr "Лог изменения статуса"
 
-#: apps/users/models.py:881
+#: apps/users/models.py:888
 msgid "Studying"
 msgstr "Учится"
 
-#: apps/users/models.py:894
+#: apps/users/models.py:901
 msgid "Online course record"
 msgstr "Запись об онлайн-курсе"
 
-#: apps/users/models.py:895
+#: apps/users/models.py:902
 msgid "Online course records"
 msgstr "Записи об онлайн-курсах"
 
-#: apps/users/models.py:907
+#: apps/users/models.py:914
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: apps/users/models.py:920
+#: apps/users/models.py:927
 msgid "SHAD course record"
 msgstr "Запись о курсе ШАД"
 
-#: apps/users/models.py:921
+#: apps/users/models.py:928
 msgid "SHAD course records"
 msgstr "Записи о курсах ШАД"
 
-#: apps/users/models.py:932
+#: apps/users/models.py:939
 msgid "Reference|signature"
 msgstr "Подпись"
 
-#: apps/users/models.py:933
+#: apps/users/models.py:940
 msgid "Reference|note"
 msgstr "Текст в свободной форме"
 
-#: apps/users/models.py:941
+#: apps/users/models.py:948
 msgid "Student Reference"
 msgstr "Справка студента"
 
-#: apps/users/models.py:942
+#: apps/users/models.py:949
 msgid "Student References"
 msgstr "Справки студента"
 
@@ -3311,7 +3297,7 @@ msgstr "Выдать справку"
 msgid "Student references"
 msgstr "Справки студента"
 
-#: apps/users/views.py:114
+#: apps/users/views.py:115
 msgid "Events"
 msgstr "События"
 
@@ -3481,7 +3467,7 @@ msgid "Other materials"
 msgstr "Другие материалы"
 
 #: lms/jinja2/lms/courses/course_class_form.html:45
-#: lms/jinja2/lms/courses/course_detail.html:87
+#: lms/jinja2/lms/courses/course_detail.html:91
 msgid "Materials"
 msgstr "Материалы"
 
@@ -3493,61 +3479,67 @@ msgstr "Настройки отображения"
 msgid "Save and add"
 msgstr "Сохранить и добавить ещё"
 
-#: lms/jinja2/lms/courses/course_detail.html:84
+#: lms/jinja2/lms/courses/course_detail.html:88
 msgid "Date and time"
 msgstr "Дата и время"
 
-#: lms/jinja2/lms/courses/course_detail.html:85
+#: lms/jinja2/lms/courses/course_detail.html:89
 #: lms/jinja2/lms/learning/timetable.html:33
 #: lms/jinja2/lms/teaching/timetable.html:35
 msgid "Class|Name"
 msgstr "Название"
 
-#: lms/jinja2/lms/courses/course_detail.html:86
+#: lms/jinja2/lms/courses/course_detail.html:90
 #: lms/jinja2/lms/learning/timetable.html:35
 #: lms/jinja2/lms/teaching/timetable.html:37
 msgid "Venue|short"
 msgstr "Место"
 
-#: lms/jinja2/lms/courses/course_detail.html:106
+#: lms/jinja2/lms/courses/course_detail.html:101
+msgid ""
+"\n"
+"                        Lecture"
+msgstr ""
+
+#: lms/jinja2/lms/courses/course_detail.html:116
 msgid "No"
 msgstr "Нет"
 
-#: lms/jinja2/lms/courses/course_detail.html:127
+#: lms/jinja2/lms/courses/course_detail.html:137
 msgid "Files"
 msgstr "Файлы"
 
-#: lms/jinja2/lms/courses/course_detail.html:181
+#: lms/jinja2/lms/courses/course_detail.html:194
 msgid "delete"
 msgstr "удалить"
 
-#: lms/jinja2/lms/courses/course_detail.html:182
+#: lms/jinja2/lms/courses/course_detail.html:195
 msgid "edit"
 msgstr "редактировать"
 
-#: lms/jinja2/lms/courses/course_detail.html:198
+#: lms/jinja2/lms/courses/course_detail.html:217
+#: lms/jinja2/lms/courses/course_detail.html:226
+msgid "Enroll in the course"
+msgstr "Записаться на курс"
+
+#: lms/jinja2/lms/courses/course_detail.html:237
 msgid "Add assignment"
 msgstr "Добавить задание"
 
-#: lms/jinja2/lms/courses/course_detail.html:201
+#: lms/jinja2/lms/courses/course_detail.html:240
 #: lms/jinja2/lms/teaching/course_list.html:27
 msgid "Add news"
 msgstr "Добавить новость"
 
-#: lms/jinja2/lms/courses/course_detail.html:202
+#: lms/jinja2/lms/courses/course_detail.html:241
 msgid "Add class"
 msgstr "Добавить занятие"
 
-#: lms/jinja2/lms/courses/course_detail.html:203
+#: lms/jinja2/lms/courses/course_detail.html:242
 msgid "Edit description"
 msgstr "Редактировать описание"
 
-#: lms/jinja2/lms/courses/course_detail.html:213
-#: lms/jinja2/lms/courses/course_detail.html:222
-msgid "Enroll in the course"
-msgstr "Записаться на курс"
-
-#: lms/jinja2/lms/courses/course_detail.html:236
+#: lms/jinja2/lms/courses/course_detail.html:252
 msgid "Start survey"
 msgstr "Оставить отзыв о курсе"
 
@@ -3658,7 +3650,6 @@ msgid "teacher"
 msgstr "преподаватель"
 
 #: lms/templates/users/user_detail.html:104
-#| msgid "Testimonial about Computer Science Center"
 msgid "Review of Computer Science Center"
 msgstr "Отзыв о CS центре"
 
@@ -3697,6 +3688,9 @@ msgstr "осенний"
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
+
+#~ msgid "Non-empty URL for no checking system"
+#~ msgstr "Указан непустой URL, хотя не выбрана проверяющая система"
 
 #~ msgid "Student field should point to an actual student"
 #~ msgstr "Поле \"Студент\" должно указывать на студента"
