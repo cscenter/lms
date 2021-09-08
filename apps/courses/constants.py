@@ -21,7 +21,6 @@ WEEKDAY_TITLES = [
 ]
 
 
-# FIXME: mb it needs to replace lazy translation with `gettext_noop`. Test with en version
 class SemesterTypes(DjangoChoices):
     """
     Term order values must be consecutive numbers and start from
@@ -51,3 +50,13 @@ class MaterialVisibilityTypes(DjangoChoices):
     PUBLIC = C('public', _('All Users'))
     PARTICIPANTS = C('participants', _('All Students'))
     COURSE_PARTICIPANTS = C('private', _('Course Participants'))
+
+
+class AssignmentFormat(DjangoChoices):
+    ONLINE = C("online", _("Online Submission"))  # file or text on site
+    YANDEX_CONTEST = C("ya.contest", _("Yandex.Contest"))
+    EXTERNAL = C("external", _("External Service"))
+    CODE_REVIEW = C("code_review", _("Code Review Submission"))
+    NO_SUBMIT = C("other", _("No Submission"))  # on paper, etc
+
+    with_checker = {CODE_REVIEW.value, YANDEX_CONTEST.value}

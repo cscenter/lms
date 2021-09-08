@@ -18,7 +18,8 @@ from core.tests.settings import (
 from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse
 from courses.admin import AssignmentAdmin
-from courses.models import Assignment, AssignmentSubmissionFormats, CourseTeacher
+from courses.models import Assignment, CourseTeacher
+from courses.constants import AssignmentFormat
 from courses.tests.factories import AssignmentFactory, CourseFactory, CourseNewsFactory
 from learning.models import AssignmentNotification, CourseNewsNotification
 from learning.services import EnrollmentService, is_course_failed_by_student
@@ -48,7 +49,7 @@ def test_view_new_assignment(client):
     a = AssignmentFactory.build()
     form = {
         'title': a.title,
-        'submission_type': AssignmentSubmissionFormats.ONLINE,
+        'submission_type': AssignmentFormat.ONLINE,
         'text': a.text,
         'passing_score': 0,
         'maximum_score': 5,
@@ -159,7 +160,7 @@ def test_assignment_setup_assignees_public_form(client):
     a = AssignmentFactory.build()
     form = {
         'title': a.title,
-        'submission_type': AssignmentSubmissionFormats.ONLINE,
+        'submission_type': AssignmentFormat.ONLINE,
         'text': a.text,
         'passing_score': 0,
         'maximum_score': 5,
@@ -203,7 +204,7 @@ def test_assignment_setup_assignees_admin_form(client):
     post_data = {
         'course': co.pk,
         'title': a.title,
-        'submission_type': AssignmentSubmissionFormats.ONLINE,
+        'submission_type': AssignmentFormat.ONLINE,
         'text': a.text,
         'passing_score': 0,
         'maximum_score': 5,

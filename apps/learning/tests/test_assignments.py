@@ -14,7 +14,8 @@ from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.models import Assignment, AssignmentAttachment, AssignmentSubmissionFormats
+from courses.models import Assignment, AssignmentAttachment
+from courses.constants import AssignmentFormat
 from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, SemesterFactory
 )
@@ -242,7 +243,7 @@ def test_create_assignment_admin_form(client):
     post_data = {
         'course': course.pk,
         'title': a.title,
-        'submission_type': AssignmentSubmissionFormats.ONLINE,
+        'submission_type': AssignmentFormat.ONLINE,
         'text': a.text,
         'passing_score': 0,
         'maximum_score': 5,

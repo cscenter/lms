@@ -10,7 +10,8 @@ from django.utils.encoding import smart_bytes
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.urls import reverse
-from courses.models import AssignmentSubmissionFormats, CourseTeacher
+from courses.models import CourseTeacher
+from courses.constants import AssignmentFormat
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from courses.utils import get_current_term_pair
 from learning.models import AssignmentComment, AssignmentNotification, StudentAssignment
@@ -300,7 +301,7 @@ def test_add_solution_for_assignment_without_solutions(client):
                       course=course)
     assignment = AssignmentFactory(
         course=course,
-        submission_type=AssignmentSubmissionFormats.NO_SUBMIT)
+        submission_type=AssignmentFormat.NO_SUBMIT)
     student_assignment = (StudentAssignment.objects
                           .get(assignment=assignment, student=student))
     student_url = student_assignment.get_student_url()

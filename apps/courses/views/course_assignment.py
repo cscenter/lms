@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Any, Dict
+
 from vanilla import CreateView, DeleteView, UpdateView
 
 from django.db import transaction
@@ -7,6 +9,7 @@ from django.shortcuts import redirect
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
 from core.views import ProtectedFormMixin
+from courses.constants import AssignmentFormat
 from courses.forms import AssignmentForm
 from courses.models import Assignment, AssignmentAttachment
 from courses.permissions import CreateAssignment, EditAssignment
@@ -18,8 +21,15 @@ __all__ = ('AssignmentCreateView', 'AssignmentUpdateView',
            'AssignmentDeleteView', 'AssignmentAttachmentDeleteView')
 
 
-class AssignmentCreateUpdateMixin(CourseURLParamsMixin,
-                                  PermissionRequiredMixin):
+if TYPE_CHECKING:
+    from vanilla import GenericModelView
+    AssignmentCreateUpdateMixinBase = GenericModelView
+else:
+    AssignmentCreateUpdateMixinBase = object
+
+
+class AssignmentCreateUpdateMixin(CourseURLParamsMixin, PermissionRequiredMixin,
+                                  AssignmentCreateUpdateMixinBase):
     model = Assignment
     template_name = "lms/courses/course_assignment_form.html"
 
@@ -44,6 +54,13 @@ class AssignmentCreateUpdateMixin(CourseURLParamsMixin,
 
     def post_save(self, form):
         pass
+
+    def get_context_data(self, form: AssignmentForm, **kwargs: Any) -> Dict[str, Any]:
+        context = {
+            "form": form,
+            "formats_with_checker": AssignmentFormat.with_checker
+        }
+        return context
 
 
 class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):

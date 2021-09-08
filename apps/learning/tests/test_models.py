@@ -11,9 +11,9 @@ from django.db import IntegrityError, transaction
 from django.utils.encoding import smart_str
 
 from core.tests.factories import BranchFactory, LocationFactory, SiteFactory
-from courses.constants import SemesterTypes
+from courses.constants import SemesterTypes, AssignmentFormat
 from courses.models import (
-    AssignmentSubmissionFormats, CourseGroupModes, CourseNews, Semester
+    CourseGroupModes, CourseNews, Semester
 )
 from courses.tests.factories import (
     AssignmentFactory, CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
@@ -80,7 +80,7 @@ def test_student_assignment_submission_is_sent():
     as_ = StudentAssignmentFactory(
         student=u_student,
         assignment__course__teachers=[u_teacher],
-        assignment__submission_type=AssignmentSubmissionFormats.ONLINE)
+        assignment__submission_type=AssignmentFormat.ONLINE)
     # teacher comments first
     assert not as_.submission_is_received
     AssignmentCommentFactory.create(student_assignment=as_,
@@ -95,7 +95,7 @@ def test_student_assignment_submission_is_sent():
     as_ = StudentAssignmentFactory(
         student=u_student,
         assignment__course__teachers=[u_teacher],
-        assignment__submission_type=AssignmentSubmissionFormats.ONLINE)
+        assignment__submission_type=AssignmentFormat.ONLINE)
     as_.refresh_from_db()
     assert not as_.submission_is_received
     AssignmentCommentFactory.create(student_assignment=as_,
@@ -110,7 +110,7 @@ def test_student_assignment_submission_is_sent():
     as_ = StudentAssignmentFactory(
         student=u_student,
         assignment__course__teachers=[u_teacher],
-        assignment__submission_type=AssignmentSubmissionFormats.NO_SUBMIT)
+        assignment__submission_type=AssignmentFormat.NO_SUBMIT)
     as_.refresh_from_db()
     assert not as_.submission_is_received
     AssignmentCommentFactory.create(student_assignment=as_,
@@ -127,7 +127,7 @@ def test_student_assignment_state():
     student = StudentFactory()
     a_online = AssignmentFactory.create(
         passing_score=5, maximum_score=10,
-        submission_type=AssignmentSubmissionFormats.ONLINE,
+        submission_type=AssignmentFormat.ONLINE,
         deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
     )
     ctx = {'student': student, 'assignment': a_online}
@@ -145,7 +145,7 @@ def test_student_assignment_state():
     assert sa.state.value == sa.States.NOT_SUBMITTED
     a_offline = AssignmentFactory.create(
         passing_score=5, maximum_score=10,
-        submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
+        submission_type=AssignmentFormat.NO_SUBMIT,
         deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
     )
     ctx['assignment'] = a_offline

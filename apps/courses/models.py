@@ -29,7 +29,7 @@ from core.timezone.fields import TimezoneAwareDateTimeField
 from core.timezone.typing import Timezone
 from core.urls import reverse
 from core.utils import get_youtube_video_id, hashids, instance_memoize
-from courses.constants import MaterialVisibilityTypes, TeacherRoles
+from courses.constants import AssignmentFormat, MaterialVisibilityTypes, TeacherRoles
 from courses.utils import TermPair, get_current_term_pair
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
@@ -1042,15 +1042,6 @@ def course_class_attachment_post_delete(sender, instance, *args, **kwargs):
     )
 
 
-class AssignmentSubmissionFormats(DjangoChoices):
-    ONLINE = C("online", _("Online Submission"))  # file or text on site
-    EXTERNAL = C("external", _("External Service"))
-    CODE_REVIEW = C("code_review", _("Code Review Submission"))
-    NO_SUBMIT = C("other", _("No Submission"))  # on paper, etc
-
-    with_checker = {CODE_REVIEW.value}
-
-
 class Assignment(TimezoneAwareMixin, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'time_zone'
 
@@ -1064,7 +1055,7 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
     submission_type = models.CharField(
         verbose_name=_("Submission Type"),
         max_length=42,
-        choices=AssignmentSubmissionFormats.choices
+        choices=AssignmentFormat.choices
     )
     title = models.CharField(_("Assignment|name"),
                              max_length=140)
@@ -1162,8 +1153,8 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
         return self.id in cache.assignment_ids_set
 
     @property
-    def checking_system_needed(self):
-        return self.submission_type == AssignmentSubmissionFormats.CODE_REVIEW
+    def format(self):
+        return self.submission_type
 
     @property
     def deadline_is_exceeded(self):
@@ -1175,7 +1166,7 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
         Online is when you want students to submit their assignments
         using current site.
         """
-        return self.submission_type == AssignmentSubmissionFormats.ONLINE
+        return self.submission_type == AssignmentFormat.ONLINE
 
     @cached_property
     def files_root(self):

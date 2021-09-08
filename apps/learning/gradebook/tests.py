@@ -17,7 +17,7 @@ from auth.mixins import PermissionRequiredMixin
 from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.urls import reverse
-from courses.models import AssignmentSubmissionFormats
+from courses.constants import AssignmentFormat
 from courses.tests.factories import AssignmentFactory, CourseFactory
 from learning.gradebook import BaseGradebookForm, GradeBookFormFactory, gradebook_data
 from learning.gradebook.imports import (
@@ -93,7 +93,7 @@ def test_nonempty_gradebook_view(client):
     as_online = AssignmentFactory.create_batch(2, course=course)
     as_offline = AssignmentFactory.create_batch(
         3, course=course,
-        submission_type=AssignmentSubmissionFormats.NO_SUBMIT)
+        submission_type=AssignmentFormat.NO_SUBMIT)
     url = course.get_gradebook_url()
     client.login(teacher)
     response = client.get(url)
@@ -124,7 +124,7 @@ def test_save_gradebook(client, assert_redirect):
     a1, a2 = AssignmentFactory.create_batch(
         2,
         course=course,
-        submission_type=AssignmentSubmissionFormats.NO_SUBMIT)
+        submission_type=AssignmentFormat.NO_SUBMIT)
     teacher_gradebook_url = course.get_gradebook_url()
     form = {}
     pairs = zip([StudentAssignment.objects.get(student=student, assignment=a)
@@ -321,7 +321,7 @@ def test_save_gradebook_form(client):
     co = CourseFactory.create(teachers=[teacher])
     a1, a2 = AssignmentFactory.create_batch(
         2, course=co,
-        submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
+        submission_type=AssignmentFormat.NO_SUBMIT,
         passing_score=10, maximum_score=20)
     e1, e2 = EnrollmentFactory.create_batch(2, course=co,
                                             grade=GradeTypes.EXCELLENT)
@@ -382,7 +382,7 @@ def test_save_gradebook_l10n(client):
     co = CourseFactory.create(teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory(course=co,
-                          submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
+                          submission_type=AssignmentFormat.NO_SUBMIT,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
     field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
@@ -408,7 +408,7 @@ def test_save_gradebook_less_than_passing_score(client):
     co = CourseFactory.create(teachers=[teacher])
     e = EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory(course=co,
-                          submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
+                          submission_type=AssignmentFormat.NO_SUBMIT,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
     field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
@@ -430,7 +430,7 @@ def test_gradebook_view_form_invalid(client):
     e = EnrollmentFactory.create(student=student, course=co,
                                  grade=GradeTypes.EXCELLENT)
     a = AssignmentFactory(course=co,
-                          submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
+                          submission_type=AssignmentFormat.NO_SUBMIT,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
     sa.score = 7
@@ -461,7 +461,7 @@ def test_gradebook_view_form_conflict(client):
     e = EnrollmentFactory.create(student=student, course=co,
                                  grade=GradeTypes.NOT_GRADED)
     a = AssignmentFactory(course=co,
-                          submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
+                          submission_type=AssignmentFormat.NO_SUBMIT,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a, score=None)
     final_grade_field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(e.pk)
@@ -541,7 +541,7 @@ def test_gradebook_import_assignment_scores_from_csv_permissions(client):
     assignments = AssignmentFactory.create_batch(
         3,
         course=co,
-        submission_type=AssignmentSubmissionFormats.NO_SUBMIT)
+        submission_type=AssignmentFormat.NO_SUBMIT)
     teacher2 = TeacherFactory()
     client.login(teacher2)
     url = reverse('teaching:gradebook_import_scores_by_stepik_id', args=[co.pk])
@@ -601,7 +601,7 @@ def test_gradebook_import_assignment_score_by_stepik_id(client):
         EnrollmentFactory.create(student=s, course=course)
     assignment = AssignmentFactory.create(
         course=course,
-        submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
+        submission_type=AssignmentFormat.NO_SUBMIT,
         maximum_score=50)
     # Missing header
     csv_data = b"""
@@ -649,7 +649,7 @@ def test_gradebook_import_assignment_score_by_yandex_login(client):
         EnrollmentFactory.create(student=s, course=course)
     assignment = AssignmentFactory(
         course=course,
-        submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
+        submission_type=AssignmentFormat.NO_SUBMIT,
         maximum_score=50)
     student_assignment3 = StudentAssignment.objects.get(assignment=assignment,
                                                         student=student3)
@@ -699,7 +699,7 @@ def test_gradebook_import_assignment_score_by_enrollment_id_invalid_data(client)
     e1, e2, e3 = EnrollmentFactory.create_batch(3, course=course)
     assignment = AssignmentFactory.create(
         course=course,
-        submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
+        submission_type=AssignmentFormat.NO_SUBMIT,
         maximum_score=50)
     # Invalid headers
     csv_data = b"""
@@ -745,7 +745,7 @@ def test_gradebook_import_assignment_score_by_enrollment_id(client):
     e1, e2, e3 = EnrollmentFactory.create_batch(3, course=course)
     assignment = AssignmentFactory.create(
         course=course,
-        submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
+        submission_type=AssignmentFormat.NO_SUBMIT,
         maximum_score=500)
     csv_data = force_bytes(f"""
 id,header2,score
@@ -767,7 +767,7 @@ id,header2,score
     e4 = EnrollmentFactory(course=other_course)
     assignment_other = AssignmentFactory.create(
         course=other_course,
-        submission_type=AssignmentSubmissionFormats.NO_SUBMIT,
+        submission_type=AssignmentFormat.NO_SUBMIT,
         maximum_score=200)
     csv_data = force_bytes(f"""
 id,header2,score

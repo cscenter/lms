@@ -1,6 +1,6 @@
 from typing import Optional
 
-from courses.models import AssignmentSubmissionFormats
+from courses.constants import AssignmentFormat
 from grading.constants import CheckingSystemTypes
 from learning.forms import (
     AssignmentSolutionBaseForm, AssignmentSolutionDefaultForm,
@@ -51,12 +51,14 @@ def get_solution_form(student_assignment: StudentAssignment,
                       **kwargs) -> Optional[AssignmentSolutionBaseForm]:
     assignment = student_assignment.assignment
     submission_format = student_assignment.assignment.submission_type
-    if submission_format == AssignmentSubmissionFormats.NO_SUBMIT:
+    if submission_format == AssignmentFormat.NO_SUBMIT:
         return None
-    elif submission_format == AssignmentSubmissionFormats.EXTERNAL:
+    elif submission_format == AssignmentFormat.YANDEX_CONTEST:
+        return None
+    elif submission_format == AssignmentFormat.EXTERNAL:
         # FIXME: return None
         form = AssignmentSolutionDefaultForm(assignment, **kwargs)
-    elif (submission_format == AssignmentSubmissionFormats.CODE_REVIEW
+    elif (submission_format == AssignmentFormat.CODE_REVIEW
           and assignment.checker_id and assignment.checker.checking_system.type == CheckingSystemTypes.YANDEX):
         form = AssignmentSolutionYandexContestForm(assignment, **kwargs)
     else:

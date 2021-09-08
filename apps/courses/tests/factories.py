@@ -7,9 +7,9 @@ from django.conf import settings
 from django.utils import timezone
 
 from core.tests.factories import BranchFactory, LocationFactory
-from courses.constants import MaterialVisibilityTypes
+from courses.constants import MaterialVisibilityTypes, AssignmentFormat
 from courses.models import (
-    Assignment, AssignmentAttachment, AssignmentSubmissionFormats, Course, CourseBranch,
+    Assignment, AssignmentAttachment, Course, CourseBranch,
     CourseClass, CourseClassAttachment, CourseNews, CourseReview, CourseTeacher,
     LearningSpace, MetaCourse, Semester
 )
@@ -189,7 +189,7 @@ class AssignmentFactory(factory.django.DjangoModelFactory):
     course = factory.SubFactory(CourseFactory)
     deadline_at = factory.Faker('date_time_between', start_date="+1d",
                                 end_date="+10d", tzinfo=pytz.UTC)
-    submission_type = AssignmentSubmissionFormats.ONLINE
+    submission_type = AssignmentFormat.ONLINE
     title = factory.Sequence(lambda n: "Test assignment %03d" % n)
     text = "This is a text for a test assignment"
     time_zone = factory.LazyAttribute(lambda o: o.course.main_branch.get_timezone())

@@ -9,12 +9,13 @@
 {% endblock javascripts %}
 
 {% block content %}
+  {% set assignment = form.instance %}
   <div class="container">
     <div class="row">
       <div class="col-xs-12">
         <h2 class="content-title mb-20">
-          {% if form.instance.pk %}Редактировать{% else %}Добавить{% endif %} задание<br>
-          <small><a href="{{ form.instance.course.get_absolute_url() }}">{{ form.instance.course }}</a></small>
+          {% if assignment.pk %}Редактировать{% else %}Добавить{% endif %} задание<br>
+          <small><a href="{{ assignment.course.get_absolute_url() }}">{{ assignment.course }}</a></small>
         </h2>
         <form action="" method="post" enctype="multipart/form-data">
           {% csrf_token %}
@@ -24,9 +25,9 @@
           {% with field=form.attachments %}
             <div class="form-group">
               {{ forms.field(field, popover_help_text=field.help_text) }}
-              {% if form.instance %}
+              {% if assignment %}
                 <ul class="list-unstyled __files mt-10">
-                  {% for aa in form.instance.assignmentattachment_set.all() %}
+                  {% for aa in assignment.assignmentattachment_set.all() %}
                     <li><a title="Удалить файл" href="{{ aa.get_delete_url() }}"><i class="fa fa-trash-o"></i>&nbsp;{{ aa.file_name }}</a>
                     </li>
                   {% endfor %}
@@ -51,8 +52,12 @@
                       <dl class="mb-0">
                         <dt>Через сайт</dt>
                         <dd>Студент отправляет решение в виде текста или приложенного файла.</dd>
+                        <dt>Яндекс.Контест</dt>
+                        <dd>Студенты сдают решение на платформе Яндекс.Контест, отправка решений через сайт закрыта.</dd>
                         <dt>Внешний сервис</dt>
-                        <dd>Это может быть ревью кода на github, gerrit, Яндекс.Контест, оценка за курс на stepik.org и др.</dd>
+                        <dd>Это может быть ревью кода на github или gitlab, оценка за курс на stepik.org и др.</dd>
+                        <dt>Задача с код-ревью</dt>
+                        <dd>Если в качестве проверяющей системы выбран Яндекс.Контест, то файл с решением сначала отправляется в Яндекс.Контест. Если решение проходит все тесты - создаётся тикет на проверку в системе Gerrit.</dd>
                         <dt>Без отправки решения</dt>
                         <dd>Например, устная форма, сдача задания непосредственно в аудитории (тест, контрольная работа, семинар&nbsp;итд)
                         </dd>
@@ -102,8 +107,8 @@
             </div>
           </fieldset>
 
-          <fieldset id="checking-system-info" {% if not form.instance.checking_system_needed %}class="hidden"{% endif %}
-                    data-display="{{ form.checking_system_fieldset_display }}">
+          <fieldset id="checking-system-info" {% if assignment.format not in formats_with_checker %}class="hidden"{% endif %}
+                    data-display="{{ formats_with_checker|join(",") }}">
             <legend>Настройки проверяющей системы</legend>
             <div class="row">
               <div class="col-xs-12">

@@ -7,8 +7,9 @@ from django.conf import settings
 
 from auth.permissions import Permission, add_perm
 from courses.models import (
-    Assignment, AssignmentSubmissionFormats, Course, CourseGroupModes, StudentGroupTypes
+    Assignment, Course, CourseGroupModes, StudentGroupTypes
 )
+from courses.constants import AssignmentFormat
 from learning.models import (
     AssignmentGroup, CourseInvitation, Enrollment, StudentAssignment, StudentGroup
 )
@@ -328,7 +329,7 @@ class CreateOwnAssignmentSolution(Permission):
     @rules.predicate
     def rule(user, student_assignment: StudentAssignment):
         submission_format = student_assignment.assignment.submission_type
-        if submission_format == AssignmentSubmissionFormats.NO_SUBMIT:
+        if submission_format == AssignmentFormat.NO_SUBMIT:
             return False
         student_profile = user.get_student_profile()
         if student_profile.status in StudentStatuses.inactive_statuses:

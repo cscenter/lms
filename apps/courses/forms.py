@@ -13,10 +13,10 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.timezone.forms import TimezoneAwareModelForm, TimezoneAwareSplitDateTimeField
 from core.widgets import DateInputTextWidget, TimeInputTextWidget, UbereditorWidget
-from courses.constants import ClassTypes
+from courses.constants import AssignmentFormat, ClassTypes
 from courses.models import (
-    Assignment, AssignmentSubmissionFormats, Course, CourseClass, CourseGroupModes,
-    CourseNews, LearningSpace, MetaCourse
+    Assignment, Course, CourseClass, CourseGroupModes, CourseNews, LearningSpace,
+    MetaCourse
 )
 from courses.services import CourseService
 from grading.models import CheckingSystem
@@ -345,17 +345,10 @@ class AssignmentForm(TimezoneAwareModelForm):
                   'submission_type', 'passing_score', 'maximum_score',
                   'weight', 'ttc', 'restricted_to')
 
-    def checking_system_fieldset_display(self):
-        """
-        Return assignment submission formats, which might need checking system
-        fieldset to be displayed. Used as a data attribute in template.
-        """
-        return ",".join(AssignmentSubmissionFormats.with_checker)
-
     def clean(self):
         cleaned_data = super().clean()
         submission_type = cleaned_data.get('submission_type')
-        if submission_type in AssignmentSubmissionFormats.with_checker:
+        if submission_type in AssignmentFormat.with_checker:
             checking_system = cleaned_data.get('checking_system')
             checker_url = cleaned_data.get('checker_url')
             if checking_system:
@@ -365,13 +358,12 @@ class AssignmentForm(TimezoneAwareModelForm):
                 except CheckerURLError as e:
                     self.add_error('checker_url', str(e))
             elif checker_url:
-                self.add_error('checker_url',
-                               _("Non-empty URL for no checking system"))
+                self.add_error('checker_url', _("URL is specified but checking system is empty"))
         return cleaned_data
 
     def save(self, commit=True):
         submission_type = self.cleaned_data['submission_type']
-        if submission_type in AssignmentSubmissionFormats.with_checker:
+        if submission_type in AssignmentFormat.with_checker:
             checking_system = self.cleaned_data['checking_system']
             checker = None
             if checking_system:

@@ -196,9 +196,9 @@ class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
         return self.student_assignment
 
     def get_form(self, data=None, files=None, **kwargs):
-        form = get_solution_form(self.student_assignment, data=data,
-                                 files=files, **kwargs)
-        return form
+        solution_form = get_solution_form(self.student_assignment, data=data,
+                                          files=files, **kwargs)
+        return solution_form
 
     def get_success_url(self):
         msg = _("Solution successfully saved")

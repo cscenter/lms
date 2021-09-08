@@ -14,7 +14,8 @@ from django.utils.encoding import smart_bytes
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.models import Assignment, AssignmentSubmissionFormats
+from courses.models import Assignment
+from courses.constants import AssignmentFormat
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseNewsFactory, CourseTeacherFactory,
     SemesterFactory
@@ -43,7 +44,7 @@ def test_assignment_public_form(settings, client):
     course_spb = CourseFactory(teachers=[teacher])
     client.login(teacher)
     form_data = {
-        "submission_type": AssignmentSubmissionFormats.ONLINE,
+        "submission_type": AssignmentFormat.ONLINE,
         "title": "title",
         "text": "text",
         "time_zone": "Europe/Moscow",
@@ -195,7 +196,7 @@ def test_create_assignment_public_form_restricted_to_settings(client):
                            branches=[branch_nsk])
     add_url = course.get_create_assignment_url()
     form_data = {
-        "submission_type": AssignmentSubmissionFormats.ONLINE,
+        "submission_type": AssignmentFormat.ONLINE,
         "title": "title",
         "text": "text",
         "time_zone": "Europe/Moscow",
@@ -237,7 +238,7 @@ def test_course_assignment_form_create_with_checking_system(client, mocker):
     checking_system_url = get_yandex_contest_problem_url(15, 'D')
     form.update({
         'course': co.pk,
-        'submission_type': AssignmentSubmissionFormats.CODE_REVIEW,
+        'submission_type': AssignmentFormat.CODE_REVIEW,
         'time_zone': 'Europe/Moscow',
         'deadline_at_0': deadline_date,
         'deadline_at_1': deadline_time,
@@ -264,7 +265,7 @@ def test_course_assignment_form_update_remove_checking_system(client):
     del form['checker']
     form.update({
         'time_zone': 'Europe/Moscow',
-        'submission_type': AssignmentSubmissionFormats.ONLINE
+        'submission_type': AssignmentFormat.ONLINE
     })
     url = course.get_create_assignment_url()
     client.login(teacher)
@@ -282,7 +283,7 @@ def test_create_assignment_public_form_code_review_without_checker(client):
                            teachers=[teacher])
     add_url = course.get_create_assignment_url()
     form_data = {
-        "submission_type": AssignmentSubmissionFormats.CODE_REVIEW,
+        "submission_type": AssignmentFormat.CODE_REVIEW,
         "title": "title",
         "text": "text",
         "time_zone": "Europe/Moscow",
@@ -308,7 +309,7 @@ def test_create_assignment_public_form_code_review_with_yandex_checker(client, m
     checking_system = CheckingSystemFactory(type=CheckingSystemTypes.YANDEX)
     add_url = course.get_create_assignment_url()
     form_data = {
-        "submission_type": AssignmentSubmissionFormats.CODE_REVIEW,
+        "submission_type": AssignmentFormat.CODE_REVIEW,
         "title": "title",
         "text": "text",
         "time_zone": "Europe/Moscow",
