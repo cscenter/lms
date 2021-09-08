@@ -991,14 +991,14 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
     TESTIMONIAL_CACHE_KEY = "csc_review"
     STATS_CACHE_KEY_PATTERN = 'alumni_stats_{graduation_year}_{site_id}'
 
+    is_active = models.BooleanField(
+        _("Visibility"),
+        default=True)
     student_profile = models.OneToOneField(
         StudentProfile,
         verbose_name=_("Student Profile"),
         on_delete=models.CASCADE,
         related_name="graduate_profile")
-    is_active = models.BooleanField(
-        _("Activity"),
-        default=True)
     graduated_on = models.DateField(
         verbose_name=_("Graduated on"),
         help_text=_("Graduation ceremony date"))
