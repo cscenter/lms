@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-09-08 17:45+0000\n"
-"PO-Revision-Date: 2021-09-08 17:48+0000\n"
+"PO-Revision-Date: 2021-09-09 14:29+0000\n"
 "Last-Translator: Сергей Жеревчук <pacabest@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -3559,7 +3559,7 @@ msgstr "Выйти"
 #: lms/jinja2/lms/layouts/_v2_top_menu.html:36
 #: lms/jinja2/lms/layouts/_v2_top_menu.html:48
 msgid "Members Area"
-msgstr ""
+msgstr "Личный кабинет"
 
 #: lms/jinja2/lms/layouts/v1_base.html:63 lms/templates/base.html:61
 msgid "гг."
