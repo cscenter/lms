@@ -82,6 +82,7 @@ AWS_SES_ACCESS_KEY_ID = env.str('AWS_SES_ACCESS_KEY_ID')
 AWS_SES_SECRET_ACCESS_KEY = env.str('AWS_SES_SECRET_ACCESS_KEY')
 AWS_SES_REGION_NAME = env.str('AWS_SES_REGION_NAME', default='eu-west-1')
 AWS_SES_REGION_ENDPOINT = env.str('AWS_SES_REGION_ENDPOINT', default='email.eu-west-1.amazonaws.com')
+AWS_SES_VERIFY_EVENT_SIGNATURES = True  # verify signature of signed complaints, bounces
 POST_OFFICE = {
     'BACKENDS': {
         'ses': 'django.core.mail.backends.console.EmailBackend',

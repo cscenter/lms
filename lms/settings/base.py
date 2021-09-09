@@ -39,6 +39,7 @@ CSRF_COOKIE_DOMAIN = env.str('DJANGO_CSRF_COOKIE_DOMAIN', default=None)
 CSRF_COOKIE_NAME = env.str('DJANGO_CSRF_COOKIE_NAME', default='csrftoken')
 
 # Upload Settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = env.int('DJANGO_FILE_UPLOAD_MAX_MEMORY_SIZE', default=2621440)
 USE_CLOUD_STORAGE = env.bool('USE_CLOUD_STORAGE', default=True)
 AWS_DEFAULT_ACL: Optional[str] = None  # All files will inherit the bucket’s ACL
 if USE_CLOUD_STORAGE:
@@ -276,8 +277,8 @@ EMAIL_HOST_PASSWORD = env.str('DJANGO_EMAIL_HOST_PASSWORD')
 EMAIL_PORT = env.int('DJANGO_EMAIL_PORT', default=465)
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_SEND_COOLDOWN = 0.5
+EMAIL_BACKEND = env.str('DJANGO_EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
 
 HASHIDS_SALT = env.str('HASHIDS_SALT')
 

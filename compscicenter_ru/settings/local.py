@@ -28,8 +28,6 @@ if DEBUG:
     ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -133,8 +131,6 @@ LOGGING = {
 FILE_UPLOAD_HANDLERS = [
     "django.core.files.uploadhandler.TemporaryFileUploadHandler",
 ]
-
-FILE_UPLOAD_MAX_MEMORY_SIZE = 26214400
 
 REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
     'rest_framework.renderers.JSONRenderer',

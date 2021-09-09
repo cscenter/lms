@@ -19,9 +19,6 @@ if DEBUG:
     ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'
 
 
-EMAIL_PORT = 1025
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
