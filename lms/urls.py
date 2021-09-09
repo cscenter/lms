@@ -1,3 +1,5 @@
+from django_ses.views import SESEventWebhookView
+
 from django.apps import apps
 from django.conf import settings
 from django.conf.urls import include
@@ -48,6 +50,7 @@ urlpatterns = [
     path('surveys/', include("surveys.urls")),
     path('', include('projects.urls')),
     path('', include('admission.urls')),
+    path('ses/event-webhook/', SESEventWebhookView.as_view(), name='aws_ses_events_webhook'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Placing this urls under `admin` namespace needs a lot of customization
