@@ -96,10 +96,10 @@ def send_notification(notification, template, context, stdout,
         notification.save()
         return
 
-    smtp_health_status = getattr(site_settings, 'smtp_health_status', None)
-    if smtp_health_status is None:
+    service_health_status = getattr(site_settings, 'service_health_status', None)
+    if service_health_status is None:
         raise EmailServiceError(f'Unknown smtp health status for {site_settings}')
-    elif smtp_health_status == EmailServiceHealthCheck.FAIL:
+    elif service_health_status == EmailServiceHealthCheck.FAIL:
         msg = (f"skip {notification}. SMTP "
                f"service {site_settings.default_from_email} is unavailable.")
         report(stdout, msg)
@@ -119,9 +119,10 @@ def send_notification(notification, template, context, stdout,
     msg.attach_alternative(html_content, "text/html")
     report(stdout, f"sending {notification} ({template})")
     try:
+        # FIXME: use .send_messages instead to reuse connection and Keep-Alive feature
         msg.send()
     except smtplib.SMTPException as e:
-        site_settings.smtp_health_status = EmailServiceHealthCheck.FAIL
+        site_settings.service_health_status = EmailServiceHealthCheck.FAIL
         logger.exception(e)
         report(stdout, f"SMTP service {site_settings.default_from_email} is unhealthy")
         return
@@ -249,14 +250,13 @@ def send_assignment_notifications(site_configurations, stdout) -> None:
 def send_course_news_notifications(site_configurations, stdout) -> None:
     prefetch = [
         'user__groups',
-        'course_offering_news',
         'course_offering_news__course',
         'course_offering_news__course__meta_course',
         'course_offering_news__course__semester',
     ]
     notifications = (CourseNewsNotification.objects
                      .filter(is_unread=True, is_notified=False)
-                     .select_related("user")
+                     .select_related("user", "course_offering_news")
                      .prefetch_related(*prefetch))
     for notification in notifications:
         template = EMAIL_TEMPLATES['new_course_news']
@@ -282,23 +282,25 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         translation.activate(settings.LANGUAGE_CODE)
 
-        # Some configuration (like SMTP settings) should be resolved at runtime
+        # SMTP settings must be resolved at runtime since any course could be
+        # shared across different sites and e.g. site1 must know how to
+        # send emails from @site2 email domain.
         site_settings = (SiteConfiguration.objects
                          .filter(enabled=True)
                          .select_related('site'))
         site_settings = {s.site_id: s for s in site_settings}
-        # The destination address is resolved at runtime. When smtp error
+        # The mail from address is resolved at runtime. When error
         # occurs (e.g. on sending from noreply@yandexdataschool.ru) the whole
         # process will be terminated that leads to potential starvation for
         # other addresses we sent emails from. To make it starvation-free check
-        # smtp service health status and prevent sending emails from it
+        # email service health status and prevent sending emails from it
         # instead of raising an exception.
         for s in site_settings.values():
-            s.smtp_health_status = EmailServiceHealthCheck.HEALTH
+            s.service_health_status = EmailServiceHealthCheck.HEALTH
 
         send_course_news_notifications(site_settings, self.stdout)
 
-        if all(s.smtp_health_status == EmailServiceHealthCheck.FAIL for s
+        if all(s.service_health_status == EmailServiceHealthCheck.FAIL for s
                in site_settings.values()):
             report(self.stdout, 'All services are unhealthy. Try again later.')
             return
