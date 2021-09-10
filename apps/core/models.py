@@ -63,29 +63,36 @@ class SiteConfiguration(ConfigurationModel):
         max_length=255)
     email_host = models.CharField(
         "Email Host",
-        help_text="The host to use for sending email",
-        max_length=255)
+        help_text="The host of the SMTP server to use for sending email",
+        max_length=255,
+        blank=True)
     email_host_password = models.CharField(
         "Email Host Password",
         help_text="Password to use for the SMTP server defined in EMAIL_HOST. "
                   "Should be encrypted with a symmetric key stored in a "
                   "settings.SECRET_KEY",
-        max_length=255)
+        max_length=255,
+        blank=True)
     email_host_user = models.CharField(
         "Email Host User",
         help_text="Username to use for the SMTP server defined in EMAIL_HOST",
-        max_length=255)
+        max_length=255,
+        blank=True)
     email_port = models.PositiveSmallIntegerField(
         "Email Port",
-        help_text="Port to use for the SMTP server defined in EMAIL_HOST.")
+        help_text="Port to use for the SMTP server defined in EMAIL_HOST.",
+        blank=True,
+        null=True)
     email_use_tls = models.BooleanField(
         "Use TLS",
         help_text="Whether to use an explicit TLS (secure) connection when "
-                  "talking to the SMTP server")
+                  "talking to the SMTP server",
+        null=True)
     email_use_ssl = models.BooleanField(
         "Use SSL",
         help_text="Whether to use an implicit TLS (secure) connection when "
-                  "talking to the SMTP server.")
+                  "talking to the SMTP server.",
+        null=True)
     lms_subdomain = models.CharField(
         "LMS Subdomain",
         max_length=10,
