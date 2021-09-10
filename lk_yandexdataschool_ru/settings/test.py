@@ -16,7 +16,6 @@ TEST_DISCOVER_ROOT = str(SHARED_APPS_DIR)
 TEST_DISCOVER_PATTERN = "test_*"
 
 # django-coverage settings
-
 COVERAGE_REPORT_HTML_OUTPUT_DIR = str(SHARED_APPS_DIR / "coverage")
 COVERAGE_USE_STDOUT = True
 COVERAGE_MODULE_EXCLUDES = ['tests$', 'settings$', 'urls$', 'locale$',
@@ -35,6 +34,7 @@ DATABASES = {
     }
 }
 
+# FIXME: don't use this settings, try to remove them from tests
 TEST_DOMAIN = 'lk.yandexdataschool.ru'
 TEST_DOMAIN_ID = 1
 ANOTHER_DOMAIN = 'www.yandexdataschool.ru'
