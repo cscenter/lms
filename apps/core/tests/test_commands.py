@@ -16,6 +16,7 @@ def test_update_site_configuration(settings):
     email_port = 444
     default_email_from = 'default@example.com'
     email_host_user = 'user'
+    settings.EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     settings.EMAIL_HOST = expected_email_host
     settings.EMAIL_HOST_PASSWORD = expected_email_password
     settings.EMAIL_USE_TLS = use_tls_ssl
