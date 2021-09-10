@@ -41,6 +41,7 @@ from files.storage import private_storage
 from grading.api.yandex_contest import Error as YandexContestError
 from grading.api.yandex_contest import RegisterStatus
 from learning.settings import AcademicDegreeLevels
+from notifications.base_models import EmailAddressSuspension
 from users.constants import Roles
 
 
@@ -221,7 +222,7 @@ ApplicantSubscribedManager = _ApplicantSubscribedManager.from_queryset(
     ApplicantQuerySet)
 
 
-class Applicant(TimezoneAwareMixin, TimeStampedModel):
+class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     TIMEZONE_AWARE_FIELD_NAME = 'campaign'
 
     # TODO: access applicant statuses with .STATUS.<code> instead

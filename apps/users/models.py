@@ -38,6 +38,7 @@ from core.utils import instance_memoize, is_club_site, ru_en_mapping
 from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from learning.utils import is_negative_grade
 from lms.utils import PublicRoute
+from notifications.base_models import EmailAddressSuspension
 from users.constants import GenderTypes
 from users.constants import Roles
 from users.constants import Roles as UserRoles
@@ -228,7 +229,7 @@ def user_photo_upload_to(instance: "User", filename):
 
 
 class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
-           UserThumbnailMixin, AbstractBaseUser):
+           UserThumbnailMixin, EmailAddressSuspension, AbstractBaseUser):
     TIMEZONE_AWARE_FIELD_NAME = "time_zone"
 
     USERNAME_FIELD = 'username'
