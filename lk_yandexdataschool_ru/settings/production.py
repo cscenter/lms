@@ -67,3 +67,6 @@ POST_OFFICE = {
         'LOG_LEVEL': 1
     }
 }
+
+# XXX: Enable AWS SES backend on CS Center and CS Club, then remove this setting
+EMAIL_BACKEND = 'django_ses.SESBackend'
