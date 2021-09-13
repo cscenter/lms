@@ -8,13 +8,14 @@ class CoreConfig(AppConfig):
     verbose_name = _("Core")
 
     def ready(self):
-        from rest_framework.serializers import ModelSerializer
-
         # Register checks
         from . import checks  # isort:skip  pylint: disable=unused-import
+        # Register signals
+        from . import signals  # isort:skip  pylint: disable=unused-import
         # Register custom lookups
         from .db import lookups  # isort:skip  pylint: disable=unused-import
         # Update Django Rest Framework serializer mappings
+        from rest_framework.serializers import ModelSerializer  # isort:skip
         from core.api import fields  # isort:skip
         from core.db.fields import ScoreField  # isort:skip
         field_mapping = ModelSerializer.serializer_field_mapping

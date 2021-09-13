@@ -61,6 +61,7 @@ class SiteConfiguration(ConfigurationModel):
         "Email Backend",
         help_text="Python import path of the backend to use for sending emails",
         max_length=255)
+    # TODO: move stmp settings to JSONField
     email_host = models.CharField(
         "Email Host",
         help_text="The host of the SMTP server to use for sending email",

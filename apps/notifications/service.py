@@ -1,16 +1,26 @@
 import abc
 import logging
 from abc import ABCMeta
+from typing import Dict, Type
 
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.mail import EmailMultiAlternatives
 from django.db.transaction import atomic
 from django.template.loader import get_template
 from django.utils.functional import cached_property
 from django.utils.html import linebreaks, strip_tags
 
+from notifications.base_models import EmailAddressSuspension
+
 logger = logging.getLogger("notifications.handlers")
+
+
+def suspend_email_address(obj_class: Type[EmailAddressSuspension], email: str,
+                          reason: Dict[str, str]) -> None:
+    if not issubclass(obj_class, EmailAddressSuspension):
+        raise ValidationError(f"{obj_class} must be subclass of notifications.base_models.EmailAddressSuspension")
+    obj_class.objects.filter(email=email).update(email_suspension_details=reason)
 
 
 class NotificationService:
