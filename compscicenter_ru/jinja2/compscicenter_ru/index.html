@@ -128,6 +128,35 @@
     </div>
   </div>
 
+  {% if announcements %}
+    <script type="text/javascript">
+      (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+    </script>
+    {% with %}
+      {% if announcements|length % 2 == 0 %}
+        {% set card_type = "v2" %}
+      {% elif announcements|length % 3 == 0 %}
+        {% set card_type = "v3" %}
+      {% else %}
+        {% set card_type = "h" %}
+      {% endif %}
+      <div class="grey-bg py-6">
+        <div class="container py-10">
+          <h2 class="text-center mb-10">Мероприятия</h2>
+          <div class="card-deck{% if card_type == 'v2' %} _two{% elif card_type == 'v3' %} _three{% endif %}">
+            {% for announcement in announcements %}
+              {% if card_type == 'h' %}
+                {{ announcement_macros.announcement_horizontal(announcement) }}
+              {% else %}
+                {{ announcement_macros.announcement_vertical(announcement, card_type=card_type) }}
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endwith %}
+  {% endif %}
+
   <div class="dark-bg py-6">
     <div class="container py-10">
       <h2 class="h1 theme-dark mb-10">Очное обучение в центре</h2>
@@ -257,35 +286,6 @@
       </div>
     </div>
   </div>
-
-  {% if announcements %}
-    <script type="text/javascript">
-      (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
-    </script>
-    {% with %}
-      {% if announcements|length % 2 == 0 %}
-        {% set card_type = "v2" %}
-      {% elif announcements|length % 3 == 0 %}
-        {% set card_type = "v3" %}
-      {% else %}
-        {% set card_type = "h" %}
-      {% endif %}
-      <div class="grey-bg py-6">
-        <div class="container py-10">
-          <h2 class="text-center mb-10">Мероприятия</h2>
-          <div class="card-deck{% if card_type == 'v2' %} _two{% elif card_type == 'v3' %} _three{% endif %}">
-            {% for announcement in announcements %}
-              {% if card_type == 'h' %}
-                {{ announcement_macros.announcement_horizontal(announcement) }}
-              {% else %}
-                {{ announcement_macros.announcement_vertical(announcement, card_type=card_type) }}
-              {% endif %}
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-    {% endwith %}
-  {% endif %}
 
   <div class="csc-online-education py-6">
     <div class="container py-10">
