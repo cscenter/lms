@@ -13,7 +13,7 @@
   <div class="cover cover-index-page">{% endblock before_navbar_container %}
 {% block after_navbar_container %}
   <div class="container">
-    <img class="img-fluid d-md-none pt-6 px-8 px-md-0" src="/static/v2/img/pages/index/mascots-mobile.svg" alt="Маскоты центра за учёбой" />
+    <img class="img-fluid d-md-none pt-6 px-8 px-md-0" src="/static/v2/img/pages/index/mascots-mobile.svg" alt="" />
     <h1 class="cover__title pt-6 pt-md-10">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
     <p class="cover__text">
       Вечерние курсы в&nbsp;Санкт-Петербурге и&nbsp;в&nbsp;Новосибирске по&nbsp;четырём направлениям: Computer
@@ -136,7 +136,7 @@
           <div class="card _no-border theme-dark">
             <div class="card__img">
               <img class="img-fluid" src="{{ static("v2/img/pages/index/about-csc/curators.jpg") }}"
-                   alt="Кураторы центра">
+                   alt="Кураторы CS центра">
             </div>
             <div class="card__content">
               <div class="card__title mb-4">Заботливые кураторы</div>
@@ -152,8 +152,7 @@
         <div class="col-sm-6 col-md-5 mb-8 offset-md-1">
           <div class=" card _no-border theme-dark">
             <div class="card__img">
-              <img class="img-fluid" src="{{ static("v2/img/pages/index/about-csc/teachers.jpg") }}"
-                   alt="Преподаватель на лекции">
+              <img class="img-fluid" src="{{ static("v2/img/pages/index/about-csc/teachers.jpg") }}" alt="">
             </div>
             <div class="card__content">
               <div class="card__title mb-4">Увлечённые преподаватели</div>
@@ -169,7 +168,7 @@
           <div class=" card _no-border theme-dark">
             <div class="card__img">
               <img class="img-fluid" src="{{ static("v2/img/pages/index/about-csc/holidays.jpg") }}"
-                   alt="Студенческий праздник в центре">
+                   alt="Студенческий праздник в CS центре">
             </div>
             <div class="card__content">
               <div class="card__title mb-4">Студенческие мероприятия</div>
@@ -186,7 +185,7 @@
           <div class=" card _no-border theme-dark">
             <div class="card__img">
               <img class="img-fluid" src="{{ static("v2/img/pages/index/about-csc/graduation.jpg") }}"
-                   alt="Выпускной в центре">
+                   alt="Выпускной в CS центре">
             </div>
             <div class="card__content">
               <div class="card__title mb-4">Выпускной</div>
@@ -233,6 +232,27 @@
              title="Факультет математики и компьютерных наук СПБГУ">{{ macros.svg_image('logo-mkn') }}</a>
           <a target="_blank" href="https://www.nsu.ru/n/"
              title="Новосибирский Государственный Университет">{{ macros.svg_image('logo-ngu') }}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dark-bg py-6">
+    <div class="container py-10">
+      <div class="card _no-border _horizontal">
+        <div class="row no-gutters">
+          <div class="col-md-5" style="background-image:url('/static/v2/img/pages/index/endowment-thanks.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 272px"></div>
+          <div class="col-md-7 d-flex">
+            <div class="card__content">
+              <div class="announcement">
+                <h3 class="h2">Эндаумент-фонд CS&nbsp;центра</h3>
+                <p>Ваша поддержка поможет CS&nbsp;центру создавать новые образовательные материалы, расширять географию и&nbsp;делать курсы
+                  доступнее, развивать профессиональное сообщество.
+                </p>
+                <a href="/fund/" class="btn _big _primary _m-wide">Поддержать CS центр</a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
