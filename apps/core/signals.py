@@ -38,4 +38,4 @@ def bounce_handler(sender, mail_obj, bounce_obj, *args, **kwargs):
 
 @receiver(complaint_received)
 def complaint_handler(sender, mail_obj, complaint_obj, raw_message,  *args, **kwargs):
-    pass
+    logger.error(complaint_obj)
