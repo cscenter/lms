@@ -48,17 +48,6 @@
                 <li role="presentation">
                   <a href="#import-marks-csv-yandex" role="menuitem" data-toggle="modal">Из CSV-файла по Яндекс.Логину</a>
                 </li>
-                {% for gradebook_assignment in gradebook.assignments.values() %}
-                  {% with assignment=gradebook_assignment.assignment %}
-                    {% if assignment.submission_type == AssignmentFormat.YANDEX_CONTEST %}
-                      <li role="separator" class="divider"></li>
-                      <li role="presentation">
-                        <a href="#import-marks-yandex-contest" role="menuitem" data-toggle="modal">Из Яндекс.Контеста</a>
-                      </li>
-                      {% break %}
-                    {% endif %}
-                  {% endwith %}
-                {% endfor %}
               </ul>
             </div>
             <div class="btn-group">
