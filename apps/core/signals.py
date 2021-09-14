@@ -5,7 +5,6 @@ from django_ses.signals import bounce_received, complaint_received
 from django.db import models
 from django.dispatch import receiver
 
-from admission.models import Applicant
 from compsciclub_ru.context_processors import BRANCHES
 from core.models import City
 from notifications.service import suspend_email_address
@@ -31,7 +30,10 @@ def bounce_handler(sender, mail_obj, bounce_obj, *args, **kwargs):
                 'bounceSubType': bounce_obj['bounceSubType'],
                 **bounced_recipient
             }
-            models_to_suspend = [User, Applicant]
+            # It's possible to suspend emails in `admission.Applicant`
+            # model but we should check that app is installed for the current
+            # configuration
+            models_to_suspend = [User]
             for model_class in models_to_suspend:
                 suspend_email_address(model_class, email_address, reason)
 
