@@ -8,7 +8,8 @@ import pytest
 import pytz
 from bs4 import BeautifulSoup
 
-from django.contrib import messages
+from django.contrib.messages import constants as messages_constants
+from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import force_bytes, smart_bytes
 from django.utils.translation import gettext_lazy
@@ -110,7 +111,7 @@ def test_nonempty_gradebook_view(client):
         assert smart_bytes(as_.title) in response.content
         for s in students:
             a_s = StudentAssignment.objects.get(student=s, assignment=as_)
-            assert response.context['form'].GRADE_PREFIX + str(a_s.pk) in response.context['form'].fields
+            assert response.context_data['form'].GRADE_PREFIX + str(a_s.pk) in response.context_data['form'].fields
 
 
 @pytest.mark.django_db
@@ -252,8 +253,8 @@ def test_empty_gradebook_view(client):
         assert smart_bytes(name) in response.content
         enrollment = Enrollment.active.get(student=student, course=co1)
         field = 'final_grade_{}'.format(enrollment.pk)
-        assert field in response.context['form'].fields
-    assert len(students) == len(response.context['form'].fields)
+        assert field in response.context_data['form'].fields
+    assert len(students) == len(response.context_data['form'].fields)
     for co in [co1, co2]:
         url = co.get_gradebook_url()
         assert smart_bytes(url) in response.content
@@ -280,7 +281,7 @@ def test_total_score(client):
         a_s.save()
     expected_total_score = assignments_count * default_score
     response = client.get(co.get_gradebook_url())
-    head_student = next(iter(response.context['gradebook'].students.values()))
+    head_student = next(iter(response.context_data['gradebook'].students.values()))
     assert head_student.total_score == expected_total_score
 
 
@@ -302,14 +303,14 @@ def test_total_score_weight(client):
     sa2.save()
     expected_total_score = 3 * a1.weight + 12 * a2.weight
     response = client.get(co.get_gradebook_url())
-    head_student = next(iter(response.context['gradebook'].students.values()))
+    head_student = next(iter(response.context_data['gradebook'].students.values()))
     assert head_student.total_score == expected_total_score
     a4 = AssignmentFactory(course=co, weight=Decimal('0'), maximum_score=3)
     sa4 = StudentAssignment.objects.get(student=student, assignment=a4)
     sa4.score = 2
     sa4.save()
     response = client.get(co.get_gradebook_url())
-    head_student = next(iter(response.context['gradebook'].students.values()))
+    head_student = next(iter(response.context_data['gradebook'].students.values()))
     assert head_student.total_score == expected_total_score
 
 
@@ -439,7 +440,7 @@ def test_gradebook_view_form_invalid(client):
     field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
     response = client.get(co.get_gradebook_url())
     assert response.status_code == 200
-    form = response.context['form']
+    form = response.context_data['form']
     assert form[field_name].value() == 7
     assert form[final_grade_field_name].value() == GradeTypes.EXCELLENT
     form_data = {
@@ -447,7 +448,7 @@ def test_gradebook_view_form_invalid(client):
     }
     response = client.post(co.get_gradebook_url(), form_data)
     assert response.status_code == 200
-    form = response.context['form']
+    form = response.context_data['form']
     assert form[field_name].value() == '-5'
     assert form[final_grade_field_name].value() == GradeTypes.EXCELLENT
 
@@ -468,7 +469,7 @@ def test_gradebook_view_form_conflict(client):
     field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
     response = client.get(co.get_gradebook_url())
     assert response.status_code == 200
-    form = response.context['form']
+    form = response.context_data['form']
     assert form[field_name].value() is None
     assert form[final_grade_field_name].value() == GradeTypes.NOT_GRADED
     form_data = {
@@ -477,7 +478,7 @@ def test_gradebook_view_form_conflict(client):
     }
     response = client.post(co.get_gradebook_url(), form_data, follow=True)
     assert response.status_code == 200
-    form = response.context['form']
+    form = response.context_data['form']
     assert form[field_name].value() == 4
     assert form[final_grade_field_name].value() == GradeTypes.NOT_GRADED
     sa.refresh_from_db()
@@ -487,8 +488,10 @@ def test_gradebook_view_form_conflict(client):
     form_data[field_name] = 5
     response = client.post(co.get_gradebook_url(), form_data)
     assert response.status_code == 200
-    assert response.context['form'].conflicts_on_last_save()
-    message = list(response.context['messages'])[0]
+    assert response.context_data['form'].conflicts_on_last_save()
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) > 0
+    message = messages[0]
     assert 'warning' in message.tags
     # The same have to be for final grade
     form_data = {
@@ -498,7 +501,7 @@ def test_gradebook_view_form_conflict(client):
     client.login(teacher1)
     response = client.post(co.get_gradebook_url(), form_data, follow=True)
     assert response.status_code == 200
-    form = response.context['form']
+    form = response.context_data['form']
     assert form[field_name].value() == 4
     assert form[final_grade_field_name].value() == GradeTypes.GOOD
     sa.refresh_from_db()
@@ -509,10 +512,12 @@ def test_gradebook_view_form_conflict(client):
     form_data[final_grade_field_name] = GradeTypes.EXCELLENT
     response = client.post(co.get_gradebook_url(), form_data)
     assert response.status_code == 200
-    assert response.context['form'].conflicts_on_last_save()
-    message = list(response.context['messages'])[0]
+    assert response.context_data['form'].conflicts_on_last_save()
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) > 0
+    message = messages[0]
     assert 'warning' in message.tags
-    final_grade_field = response.context['form'][final_grade_field_name]
+    final_grade_field = response.context_data['form'][final_grade_field_name]
     assert final_grade_field.value() == GradeTypes.EXCELLENT
     # Hidden field should store current value from db
     hidden_input = BeautifulSoup(final_grade_field.as_hidden(), "html.parser")
@@ -618,8 +623,9 @@ header1,header2,score
     client.login(teacher)
     response = client.post(import_csv_url, form, follow=True)
     assert response.status_code == 200
-    assert 'messages' in response.context
-    assert list(response.context['messages'])[0].level == messages.ERROR
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert messages[0].level == messages_constants.ERROR
     csv_data = b"""
 stepic_id,header2,score
 2,2,42
@@ -669,8 +675,9 @@ header1,header2,score
     client.login(teacher)
     response = client.post(import_csv_url, form, follow=True)
     assert response.status_code == 200
-    assert 'messages' in response.context
-    assert list(response.context['messages'])[0].level == messages.ERROR
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert messages[0].level == messages_constants.ERROR
     #
     csv_data = b"""
 yandex_login,header2,score
@@ -713,8 +720,9 @@ header1,header2,score
     }
     response = client.post(import_csv_url, form, follow=True)
     assert response.status_code == 200
-    assert 'messages' in response.context
-    assert list(response.context['messages'])[-1].level == messages.ERROR
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) > 0
+    assert messages[-1].level == messages_constants.ERROR
     # Score > maximum score
     csv_data = force_bytes(f"""
 id,header2,score
@@ -727,9 +735,9 @@ id,header2,score
     }
     response = client.post(import_csv_url, form, follow=True)
     assert response.status_code == 200
-    assert 'messages' in response.context
-    msgs = list(response.context['messages'])
-    assert msgs[-1].level == messages.ERROR
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) > 0
+    assert messages[-1].level == messages_constants.ERROR
     # Score for enrollment1 has been imported
     assert StudentAssignment.objects.get(student=e1.student).score == 10
     assert StudentAssignment.objects.get(student=e2.student).score is None

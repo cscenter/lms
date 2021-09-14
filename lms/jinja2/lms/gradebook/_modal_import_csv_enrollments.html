@@ -1,0 +1,55 @@
+{% if view.is_for_staff %}
+  {% set form_url = url('staff:gradebook_import_scores_by_enrollment_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
+{% else %}
+  {% set form_url = url('teaching:gradebook_import_scores_by_enrollment_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
+{% endif %}
+<div id="import-marks-csv-enrollments" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">{% trans %}Import scores from CSV{% endtrans %}</h4>
+      </div>
+      <form action="{{ form_url }}" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="csv-assignment-selected">1. {% trans %}Choose assignment{% endtrans %}</label>
+            <select required name="assignment" class="form-control" id="csv-assignment-selected">
+              <option value="">-----</option>
+              {% for gradebook_assignment in gradebook.assignments.values() %}
+                {% with assignment=gradebook_assignment.assignment %}
+                  <option value="{{ assignment.pk }}">{{ assignment.title }}</option>
+                {% endwith %}
+              {% endfor %}
+            </select>
+            <span class="help-block">{% trans %}Score will be imported for selected assignment{% endtrans %}</span>
+          </div>
+          <div class="form-group">
+            <label for="csv-choose-file">2. {% trans %}Choose csv file{% endtrans %}</label>
+            <input id="input-id" name="csv_file" value="2" type="file" required>
+            <div class="help-block">
+              {% trans %}
+                File Format:<br>
+                <ul class="mb-0">
+                  <li>First row contains column headers. Column headers <code>id</code> and <code>score</code> are required.</li>
+                  <li>Other rows contain values of enrollment ID and assignment score in the corresponding columns.</li>
+                </ul>
+                The easiest way to get student enrollment ID's is to export the gradebook to a csv file and copy <code>id</code> column
+                from there.<br>
+                File Content Example:<br>
+              {% endtrans %}
+            </div>
+            <pre><code>id,full name,score
+1,Ivanov I,7
+2,Ivanova A,42</code></pre>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">{% trans %}Close{% endtrans %}</button>
+          <button type="submit" class="btn btn-primary">{% trans %}Import{% endtrans %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

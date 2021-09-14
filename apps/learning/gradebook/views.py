@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
-from courses.constants import SemesterTypes
+from courses.constants import AssignmentFormat, SemesterTypes
 from courses.models import Assignment, Course, Semester
 from courses.utils import get_current_term_pair
 from courses.views.mixins import CourseURLParamsMixin
@@ -69,7 +69,7 @@ class GradeBookListBaseView(generic.ListView):
 class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
     is_for_staff = False
     user_type = 'teacher'
-    template_name = "learning/gradebook/gradebook_form.html"
+    template_name = "lms/gradebook/gradebook_form.html"
     context_object_name = 'assignment_list'
     # FIXME: check EditOwnGradebook permission on POST action
     permission_required = ViewOwnGradebook.name
@@ -101,7 +101,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
                     "В процессе редактирования данные были "
                     "изменены другими участниками. Необходимо вручную "
                     "разрешить конфликты и повторить отправку формы.")
-            messages.warning(self.request, msg)
+            messages.warning(self.request, str(msg))
             # Replace form data with actual db values and user input
             # for conflict fields
             self.data = gradebook_data(self.course)
@@ -116,7 +116,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
 
     def get_success_url(self):
         messages.success(self.request,
-                         _('Gradebook successfully saved.'),
+                         str(_('Gradebook successfully saved.')),
                          extra_tags='timeout')
         if self.is_for_staff:
             params = {"url_name": "staff:gradebook"}
@@ -130,7 +130,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
         form data in POST-request, but only changed data
         """
         msg = _("Gradebook hasn't been saved.")
-        messages.error(self.request, msg)
+        messages.error(self.request, str(msg))
         initial = GradeBookFormFactory.transform_to_initial(self.data)
         data = form.data.copy()
         for k, v in initial.items():
@@ -142,6 +142,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context["gradebook"] = self.data
+        context['AssignmentFormat'] = AssignmentFormat
         # TODO: Move to the model
         filter_kwargs = {}
         if not self.request.user.is_curator:

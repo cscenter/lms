@@ -1,0 +1,48 @@
+{% if view.is_for_staff %}
+  {% set form_url = url('staff:gradebook_import_scores_by_yandex_login', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
+{% else %}
+  {% set form_url = url('teaching:gradebook_import_scores_by_yandex_login', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
+{% endif %}
+<div id="import-marks-csv-yandex" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">{% trans %}Import yandex statements{% endtrans %}</h4>
+      </div>
+      <form action="{{ form_url }}" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="csv-assignment-selected">1. {% trans %}Select assignment{% endtrans %}</label>
+            <select name="assignment" class="form-control" id="csv-assignment-selected">
+              {% for gradebook_assignment in gradebook.assignments.values() %}
+                {% with assignment=gradebook_assignment.assignment %}
+                  {% if not assignment.is_online %}
+                    <option value="{{ assignment.pk }}">{{ assignment.title }}</option>
+                  {% endif %}
+                {% endwith %}
+              {% endfor %}
+            </select>
+            <span class="help-block">{% trans %}Score will be imported for selected assignment{% endtrans %}</span>
+          </div>
+          <div class="form-group">
+            <label for="csv-choose-file">2. {% trans %}Select csv file{% endtrans %}</label>
+            <input id="input-id" name="csv_file" value="2" type="file" required>
+            <span
+              class="help-block">{% trans %}Should contains comma-separated values of yandex username and assignment score. First row is header. Example:{% endtrans %}</span>
+            <pre><code>yandex_login,score
+my_yandex_login,7</code></pre>
+            <div class="alert alert-block alert-warning">
+              Студенты сами указывают Яндекс.Логин, а значит есть вероятность импортировать чужие результаты.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">{% trans %}Close{% endtrans %}</button>
+          <button type="submit" class="btn btn-primary">{% trans %}Import{% endtrans %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
