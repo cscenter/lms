@@ -23,23 +23,12 @@ def test_get_available_compiler_choices():
 
 
 @pytest.mark.django_db
-def test_get_or_create_checker_from_url_no_commit():
-    checking_system = CheckingSystemFactory(type=CheckingSystemTypes.YANDEX)
-    checking_system_url = get_yandex_contest_problem_url(15, 'A')
-    CheckerService.get_or_create_checker_from_url(checking_system,
-                                                  checking_system_url,
-                                                  commit=False)
-    assert Checker.objects.count() == 0
-
-
-@pytest.mark.django_db
 def test_get_or_create_checker_from_url_throws_error_on_bad_url():
     checking_system = CheckingSystemFactory(type=CheckingSystemTypes.YANDEX)
     checking_system_url = get_yandex_contest_problem_url(0, 'A')
     with pytest.raises(CheckerURLError) as e:
         CheckerService.get_or_create_checker_from_url(checking_system,
-                                                      checking_system_url,
-                                                      commit=False)
+                                                      checking_system_url)
     assert 'Contest ID should be positive' in str(e.value)
 
 

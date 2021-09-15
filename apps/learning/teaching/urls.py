@@ -36,6 +36,10 @@ student_group_api_patterns = [
     path('student-groups/<int:source_student_group>/transfer/', StudentGroupTransferStudentsView.as_view(), name='transfer'),
 ]
 
+import_scores_api_patterns = [
+    path('<int:course_id>/import/yandex-contest/', gv.GradebookImportScoresFromYandexContest.as_view(), name='yandex_contest')
+]
+
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name='teaching:assignment_list', permanent=False), name='base'),
     path('timetable/', TeacherTimetable.as_view(), name='timetable'),
@@ -47,9 +51,6 @@ urlpatterns = [
         # TODO: separate api views?
         path("news/<int:news_pk>/stats", CourseNewsUnreadNotificationsView.as_view(), name="course_news_unread"),
     ])),
-    path('api/', include(([
-        path('', include((student_group_api_patterns, 'student-groups'))),
-    ], 'api'))),
     path('assignments/', include([
         path('', AssignmentListView.as_view(), name='assignment_list'),
         path('<int:pk>/', AssignmentDetailView.as_view(), name='assignment_detail'),
@@ -63,10 +64,14 @@ urlpatterns = [
             path('', gv.GradeBookView.as_view(), name='gradebook'),
             path('csv/', gv.GradeBookCSVView.as_view(), name='gradebook_csv'),
         ])),
-        path('<int:course_id>/import/', include([
-            path('stepic', gv.ImportAssignmentScoresByStepikIDView.as_view(), name='gradebook_import_scores_by_stepik_id'),
-            path('yandex', gv.ImportAssignmentScoresByYandexLoginView.as_view(), name='gradebook_import_scores_by_yandex_login'),
+        path('<int:course_id>/import/csv/', include([
+            path('stepik', gv.ImportAssignmentScoresByStepikIDView.as_view(), name='gradebook_import_scores_by_stepik_id'),
+            path('yandex-login', gv.ImportAssignmentScoresByYandexLoginView.as_view(), name='gradebook_import_scores_by_yandex_login'),
             path('enrollments', gv.ImportAssignmentScoresByEnrollmentIDView.as_view(), name='gradebook_import_scores_by_enrollment_id'),
         ])),
     ])),
+    path('api/', include(([
+        path('', include((student_group_api_patterns, 'student-groups'))),
+        path('scores/', include((import_scores_api_patterns, 'import-scores'))),
+    ], 'api'))),
 ]

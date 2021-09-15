@@ -3,7 +3,7 @@
 {% else %}
   {% set form_url = url('teaching:gradebook_import_scores_by_stepik_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
 {% endif %}
-<div id="import-marks-csv-stepic" class="modal fade">
+<div id="import-scores-from-csv-stepik" class="modal fade">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -29,12 +29,11 @@
           <div class="form-group">
             <label for="csv-choose-file">2. {% trans %}Select csv file{% endtrans %}</label>
             <input id="input-id" name="csv_file" value="2" type="file" required>
-            <span
-              class="help-block">{% trans %}Should contains comma-separated values of user stepic id and assignment score. First row is header. Example:{% endtrans %}</span>
+            <div class="help-block">Значения должны быть разделены запятой. Первая строка - заголовки.<br>Пример содержимого файла:</div>
             <pre><code>stepic_id,score
 1,7</code></pre>
             <div class="alert alert-block alert-warning">
-              Студенты сами указывают Stepik ID, а значит есть вероятность импортировать чужие результаты.
+              Студенты могут указать произвольный Stepik ID в своём профиле, а значит есть вероятность импортировать чужие результаты.
             </div>
           </div>
         </div>

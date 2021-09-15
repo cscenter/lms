@@ -12,6 +12,9 @@
   {% else %}
     {% set gradebook_url_reverse_name = 'teaching:gradebook' %}
   {% endif %}
+
+  {% set show_import_yandex_contest_modal = gradebook.assignments.values()|map(attribute='assignment.submission_type')|select("eq", AssignmentFormat.YANDEX_CONTEST)|list|length > 0 %}
+
   <div class="container container-wide">
     <form method="post" name="gradebook">
       {% csrf_token %}
@@ -33,21 +36,28 @@
             <div class="btn-group">
               <a href="{{ gradebook.course.get_gradebook_url(url_name=gradebook_url_reverse_name, format='csv') }}" target="_blank"
                  class="btn btn-default marks-sheet-csv-link" role="button" data-toggle="tooltip">
-                <i class="fa fa-download"></i> Скачать .csv
+                <i class="fa fa-download"></i> Скачать ведомость.csv
               </a>
             </div>
             <div class="btn-group">
               <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт оценок <span class="caret"></span></a>
               <ul class="dropdown-menu pull-right" role="menu">
+                <li class="dropdown-header">Из CSV-файла</li>
                 <li role="presentation">
-                  <a href="#import-marks-csv-enrollments" role="menuitem" data-toggle="modal">Из CSV-файла по идентификатору студента</a>
+                  <a href="#import-scores-from-csv-enrollments" role="menuitem" data-toggle="modal">&nbsp;&nbsp;по идентификатору студента</a>
                 </li>
                 <li role="presentation">
-                  <a href="#import-marks-csv-stepic" role="menuitem" data-toggle="modal">Из CSV-файла по stepik.org ID</a>
+                  <a href="#import-scores-from-csv-stepik" role="menuitem" data-toggle="modal">&nbsp;&nbsp;по stepik.org ID</a>
                 </li>
                 <li role="presentation">
-                  <a href="#import-marks-csv-yandex" role="menuitem" data-toggle="modal">Из CSV-файла по Яндекс.Логину</a>
+                  <a href="#import-scores-from-csv-yandex-login" role="menuitem" data-toggle="modal">&nbsp;&nbsp;по Яндекс.Логину</a>
                 </li>
+                {% if show_import_yandex_contest_modal %}
+                  <li role="separator" class="divider"></li>
+                  <li role="presentation">
+                    <a href="#import-scores-from-yandex-contest" role="menuitem" data-toggle="modal">Из Яндекс.Контеста</a>
+                  </li>
+                {% endif %}
               </ul>
             </div>
             <div class="btn-group">
@@ -59,7 +69,8 @@
                   <li role="presentation" class="dropdown-header">{{ cos.grouper }}</li>
                   {% for course in cos.list %}
                     <li role="presentation">
-                      <a role="menuitem" tabindex="-1" href="{{ course.get_gradebook_url(url_name=gradebook_url_reverse_name) }}">{{ course.meta_course }}</a>
+                      <a role="menuitem" tabindex="-1"
+                         href="{{ course.get_gradebook_url(url_name=gradebook_url_reverse_name) }}">{{ course.meta_course }}</a>
                     </li>
                   {% endfor %}
                 {% endfor %}
@@ -89,7 +100,8 @@
                 {% with assignment=gradebook_assignment.assignment %}
                   <div class="title __assignment{% if gradebook.show_weight %}  __weight{% endif %}">
                     <a href="{{ assignment.get_teacher_url() }}" title="{{ assignment.title }}">{{ assignment.title }}</a>
-                    {% if gradebook.show_weight %}<div class="assignment__weight">Вес: {{ assignment.weight }}</div>{% endif %}
+                    {% if gradebook.show_weight %}
+                      <div class="assignment__weight">Вес: {{ assignment.weight }}</div>{% endif %}
                   </div>
                 {% endwith %}
               {% endfor %}
@@ -151,5 +163,6 @@
   {% include "lms/gradebook/_modal_import_csv_enrollments.html" %}
   {% include "lms/gradebook/_modal_import_csv_stepik.html" %}
   {% include "lms/gradebook/_modal_import_csv_yandex_login.html" %}
+  {% include "lms/gradebook/_modal_import_yandex_contest_problem.html" %}
 
 {% endblock content %}

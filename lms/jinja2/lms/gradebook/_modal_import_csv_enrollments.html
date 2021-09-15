@@ -3,7 +3,7 @@
 {% else %}
   {% set form_url = url('teaching:gradebook_import_scores_by_enrollment_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
 {% endif %}
-<div id="import-marks-csv-enrollments" class="modal fade">
+<div id="import-scores-from-csv-enrollments" class="modal fade">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -29,16 +29,14 @@
             <label for="csv-choose-file">2. {% trans %}Choose csv file{% endtrans %}</label>
             <input id="input-id" name="csv_file" value="2" type="file" required>
             <div class="help-block">
-              {% trans %}
-                File Format:<br>
-                <ul class="mb-0">
-                  <li>First row contains column headers. Column headers <code>id</code> and <code>score</code> are required.</li>
-                  <li>Other rows contain values of enrollment ID and assignment score in the corresponding columns.</li>
-                </ul>
-                The easiest way to get student enrollment ID's is to export the gradebook to a csv file and copy <code>id</code> column
-                from there.<br>
-                File Content Example:<br>
-              {% endtrans %}
+              Формат файла:<br>
+              <ul>
+                <li>Значения разделяются запятой.</li>
+                <li>Первая строка содержит заголовки. Для успешного импорта необходимы <code>id</code> и <code>score</code>.</li>
+                <li>Остальные строки содержат как минимум идентификатор студента и его оценку в соответствующих колонках.</li>
+              </ul>
+              <p>Получить идентификаторы студентов можно скачав ведомость курса в csv формате, она содержит целевую колонку <code>id</code>.</p>
+              Пример содержимого файла:<br>
             </div>
             <pre><code>id,full name,score
 1,Ivanov I,7

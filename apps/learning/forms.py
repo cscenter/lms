@@ -12,7 +12,7 @@ from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
-from grading.services import CheckerService, SubmissionService
+from grading.services import CheckerService, CheckerSubmissionService
 from learning.models import AssignmentSubmissionTypes, GraduateProfile
 
 from .models import AssignmentComment
@@ -187,8 +187,7 @@ class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
     def save(self, commit=True):
         instance = super().save(commit=commit)
         compiler = self.cleaned_data['compiler']
-        SubmissionService.update_or_create_submission_settings(instance,
-                                                               compiler=compiler)
+        CheckerSubmissionService.update_or_create(instance, compiler=compiler)
         return instance
 
 

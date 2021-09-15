@@ -19,6 +19,7 @@ from courses.models import (
     MetaCourse
 )
 from courses.services import CourseService
+from grading.constants import CheckingSystemTypes
 from grading.models import CheckingSystem
 from grading.services import CheckerService, CheckerURLError
 
@@ -48,7 +49,7 @@ class MultipleStudentGroupField(forms.TypedMultipleChoiceField):
         widget_attrs = super().widget_attrs(widget)
         widget_attrs.update({
             'class': 'multiple-select bs-select-hidden',
-            'title': _('All groups'),
+            'title': _('To all groups'),
         })
         return widget_attrs
 
@@ -330,9 +331,6 @@ class AssignmentForm(TimezoneAwareModelForm):
         self.fields['time_zone'].choices = CourseService.get_time_zones(course, locale=locale)
         # Student groups
         field_restrict_to = self.fields['restricted_to']
-        if course.group_mode == CourseGroupModes.BRANCH:
-            field_restrict_to.label = _("Available to Branches")
-            field_restrict_to.widget.attrs['title'] = _("All Branches")
         field_restrict_to.choices = StudentGroupService.get_choices(course)
         checker = self.instance.checker
         if checker:
@@ -352,10 +350,11 @@ class AssignmentForm(TimezoneAwareModelForm):
             checking_system = cleaned_data.get('checking_system')
             checker_url = cleaned_data.get('checker_url')
             if checking_system:
+                if checking_system.type != CheckingSystemTypes.YANDEX:
+                    self.add_error('checker_url', "Checking system type is not supported")
                 try:
-                    CheckerService.get_or_create_checker_from_url(
-                        checking_system, checker_url, commit=False)
-                except CheckerURLError as e:
+                    CheckerService.resolve_yandex_contest_problem_alias(checker_url)
+                except ValueError as e:
                     self.add_error('checker_url', str(e))
             elif checker_url:
                 self.add_error('checker_url', _("URL is specified but checking system is empty"))

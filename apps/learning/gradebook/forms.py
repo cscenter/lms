@@ -96,8 +96,8 @@ class CustomBoundField(BoundField):
         """
         widget = self.field.hidden_widget()
         return force_str(widget.render(self.html_initial_name,
-                                        self.field.hidden_initial_value,
-                                        attrs=attrs))
+                                       self.field.hidden_initial_value,
+                                       attrs=attrs))
 
 
 class AssignmentScore(ScoreField):

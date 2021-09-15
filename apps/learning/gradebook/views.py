@@ -1,6 +1,9 @@
 import csv
 import itertools
+from typing import Any
 
+from rest_framework import serializers, status
+from rest_framework.response import Response
 from vanilla import FormView
 
 from django.contrib import messages
@@ -12,16 +15,21 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
-from auth.mixins import PermissionRequiredMixin
+from api.views import APIBaseView
+from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
+from core.http import HttpRequest
 from courses.constants import AssignmentFormat, SemesterTypes
 from courses.models import Assignment, Course, Semester
 from courses.utils import get_current_term_pair
 from courses.views.mixins import CourseURLParamsMixin
+from grading.api.yandex_contest import ContestAPIError, YandexContestAPI
+from grading.services import CheckerService, yandex_contest_scoreboard_iterator
 from learning.gradebook import GradeBookFormFactory, gradebook_data
 from learning.gradebook.imports import (
     get_course_students, get_course_students_by_stepik_id,
     get_course_students_by_yandex_login, import_assignment_scores
 )
+from learning.gradebook.services import assignment_import_scores_from_yandex_contest
 from learning.permissions import EditGradebook, ViewOwnGradebook
 
 __all__ = [
@@ -291,3 +299,33 @@ class ImportAssignmentScoresByEnrollmentIDView(ImportAssignmentScoresBaseView):
                                         required_headers=['id', 'score'],
                                         enrolled_students=course_students,
                                         lookup_column_name='id')
+
+
+class GradebookImportScoresFromYandexContest(RolePermissionRequiredMixin, APIBaseView):
+    """
+    Imports assignment scores from Yandex.Contest problem defined in
+    the assignment checker.
+    """
+    permission_classes = [EditGradebook]
+
+    class InputSerializer(serializers.Serializer):
+        assignment = serializers.IntegerField()
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        serializer = self.InputSerializer(data=request.POST)
+        serializer.is_valid(raise_exception=True)
+
+        queryset = Assignment.objects.filter(pk=serializer.validated_data['assignment'])
+        assignment = get_object_or_404(queryset)
+
+        # FIXME: здесь проверять доступ к контесту и кидать читаемую ошибку
+        # TODO: process Unavailable/ContestApiError (add them to the ApiErrorsMixin?)
+        try:
+            assignment_import_scores_from_yandex_contest(assignment)
+        except ContestAPIError as e:
+            # logger.error
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        # TODO: return stats with updated/skiped/invalid?
+        return Response(status=status.HTTP_201_CREATED, data={})
+

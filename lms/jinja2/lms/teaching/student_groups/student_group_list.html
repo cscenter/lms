@@ -23,7 +23,7 @@
               <a href="{{ student_group.get_absolute_url() }}" class="list-group-item">
                 <h4 class="list-group-item-heading">{{ student_group.get_name() }}</h4>
                 <span class="text-muted">
-                  {% if student_group.type == 'system' %}Группа по-умолчанию. {% endif %}
+                  {% if student_group.type == 'system' %}Группа по умолчанию. {% endif %}
                   {% if student_group.student_group_assignees.all()|length > 1 %}Ответственные:{% else %}Ответственный:{% endif %}
                   {% for responsible_teacher in student_group.student_group_assignees.all() -%}
                     {{ responsible_teacher.assignee.teacher.get_abbreviated_name() }}{% if not loop.last %}, {% endif %}

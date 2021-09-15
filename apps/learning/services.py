@@ -1,5 +1,6 @@
 import logging
 from datetime import timedelta
+from decimal import Decimal
 from enum import Enum, auto
 from itertools import islice
 from typing import Any, Iterable, List, Optional, Tuple, Union
@@ -302,6 +303,7 @@ class StudentGroupService:
         assignees = list(StudentGroupAssignee.objects
                          .filter(default_and_overridden,
                                  student_group=student_group)
+                         # FIXME: order by
                          .select_related('assignee__teacher'))
         # Teachers assigned for the particular assignment fully override
         # default list of teachers assigned on the course level
@@ -684,7 +686,7 @@ def create_notifications_about_new_submission(submission: AssignmentComment):
                                    student_id=student_assignment.student_id))
             except Enrollment.DoesNotExist:
                 logger.info("No need to send assignment notifications "
-                            "for student that left the course")
+                            "to student who left the course")
                 return
             student_group = enrollment.student_group_id
             group_assignees = StudentGroupService.get_assignees(student_group,
@@ -708,6 +710,14 @@ def create_notifications_about_new_submission(submission: AssignmentComment):
             notifications.append(n)
     AssignmentNotification.objects.bulk_create(notifications)
     return len(notifications)
+
+
+def update_personal_assignment_score(*, assignment: Assignment,
+                                     student: Union[User, int],
+                                     score: Union[int, Decimal]) -> None:
+    (StudentAssignment.objects
+     .filter(assignment=assignment, student=student)
+     .update(score=score))
 
 
 def update_student_assignment_derivable_fields(comment):

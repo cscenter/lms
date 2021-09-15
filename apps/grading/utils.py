@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from django.utils.translation import gettext_lazy as _
 
 from grading.api.yandex_contest import (
@@ -9,7 +11,8 @@ def get_yandex_contest_problem_url(contest_id, problem_id):
     return YANDEX_CONTEST_PROBLEM_URL.format(contest_id=contest_id,
                                              problem_id=problem_id)
 
-def resolve_problem_id(url):
+
+def resolve_yandex_contest_problem_alias(url: str) -> Tuple[int, str]:
     prefix, domain, suffix = url.partition(YANDEX_CONTEST_DOMAIN)
     if not domain:
         raise ValueError(_("Not a Yandex.Contest URL"))
@@ -19,7 +22,7 @@ def resolve_problem_id(url):
     contest_id = int(match.group('contest_id'))
     if contest_id == 0:
         raise ValueError(_("Contest ID should be positive"))
-    problem_id = match.group('problem_id')
-    if not problem_id:
+    problem_alias = match.group('problem_alias')
+    if not problem_alias:
         raise ValueError(_("URL does not contain ID of the problem"))
-    return contest_id, problem_id
+    return contest_id, problem_alias
