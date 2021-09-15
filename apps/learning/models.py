@@ -92,6 +92,9 @@ class StudentGroup(TimeStampedModel):
         super().save(**kwargs)
 
     def clean(self):
+        if self.type == StudentGroupTypes.BRANCH and not self.branch_id:
+            msg = _("Branch is not specified for the `branch` group type")
+            raise ValidationError(msg, code='invalid')
         if self.course_id and self.name:
             groups_with_the_same_name = (StudentGroup.objects
                                          .exclude(pk=self.pk)
