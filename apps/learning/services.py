@@ -689,10 +689,10 @@ def create_notifications_about_new_submission(submission: AssignmentComment):
                             "to student who left the course")
                 return
             student_group = enrollment.student_group_id
-            group_assignees = StudentGroupService.get_assignees(student_group,
-                                                                assignment)
-            if group_assignees:
-                assignees = [a.teacher_id for a in group_assignees]
+            student_group_assignees = StudentGroupService.get_assignees(student_group,
+                                                                        assignment)
+            if student_group_assignees:
+                assignees = [a.teacher_id for a in student_group_assignees]
             else:
                 assignees = [a.teacher_id for a in assignment.assignees.all()]
         # Skip course teachers who don't want receive notifications
@@ -746,18 +746,10 @@ def update_student_assignment_derivable_fields(comment):
         setattr(sa, attr_name, attr_value)
 
 
-def trigger_auto_assign_for_student_assignment(submission: AssignmentComment):
-    """
-    Auto assign teacher in a lazy manner (on student activity) when
-    student group has assignee.
-    """
-    student_assignment = submission.student_assignment
-    # Trigger on student activity
-    if submission.author_id != student_assignment.student_id:
-        return
-    if not student_assignment.trigger_auto_assign:
-        return
-    update_fields = ['trigger_auto_assign', 'modified']
+def resolve_assignees_for_personal_assignment(student_assignment: StudentAssignment) -> List[CourseTeacher]:
+    if student_assignment.assignee is not None:
+        return [student_assignment.assignee]
+
     assignment = student_assignment.assignment
     try:
         enrollment = (Enrollment.active
@@ -765,18 +757,42 @@ def trigger_auto_assign_for_student_assignment(submission: AssignmentComment):
                       .get(course_id=assignment.course_id,
                            student_id=student_assignment.student_id))
     except Enrollment.DoesNotExist:
-        logger.error('Auto assign triggered for student that left the course')
-        return
-    student_group = enrollment.student_group
-    assignees = StudentGroupService.get_assignees(student_group, assignment)
-    if assignees:
-        update_fields.append('assignee')
-        if len(assignees) == 1:
-            assignee = assignees[0]
-        else:
-            # TODO: set all of them as watchers instead or get random
-            assignee = assignees[0]
-        student_assignment.assignee = assignee
+        # No need to search for the candidates
+        logger.info(f"User {student_assignment.student_id} left the course.")
+        raise
+    return StudentGroupService.get_assignees(enrollment.student_group, assignment)
+
+
+def maybe_set_assignee_for_personal_assignment(submission: AssignmentComment) -> None:
+    """
+    Auto assign teacher in a lazy manner (on student activity) when
+    student group has assignee.
+    """
+    student_assignment = submission.student_assignment
+    # Trigger on student activity
+    if submission.author_id != student_assignment.student_id:
+        return None
+    if not student_assignment.trigger_auto_assign:
+        return None
+    update_fields = ['trigger_auto_assign', 'modified']
+    # Do not overwrite assignee if someone already set the value.
+    if not student_assignment.assignee_id:
+        try:
+            assignees = resolve_assignees_for_personal_assignment(student_assignment)
+        except Enrollment.DoesNotExist:
+            # Left auto assigning trigger until student re-enter the course.
+            return None
+        if assignees:
+            if len(assignees) == 1:
+                update_fields.append('assignee')
+                assignee = assignees[0]
+                student_assignment.assignee = assignee
+            else:
+                # It is unclear who must be set as an assignee in that case.
+                # Let's leave it blank to send notifications to all responsible
+                # teachers until they decide who must be assigned.
+                # TODO: set all of them as watchers instead
+                pass
     student_assignment.trigger_auto_assign = False
     student_assignment.modified = now()
     student_assignment.save(update_fields=update_fields)

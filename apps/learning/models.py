@@ -768,7 +768,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
 
     def save(self, **kwargs):
         from learning.services import (
-            trigger_auto_assign_for_student_assignment,
+            maybe_set_assignee_for_personal_assignment,
             update_student_assignment_derivable_fields
         )
         from learning.tasks import generate_notifications_about_new_submission
@@ -779,7 +779,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
                                                     not is_published_before)
         # Send notifications on publishing submission
         if has_been_published:
-            trigger_auto_assign_for_student_assignment(self)
+            maybe_set_assignee_for_personal_assignment(self)
             # FIXME: move side effects outside model saving, e.g. to on_commit
             # TODO: replace with self.student_assignment.('first_student_comment_at', 'last_comment_from')
             update_student_assignment_derivable_fields(self)
