@@ -14,6 +14,7 @@
   {% endif %}
 
   {% set show_import_yandex_contest_modal = gradebook.assignments.values()|map(attribute='assignment.submission_type')|select("eq", AssignmentFormat.YANDEX_CONTEST)|list|length > 0 %}
+  {% set show_import_yandex_contest_modal = False %}
 
   <div class="container container-wide">
     <form method="post" name="gradebook">
