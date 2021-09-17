@@ -2,7 +2,7 @@ from rules import predicate
 
 from auth.permissions import Permission, add_perm
 from courses.constants import MaterialVisibilityTypes
-from courses.models import Course, CourseClass, Assignment
+from courses.models import Assignment, Course, CourseClass
 from learning.services import CourseRole, course_access_role
 
 
