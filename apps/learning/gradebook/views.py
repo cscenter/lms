@@ -2,6 +2,7 @@ import csv
 import itertools
 from typing import Any
 
+from rest_framework import exceptions as rest_exceptions
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from vanilla import FormView
@@ -15,6 +16,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
+from api.mixins import ApiErrorsMixin
 from api.views import APIBaseView
 from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
 from core.http import HttpRequest
@@ -22,14 +24,17 @@ from courses.constants import AssignmentFormat, SemesterTypes
 from courses.models import Assignment, Course, Semester
 from courses.utils import get_current_term_pair
 from courses.views.mixins import CourseURLParamsMixin
-from grading.api.yandex_contest import ContestAPIError, YandexContestAPI
-from grading.services import CheckerService, yandex_contest_scoreboard_iterator
+from grading.api.yandex_contest import (
+    ContestAPIError, Unavailable, YandexContestAPI, cast_contest_error
+)
 from learning.gradebook import GradeBookFormFactory, gradebook_data
 from learning.gradebook.imports import (
     get_course_students, get_course_students_by_stepik_id,
     get_course_students_by_yandex_login, import_assignment_scores
 )
-from learning.gradebook.services import assignment_import_scores_from_yandex_contest
+from learning.gradebook.services import (
+    assignment_import_scores_from_yandex_contest, get_assignment_checker
+)
 from learning.permissions import EditGradebook, ViewOwnGradebook
 
 __all__ = [
@@ -306,7 +311,22 @@ class GradebookImportScoresFromYandexContest(RolePermissionRequiredMixin, APIBas
     Imports assignment scores from Yandex.Contest problem defined in
     the assignment checker.
     """
+    course: Course
     permission_classes = [EditGradebook]
+
+    cast_exceptions = {
+        ContestAPIError: rest_exceptions.ValidationError,
+        **ApiErrorsMixin.cast_exceptions
+    }
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        queryset = (Course.objects
+                    .filter(pk=kwargs['course_id']))
+        self.course = get_object_or_404(queryset)
+
+    def get_permission_object(self) -> Course:
+        return self.course
 
     class InputSerializer(serializers.Serializer):
         assignment = serializers.IntegerField()
@@ -315,17 +335,20 @@ class GradebookImportScoresFromYandexContest(RolePermissionRequiredMixin, APIBas
         serializer = self.InputSerializer(data=request.POST)
         serializer.is_valid(raise_exception=True)
 
-        queryset = Assignment.objects.filter(pk=serializer.validated_data['assignment'])
+        queryset = (Assignment.objects
+                    .filter(pk=serializer.validated_data['assignment'],
+                            course=self.course))
         assignment = get_object_or_404(queryset)
 
-        # FIXME: здесь проверять доступ к контесту и кидать читаемую ошибку
-        # TODO: process Unavailable/ContestApiError (add them to the ApiErrorsMixin?)
-        try:
-            assignment_import_scores_from_yandex_contest(assignment)
-        except ContestAPIError as e:
-            # logger.error
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        checker = get_assignment_checker(assignment)
+        access_token = checker.checking_system.settings['access_token']
+        client = YandexContestAPI(access_token=access_token, refresh_token=access_token)
 
-        # TODO: return stats with updated/skiped/invalid?
+        try:
+            assignment_import_scores_from_yandex_contest(client, assignment)
+        except (Unavailable, ContestAPIError) as e:
+            raise cast_contest_error(e) from e
+
+        # TODO: return stats with updated/skiped/invalid/students without yandex login?
         return Response(status=status.HTTP_201_CREATED, data={})
 

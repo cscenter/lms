@@ -6,7 +6,7 @@ from courses.permissions import (
     CreateAssignment, EditAssignment, EditCourseClass, ViewCourseClassMaterials
 )
 from courses.tests.factories import (
-    CourseClassFactory, CourseFactory, CourseTeacherFactory
+    AssignmentFactory, CourseClassFactory, CourseFactory, CourseTeacherFactory
 )
 from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
@@ -18,12 +18,11 @@ from users.tests.factories import (
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("permission_name", [CreateAssignment.name,
-                                             EditAssignment.name])
-def test_can_create_course_assignment(permission_name, client):
+def test_permission_create_course_assignment(client):
     """
-    Curators and actual teachers have permissions to create/edit assignment
+    Curators and actual teachers have permissions to create course assignment
     """
+    permission_name = CreateAssignment.name
     teacher = TeacherFactory()
     curator = CuratorFactory()
     user = UserFactory()
@@ -40,7 +39,25 @@ def test_can_create_course_assignment(permission_name, client):
 
 
 @pytest.mark.django_db
-def test_can_edit_course_class(client):
+def test_permission_edit_course_assignment(client):
+    permission_name = EditAssignment.name
+    user = UserFactory()
+    student = StudentFactory()
+    teacher, teacher_other = TeacherFactory.create_batch(2)
+    curator = CuratorFactory()
+    invited_student = InvitedStudentFactory()
+    course = CourseFactory(teachers=[teacher])
+    assignment = AssignmentFactory(course=course)
+    assert teacher.has_perm(permission_name, assignment)
+    assert curator.has_perm(permission_name, assignment)
+    assert not user.has_perm(permission_name, assignment)
+    assert not student.has_perm(permission_name, assignment)
+    assert not invited_student.has_perm(permission_name, assignment)
+    assert not teacher_other.has_perm(permission_name, assignment)
+
+
+@pytest.mark.django_db
+def test_permission_edit_course_class(client):
     user = UserFactory()
     teacher = TeacherFactory()
     teacher_other = TeacherFactory()

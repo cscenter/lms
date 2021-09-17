@@ -1,4 +1,5 @@
 import datetime
+from typing import Any, Optional
 
 from crispy_forms.bootstrap import Tab, TabHolder
 from crispy_forms.helper import FormHelper
@@ -324,7 +325,7 @@ class AssignmentForm(TimezoneAwareModelForm):
                     "https://contest.yandex.ru/contest/3/problems/A/")
     )
 
-    def __init__(self, course, locale="en", **kwargs):
+    def __init__(self, course: Course, locale: Optional[str] = "en", **kwargs: Any):
         super().__init__(**kwargs)
         self.instance.course = course
         self.fields['ttc'].required = course.ask_ttc

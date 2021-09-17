@@ -1,8 +1,11 @@
 import logging
 import re
 from enum import Enum, IntEnum
+from typing import Optional
 
 import requests
+
+from core.typings import assert_never
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +95,33 @@ class YandexContestAPIException(Exception):
     pass
 
 
+def cast_contest_error(exc) -> Exception:
+    from rest_framework import status
+    from rest_framework.exceptions import APIException
+
+    # Any errors returned from the Yandex.Contest in a
+    # (lms client) - (lms server) - (yandex.contest) chain are considered
+    # as an internal error from the client side.
+    status_code = str(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    if isinstance(exc, Unavailable):
+        msg = "Yandex.Contest is unavailable at this moment. Try again later."
+        return APIException(detail=msg, code=status_code)
+    elif isinstance(exc, ContestAPIError):
+        code = ResponseStatus(exc.code)
+        if code == ResponseStatus.NO_ACCESS:
+            msg = ("Make sure contest@compscicenter.ru was added to the "
+                   "contest participants with an admin role")
+            return APIException(detail=msg, code=status_code)
+        elif code == ResponseStatus.BAD_TOKEN:
+            msg = ("Credentials for contest@compscicenter.ru are expired. "
+                   "Please, contact curators to fix this problem.")
+            return APIException(detail=msg, code=status_code)
+        else:
+            return APIException(detail=exc.message, code=str(code))
+    else:
+        assert_never(exc)
+
+
 # TODO: better handle exceptions. Use `register_in_contest` method as example
 class YandexContestAPI:
     """
@@ -146,18 +176,17 @@ class YandexContestAPI:
         return response.status_code, participant_id
 
     # FIXME: api.contest(42).info()
-    def contest_info(self, contest_id):
+    def contest_info(self, contest_id, timeout: Optional[int] = 1):
         headers = self.base_headers
         url = self.CONTEST_URL.format(contest_id=contest_id)
-        response = requests.get(url, headers=headers, timeout=1)
-        if response.status_code != ResponseStatus.SUCCESS:
-            raise YandexContestAPIException(response.status_code, response.text)
+        response = self.request_and_check(url, "get", headers=headers,
+                                          timeout=timeout)
         info = response.json()
         logger.debug("Meta data: {}".format(info))
         return response.status_code, info
 
     # FIXME: api.contest(42).problems()
-    def contest_problems(self, contest_id, timeout: int = 1):
+    def contest_problems(self, contest_id, timeout: Optional[int] = 1):
         headers = self.base_headers
         url = self.PROBLEMS_URL.format(contest_id=contest_id)
         response = self.request_and_check(url, "get", headers=headers,
@@ -168,7 +197,7 @@ class YandexContestAPI:
 
     # FIXME: api.contest(42).submissions()
     # TODO: add pagination
-    def contest_submissions(self, contest_id, timeout: int = 2, **params):
+    def contest_submissions(self, contest_id, timeout: Optional[int] = 2, **params):
         headers = self.base_headers
         url = self.SUBMISSIONS_URL.format(contest_id=contest_id)
         if "page" not in params:
@@ -189,7 +218,7 @@ class YandexContestAPI:
 
     # FIXME: api.contest(42).submission(1)
     def submission_details(self, contest_id, submission_id,
-                           full=False, timeout=1):
+                           full=False, timeout: Optional[int] = 1):
         """Provide `full=True` to get all details like checker log"""
         headers = self.base_headers
         url = self.SUBMISSION_URL.format(contest_id=contest_id,
@@ -234,7 +263,7 @@ class YandexContestAPI:
             try:
                 s = response.status_code
                 ResponseStatus(s)  # known statuses
-                raise ContestAPIError(s, response.text) from e
+                raise ContestAPIError(code=s, message=response.text) from e
             except ValueError:
                 # Unpredictable client or server error
                 logger.exception("Contest API service had internal error.")

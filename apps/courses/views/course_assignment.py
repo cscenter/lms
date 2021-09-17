@@ -4,14 +4,14 @@ from vanilla import CreateView, DeleteView, UpdateView
 
 from django.db import transaction
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
 from core.views import ProtectedFormMixin
 from courses.constants import AssignmentFormat
 from courses.forms import AssignmentForm
-from courses.models import Assignment, AssignmentAttachment
+from courses.models import Assignment, AssignmentAttachment, Course
 from courses.permissions import CreateAssignment, EditAssignment
 from courses.views.mixins import CourseURLParamsMixin
 from learning.services import AssignmentService
@@ -32,9 +32,6 @@ class AssignmentCreateUpdateMixin(CourseURLParamsMixin, PermissionRequiredMixin,
                                   AssignmentCreateUpdateMixinBase):
     model = Assignment
     template_name = "lms/courses/course_assignment_form.html"
-
-    def get_permission_object(self):
-        return self.course
 
     def get_form(self, **kwargs):
         return AssignmentForm(course=self.course,
@@ -66,6 +63,9 @@ class AssignmentCreateUpdateMixin(CourseURLParamsMixin, PermissionRequiredMixin,
 class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
     permission_required = CreateAssignment.name
 
+    def get_permission_object(self) -> Course:
+        return self.course
+
     def get_form(self, **kwargs):
         kwargs['initial'] = {
             "time_zone": self.course.main_branch.get_timezone() or None
@@ -78,7 +78,17 @@ class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
 
 
 class AssignmentUpdateView(AssignmentCreateUpdateMixin, UpdateView):
+    assignment: Assignment
     permission_required = EditAssignment.name
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        queryset = (Assignment.objects
+                    .filter(pk=kwargs['pk'], course=self.course))
+        self.assignment = get_object_or_404(queryset)
+
+    def get_permission_object(self) -> Assignment:
+        return self.assignment
 
     def post_save(self, assignment):
         AssignmentService.sync_student_assignments(assignment)

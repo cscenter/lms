@@ -187,9 +187,8 @@ class EditOwnStudentAssignment(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, student_assignment: StudentAssignment):
-        course = student_assignment.assignment.course
-        # FIXME: check is actual teacher?
-        return user in course.teachers.all()
+        course: Course = student_assignment.assignment.course
+        return course.is_actual_teacher(user.pk)
 
 
 # FIXME: возможно, view_assignments надо отдать куратору и преподавателю. А студенту явный view_own_assignments.

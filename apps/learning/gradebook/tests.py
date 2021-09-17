@@ -14,7 +14,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import force_bytes, smart_bytes
 from django.utils.translation import gettext_lazy
 
-from auth.mixins import PermissionRequiredMixin
+from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
 from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.urls import reverse
@@ -25,11 +25,13 @@ from learning.gradebook.imports import (
     get_course_students_by_stepik_id, import_assignment_scores
 )
 from learning.models import Enrollment, StudentAssignment
-from learning.permissions import ViewOwnGradebook
+from learning.permissions import EditGradebook, ViewOwnGradebook, ViewStudentAssignment
 from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import EnrollmentFactory
 from users.services import get_student_profile
-from users.tests.factories import StudentFactory, TeacherFactory
+from users.tests.factories import (
+    CuratorFactory, StudentFactory, TeacherFactory, UserFactory
+)
 
 # TODO: test redirect to gradebook for teachers if only 1 course in current term
 
@@ -791,4 +793,36 @@ id,header2,score
     response = client.post(import_csv_url, form, follow=True)
     assert StudentAssignment.objects.get(student=e2.student).score == 100
     assert StudentAssignment.objects.get(student=e4.student).score is None
+
+
+@pytest.mark.django_db
+def test_gradebook_import_scores_from_yandex_contest_permissions(settings, client, lms_resolver):
+    curator = CuratorFactory()
+    teacher1, teacher2 = TeacherFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher2])
+    url = reverse('teaching:api:import-scores:yandex_contest', kwargs={"course_id": course.pk},
+                  subdomain=settings.LMS_SUBDOMAIN)
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, RolePermissionRequiredMixin)
+    assert resolver.func.view_class.permission_classes == [EditGradebook]
+    assert EditGradebook.name in perm_registry
+    # Check unauthorized and forbidden requests
+    response = client.post(url, data={}, content_type='application/json')
+    assert response.status_code == 401
+    client.login(UserFactory())
+    response = client.post(url, data={}, content_type='application/json')
+    assert response.status_code == 403
+    client.login(teacher1)
+    response = client.post(url, data={}, content_type='application/json')
+    assert response.status_code == 403
+    # Authorized
+    client.login(teacher2)
+    response = client.post(url, data={}, content_type='application/json')
+    assert response.status_code == 400
+    client.login(curator)
+    response = client.post(url, data={}, content_type='application/json')
+    assert response.status_code == 400
+    # Wrong assignment id, but valid permissions
+
+
 

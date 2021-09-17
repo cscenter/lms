@@ -21,7 +21,10 @@
                 {% endwith %}
               {% endfor %}
             </select>
-            <span class="help-block">{% trans %}Score will be imported for selected assignment{% endtrans %}</span>
+            <div class="help-block mb-10">{% trans %}Score will be imported for selected assignment{% endtrans %}</div>
+            <div class="alert alert-block alert-warning">
+              Страница будет перезагружена. Сохраните изменения перед импортом.
+            </div>
           </div>
         </div>
         <div class="modal-footer">

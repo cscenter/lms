@@ -101,7 +101,7 @@ def yandex_contest_scoreboard_iterator(client: YandexContestAPI, contest_id: int
                 # TODO: how to reuse logic from AssignmentScore?
                 if problem_status == ProblemStatus.ACCEPTED:
                     score_str: str = data['score'].replace(',', '.')
-                    score = int(round(float(score_str)))
+                    score = round(Decimal(score_str), ndigits=2)
                 elif problem_status == ProblemStatus.NOT_ACCEPTED:
                     score = 0
                 else:

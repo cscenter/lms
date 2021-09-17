@@ -715,6 +715,7 @@ def create_notifications_about_new_submission(submission: AssignmentComment):
 def update_personal_assignment_score(*, assignment: Assignment,
                                      student: Union[User, int],
                                      score: Union[int, Decimal]) -> None:
+    # FIXME: check score <= max_score
     (StudentAssignment.objects
      .filter(assignment=assignment, student=student)
      .update(score=score))

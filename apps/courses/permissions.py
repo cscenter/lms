@@ -2,7 +2,7 @@ from rules import predicate
 
 from auth.permissions import Permission, add_perm
 from courses.constants import MaterialVisibilityTypes
-from courses.models import Course, CourseClass
+from courses.models import Course, CourseClass, Assignment
 from learning.services import CourseRole, course_access_role
 
 
@@ -78,8 +78,8 @@ class EditOwnAssignment(Permission):
 
     @staticmethod
     @predicate
-    def rule(user, course: Course):
-        return course.is_actual_teacher(user.pk)
+    def rule(user, assignment: Assignment):
+        return assignment.course.is_actual_teacher(user.pk)
 
 
 @add_perm

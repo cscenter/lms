@@ -3,25 +3,29 @@ from django.core.exceptions import ValidationError
 from courses.constants import AssignmentFormat
 from courses.models import Assignment
 from grading.api.yandex_contest import ProblemStatus, YandexContestAPI
+from grading.models import Checker
 from grading.services import yandex_contest_scoreboard_iterator
 from learning.models import Enrollment
 from learning.services import update_personal_assignment_score
 
 
-# FIXME: что если балл превышает максимальный у задания?
-# TODO: спросить про тип score
-def assignment_import_scores_from_yandex_contest(assignment: Assignment):
+def get_assignment_checker(assignment: Assignment) -> Checker:
     if assignment.submission_type != AssignmentFormat.YANDEX_CONTEST:
         raise ValidationError("Wrong assignment format", code="invalid")
     if not assignment.checker_id:
         raise ValidationError("Checker is not defined", code="malformed")
+    return assignment.checker
 
-    checker = assignment.checker
+
+# FIXME: что если балл превышает максимальный у задания?
+# TODO: спросить про тип score
+def assignment_import_scores_from_yandex_contest(client: YandexContestAPI,
+                                                 assignment: Assignment):
+    checker = get_assignment_checker(assignment)
     contest_id = checker.settings['contest_id']
     problem_alias = checker.settings['problem_id']
 
-    access_token = checker.checking_system.settings['access_token']
-    client = YandexContestAPI(access_token=access_token, refresh_token=access_token)
+    # FIXME: Validate problem_alias exists in the contest or it will be the hidden problem
 
     enrolled_students = (Enrollment.active
                          .filter(course_id=assignment.course_id)
