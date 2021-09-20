@@ -1,7 +1,9 @@
 import logging
 import re
+from dataclasses import dataclass
+from decimal import Decimal
 from enum import Enum, IntEnum
-from typing import Optional
+from typing import Iterator, List, Optional, Union
 
 import requests
 
@@ -315,3 +317,63 @@ class YandexContestAPI:
         json_data = response.json()
         logger.debug(f"Meta data: {json_data}")
         return response.status_code, json_data
+
+
+@dataclass
+class YandexContestProblemResult:
+    problem_alias: str
+    status: ProblemStatus
+    score: Optional[Union[int, Decimal]]
+    submission_count: int
+    submission_delay: int
+
+
+@dataclass
+class YandexContestParticipantProgress:
+    participant_id: int
+    yandex_login: str
+    score_total: str
+    problems: List[YandexContestProblemResult]
+
+
+def yandex_contest_scoreboard_iterator(client: YandexContestAPI, contest_id: int,
+                                       batch_size: Optional[int] = 50) -> Iterator[YandexContestParticipantProgress]:
+    paging = {
+        "page_size": batch_size,
+        "page": 1
+    }
+    while True:
+        status, json_data = client.standings(contest_id, **paging)
+        problem_aliases = [t["title"] for t in json_data["titles"]]
+        page_total = 0
+        for row in json_data['rows']:
+            page_total += 1
+            problems = []
+            for index, data in enumerate(row['problemResults']):
+                problem_status = ProblemStatus(data['status'])
+                # TODO: how to reuse logic from AssignmentScore?
+                if problem_status == ProblemStatus.ACCEPTED:
+                    score_str: str = data['score'].replace(',', '.')
+                    score = round(Decimal(score_str), ndigits=2)
+                elif problem_status == ProblemStatus.NOT_ACCEPTED:
+                    score = 0
+                else:
+                    score = None
+                problem_result = YandexContestProblemResult(
+                    problem_alias=problem_aliases[index],
+                    status=problem_status,
+                    score=score,
+                    submission_count=data['submissionCount'],
+                    submission_delay=data['submitDelay'],
+                )
+                problems.append(problem_result)
+            participant_progress = YandexContestParticipantProgress(
+                participant_id=row['participantInfo']['id'],
+                yandex_login=row['participantInfo']['login'],
+                score_total=row['score'],
+                problems=problems
+            )
+            yield participant_progress
+        if page_total < paging["page_size"]:
+            return
+        paging["page"] += 1

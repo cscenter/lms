@@ -324,8 +324,8 @@ class GradebookImportScoresFromYandexContest(RolePermissionRequiredMixin, APIBas
     class InputSerializer(serializers.Serializer):
         assignment = serializers.IntegerField()
 
-    def post(self, request: HttpRequest, *args: Any, **kwargs: Any):
-        serializer = self.InputSerializer(data=request.POST)
+    def post(self, request, *args: Any, **kwargs: Any):
+        serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         queryset = (Assignment.objects
@@ -339,7 +339,7 @@ class GradebookImportScoresFromYandexContest(RolePermissionRequiredMixin, APIBas
 
         assignment_import_scores_from_yandex_contest(client, assignment)
 
-        # TODO: return stats with updated/skiped/invalid/students without yandex login?
+        # TODO: return stats with updated/skipped/invalid/students without yandex login
         return Response(status=status.HTTP_201_CREATED, data={})
 
     def handle_exception(self, exc):

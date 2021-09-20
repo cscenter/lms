@@ -2,9 +2,10 @@ from django.core.exceptions import ValidationError
 
 from courses.constants import AssignmentFormat
 from courses.models import Assignment
-from grading.api.yandex_contest import ProblemStatus, YandexContestAPI
+from grading.api.yandex_contest import (
+    ProblemStatus, YandexContestAPI, yandex_contest_scoreboard_iterator
+)
 from grading.models import Checker
-from grading.services import yandex_contest_scoreboard_iterator
 from learning.models import Enrollment
 from learning.services import update_personal_assignment_score
 

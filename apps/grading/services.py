@@ -1,8 +1,5 @@
-from dataclasses import dataclass
-from decimal import Decimal
-from typing import Any, Iterator, List, Optional, Tuple, Union
+from typing import Any, List, Tuple
 
-from grading.api.yandex_contest import ProblemStatus, YandexContestAPI
 from grading.constants import CheckingSystemTypes, YandexCompilers
 from grading.models import Checker, CheckingSystem, Submission
 from grading.utils import resolve_yandex_contest_problem_alias
@@ -64,63 +61,3 @@ class CheckerSubmissionService:
         )
         submission.save()
         return submission
-
-
-@dataclass
-class YandexContestProblemResult:
-    problem_alias: str
-    status: ProblemStatus
-    score: Optional[Union[int, Decimal]]
-    submission_count: int
-    submission_delay: int
-
-
-@dataclass
-class YandexContestParticipantProgress:
-    participant_id: int
-    yandex_login: str
-    score_total: str
-    problems: List[YandexContestProblemResult]
-
-
-def yandex_contest_scoreboard_iterator(client: YandexContestAPI, contest_id: int,
-                                       batch_size: Optional[int] = 50) -> Iterator[YandexContestParticipantProgress]:
-    paging = {
-        "page_size": batch_size,
-        "page": 1
-    }
-    while True:
-        status, json_data = client.standings(contest_id, **paging)
-        problem_aliases = [t["title"] for t in json_data["titles"]]
-        page_total = 0
-        for row in json_data['rows']:
-            page_total += 1
-            problems = []
-            for index, data in enumerate(row['problemResults']):
-                problem_status = ProblemStatus(data['status'])
-                # TODO: how to reuse logic from AssignmentScore?
-                if problem_status == ProblemStatus.ACCEPTED:
-                    score_str: str = data['score'].replace(',', '.')
-                    score = round(Decimal(score_str), ndigits=2)
-                elif problem_status == ProblemStatus.NOT_ACCEPTED:
-                    score = 0
-                else:
-                    score = None
-                problem_result = YandexContestProblemResult(
-                    problem_alias=problem_aliases[index],
-                    status=problem_status,
-                    score=score,
-                    submission_count=data['submissionCount'],
-                    submission_delay=data['submitDelay'],
-                )
-                problems.append(problem_result)
-            participant_progress = YandexContestParticipantProgress(
-                participant_id=row['participantInfo']['id'],
-                yandex_login=row['participantInfo']['login'],
-                score_total=row['score'],
-                problems=problems
-            )
-            yield participant_progress
-        if page_total < paging["page_size"]:
-            return
-        paging["page"] += 1

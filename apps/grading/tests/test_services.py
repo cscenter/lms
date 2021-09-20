@@ -1,7 +1,6 @@
 import pytest
 
 from grading.constants import CheckingSystemTypes
-from grading.models import Checker
 from grading.services import CheckerService, CheckerURLError
 from grading.tests.factories import CheckerFactory, CheckingSystemFactory
 from grading.utils import get_yandex_contest_problem_url

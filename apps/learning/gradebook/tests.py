@@ -20,12 +20,13 @@ from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.constants import AssignmentFormat
 from courses.tests.factories import AssignmentFactory, CourseFactory
+from grading.tests.factories import CheckerFactory
 from learning.gradebook import BaseGradebookForm, GradeBookFormFactory, gradebook_data
 from learning.gradebook.imports import (
     get_course_students_by_stepik_id, import_assignment_scores
 )
 from learning.models import Enrollment, StudentAssignment
-from learning.permissions import EditGradebook, ViewOwnGradebook, ViewStudentAssignment
+from learning.permissions import EditGradebook, ViewOwnGradebook
 from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import EnrollmentFactory
 from users.services import get_student_profile
@@ -796,7 +797,9 @@ id,header2,score
 
 
 @pytest.mark.django_db
-def test_gradebook_import_scores_from_yandex_contest_permissions(settings, client, lms_resolver):
+def test_gradebook_import_scores_from_yandex_contest_permissions(settings, client, mocker, lms_resolver):
+    mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.standings',
+                              return_value=(200, {'titles': [], 'rows': []}))
     curator = CuratorFactory()
     teacher1, teacher2 = TeacherFactory.create_batch(2)
     course = CourseFactory(teachers=[teacher2])
@@ -823,6 +826,12 @@ def test_gradebook_import_scores_from_yandex_contest_permissions(settings, clien
     response = client.post(url, data={}, content_type='application/json')
     assert response.status_code == 400
     # Wrong assignment id, but valid permissions
-
-
-
+    assignment1 = AssignmentFactory(course=course,
+                                    checker=CheckerFactory(),
+                                    submission_type=AssignmentFormat.YANDEX_CONTEST)
+    assignment2 = AssignmentFactory(checker=CheckerFactory(),
+                                    submission_type=AssignmentFormat.YANDEX_CONTEST)
+    response = client.post(url, data={'assignment': assignment1.pk}, content_type='application/json')
+    assert response.status_code == 201
+    response = client.post(url, data={'assignment': assignment2.pk}, content_type='application/json')
+    assert response.status_code == 404
