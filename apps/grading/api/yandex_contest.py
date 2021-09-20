@@ -110,14 +110,18 @@ def cast_contest_error(exc) -> Exception:
         code = ResponseStatus(exc.code)
         if code == ResponseStatus.NO_ACCESS:
             msg = ("Make sure contest@compscicenter.ru was added to the "
-                   "contest participants with an admin role")
+                   "contest participants with an admin role.")
+            return APIException(detail=msg, code=status_code)
+        elif code == ResponseStatus.NOT_FOUND:
+            # Actually contest or participant
+            msg = "Contest was not found."
             return APIException(detail=msg, code=status_code)
         elif code == ResponseStatus.BAD_TOKEN:
             msg = ("Credentials for contest@compscicenter.ru are expired. "
                    "Please, contact curators to fix this problem.")
             return APIException(detail=msg, code=status_code)
         else:
-            return APIException(detail=exc.message, code=str(code))
+            return APIException(detail=exc.message, code=status_code)
     else:
         assert_never(exc)
 

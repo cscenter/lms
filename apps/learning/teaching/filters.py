@@ -2,7 +2,6 @@ from django_filters import ChoiceFilter, FilterSet
 
 from django.utils.translation import gettext_lazy as _
 
-from courses.services import CourseService
 from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.services import StudentGroupService
 

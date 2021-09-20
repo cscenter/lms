@@ -2,7 +2,6 @@ import csv
 import itertools
 from typing import Any
 
-from rest_framework import exceptions as rest_exceptions
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from vanilla import FormView
@@ -16,7 +15,6 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
-from api.mixins import ApiErrorsMixin
 from api.views import APIBaseView
 from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
 from core.http import HttpRequest
@@ -314,11 +312,6 @@ class GradebookImportScoresFromYandexContest(RolePermissionRequiredMixin, APIBas
     course: Course
     permission_classes = [EditGradebook]
 
-    cast_exceptions = {
-        ContestAPIError: rest_exceptions.ValidationError,
-        **ApiErrorsMixin.cast_exceptions
-    }
-
     def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
         super().setup(request, *args, **kwargs)
         queryset = (Course.objects
@@ -344,11 +337,12 @@ class GradebookImportScoresFromYandexContest(RolePermissionRequiredMixin, APIBas
         access_token = checker.checking_system.settings['access_token']
         client = YandexContestAPI(access_token=access_token, refresh_token=access_token)
 
-        try:
-            assignment_import_scores_from_yandex_contest(client, assignment)
-        except (Unavailable, ContestAPIError) as e:
-            raise cast_contest_error(e) from e
+        assignment_import_scores_from_yandex_contest(client, assignment)
 
         # TODO: return stats with updated/skiped/invalid/students without yandex login?
         return Response(status=status.HTTP_201_CREATED, data={})
 
+    def handle_exception(self, exc):
+        if isinstance(exc, (Unavailable, ContestAPIError)):
+            exc = cast_contest_error(exc)
+        return super().handle_exception(exc)

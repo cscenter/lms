@@ -17,16 +17,14 @@ def get_assignment_checker(assignment: Assignment) -> Checker:
     return assignment.checker
 
 
-# FIXME: что если балл превышает максимальный у задания?
-# TODO: спросить про тип score
 def assignment_import_scores_from_yandex_contest(client: YandexContestAPI,
-                                                 assignment: Assignment):
+                                                 assignment: Assignment) -> None:
     checker = get_assignment_checker(assignment)
     contest_id = checker.settings['contest_id']
     problem_alias = checker.settings['problem_id']
 
-    # FIXME: Validate problem_alias exists in the contest or it will be the hidden problem
-
+    # There is no API call to check that yandex contest problem max score is
+    # synchronized with the assignment max score.
     enrolled_students = (Enrollment.active
                          .filter(course_id=assignment.course_id)
                          .exclude(student_profile__user__yandex_login='')
@@ -38,7 +36,7 @@ def assignment_import_scores_from_yandex_contest(client: YandexContestAPI,
         gen = (pr for pr in participant_results.problems if pr.problem_alias == problem_alias)
         problem_results = next(gen, None)
         if not problem_results:
-            raise ValidationError("Problem not found", code="malformed")
+            raise ValidationError("Problem was not found", code="malformed")
         if problem_results.status == ProblemStatus.NOT_SUBMITTED:
             continue
         user_id = yandex_logins[participant_results.yandex_login]
