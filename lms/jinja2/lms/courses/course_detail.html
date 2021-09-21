@@ -98,8 +98,7 @@
                       </td>
                       <td>
                         <a href="{{ course_class.get_absolute_url() }}">
-                          {{ course_class.name }}</a><span class="text-muted">, {% if course_class.type == 'lecture' %}{% trans %}
-                        Lecture{% endtrans %}{% else %}{% trans %}Seminar{% endtrans %}</span>{% endif %}
+                          {{ course_class.name }}</a><span class="text-muted">, {% if course_class.type == 'lecture' %}{% trans %}Lecture{% endtrans %}{% else %}{% trans %}Seminar{% endtrans %}</span>{% endif %}
                       </td>
                       <td>
                         <a href="{{ course_class.venue.location.get_absolute_url() }}">{{ course_class.venue.full_name }}</a>
