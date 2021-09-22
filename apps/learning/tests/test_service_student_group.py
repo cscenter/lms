@@ -9,7 +9,7 @@ from courses.models import CourseBranch, CourseGroupModes, StudentGroupTypes
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseTeacherFactory
 )
-from learning.models import StudentGroup, StudentGroupAssignee
+from learning.models import StudentAssignment, StudentGroup, StudentGroupAssignee
 from learning.services import (
     EnrollmentService, GroupEnrollmentKeyError, StudentGroupError, StudentGroupService
 )
@@ -131,30 +131,120 @@ def test_student_group_service_get_student_profiles():
 def test_student_group_service_get_groups_available_for_student_transfer():
     course = CourseFactory(group_mode=StudentGroupTypes.MANUAL)
     student_group1, student_group2, student_group3 = StudentGroupFactory.create_batch(3, course=course)
-    student_group4 = StudentGroupFactory(course__group_mode=StudentGroupTypes.MANUAL)
+    student_group_another_course = StudentGroupFactory(course__group_mode=StudentGroupTypes.MANUAL)
     student_groups = StudentGroupService.get_groups_available_for_student_transfer(student_group1)
     assert len(student_groups) == 2
     assert student_group2 in student_groups
     assert student_group3 in student_groups
-    student_groups = StudentGroupService.get_groups_available_for_student_transfer(student_group4)
+    student_groups = StudentGroupService.get_groups_available_for_student_transfer(student_group_another_course)
     assert len(student_groups) == 0
     assignment1, assignment2 = AssignmentFactory.create_batch(2, course=course)
-    assignment1.restricted_to.add(student_group2, student_group3)
-    student_groups = StudentGroupService.get_groups_available_for_student_transfer(student_group1)
-    assert len(student_groups) == 0
-    assignment1.restricted_to.add(student_group1)
+    # No assignment visibility restrictions
     student_groups = StudentGroupService.get_groups_available_for_student_transfer(student_group1)
     assert len(student_groups) == 2
+    # Assignment 1 is not available for student group 1 but we could transfer
+    # students from group1 to group2 or group3 by adding missing assignments
+    assignment1.restricted_to.add(student_group2, student_group3)
+    student_groups = StudentGroupService.get_groups_available_for_student_transfer(student_group1)
+    assert len(student_groups) == 2
+    # Assignment 1 is not available for student group 3 and we must delete
+    # personal assignment on transferring student from group1 to group3.
+    # Make sure this transition is prohibited.
+    assignment1.restricted_to.clear()
+    assignment1.restricted_to.add(student_group1, student_group2)
+    student_groups = StudentGroupService.get_groups_available_for_student_transfer(student_group1)
+    assert len(student_groups) == 1
     assert student_group2 in student_groups
-    assert student_group3 in student_groups
+    # Assignment 1 is available for group1/group2, Assignment 2 is restricted to group2
     assignment2.restricted_to.add(student_group2)
     student_groups = StudentGroupService.get_groups_available_for_student_transfer(student_group1)
     assert len(student_groups) == 1
-    assert student_group3 in student_groups
-    assignment2.restricted_to.add(student_group1)
+    assert student_group2 in student_groups
+    assignment2.restricted_to.add(student_group3)
     student_groups = StudentGroupService.get_groups_available_for_student_transfer(student_group1)
     assert len(student_groups) == 1
     assert student_group2 in student_groups
+    assignment2.restricted_to.clear()
+    assignment2.restricted_to.add(student_group1)
+    student_groups = StudentGroupService.get_groups_available_for_student_transfer(student_group1)
+    assert len(student_groups) == 0
+
+
+@pytest.mark.django_db
+def test_student_group_service_transfer_students():
+    course = CourseFactory(group_mode=StudentGroupTypes.MANUAL)
+    student_group1, student_group2, student_group3, student_group4 = StudentGroupFactory.create_batch(4, course=course)
+    assignment1, assignment2 = AssignmentFactory.create_batch(2, course=course)
+    assignment1.restricted_to.add(student_group2)
+    assignment2.restricted_to.add(student_group3)
+    enrollment = EnrollmentFactory(course=course, student_group=student_group2)
+    assert StudentAssignment.objects.filter(assignment=assignment1, student=enrollment.student_profile.user).exists()
+    assert not StudentAssignment.objects.filter(assignment=assignment2, student=enrollment.student_profile.user).exists()
+    enrollment1 = EnrollmentFactory(course=course, student_group=student_group2)
+    student_profile1 = enrollment1.student_profile
+    assert StudentAssignment.objects.filter(assignment=assignment1, student=student_profile1.user).exists()
+    # Assignment 1 is available for group 2, assignment 2 for group 3
+    with pytest.raises(ValidationError) as e:
+        StudentGroupService.transfer_students(source=student_group2,
+                                              destination=student_group3,
+                                              student_profiles=[student_profile1.pk])
+    assert e.value.code == 'unsafe'
+    # Assignment 1 is available both for group 2 and group 3, assignment 2 for group 3 only
+    assignment1.restricted_to.add(student_group3)
+    with pytest.raises(ValidationError) as e:
+        StudentGroupService.transfer_students(source=student_group3,
+                                              destination=student_group2,
+                                              student_profiles=[student_profile1.pk])
+    assert e.value.code == 'unsafe'
+    assert StudentAssignment.objects.filter(assignment=assignment1, student=student_profile1.user).exists()
+    assert not StudentAssignment.objects.filter(assignment=assignment2, student=student_profile1.user).exists()
+    StudentGroupService.transfer_students(source=student_group2,
+                                          destination=student_group3,
+                                          student_profiles=[student_profile1.pk])
+    enrollment1.refresh_from_db()
+    assert enrollment1.student_group == student_group3
+    assert StudentAssignment.objects.filter(assignment=assignment1, student=student_profile1.user).exists()
+    # Make sure missing personal assignments were created on transfer group2 -> group3
+    assert StudentAssignment.objects.filter(assignment=assignment2, student=student_profile1.user).exists()
+    # But another student from group 2 keeps untouched
+    assert StudentAssignment.objects.filter(assignment=assignment1, student=enrollment.student_profile.user).exists()
+    assert not StudentAssignment.objects.filter(assignment=assignment2, student=enrollment.student_profile.user).exists()
+    enrollment2 = EnrollmentFactory(course=course, student_group=student_group1)
+    student_profile2 = enrollment2.student_profile
+    # Student 2 is not in a source group. Errors like this are silently ignored now.
+    StudentGroupService.transfer_students(source=student_group4,
+                                          destination=student_group2,
+                                          student_profiles=[student_profile2.pk])
+    enrollment2.refresh_from_db()
+    assert enrollment2.student_group == student_group1
+    StudentGroupService.transfer_students(source=student_group1,
+                                          destination=student_group4,
+                                          student_profiles=[student_profile2.pk])
+    assert not StudentAssignment.objects.filter(assignment=assignment2, student=student_profile2.user).exists()
+    assert not StudentAssignment.objects.filter(assignment=assignment1, student=student_profile2.user).exists()
+    StudentGroupService.transfer_students(source=student_group4,
+                                          destination=student_group2,
+                                          student_profiles=[student_profile2.pk])
+    enrollment2.refresh_from_db()
+    assert enrollment2.student_group == student_group2
+    assert StudentAssignment.objects.filter(assignment=assignment1, student=student_profile2.user).exists()
+    assert not StudentAssignment.objects.filter(assignment=assignment2, student=student_profile2.user).exists()
+
+
+@pytest.mark.django_db
+def test_student_group_service_available_assignments():
+    course = CourseFactory(group_mode=StudentGroupTypes.MANUAL)
+    student_group1, student_group2, student_group3 = StudentGroupFactory.create_batch(3, course=course)
+    assignment1, assignment2, assignment3 = AssignmentFactory.create_batch(3, course=course)
+    assert len(StudentGroupService.available_assignments(student_group1)) == 3
+    assignment1.restricted_to.add(student_group1)
+    assert len(StudentGroupService.available_assignments(student_group1)) == 3
+    assert len(StudentGroupService.available_assignments(student_group2)) == 2
+    assert assignment2 in StudentGroupService.available_assignments(student_group2)
+    assert assignment3 in StudentGroupService.available_assignments(student_group2)
+    assignment2.restricted_to.add(student_group2)
+    assert len(StudentGroupService.available_assignments(student_group3)) == 1
+    assert assignment3 in StudentGroupService.available_assignments(student_group3)
 
 
 @pytest.mark.django_db

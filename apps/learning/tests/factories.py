@@ -100,12 +100,6 @@ class EnrollmentFactory(factory.django.DjangoModelFactory):
     course = factory.SubFactory(CourseFactory)
 
     @factory.post_generation
-    def recreate_assignments(self, create, extracted, **kwargs):
-        if not create:
-            return
-        recreate_assignments_for_student(self)
-
-    @factory.post_generation
     def student_group(self, create, extracted, **kwargs):
         if not create:
             return
@@ -115,6 +109,13 @@ class EnrollmentFactory(factory.django.DjangoModelFactory):
             self.student_group = StudentGroupService.resolve(self.course,
                                                              self.student,
                                                              settings.SITE_ID)
+
+    @factory.post_generation
+    def recreate_assignments(self, create, extracted, **kwargs):
+        if not create:
+            return
+        # Make sure student group is already assigned here
+        recreate_assignments_for_student(self)
 
 
 class InvitationFactory(factory.django.DjangoModelFactory):

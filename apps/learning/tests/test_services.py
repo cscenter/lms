@@ -82,9 +82,9 @@ def test_delete_student_profile():
 
 
 @pytest.mark.django_db
-def test_assignment_service_create_student_assignments(settings):
-    branch_spb = BranchFactory(code=Branches.SPB)
-    branch_nsk = BranchFactory(code=Branches.NSK)
+def test_assignment_service_bulk_create_personal_assignments(settings):
+    branch_spb = BranchFactory(code="spb")
+    branch_nsk = BranchFactory(code="nsk")
     branch_other = BranchFactory()
     course = CourseFactory(main_branch=branch_spb,
                            group_mode=StudentGroupTypes.BRANCH,
@@ -156,7 +156,7 @@ def test_assignment_service_create_student_assignments(settings):
                                              StudentStatuses.ACADEMIC_LEAVE_SECOND,
                                              StudentStatuses.EXPELLED])
 @pytest.mark.django_db
-def test_assignment_service_create_student_assignments_inactive_status(inactive_status, settings):
+def test_assignment_service_create_personal_assignments_inactive_status(inactive_status, settings):
     """
     Inactive student profile status prevents from generating assignment
     record for student.
@@ -182,7 +182,25 @@ def test_assignment_service_create_student_assignments_inactive_status(inactive_
 
 
 @pytest.mark.django_db
-def test_assignment_service_remove_student_assignments():
+def test_assignment_service_bulk_create_personal_assignments_with_existing_records(settings):
+    """
+    Create personal assignments for assignment where some personal records
+    already exist.
+    """
+    course = CourseFactory(group_mode=StudentGroupTypes.MANUAL)
+    enrollment1, enrollment2, enrollment3 = EnrollmentFactory.create_batch(3, course=course)
+    student_profile1 = enrollment1.student_profile
+    assignment = AssignmentFactory(course=course)
+    StudentAssignment.objects.all().delete()
+    AssignmentService.bulk_create_student_assignments(assignment)
+    assert StudentAssignment.objects.filter(assignment=assignment).count() == 3
+    StudentAssignment.objects.filter(assignment=assignment, student=student_profile1.user).delete()
+    AssignmentService.bulk_create_student_assignments(assignment)
+    assert StudentAssignment.objects.filter(assignment=assignment).count() == 3
+
+
+@pytest.mark.django_db
+def test_assignment_service_remove_personal_assignments():
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     branch_other = BranchFactory()
@@ -229,7 +247,7 @@ def test_assignment_service_remove_student_assignments():
 
 
 @pytest.mark.django_db
-def test_assignment_service_sync_student_assignments():
+def test_assignment_service_sync_personal_assignments():
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     branch_other = BranchFactory()

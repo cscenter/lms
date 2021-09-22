@@ -328,28 +328,46 @@ class StudentGroupService:
                     .order_by('user__last_name'))
 
     @staticmethod
-    def get_groups_available_for_student_transfer(student_group: StudentGroup) -> List[StudentGroup]:
+    def get_groups_available_for_student_transfer(source_group: StudentGroup) -> List[StudentGroup]:
         """
-        Returns list of student groups where students of the current
-        *student_group* could be transferred to.
+        Returns list of target student groups where students of the source
+        student group could be transferred to.
         """
         student_groups = list(StudentGroup.objects
-                              .filter(course_id=student_group.course_id)
-                              .exclude(pk=student_group.pk)
+                              .filter(course_id=source_group.course_id)
+                              .exclude(pk=source_group.pk)
                               .select_related('branch__site')
                               .order_by('name'))
-        # Students transfer is allowed for the course groups with
-        # the same visibility settings as a source student group
-        available_groups = {sg.pk for sg in student_groups}
+        # Deleting existing personal assignments is forbidden. This means it's
+        # not possible to transfer a student to a target group if any
+        # assignment available in the source group but not available in
+        # the target group.
+        all_target_groups = {sg.pk for sg in student_groups}
+        available_groups = all_target_groups.copy()
         qs = (AssignmentGroup.objects
-              .filter(group__course_id=student_group.course_id))
+              .filter(group__course_id=source_group.course_id))
         assignment_settings = bucketize(qs, key=lambda ag: ag.assignment_id)
         for bucket in assignment_settings.values():
             groups = {ag.group_id for ag in bucket}
-            if student_group.pk not in groups:
-                groups = {sg.pk for sg in student_groups if sg.pk not in groups}
+            if source_group.pk not in groups:
+                groups = all_target_groups
             available_groups &= groups
         return [sg for sg in student_groups if sg.pk in available_groups]
+
+    @staticmethod
+    def available_assignments(student_group: StudentGroup) -> List[Assignment]:
+        """
+        Returns list of course assignments available for the *student_group*.
+        """
+        available = []
+        assignments = (Assignment.objects
+                       .filter(course_id=student_group.course_id)
+                       .prefetch_related('restricted_to'))
+        for assignment in assignments:
+            restricted_to_groups = assignment.restricted_to.all()
+            if not restricted_to_groups or student_group in restricted_to_groups:
+                available.append(assignment)
+        return available
 
     @classmethod
     def transfer_students(cls, *, source: StudentGroup, destination: StudentGroup,
@@ -364,6 +382,17 @@ class StudentGroupService:
                  student_group=source,
                  student_profile__in=student_profiles)
          .update(student_group_id=destination))
+        # After students were trasferred to the target group create missing
+        # personal assignments
+        source_group_assignments = cls.available_assignments(source)
+        target_group_assignments = cls.available_assignments(destination)
+        # Assignments that are not available in the source group, but
+        # available in the target group
+        in_target_group_only = set(target_group_assignments).difference(source_group_assignments)
+        # Create missing personal assignments
+        for assignment in in_target_group_only:
+            AssignmentService.bulk_create_student_assignments(assignment=assignment,
+                                                              for_groups=[destination.pk])
 
 
 class AssignmentService:
@@ -398,6 +427,7 @@ class AssignmentService:
             return
         return StudentAssignment.base.update_or_create(
             assignment=assignment, student_id=enrollment.student_id,
+            # FIXME: is it really necessary to reset score and execution_time?
             defaults={'deleted_at': None, 'score': None, 'execution_time': None})
 
     @classmethod
@@ -409,20 +439,19 @@ class AssignmentService:
             # TODO: reset score? execution_time?
             student_assignment.restore()
 
-    # TODO: send notification to teachers except assignment publisher
+    # TODO: send notification to teachers
     @classmethod
     def bulk_create_student_assignments(cls, assignment: Assignment,
                                         for_groups: Iterable[Union[int, None]] = None):
         """
-        Generates individual assignments to store student progress.
+        Generates personal assignments to store student progress.
         By default it creates record for each enrolled student who's not
-        expelled or on academic leave and the assignment is not restricted
-        for the group in which the student participates in the course.
+        expelled or on academic leave and the assignment is available for
+        the student group in which the student participates in the course.
 
-        You can restrict processed enrollments to the specific groups by
-        setting  `for_groups`.
-        Special case `for_groups=[..., None]` - include enrollments without
-        student group.
+        You can process students from the specific groups only by setting
+        `for_groups`. Special value `for_groups=[..., None]` - includes
+        enrollments without student group.
         """
         filters = [
             Q(course_id=assignment.course_id),
@@ -445,14 +474,21 @@ class AssignmentService:
         students = list(Enrollment.active
                         .filter(*filters)
                         .values_list("student_id", flat=True))
-        # Create/update records in separate steps to avoid tons of save points
+        # It's possible in case of transferring some students from one
+        # group to another
+        already_exist = set(StudentAssignment.objects
+                            .filter(assignment=assignment, student__in=students)
+                            .values_list('student_id', flat=True))
+        # Restore personal assignments
         in_trash = set(StudentAssignment.trash
                        .filter(assignment=assignment, student__in=students)
                        .values_list('student_id', flat=True))
         if in_trash:
             cls._restore_student_assignments(assignment, in_trash)
+            already_exist.update(in_trash)
+        # Create personal assignments if necessary
         batch_size = 100
-        to_create = (sid for sid in students if sid not in in_trash)
+        to_create = (sid for sid in students if sid not in already_exist)
         objs = (StudentAssignment(assignment=assignment, student_id=student_id)
                 for student_id in to_create)
         while True:
@@ -460,6 +496,7 @@ class AssignmentService:
             if not batch:
                 break
             StudentAssignment.objects.bulk_create(batch, batch_size)
+        # TODO: move to the separated method
         # Generate notifications
         created = (StudentAssignment.objects
                    .filter(assignment=assignment, student_id__in=students)
@@ -505,6 +542,8 @@ class AssignmentService:
         ss = (StudentAssignment.objects
               .filter(assignment=assignment)
               .values_list('student_id', flat=True))
+        # XXX: It could skip processing the whole student group if someone
+        # manually created personal assignment for student from this group.
         existing_groups = set(Enrollment.objects
                               .filter(course_id=assignment.course_id,
                                       student__in=ss)
@@ -525,6 +564,7 @@ class AssignmentService:
         if groups_remove:
             cls.bulk_remove_student_assignments(assignment,
                                                 for_groups=groups_remove)
+
 
     @classmethod
     def get_mean_execution_time(cls, assignment: Assignment):

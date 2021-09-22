@@ -4,6 +4,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 
 from django.contrib import messages
+from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 
@@ -46,9 +47,10 @@ class StudentGroupTransferStudentsView(RolePermissionRequiredMixin, APIBaseView)
         serializer.is_valid(raise_exception=True)
 
         destination_student_group = serializer.validated_data['student_group']
-        StudentGroupService.transfer_students(source=self.student_group,
-                                              destination=destination_student_group,
-                                              student_profiles=serializer.validated_data['ids'])
+        with transaction.atomic():
+            StudentGroupService.transfer_students(source=self.student_group,
+                                                  destination=destination_student_group,
+                                                  student_profiles=serializer.validated_data['ids'])
 
         msg = f"Студенты успешно перенесены в группу {destination_student_group.name}"
         messages.success(self.request, msg, extra_tags='timeout')
