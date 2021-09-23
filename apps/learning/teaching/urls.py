@@ -10,7 +10,8 @@ from learning.teaching.views import (
 )
 from learning.teaching.views import TimetableView as TeacherTimetable
 from learning.teaching.views.assignments import (
-    AssignmentCommentUpdateView, AssignmentDetailView, AssignmentListView,
+    AssignmentCommentUpdateView, AssignmentDetailView,
+    AssignmentDownloadSolutionAttachmentsView, AssignmentListView,
     StudentAssignmentCommentCreateView, StudentAssignmentDetailView
 )
 from learning.teaching.views.student_groups import (
@@ -54,6 +55,7 @@ urlpatterns = [
     path('assignments/', include([
         path('', AssignmentListView.as_view(), name='assignment_list'),
         path('<int:pk>/', AssignmentDetailView.as_view(), name='assignment_detail'),
+        path('<int:pk>/export/solution-attachments/', AssignmentDownloadSolutionAttachmentsView.as_view(), name='assignment_download_solution_attachments'),
         path('submissions/<int:pk>/', StudentAssignmentDetailView.as_view(), name='student_assignment_detail'),
         path('submissions/<int:pk>/comments/', StudentAssignmentCommentCreateView.as_view(), name='assignment_comment_create'),
         path('submissions/<int:pk>/comments/<int:comment_pk>/update/', AssignmentCommentUpdateView.as_view(), name='student_assignment_comment_edit'),

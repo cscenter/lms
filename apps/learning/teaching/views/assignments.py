@@ -1,4 +1,8 @@
+import os.path
+import tempfile
+import zipfile
 from collections import OrderedDict
+from typing import Iterator, NamedTuple, Tuple
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from django_filters.views import FilterMixin
@@ -7,8 +11,9 @@ from vanilla import TemplateView
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.http import HttpResponseBadRequest, JsonResponse
-from django.shortcuts import redirect
+from django.db.models import FileField
+from django.http import FileResponse, HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
@@ -28,8 +33,8 @@ from learning.models import (
     AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
 )
 from learning.permissions import (
-    CreateAssignmentComment, EditOwnStudentAssignment, ViewStudentAssignment,
-    ViewStudentAssignmentList
+    CreateAssignmentComment, DownloadAssignmentSolutions, EditOwnStudentAssignment,
+    ViewStudentAssignment, ViewStudentAssignmentList
 )
 from learning.services import AssignmentService
 from learning.teaching.filters import AssignmentStudentsFilter
@@ -378,3 +383,63 @@ class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
 
     def get_error_url(self):
         return self.student_assignment.get_teacher_url()
+
+
+class SolutionAttachmentZipFile(NamedTuple):
+    path: str
+    file_field: FileField
+
+
+def _solution_attachments(assignment: Assignment) -> Iterator[SolutionAttachmentZipFile]:
+    enrollments = (Enrollment.active
+                   .filter(course_id=assignment.course_id)
+                   .prefetch_related('student_group'))
+    student_groups = {e.student_id: e.student_group.get_name() for e in enrollments}
+    active_students = student_groups.keys()
+    personal_assignments = (StudentAssignment.objects
+                            .filter(assignment=assignment,
+                                    student__in=active_students)
+                            .select_related('student'))
+    root_name = f"{assignment.pk}-{assignment.title}"
+    for student_assignment in personal_assignments:
+        solutions = list(AssignmentComment.published
+                         .filter(student_assignment=student_assignment,
+                                 type=AssignmentSubmissionTypes.SOLUTION))
+        if solutions:
+            student_group = student_groups[student_assignment.student_id]
+            dir_name = student_assignment.student.get_abbreviated_short_name()
+            for solution in solutions:
+                file_field = solution.attached_file
+                file_name = os.path.basename(file_field.name)
+                yield SolutionAttachmentZipFile(
+                    path=f"{root_name}/{student_group}/{dir_name}/{file_name}",
+                    file_field=file_field)
+
+
+class AssignmentDownloadSolutionAttachmentsView(PermissionRequiredMixin, generic.View):
+    permission_required = DownloadAssignmentSolutions.name
+
+    def get(self, request, *args, **kwargs):
+        assignment_id = kwargs['pk']
+        assignment = get_object_or_404(Assignment.objects.filter(pk=assignment_id))
+        files = _solution_attachments(assignment)
+
+        in_memory_size = 1024 * 1024 * 25  # 25 mb
+        temp_file = tempfile.SpooledTemporaryFile(max_size=in_memory_size)
+        with zipfile.ZipFile(temp_file, mode='w', compression=zipfile.ZIP_DEFLATED) as zip_file:
+            for attachment in files:
+                file_field = attachment.file_field
+                try:
+                    with file_field.storage.open(file_field.name) as f:
+                        zip_file.writestr(attachment.path, f.read())
+                except FileNotFoundError:
+                    pass
+
+        file_size = temp_file.tell()
+        temp_file.seek(0)
+        file_name = 'download.zip'
+
+        response = FileResponse(temp_file, content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename={file_name}'
+        response['Content-Length'] = file_size
+        return response

@@ -335,6 +335,11 @@ class CreateOwnAssignmentSolution(Permission):
 
 
 @add_perm
+class DownloadAssignmentSolutions(Permission):
+    name = "learning.download_assignment_solutions"
+
+
+@add_perm
 class ViewAssignmentCommentAttachment(Permission):
     name = "learning.view_assignment_comment_attachment"
 
