@@ -57,7 +57,7 @@ class CheckerSubmissionService:
         """
         submission, _ = Submission.objects.update_or_create(
             assignment_submission=solution,
-            default={"settings": settings}
+            defaults={"settings": settings}
         )
         submission.save()
         return submission

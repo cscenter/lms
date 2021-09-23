@@ -180,8 +180,7 @@ class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
         cleaned_data = super().clean()
         invalid_attachment = 'attached_file' in self.errors
         if not cleaned_data.get("attached_file") and not invalid_attachment:
-            raise forms.ValidationError(
-                _("File should be non-empty"))
+            raise forms.ValidationError(_("File should be non-empty"))
         return cleaned_data
 
     def save(self, commit=True):

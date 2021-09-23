@@ -4,6 +4,7 @@ import pytest
 from bs4 import BeautifulSoup
 
 from django.contrib.messages import get_messages
+from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import smart_bytes
 
@@ -14,13 +15,21 @@ from courses.constants import AssignmentFormat
 from courses.models import CourseTeacher
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from courses.utils import get_current_term_pair
-from learning.models import AssignmentComment, AssignmentNotification, StudentAssignment
+from grading.constants import CheckingSystemTypes, YandexCompilers
+from grading.tests.factories import CheckerFactory
+from learning.forms import AssignmentSolutionYandexContestForm
+from learning.models import (
+    AssignmentComment, AssignmentNotification, AssignmentSubmissionTypes,
+    StudentAssignment
+)
 from learning.permissions import ViewCourses, ViewOwnStudentAssignment
 from learning.settings import Branches
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
 )
-from users.tests.factories import StudentFactory, StudentProfileFactory, TeacherFactory
+from users.tests.factories import (
+    StudentFactory, StudentProfileFactory, TeacherFactory, UserFactory
+)
 
 # TODO: test ViewOwnAssignment in test_permissions.py
 
@@ -287,6 +296,34 @@ def test_add_solution(client):
     response = client.post(create_solution_url, form_data)
     student_assignment.refresh_from_db()
     assert student_assignment.execution_time == timedelta(hours=1, minutes=46)
+
+
+@pytest.mark.django_db
+def test_add_solution_review_code_type(client, mocker):
+    mocker.patch('grading.tasks.retrieve_yandex_contest_checker_compilers')
+    mocker.patch('grading.tasks.add_new_submission_to_checking_system')
+    student = UserFactory()
+    student_profile = StudentProfileFactory(user=student)
+    course = CourseFactory(ask_ttc=False)
+    enrollment = EnrollmentFactory(course=course, student=student, student_profile=student_profile)
+    code_review_checker = CheckerFactory(checking_system__type=CheckingSystemTypes.YANDEX,
+                                         settings={'compilers': [YandexCompilers.c11], 'contest_id': 42, 'problem_id': 42})
+    assignment = AssignmentFactory(course=course,
+                                   submission_type=AssignmentFormat.CODE_REVIEW,
+                                   checker=code_review_checker)
+    student_assignment = (StudentAssignment.objects
+                          .get(assignment=assignment,
+                               student=student))
+    create_solution_url = reverse("study:assignment_solution_create",
+                                  kwargs={"pk": student_assignment.pk})
+    form_data = {
+        f'{AssignmentSolutionYandexContestForm.prefix}-compiler': YandexCompilers.c11,
+        f'{AssignmentSolutionYandexContestForm.prefix}-attached_file': ContentFile("stub", name="test.txt")
+    }
+    client.login(student)
+    response = client.post(create_solution_url, form_data)
+    assert response.status_code == 302
+    assert AssignmentComment.objects.filter(type=AssignmentSubmissionTypes.SOLUTION).count() == 1
 
 
 @pytest.mark.django_db
