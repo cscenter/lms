@@ -25,11 +25,11 @@ class StudentGroupForm(forms.ModelForm):
         fields = ('name', 'assignee')
 
     def __init__(self, course: Course, **kwargs: Any):
-        initial_data = kwargs.get("initial", {})
-        initial_data["type"] = StudentGroupTypes.MANUAL
-        kwargs["initial"] = initial_data
         super().__init__(**kwargs)
         self.instance.course = course
+        # Set type for new student groups
+        if self.instance.pk is None:
+            self.instance.type = StudentGroupTypes.MANUAL
         course_teachers = (CourseTeacher.objects
                            .filter(course=course)
                            .select_related('teacher'))
