@@ -1,4 +1,5 @@
 import base64
+import logging
 from typing import Dict, List, Union
 
 import ldif
@@ -7,18 +8,34 @@ from ldap.dn import escape_dn_chars
 from django.conf import settings
 from django.utils.encoding import force_bytes
 
+from code_reviews.api.ldap import LDAPClient, adapted_base64
 from code_reviews.constants import GROUPS_IMPORT_TO_GERRIT
 from users.models import User
 
+logger = logging.getLogger(__name__)
 
-def adapted_base64(data: bytes) -> bytes:
-    """
-    Adapted base64 encode is identical to general base64 encode except
-    that it uses '.' instead of '+', and omits trailing padding '=' and
-    whitespace.
-    """
-    encoded = base64.b64encode(data, altchars=b'./')
-    return encoded.rstrip(b"=\n")
+
+def create_ldap_user(client, user: User) -> bool:
+    uid = get_ldap_username(user)
+    results = client.search_users(uid)
+    if results:
+        logger.info(f"LDAP entry with uid={uid} for user {user.pk} already exists")
+        return False
+    else:
+        logger.info(f"Creating LDAP entry with uid={uid} for user {user.pk}")
+        entry = user_to_ldap_entry(user)
+        result_type, *_ = client.add_entry(entry)
+        return True
+
+
+def update_ldap_user_password_hash(client: LDAPClient, user: User) -> bool:
+    username = get_ldap_username(user)
+    password_hash = get_ldap_password_hash(user.password)
+    if not password_hash:
+        logger.info(f"Empty hash for user_id={user.pk}")
+        return False
+    changed = client.set_password_hash(username, password_hash)
+    return bool(changed)
 
 
 def get_ldap_username(user: User) -> str:
@@ -84,7 +101,9 @@ def user_to_ldap_entry(user: User, domain_component=settings.LDAP_DB_SUFFIX) -> 
     }
 
 
-# FIXME: у некоторых пользователей нет пароля, надо их импортировать и посмотреть, создастся ли для них аккаунт и не будет ли там падать с 500й, если пробовать входить по пустому паролю или любому невалидному.
+# FIXME: у некоторых пользователей нет пароля, надо их импортировать и
+#  посмотреть, создастся ли для них аккаунт и не будет ли там падать с 500й,
+#  если пробовать входить по пустому паролю или любому невалидному.
 def export(file_path, site_id=settings.SITE_ID) -> None:
     """
     Exports account data in a LDIF format for users having at least one

@@ -5,11 +5,10 @@ from django_rq import job
 from django.conf import settings
 
 from code_reviews.api.gerrit import Gerrit
-from code_reviews.api.ldap import init_client
-from code_reviews.gerrit import get_or_create_change, list_change_files
-from code_reviews.ldap import (
-    get_ldap_password_hash, get_ldap_username, user_to_ldap_entry
-)
+from code_reviews.api.ldap import ldap_client
+from code_reviews.gerrit import get_or_create_change, list_change_files, \
+    get_ldap_username
+from code_reviews.gerrit.ldap import get_ldap_password_hash, user_to_ldap_entry
 from learning.models import AssignmentComment, AssignmentSubmissionTypes
 from users.models import User
 
@@ -24,14 +23,14 @@ def create_account_in_gerrit(*, user_id: int):
         logger.warning(f"User with id={user_id} not found")
         return
     uid = get_ldap_username(user)
-    with init_client() as ldap_client:
-        results = ldap_client.search_users(uid)
+    with ldap_client() as client:
+        results = client.search_users(uid)
         if results:
             logger.info(f"User with id={user_id} already has an account")
             return
         else:
             entry = user_to_ldap_entry(user)
-            ldap_client.add_entry(entry)
+            client.add_entry(entry)
 
 
 @job('high')
@@ -51,7 +50,7 @@ def update_password_in_gerrit(*, user_id: int):
         return
     username = get_ldap_username(user)
     # TODO: What if connection fail when code review system is not available?
-    with init_client() as client:
+    with ldap_client() as client:
         changed = client.set_password_hash(username, password_hash)
         if not changed:
             logger.error(f"Password hash for user {user_id} wasn't changed")

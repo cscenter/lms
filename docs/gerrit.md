@@ -11,9 +11,10 @@ ssh -p 29418 admin@review.compscicenter.ru gerrit flush-caches --cache projects
 Убедиться, что для преподавателей и студентов созданы ldap-аккаунты:
 
 ```python
-from code_reviews.ldap import *
-from django.conf import settings
 import datetime
+from django.conf import settings
+from code_reviews.gerrit.ldap import export
+
 today = datetime.datetime.now().strftime('%d%m%y')
 file_path = settings.ROOT_DIR / f"{today}.ldif"
 # Save dump into repository root dir
@@ -31,7 +32,7 @@ ldapadd -H ldap:// -x -D "cn=admin,dc=review,dc=compscicenter,dc=ru" -w "***REMO
 ```python
 from code_reviews.gerrit import *
 from learning.models import Course
-course_id = 1
+course_id = 984
 course = Course.objects.get(pk=course_id)
 init_project_for_course(course)
 ```

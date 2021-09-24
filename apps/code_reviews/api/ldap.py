@@ -1,11 +1,13 @@
+import base64
 import logging
 import platform
 import sys
 from contextlib import contextmanager
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import ldap
 from ldap.dn import escape_dn_chars
+from ldap.ldapobject import LDAPObject
 from ldap.modlist import addModlist
 
 from django.conf import settings
@@ -44,17 +46,17 @@ class LDAPClient:
     Client to the LDAP server.
     """
 
-    def __init__(self, connection, suffix):
+    def __init__(self, connection, domain_component: Optional[str] = None):
         self.connection = connection
-        self._suffix = suffix
+        self._domain_component = domain_component or settings.LDAP_DB_SUFFIX
 
     def users(self):
-        res = self.connection.search_s(f'ou=users,{self._suffix}',
+        res = self.connection.search_s(f'ou=users,{self._domain_component}',
                                        ldap.SCOPE_SUBTREE)
         return res
 
     def search_users(self, uid) -> List[Tuple[str, Dict]]:
-        return self.connection.search_s(f'ou=users,{self._suffix}',
+        return self.connection.search_s(f'ou=users,{self._domain_component}',
                                         ldap.SCOPE_ONELEVEL,
                                         f'(uid={uid})',
                                         ['displayName'])
@@ -70,7 +72,7 @@ class LDAPClient:
         rootdn user. Uses sync method version for changing password.
         """
         try:
-            dn = f'uid={escape_dn_chars(uid)},ou=users,{self._suffix}'
+            dn = f'uid={escape_dn_chars(uid)},ou=users,{self._domain_component}'
             self.connection.passwd_s(dn, old_password, new_password)
             return True
         except ldap.LDAPError as e:
@@ -82,7 +84,7 @@ class LDAPClient:
         Modify `userPassword` attribute in synchronous mode for provided user
         """
         try:
-            dn = f'uid={escape_dn_chars(uid)},ou=users,{self._suffix}'
+            dn = f'uid={escape_dn_chars(uid)},ou=users,{self._domain_component}'
             mod_list = [(ldap.MOD_REPLACE, 'userPassword', password_hash)]
             self.connection.modify_s(dn, modlist=mod_list)
             return True
@@ -92,7 +94,7 @@ class LDAPClient:
 
     def modify_attribute(self, uid: str, name: str, value: bytes) -> bool:
         """Performs an LDAP modify operation on a user entry's attribute"""
-        dn = f'uid={escape_dn_chars(uid)},ou=users,{self._suffix}'
+        dn = f'uid={escape_dn_chars(uid)},ou=users,{self._domain_component}'
         mod_list = [(ldap.MOD_REPLACE, name, value)]
         try:
             self.connection.modify_s(dn, modlist=mod_list)
@@ -102,41 +104,59 @@ class LDAPClient:
         return False
 
 
-@contextmanager
-def init_client(**kwargs):
-    """
-    Starts a new connection to the LDAP server over StartTLS.
-    """
-    client_uri = kwargs.pop("client_uri", settings.LDAP_CLIENT_URI)
-    suffix = settings.LDAP_DB_SUFFIX
-    username = kwargs.pop("username", settings.LDAP_CLIENT_USERNAME)
-    login_dn = f"cn={username},{suffix}"
-    password = kwargs.pop("password", settings.LDAP_CLIENT_PASSWORD)
-
+def init_ldap_connection(*, uri: str, dn: str, password: str,
+                         timeout: Optional[int] = 5, **options: Any) -> LDAPObject:
+    """Returns LDAP connection binded over TLS."""
     # Always check server certificate
     ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_DEMAND)
     try:
-        connect = ldap.initialize(client_uri,
-                            # trace_level=ldapmodule_trace_level,
-                            # trace_file=ldapmodule_trace_file
-                            )
-        connect.protocol_version = ldap.VERSION3
-        connect.network_timeout = 5  # in seconds
+        connection = ldap.initialize(uri, **options)
+        connection.protocol_version = ldap.VERSION3
+        connection.network_timeout = timeout  # in seconds
         # Fail if TLS is not available.
-        connect.start_tls_s()
+        connection.start_tls_s()
     except ldap.LDAPError as e:
-        logger.warning(f"LDAP connect failed: {e}")
+        logger.error(f"LDAP connection failed: {e}")
+        raise
+    try:
+        connection.simple_bind_s(dn, password)
+    except ldap.LDAPError as e:
+        logger.error(f"LDAP simple bind failed: {e}")
+        raise
+    return connection
+
+
+@contextmanager
+def ldap_client(**options):
+    """
+    Starts a new connection to the LDAP server over StartTLS.
+    """
+    domain_component = settings.LDAP_DB_SUFFIX
+    distinguished_name = f"cn={settings.LDAP_CLIENT_USERNAME},{domain_component}"
+
+    options.setdefault("uri", settings.LDAP_CLIENT_URI)
+    options.setdefault("dn", distinguished_name)
+    options.setdefault("password", settings.LDAP_CLIENT_PASSWORD)
+
+    try:
+        connection = init_ldap_connection(**options)
+    except ldap.LDAPError:
         yield None
         return
 
-    try:
-        connect.simple_bind_s(login_dn, password)
-    except ldap.LDAPError as e:
-        logger.warning(f"LDAP simple bind failed: {e}")
-        yield None
-        return
     logger.info("LDAP connect succeeded")
+
     try:
-        yield LDAPClient(connect, suffix)
+        yield LDAPClient(connection, domain_component)
     finally:
-        connect.unbind_s()
+        connection.unbind_s()
+
+
+def adapted_base64(data: bytes) -> bytes:
+    """
+    Adapted base64 encode is identical to general base64 encode except
+    that it uses '.' instead of '+', and omits trailing padding '=' and
+    whitespace.
+    """
+    encoded = base64.b64encode(data, altchars=b'./')
+    return encoded.rstrip(b"=\n")
