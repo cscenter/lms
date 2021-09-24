@@ -219,6 +219,7 @@ def add_student_to_project(*, gerrit_client: Gerrit,
 
 def get_test_student_profile(course: Course) -> StudentProfile:
     student = User(username='student', email='student')
+    student.set_password(settings.GERRIT_TEST_STUDENT_PASSWORD)
     return StudentProfile(user=student, branch=course.main_branch)
 
 

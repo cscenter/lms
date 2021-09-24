@@ -62,6 +62,7 @@ GERRIT_API_URI = env.str('GERRIT_API_URI', default="https://review.compscicenter
 GERRIT_CLIENT_USERNAME = env.str('GERRIT_CLIENT_USERNAME', default="admin")
 GERRIT_CLIENT_HTTP_PASSWORD = env.str('GERRIT_CLIENT_HTTP_PASSWORD')
 GERRIT_ROBOT_USERNAME = env.str('GERRIT_ROBOT_USERNAME', default="gerrit.bot")
+GERRIT_TEST_STUDENT_PASSWORD = env.str('GERRIT_TEST_STUDENT_PASSWORD', default="")
 LDAP_TLS_TRUSTED_CA_CERT_FILE = env.str('LDAP_TLS_TRUSTED_CA_CERT_FILE', default=str(ROOT_DIR / "lms" / "LDAPTrustedCA.crt"))
 
 # Registration by invitation link
