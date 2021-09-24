@@ -6,8 +6,9 @@ from django.conf import settings
 
 from code_reviews.api.gerrit import Gerrit
 from code_reviews.api.ldap import ldap_client
-from code_reviews.gerrit import get_or_create_change, list_change_files, \
-    get_ldap_username
+from code_reviews.gerrit import (
+    get_ldap_username, get_or_create_change, list_change_files
+)
 from code_reviews.gerrit.ldap import get_ldap_password_hash, user_to_ldap_entry
 from learning.models import AssignmentComment, AssignmentSubmissionTypes
 from users.models import User

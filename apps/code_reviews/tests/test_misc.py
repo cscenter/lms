@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from code_reviews.gerrit import set_reviewers_for_change, get_ldap_username
+from code_reviews.gerrit import get_ldap_username, set_reviewers_for_change
 from code_reviews.tests.factories import GerritChangeFactory
 from learning.models import Enrollment
 from learning.tests.factories import StudentGroupAssigneeFactory
