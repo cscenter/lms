@@ -261,10 +261,16 @@ class Gerrit:
         return self._request('GET', changes_uri)
 
     def delete_file(self, change_id, path_to_file):
+        """
+        Deletes a file from a change edit. This deletes the file from the
+        repository completely. This is not the same as reverting or restoring
+        a file to its previous contents.
+        """
         change_edit_uri = f'changes/{change_id}/edit/{path_to_file}'
         return self._request('DELETE', change_edit_uri)
 
     def upload_file(self, change_id, path_to_file, file):
+        """Put content of a file to a change edit."""
         change_edit_uri = f'changes/{change_id}/edit/{path_to_file}'
 
         content = file.read()
@@ -274,10 +280,15 @@ class Gerrit:
         })
 
     def get_change_edit(self, change_id):
+        """
+        Change edits are stored on special branches and there can be max one
+        edit per user per change.
+        """
         change_edit_uri = f'changes/{change_id}/edit'
         return self._request('GET', change_edit_uri)
 
     def publish_change_edit(self, change_id):
+        """Promotes change edit to a regular patch set."""
         change_edit_uri = f'changes/{change_id}/edit:publish'
         return self._request('POST', change_edit_uri)
 

@@ -72,15 +72,18 @@ def upload_attachment_to_gerrit(assignment_comment_id):
 
     change = get_or_create_change(client, student_assignment)
     if not change:
-        logger.info('Failed to get or create a change')
+        logger.error(f'Failed to get or create a change for '
+                     f'personal assignment {student_assignment.pk}')
         return
+
+    # FIXME: Files can only be added to changes that have not been merged into the code base.
 
     response = client.get_change_edit(change.change_id)
     if not response.no_content:
-        logger.info('Found previous change edit')
+        logger.info(f'Found previous change edit for the change {change.change_id}')
         response = client.delete_change_edit(change.change_id)
         if not response.no_content:
-            logger.error('Failed to delete previous change edit')
+            logger.error('Failed to delete current change edit')
 
     # Save extension to enable syntax highlighting in the UI
     extension = attached_file.name.split('.')[-1]
@@ -92,14 +95,16 @@ def upload_attachment_to_gerrit(assignment_comment_id):
         if file != solution_filename:
             client.delete_file(change.change_id, file)
 
-    # Upload new solution as a Change Edit
+    # Put content of a solution file to a change edit.
     response = client.upload_file(change.change_id, solution_filename,
                                   attached_file)
+    # FIXME: When the change edit is a no-op, for example when providing the
+    #  same file content that the file already has, '409 no changes were made' is returned.
     if not response.no_content:
         logger.info('Failed to upload the solution')
 
-    # Publish Change Edit with all modifications
+    # Promotes Change Edit to a regular Patch Set.
     response = client.publish_change_edit(change.change_id)
     if not response.no_content:
-        logger.info('Failed to publish change edit')
+        logger.error('Failed to publish change edit')
         return

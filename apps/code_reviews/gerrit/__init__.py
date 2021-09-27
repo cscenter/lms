@@ -344,6 +344,7 @@ def set_reviewers_for_change(client: Gerrit, change: GerritChange):
     enrollment = student.get_enrollment(assignment.course_id)
     if not enrollment or not enrollment.student_group_id:
         return
+    logger.info(f'Set reviewers for change {change.change_id}')
     assignees = StudentGroupService.get_assignees(enrollment.student_group,
                                                   assignment=assignment)
     for assignee in assignees:
