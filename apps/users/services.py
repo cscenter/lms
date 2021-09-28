@@ -233,10 +233,10 @@ def get_student_profile(user: User, site, profile_type=None,
     student_profile = (StudentProfile.objects
                        .filter(*filters, user=user, site=site)
                        .select_related('branch')
-                       .order_by('-year_of_admission', '-priority', '-pk')
+                       .order_by('priority', '-year_of_admission', '-pk')
                        .first())
     if student_profile is not None:
-        # It helps to invalidate cache on user model if profile were changed
+        # Invalidate cache on user model if the profile has been changed
         student_profile.user = user
     return student_profile
 

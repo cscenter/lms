@@ -189,7 +189,7 @@ class StudentProfileForm(forms.ModelForm):
 class StudentProfileAdmin(BaseModelAdmin):
     form = StudentProfileForm
     list_select_related = ['user', 'branch', 'branch__site']
-    list_display = ('user', 'branch', 'type', 'year_of_admission', 'status')
+    list_display = ('user', 'branch', 'type', 'year_of_admission', 'status', 'priority')
     list_filter = ('type', 'site', 'branch', 'status',)
     raw_id_fields = ('user', 'comment_last_author')
     search_fields = ['user__last_name']

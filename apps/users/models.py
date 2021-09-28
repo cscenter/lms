@@ -822,7 +822,8 @@ class StudentProfile(TimeStampedModel):
         if update_fields:
             kwargs['update_fields'] = set(update_fields).union({'priority', 'site_id'})
         super().save(**kwargs)
-        instance_memoize.delete_cache(self.user)
+        if StudentProfile.user.is_cached(self):
+            instance_memoize.delete_cache(self.user)
 
     def clean(self):
         if self.type == StudentTypes.INVITED:
