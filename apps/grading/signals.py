@@ -1,7 +1,7 @@
+from django.apps import apps
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from code_reviews.gerrit.tasks import upload_attachment_to_gerrit
 from courses.constants import AssignmentFormat
 from courses.models import Assignment
 from grading.constants import CheckingSystemTypes, SubmissionStatus
@@ -31,9 +31,11 @@ def add_submission_to_checking_system(sender, instance: Submission,
     if created:
         add_new_submission_to_checking_system.delay(submission_id=instance.pk,
                                                     retries=3)
-    elif update_fields and 'status' in update_fields:
-        if instance.status == SubmissionStatus.PASSED:
-            assignment_submission = instance.assignment_submission
-            submission_type = assignment_submission.student_assignment.assignment.submission_type
-            if submission_type == AssignmentFormat.CODE_REVIEW:
-                upload_attachment_to_gerrit.delay(assignment_submission.pk)
+    if apps.is_installed("code_reviews"):
+        from code_reviews.gerrit.tasks import upload_attachment_to_gerrit
+        if update_fields and 'status' in update_fields:
+            if instance.status == SubmissionStatus.PASSED:
+                assignment_submission = instance.assignment_submission
+                submission_type = assignment_submission.student_assignment.assignment.submission_type
+                if submission_type == AssignmentFormat.CODE_REVIEW:
+                    upload_attachment_to_gerrit.delay(assignment_submission.pk)
