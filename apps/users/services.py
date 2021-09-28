@@ -103,12 +103,6 @@ def get_student_progress(queryset,
     return progress
 
 
-def get_student_status_history(student_profile: StudentProfile) -> List[StudentStatusLog]:
-    return (StudentStatusLog.objects
-            .filter(student_profile=student_profile)
-            .order_by('-status_changed_at', '-pk'))
-
-
 def create_graduate_profiles(site: Site, graduated_on: datetime.date,
                              created_by: Optional[User] = None) -> None:
     """
@@ -222,10 +216,10 @@ def get_student_profile(user: User, site, profile_type=None,
     return student_profile
 
 
-# TODO: try to make it an implementation detail of the `student_profile_update` service method
 def update_student_status(student_profile: StudentProfile, *,
                           new_status: str, editor: User,
                           status_changed_at: Optional[datetime.date] = None) -> StudentProfile:
+    # TODO: try to make this method as an implementation detail of the `student_profile_update` service method
     is_studying_status = ''
     if new_status not in StudentStatuses.values and new_status != is_studying_status:
         raise ValidationError("Unknown Student Status", code="invalid")
@@ -251,6 +245,12 @@ def update_student_status(student_profile: StudentProfile, *,
     log_entry.save()
 
     return student_profile
+
+
+def get_student_status_history(student_profile: StudentProfile) -> List[StudentStatusLog]:
+    return (StudentStatusLog.objects
+            .filter(student_profile=student_profile)
+            .order_by('-status_changed_at', '-pk'))
 
 
 def assign_or_revoke_student_role(*, student_profile: StudentProfile,

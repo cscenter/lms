@@ -31,6 +31,7 @@ from api.services import generate_hash
 from api.settings import DIGEST_MAX_LENGTH
 from auth.permissions import perm_registry
 from core.db.fields import TimeZoneField
+from core.models import TimestampedModel
 from core.timezone import TimezoneAwareMixin
 from core.timezone.constants import DATETIME_FORMAT_RU
 from core.urls import reverse
@@ -856,11 +857,7 @@ class StudentProfile(TimeStampedModel):
         return default
 
 
-class StudentStatusLog(models.Model):
-    created_at = models.DateField(
-        verbose_name=_("Created"),
-        editable=False,
-        default=timezone.now)
+class StudentStatusLog(TimestampedModel):
     status_changed_at = models.DateField(
         verbose_name=_("Entry Added"),
         default=timezone.now)
