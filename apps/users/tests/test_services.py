@@ -12,7 +12,8 @@ from users.constants import Roles
 from users.models import StudentProfile, StudentTypes, UserGroup
 from users.services import (
     StudentStatusTransition, assign_or_revoke_student_role, assign_role,
-    create_graduate_profiles, maybe_unassign_student_role, unassign_role
+    create_graduate_profiles, get_student_profile_priority, maybe_unassign_student_role,
+    unassign_role
 )
 from users.tests.factories import CuratorFactory, StudentProfileFactory, UserFactory
 
@@ -195,3 +196,23 @@ def test_assign_or_revoke_student_role():
     assert UserGroup.objects.filter(site=site1, user=user, role=Roles.GRADUATE).exists()
     assert UserGroup.objects.filter(site=site2, user=user, role=Roles.STUDENT).exists()
 
+
+@pytest.mark.django_db
+def test_get_student_profile_priority():
+    student_profile1 = StudentProfileFactory(type=StudentTypes.REGULAR,
+                                             status=StudentStatuses.REINSTATED)
+    student_profile2 = StudentProfileFactory(type=StudentTypes.INVITED,
+                                             status=StudentStatuses.REINSTATED)
+    assert get_student_profile_priority(student_profile1) < get_student_profile_priority(student_profile2)
+    student_profile3 = StudentProfileFactory(type=StudentTypes.REGULAR,
+                                             status=StudentStatuses.EXPELLED)
+    assert get_student_profile_priority(student_profile1) < get_student_profile_priority(student_profile3)
+    student_profile4 = StudentProfileFactory(type=StudentTypes.REGULAR,
+                                             status=StudentStatuses.GRADUATE)
+    assert get_student_profile_priority(student_profile1) < get_student_profile_priority(student_profile4)
+    student_profile5 = StudentProfileFactory(type=StudentTypes.REGULAR,
+                                             status=StudentStatuses.EXPELLED)
+    assert get_student_profile_priority(student_profile2) < get_student_profile_priority(student_profile5)
+    student_profile6 = StudentProfileFactory(type=StudentTypes.VOLUNTEER,
+                                             status=StudentStatuses.EXPELLED)
+    assert get_student_profile_priority(student_profile5) == get_student_profile_priority(student_profile6)

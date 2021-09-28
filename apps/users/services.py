@@ -162,6 +162,31 @@ class StudentProfileError(Exception):
     pass
 
 
+def get_student_profile_priority(student_profile: StudentProfile) -> int:
+    """
+    Calculates student profile priority based on profile type and activity.
+    The less value the higher priority.
+    """
+    min_priority = 1000
+    if student_profile.type == StudentTypes.REGULAR:
+        priority = 200
+    elif student_profile.type == StudentTypes.INVITED:
+        priority = min_priority
+    elif student_profile.type == StudentTypes.PARTNER:
+        # In case a student has both regular and partner profiles the latter
+        # should have a higher priority.
+        priority = 100
+    elif student_profile.type == StudentTypes.VOLUNTEER:
+        priority = 300
+    else:
+        priority = min_priority
+    if student_profile.status in StudentStatuses.inactive_statuses:
+        priority = min_priority + 200
+    elif student_profile.status == StudentStatuses.GRADUATE:
+        priority = min_priority + 100
+    return priority
+
+
 def create_student_profile(*, user: User, branch: Branch, profile_type,
                            year_of_admission, **fields) -> StudentProfile:
     profile_fields = {

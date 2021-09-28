@@ -661,10 +661,10 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
 
 
 class StudentTypes(DjangoChoices):
-    REGULAR = C('regular', _("Regular Student"), priority=300)
-    VOLUNTEER = C('volunteer', _("Co-worker"), priority=200)
-    INVITED = C('invited', _("Invited Student"), priority=100)
-    PARTNER = C('partner', _("Master's Degree Student"), priority=400)
+    REGULAR = C('regular', _("Regular Student"))
+    VOLUNTEER = C('volunteer', _("Co-worker"))
+    INVITED = C('invited', _("Invited Student"))
+    PARTNER = C('partner', _("Master's Degree Student"))
 
     @classmethod
     def from_permission_role(cls, role):
@@ -813,10 +813,14 @@ class StudentProfile(TimeStampedModel):
         ]
 
     def save(self, **kwargs):
+        from users.services import get_student_profile_priority
         created = self.pk is None
         self.site_id = self.branch.site_id
-        self.priority = StudentTypes.get_choice(self.type).priority
+        self.priority = get_student_profile_priority(self)
         self.full_clean()
+        update_fields = kwargs.get('update_fields', None)
+        if update_fields:
+            kwargs['update_fields'] = set(update_fields).union({'priority', 'site_id'})
         super().save(**kwargs)
         instance_memoize.delete_cache(self.user)
 
