@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from code_reviews.gerrit.tasks import upload_attachment_to_gerrit
 from courses.constants import AssignmentFormat
 from courses.models import Assignment
 from grading.constants import CheckingSystemTypes, SubmissionStatus
@@ -35,5 +36,4 @@ def add_submission_to_checking_system(sender, instance: Submission,
             assignment_submission = instance.assignment_submission
             submission_type = assignment_submission.student_assignment.assignment.submission_type
             if submission_type == AssignmentFormat.CODE_REVIEW:
-                from code_reviews.tasks import upload_attachment_to_gerrit
                 upload_attachment_to_gerrit.delay(assignment_submission.pk)

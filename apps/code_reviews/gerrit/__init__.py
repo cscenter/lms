@@ -7,7 +7,7 @@ from django.utils import translation
 
 from code_reviews.api.gerrit import Gerrit
 from code_reviews.api.ldap import LDAPClient, init_ldap_connection
-from code_reviews.constants import GerritRobotMessages
+from code_reviews.gerrit.constants import GerritRobotMessages
 from code_reviews.gerrit.ldap import (
     create_ldap_user, get_ldap_username, update_ldap_user_password_hash
 )

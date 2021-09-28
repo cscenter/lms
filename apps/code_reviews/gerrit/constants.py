@@ -6,6 +6,7 @@ GROUPS_IMPORT_TO_GERRIT = [
     Roles.STUDENT,
     Roles.VOLUNTEER,
     Roles.PARTNER,
+    Roles.INVITED,
     Roles.TEACHER,
     Roles.GRADUATE,
     Roles.CURATOR,

@@ -9,7 +9,7 @@ from django.conf import settings
 from django.utils.encoding import force_bytes
 
 from code_reviews.api.ldap import LDAPClient, adapted_base64
-from code_reviews.constants import GROUPS_IMPORT_TO_GERRIT
+from code_reviews.gerrit.constants import GROUPS_IMPORT_TO_GERRIT
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ def update_ldap_user_password_hash(client: LDAPClient, user: User) -> bool:
     username = get_ldap_username(user)
     password_hash = get_ldap_password_hash(user.password)
     if not password_hash:
-        logger.info(f"Empty hash for user_id={user.pk}")
+        logger.warning(f"Empty hash for user_id={user.pk}")
         return False
     changed = client.set_password_hash(username, password_hash)
     return bool(changed)

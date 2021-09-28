@@ -76,7 +76,7 @@ class LDAPClient:
             self.connection.passwd_s(dn, old_password, new_password)
             return True
         except ldap.LDAPError as e:
-            logger.error(f"Unable to change password for {uid}. {e}")
+            logger.info(f"Unable to change password for {uid}. {e}")
         return False
 
     def set_password_hash(self, uid, password_hash: bytes) -> bool:
@@ -89,7 +89,7 @@ class LDAPClient:
             self.connection.modify_s(dn, modlist=mod_list)
             return True
         except ldap.LDAPError as e:
-            logger.error(f"Unable to change password for {uid}. {e}")
+            logger.info(f"Unable to change password hash for {uid}. {e}")
         return False
 
     def modify_attribute(self, uid: str, name: str, value: bytes) -> bool:

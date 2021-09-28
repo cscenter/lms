@@ -61,3 +61,5 @@ SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 for queue_config in RQ_QUEUES.values():
     queue_config['ASYNC'] = False
 
+# Disable gerrit ldap password hash sync
+LDAP_SYNC_PASSWORD = False

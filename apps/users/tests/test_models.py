@@ -68,7 +68,7 @@ def test_user_remove_group():
 
 @pytest.mark.django_db
 def test_roles(settings, mocker):
-    mocker.patch('code_reviews.tasks.update_password_in_gerrit')
+    mocker.patch('code_reviews.gerrit.tasks.update_password_in_gerrit')
     user = StudentFactory(groups=[Roles.TEACHER])
     assert set(user.roles) == {Roles.STUDENT, Roles.TEACHER}
     UserGroupFactory(user=user, role=Roles.INTERVIEWER)

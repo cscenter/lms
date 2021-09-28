@@ -28,7 +28,7 @@ def test_smoke(client, curator, settings):
 
 @pytest.mark.django_db
 def test_course_classes(client, settings, mocker):
-    mocker.patch('code_reviews.tasks.update_password_in_gerrit')
+    mocker.patch('code_reviews.gerrit.tasks.update_password_in_gerrit')
     user = StudentFactory(groups=[Roles.TEACHER])
     client.login(user)
     fname = 'classes.ics'
@@ -59,7 +59,7 @@ def test_course_classes(client, settings, mocker):
 
 @pytest.mark.django_db
 def test_assignments(client, settings, mocker):
-    mocker.patch('code_reviews.tasks.update_password_in_gerrit')
+    mocker.patch('code_reviews.gerrit.tasks.update_password_in_gerrit')
     user = StudentFactory(groups=[Roles.TEACHER],
                           branch__code=Branches.SPB)
     client.login(user)

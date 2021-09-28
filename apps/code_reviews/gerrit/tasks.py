@@ -6,10 +6,8 @@ from django.conf import settings
 
 from code_reviews.api.gerrit import Gerrit
 from code_reviews.api.ldap import ldap_client
-from code_reviews.gerrit import (
-    get_ldap_username, get_or_create_change, list_change_files
-)
-from code_reviews.gerrit.ldap import get_ldap_password_hash, user_to_ldap_entry
+from code_reviews.gerrit import get_or_create_change, list_change_files
+from code_reviews.gerrit.ldap import get_ldap_username, update_ldap_user_password_hash
 from learning.models import AssignmentComment, AssignmentSubmissionTypes
 from users.models import User
 
@@ -17,43 +15,20 @@ logger = logging.getLogger(__name__)
 
 
 @job('high')
-def create_account_in_gerrit(*, user_id: int):
-    try:
-        user = User.objects.get(pk=user_id)
-    except User.DoesNotExist:
-        logger.warning(f"User with id={user_id} not found")
-        return
-    uid = get_ldap_username(user)
-    with ldap_client() as client:
-        results = client.search_users(uid)
-        if results:
-            logger.info(f"User with id={user_id} already has an account")
-            return
-        else:
-            entry = user_to_ldap_entry(user)
-            client.add_entry(entry)
-
-
-@job('high')
 def update_password_in_gerrit(*, user_id: int):
-    """
-    Update LDAP password hash in review.compscicenter.ru when user
-    successfully changed his password with reset or change form.
-    """
+    """Updates LDAP password hash in Gerrit."""
     try:
         user = User.objects.get(pk=user_id)
     except User.DoesNotExist:
         logger.warning(f"User with id={user_id} not found")
         return
-    password_hash = get_ldap_password_hash(user.password)
-    if not password_hash:
-        logger.info(f"Empty hash for user_id={user_id}")
-        return
-    username = get_ldap_username(user)
-    # TODO: What if connection fail when code review system is not available?
     with ldap_client() as client:
-        changed = client.set_password_hash(username, password_hash)
-        if not changed:
+        uid = get_ldap_username(user)
+        if not client.search_users(uid):
+            # User doesn't exist
+            return
+        updated = update_ldap_user_password_hash(client, user)
+        if not updated:
             logger.error(f"Password hash for user {user_id} wasn't changed")
 
 
