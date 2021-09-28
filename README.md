@@ -1,6 +1,6 @@
 # CSC websites
 
-[![Build Status](https://travis-ci.com/cscenter/lms.svg?token=FeohhsTsZzQVU5xBDk5L&branch=master)](https://travis-ci.com/cscenter/lms)
+[![Build Status](https://app.travis-ci.com/cscenter/lms.svg?token=FeohhsTsZzQVU5xBDk5L&branch=master)](https://app.travis-ci.com/cscenter/lms)
 
 Production stack: AWS, ubuntu 16.04 LTS, nginx, uwsgi, python3.7, Django 2.2.x, postgresql 11, redis (for queue), rq workers managed by `systemd`
 
