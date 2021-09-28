@@ -2,17 +2,18 @@ import os.path
 import tempfile
 import zipfile
 from collections import OrderedDict
-from typing import Iterator, NamedTuple, Tuple
+from typing import Any, Dict, Iterator, List, NamedTuple
 from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from django_filters.views import FilterMixin
+from rest_framework import serializers
 from vanilla import TemplateView
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import FileField
-from django.http import FileResponse, HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import FileResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
@@ -21,7 +22,7 @@ from django.views.generic.edit import BaseUpdateView
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.urls import reverse
-from core.utils import render_markdown
+from core.utils import bucketize, render_markdown
 from courses.constants import SemesterTypes
 from courses.models import Assignment, Course, CourseTeacher
 from courses.permissions import ViewAssignment
@@ -36,10 +37,60 @@ from learning.permissions import (
     CreateAssignmentComment, DownloadAssignmentSolutions, EditOwnStudentAssignment,
     ViewStudentAssignment, ViewStudentAssignmentList
 )
+from learning.selectors import (
+    get_active_enrollments, get_course_assignments, get_teacher_courses
+)
 from learning.services import AssignmentService
 from learning.teaching.filters import AssignmentStudentsFilter
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
+
+
+class AssignmentCheckQueueView(PermissionRequiredMixin, TemplateView):
+    permission_required = ViewStudentAssignmentList.name
+    template_name = "lms/teaching/assignments_check_queue.html"
+
+    class InputSerializer(serializers.Serializer):
+        course = serializers.ChoiceField(choices=(), allow_blank=False,
+                                         required=False)
+        assignments = serializers.ListField(
+            label="Assignments",
+            child=serializers.IntegerField(min_value=1),
+            min_length=1,
+            allow_empty=False,
+            required=False)
+
+        def __init__(self, courses: List[Course], **kwargs):
+            super().__init__(**kwargs)
+            self.fields['course'].choices = [(c.pk, c.name) for c in courses]
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        teacher = self.request.user
+        courses = list(get_teacher_courses(teacher)
+                       .order_by("-semester__index", "meta_course__name"))
+        if not courses:
+            return {}
+        serializer = self.InputSerializer(courses, data=self.request.GET)
+        if not serializer.is_valid(raise_exception=False):
+            # Use defaults and redirect
+            raise Redirect(to=self.request.path_info)
+        # Group courses by meta course inside each semester
+        by_semester = bucketize(courses, key=lambda c: (c.semester_id, c.meta_course_id))
+        # Get assignments for the selected course
+        course_id = serializer.validated_data.get('course') or courses[0].pk
+        course = next((c for c in courses if c.pk == course_id))
+        # TODO: убедиться, что среди указанных assignments есть валидные значения, но в какой момент?
+        return {
+            "options": {
+                "courses": by_semester,
+                # TODO: сортировать по дедлайну
+                "assignments": get_course_assignments(course),
+                # TODO: брать список всех проверяющих из настроек курса + список студенческих групп
+            },
+            "state": {
+                "course": course,
+            },
+        }
 
 
 def set_query_parameter(url, param_name, param_value):
@@ -90,8 +141,7 @@ class AssignmentListView(PermissionRequiredMixin, FilterMixin, TemplateView):
             course = assignment.course
             filters["assignment"] = assignment
             query_params["assignment"] = assignment.pk
-            active_enrollments = (Enrollment.active
-                                  .filter(course_id=assignment.course_id)
+            active_enrollments = (get_active_enrollments(assignment.course_id)
                                   .values_list("student_id", flat=True))
             context["enrollments"] = set(active_enrollments)
         else:
@@ -157,11 +207,8 @@ class AssignmentListView(PermissionRequiredMixin, FilterMixin, TemplateView):
         Redirects to the start page if query value is invalid.
         """
         teacher = self.request.user
-        courses = (Course.objects
-                   .filter(teachers=teacher)
-                   .select_related("meta_course", "semester")
-                   .order_by("semester__index",
-                             "meta_course__name"))
+        courses = (get_teacher_courses(teacher)
+                   .order_by("semester__index", "meta_course__name"))
         if not courses:
             messages.info(self.request,
                           _("You were redirected from Assignments due to "
