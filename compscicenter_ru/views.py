@@ -28,6 +28,7 @@ from core.utils import bucketize
 from courses.constants import SemesterTypes, TeacherRoles
 from courses.models import Course, CourseClass, CourseTeacher, MetaCourse, Semester
 from courses.permissions import ViewCourseClassMaterials, can_view_private_materials
+from courses.selectors import course_teachers_prefetch_queryset, get_lecturers
 from courses.services import CourseService, group_teachers
 from courses.utils import get_current_term_pair, get_term_index
 from courses.views.mixins import CoursePublicURLParamsMixin
@@ -539,11 +540,12 @@ class MetaCourseDetailView(PublicURLMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         branches = Branch.objects.for_site(site_id=self.request.site.pk)
+        lecturers = Prefetch('course_teachers', queryset=get_lecturers())
         courses = (Course.objects
                    .filter(meta_course=self.object)
                    .made_by(branches)
                    .select_related("meta_course", "semester", "main_branch")
-                   .prefetch_related(CourseTeacher.lecturers_prefetch())
+                   .prefetch_related(lecturers)
                    .order_by('-semester__index'))
         # Don't divide center and club courses from the same city
         courses_by_branch = bucketize(
@@ -659,7 +661,7 @@ class CourseDetailView(PublicURLMixin, CoursePublicURLParamsMixin,
     context_object_name = 'course'
 
     def get_course_queryset(self):
-        course_teachers = CourseTeacher.get_queryset()
+        course_teachers = course_teachers_prefetch_queryset()
         return (super().get_course_queryset()
                 .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(

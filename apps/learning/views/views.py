@@ -14,6 +14,7 @@ from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin
 from courses.models import AssignmentAttachment, CourseTeacher
+from courses.selectors import course_teachers_prefetch_queryset
 from courses.views.mixins import CourseURLParamsMixin
 from files.views import ProtectedFileDownloadView
 from learning.forms import AssignmentCommentForm
@@ -119,7 +120,7 @@ class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
             Prefetch('assignmentcomment_set',
                      queryset=submissions),
             Prefetch('assignment__course__course_teachers',
-                     queryset=CourseTeacher.get_queryset()),
+                     queryset=course_teachers_prefetch_queryset(role_priority=False)),
             'assignment__assignmentattachment_set')
 
     def get_context_data(self, **kwargs):

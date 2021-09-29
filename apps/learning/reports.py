@@ -13,6 +13,7 @@ from admission.models import Applicant
 from core.reports import ReportFileOutput
 from courses.constants import SemesterTypes
 from courses.models import Course, CourseTeacher, MetaCourse, Semester
+from courses.selectors import course_teachers_prefetch_queryset
 from courses.utils import get_term_index
 from learning.models import AssignmentComment, Enrollment, GraduateProfile
 from learning.settings import GradeTypes, StudentStatuses
@@ -138,7 +139,8 @@ class ProgressReport:
         for student in students:
             for e in student.enrollments_progress:
                 courses.add(e.course_id)
-        course_teachers = CourseTeacher.get_prefetch()
+        course_teachers = Prefetch('course_teachers',
+                                   queryset=course_teachers_prefetch_queryset())
         qs = (Course.objects
               .filter(pk__in=courses)
               .select_related('meta_course', 'main_branch', 'semester')

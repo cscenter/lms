@@ -164,8 +164,14 @@ class StudentProfileError(Exception):
 
 def get_student_profile_priority(student_profile: StudentProfile) -> int:
     """
-    Calculates student profile priority based on profile type and activity.
+    Calculates student profile priority based on profile type and status.
     The less value the higher priority.
+
+    The priority values are divided into 3 groups by status:
+        * active student profiles (the group with the highest priorities,
+            value depends on the profile type)
+        * graduate profiles
+        * inactive student profiles (the lowest priority)
     """
     min_priority = 1000
     if student_profile.type == StudentTypes.REGULAR:
@@ -180,10 +186,10 @@ def get_student_profile_priority(student_profile: StudentProfile) -> int:
         priority = 300
     else:
         priority = min_priority
-    if student_profile.status in StudentStatuses.inactive_statuses:
-        priority = min_priority + 200
-    elif student_profile.status == StudentStatuses.GRADUATE:
+    if student_profile.status == StudentStatuses.GRADUATE:
         priority = min_priority + 100
+    elif student_profile.status in StudentStatuses.inactive_statuses:
+        priority = min_priority + 200
     return priority
 
 

@@ -12,6 +12,7 @@ from api.pagination import StandardPagination
 from core.models import Branch
 from courses.constants import SemesterTypes
 from courses.models import Course, CourseTeacher
+from courses.selectors import course_teachers_prefetch_queryset, get_lecturers
 from courses.utils import get_term_index
 from learning.models import GraduateProfile
 from study_programs.models import AcademicDiscipline
@@ -112,7 +113,7 @@ class CourseVideoList(ListAPIView):
     serializer_class = CourseVideoSerializer
 
     def get_queryset(self):
-        lecturers = CourseTeacher.lecturers_prefetch()
+        lecturers = Prefetch('course_teachers', queryset=get_lecturers())
         return (Course.objects
                 .filter(is_published_in_video=True,
                         # Could be incorrect within one day since it doesn't
@@ -190,7 +191,8 @@ class CourseList(ListAPIView):
     serializer_class = CoursePublicSerializer
 
     def get_queryset(self):
-        course_teachers = CourseTeacher.get_prefetch()
+        course_teachers = Prefetch('course_teachers',
+                                   queryset=course_teachers_prefetch_queryset())
         return (Course.objects
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'main_branch')

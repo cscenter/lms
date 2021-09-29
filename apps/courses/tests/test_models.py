@@ -5,12 +5,14 @@ import pytest
 import pytz
 
 from django.core.exceptions import ValidationError
+from django.db.models import Prefetch
 
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN, TEST_DOMAIN
 from courses.constants import MaterialVisibilityTypes, SemesterTypes
 from courses.models import Assignment, Course, CourseClass, CourseTeacher
+from courses.selectors import course_teachers_prefetch_queryset
 from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseClassAttachmentFactory,
     CourseClassFactory, CourseFactory, CourseNewsFactory, CourseTeacherFactory,
@@ -46,7 +48,8 @@ def test_course_teacher_get_most_priority_role_prefetch(django_assert_num_querie
     ct3.save()
     ct4.roles = CourseTeacher.roles.lecturer
     ct4.save()
-    course_teachers = CourseTeacher.get_prefetch()
+    course_teachers = Prefetch('course_teachers',
+                               queryset=course_teachers_prefetch_queryset())
     with django_assert_num_queries(2):
         course = (Course.objects
                   .filter(pk=course.pk)

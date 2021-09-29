@@ -14,6 +14,7 @@ from core.exceptions import Redirect
 from core.urls import reverse
 from courses.constants import SemesterTypes
 from courses.models import Course, CourseTeacher
+from courses.selectors import course_teachers_prefetch_queryset
 from courses.utils import TermPair, get_current_term_pair
 from lms.api.serializers import OfferingsCourseSerializer
 from lms.filters import CoursesFilter
@@ -47,9 +48,8 @@ class CourseOfferingsView(FilterMixin, TemplateView):
     template_name = "lms/course_offerings.html"
 
     def get_queryset(self):
-        course_teachers = Prefetch(
-            'course_teachers',
-            queryset=CourseTeacher.get_queryset(role_priority=True))
+        course_teachers = Prefetch('course_teachers',
+                                   queryset=course_teachers_prefetch_queryset())
         return (Course.objects
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'main_branch')

@@ -26,6 +26,7 @@ from core.urls import reverse
 from courses.calendar import CalendarEventFactory
 from courses.constants import SemesterTypes, TeacherRoles
 from courses.models import Course, CourseClass, CourseTeacher, MetaCourse, Semester
+from courses.selectors import course_teachers_prefetch_queryset
 from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
 from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
@@ -135,7 +136,7 @@ class IndexView(PublicURLContextMixin, generic.TemplateView):
                 .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(
                     Prefetch('course_teachers',
-                             queryset=CourseTeacher.get_queryset()),
+                             queryset=course_teachers_prefetch_queryset(role_priority=False)),
                     Prefetch(
                         'courseclass_set',
                         queryset=courseclass_queryset,
@@ -276,7 +277,7 @@ class CoursesListView(PublicURLContextMixin, generic.ListView):
 
     def get_queryset(self):
         course_teachers = Prefetch('course_teachers',
-                                   queryset=CourseTeacher.get_queryset())
+                                   queryset=course_teachers_prefetch_queryset(role_priority=False))
         courses_qs = (Course.objects
                       .available_in(self.request.branch)
                       .select_related('meta_course', 'main_branch')
@@ -341,7 +342,7 @@ class CourseDetailView(PublicURLContextMixin,
         return (super().get_course_queryset()
                 .prefetch_related(
                     Prefetch('course_teachers',
-                             queryset=CourseTeacher.get_queryset()),
+                             queryset=course_teachers_prefetch_queryset(role_priority=False)),
                     "branches"))
 
     def get_object(self):

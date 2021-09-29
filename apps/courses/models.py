@@ -620,42 +620,6 @@ class CourseTeacher(models.Model):
     def is_lecturer(self):
         return bool(self.roles.lecturer)
 
-    @classmethod
-    def lecturers_prefetch(cls):
-        lecturer = cls.roles.lecturer
-        return Prefetch(
-            'course_teachers',
-            queryset=(cls.objects
-                      .filter(roles=lecturer)
-                      .select_related('teacher')))
-
-    @classmethod
-    def get_prefetch(cls, lookup='course_teachers') -> Prefetch:
-        """Course teachers sorted by the most priority role"""
-        return Prefetch(lookup,
-                        queryset=cls.get_queryset(role_priority=True))
-
-    @classmethod
-    def get_queryset(cls, role_priority=False):
-        """
-        Base queryset for prefetching course teachers.
-
-        Set `role_priority=True` to sort teachers by the most priority role.
-        """
-        sort = ['teacher__last_name', 'teacher__first_name']
-        qs = (cls.objects
-              .filter(roles=~cls.roles.spectator)
-              .select_related('teacher')
-              .only('id', 'course_id', 'teacher_id', 'roles',
-                    'teacher__first_name',
-                    'teacher__last_name',
-                    'teacher__patronymic'))
-        if role_priority:
-            most_priority_role = cls.get_most_priority_role_expr()
-            qs = qs.annotate(most_priority_role=most_priority_role)
-            sort.insert(0, '-most_priority_role')
-        return qs.order_by(*sort)
-
     @staticmethod
     def get_most_priority_role_expr():
         """
