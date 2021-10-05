@@ -1,21 +1,12 @@
 from django_filters.fields import MultipleChoiceField
-from django_filters.rest_framework import (
-    BaseInFilter, CharFilter, FilterSet, NumberFilter
-)
+from django_filters.rest_framework import CharFilter, FilterSet
 
 from django.db.models import Case, Count, F, Q, Value, When
 from django.forms import SelectMultiple
 
+from core.filters import CharInFilter, NumberInFilter
 from learning.settings import GradeTypes, StudentStatuses
 from users.models import StudentProfile
-
-
-class NumberInFilter(BaseInFilter, NumberFilter):
-    pass
-
-
-class CharInFilter(BaseInFilter, CharFilter):
-    pass
 
 
 class SelectMultipleCSVSupport(SelectMultiple):
