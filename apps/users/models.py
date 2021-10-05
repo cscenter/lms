@@ -469,9 +469,11 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         full_name = smart_str(" ".join(p for p in parts if p).strip())
         return full_name or self.username
 
-    def get_short_name(self):
-        return (smart_str(" ".join([self.first_name, self.last_name]).strip())
-                or self.username)
+    def get_short_name(self, last_name_first: Optional[bool] = False) -> str:
+        parts = [self.first_name, self.last_name]
+        if last_name_first:
+            parts.reverse()
+        return smart_str(" ".join(parts).strip()) or self.username
 
     def get_abbreviated_name(self, delimiter=chr(160)):  # non-breaking space
         parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
