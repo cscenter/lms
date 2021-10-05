@@ -343,36 +343,6 @@ class AlumniView(TemplateView):
 class OnCampusProgramsView(generic.TemplateView):
     template_name = "compscicenter_ru/syllabus/syllabus.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Active programs grouped by branch
-        current_programs = (StudyProgram.objects
-                            .filter(is_active=True,
-                                    branch__site=self.request.site,
-                                    branch__active=True)
-                            .exclude(branch__city=None)
-                            .select_related("branch", "academic_discipline")
-                            .order_by("branch",
-                                      "academic_discipline__name_ru"))
-        current_programs = bucketize(current_programs, key=lambda sp: sp.branch)
-        tabs = TabList()
-        selected_branch = self.request.GET.get('branch', Branches.SPB)
-        for i, branch in enumerate(current_programs):
-            tab = Tab(target=branch.code,
-                      name=branch.name,
-                      url=f"{self.request.path}?branch={branch.code}",
-                      order=branch.order)
-            # Mark first tab as active by default
-            if i == 0:
-                tab.active = True
-            tabs.add(tab)
-            if branch.code == selected_branch:
-                tabs.set_active(branch.code)
-        tabs.sort()
-        context["tabs"] = tabs
-        context["programs"] = current_programs
-        return context
-
 
 class OnCampusProgramDetailView(PublicURLMixin, generic.TemplateView):
     def get_template_names(self):
