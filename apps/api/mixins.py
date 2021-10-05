@@ -1,6 +1,9 @@
 from rest_framework import exceptions as rest_exceptions
+from rest_framework.views import exception_handler as drf_exception_handler
 
 from django.core.exceptions import ValidationError
+
+from api.errors import ErrorsFormatter
 
 
 def get_first_matching_attr(obj, *attrs, default=None):
@@ -27,6 +30,15 @@ def get_error_message(exc):
     return error_msg
 
 
+def exception_handler(exc, context):
+    response = drf_exception_handler(exc, context)
+    # Unexpected errors (e.g. 5xx server error)
+    if response is None:
+        return response
+    response.data = ErrorsFormatter(exc).format()
+    return response
+
+
 class ApiErrorsMixin:
     """
     Converts known Django and Python exceptions into a DRF format.
@@ -48,3 +60,8 @@ class ApiErrorsMixin:
             code = getattr(exc, "code", None)
             e = drf_exception_class(detail=get_error_message(exc), code=code)
         return super().handle_exception(e)
+
+    def get_exception_handler(self):
+        # TODO: remove when it will be safe to enable this handler globally
+        #  in rest settings
+        return exception_handler

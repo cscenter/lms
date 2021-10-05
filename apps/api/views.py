@@ -1,10 +1,9 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.views import exception_handler as drf_exception_handler
 
 from . import serializers
-from .errors import ErrorsFormatter, InvalidToken, TokenError
+from .errors import InvalidToken, TokenError
 from .mixins import ApiErrorsMixin
 
 
@@ -38,16 +37,5 @@ class TokenRevokeView(TokenViewBase):
     serializer_class = serializers.TokenRevokeSerializer
 
 
-def exception_handler(exc, context):
-    response = drf_exception_handler(exc, context)
-    # Unexpected errors (e.g. 5xx server error)
-    if response is None:
-        return response
-    response.data = ErrorsFormatter(exc).format()
-    return response
-
-
 class APIBaseView(ApiErrorsMixin, APIView):
-    # TODO: remove when it will be safe to enable this handler in rest settings
-    def get_exception_handler(self):
-        return exception_handler
+    pass
