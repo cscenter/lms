@@ -323,37 +323,4 @@
     </div>
   </div>
 
-
-  <div class="social-media-posts py-6">
-    <div class="container py-10">
-      <h2 class="text-center text-sm-left mb-10">#compscicenter</h2>
-      <div class="row">
-        {% if instagram_posts %}
-          <div class="col-lg">
-            {% for post in instagram_posts %}
-              <a href="{{ post.post_url }}" target="_blank" class="social-media social-media--instagram social-media--full-size"
-                 style="background-image:url('{{ post.thumbnail }}')">
-                <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/instagram.svg') }}" width="34"
-                     alt="">
-                <div class="social-media__text">{{ post.text }}</div>
-                <p class="social-media__date social-media__date--light">{{ post.date|date("j b") }}</p>
-              </a>
-            {% endfor %}
-          </div>
-        {% endif %}
-        <div class="col-lg">
-          {% if vk_news %}
-            {% for post in vk_news %}
-              <a href="{{ post.post_url }}" target="_blank" rel="noopener nofollow"
-                 class="social-media social-media--vk social-media--half-size">
-                <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/vk.svg') }}" width="40" alt="">
-                <div class="social-media__text social-media__text--dark">{{ post.text }}</div>
-                <p class="social-media__date">{{ post.date|date("j b") }}</p>
-              </a>
-            {% endfor %}
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
 {% endblock content %}
