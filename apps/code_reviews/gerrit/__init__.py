@@ -17,6 +17,7 @@ from code_reviews.gerrit.permissions import (
 )
 from code_reviews.models import GerritChange
 from courses.models import Course, CourseTeacher
+from courses.services import CourseService
 from learning.models import (
     AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
 )
@@ -29,7 +30,10 @@ logger = logging.getLogger(__name__)
 def get_project_name(course: Course) -> str:
     main_branch = course.main_branch.code
     course_name = course.meta_course.slug.replace("-", "_")
-    return f"{main_branch}/{course_name}_{course.semester.year}"
+    # TODO: deprecated project name format. Can remove in spring 2022
+    if course.pk == 964 or course.semester.year < 2021:
+        return f"{main_branch}/{course_name}_{course.semester.year}"
+    return CourseService.get_course_uri(course)
 
 
 def get_branch_name(student_profile: StudentProfile, course: Course) -> str:

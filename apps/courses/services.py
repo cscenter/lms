@@ -103,10 +103,14 @@ class CourseService:
     def get_student_groups(course: Course) -> List[StudentGroup]:
         student_groups = list(StudentGroup.objects
                               .filter(course=course)
-                              .order_by('pk'))
+                              .order_by('name', 'pk'))
         for s in student_groups:
             s.course = course
         return student_groups
+
+    @staticmethod
+    def get_course_uri(course: Course) -> str:
+        return f"{course.semester.slug}/{course.main_branch_id}.{course.pk}-{course.meta_course.slug}"
 
 
 def get_teacher_branches(user, start_date, end_date):
