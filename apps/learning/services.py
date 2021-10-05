@@ -229,19 +229,23 @@ class StudentGroupService:
             })
         return student_group
 
+    @staticmethod
+    def unique_sites(student_groups: List[StudentGroup]) -> int:
+        """Returns number of unique sites where student groups are available."""
+        sites = set()
+        for g in student_groups:
+            if g.branch_id:
+                g.branch = Branch.objects.get_by_pk(g.branch_id)
+                sites.add(g.branch.site_id)
+        return len(sites) if sites else 1
+
     @classmethod
     def get_choices(cls, course: Course) -> List[Tuple[str, str]]:
         choices = []
         student_groups = CourseService.get_student_groups(course)
-        sites = set()
-        if course.group_mode == CourseGroupModes.BRANCH:
-            for g in student_groups:
-                if g.branch_id:
-                    g.branch = Branch.objects.get_by_pk(g.branch_id)
-                    sites.add(g.branch.site_id)
-        sites_count = len(sites)
+        sites_total = cls.unique_sites(student_groups)
         for g in student_groups:
-            label = g.get_name(branch_details=sites_count > 1)
+            label = g.get_name(branch_details=sites_total > 1)
             choices.append((str(g.pk), label))
         return choices
 
