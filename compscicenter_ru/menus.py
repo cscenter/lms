@@ -11,7 +11,7 @@ PUBLIC_DOMAIN = reverse('index')[:-1]  # remove trailing slash
 public_menu = [
     MenuItem(
         "Направления",
-        reverse('on_campus_programs'),
+        reverse('syllabus_list'),
         weight=10,
         selected_patterns=[
             r"^/events/"

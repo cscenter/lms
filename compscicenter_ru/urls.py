@@ -42,9 +42,9 @@ urlpatterns += [
     ])),
     # Programs
     path('syllabus/', include([
-        path('', RedirectView.as_view(url='/syllabus/on-campus/', permanent=False)),
-        path('on-campus/', views.OnCampusProgramsView.as_view(), name='on_campus_programs'),
-        path('on-campus/<slug:discipline_code>/', views.OnCampusProgramDetailView.as_view(), name='on_campus_program_detail'),
+        path('', views.OnCampusProgramsView.as_view(), name='syllabus_list'),
+        path('on-campus/', RedirectView.as_view(url='/syllabus/', permanent=False)),  # old urls
+        path('<slug:discipline_code>/', views.OnCampusProgramDetailView.as_view(), name='syllabus_program_detail'),
         path('distance/', views.DistanceProgramView.as_view(), name='distance_program'),
     ])),
     # Admission

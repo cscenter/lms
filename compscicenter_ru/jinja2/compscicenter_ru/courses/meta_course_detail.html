@@ -41,7 +41,7 @@
                                         {% if branch_code in study_programs %}
                                             {% with sps = study_programs[branch_code] -%}
                                                 <p>Базовый курс для направлени{% if sps|length > 1 %}й{% else %}я{% endif %} {% for study_program in sps -%}
-                                                    <a class="text-nowrap" href="{{ url('on_campus_program_detail', discipline_code=study_program.academic_discipline.code) }}?branch={{ study_program.branch.code }}">{{ study_program.academic_discipline.name }}</a>
+                                                    <a class="text-nowrap" href="{{ url('syllabus_program_detail', discipline_code=study_program.academic_discipline.code) }}?branch={{ study_program.branch.code }}">{{ study_program.academic_discipline.name }}</a>
                                                 {%- if not loop.last %}, {% endif %}{% endfor %}.</p>
                                             {%- endwith %}
                                         {% else %}

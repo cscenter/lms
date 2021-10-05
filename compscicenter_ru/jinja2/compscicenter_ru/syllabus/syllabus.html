@@ -22,7 +22,7 @@
                 <h2>Направления обучения</h2>
                 {% for program in current_programs -%}
                   {% with academic_discipline=program.academic_discipline %}
-                    <a class="card _program-card" href="{{ url('on_campus_program_detail', discipline_code=academic_discipline.code) }}">
+                    <a class="card _program-card" href="{{ url('syllabus_program_detail', discipline_code=academic_discipline.code) }}">
                       <div class="card__img col-md-4">
                         {% if academic_discipline.cover %}<img src="{{ academic_discipline.cover.url }}" alt="">{% endif %}
                       </div>

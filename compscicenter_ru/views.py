@@ -402,6 +402,7 @@ class OnCampusProgramDetailView(PublicURLMixin, generic.TemplateView):
 
 
 class DistanceProgramView(generic.TemplateView):
+    """Distance branch 2019 view."""
     template_name = "compscicenter_ru/syllabus/distance.html"
 
 
