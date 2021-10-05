@@ -57,8 +57,51 @@
 
   {% set branches = [
     {'target': 'spb', 'name': 'Санкт-Петербург', 'active': selected_branch == 'spb', 'url': '?branch=spb'},
-    {'target': 'nsk', 'name': 'Новосибирск', 'active': selected_branch == 'nsk', 'url': '?branch=nsk'}
+    {'target': 'nsk', 'name': 'Новосибирск', 'active': selected_branch == 'nsk', 'url': '?branch=nsk'},
+    {'target': 'distance', 'name': 'Дистанционное', 'active': selected_branch == 'distance', 'url': '?branch=distance'}
   ] %}
+
+{% macro spb_and_distance_courses() -%}
+  <h2>Обязательные курсы</h2>
+
+  <h3 class="mt-10">Алгоритмы</h3>
+  {{ collapsible_meta_course('Алгоритмы и структуры данных, часть 1', 'algorithms-1', '<p>Курс знакомит слушателей с базовыми алгоритмическими приёмами и структурами данных.</p>') }}
+  {{ collapsible_meta_course('Алгоритмы и структуры данных, часть 2', 'algorithms-2', '<p>Продолжение изучения базовых алгоритмов</p>') }}
+  <p class="text-muted">или</p>
+  {{ collapsible_meta_course('Дополнительные главы алгоритмов, часть 1', 'advanced-algo', '<p>Курс рассчитан на студентов, сдавших базовые курсы по алгоритмам, предлагаемые в CS центре, и желающих применить свои знания для более сложных задач.</p>') }}
+  {{ collapsible_meta_course('Дополнительные главы алгоритмов, часть 2', 'advanced-algo_part2', '<p>Курс рассчитан на студентов, сдавших базовые курсы по алгоритмам, предлагаемые в CS центре, и желающих применить свои знания для более сложных задач.</p>') }}
+
+  <h3 class="mt-10">Математика</h3>
+  {{ collapsible_meta_course('Асимптотический анализ и теория вероятностей', 'prob-theory', '<p>В курсе разбираются следующие темы: теория множеств, асимптотики, производящие функции, дискретная и условная вероятность, случайные величины, предельные теоремы.</p>') }}
+  <p class="text-muted">или</p>
+  {{ collapsible_meta_course('Основы дискретной математики', 'discrete-math', '<p>Целью курса является знакомство слушателей с основными понятиями и методами дискретной математики.</p>') }}
+
+  <h3 class="mt-10">Программирование</h3>
+  {{ collapsible_meta_course('Программирование на C++, часть 1', 'cpp-1', '<p>Курс демонстрирует основные средства языка С++, а также наиболее популярных его библиотек.</p>') }}
+
+  <h3 class="mt-10">Углублённый курс по языку программирования</h3>
+  {{ collapsible_meta_course('Программирование на C++, часть 2', 'cpp-2', '<p>Продолжение курса «Программирование на С++, часть 1».</p>') }}
+  <p class="text-muted">или</p>
+  {{ collapsible_meta_course('Программирование на Java', 'java', '<p>Курс знакомит слушателей с языком Java на базовом уровне, как в теории, так и на практике.</p>') }}
+  <p class="text-muted">или</p>
+  {{ collapsible_meta_course('Программирование на Kotlin', 'kotlinprogramming', '<p>Курс знакомит слушателей с языком программирования Kotlin.</p>') }}
+  <p class="text-muted">или</p>
+  {{ collapsible_meta_course('Программирование на Python', 'python', '<p>Погружение в программирование на Python. Продвинутый курс.</p>') }}
+
+  <h3 class="mt-10">Курс для знакомства с конкретной областью разработки ПО</h3>
+  {{ collapsible_meta_course('Базы данных', 'data-bases', '<p>Курс знакомит слушателей c основными понятиями области баз данных, подробнее в нём разбираются способы хранения различных данных.</p>') }}
+  <p class="text-muted">или</p>
+  {{ collapsible_meta_course('Параллельное программирование', 'hp-course', '<p>Курс рассматривает принципы и возможности многопоточного программирования в теории и на практике.</p>') }}
+  <p class="text-muted">или</p>
+  {{ collapsible_meta_course('Функциональное программирование', 'func-prog', '<p>Курс знакомит слушателей с функциональными языками программирования и методами программирования на этих языках.</p>') }}
+
+  <h3 class="mt-10">Шесть любых других курсов</h3>
+  <a href="https://compscicenter.ru/courses/" class="btn _outline _gray _m-wide">Все курсы центра</a>
+
+  <h3 class="mt-10">Три семестра практики</h3>
+  <a href="/projects/" class="btn _outline _gray _m-wide">Примеры проектов</a>
+{%- endmacro %}
+
   <div class="container py-10">
     <div class="row">
       <div class="col-lg-10">
@@ -68,46 +111,8 @@
 
           <div class="tab-content mt-10">
             {% with tab = branches[0] %}
-              <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel"
-                   aria-labelledby="tab__{{ tab.target }}">
-                <h2>Обязательные курсы</h2>
-
-                <h3 class="mt-10">Алгоритмы</h3>
-                {{ collapsible_meta_course('Алгоритмы и структуры данных, часть 1', 'algorithms-1', '<p>Курс знакомит слушателей с базовыми алгоритмическими приёмами и структурами данных.</p>') }}
-                {{ collapsible_meta_course('Алгоритмы и структуры данных, часть 2', 'algorithms-2', '<p>Продолжение изучения базовых алгоритмов</p>') }}
-                <p class="text-muted">или</p>
-                {{ collapsible_meta_course('Дополнительные главы алгоритмов, часть 1', 'advanced-algo', '<p>Курс рассчитан на студентов, сдавших базовые курсы по алгоритмам, предлагаемые в CS центре, и желающих применить свои знания для более сложных задач.</p>') }}
-                {{ collapsible_meta_course('Дополнительные главы алгоритмов, часть 2', 'advanced-algo_part2', '<p>Курс рассчитан на студентов, сдавших базовые курсы по алгоритмам, предлагаемые в CS центре, и желающих применить свои знания для более сложных задач.</p>') }}
-
-                <h3 class="mt-10">Математика</h3>
-                {{ collapsible_meta_course('Асимптотический анализ и теория вероятностей', 'prob-theory', '<p>В курсе разбираются следующие темы: теория множеств, асимптотики, производящие функции, дискретная и условная вероятность, случайные величины, предельные теоремы.</p>') }}
-                <p class="text-muted">или</p>
-                {{ collapsible_meta_course('Основы дискретной математики', 'discrete-math', '<p>Целью курса является знакомство слушателей с основными понятиями и методами дискретной математики.</p>') }}
-
-                <h3 class="mt-10">Программирование</h3>
-                {{ collapsible_meta_course('Программирование на C++, часть 1', 'cpp-1', '<p>Курс демонстрирует основные средства языка С++, а также наиболее популярных его библиотек.</p>') }}
-
-                <h3 class="mt-10">Углублённый курс по языку программирования</h3>
-                {{ collapsible_meta_course('Программирование на C++, часть 2', 'cpp-2', '<p>Продолжение курса «Программирование на С++, часть 1».</p>') }}
-                <p class="text-muted">или</p>
-                {{ collapsible_meta_course('Программирование на Java', 'java', '<p>Курс знакомит слушателей с языком Java на базовом уровне, как в теории, так и на практике.</p>') }}
-                <p class="text-muted">или</p>
-                {{ collapsible_meta_course('Программирование на Kotlin', 'kotlinprogramming', '<p>Курс знакомит слушателей с языком программирования Kotlin.</p>') }}
-                <p class="text-muted">или</p>
-                {{ collapsible_meta_course('Программирование на Python', 'python', '<p>Погружение в программирование на Python. Продвинутый курс.</p>') }}
-
-                <h3 class="mt-10">Курс для знакомства с конкретной областью разработки ПО</h3>
-                {{ collapsible_meta_course('Базы данных', 'data-bases', '<p>Курс знакомит слушателей c основными понятиями области баз данных, подробнее в нём разбираются способы хранения различных данных.</p>') }}
-                <p class="text-muted">или</p>
-                {{ collapsible_meta_course('Параллельное программирование', 'hp-course', '<p>Курс рассматривает принципы и возможности многопоточного программирования в теории и на практике.</p>') }}
-                <p class="text-muted">или</p>
-                {{ collapsible_meta_course('Функциональное программирование', 'func-prog', '<p>Курс знакомит слушателей с функциональными языками программирования и методами программирования на этих языках.</p>') }}
-
-                <h3 class="mt-10">Шесть любых других курсов</h3>
-                <a href="https://compscicenter.ru/courses/" class="btn _outline _gray _m-wide">Все курсы центра</a>
-
-                <h3 class="mt-10">Три семестра практики</h3>
-                <a href="/projects/" class="btn _outline _gray _m-wide">Примеры проектов</a>
+              <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                {{ spb_and_distance_courses() }}
               </div>
             {% endwith %}
 
@@ -142,6 +147,12 @@
                 <a href="/courses/" class="btn _outline _gray _m-wide">Все курсы центра</a>
                 <h3 class="mt-10">Три семестра практики</h3>
                 <a href="/projects/" class="btn _outline _gray _m-wide">Примеры проектов</a>
+              </div>
+            {% endwith %}
+
+            {% with tab = branches[2] %}
+              <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                {{ spb_and_distance_courses() }}
               </div>
             {% endwith %}
           </div>
