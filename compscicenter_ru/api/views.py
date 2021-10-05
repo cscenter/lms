@@ -9,6 +9,7 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from api.pagination import StandardPagination
+from api.views import APIBaseView
 from core.models import Branch
 from courses.constants import SemesterTypes
 from courses.models import Course, CourseTeacher
@@ -20,6 +21,7 @@ from users.constants import Roles
 from users.models import User
 
 from .filters import AlumniFilter, CoursesPublicFilter
+from .selectors import teachers_list
 from .serializers import (
     AlumniSerializer, CoursePublicSerializer, CourseVideoSerializer,
     SiteCourseSerializer, TeacherSerializer, TestimonialCardSerializer
@@ -41,70 +43,19 @@ class SiteCourseList(ListAPIView):
                 .distinct("meta_course__name"))
 
 
-class TeacherList(ListAPIView):
+class TeacherList(APIBaseView):
     """Returns all teachers except pure reviewers or spectators"""
     pagination_class = None
-    serializer_class = TeacherSerializer
 
-    # FIXME: cheaper and easier to aggregate courseteacher, than filter users (see compsciclub.ru TeachersView)
-    def get_queryset(self):
-        reviewer = CourseTeacher.roles.reviewer
-        spectator = CourseTeacher.roles.spectator
-        # `__ne` custom lookup used to filter out teachers without any role or
-        # pure reviewers - those who has only reviewer role
-        any_role_except_pure_reviewer_or_spectator = (
-                Q(courseteacher__roles__ne=reviewer.mask) &
-                Q(courseteacher__roles=~spectator) &
-                Q(courseteacher__roles__ne=0)
-        )
-        queryset = (User.objects
-                    .has_role(Roles.TEACHER, site_id=self.request.site.pk)
-                    .filter(any_role_except_pure_reviewer_or_spectator)
-                    .select_related('branch')
-                    .only("pk", "first_name", "last_name", "patronymic",
-                          "username", "cropbox_data", "photo", "branch__code",
-                          "gender", "workplace")
-                    .distinct("last_name", "first_name", "pk")
-                    .order_by("last_name", "first_name", "pk"))
-        course = self.request.query_params.get("course", None)
-        if course:
-            branches = Branch.objects.for_site(site_id=self.request.site.pk)
-            min_established = min(b.established for b in branches)
-            term_index = get_term_index(min_established, SemesterTypes.AUTUMN)
-            queryset = queryset.filter(
-                courseteacher__course__meta_course_id=course,
-                courseteacher__course__semester__index__gte=term_index)
-        any_role_except_pure_reviewer_or_spectator = (
-                Q(roles__ne=reviewer.mask) &
-                Q(roles=~spectator) &
-                Q(roles__ne=0)
-        )
-        queryset = queryset.prefetch_related(
-            Prefetch(
-                "courseteacher_set",
-                queryset=(CourseTeacher.objects
-                          .filter(any_role_except_pure_reviewer_or_spectator)
-                          .select_related("course",
-                                          "course__semester")
-                          .only("teacher_id",
-                                "course__meta_course_id",
-                                "course__semester__index")
-                          .order_by("teacher_id", "course__meta_course__id",
-                                    "-course__semester__index")
-                          .distinct("teacher_id", "course__meta_course__id"))
-            )
-        )
-        return queryset
-
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         try:
-            course = self.request.query_params.get('course', None)
+            course = request.query_params.get('course', None)
             if course:
                 course = int(course)
         except ValueError:
             return HttpResponseBadRequest()
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
+        teachers = teachers_list(site=self.request.site, course=course)
+        serializer = TeacherSerializer(teachers, many=True)
         return Response(serializer.data)
 
 

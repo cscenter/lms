@@ -199,7 +199,7 @@ class TeachersView(TemplateView):
     template_name = "compscicenter_ru/teachers.html"
 
     def get_context_data(self, **kwargs):
-        # Get terms in the last 3 academic years.
+        # Calculates the min term index in the last 3 academic years.
         term_pair = get_current_term_pair()
         term_index = get_term_index(term_pair.academic_year,
                                     SemesterTypes.AUTUMN)
