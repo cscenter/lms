@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 def get_project_name(course: Course) -> str:
     main_branch = course.main_branch.code
     course_name = course.meta_course.slug.replace("-", "_")
-    # TODO: deprecated project name format. Can remove in spring 2022
+    # XXX: Deprecated project name format. Can remove in spring 2022
     if course.pk == 964 or course.semester.year < 2021:
         return f"{main_branch}/{course_name}_{course.semester.year}"
     return CourseService.get_course_uri(course)
@@ -38,8 +38,9 @@ def get_project_name(course: Course) -> str:
 
 def get_branch_name(student_profile: StudentProfile, course: Course) -> str:
     git_branch_name = student_profile.user.get_abbreviated_name_in_latin()
-    # FIXME: always attach branch code (unsafe to do it while projects are not fully initialized)
-    if len(course.branches.all()) > 1:
+    # XXX: Deprecated branch name format. Can remove in spring 2022
+    is_legacy = course.pk == 964 or course.semester.year < 2021
+    if not is_legacy or len(course.branches.all()) > 1:
         git_branch_name = f"{student_profile.branch.code}/{git_branch_name}"
     return git_branch_name
 
@@ -292,6 +293,7 @@ def create_change(client, student_assignment: StudentAssignment) -> Optional[Ger
     course = student_assignment.assignment.course
     enrollment = (Enrollment.objects
                   .filter(course=course, student=student_assignment.student)
+                  .select_related('student_profile__branch')
                   .first())
     if not enrollment:
         logger.error("Failed to find enrollment")
