@@ -3,7 +3,7 @@ from datetime import timedelta
 from decimal import Decimal
 from enum import Enum, auto
 from itertools import islice
-from typing import Any, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
@@ -28,6 +28,7 @@ from courses.models import (
     CourseTeacher, StudentGroupTypes
 )
 from courses.services import CourseService
+from grading.services import CheckerService, CheckerSubmissionService
 from learning.models import (
     AssignmentComment, AssignmentGroup, AssignmentNotification,
     AssignmentSubmissionTypes, CourseClassGroup, CourseNewsNotification, Enrollment,
@@ -768,6 +769,7 @@ def update_personal_assignment_score(*, assignment: Assignment,
      .update(score=score))
 
 
+# TODO: remove
 def update_student_assignment_derivable_fields(comment):
     """
     Optimize db queries by reimplementing next logic:
@@ -974,8 +976,38 @@ def create_assignment_comment(*, personal_assignment: StudentAssignment,
     # TODO: write test
     comment.created = get_now_utc()
     comment.save()
-
-    if comment.text:
-        comment_persistence.add_to_gc(comment.text)
-
     return comment
+
+
+def create_assignment_solution(*, personal_assignment: StudentAssignment,
+                               created_by: User,
+                               execution_time: Optional[timedelta] = None,
+                               message: Optional[str] = None,
+                               attachment: Optional[UploadedFile] = None) -> AssignmentComment:
+    if not message and not attachment:
+        raise ValidationError("Provide either text or a file.", code="malformed")
+
+    solution = AssignmentComment(student_assignment=personal_assignment,
+                                 author=created_by,
+                                 type=AssignmentSubmissionTypes.SOLUTION,
+                                 is_published=True,
+                                 execution_time=execution_time,
+                                 text=message,
+                                 attached_file=attachment)
+    solution.save()
+
+    return solution
+
+
+# TODO: Looks like a good example for signal (save additional checker settings
+#  to the StudentAssignment.meta, then move checker part to the grading app?)
+def create_assignment_solution_and_check(*, personal_assignment: StudentAssignment,
+                                         created_by: User, settings: Dict[str, Any],
+                                         execution_time: Optional[timedelta] = None,
+                                         attachment: Optional[UploadedFile] = None) -> AssignmentComment:
+    """Creates assignment solution along with a checker submission."""
+    solution = create_assignment_solution(personal_assignment=personal_assignment,
+                                          created_by=created_by, execution_time=execution_time,
+                                          message='', attachment=attachment)
+    CheckerSubmissionService.update_or_create(solution, **settings)
+    return solution

@@ -279,6 +279,7 @@ def add_assignment_comment_about_new_change(student_assignment: StudentAssignmen
     course = student_assignment.assignment.course
     with translation.override(course.language):
         message = GerritRobotMessages.CHANGE_CREATED.format(link=change_url)
+    # TODO: replace with create_assignment_comment
     comment = AssignmentComment(student_assignment=student_assignment,
                                 type=AssignmentSubmissionTypes.COMMENT,
                                 text=message, author=get_gerrit_robot())

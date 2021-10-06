@@ -12,10 +12,12 @@ from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
+from courses.models import Assignment
 from grading.services import CheckerService, CheckerSubmissionService
 from learning.models import AssignmentSubmissionTypes, GraduateProfile
 
 from .models import AssignmentComment
+from .services import create_assignment_solution
 
 
 class SubmitLink(BaseInput):
@@ -75,18 +77,16 @@ class AssignmentCommentForm(forms.ModelForm):
         return cleaned_data
 
 
+# TODO: forbid save method
 class AssignmentSolutionBaseForm(forms.ModelForm):
     """
     Base class for an assignment solution form.
     Dynamically adds `execution_time` field if asking time to completion
     is enabled in the course settings.
-
-    XXX:
-        Make sure to include execution time field in the form layout if needed.
     """
     prefix = "solution"
 
-    def __init__(self, assignment, *args, **kwargs):
+    def __init__(self, assignment: Assignment, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['execution_time'] = AssignmentDurationField(
             label=_("Time Spent on Assignment"),
@@ -182,12 +182,6 @@ class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
         if not cleaned_data.get("attached_file") and not invalid_attachment:
             raise forms.ValidationError(_("File should be non-empty"))
         return cleaned_data
-
-    def save(self, commit=True):
-        instance = super().save(commit=commit)
-        compiler = self.cleaned_data['compiler']
-        CheckerSubmissionService.update_or_create(instance, compiler=compiler)
-        return instance
 
 
 class AssignmentModalCommentForm(forms.ModelForm):

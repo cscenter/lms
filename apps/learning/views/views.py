@@ -68,11 +68,13 @@ class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin, GenericModelV
 
     def form_valid(self, form):
         is_draft = "save-draft" in self.request.POST
-        create_assignment_comment(personal_assignment=self.student_assignment,
-                                  created_by=self.request.user,
-                                  is_draft=is_draft,
-                                  message=form.cleaned_data['text'],
-                                  attachment=form.cleaned_data['attached_file'])
+        new_comment = create_assignment_comment(personal_assignment=self.student_assignment,
+                                                created_by=self.request.user,
+                                                is_draft=is_draft,
+                                                message=form.cleaned_data['text'],
+                                                attachment=form.cleaned_data['attached_file'])
+        if new_comment.text:
+            comment_persistence.add_to_gc(new_comment.text)
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form):

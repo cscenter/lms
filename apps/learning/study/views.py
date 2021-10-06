@@ -6,7 +6,7 @@ from vanilla import GenericModelView, TemplateView
 from django.apps import apps
 from django.contrib import messages
 from django.db.models import Prefetch, Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
@@ -33,8 +33,8 @@ from learning.permissions import (
     EnrollPermissionObject, ViewCourses, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments
 )
-from learning.services import get_student_classes, get_draft_solution
-from learning.study.services import get_solution_form
+from learning.services import get_draft_solution, get_student_classes
+from learning.study.services import get_solution_form, save_solution_form
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import (
     AssignmentCommentUpsertView, StudentAssignmentURLParamsMixin
@@ -159,14 +159,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         comment_form.helper.form_action = add_comment_url
         # Format datetime in student timezone
         context['timezone'] = self.request.user.time_zone
-        # Solution Form
-        draft_solution = get_draft_solution(self.request.user, sa)
-        solution_form = get_solution_form(sa, instance=draft_solution)
-        if solution_form:
-            add_solution_url = reverse('study:assignment_solution_create',
-                                       kwargs={'pk': sa.pk})
-            solution_form.helper.form_action = add_solution_url
-        context['solution_form'] = solution_form
+        context['solution_form'] = get_solution_form(sa)
         return context
 
 
@@ -202,16 +195,14 @@ class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
         return HttpResponseRedirect(redirect_to)
 
     def post(self, request, *args, **kwargs):
-        solution = AssignmentComment(
-            student_assignment=self.student_assignment,
-            author=request.user,
-            type=AssignmentSubmissionTypes.SOLUTION,
-            is_published=True)
         solution_form = get_solution_form(self.student_assignment, data=request.POST,
-                                          files=request.FILES,
-                                          instance=solution)
+                                          files=request.FILES)
+        if solution_form is None:
+            return HttpResponseBadRequest("Assignment format doesn't support this method")
         if solution_form.is_valid():
-            submission = solution_form.save()
+            submission = save_solution_form(form=solution_form,
+                                            personal_assignment=self.student_assignment,
+                                            created_by=request.user)
             if submission.text:
                 comment_persistence.add_to_gc(submission.text)
             msg = _("Solution successfully saved")

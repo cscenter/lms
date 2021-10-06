@@ -772,6 +772,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
         created = self.pk is None
         is_published_before = bool(self.tracker.previous('is_published'))
         super().save(**kwargs)
+        # FIXME: move this logic to create_assignment_comment/create_assignment_solution
         has_been_published = self.is_published and (created or
                                                     not is_published_before)
         # Send notifications on publishing submission
