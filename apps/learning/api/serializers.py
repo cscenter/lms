@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from api.utils import DynamicFieldsModelSerializer
 from core.api.serializers import BranchSerializer
-from courses.api.serializers import AssignmentSerializer, CourseSerializer
+from courses.api.serializers import BaseAssignmentSerializer, CourseSerializer
 from learning.models import CourseNewsNotification, Enrollment, StudentAssignment
 from users.models import StudentProfile, User
 
@@ -17,7 +17,7 @@ class UserSerializer(DynamicFieldsModelSerializer):
 
 class StudentProfileSerializer(DynamicFieldsModelSerializer):
     branch = BranchSerializer()
-    student = UserSerializer(source='user')
+    student = UserSerializer(source='user', fields=('id', 'first_name', 'last_name', 'patronymic', 'gender'))
     # TODO: remove
     short_name = serializers.SerializerMethodField()
 
@@ -46,7 +46,7 @@ class CourseNewsNotificationSerializer(serializers.ModelSerializer):
         fields = ('user', 'is_unread', 'is_notified')
 
 
-class StudentAssignmentSerializer(serializers.ModelSerializer):
+class BaseStudentAssignmentSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()
 
     class Meta:
@@ -65,13 +65,13 @@ class StudentAssignmentSerializer(serializers.ModelSerializer):
         return obj.state.value
 
 
-class AssignmentScoreSerializer(StudentAssignmentSerializer):
-    class Meta(StudentAssignmentSerializer.Meta):
+class AssignmentScoreSerializer(BaseStudentAssignmentSerializer):
+    class Meta(BaseStudentAssignmentSerializer.Meta):
         fields = ('score',)
 
 
-class StudentAssignmentAssigneeSerializer(StudentAssignmentSerializer):
-    class Meta(StudentAssignmentSerializer.Meta):
+class StudentAssignmentAssigneeSerializer(BaseStudentAssignmentSerializer):
+    class Meta(BaseStudentAssignmentSerializer.Meta):
         fields = ('pk', 'assignee',)
 
     def validate_assignee(self, value):
@@ -88,8 +88,8 @@ class MyCourseSerializer(CourseSerializer):
         fields = ('id', 'name', 'url', 'semester')
 
 
-class MyCourseAssignmentSerializer(AssignmentSerializer):
-    class Meta(AssignmentSerializer.Meta):
+class CourseAssignmentSerializer(BaseAssignmentSerializer):
+    class Meta(BaseAssignmentSerializer.Meta):
         fields = ('pk', 'deadline_at', 'title', 'passing_score',
                   'maximum_score', 'weight', 'ttc', 'solution_format')
 

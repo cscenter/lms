@@ -56,7 +56,7 @@ class CourseSerializer(serializers.ModelSerializer):
         }
 
 
-class AssignmentSerializer(serializers.ModelSerializer):
+class BaseAssignmentSerializer(serializers.ModelSerializer):
     text = serializers.SerializerMethodField()
     solution_format = serializers.CharField(source='submission_type')
 
