@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from rest_framework import serializers
 from rest_framework.authentication import SessionAuthentication
@@ -112,13 +112,22 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
             "id": serializers.IntegerField(),
             "teacher": UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic'))
         })
+        # TODO: inline `latest_activity`. Skip total stats for now?
+        activity = serializers.SerializerMethodField()
 
         class Meta:
             model = StudentAssignment
-            fields = ('pk', 'assignment_id', 'score', 'state', 'student', 'assignee', 'last_comment_from')
+            fields = ('pk', 'assignment_id', 'score', 'state', 'student',
+                      'assignee', 'activity')
 
         def get_state(self, obj):
             return obj.state.value
+
+        def get_activity(self, obj: StudentAssignment) -> Optional[str]:
+            """Returns latest activity."""
+            if not obj.meta or 'stats' not in obj.meta:
+                return None
+            return obj.meta['stats'].get('latest_activity', None)
 
     def initial(self, request, *args, **kwargs):
         self.course = get_object_or_404(Course.objects.get_queryset(), pk=kwargs['course_id'])

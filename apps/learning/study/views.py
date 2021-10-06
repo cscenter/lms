@@ -5,6 +5,7 @@ from vanilla import GenericModelView, TemplateView
 
 from django.apps import apps
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Prefetch, Q
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
@@ -200,9 +201,10 @@ class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
         if solution_form is None:
             return HttpResponseBadRequest("Assignment format doesn't support this method")
         if solution_form.is_valid():
-            submission = save_solution_form(form=solution_form,
-                                            personal_assignment=self.student_assignment,
-                                            created_by=request.user)
+            with transaction.atomic():
+                submission = save_solution_form(form=solution_form,
+                                                personal_assignment=self.student_assignment,
+                                                created_by=request.user)
             if submission.text:
                 comment_persistence.add_to_gc(submission.text)
             msg = _("Solution successfully saved")

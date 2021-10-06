@@ -45,9 +45,7 @@ def get_solution_form(student_assignment: StudentAssignment,
 def save_solution_form(*, form: AssignmentSolutionBaseForm,
                        personal_assignment: StudentAssignment,
                        created_by: User) -> AssignmentComment:
-    print(form.cleaned_data)
     if isinstance(form, AssignmentSolutionDefaultForm):
-        # TODO: здесь достаём всё что необходимо из формы
         solution_data = {
             "message": form.cleaned_data['text'],
             "attachment": form.cleaned_data['attached_file'],

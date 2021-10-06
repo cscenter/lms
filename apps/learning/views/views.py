@@ -2,6 +2,7 @@ import datetime
 import logging
 from typing import Optional
 
+from django.db import transaction
 from vanilla import GenericModelView, TemplateView
 
 from django.contrib import messages
@@ -68,11 +69,12 @@ class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin, GenericModelV
 
     def form_valid(self, form):
         is_draft = "save-draft" in self.request.POST
-        new_comment = create_assignment_comment(personal_assignment=self.student_assignment,
-                                                created_by=self.request.user,
-                                                is_draft=is_draft,
-                                                message=form.cleaned_data['text'],
-                                                attachment=form.cleaned_data['attached_file'])
+        with transaction.atomic():
+            new_comment = create_assignment_comment(personal_assignment=self.student_assignment,
+                                                    created_by=self.request.user,
+                                                    is_draft=is_draft,
+                                                    message=form.cleaned_data['text'],
+                                                    attachment=form.cleaned_data['attached_file'])
         if new_comment.text:
             comment_persistence.add_to_gc(new_comment.text)
         return HttpResponseRedirect(self.get_success_url())

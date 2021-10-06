@@ -475,6 +475,12 @@ class AssignmentStatuses(DjangoChoices):
     REWORK = ChoiceItem('rework', _("AssignmentStatus|Rework"))
 
 
+class PersonalAssignmentActivity(models.TextChoices):
+    STUDENT_COMMENT = 'sc'
+    TEACHER_COMMENT = 'tc'
+    SOLUTION = 'ns'
+
+
 class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
                         DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'assignment'
@@ -548,16 +554,18 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         editable=False,
         help_text=_("The time spent by the student executing this task"),
     )
+    # TODO: deprecated, remove after migrating to .meta field
     first_student_comment_at = models.DateTimeField(
         _("First Student Comment At"),
         null=True,
         editable=False)
-    # TODO: rename
+    # TODO: deprecated, remove after migrating to .meta field
     last_comment_from = models.PositiveSmallIntegerField(
         verbose_name=_("The author type of the latest comment"),
         editable=False,
         choices=CommentAuthorTypes.choices,
         default=CommentAuthorTypes.NOBODY)
+    meta = models.JSONField(blank=True, null=True, editable=False)
 
     objects = StudentAssignmentManager()
 

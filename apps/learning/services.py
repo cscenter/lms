@@ -10,9 +10,11 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.db import router, transaction
 from django.db.models import (
-    Avg, Count, F, OuterRef, Q, QuerySet, Subquery, TextField, Value
+    Avg, Case, Count, F, Max, OuterRef, Q, QuerySet, Subquery, TextField, Value, When,
+    Window
 )
-from django.db.models.functions import Coalesce, Concat
+from django.db.models.fields import IntegerField
+from django.db.models.functions import Coalesce, Concat, FirstValue
 from django.db.models.signals import post_save
 from django.utils.timezone import now
 
@@ -32,7 +34,8 @@ from grading.services import CheckerService, CheckerSubmissionService
 from learning.models import (
     AssignmentComment, AssignmentGroup, AssignmentNotification,
     AssignmentSubmissionTypes, CourseClassGroup, CourseNewsNotification, Enrollment,
-    Event, StudentAssignment, StudentGroup, StudentGroupAssignee
+    Event, PersonalAssignmentActivity, StudentAssignment, StudentGroup,
+    StudentGroupAssignee
 )
 from learning.settings import StudentStatuses
 from users.constants import Roles
@@ -973,9 +976,11 @@ def create_assignment_comment(*, personal_assignment: StudentAssignment,
     comment.is_published = not is_draft
     comment.text = message
     comment.attached_file = attachment
-    # TODO: write test
-    comment.created = get_now_utc()
+    comment.created = get_now_utc()  # TODO: write test
     comment.save()
+
+    update_personal_assignment_stats(personal_assignment)
+
     return comment
 
 
@@ -996,6 +1001,8 @@ def create_assignment_solution(*, personal_assignment: StudentAssignment,
                                  attached_file=attachment)
     solution.save()
 
+    update_personal_assignment_stats(personal_assignment)
+
     return solution
 
 
@@ -1011,3 +1018,50 @@ def create_assignment_solution_and_check(*, personal_assignment: StudentAssignme
                                           message='', attachment=attachment)
     CheckerSubmissionService.update_or_create(solution, **settings)
     return solution
+
+
+# TODO: It's safe to make this logic async
+def update_personal_assignment_stats(personal_assignment: StudentAssignment):
+    student_assignment_id = personal_assignment.pk
+    solutions_count = Count(
+        Case(When(type=AssignmentSubmissionTypes.SOLUTION,
+                  then=1),
+             output_field=IntegerField()))
+    window = {
+        'partition_by': [F('student_assignment_id')],
+        'order_by': F('created').asc()
+    }
+    latest_submission = (AssignmentComment.published
+                         .filter(student_assignment_id=student_assignment_id)
+                         .annotate(comments_total=Window(expression=Count('*'), **window),
+                                   solutions_total=Window(expression=solutions_count, **window))
+                         .order_by('created')
+                         .last())
+    if latest_submission is None:
+        return
+
+    if latest_submission.type == AssignmentSubmissionTypes.SOLUTION:
+        latest_activity = PersonalAssignmentActivity.SOLUTION
+    elif latest_submission.type == AssignmentSubmissionTypes.COMMENT:
+        is_student = latest_submission.author_id == personal_assignment.student_id
+        if is_student:
+            latest_activity = PersonalAssignmentActivity.STUDENT_COMMENT
+        else:
+            latest_activity = PersonalAssignmentActivity.TEACHER_COMMENT
+    else:
+        raise ValueError('Unknown submission type')
+    # Django 3.2 doesn't support partial update of the json field,
+    # better to select_for_update
+    meta = personal_assignment.meta or {}
+    stats = {
+        'comments': latest_submission.comments_total,
+        'latest_activity': str(latest_activity)
+    }
+    # Omit default or null values to save space
+    if latest_submission.solutions_total:
+        stats['solutions'] = latest_submission.solutions_total
+    meta['stats'] = stats
+    (StudentAssignment.objects
+     .filter(pk=student_assignment_id)
+     .update(meta=meta))
+
