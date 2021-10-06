@@ -5,6 +5,7 @@ import os.path
 from secrets import token_urlsafe
 
 from djchoices import C, ChoiceItem, DjangoChoices
+from model_utils import FieldTracker
 from model_utils.fields import MonitorField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
@@ -748,6 +749,8 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
         storage=private_storage,
         blank=True)
 
+    tracker = FieldTracker(fields=['is_published'])
+
     published = AssignmentCommentPublishedManager()
 
     class Meta:
@@ -760,12 +763,6 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
             smart_str(self.student_assignment.assignment),
             smart_str(self.student_assignment.student.get_full_name())))
 
-    @classmethod
-    def from_db(cls, db, field_names, values):
-        instance = super().from_db(db, field_names, values)
-        instance._loaded_is_published = instance.is_published
-        return instance
-
     def save(self, **kwargs):
         from learning.services import (
             maybe_set_assignee_for_personal_assignment,
@@ -773,7 +770,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
         )
         from learning.tasks import generate_notifications_about_new_submission
         created = self.pk is None
-        is_published_before = getattr(self, '_loaded_is_published', False)
+        is_published_before = bool(self.tracker.previous('is_published'))
         super().save(**kwargs)
         has_been_published = self.is_published and (created or
                                                     not is_published_before)
@@ -785,7 +782,6 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
             update_student_assignment_derivable_fields(self)
             generate_notifications_about_new_submission.delay(
                 assignment_submission_id=self.pk)
-        self._loaded_is_published = self.is_published
 
     def created_local(self, tz=None):
         if not tz:

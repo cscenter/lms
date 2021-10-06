@@ -958,9 +958,9 @@ def get_draft_solution(user: User, student_assignment: StudentAssignment):
 
 def create_assignment_comment(*, personal_assignment: StudentAssignment,
                               is_draft: bool, created_by: User,
-                              comment_text: Optional[str] = None,
+                              message: Optional[str] = None,
                               attachment: Optional[UploadedFile] = None) -> AssignmentComment:
-    if not comment_text and not attachment:
+    if not message and not attachment:
         raise ValidationError("Provide either text or a file.", code="malformed")
 
     comment = get_draft_comment(created_by, personal_assignment)
@@ -969,7 +969,7 @@ def create_assignment_comment(*, personal_assignment: StudentAssignment,
                                     author=created_by,
                                     type=AssignmentSubmissionTypes.COMMENT)
     comment.is_published = not is_draft
-    comment.text = comment_text
+    comment.text = message
     comment.attached_file = attachment
     # TODO: write test
     comment.created = get_now_utc()

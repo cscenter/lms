@@ -260,6 +260,8 @@ def update_student_status(student_profile: StudentProfile, *,
             raise ValidationError(f"Status {new_status} is forbidden for invited students", code="forbidden")
 
     old_status = student_profile.tracker.previous('status')
+    # `status` field tracker will return `None` for unsaved model
+    assert old_status is not None
     student_profile.status = new_status
     student_profile.save(update_fields=['status'])
 

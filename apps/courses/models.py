@@ -14,7 +14,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Case, Count, IntegerField, Prefetch, Value, When
+from django.db.models import Case, Count, IntegerField, Value, When
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.encoding import smart_str

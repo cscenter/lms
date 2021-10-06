@@ -71,7 +71,7 @@ class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin, GenericModelV
         create_assignment_comment(personal_assignment=self.student_assignment,
                                   created_by=self.request.user,
                                   is_draft=is_draft,
-                                  comment_text=form.cleaned_data['text'],
+                                  message=form.cleaned_data['text'],
                                   attachment=form.cleaned_data['attached_file'])
         return HttpResponseRedirect(self.get_success_url())
 
