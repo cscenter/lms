@@ -80,6 +80,7 @@ class StudentProgress:
     def weight_score(self):
         return self._student_assignment.weight_score
 
+    # TODO: remove?
     @property
     def assignment_id(self):
         return self._student_assignment.assignment_id

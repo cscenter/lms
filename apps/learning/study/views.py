@@ -33,8 +33,8 @@ from learning.permissions import (
     EnrollPermissionObject, ViewCourses, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments
 )
-from learning.services import get_student_classes
-from learning.study.services import get_draft_solution, get_solution_form
+from learning.services import get_student_classes, get_draft_solution
+from learning.study.services import get_solution_form
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import (
     AssignmentCommentUpsertView, StudentAssignmentURLParamsMixin
@@ -212,7 +212,8 @@ class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
                                           instance=solution)
         if solution_form.is_valid():
             submission = solution_form.save()
-            comment_persistence.report_saved(submission.text)
+            if submission.text:
+                comment_persistence.add_to_gc(submission.text)
             msg = _("Solution successfully saved")
             messages.success(self.request, msg)
             redirect_to = self.student_assignment.get_student_url()

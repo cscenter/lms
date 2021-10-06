@@ -65,10 +65,6 @@ class StudentAssignmentFactory(factory.django.DjangoModelFactory):
 
 
 class AssignmentCommentFactory(factory.django.DjangoModelFactory):
-    """
-    Make sure to call refresh_from_db if logic depends on
-    `first_student_comment_at` or `last_comment_from`.
-    """
     class Meta:
         model = AssignmentComment
 

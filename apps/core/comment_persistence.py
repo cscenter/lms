@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, unicode_literals
-
 import hashlib
 import json
 import re
@@ -10,11 +6,15 @@ from django.core.cache import cache
 
 HASH_LEN = 16 + 1
 HASH_N = 100
-HASH_MAX_TTL = 60 * 10
+HASH_MAX_TTL = 600  # in seconds
 CACHE_KEY = 'comment_persistence'
 
 
-def report_saved(comment_text):
+def add_to_gc(comment_text: str) -> None:
+    """
+    After comment was saved to the persistent data storage mark it as not
+    'in-use' for the client garbage collector.
+    """
     nowhite_text = re.sub(r"\s+", '', comment_text)
     comment_md5 = hashlib.md5(nowhite_text.encode('utf-8')).hexdigest()
     # NOTE(Dmitry): there is a race here, but it shouldn't matter
@@ -23,6 +23,6 @@ def report_saved(comment_text):
     cache.set(CACHE_KEY, new_md5s, HASH_MAX_TTL)
 
 
-def get_hashes_json():
+def get_garbage_collection() -> str:
     hashes = cache.get(CACHE_KEY, "").split("|")
-    return json.dumps({h: 0 for h in cache.get(CACHE_KEY, "").split("|") if h})
+    return json.dumps({h: 0 for h in hashes if h})

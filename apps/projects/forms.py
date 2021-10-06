@@ -134,7 +134,8 @@ class ReportCommentForm(forms.ModelForm):
 
     def save(self, commit=True):
         comment = super(ReportCommentForm, self).save(commit)
-        comment_persistence.report_saved(comment.text)
+        if comment.text:
+            comment_persistence.add_to_gc(comment.text)
         return comment
 
 

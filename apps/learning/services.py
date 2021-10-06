@@ -16,9 +16,10 @@ from django.db.models.functions import Coalesce, Concat
 from django.db.models.signals import post_save
 from django.utils.timezone import now
 
+from core import comment_persistence
 from core.models import Branch
 from core.services import SoftDeleteService
-from core.timezone import now_local
+from core.timezone import get_now_utc, now_local
 from core.timezone.constants import DATE_FORMAT_RU
 from core.utils import bucketize
 from courses.managers import CourseClassQuerySet
@@ -57,6 +58,7 @@ def get_learners_count_subquery(outer_ref: OuterRef):
     ), Value(0))
 
 
+# FIXME: move to courseservice
 def update_course_learners_count(course_id):
     Course.objects.filter(id=course_id).update(
         learners_count=get_learners_count_subquery(outer_ref=OuterRef('id'))
@@ -929,3 +931,51 @@ def course_access_role(*, course, user) -> CourseRole:
         # Teacher role has a higher precedence
         role = CourseRole.TEACHER
     return role
+
+
+def get_draft_submission(user: User,
+                         student_assignment: StudentAssignment,
+                         submission_type) -> Optional[AssignmentComment]:
+    """Returns draft submission if it was previously saved."""
+    return (AssignmentComment.objects
+            .filter(author=user,
+                    is_published=False,
+                    type=submission_type,
+                    student_assignment=student_assignment)
+            .order_by('pk')
+            .last())
+
+
+def get_draft_comment(user: User, student_assignment: StudentAssignment):
+    return get_draft_submission(user, student_assignment,
+                                AssignmentSubmissionTypes.COMMENT)
+
+
+def get_draft_solution(user: User, student_assignment: StudentAssignment):
+    return get_draft_submission(user, student_assignment,
+                                AssignmentSubmissionTypes.SOLUTION)
+
+
+def create_assignment_comment(*, personal_assignment: StudentAssignment,
+                              is_draft: bool, created_by: User,
+                              comment_text: Optional[str] = None,
+                              attachment: Optional[UploadedFile] = None) -> AssignmentComment:
+    if not comment_text and not attachment:
+        raise ValidationError("Provide either text or a file.", code="malformed")
+
+    comment = get_draft_comment(created_by, personal_assignment)
+    if comment is None:
+        comment = AssignmentComment(student_assignment=personal_assignment,
+                                    author=created_by,
+                                    type=AssignmentSubmissionTypes.COMMENT)
+    comment.is_published = not is_draft
+    comment.text = comment_text
+    comment.attached_file = attachment
+    # TODO: write test
+    comment.created = get_now_utc()
+    comment.save()
+
+    if comment.text:
+        comment_persistence.add_to_gc(comment.text)
+
+    return comment

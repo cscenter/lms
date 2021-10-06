@@ -92,6 +92,7 @@ def create_deadline_change_notification(sender, instance, created,
 
 @receiver(post_save, sender=AssignmentComment)
 def convert_ipynb_files(sender, instance: AssignmentComment, *args, **kwargs):
+    # TODO: convert for solutions only? both?
     if not instance.attached_file:
         return
     if instance.attached_file_name.endswith('.ipynb'):

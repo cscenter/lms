@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 from django.views import generic
 
 from core import comment_persistence
+from core.http import AuthenticatedHttpRequest
 from core.utils import hashids
 from core.views import LoginRequiredMixin
 from courses.models import AssignmentAttachment, CourseTeacher
@@ -25,7 +26,7 @@ from learning.models import (
 from learning.permissions import (
     ViewAssignmentAttachment, ViewAssignmentCommentAttachment
 )
-from learning.study.services import get_draft_comment
+from learning.services import create_assignment_comment, get_draft_comment
 from users.mixins import TeacherOnlyMixin
 
 logger = logging.getLogger(__name__)
@@ -63,27 +64,25 @@ class StudentAssignmentURLParamsMixin:
 class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin, GenericModelView):
     """Posts a new comment or saves draft"""
     model = AssignmentComment
+    request = AuthenticatedHttpRequest
 
     def form_valid(self, form):
-        submission = form.save()
-        comment_persistence.report_saved(submission.text)
+        is_draft = "save-draft" in self.request.POST
+        create_assignment_comment(personal_assignment=self.student_assignment,
+                                  created_by=self.request.user,
+                                  is_draft=is_draft,
+                                  comment_text=form.cleaned_data['text'],
+                                  attachment=form.cleaned_data['attached_file'])
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form):
         msg = "<br>".join("<br>".join(errors)
                           for errors in form.errors.values())
         messages.error(self.request, "Данные не сохранены!<br>" + msg)
-        redirect_to = self.get_error_url()
-        return HttpResponseRedirect(redirect_to)
+        return HttpResponseRedirect(redirect_to=self.get_error_url())
 
     def post(self, request, *args, **kwargs):
-        save_draft = "save-draft" in request.POST
-        submission = get_draft_comment(request.user,
-                                       self.student_assignment,
-                                       build=True)
-        submission.is_published = not save_draft
-        form = AssignmentCommentForm(data=request.POST, files=request.FILES,
-                                     instance=submission)
+        form = AssignmentCommentForm(data=request.POST, files=request.FILES)
         if form.is_valid():
             return self.form_valid(form)
         return self.form_invalid(form)
@@ -131,7 +130,7 @@ class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
             'timezone': sa.assignment.course.get_timezone(),
             'first_comment_after_deadline': first_comment_after_deadline,
             'one_teacher': len(sa.assignment.course.course_teachers.all()) == 1,
-            'hashes_json': comment_persistence.get_hashes_json(),
+            'hashes_json': comment_persistence.get_garbage_collection(),
             'comment_form': comment_form,
         }
         return context

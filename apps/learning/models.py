@@ -520,6 +520,9 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         verbose_name=_("Grade"),
         null=True,
         blank=True)
+    score_changed = MonitorField(
+        verbose_name=_("Assignment|grade changed"),
+        monitor='score')
     assignee = models.ForeignKey(
         'courses.CourseTeacher',
         verbose_name=_("Assignee"),
@@ -538,9 +541,6 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         related_name="+",  # Disable backwards relation
         blank=True,  # Make this field optional in django admin
     )
-    score_changed = MonitorField(
-        verbose_name=_("Assignment|grade changed"),
-        monitor='score')
     execution_time = models.DurationField(
         verbose_name=_("Execution Time"),
         blank=True, null=True,

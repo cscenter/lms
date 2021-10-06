@@ -481,7 +481,7 @@ class ReportView(FormMixin, generic.DetailView):
                     .order_by('created')
                     .select_related('author'))
         context["comments"] = comments
-        context['clean_comments_json'] = comment_persistence.get_hashes_json()
+        context['clean_comments_json'] = comment_persistence.get_garbage_collection()
         context["can_comment"] = self.can_comment(report, own_review)
         context["can_assess"] = (report.status == report.SENT and
                                  self.request.user.is_curator)
