@@ -38,8 +38,8 @@ def get_project_name(course: Course) -> str:
 
 def get_branch_name(student_profile: StudentProfile, course: Course) -> str:
     git_branch_name = student_profile.user.get_abbreviated_name_in_latin()
-    # XXX: Deprecated branch name format. Can remove in spring 2022
     is_legacy = course.pk == 984 or course.semester.year < 2021
+    # TODO: Always attach branch code. Remove this `if` statement in spring 2022
     if not is_legacy or len(course.branches.all()) > 1:
         git_branch_name = f"{student_profile.branch.code}/{git_branch_name}"
     return git_branch_name
