@@ -35,18 +35,18 @@ __all__ = (
     'AssignmentSubmissionBaseView', 'EventDetailView',
     'AssignmentAttachmentDownloadView', 'CourseNewsNotificationUpdate',
     'CourseStudentsView', 'AssignmentCommentAttachmentDownloadView',
-    'AssignmentCommentUpsertView', 'AssignmentSubmissionUpsertView',
-)
+    'AssignmentCommentUpsertView')
 
 
 class StudentAssignmentURLParamsMixin:
     """
     Fetches student assignment by URL params and attaches it to the view kwargs.
     """
+    student_assignment: StudentAssignment
+
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        self.student_assignment: StudentAssignment = get_object_or_404(
-            self.get_student_assignment_queryset())
+        self.student_assignment = get_object_or_404(self.get_student_assignment_queryset())
 
     def get_student_assignment_queryset(self):
         return (StudentAssignment.objects
@@ -60,14 +60,9 @@ class StudentAssignmentURLParamsMixin:
                                 'assignment__course__semester'))
 
 
-class AssignmentSubmissionUpsertView(StudentAssignmentURLParamsMixin,
-                                     GenericModelView):
-    """Post a new comment or save draft"""
+class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin, GenericModelView):
+    """Posts a new comment or saves draft"""
     model = AssignmentComment
-    submission_type = None
-
-    def post(self, request, *args, **kwargs):
-        raise NotImplementedError
 
     def form_valid(self, form):
         submission = form.save()
@@ -81,27 +76,20 @@ class AssignmentSubmissionUpsertView(StudentAssignmentURLParamsMixin,
         redirect_to = self.get_error_url()
         return HttpResponseRedirect(redirect_to)
 
-    def get_error_url(self):
-        raise NotImplementedError
-
-
-class AssignmentCommentUpsertView(AssignmentSubmissionUpsertView):
-    """Post a new comment or save draft"""
-
-    model = AssignmentComment
-    submission_type = AssignmentSubmissionTypes.COMMENT
-
     def post(self, request, *args, **kwargs):
         save_draft = "save-draft" in request.POST
         submission = get_draft_comment(request.user,
                                        self.student_assignment,
                                        build=True)
         submission.is_published = not save_draft
-        form = self.get_form(data=request.POST, files=request.FILES,
-                             instance=submission)
+        form = AssignmentCommentForm(data=request.POST, files=request.FILES,
+                                     instance=submission)
         if form.is_valid():
             return self.form_valid(form)
         return self.form_invalid(form)
+
+    def get_success_url(self):
+        raise NotImplementedError
 
     def get_error_url(self):
         raise NotImplementedError

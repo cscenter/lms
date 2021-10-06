@@ -417,13 +417,9 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
                                          AssignmentCommentUpsertView):
     permission_required = CreateAssignmentComment.name
-    submission_type = AssignmentSubmissionTypes.COMMENT
 
     def get_permission_object(self):
         return self.student_assignment
-
-    def get_form_class(self):
-        return AssignmentCommentForm
 
     def get_success_url(self):
         return self.student_assignment.get_teacher_url()

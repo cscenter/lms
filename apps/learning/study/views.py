@@ -1,19 +1,21 @@
 from typing import Iterable
 
 from isoweek import Week
-from vanilla import TemplateView
+from vanilla import GenericModelView, TemplateView
 
 from django.apps import apps
 from django.contrib import messages
 from django.db.models import Prefetch, Q
+from django.http import HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
+from core import comment_persistence
 from core.exceptions import Redirect
 from core.urls import reverse
 from courses.calendar import CalendarEvent, TimetableEvent
-from courses.models import Course, CourseTeacher, Semester
+from courses.models import Course, Semester
 from courses.selectors import course_teachers_prefetch_queryset
 from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
 from courses.views import MonthEventsCalendarView, WeekEventsView
@@ -35,7 +37,7 @@ from learning.services import get_student_classes
 from learning.study.services import get_draft_solution, get_solution_form
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import (
-    AssignmentCommentUpsertView, AssignmentSubmissionUpsertView
+    AssignmentCommentUpsertView, StudentAssignmentURLParamsMixin
 )
 from users.constants import Roles
 from users.services import get_student_profile
@@ -171,13 +173,9 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
                                          AssignmentCommentUpsertView):
     permission_required = CreateAssignmentCommentAsLearner.name
-    submission_type = AssignmentSubmissionTypes.COMMENT
 
     def get_permission_object(self):
         return self.student_assignment
-
-    def get_form_class(self):
-        return AssignmentCommentForm
 
     def get_success_url(self):
         msg = _("Comment successfully saved")
@@ -189,37 +187,37 @@ class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
 
 
 class StudentAssignmentSolutionCreateView(PermissionRequiredMixin,
-                                          AssignmentSubmissionUpsertView):
+                                          StudentAssignmentURLParamsMixin,
+                                          GenericModelView):
     permission_required = CreateOwnAssignmentSolution.name
-    submission_type = AssignmentSubmissionTypes.SOLUTION
 
     def get_permission_object(self):
         return self.student_assignment
 
-    def get_form(self, data=None, files=None, **kwargs):
-        solution_form = get_solution_form(self.student_assignment, data=data,
-                                          files=files, **kwargs)
-        return solution_form
-
-    def get_success_url(self):
-        msg = _("Solution successfully saved")
-        messages.success(self.request, msg)
-        return self.student_assignment.get_student_url()
+    def form_invalid(self, form):
+        msg = "<br>".join("<br>".join(errors)
+                          for errors in form.errors.values())
+        messages.error(self.request, "Данные не сохранены!<br>" + msg)
+        redirect_to = self.student_assignment.get_student_url()
+        return HttpResponseRedirect(redirect_to)
 
     def post(self, request, *args, **kwargs):
-        submission = AssignmentComment(
+        solution = AssignmentComment(
             student_assignment=self.student_assignment,
             author=request.user,
-            type=self.submission_type,
+            type=AssignmentSubmissionTypes.SOLUTION,
             is_published=True)
-        form = self.get_form(data=request.POST, files=request.FILES,
-                             instance=submission)
-        if form.is_valid():
-            return self.form_valid(form)
-        return self.form_invalid(form)
-
-    def get_error_url(self):
-        return self.student_assignment.get_student_url()
+        solution_form = get_solution_form(self.student_assignment, data=request.POST,
+                                          files=request.FILES,
+                                          instance=solution)
+        if solution_form.is_valid():
+            submission = solution_form.save()
+            comment_persistence.report_saved(submission.text)
+            msg = _("Solution successfully saved")
+            messages.success(self.request, msg)
+            redirect_to = self.student_assignment.get_student_url()
+            return HttpResponseRedirect(redirect_to)
+        return self.form_invalid(solution_form)
 
 
 class CourseListView(PermissionRequiredMixin, generic.TemplateView):
