@@ -1055,7 +1055,10 @@ def update_personal_assignment_stats(personal_assignment: StudentAssignment):
     meta = personal_assignment.meta or {}
     stats = {
         'comments': latest_submission.comments_total,
-        'latest_activity': str(latest_activity)
+        'activity': {
+            'code': str(latest_activity),
+            'dt': latest_submission.created.replace(microsecond=0)
+        }
     }
     # Omit default or null values to save space
     if latest_submission.solutions_total:
