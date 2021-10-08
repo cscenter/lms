@@ -9,6 +9,7 @@ from model_utils import FieldTracker
 from model_utils.fields import MonitorField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
+from rest_framework.utils.encoders import JSONEncoder
 from sorl.thumbnail import ImageField
 
 from django.conf import settings
@@ -565,7 +566,8 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         editable=False,
         choices=CommentAuthorTypes.choices,
         default=CommentAuthorTypes.NOBODY)
-    meta = models.JSONField(blank=True, null=True, editable=False)
+    meta = models.JSONField(encoder=JSONEncoder, blank=True, null=True,
+                            editable=False)
 
     objects = StudentAssignmentManager()
 
