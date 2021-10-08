@@ -140,7 +140,7 @@
                     <tr>
                       <td>
                         <div class="assignment-deadline">
-                          {% set assignment_deadline_at_local = assignment.deadline_at_local(tz_override) %}
+                          {% set assignment_deadline_at_local = assignment.deadline_at_local(tz) %}
                           {{ assignment_deadline_at_local|date("d E") }}<br>
                           <span class="text-muted">{{ assignment_deadline_at_local|time("H:i") }}</span>
                         </div>
@@ -177,7 +177,7 @@
                 {% for news in tab.tab_panel.context['items'] %}
                   <div class="panel bg-gray" id="news-{{ news.pk }}">
                     <div class="panel-body">
-                      {% set news_created_local = news.created_local(tz_override) %}
+                      {% set news_created_local = news.created_local(tz) %}
                       <div class="date">{{ news_created_local|date("d E Y") }}</div>
                       <h4>{{ news.title }}{% if user.is_curator or user.is_teacher and is_actual_teacher %}
                         <a href="#news-{{ news.pk }}"><i class="fa fa-link" aria-hidden="true"></i></a>{% endif %}</h4>

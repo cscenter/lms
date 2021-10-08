@@ -67,7 +67,7 @@
                 <li class="{% if comment.author == a_s.student %}student{% else %}teacher{% endif %}">
                     <div class="panel bg-gray assignment-submission assignment-{{ comment.type }}" {% if user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
                         <div class="panel-body">
-                            <span class="assignment-submission__date pull-right">{{ comment.created|timezone:timezone|date:"d.m.Y H:i" }}</span>
+                            <span class="assignment-submission__date pull-right">{{ comment.created|timezone:time_zone|date:"d.m.Y H:i" }}</span>
                             <h5 class="assignment">{{ comment.author }}</h5>
                             {% if comment.text %}
                             <div class="ubertext">
@@ -149,7 +149,7 @@
                 {% endif %}
 
                 <h5 class="assignment">{% trans "Deadline" %}</h5>
-                <span class="nowrap">{{ a_s.assignment.deadline_at|timezone:timezone|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at|timezone:timezone|time:"H:i" }}</span>
+                <span class="nowrap">{{ a_s.assignment.deadline_at|timezone:time_zone|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at|timezone:time_zone|time:"H:i" }}</span>
 
                 <h5 class="assignment">{% trans "Submission Type" %}</h5>
                 {{ a_s.assignment.get_submission_type_display }}

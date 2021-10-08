@@ -2,10 +2,10 @@ import datetime
 import logging
 from typing import Optional
 
-from django.db import transaction
 from vanilla import GenericModelView, TemplateView
 
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Prefetch
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -131,7 +131,7 @@ class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
         comment_form = AssignmentCommentForm(instance=draft_comment)
         context = {
             'a_s': sa,
-            'timezone': sa.assignment.course.get_timezone(),
+            'time_zone': user.time_zone,
             'first_comment_after_deadline': first_comment_after_deadline,
             'one_teacher': len(sa.assignment.course.course_teachers.all()) == 1,
             'hashes_json': comment_persistence.get_garbage_collection(),

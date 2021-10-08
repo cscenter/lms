@@ -159,7 +159,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                                   kwargs={'pk': sa.pk})
         comment_form.helper.form_action = add_comment_url
         # Format datetime in student timezone
-        context['timezone'] = self.request.user.time_zone
+        context['time_zone'] = self.request.user.time_zone
         context['solution_form'] = get_solution_form(sa)
         return context
 
