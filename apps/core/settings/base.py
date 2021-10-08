@@ -104,9 +104,13 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
     'UNAUTHENTICATED_USER': 'users.models.ExtendedAnonymousUser',
+    # TODO: migrate all existing api views to the camel case renderer
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
+    'JSON_UNDERSCOREIZE': {
+        'no_underscore_before_number': True,
+    },
     'DATE_INPUT_FORMATS': ['iso-8601', '%d.%m.%Y']
 }
 

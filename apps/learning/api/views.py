@@ -1,5 +1,8 @@
 from typing import Any, Optional
 
+from djangorestframework_camel_case.render import (
+    CamelCaseBrowsableAPIRenderer, CamelCaseJSONRenderer
+)
 from rest_framework import serializers
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import ListAPIView, UpdateAPIView, get_object_or_404
@@ -60,6 +63,7 @@ class CourseAssignmentList(RolePermissionRequiredMixin, ApiErrorsMixin, ListAPIV
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [CreateAssignment]
     serializer_class = CourseAssignmentSerializer
+    renderer_classes = (CamelCaseJSONRenderer, CamelCaseBrowsableAPIRenderer)
     course: Course
 
     def initial(self, request, *args, **kwargs):
@@ -100,6 +104,7 @@ class EnrollmentList(ListAPIView):
 class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [CreateAssignment]
+    renderer_classes = (CamelCaseJSONRenderer, CamelCaseBrowsableAPIRenderer)
     course: Course
 
     class FilterSerializer(serializers.Serializer):
@@ -112,7 +117,6 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
             "id": serializers.IntegerField(),
             "teacher": UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic'))
         })
-        # TODO: inline `latest_activity`. Skip total stats for now?
         activity = serializers.SerializerMethodField()
 
         class Meta:
@@ -127,7 +131,7 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
             """Returns latest activity."""
             if not obj.meta or 'stats' not in obj.meta:
                 return None
-            return obj.meta['stats'].get('latest_activity', None)
+            return obj.meta['stats'].get('activity', None)
 
     def initial(self, request, *args, **kwargs):
         self.course = get_object_or_404(Course.objects.get_queryset(), pk=kwargs['course_id'])
