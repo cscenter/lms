@@ -10,7 +10,7 @@ from learning.teaching.views import (
 )
 from learning.teaching.views import TimetableView as TeacherTimetable
 from learning.teaching.views.assignments import (
-    AssignmentCommentUpdateView, AssignmentDetailView,
+    AssignmentCheckQueueView, AssignmentCommentUpdateView, AssignmentDetailView,
     AssignmentDownloadSolutionAttachmentsView, AssignmentListView,
     StudentAssignmentCommentCreateView, StudentAssignmentDetailView
 )
@@ -42,7 +42,8 @@ import_scores_api_patterns = [
 ]
 
 urlpatterns = [
-    path('', RedirectView.as_view(pattern_name='teaching:assignment_list', permanent=False), name='base'),
+    # TODO: add login_required before redirect
+    path('', RedirectView.as_view(pattern_name='teaching:assignments_check_queue', permanent=False), name='base'),
     path('timetable/', TeacherTimetable.as_view(), name='timetable'),
     path('calendar/', CalendarPersonalView.as_view(), name='calendar'),
     path('full-calendar/', CalendarFullView.as_view(), name='calendar_full'),
@@ -53,7 +54,8 @@ urlpatterns = [
         path("news/<int:news_pk>/stats", CourseNewsUnreadNotificationsView.as_view(), name="course_news_unread"),
     ])),
     path('assignments/', include([
-        path('', AssignmentListView.as_view(), name='assignment_list'),
+        path('', AssignmentCheckQueueView.as_view(), name='assignments_check_queue'),
+        path('old/', AssignmentListView.as_view(), name='assignment_list'),
         path('<int:pk>/', AssignmentDetailView.as_view(), name='assignment_detail'),
         path('<int:pk>/export/solution-attachments/', AssignmentDownloadSolutionAttachmentsView.as_view(), name='assignment_download_solution_attachments'),
         path('submissions/<int:pk>/', StudentAssignmentDetailView.as_view(), name='student_assignment_detail'),

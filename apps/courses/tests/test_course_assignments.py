@@ -90,7 +90,7 @@ def test_course_assignment_update(client, assert_redirect):
         'deadline_at_1': deadline_time,
     })
     # Make sure new title is not present on /teaching/assignments/
-    list_url = reverse('teaching:assignment_list')
+    list_url = reverse('teaching:assignments_check_queue')
     response = client.get(list_url)
     assert response.status_code == 200
     assert smart_bytes(form['title']) not in response.content
@@ -136,7 +136,7 @@ def test_course_assignment_delete(client, assert_redirect):
     response = client.get(delete_url)
     assert response.status_code == 200
     assert smart_bytes(assignment.title) in response.content
-    teaching_assignment_list = reverse('teaching:assignment_list')
+    teaching_assignment_list = reverse('teaching:assignments_check_queue')
     assert_redirect(client.post(delete_url), teaching_assignment_list)
     response = client.get(teaching_assignment_list)
     assert response.status_code == 200

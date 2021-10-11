@@ -46,7 +46,7 @@
         <h5>КУРС</h5>
         <div class="list-group inverse">
           {% for course in course_offerings %}
-                <a href="{% url "teaching:assignment_list" %}?term={{ course.semester.slug }}&course={{ course.meta_course.slug }}" data-slug="{{ course.meta_course.slug }}" class="list-group-item{% if course.meta_course.slug == query.course %} active{% endif %}" title="{{ course.meta_course.name }}">{{ course.meta_course.name }}</a>
+                <a href="{% url "teaching:assignments_check_queue" %}?term={{ course.semester.slug }}&course={{ course.meta_course.slug }}" data-slug="{{ course.meta_course.slug }}" class="list-group-item{% if course.meta_course.slug == query.course %} active{% endif %}" title="{{ course.meta_course.name }}">{{ course.meta_course.name }}</a>
           {% endfor %}
         </div>
     {% endif %}
@@ -55,7 +55,7 @@
         <h5>СЕМЕСТР</h5>
         <div class="list-group inverse">
           {% for term in all_terms %}
-              <a href="{% url "teaching:assignment_list" %}?term={{ term.slug }}" class="list-group-item{% if term.slug == query.term %} active{% endif %}">{{ term }}</a>
+              <a href="{% url "teaching:assignments_check_queue" %}?term={{ term.slug }}" class="list-group-item{% if term.slug == query.term %} active{% endif %}">{{ term }}</a>
           {% endfor %}
         </div>
     {% endif %}

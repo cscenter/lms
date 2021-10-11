@@ -1,0 +1,29 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block title %}Очередь проверки заданий{% endblock title %}
+
+{% block body_attrs %} class="gray _wide" data-init-sections="assignmentsCheckQueue"{% endblock body_attrs %}
+
+{% block javascripts %}
+  {{ render_bundle('teaching', config='V1', extension='js') }}
+
+  <style>
+    .checkbox label {
+      user-select: none;
+    }
+  </style>
+
+{% endblock javascripts %}
+
+{% block content %}
+  <div class="container">
+    <h1 class="mb-30">Очередь проверки</h1>
+    {% if app_data is not defined or app_data.props.courseOptions is not defined %}
+      Вы не были добавлены ни в одно прочтение курса в качестве преподавателя.
+    {% else %}
+
+      <div class="__react-app" id="AssignmentsCheckQueue" data-init='{{ app_data|tojson|safe }}'></div>
+
+    {% endif %}
+  </div>
+{% endblock content %}

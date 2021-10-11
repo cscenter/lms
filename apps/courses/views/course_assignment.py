@@ -99,7 +99,7 @@ class AssignmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin, DeleteView):
     template_name = "forms/simple_delete_confirmation.html"
 
     def get_success_url(self):
-        return reverse('teaching:assignment_list')
+        return reverse('teaching:assignments_check_queue')
 
     def is_form_allowed(self, user, obj: Assignment):
         return user.is_curator or user in obj.course.teachers.all()

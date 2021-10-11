@@ -90,7 +90,7 @@ class MyCourseSerializer(CourseSerializer):
 
 class CourseAssignmentSerializer(BaseAssignmentSerializer):
     class Meta(BaseAssignmentSerializer.Meta):
-        fields = ('pk', 'deadline_at', 'title', 'passing_score',
+        fields = ('id', 'deadline_at', 'title', 'passing_score',
                   'maximum_score', 'weight', 'ttc', 'solution_format')
 
 

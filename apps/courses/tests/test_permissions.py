@@ -16,6 +16,8 @@ from users.tests.factories import (
     VolunteerFactory
 )
 
+# FIXME: test ViewOwnAssignment
+
 
 @pytest.mark.django_db
 def test_permission_create_course_assignment(client):

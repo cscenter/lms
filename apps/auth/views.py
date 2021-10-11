@@ -43,7 +43,7 @@ class LoginView(generic.FormView):
             if user_roles == {Roles.STUDENT}:
                 redirect_to = reverse("study:assignment_list")
             elif user_roles == {Roles.TEACHER}:
-                redirect_to = reverse("teaching:assignment_list")
+                redirect_to = reverse("teaching:assignments_check_queue")
 
         hosts = {self.request.get_host()}
         if not url_has_allowed_host_and_scheme(redirect_to, allowed_hosts=hosts):

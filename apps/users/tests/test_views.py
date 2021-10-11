@@ -216,30 +216,6 @@ def test_email_on_detail(client):
 
 
 @pytest.mark.django_db
-def test_auth_restrictions(client, assert_login_redirect):
-    user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-    user_data["branch"] = BranchFactory()
-    user = User.objects.create_user(**user_data)
-    teaching_assignments_url = reverse('teaching:assignment_list')
-    assert_login_redirect(teaching_assignments_url)
-    response = client.post(reverse('auth:login'), user_data)
-    assert response.status_code == 200
-    branch_spb = Branch.objects.get_by_natural_key(Branches.SPB, settings.SITE_ID)
-    student = StudentFactory(branch=branch_spb)
-    auth_data = {'username': student.username, 'password': student.raw_password}
-    response = client.post(reverse('auth:login'), auth_data)
-    assert response.status_code == 302
-    assert client.get(teaching_assignments_url).status_code == 403
-    add_user_groups(student, [Roles.TEACHER])
-    response = client.get(teaching_assignments_url)
-    # Teacher has no course offerings and will be redirected to the course list
-    assert response.status_code == 302
-    CourseFactory(teachers=[student])
-    response = client.get(teaching_assignments_url)
-    assert response.status_code == 200
-
-
-@pytest.mark.django_db
 def test_user_detail_view(client, assert_login_redirect):
     user = UserFactory()
     assert_login_redirect(user.get_absolute_url())

@@ -45,12 +45,12 @@ compsciclub_ru_menu = [
     ),
     MenuItem(
         "Преподавание",
-        reverse_lazy('teaching:assignment_list'),
+        reverse_lazy('teaching:assignments_check_queue'),
         weight=60,
         children=[
             MenuItem(
                 "Задания",
-                reverse_lazy('teaching:assignment_list'),
+                reverse_lazy('teaching:assignments_check_queue'),
                 weight=10,
                 budge='assignments_teacher',
                 selected_patterns=[

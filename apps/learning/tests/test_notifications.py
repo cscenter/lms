@@ -78,7 +78,7 @@ def test_view_new_assignment(client):
         kwargs={"pk": a_s.pk})
     teacher_url = a_s.get_teacher_url()
     student_list_url = reverse('study:assignment_list', args=[])
-    teacher_list_url = reverse('teaching:assignment_list', args=[])
+    teacher_list_url = reverse('teaching:assignments_check_queue', args=[])
     student_comment_dict = {
         'comment-text': "Test student comment without file"
     }

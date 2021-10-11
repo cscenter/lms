@@ -121,10 +121,10 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
 
         class Meta:
             model = StudentAssignment
-            fields = ('pk', 'assignment_id', 'score', 'state', 'student',
+            fields = ('id', 'assignment_id', 'score', 'state', 'student',
                       'assignee', 'activity')
 
-        def get_state(self, obj):
+        def get_state(self, obj: StudentAssignment):
             return obj.state.value
 
         def get_activity(self, obj: StudentAssignment) -> Optional[str]:

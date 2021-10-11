@@ -414,7 +414,7 @@ def test_view_student_assignment_as_teacher():
 
 
 @pytest.mark.django_db
-def test_view_student_assignment_role_relation():
+def test_view_student_assignment_relation():
     """
     Tests call chain `teacher.has_perm(ViewStudentAssignment.name, sa)` ->
     `teacher.has_perm(ViewRelatedStudentAssignment.name, sa)`

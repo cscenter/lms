@@ -16,7 +16,7 @@ class PublicRoute(Enum):
     PROJECTS = ('projects', 'Проекты', 'projects:report_list_reviewers')
     ADMISSION = ('admission', 'Набор', 'admission:interviews:list')
     LEARNING = ('learning', 'Обучение', 'study:assignment_list')
-    TEACHING = ('teaching', 'Преподавание', 'teaching:assignment_list')
+    TEACHING = ('teaching', 'Преподавание', 'teaching:assignments_check_queue')
     STAFF = ('staff', 'Курирование', 'staff:student_search')
 
     def __init__(self, code, section_name, url_name):

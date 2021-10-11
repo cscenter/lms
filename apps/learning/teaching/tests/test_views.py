@@ -1,12 +1,16 @@
 import datetime
 
+import factory
 import pytest
 import pytz
 
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
+from core.models import Branch
+from core.tests.factories import BranchFactory, SiteFactory
 from core.urls import reverse
+from courses.models import CourseGroupModes, CourseTeacher
 from courses.permissions import ViewAssignment
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from learning.models import StudentAssignment
@@ -15,7 +19,11 @@ from learning.settings import Branches
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
 )
-from users.tests.factories import CuratorFactory, StudentFactory, TeacherFactory
+from users.constants import Roles
+from users.models import User
+from users.tests.factories import (
+    CuratorFactory, StudentFactory, TeacherFactory, UserFactory
+)
 
 
 @pytest.mark.django_db
@@ -26,13 +34,12 @@ def test_teaching_index_page_smoke(client):
 
 
 @pytest.mark.django_db
-def test_student_assignment_list_view_permissions(client, lms_resolver,
+def test_assignments_check_queue_view_permissions(client, lms_resolver,
                                                   assert_login_redirect):
     from auth.permissions import perm_registry
     teacher = TeacherFactory()
     student = StudentFactory()
-    course = CourseFactory(teachers=[teacher])
-    url = reverse('teaching:assignment_list')
+    url = reverse('teaching:assignments_check_queue')
     resolver = lms_resolver(url)
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
     assert resolver.func.view_class.permission_required == ViewStudentAssignmentList.name
@@ -47,121 +54,43 @@ def test_student_assignment_list_view_permissions(client, lms_resolver,
 
 
 @pytest.mark.django_db
-def test_student_assignment_list_view_redirect(client, lms_resolver,
-                                               assert_login_redirect):
-    """
-    Teacher will be redirected if no courses where he participated were found
-    """
-    teacher = TeacherFactory()
-    url = reverse('teaching:assignment_list')
+def test_assignments_check_queue_view(settings, client):
+    teacher = TeacherFactory(time_zone=pytz.timezone('Asia/Novosibirsk'))
     client.login(teacher)
+    url = reverse('teaching:assignments_check_queue')
     response = client.get(url)
+    assert response.status_code == 200
+    assert not len(response.context_data)
+    # TODO: test input serializer with wrong data
+    branch = BranchFactory(site=SiteFactory(pk=settings.SITE_ID))
+    term = SemesterFactory(year=2018)
+    course = CourseFactory(main_branch=branch, semester=term, teachers=[teacher],
+                           group_mode=CourseGroupModes.MANUAL)
+    response = client.get(url)
+    assert 'app_data' in response.context_data
+    app_data = response.context_data['app_data']
+    assert 'courseOptions' in app_data['props']
+    assert course.pk == app_data['state']['course']
+    assert app_data['state']['assignments'] == []
+    assert len(app_data['props']['courseTeachers']) == 2
+    assert app_data['props']['courseTeachers'][0]['value'] == ''  # not set
+    course_teacher = CourseTeacher.objects.get(course=course, teacher=teacher)
+    assert app_data['props']['courseTeachers'][1]['value'] == course_teacher.pk
+    assert app_data['props']['timeZone'] == str(teacher.time_zone)
+    assert 'csrfToken' in app_data['props']
+    # Test course input
+    course_other = CourseFactory(main_branch=branch, semester=term,
+                                 group_mode=CourseGroupModes.MANUAL)
+    response = client.get(f"{url}?course={course_other.pk}")
     assert response.status_code == 302
-    assert response.url == reverse('teaching:course_list')
-
-
-@pytest.mark.django_db
-def test_student_assignment_list_view_filters(client):
-    url = reverse('teaching:assignment_list')
-    # Default filter for grade - `no_grade`
-    teacher = TeacherFactory()
-    students = StudentFactory.create_batch(3)
-    s = SemesterFactory.create_current(for_branch=Branches.SPB)
-    # some other teacher's course offering
-    co_other = CourseFactory.create(semester=s)
-    AssignmentFactory.create_batch(2, course=co_other)
-    client.login(teacher)
-    # no course offerings yet, return 302
+    term_prev = SemesterFactory(year=2017)
+    course_prev = CourseFactory(main_branch=branch, semester=term_prev, teachers=[teacher],
+                                group_mode=CourseGroupModes.MANUAL)
     response = client.get(url)
-    assert response.status_code == 302
-    # Create co, assignments and enroll students
-    co = CourseFactory.create(semester=s, teachers=[teacher])
-    for student1 in students:
-        EnrollmentFactory.create(student=student1, course=co)
-    assignment = AssignmentFactory.create(course=co)
-    response = client.get(url)
-    # TODO: add wrong term type and check redirect.
-    # By default we show all submissions without grades
-    assert len(response.context['student_assignment_list']) == 3
-    # Show submissions without comments
-    response = client.get(url + "?comment=empty")
-    assert len(response.context['student_assignment_list']) == 3
-    # TODO: add test which assignment selected by default.
-    sas = {(StudentAssignment.objects.get(student=student,
-                                          assignment=assignment))
-           for student in students}
-    assert set(sas) == set(response.context['student_assignment_list'])
-    assert len(sas) == len(response.context['student_assignment_list'])
-    # Let's check assignments with last comment from student only
-    response = client.get(url + "?comment=student")
-    assert len(response.context['student_assignment_list']) == 0
-    # Teacher commented on student1 assignment
-    student1, student2, student3 = students
-    sa1: StudentAssignment = StudentAssignment.objects.get(
-        student=student1, assignment=assignment)
-    sa2 = StudentAssignment.objects.get(student=student2,
-                                        assignment=assignment)
-    AssignmentCommentFactory.create(student_assignment=sa1, author=teacher)
-    sa1.refresh_from_db()
-    assert sa1.last_comment_from == sa1.CommentAuthorTypes.TEACHER
-    response = client.get(url + "?comment=any")
-    assert len(response.context['student_assignment_list']) == 3
-    response = client.get(url + "?comment=student")
-    assert len(response.context['student_assignment_list']) == 0
-    response = client.get(url + "?comment=teacher")
-    assert len(response.context['student_assignment_list']) == 1
-    response = client.get(url + "?comment=empty")
-    assert len(response.context['student_assignment_list']) == 2
-    # Student2 commented on assignment
-    AssignmentCommentFactory.create_batch(2, student_assignment=sa2,
-                                          author=student2)
-    response = client.get(url + "?comment=any")
-    assert len(response.context['student_assignment_list']) == 3
-    response = client.get(url + "?comment=student")
-    assert len(response.context['student_assignment_list']) == 1
-    assert {sa2} == set(response.context['student_assignment_list'])
-    response = client.get(url + "?comment=teacher")
-    assert len(response.context['student_assignment_list']) == 1
-    response = client.get(url + "?comment=empty")
-    assert len(response.context['student_assignment_list']) == 1
-    # Teacher answered on the student2 assignment
-    AssignmentCommentFactory.create(student_assignment=sa2, author=teacher)
-    response = client.get(url + "?comment=any")
-    assert len(response.context['student_assignment_list']) == 3
-    response = client.get(url + "?comment=student")
-    assert len(response.context['student_assignment_list']) == 0
-    response = client.get(url + "?comment=teacher")
-    assert len(response.context['student_assignment_list']) == 2
-    response = client.get(url + "?comment=empty")
-    assert len(response.context['student_assignment_list']) == 1
-    # Student 3 add comment on assignment
-    sa3 = StudentAssignment.objects.get(student=student3,
-                                        assignment=assignment)
-    AssignmentCommentFactory.create_batch(3, student_assignment=sa3,
-                                          author=student3)
-    response = client.get(url + "?comment=any")
-    assert len(response.context['student_assignment_list']) == 3
-    response = client.get(url + "?comment=student")
-    assert len(response.context['student_assignment_list']) == 1
-    response = client.get(url + "?comment=teacher")
-    assert len(response.context['student_assignment_list']) == 2
-    response = client.get(url + "?comment=empty")
-    assert len(response.context['student_assignment_list']) == 0
-    # teacher has set a grade
-    sa3.score = 3
-    sa3.save(update_fields=['score'])
-    response = client.get(url + "?comment=student&score=no")
-    assert len(response.context['student_assignment_list']) == 0
-    response = client.get(url + "?comment=student&score=any")
-    assert len(response.context['student_assignment_list']) == 1
-    sa3.refresh_from_db()
-    sa1.score = 3
-    sa1.save(update_fields=['score'])
-    response = client.get(url + "?comment=student&score=yes")
-    assert len(response.context['student_assignment_list']) == 1
-
-
-# TODO: test ViewOwnAssignment in courses/tests/test_permissions.py
+    app_data = response.context_data['app_data']
+    assert len(app_data['props']['courseOptions']) == 2
+    assert app_data['props']['courseOptions'][0]['value'] == course.pk
+    assert len(app_data['props']['courseGroups']) == 0
 
 
 @pytest.mark.django_db
@@ -187,8 +116,6 @@ def test_assignment_detail_view_permissions(client, lms_resolver,
     response = client.get(url)
     assert response.status_code == 200
 
-
-# TODO: test ViewStudentAssignment in test_permissions.py
 
 @pytest.mark.django_db
 def test_student_assignment_detail_view_permissions(client, lms_resolver,
@@ -323,3 +250,4 @@ def test_gradebook_list(client, mocker, assert_redirect):
     course2 = CourseFactory(semester=semester, teachers=[teacher])
     response = client.get(gradebooks_url)
     assert response.status_code == 200
+

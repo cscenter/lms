@@ -33,12 +33,12 @@ top_menu = [
         css_classes='for-students'),
     MenuItem(
         pgettext_lazy("menu", "Преподавание"),
-        reverse('teaching:assignment_list'),
+        reverse('teaching:assignments_check_queue'),
         weight=20,
         children=[
             MenuItem(
-                pgettext_lazy("menu", "Задания"),
-                reverse('teaching:assignment_list'),
+                pgettext_lazy("menu", "Очередь проверки"),
+                reverse('teaching:assignments_check_queue'),
                 weight=10,
                 budge='assignments_teacher',
                 selected_patterns=[

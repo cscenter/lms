@@ -12,20 +12,24 @@ from vanilla import TemplateView
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import FileField
+from django.db.models import FileField, Q
 from django.http import FileResponse, HttpResponseBadRequest, JsonResponse
+from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
 
 from auth.mixins import PermissionRequiredMixin
+from core.api.fields import CharSeparatedField
 from core.exceptions import Redirect
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
 from courses.constants import SemesterTypes
 from courses.models import Assignment, Course, CourseTeacher
 from courses.permissions import ViewAssignment
+from courses.selectors import assignments_list, course_teachers_prefetch_queryset
+from courses.services import CourseService
 from learning.api.serializers import AssignmentScoreSerializer
 from learning.forms import (
     AssignmentCommentForm, AssignmentModalCommentForm, AssignmentScoreForm
@@ -37,13 +41,43 @@ from learning.permissions import (
     CreateAssignmentComment, DownloadAssignmentSolutions, EditOwnStudentAssignment,
     ViewStudentAssignment, ViewStudentAssignmentList
 )
-from learning.selectors import (
-    get_active_enrollments, get_course_assignments, get_teacher_courses
-)
-from learning.services import AssignmentService
+from learning.selectors import get_active_enrollments, get_teacher_courses
+from learning.services import AssignmentService, StudentGroupService
 from learning.teaching.filters import AssignmentStudentsFilter
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
+
+
+def _check_queue_filters(course: Course, query_params):
+    assignments = []
+    assignments_filter = query_params.get('assignments', {})
+    assignments_queryset = assignments_list(filters={"course": course}).order_by('-deadline_at', 'title')
+    for i, assignment in enumerate(assignments_queryset):
+        assignments.append({
+            "value": assignment.pk,
+            "label": assignment.title,
+            "selected": str(assignment.pk) in assignments_filter if assignments_filter else i < 2
+        })
+    # Course teachers
+    course_teachers = [{"value": "", "label": "Не назначен", "selected": False}]
+    teachers_qs = (course_teachers_prefetch_queryset(role_priority=False)
+                   .filter(course=course))
+    for course_teacher in teachers_qs:
+        value = course_teacher.pk
+        label = course_teacher.teacher.get_short_name(last_name_first=True)
+        course_teachers.append({"value": value, "label": label, "selected": False})
+    # Student groups
+    student_groups_ = CourseService.get_student_groups(course)
+    sites_total = StudentGroupService.unique_sites(student_groups_)
+    student_groups = []
+    for g in student_groups_:
+        label = g.get_name(branch_details=sites_total > 1)
+        student_groups.append({"value": g.pk, "label": label, "selected": False})
+    return {
+        "assignments": assignments,
+        "courseTeachers": course_teachers,
+        "courseGroups": student_groups
+    }
 
 
 class AssignmentCheckQueueView(PermissionRequiredMixin, TemplateView):
@@ -53,12 +87,9 @@ class AssignmentCheckQueueView(PermissionRequiredMixin, TemplateView):
     class InputSerializer(serializers.Serializer):
         course = serializers.ChoiceField(choices=(), allow_blank=False,
                                          required=False)
-        assignments = serializers.ListField(
-            label="Assignments",
-            child=serializers.IntegerField(min_value=1),
-            min_length=1,
-            allow_empty=False,
-            required=False)
+        assignments = CharSeparatedField(label="Assignments",
+                                         allow_blank=True,
+                                         required=False)
 
         def __init__(self, courses: List[Course], **kwargs):
             super().__init__(**kwargs)
@@ -74,22 +105,43 @@ class AssignmentCheckQueueView(PermissionRequiredMixin, TemplateView):
         if not serializer.is_valid(raise_exception=False):
             # Use defaults and redirect
             raise Redirect(to=self.request.path_info)
+        # Course options
+        course_options = []
         # Group courses by meta course inside each semester
-        by_semester = bucketize(courses, key=lambda c: (c.semester_id, c.meta_course_id))
-        # Get assignments for the selected course
+        grouped_courses = bucketize(courses, key=lambda c: (c.semester_id, c.meta_course_id))
+        for semester, semester_courses in grouped_courses.items():
+            for course in semester_courses:
+                course_name = f"{course.name}, {course.semester.name}"
+                if len(semester_courses) > 1:
+                    course_name += f" {course.main_branch.name}"
+                course_options.append({
+                    "value": course.pk,
+                    "label": course_name
+                })
+        # Selected course
         course_id = serializer.validated_data.get('course') or courses[0].pk
         course = next((c for c in courses if c.pk == course_id))
-        # TODO: убедиться, что среди указанных assignments есть валидные значения, но в какой момент?
+        filters = _check_queue_filters(course, serializer.validated_data)
+        score_states = {}
+        for key in StudentAssignment.States.values:
+            choice = StudentAssignment.States.get_choice(key)
+            score_states[key] = choice.abbr
         return {
-            "options": {
-                "courses": by_semester,
-                # TODO: сортировать по дедлайну
-                "assignments": get_course_assignments(course),
-                # TODO: брать список всех проверяющих из настроек курса + список студенческих групп
-            },
-            "state": {
-                "course": course,
-            },
+            "app_data": {
+                "props": {
+                    "timeZone": str(self.request.user.time_zone),
+                    "csrfToken": get_token(self.request),
+                    "scoreStates": score_states,
+                    "courseOptions": course_options,
+                    "courseTeachers": filters["courseTeachers"],
+                    "courseGroups": filters["courseGroups"]
+                },
+                "state": {
+                    "course": course.pk,
+                    "assignments": [a["value"] for a in filters['assignments']
+                                    if a["selected"]]
+                }
+            }
         }
 
 
@@ -183,7 +235,7 @@ class AssignmentListView(PermissionRequiredMixin, FilterMixin, TemplateView):
             ('assignment', ""),  # should be the last one
         ]
         context["form_url"] = "{}?{}".format(
-            reverse("teaching:assignment_list"),
+            reverse("teaching:assignments_check_queue"),
             urlencode(OrderedDict(query_tuple))
         )
         context["student_assignment_list"] = student_assignment_list
@@ -192,7 +244,7 @@ class AssignmentListView(PermissionRequiredMixin, FilterMixin, TemplateView):
         context['filter_by_student_group'] = filterset.form.fields['student_group'].choices
         context["query"] = query_params
         context["base_url"] = "{}?{}".format(
-            reverse("teaching:assignment_list"),
+            reverse("teaching:assignments_check_queue"),
             urlencode(query_params))
         context["set_query_parameter"] = set_query_parameter
         return context
@@ -259,7 +311,7 @@ class AssignmentListView(PermissionRequiredMixin, FilterMixin, TemplateView):
             if not term:
                 raise ValidationError("Term is not presented among available")
         except (ValueError, ValidationError):
-            raise Redirect(to=reverse("teaching:assignment_list"))
+            raise Redirect(to=reverse("teaching:assignments_check_queue"))
         return term.index
 
     def _get_requested_course(self, courses):

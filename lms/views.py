@@ -37,7 +37,7 @@ class IndexView(View):
         elif user.is_curator:
             redirect_to = reverse('staff:student_search')
         elif user.is_teacher:
-            redirect_to = reverse('teaching:assignment_list')
+            redirect_to = reverse('teaching:assignments_check_queue')
         elif user.is_student or user.is_volunteer:
             redirect_to = reverse('study:assignment_list')
         return HttpResponseRedirect(redirect_to=redirect_to)
