@@ -979,7 +979,8 @@ def create_assignment_comment(*, personal_assignment: StudentAssignment,
     comment.created = get_now_utc()  # TODO: write test
     comment.save()
 
-    update_personal_assignment_stats(personal_assignment)
+    from learning.tasks import update_student_assignment_stats
+    update_student_assignment_stats.delay(personal_assignment.pk)
 
     return comment
 
@@ -1001,7 +1002,8 @@ def create_assignment_solution(*, personal_assignment: StudentAssignment,
                                  attached_file=attachment)
     solution.save()
 
-    update_personal_assignment_stats(personal_assignment)
+    from learning.tasks import update_student_assignment_stats
+    update_student_assignment_stats.delay(personal_assignment.pk)
 
     return solution
 
@@ -1020,9 +1022,11 @@ def create_assignment_solution_and_check(*, personal_assignment: StudentAssignme
     return solution
 
 
-# TODO: It's safe to make this logic async
-def update_personal_assignment_stats(personal_assignment: StudentAssignment):
-    student_assignment_id = personal_assignment.pk
+def update_personal_assignment_stats(*, personal_assignment: StudentAssignment) -> None:
+    """
+    Calculates and fully replaces personal assignment stats stored
+    in a `stats` property of the .meta json field.
+    """
     solutions_count = Count(
         Case(When(type=AssignmentSubmissionTypes.SOLUTION,
                   then=1),
@@ -1032,7 +1036,7 @@ def update_personal_assignment_stats(personal_assignment: StudentAssignment):
         'order_by': F('created').asc()
     }
     latest_submission = (AssignmentComment.published
-                         .filter(student_assignment_id=student_assignment_id)
+                         .filter(student_assignment_id=personal_assignment.pk)
                          .annotate(comments_total=Window(expression=Count('*'), **window),
                                    solutions_total=Window(expression=solutions_count, **window))
                          .order_by('created')
@@ -1065,6 +1069,6 @@ def update_personal_assignment_stats(personal_assignment: StudentAssignment):
         stats['solutions'] = latest_submission.solutions_total
     meta['stats'] = stats
     (StudentAssignment.objects
-     .filter(pk=student_assignment_id)
+     .filter(pk=personal_assignment.pk)
      .update(meta=meta))
 

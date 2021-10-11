@@ -3,8 +3,10 @@ import logging
 from django_rq import job
 
 from files.utils import convert_ipynb_to_html
-from learning.models import AssignmentComment, SubmissionAttachment
-from learning.services import create_notifications_about_new_submission
+from learning.models import AssignmentComment, StudentAssignment, SubmissionAttachment
+from learning.services import (
+    create_notifications_about_new_submission, update_personal_assignment_stats
+)
 
 logger = logging.getLogger(__file__)
 
@@ -29,6 +31,16 @@ def convert_assignment_submission_ipynb_file_to_html(*, assignment_submission_id
     submission_attachment = SubmissionAttachment(submission=submission,
                                                  attachment=html_source)
     submission_attachment.save()
+
+
+@job('default')
+def update_student_assignment_stats(student_assignment_id: int) -> None:
+    student_assignment = (StudentAssignment.objects
+                          .filter(pk=student_assignment_id)
+                          .first())
+    if not student_assignment:
+        return
+    update_personal_assignment_stats(personal_assignment=student_assignment)
 
 
 @job('high')

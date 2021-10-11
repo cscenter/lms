@@ -8,10 +8,12 @@ from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseTeacherFactory
 )
 from learning.models import (
-    AssignmentNotification, Enrollment, StudentAssignment, StudentGroup
+    AssignmentNotification, Enrollment, PersonalAssignmentActivity, StudentAssignment,
+    StudentGroup
 )
 from learning.services import (
-    AssignmentService, create_notifications_about_new_submission
+    AssignmentService, create_assignment_comment,
+    create_notifications_about_new_submission
 )
 from learning.settings import Branches, StudentStatuses
 from learning.tests.factories import (
@@ -21,7 +23,7 @@ from learning.tests.factories import (
 from users.models import StudentTypes, UserGroup
 from users.services import StudentProfileError, create_student_profile
 from users.tests.factories import (
-    StudentFactory, StudentProfileFactory, TeacherFactory, UserFactory
+    CuratorFactory, StudentFactory, StudentProfileFactory, TeacherFactory, UserFactory
 )
 
 
@@ -425,3 +427,23 @@ def test_maybe_set_assignee_for_personal_assignment_already_assigned():
     student_assignment.refresh_from_db()
     assert student_assignment.assignee == course_teacher1
     assert student_assignment.trigger_auto_assign is False
+
+
+@pytest.mark.django_db
+def test_update_personal_assignment_stats():
+    curator = CuratorFactory()
+    student_assignment = StudentAssignmentFactory()
+    create_assignment_comment(personal_assignment=student_assignment,
+                              is_draft=True,
+                              created_by=curator,
+                              message='Comment message')
+    student_assignment.refresh_from_db()
+    assert student_assignment.meta is None
+    comment = create_assignment_comment(personal_assignment=student_assignment,
+                                        is_draft=False,
+                                        created_by=curator,
+                                        message='Comment message')
+    student_assignment.refresh_from_db()
+    assert isinstance(student_assignment.meta, dict)
+    assert student_assignment.meta['stats']['comments'] == 1
+    assert student_assignment.meta['stats']['activity']['code'] == PersonalAssignmentActivity.TEACHER_COMMENT
