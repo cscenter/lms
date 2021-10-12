@@ -61,7 +61,6 @@ def test_assignments_check_queue_view(settings, client):
     response = client.get(url)
     assert response.status_code == 200
     assert not len(response.context_data)
-    # TODO: test input serializer with wrong data
     branch = BranchFactory(site=SiteFactory(pk=settings.SITE_ID))
     term = SemesterFactory(year=2018)
     course = CourseFactory(main_branch=branch, semester=term, teachers=[teacher],
@@ -78,6 +77,11 @@ def test_assignments_check_queue_view(settings, client):
     assert app_data['props']['courseTeachers'][1]['value'] == course_teacher.pk
     assert app_data['props']['timeZone'] == str(teacher.time_zone)
     assert 'csrfToken' in app_data['props']
+    # Hide courses from other sites
+    branch_other = BranchFactory(site=SiteFactory(domain='test.domain'))
+    CourseFactory(main_branch=branch_other, semester=term, teachers=[teacher])
+    response = client.get(url)
+    assert len(response.context_data['app_data']['props']['courseTeachers']) == 2
     # Test course input
     course_other = CourseFactory(main_branch=branch, semester=term,
                                  group_mode=CourseGroupModes.MANUAL)

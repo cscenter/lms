@@ -98,6 +98,7 @@ class AssignmentCheckQueueView(PermissionRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         teacher = self.request.user
         courses = list(get_teacher_courses(teacher)
+                       .filter(main_branch__site=self.request.site)
                        .order_by("-semester__index", "meta_course__name"))
         if not courses:
             return {}
