@@ -468,6 +468,7 @@ class AssignmentService:
             ~Q(student_profile__status__in=StudentStatuses.inactive_statuses)
         ]
         restrict_to = list(sg.pk for sg in assignment.restricted_to.all())
+        # Filter out enrollments not in the targeted course groups
         if for_groups is not None:
             has_null = None in for_groups
             if restrict_to:
@@ -478,13 +479,11 @@ class AssignmentService:
                 groups_q |= Q(student_group__isnull=True)
             filters.append(groups_q)
         elif restrict_to:
-            # Exclude enrollments without student group if assignment is
-            # restricted to some groups
             filters.append(Q(student_group_id__in=restrict_to))
         students = list(Enrollment.active
                         .filter(*filters)
                         .values_list("student_id", flat=True))
-        # It's possible in case of transferring some students from one
+        # Records could exist in case of transferring students from one
         # group to another
         already_exist = set(StudentAssignment.objects
                             .filter(assignment=assignment, student__in=students)
@@ -495,10 +494,10 @@ class AssignmentService:
                        .values_list('student_id', flat=True))
         if in_trash:
             cls._restore_student_assignments(assignment, in_trash)
-            already_exist.update(in_trash)
         # Create personal assignments if necessary
+        already_created = already_exist | in_trash
         batch_size = 100
-        to_create = (sid for sid in students if sid not in already_exist)
+        to_create = (sid for sid in students if sid not in already_created)
         objs = (StudentAssignment(assignment=assignment, student_id=student_id)
                 for student_id in to_create)
         while True:
@@ -508,8 +507,9 @@ class AssignmentService:
             StudentAssignment.objects.bulk_create(batch, batch_size)
         # TODO: move to the separated method
         # Generate notifications
+        to_notify = [sid for sid in students if sid not in already_exist]
         created = (StudentAssignment.objects
-                   .filter(assignment=assignment, student_id__in=students)
+                   .filter(assignment=assignment, student_id__in=to_notify)
                    .values_list('pk', 'student_id', named=True))
         objs = (notify_student_new_assignment(sa, commit=False) for sa
                 in created)
