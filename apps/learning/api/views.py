@@ -18,7 +18,7 @@ from api.permissions import CuratorAccessPermission
 from api.utils import get_serializer_fields, inline_serializer
 from api.views import APIBaseView
 from auth.mixins import RolePermissionRequiredMixin
-from core.api.fields import CharSeparatedField
+from core.api.fields import CharSeparatedField, ScoreField
 from core.http import AuthenticatedAPIRequest, HttpRequest
 from courses.api.serializers import CourseTeacherSerializer
 from courses.models import Assignment, Course
@@ -112,6 +112,7 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
 
     class OutputSerializer(serializers.ModelSerializer):
         state = serializers.SerializerMethodField()
+        score = ScoreField(coerce_to_string=True)
         student = UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic'))
         assignee = inline_serializer(fields={
             "id": serializers.IntegerField(),

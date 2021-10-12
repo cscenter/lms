@@ -392,7 +392,7 @@ class StudentGroupService:
                  student_group=source,
                  student_profile__in=student_profiles)
          .update(student_group_id=destination))
-        # After students were trasferred to the target group create missing
+        # After students were transferred to the target group create missing
         # personal assignments
         source_group_assignments = cls.available_assignments(source)
         target_group_assignments = cls.available_assignments(destination)

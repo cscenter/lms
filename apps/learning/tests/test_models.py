@@ -302,6 +302,14 @@ def test_score_field():
     sa.save()
     sa.refresh_from_db()
     assert str(sa.score) == '20.5'
+    sa.score = 0.980
+    sa.save()
+    sa.refresh_from_db()
+    assert str(sa.score) == '0.98'
+    sa.score = 2E+1
+    sa.save()
+    sa.refresh_from_db()
+    assert str(sa.score) == '20'
 
 
 @pytest.mark.django_db

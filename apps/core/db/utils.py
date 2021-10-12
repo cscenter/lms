@@ -2,17 +2,17 @@ from decimal import Decimal
 from typing import Optional, Union
 
 
-def normalize_score(value: Optional[Decimal]) -> Optional[Union[int, Decimal]]:
+def normalize_score(value: Optional[Decimal]) -> Optional[Decimal]:
     """
-    This method used for humanizing score value - we want to show `5`
-    instead of `5.00` when it's possible.
+    Removes the exponent and trailing zeroes, losing significance,
+    but keeping the value unchanged.
 
-    When decimal is provided cast it to integer. If the result is exact
-    as decimal value returns integer instead of the original decimal.
+    For example, expressing 5.0E+3 as 5000 keeps the value constant but
+    cannot show the original’s two-place significance.
     """
     if value is None:
         return value
-    decimal_as_int = value.to_integral_value()
-    if value == decimal_as_int:
-        return decimal_as_int
+    as_integral = value.to_integral_value()
+    if value == as_integral:
+        return as_integral.quantize(Decimal(1))
     return value.normalize()
