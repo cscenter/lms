@@ -202,6 +202,31 @@ def test_assignment_service_bulk_create_personal_assignments_with_existing_recor
 
 
 @pytest.mark.django_db
+def test_assignment_service_bulk_create_personal_assignments_notifications(settings):
+    course = CourseFactory(group_mode=StudentGroupTypes.MANUAL)
+    enrollment1, enrollment2, enrollment3 = EnrollmentFactory.create_batch(3, course=course)
+    assignment = AssignmentFactory(course=course)
+    StudentAssignment.objects.all().delete()
+    AssignmentService.bulk_create_student_assignments(assignment)
+    assert AssignmentNotification.objects.count() == 3
+    # 1 already exist
+    StudentAssignment.objects.all().delete()
+    AssignmentService.recreate_student_assignment(assignment, enrollment1)
+    AssignmentNotification.objects.all().delete()
+    AssignmentService.bulk_create_student_assignments(assignment)
+    assert AssignmentNotification.objects.count() == 2
+    # 1 exist, 1 soft deleted
+    StudentAssignment.objects.all().delete()
+    AssignmentService.recreate_student_assignment(assignment, enrollment1)
+    student_assignment2 = AssignmentService.recreate_student_assignment(assignment, enrollment2)
+    student_assignment2.delete()
+    assert student_assignment2.is_deleted
+    AssignmentNotification.objects.all().delete()
+    AssignmentService.bulk_create_student_assignments(assignment)
+    assert AssignmentNotification.objects.count() == 2
+
+
+@pytest.mark.django_db
 def test_assignment_service_remove_personal_assignments():
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)

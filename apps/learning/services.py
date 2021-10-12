@@ -427,18 +427,19 @@ class AssignmentService:
 
     @classmethod
     def recreate_student_assignment(cls, assignment: Assignment,
-                                    enrollment: Enrollment):
+                                    enrollment: Enrollment) -> Optional[StudentAssignment]:
         """
         Creates or restores record for tracking student progress on assignment
         if the assignment is not restricted for the student's group.
         """
         restricted_to = list(sg.pk for sg in assignment.restricted_to.all())
         if restricted_to and enrollment.student_group_id not in restricted_to:
-            return
-        return StudentAssignment.base.update_or_create(
+            return None
+        student_assignment, _ = StudentAssignment.base.update_or_create(
             assignment=assignment, student_id=enrollment.student_id,
             # FIXME: is it really necessary to reset score and execution_time?
             defaults={'deleted_at': None, 'score': None, 'execution_time': None})
+        return student_assignment
 
     @classmethod
     def _restore_student_assignments(cls, assignment: Assignment,
