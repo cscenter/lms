@@ -59,7 +59,7 @@ def _check_queue_filters(course: Course, query_params):
             "selected": str(assignment.pk) in assignments_filter if assignments_filter else i < 2
         })
     # Course teachers
-    course_teachers = [{"value": "", "label": "Не назначен", "selected": False}]
+    course_teachers = [{"value": "unset", "label": "Не назначен", "selected": False}]
     teachers_qs = (course_teachers_prefetch_queryset(role_priority=False)
                    .filter(course=course))
     for course_teacher in teachers_qs:
@@ -139,8 +139,8 @@ class AssignmentCheckQueueView(PermissionRequiredMixin, TemplateView):
                 },
                 "state": {
                     "course": course.pk,
-                    "assignments": [a["value"] for a in filters['assignments']
-                                    if a["selected"]]
+                    "selectedAssignments": [a["value"] for a in filters['assignments']
+                                            if a["selected"]]
                 }
             }
         }
