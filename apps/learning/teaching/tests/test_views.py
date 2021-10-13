@@ -70,9 +70,9 @@ def test_assignments_check_queue_view(settings, client):
     app_data = response.context_data['app_data']
     assert 'courseOptions' in app_data['props']
     assert course.pk == app_data['state']['course']
-    assert app_data['state']['assignments'] == []
+    assert app_data['state']['selectedAssignments'] == []
     assert len(app_data['props']['courseTeachers']) == 2
-    assert app_data['props']['courseTeachers'][0]['value'] == ''  # not set
+    assert app_data['props']['courseTeachers'][0]['value'] == 'unset'
     course_teacher = CourseTeacher.objects.get(course=course, teacher=teacher)
     assert app_data['props']['courseTeachers'][1]['value'] == course_teacher.pk
     assert app_data['props']['timeZone'] == str(teacher.time_zone)
