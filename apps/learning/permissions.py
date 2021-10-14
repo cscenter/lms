@@ -137,9 +137,7 @@ class ViewRelatedEnrollments(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, course: Course):
-        # TODO: What about teachers from other related courses?
-        return any(t.teacher_id == user.pk for t in
-                   course.course_teachers.all())
+        return course.is_actual_teacher(user.pk)
 
 
 @add_perm

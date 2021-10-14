@@ -30,12 +30,12 @@ class StudentProfileSerializer(DynamicFieldsModelSerializer):
         return student_profile.user.get_short_name()
 
 
-class EnrollmentSerializer(serializers.ModelSerializer):
+class BaseEnrollmentSerializer(serializers.ModelSerializer):
     student_profile = StudentProfileSerializer(fields=('id', 'type', 'branch', 'year_of_admission', 'student'))
 
     class Meta:
         model = Enrollment
-        fields = ('id', 'grade', 'student_profile',)
+        fields = ('id', 'grade', 'student_profile')
 
 
 class CourseNewsNotificationSerializer(serializers.ModelSerializer):
@@ -92,16 +92,3 @@ class CourseAssignmentSerializer(BaseAssignmentSerializer):
     class Meta(BaseAssignmentSerializer.Meta):
         fields = ('id', 'deadline_at', 'title', 'passing_score',
                   'maximum_score', 'weight', 'ttc', 'solution_format')
-
-
-class EnrollmentStudentProfileSerializer(StudentProfileSerializer):
-    class Meta(StudentProfileSerializer.Meta):
-        fields = ('id', 'type', 'branch', 'year_of_admission')
-
-
-class MyEnrollmentSerializer(EnrollmentSerializer):
-    student = UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic'))
-    student_profile = EnrollmentStudentProfileSerializer()
-
-    class Meta(EnrollmentSerializer.Meta):
-        fields = ('id', 'grade', 'student', 'student_profile')

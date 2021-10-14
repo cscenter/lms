@@ -5,8 +5,7 @@ import pytest
 from core.urls import reverse
 from courses.tests.factories import AssignmentFactory, CourseFactory
 from learning.api.serializers import (
-    BaseStudentAssignmentSerializer, CourseAssignmentSerializer, MyCourseSerializer,
-    MyEnrollmentSerializer
+    BaseStudentAssignmentSerializer, CourseAssignmentSerializer, MyCourseSerializer
 )
 from learning.models import StudentAssignment
 from learning.tests.factories import EnrollmentFactory
@@ -87,7 +86,7 @@ def test_api_course_enrollments_empty(client):
                   kwargs={'course_id': course.pk})
     AssignmentFactory(course=other_course)
     response = client.get(url)
-    assert response.status_code == 401
+    assert response.status_code == 403
     # Authenticate, but request a course that teacher not participated in
     auth_token = client.get_api_token(teacher)
     url = reverse("learning-api:v1:course_enrollments",
@@ -113,7 +112,6 @@ def test_api_course_enrollments_with_data(client):
     response = client.get(url, HTTP_AUTHORIZATION=f'Token {auth_token}')
     assert response.status_code == 200
     assert len(response.data) == 1
-    assert response.data[0] == MyEnrollmentSerializer(enrollment1).data
 
 
 @pytest.mark.django_db

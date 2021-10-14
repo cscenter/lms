@@ -9,24 +9,20 @@ from rest_framework.generics import ListAPIView, UpdateAPIView, get_object_or_40
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from django.db.models import Prefetch
-from django.utils.translation import gettext_lazy as _
-
 from api.authentication import TokenAuthentication
 from api.mixins import ApiErrorsMixin
 from api.permissions import CuratorAccessPermission
-from api.utils import get_serializer_fields, inline_serializer
+from api.utils import inline_serializer
 from api.views import APIBaseView
 from auth.mixins import RolePermissionRequiredMixin
 from core.api.fields import CharSeparatedField, ScoreField
-from core.http import AuthenticatedAPIRequest, HttpRequest
-from courses.api.serializers import CourseTeacherSerializer
+from core.http import AuthenticatedAPIRequest
 from courses.models import Assignment, Course
 from courses.permissions import CreateAssignment
-from courses.selectors import course_personal_assignments, personal_assignments_list
+from courses.selectors import course_personal_assignments
 from learning.api.serializers import (
-    BaseStudentAssignmentSerializer, CourseAssignmentSerializer,
-    CourseNewsNotificationSerializer, MyCourseSerializer, MyEnrollmentSerializer,
+    BaseEnrollmentSerializer, BaseStudentAssignmentSerializer,
+    CourseAssignmentSerializer, CourseNewsNotificationSerializer, MyCourseSerializer,
     StudentAssignmentAssigneeSerializer, StudentProfileSerializer, UserSerializer
 )
 from learning.models import CourseNewsNotification, Enrollment, StudentAssignment
@@ -79,26 +75,37 @@ class CourseAssignmentList(RolePermissionRequiredMixin, ApiErrorsMixin, ListAPIV
                 .order_by('-deadline_at'))
 
 
-class EnrollmentList(ListAPIView):
-    """
-    List students enrolled in the course.
-    """
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, ViewEnrollments]
-    serializer_class = MyEnrollmentSerializer
+class CourseStudentsList(RolePermissionRequiredMixin, APIBaseView):
+    """List of students enrolled in the course."""
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [ViewEnrollments]
+    renderer_classes = (CamelCaseJSONRenderer, CamelCaseBrowsableAPIRenderer)
     course: Course
 
+    class OutputSerializer(BaseEnrollmentSerializer):
+        student = UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic'))
+        # TODO: consider to use expandable fields https://github.com/rsinger86/drf-flex-fields or
+        #  https://github.com/evenicoulddoit/django-rest-framework-serializer-extensions
+        # student_profile = StudentProfileSerializer(fields=('id', 'type', 'branch', 'year_of_admission'))
+
+        class Meta(BaseEnrollmentSerializer.Meta):
+            fields = ('id', 'grade', 'student_group_id', 'student', 'student_profile_id')
+
     def initial(self, request, *args, **kwargs):
-        super().initial(request, *args, **kwargs)
         self.course = get_object_or_404(Course.objects.get_queryset(),
                                         pk=kwargs['course_id'])
-        self.check_object_permissions(self.request, self.course)
+        super().initial(request, *args, **kwargs)
 
-    def get_queryset(self):
-        return (Enrollment.active
-                .select_related('student_profile__user',
-                                'student_profile__branch')
-                .filter(course_id=self.kwargs['course_id']))
+    def get_permission_object(self) -> Course:
+        return self.course
+
+    def get(self, request: AuthenticatedAPIRequest, **kwargs: Any):
+        queryset = (Enrollment.active
+                    .select_related('student')
+                    .filter(course=self.course,
+                            course__main_branch__site=request.site))
+        data = self.OutputSerializer(queryset, many=True).data
+        return Response(data)
 
 
 class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
