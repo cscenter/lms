@@ -1,18 +1,14 @@
 import os.path
 import tempfile
 import zipfile
-from collections import OrderedDict
 from typing import Any, Dict, Iterator, List, NamedTuple
-from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
-from django_filters.views import FilterMixin
 from rest_framework import serializers
 from vanilla import TemplateView
 
-from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import FileField, Q
+from django.core.exceptions import PermissionDenied
+from django.db.models import FileField
 from django.http import FileResponse, HttpResponseBadRequest, JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect
@@ -25,15 +21,12 @@ from core.api.fields import CharSeparatedField
 from core.exceptions import Redirect
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
-from courses.constants import SemesterTypes
 from courses.models import Assignment, Course, CourseTeacher
 from courses.permissions import ViewAssignment
 from courses.selectors import assignments_list, course_teachers_prefetch_queryset
 from courses.services import CourseService
 from learning.api.serializers import AssignmentScoreSerializer
-from learning.forms import (
-    AssignmentCommentForm, AssignmentModalCommentForm, AssignmentScoreForm
-)
+from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
 from learning.models import (
     AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
 )
@@ -41,14 +34,17 @@ from learning.permissions import (
     CreateAssignmentComment, DownloadAssignmentSolutions, EditOwnStudentAssignment,
     ViewStudentAssignment, ViewStudentAssignmentList
 )
-from learning.selectors import get_active_enrollments, get_teacher_courses
+from learning.selectors import get_teacher_courses
 from learning.services import AssignmentService, StudentGroupService
-from learning.teaching.filters import AssignmentStudentsFilter
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
 
 
 def _check_queue_filters(course: Course, query_params):
+    """
+    Returns filter options for the selected course in the assignments
+    check queue.
+    """
     assignments = []
     assignments_filter = query_params.get('assignments', {})
     assignments_queryset = assignments_list(filters={"course": course}).order_by('-deadline_at', 'title')
@@ -144,186 +140,6 @@ class AssignmentCheckQueueView(PermissionRequiredMixin, TemplateView):
                 }
             }
         }
-
-
-def set_query_parameter(url, param_name, param_value):
-    """
-    Given a URL, set or replace a query parameter and return the modified URL.
-    """
-    scheme, netloc, path, query_string, fragment = urlsplit(url)
-    query_params = parse_qs(query_string)
-    query_params[param_name] = [param_value]
-    new_query_string = urlencode(query_params, doseq=True)
-    return urlunsplit((scheme, netloc, path, new_query_string, fragment))
-
-
-# Note: Wow, looks like a shit
-class AssignmentListView(PermissionRequiredMixin, FilterMixin, TemplateView):
-    permission_required = ViewStudentAssignmentList.name
-    filterset_class = AssignmentStudentsFilter
-    model = StudentAssignment
-    template_name = "learning/teaching/assignment_list.html"
-
-    def get_queryset(self, filters):
-        return (
-            StudentAssignment.objects
-            .filter(**filters)
-            .select_related("assignment", "student",)
-            .only("id",
-                  "score",
-                  "first_student_comment_at",
-                  "student__username",
-                  "student__first_name",
-                  "student__last_name",
-                  "student__gender",
-                  "assignment__id",
-                  "assignment__course_id",
-                  "assignment__submission_type",
-                  "assignment__passing_score",
-                  "assignment__maximum_score",)
-            .prefetch_related("student__groups",)
-            .order_by('student__last_name', 'student__first_name'))
-
-    def get_context_data(self, **kwargs):
-        context = {}
-        data = self.get_assignment_with_navigation_data()
-        assignment, assignments, courses, terms = data
-        filters = {}
-        query_params = {}
-        if assignment:
-            course = assignment.course
-            filters["assignment"] = assignment
-            query_params["assignment"] = assignment.pk
-            active_enrollments = (get_active_enrollments(assignment.course_id)
-                                  .values_list("student_id", flat=True))
-            context["enrollments"] = set(active_enrollments)
-        else:
-            course = courses[0]
-        query_params["course"] = course.meta_course.slug
-        query_params["term"] = course.semester.slug
-
-        context["tz_override"] = self.request.user.time_zone
-        context["assignment"] = assignment
-        context["all_terms"] = terms
-        context["course_offerings"] = courses
-        context["assignments"] = assignments
-        filterset_class = self.get_filterset_class()
-        filterset_kwargs = {
-            'data': self.request.GET or None,
-            'request': self.request,
-            'queryset': self.get_queryset(filters),
-            'course': course,
-        }
-        filterset = filterset_class(**filterset_kwargs)
-        if not filterset.is_bound or filterset.is_valid():
-            student_assignment_list = filterset.qs
-        else:
-            student_assignment_list = filterset.queryset.none()
-        if filterset.form.is_bound:
-            query_params['student_group'] = filterset.form.cleaned_data['student_group'] or 'any'
-            query_params['score'] = filterset.form.cleaned_data['score'] or 'any'
-            query_params['comment'] = filterset.form.cleaned_data['comment'] or 'any'
-        else:
-            query_params['student_group'] = 'any'
-            query_params['score'] = 'any'
-            query_params['comment'] = 'any'
-        # Url prefix for assignments select
-        query_tuple = [
-            ('term', query_params.get("term", "")),
-            ('course', query_params.get("course", "")),
-            ('score', query_params["score"]),
-            ('comment', query_params["comment"]),
-            ('assignment', ""),  # should be the last one
-        ]
-        context["form_url"] = "{}?{}".format(
-            reverse("teaching:assignments_check_queue"),
-            urlencode(OrderedDict(query_tuple))
-        )
-        context["student_assignment_list"] = student_assignment_list
-        context['filter_by_comments'] = filterset.form.fields['comment'].choices
-        context['filter_by_score'] = filterset.form.fields['score'].choices
-        context['filter_by_student_group'] = filterset.form.fields['student_group'].choices
-        context["query"] = query_params
-        context["base_url"] = "{}?{}".format(
-            reverse("teaching:assignments_check_queue"),
-            urlencode(query_params))
-        context["set_query_parameter"] = set_query_parameter
-        return context
-
-    def get_assignment_with_navigation_data(self):
-        """
-        Returns requested assignment and data needed for navigation:
-            * courses in the term of the requested assignment
-            * all available terms
-            * other assignments of the related course
-
-        Redirects to the start page if query value is invalid.
-        """
-        teacher = self.request.user
-        courses = (get_teacher_courses(teacher)
-                   .order_by("semester__index", "meta_course__name"))
-        if not courses:
-            messages.info(self.request,
-                          _("You were redirected from Assignments due to "
-                            "empty course list."),
-                          extra_tags='timeout')
-            raise Redirect(to=reverse("teaching:course_list"))
-        terms = set(c.semester for c in courses)  # remove duplicates
-        terms = sorted(terms, key=lambda t: -t.index)  # restore DESC order
-        # Try to get course for the requested term
-        query_term_index = self._get_requested_term_index(terms)
-        courses_in_target_term = [c for c in courses
-                                  if c.semester.index == query_term_index]
-        # Try to get assignments for requested course
-        course = self._get_requested_course(courses_in_target_term)
-        assignments = list(Assignment.objects
-                           .filter(course=course)
-                           .only("pk", "deadline_at", "title", "course_id")
-                           .order_by("-deadline_at"))
-        # Get requested assignment
-        try:
-            assignment_id = int(self.request.GET.get("assignment", ""))
-        except ValueError:
-            # FIXME: Ищем ближайшее, где должен наступить дедлайн
-            assignment_id = next((a.pk for a in assignments), False)
-        assignment = next((a for a in assignments
-                           if a.pk == assignment_id), None)
-        return assignment, assignments, courses_in_target_term, terms
-
-    def _get_requested_term_index(self, terms):
-        """
-        Calculate term index from `term` and `year` GET-params.
-        If term index not presented in teachers term_list, redirect
-        to the latest available valid term from this list.
-        """
-        assert len(terms) > 0
-        query_term = self.request.GET.get("term")
-        if not query_term:
-            return terms[0].index  # Terms are in descending order
-        try:
-            year, term_type = query_term.split("-")
-            year = int(year)
-            if year < settings.ESTABLISHED:  # invalid GET-param value
-                raise ValidationError("Wrong year value")
-            if term_type not in SemesterTypes.values:
-                raise ValidationError("Wrong term type")
-            term = next((t for t in terms if
-                         t.type == term_type and t.year == year), None)
-            if not term:
-                raise ValidationError("Term is not presented among available")
-        except (ValueError, ValidationError):
-            raise Redirect(to=reverse("teaching:assignments_check_queue"))
-        return term.index
-
-    def _get_requested_course(self, courses):
-        assert len(courses) > 0
-        course_slug = self.request.GET.get("course", "")
-        course = next((c for c in courses
-                       if c.meta_course.slug == course_slug), None)
-        if course is None:
-            # TODO: get term and redirect to entry page
-            course = courses[0]
-        return course
 
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
