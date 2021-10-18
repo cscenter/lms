@@ -778,7 +778,6 @@ def update_student_assignment_derivable_fields(comment):
     """
     Optimize db queries by reimplementing next logic:
         student_assignment.compute_fields('first_student_comment_at')
-        student_assignment.compute_fields('last_comment_from')
     """
     if not comment.pk:
         return
@@ -792,9 +791,6 @@ def update_student_assignment_derivable_fields(comment):
         is_first_comment = not other_comments.exists()
         if is_first_comment:
             fields["first_student_comment_at"] = comment.created
-        fields["last_comment_from"] = sa.CommentAuthorTypes.STUDENT
-    else:
-        fields["last_comment_from"] = sa.CommentAuthorTypes.TEACHER
     StudentAssignment.objects.filter(pk=sa.pk).update(**fields)
     for attr_name, attr_value in fields.items():
         setattr(sa, attr_name, attr_value)

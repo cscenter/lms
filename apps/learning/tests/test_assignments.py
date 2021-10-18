@@ -65,25 +65,6 @@ def test_security_course_detail(client):
 
 
 @pytest.mark.django_db
-def test_student_assignment_last_comment_from():
-    teacher = TeacherFactory.create()
-    student = StudentFactory.create()
-    s = SemesterFactory.create_current(for_branch=Branches.SPB)
-    course = CourseFactory.create(semester=s, teachers=[teacher])
-    EnrollmentFactory.create(student=student, course=course)
-    assignment = AssignmentFactory.create(course=course)
-    sa = StudentAssignment.objects.get(assignment=assignment)
-    # Nobody comments yet
-    assert sa.last_comment_from == StudentAssignment.CommentAuthorTypes.NOBODY
-    AssignmentCommentFactory.create(student_assignment=sa, author=student)
-    sa.refresh_from_db()
-    assert sa.last_comment_from == StudentAssignment.CommentAuthorTypes.STUDENT
-    AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
-    sa.refresh_from_db()
-    assert sa.last_comment_from == StudentAssignment.CommentAuthorTypes.TEACHER
-
-
-@pytest.mark.django_db
 def test_student_assignment_model_weight_score():
     assignment = AssignmentFactory(weight=1, maximum_score=10, passing_score=2)
     student_assignment = StudentAssignment(assignment=assignment, score=2)
@@ -134,9 +115,9 @@ def test_first_comment_after_deadline(client):
     sa = StudentAssignmentFactory(assignment=assignment,
                                   student__branch=branch_spb)
     student = sa.student
-    comment = AssignmentCommentFactory.create(student_assignment=sa,
-                                              author=student,
-                                              created=dt)
+    comment = AssignmentCommentFactory(student_assignment=sa,
+                                       author=student,
+                                       created=dt)
     client.login(student)
     response = client.get(sa.get_student_url())
     assert response.status_code == 200

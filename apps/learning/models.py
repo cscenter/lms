@@ -486,6 +486,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
                         DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'assignment'
 
+    # FIXME: remove?
     class CommentAuthorTypes(DjangoChoices):
         NOBODY = ChoiceItem(0)
         STUDENT = ChoiceItem(1)
@@ -574,7 +575,6 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
     derivable_fields = [
         'execution_time',
         'first_student_comment_at',
-        'last_comment_from',
     ]
 
     class Meta:
@@ -619,24 +619,6 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             return True
         return False
 
-    def _compute_last_comment_from(self):
-        latest_comment = (AssignmentComment.objects
-                          .filter(student_assignment=self,
-                                  type=AssignmentSubmissionTypes.COMMENT)
-                          .order_by('-created')
-                          .values('author_id')
-                          .first())
-        if not latest_comment:
-            comment_from = self.CommentAuthorTypes.NOBODY
-        elif latest_comment['author_id'] == self.student_id:
-            comment_from = self.CommentAuthorTypes.STUDENT
-        else:
-            comment_from = self.CommentAuthorTypes.TEACHER
-        if self.last_comment_from != comment_from:
-            self.last_comment_from = comment_from
-            return True
-        return False
-
     def get_teacher_url(self):
         return reverse('teaching:student_assignment_detail',
                        kwargs={"pk": self.pk})
@@ -662,7 +644,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         maximum_score = assignment.maximum_score
         satisfactory_range = maximum_score - passing_score
         if score is None:
-            if not assignment.is_online or self.submission_is_received:
+            if not assignment.is_online or self.is_submission_received:
                 state = StudentAssignment.States.NOT_CHECKED
             else:
                 state = StudentAssignment.States.NOT_SUBMITTED
@@ -678,13 +660,11 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         return StudentAssignment.States.get_choice(state)
 
     @property
-    def submission_is_received(self):
-        """
-        Submission is a first comment which student sent to the assignment
-        marked as `online`.
-        """
-        return (self.first_student_comment_at is not None
-                and self.assignment.is_online)
+    def is_submission_received(self):
+        try:
+            return self.meta is not None and self.meta.get('stats', {}).get('solutions', 0) > 0
+        except ValueError:
+            return False
 
     @property
     def state_display(self):
@@ -789,7 +769,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
         if has_been_published:
             maybe_set_assignee_for_personal_assignment(self)
             # FIXME: move side effects outside model saving, e.g. to on_commit
-            # TODO: replace with self.student_assignment.('first_student_comment_at', 'last_comment_from')
+            # TODO: replace with self.student_assignment.('first_student_comment_at')
             update_student_assignment_derivable_fields(self)
             generate_notifications_about_new_submission.delay(
                 assignment_submission_id=self.pk)

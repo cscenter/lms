@@ -17,7 +17,7 @@ from users.models import StudentProfile
 from .pandas_serializers import (
     StudentsTotalByTypePandasSerializer, StudentsTotalByYearPandasSerializer
 )
-from .serializers import StudentAssignmentsSerializer
+from .serializers import StudentAssignmentStatsSerializer
 
 
 class CourseParticipantsStatsByType(ListRenderersMixin, PandasView):
@@ -86,7 +86,7 @@ class AssignmentsStats(APIView):
         deadline_at = serializers.DateTimeField(label="deadline", read_only=True)
         passing_score = serializers.IntegerField(read_only=True)
         maximum_score = serializers.IntegerField(read_only=True)
-        students = StudentAssignmentsSerializer(many=True, read_only=True)
+        students = StudentAssignmentStatsSerializer(many=True, read_only=True)
 
     def get(self, request, **kwargs):
         assignments = self.get_queryset()

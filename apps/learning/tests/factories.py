@@ -13,7 +13,10 @@ from learning.models import (
     CourseInvitation, CourseNewsNotification, Enrollment, EnrollmentPeriod, Event,
     GraduateProfile, Invitation, StudentAssignment, StudentGroup, StudentGroupAssignee
 )
-from learning.services import StudentGroupService, recreate_assignments_for_student
+from learning.services import (
+    StudentGroupService, create_assignment_comment, create_assignment_solution,
+    recreate_assignments_for_student
+)
 from learning.settings import StudentStatuses
 from users.constants import Roles
 from users.models import UserGroup
@@ -73,6 +76,29 @@ class AssignmentCommentFactory(factory.django.DjangoModelFactory):
     author = factory.SubFactory(UserFactory)
     type = AssignmentSubmissionTypes.COMMENT
     attached_file = factory.django.FileField()
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        is_draft = not kwargs.get('is_published', True)
+        if kwargs['type'] == AssignmentSubmissionTypes.COMMENT:
+            comment = create_assignment_comment(personal_assignment=kwargs['student_assignment'],
+                                                is_draft=is_draft,
+                                                created_by=kwargs['author'],
+                                                message=kwargs['text'],
+                                                attachment=kwargs['attached_file'])
+        elif kwargs['type'] == AssignmentSubmissionTypes.SOLUTION:
+            comment = create_assignment_solution(personal_assignment=kwargs['student_assignment'],
+                                                 created_by=kwargs['author'],
+                                                 execution_time=kwargs.get('execution_time'),
+                                                 message=kwargs['text'],
+                                                 attachment=kwargs['attached_file'])
+        else:
+            raise ValueError()
+        # Consider to move valid kwargs to the create_assignment_comment/_solution
+        if 'created' in kwargs:
+            comment.created = kwargs['created']
+            comment.save(update_fields=['created'])
+        return comment
 
 
 class EnrollmentPeriodFactory(factory.django.DjangoModelFactory):

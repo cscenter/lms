@@ -72,49 +72,43 @@ def test_models__str__(mocker):
 
 
 @pytest.mark.django_db
-def test_student_assignment_submission_is_sent():
-    u_student = StudentFactory()
-    u_teacher = TeacherFactory()
-    as_ = StudentAssignmentFactory(
-        student=u_student,
-        assignment__course__teachers=[u_teacher],
+def test_student_assignment_is_submission_received():
+    student = StudentFactory()
+    teacher = TeacherFactory()
+    student_assignment = StudentAssignmentFactory(
+        student=student,
+        assignment__course__teachers=[teacher],
         assignment__submission_type=AssignmentFormat.ONLINE)
     # teacher comments first
-    assert not as_.submission_is_received
-    AssignmentCommentFactory.create(student_assignment=as_,
-                                    author=u_teacher)
-    as_.refresh_from_db()
-    assert not as_.submission_is_received
-    AssignmentCommentFactory.create(student_assignment=as_,
-                                    author=u_student)
-    as_.refresh_from_db()
-    assert as_.submission_is_received
+    assert not student_assignment.is_submission_received
+    AssignmentCommentFactory(student_assignment=student_assignment,
+                             author=teacher,
+                             type=AssignmentSubmissionTypes.COMMENT)
+    student_assignment.refresh_from_db()
+    assert student_assignment.meta is not None
+    assert not student_assignment.is_submission_received
+    AssignmentCommentFactory(student_assignment=student_assignment,
+                             author=student,
+                             type=AssignmentSubmissionTypes.SOLUTION)
+    student_assignment.refresh_from_db()
+    assert student_assignment.is_submission_received
     # student comments first
-    as_ = StudentAssignmentFactory(
-        student=u_student,
-        assignment__course__teachers=[u_teacher],
+    student_assignment = StudentAssignmentFactory(
+        student=student,
+        assignment__course__teachers=[teacher],
         assignment__submission_type=AssignmentFormat.ONLINE)
-    as_.refresh_from_db()
-    assert not as_.submission_is_received
-    AssignmentCommentFactory.create(student_assignment=as_,
-                                    author=u_student)
-    as_.refresh_from_db()
-    assert as_.submission_is_received
-    AssignmentCommentFactory.create(student_assignment=as_,
-                                    author=u_student)
-    as_.refresh_from_db()
-    assert as_.submission_is_received
-    # assignment is offline
-    as_ = StudentAssignmentFactory(
-        student=u_student,
-        assignment__course__teachers=[u_teacher],
-        assignment__submission_type=AssignmentFormat.NO_SUBMIT)
-    as_.refresh_from_db()
-    assert not as_.submission_is_received
-    AssignmentCommentFactory.create(student_assignment=as_,
-                                    author=u_student)
-    as_.refresh_from_db()
-    assert not as_.submission_is_received
+    student_assignment.refresh_from_db()
+    assert not student_assignment.is_submission_received
+    AssignmentCommentFactory(student_assignment=student_assignment,
+                             type=AssignmentSubmissionTypes.COMMENT,
+                             author=student)
+    student_assignment.refresh_from_db()
+    assert not student_assignment.is_submission_received
+    AssignmentCommentFactory(student_assignment=student_assignment,
+                             type=AssignmentSubmissionTypes.SOLUTION,
+                             author=student)
+    student_assignment.refresh_from_db()
+    assert student_assignment.is_submission_received
 
 
 @pytest.mark.django_db
