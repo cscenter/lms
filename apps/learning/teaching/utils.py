@@ -1,4 +1,4 @@
-from urllib.parse import urlsplit, parse_qs, urlencode, urlunsplit
+from urllib.parse import parse_qs, urlencode, urlsplit, urlunsplit
 
 from django.conf import settings
 
