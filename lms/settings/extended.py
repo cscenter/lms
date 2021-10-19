@@ -43,6 +43,7 @@ LOCALE_PATHS += [
     str(SHARED_APPS_DIR / "surveys" / "locale"),
 ]
 
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
 # Admission app authentication
 # Oauth settings for getting access to login from Yandex.Passport
 # Note: Application is managed by `contest@compscicenter.ru` yandex account
