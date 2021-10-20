@@ -17,9 +17,7 @@ class RBACPermissions:
     Backend uses RBAC model approach allowing to check permissions
     both on model and object level.
 
-    Default roles and permissions are not supported.
-
-    Implementation uses `UserModel.roles` attribute which should return
+    Implementation relies on `UserModel.roles` attribute that must return
     set of available roles for the user.
     """
     def authenticate(self, *args, **kwargs):
