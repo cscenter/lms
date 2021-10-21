@@ -9,7 +9,7 @@ UserModel = get_user_model()
 
 
 class TokenObtainSerializer(serializers.Serializer):
-    username_field = UserModel.USERNAME_FIELD
+    login_field_name: str = UserModel.USERNAME_FIELD
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -21,7 +21,7 @@ class TokenObtainSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         authenticate_kwargs = {
-            self.username_field: attrs['login'],
+            self.login_field_name: attrs['login'],
             'password': attrs['password'],
         }
         try:

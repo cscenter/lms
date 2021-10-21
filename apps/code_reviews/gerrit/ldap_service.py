@@ -2,12 +2,13 @@ import base64
 import logging
 from typing import Dict, List, Union
 
-import ldif
 from ldap.dn import escape_dn_chars
+from ldif import LDIFWriter
 
 from django.conf import settings
 from django.utils.encoding import force_bytes
 
+from auth.models import ConnectedAuthService
 from code_reviews.api.ldap import LDAPClient, adapted_base64
 from code_reviews.gerrit.constants import GROUPS_IMPORT_TO_GERRIT
 from users.models import User
@@ -15,17 +16,31 @@ from users.models import User
 logger = logging.getLogger(__name__)
 
 
-def create_ldap_user(client, user: User) -> bool:
+def connect_gerrit_auth_provider(client, user: User) -> bool:
+    """
+    Creates LDAP account and associates gerrit auth provider with the user.
+    """
     uid = get_ldap_username(user)
+    associated = (ConnectedAuthService.objects
+                  .filter(user=user, provider='gerrit', uid=uid)
+                  .first())
+    if associated is not None:
+        logger.info(f"LDAP account already connected for user {user.pk}.")
+        return False
     results = client.search_users(uid)
     if results:
         logger.info(f"LDAP entry with uid={uid} for user {user.pk} already exists")
-        return False
+        created = False
     else:
         logger.info(f"Creating LDAP entry with uid={uid} for user {user.pk}")
         entry = user_to_ldap_entry(user)
         result_type, *_ = client.add_entry(entry)
-        return True
+        created = True
+    if created:
+        # TODO: Create gerrit account here and save account uid in extra data
+        connected = ConnectedAuthService(user=user, provider='gerrit', uid=uid)
+        connected.save()
+    return created
 
 
 def update_ldap_user_password_hash(client: LDAPClient, user: User) -> bool:
@@ -118,5 +133,5 @@ def export(file_path, site_id=settings.SITE_ID) -> None:
         for user in users:
             entry = user_to_ldap_entry(user)
             user_dn = entry.pop('dn')
-            ldif_writer = ldif.LDIFWriter(f)
+            ldif_writer = LDIFWriter(f)
             ldif_writer.unparse(user_dn, entry)

@@ -1,14 +1,24 @@
 import logging
+from decimal import Decimal
+from typing import Literal, Optional
 
 from django_rq import job
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
+from auth.models import ConnectedAuthService
 from code_reviews.api.gerrit import Gerrit
 from code_reviews.api.ldap import ldap_client
-from code_reviews.gerrit import get_or_create_change, list_change_files
-from code_reviews.gerrit.ldap import get_ldap_username, update_ldap_user_password_hash
-from learning.models import AssignmentComment, AssignmentSubmissionTypes
+from code_reviews.gerrit.ldap_service import (
+    get_ldap_username, update_ldap_user_password_hash
+)
+from code_reviews.gerrit.services import get_or_create_change, list_change_files, normalize_code_review_score
+from code_reviews.models import GerritChange
+from learning.models import (
+    AssignmentComment, AssignmentSubmissionTypes, StudentAssignment
+)
+from learning.permissions import EditStudentAssignment
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -83,3 +93,61 @@ def upload_attachment_to_gerrit(assignment_comment_id):
     if not response.no_content:
         logger.error('Failed to publish change edit')
         return
+
+
+SourceType = Literal['gerrit', 'api', 'form', 'gradebook', 'admin']
+
+
+def update_personal_assignment_score(*, student_assignment: StudentAssignment,
+                                     changed_by: User,
+                                     score_old: Decimal, score_new: Decimal,
+                                     source: SourceType) -> StudentAssignment:
+    if score_new > student_assignment.assignment.maximum_score:
+        raise ValidationError("Score value is greater than the maximum score")
+    student_assignment.score = score_new
+    student_assignment.save(update_fields=['score'])
+    # Log change
+    return student_assignment
+
+
+@job('default')
+def import_gerrit_code_review_score(*, change_id: str, score_old: int,
+                                    score_new: int, username: str) -> Optional[int]:
+    try:
+        change = (GerritChange.objects
+                  .select_related('student_assignment__assignment__course')
+                  .get(change_id=change_id))
+        student_assignment = change.student_assignment
+    except GerritChange.DoesNotExist:
+        logger.error("Change id has not been found.")
+        return
+    try:
+        gerrit_auth = (ConnectedAuthService.objects
+                       .select_related('user')
+                       .get(provider='gerrit', uid=username))
+        changed_by = gerrit_auth.user
+    except ConnectedAuthService.DoesNotExist:
+        logger.error(f"User account associated with gerrit "
+                     f"username {username} has not been found.")
+        return
+
+    score_old = normalize_code_review_score(score_old, student_assignment.assignment)
+    score_new = normalize_code_review_score(score_new, student_assignment.assignment)
+
+    score_current = student_assignment.score
+    if score_current is not None and score_current != score_old:
+        # FIXME: log warning instead after score update logging will be implemented
+        raise ValidationError("Abort operation since current score value "
+                              "differs from the expected.")
+
+    if not changed_by.has_perm(EditStudentAssignment.name, student_assignment):
+        logger.error(f"User {changed_by.pk} has no permission to "
+                     f"edit student assignment")
+        return None
+
+    update_personal_assignment_score(student_assignment=student_assignment,
+                                     changed_by=changed_by,
+                                     score_old=score_old,
+                                     score_new=score_new,
+                                     source='gerrit')
+    return student_assignment.pk

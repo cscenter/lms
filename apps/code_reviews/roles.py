@@ -8,9 +8,9 @@ from learning.permissions import EditStudentAssignment
 
 
 class Roles(DjangoChoices):
-    SERVICE_USER = C(12, _('Service User'), permissions=(
+    SERVICE_USER = C(12, _('Service User'), permissions=[
         EditStudentAssignment
-    ))
+    ])
 
 
 for code, name in Roles.choices:

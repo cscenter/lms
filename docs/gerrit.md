@@ -13,7 +13,7 @@ ssh -p 29418 admin@review.compscicenter.ru gerrit flush-caches --cache projects
 ```python
 import datetime
 from django.conf import settings
-from code_reviews.gerrit.ldap import export
+from code_reviews.gerrit.ldap_service import export
 
 today = datetime.datetime.now().strftime('%d%m%y')
 file_path = settings.ROOT_DIR / f"{today}.ldif"
@@ -30,7 +30,7 @@ ldapadd -H ldap:// -x -D "cn=admin,dc=review,dc=compscicenter,dc=ru" -w "***REMO
 Далее
 
 ```python
-from code_reviews.gerrit import *
+from code_reviews.gerrit.services import *
 from learning.models import Course
 course_id = 984
 course = Course.objects.get(pk=course_id)
