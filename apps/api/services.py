@@ -2,7 +2,6 @@ import binascii
 import random
 import secrets
 import string
-from os import urandom as generate_bytes
 from typing import Sequence, Tuple
 
 from cryptography.hazmat.backends import default_backend
@@ -22,20 +21,16 @@ def generate_random_string(length: int, *, alphabet: Sequence[str]) -> str:
     return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 
+_token_alphabet = string.ascii_letters + string.digits
+
+
 def create_token_string(length: int = AUTH_TOKEN_CHARACTER_LENGTH) -> str:
-    return binascii.hexlify(
-        generate_bytes(length // 2)
-    ).decode()
+    return generate_random_string(length, alphabet=_token_alphabet)
 
 
 def hash_token(token: str) -> str:
-    """
-    Calculates the hash of a token.
-
-    Token must contain an even number of hex digits or a binascii.Error
-    will be raised.
-    """
-    return generate_hash(binascii.unhexlify(token), salt=False)
+    """Calculates the hash of a token containing ASCII characters and digits."""
+    return generate_hash(token.encode('utf-8'), salt=False)
 
 
 # TODO: move to core utils
