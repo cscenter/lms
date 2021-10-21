@@ -13,7 +13,9 @@ from code_reviews.api.ldap import ldap_client
 from code_reviews.gerrit.ldap_service import (
     get_ldap_username, update_ldap_user_password_hash
 )
-from code_reviews.gerrit.services import get_or_create_change, list_change_files, normalize_code_review_score
+from code_reviews.gerrit.services import (
+    get_or_create_change, list_change_files, normalize_code_review_score
+)
 from code_reviews.models import GerritChange
 from learning.models import (
     AssignmentComment, AssignmentSubmissionTypes, StudentAssignment
