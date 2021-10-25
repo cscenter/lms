@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Type
 
 from djangorestframework_camel_case.render import (
     CamelCaseBrowsableAPIRenderer, CamelCaseJSONRenderer
@@ -8,6 +8,8 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import ListAPIView, UpdateAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from django.utils.translation import gettext_lazy as _
 
 from api.authentication import TokenAuthentication
 from api.mixins import ApiErrorsMixin
@@ -23,7 +25,7 @@ from courses.selectors import course_personal_assignments
 from learning.api.serializers import (
     BaseEnrollmentSerializer, BaseStudentAssignmentSerializer,
     CourseAssignmentSerializer, CourseNewsNotificationSerializer, MyCourseSerializer,
-    StudentAssignmentAssigneeSerializer, StudentProfileSerializer, UserSerializer
+    UserSerializer
 )
 from learning.models import CourseNewsNotification, Enrollment, StudentAssignment
 from learning.permissions import EditStudentAssignment, ViewEnrollments
@@ -173,9 +175,23 @@ class StudentAssignmentUpdate(UpdateAPIView):
 
 class StudentAssignmentAssigneeUpdate(UpdateAPIView):
     permission_classes = [EditStudentAssignment]
-    serializer_class = StudentAssignmentAssigneeSerializer
     lookup_url_kwarg = 'student_id'
     lookup_field = 'student_id'
+
+    class InputSerializer(BaseStudentAssignmentSerializer):
+        class Meta(BaseStudentAssignmentSerializer.Meta):
+            fields = ('pk', 'assignee',)
+
+        def validate_assignee(self, value):
+            teachers = self.instance.assignment.course.course_teachers.all()
+            valid_values = {t for t in teachers if not t.roles.spectator}
+            if value and value not in valid_values:
+                msg = _("Invalid course teacher %s") % value
+                raise serializers.ValidationError(msg)
+            return value
+
+    def get_serializer_class(self) -> Type[BaseStudentAssignmentSerializer]:
+        return self.InputSerializer
 
     def get_queryset(self):
         return (StudentAssignment.objects

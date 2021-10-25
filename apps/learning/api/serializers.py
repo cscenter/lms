@@ -70,19 +70,6 @@ class AssignmentScoreSerializer(BaseStudentAssignmentSerializer):
         fields = ('score',)
 
 
-class StudentAssignmentAssigneeSerializer(BaseStudentAssignmentSerializer):
-    class Meta(BaseStudentAssignmentSerializer.Meta):
-        fields = ('pk', 'assignee',)
-
-    def validate_assignee(self, value):
-        teachers = self.instance.assignment.course.course_teachers.all()
-        valid_values = {t for t in teachers if not t.roles.spectator}
-        if value and value not in valid_values:
-            msg = _("Invalid course teacher %s") % value
-            raise serializers.ValidationError(msg)
-        return value
-
-
 class MyCourseSerializer(CourseSerializer):
     class Meta(CourseSerializer.Meta):
         fields = ('id', 'name', 'url', 'semester')
