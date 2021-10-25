@@ -100,6 +100,7 @@ def convert_ipynb_files(sender, instance: AssignmentComment, *args, **kwargs):
         convert_assignment_submission_ipynb_file_to_html.delay(**kwargs)
 
 
+# TODO: move to the create_assignment_solution service method
 @receiver(post_save, sender=AssignmentComment)
 def save_student_solution(sender, instance: AssignmentComment, *args, **kwargs):
     """Updates aggregated execution time value on StudentAssignment model"""

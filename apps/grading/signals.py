@@ -33,6 +33,8 @@ def add_submission_to_checking_system(sender, instance: Submission,
                                                     retries=3)
     if apps.is_installed("code_reviews"):
         from code_reviews.gerrit.tasks import upload_attachment_to_gerrit
+
+        # FIXME: use service method or FieldTracker instead
         if update_fields and 'status' in update_fields:
             if instance.status == SubmissionStatus.PASSED:
                 assignment_submission = instance.assignment_submission
