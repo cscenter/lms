@@ -188,11 +188,12 @@ class TeacherDetailView(PublicURLContextMixin, DetailView):
     def get_context_data(self, **kwargs):
         branches = Branch.objects.for_site(site_id=self.request.site.pk)
         min_established = min(b.established for b in branches)
+        any_hidden_role = CourseTeacher.has_any_hidden_role(lookup='course_teachers__roles')
         courses = (Course.objects
                    .made_by(branches)
                    .available_in(self.request.branch)
-                   .filter(semester__year__gte=min_established,
-                           course_teachers__roles=~CourseTeacher.roles.spectator,
+                   .filter(~any_hidden_role,
+                           semester__year__gte=min_established,
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index'))

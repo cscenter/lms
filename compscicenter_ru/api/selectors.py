@@ -13,15 +13,14 @@ from users.models import User
 
 
 def teachers_list(*, site: Site, course: Optional[int] = None) -> UserQuerySet:
-    """Returns site teachers except pure reviewers or spectators."""
+    """Returns site teachers except pure reviewers or with a hidden role."""
     # FIXME: cheaper to aggregate courseteacher (see compsciclub.ru TeachersView)
     reviewer = CourseTeacher.roles.reviewer
-    spectator = CourseTeacher.roles.spectator
     # `__ne` custom lookup used to filter out teachers without any role or
     # with reviewer role only.
     any_role_except_pure_reviewer_or_spectator = (
         Q(courseteacher__roles__ne=reviewer.mask) &
-        Q(courseteacher__roles=~spectator) &
+        ~CourseTeacher.has_any_hidden_role(lookup='courseteacher__roles') &
         Q(courseteacher__roles__ne=0)
     )
     filters = [any_role_except_pure_reviewer_or_spectator]
@@ -35,7 +34,7 @@ def teachers_list(*, site: Site, course: Optional[int] = None) -> UserQuerySet:
         ])
     any_role_except_pure_reviewer_or_spectator = (
         Q(roles__ne=reviewer.mask) &
-        Q(roles=~spectator) &
+        ~CourseTeacher.has_any_hidden_role() &
         Q(roles__ne=0)
     )
     prefetch_course_teachers = Prefetch(

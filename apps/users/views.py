@@ -62,10 +62,10 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
         elif self.request.user.is_curator:
             enrollments_queryset = enrollments_queryset.annotate(
                 classes_total=Count('course__courseclass'))
-        not_a_spectator = Q(course_teachers__roles=~CourseTeacher.roles.spectator)
+        only_public_role = ~CourseTeacher.has_any_hidden_role(lookup='course_teachers__roles')
         co_queryset = (Course.objects
                        .available_on_site(self.request.site)
-                       .filter(not_a_spectator)
+                       .filter(only_public_role)
                        .select_related('semester', 'meta_course',
                                        'main_branch'))
         # Limit results on compsciclub.ru

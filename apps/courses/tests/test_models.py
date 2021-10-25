@@ -61,6 +61,23 @@ def test_course_teacher_get_most_priority_role_prefetch(django_assert_num_querie
 
 
 @pytest.mark.django_db
+def test_course_teacher_has_any_hidden_role():
+    course = CourseFactory()
+    course_teacher = CourseTeacherFactory(course=course, roles=CourseTeacher.roles.reviewer)
+    assert CourseTeacher.objects.filter(CourseTeacher.has_any_hidden_role()).count() == 0
+    CourseTeacherFactory(course=course, roles=CourseTeacher.roles.reviewer | CourseTeacher.roles.spectator)
+    assert CourseTeacher.objects.filter(CourseTeacher.has_any_hidden_role()).count() == 1
+    CourseTeacherFactory(course=course, roles=CourseTeacher.roles.organizer | CourseTeacher.roles.spectator)
+    assert CourseTeacher.objects.filter(CourseTeacher.has_any_hidden_role()).count() == 2
+    CourseTeacherFactory(course=course, roles=CourseTeacher.roles.organizer)
+    assert CourseTeacher.objects.filter(CourseTeacher.has_any_hidden_role()).count() == 3
+    assert CourseTeacher.objects.exclude(CourseTeacher.has_any_hidden_role()).count() == 1
+    assert CourseTeacher.objects.exclude(CourseTeacher.has_any_hidden_role()).get() == course_teacher
+    CourseTeacherFactory(course=course, roles=CourseTeacher.roles.reviewer | CourseTeacher.roles.lecturer)
+    assert CourseTeacher.objects.exclude(CourseTeacher.has_any_hidden_role()).count() == 2
+
+
+@pytest.mark.django_db
 def test_semester_starts_ends():
     import datetime
 

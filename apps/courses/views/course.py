@@ -29,10 +29,9 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
     context_object_name = 'course'
 
     def get_course_queryset(self):
-        spectator = CourseTeacher.roles.spectator
         teachers = Prefetch('course_teachers',
                             queryset=(CourseTeacher.objects
-                                      .filter(roles=~spectator)
+                                      .filter(~CourseTeacher.has_any_hidden_role())
                                       .select_related("teacher")
                                       .order_by('teacher__last_name',
                                                 'teacher__first_name')))

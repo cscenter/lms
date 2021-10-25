@@ -562,10 +562,11 @@ class TeacherDetailView(PublicURLMixin, DetailView):
             queryset=(Branch.objects
                       .filter(site_id=self.request.site.pk)
                       .order_by('order')))
+        any_hidden_role = CourseTeacher.has_any_hidden_role(lookup='course_teachers__roles')
         courses = (Course.objects
                    .made_by(site_branches)
-                   .filter(semester__year__gte=min_established,
-                           course_teachers__roles=~CourseTeacher.roles.spectator,
+                   .filter(~any_hidden_role,
+                           semester__year__gte=min_established,
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index')

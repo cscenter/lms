@@ -14,7 +14,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Case, Count, IntegerField, Value, When
+from django.db.models import Case, Count, F, IntegerField, Q, Value, When
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.encoding import smart_str
@@ -629,10 +629,20 @@ class CourseTeacher(models.Model):
         """
         return Case(
             When(roles=CourseTeacher.roles.spectator, then=Value(-1)),
+            When(roles=CourseTeacher.roles.organizer, then=Value(12)),
             When(roles=CourseTeacher.roles.lecturer, then=Value(8)),
             When(roles=CourseTeacher.roles.seminar, then=Value(4)),
             default=Value(0),
             output_field=IntegerField())
+
+    # TODO: rewrite as a generic function with bitwise operations and move to core.utils
+    @classmethod
+    def has_any_hidden_role(cls, lookup='roles') -> Q:
+        assert lookup.endswith('roles')
+        mask = cls.roles.spectator | cls.roles.organizer
+        assert mask > 0
+        # One of: `field & mask > 0` or `field + field & mask > field`
+        return Q(**{f"{lookup}__lt": F(lookup) + F(lookup).bitand(mask)})
 
 
 class CourseReview(TimeStampedModel):

@@ -18,6 +18,7 @@ from code_reviews.gerrit.permissions import (
 )
 from code_reviews.models import GerritChange
 from courses.models import Assignment, Course, CourseTeacher
+from courses.selectors import get_course_teachers
 from courses.services import CourseService
 from learning.models import (
     AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
@@ -105,20 +106,17 @@ def init_project_for_course(course: Course, skip_users: Optional[bool] = False):
         logger.error(f"Couldn't set permissions for group "
                      f"{reviewers_group_name}. {res.text}")
         return
-    # Add course reviewers to the project
-    reviewers = (CourseTeacher.objects
-                 .filter(course=course,
-                         roles=CourseTeacher.roles.reviewer)
-                 .select_related("teacher"))
-    for course_reviewer in reviewers:
-        user = course_reviewer.teacher
+    # Add reviewers to the project
+    course_teachers = get_course_teachers(course=course)
+    for course_teacher in course_teachers:
+        user = course_teacher.teacher
         created = connect_gerrit_auth_provider(ldap_client, user)
         if not created:
             updated = update_ldap_user_password_hash(ldap_client, user)
             if not updated:
                 logger.error(f"Password hash for user {user.pk} wasn't changed")
                 return
-    reviewers_group_members = [get_ldap_username(t.teacher) for t in reviewers]
+    reviewers_group_members = [get_ldap_username(t.teacher) for t in course_teachers]
     members_res = gerrit_client.get_group_members(reviewers_group_uuid)
     members = {m["username"] for m in members_res.data}
     to_delete = members.difference(reviewers_group_members)
