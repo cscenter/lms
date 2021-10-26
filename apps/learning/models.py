@@ -3,6 +3,7 @@ import logging
 import os
 import os.path
 from secrets import token_urlsafe
+from typing import Optional
 
 from djchoices import C, ChoiceItem, DjangoChoices
 from model_utils import FieldTracker
@@ -26,7 +27,7 @@ from django.utils.translation import gettext_lazy as _
 from core.db.fields import PrettyJSONField, ScoreField
 from core.db.mixins import DerivableFieldsMixin
 from core.db.models import SoftDeletionModel
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location, TimestampedModel
 from core.timezone import TimezoneAwareMixin, now_local
 from core.urls import reverse
 from core.utils import hashids
@@ -38,7 +39,9 @@ from learning.managers import (
     EnrollmentDefaultManager, EventQuerySet, GraduateProfileActiveManager,
     GraduateProfileDefaultManager, StudentAssignmentManager
 )
-from learning.settings import ENROLLMENT_DURATION, GradeTypes, GradingSystems
+from learning.settings import (
+    ENROLLMENT_DURATION, AssignmentScoreUpdateSource, GradeTypes, GradingSystems
+)
 from learning.utils import humanize_duration
 from users.constants import ThumbnailSizes
 from users.models import StudentProfile
@@ -486,7 +489,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
                         DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'assignment'
 
-    # FIXME: remove?
+    # TODO: remove with .last_comment_from field
     class CommentAuthorTypes(DjangoChoices):
         NOBODY = ChoiceItem(0)
         STUDENT = ChoiceItem(1)
@@ -605,17 +608,18 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         return False
 
     def _compute_first_student_comment_at(self):
-        first_student_submission = (AssignmentComment.objects
-                                    .filter(student_assignment=self,
-                                            author_id=self.student_id)
-                                    .order_by('created')
-                                    .values('created')
-                                    .first())
-        if not first_student_submission:
+        first_student_comment = (AssignmentComment.objects
+                                 .filter(student_assignment=self,
+                                         type=AssignmentSubmissionTypes.COMMENT,
+                                         author_id=self.student_id)
+                                 .order_by('created')
+                                 .values('created')
+                                 .first())
+        if not first_student_comment:
             return False
-        first_student_submission_at = first_student_submission['created']
-        if self.first_student_comment_at != first_student_submission_at:
-            self.first_student_comment_at = first_student_submission_at
+        first_student_comment_at = first_student_comment['created']
+        if self.first_student_comment_at != first_student_comment_at:
+            self.first_student_comment_at = first_student_comment_at
             return True
         return False
 
@@ -689,6 +693,29 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
 
     def get_execution_time_display(self):
         return humanize_duration(self.execution_time)
+
+
+class AssignmentScoreAuditLog(TimestampedModel):
+    student_assignment = models.ForeignKey(
+        StudentAssignment,
+        verbose_name=_("Student Assignment"),
+        related_name="score_history",
+        on_delete=models.CASCADE)
+    changed_by = models.ForeignKey(
+        'users.User',
+        verbose_name=_("Changed by"),
+        on_delete=models.CASCADE)
+    score_old = ScoreField(
+        verbose_name=_("Previous Score"),
+        null=True,
+        blank=True)
+    score_new = ScoreField(
+        verbose_name=_("New Score"),
+        null=True,
+        blank=True)
+    source = models.CharField(
+        choices=AssignmentScoreUpdateSource.choices,
+        max_length=15)
 
 
 def assignment_comment_attachment_upload_to(self: "AssignmentComment",
@@ -795,9 +822,22 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
             "file_name": self.attached_file_name
         })
 
-    def is_stale_for_edit(self):
+    @property
+    def is_stale_for_edit(self) -> bool:
         # Teacher can edit comment during 10 min period only
         return (now() - self.created).total_seconds() > 600
+
+    def get_execution_time_display(self) -> str:
+        td: Optional[datetime.timedelta] = self.execution_time
+        if td is None:
+            return "-:-"
+        mm, _ = divmod(td.seconds, 60)
+        hh, mm = divmod(mm, 60)
+        s = "%d:%02d" % (hh, mm)
+        if td.days:
+            # TODO: pluralize, add i18n
+            return f"{td.days} д. {s}"
+        return s
 
 
 def assignment_submission_attachment_upload_to(self: "SubmissionAttachment",

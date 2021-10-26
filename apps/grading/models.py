@@ -123,7 +123,7 @@ class Submission(models.Model):
         return SubmissionStatus.get_choice(self.status)
 
     @property
-    def get_report_url(self):
+    def report_url(self) -> Optional[str]:
         if self.checking_system_choice.value == CheckingSystemTypes.YANDEX:
             required_attributes = ['contestId', 'runId']
             for attr in required_attributes:
@@ -131,12 +131,11 @@ class Submission(models.Model):
                     return None
             contest_id = self.meta['contestId']
             run_id = self.meta['runId']
-            return YANDEX_SUBMISSION_REPORT_URL.format(contest_id=contest_id,
-                                                       run_id=run_id)
+            return YANDEX_SUBMISSION_REPORT_URL.format(contest_id=contest_id, run_id=run_id)
         return None
 
     @property
-    def get_status_display(self) -> Optional[str]:
+    def verdict_or_status(self) -> Optional[str]:
         if "verdict" in self.meta:
             verdict = self.meta["verdict"]
             try:

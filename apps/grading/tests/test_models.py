@@ -15,7 +15,7 @@ from grading.tests.factories import SubmissionFactory
 def test_submission_get_status_display_not_checked(status, label, mocker):
     mocker.patch('grading.tasks.add_new_submission_to_checking_system')
     submission = SubmissionFactory(status=status)
-    assert submission.get_status_display == label
+    assert submission.verdict_or_status == label
 
 
 @pytest.mark.django_db
@@ -23,7 +23,7 @@ def test_submission_get_status_display_passed(mocker):
     mocker.patch('grading.tasks.add_new_submission_to_checking_system')
     submission = SubmissionFactory(status=SubmissionStatus.PASSED,
                                    meta={'verdict': SubmissionVerdict.OK.value})
-    assert submission.get_status_display == SubmissionVerdict.OK.value
+    assert submission.verdict_or_status == SubmissionVerdict.OK.value
 
 
 @pytest.mark.django_db
@@ -39,5 +39,5 @@ def test_submission_get_status_display_wrong_answer_show_test_number(mocker):
     }
     submission = SubmissionFactory(status=SubmissionStatus.FAILED,
                                    meta=meta)
-    assert SubmissionVerdict.WA.name in submission.get_status_display
-    assert '3' in submission.get_status_display
+    assert SubmissionVerdict.WA.name in submission.verdict_or_status
+    assert '3' in submission.verdict_or_status

@@ -79,7 +79,7 @@ class CourseSurveyAdmin(admin.ModelAdmin):
         return fields
 
     @meta(short_description=_("Status"))
-    def get_form_status(self, obj):
+    def get_form_status(self, obj: CourseSurvey):
         return obj.form.get_status_display()
 
     @meta(short_description=_("Form"))

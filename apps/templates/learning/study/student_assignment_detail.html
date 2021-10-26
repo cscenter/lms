@@ -79,12 +79,19 @@
                         {% endif %}
                     </div>
 
-                    {% with submission=comment.submission %}
-                    {% if submission %}
-                        <div class="panel-footer" style="border-top: 1px solid #eee;">
-                        {{ submission.checking_system_choice.label }} {% if submission.get_report_url %}<a class="pull-right nowrap submission-status {{ submission.status_choice.css_class }}" target="_blank" href="{{ submission.get_report_url }}">{{ submission.get_status_display }}</a>{% else %}<span class="pull-right nowrap submission-status {{ submission.status_choice.css_class }}">{{ submission.get_status_display }}</span>{% endif %}
-                        </div>
-                    {% endif %}
+                    {% with checker_submission=comment.submission %}
+                      {% if checker_submission %}
+                          <div class="panel-footer" style="border-top: 1px solid #eee;">
+                          {{ checker_submission.checking_system_choice.label }}
+                            {% if checker_submission.report_url %}
+                              <a class="pull-right nowrap submission-status {{ checker_submission.status_choice.css_class }}" target="_blank" href="{{ checker_submission.report_url }}">
+                                {{ checker_submission.verdict_or_status }}
+                              </a>
+                            {% else %}
+                              <span class="pull-right nowrap submission-status {{ checker_submission.status_choice.css_class }}">{{ checker_submission.verdict_or_status }}</span>
+                            {% endif %}
+                          </div>
+                      {% endif %}
                     {% endwith %}
 
                     {% if comment.type == 'comment' %}{% if is_actual_teacher and comment.author_id == user.pk and not comment.is_stale_for_edit or user.is_curator %}

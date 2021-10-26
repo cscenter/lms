@@ -30,7 +30,7 @@ from courses.models import (
 from courses.services import CourseService
 from grading.services import CheckerSubmissionService
 from learning.models import (
-    AssignmentComment, AssignmentGroup, AssignmentNotification,
+    AssignmentComment, AssignmentGroup, AssignmentNotification, AssignmentScoreAuditLog,
     AssignmentSubmissionTypes, CourseClassGroup, CourseNewsNotification, Enrollment,
     Event, PersonalAssignmentActivity, StudentAssignment, StudentGroup,
     StudentGroupAssignee
@@ -764,11 +764,18 @@ def create_notifications_about_new_submission(submission: AssignmentComment):
 def update_personal_assignment_score(*, student_assignment: StudentAssignment,
                                      changed_by: User, score_old: Decimal, score_new: Decimal,
                                      source: AssignmentScoreUpdateSource) -> StudentAssignment:
-    if score_new > student_assignment.assignment.maximum_score:
+    if score_new is not None and score_new > student_assignment.assignment.maximum_score:
         raise ValueError("Score value is greater than the maximum score")
     student_assignment.score = score_new
     student_assignment.save(update_fields=['score'])
-    # Log change
+
+    audit_log = AssignmentScoreAuditLog(student_assignment=student_assignment,
+                                        changed_by=changed_by,
+                                        score_old=score_old,
+                                        score_new=score_new,
+                                        source=source)
+    audit_log.save()
+
     return student_assignment
 
 

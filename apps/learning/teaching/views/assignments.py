@@ -35,7 +35,10 @@ from learning.permissions import (
     ViewStudentAssignment, ViewStudentAssignmentList
 )
 from learning.selectors import get_teacher_courses
-from learning.services import AssignmentService, StudentGroupService
+from learning.services import (
+    AssignmentService, StudentGroupService, update_personal_assignment_score
+)
+from learning.settings import AssignmentScoreUpdateSource
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
 
@@ -167,8 +170,7 @@ class AssignmentCommentUpdateView(generic.UpdateView):
             is_teacher = self.request.user.is_teacher
             if comment.author_id != self.request.user.pk or not is_teacher:
                 raise PermissionDenied
-            # Check comment not in stale state for edit
-            if comment.is_stale_for_edit():
+            if comment.is_stale_for_edit:
                 raise PermissionDenied
 
     def get(self, request, *args, **kwargs):
@@ -227,7 +229,7 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
 
 class StudentAssignmentDetailView(PermissionRequiredMixin,
                                   AssignmentSubmissionBaseView):
-    template_name = "learning/teaching/student_assignment_detail.html"
+    template_name = "lms/teaching/student_assignment_detail.html"
     permission_required = ViewStudentAssignment.name
 
     def get_permission_object(self):
@@ -268,8 +270,13 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
             serializer = AssignmentScoreSerializer(data=request.POST,
                                                    instance=sa)
             if serializer.is_valid():
-                serializer.save()
-                if serializer.instance.score is None:
+                # serializer.save()
+                update_personal_assignment_score(student_assignment=sa,
+                                                 changed_by=request.user,
+                                                 score_old=sa.score,
+                                                 score_new=serializer.validated_data['score'],
+                                                 source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT)
+                if sa.score is None:
                     messages.info(self.request, _("Score was deleted"),
                                   extra_tags='timeout')
                 else:
