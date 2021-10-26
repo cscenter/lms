@@ -1,6 +1,9 @@
+from enum import Enum, unique
+
 from djchoices import C, DjangoChoices
 
 from django.conf import settings
+from django.db.models import TextChoices
 from django.utils.translation import gettext_lazy as _
 
 # This setting helps calculate the last day of enrollment period if
@@ -98,3 +101,15 @@ class GradeTypes(DjangoChoices):
     @classmethod
     def get_grades_for_grading_system(cls, grading_system):
         return [grade[0] for grade in cls.get_choices_for_grading_system(grading_system)]
+
+
+class AssignmentScoreUpdateSource(TextChoices):
+    API = 'api'
+    API_YANDEX_CONTEST = 'api-ya.contest'
+    CSV_YANDEX_LOGIN = 'csv-ya.login'
+    CSV_STEPIK = 'csv-stepik'
+    CSV_ENROLLMENT = 'csv-enrollment'
+    FORM_ADMIN = 'admin'
+    FORM_ASSIGNMENT = 'form'
+    FORM_GRADEBOOK = 'gradebook'
+    WEBHOOK_GERRIT = 'webhook-gerrit'

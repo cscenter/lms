@@ -21,6 +21,8 @@ from learning.models import (
     AssignmentComment, AssignmentSubmissionTypes, StudentAssignment
 )
 from learning.permissions import EditStudentAssignment
+from learning.services import update_personal_assignment_score
+from learning.settings import AssignmentScoreUpdateSource
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -97,21 +99,6 @@ def upload_attachment_to_gerrit(assignment_comment_id):
         return
 
 
-SourceType = Literal['gerrit', 'api', 'form', 'gradebook', 'admin']
-
-
-def update_personal_assignment_score(*, student_assignment: StudentAssignment,
-                                     changed_by: User,
-                                     score_old: Decimal, score_new: Decimal,
-                                     source: SourceType) -> StudentAssignment:
-    if score_new > student_assignment.assignment.maximum_score:
-        raise ValidationError("Score value is greater than the maximum score")
-    student_assignment.score = score_new
-    student_assignment.save(update_fields=['score'])
-    # Log change
-    return student_assignment
-
-
 @job('default')
 def import_gerrit_code_review_score(*, change_id: str, score_old: int,
                                     score_new: int, username: str) -> Optional[int]:
@@ -151,5 +138,5 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
                                      changed_by=changed_by,
                                      score_old=score_old,
                                      score_new=score_new,
-                                     source='gerrit')
+                                     source=AssignmentScoreUpdateSource.WEBHOOK_GERRIT)
     return student_assignment.pk

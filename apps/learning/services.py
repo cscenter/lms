@@ -10,15 +10,13 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.db import router, transaction
 from django.db.models import (
-    Avg, Case, Count, F, Max, OuterRef, Q, QuerySet, Subquery, TextField, Value, When,
-    Window
+    Avg, Case, Count, F, OuterRef, Q, QuerySet, Subquery, TextField, Value, When, Window
 )
 from django.db.models.fields import IntegerField
-from django.db.models.functions import Coalesce, Concat, FirstValue
+from django.db.models.functions import Coalesce, Concat
 from django.db.models.signals import post_save
 from django.utils.timezone import now
 
-from core import comment_persistence
 from core.models import Branch
 from core.services import SoftDeleteService
 from core.timezone import get_now_utc, now_local
@@ -30,14 +28,14 @@ from courses.models import (
     CourseTeacher, StudentGroupTypes
 )
 from courses.services import CourseService
-from grading.services import CheckerService, CheckerSubmissionService
+from grading.services import CheckerSubmissionService
 from learning.models import (
     AssignmentComment, AssignmentGroup, AssignmentNotification,
     AssignmentSubmissionTypes, CourseClassGroup, CourseNewsNotification, Enrollment,
     Event, PersonalAssignmentActivity, StudentAssignment, StudentGroup,
     StudentGroupAssignee
 )
-from learning.settings import StudentStatuses
+from learning.settings import AssignmentScoreUpdateSource, StudentStatuses
 from users.constants import Roles
 from users.models import StudentProfile, User
 
@@ -763,14 +761,15 @@ def create_notifications_about_new_submission(submission: AssignmentComment):
     return len(notifications)
 
 
-def update_personal_assignment_score(*, assignment: Assignment,
-                                     student: Union[User, int],
-                                     score: Union[int, Decimal]) -> None:
-    if score > assignment.maximum_score:
-        raise ValueError("Score value is higher than the maximum score")
-    (StudentAssignment.objects
-     .filter(assignment=assignment, student=student)
-     .update(score=score))
+def update_personal_assignment_score(*, student_assignment: StudentAssignment,
+                                     changed_by: User, score_old: Decimal, score_new: Decimal,
+                                     source: AssignmentScoreUpdateSource) -> StudentAssignment:
+    if score_new > student_assignment.assignment.maximum_score:
+        raise ValueError("Score value is greater than the maximum score")
+    student_assignment.score = score_new
+    student_assignment.save(update_fields=['score'])
+    # Log change
+    return student_assignment
 
 
 # TODO: remove

@@ -6,8 +6,10 @@ from grading.api.yandex_contest import (
     ProblemStatus, YandexContestAPI, yandex_contest_scoreboard_iterator
 )
 from grading.models import Checker
-from learning.models import Enrollment
+from learning.models import Enrollment, StudentAssignment
 from learning.services import update_personal_assignment_score
+from learning.settings import AssignmentScoreUpdateSource
+from users.models import User
 
 
 def get_assignment_checker(assignment: Assignment) -> Checker:
@@ -18,8 +20,9 @@ def get_assignment_checker(assignment: Assignment) -> Checker:
     return assignment.checker
 
 
-def assignment_import_scores_from_yandex_contest(client: YandexContestAPI,
-                                                 assignment: Assignment) -> None:
+def assignment_import_scores_from_yandex_contest(*, client: YandexContestAPI,
+                                                 assignment: Assignment,
+                                                 triggered_by: User) -> None:
     checker = get_assignment_checker(assignment)
     contest_id = checker.settings['contest_id']
     problem_alias = checker.settings['problem_id']
@@ -29,10 +32,14 @@ def assignment_import_scores_from_yandex_contest(client: YandexContestAPI,
     enrolled_students = (Enrollment.active
                          .filter(course_id=assignment.course_id)
                          .exclude(student_profile__user__yandex_login='')
-                         .values_list('student_profile__user__yandex_login', 'student_profile__user_id'))
-    yandex_logins = {yandex_login: user_id for yandex_login, user_id in enrolled_students}
+                         .select_related('student_profile__user')
+                         .only('student_profile__user'))
+    students = {e.student_profile.user.yandex_login: e.student_profile.user
+                for e in enrolled_students}
+    student_assignments = StudentAssignment.objects.filter(assignment=assignment).order_by()
+    student_assignments = {s.student_id: s for s in student_assignments}
     for participant_results in yandex_contest_scoreboard_iterator(client, contest_id):
-        if participant_results.yandex_login not in yandex_logins:
+        if participant_results.yandex_login not in students:
             continue
         gen = (pr for pr in participant_results.problems if pr.problem_alias == problem_alias)
         problem_results = next(gen, None)
@@ -40,6 +47,15 @@ def assignment_import_scores_from_yandex_contest(client: YandexContestAPI,
             raise ValidationError("Problem was not found", code="malformed")
         if problem_results.status == ProblemStatus.NOT_SUBMITTED:
             continue
-        user_id = yandex_logins[participant_results.yandex_login]
-        update_personal_assignment_score(assignment=assignment, student=user_id,
-                                         score=problem_results.score)
+        student = students[participant_results.yandex_login]
+        assert student.pk in student_assignments
+        if student.pk in student_assignments:
+            student_assignment = student_assignments[student.pk]
+            assert student_assignment.assignment_id == assignment.pk
+            student_assignment.assignment = assignment
+            student_assignment.student = student
+            update_personal_assignment_score(student_assignment=student_assignment,
+                                             changed_by=triggered_by,
+                                             score_old=student_assignment.score,
+                                             score_new=problem_results.score,
+                                             source=AssignmentScoreUpdateSource.API_YANDEX_CONTEST)

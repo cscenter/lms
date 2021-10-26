@@ -337,7 +337,8 @@ class GradebookImportScoresFromYandexContest(RolePermissionRequiredMixin, APIBas
         access_token = checker.checking_system.settings['access_token']
         client = YandexContestAPI(access_token=access_token, refresh_token=access_token)
 
-        assignment_import_scores_from_yandex_contest(client, assignment)
+        assignment_import_scores_from_yandex_contest(client=client, assignment=assignment,
+                                                     triggered_by=request.user)
 
         # TODO: return stats with updated/skipped/invalid/students without yandex login
         return Response(status=status.HTTP_201_CREATED, data={})
