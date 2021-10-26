@@ -210,8 +210,7 @@ def gradebook_data(course: Course) -> GradeBookData:
                 .filter(assignment__course_id=course.pk)
                 .only("pk",
                       "score",
-                      # needs to calculate progress status
-                      "first_student_comment_at",
+                      "meta",
                       "assignment_id",
                       "student_id")
                 .order_by("student_id", "assignment_id"))
