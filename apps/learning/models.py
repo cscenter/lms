@@ -714,8 +714,12 @@ class AssignmentScoreAuditLog(TimestampedModel):
         null=True,
         blank=True)
     source = models.CharField(
+        verbose_name=_("Source"),
         choices=AssignmentScoreUpdateSource.choices,
         max_length=15)
+
+    class Meta:
+        verbose_name_plural = _("Assignment score audit log")
 
 
 def assignment_comment_attachment_upload_to(self: "AssignmentComment",

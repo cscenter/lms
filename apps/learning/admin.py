@@ -12,8 +12,8 @@ from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseGroupModes, CourseTeacher
 from learning.models import (
-    CourseInvitation, GraduateProfile, Invitation, StudentAssignment, StudentGroup,
-    StudentGroupAssignee
+    AssignmentScoreAuditLog, CourseInvitation, GraduateProfile, Invitation,
+    StudentAssignment, StudentGroup, StudentGroupAssignee
 )
 
 from .models import AssignmentComment, Enrollment, Event
@@ -141,6 +141,26 @@ class StudentAssignmentWatcherInlineAdmin(admin.TabularInline):
     extra = 0
 
 
+class AssignmentScoreAuditLogAdminInline(admin.TabularInline):
+    model = AssignmentScoreAuditLog
+    readonly_fields = ('created_at', 'score_old', 'score_new', 'changed_by', 'source')
+    extra = 0
+    show_change_link = False
+    ordering = ['-created_at']
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        return False
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('changed_by')
+
+
 @admin.register(StudentAssignment)
 class StudentAssignmentAdmin(BaseModelAdmin):
     list_select_related = [
@@ -155,13 +175,18 @@ class StudentAssignmentAdmin(BaseModelAdmin):
     search_fields = ['student__last_name']
     raw_id_fields = ["assignment", "student", "assignee"]
     exclude = ['watchers']
-    inlines = [StudentAssignmentWatcherInlineAdmin]
+    inlines = [StudentAssignmentWatcherInlineAdmin, AssignmentScoreAuditLogAdminInline]
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
             return ['student', 'assignment', 'score_changed', 'state_display']
         else:
             return ['score_changed', 'state_display']
+
+    class Media:
+        css = {
+            'all': ('v2/css/django_admin.css',)
+        }
 
 
 class EventAdmin(BaseModelAdmin):
