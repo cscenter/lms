@@ -1,0 +1,93 @@
+name: Tests
+
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+    branches:
+      - master
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+    branches:
+      - master
+
+jobs:
+  python-tests:
+    name: Django Tests
+    runs-on: ubuntu-latest
+
+    services:
+      # Label used to access the service container
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: iddqd
+          POSTGRES_DB: github_actions
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+      redis:
+        # 5.0.6 on AWS
+        image: redis:5.0.14
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 6379 on service container to the host
+          - 6379:6379
+
+    env:
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      WEBPACK_ENVIRONMENT: prod
+      WEBPACK_ASSETS_ROOT: ./site-frontend/assets/
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout private frontend repo
+        uses: actions/checkout@v2
+        with:
+          repository: cscenter/site-frontend
+          ssh-key: ${{ secrets.FRONTEND_DEPLOY_KEY }}
+          path: site-frontend
+      - name: Install system dependencies
+        # swig - m2crypto dependency for django-ses
+        run: |
+          sudo apt-get -y install libgnutls-dev swig
+      - name: Install python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Check Python version
+        run: python --version
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          pipenv sync --dev
+      # TODO: cp env files
+      - name: Create files with env configurations
+        run: |
+          cp lms/settings/.env.example lms/settings/.env
+          cp lms/settings/.env.example lk_yandexdataschool_ru/settings/.env
+          cp compsciclub_ru/settings/.env.example compsciclub_ru/settings/.env
+      - name: Validate imports order
+        run: isort . --check-only
+      - name: Run migrations
+        run: python manage.py migrate --noinput --settings=compscicenter_ru.settings.test
+      - name: Run tests
+        run: pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
