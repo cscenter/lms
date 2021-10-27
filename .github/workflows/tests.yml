@@ -103,7 +103,7 @@ jobs:
           cp compsciclub_ru/settings/.env.example compsciclub_ru/settings/.env
 
       - name: Validate imports order
-        run: pipenv run isort --settings .isort.cfg . --check-only --skip site-frontend
+        run: pipenv run isort --settings .isort.cfg . --check-only
 
       - name: Run migrations
         run: pipenv run ./manage.py migrate --noinput --settings=compscicenter_ru.settings.test
