@@ -66,8 +66,11 @@ jobs:
           path: site-frontend
       - name: Install system dependencies
         # swig - m2crypto dependency for django-ses
+        # libcurl4-gnutls-dev - dependency for pycurl
         run: |
-          sudo apt-get -y install libgnutls28-dev swig
+          sudo apt-get -y install libgnutls28-dev \
+                                  swig \
+                                  libcurl4-gnutls-dev
       - name: Install python
         uses: actions/setup-python@v2
         with:
