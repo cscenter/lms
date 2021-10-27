@@ -8,6 +8,7 @@ from vanilla import TemplateView
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import FileField
 from django.http import FileResponse, HttpResponseBadRequest, JsonResponse
 from django.middleware.csrf import get_token
@@ -262,6 +263,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         return context
 
     def post(self, request, *args, **kwargs):
+        # TODO: rewrite with API call
         if 'grading_form' in request.POST:
             sa = self.student_assignment
             if not request.user.has_perm(EditOwnStudentAssignment.name, sa):
@@ -270,12 +272,12 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
             serializer = AssignmentScoreSerializer(data=request.POST,
                                                    instance=sa)
             if serializer.is_valid():
-                # serializer.save()
-                update_personal_assignment_score(student_assignment=sa,
-                                                 changed_by=request.user,
-                                                 score_old=sa.score,
-                                                 score_new=serializer.validated_data['score'],
-                                                 source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT)
+                with transaction.atomic():
+                    update_personal_assignment_score(student_assignment=sa,
+                                                     changed_by=request.user,
+                                                     score_old=sa.score,
+                                                     score_new=serializer.validated_data['score'],
+                                                     source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT)
                 if sa.score is None:
                     messages.info(self.request, _("Score was deleted"),
                                   extra_tags='timeout')

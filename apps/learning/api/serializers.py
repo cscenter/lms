@@ -65,6 +65,7 @@ class BaseStudentAssignmentSerializer(serializers.ModelSerializer):
         return obj.state.value
 
 
+# TODO: inline
 class AssignmentScoreSerializer(BaseStudentAssignmentSerializer):
     class Meta(BaseStudentAssignmentSerializer.Meta):
         fields = ('score',)
