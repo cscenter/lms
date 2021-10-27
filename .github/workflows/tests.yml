@@ -102,6 +102,15 @@ jobs:
           cp lms/settings/.env.example lk_yandexdataschool_ru/settings/.env
           cp compsciclub_ru/settings/.env.example compsciclub_ru/settings/.env
 
+      - name: Debug 1
+        run: pwd
+
+      - name: Debug 2
+        run: ls -la
+
+      - name: Debug 3
+        run: pipenv run isort --version
+
       - name: Validate imports order
         run: pipenv run isort --skip site-frontend . --check-only
 
