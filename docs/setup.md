@@ -29,10 +29,11 @@ And setup postgres databases:
 CREATE DATABASE cscdb;
 CREATE USER csc WITH password 'FooBar';
 GRANT ALL privileges ON DATABASE cscdb TO csc;
+```
 
-CREATE DATABASE test_cscdb;
-ALTER DATABASE test_cscdb OWNER TO csc;
-ALTER USER csc with CREATEDB;
+```sql
+CREATE USER ci WITH password 'iddqd';
+ALTER USER ci with CREATEDB;
 ```
 
 * Create virtualenv for the project, activate it and install all python dependencies with pipenv (see Pipenv.lock in the root dir)

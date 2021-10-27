@@ -19,11 +19,11 @@ COVERAGE_PATH_EXCLUDES = [r'.svn', r'fixtures', r'node_modules']
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "travis_ci_test",
-        "USER": "postgres",
-        "PASSWORD": "",
+        "NAME": "github_actions",
+        "USER": "ci",
+        "PASSWORD": "iddqd",
         "HOST": "localhost",
-        "PORT": ""
+        "PORT": "5432"
     }
 }
 
