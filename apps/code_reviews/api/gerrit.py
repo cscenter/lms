@@ -295,3 +295,8 @@ class Gerrit:
     def delete_change_edit(self, change_id):
         change_edit_uri = f'changes/{change_id}/edit'
         return self._request('DELETE', change_edit_uri)
+
+    def get_review(self, change_id, revision_id):
+        """Retrieves a review of a revision (or Patch Set)."""
+        endpoint = f'changes/{change_id}/revisions/{revision_id}/review'
+        return self._request('GET', endpoint)
