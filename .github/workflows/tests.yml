@@ -83,18 +83,27 @@ jobs:
       - name: Check Python version
         run: python --version
 
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          pipenv --venv
+
+      - name: Debug 1
+        run: ls ~/.local/share/virtualenvs
+
       - id: cache-pipenv
         uses: actions/cache@v2
         with:
           path: ~/.local/share/virtualenvs
           key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
 
+      - name: Debug 2
+        run: ls ~/.local/share/virtualenvs
+
       - name: Install app dependencies
         if: steps.cache-pipenv.outputs.cache-hit != 'true'
-        run: |
-          python -m pip install --upgrade pip
-          pip install pipenv
-          pipenv sync --dev
+        run: pipenv sync --dev
 
       - name: Create files with env configurations
         run: |
