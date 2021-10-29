@@ -6,6 +6,7 @@ from django_rq import job
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from auth.models import ConnectedAuthService
 from code_reviews.api.gerrit import Gerrit
@@ -120,8 +121,9 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
                      f"username {username} has not been found.")
         return
 
-    score_old = normalize_code_review_score(score_old, student_assignment.assignment)
-    score_new = normalize_code_review_score(score_new, student_assignment.assignment)
+    assignment = student_assignment.assignment
+    score_old = normalize_code_review_score(score_old, assignment)
+    score_new = normalize_code_review_score(score_new, assignment)
 
     score_current = student_assignment.score
     if score_current is not None and score_current != score_old:
@@ -129,14 +131,18 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
         raise ValidationError("Abort operation since current score value "
                               "differs from the expected.")
 
+    # Check site permissions of the main branch of the course
+    access_groups = changed_by.get_site_groups(assignment.course.main_branch.site_id)
+    changed_by.roles = {g.role for g in access_groups}
     if not changed_by.has_perm(EditStudentAssignment.name, student_assignment):
         logger.error(f"User {changed_by.pk} has no permission to "
-                     f"edit student assignment")
+                     f"edit student assignment {student_assignment.pk}")
         return None
 
-    update_personal_assignment_score(student_assignment=student_assignment,
-                                     changed_by=changed_by,
-                                     score_old=score_old,
-                                     score_new=score_new,
-                                     source=AssignmentScoreUpdateSource.WEBHOOK_GERRIT)
+    with transaction.atomic():
+        update_personal_assignment_score(student_assignment=student_assignment,
+                                         changed_by=changed_by,
+                                         score_old=score_old,
+                                         score_new=score_new,
+                                         source=AssignmentScoreUpdateSource.WEBHOOK_GERRIT)
     return student_assignment.pk
