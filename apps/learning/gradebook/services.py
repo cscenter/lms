@@ -41,14 +41,14 @@ def assignment_import_scores_from_yandex_contest(*, client: YandexContestAPI,
     for participant_results in yandex_contest_scoreboard_iterator(client, contest_id):
         if participant_results.yandex_login not in students:
             continue
+        student = students[participant_results.yandex_login]
         gen = (pr for pr in participant_results.problems if pr.problem_alias == problem_alias)
         problem_results = next(gen, None)
         if not problem_results:
             raise ValidationError("Problem was not found", code="malformed")
         if problem_results.status == ProblemStatus.NOT_SUBMITTED:
             continue
-        student = students[participant_results.yandex_login]
-        assert student.pk in student_assignments
+        # Student could left the course or is on academic leave
         if student.pk in student_assignments:
             student_assignment = student_assignments[student.pk]
             assert student_assignment.assignment_id == assignment.pk

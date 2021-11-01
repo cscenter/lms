@@ -50,18 +50,21 @@ git push origin HEAD:refs/for/master%ready
 
 ```bash
 git clone ssh://admin@review.compscicenter.ru:29418/All-Projects.git
-cd All-Projects.git
+cd All-Projects
 git pull origin refs/meta/config
 git push origin HEAD:refs/meta/config
 ```
 
 ### Edit project configuration (example: add new label)
+
 ```bash
 git clone ssh://admin@review.compscicenter.ru:29418/<PROJECT_NAME>.git
 git fetch origin refs/meta/config:refs/remotes/origin/meta/config
 git checkout meta/config
 ```
+
 Edit project.config
+
 ```
 [label "Verified"]
         function = MaxWithBlock
@@ -70,19 +73,28 @@ Edit project.config
         value = +1 Verified
         copyAllScoresIfNoCodeChange = true
         defaultValue = 0
+        copyAnyScore = true
 [access "refs/heads/*"]
         label-Verified = -1..+1 group Service Users
 ```
+
+`label.Label-Name.copyAnyScore` - If true, any score for the label is copied forward when a new patch set is uploaded.
+
 Make sure target group in a `groups` file (UUID can be viewed in gerrit UI)
+
 ```text
 e88b5ea24c4f9488b8908632c03bf517e0707474	Service Users
 ```
+
 Now save changes
+
 ```bash
 git commit -a -m "Added label - Verified"
 git push origin meta/config:meta/config
 ```
+
 You may need to fix author and committer
+
 ```bash
 git -c "user.name=admin" -c "user.email=webmaster@compscicenter.ru" commit --amend --reuse-message=HEAD --author="admin <webmaster@compscicenter.ru>"
 ```
