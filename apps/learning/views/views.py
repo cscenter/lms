@@ -15,19 +15,21 @@ from core import comment_persistence
 from core.http import AuthenticatedHttpRequest
 from core.utils import hashids
 from core.views import LoginRequiredMixin
-from courses.models import AssignmentAttachment, CourseTeacher
+from courses.models import AssignmentAttachment
 from courses.selectors import course_teachers_prefetch_queryset
 from courses.views.mixins import CourseURLParamsMixin
 from files.views import ProtectedFileDownloadView
 from learning.forms import AssignmentCommentForm
 from learning.models import (
-    AssignmentComment, AssignmentNotification, AssignmentSubmissionTypes,
-    CourseNewsNotification, Event, StudentAssignment, SubmissionAttachment
+    AssignmentComment, AssignmentNotification, CourseNewsNotification, Event,
+    StudentAssignment, SubmissionAttachment
 )
 from learning.permissions import (
     ViewAssignmentAttachment, ViewAssignmentCommentAttachment
 )
-from learning.services import create_assignment_comment, get_draft_comment
+from learning.services.personal_assignment_service import (
+    create_assignment_comment, get_draft_comment
+)
 from users.mixins import TeacherOnlyMixin
 
 logger = logging.getLogger(__name__)

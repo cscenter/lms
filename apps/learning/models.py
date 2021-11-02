@@ -785,7 +785,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
             smart_str(self.student_assignment.student.get_full_name())))
 
     def save(self, **kwargs):
-        from learning.services import (
+        from learning.services.personal_assignment_service import (
             maybe_set_assignee_for_personal_assignment,
             update_student_assignment_derivable_fields
         )

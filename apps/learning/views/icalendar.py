@@ -13,7 +13,7 @@ from learning.icalendar import (
     TeacherClassICalendarEvent, generate_icalendar
 )
 from learning.models import StudentAssignment
-from learning.services import (
+from learning.selectors import (
     get_student_classes, get_study_events, get_teacher_assignments, get_teacher_classes
 )
 from users.models import User

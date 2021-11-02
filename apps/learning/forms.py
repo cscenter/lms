@@ -13,11 +13,10 @@ from core.models import LATEX_MARKDOWN_ENABLED
 from core.widgets import UbereditorWidget
 from courses.forms import AssignmentDurationField
 from courses.models import Assignment
-from grading.services import CheckerService, CheckerSubmissionService
+from grading.services import CheckerService
 from learning.models import AssignmentSubmissionTypes, GraduateProfile
 
 from .models import AssignmentComment
-from .services import create_assignment_solution
 
 
 class SubmitLink(BaseInput):

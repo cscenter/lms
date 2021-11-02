@@ -9,7 +9,8 @@ from learning.models import (
     AssignmentComment, AssignmentNotification, AssignmentSubmissionTypes,
     CourseNewsNotification, Enrollment, StudentAssignment, StudentGroup
 )
-from learning.services import StudentGroupService, update_course_learners_count
+from learning.services import StudentGroupService
+from learning.services.enrollment_service import update_course_learners_count
 # FIXME: post_delete нужен? Что лучше - удалять StudentGroup + SET_NULL у Enrollment или делать soft-delete?
 # FIXME: группу лучше удалить, т.к. она будет предлагаться для новых заданий, хотя типа уже удалена.
 from learning.tasks import convert_assignment_submission_ipynb_file_to_html

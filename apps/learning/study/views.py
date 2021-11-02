@@ -25,16 +25,13 @@ from info_blocks.models import InfoBlock
 from info_blocks.permissions import ViewInternships
 from learning import utils
 from learning.calendar import get_all_calendar_events, get_student_calendar_events
-from learning.forms import AssignmentCommentForm
-from learning.models import (
-    AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
-)
+from learning.models import Enrollment, StudentAssignment
 from learning.permissions import (
     CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution,
     EnrollPermissionObject, ViewCourses, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments
 )
-from learning.services import get_draft_solution, get_student_classes
+from learning.selectors import get_student_classes
 from learning.study.services import get_solution_form, save_solution_form
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import (

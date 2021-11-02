@@ -11,9 +11,8 @@ from courses.models import Assignment, Course, CourseGroupModes, StudentGroupTyp
 from learning.models import (
     AssignmentGroup, CourseInvitation, Enrollment, StudentAssignment, StudentGroup
 )
-from learning.services import (
-    CourseRole, course_access_role, is_course_failed_by_student
-)
+from learning.services import CourseRole, course_access_role
+from learning.services.enrollment_service import is_course_failed_by_student
 from learning.settings import StudentStatuses
 from users.models import StudentProfile, User
 

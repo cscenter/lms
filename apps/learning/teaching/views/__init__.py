@@ -11,7 +11,7 @@ from courses.utils import MonthPeriod, extended_month_date_range, get_current_te
 from courses.views.calendar import MonthEventsCalendarView
 from learning.calendar import get_all_calendar_events, get_teacher_calendar_events
 from learning.gradebook.views import GradeBookListBaseView
-from learning.services import get_teacher_classes
+from learning.selectors import get_teacher_classes
 from learning.teaching.utils import get_student_groups_url
 from users.mixins import TeacherOnlyMixin
 

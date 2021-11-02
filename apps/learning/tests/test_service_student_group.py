@@ -10,8 +10,9 @@ from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseTeacherFactory
 )
 from learning.models import StudentAssignment, StudentGroup, StudentGroupAssignee
-from learning.services import (
-    EnrollmentService, GroupEnrollmentKeyError, StudentGroupError, StudentGroupService
+from learning.services import EnrollmentService, StudentGroupService
+from learning.services.student_group_service import (
+    GroupEnrollmentKeyError, StudentGroupError
 )
 from learning.tests.factories import (
     EnrollmentFactory, StudentGroupAssigneeFactory, StudentGroupFactory

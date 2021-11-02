@@ -18,11 +18,13 @@ from core.tests.settings import (
 from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse
 from courses.admin import AssignmentAdmin
-from courses.constants import AssignmentFormat
+from courses.constants import AssigneeMode, AssignmentFormat
 from courses.models import Assignment, CourseTeacher
 from courses.tests.factories import AssignmentFactory, CourseFactory, CourseNewsFactory
 from learning.models import AssignmentNotification, CourseNewsNotification
-from learning.services import EnrollmentService, is_course_failed_by_student
+from learning.services.enrollment_service import (
+    EnrollmentService, is_course_failed_by_student
+)
 from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import *
 from notifications.management.commands.notify import (
@@ -204,6 +206,7 @@ def test_assignment_setup_assignees_admin_form(client):
     post_data = {
         'course': co.pk,
         'title': a.title,
+        'assignee_mode': AssigneeMode.STUDENT_GROUP,
         'submission_type': AssignmentFormat.ONLINE,
         'text': a.text,
         'passing_score': 0,

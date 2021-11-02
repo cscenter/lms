@@ -13,9 +13,10 @@ from learning.models import (
     CourseInvitation, CourseNewsNotification, Enrollment, EnrollmentPeriod, Event,
     GraduateProfile, Invitation, StudentAssignment, StudentGroup, StudentGroupAssignee
 )
-from learning.services import (
-    StudentGroupService, create_assignment_comment, create_assignment_solution,
-    recreate_assignments_for_student
+from learning.services import StudentGroupService
+from learning.services.enrollment_service import recreate_assignments_for_student
+from learning.services.personal_assignment_service import (
+    create_assignment_comment, create_assignment_solution
 )
 from learning.settings import StudentStatuses
 from users.constants import Roles

@@ -17,9 +17,10 @@ from learning.permissions import (
     EnrollInCourse, EnrollInCourseByInvitation, EnrollPermissionObject,
     InvitationEnrollPermissionObject
 )
-from learning.services import (
-    AlreadyEnrolled, CourseCapacityFull, EnrollmentService, GroupEnrollmentKeyError,
-    StudentGroupService
+from learning.services import EnrollmentService
+from learning.services.enrollment_service import AlreadyEnrolled, CourseCapacityFull
+from learning.services.student_group_service import (
+    GroupEnrollmentKeyError, StudentGroupService
 )
 
 

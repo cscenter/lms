@@ -36,8 +36,9 @@ from learning.permissions import (
     ViewStudentAssignment, ViewStudentAssignmentList
 )
 from learning.selectors import get_teacher_courses
-from learning.services import (
-    AssignmentService, StudentGroupService, update_personal_assignment_score
+from learning.services import AssignmentService, StudentGroupService
+from learning.services.personal_assignment_service import (
+    update_personal_assignment_score
 )
 from learning.settings import AssignmentScoreUpdateSource
 from learning.utils import humanize_duration

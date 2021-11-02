@@ -4,8 +4,9 @@ from django_rq import job
 
 from files.utils import convert_ipynb_to_html
 from learning.models import AssignmentComment, StudentAssignment, SubmissionAttachment
-from learning.services import (
-    create_notifications_about_new_submission, update_personal_assignment_stats
+from learning.services.notification_service import create_notifications_about_new_submission
+from learning.services.personal_assignment_service import (
+    update_personal_assignment_stats
 )
 
 logger = logging.getLogger(__file__)

@@ -14,14 +14,14 @@ from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.constants import AssignmentFormat
+from courses.constants import AssigneeMode, AssignmentFormat
 from courses.models import Assignment, AssignmentAttachment
 from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, SemesterFactory
 )
 from learning.models import StudentAssignment
 from learning.permissions import ViewAssignmentAttachment
-from learning.services import is_course_failed_by_student
+from learning.services.enrollment_service import is_course_failed_by_student
 from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
@@ -224,6 +224,7 @@ def test_create_assignment_admin_form(client):
     post_data = {
         'course': course.pk,
         'title': a.title,
+        "assignee_mode": AssigneeMode.STUDENT_GROUP,
         'submission_type': AssignmentFormat.ONLINE,
         'text': a.text,
         'passing_score': 0,

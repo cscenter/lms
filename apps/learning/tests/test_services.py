@@ -11,10 +11,11 @@ from learning.models import (
     AssignmentNotification, Enrollment, PersonalAssignmentActivity, StudentAssignment,
     StudentGroup
 )
-from learning.services import (
-    AssignmentService, create_assignment_comment,
+from learning.services import AssignmentService
+from learning.services.notification_service import (
     create_notifications_about_new_submission
 )
+from learning.services.personal_assignment_service import create_assignment_comment
 from learning.settings import Branches, StudentStatuses
 from learning.tests.factories import (
     AssignmentCommentFactory, AssignmentNotificationFactory, EnrollmentFactory,

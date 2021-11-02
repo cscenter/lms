@@ -7,7 +7,7 @@ from grading.api.yandex_contest import (
 )
 from grading.models import Checker
 from learning.models import Enrollment, StudentAssignment
-from learning.services import update_personal_assignment_score
+from learning.services.personal_assignment_service import update_personal_assignment_score
 from learning.settings import AssignmentScoreUpdateSource
 from users.models import User
 

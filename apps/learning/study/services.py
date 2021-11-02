@@ -1,19 +1,14 @@
 from typing import Optional
 
-from django.core.exceptions import ValidationError
-from django.core.files.uploadedfile import UploadedFile
-from django.forms import ModelForm
-
 from core.urls import reverse
 from courses.constants import AssignmentFormat
 from grading.constants import CheckingSystemTypes
-from grading.services import CheckerService
 from learning.forms import (
     AssignmentSolutionBaseForm, AssignmentSolutionDefaultForm,
     AssignmentSolutionYandexContestForm
 )
 from learning.models import AssignmentComment, StudentAssignment
-from learning.services import (
+from learning.services.personal_assignment_service import (
     create_assignment_solution, create_assignment_solution_and_check
 )
 from users.models import User

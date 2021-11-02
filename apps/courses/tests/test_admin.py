@@ -8,7 +8,7 @@ from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.admin import CourseBranchInline, CourseTeacherInline
-from courses.constants import AssignmentFormat, MaterialVisibilityTypes
+from courses.constants import AssigneeMode, AssignmentFormat, MaterialVisibilityTypes
 from courses.models import (
     Assignment, Course, CourseBranch, CourseGroupModes, CourseTeacher
 )
@@ -290,6 +290,7 @@ def test_assignment_admin_view(settings, client):
     co_in_nsk = CourseFactory(main_branch__code=Branches.NSK)
     form_data = {
         "course": "",
+        "assignee_mode": AssigneeMode.STUDENT_GROUP,
         "submission_type": AssignmentFormat.ONLINE,
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00:00",
