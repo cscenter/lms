@@ -1,5 +1,6 @@
 from djchoices import C, DjangoChoices
 
+from django.db.models.enums import TextChoices
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext_noop
 
@@ -61,3 +62,9 @@ class AssignmentFormat(DjangoChoices):
     NO_SUBMIT = C("other", _("No Submission"))  # on paper, etc
 
     with_checker = {CODE_REVIEW.value, YANDEX_CONTEST.value}
+
+
+class AssigneeMode(TextChoices):
+    DISABLED = 'off', _('Disabled')
+    STUDENT_GROUP = 'sg', _('Student Group')
+    MANUAL = 'manual', _('Manual')

@@ -29,7 +29,9 @@ from core.timezone.fields import TimezoneAwareDateTimeField
 from core.timezone.typing import Timezone
 from core.urls import reverse
 from core.utils import get_youtube_video_id, hashids, instance_memoize
-from courses.constants import AssignmentFormat, MaterialVisibilityTypes, TeacherRoles
+from courses.constants import (
+    AssigneeMode, AssignmentFormat, MaterialVisibilityTypes, TeacherRoles
+)
 from courses.utils import TermPair, get_current_term_pair
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
@@ -1052,6 +1054,12 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
         _("Time to Completion"),
         blank=True, null=True,
         help_text=_("Estimated amount of time required for the task to be completed"))
+    assignee_mode = models.CharField(
+        verbose_name=_("Assignee mode"),
+        help_text=_("Automatic assignment mode of a responsible teacher"),
+        max_length=12,
+        choices=AssigneeMode.choices,
+        default=AssigneeMode.STUDENT_GROUP)
     assignees = models.ManyToManyField(
         CourseTeacher,
         verbose_name=_("Assignment Assignees"),
