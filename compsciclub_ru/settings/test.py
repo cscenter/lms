@@ -16,17 +16,6 @@ COVERAGE_MODULE_EXCLUDES = ['tests$', 'settings$', 'urls$', 'locale$',
                             'migrations', '^sorl', '__pycache__']
 COVERAGE_PATH_EXCLUDES = [r'.svn', r'fixtures', r'node_modules']
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "github_actions",
-        "USER": "ci",
-        "PASSWORD": "iddqd",
-        "HOST": "localhost",
-        "PORT": "5432"
-    }
-}
-
 
 TEST_DOMAIN = 'compsciclub.ru'
 TEST_DOMAIN_ID = 2
