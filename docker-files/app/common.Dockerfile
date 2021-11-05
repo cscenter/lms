@@ -82,12 +82,6 @@ RUN mkdir /var/www/code && chown ${APP_USER}:${APP_USER} /var/www/code
 COPY . /var/www/code/
 WORKDIR /var/www/code/
 
-# Compile .mo translation files
-RUN ENV_FILE=/var/www/code/lms/settings/.env.example \
-    DJANGO_SETTINGS_MODULE="lms.settings.extended" \
-    DJANGO_STATIC_ROOT=${DJANGO_STATIC_ROOT} \
-    python manage.py compilemessages
-
 # Start uWSGI
 RUN mkdir /var/run/uwsgi-sockets/ && chown ${APP_USER}:${APP_USER} /var/run/uwsgi-sockets
 COPY docker-files/app/uwsgi.ini /etc/uwsgi.ini
