@@ -63,3 +63,6 @@ for queue_config in RQ_QUEUES.values():
 
 # Disable gerrit ldap password hash sync
 LDAP_SYNC_PASSWORD = False
+
+for bundle_conf in WEBPACK_LOADER.values():
+    bundle_conf['LOADER_CLASS'] = 'core.webpack_loader.TestingWebpackLoader'
