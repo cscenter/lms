@@ -95,7 +95,8 @@ jobs:
           key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
 
       - name: Install app dependencies
-        if: steps.cache-pipenv.outputs.cache-hit != 'true'
+        # FIXME: pipenv virtualenv name could change between builds
+        # if: steps.cache-pipenv.outputs.cache-hit != 'true'
         run: pipenv sync --dev
 
       - name: Debug 2
