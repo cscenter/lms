@@ -22,7 +22,9 @@ from learning.models import (
     AssignmentComment, AssignmentSubmissionTypes, StudentAssignment
 )
 from learning.permissions import EditStudentAssignment
-from learning.services.personal_assignment_service import update_personal_assignment_score
+from learning.services.personal_assignment_service import (
+    update_personal_assignment_score
+)
 from learning.settings import AssignmentScoreUpdateSource
 from users.models import User
 

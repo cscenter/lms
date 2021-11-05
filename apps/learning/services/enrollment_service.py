@@ -8,7 +8,9 @@ from core.timezone.constants import DATE_FORMAT_RU
 from courses.models import Course
 from learning.models import Enrollment
 from learning.services import AssignmentService
-from learning.services.notification_service import remove_course_notifications_for_student
+from learning.services.notification_service import (
+    remove_course_notifications_for_student
+)
 from users.models import StudentProfile
 
 
