@@ -1,0 +1,95 @@
+version: '3'
+
+services:
+  django:
+    container_name: lms-django
+    build:
+      context: .
+      dockerfile: docker-files/app/common.Dockerfile
+      args:
+        - DJANGO_STATIC_ROOT=/var/www/static/
+        - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+    image: lms-backend-django
+    restart: always
+    environment:
+     - PROJECT_MODULE_NAME=compscicenter_ru
+     - REDIS_HOST=lms-redis-cluster
+     - REDIS_PASSWORD=secret-password
+    volumes:
+      - uwsgi-sockets:/var/run/uwsgi-sockets
+      - static-data:/var/www/static
+    depends_on:
+      - db
+      - redis
+  django-tests:
+    container_name: lms-django-tests
+    build:
+      context: .
+      dockerfile: docker-files/app/dev.Dockerfile
+      args:
+        - BASE_IMAGE=lms-backend-django
+    image: lms-backend-django-tests
+    environment:
+     - PROJECT_MODULE_NAME=compscicenter_ru
+     - REDIS_HOST=lms-redis-cluster
+     - REDIS_PASSWORD=secret-password
+    depends_on:
+      - db
+      - redis
+  rqworker:
+    container_name: lms-task-queue
+    image: lms-backend-django
+    restart: always
+    environment:
+     - REDIS_HOST=lms-redis-cluster
+     - REDIS_PASSWORD=secret-password
+    command: python manage.py rqworker high default
+  nginx:
+    container_name: lms-nginx
+    build:
+      context: ./docker-files/nginx
+      dockerfile: Dockerfile
+    image: lms-backend-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - static-data:/var/www/static
+      - media-data:/var/www/media
+      - uwsgi-sockets:/var/run/uwsgi-sockets
+    environment:
+      - PROJECT_MODULE_NAME=compscicenter_ru
+      - MAIN_DOMAIN=compscicenter.ru
+    depends_on:
+      - redis
+      - django
+  db:
+    container_name: db
+    image: postgres:12-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ci
+      POSTGRES_DB: github_actions
+      POSTGRES_PASSWORD: iddqd
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+  redis:
+    container_name: lms-redis-cluster
+    image: "redis:6-alpine"
+    command: sh -c 'if [ "x$${REDIS_PASSWORD}" = "x" ]; then redis-server --appendonly yes; else redis-server --appendonly yes --requirepass $$REDIS_PASSWORD; fi'
+    expose:
+      - 6379
+    volumes:
+      - redis-data:/data
+    environment:
+      - REDIS_PASSWORD=secret-password
+
+volumes:
+  uwsgi-sockets:
+  static-data:
+  media-data:
+    external:
+      name: lms-media
+  redis-data:
+    external:
+      name: lms-redis-data
+  postgres-data:

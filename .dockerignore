@@ -1,6 +1,8 @@
 .dockerignore
 .travis.yml
 .git
+.cache
+.mypy_cache
 __pycache__
 db.sqlite3
 infrastructure/
@@ -10,3 +12,7 @@ public/*
 !public/assets/
 docs/
 setup.cfg
+docker-compose.override.yml
+
+**/.env
+**/.DS_Store
