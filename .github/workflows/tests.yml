@@ -24,7 +24,7 @@ jobs:
         env:
           POSTGRES_USER: csc
           POSTGRES_PASSWORD: FooBar
-          # POSTGRES_DB: cscdb
+          POSTGRES_DB: cscdb
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -118,7 +118,10 @@ jobs:
         run: |
           pipenv --venv
           ls ~/.local/share/virtualenvs
+          env DATABASE_URL=postgresql://csc:FooBar@localhost:5432/cscdb
           pipenv run python ./manage.py migrate --noinput --settings=compscicenter_ru.settings.test
 
       - name: Run tests
-        run: pipenv run pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
+        run: |
+          env DATABASE_URL=postgresql://csc:FooBar@localhost:5432/cscdb
+          pipenv run pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
