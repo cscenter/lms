@@ -115,7 +115,9 @@ jobs:
         run: pipenv run isort --settings .isort.cfg . --check-only
 
       - name: Run migrations
-        run: pipenv run ./manage.py migrate --noinput --settings=compscicenter_ru.settings.test
+        run: |
+          pipenv run pip freeze
+          pipenv run ./manage.py migrate --noinput --settings=compscicenter_ru.settings.test
 
       - name: Run tests
         run: pipenv run pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
