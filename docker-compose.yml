@@ -67,9 +67,9 @@ services:
     image: postgres:12-alpine
     restart: always
     environment:
-      POSTGRES_USER: ci
-      POSTGRES_DB: github_actions
-      POSTGRES_PASSWORD: iddqd
+      POSTGRES_USER: csc
+      POSTGRES_DB: cscdb
+      POSTGRES_PASSWORD: FooBar
     volumes:
       - postgres-data:/var/lib/postgresql/data/
   redis:

@@ -22,9 +22,9 @@ jobs:
       postgres:
         image: postgres:12
         env:
-          POSTGRES_USER: ci
-          POSTGRES_PASSWORD: iddqd
-          POSTGRES_DB: github_actions
+          POSTGRES_USER: csc
+          POSTGRES_PASSWORD: FooBar
+          # POSTGRES_DB: cscdb
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
