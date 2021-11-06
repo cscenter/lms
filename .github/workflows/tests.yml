@@ -116,8 +116,9 @@ jobs:
 
       - name: Run migrations
         run: |
-          pipenv run pip freeze
-          pipenv run ./manage.py migrate --noinput --settings=compscicenter_ru.settings.test
+          pipenv --venv
+          ls ~/.local/share/virtualenvs
+          pipenv run python ./manage.py migrate --noinput --settings=compscicenter_ru.settings.test
 
       - name: Run tests
         run: pipenv run pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
