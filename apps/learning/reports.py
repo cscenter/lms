@@ -1,7 +1,7 @@
 import io
 from abc import ABCMeta, abstractmethod
 from operator import attrgetter
-from typing import Dict, List, Set
+from typing import Dict, List, Literal, Set
 
 from pandas import DataFrame, ExcelWriter
 
@@ -110,7 +110,8 @@ class ProgressReport:
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, grade_getter="grade_display", on_course_duplicate='store_last'):
+    def __init__(self, grade_getter="grade_display",
+                 on_course_duplicate: Literal["store_last", "store_max"] = "store_last"):
         """
         Two options to choose what grade to export when student take
         a course multiple times:
@@ -135,7 +136,7 @@ class ProgressReport:
         return []
 
     def get_courses_queryset(self, students):
-        courses = set()
+        courses: Set[int] = set()
         for student in students:
             for e in student.enrollments_progress:
                 courses.add(e.course_id)
@@ -160,9 +161,7 @@ class ProgressReport:
         # It's possible to prefetch all related courses but nested
         # .prefetch_related() for course teachers is extremely slow
         students = (sp.user for sp in student_profiles)
-        unique_courses: Dict[int, Course] = {}
-        for c in self.get_courses_queryset(students):
-            unique_courses[c.pk] = c
+        unique_courses: Dict[int, Course] = {c.pk: c for c in self.get_courses_queryset(students)}
         unique_meta_courses: Dict[int, MetaCourse] = {}
         # Aggregate max number of courses for each type. Result headers
         # depend on these values.
@@ -199,7 +198,7 @@ class ProgressReport:
         return DataFrame.from_records(columns=headers, data=data, index='ID')
 
     def process_student(self, student, unique_courses, unique_meta_courses):
-        final_grades: Dict[int, Enrollment] = {}
+        grades: Dict[int, Enrollment] = {}
         for enrollment in student.enrollments_progress:
             self.before_skip_enrollment(enrollment, student, unique_courses)
             if self.skip_enrollment(enrollment, student, unique_courses):
@@ -207,23 +206,25 @@ class ProgressReport:
             course = unique_courses[enrollment.course_id]
             meta_course_id = course.meta_course_id
             unique_meta_courses[meta_course_id] = course.meta_course
-            if meta_course_id in final_grades:
-                current_enrollment = final_grades[meta_course_id]
-                # Store the last grade
+            if meta_course_id in grades:
+                current_enrollment = grades[meta_course_id]
+                # Store the latest satisfactory grade
                 if self.on_course_duplicate == 'store_last':
                     current_course = unique_courses[current_enrollment.course_id]
-                    is_satisfactory_grade = enrollment.grade in GradeTypes.satisfactory_grades
-                    if is_satisfactory_grade and course.semester.index > current_course.semester.index:
-                        final_grades[meta_course_id] = enrollment
+                    is_current_grade_satisfactory = current_enrollment.grade in GradeTypes.satisfactory_grades
+                    is_grade_satisfactory = enrollment.grade in GradeTypes.satisfactory_grades
+                    is_grade_newer = course.semester.index > current_course.semester.index
+                    if is_grade_satisfactory and (is_grade_newer or not is_current_grade_satisfactory):
+                        grades[meta_course_id] = enrollment
                 # Stores the highest grade
                 elif self.on_course_duplicate == 'store_max':
                     # The behavior is not specified if different grading systems were
                     # used in different terms (e.g. 10-point scale and binary)
                     if grade_to_mark(enrollment.grade) > grade_to_mark(current_enrollment.grade):
-                        final_grades[meta_course_id] = enrollment
+                        grades[meta_course_id] = enrollment
             else:
-                final_grades[meta_course_id] = enrollment
-        student.unique_enrollments = final_grades
+                grades[meta_course_id] = enrollment
+        student.unique_enrollments = grades
 
     def before_skip_enrollment(self, enrollment, student, courses) -> None:
         """
