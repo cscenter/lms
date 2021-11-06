@@ -103,6 +103,7 @@ jobs:
         run: |
           pipenv --venv
           ls ~/.local/share/virtualenvs
+          pipenv run pip freeze
 
       - name: Create files with env configurations
         run: |
