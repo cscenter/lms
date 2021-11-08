@@ -85,6 +85,7 @@ WORKDIR /var/www/code/
 RUN mkdir /var/run/uwsgi-sockets/ && chown ${APP_USER}:${APP_USER} /var/run/uwsgi-sockets
 COPY docker-files/app/uwsgi.ini /etc/uwsgi.ini
 
+# TODO: remove entrypoint, use docker built-in non-root mode
 # Change to a non-root user inside entry point
 COPY docker-files/app/docker-entrypoint.sh /
 ENTRYPOINT ["sh", "/docker-entrypoint.sh"]
