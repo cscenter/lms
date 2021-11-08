@@ -1,0 +1,110 @@
+name: Tests | VM
+
+on: workflow_dispatch
+
+env:
+  DATABASE_URL: postgresql://csc:FooBar@localhost:5432/cscdb
+
+jobs:
+  python-tests:
+    name: Django Tests
+    runs-on: ubuntu-latest
+
+    services:
+      # Label used to access the service container
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: csc
+          POSTGRES_PASSWORD: FooBar
+          POSTGRES_DB: cscdb
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+      redis:
+        # 5.0.6 on AWS
+        image: redis:5.0.14
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 6379 on service container to the host
+          - 6379:6379
+
+    env:
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      WEBPACK_ENVIRONMENT: prod
+      WEBPACK_ASSETS_ROOT: ./site-frontend/assets/
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+      - name: Checkout private frontend repo
+        uses: actions/checkout@v2
+        with:
+          repository: cscenter/site-frontend
+          ssh-key: ${{ secrets.FRONTEND_DEPLOY_KEY }}
+          path: site-frontend
+      - name: Install system dependencies
+        # swig - m2crypto dependency for django-ses
+        # libcurl4-gnutls-dev - dependency for pycurl
+        # libsasl2-dev python-dev libldap2-dev libssl-dev - python-ldap dependencies
+        run: |
+          sudo apt-get -y install libgnutls28-dev \
+                                  swig \
+                                  libcurl4-gnutls-dev \
+                                  libsasl2-dev \
+                                  libldap2-dev \
+                                  libssl-dev
+      - name: Install python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Check Python version
+        run: python --version
+
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+
+      - id: cache-pipenv
+        uses: actions/cache@v2
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+
+      - name: Install app dependencies
+        if: steps.cache-pipenv.outputs.cache-hit != 'true'
+        run: pipenv sync --dev
+
+      - name: Debug 2
+        run: |
+          pipenv --venv
+          ls ~/.local/share/virtualenvs
+          pipenv run pip freeze
+
+      - name: Create files with env configurations
+        run: |
+          cp lms/settings/.env.example lms/settings/.env
+          cp lms/settings/.env.example lk_yandexdataschool_ru/settings/.env
+          cp compsciclub_ru/settings/.env.example compsciclub_ru/settings/.env
+
+      - name: Validate imports order
+        run: pipenv run isort --settings .isort.cfg . --check-only
+
+      - name: Run tests
+        run: pipenv run pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/

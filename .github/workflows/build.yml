@@ -1,11 +1,6 @@
-name: Build Docker Images
+name: Build and Push Docker Images
 
 on: workflow_dispatch
-
-#on:
-#  push:
-#    branches:
-#      - master
 
 env:
   LOCAL_IMAGE_FRONTEND: localhost:5000/lms-frontend-webpack:latest
@@ -34,17 +29,6 @@ jobs:
         with:
           driver-opts: network=host
 
-#      - name: Configure AWS credentials
-#        uses: aws-actions/configure-aws-credentials@v1
-#        with:
-#          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#          aws-region: eu-central-1
-#
-#      - name: Login to Amazon ECR
-#        id: login-ecr
-#        uses: aws-actions/amazon-ecr-login@v1
-
       - name: Build Cache - Frontend
         uses: actions/cache@v2
         with:
@@ -67,6 +51,17 @@ jobs:
           repository: cscenter/site-frontend
           ssh-key: ${{ secrets.FRONTEND_DEPLOY_KEY }}
           path: lms-frontend
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
       - name: Debug
         run: |
@@ -109,8 +104,8 @@ jobs:
         with:
           context: ./lms-backend/
           file: ./lms-backend/docker-files/app/Dockerfile
-          push: false
-          load: true
+          push: true
+          load: false
           builder: ${{ steps.buildx.outputs.name }}
           build-args: |
             WEBPACK_ENVIRONMENT=prod
@@ -125,12 +120,10 @@ jobs:
         with:
           context: ./lms-backend/docker-files/nginx/
           file: ./lms-backend/docker-files/nginx/Dockerfile
-          push: false
-          load: true
+          push: true
+          load: false
           builder: ${{ steps.buildx.outputs.name }}
           tags: ${{ env.REMOTE_IMAGE_BACKEND_NGINX }}
-
-      # TODO: tag images and push. Then test it works on AWS
 
       - name: Debug
         run: docker images
