@@ -130,7 +130,7 @@ jobs:
         run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/.docker-registry:/var/lib/registry registry:2 && npx wait-on tcp:5000
 
       - name: Run pytest
-        run: docker run ${{ env.LOCAL_IMAGE_DJANGO_DEV }} pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
+        run: docker run -e ENV_FILE=${{ env.ENV_FILE }} ${{ env.LOCAL_IMAGE_DJANGO_DEV }} pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
         env:
           WEBPACK_ENVIRONMENT: prod
           WEBPACK_ASSETS_ROOT: ./site-frontend/assets/
