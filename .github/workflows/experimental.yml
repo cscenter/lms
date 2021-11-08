@@ -72,13 +72,7 @@ jobs:
             BASE_IMAGE=${{ env.LOCAL_IMAGE_DJANGO_PROD }}
           tags: ${{ env.LOCAL_IMAGE_DJANGO_DEV }}
           cache-from: type=registry,ref=${{ env.LOCAL_IMAGE_DJANGO_DEV }}
-          cache-to: type=registry,mode=max,ref=${{ env.LOCAL_IMAGE_DJANGO_DEV }}
-
-      - name: Debug
-        run: |
-          docker pull ${{ env.LOCAL_IMAGE_DJANGO_PROD }}
-          docker pull ${{ env.LOCAL_IMAGE_DJANGO_DEV }}
-          docker images
+          cache-to: type=inline
 
       # https://github.com/docker/build-push-action/issues/252
       - name: Move cache
@@ -118,12 +112,11 @@ jobs:
           - 6379:6379
 
     env:
-      REDIS_HOST: localhost
+      REDIS_HOST: redis
       REDIS_PORT: 6379
-      POSTGRES_HOST: localhost
+      POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      WEBPACK_ENVIRONMENT: prod
-      WEBPACK_ASSETS_ROOT: ./site-frontend/assets/
+      DATABASE_URL: postgresql://csc:FooBar@postgres:5432/cscdb
 
     steps:
       - name: Restore docker registry cache
@@ -136,9 +129,9 @@ jobs:
       - name: Start docker registry
         run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/.docker-registry:/var/lib/registry registry:2 && npx wait-on tcp:5000
 
-      - name: Debug
-        run: |
-          docker pull ${{ env.LOCAL_IMAGE_DJANGO_DEV }}
-          docker images
-
-
+      - name: Run pytest
+        run: docker run ${{ env.LOCAL_IMAGE_DJANGO_DEV }} pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
+        env:
+          WEBPACK_ENVIRONMENT: prod
+          WEBPACK_ASSETS_ROOT: ./site-frontend/assets/
+          ENV_FILE: /var/www/code/lms/settings/.env.example
