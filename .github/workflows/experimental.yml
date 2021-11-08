@@ -72,7 +72,7 @@ jobs:
             BASE_IMAGE=${{ env.LOCAL_IMAGE_DJANGO_PROD }}
           tags: ${{ env.LOCAL_IMAGE_DJANGO_DEV }}
           cache-from: type=registry,ref=${{ env.LOCAL_IMAGE_DJANGO_DEV }}
-          cache-to: type=inline
+          cache-to: type=registry,mode=max,ref=${{ env.LOCAL_IMAGE_DJANGO_DEV }}
 
       - name: Debug
         run: |
