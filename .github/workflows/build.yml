@@ -61,14 +61,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-django-buildx
 
-      - name: Build Cache - Full
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx
-
       - name: Checkout frontend repo
         uses: actions/checkout@v2
         with:
@@ -127,8 +119,6 @@ jobs:
             FRONTEND_IMAGE=${{ env.LOCAL_IMAGE_FRONTEND }}
             BASE_IMAGE=${{ env.LOCAL_IMAGE_DJANGO }}
           tags: ${{ env.REMOTE_IMAGE_BACKEND_DJANGO }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
 
       - name: Build backend nginx image
         uses: docker/build-push-action@v2
@@ -148,7 +138,6 @@ jobs:
       # https://github.com/docker/build-push-action/issues/252
       - name: Move cache
         run: |
-          rm -rf /tmp/.buildx-cache /tmp/.buildx-webpack-cache /tmp/.buildx-django-cache
+          rm -rf /tmp/.buildx-webpack-cache /tmp/.buildx-django-cache
           mv /tmp/.buildx-webpack-cache-new /tmp/.buildx-webpack-cache
           mv /tmp/.buildx-django-cache-new /tmp/.buildx-django-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
