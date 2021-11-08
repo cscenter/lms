@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=lms-backend-django
+ARG BASE_IMAGE=lms-backend-django:latest
 FROM ${BASE_IMAGE}
 
 # Install build deps, then run `pip install`,
@@ -12,3 +12,6 @@ RUN set -ex \
     \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPS \
     && rm -rf /var/lib/apt/lists/*
+
+# Copy main application code
+COPY . /var/www/code/

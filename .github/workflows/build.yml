@@ -1,11 +1,11 @@
 name: Build Docker Images
 
-# on: workflow_dispatch
+on: workflow_dispatch
 
-on:
-  push:
-    branches:
-      - master
+#on:
+#  push:
+#    branches:
+#      - master
 
 env:
   LOCAL_IMAGE_FRONTEND: localhost:5000/lms-frontend-webpack:latest

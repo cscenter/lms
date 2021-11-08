@@ -76,10 +76,9 @@ ENV LC_ALL="C.UTF-8"
 ENV LANG="C.UTF-8"
 ENV PYTHONUNBUFFERED 1
 
-# Copy main application code
+# Main application code directory
 RUN mkdir /var/www && chown ${APP_USER}:${APP_USER} /var/www
 RUN mkdir /var/www/code && chown ${APP_USER}:${APP_USER} /var/www/code
-COPY . /var/www/code/
 WORKDIR /var/www/code/
 
 # Start uWSGI

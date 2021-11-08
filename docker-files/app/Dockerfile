@@ -5,6 +5,9 @@ FROM ${FRONTEND_IMAGE} as frontend-builder
 
 FROM ${BASE_IMAGE}
 
+# Copy main application code
+COPY . /var/www/code/
+
 # Copy frontend assets (webpack bundles + static)
 ARG WEBPACK_ENVIRONMENT
 ENV WEBPACK_ENVIRONMENT=${WEBPACK_ENVIRONMENT}
