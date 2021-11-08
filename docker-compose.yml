@@ -5,7 +5,7 @@ services:
     container_name: lms-django
     build:
       context: .
-      dockerfile: docker-files/app/common.Dockerfile
+      dockerfile: docker-files/app/Dockerfile
       args:
         - DJANGO_STATIC_ROOT=/var/www/static/
         - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}

@@ -28,7 +28,4 @@ RUN ENV_FILE=/var/www/code/lms/settings/.env.example \
     DJANGO_STATIC_ROOT=${DJANGO_STATIC_ROOT} \
     python manage.py collectstatic --noinput --ignore "webpack-stats-v*.json"
 
-# Change to a non-root user inside entry point since we write to the /etc/hosts
-COPY docker-files/app/docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
-ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["uwsgi", "--ini", "/etc/uwsgi.ini", "--show-config"]
