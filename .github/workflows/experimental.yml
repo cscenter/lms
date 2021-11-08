@@ -14,15 +14,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      # https://docs.docker.com/registry/deploying/#run-a-local-registry
-      registry:
-        image: registry:2
-        volumes:
-          - /tmp/.docker-registry:/var/lib/registry
-        ports:
-          - 5000:5000
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -35,7 +26,7 @@ jobs:
         with:
           driver-opts: network=host
 
-      - name: Restore Docker Local Registry Cache
+      - name: Restore docker registry cache
         uses: actions/cache@v2
         id: cache-docker
         with:
@@ -43,6 +34,11 @@ jobs:
           key: ${{ runner.os }}-docker-local-registry-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-docker-local-registry
+
+      - name: Start docker registry
+        # https://docs.docker.com/registry/deploying/#run-a-local-registry
+        # Assuming it will be ready before first build
+        run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/.docker-registry:/var/lib/registry registry:2
 
       # TODO: Is it safe to replace it with a local registry cache?
       - name: Restore Django cache with production dependencies | header image
@@ -127,13 +123,13 @@ jobs:
       - name: Debug
         run: |
           docker images
-      - name: Restore Docker Local Registry Cache
+      - name: Restore docker registry cache
         uses: actions/cache@v2
         id: cache-docker
         with:
           path: /tmp/.docker-registry
           key: ${{ runner.os }}-docker-local-registry-${{ github.sha }}
-      - name: Start Docker registry
+      - name: Start docker registry
         run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/.docker-registry:/var/lib/registry registry:2 && npx wait-on tcp:5000
       - name: Debug
         run: |
