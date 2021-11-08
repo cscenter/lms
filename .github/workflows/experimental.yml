@@ -54,15 +54,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-django-buildx
 
-      # TODO: remove?
-      - name: Restore Django cache with dev dependencies | full image
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-django-dev-cache
-          key: ${{ runner.os }}-django-dev-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-django-dev-buildx
-
       - name: Build Django image with production dependencies | header image
         uses: docker/build-push-action@v2
         with:
@@ -142,10 +133,11 @@ jobs:
         with:
           path: /tmp/.docker-registry
           key: ${{ runner.os }}-docker-local-registry-${{ github.sha }}
-      - name: Run Local Docker Registry
+      - name: Start Docker registry
         run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/.docker-registry:/var/lib/registry registry:2 && npx wait-on tcp:5000
       - name: Debug
         run: |
+          docker image ls localhost:5000
           docker images
 
 
