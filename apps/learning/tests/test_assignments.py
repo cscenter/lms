@@ -224,7 +224,7 @@ def test_create_assignment_admin_form(client):
     post_data = {
         'course': course.pk,
         'title': a.title,
-        "assignee_mode": AssigneeMode.STUDENT_GROUP,
+        "assignee_mode": AssigneeMode.STUDENT_GROUP_DEFAULT,
         'submission_type': AssignmentFormat.ONLINE,
         'text': a.text,
         'passing_score': 0,

@@ -66,5 +66,6 @@ class AssignmentFormat(DjangoChoices):
 
 class AssigneeMode(TextChoices):
     DISABLED = 'off', _('Disabled')
-    STUDENT_GROUP = 'sg', _('Student Group')
+    STUDENT_GROUP_DEFAULT = 'sg_default', _('Student Group - Default')
+    STUDENT_GROUP_CUSTOM = 'sg_custom', _('Student Group - Custom')
     MANUAL = 'manual', _('Manual')

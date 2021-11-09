@@ -290,7 +290,7 @@ def test_assignment_admin_view(settings, client):
     co_in_nsk = CourseFactory(main_branch__code=Branches.NSK)
     form_data = {
         "course": "",
-        "assignee_mode": AssigneeMode.STUDENT_GROUP,
+        "assignee_mode": AssigneeMode.STUDENT_GROUP_DEFAULT,
         "submission_type": AssignmentFormat.ONLINE,
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00:00",

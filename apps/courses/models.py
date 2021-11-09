@@ -1059,7 +1059,7 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
         help_text=_("Automatic assignment mode of a responsible teacher"),
         max_length=12,
         choices=AssigneeMode.choices,
-        default=AssigneeMode.STUDENT_GROUP)
+        default=AssigneeMode.STUDENT_GROUP_DEFAULT)
     assignees = models.ManyToManyField(
         CourseTeacher,
         verbose_name=_("Assignment Assignees"),

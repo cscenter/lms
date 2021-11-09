@@ -27,7 +27,9 @@ def notify_student_new_assignment(student_assignment, commit=True):
 
 
 def create_notifications_about_new_submission(submission: AssignmentComment):
-    from learning.services import StudentGroupService
+    from learning.services.personal_assignment_service import (
+        resolve_assignees_for_personal_assignment
+    )
     if not submission.pk:
         return
     notifications = []
@@ -38,27 +40,13 @@ def create_notifications_about_new_submission(submission: AssignmentComment):
                                    student_assignment=student_assignment)
         notifications.append(n)
     else:
-        assignees = []
         assignment = student_assignment.assignment
-        if student_assignment.assignee_id:
-            assignees.append(student_assignment.assignee.teacher_id)
-        else:
-            # There is no teacher assigned, check student group assignees
-            try:
-                enrollment = (Enrollment.active
-                              .get(course_id=assignment.course_id,
-                                   student_id=student_assignment.student_id))
-            except Enrollment.DoesNotExist:
-                # Student has left the course
-                return
-            student_group = enrollment.student_group_id
-            student_group_assignees = StudentGroupService.get_assignees(student_group,
-                                                                        assignment)
-            if student_group_assignees:
-                assignees = [a.teacher_id for a in student_group_assignees]
-            else:
-                assignees = [a.teacher_id for a in assignment.assignees.all()]
-        # Skip course teachers who don't want receive notifications
+        try:
+            assignees = [a.teacher_id for a in
+                         resolve_assignees_for_personal_assignment(student_assignment=student_assignment)]
+        except Enrollment.DoesNotExist:
+            return None
+        # Check teachers notification preferences
         if assignees:
             course_teachers = (CourseTeacher.objects
                                .filter(course=assignment.course_id))

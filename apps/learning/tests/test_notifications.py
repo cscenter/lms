@@ -65,20 +65,22 @@ def test_view_new_assignment(client):
     assert response.status_code == 200
     assignments = course.assignment_set.all()
     assert len(assignments) == 1
-    a = assignments[0]
-    a_s = (StudentAssignment.objects
-           .filter(assignment=a, student=student)
-           .get())
+    assignment = assignments[0]
+    assignment.assignee_mode = AssigneeMode.MANUAL
+    assignment.save()
+    student_assignment = (StudentAssignment.objects
+                          .filter(assignment=assignment, student=student)
+                          .get())
     assert AssignmentNotification.objects.filter(is_about_creation=True).count() == 1
-    student_url = a_s.get_student_url()
+    student_url = student_assignment.get_student_url()
     student_create_comment_url = reverse("study:assignment_comment_create",
-                                         kwargs={"pk": a_s.pk})
+                                         kwargs={"pk": student_assignment.pk})
     student_create_solution_url = reverse("study:assignment_solution_create",
-                                          kwargs={"pk": a_s.pk})
+                                          kwargs={"pk": student_assignment.pk})
     teacher_create_comment_url = reverse(
         "teaching:assignment_comment_create",
-        kwargs={"pk": a_s.pk})
-    teacher_url = a_s.get_teacher_url()
+        kwargs={"pk": student_assignment.pk})
+    teacher_url = student_assignment.get_teacher_url()
     student_list_url = reverse('study:assignment_list', args=[])
     teacher_list_url = reverse('teaching:assignments_check_queue', args=[])
     student_comment_dict = {
@@ -206,7 +208,7 @@ def test_assignment_setup_assignees_admin_form(client):
     post_data = {
         'course': co.pk,
         'title': a.title,
-        'assignee_mode': AssigneeMode.STUDENT_GROUP,
+        'assignee_mode': AssigneeMode.STUDENT_GROUP_DEFAULT,
         'submission_type': AssignmentFormat.ONLINE,
         'text': a.text,
         'passing_score': 0,
@@ -245,6 +247,8 @@ def test_assignment_submission_notifications_for_teacher(client):
     assert Assignment.objects.count() == 0
     sa = StudentAssignmentFactory(student=student, assignment__course=course)
     assignment = sa.assignment
+    assignment.assignee_mode = AssigneeMode.MANUAL
+    assignment.save()
     student_create_comment_url = reverse("study:assignment_comment_create",
                                          kwargs={"pk": sa.pk})
     client.post(student_create_comment_url,

@@ -3,6 +3,7 @@ from datetime import timedelta
 import pytest
 
 from core.tests.factories import BranchFactory
+from courses.constants import AssigneeMode
 from courses.models import CourseTeacher, StudentGroupTypes
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseTeacherFactory
@@ -352,9 +353,11 @@ def test_median_execution_time():
 @pytest.mark.django_db
 def test_create_notifications_about_new_submission():
     student_assignment = StudentAssignmentFactory()
-    student = student_assignment.student
+    assignment = student_assignment.assignment
+    assignment.assignee_mode = AssigneeMode.MANUAL
+    assignment.save()
     course = student_assignment.assignment.course
-    comment = AssignmentCommentFactory(author=student,
+    comment = AssignmentCommentFactory(author=student_assignment.student,
                                        student_assignment=student_assignment)
     AssignmentNotification.objects.all().delete()
     create_notifications_about_new_submission(comment)
@@ -388,6 +391,8 @@ def test_create_notifications_about_new_submission():
     enrollment = Enrollment.objects.get(course=course)
     StudentGroupAssigneeFactory(student_group=enrollment.student_group,
                                 assignee=ct3)
+    assignment.assignee_mode = AssigneeMode.STUDENT_GROUP_DEFAULT
+    assignment.save()
     create_notifications_about_new_submission(comment)
     notifications = (AssignmentNotification.objects
                      .filter(student_assignment=student_assignment))

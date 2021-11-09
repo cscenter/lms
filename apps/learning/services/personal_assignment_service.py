@@ -9,6 +9,8 @@ from django.db.models import Case, Count, F, IntegerField, When, Window
 from django.utils.timezone import now
 
 from core.timezone import get_now_utc
+from core.typings import assert_never
+from courses.constants import AssigneeMode
 from courses.models import CourseTeacher
 from grading.services import CheckerSubmissionService
 from learning.models import (
@@ -134,9 +136,9 @@ def create_assignment_comment(*, personal_assignment: StudentAssignment,
     return comment
 
 
-def get_draft_submission(user: User,
-                         student_assignment: StudentAssignment,
-                         submission_type) -> Optional[AssignmentComment]:
+def _get_draft_submission(user: User,
+                          student_assignment: StudentAssignment,
+                          submission_type) -> Optional[AssignmentComment]:
     """Returns draft submission if it was previously saved."""
     return (AssignmentComment.objects
             .filter(author=user,
@@ -148,18 +150,20 @@ def get_draft_submission(user: User,
 
 
 def get_draft_comment(user: User, student_assignment: StudentAssignment):
-    return get_draft_submission(user, student_assignment,
-                                AssignmentSubmissionTypes.COMMENT)
+    return _get_draft_submission(user, student_assignment,
+                                 AssignmentSubmissionTypes.COMMENT)
 
 
 def get_draft_solution(user: User, student_assignment: StudentAssignment):
-    return get_draft_submission(user, student_assignment,
-                                AssignmentSubmissionTypes.SOLUTION)
+    return _get_draft_submission(user, student_assignment,
+                                 AssignmentSubmissionTypes.SOLUTION)
 
 
 def update_personal_assignment_score(*, student_assignment: StudentAssignment,
                                      changed_by: User, score_old: Decimal, score_new: Decimal,
                                      source: AssignmentScoreUpdateSource) -> StudentAssignment:
+    if score_new == score_old:
+        return student_assignment
     if score_new is not None and score_new > student_assignment.assignment.maximum_score:
         raise ValueError("Score value is greater than the maximum score")
     student_assignment.score = score_new
@@ -199,26 +203,40 @@ def update_student_assignment_derivable_fields(comment):
 
 
 def resolve_assignees_for_personal_assignment(student_assignment: StudentAssignment) -> List[CourseTeacher]:
-    if student_assignment.assignee is not None:
+    """
+    Returns candidates who can be auto-assign as a responsible teacher for the
+    personal assignment.
+    """
+    if student_assignment.assignee_id is not None:
         return [student_assignment.assignee]
 
     assignment = student_assignment.assignment
-    try:
-        enrollment = (Enrollment.active
-                      .select_related('student_group')
-                      .get(course_id=assignment.course_id,
-                           student_id=student_assignment.student_id))
-    except Enrollment.DoesNotExist:
-        # No need to search for the candidates
-        logger.info(f"User {student_assignment.student_id} left the course.")
-        raise
-    return StudentGroupService.get_assignees(enrollment.student_group, assignment)
+    assignee_mode = assignment.assignee_mode
+    if assignee_mode == AssigneeMode.DISABLED:
+        return []
+    elif assignee_mode == AssigneeMode.MANUAL:
+        return list(assignment.assignees.all())
+    elif assignee_mode in {AssigneeMode.STUDENT_GROUP_DEFAULT, AssigneeMode.STUDENT_GROUP_CUSTOM}:
+        try:
+            enrollment = (Enrollment.active
+                          .select_related('student_group')
+                          .get(course_id=assignment.course_id,
+                               student_id=student_assignment.student_id))
+        except Enrollment.DoesNotExist:
+            logger.info(f"User {student_assignment.student_id} has left the course.")
+            raise
+        if assignee_mode == AssigneeMode.STUDENT_GROUP_CUSTOM:
+            return StudentGroupService.get_assignees(enrollment.student_group, assignment)
+        elif assignee_mode == AssigneeMode.STUDENT_GROUP_DEFAULT:
+            return StudentGroupService.get_assignees(enrollment.student_group)
+    else:
+        assert_never(assignee_mode)
 
 
 def maybe_set_assignee_for_personal_assignment(submission: AssignmentComment) -> None:
     """
-    Auto assign teacher in a lazy manner (on student activity) when
-    student group has assignee.
+    This handler helps to assign responsible teacher for the personal
+    assignment when any student activity occurs.
     """
     student_assignment = submission.student_assignment
     # Trigger on student activity

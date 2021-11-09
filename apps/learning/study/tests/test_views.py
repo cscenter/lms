@@ -11,7 +11,7 @@ from django.utils.encoding import smart_bytes
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.urls import reverse
-from courses.constants import AssignmentFormat
+from courses.constants import AssigneeMode, AssignmentFormat
 from courses.models import CourseTeacher
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from courses.utils import get_current_term_pair
@@ -138,9 +138,9 @@ def test_new_comment_on_assignment_page(client, assert_redirect):
     EnrollmentFactory(student_profile=student_profile,
                       student=student_profile.user,
                       course=course)
-    a = AssignmentFactory.create(course=course)
+    assignment = AssignmentFactory(course=course, assignee_mode=AssigneeMode.MANUAL)
     a_s = (StudentAssignment.objects
-           .filter(assignment=a, student=student_profile.user)
+           .filter(assignment=assignment, student=student_profile.user)
            .get())
     client.login(student_profile.user)
     detail_url = a_s.get_student_url()
