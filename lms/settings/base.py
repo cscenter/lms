@@ -4,10 +4,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import environ
+import pytz
 
 import django
-
-from core.settings.base import *
 
 env = environ.Env()
 # Try to read .env file, if it's not present, assume that application
@@ -16,6 +15,9 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
 
+
+ROOT_DIR = Path(__file__).parents[3]
+SHARED_APPS_DIR = ROOT_DIR / "apps"
 
 SITE_ID = env.str('SITE_ID', default=None)
 
@@ -39,6 +41,7 @@ CSRF_COOKIE_DOMAIN = env.str('DJANGO_CSRF_COOKIE_DOMAIN', default=None)
 CSRF_COOKIE_NAME = env.str('DJANGO_CSRF_COOKIE_NAME', default='csrftoken')
 
 # Upload Settings
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 3000
 FILE_UPLOAD_MAX_MEMORY_SIZE = env.int('DJANGO_FILE_UPLOAD_MAX_MEMORY_SIZE', default=2621440)
 USE_CLOUD_STORAGE = env.bool('USE_CLOUD_STORAGE', default=True)
 AWS_DEFAULT_ACL: Optional[str] = None  # All files will inherit the bucket’s ACL
@@ -292,5 +295,167 @@ RECAPTCHA_PUBLIC_KEY = env.str('RECAPTCHA_PUBLIC_KEY', default="6LeIxAcTAAAAAJcZ
 RECAPTCHA_PRIVATE_KEY = env.str('RECAPTCHA_PRIVATE_KEY', default="6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe")
 RECAPTCHA_USE_SSL = True
 
-# Stub
+INSTALLED_APPS = [
+    'modeltranslation',  # insert before admin
+    'dal',
+    'dal_select2',
+    'core.apps.CustomAdminConfig',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.sites',
+    'django.contrib.humanize',
+
+    'loginas',
+    'registration',
+    'sorl.thumbnail',
+    'crispy_forms',
+    'simple_history',
+    'import_export',
+    'bootstrap_pagination',
+    'prettyjson',
+    'mptt',
+    'django_rq',
+    'webpack_loader',
+    'django_filters',
+    'rest_framework',
+    'captcha',
+    'taggit',
+
+    'core.apps.CoreConfig',
+    'menu',
+    # django.contrib.static with a customized list of ignore patterns
+    'files.apps.StaticFilesConfig',
+    'files.apps.MediaFilesConfig',
+    'auth.apps.AuthConfig',  # custom `User` model is defined in `users` app
+    'users.apps.UsersConfig',
+    'htmlpages',
+    'courses.apps.CoursesConfig',
+    'study_programs.apps.StudyProgramsConfig',
+    'learning.apps.LearningConfig',
+    'tasks',
+    'learning.gallery.apps.GalleryConfig',
+    'notifications.apps.NotificationsConfig',
+    'api.apps.APIConfig',
+    'library.apps.LibraryConfig',
+]
+
+# i18n, l10n
+LANGUAGE_CODE = 'ru'
+LANGUAGES = [
+    ('ru', "Russian"),
+    ('en', "English"),
+]
+USE_I18N = True
+USE_L10N = True
+LOCALE_PATHS = [
+    str(ROOT_DIR / "locale"),
+]
+USE_TZ = True
+TIME_ZONE = 'UTC'
+DATE_FORMAT = 'j E Y'
+DEFAULT_TIMEZONE = pytz.timezone("Europe/Moscow")
+
+# auth
+AUTH_USER_MODEL = "users.User"
+AUTHENTICATION_BACKENDS = (
+    "auth.backends.RBACModelBackend",
+)
+CAN_LOGIN_AS = lambda request, target_user: request.user.is_superuser
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+LOGINAS_FROM_USER_SESSION_FLAG = "loginas_from_user"
+
+# TODO: remove?
+CLUB_SITE_ID = 2
+
+DEFAULT_CITY_CODE = "spb"
+DEFAULT_BRANCH_CODE = "spb"
+ADMIN_URL = '/narnia/'
 ADMIN_REORDER: List[Any] = []
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+# Determine if we should apply 'selected' to parents when one of their
+# children is the 'selected' menu
+MENU_SELECT_PARENTS = True
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        # FIXME: Better to use more restricted rules by default
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'api.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'UNAUTHENTICATED_USER': 'users.models.ExtendedAnonymousUser',
+    # TODO: migrate all existing api views to the camel case renderer
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+    'JSON_UNDERSCOREIZE': {
+        'no_underscore_before_number': True,
+    },
+    'DATE_INPUT_FORMATS': ['iso-8601', '%d.%m.%Y']
+}
+
+
+# CKEDITOR Settings
+CKEDITOR_UPLOAD_PATH = "uploads/"  # /media/uploads/*
+CKEDITOR_IMAGE_BACKEND = "pillow"
+CKEDITOR_ALLOW_NONIMAGE_FILES = False
+CKEDITOR_CONFIGS = {
+    'default': {
+        'skin': 'moono-lisa',
+        'contentsCss': [],
+        'toolbar_YouCustomToolbarConfig': [
+            {'name': 'document',
+             'items': ['Source', '-', 'Preview', 'Maximize']},
+            {'name': 'basicstyles',
+             'items': ['Bold', 'Italic', 'Underline', 'RemoveFormat']},
+            {'name': 'paragraph',
+             'items': ['NumberedList', 'BulletedList']},
+            {'name': 'insert', 'items': ['Image', 'Table', 'CodeSnippet']},
+            {'name': 'styles', 'items': ['Format']},
+            {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
+            {'name': 'clipboard',
+             'items': ['-', 'Undo', 'Redo']},
+            '/',  # put this to force next toolbar on new line
+        ],
+        'toolbar': 'YouCustomToolbarConfig',  # put selected toolbar config here
+        # 'toolbarGroups': [{ 'name': 'document', 'groups': [ 'mode', 'document', 'doctools' ] }],
+        # 'height': 291,
+        'extraAllowedContent': 'figure(*); figcaption(figure-caption); div(*)[data-*]; span(*); p(*); th(*); td(*); section(*); ul(*); li(*); iframe[*](embed, _responsive); h1(*); h2(*)',
+        'format_tags': 'p;h1;h2;h3;h4;h5',
+        'width': 'calc(100% - 2px)',
+        'filebrowserWindowHeight': 725,
+        'filebrowserWindowWidth': 940,
+        # 'toolbarCanCollapse': True,
+        # 'mathJaxLib': '//cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML',
+        'tabSpaces': 4,
+        'extraPlugins': ','.join(
+            [
+                'div',
+                'autolink',
+                'autoembed',
+                'embedsemantic',
+                'autogrow',
+                # 'devtools',
+                'widget',
+                'lineutils',
+                'clipboard',
+                'dialog',
+                'dialogui',
+                'elementspath',
+                'uploadimage',
+                'codesnippet',
+                # 'image2',
+                # 'uploadwidget',
+            ]),
+    }
+}
+
