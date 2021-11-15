@@ -45,13 +45,11 @@ jobs:
         # Assuming it will be ready before first build
         run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/.docker-registry:/var/lib/registry registry:2
 
-      # TODO: Is it safe to replace it with a local registry cache?
       - name: Restore Django cache with production dependencies | header image
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-django-cache
-          # FIXME: hash Dockerfiles + Pipfile.lock instead of using github.sha
-          key: ${{ runner.os }}-django-buildx-${{ github.sha }}
+          key: ${{ runner.os }}-django-buildx-${{ hashFiles('**/Pipfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-django-buildx
 
