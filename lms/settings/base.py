@@ -16,7 +16,7 @@ with warnings.catch_warnings():
     environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
 
 
-ROOT_DIR = Path(__file__).parents[3]
+ROOT_DIR = Path(__file__).parents[2]
 SHARED_APPS_DIR = ROOT_DIR / "apps"
 
 SITE_ID = env.str('SITE_ID', default=None)
