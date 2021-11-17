@@ -240,7 +240,7 @@
               <a href="{{ course.get_create_class_url() }}" class="btn btn-primary btn-outline btn-block">{% trans %}Add class{% endtrans %}</a>
               <a href="{{ course.get_update_url() }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans %}Edit description{% endtrans %}</a>
               {% if course.group_mode == CourseGroupModes.MANUAL %}
-                <a href="{{ get_student_groups_url(course) }}" class="btn btn-link btn-outline btn-block" role="button">Группы студентов</a>
+                <a href="{{ get_student_groups_url(course) }}" class="btn btn-primary btn-outline btn-block" role="button">Группы студентов</a>
               {% endif %}
             {% endif %}
 
