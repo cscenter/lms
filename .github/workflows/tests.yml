@@ -61,7 +61,9 @@ jobs:
           cat /tmp/.buildx-django-cache/index.json
 
       - name: Inspect python base image
-        run: docker inspect python:3.9-slim-buster
+        run: |
+          docker pull python:3.9-slim-buster
+          docker inspect python:3.9-slim-buster
 
       - name: Build Django image with production dependencies | header image
         uses: docker/build-push-action@v2
