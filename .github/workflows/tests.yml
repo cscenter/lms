@@ -92,6 +92,9 @@ jobs:
           cache-from: type=registry,ref=${{ env.LOCAL_IMAGE_DJANGO_DEV }}
           cache-to: type=inline
 
+      - name: Debug docker registry
+        run: curl http://localhost:5000/v2/_catalog
+
       # https://docs.docker.com/registry/garbage-collection/#run-garbage-collection
       - name: Cleanup local docker registry
         # --delete-untagged     delete manifests that are not currently referenced via tag
