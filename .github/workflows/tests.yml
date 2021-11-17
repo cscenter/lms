@@ -96,8 +96,10 @@ jobs:
         run: |
           curl http://localhost:5000/v2/_catalog
           docker exec registry cat /etc/docker/registry/config.yml
-          docker inspect ${{ env.LOCAL_IMAGE_DJANGO_PROD }}
-          docker inspect ${{ env.LOCAL_IMAGE_DJANGO_DEV }}
+          curl http://localhost:5000/v2/lms-backend-django/tags/list
+          curl http://localhost:5000/v2/lms-backend-django/manifests/latest
+          curl http://localhost:5000/v2/lms-backend-django-dev/tags/list
+          curl http://localhost:5000/v2/lms-backend-django-dev/manifests/latest
 
       # https://docs.docker.com/registry/garbage-collection/#run-garbage-collection
       - name: Cleanup local docker registry
