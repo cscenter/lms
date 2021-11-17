@@ -45,12 +45,20 @@ jobs:
         # Assuming it will be ready before first build
         run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/.docker-registry:/var/lib/registry registry:2
 
+      - name: Inspect python base image
+        id: digests
+        run: |
+          docker pull python:3.9-slim-buster
+          docker inspect docker.io/library/python:3.9-slim-buster | jq -r '.[0].RepoDigests[0]' | cut -d'@' -f2
+          echo "::set-output name=PYTHON_IMAGE::$(docker inspect docker.io/library/python:3.9-slim-buster | jq -r '.[0].RepoDigests[0]' | cut -d'@' -f2)"
+
       - name: Production dependencies cache | header image
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-django-cache
-          key: ${{ runner.os }}-django-buildx-${{ hashFiles('**/Pipfile.lock') }}
+          key: ${{ runner.os }}-django-buildx-${{ hashFiles('**/Pipfile.lock')-${{ steps.digests.outputs.PYTHON_IMAGE }}" }}
           restore-keys: |
+            ${{ runner.os }}-django-buildx-${{ hashFiles('**/Pipfile.lock')
             ${{ runner.os }}-django-buildx
 
       - name: Debug
@@ -59,11 +67,6 @@ jobs:
           ls -la /tmp/.buildx-django-cache/blobs/sha256
           ls -la /tmp/.buildx-django-cache/ingest
           cat /tmp/.buildx-django-cache/index.json
-
-      - name: Inspect python base image
-        run: |
-          docker pull python:3.9-slim-buster
-          docker inspect python:3.9-slim-buster
 
       - name: Build Django image with production dependencies | header image
         uses: docker/build-push-action@v2
