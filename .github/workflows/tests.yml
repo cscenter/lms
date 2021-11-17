@@ -53,6 +53,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-django-buildx
 
+      - name: Debug
+        run: |
+          ls -la /tmp/.buildx-django-cache-new
+          ls -la /tmp/.buildx-django-cache-new/blobs
+          ls -la /tmp/.buildx-django-cache-new/ingest
+          cat /tmp/.buildx-django-cache-new/index.json
+
       - name: Build Django image with production dependencies | header image
         uses: docker/build-push-action@v2
         with:
@@ -65,7 +72,11 @@ jobs:
           cache-to: type=local,mode=max,dest=/tmp/.buildx-django-cache-new
 
       - name: Debug
-        run: ls -la /tmp/.buildx-django-cache-new
+        run: |
+          ls -la /tmp/.buildx-django-cache-new
+          ls -la /tmp/.buildx-django-cache-new/ingest
+          ls -la /tmp/.buildx-django-cache-new/blobs
+          cat /tmp/.buildx-django-cache-new/index.json
 
       - name: Build Django image with dev dependencies | full image
         uses: docker/build-push-action@v2
