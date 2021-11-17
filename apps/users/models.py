@@ -752,6 +752,9 @@ class StudentProfile(TimeStampedModel):
         help_text=_("Passport, consent for processing personal data, "
                     "diploma (optional)"),
         default=False)
+    is_paid_basis = models.BooleanField(
+        verbose_name=_("Paid Basis"),
+        default=False)
     # Fields required for the issuance of an official diploma
     diploma_number = models.CharField(
         verbose_name=_("Diploma Number"),
