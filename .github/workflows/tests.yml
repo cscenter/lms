@@ -58,7 +58,7 @@ jobs:
           path: /tmp/.buildx-django-cache
           key: ${{ runner.os }}-django-buildx-${{ hashFiles('**/Pipfile.lock')  }}-${{ steps.digests.outputs.PYTHON_IMAGE }}
           restore-keys: |
-            ${{ runner.os }}-django-buildx-${{ hashFiles('**/Pipfile.lock')
+            ${{ runner.os }}-django-buildx-${{ hashFiles('**/Pipfile.lock') }}
             ${{ runner.os }}-django-buildx
 
       - name: Debug
