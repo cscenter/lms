@@ -9,80 +9,18 @@ from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseTeacherFactory
 )
 from learning.models import (
-    AssignmentNotification, Enrollment, PersonalAssignmentActivity, StudentAssignment,
-    StudentGroup
+    AssignmentNotification, Enrollment, StudentAssignment, StudentGroup
 )
 from learning.services import AssignmentService
 from learning.services.notification_service import (
     create_notifications_about_new_submission
 )
-from learning.services.personal_assignment_service import create_assignment_comment
 from learning.settings import Branches, StudentStatuses
 from learning.tests.factories import (
     AssignmentCommentFactory, AssignmentNotificationFactory, EnrollmentFactory,
     StudentAssignmentFactory, StudentGroupAssigneeFactory
 )
-from users.models import StudentTypes, UserGroup
-from users.services import StudentProfileError, create_student_profile
-from users.tests.factories import (
-    CuratorFactory, StudentFactory, StudentProfileFactory, TeacherFactory, UserFactory
-)
-
-
-@pytest.mark.django_db
-def test_create_student_profile():
-    user = UserFactory()
-    branch = BranchFactory()
-    # Year of curriculum is required for the REGULAR student type
-    with pytest.raises(StudentProfileError):
-        create_student_profile(user=user, branch=branch,
-                               profile_type=StudentTypes.REGULAR,
-                               year_of_admission=2020)
-    student_profile = create_student_profile(user=user, branch=branch,
-                                             profile_type=StudentTypes.REGULAR,
-                                             year_of_admission=2020,
-                                             year_of_curriculum=2019)
-    assert student_profile.user == user
-    assert student_profile.site_id == branch.site_id
-    assert student_profile.type == StudentTypes.REGULAR
-    assert student_profile.year_of_admission == 2020
-    assert student_profile.year_of_curriculum == 2019
-    assert UserGroup.objects.filter(user=user)
-    assert UserGroup.objects.filter(user=user).count() == 1
-    permission_group = UserGroup.objects.get(user=user)
-    assert permission_group.role == StudentTypes.to_permission_role(StudentTypes.REGULAR)
-    profile = create_student_profile(user=user, branch=branch,
-                                     profile_type=StudentTypes.INVITED,
-                                     year_of_admission=2020)
-    assert profile.year_of_curriculum is None
-
-
-@pytest.mark.django_db
-def test_delete_student_profile():
-    """
-    Revoke student permissions on site only if no other student profiles of
-    the same type are exist after removing profile.
-    """
-    user = UserFactory()
-    branch = BranchFactory()
-    student_profile = create_student_profile(user=user, branch=branch,
-                                             profile_type=StudentTypes.INVITED,
-                                             year_of_admission=2020)
-    student_profile1 = create_student_profile(user=user, branch=branch,
-                                              profile_type=StudentTypes.REGULAR,
-                                              year_of_admission=2020,
-                                              year_of_curriculum=2019)
-    student_profile2 = create_student_profile(user=user, branch=branch,
-                                              profile_type=StudentTypes.REGULAR,
-                                              year_of_admission=2021,
-                                              year_of_curriculum=2019)
-    assert UserGroup.objects.filter(user=user).count() == 2
-    student_profile1.delete()
-    assert UserGroup.objects.filter(user=user).count() == 2
-    student_profile2.delete()
-    assert UserGroup.objects.filter(user=user).count() == 1
-    permission_group = UserGroup.objects.get(user=user)
-    assert permission_group.role == StudentTypes.to_permission_role(StudentTypes.INVITED)
+from users.tests.factories import StudentProfileFactory
 
 
 @pytest.mark.django_db
@@ -352,129 +290,55 @@ def test_median_execution_time():
 
 @pytest.mark.django_db
 def test_create_notifications_about_new_submission():
-    student_assignment = StudentAssignmentFactory()
-    assignment = student_assignment.assignment
-    assignment.assignee_mode = AssigneeMode.MANUAL
-    assignment.save()
-    course = student_assignment.assignment.course
+    course = CourseFactory()
+    assignment = AssignmentFactory(course=course, assignee_mode=AssigneeMode.MANUAL)
+    student_assignment = StudentAssignmentFactory(assignment=assignment)
     comment = AssignmentCommentFactory(author=student_assignment.student,
                                        student_assignment=student_assignment)
     AssignmentNotification.objects.all().delete()
     create_notifications_about_new_submission(comment)
     assert AssignmentNotification.objects.count() == 0
-    # Add course teacher without reviewer role
-    ct1 = CourseTeacherFactory(course=course)
+    # Add first course teacher
+    course_teacher1 = CourseTeacherFactory(course=course, roles=CourseTeacher.roles.lecturer)
     create_notifications_about_new_submission(comment)
     assert AssignmentNotification.objects.count() == 0
-    # Add course teachers with a reviewer role
-    ct2 = CourseTeacherFactory(course=course,
-                               roles=CourseTeacher.roles.reviewer,
-                               notify_by_default=True)
-    ct3 = CourseTeacherFactory(course=course,
-                               roles=CourseTeacher.roles.reviewer,
-                               notify_by_default=True)
+    # Add course teachers with a reviewer role and mark them as responsible
+    course_teacher2 = CourseTeacherFactory(course=course,
+                                           roles=CourseTeacher.roles.reviewer,
+                                           notify_by_default=True)
+    course_teacher3 = CourseTeacherFactory(course=course,
+                                           roles=CourseTeacher.roles.reviewer,
+                                           notify_by_default=True)
+    assignment.assignees.add(course_teacher2, course_teacher3)
     create_notifications_about_new_submission(comment)
     assert AssignmentNotification.objects.count() == 2
     # Assign student assignment to teacher
-    student_assignment.assignee = ct2
+    student_assignment.assignee = course_teacher2
     student_assignment.save()
     AssignmentNotification.objects.all().delete()
     create_notifications_about_new_submission(comment)
     notifications = (AssignmentNotification.objects
                      .filter(student_assignment=student_assignment))
     assert notifications.count() == 1
-    assert notifications[0].user == ct2.teacher
+    assert notifications[0].user == course_teacher2.teacher
     student_assignment.assignee = None
     student_assignment.save()
-    # Add student group assignees
+    # Set responsible teachers for the student group
     AssignmentNotification.objects.all().delete()
     enrollment = Enrollment.objects.get(course=course)
     StudentGroupAssigneeFactory(student_group=enrollment.student_group,
-                                assignee=ct3)
+                                assignee=course_teacher3)
     assignment.assignee_mode = AssigneeMode.STUDENT_GROUP_DEFAULT
     assignment.save()
     create_notifications_about_new_submission(comment)
     notifications = (AssignmentNotification.objects
                      .filter(student_assignment=student_assignment))
     assert notifications.count() == 1
-    assert notifications[0].user == ct3.teacher
-
-
-@pytest.mark.django_db
-def test_maybe_set_assignee_for_personal_assignment():
-    student = StudentFactory()
-    teacher = TeacherFactory()
-    course = CourseFactory(teachers=[teacher])
-    student_assignment = StudentAssignmentFactory(assignment__course=course,
-                                                  student=student)
-    # Don't trigger on teacher activity
-    comment1 = AssignmentCommentFactory(student_assignment=student_assignment,
-                                        author=teacher)
-    student_assignment.refresh_from_db()
-    assert student_assignment.assignee is None
-    assert student_assignment.trigger_auto_assign is True
-    # Assign teacher responsible for the student group
-    enrollment = Enrollment.objects.get(student=comment1.student_assignment.student)
-    course_teacher = CourseTeacher.objects.get(course=course)
-    StudentGroupAssigneeFactory(student_group=enrollment.student_group,
-                                assignee=course_teacher)
-    comment2 = AssignmentCommentFactory(student_assignment=student_assignment,
-                                        author=student)
-    student_assignment.refresh_from_db()
-    assert student_assignment.trigger_auto_assign is False
-    assert student_assignment.assignee == course_teacher
-    # Auto assigning doesn't work if enrollment is deleted
-    enrollment.is_deleted = True
-    enrollment.save()
-    student_assignment.trigger_auto_assign = True
-    student_assignment.assignee = None
-    student_assignment.save()
-    comment3 = AssignmentCommentFactory(student_assignment=student_assignment,
-                                        author=student)
-    student_assignment.refresh_from_db()
-    assert student_assignment.trigger_auto_assign is True
-
-
-@pytest.mark.django_db
-def test_maybe_set_assignee_for_personal_assignment_already_assigned():
-    """Don't overwrite assignee if someone was set before student activity."""
-    teacher1, teacher2 = TeacherFactory.create_batch(2)
-    course = CourseFactory(teachers=[teacher1, teacher2])
-    course_teacher1 = CourseTeacher.objects.get(course=course, teacher=teacher1)
-    course_teacher2 = CourseTeacher.objects.get(course=course, teacher=teacher2)
-    student = StudentFactory()
-    enrollment = EnrollmentFactory(course=course, student=student)
-    # Teacher2 is responsible fot the student group
+    assert notifications[0].user == course_teacher3.teacher
     StudentGroupAssigneeFactory(student_group=enrollment.student_group,
                                 assignee=course_teacher2)
-    # But teacher1 was assigned before student activity
-    assignment = AssignmentFactory(course=course)
-    student_assignment = StudentAssignment.objects.get(student=student)
-    student_assignment.assignee = course_teacher1
-    student_assignment.save()
-    # Leave a comment from the student
-    AssignmentCommentFactory(student_assignment=student_assignment,
-                             author=student)
-    student_assignment.refresh_from_db()
-    assert student_assignment.assignee == course_teacher1
-    assert student_assignment.trigger_auto_assign is False
-
-
-@pytest.mark.django_db
-def test_update_personal_assignment_stats():
-    curator = CuratorFactory()
-    student_assignment = StudentAssignmentFactory()
-    create_assignment_comment(personal_assignment=student_assignment,
-                              is_draft=True,
-                              created_by=curator,
-                              message='Comment message')
-    student_assignment.refresh_from_db()
-    assert student_assignment.meta is None
-    comment = create_assignment_comment(personal_assignment=student_assignment,
-                                        is_draft=False,
-                                        created_by=curator,
-                                        message='Comment message')
-    student_assignment.refresh_from_db()
-    assert isinstance(student_assignment.meta, dict)
-    assert student_assignment.meta['stats']['comments'] == 1
-    assert student_assignment.meta['stats']['activity']['code'] == PersonalAssignmentActivity.TEACHER_COMMENT
+    AssignmentNotification.objects.all().delete()
+    create_notifications_about_new_submission(comment)
+    notifications = (AssignmentNotification.objects
+                     .filter(student_assignment=student_assignment))
+    assert notifications.count() == 2

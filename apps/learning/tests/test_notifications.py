@@ -34,6 +34,10 @@ from users.services import get_student_profile
 from users.tests.factories import *
 
 
+def _prefixed_form(form_data, prefix: str):
+    return {f"{prefix}-{k}": v for k, v in form_data.items()}
+
+
 def _get_unread(client, url):
     return client.get(url).wsgi_request.unread_notifications_cache
 
@@ -43,9 +47,7 @@ def test_view_new_assignment(client):
     teacher1 = TeacherFactory()
     teacher2 = TeacherFactory()
     course = CourseFactory(teachers=[teacher1, teacher2])
-    for ct in CourseTeacher.objects.filter(course=course):
-        ct.roles = CourseTeacher.roles.reviewer
-        ct.save()
+    course_teacher1, course_teacher2 = CourseTeacher.objects.filter(course=course)
     student = StudentFactory()
     EnrollmentFactory(student=student, course=course, grade=GradeTypes.GOOD)
     a = AssignmentFactory.build()
@@ -58,16 +60,20 @@ def test_view_new_assignment(client):
         'weight': 1,
         'time_zone': 'Europe/Moscow',
         'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
-        'deadline_at_1': '00:00'
+        'deadline_at_1': '00:00',
+        'assignee_mode': AssigneeMode.MANUAL
     }
+    form_prefixed = _prefixed_form(form, "assignment")
+    form_prefixed.update({
+        f'responsible-teacher-{course_teacher1.pk}-active': True,
+        f'responsible-teacher-{course_teacher2.pk}-active': True
+    })
     client.login(teacher1)
-    response = client.post(course.get_create_assignment_url(), form, follow=True)
-    assert response.status_code == 200
+    response = client.post(course.get_create_assignment_url(), form_prefixed)
+    assert response.status_code == 302
     assignments = course.assignment_set.all()
     assert len(assignments) == 1
     assignment = assignments[0]
-    assignment.assignee_mode = AssigneeMode.MANUAL
-    assignment.save()
     student_assignment = (StudentAssignment.objects
                           .filter(assignment=assignment, student=student)
                           .get())
@@ -151,13 +157,15 @@ def test_assignment_setup_assignees_public_form(client):
     student = StudentFactory()
     t1, t2, t3, t4 = TeacherFactory.create_batch(4)
     course = CourseFactory.create(teachers=[t1, t2, t3, t4])
-    for course_teacher in CourseTeacher.objects.filter(course=course):
+    course_teachers = list(CourseTeacher.objects.filter(course=course))
+    for course_teacher in course_teachers:
         course_teacher.roles = CourseTeacher.roles.reviewer
         course_teacher.save()
-    co_teacher1 = CourseTeacher.objects.get(course=course, teacher=t1)
-    co_teacher1.notify_by_default = False
-    co_teacher1.roles = None
-    co_teacher1.save()
+    course_teacher1 = CourseTeacher.objects.get(course=course, teacher=t1)
+    course_teacher1.notify_by_default = False
+    course_teacher1.roles = None
+    course_teacher1.save()
+    course_teacher2 = CourseTeacher.objects.get(course=course, teacher=t2)
     EnrollmentFactory.create(student=student, course=course, grade=GradeTypes.GOOD)
     # Create first assignment
     client.login(t1)
@@ -171,21 +179,30 @@ def test_assignment_setup_assignees_public_form(client):
         'weight': '1.00',
         'time_zone': 'Europe/Moscow',
         'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
-        'deadline_at_1': '00:00'
+        'deadline_at_1': '00:00',
+        'assignee_mode': AssigneeMode.MANUAL,
     }
+    form_prefixed = _prefixed_form(form, "assignment")
+    form_prefixed.update({
+        f'responsible-teacher-{course_teacher1.pk}-active': True,
+        f'responsible-teacher-{course_teacher2.pk}-active': True,
+    })
     url = course.get_create_assignment_url()
-    response = client.post(url, form, follow=True)
+    response = client.post(url, form_prefixed, follow=True)
     assert response.status_code == 200
     assignments = course.assignment_set.all()
     assert len(assignments) == 1
     assignment = assignments[0]
-    assert len(assignment.assignees.all()) == 3
+    assert len(assignment.assignees.all()) == 2
     # Update assignment and check, that assignees are not changed
-    form['maximum_score'] = 10
+    form_prefixed['maximum_score'] = 10
     url = assignment.get_update_url()
-    response = client.post(url, form, follow=True)
-    assert response.status_code == 200
-    assert len(assignment.assignees.all()) == 3
+    response = client.post(url, form_prefixed)
+    assert response.status_code == 302
+    assigned_teachers = list(assignment.assignees.all())
+    assert len(assigned_teachers) == 2
+    assert course_teacher1 in assigned_teachers
+    assert course_teacher2 in assigned_teachers
 
 
 @pytest.mark.django_db

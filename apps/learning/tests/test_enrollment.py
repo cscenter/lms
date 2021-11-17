@@ -12,7 +12,7 @@ from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse
-from courses.models import CourseBranch
+from courses.models import CourseBranch, CourseGroupModes
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from learning.models import (
     Enrollment, EnrollmentPeriod, StudentAssignment, StudentGroup
@@ -20,7 +20,9 @@ from learning.models import (
 from learning.services import EnrollmentService, StudentGroupService
 from learning.services.enrollment_service import CourseCapacityFull
 from learning.settings import Branches, StudentStatuses
-from learning.tests.factories import CourseInvitationFactory, EnrollmentFactory
+from learning.tests.factories import (
+    CourseInvitationFactory, EnrollmentFactory, StudentGroupFactory
+)
 from users.services import get_student_profile
 from users.tests.factories import (
     InvitedStudentFactory, StudentFactory, StudentProfileFactory
@@ -35,20 +37,22 @@ from users.tests.factories import (
 
 @pytest.mark.django_db
 def test_service_enroll(settings):
-    student_profile = StudentProfileFactory()
-    student_profile2 = StudentProfileFactory(branch=student_profile.branch)
+    student_profile, student_profile2 = StudentProfileFactory.create_batch(2)
     current_semester = SemesterFactory.create_current()
     course = CourseFactory(main_branch=student_profile.branch,
-                           semester=current_semester)
-    enrollment = EnrollmentService.enroll(student_profile, course, 'test enrollment')
+                           semester=current_semester,
+                           group_mode=CourseGroupModes.MANUAL)
+    student_group = StudentGroupFactory(course=course)
+    enrollment = EnrollmentService.enroll(student_profile, course,
+                                          student_group=student_group, reason_entry='test enrollment')
     reason_entry = EnrollmentService._format_reason_record('test enrollment', course)
     assert enrollment.reason_entry == reason_entry
     assert not enrollment.is_deleted
-    assert enrollment.student_group_id is None
+    assert enrollment.student_group_id == student_group.pk
     student_group = StudentGroupService.resolve(course, student_profile2.user,
                                                 settings.SITE_ID)
     enrollment = EnrollmentService.enroll(student_profile2, course,
-                                          'test enrollment',
+                                          reason_entry='test enrollment',
                                           student_group=student_group)
     assert enrollment.student_group == student_group
 
@@ -60,13 +64,13 @@ def test_enrollment_capacity(settings):
     course = CourseFactory.create(main_branch=student_profile.branch,
                                   semester=current_semester,
                                   capacity=1)
-    EnrollmentFactory(course=course)
+    student_group = course.student_groups.first()
+    EnrollmentService.enroll(StudentProfileFactory(), course, student_group=student_group)
     course.refresh_from_db()
     assert course.places_left == 0
-    # 1 active enrollment
-    assert Enrollment.objects.count() == 1
+    assert Enrollment.active.count() == 1
     with pytest.raises(CourseCapacityFull):
-        EnrollmentService.enroll(student_profile, course, reason_entry='')
+        EnrollmentService.enroll(student_profile, course, student_group=student_group)
     # Make sure enrollment record created by enrollment service
     # was rollbacked by transaction context manager
     assert Enrollment.objects.count() == 1

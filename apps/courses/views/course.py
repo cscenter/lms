@@ -9,7 +9,7 @@ from core.exceptions import Redirect
 from core.utils import is_club_site
 from core.views import ProtectedFormMixin
 from courses.constants import TeacherRoles
-from courses.forms import CourseEditDescrForm
+from courses.forms import CourseEditDescriptionForm
 from courses.models import Course, CourseGroupModes, CourseTeacher
 from courses.permissions import can_view_private_materials
 from courses.services import group_teachers
@@ -106,7 +106,7 @@ class CourseEditView(TeacherOnlyMixin, CourseURLParamsMixin, ProtectedFormMixin,
                      generic.UpdateView):
     model = Course
     template_name = "courses/simple_crispy_form.html"
-    form_class = CourseEditDescrForm
+    form_class = CourseEditDescriptionForm
 
     def get_object(self, queryset=None):
         return self.course

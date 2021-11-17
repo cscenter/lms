@@ -14,7 +14,7 @@ from django.utils.encoding import smart_bytes
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.constants import AssignmentFormat
+from courses.constants import AssigneeMode, AssignmentFormat
 from courses.models import Assignment
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseNewsFactory, CourseTeacherFactory,
@@ -34,7 +34,9 @@ from learning.tests.factories import (
 )
 from users.tests.factories import StudentFactory, StudentProfileFactory, TeacherFactory
 
-# TODO: Преподавание -> Задания, добавить тест для deadline_local
+
+def prefixed_form(form_data, prefix: str):
+    return {f"{prefix}-{k}": v for k, v in form_data.items()}
 
 
 @pytest.mark.django_db
@@ -52,11 +54,13 @@ def test_assignment_public_form(settings, client):
         "deadline_at_1": "00:00",
         "passing_score": "3",
         "maximum_score": "5",
-        "weight": "1.00"
+        "weight": "1.00",
+        "assignee_mode": AssigneeMode.DISABLED
     }
     add_url = course_spb.get_create_assignment_url()
-    response = client.post(add_url, form_data, follow=True)
-    assert response.status_code == 200
+    form_prefixed = prefixed_form(form_data, "assignment")
+    response = client.post(add_url, form_prefixed)
+    assert response.status_code == 302
     assert Assignment.objects.count() == 1
     assignment = Assignment.objects.first()
     # DB stores datetime values in UTC
@@ -68,9 +72,9 @@ def test_assignment_public_form(settings, client):
     assert assignment.deadline_at_local().utcoffset() == tz_diff
     # Check widget shows local time
     response = client.get(assignment.get_update_url())
-    widget_html = response.context_data['form']['deadline_at'].as_widget()
+    widget_html = response.context_data['assignment_form']['deadline_at'].as_widget()
     widget = BeautifulSoup(widget_html, "html.parser")
-    time_input = widget.find('input', {"name": 'deadline_at_1'})
+    time_input = widget.find('input', {"name": 'assignment-deadline_at_1'})
     assert time_input.get('value') == '00:00'
     # Clone CO from msk
     co_in_nsk = CourseFactory(main_branch__code=Branches.NSK,
@@ -78,7 +82,7 @@ def test_assignment_public_form(settings, client):
                               teachers=[teacher])
     add_url = co_in_nsk.get_create_assignment_url()
     form_data['time_zone'] = 'Asia/Novosibirsk'
-    response = client.post(add_url, form_data, follow=True)
+    response = client.post(add_url, prefixed_form(form_data, "assignment"), follow=True)
     assert response.status_code == 200
     assert Assignment.objects.count() == 2
     assignment_last = Assignment.objects.order_by("pk").last()
@@ -204,10 +208,11 @@ def test_create_assignment_public_form_restricted_to_settings(client):
         "deadline_at_1": "00:00",
         "passing_score": "3",
         "maximum_score": "5",
-        "weight": "1.00"
+        "weight": "1.00",
+        "assignee_mode": AssigneeMode.DISABLED,
     }
     client.login(teacher)
-    response = client.post(add_url, form_data, follow=True)
+    response = client.post(add_url, prefixed_form(form_data, "assignment"), follow=True)
     assert response.status_code == 200
     assert Assignment.objects.filter(course=course).count() == 1
     assignment = Assignment.objects.get(course=course)
@@ -216,7 +221,7 @@ def test_create_assignment_public_form_restricted_to_settings(client):
     student_group1, student_group2 = list(StudentGroup.objects.filter(course=course))
     form_data['restricted_to'] = student_group1.pk
     Assignment.objects.filter(course=course).delete()
-    response = client.post(add_url, form_data)
+    response = client.post(add_url, prefixed_form(form_data, "assignment"))
     assert response.status_code == 302
     assert Assignment.objects.filter(course=course).count() == 1
     assignment = Assignment.objects.get(course=course)
@@ -243,11 +248,12 @@ def test_course_assignment_form_create_with_checking_system(client, mocker):
         'deadline_at_0': deadline_date,
         'deadline_at_1': deadline_time,
         'checking_system': checking_system.pk,
-        'checker_url': checking_system_url
+        'checker_url': checking_system_url,
+        'assignee_mode': AssigneeMode.DISABLED,
     })
     url = co.get_create_assignment_url()
     client.login(teacher)
-    response = client.post(url, form)
+    response = client.post(url, prefixed_form(form, "assignment"))
     assert response.status_code == 302
     assert Assignment.objects.count() == 1
     assert Checker.objects.count() == 1
@@ -291,11 +297,12 @@ def test_create_assignment_public_form_code_review_without_checker(client):
         "deadline_at_1": "00:00",
         "passing_score": "3",
         "maximum_score": "5",
-        "weight": "1.00"
+        "weight": "1.00",
+        "assignee_mode": AssigneeMode.DISABLED
     }
     client.login(teacher)
     # Save without specifying checking system
-    response = client.post(add_url, form_data, follow=True)
+    response = client.post(add_url, prefixed_form(form_data, "assignment"), follow=True)
     assert response.status_code == 200
     assert Assignment.objects.filter(course=course).count() == 1
 
@@ -319,16 +326,17 @@ def test_create_assignment_public_form_code_review_with_yandex_checker(client, m
         "maximum_score": "5",
         "weight": "1.00",
         "checking_system": checking_system.pk,
+        "assignee_mode": AssigneeMode.DISABLED
     }
     client.login(teacher)
     # Checker URL is not specified
-    response = client.post(add_url, form_data, follow=True)
+    response = client.post(add_url, prefixed_form(form_data, "assignment"), follow=True)
     assert response.status_code == 200
     assert Assignment.objects.filter(course=course).count() == 0
-    assert not response.context_data['form'].is_valid()
+    assert not response.context_data['assignment_form'].is_valid()
     # FIXME: This doesn't mean we have access to the contest or oauth token is valid
     form_data['checker_url'] = 'https://contest.yandex.ru/contest/3/problems/A/'
-    response = client.post(add_url, form_data, follow=True)
+    response = client.post(add_url, prefixed_form(form_data, "assignment"), follow=True)
     assert response.status_code == 200
     assert Assignment.objects.filter(course=course).count() == 1
 

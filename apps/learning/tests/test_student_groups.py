@@ -263,7 +263,7 @@ def test_view_student_group_detail_smoke(client):
 
 
 @pytest.mark.django_db
-def test_view_student_group_delete(client):
+def test_view_student_group_delete(settings):
     teacher = TeacherFactory()
     course = CourseFactory(teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
     student_group = StudentGroupFactory(course=course)
@@ -272,11 +272,15 @@ def test_view_student_group_delete(client):
     EnrollmentService.leave(enrollment)
     assert Enrollment.active.filter(course=course).count() == 0
     assert Enrollment.objects.filter(course=course).count() == 1
-    # Student must be moved to the default course if student's course group
+    # Student must be moved to the default student group if student's group
     # was deleted after student left the course
     StudentGroupService.remove(student_group)
     enrollment.refresh_from_db()
     assert enrollment.student_group == StudentGroupService.get_or_create_default_group(course)
     # Re-enter the course
-    EnrollmentService.enroll(enrollment.student_profile, course)
+    student_group = StudentGroupService.resolve(course, enrollment.student, site=settings.SITE_ID)
+    EnrollmentService.enroll(enrollment.student_profile, course, student_group=student_group)
     enrollment.refresh_from_db()
+    assert Enrollment.active.filter(course=course).count() == 1
+    default_sg = StudentGroup.objects.get(course=course, type=StudentGroupTypes.SYSTEM)
+    assert enrollment.student_group == default_sg

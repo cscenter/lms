@@ -18,51 +18,44 @@ from core.timezone import now_local
 from core.urls import reverse
 from courses.constants import MaterialVisibilityTypes
 from courses.forms import CourseClassForm
-from courses.models import CourseClass
+from courses.models import CourseClass, CourseGroupModes
 from courses.tests.factories import (
     CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
     LearningSpaceFactory, SemesterFactory
 )
 from learning.models import StudentGroup
 from learning.services import EnrollmentService, StudentGroupService
-from learning.tests.factories import EnrollmentFactory
+from learning.tests.factories import EnrollmentFactory, StudentGroupFactory
 from users.tests.factories import CuratorFactory, StudentProfileFactory, TeacherFactory
 
 
 @pytest.mark.django_db
 def test_manager_for_student(settings):
-    new_branch = BranchFactory()
     student_profile = StudentProfileFactory()
     student = student_profile.user
     teacher = TeacherFactory()
-    course = CourseFactory(main_branch=student_profile.branch,
-                           branches=[new_branch])
+    course = CourseFactory(group_mode=CourseGroupModes.MANUAL)
+    student_group1, student_group2 = StudentGroupFactory.create_batch(2, course=course)
     # Active enrollment
-    enrollment = EnrollmentService.enroll(student_profile, course)
-    enrollment.student_group = StudentGroupService.resolve(course, student,
-                                                           settings.SITE_ID)
-    enrollment.save()
+    enrollment = EnrollmentService.enroll(student_profile, course, student_group=student_group1)
     assert CourseClass.objects.for_student(student).count() == 0
     assert CourseClass.objects.for_student(teacher).count() == 0
     cc = CourseClassFactory(course=course)
     assert CourseClass.objects.for_student(student).count() == 1
     assert CourseClass.objects.for_student(teacher).count() == 0
-    # Student left the course
+    # Student has left the course
     EnrollmentService.leave(enrollment)
     assert CourseClass.objects.for_student(student).count() == 0
     assert CourseClass.objects.for_student(teacher).count() == 0
-    # Course class is visible to main course branch students
+    # Course class is visible to the student_group1
     cc = CourseClassFactory(course=course,
-                            restricted_to=[enrollment.student_group])
-    EnrollmentService.enroll(student_profile, course)
+                            restricted_to=[student_group1])
+    EnrollmentService.enroll(student_profile, course, student_group=student_group1)
     assert CourseClass.objects.for_student(student).count() == 2
     assert CourseClass.objects.for_student(teacher).count() == 0
-    # This one is hidden to main branch
-    new_branch_group = StudentGroup.objects.filter(course=course,
-                                                   branch_id=new_branch).first()
-    assert new_branch_group is not None
+    # This one is hidden for the student_group1
     cc = CourseClassFactory(course=course,
-                            restricted_to=[new_branch_group])
+                            restricted_to=[student_group2])
     assert CourseClass.objects.for_student(student).count() == 2
     assert CourseClass.objects.for_student(teacher).count() == 0
     # Student is not enrolled in the course
@@ -72,7 +65,7 @@ def test_manager_for_student(settings):
     EnrollmentFactory(student=student, course=course2)
     assert CourseClass.objects.for_student(student).count() == 3
     CourseClassFactory(course=course,
-                       restricted_to=[enrollment.student_group, new_branch_group])
+                       restricted_to=[student_group1, student_group2])
     assert CourseClass.objects.for_student(student).count() == 4
 
 

@@ -229,7 +229,7 @@ class AssignmentAdmin(admin.ModelAdmin):
         return None if obj else ('assignees',)
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
-        if db_field.name == "assignees" or db_field.name == 'notify_teachers':
+        if db_field.name == "assignees":
             qs = CourseTeacher.objects.select_related("teacher", "course")
             try:
                 assignment_id = request.resolver_match.kwargs['object_id']

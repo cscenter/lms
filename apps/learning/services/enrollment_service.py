@@ -1,17 +1,20 @@
+from typing import Any, Optional
+
+from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Count, F, OuterRef, Q, Subquery, TextField, Value
+from django.db.models import Count, F, Func, OuterRef, Q, Subquery, TextField, Value
 from django.db.models.functions import Coalesce, Concat
 from django.db.models.signals import post_save
 
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
-from courses.models import Course
-from learning.models import Enrollment
+from courses.models import Course, CourseGroupModes
+from learning.models import Enrollment, StudentGroup
 from learning.services import AssignmentService
 from learning.services.notification_service import (
     remove_course_notifications_for_student
 )
-from users.models import StudentProfile
+from users.models import StudentProfile, User
 
 
 class EnrollmentError(Exception):
@@ -28,7 +31,7 @@ class CourseCapacityFull(EnrollmentError):
 
 class EnrollmentService:
     @staticmethod
-    def _format_reason_record(reason_text: str, course: Course):
+    def _format_reason_record(reason_text: str, course: Course) -> str:
         """Append date to the enter/leave reason text"""
         timezone = course.get_timezone()
         today = now_local(timezone).strftime(DATE_FORMAT_RU)
@@ -36,18 +39,27 @@ class EnrollmentService:
 
     @classmethod
     def enroll(cls, student_profile: StudentProfile, course: Course,
-               reason_entry='', **attrs):
+               reason_entry: Optional[str] = '',
+               student_group: Optional[StudentGroup] = None, **attrs: Any) -> Enrollment:
+        if course.group_mode != CourseGroupModes.NO_GROUPS and not student_group:
+            raise ValidationError("Provide student group value")
+        elif course.group_mode == CourseGroupModes.NO_GROUPS and student_group:
+            raise ValidationError(f"Course {course} does not support student groups")
+        if student_group and student_group.course_id != course.pk:
+            raise ValueError(f"Student group {student_group.pk} is not "
+                             f"associated with the course {course.pk}")
         if reason_entry:
             new_record = cls._format_reason_record(reason_entry, course)
             reason_entry = Concat(Value(new_record),
                                   F('reason_entry'),
                                   output_field=TextField())
         with transaction.atomic():
-            # At this moment enrollment instance not in a consistent state -
-            # it has no student group, etc
+            # At this moment enrollment instance not in a consistent state
             enrollment, created = (Enrollment.objects.get_or_create(
                 student=student_profile.user, course=course,
-                defaults={'is_deleted': True, 'student_profile': student_profile}))
+                defaults={'is_deleted': True,
+                          'student_profile': student_profile,
+                          'student_group': student_group}))
             if not enrollment.is_deleted:
                 raise AlreadyEnrolled
             # Use sharable lock for concurrent enrollments if necessary to
@@ -65,6 +77,7 @@ class EnrollmentService:
             attrs.update({
                 "is_deleted": False,
                 "student_profile": student_profile,
+                "student_group": student_group,
                 "reason_entry": reason_entry
             })
             updated = (Enrollment.objects
@@ -88,7 +101,7 @@ class EnrollmentService:
         return enrollment
 
     @classmethod
-    def leave(cls, enrollment: Enrollment, reason_leave=''):
+    def leave(cls, enrollment: Enrollment, reason_leave: Optional[str] = '') -> None:
         update_fields = ['is_deleted']
         enrollment.is_deleted = True
         if reason_leave:
@@ -104,7 +117,7 @@ class EnrollmentService:
             remove_course_notifications_for_student(enrollment)
 
 
-def get_learners_count_subquery(outer_ref: OuterRef):
+def get_learners_count_subquery(outer_ref: OuterRef) -> Func:
     from learning.models import Enrollment
     return Coalesce(Subquery(
         (Enrollment.active
@@ -116,19 +129,20 @@ def get_learners_count_subquery(outer_ref: OuterRef):
     ), Value(0))
 
 
-def update_course_learners_count(course_id):
+def update_course_learners_count(course_id: int) -> None:
     Course.objects.filter(id=course_id).update(
         learners_count=get_learners_count_subquery(outer_ref=OuterRef('id'))
     )
 
 
-def recreate_assignments_for_student(enrollment):
+def recreate_assignments_for_student(enrollment: Enrollment) -> None:
     """Resets progress for existing and creates missing assignments"""
     for a in enrollment.course.assignment_set.all():
         AssignmentService.recreate_student_assignment(a, enrollment)
 
 
-def is_course_failed_by_student(course: Course, student, enrollment=None) -> bool:
+def is_course_failed_by_student(course: Course, student: User,
+                                enrollment: Optional[Enrollment] = None) -> bool:
     """Checks that student didn't fail the completed course"""
     from learning.models import Enrollment
     if course.is_club_course or not course.is_completed:
@@ -138,7 +152,7 @@ def is_course_failed_by_student(course: Course, student, enrollment=None) -> boo
     if enrollment:
         return enrollment.grade in bad_grades
     return (Enrollment.active
-            .filter(student_id=student.id,
-                    course_id=course.id,
+            .filter(student=student,
+                    course=course,
                     grade__in=bad_grades)
             .exists())

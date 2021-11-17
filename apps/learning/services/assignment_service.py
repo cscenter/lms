@@ -24,6 +24,7 @@ class AssignmentService:
                 (AssignmentAttachment.objects
                  .create(assignment=assignment, attachment=attachment))
 
+    # TODO: remove
     @staticmethod
     def setup_assignees(assignment: Assignment):
         """
@@ -34,6 +35,11 @@ class AssignmentService:
             roles=CourseTeacher.roles.reviewer
         )
         assignment.assignees.add(*course_reviewers)
+
+    @staticmethod
+    def set_responsible_teachers(assignment: Assignment, *, teachers: List[int]) -> None:
+        assignment.assignees.clear()
+        assignment.assignees.add(*teachers)
 
     @classmethod
     def recreate_student_assignment(cls, assignment: Assignment,

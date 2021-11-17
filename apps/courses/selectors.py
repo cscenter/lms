@@ -38,6 +38,7 @@ def get_reviewers() -> CourseTeacherQuerySet:
     return get_teachers(role_priority=False, filters=filters)
 
 
+# FIXME: move to the service method
 def get_course_teachers(*, course: Course,
                         role_priority: Optional[bool] = False) -> CourseTeacherQuerySet:
     filters = [

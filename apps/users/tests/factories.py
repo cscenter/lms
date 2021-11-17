@@ -1,8 +1,6 @@
 import factory
-from factory import errors
 
 from django.conf import settings
-from django.db import IntegrityError
 
 from core.tests.factories import BranchFactory
 from learning.settings import GradeTypes
@@ -15,10 +13,10 @@ from users.models import (
 __all__ = ('User', 'SHADCourseRecord', 'CertificateOfParticipation',
            'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',
            'StudentFactory', 'TeacherFactory', 'VolunteerFactory',
-           'OnlineCourseRecordFactory',
+           'OnlineCourseRecordFactory',  'StudentProfileFactory',
            'SHADCourseRecordFactory', 'CertificateOfParticipationFactory')
 
-from users.services import assign_role, create_student_profile
+from users.services import assign_role
 
 
 def add_user_groups(user, groups):

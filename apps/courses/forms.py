@@ -1,5 +1,6 @@
 import datetime
-from typing import Any, Optional
+from collections import defaultdict
+from typing import Any, Dict, List, Optional, Type
 
 from crispy_forms.bootstrap import Tab, TabHolder
 from crispy_forms.helper import FormHelper
@@ -13,22 +14,25 @@ from core.forms import CANCEL_SAVE_PAIR
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.timezone.forms import TimezoneAwareModelForm, TimezoneAwareSplitDateTimeField
+from core.utils import bucketize
 from core.widgets import DateInputTextWidget, TimeInputTextWidget, UbereditorWidget
-from courses.constants import AssignmentFormat, ClassTypes
+from courses.constants import AssigneeMode, AssignmentFormat, ClassTypes
 from courses.models import (
-    Assignment, Course, CourseClass, CourseGroupModes, CourseNews, LearningSpace,
-    MetaCourse
+    Assignment, Course, CourseClass, CourseNews, LearningSpace, MetaCourse
 )
+from courses.selectors import get_course_teachers
 from courses.services import CourseService
 from grading.constants import CheckingSystemTypes
 from grading.models import CheckingSystem
-from grading.services import CheckerService, CheckerURLError
+from grading.services import CheckerService
 
-__all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
-           'CourseClassForm', 'AssignmentForm')
+__all__ = ('CourseForm', 'CourseEditDescriptionForm', 'CourseNewsForm',
+           'CourseClassForm', 'AssignmentForm', 'AssignmentResponsibleTeachersForm',
+           'AssignmentResponsibleTeachersFormFactory',
+           'StudentGroupAssigneeForm', 'StudentGroupAssigneeFormFactory')
 
 from courses.utils import execution_time_string
-from learning.models import StudentGroup
+from learning.models import StudentGroup, StudentGroupAssignee
 from learning.services import StudentGroupService
 
 DROP_ATTACHMENT_LINK = '<a href="{}"><i class="fa fa-trash-o"></i>&nbsp;{}</a>'
@@ -91,7 +95,7 @@ class CourseForm(forms.ModelForm):
         fields = ('name_ru', 'name_en', 'description_ru', 'description_en')
 
 
-class CourseEditDescrForm(forms.ModelForm):
+class CourseEditDescriptionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -268,6 +272,8 @@ class AssignmentDurationField(forms.DurationField):
 
 
 class AssignmentForm(TimezoneAwareModelForm):
+    prefix = "assignment"
+
     title = forms.CharField(
         label=_("Title"),
         widget=forms.TextInput(attrs={'autocomplete': 'off'}))
@@ -324,6 +330,10 @@ class AssignmentForm(TimezoneAwareModelForm):
         help_text=_("For example, URL of the Yandex.Contest problem: "
                     "https://contest.yandex.ru/contest/3/problems/A/")
     )
+    assignee_mode = forms.ChoiceField(
+        label=_("Selection Mode"),
+        choices=AssigneeMode.choices,
+        required=True)
 
     def __init__(self, course: Course, locale: Optional[str] = "en", **kwargs: Any):
         super().__init__(**kwargs)
@@ -333,6 +343,7 @@ class AssignmentForm(TimezoneAwareModelForm):
         # Student groups
         field_restrict_to = self.fields['restricted_to']
         field_restrict_to.choices = StudentGroupService.get_choices(course)
+        # Checker settings
         checker = self.instance.checker
         if checker:
             self.fields['checking_system'].initial = checker.checking_system
@@ -342,7 +353,7 @@ class AssignmentForm(TimezoneAwareModelForm):
         model = Assignment
         fields = ('title', 'text', 'deadline_at', 'time_zone', 'attachments',
                   'submission_type', 'passing_score', 'maximum_score',
-                  'weight', 'ttc', 'restricted_to')
+                  'weight', 'ttc', 'restricted_to', 'assignee_mode')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -373,3 +384,135 @@ class AssignmentForm(TimezoneAwareModelForm):
             self.instance.checker = checker
         instance = super().save()
         return instance
+
+
+class AssignmentResponsibleTeachersForm(forms.Form):
+    prefix = "responsible"
+    field_prefix = "teacher"
+
+    @property
+    def helper(self):
+        helper = FormHelper()
+        helper.disable_csrf = True
+        helper.form_tag = False
+        return helper
+
+    def clean(self):
+        data = self.to_internal()
+        if not data.get('responsible_teachers'):
+            raise ValidationError("Укажите хотя бы одного преподавателя")
+        return self.cleaned_data
+
+    def to_internal(self):
+        if not self.is_valid():
+            return {}
+        data = {'responsible_teachers': []}
+        for field_name, field_value in self.cleaned_data.items():
+            if field_name.startswith(self.field_prefix):
+                pk, name = field_name[len(self.field_prefix) + 1:].split("-", maxsplit=1)
+                if name == "active" and field_value:
+                    data['responsible_teachers'].append(int(pk))
+        return data
+
+
+class AssignmentResponsibleTeachersFormFactory:
+    field_prefix = AssignmentResponsibleTeachersForm.field_prefix
+
+    @classmethod
+    def build_form_class(cls, course: Course):
+        cls_dict = {}
+        # TODO: cache the result of get_course_teachers
+        for course_teacher in get_course_teachers(course=course):
+            key = f"{cls.field_prefix}-{course_teacher.pk}-active"
+            teacher_name = course_teacher.teacher.get_full_name(last_name_first=True)
+            cls_dict[key] = forms.BooleanField(label=teacher_name, required=False)
+        return type("AssignmentResponsibleTeachersForm", (AssignmentResponsibleTeachersForm,), cls_dict)
+
+    @classmethod
+    def to_initial_state(cls, course: Course, assignment: Optional[Assignment] = None):
+        initial = {}
+        if assignment is None:
+            course_teachers = list(get_course_teachers(course=course))
+            selected = [ct for ct in course_teachers if ct.roles.reviewer]
+        else:
+            selected = assignment.assignees.all()
+        for course_teacher in selected:
+            initial[f"{cls.field_prefix}-{course_teacher.pk}-active"] = True
+        return initial
+
+    @classmethod
+    def build_form(cls, course: Course, *, assignment: Optional[Assignment] = None,
+                   **form_kwargs: Any) -> AssignmentResponsibleTeachersForm:
+        form_class = cls.build_form_class(course)
+        form_kwargs.setdefault("initial", cls.to_initial_state(course, assignment))
+        return form_class(**form_kwargs)
+
+
+class StudentGroupAssigneeForm(forms.Form):
+    prefix = "student-group"
+    field_prefix = "assignee"
+
+    @property
+    def helper(self):
+        helper = FormHelper()
+        helper.disable_csrf = True
+        helper.form_tag = False
+        return helper
+
+    def to_internal(self) -> Dict[int, List[int]]:
+        if not self.is_valid():
+            return {}
+        data = defaultdict(list)
+        for field_name, field_value in self.cleaned_data.items():
+            if field_name.startswith(self.field_prefix):
+                pk, name = field_name[len(self.field_prefix) + 1:].split("-", maxsplit=1)
+                if name == "teacher":
+                    data[int(pk)].append(int(field_value))
+        return data
+
+
+class StudentGroupAssigneeFormFactory:
+    field_prefix = StudentGroupAssigneeForm.field_prefix
+
+    @classmethod
+    def build_form_class(cls, course: Course, is_required: Optional[bool] = False):
+        student_groups = CourseService.get_student_groups(course)
+        course_teachers = get_course_teachers(course=course)
+        cls_dict = {'student_groups': student_groups}
+        choices = [
+            ('', '-------'),
+            *((ct.pk, ct.teacher.get_full_name(last_name_first=True))
+              for ct in course_teachers)
+        ]
+        for student_group in student_groups:
+            prefix = f"{cls.field_prefix}-{student_group.pk}"
+            cls_dict[f"{prefix}-name"] = forms.CharField(label=_("Name"), max_length=255,
+                                                         initial=student_group.name,
+                                                         disabled=True)
+            cls_dict[f"{prefix}-teacher"] = forms.ChoiceField(label=_("Teacher"),
+                                                              choices=choices,
+                                                              required=is_required)
+        return type("StudentGroupAssigneeForm", (StudentGroupAssigneeForm,), cls_dict)
+
+    @classmethod
+    def get_initial_state(cls, course: Course,
+                          assignment: Optional[Assignment] = None) -> Dict[str, int]:
+        if assignment and assignment.course_id != course.pk:
+            raise ValidationError(f"Assignment {assignment} is not from the course {course}")
+        initial = {}
+        if assignment is not None and assignment.assignee_mode == AssigneeMode.STUDENT_GROUP_CUSTOM:
+            assigned_teachers = (StudentGroupAssignee.objects
+                                 .filter(assignment=assignment))
+            grouped = bucketize(assigned_teachers, key=lambda sga: sga.student_group_id)
+            for sg_id, responsible_teachers in grouped.items():
+                if len(responsible_teachers) == 1:
+                    value = responsible_teachers[0].assignee_id
+                    initial[f"{cls.field_prefix}-{sg_id}-teacher"] = value
+        return initial
+
+    @classmethod
+    def build_form(cls, course: Course, *, is_required: Optional[bool] = True,
+                   assignment: Optional[Assignment] = None, **form_kwargs: Any) -> StudentGroupAssigneeForm:
+        form_class = cls.build_form_class(course, is_required)
+        form_kwargs.setdefault("initial", cls.get_initial_state(course, assignment))
+        return form_class(**form_kwargs)

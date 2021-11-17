@@ -23,9 +23,9 @@ from users.constants import Roles
 from users.models import UserGroup
 from users.tests.factories import StudentFactory, StudentProfileFactory, UserFactory
 
-__all__ = ('StudentGroupFactory', 'StudentAssignmentFactory',
-           'AssignmentCommentFactory', 'EnrollmentPeriodFactory',
-           'EnrollmentFactory', 'InvitationFactory',
+__all__ = ('StudentGroupFactory', 'StudentGroupAssigneeFactory',
+           'StudentAssignmentFactory', 'AssignmentCommentFactory',
+           'EnrollmentPeriodFactory', 'EnrollmentFactory', 'InvitationFactory',
            'CourseInvitationFactory', 'AssignmentNotificationFactory',
            'CourseNewsNotificationFactory', 'EventFactory',
            'StudentAssignment', 'EnrollmentPeriod', 'Enrollment',

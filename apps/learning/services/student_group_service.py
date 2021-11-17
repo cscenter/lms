@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
@@ -6,6 +6,7 @@ from django.db.models import Q
 
 from core.models import Branch
 from core.utils import bucketize
+from courses.constants import AssigneeMode
 from courses.models import (
     Assignment, Course, CourseGroupModes, CourseTeacher, StudentGroupTypes
 )
@@ -15,6 +16,9 @@ from learning.models import (
 )
 from learning.services.assignment_service import AssignmentService
 from users.models import StudentProfile, User
+
+CourseTeacherId = int
+StudentGroupId = int
 
 
 class StudentGroupError(Exception):
@@ -201,8 +205,8 @@ class StudentGroupService:
             }
             new_objects.append(StudentGroupAssignee(**fields))
         # Validate records before call .bulk_create()
-        for a in new_objects:
-            a.full_clean()
+        for sga in new_objects:
+            sga.full_clean()
         StudentGroupAssignee.objects.bulk_create(new_objects)
 
     @classmethod
@@ -222,6 +226,7 @@ class StudentGroupService:
         for group_assignee_id in current_assignees:
             if group_assignee_id not in new_assignee_ids:
                 to_delete.append(group_assignee_id)
+        # TODO: try to overwrite records before deleting
         (StudentGroupAssignee.objects
          .filter(student_group=student_group,
                  assignment=assignment,
@@ -248,12 +253,30 @@ class StudentGroupService:
                          # FIXME: order by
                          .select_related('assignee__teacher'))
         # Teachers assigned for the particular assignment fully override
-        # default list of teachers assigned on the course level
+        # default list of the teachers assigned on the course level
         if any(ga.assignment_id is not None for ga in assignees):
             # Remove defaults
             assignees = [ga for ga in assignees if ga.assignment_id]
         filtered = [ga.assignee for ga in assignees]
         return filtered
+
+    # FIXME: move to assignment service? it depends on assignee mode :<
+    # FIXME: add tests
+    @staticmethod
+    def set_custom_assignees_for_assignment(*, assignment: Assignment,
+                                            data: Dict[StudentGroupId, List[CourseTeacherId]]) -> None:
+        if assignment.assignee_mode != AssigneeMode.STUDENT_GROUP_CUSTOM:
+            raise ValidationError(f"Change assignee mode first to customize student group "
+                                  f"responsible teachers for assignment {assignment}")
+        to_add = []
+        for student_group_id, assignee_list in data.items():
+            for assignee_id in assignee_list:
+                obj = StudentGroupAssignee(assignment=assignment,
+                                           student_group_id=student_group_id,
+                                           assignee_id=assignee_id)
+                to_add.append(obj)
+        StudentGroupAssignee.objects.filter(assignment=assignment).delete()
+        StudentGroupAssignee.objects.bulk_create(to_add)
 
     @staticmethod
     def get_student_profiles(student_group: StudentGroup) -> List[StudentProfile]:

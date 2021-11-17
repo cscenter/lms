@@ -2,10 +2,12 @@ from typing import Dict, List, Tuple
 
 from babel.dates import get_timezone_location
 
+from django.db.models import Prefetch, prefetch_related_objects
+
 from courses.constants import TeacherRoles
 from courses.models import Course, CourseBranch, CourseReview
 from courses.utils import get_terms_in_range
-from learning.models import StudentGroup
+from learning.models import StudentGroup, StudentGroupAssignee
 
 
 def group_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
@@ -100,10 +102,20 @@ class CourseService:
         return list(time_zones)
 
     @staticmethod
-    def get_student_groups(course: Course) -> List[StudentGroup]:
+    def get_student_groups(course: Course, with_assignees=False) -> List[StudentGroup]:
+        """
+        Set `with_assignees=True` to prefetch default responsible teachers
+        for each group.
+        """
+        # TODO: prefetch student groups instead
         student_groups = list(StudentGroup.objects
                               .filter(course=course)
                               .order_by('name', 'pk'))
+        if with_assignees:
+            responsible_teachers = Prefetch('student_group_assignees',
+                                            queryset=(StudentGroupAssignee.objects
+                                                      .filter(assignment__isnull=True)))
+            prefetch_related_objects(student_groups, responsible_teachers)
         for s in student_groups:
             s.course = course
         return student_groups

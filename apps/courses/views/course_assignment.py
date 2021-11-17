@@ -1,85 +1,141 @@
-from typing import TYPE_CHECKING, Any, Dict
+from typing import Any, Optional
 
-from vanilla import CreateView, DeleteView, UpdateView
+from vanilla import DeleteView
 
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
+from django.views import View
+from django.views.generic.base import TemplateResponseMixin
 
 from auth.mixins import PermissionRequiredMixin
+from core.http import AuthenticatedHttpRequest, HttpRequest
 from core.urls import reverse
 from core.views import ProtectedFormMixin
-from courses.constants import AssignmentFormat
-from courses.forms import AssignmentForm
-from courses.models import Assignment, AssignmentAttachment, Course
+from courses.constants import AssigneeMode, AssignmentFormat
+from courses.forms import (
+    AssignmentForm, AssignmentResponsibleTeachersFormFactory,
+    StudentGroupAssigneeFormFactory
+)
+from courses.models import Assignment, AssignmentAttachment, Course, CourseGroupModes
 from courses.permissions import CreateAssignment, EditAssignment
 from courses.views.mixins import CourseURLParamsMixin
-from learning.services import AssignmentService
+from learning.models import StudentGroupAssignee
+from learning.services import AssignmentService, StudentGroupService
 from users.mixins import TeacherOnlyMixin
 
 __all__ = ('AssignmentCreateView', 'AssignmentUpdateView',
            'AssignmentDeleteView', 'AssignmentAttachmentDeleteView')
 
 
-if TYPE_CHECKING:
-    from vanilla import GenericModelView
-    AssignmentCreateUpdateMixinBase = GenericModelView
-else:
-    AssignmentCreateUpdateMixinBase = object
-
-
-class AssignmentCreateUpdateMixin(CourseURLParamsMixin, PermissionRequiredMixin,
-                                  AssignmentCreateUpdateMixinBase):
-    model = Assignment
-    template_name = "lms/courses/course_assignment_form.html"
-
-    def get_form(self, **kwargs):
-        return AssignmentForm(course=self.course,
-                              locale=self.request.LANGUAGE_CODE,
-                              **kwargs)
-
-    def get_success_url(self):
-        return self.object.get_teacher_url()
-
-    def form_valid(self, form):
-        attachments = self.request.FILES.getlist('attachments')
-        with transaction.atomic(savepoint=False):
-            self.object = form.save()
-            self.post_save(self.object)
-            AssignmentService.process_attachments(self.object, attachments)
-        return redirect(self.get_success_url())
-
-    def post_save(self, form):
-        pass
-
-    def get_context_data(self, form: AssignmentForm, **kwargs: Any) -> Dict[str, Any]:
-        context = {
-            "form": form,
-            "formats_with_checker": AssignmentFormat.with_checker
+def _get_assignment_form(course: Course, request: HttpRequest,
+                         assignment: Optional[Assignment] = None):
+    form_kwargs = {
+        'course': course,
+        'locale': request.LANGUAGE_CODE,
+        'instance': assignment
+    }
+    if course.group_mode == CourseGroupModes.MANUAL:
+        default_mode = AssigneeMode.STUDENT_GROUP_DEFAULT
+    else:
+        default_mode = AssigneeMode.MANUAL
+    if request.method == 'GET' and assignment is None:
+        form_kwargs["initial"] = {
+            "assignee_mode": default_mode,
+            "time_zone": course.main_branch.get_timezone() or None
         }
-        return context
+    if request.method == 'POST':
+        form_kwargs.update({
+            'data': request.POST,
+            'files': request.FILES
+        })
+    return AssignmentForm(**form_kwargs)
 
 
-class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
+class AssignmentCreateUpdateBaseView(CourseURLParamsMixin, PermissionRequiredMixin,
+                                     TemplateResponseMixin, View):
+    request: AuthenticatedHttpRequest
+
+    def get(self, request: AuthenticatedHttpRequest, *args: Any, **kwargs: Any):
+        return self._handle_request(request)
+
+    def post(self, request: AuthenticatedHttpRequest, *args: Any, **kwargs: Any):
+        return self._handle_request(request)
+
+    def _handle_request(self, request: AuthenticatedHttpRequest):
+        assignment = self.get_object()
+        post_data = request.POST if request.method == 'POST' else None
+        assignment_form = _get_assignment_form(self.course, request, assignment=assignment)
+        selected_assignee_mode = assignment_form['assignee_mode'].value()
+        responsible_teachers_form = AssignmentResponsibleTeachersFormFactory.build_form(
+            self.course, assignment=assignment,
+            data=post_data)
+        student_groups_custom_form = StudentGroupAssigneeFormFactory.build_form(
+            self.course, is_required=(selected_assignee_mode == AssigneeMode.STUDENT_GROUP_CUSTOM),
+            assignment=assignment, data=post_data)
+        all_forms = [
+            assignment_form,
+            responsible_teachers_form,
+            student_groups_custom_form
+        ]
+        if request.method == 'POST' and self.all_valid(*all_forms):
+            return self.save(*all_forms)
+        context = {
+            "AssigneeMode": AssigneeMode,
+            "formats_with_checker": AssignmentFormat.with_checker,
+            "assignment_form": assignment_form,
+            "responsible_teachers_form": responsible_teachers_form,
+            "student_groups_custom_form": student_groups_custom_form,
+        }
+        return self.render_to_response(context)
+
+    @staticmethod
+    def all_valid(assignment_form, responsible_teachers_form, student_groups_custom_form):
+        selected_assignee_mode = assignment_form['assignee_mode'].value()
+        to_validate = [assignment_form]
+        if selected_assignee_mode == AssigneeMode.MANUAL:
+            to_validate.append(responsible_teachers_form)
+        elif selected_assignee_mode == AssigneeMode.STUDENT_GROUP_CUSTOM:
+            to_validate.append(student_groups_custom_form)
+        return all(f.is_valid() for f in to_validate)
+
+    def get_object(self) -> Optional[Assignment]:
+        raise NotImplementedError
+
+    def save(self, *args, **kwargs):
+        raise NotImplementedError
+
+
+class AssignmentCreateView(AssignmentCreateUpdateBaseView):
     permission_required = CreateAssignment.name
+    template_name = "lms/courses/course_assignment_form.html"
 
     def get_permission_object(self) -> Course:
         return self.course
 
-    def get_form(self, **kwargs):
-        kwargs['initial'] = {
-            "time_zone": self.course.main_branch.get_timezone() or None
-        }
-        return super().get_form(**kwargs)
+    def get_object(self) -> Optional[Assignment]:
+        return None
 
-    def post_save(self, assignment):
-        AssignmentService.bulk_create_student_assignments(assignment)
-        AssignmentService.setup_assignees(assignment)
+    def save(self, assignment_form, responsible_teachers_form, student_groups_custom_form):
+        attachments = self.request.FILES.getlist('assignment-attachments')
+        with transaction.atomic(savepoint=False):
+            assignment = assignment_form.save()
+            AssignmentService.bulk_create_student_assignments(assignment)
+            if assignment.assignee_mode == AssigneeMode.MANUAL:
+                data = responsible_teachers_form.to_internal()
+                AssignmentService.set_responsible_teachers(assignment,
+                                                           teachers=data['responsible_teachers'])
+            elif assignment.assignee_mode == AssigneeMode.STUDENT_GROUP_CUSTOM:
+                data = student_groups_custom_form.to_internal()
+                StudentGroupService.set_custom_assignees_for_assignment(assignment=assignment, data=data)
+            AssignmentService.process_attachments(assignment, attachments)
+        return redirect(assignment.get_teacher_url())
 
 
-class AssignmentUpdateView(AssignmentCreateUpdateMixin, UpdateView):
+class AssignmentUpdateView(AssignmentCreateUpdateBaseView):
     assignment: Assignment
     permission_required = EditAssignment.name
+    template_name = "lms/courses/course_assignment_form.html"
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
@@ -90,8 +146,24 @@ class AssignmentUpdateView(AssignmentCreateUpdateMixin, UpdateView):
     def get_permission_object(self) -> Assignment:
         return self.assignment
 
-    def post_save(self, assignment):
-        AssignmentService.sync_student_assignments(assignment)
+    def get_object(self) -> Assignment:
+        return self.assignment
+
+    def save(self, assignment_form, responsible_teachers_form, student_groups_custom_form):
+        attachments = self.request.FILES.getlist('assignment-attachments')
+        with transaction.atomic(savepoint=False):
+            assignment = assignment_form.save()
+            if assignment.assignee_mode == AssigneeMode.MANUAL:
+                data = responsible_teachers_form.to_internal()
+                AssignmentService.set_responsible_teachers(assignment, teachers=data['responsible_teachers'])
+                # TODO: track .assignee_mode to cleanup previous settings on change
+            elif assignment.assignee_mode == AssigneeMode.STUDENT_GROUP_CUSTOM:
+                data = student_groups_custom_form.to_internal()
+                StudentGroupService.set_custom_assignees_for_assignment(assignment=assignment, data=data)
+            # TODO: Call this one only if .restricted_to has changed
+            AssignmentService.sync_student_assignments(assignment)
+            AssignmentService.process_attachments(assignment, attachments)
+        return redirect(assignment.get_teacher_url())
 
 
 class AssignmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin, DeleteView):

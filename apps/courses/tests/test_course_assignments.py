@@ -7,10 +7,15 @@ from django.utils.encoding import smart_bytes
 from auth.mixins import PermissionRequiredMixin
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.models import Assignment
+from courses.constants import AssigneeMode
+from courses.models import Assignment, CourseGroupModes
 from courses.permissions import CreateAssignment, EditAssignment
 from courses.tests.factories import AssignmentFactory, CourseFactory
 from users.tests.factories import CuratorFactory, TeacherFactory
+
+
+def prefixed_form(form_data, prefix: str):
+    return {f"{prefix}-{k}": v for k, v in form_data.items()}
 
 
 @pytest.mark.django_db
@@ -31,7 +36,7 @@ def test_course_assignment_form_create(client):
     import datetime
     teacher = TeacherFactory()
     CourseFactory.create_batch(3, teachers=[teacher])
-    course = CourseFactory.create(teachers=[teacher])
+    course = CourseFactory(teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
@@ -40,16 +45,18 @@ def test_course_assignment_form_create(client):
         'deadline_at_0': deadline_date,
         'deadline_at_1': deadline_time,
         'time_zone': 'Europe/Moscow',
+        'assignee_mode': AssigneeMode.STUDENT_GROUP_DEFAULT
     })
+
     url = course.get_create_assignment_url()
     client.login(teacher)
-    response = client.post(url, form)
+    response = client.post(url, prefixed_form(form, "assignment"))
     assert response.status_code == 302
     assert Assignment.objects.count() == 1
     a = Assignment.objects.first()
     assert a.ttc is None
     form.update({'ttc': '2:42'})
-    response = client.post(url, form)
+    response = client.post(url, prefixed_form(form, "assignment"))
     assert response.status_code == 302
     assert Assignment.objects.count() == 2
     a2 = Assignment.objects.exclude(pk=a.pk).first()
@@ -83,6 +90,7 @@ def test_course_assignment_update(client, assert_redirect):
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     new_title = a.title + " foo42bar"
     form.update({
+        'assignee_mode': AssigneeMode.STUDENT_GROUP_DEFAULT,
         'title': new_title,
         'course': course.pk,
         'time_zone': 'Europe/Moscow',
@@ -94,7 +102,7 @@ def test_course_assignment_update(client, assert_redirect):
     response = client.get(list_url)
     assert response.status_code == 200
     assert smart_bytes(form['title']) not in response.content
-    response = client.post(a.get_update_url(), form)
+    response = client.post(a.get_update_url(), prefixed_form(form, "assignment"))
     assert_redirect(response, a.get_teacher_url())
     a.refresh_from_db()
     assert a.title == new_title

@@ -9,7 +9,7 @@
 {% endblock javascripts %}
 
 {% block content %}
-  {% set assignment = form.instance %}
+  {% set assignment = assignment_form.instance %}
   <div class="container">
     <div class="row">
       <div class="col-xs-12">
@@ -19,10 +19,10 @@
         </h2>
         <form action="" method="post" enctype="multipart/form-data">
           {% csrf_token %}
-          {{ form.non_field_errors() }}
-          {{ forms.field(form['title']) }}
-          {{ forms.field(form['text']) }}
-          {% with field=form.attachments %}
+          {{ assignment_form.non_field_errors() }}
+          {{ forms.field(assignment_form['title']) }}
+          {{ forms.field(assignment_form['text']) }}
+          {% with field=assignment_form.attachments %}
             <div class="form-group">
               {{ forms.field(field, popover_help_text=field.help_text) }}
               {% if assignment %}
@@ -40,7 +40,7 @@
             <legend>Настройки задания</legend>
             <div class="row">
               <div class="col-xs-3">
-                {% with field=form.submission_type %}
+                {% with field=assignment_form.submission_type %}
                   <div class="form-group">
                     <label for="{{ field.id_for_label }}">
                       {{ field.label }}{% if field.field.required %}<span class="asteriskField">*</span>{% endif %}
@@ -68,34 +68,34 @@
                 {% endwith %}
               </div>
               <div class="col-xs-3">
-                {% with field = form['ttc'] -%}
+                {% with field = assignment_form['ttc'] -%}
                   {{ forms.field(field, prepend_text='<i class="fa fa-clock-o"></i>', popover_help_text=field.help_text) }}
                 {%- endwith %}
               </div>
             </div>
             <div class="row">
               <div class="col-xs-4">
-                {{ forms.field(form['deadline_at']) }}
+                {{ forms.field(assignment_form['deadline_at']) }}
               </div>
               <div class="col-xs-3">
-                {{ forms.field(form['time_zone']) }}
+                {{ forms.field(assignment_form['time_zone']) }}
               </div>
             </div>
             <div class="row">
               <div class="col-xs-12">
                 <div class="row">
                   <div class="col-xs-3">
-                    {{ forms.field(form['passing_score']) }}
+                    {{ forms.field(assignment_form['passing_score']) }}
                   </div>
                   <div class="col-xs-3">
-                      {{ forms.field(form['maximum_score']) }}
+                      {{ forms.field(assignment_form['maximum_score']) }}
                   </div>
                   <div class="col-xs-3">
-                      {% with field = form['weight'] -%}
+                      {% with field = assignment_form['weight'] -%}
                         {{ forms.field(field, prepend_text='<i class="fa fa-clock-o"></i>', popover_help_text=field.help_text) }}
                       {%- endwith %}
                   </div>
-                  {% with field=form.restricted_to -%}
+                  {% with field=assignment_form.restricted_to -%}
                     {% if field.field.choices|length > 1 %}
                       <div class="col-xs-3">
                         {{ forms.field(field, popover_help_text=field.help_text) }}
@@ -106,22 +106,91 @@
               </div>
             </div>
           </fieldset>
+
           <fieldset id="checking-system-info" {% if assignment.format not in formats_with_checker %}class="hidden"{% endif %}
                     data-display="{{ formats_with_checker|join(",") }}">
             <legend>Настройки проверяющей системы</legend>
             <div class="row">
-              <div class="col-xs-12">
-                <div class="row">
-                  <div class="col-xs-3">
-                    {{ forms.field(form['checking_system']) }}
-                  </div>
-                  <div class="col-xs-9">
-                    {{ forms.field(form['checker_url']) }}
-                  </div>
-                </div>
+              <div class="col-xs-3">
+                {{ forms.field(assignment_form['checking_system']) }}
+              </div>
+              <div class="col-xs-9">
+                {{ forms.field(assignment_form['checker_url']) }}
               </div>
             </div>
           </fieldset>
+
+          <fieldset id="responsible-teachers-settings">
+            <legend>Ответственные за задание</legend>
+            <div class="row">
+              <div class="col-xs-4">
+                {% with field=assignment_form.assignee_mode %}
+                  <div class="form-group">
+                    <label for="{{ field.id_for_label }}">
+                      {{ field.label }}{% if field.field.required %}<span class="asteriskField">*</span>{% endif %}
+                    </label>
+                    <a class="btn btn-link p-0 pull-right has-popover" data-target="#assignee-modes-help-block">
+                      <i class="fa fa-question-circle-o" aria-hidden="true"></i>
+                    </a>
+                    <div id="assignee-modes-help-block" class="hidden" data-placement="bottom">
+                      <p>
+                        Режим выбора ответственных влияет на список преподавателей, которые будут получать уведомления об активности
+                        студента, если проверяющий задание не назначен. Если проверяющий назначен, только он получает уведомления.
+                      </p>
+                      <p>
+                        Проверяющий указывается либо вручную на странице проверки задания, либо автоматически в момент первой активности
+                        студента, но только если список ответственных состоит из одного преподавателя.
+                      </p>
+                      <dl class="mb-0">
+                        <dt>Без ответственного</dt>
+                        <dd>Проверяющий автоматически не назначается. Никто из преподавателей не получает уведомления, пока вручную не будет указан проверяющим на странице проверки задания.</dd>
+                        <dt>Вручную</dt>
+                        <dd>Ответственные выбираются из списка преподавателей курса. По умолчанию выбраны все преподаватели с ролью "Проверяющий ДЗ".</dd>
+                        <dt>Студенческие группы по умолчанию</dt>
+                        <dd>Список ответственных берётся из настроек студенческой группы, с которой связан студент. Убедитесь, что вы указали ответственного для каждой студенческой группы (сейчас разрешено указывать только одного ответственного).</dd>
+                        <dt>Студенческие группы вручную</dt>
+                        <dd>В этом режиме можно кастомизировать ответственных студенческих групп для текущего задания.</dd>
+                      </dl>
+                    </div>
+                    {{ forms.field(field, hide_label=True) }}
+                  </div>
+                {% endwith %}
+              </div>
+            </div>
+            <div class="row {% if assignment.assignee_mode != AssigneeMode.MANUAL %}hidden{% endif %}" data-assignee-mode="{{ AssigneeMode.MANUAL }}">
+              <div class="col-xs-12">
+                <b>Выберите ответственных из списка</b>
+                {{ crispy(responsible_teachers_form) }}
+              </div>
+            </div>
+            <div class="row {% if assignment.assignee_mode != AssigneeMode.STUDENT_GROUP_CUSTOM %}hidden{% endif %}" data-assignee-mode="{{ AssigneeMode.STUDENT_GROUP_CUSTOM }}">
+              <div class="col-xs-12">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th style="width: 50%;">Название группы</th>
+                      <th>Ответственный</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for student_group in student_groups_custom_form.student_groups %}
+                      <tr>
+                        <td>
+                          {% set field = student_groups_custom_form['assignee-' + student_group.pk|string + '-name'] %}
+                          {{ field.value() }}
+                        </td>
+                        <td>
+                          {% set field = student_groups_custom_form['assignee-' + student_group.pk|string + '-teacher'] %}
+                          {{ forms.field(field, hide_label=True, wrapper_classes='mb-0') }}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </fieldset>
+
           <input type="submit" name="save" value="Сохранить" class="btn btn-primary" id="submit-id-save">
           <input type="button" name="cancel" value="Отмена" class="btn btn btn-link" id="button-id-cancel" onclick="history.go(-1);">
         </form>

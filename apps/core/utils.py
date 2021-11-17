@@ -262,7 +262,7 @@ def chunks(iterable, n, fillvalue=None):
     return zip_longest(fillvalue=fillvalue, *args)
 
 
-def bucketize(iterable, key=None, value_transform=None):
+def bucketize(iterable, key=None, value_transform=None) -> Dict[Any, List[Any]]:
     """
     Collect data into buckets from the iterable grouping values by key.
 
@@ -276,7 +276,7 @@ def bucketize(iterable, key=None, value_transform=None):
         key = lambda x: x
     if value_transform is None:
         value_transform = lambda x: x
-    buckets: Dict[Any, List[Any]] = {}
+    buckets = {}
     for val in iterable:
         bucket_key = key(val)
         buckets.setdefault(bucket_key, []).append(value_transform(val))

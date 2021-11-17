@@ -147,10 +147,13 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
         'attachments': tmp_file.open(),
         'time_zone': 'Europe/Moscow',
         'deadline_at_0': deadline_date,
-        'deadline_at_1': deadline_time
+        'deadline_at_1': deadline_time,
+        "assignee_mode": AssigneeMode.DISABLED
     })
     url = course.get_create_assignment_url()
-    client.post(url, form)
+
+    prefixed_form = {f"assignment-{k}": v for k, v in form.items()}
+    client.post(url, prefixed_form)
     assert Assignment.objects.count() == 1
     assert AssignmentAttachment.objects.count() == 1
     a_attachment = AssignmentAttachment.objects.first()

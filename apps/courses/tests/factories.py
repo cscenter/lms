@@ -7,7 +7,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from core.tests.factories import BranchFactory, LocationFactory
-from courses.constants import AssignmentFormat, MaterialVisibilityTypes
+from courses.constants import AssigneeMode, AssignmentFormat, MaterialVisibilityTypes
 from courses.models import (
     Assignment, AssignmentAttachment, Course, CourseBranch, CourseClass,
     CourseClassAttachment, CourseNews, CourseReview, CourseTeacher, LearningSpace,
@@ -196,6 +196,7 @@ class AssignmentFactory(factory.django.DjangoModelFactory):
     passing_score = 10
     maximum_score = 80
     weight = 1
+    assignee_mode = AssigneeMode.MANUAL
 
     @factory.post_generation
     def restricted_to(self, create, extracted, **kwargs):

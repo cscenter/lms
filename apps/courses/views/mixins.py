@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.http import Http404
@@ -10,8 +11,14 @@ from courses.models import Course
 
 logger = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from django.views import View
+    CourseURLParamsMixinBase = View
+else:
+    CourseURLParamsMixinBase = object
 
-class CourseURLParamsMixin:
+
+class CourseURLParamsMixin(CourseURLParamsMixinBase):
     """
     This mixin helps to get course by url parameters and assigns it to the
     `course` attribute of the view instance.
@@ -42,7 +49,7 @@ class CourseURLParamsMixin:
                 .select_related('meta_course', 'semester', 'main_branch'))
 
 
-class CoursePublicURLParamsMixin:
+class CoursePublicURLParamsMixin(CourseURLParamsMixinBase):
     """
     This mixin helps to retrieve course made by the current site (where
     main branch is related to the `request.site`), `RE_COURSE_PUBLIC_URI`
@@ -64,6 +71,8 @@ class CoursePublicURLParamsMixin:
             if omitted
 
     """
+    course: Course
+
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         main_branch_code = kwargs.get("main_branch_code", None)
@@ -99,7 +108,7 @@ class CoursePublicURLParamsMixin:
         if not courses:
             raise Http404
 
-        self.course: Course = courses[0]
+        self.course = courses[0]
 
     def get_course_queryset(self):
         """
