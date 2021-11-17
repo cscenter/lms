@@ -55,10 +55,10 @@ jobs:
 
       - name: Debug
         run: |
-          ls -la /tmp/.buildx-django-cache-new
-          ls -la /tmp/.buildx-django-cache-new/blobs
-          ls -la /tmp/.buildx-django-cache-new/ingest
-          cat /tmp/.buildx-django-cache-new/index.json
+          ls -la /tmp/.buildx-django-cache
+          ls -la /tmp/.buildx-django-cache/blobs
+          ls -la /tmp/.buildx-django-cache/ingest
+          cat /tmp/.buildx-django-cache/index.json
 
       - name: Build Django image with production dependencies | header image
         uses: docker/build-push-action@v2
