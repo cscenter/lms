@@ -1,7 +1,7 @@
 import datetime
 from functools import partial
 from itertools import zip_longest
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Optional
 from urllib.parse import parse_qs, urlparse
 
 import bleach
@@ -251,7 +251,11 @@ def get_youtube_video_id(video_url):
     return video_id
 
 
-def chunks(iterable, n, fillvalue=None):
+def normalize_yandex_login(value: str) -> str:
+    return value.lower().replace('-', '.')
+
+
+def chunks(iterable: Iterable, n: int, fillvalue: Optional[Any] = None) -> zip_longest:
     """
     Collect data into fixed-length chunks or blocks:
     Example:

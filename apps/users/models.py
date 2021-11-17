@@ -35,7 +35,9 @@ from core.models import TimestampedModel
 from core.timezone import TimezoneAwareMixin
 from core.timezone.constants import DATETIME_FORMAT_RU
 from core.urls import reverse
-from core.utils import instance_memoize, is_club_site, ru_en_mapping
+from core.utils import (
+    instance_memoize, is_club_site, normalize_yandex_login, ru_en_mapping
+)
 from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from learning.utils import is_negative_grade
 from lms.utils import PublicRoute
@@ -309,6 +311,10 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         _("Yandex Login"),
         max_length=80,
         blank=True)
+    yandex_login_normalized = models.CharField(
+        max_length=80,
+        editable=False,
+        blank=True)
     github_login = models.CharField(
         _("Github Login"),
         max_length=80,
@@ -378,6 +384,8 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
             username, domain = self.email.split("@", 1)
             if domain in YANDEX_DOMAINS:
                 self.yandex_login = username
+        if self.yandex_login:
+            self.yandex_login_normalized = normalize_yandex_login(self.yandex_login)
         if not self.calendar_key:
             self.calendar_key = generate_hash(b'calendar',
                                               force_bytes(self.email))

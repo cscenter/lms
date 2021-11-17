@@ -36,6 +36,7 @@ from core.models import Branch, Location, TimestampedModel
 from core.timezone import TimezoneAwareMixin
 from core.timezone.fields import TimezoneAwareDateTimeField
 from core.urls import reverse
+from core.utils import normalize_yandex_login
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
 from grading.api.yandex_contest import Error as YandexContestError
@@ -491,7 +492,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     def save(self, **kwargs):
         created = self.pk is None
         if self.yandex_login:
-            self.yandex_login_q = self.yandex_login.lower().replace('-', '.')
+            self.yandex_login_q = normalize_yandex_login(self.yandex_login)
         super().save(**kwargs)
         if created:
             self._assign_testing()
