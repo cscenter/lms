@@ -95,7 +95,7 @@ jobs:
       - name: Debug docker registry
         run: |
           curl http://localhost:5000/v2/_catalog
-          cat /etc/docker/registry/config.yml
+          docker exec registry cat /etc/docker/registry/config.yml
           docker inspect ${{ env.LOCAL_IMAGE_DJANGO_PROD }}
           docker inspect ${{ env.LOCAL_IMAGE_DJANGO_DEV }}
 
