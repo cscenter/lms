@@ -51,7 +51,7 @@ class StudentGroupListView(PermissionRequiredMixin, CourseURLParamsMixin, ListVi
         # TODO: move to selectors
         student_group_assignees = Prefetch(
             'student_group_assignees',
-            queryset=StudentGroupAssignee.objects.select_related('assignee')
+            queryset=StudentGroupAssignee.objects.select_related('assignee__teacher')
         )
         return (StudentGroup.objects
                 .filter(course=self.course)
