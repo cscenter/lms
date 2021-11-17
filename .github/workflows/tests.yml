@@ -31,7 +31,7 @@ jobs:
         with:
           driver-opts: network=host
 
-      - name: Restore docker registry cache
+      - name: Docker registry cache
         uses: actions/cache@v2
         id: cache-docker
         with:
@@ -45,7 +45,7 @@ jobs:
         # Assuming it will be ready before first build
         run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/.docker-registry:/var/lib/registry registry:2
 
-      - name: Restore Django cache with production dependencies | header image
+      - name: Production dependencies cache | header image
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-django-cache
@@ -63,6 +63,9 @@ jobs:
           tags: ${{ env.LOCAL_IMAGE_DJANGO_PROD }}
           cache-from: type=local,src=/tmp/.buildx-django-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-django-cache-new
+
+      - name: Debug
+        run: ls -la /tmp/.buildx-django-cache-new
 
       - name: Build Django image with dev dependencies | full image
         uses: docker/build-push-action@v2
