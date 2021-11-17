@@ -56,7 +56,7 @@ jobs:
       - name: Debug
         run: |
           ls -la /tmp/.buildx-django-cache
-          ls -la /tmp/.buildx-django-cache/blobs
+          ls -la /tmp/.buildx-django-cache/blobs/sha256
           ls -la /tmp/.buildx-django-cache/ingest
           cat /tmp/.buildx-django-cache/index.json
 
@@ -69,13 +69,14 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           tags: ${{ env.LOCAL_IMAGE_DJANGO_PROD }}
           cache-from: type=local,src=/tmp/.buildx-django-cache
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-django-cache-new
+          # “min” on only exports layers already in the final build stage
+          cache-to: type=local,mode=min,dest=/tmp/.buildx-django-cache-new
 
       - name: Debug
         run: |
           ls -la /tmp/.buildx-django-cache-new
           ls -la /tmp/.buildx-django-cache-new/ingest
-          ls -la /tmp/.buildx-django-cache-new/blobs
+          ls -la /tmp/.buildx-django-cache-new/blobs/sha256
           cat /tmp/.buildx-django-cache-new/index.json
 
       - name: Build Django image with dev dependencies | full image
