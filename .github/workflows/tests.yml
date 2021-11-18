@@ -114,8 +114,8 @@ jobs:
         # --delete-untagged     delete manifests that are not currently referenced via tag
         run: docker exec registry bin/registry garbage-collect /etc/docker/registry/config.yml --delete-untagged
 
-
       # TODO: remove prod django image from local registry https://docs.docker.com/registry/spec/api/#deleting-an-image
+
       # https://github.com/docker/build-push-action/issues/252
       - name: Move cache
         run: |
