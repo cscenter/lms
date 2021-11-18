@@ -3,6 +3,7 @@ name: Build and Push Docker Images
 on: workflow_dispatch
 
 env:
+  PYTHON_IMAGE: python:3.9-slim-buster
   LOCAL_IMAGE_FRONTEND: localhost:5000/lms-frontend-webpack:latest
   LOCAL_IMAGE_DJANGO: localhost:5000/lms-backend-django:latest
   REMOTE_IMAGE_BACKEND_DJANGO: 297302290031.dkr.ecr.eu-central-1.amazonaws.com/lms-uwsgi:${{ github.run_number }}
@@ -29,6 +30,12 @@ jobs:
         with:
           driver-opts: network=host
 
+      - name: Inspect python base image
+        id: digests
+        run: |
+          docker pull ${{ env.PYTHON_IMAGE }}
+          echo "::set-output name=PYTHON_IMAGE::$(docker inspect docker.io/library/${{ env.PYTHON_IMAGE }} | jq -r '.[0].RepoDigests[0]' | cut -d'@' -f2)"
+
       - name: Build Cache - Frontend
         uses: actions/cache@v2
         with:
@@ -41,8 +48,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-django-cache
-          key: ${{ runner.os }}-django-buildx-${{ github.sha }}
+          key: ${{ runner.os }}-django-buildx-${{ hashFiles('**/Pipfile.lock')  }}-${{ steps.digests.outputs.PYTHON_IMAGE }}
           restore-keys: |
+            ${{ runner.os }}-django-buildx-${{ hashFiles('**/Pipfile.lock') }}
             ${{ runner.os }}-django-buildx
 
       - name: Checkout frontend repo

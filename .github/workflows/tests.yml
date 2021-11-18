@@ -13,6 +13,7 @@ on:
       - master
 
 env:
+  PYTHON_IMAGE: python:3.9-slim-buster
   LOCAL_IMAGE_DJANGO_PROD: localhost:5000/lms-backend-django:latest
   LOCAL_IMAGE_DJANGO_DEV: localhost:5000/lms-backend-django-dev:latest
 
@@ -48,9 +49,8 @@ jobs:
       - name: Inspect python base image
         id: digests
         run: |
-          docker pull python:3.9-slim-buster
-          docker inspect docker.io/library/python:3.9-slim-buster | jq -r '.[0].RepoDigests[0]' | cut -d'@' -f2
-          echo "::set-output name=PYTHON_IMAGE::$(docker inspect docker.io/library/python:3.9-slim-buster | jq -r '.[0].RepoDigests[0]' | cut -d'@' -f2)"
+          docker pull ${{ env.PYTHON_IMAGE }}
+          echo "::set-output name=PYTHON_IMAGE::$(docker inspect docker.io/library/${{ env.PYTHON_IMAGE }} | jq -r '.[0].RepoDigests[0]' | cut -d'@' -f2)"
 
       - name: Production dependencies cache | header image
         uses: actions/cache@v2
@@ -102,12 +102,10 @@ jobs:
 
       - name: Debug docker registry
         run: |
-          curl http://localhost:5000/v2/_catalog
+          curl -s http://localhost:5000/v2/_catalog
           docker exec registry cat /etc/docker/registry/config.yml
-          curl http://localhost:5000/v2/lms-backend-django/tags/list
-          curl http://localhost:5000/v2/lms-backend-django/manifests/latest
-          curl http://localhost:5000/v2/lms-backend-django-dev/tags/list
-          curl http://localhost:5000/v2/lms-backend-django-dev/manifests/latest
+          curl -s http://localhost:5000/v2/lms-backend-django/manifests/latest
+          curl -s http://localhost:5000/v2/lms-backend-django-dev/manifests/latest
 
       # https://docs.docker.com/registry/garbage-collection/#run-garbage-collection
       - name: Cleanup local docker registry
