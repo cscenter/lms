@@ -8,6 +8,7 @@ from typing import Iterator, List, Optional, Union
 import requests
 
 from core.typings import assert_never
+from core.utils import normalize_yandex_login
 
 logger = logging.getLogger(__name__)
 
@@ -369,7 +370,7 @@ def yandex_contest_scoreboard_iterator(client: YandexContestAPI, contest_id: int
                 problems.append(problem_result)
             participant_progress = YandexContestParticipantProgress(
                 participant_id=row['participantInfo']['id'],
-                yandex_login=row['participantInfo']['login'],
+                yandex_login=normalize_yandex_login(row['participantInfo']['login']),
                 score_total=row['score'],
                 problems=problems
             )

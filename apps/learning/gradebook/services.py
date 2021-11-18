@@ -33,10 +33,10 @@ def assignment_import_scores_from_yandex_contest(*, client: YandexContestAPI,
     # synchronized with the assignment max score.
     enrolled_students = (Enrollment.active
                          .filter(course_id=assignment.course_id)
-                         .exclude(student_profile__user__yandex_login='')
+                         .exclude(student_profile__user__yandex_login_normalized='')
                          .select_related('student_profile__user')
                          .only('student_profile__user'))
-    students = {e.student_profile.user.yandex_login: e.student_profile.user
+    students = {e.student_profile.user.yandex_login_normalized: e.student_profile.user
                 for e in enrolled_students}
     student_assignments = StudentAssignment.objects.filter(assignment=assignment).order_by()
     student_assignments = {s.student_id: s for s in student_assignments}
