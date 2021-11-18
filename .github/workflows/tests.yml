@@ -48,6 +48,7 @@ jobs:
 
       - name: Inspect python base image
         id: digests
+        # FIXME: RepoDigests refer to the digest of the manifest list, better to use `docker manifest inspect --verbose docker.io/library/python:3.9-slim-buster` and filter by image manifest
         run: |
           docker pull ${{ env.PYTHON_IMAGE }}
           echo "::set-output name=PYTHON_IMAGE::$(docker inspect docker.io/library/${{ env.PYTHON_IMAGE }} | jq -r '.[0].RepoDigests[0]' | cut -d'@' -f2)"
@@ -58,7 +59,6 @@ jobs:
           path: /tmp/.buildx-django-cache
           key: ${{ runner.os }}-django-buildx-${{ hashFiles('**/Pipfile.lock')  }}-${{ steps.digests.outputs.PYTHON_IMAGE }}
           restore-keys: |
-            ${{ runner.os }}-django-buildx-${{ hashFiles('**/Pipfile.lock') }}
             ${{ runner.os }}-django-buildx
 
       - name: Debug
