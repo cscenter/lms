@@ -18,6 +18,7 @@ from django.views import generic
 from api.views import APIBaseView
 from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
 from core.http import HttpRequest
+from core.utils import normalize_yandex_login
 from courses.constants import AssignmentFormat, SemesterTypes
 from courses.models import Assignment, Course, Semester
 from courses.utils import get_current_term_pair
@@ -292,7 +293,8 @@ class ImportAssignmentScoresByYandexLoginView(ImportAssignmentScoresBaseView):
         return import_assignment_scores(assignment, csv_file,
                                         required_headers=['yandex_login', 'score'],
                                         enrolled_students=with_yandex_login,
-                                        lookup_column_name='yandex_login')
+                                        lookup_column_name='yandex_login',
+                                        transform=normalize_yandex_login)
 
 
 class ImportAssignmentScoresByEnrollmentIDView(ImportAssignmentScoresBaseView):

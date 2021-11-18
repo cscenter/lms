@@ -651,8 +651,8 @@ def test_gradebook_import_assignment_score_by_yandex_login(client):
     teacher = TeacherFactory()
     branch = BranchFactory(code=Branches.SPB)
     course = CourseFactory(teachers=[teacher])
-    student1 = StudentFactory(branch=branch, yandex_login='yandex1')
-    student2 = StudentFactory(branch=branch, yandex_login='yandex2')
+    student1 = StudentFactory(branch=branch, yandex_login='Yandex-login1')
+    student2 = StudentFactory(branch=branch, yandex_login='yandex.login2')
     student3 = StudentFactory(branch=branch, yandex_login='')
     for s in [student1, student2, student3]:
         EnrollmentFactory.create(student=s, course=course)
@@ -684,8 +684,8 @@ header1,header2,score
     #
     csv_data = b"""
 yandex_login,header2,score
-yandex1,1,10
-yandex2,2,20
+yandex-login1,1,10
+YANDEX-login2,2,20
 ,3,30
     """.strip()
     form = {

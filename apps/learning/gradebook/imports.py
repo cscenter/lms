@@ -1,7 +1,7 @@
 import csv
 import logging
 from decimal import Decimal
-from typing import IO, Dict, List, Optional
+from typing import IO, Callable, Dict, List, Optional
 
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -56,10 +56,10 @@ def get_course_students_by_yandex_login(course_id) -> Dict[CSVColumnValue, int]:
     """
     enrollments = (Enrollment.active
                    .filter(course_id=course_id)
-                   .only("student_id", "student__yandex_login"))
+                   .only("student_id", "student__yandex_login_normalized"))
     enrolled_students = {}
     for enrollment in enrollments.iterator():
-        yandex_login = enrollment.student.yandex_login
+        yandex_login = enrollment.student.yandex_login_normalized
         if yandex_login:
             enrolled_students[str(yandex_login)] = enrollment.student_id
     return enrolled_students
@@ -69,7 +69,8 @@ def import_assignment_scores(assignment: Assignment,
                              csv_file: IO,
                              enrolled_students: Dict[CSVColumnValue, int],
                              required_headers: List[CSVColumnName],
-                             lookup_column_name: str):
+                             lookup_column_name: str,
+                             transform: Optional[Callable[[str], str]] = None):
     # Remove BOM by using 'utf-8-sig'
     f = (bs.decode("utf-8-sig") for bs in csv_file)
     reader = csv.DictReader(f)
@@ -82,8 +83,11 @@ def import_assignment_scores(assignment: Assignment,
     found = 0
     imported = 0
     maximum_score = assignment.maximum_score
+
     for row_number, row in enumerate(reader, start=1):
         lookup_column_value = row[lookup_column_name].strip()
+        if transform:
+            lookup_column_value = transform(lookup_column_value)
         student_id = enrolled_students.get(lookup_column_value, None)
         if not student_id:
             continue
