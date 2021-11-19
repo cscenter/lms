@@ -19,6 +19,7 @@ from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.constants import AssignmentFormat
+from courses.models import CourseGroupModes
 from courses.tests.factories import AssignmentFactory, CourseFactory
 from grading.tests.factories import CheckerFactory
 from learning.gradebook import BaseGradebookForm, GradeBookFormFactory, gradebook_data
@@ -28,7 +29,8 @@ from learning.gradebook.imports import (
 from learning.models import Enrollment, StudentAssignment
 from learning.permissions import EditGradebook, ViewOwnGradebook
 from learning.settings import Branches, GradeTypes, StudentStatuses
-from learning.tests.factories import EnrollmentFactory
+from learning.tests.factories import EnrollmentFactory, StudentGroupFactory
+from users.models import StudentTypes
 from users.services import get_student_profile
 from users.tests.factories import (
     CuratorFactory, StudentFactory, TeacherFactory, UserFactory
@@ -835,3 +837,114 @@ def test_gradebook_import_scores_from_yandex_contest_permissions(settings, clien
     assert response.status_code == 201
     response = client.post(url, data={'assignment': assignment2.pk}, content_type='application/json')
     assert response.status_code == 404
+
+
+def generate_course():
+    teacher = TeacherFactory()
+    branch = BranchFactory(code=Branches.SPB)
+    course = CourseFactory(main_branch=branch, teachers=[teacher],
+                           group_mode=CourseGroupModes.MANUAL)
+    group_one, group_two = StudentGroupFactory.create_batch(2, course=course)
+    just_students = StudentFactory.create_batch(5, branch=branch)
+    invited_students = StudentFactory.create_batch(5, branch=branch,
+                                                   student_profile__type=StudentTypes.INVITED)
+    for student in just_students:
+        EnrollmentFactory(student=student, course=course, student_group=group_one,
+                          student_profile=student.student_profiles.get())
+    for student in invited_students:
+        EnrollmentFactory(student=student, course=course, student_group=group_two,
+                          student_profile=student.student_profiles.get())
+    return teacher, course, just_students, invited_students, group_one, group_two
+
+
+@pytest.mark.django_db
+def test_gradebook_contain_student_type(client):
+    teacher, course, just_students, invited_students,\
+    group_one, group_two = generate_course()
+    client.login(teacher)
+    gradebook_url = course.get_gradebook_url()
+    response = client.get(gradebook_url)
+    for pk, students_gradebook, in response.context_data['gradebook'].students.items():
+        if students_gradebook.student in invited_students:
+            assert students_gradebook.student_profile.type == StudentTypes.INVITED
+        else:
+            assert students_gradebook.student_profile.type == StudentTypes.REGULAR
+
+
+@pytest.mark.django_db
+def test_filter_hidden_when_one_student_group(client):
+    teacher = TeacherFactory()
+    branch = BranchFactory(code=Branches.SPB)
+    course = CourseFactory(main_branch=branch, teachers=[teacher])
+    client.login(teacher)
+    gradebook_url = course.get_gradebook_url()
+    response = client.get(gradebook_url)
+    assert response.context_data['filter_form'] is None
+
+
+@pytest.mark.django_db
+def test_filter_has_all_student_groups(client):
+    teacher = TeacherFactory()
+    branch = BranchFactory(code=Branches.SPB)
+    course = CourseFactory(main_branch=branch, teachers=[teacher],
+                           group_mode=CourseGroupModes.MANUAL)
+    groups = StudentGroupFactory.create_batch(3, course=course)
+    client.login(teacher)
+    gradebook_url = course.get_gradebook_url()
+    response = client.get(gradebook_url)
+    form = response.context_data['filter_form']
+    choices = form.fields['student_group'].choices
+    assert len(choices) == 4  # 3 groups + All
+    assert choices[0][0] is None
+    for group, choice in zip(groups, choices[1:]):
+        assert group.name == choice[1]
+
+
+@pytest.mark.django_db
+def test_filter_works(client):
+    teacher, course, just_students, invited_students,\
+    group_one, group_two = generate_course()
+    client.login(teacher)
+    no_filter_url = course.get_gradebook_url()
+    response = client.get(no_filter_url)
+    assert len(response.context_data['gradebook'].students) == 10
+    wrong_filter_url = course.get_gradebook_url(student_group='wrong')
+    response.client.get(wrong_filter_url)
+    assert len(response.context_data['gradebook'].students) == 10
+    filter_first_url = course.get_gradebook_url(student_group=group_one.pk)
+    response = client.get(filter_first_url)
+    students = response.context_data['gradebook'].students
+    assert len(students) == 5
+    for student in just_students:
+        assert student.pk in students
+    filter_second_url = course.get_gradebook_url(student_group=group_two.pk)
+    response = client.get(filter_second_url)
+    students = response.context_data['gradebook'].students
+    assert len(students) == 5
+    for student in invited_students:
+        assert student.pk in students
+
+
+@pytest.mark.django_db
+def test_filter_saves_selected_group(client):
+    teacher, course, just_students, invited_students,\
+    group_one, group_two = generate_course()
+    client.login(teacher)
+    course.get_gradebook_url(student_group=group_one.pk)
+    filter_first_url = course.get_gradebook_url(student_group=group_one.pk)
+    response = client.get(filter_first_url)
+    assert response.context_data["filter_form"].get_student_group() == group_one.pk
+
+
+@pytest.mark.django_db
+def test_filter_works_after_post_request(client):
+    teacher, course, just_students,\
+    invited_students, group_one, group_two = generate_course()
+    client.login(teacher)
+    filter_first_url = course.get_gradebook_url(student_group=group_one.pk)
+    response = client.post(filter_first_url, follow=True)
+    students = response.context_data['gradebook'].students
+    assert len(students) == 5
+    for student in just_students:
+        assert student.pk in students
+

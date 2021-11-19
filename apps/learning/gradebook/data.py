@@ -55,6 +55,10 @@ class GradebookStudent:
             return self._enrollment.student_group
         return None
 
+    @property
+    def student_type(self) -> str:
+        return self.student_profile.type
+
 
 @dataclass
 class GradebookAssignment:
@@ -145,7 +149,7 @@ class GradeBookData:
         return len(self.students) > 100 or number_of_fields_is_exceeded
 
 
-def gradebook_data(course: Course) -> GradeBookData:
+def gradebook_data(course: Course, student_group: Optional[int] = None) -> GradeBookData:
     """
     Returns:
         students = OrderedDict(
@@ -155,6 +159,7 @@ def gradebook_data(course: Course) -> GradeBookData:
                 "final_grade": "good",
                 "total_score": 23,
                 "enrollment_id": 1,
+                "type": "invited"  # StudentTypes.INVITED
             ),
             ...
         ),
@@ -180,10 +185,14 @@ def gradebook_data(course: Course) -> GradeBookData:
     """
     # Collect active enrollments
     enrolled_students = OrderedDict()
-    enrollments = (Enrollment.active
-                   .filter(course=course)
+    course_enrollments = (Enrollment.active
+                          .filter(course=course))
+    if student_group is not None:
+        course_enrollments = course_enrollments.filter(student_group=student_group)
+    enrollments = (course_enrollments
                    .select_related("student",
                                    "student_profile__branch",
+                                   "student_profile",
                                    "student_group")
                    .order_by("student__last_name", "pk"))
     for index, e in enumerate(enrollments.iterator()):

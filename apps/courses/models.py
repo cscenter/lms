@@ -482,10 +482,13 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         return reverse('course_leave', kwargs=self.url_kwargs,
                        subdomain=settings.LMS_SUBDOMAIN)
 
-    def get_gradebook_url(self, url_name="teaching:gradebook", format=None):
+    def get_gradebook_url(self, url_name="teaching:gradebook", format=None, student_group=None):
         if format == "csv":
             url_name = f"{url_name}_csv"
-        return reverse(url_name, kwargs=self.url_kwargs)
+        url = reverse(url_name, kwargs=self.url_kwargs)
+        if student_group is not None:
+            url += f'?student_group={student_group}'
+        return url
 
     def get_course_news_notifications_url(self):
         return reverse('course_news_notifications_read', kwargs=self.url_kwargs,
