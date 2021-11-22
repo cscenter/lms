@@ -196,7 +196,7 @@ class StudentProfileAdmin(BaseModelAdmin):
     inlines = [StudentStatusLogAdminInline]
     fieldsets = [
         (None, {
-            'fields': ['type', 'branch', 'user', 'status', 'partner',
+            'fields': ['type', 'is_paid_basis', 'branch', 'user', 'status', 'partner',
                        'year_of_admission', 'year_of_curriculum',
                        'university', 'level_of_education_on_admission',
                        'academic_disciplines']

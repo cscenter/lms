@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-11-18 13:05+0000\n"
-"PO-Revision-Date: 2021-11-18 13:06+0000\n"
+"PO-Revision-Date: 2021-11-22 12:32+0000\n"
 "Last-Translator: Сергей Жеревчук <pacabest@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -3111,7 +3111,7 @@ msgstr ""
 
 #: apps/users/models.py:764
 msgid "Paid Basis"
-msgstr "Платная основа"
+msgstr "Платная форма обучения"
 
 #: apps/users/models.py:770
 msgid "Number of higher education diploma"
