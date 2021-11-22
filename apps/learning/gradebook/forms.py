@@ -103,10 +103,6 @@ class GradeBookFilterForm(forms.Form):
         choices += [(sg.pk, sg.name) for sg in student_group]
         self.fields['student_group'].choices = choices
 
-    def set_initial(self, student_group: Optional[int] = None):
-        if student_group in map(lambda x: x[0], self.fields['student_group'].choices):
-            self.fields['student_group'].initial = student_group
-
     def get_student_group(self):
         if self.is_valid():
             return self.cleaned_data['student_group']
