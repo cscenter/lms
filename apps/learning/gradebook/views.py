@@ -1,6 +1,6 @@
 import csv
 import itertools
-from typing import Any
+from typing import Any, Optional
 
 from rest_framework import serializers, status
 from rest_framework.response import Response
@@ -41,6 +41,8 @@ __all__ = [
     "GradeBookCSVView", "ImportAssignmentScoresByStepikIDView",
     "ImportAssignmentScoresByYandexLoginView"
 ]
+
+from users.models import StudentTypes
 
 
 class GradeBookListBaseView(generic.ListView):
@@ -98,9 +100,9 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
     def get(self, request, *args, **kwargs):
         filter_form = GradeBookFilterForm(data=request.GET, course=self.course)
         selected_group = filter_form.get_student_group()
-        form = self.get_form(student_group=selected_group)
         if filter_form.groups_count() <= 2:
             filter_form = None
+        form = self.get_form(student_group=selected_group)
         context = self.get_context_data(form=form, filter_form=filter_form)
         return self.render_to_response(context)
 
@@ -110,23 +112,20 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
             return self.form_valid(form)
         return self.form_invalid(form)
 
-    def get_form(self, data=None, files=None, student_group=None, **kwargs):
-        cls = self.get_form_class(student_group)
+    def get_form(self, data=None, files=None, student_group: Optional[int] = None, **kwargs):
+        self.data = gradebook_data(self.course, student_group)
+        cls = GradeBookFormFactory.build_form_class(self.data)
         # Set initial data for all GET-requests
         if not data and "initial" not in kwargs:
             initial = GradeBookFormFactory.transform_to_initial(self.data)
             kwargs["initial"] = initial
         return cls(data=data, files=files, **kwargs)
 
-    def get_form_class(self, student_group=None):
-        self.data = gradebook_data(self.course, student_group)
-        return GradeBookFormFactory.build_form_class(self.data)
-
     def invalid_answer(self, form):
         # Replace form data with actual db values and user input
         # for conflict fields
-        student_group = self.request.GET.get('student_group')
         filter_form = GradeBookFilterForm(data=self.request.GET, course=self.course)
+        student_group = filter_form.get_student_group()
         self.data = gradebook_data(self.course, student_group=student_group)
         current_data = GradeBookFormFactory.transform_to_initial(self.data)
         data = form.data.copy()
@@ -156,7 +155,8 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
             params = {"url_name": "staff:gradebook"}
         else:
             params = {}
-        student_group = self.request.GET.get('student_group')
+        gradebook_filter = GradeBookFilterForm(data=self.request.GET, course=self.course)
+        student_group = gradebook_filter.get_student_group()
         url = self.data.course.get_gradebook_url(student_group=student_group, **params)
         return url
 
@@ -174,6 +174,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
             'view': self,
             'form': kwargs.get('form'),
             'filter_form': kwargs.get('filter_form'),
+            "student_types": StudentTypes,
             "gradebook": self.data,
             'AssignmentFormat': AssignmentFormat
         }

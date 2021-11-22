@@ -98,11 +98,10 @@ class GradeBookFilterForm(forms.Form):
 
     def __init__(self, course: Course, **kwargs):
         super().__init__(**kwargs)
-        students_groups = StudentGroup.objects.filter(course=course)
+        student_group = StudentGroup.objects.filter(course=course)
         choices = [(None, 'Студенты всех групп')]
-        choices += [(sg.pk, sg.name) for sg in students_groups]
+        choices += [(sg.pk, sg.name) for sg in student_group]
         self.fields['student_group'].choices = choices
-        self.set_initial(choices[0][0])
 
     def set_initial(self, student_group: Optional[int] = None):
         if student_group in map(lambda x: x[0], self.fields['student_group'].choices):

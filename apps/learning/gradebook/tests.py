@@ -849,11 +849,9 @@ def generate_course():
     invited_students = StudentFactory.create_batch(5, branch=branch,
                                                    student_profile__type=StudentTypes.INVITED)
     for student in just_students:
-        EnrollmentFactory(student=student, course=course, student_group=group_one,
-                          student_profile=student.student_profiles.get())
+        EnrollmentFactory(student=student, course=course, student_group=group_one)
     for student in invited_students:
-        EnrollmentFactory(student=student, course=course, student_group=group_two,
-                          student_profile=student.student_profiles.get())
+        EnrollmentFactory(student=student, course=course, student_group=group_two)
     return teacher, course, just_students, invited_students, group_one, group_two
 
 

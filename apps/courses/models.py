@@ -1,6 +1,6 @@
 import os.path
 from datetime import datetime, timedelta
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 import pytz
 from bitfield import BitField
@@ -482,7 +482,9 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         return reverse('course_leave', kwargs=self.url_kwargs,
                        subdomain=settings.LMS_SUBDOMAIN)
 
-    def get_gradebook_url(self, url_name="teaching:gradebook", format=None, student_group=None):
+    def get_gradebook_url(self, url_name: Optional[str] = "teaching:gradebook",
+                                format: Optional[str] = None,
+                                student_group: Optional[int] = None):
         if format == "csv":
             url_name = f"{url_name}_csv"
         url = reverse(url_name, kwargs=self.url_kwargs)
