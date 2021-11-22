@@ -99,9 +99,9 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
 
     def get(self, request, *args, **kwargs):
         filter_form = GradeBookFilterForm(data=request.GET, course=self.course)
-        selected_group = filter_form.get_student_group()
-        if filter_form.groups_count() <= 2:
-            filter_form = None
+        selected_group = None
+        if filter_form.is_valid():
+            selected_group = filter_form.cleaned_data['student_group']
         form = self.get_form(student_group=selected_group)
         context = self.get_context_data(form=form, filter_form=filter_form)
         return self.render_to_response(context)
@@ -125,7 +125,9 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
         # Replace form data with actual db values and user input
         # for conflict fields
         filter_form = GradeBookFilterForm(data=self.request.GET, course=self.course)
-        student_group = filter_form.get_student_group()
+        student_group = None
+        if filter_form.is_valid():
+            student_group = filter_form.cleaned_data['student_group']
         self.data = gradebook_data(self.course, student_group=student_group)
         current_data = GradeBookFormFactory.transform_to_initial(self.data)
         data = form.data.copy()
@@ -155,8 +157,10 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
             params = {"url_name": "staff:gradebook"}
         else:
             params = {}
-        gradebook_filter = GradeBookFilterForm(data=self.request.GET, course=self.course)
-        student_group = gradebook_filter.get_student_group()
+        filter_form = GradeBookFilterForm(data=self.request.GET, course=self.course)
+        student_group = None
+        if filter_form.is_valid():
+            student_group = filter_form.cleaned_data["student_group"]
         url = self.data.course.get_gradebook_url(student_group=student_group, **params)
         return url
 

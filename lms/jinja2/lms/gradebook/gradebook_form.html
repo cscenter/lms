@@ -78,7 +78,7 @@
           <hr>
         </div>
       </div>
-      {% if filter_form %}
+      {% if filter_form.is_visible() %}
           <form method="get" name="gradebook">
           <label for="{{ filter_form.student_group.id_for_label }}">Группы</label>
           <div class="row form-group">

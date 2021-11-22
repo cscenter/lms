@@ -22,7 +22,7 @@ from courses.constants import AssignmentFormat
 from courses.models import CourseGroupModes
 from courses.tests.factories import AssignmentFactory, CourseFactory
 from grading.tests.factories import CheckerFactory
-from learning.gradebook import BaseGradebookForm, GradeBookFormFactory, gradebook_data
+from learning.gradebook import BaseGradebookForm, GradeBookFormFactory, gradebook_data, GradeBookFilterForm
 from learning.gradebook.imports import (
     get_course_students_by_stepik_id, import_assignment_scores
 )
@@ -845,19 +845,19 @@ def generate_course():
     course = CourseFactory(main_branch=branch, teachers=[teacher],
                            group_mode=CourseGroupModes.MANUAL)
     group_one, group_two = StudentGroupFactory.create_batch(2, course=course)
-    just_students = StudentFactory.create_batch(5, branch=branch)
+    regular_students = StudentFactory.create_batch(5, branch=branch)
     invited_students = StudentFactory.create_batch(5, branch=branch,
                                                    student_profile__type=StudentTypes.INVITED)
-    for student in just_students:
+    for student in regular_students:
         EnrollmentFactory(student=student, course=course, student_group=group_one)
     for student in invited_students:
         EnrollmentFactory(student=student, course=course, student_group=group_two)
-    return teacher, course, just_students, invited_students, group_one, group_two
+    return teacher, course, regular_students, invited_students, group_one, group_two
 
 
 @pytest.mark.django_db
-def test_gradebook_contain_student_type(client):
-    teacher, course, just_students, invited_students,\
+def test_view_gradebook_student_profile_shows_student_type(client):
+    teacher, course, regular_students, invited_students,\
     group_one, group_two = generate_course()
     client.login(teacher)
     gradebook_url = course.get_gradebook_url()
@@ -870,27 +870,22 @@ def test_gradebook_contain_student_type(client):
 
 
 @pytest.mark.django_db
-def test_filter_hidden_when_one_student_group(client):
+def test_view_gradebook_filter_form_is_hidden(client):
     teacher = TeacherFactory()
     branch = BranchFactory(code=Branches.SPB)
     course = CourseFactory(main_branch=branch, teachers=[teacher])
-    client.login(teacher)
-    gradebook_url = course.get_gradebook_url()
-    response = client.get(gradebook_url)
-    assert response.context_data['filter_form'] is None
+    form = GradeBookFilterForm(course=course)
+    assert not form.is_visible()
 
 
 @pytest.mark.django_db
-def test_filter_has_all_student_groups(client):
+def test_view_gradebook_filter_form_contains_all_student_groups(client):
     teacher = TeacherFactory()
     branch = BranchFactory(code=Branches.SPB)
     course = CourseFactory(main_branch=branch, teachers=[teacher],
                            group_mode=CourseGroupModes.MANUAL)
     groups = StudentGroupFactory.create_batch(3, course=course)
-    client.login(teacher)
-    gradebook_url = course.get_gradebook_url()
-    response = client.get(gradebook_url)
-    form = response.context_data['filter_form']
+    form = GradeBookFilterForm(course=course)
     choices = form.fields['student_group'].choices
     assert len(choices) == 4  # 3 groups + All
     assert choices[0][0] is None
@@ -899,8 +894,18 @@ def test_filter_has_all_student_groups(client):
 
 
 @pytest.mark.django_db
-def test_filter_works(client):
-    teacher, course, just_students, invited_students,\
+def test_gradebook_data_returns_only_selected_group():
+    teacher, course, regular_students, invited_students, \
+    group_one, group_two = generate_course()
+    data = gradebook_data(course, student_group=group_one.pk)
+    assert len(data.students) == len(regular_students)
+    for student in regular_students:
+        assert student.pk in data.students
+
+
+@pytest.mark.django_db
+def test_view_gradebook_filter_form_integration_test(client):
+    teacher, course, regular_students, invited_students,\
     group_one, group_two = generate_course()
     client.login(teacher)
     no_filter_url = course.get_gradebook_url()
@@ -913,7 +918,7 @@ def test_filter_works(client):
     response = client.get(filter_first_url)
     students = response.context_data['gradebook'].students
     assert len(students) == 5
-    for student in just_students:
+    for student in regular_students:
         assert student.pk in students
     filter_second_url = course.get_gradebook_url(student_group=group_two.pk)
     response = client.get(filter_second_url)
@@ -924,25 +929,24 @@ def test_filter_works(client):
 
 
 @pytest.mark.django_db
-def test_filter_saves_selected_group(client):
-    teacher, course, just_students, invited_students,\
+def test_view_gradebook_query_param_marks_selected_group(client):
+    teacher, course, regular_student, invited_students,\
     group_one, group_two = generate_course()
     client.login(teacher)
     course.get_gradebook_url(student_group=group_one.pk)
     filter_first_url = course.get_gradebook_url(student_group=group_one.pk)
     response = client.get(filter_first_url)
-    assert response.context_data["filter_form"].get_student_group() == group_one.pk
+    form = response.context_data["filter_form"]
+    assert form.cleaned_data['student_group'] == group_one.pk
 
 
 @pytest.mark.django_db
-def test_filter_works_after_post_request(client):
-    teacher, course, just_students,\
+def test_view_gradebook_submitting_remember_selected_group(client):
+    teacher, course, regular_student,\
     invited_students, group_one, group_two = generate_course()
     client.login(teacher)
     filter_first_url = course.get_gradebook_url(student_group=group_one.pk)
-    response = client.post(filter_first_url, follow=True)
-    students = response.context_data['gradebook'].students
-    assert len(students) == 5
-    for student in just_students:
-        assert student.pk in students
+    response = client.post(filter_first_url)
+    assert response.status_code == 302
+    assert f"student_group={group_one.pk}" in response.url
 

@@ -103,13 +103,10 @@ class GradeBookFilterForm(forms.Form):
         choices += [(sg.pk, sg.name) for sg in student_group]
         self.fields['student_group'].choices = choices
 
-    def get_student_group(self):
-        if self.is_valid():
-            return self.cleaned_data['student_group']
-        return None
-
-    def groups_count(self) -> int:
-        return len(self.fields['student_group'].choices)
+    def is_visible(self) -> bool:
+        # Filtering only makes sense if we have at least 3 choices
+        # One of them is "All students" others are student groups
+        return len(self.fields['student_group'].choices) > 2
 
 
 class CustomBoundField(BoundField):
