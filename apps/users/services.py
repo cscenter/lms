@@ -1,7 +1,7 @@
 import datetime
 from collections import defaultdict
 from enum import Enum, auto
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Tuple
 
 from registration.models import RegistrationProfile
 
@@ -19,6 +19,7 @@ from core.timezone.typing import Timezone
 from courses.models import Semester
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
+from study_programs.models import AcademicDiscipline
 from users.constants import GenderTypes, Roles
 from users.models import (
     OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User, UserGroup
@@ -103,6 +104,38 @@ def get_student_progress(queryset,
     return progress
 
 
+def get_or_create_graduate_profile(*, student_profile: StudentProfile,
+                                   graduated_on: datetime.date,
+                                   is_visible: Optional[bool] = True) -> Tuple[GraduateProfile, bool]:
+    """
+    Note:
+        Can be used inside transaction only.
+        This method does not trying to update the student profile status
+        to `graduate`.
+    """
+    try:
+        graduate = (GraduateProfile.objects
+                    .select_for_update()
+                    .get(student_profile=student_profile))
+        created = False
+    except GraduateProfile.DoesNotExist:
+        graduate = GraduateProfile(student_profile=student_profile)
+        created = True
+    graduate.graduated_on = graduated_on
+    graduate.is_active = is_visible
+    graduate.save()
+    if created:
+        # Copy academic disciplines from the student profile
+        model_class = GraduateProfile.academic_disciplines.through
+        disciplines = []
+        for discipline in student_profile.academic_disciplines.all():
+            d = model_class(academicdiscipline_id=discipline.pk,
+                            graduateprofile_id=graduate.pk)
+            disciplines.append(d)
+        model_class.objects.bulk_create(disciplines)
+    return graduate, created
+
+
 def create_graduate_profiles(site: Site, graduated_on: datetime.date,
                              created_by: Optional[User] = None) -> None:
     """
@@ -119,33 +152,11 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date,
         created_by = User.objects.has_role(Roles.CURATOR).order_by('pk').first()
     for student_profile in student_profiles:
         with transaction.atomic():
-            try:
-                graduate = (GraduateProfile.objects
-                            .select_for_update()
-                            .get(student_profile=student_profile))
-                created = False
-            except GraduateProfile.DoesNotExist:
-                graduate = GraduateProfile(student_profile=student_profile,
-                                           details={})
-                created = True
-            graduate.graduated_on = graduated_on
-            graduate.is_active = True
-            graduate.save()
-            if created:
-                # Copy academic disciplines from the student profile
-                model_class = GraduateProfile.academic_disciplines.through
-                disciplines = []
-                for discipline in student_profile.academic_disciplines.all():
-                    d = model_class(academicdiscipline_id=discipline.pk,
-                                    graduateprofile_id=graduate.pk)
-                    disciplines.append(d)
-                model_class.objects.bulk_create(disciplines)
+            get_or_create_graduate_profile(student_profile=student_profile,
+                                           graduated_on=graduated_on)
             if is_update_student_status:
                 update_student_status(student_profile, new_status=StudentStatuses.GRADUATE,
                                       editor=created_by, status_changed_at=graduated_on)
-                # FIXME: replace student permission with graduate if there is no other active student profiles
-                student_profile.user.remove_group(Roles.STUDENT)
-                student_profile.user.add_group(Roles.GRADUATE)
     cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
     cache_key = cache_key_pattern.format(site_id=site.pk)
     cache.delete(cache_key)
