@@ -980,14 +980,44 @@ def test_view_gradebook_filtered_data_editable(client, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_gradebook_data_filering_restricted_assignments(client, assert_redirect):
+def test_gradebook_data_filtering_restricted_assignments(client, assert_redirect):
     teacher, course, group_one_students, group_two_students, \
     group_one, group_two = generate_course(group_one_size=1, group_two_size=1)
     assignment = AssignmentFactory(course=course)
     assignment_restricted_1 = AssignmentFactory(course=course, restricted_to=[group_one])
     assignment_restricted_2 = AssignmentFactory(course=course, restricted_to=[group_two])
+
     data = gradebook_data(course=course, student_group=group_one.pk)
     assert len(data.assignments) == 2
     assert data.assignments.get(assignment.pk) is not None
-    assert data.assignments.get(assignment_restricted_2.pk) is not None
+    assert data.assignments.get(assignment_restricted_1.pk) is not None
+    assert data.assignments.get(assignment_restricted_2.pk) is None
+    tasks = map(lambda sp: sp.assignment_id, data.submissions[0])
+    assert set(tasks) == {assignment.pk, assignment_restricted_1.pk}
+
+    data = gradebook_data(course=course, student_group=group_two.pk)
+    assert len(data.assignments) == 2
+    assert data.assignments.get(assignment.pk) is not None
     assert data.assignments.get(assignment_restricted_1.pk) is None
+    assert data.assignments.get(assignment_restricted_2.pk) is not None
+    tasks = map(lambda sp: sp.assignment_id, data.submissions[0])
+    assert set(tasks) == {assignment.pk, assignment_restricted_2.pk}
+
+    data = gradebook_data(course=course)
+    assert len(data.assignments) == 3
+    assert data.assignments.get(assignment.pk) is not None
+    assert data.assignments.get(assignment_restricted_1.pk) is not None
+    assert data.assignments.get(assignment_restricted_2.pk) is not None
+    stud_0_subs, stud_1_subs = data.submissions
+    for submission in stud_0_subs:
+        if submission is not None:
+            assert submission.assignment_id in {
+                assignment.pk,
+                assignment_restricted_1.pk
+            }
+    for submission in stud_1_subs:
+        if submission is not None:
+            assert submission.assignment_id in {
+                assignment.pk,
+                assignment_restricted_2.pk
+            }

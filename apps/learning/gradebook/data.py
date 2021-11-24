@@ -6,6 +6,7 @@ from typing import Dict, Optional
 import numpy as np
 
 from django.conf import settings
+from django.db.models import Q
 from django.utils.functional import cached_property
 
 from core.db.utils import normalize_score
@@ -200,16 +201,20 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
     assignments = OrderedDict()
     queryset = Assignment.objects.filter(course_id=course.pk)
     if student_group is not None:
-        queryset = queryset.exclude(assignmentgroup__group=student_group)
-    queryset = (queryset.only("pk",
-                              "title",
-                              # Assignment constructor caches course id
-                              "course_id",
-                              "submission_type",
-                              "maximum_score",
-                              "passing_score",
-                              "weight")
-                        .order_by("deadline_at", "pk"))
+        queryset = queryset.filter(
+            Q(assignmentgroup__group=student_group) |
+            Q(assignmentgroup__group__isnull=True)
+        )
+    queryset = (queryset
+                .only("pk",
+                      "title",
+                      # Assignment constructor caches course id
+                      "course_id",
+                      "submission_type",
+                      "maximum_score",
+                      "passing_score",
+                      "weight")
+                .order_by("deadline_at", "pk"))
     for index, a in enumerate(queryset.iterator()):
         assignments[a.pk] = GradebookAssignment(index, assignment=a)
     # Collect students progress
@@ -217,13 +222,17 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
                            dtype=object)
     queryset = StudentAssignment.objects.filter(assignment__course_id=course.pk)
     if student_group is not None:
-        queryset = queryset.exclude(assignment__assignmentgroup__group=student_group)
-    queryset = (queryset.only("pk",
-                              "score",
-                              "meta",
-                              "assignment_id",
-                              "student_id")
-                        .order_by("student_id", "assignment_id"))
+        queryset = queryset.filter(
+            Q(assignment__assignmentgroup__group=student_group) |
+            Q(assignment__assignmentgroup__group__isnull=True)
+        )
+    queryset = (queryset
+                .only("pk",
+                      "score",
+                      "meta",
+                      "assignment_id",
+                      "student_id")
+                .order_by("student_id", "assignment_id"))
     for student_assignment in queryset.iterator():
         student_id = student_assignment.student_id
         if student_id not in enrolled_students:
