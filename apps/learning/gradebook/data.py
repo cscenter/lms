@@ -198,30 +198,32 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
         enrolled_students[e.student_id] = GradebookStudent(e, index)
     # Collect course assignments
     assignments = OrderedDict()
-    queryset = (Assignment.objects
-                .filter(course_id=course.pk)
-                .only("pk",
-                      "title",
-                      # Assignment constructor caches course id
-                      "course_id",
-                      "submission_type",
-                      "maximum_score",
-                      "passing_score",
-                      "weight")
-                .order_by("deadline_at", "pk"))
+    queryset = Assignment.objects.filter(course_id=course.pk)
+    if student_group is not None:
+        queryset = queryset.exclude(assignmentgroup__group=student_group)
+    queryset = (queryset.only("pk",
+                              "title",
+                              # Assignment constructor caches course id
+                              "course_id",
+                              "submission_type",
+                              "maximum_score",
+                              "passing_score",
+                              "weight")
+                        .order_by("deadline_at", "pk"))
     for index, a in enumerate(queryset.iterator()):
         assignments[a.pk] = GradebookAssignment(index, assignment=a)
     # Collect students progress
     submissions = np.empty((len(enrolled_students), len(assignments)),
                            dtype=object)
-    queryset = (StudentAssignment.objects
-                .filter(assignment__course_id=course.pk)
-                .only("pk",
-                      "score",
-                      "meta",
-                      "assignment_id",
-                      "student_id")
-                .order_by("student_id", "assignment_id"))
+    queryset = StudentAssignment.objects.filter(assignment__course_id=course.pk)
+    if student_group is not None:
+        queryset = queryset.exclude(assignment__assignmentgroup__group=student_group)
+    queryset = (queryset.only("pk",
+                              "score",
+                              "meta",
+                              "assignment_id",
+                              "student_id")
+                        .order_by("student_id", "assignment_id"))
     for student_assignment in queryset.iterator():
         student_id = student_assignment.student_id
         if student_id not in enrolled_students:

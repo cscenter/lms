@@ -20,7 +20,7 @@ from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.constants import AssignmentFormat
-from courses.models import CourseGroupModes
+from courses.models import CourseGroupModes, Assignment
 from courses.tests.factories import AssignmentFactory, CourseFactory
 from grading.tests.factories import CheckerFactory
 from learning.gradebook import BaseGradebookForm, GradeBookFormFactory, gradebook_data, GradeBookFilterForm
@@ -975,3 +975,17 @@ def test_view_gradebook_filtered_data_editable(client, assert_redirect):
     filter_first_url = course.get_gradebook_url(student_group=group_one.pk)
     assert_redirect(client.post(filter_first_url, form), filter_first_url)
     assert StudentAssignment.objects.get(pk=sa.pk).score == grade
+
+
+@pytest.mark.django_db
+def test_gradebook_data_filering_restricted_assignments(client, assert_redirect):
+    teacher, course, group_one_students, group_two_students, \
+    group_one, group_two = generate_course(group_one_size=1, group_two_size=1)
+    assignment = AssignmentFactory(course=course)
+    assignment_restricted_1 = AssignmentFactory(course=course, restricted_to=[group_one])
+    assignment_restricted_2 = AssignmentFactory(course=course, restricted_to=[group_two])
+    data = gradebook_data(course=course, student_group=group_one.pk)
+    assert len(data.assignments) == 2
+    assert data.assignments.get(assignment.pk) is not None
+    assert data.assignments.get(assignment_restricted_2.pk) is not None
+    assert data.assignments.get(assignment_restricted_1.pk) is None
