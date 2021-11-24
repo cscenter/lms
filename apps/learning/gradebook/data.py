@@ -192,7 +192,6 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
     enrollments = (course_enrollments
                    .select_related("student",
                                    "student_profile__branch",
-                                   "student_profile",
                                    "student_group")
                    .order_by("student__last_name", "pk"))
     for index, e in enumerate(enrollments.iterator()):

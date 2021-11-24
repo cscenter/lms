@@ -63,9 +63,9 @@ class FormBuilder(forms.ModelForm):
             # Link form field with db model instance
             new_field.db_field = db_field
             # Set field visibility based on conditional logic
-            new_field.is_visible = (db_field.visibility == db_field.HIDDEN)
+            new_field.is_hidden = (db_field.visibility == db_field.HIDDEN)
             needs_to_recalculate = self.is_bound or field_key in self.initial
-            if (needs_to_recalculate and new_field.is_visible and
+            if (needs_to_recalculate and new_field.is_hidden and
                     db_field.conditional_logic):
                 for logic in db_field.conditional_logic:
                     if (logic.get('scope') != 'field' or
@@ -95,9 +95,9 @@ class FormBuilder(forms.ModelForm):
                             continue
                         if set(selected_values).intersection(str(v) for v in
                                                              expected_values):
-                            new_field.is_visible = False
+                            new_field.is_hidden = False
                             break
-            if new_field.is_visible:
+            if new_field.is_hidden:
                 new_field.required = False
             self.fields[field_key] = new_field
             css_class = ""

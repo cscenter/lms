@@ -107,7 +107,12 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
         return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):
-        form = self.get_form(data=request.POST, files=request.FILES)
+        filter_form = GradeBookFilterForm(data=request.GET, course=self.course)
+        selected_group = None
+        if filter_form.is_valid():
+            selected_group = filter_form.cleaned_data['student_group']
+        form = self.get_form(data=request.POST, files=request.FILES,
+                             student_group=selected_group)
         if form.is_valid():
             return self.form_valid(form)
         return self.form_invalid(form)
@@ -178,7 +183,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
             'view': self,
             'form': kwargs.get('form'),
             'filter_form': kwargs.get('filter_form'),
-            "student_types": StudentTypes,
+            "StudentTypes": StudentTypes,
             "gradebook": self.data,
             'AssignmentFormat': AssignmentFormat
         }
