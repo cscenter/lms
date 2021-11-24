@@ -20,10 +20,12 @@ from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.constants import AssignmentFormat
-from courses.models import CourseGroupModes, Assignment
+from courses.models import CourseGroupModes
 from courses.tests.factories import AssignmentFactory, CourseFactory
 from grading.tests.factories import CheckerFactory
-from learning.gradebook import BaseGradebookForm, GradeBookFormFactory, gradebook_data, GradeBookFilterForm
+from learning.gradebook import (
+    BaseGradebookForm, GradeBookFilterForm, GradeBookFormFactory, gradebook_data
+)
 from learning.gradebook.imports import (
     get_course_students_by_stepik_id, import_assignment_scores
 )
