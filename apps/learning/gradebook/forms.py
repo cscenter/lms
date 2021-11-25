@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import List
+from typing import List, Optional
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -9,10 +9,10 @@ from django.utils.encoding import force_str
 
 from core.forms import ScoreField
 from learning.gradebook.data import GradeBookData
-from learning.models import Enrollment, StudentAssignment
+from learning.models import Course, Enrollment, StudentAssignment, StudentGroup
 
 __all__ = ('ConflictError', 'BaseGradebookForm', 'AssignmentScore',
-           'EnrollmentFinalGrade', 'GradeBookFormFactory')
+           'EnrollmentFinalGrade', 'GradeBookFormFactory', 'GradeBookFilterForm')
 
 ConflictError = namedtuple('ConflictError', ['field_name', 'unsaved_value'])
 
@@ -83,6 +83,30 @@ class BaseGradebookForm(forms.Form):
 
     def conflicts_on_last_save(self):
         return self._conflicts
+
+
+class GradeBookFilterForm(forms.Form):
+
+    student_group = forms.TypedChoiceField(
+        label='Группы',
+        label_suffix='',
+        coerce=int,
+        empty_value=None,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+
+    def __init__(self, course: Course, **kwargs):
+        super().__init__(**kwargs)
+        student_group = StudentGroup.objects.filter(course=course)
+        choices = [(None, 'Студенты всех групп')]
+        choices += [(sg.pk, sg.name) for sg in student_group]
+        self.fields['student_group'].choices = choices
+
+    def is_visible(self) -> bool:
+        # Filtering only makes sense if we have at least 3 choices
+        # One of them is "All students" others are student groups
+        return len(self.fields['student_group'].choices) > 2
 
 
 class CustomBoundField(BoundField):

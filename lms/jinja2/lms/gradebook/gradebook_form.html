@@ -16,8 +16,6 @@
   {% set show_import_yandex_contest_modal = gradebook.assignments.values()|map(attribute='assignment.submission_type')|select("eq", AssignmentFormat.YANDEX_CONTEST)|list|length > 0 %}
 
   <div class="container container-wide">
-    <form method="post" name="gradebook">
-      {% csrf_token %}
       <div class="row">
         <div class="col-xs-12 h2-and-buttons">
           <h2>
@@ -80,13 +78,26 @@
           <hr>
         </div>
       </div>
-
-
+      {% if filter_form.is_visible() %}
+          <form method="get" name="gradebook">
+          <label for="{{ filter_form.student_group.id_for_label }}">Группы</label>
+          <div class="row form-group">
+            <div class="col-xs-4">
+            {{ filter_form.student_group }}
+            </div>
+            <div class="col-xs-2">
+              <button type="submit" class="btn btn-outline btn-primary" id="apply-filter">Фильтровать</button>
+            </div>
+          </div>
+          </form>
+      {% endif %}
       {% if gradebook.assignments %}
         <div class="gradebook__controls">
           <span class="scroll left">«</span><span class="scroll right">»</span>
         </div>
       {% endif %}
+      <form method="post" name="gradebook">
+      {% csrf_token %}
       <div class="gradebook-wrapper">
         <div id="gradebook-container">
           <div id="gradebook" style="width: {{ gradebook.get_table_width() }}px;">
@@ -113,7 +124,9 @@
                   <div class="student {{ loop.cycle('', 'even') }}">
                     <a class="cell __student {{ loop.cycle('', 'even') }}" href="{{ student.get_absolute_url() }}"
                        title="{{ student.username }}">
-                      {{ student.get_abbreviated_short_name() }}
+                      {% if gradebook_student.student_type == StudentTypes.INVITED %}
+                        <i style="font-size:14px" class="fa" title="Приглашённый студент">&#xf069;</i>
+                      {% endif %} {{ student.get_abbreviated_short_name() }}
                     </a>
                     <div class="cell __final_grade {{ loop.cycle('', 'even') }}">
                       {{ form.get_final_widget(gradebook_student.enrollment_id) }}

@@ -3,6 +3,7 @@ import datetime
 import io
 from decimal import Decimal
 from io import BytesIO, StringIO
+from typing import Optional
 
 import pytest
 import pytz
@@ -19,16 +20,20 @@ from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.constants import AssignmentFormat
+from courses.models import CourseGroupModes
 from courses.tests.factories import AssignmentFactory, CourseFactory
 from grading.tests.factories import CheckerFactory
-from learning.gradebook import BaseGradebookForm, GradeBookFormFactory, gradebook_data
+from learning.gradebook import (
+    BaseGradebookForm, GradeBookFilterForm, GradeBookFormFactory, gradebook_data
+)
 from learning.gradebook.imports import (
     get_course_students_by_stepik_id, import_assignment_scores
 )
 from learning.models import Enrollment, StudentAssignment
 from learning.permissions import EditGradebook, ViewOwnGradebook
 from learning.settings import Branches, GradeTypes, StudentStatuses
-from learning.tests.factories import EnrollmentFactory
+from learning.tests.factories import EnrollmentFactory, StudentGroupFactory
+from users.models import StudentTypes
 from users.services import get_student_profile
 from users.tests.factories import (
     CuratorFactory, StudentFactory, TeacherFactory, UserFactory
@@ -835,3 +840,184 @@ def test_gradebook_import_scores_from_yandex_contest_permissions(settings, clien
     assert response.status_code == 201
     response = client.post(url, data={'assignment': assignment2.pk}, content_type='application/json')
     assert response.status_code == 404
+
+
+def generate_course(group_one_size: Optional[int] = 5,
+                    group_two_size: Optional[int] = 5,
+                    group_one_type: Optional[str] = StudentTypes.REGULAR,
+                    group_two_type: Optional[str] = StudentTypes.INVITED):
+    teacher = TeacherFactory()
+    branch = BranchFactory(code=Branches.SPB)
+    course = CourseFactory(main_branch=branch, teachers=[teacher],
+                           group_mode=CourseGroupModes.MANUAL)
+    group_one, group_two = StudentGroupFactory.create_batch(2, course=course)
+    group_one_students = StudentFactory.create_batch(group_one_size, branch=branch,
+                                                     student_profile__type=group_one_type)
+    group_two_students = StudentFactory.create_batch(group_two_size, branch=branch,
+                                                     student_profile__type=group_two_type)
+    for student in group_one_students:
+        EnrollmentFactory(student=student, course=course, student_group=group_one)
+    for student in group_two_students:
+        EnrollmentFactory(student=student, course=course, student_group=group_two)
+    return teacher, course, group_one_students, group_two_students, group_one, group_two
+
+
+@pytest.mark.django_db
+def test_view_gradebook_student_profile_shows_student_type(client):
+    teacher, course, regular_students, invited_students,\
+    group_one, group_two = generate_course()
+    gradebook = gradebook_data(course)
+    for pk, students_gradebook, in gradebook.students.items():
+        if students_gradebook.student in invited_students:
+            assert students_gradebook.student_profile.type == StudentTypes.INVITED
+        else:
+            assert students_gradebook.student_profile.type == StudentTypes.REGULAR
+
+
+@pytest.mark.django_db
+def test_filter_form_is_hidden(client):
+    teacher = TeacherFactory()
+    branch = BranchFactory(code=Branches.SPB)
+    course = CourseFactory(main_branch=branch, teachers=[teacher])
+    form = GradeBookFilterForm(course=course)
+    assert not form.is_visible()
+
+
+@pytest.mark.django_db
+def test_view_gradebook_filter_form_contains_all_student_groups(client):
+    teacher = TeacherFactory()
+    branch = BranchFactory(code=Branches.SPB)
+    course = CourseFactory(main_branch=branch, teachers=[teacher],
+                           group_mode=CourseGroupModes.MANUAL)
+    groups = StudentGroupFactory.create_batch(3, course=course)
+    form = GradeBookFilterForm(course=course)
+    choices = form.fields['student_group'].choices
+    assert len(choices) == 4  # 3 groups + All
+    assert choices[0][0] is None
+    for group, choice in zip(groups, choices[1:]):
+        assert group.name == choice[1]
+
+
+@pytest.mark.django_db
+def test_gradebook_data_returns_only_selected_group():
+    teacher, course, students_group_one, students_group_two, \
+    group_one, group_two = generate_course()
+    data = gradebook_data(course, student_group=group_one.pk)
+    assert len(data.students) == len(students_group_one)
+    for student in students_group_one:
+        assert student.pk in data.students
+
+
+@pytest.mark.django_db
+def test_view_gradebook_filter_form_integration_test(client):
+    teacher, course, regular_students, invited_students,\
+    group_one, group_two = generate_course(group_one_size=6, group_two_size=4)
+    client.login(teacher)
+    no_filter_url = course.get_gradebook_url()
+    response = client.get(no_filter_url)
+    assert len(response.context_data['gradebook'].students) == 10
+    wrong_filter_url = course.get_gradebook_url(student_group='wrong')
+    response.client.get(wrong_filter_url)
+    assert len(response.context_data['gradebook'].students) == 10
+    filter_first_url = course.get_gradebook_url(student_group=group_one.pk)
+    response = client.get(filter_first_url)
+    students = response.context_data['gradebook'].students
+    assert len(students) == 6
+    for student in regular_students:
+        assert student.pk in students
+    filter_second_url = course.get_gradebook_url(student_group=group_two.pk)
+    response = client.get(filter_second_url)
+    students = response.context_data['gradebook'].students
+    assert len(students) == 4
+    for student in invited_students:
+        assert student.pk in students
+
+
+@pytest.mark.django_db
+def test_view_gradebook_query_param_marks_selected_group(client):
+    teacher, course, regular_student, invited_students,\
+    group_one, group_two = generate_course()
+    client.login(teacher)
+    course.get_gradebook_url(student_group=group_one.pk)
+    filter_first_url = course.get_gradebook_url(student_group=group_one.pk)
+    response = client.get(filter_first_url)
+    form = response.context_data["filter_form"]
+    assert form.cleaned_data['student_group'] == group_one.pk
+
+
+@pytest.mark.django_db
+def test_view_gradebook_submitting_remember_selected_group(client):
+    teacher, course, regular_student,\
+    invited_students, group_one, group_two = generate_course()
+    client.login(teacher)
+    filter_first_url = course.get_gradebook_url(student_group=group_one.pk)
+    response = client.post(filter_first_url)
+    assert response.status_code == 302
+    assert f"student_group={group_one.pk}" in response.url
+
+
+@pytest.mark.django_db
+def test_view_gradebook_filtered_data_editable(client, assert_redirect):
+    teacher, course, group_one_students, group_two_students,\
+    group_one, group_two = generate_course(group_one_size=50, group_two_size=51)
+    assignment = AssignmentFactory(course=course, submission_type=AssignmentFormat.NO_SUBMIT)
+    sa = StudentAssignment.objects.get(student=group_one_students[0], assignment=assignment)
+
+    # GradeBook should be readonly before filtering because students count > 100
+    data = gradebook_data(course)
+    assert data.is_readonly
+
+    # but after filtering should be editable: students count < 100
+    client.login(teacher)
+    field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
+    grade = 3
+    form = {
+        field_name: grade
+    }
+    filter_first_url = course.get_gradebook_url(student_group=group_one.pk)
+    assert_redirect(client.post(filter_first_url, form), filter_first_url)
+    assert StudentAssignment.objects.get(pk=sa.pk).score == grade
+
+
+@pytest.mark.django_db
+def test_gradebook_data_filtering_restricted_assignments(client, assert_redirect):
+    teacher, course, group_one_students, group_two_students, \
+    group_one, group_two = generate_course(group_one_size=1, group_two_size=1)
+    assignment = AssignmentFactory(course=course)
+    assignment_restricted_1 = AssignmentFactory(course=course, restricted_to=[group_one])
+    assignment_restricted_2 = AssignmentFactory(course=course, restricted_to=[group_two])
+
+    data = gradebook_data(course=course, student_group=group_one.pk)
+    assert len(data.assignments) == 2
+    assert data.assignments.get(assignment.pk) is not None
+    assert data.assignments.get(assignment_restricted_1.pk) is not None
+    assert data.assignments.get(assignment_restricted_2.pk) is None
+    tasks = map(lambda sp: sp.assignment_id, data.submissions[0])
+    assert set(tasks) == {assignment.pk, assignment_restricted_1.pk}
+
+    data = gradebook_data(course=course, student_group=group_two.pk)
+    assert len(data.assignments) == 2
+    assert data.assignments.get(assignment.pk) is not None
+    assert data.assignments.get(assignment_restricted_1.pk) is None
+    assert data.assignments.get(assignment_restricted_2.pk) is not None
+    tasks = map(lambda sp: sp.assignment_id, data.submissions[0])
+    assert set(tasks) == {assignment.pk, assignment_restricted_2.pk}
+
+    data = gradebook_data(course=course)
+    assert len(data.assignments) == 3
+    assert data.assignments.get(assignment.pk) is not None
+    assert data.assignments.get(assignment_restricted_1.pk) is not None
+    assert data.assignments.get(assignment_restricted_2.pk) is not None
+    stud_0_subs, stud_1_subs = data.submissions
+    for submission in stud_0_subs:
+        if submission is not None:
+            assert submission.assignment_id in {
+                assignment.pk,
+                assignment_restricted_1.pk
+            }
+    for submission in stud_1_subs:
+        if submission is not None:
+            assert submission.assignment_id in {
+                assignment.pk,
+                assignment_restricted_2.pk
+            }

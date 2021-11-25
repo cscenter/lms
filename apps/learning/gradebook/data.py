@@ -6,6 +6,7 @@ from typing import Dict, Optional
 import numpy as np
 
 from django.conf import settings
+from django.db.models import Q
 from django.utils.functional import cached_property
 
 from core.db.utils import normalize_score
@@ -54,6 +55,10 @@ class GradebookStudent:
         if self._enrollment.student_group_id:
             return self._enrollment.student_group
         return None
+
+    @property
+    def student_type(self) -> str:
+        return self.student_profile.type
 
 
 @dataclass
@@ -145,7 +150,7 @@ class GradeBookData:
         return len(self.students) > 100 or number_of_fields_is_exceeded
 
 
-def gradebook_data(course: Course) -> GradeBookData:
+def gradebook_data(course: Course, student_group: Optional[int] = None) -> GradeBookData:
     """
     Returns:
         students = OrderedDict(
@@ -155,6 +160,7 @@ def gradebook_data(course: Course) -> GradeBookData:
                 "final_grade": "good",
                 "total_score": 23,
                 "enrollment_id": 1,
+                "type": "invited"  # StudentTypes.INVITED
             ),
             ...
         ),
@@ -180,8 +186,11 @@ def gradebook_data(course: Course) -> GradeBookData:
     """
     # Collect active enrollments
     enrolled_students = OrderedDict()
-    enrollments = (Enrollment.active
-                   .filter(course=course)
+    course_enrollments = (Enrollment.active
+                          .filter(course=course))
+    if student_group is not None:
+        course_enrollments = course_enrollments.filter(student_group=student_group)
+    enrollments = (course_enrollments
                    .select_related("student",
                                    "student_profile__branch",
                                    "student_group")
@@ -190,8 +199,13 @@ def gradebook_data(course: Course) -> GradeBookData:
         enrolled_students[e.student_id] = GradebookStudent(e, index)
     # Collect course assignments
     assignments = OrderedDict()
-    queryset = (Assignment.objects
-                .filter(course_id=course.pk)
+    queryset = Assignment.objects.filter(course_id=course.pk)
+    if student_group is not None:
+        queryset = queryset.filter(
+            Q(assignmentgroup__group=student_group) |
+            Q(assignmentgroup__group__isnull=True)
+        )
+    queryset = (queryset
                 .only("pk",
                       "title",
                       # Assignment constructor caches course id
@@ -206,8 +220,13 @@ def gradebook_data(course: Course) -> GradeBookData:
     # Collect students progress
     submissions = np.empty((len(enrolled_students), len(assignments)),
                            dtype=object)
-    queryset = (StudentAssignment.objects
-                .filter(assignment__course_id=course.pk)
+    queryset = StudentAssignment.objects.filter(assignment__course_id=course.pk)
+    if student_group is not None:
+        queryset = queryset.filter(
+            Q(assignment__assignmentgroup__group=student_group) |
+            Q(assignment__assignmentgroup__group__isnull=True)
+        )
+    queryset = (queryset
                 .only("pk",
                       "score",
                       "meta",

@@ -1,10 +1,9 @@
 import csv
 import itertools
-from typing import Any
+from typing import Any, Optional
 
 from rest_framework import serializers, status
 from rest_framework.response import Response
-from vanilla import FormView
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -13,7 +12,8 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedire
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.translation import gettext_lazy as _
-from django.views import generic
+from django.views import View, generic
+from django.views.generic.base import TemplateResponseMixin
 
 from api.views import APIBaseView
 from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
@@ -26,7 +26,7 @@ from courses.views.mixins import CourseURLParamsMixin
 from grading.api.yandex_contest import (
     ContestAPIError, Unavailable, YandexContestAPI, cast_contest_error
 )
-from learning.gradebook import GradeBookFormFactory, gradebook_data
+from learning.gradebook import GradeBookFilterForm, GradeBookFormFactory, gradebook_data
 from learning.gradebook.imports import (
     get_course_students, get_course_students_by_stepik_id,
     get_course_students_by_yandex_login, import_assignment_scores
@@ -41,6 +41,8 @@ __all__ = [
     "GradeBookCSVView", "ImportAssignmentScoresByStepikIDView",
     "ImportAssignmentScoresByYandexLoginView"
 ]
+
+from users.models import StudentTypes
 
 
 class GradeBookListBaseView(generic.ListView):
@@ -78,7 +80,8 @@ class GradeBookListBaseView(generic.ListView):
                     )))
 
 
-class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
+class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
+                    TemplateResponseMixin, View):
     is_for_staff = False
     user_type = 'teacher'
     template_name = "lms/gradebook/gradebook_form.html"
@@ -94,17 +97,51 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
         self.data = None
         self.is_for_staff = kwargs.get('is_for_staff', False)
 
-    def get_form(self, data=None, files=None, **kwargs):
-        cls = self.get_form_class()
+    def get(self, request, *args, **kwargs):
+        filter_form = GradeBookFilterForm(data=request.GET, course=self.course)
+        selected_group = None
+        if filter_form.is_valid():
+            selected_group = filter_form.cleaned_data['student_group']
+        form = self.get_form(student_group=selected_group)
+        context = self.get_context_data(form=form, filter_form=filter_form)
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        filter_form = GradeBookFilterForm(data=request.GET, course=self.course)
+        selected_group = None
+        if filter_form.is_valid():
+            selected_group = filter_form.cleaned_data['student_group']
+        form = self.get_form(data=request.POST, files=request.FILES,
+                             student_group=selected_group)
+        if form.is_valid():
+            return self.form_valid(form)
+        return self.form_invalid(form)
+
+    def get_form(self, data=None, files=None, student_group: Optional[int] = None, **kwargs):
+        self.data = gradebook_data(self.course, student_group)
+        cls = GradeBookFormFactory.build_form_class(self.data)
         # Set initial data for all GET-requests
         if not data and "initial" not in kwargs:
             initial = GradeBookFormFactory.transform_to_initial(self.data)
             kwargs["initial"] = initial
         return cls(data=data, files=files, **kwargs)
 
-    def get_form_class(self):
-        self.data = gradebook_data(self.course)
-        return GradeBookFormFactory.build_form_class(self.data)
+    def invalid_answer(self, form):
+        # Replace form data with actual db values and user input
+        # for conflict fields
+        filter_form = GradeBookFilterForm(data=self.request.GET, course=self.course)
+        student_group = None
+        if filter_form.is_valid():
+            student_group = filter_form.cleaned_data['student_group']
+        self.data = gradebook_data(self.course, student_group=student_group)
+        current_data = GradeBookFormFactory.transform_to_initial(self.data)
+        data = form.data.copy()
+        for k, v in current_data.items():
+            if k not in data:
+                data[k] = v
+        form.data = data
+        context = self.get_context_data(form=form, filter_form=filter_form)
+        return self.render_to_response(context)
 
     def form_valid(self, form):
         conflicts_on_save = form.save()
@@ -114,16 +151,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
                     "изменены другими участниками. Необходимо вручную "
                     "разрешить конфликты и повторить отправку формы.")
             messages.warning(self.request, str(msg))
-            # Replace form data with actual db values and user input
-            # for conflict fields
-            self.data = gradebook_data(self.course)
-            current_data = GradeBookFormFactory.transform_to_initial(self.data)
-            data = form.data.copy()
-            for k, v in current_data.items():
-                if k not in data:
-                    data[k] = v
-            form.data = data
-            return super().form_invalid(form)
+            return self.invalid_answer(form)
         return redirect(self.get_success_url())
 
     def get_success_url(self):
@@ -134,7 +162,12 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
             params = {"url_name": "staff:gradebook"}
         else:
             params = {}
-        return self.data.course.get_gradebook_url(**params)
+        filter_form = GradeBookFilterForm(data=self.request.GET, course=self.course)
+        student_group = None
+        if filter_form.is_valid():
+            student_group = filter_form.cleaned_data["student_group"]
+        url = self.data.course.get_gradebook_url(student_group=student_group, **params)
+        return url
 
     def form_invalid(self, form):
         """
@@ -143,18 +176,17 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
         """
         msg = _("Gradebook hasn't been saved.")
         messages.error(self.request, str(msg))
-        initial = GradeBookFormFactory.transform_to_initial(self.data)
-        data = form.data.copy()
-        for k, v in initial.items():
-            if k not in data:
-                data[k] = v
-        form.data = data
-        return super().form_invalid(form)
+        return self.invalid_answer(form)
 
     def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["gradebook"] = self.data
-        context['AssignmentFormat'] = AssignmentFormat
+        context = {
+            'view': self,
+            'form': kwargs.get('form'),
+            'filter_form': kwargs.get('filter_form'),
+            "StudentTypes": StudentTypes,
+            "gradebook": self.data,
+            'AssignmentFormat': AssignmentFormat
+        }
         # TODO: Move to the model
         filter_kwargs = {}
         if not self.request.user.is_curator:
