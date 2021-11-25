@@ -2,7 +2,7 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 from lms.utils import PublicRoute
-from users.constants import Roles
+from users.constants import student_permission_roles
 
 from .models import StudentProfile, StudentTypes, User, UserGroup
 from .services import get_student_profile, maybe_unassign_student_role
@@ -12,7 +12,7 @@ from .services import get_student_profile, maybe_unassign_student_role
 def post_save_user_group(sender, instance: UserGroup, *args, **kwargs):
     """Copy branch value from the student profile"""
     # FIXME: What if multiple profiles from different branches were found?
-    if instance.role in {Roles.STUDENT, Roles.VOLUNTEER, Roles.PARTNER, Roles.INVITED}:
+    if instance.role in student_permission_roles:
         profile_type = StudentTypes.from_permission_role(instance.role)
         student_profile = get_student_profile(instance.user, instance.site_id,
                                               profile_type=profile_type)
@@ -25,9 +25,8 @@ def post_save_user_group(sender, instance: UserGroup, *args, **kwargs):
 def post_delete_user_group(sender, instance: UserGroup, *args, **kwargs):
     """Restore redirect defaults in case user is not a student anymore"""
     # FIXME: remove redirect at all or sync PublicRoute codes with `view_*_menu` permissions and check permissions intead
-    student_roles = {Roles.STUDENT, Roles.VOLUNTEER, Roles.INVITED, Roles.PARTNER}
     # FIXME: consider that user doesn't have other student roles (on site? on any site? Looks like we should remove index_redirect at all)
-    if instance.role in student_roles and instance.user.index_redirect == PublicRoute.LEARNING.code:
+    if instance.role in student_permission_roles and instance.user.index_redirect == PublicRoute.LEARNING.code:
         User.objects.filter(pk=instance.user_id).update(index_redirect='')
 
 

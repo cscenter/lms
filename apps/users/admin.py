@@ -12,7 +12,7 @@ from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
 from core.widgets import AdminRichTextAreaWidget
 from learning.settings import StudentStatuses
-from users.constants import Roles
+from users.constants import Roles, student_permission_roles
 from users.forms import UserChangeForm, UserCreationForm
 
 from .import_export import UserRecordResource
@@ -48,7 +48,7 @@ class UserGroupForm(forms.ModelForm):
         permission_role = cleaned_data.get('role')
         if permission_role:
             permission_role = int(permission_role)
-            if permission_role in {Roles.INVITED, Roles.VOLUNTEER, Roles.STUDENT}:
+            if permission_role in student_permission_roles:
                 profile_type = StudentTypes.from_permission_role(permission_role)
                 student_profile = user.get_student_profile(
                     site, profile_type=profile_type)

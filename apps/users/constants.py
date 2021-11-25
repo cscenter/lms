@@ -46,6 +46,9 @@ class Roles(DjangoChoices):
     PARTNER = C(13, _("Master's Degree Student"))
 
 
+student_permission_roles = {Roles.INVITED, Roles.VOLUNTEER, Roles.PARTNER, Roles.STUDENT}
+
+
 class SHADCourseGradeTypes(DjangoChoices):
     NOT_GRADED = C('not_graded', _("Not graded"))
     UNSATISFACTORY = C('unsatisfactory', _("SHADCourseGrade|Unsatisfactory"))
