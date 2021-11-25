@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
 from core.widgets import AdminRichTextAreaWidget
+from learning.settings import StudentStatuses
 from users.constants import Roles
 from users.forms import UserChangeForm, UserCreationForm
 
@@ -19,7 +20,7 @@ from .models import (
     CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
     StudentStatusLog, StudentTypes, User, UserGroup
 )
-from .services import update_student_status
+from .services import assign_role, update_student_status
 
 
 class OnlineCourseRecordAdmin(admin.StackedInline):
@@ -145,7 +146,7 @@ class StudentStatusLogAdminInline(admin.TabularInline):
     extra = 0
     show_change_link = True
     readonly_fields = ('get_semester', 'status', 'entry_author')
-    ordering = ['-status_changed_at']
+    ordering = ['-status_changed_at', '-pk']
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -223,14 +224,18 @@ class StudentProfileAdmin(BaseModelAdmin):
                     'comment_changed_at', 'comment_last_author',]
         return []
 
-    def save_model(self, request, obj, form, change):
+    def save_model(self, request, obj: StudentProfile,
+                   form: StudentProfileForm, change: bool) -> None:
         if "comment" in form.changed_data:
             obj.comment_last_author = request.user
-        # Don't save initial status
-        if change and "status" in form.changed_data:
-            update_student_status(obj, new_status=form.cleaned_data['status'],
-                                  editor=request.user)
+        if change:
+            if "status" in form.changed_data:
+                update_student_status(obj, new_status=form.cleaned_data['status'],
+                                      editor=request.user)
         super().save_model(request, obj, form, change)
+        if not change and  obj.status not in StudentStatuses.inactive_statuses:
+            permission_role = StudentTypes.to_permission_role(obj.type)
+            assign_role(account=obj.user, role=permission_role, site=obj.site)
 
 
 class SHADCourseRecordAdmin(admin.ModelAdmin):

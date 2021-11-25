@@ -169,10 +169,6 @@ def get_graduate_profile(student_profile: StudentProfile) -> Optional[GraduatePr
             .first())
 
 
-class StudentProfileError(Exception):
-    pass
-
-
 def get_student_profile_priority(student_profile: StudentProfile) -> int:
     """
     Calculates student profile priority based on profile type and status.
@@ -217,7 +213,7 @@ def create_student_profile(*, user: User, branch: Branch, profile_type,
         # TODO: move to the .clean method
         if "year_of_curriculum" not in profile_fields:
             msg = "Year of curriculum is not set for the regular student"
-            raise StudentProfileError(msg)
+            raise ValidationError(msg)
     # FIXME: Prevent creating 2 profiles for invited student in the same
     #  term through the admin interface
     student_profile = StudentProfile(**profile_fields)
@@ -261,6 +257,14 @@ def get_student_profile(user: User, site, profile_type=None,
 def update_student_status(student_profile: StudentProfile, *,
                           new_status: str, editor: User,
                           status_changed_at: Optional[datetime.date] = None) -> StudentProfile:
+    """
+    Updates student profile status value, then adds new log record to
+    the student status history and tries to synchronize related account
+    permissions based on the status transition value.
+
+    To correctly resolve status transition must be called before calling
+    .save() method on the student profile object.
+    """
     # TODO: try to make this method as an implementation detail of the `student_profile_update` service method
     is_studying_status = ''
     if new_status not in StudentStatuses.values and new_status != is_studying_status:

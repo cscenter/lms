@@ -11,9 +11,9 @@ from study_programs.tests.factories import AcademicDisciplineFactory
 from users.constants import Roles
 from users.models import StudentProfile, StudentTypes, UserGroup
 from users.services import (
-    StudentProfileError, StudentStatusTransition, assign_or_revoke_student_role,
-    assign_role, create_graduate_profiles, create_student_profile,
-    get_student_profile_priority, maybe_unassign_student_role, unassign_role
+    StudentStatusTransition, assign_or_revoke_student_role, assign_role,
+    create_graduate_profiles, create_student_profile, get_student_profile_priority,
+    maybe_unassign_student_role, unassign_role
 )
 from users.tests.factories import CuratorFactory, StudentProfileFactory, UserFactory
 
@@ -223,7 +223,7 @@ def test_create_student_profile():
     user = UserFactory()
     branch = BranchFactory()
     # Year of curriculum is required for the REGULAR student type
-    with pytest.raises(StudentProfileError):
+    with pytest.raises(ValidationError):
         create_student_profile(user=user, branch=branch,
                                profile_type=StudentTypes.REGULAR,
                                year_of_admission=2020)
