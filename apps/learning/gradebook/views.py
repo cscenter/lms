@@ -26,7 +26,9 @@ from courses.views.mixins import CourseURLParamsMixin
 from grading.api.yandex_contest import (
     ContestAPIError, Unavailable, YandexContestAPI, cast_contest_error
 )
-from learning.gradebook import GradeBookFilterForm, GradeBookFormFactory, gradebook_data
+from learning.gradebook import (
+    BaseGradebookForm, GradeBookFilterForm, GradeBookFormFactory, gradebook_data
+)
 from learning.gradebook.imports import (
     get_course_students, get_course_students_by_stepik_id,
     get_course_students_by_yandex_login, import_assignment_scores
@@ -34,6 +36,7 @@ from learning.gradebook.imports import (
 from learning.gradebook.services import (
     assignment_import_scores_from_yandex_contest, get_assignment_checker
 )
+from learning.models import StudentGroup
 from learning.permissions import EditGradebook, ViewOwnGradebook
 
 __all__ = [
@@ -114,7 +117,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
         form = self.get_form(data=request.POST, files=request.FILES,
                              student_group=selected_group)
         if form.is_valid():
-            return self.form_valid(form)
+            return self.form_valid(form, selected_group)
         return self.form_invalid(form)
 
     def get_form(self, data=None, files=None, student_group: Optional[int] = None, **kwargs):
@@ -126,9 +129,36 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
             kwargs["initial"] = initial
         return cls(data=data, files=files, **kwargs)
 
-    def invalid_answer(self, form):
-        # Replace form data with actual db values and user input
-        # for conflict fields
+    def form_valid(self, form: BaseGradebookForm,
+                   student_group: Optional[StudentGroup] = None):
+        conflicts_on_save = form.save()
+        if conflicts_on_save:
+            msg = _("<b>Внимание, часть данных не была сохранена!</b><br>"
+                    "В процессе редактирования данные были "
+                    "изменены другими участниками. Необходимо вручную "
+                    "разрешить конфликты и повторить отправку формы.")
+            messages.warning(self.request, str(msg))
+            return self._form_invalid(form)
+        messages.success(self.request,
+                         str(_('Gradebook successfully saved.')),
+                         extra_tags='timeout')
+        if self.is_for_staff:
+            params = {"url_name": "staff:gradebook"}
+        else:
+            params = {}
+        url = self.course.get_gradebook_url(student_group=student_group, **params)
+        return redirect(url)
+
+    def form_invalid(self, form: BaseGradebookForm):
+        msg = _("Gradebook hasn't been saved.")
+        messages.error(self.request, str(msg))
+        return self._form_invalid(form)
+
+    def _form_invalid(self, form: BaseGradebookForm):
+        """
+        Extends form data with the values missing in the POST request (client
+        sends only changed values)
+        """
         filter_form = GradeBookFilterForm(data=self.request.GET, course=self.course)
         student_group = None
         if filter_form.is_valid():
@@ -143,46 +173,12 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
         context = self.get_context_data(form=form, filter_form=filter_form)
         return self.render_to_response(context)
 
-    def form_valid(self, form):
-        conflicts_on_save = form.save()
-        if conflicts_on_save:
-            msg = _("<b>Внимание, часть данных не была сохранена!</b><br>"
-                    "В процессе редактирования данные были "
-                    "изменены другими участниками. Необходимо вручную "
-                    "разрешить конфликты и повторить отправку формы.")
-            messages.warning(self.request, str(msg))
-            return self.invalid_answer(form)
-        return redirect(self.get_success_url())
-
-    def get_success_url(self):
-        messages.success(self.request,
-                         str(_('Gradebook successfully saved.')),
-                         extra_tags='timeout')
-        if self.is_for_staff:
-            params = {"url_name": "staff:gradebook"}
-        else:
-            params = {}
-        filter_form = GradeBookFilterForm(data=self.request.GET, course=self.course)
-        student_group = None
-        if filter_form.is_valid():
-            student_group = filter_form.cleaned_data["student_group"]
-        url = self.data.course.get_gradebook_url(student_group=student_group, **params)
-        return url
-
-    def form_invalid(self, form):
-        """
-        Append initial to form.data since we didn't sent full image of
-        form data in POST-request, but only changed data
-        """
-        msg = _("Gradebook hasn't been saved.")
-        messages.error(self.request, str(msg))
-        return self.invalid_answer(form)
-
-    def get_context_data(self, *args, **kwargs):
+    def get_context_data(self, form: BaseGradebookForm,
+                         filter_form: GradeBookFilterForm, **kwargs: Any):
         context = {
             'view': self,
-            'form': kwargs.get('form'),
-            'filter_form': kwargs.get('filter_form'),
+            'form': form,
+            'filter_form': filter_form,
             "StudentTypes": StudentTypes,
             "gradebook": self.data,
             'AssignmentFormat': AssignmentFormat
