@@ -1,6 +1,6 @@
 # CSC websites
 
-![Tests](https://github.com/cscenter/lms/actions/workflows/tests/badge.svg) ![Build](https://github.com/cscenter/lms/actions/workflows/build/badge.svg)
+![Tests](https://github.com/cscenter/lms/workflows/Tests%20|%20docker/badge.svg) ![Build](https://github.com/cscenter/lms/workflows/Build%20and%20Push%20Docker%20Images/badge.svg)
 
 Production stack: AWS, ubuntu 16.04 LTS, nginx, uwsgi, python3.7, Django 2.2.x, postgresql 11, redis (for queue), rq workers managed by `systemd`
 
