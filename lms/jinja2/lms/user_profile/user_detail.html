@@ -85,11 +85,6 @@
                 <li role="presentation">
                   <a href="{{ profile_user.get_update_profile_url() }}"><i class="fa fa-cog"></i> {% trans %}Edit{% endtrans %}</a>
                 </li>
-                <li role="presentation">
-                  <a href="{{ url('user_connected_accounts', pk=profile_user.pk, subdomain=LMS_SUBDOMAIN) }}">
-                    <i class="fa fa-plug"></i> Привязка аккаунтов
-                  </a>
-                </li>
               {% endif %}
               {% if request_user.is_curator %}
                 <li role="presentation">

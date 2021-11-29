@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-29 12:06+0000\n"
-"PO-Revision-Date: 2021-11-29 12:07+0000\n"
+"POT-Creation-Date: 2021-11-29 21:50+0000\n"
+"PO-Revision-Date: 2021-11-29 21:50+0000\n"
 "Last-Translator: Сергей Жеревчук <pacabest@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -178,6 +178,7 @@ msgstr "Отмена"
 #: apps/templates/users/_user_detail_upload_photo.html:42
 #: apps/users/forms.py:73 lms/jinja2/lms/courses/course_class_form.html:80
 #: lms/jinja2/lms/gradebook/gradebook_form.html:32
+#: lms/jinja2/lms/user_profile/_profile_upload_photo.html:40
 msgid "Save"
 msgstr "Сохранить"
 
@@ -322,7 +323,7 @@ msgid "Name"
 msgstr "Имя"
 
 #: apps/core/models.py:326 apps/users/models.py:750
-#: lms/templates/users/user_detail.html:272
+#: lms/jinja2/lms/user_profile/_tab_curators.html:133
 msgid "University"
 msgstr "Университет"
 
@@ -608,7 +609,7 @@ msgstr "Конец"
 
 #: apps/courses/forms.py:196 apps/courses/forms.py:290
 #: apps/courses/models.py:782 apps/courses/models.py:1034
-#: apps/users/models.py:305 lms/templates/users/user_detail.html:481
+#: apps/users/models.py:305 lms/jinja2/lms/user_profile/_tab_account.html:87
 msgid "Time Zone"
 msgstr "Часовой пояс"
 
@@ -940,7 +941,7 @@ msgstr "Публичные приложения"
 #: apps/courses/models.py:357 apps/courses/models.py:1031
 #: apps/learning/gallery/models.py:49 apps/learning/models.py:65
 #: apps/learning/models.py:309 apps/learning/models.py:390
-#: lms/templates/users/user_detail.html:352
+#: lms/jinja2/lms/user_profile/_tab_assignments.html:10
 msgid "Course offering"
 msgstr "Прочтение курса"
 
@@ -1022,7 +1023,7 @@ msgstr "Слайды, приложенные файлы и др."
 msgid "Groups"
 msgstr "Группы"
 
-#: apps/courses/models.py:819 apps/users/views.py:113
+#: apps/courses/models.py:819 apps/users/views.py:115
 msgid "Classes"
 msgstr "Занятия"
 
@@ -1092,12 +1093,13 @@ msgstr "Приоритет ниже, чем у ответственных за �
 
 #: apps/courses/models.py:1092 apps/courses/models.py:1180
 #: apps/grading/admin.py:25 apps/learning/models.py:154
-#: apps/learning/models.py:191 lms/templates/users/user_detail.html:353
+#: apps/learning/models.py:191
+#: lms/jinja2/lms/user_profile/_tab_assignments.html:11
 msgid "Assignment"
 msgstr "Задание"
 
-#: apps/courses/models.py:1093 apps/users/views.py:114
-#: lms/templates/users/user_detail.html:343
+#: apps/courses/models.py:1093 apps/users/views.py:116
+#: lms/jinja2/lms/user_profile/_tab_assignments.html:3
 msgid "Assignments"
 msgstr "Задания"
 
@@ -1809,7 +1811,7 @@ msgstr "Статус"
 #: apps/templates/learning/teaching/assignment_list.html:100
 #: lms/jinja2/lms/study/course_list.html:100
 #: lms/jinja2/lms/teaching/student_assignment_detail.html:137
-#: lms/templates/users/user_detail.html:354
+#: lms/jinja2/lms/user_profile/_tab_assignments.html:12
 msgid "Grade"
 msgstr "Оценка"
 
@@ -1869,7 +1871,7 @@ msgid "Assignment score audit log"
 msgstr "Лог изменения оценки"
 
 #: apps/learning/models.py:737 apps/users/models.py:791
-#: lms/templates/users/user_detail.html:321
+#: lms/jinja2/lms/user_profile/_tab_curators.html:183
 msgid "Comment"
 msgstr "Комментарий"
 
@@ -2165,7 +2167,6 @@ msgid "Pass/Fail"
 msgstr "Зачет/Незачет"
 
 #: apps/learning/settings.py:59
-#| msgid "Pass/Fail"
 msgid "Pass/Fail + Excellent"
 msgstr "Зачет/Незачет + Отлично"
 
@@ -2310,7 +2311,7 @@ msgstr "Обложка"
 msgid "book"
 msgstr "Книга"
 
-#: apps/library/models.py:54 lms/templates/users/user_detail.html:206
+#: apps/library/models.py:54 lms/jinja2/lms/user_profile/_tab_curators.html:66
 msgid "books"
 msgstr "Книги"
 
@@ -2428,7 +2429,7 @@ msgstr "Направление обучения"
 
 #: apps/study_programs/models.py:38
 #: lms/jinja2/lms/staff/student_search.html:102
-#: lms/templates/users/user_detail.html:312
+#: lms/jinja2/lms/user_profile/_tab_curators.html:173
 msgid "Areas of study"
 msgstr "Направления обучения"
 
@@ -2677,7 +2678,8 @@ msgstr "Задание добавлено"
 #: apps/templates/learning/teaching/assignment_detail.html:19
 #: lms/jinja2/lms/courses/course_class_detail.html:17
 #: lms/jinja2/lms/courses/meta_detail.html:11
-#: lms/templates/users/user_detail.html:120
+#: lms/jinja2/lms/user_profile/connected_social_services.html:45
+#: lms/jinja2/lms/user_profile/user_detail.html:86
 msgid "Edit"
 msgstr "Редактировать"
 
@@ -2789,14 +2791,17 @@ msgid "Restore password"
 msgstr "Восстановить пароль"
 
 #: apps/templates/users/_user_detail_upload_photo.html:8
+#: lms/jinja2/lms/user_profile/_profile_upload_photo.html:6
 msgid "Profile photo"
 msgstr "Фото профиля"
 
 #: apps/templates/users/_user_detail_upload_photo.html:27
+#: lms/jinja2/lms/user_profile/_profile_upload_photo.html:25
 msgid "Select a file"
 msgstr "Выбрать изображение"
 
 #: apps/templates/users/_user_detail_upload_photo.html:41
+#: lms/jinja2/lms/user_profile/_profile_upload_photo.html:39
 msgid "Back to upload"
 msgstr "Назад к загрузке фото"
 
@@ -3015,7 +3020,7 @@ msgstr ""
 msgid "Gender"
 msgstr "Пол"
 
-#: apps/users/models.py:286 lms/templates/users/user_detail.html:147
+#: apps/users/models.py:286 lms/jinja2/lms/user_profile/_tab_curators.html:5
 msgid "Phone"
 msgstr "Телефон"
 
@@ -3052,11 +3057,11 @@ msgid "will be shown to curators only"
 msgstr "будут показаны только кураторам"
 
 #: apps/users/models.py:340 lms/jinja2/lms/courses/teacher_detail.html:19
-#: lms/templates/users/user_detail.html:535
+#: lms/jinja2/lms/user_profile/_tab_account.html:139
 msgid "Contact information"
 msgstr "Контактная информация"
 
-#: apps/users/models.py:346 lms/templates/users/user_detail.html:157
+#: apps/users/models.py:346 lms/jinja2/lms/user_profile/_tab_curators.html:15
 msgid "Workplace"
 msgstr "Место работы"
 
@@ -3093,7 +3098,7 @@ msgid "Magistracy"
 msgstr "Магистратура"
 
 #: apps/users/models.py:743 lms/jinja2/lms/staff/student_search.html:35
-#: lms/templates/users/user_detail.html:264
+#: lms/jinja2/lms/user_profile/_tab_curators.html:125
 msgid "Student|admission year"
 msgstr "Год поступления"
 
@@ -3101,7 +3106,7 @@ msgstr "Год поступления"
 msgid "CSCUser|Curriculum year"
 msgstr "Год программы обучения"
 
-#: apps/users/models.py:754 lms/templates/users/user_detail.html:276
+#: apps/users/models.py:754 lms/jinja2/lms/user_profile/_tab_curators.html:137
 msgid "StudentInfo|University year"
 msgstr "Курс при поступлении"
 
@@ -3196,17 +3201,17 @@ msgstr "Справки студента"
 
 #: apps/users/tests/test_certificates_of_participation.py:59
 #: apps/users/tests/test_certificates_of_participation.py:67
-#: lms/templates/users/user_detail.html:232
+#: lms/jinja2/lms/user_profile/_tab_curators.html:92
 msgid "Create reference"
 msgstr "Выдать справку"
 
 #: apps/users/tests/test_certificates_of_participation.py:85
 #: apps/users/tests/test_certificates_of_participation.py:90
-#: lms/templates/users/user_detail.html:221
+#: lms/jinja2/lms/user_profile/_tab_curators.html:81
 msgid "Student references"
 msgstr "Справки студента"
 
-#: apps/users/views.py:115
+#: apps/users/views.py:117
 msgid "Events"
 msgstr "События"
 
@@ -3512,8 +3517,9 @@ msgstr "Студенты"
 msgid "Grades"
 msgstr "Итоговая оценка"
 
-#: lms/jinja2/lms/layouts/_top_menu.html:34 lms/templates/_top_menu.html:37
-#: lms/templates/users/user_detail.html:10
+#: lms/jinja2/lms/layouts/_top_menu.html:34
+#: lms/jinja2/lms/user_profile/user_detail.html:6
+#: lms/templates/_top_menu.html:37
 msgid "Profile"
 msgstr "Профиль"
 
@@ -3592,6 +3598,34 @@ msgstr "Следующее непроверенное"
 msgid "No value is specified"
 msgstr "Не указано"
 
+#: lms/jinja2/lms/user_profile/_tab_account.html:47
+msgid "Online courses"
+msgstr "Онлайн-курсы"
+
+#: lms/jinja2/lms/user_profile/_tab_curators.html:9
+msgid "Email"
+msgstr "Email"
+
+#: lms/jinja2/lms/user_profile/_tab_curators.html:115
+msgid "Student info record"
+msgstr "Карточка студента"
+
+#: lms/jinja2/lms/user_profile/_tab_curators.html:142
+msgid "Curriculum year"
+msgstr "Год программы обучения"
+
+#: lms/jinja2/lms/user_profile/user_detail.html:6
+msgid "on site"
+msgstr "на сайте"
+
+#: lms/jinja2/lms/user_profile/user_detail.html:29
+msgid "Change photo"
+msgstr "Изменить фото"
+
+#: lms/jinja2/lms/user_profile/user_detail.html:71
+msgid "Review of the Organization"
+msgstr "Отзыв"
+
 #: lms/templates/base.html:77
 msgid "close all"
 msgstr "закрыть все"
@@ -3600,57 +3634,6 @@ msgstr "закрыть все"
 #: lms/templates/lms/course_offerings.html:74
 msgid "CS club course"
 msgstr "Курс CS клуба"
-
-#: lms/templates/users/user_detail.html:10
-msgid "on site"
-msgstr "на сайте"
-
-#: lms/templates/users/user_detail.html:54
-msgid "Change photo"
-msgstr "Изменить фото"
-
-#: lms/templates/users/user_detail.html:79
-msgid "student"
-msgstr "студент"
-
-#: lms/templates/users/user_detail.html:80
-msgctxt "user_detail"
-msgid "enrolled in"
-msgstr "года поступления"
-
-#: lms/templates/users/user_detail.html:85
-msgid "teacher"
-msgstr "преподаватель"
-
-#: lms/templates/users/user_detail.html:104
-msgid "Review of Computer Science Center"
-msgstr "Отзыв о CS центре"
-
-#: lms/templates/users/user_detail.html:151
-msgid "Email"
-msgstr "Email"
-
-#: lms/templates/users/user_detail.html:255
-msgid "Student info record"
-msgstr "Карточка студента"
-
-#: lms/templates/users/user_detail.html:281
-msgid "Curriculum year"
-msgstr "Год программы обучения"
-
-#: lms/templates/users/user_detail.html:424
-msgctxt "Project"
-msgid "Shifted"
-msgstr "Перенесён"
-
-#: lms/templates/users/user_detail.html:426
-msgctxt "Project"
-msgid "Canceled"
-msgstr "Отменен"
-
-#: lms/templates/users/user_detail.html:441
-msgid "Online courses"
-msgstr "Онлайн-курсы"
 
 #: lms/views.py:72
 msgctxt "adjective"
@@ -3661,6 +3644,27 @@ msgstr "осенний"
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
+
+#~ msgid "student"
+#~ msgstr "студент"
+
+#~ msgctxt "user_detail"
+#~ msgid "enrolled in"
+#~ msgstr "года поступления"
+
+#~ msgid "teacher"
+#~ msgstr "преподаватель"
+
+#~ msgid "Review of Computer Science Center"
+#~ msgstr "Отзыв о CS центре"
+
+#~ msgctxt "Project"
+#~ msgid "Shifted"
+#~ msgstr "Перенесён"
+
+#~ msgctxt "Project"
+#~ msgid "Canceled"
+#~ msgstr "Отменен"
 
 #~ msgid "Available to Branches"
 #~ msgstr "Доступно отделениям"
