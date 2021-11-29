@@ -107,4 +107,13 @@ jobs:
         run: pipenv run isort --settings .isort.cfg . --check-only
 
       - name: Run tests
-        run: pipenv run pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
+        run: pipenv run pytest --create-db --cov=./apps/ --cov=./lms/
+
+      - name: Run tests for CS Center project
+        run: pipenv run pytest -c compscicenter_ru/pytest.ini --cov=./compscicenter_ru/
+
+      - name: Run tests for CS Club project
+        run: pipenv run pytest -c compsciclub_ru/pytest.ini --cov=./compsciclub_ru/
+
+      - name: Run tests for Yandex School of Data Analysis project
+        run: pipenv run pytest -c lk_yandexdataschool_ru/pytest.ini --cov=./lk_yandexdataschool_ru/
