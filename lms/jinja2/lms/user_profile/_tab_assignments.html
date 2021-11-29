@@ -1,0 +1,40 @@
+{% if assignments %}
+  <h4 class="_mtop-30">
+    {% trans %}Assignments{% endtrans %}:
+    <div class="btn-group pull-right assignment-list-control" role="group">
+      <button type="button" class="btn btn-xs btn-default active current-semester">{{ current_semester }}</button>
+    </div>
+  </h4>
+  <table class="table table-condensed" id="assignments-table">
+    <tr>
+      <th>{% trans %}Course offering{% endtrans %}</th>
+      <th>{% trans %}Assignment{% endtrans %}</th>
+      <th>{% trans %}Grade{% endtrans %}</th>
+    </tr>
+    {% for course_id, student_assignments in student_assignments_by_course|groupby('assignment.course_id') %}
+      {% for a_s in student_assignments %}
+        <tr>
+          <td>
+            {% if loop.first %}
+              <a href="{{ a_s.assignment.course.get_absolute_url() }}">{{ a_s.assignment.course }}</a>
+            {% else %}
+              <span style="color: #CCC">—〃—</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{ a_s.get_teacher_url() }}">
+              {{ a_s.assignment.title }}
+            </a>
+          </td>
+          <td>
+                    <span style="white-space: nowrap;" class="badge assignment-status {{ a_s.state.css_class }}">
+                      {{ a_s.state_display }}
+                    </span>
+          </td>
+        </tr>
+      {% endfor %}
+    {% endfor %}
+  </table>
+{% else %}
+  Список заданий пуст.
+{% endif %}
