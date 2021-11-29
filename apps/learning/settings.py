@@ -56,6 +56,7 @@ class StudentStatuses(DjangoChoices):
 class GradingSystems(DjangoChoices):
     BASE = C(0, _("Default"), css_class="")
     BINARY = C(1, _("Pass/Fail"), css_class="__binary")
+    BINARY_PLUS_EXCELLENT = C(3, _("Pass/Fail + Excellent"), css_class="")
     TEN_POINT = C(2, _("10-point scale"), css_class="")
 
 
@@ -64,11 +65,16 @@ class GradeTypes(DjangoChoices):
     Used as grade choices for the Enrollment model.
     """
     NOT_GRADED = C('not_graded', _("Not graded"), system='__all__', order=0)
-    UNSATISFACTORY = C('unsatisfactory', _("Enrollment|Unsatisfactory"),
-                       system=(GradingSystems.BASE, GradingSystems.BINARY), order=11)
-    CREDIT = C('pass', _("Enrollment|Pass"), system=(GradingSystems.BASE, GradingSystems.BINARY), order=12)
+    UNSATISFACTORY = C('unsatisfactory', _("Enrollment|Unsatisfactory"), system=(
+        GradingSystems.BASE, GradingSystems.BINARY, GradingSystems.BINARY_PLUS_EXCELLENT
+    ), order=11)
+    CREDIT = C('pass', _("Enrollment|Pass"), system=(
+        GradingSystems.BASE, GradingSystems.BINARY, GradingSystems.BINARY_PLUS_EXCELLENT
+    ), order=12)
     GOOD = C('good', _("Good"), system=(GradingSystems.BASE,), order=13)
-    EXCELLENT = C('excellent', _("Excellent"), system=(GradingSystems.BASE,), order=14)
+    EXCELLENT = C('excellent', _("Excellent"), system=(
+        GradingSystems.BASE, GradingSystems.BINARY_PLUS_EXCELLENT
+    ), order=14)
 
     ONE = C('one', '1', system=(GradingSystems.TEN_POINT,), order=1)
     TWO = C('two', '2', system=(GradingSystems.TEN_POINT,), order=2)
