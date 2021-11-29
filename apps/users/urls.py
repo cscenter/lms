@@ -4,7 +4,9 @@ from learning.views import EventDetailView
 from learning.views.icalendar import (
     ICalAssignmentsView, ICalClassesView, ICalEventsView
 )
-from users.views import ProfileImageUpdate, UserDetailView, UserUpdateView, UserConnectedAuthServicesView
+from users.views import (
+    ProfileImageUpdate, UserConnectedAuthServicesView, UserDetailView, UserUpdateView
+)
 
 urlpatterns = [
     path('users/<int:pk>/', UserDetailView.as_view(), name='user_detail'),
