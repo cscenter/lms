@@ -172,11 +172,20 @@ jobs:
       - name: Run tests
         run: docker run -e ENV_FILE=${{ env.ENV_FILE }} --network host ${{ env.LOCAL_IMAGE_DJANGO_DEV }} pytest --create-db --cov=./apps/
         env:
-          WEBPACK_ENVIRONMENT: prod
           WEBPACK_ASSETS_ROOT: ./site-frontend/assets/
           ENV_FILE: /var/www/code/lms/settings/.env.example
 
       - name: Run tests for CS Center project
         run: docker run -e ENV_FILE=${{ env.ENV_FILE }} --network host ${{ env.LOCAL_IMAGE_DJANGO_DEV }} pytest -c compscicenter_ru/pytest.ini --cov=./compscicenter_ru/
+        env:
+          ENV_FILE: /var/www/code/lms/settings/.env.example
+
+      - name: Run tests for CS Club project
+        run: docker run -e ENV_FILE=${{ env.ENV_FILE }} --network host ${{ env.LOCAL_IMAGE_DJANGO_DEV }} pytest -c compsciclub_ru/pytest.ini --cov=./compsciclub_ru/
+        env:
+          ENV_FILE: /var/www/code/lms/settings/.env.example
+
+      - name: Run tests for Yandex School of Data Analysis project
+        run: docker run -e ENV_FILE=${{ env.ENV_FILE }} --network host ${{ env.LOCAL_IMAGE_DJANGO_DEV }} pytest -c lk_yandexdataschool_ru/pytest.ini --cov=./lk_yandexdataschool_ru/
         env:
           ENV_FILE: /var/www/code/lms/settings/.env.example
