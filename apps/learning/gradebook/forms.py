@@ -14,12 +14,18 @@ from learning.models import Course, Enrollment, StudentAssignment, StudentGroup
 __all__ = ('ConflictError', 'BaseGradebookForm', 'AssignmentScore',
            'EnrollmentFinalGrade', 'GradeBookFormFactory', 'GradeBookFilterForm')
 
+from learning.permissions import EditGradebook
+
+from users.models import User
+
 ConflictError = namedtuple('ConflictError', ['field_name', 'unsaved_value'])
 
 
 class BaseGradebookForm(forms.Form):
     GRADE_PREFIX = "sa_"
     FINAL_GRADE_PREFIX = "final_grade_"
+
+    is_readonly: bool
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -151,9 +157,10 @@ class AssignmentScore(ScoreField):
 
 
 class EnrollmentFinalGrade(forms.ChoiceField):
-    def __init__(self, student, course):
+    def __init__(self, student, course, readonly: Optional[bool] = False):
         widget = forms.Select(attrs={
-            'initial': student.final_grade
+            'initial': student.final_grade,
+            'disabled': readonly
         })
         super().__init__(choices=course.grade_choices,
                          required=False,
@@ -174,7 +181,7 @@ class EnrollmentFinalGrade(forms.ChoiceField):
 
 class GradeBookFormFactory:
     @classmethod
-    def build_form_class(cls, gradebook: GradeBookData):
+    def build_form_class(cls, user: User, gradebook: GradeBookData):
         """
         Creates new form.Form subclass with students scores for
         each offline assignment (which student can't pass on this site) and
@@ -184,20 +191,22 @@ class GradeBookFormFactory:
         (see `CustomBoundField`) instead of the value provided to the form.
         """
         cls_dict = fields = {}
+        readonly = not user.has_perm(EditGradebook.name, gradebook.course)
         for student_assignments in gradebook.submissions:
             for sa in student_assignments:
                 # Student have no submissions after withdrawal
                 if not sa:
                     continue
                 assignment = sa.assignment
-                if not assignment.is_online and not gradebook.is_readonly:
+                if not (assignment.is_online or gradebook.is_readonly or readonly):
                     k = BaseGradebookForm.GRADE_PREFIX + str(sa.id)
                     fields[k] = AssignmentScore(assignment, sa)
 
         for gs in gradebook.students.values():
             k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(gs.enrollment_id)
-            fields[k] = EnrollmentFinalGrade(gs, gradebook.course)
+            fields[k] = EnrollmentFinalGrade(gs, gradebook.course, readonly)
         cls_dict["_course"] = gradebook.course
+        cls_dict["is_readonly"] = readonly
         return type("GradebookForm", (BaseGradebookForm,), cls_dict)
 
     @classmethod

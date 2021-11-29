@@ -28,15 +28,18 @@
             <a class="small" href="{{ gradebook.course.get_absolute_url() }}">{{ gradebook.course }}</a>
           </h2>
           <div class="btn-toolbar">
+            {% if not form.is_readonly %}
             <div class="btn-group">
               <button type="submit" class="btn btn-primary pull-right" id="marks-sheet-save">{% trans %}Save{% endtrans %}</button>
             </div>
+            {% endif %}
             <div class="btn-group">
               <a href="{{ gradebook.course.get_gradebook_url(url_name=gradebook_url_reverse_name, format='csv') }}" target="_blank"
                  class="btn btn-default marks-sheet-csv-link" role="button" data-toggle="tooltip">
                 <i class="fa fa-download"></i> Скачать ведомость.csv
               </a>
             </div>
+            {% if not form.is_readonly %}
             <div class="btn-group">
               <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт оценок <span class="caret"></span></a>
               <ul class="dropdown-menu pull-right" role="menu">
@@ -58,6 +61,7 @@
                 {% endif %}
               </ul>
             </div>
+            {% endif %}
             <div class="btn-group">
               <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
                 Все ведомости&nbsp;<span class="caret"></span>
@@ -136,7 +140,7 @@
                     {% endif %}
                     {% for student_progress in gradebook.submissions[gradebook_student.index] %}
                       {% if student_progress %}
-                        {% if gradebook.is_readonly or student_progress.assignment.is_online %}
+                        {% if gradebook.is_readonly or student_progress.assignment.is_online or form.is_readonly%}
                           <div class="cell __assignment __score">
                             <a href="{{ student_progress.get_teacher_url() }}">{{ student_progress.get_state() }}</a>
                           </div>

@@ -6,7 +6,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db.models import Prefetch
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
@@ -37,7 +37,7 @@ from learning.gradebook.services import (
     assignment_import_scores_from_yandex_contest, get_assignment_checker
 )
 from learning.models import StudentGroup
-from learning.permissions import EditGradebook, ViewOwnGradebook
+from learning.permissions import EditGradebook, ViewGradebook
 
 __all__ = [
     "GradeBookView",
@@ -45,7 +45,7 @@ __all__ = [
     "ImportAssignmentScoresByYandexLoginView"
 ]
 
-from users.models import StudentTypes
+from users.models import StudentTypes, User
 
 
 class GradeBookListBaseView(generic.ListView):
@@ -89,8 +89,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
     user_type = 'teacher'
     template_name = "lms/gradebook/gradebook_form.html"
     context_object_name = 'assignment_list'
-    # FIXME: check EditOwnGradebook permission on POST action
-    permission_required = ViewOwnGradebook.name
+    permission_required = ViewGradebook.name
 
     def get_permission_object(self):
         return self.course
@@ -105,24 +104,27 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
         selected_group = None
         if filter_form.is_valid():
             selected_group = filter_form.cleaned_data['student_group']
-        form = self.get_form(student_group=selected_group)
+        form = self.get_form(request.user, student_group=selected_group)
         context = self.get_context_data(form=form, filter_form=filter_form)
         return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):
+        if not request.user.has_perm(EditGradebook.name, self.course):
+            raise PermissionDenied
         filter_form = GradeBookFilterForm(data=request.GET, course=self.course)
         selected_group = None
         if filter_form.is_valid():
             selected_group = filter_form.cleaned_data['student_group']
-        form = self.get_form(data=request.POST, files=request.FILES,
+        form = self.get_form(request.user, data=request.POST, files=request.FILES,
                              student_group=selected_group)
         if form.is_valid():
             return self.form_valid(form, selected_group)
         return self.form_invalid(form)
 
-    def get_form(self, data=None, files=None, student_group: Optional[int] = None, **kwargs):
+    def get_form(self, user: User, data=None, files=None,
+                 student_group: Optional[int] = None, **kwargs):
         self.data = gradebook_data(self.course, student_group)
-        cls = GradeBookFormFactory.build_form_class(self.data)
+        cls = GradeBookFormFactory.build_form_class(user, self.data)
         # Set initial data for all GET-requests
         if not data and "initial" not in kwargs:
             initial = GradeBookFormFactory.transform_to_initial(self.data)
@@ -199,7 +201,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
 
 class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
                        generic.base.View):
-    permission_required = ViewOwnGradebook.name
+    permission_required = ViewGradebook.name
 
     def get_permission_object(self):
         return self.course
