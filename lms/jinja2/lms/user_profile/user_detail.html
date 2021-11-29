@@ -1,0 +1,129 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% set request_user = request.user %}
+
+{% block title -%}
+  {{ profile_user.get_short_name() }} - {% trans %}Profile{% endtrans %} {% trans %}on site{% endtrans %} {{ request.site.name }}
+{%- endblock title %}
+
+{% block body_attrs %} data-init-sections="profile"{% endblock body_attrs %}
+
+{% block javascripts %}
+  <script type="text/javascript">
+    window.profileAppInit = {{ appData['props']|safe }};
+  </script>
+{% endblock javascripts %}
+
+{% block content %}
+  <div id="profile">
+    <header>
+      <div class="thumbnail text-center">
+        <div class="thumbnail-inner">
+          <div class="thumbnail-img">
+            {% with im = profile_user.get_thumbnail(profile_user.ThumbnailSize.BASE, use_stub=True) -%}
+              <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" alt="" />
+            {% endwith -%}
+          </div>
+          {% if profile_user.pk == request_user.pk or request_user.is_curator %}
+            <div class="photo-actions">
+              <a href="#user-photo-upload">{% trans %}Change photo{% endtrans %}</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      <h2>
+        {{ profile_user.first_name }} {{ profile_user.patronymic }}<br>{{ profile_user.last_name }}
+        {% if request_user.is_curator %}
+          <a href="{{ url('admin:users_user_change', object_id=profile_user.pk) }}" target="_blank"><i
+            class="fa fa-pencil-square-o"></i></a>
+          <form action="{{ url('admin:loginas-user-login', user_id=profile_user.pk) }}" method="POST" style="display: inline-block">
+            {% csrf_token %}
+            <a title="" class="login-helper" href="#"><i class="fa fa-ils" aria-hidden="true"></i></a>
+          </form>
+        {% endif %}
+      </h2>
+      {% if graduate_profile %}
+        <div class="mb-15">
+          С сентября {{ graduate_profile.student_profile.year_of_admission }} года по июнь {{ graduate_profile.graduation_year }} года<br>
+          {% with disciplines_total = graduate_profile.academic_disciplines.all()|length %}
+            {% if profile_user.gender == profile_user.GENDER_FEMALE %}прошла{% else %}прошёл{% endif %}
+            обучение по направлени{{ disciplines_total|pluralize("ю", "ям", "ям") }}
+            {% for program in graduate_profile.academic_disciplines.all() -%}
+              {{ program.name_en }}{% if not loop.last %}{% if loop.revcounter0 == 1 %} и {% else %}, {% endif %}{% endif %}
+            {%- endfor %}.
+          {% endwith %}
+        </div>
+      {% endif %}
+      {% if profile_user.bio.strip() %}
+        <div class="about-me mb-15">
+          <div class="ubertext">
+            {{ profile_user.bio|markdown("user_bio", 3600, profile_user.pk, profile_user.modified) }}
+          </div>
+        </div>
+      {% elif profile_user.pk == request_user.pk or request_user.is_curator %}
+        <div class="about-me"></div>
+      {% endif %}
+    </header>
+
+    <div class="profile-additional-info">
+      <div class="container">
+        {% if graduate_profile and graduate_profile.testimonial %}
+          <div class="review mt-10 mb-30">
+            <h4>{% trans %}Review of the Organization{% endtrans %}</h4>
+            <div class="ubertext">
+              {{ graduate_profile.testimonial|markdown(graduate_profile.TESTIMONIAL_CACHE_KEY, 3600, graduate_profile.pk, graduate_profile.modified) }}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if profile_user.pk == request_user.pk or request_user.is_curator %}
+          <div class="nav-tabs-inverse">
+            <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
+              <li class="active" role="presentation">
+                <a data-toggle="tab" href="#profile-tab" aria-controls="current" role="tab" aria-expanded="true">Профиль</a>
+              </li>
+              {% if is_editing_allowed %}
+                <li role="presentation">
+                  <a href="{{ profile_user.get_update_profile_url() }}"><i class="fa fa-cog"></i> {% trans %}Edit{% endtrans %}</a>
+                </li>
+                <li role="presentation">
+                  <a href="{{ url('user_connected_accounts', pk=profile_user.pk, subdomain=LMS_SUBDOMAIN) }}">
+                    <i class="fa fa-plug"></i> Привязка аккаунтов
+                  </a>
+                </li>
+              {% endif %}
+              {% if request_user.is_curator %}
+                <li role="presentation">
+                  <a href="#for-curator-tab" role="tab" data-toggle="tab">
+                    <i class="fa fa-user-secret"></i> Для куратора
+                  </a>
+                </li>
+                {% if student_profile %}
+                  <li role="presentation">
+                    <a href="#student-assignments-tab" role="tab" data-toggle="tab">
+                      <i class="fa fa-list"></i>&nbsp;Задания
+                    </a>
+                  </li>
+                {% endif %}
+              {% endif %}
+            </ul>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="profile-content tab-content py-30">
+      <div class="tab-pane active" role="tabpanel" id="profile-tab">
+        {% include "lms/user_profile/_tab_account.html" %}
+      </div>
+
+      {% if request_user.is_curator %}
+        <div class="tab-pane" role="tabpanel" id="for-curator-tab">
+          {% include "lms/user_profile/_tab_curators.html" %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+{% include "lms/user_profile/_profile_upload_photo.html" %}
+{% endblock content %}

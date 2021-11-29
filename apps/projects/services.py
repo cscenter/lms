@@ -3,6 +3,7 @@ from typing import Dict
 from projects.models import (
     Project, ProjectStudent, Report, ReportingPeriod, ReportingPeriodKey
 )
+from users.models import User
 
 
 def get_project_reporting_periods(student, term) -> Dict[ProjectStudent, ReportingPeriod]:
@@ -37,3 +38,11 @@ def autocomplete_review_stage(review):
         if reviews_completed == reviewers_total:
             report.status = Report.SUMMARY
             report.save(update_fields=("status", "final_score"))
+
+
+def get_student_projects(student_account: User):
+    return (ProjectStudent.objects
+            .filter(student=student_account)
+            .select_related('project',
+                            'project__semester')
+            .order_by('project__semester__index'))

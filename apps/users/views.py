@@ -2,6 +2,7 @@
 import json
 import os
 from collections import OrderedDict
+from typing import Any, Dict
 
 from django.apps import apps
 from django.conf import settings
@@ -10,6 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Count, Prefetch, Q, prefetch_related_objects
 from django.http import HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
@@ -40,7 +42,7 @@ from .services import (
 
 
 class UserDetailView(LoginRequiredMixin, generic.DetailView):
-    template_name = "users/user_detail.html"
+    template_name = "lms/user_profile/user_detail.html"
     context_object_name = 'profile_user'
 
     def get_queryset(self, *args, **kwargs):
@@ -117,12 +119,8 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
         context['icalendars'] = icalendars
         context['is_editing_allowed'] = (u == profile_user or u.is_curator)
         if apps.is_installed("projects"):
-            from projects.models import ProjectStudent
-            context['student_projects'] = (ProjectStudent.objects
-                                           .filter(student_id=profile_user.pk)
-                                           .select_related('project',
-                                                           'project__semester')
-                                           .order_by('project__semester__index'))
+            from projects.services import get_student_projects
+            context['student_projects'] = get_student_projects(profile_user)
         context['current_semester'] = Semester.get_current()
         # Assignments sorted by course name
         assignments_qs = (StudentAssignment.objects
@@ -136,10 +134,12 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
         photo_data = {}
         if context['is_editing_allowed']:
             photo_data = {
-                "user_id": profile_user.pk,
+                "userID": profile_user.pk,
                 "photo": profile_user.photo_data
             }
-        context["initial"] = json.dumps(photo_data)
+        context["appData"] = {
+            "props": json.dumps(photo_data)
+        }
         # Collect stats about successfully passed courses
         if u.is_curator:
             context['stats'] = profile_user.stats(context['current_semester'])
@@ -194,6 +194,21 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
                 graduate_profile.testimonial = testimonial
                 graduate_profile.save()
         return super().form_valid(form)
+
+
+class UserConnectedAuthServicesView(LoginRequiredMixin, generic.TemplateView):
+    template_name = "lms/user_profile/connected_social_services.html"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        filters = {"is_active": True, "pk": kwargs["pk"]}
+        if not self.request.user.is_curator:
+            filters["group__site_id"] = settings.SITE_ID
+        profile_user = get_object_or_404(User.objects
+                                         .filter(**filters))
+        context = {
+            'profile_user': profile_user
+        }
+        return context
 
 
 class CertificateOfParticipationCreateView(PermissionRequiredMixin,

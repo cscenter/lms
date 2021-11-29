@@ -1,0 +1,70 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block javascripts %}
+  {% if request.user.is_curator %}
+    <script type="text/javascript">
+      // FIXME: move to the user profile code
+      $('.loginas-user')
+        .click(function(e) {
+          e.preventDefault();
+          var href = $(this)
+            .attr('href');
+          $('<form>', {
+            'method': 'POST',
+            'html': '',
+            'action': href
+          })
+            .appendTo(document.body)
+            .submit();
+        });
+    </script>
+  {% endif %}
+{% endblock javascripts %}
+
+{% block content %}
+  <div id="profile">
+    <div class="profile-additional-info">
+      {% if profile_user.bio.strip %}
+        <div class="about-me">
+          <div class="ubertext">
+            {{ profile_user.bio|markdown("user_bio", 3600, profile_user.pk, profile_user.modified) }}
+          </div>
+        </div>
+      {% elif profile_user.pk == user.pk or request.user.is_curator %}
+        <div class="about-me"></div>
+      {% endif %}
+
+      {% if profile_user.pk == request.user.pk or request.user.is_curator %}
+        <div class="nav-tabs-inverse">
+          <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
+            <li class="active" role="presentation">
+              <a data-toggle="tab" href="#profile-tab" aria-controls="current" role="tab" aria-expanded="true">Профиль</a>
+            </li>
+            {% if is_editing_allowed %}
+              <li role="presentation">
+                <a href="{{ profile_user.get_update_profile_url }}"><i class="fa fa-cog"></i> {% trans %}Edit{% endtrans %}</a>
+              </li>
+              <li role="presentation">
+                <a href="{{ url('user_connected_accounts', pk=profile_user.pk) }}"><i class="fa fa-plug"></i> Привязка аккаунтов</a>
+              </li>
+            {% endif %}
+            {% if request.user.is_curator %}
+              <li role="presentation">
+                <a href="#for-curator-tab" role="tab" data-toggle="tab">
+                  <i class="fa fa-user-secret"></i> Для куратора
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+
+  <div class="profile-content tab-content">
+    <div class="tab-pane active" role="tabpanel" id="for-curator-tab">
+      Tab content
+    </div>
+  </div>
+
+  </div>
+{% endblock content %}

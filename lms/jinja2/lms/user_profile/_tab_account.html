@@ -1,0 +1,144 @@
+{% set suffix = 'а' if profile_user.gender == 'F' else '' -%}
+{% set request_user = request.user -%}
+
+<ul class="list-unstyled">
+  {% if profile_user.enrollment_set.all() or profile_user.shadcourserecord_set.all() %}
+    <li>
+      <h4>{{ profile_user.first_name }} прослушал{{ suffix }} и сдал{{ suffix }} следующие курсы:</h4>
+      <ul>
+        {% for enrollment in profile_user.enrollment_set.all() %}
+          <li>
+            <a href="{{ enrollment.course.get_absolute_url() }}">{{ enrollment.course }}</a> /{{ enrollment.grade_honest|lower }}/
+          </li>
+        {% endfor %}
+        {% for shad in profile_user.shadcourserecord_set.all() %}
+          <li>
+            {{ shad.name }} (ШАД), {{ shad.semester }} - {{ shad.teachers }} /{{ shad.grade_display|lower }}/
+          </li>
+        {% endfor %}
+      </ul>
+    </li>
+  {% endif %}
+
+  {% if student_projects %}
+    <li>
+      <h4>Кроме того, участвовал{{ suffix }} в проектах:</h4>
+      <ul>
+        {% for ps in student_projects %}
+          <li>
+            {% if request_user.is_authenticated %}
+              <a href="{{ ps.project.get_absolute_url() }}">
+            {% endif %}
+              {{ ps.project.name }},{{ ps.project.semester }}
+            {% if request_user.is_authenticated %}</a>
+            {% endif %} /{{ ps.get_status_display()|lower }}/<br>
+          </li>
+        {% endfor %}
+      </ul>
+    </li>
+  {% elif request_user.is_curator %}
+    <li>Нет студенческих проектов</li>
+  {% endif %}
+
+  {% if profile_user.pk == request_user.pk or request_user.is_curator %}
+    {% with recs = profile_user.onlinecourserecord_set.all() %}
+      {% if recs %}
+        <li>
+          <h4>{% trans %}Online courses{% endtrans %}</h4>
+          <ul>
+            {% for rec in recs %}
+              <li>
+                {% if rec.url %}
+                  <a href="{{ rec.url }}">{{ rec.name }}</a>
+                {% else %}
+                  {{ rec.name }}
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </li>
+        {% elif request_user.is_curator %}
+          <li>Нет зачтённых онлайн-курсов</li>
+      {% endif %}
+    {% endwith %}
+  {% endif %}
+
+  {% if profile_user.is_teacher %}
+    <li>
+      {% if profile_user.teaching_set.all() %}
+        <h4>Преподаватель курсов:</h4>
+        <ul class="">
+          {% for course in profile_user.teaching_set.all() %}
+            <li>
+              <a href="{{ course.get_absolute_url() }}">{{ course }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </li>
+  {% endif %}
+</ul>
+
+{% if request_user.is_authenticated %}
+  <div class="accounts">
+    <table class="table table-condensed table-striped">
+      {% if profile_user.pk == request_user.pk or request_user.is_curator %}
+        <tr>
+          <td>{% trans %}Time Zone{% endtrans %}</td>
+          <td>{{ time_zone }}</td>
+        </tr>
+      {% endif %}
+      {% if icalendars %}
+        <tr>
+          <td>.iCal-календари</td>
+          <td>
+            {% for name, url in icalendars %}
+              <a target="_blank" href="{{ url }}">{{ name }}</a>{% if not loop.last %}&nbsp;&nbsp;{% endif %}
+            {% endfor %}
+          </td>
+        </tr>
+      {% endif %}
+      <tr>
+        <td>Yandex</td>
+        <td>{{ profile_user.yandex_login|default("—", True) }}</td>
+      </tr>
+      <tr>
+        <td>Github</td>
+        <td>{% if profile_user.github_login %}
+          <a href="https://github.com/{{ profile_user.github_login }}" target="_blank">{{ profile_user.github_login }}</a>
+        {% else %}
+          —
+        {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td>Stepik</td>
+        <td>{% if profile_user.stepic_id %}
+          <a href="https://stepik.org/users/{{ profile_user.stepic_id }}" target="_blank">{{ profile_user.stepic_id }}</a>
+        {% else %}
+          —
+        {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td>Codeforces</td>
+        <td>
+          {% if profile_user.codeforces_login %}
+            <a href="https://codeforces.com/profile/{{ profile_user.codeforces_login }}" target="_blank">{{ profile_user.codeforces_login }}</a>
+          {% else %}
+            —
+          {% endif %}
+        </td>
+      </tr>
+    </table>
+  </div>
+{% endif %}
+
+{% if request_user.is_authenticated and profile_user.private_contacts.strip() %}
+  <div class="contact-info">
+    <h4>{% trans %}Contact information{% endtrans %}:</h4>
+    <div class="ubertext">
+      {{ profile_user.private_contacts|markdown("user_private_contacts", 3600, profile_user.pk, profile_user.modified) }}
+    </div>
+  </div>
+{% endif %}

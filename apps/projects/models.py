@@ -17,6 +17,7 @@ from django.db.models import F, Q
 from django.utils import formats, timezone
 from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from core.db.fields import ScoreField
 from core.db.mixins import DerivableFieldsMixin
@@ -400,6 +401,14 @@ class ProjectStudent(TimezoneAwareMixin, models.Model):
                 self.project.semester.type != SemesterTypes.SUMMER):
             label = _("Assignment|pass")
         return label
+
+    def get_status_display(self) -> str:
+        if self.project.status == self.project.Statuses.CONTINUED:
+            return str(pgettext_lazy("Project", "Shifted"))
+        elif self.project.is_canceled:
+            return str(pgettext_lazy("Project", "Canceled"))
+        else:
+            return str(self.final_grade_display())
 
 
 def project_presentations_upload_to(self: "Project", filename):

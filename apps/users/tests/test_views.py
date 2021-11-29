@@ -225,8 +225,8 @@ def test_user_detail_view(client, assert_login_redirect):
     student = StudentFactory()
     response = client.get(student.get_absolute_url())
     assert response.status_code == 200
-    assert response.context['profile_user'] == student
-    assert not response.context['is_editing_allowed']
+    assert response.context_data['profile_user'] == student
+    assert not response.context_data['is_editing_allowed']
 
 
 @pytest.mark.django_db
@@ -236,8 +236,8 @@ def test_user_can_update_profile(client, assert_redirect):
     client.login(user)
     response = client.get(user.get_absolute_url())
     assert response.status_code == 200
-    assert response.context['profile_user'] == user
-    assert response.context['is_editing_allowed']
+    assert response.context_data['profile_user'] == user
+    assert response.context_data['is_editing_allowed']
     assert smart_bytes(user.get_update_profile_url()) in response.content
     response = client.get(user.get_update_profile_url())
     assert b'bio' in response.content
