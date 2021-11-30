@@ -11,7 +11,7 @@ ifeq ($(filter $(PROJECT),$(PROJECTS)),)
     $(error A project with name '$(PROJECT)' does not exist. Available projects: $(PROJECTS))
 endif
 
-.PHONY: run club migrate msg msg-compile static dumpdata loaddata clean cmd refresh sync deploy check_defined
+.PHONY: run club migrate msg msg-compile static dumpdata loaddata clean cmd refresh sync deploy check_defined tests
 
 run:
 	python -W once manage.py runserver --settings=$(PROJECT).settings.local $(PORT)
@@ -21,6 +21,12 @@ club:
 
 shad:
 	python manage.py runserver --settings=lk_yandexdataschool_ru.settings.local 8003
+
+tests:
+	pytest --create-db
+	pytest -c compscicenter_ru/pytest.ini
+	pytest -c compsciclub_ru/pytest.ini
+	pytest -c lk_yandexdataschool_ru/pytest.ini
 
 migrate:
 	python manage.py migrate $(DJANGO_POSTFIX)
