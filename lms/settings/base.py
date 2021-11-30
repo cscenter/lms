@@ -338,7 +338,6 @@ INSTALLED_APPS = [
     'learning.gallery.apps.GalleryConfig',
     'notifications.apps.NotificationsConfig',
     'api.apps.APIConfig',
-    'library.apps.LibraryConfig',
 ]
 
 # i18n, l10n
@@ -459,3 +458,4 @@ CKEDITOR_CONFIGS = {
     }
 }
 
+IS_CERTIFICATES_OF_PARTICIPATION_ENABLED = env.bool('IS_CERTIFICATES_OF_PARTICIPATION_ENABLED', default=True)

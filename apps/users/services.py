@@ -1,7 +1,7 @@
 import datetime
 from collections import defaultdict
 from enum import Enum, auto
-from typing import Any, Dict, List, Literal, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from registration.models import RegistrationProfile
 
@@ -19,7 +19,6 @@ from core.timezone.typing import Timezone
 from courses.models import Semester
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
-from study_programs.models import AcademicDiscipline
 from users.constants import GenderTypes, Roles
 from users.models import (
     OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User, UserGroup

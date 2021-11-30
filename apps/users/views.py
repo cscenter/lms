@@ -4,6 +4,10 @@ import os
 from collections import OrderedDict
 from typing import Any, Dict
 
+from rest_framework import serializers, status
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+
 from django.apps import apps
 from django.conf import settings
 from django.contrib import auth
@@ -17,7 +21,11 @@ from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
+from api.views import APIBaseView
 from auth.mixins import PermissionRequiredMixin
+from auth.models import ConnectedAuthService
+from auth.services import get_connected_accounts
+from core.http import AuthenticatedHttpRequest
 from core.timezone.utils import get_gmt
 from core.urls import reverse
 from core.views import ProtectedFormMixin
@@ -80,10 +88,7 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
         ]
         select_list = []
         if self.request.user.is_curator:
-            prefetch_list += ['borrows',
-                              'borrows__stock',
-                              'borrows__stock__book',
-                              'onlinecourserecord_set']
+            prefetch_list += ['onlinecourserecord_set']
         filters = {}
         if not self.request.user.is_curator:
             filters["is_active"] = True
@@ -118,9 +123,19 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
             ]
         context['icalendars'] = icalendars
         context['is_editing_allowed'] = (u == profile_user or u.is_curator)
+        is_library_installed = apps.is_installed("library")
+        context['is_certificates_of_participation_enabled'] = settings.IS_CERTIFICATES_OF_PARTICIPATION_ENABLED
+        context['is_library_installed'] = is_library_installed
+        if is_library_installed and u.is_curator:
+            from library.models import Borrow
+            context['borrowed_books'] = (Borrow.objects
+                                         .filter(student=profile_user)
+                                         .select_related('stock__book'))
         if apps.is_installed("projects"):
             from projects.services import get_student_projects
             context['student_projects'] = get_student_projects(profile_user)
+        if apps.is_installed('admission'):
+            context['applicant_list'] = profile_user.applicant_set.all()
         context['current_semester'] = Semester.get_current()
         # Assignments sorted by course name
         assignments_qs = (StudentAssignment.objects
@@ -196,19 +211,23 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
         return super().form_valid(form)
 
 
-class UserConnectedAuthServicesView(LoginRequiredMixin, generic.TemplateView):
-    template_name = "lms/user_profile/connected_social_services.html"
+class UserConnectedAuthServicesView(APIBaseView):
+    permission_classes = (IsAuthenticated,)
 
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        filters = {"is_active": True, "pk": kwargs["pk"]}
-        if not self.request.user.is_curator:
-            filters["group__site_id"] = settings.SITE_ID
-        profile_user = get_object_or_404(User.objects
-                                         .filter(**filters))
-        context = {
-            'profile_user': profile_user
-        }
-        return context
+    class InputSerializer(serializers.Serializer):
+        user = serializers.IntegerField()
+
+    class OutputSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = ConnectedAuthService
+            fields = ('provider', 'uid', 'extra_data')
+
+    def get(self, request: AuthenticatedHttpRequest, **kwargs) -> Response:
+        serializer = self.InputSerializer(data=kwargs)
+        serializer.is_valid(raise_exception=True)
+        connected_accounts = get_connected_accounts(**serializer.validated_data)
+        data = self.OutputSerializer(connected_accounts, many=True).data
+        return Response(status=status.HTTP_200_OK, data=data)
 
 
 class CertificateOfParticipationCreateView(PermissionRequiredMixin,

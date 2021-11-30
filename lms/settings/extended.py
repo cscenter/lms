@@ -11,6 +11,7 @@ INSTALLED_APPS += [
     'lms',
     'post_office',
     'django_jinja',
+    'library.apps.LibraryConfig',
     'projects.apps.ProjectsConfig',
     'stats.apps.StatisticsConfig',
     'admission.apps.AdmissionConfig',

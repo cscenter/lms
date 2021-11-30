@@ -104,3 +104,5 @@ MIGRATION_MODULES = {
     "users": None,
     "grading": None,
 }
+
+IS_CERTIFICATES_OF_PARTICIPATION_ENABLED = False

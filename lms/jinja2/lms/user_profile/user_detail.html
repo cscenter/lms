@@ -24,9 +24,11 @@
               <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" alt="" />
             {% endwith -%}
           </div>
-          {% if profile_user.pk == request_user.pk or request_user.is_curator %}
-            <div class="photo-actions">
+          {% if is_editing_allowed %}
+
+            <div class="profile-actions">
               <a href="#user-photo-upload">{% trans %}Change photo{% endtrans %}</a>
+              <a href="{{ profile_user.get_update_profile_url() }}"><i class="fa fa-cog"></i> {% trans %}Edit{% endtrans %}</a>
             </div>
           {% endif %}
         </div>
@@ -34,7 +36,8 @@
       <h2>
         {{ profile_user.first_name }} {{ profile_user.patronymic }}<br>{{ profile_user.last_name }}
         {% if request_user.is_superuser %}
-          <a href="{{ url('admin:users_user_change', object_id=profile_user.pk) }}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>
+          <a href="{{ url('admin:users_user_change', object_id=profile_user.pk) }}" target="_blank"><i
+            class="fa fa-pencil-square-o"></i></a>
           <form action="{{ url('admin:loginas-user-login', user_id=profile_user.pk) }}" method="POST" style="display: inline">
             {% csrf_token %}
             <a title="" class="login-helper" href="#"><i class="fa fa-ils" aria-hidden="true"></i></a>
@@ -75,34 +78,32 @@
           </div>
         {% endif %}
 
-        {% if profile_user.pk == request_user.pk or request_user.is_curator %}
-          <div class="nav-tabs-inverse">
-            <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
-              <li class="active" role="presentation">
-                <a data-toggle="tab" href="#profile-tab" aria-controls="current" role="tab" aria-expanded="true">Профиль</a>
+        <div class="nav-tabs-inverse">
+          <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
+            <li class="active" role="presentation">
+              <a data-toggle="tab" href="#profile-tab" aria-controls="current" role="tab" aria-expanded="true">Основная информация</a>
+            </li>
+            {% if is_editing_allowed %}
+              <li role="presentation">
+                <a href="#connected-accounts" role="tab" data-toggle="tab">Аккаунты</a>
               </li>
-              {% if is_editing_allowed %}
+            {% endif %}
+            {% if request_user.is_curator %}
+              <li role="presentation">
+                <a href="#for-curator-tab" role="tab" data-toggle="tab">
+                  <i class="fa fa-user-secret"></i> Для куратора
+                </a>
+              </li>
+              {% if student_profile %}
                 <li role="presentation">
-                  <a href="{{ profile_user.get_update_profile_url() }}"><i class="fa fa-cog"></i> {% trans %}Edit{% endtrans %}</a>
-                </li>
-              {% endif %}
-              {% if request_user.is_curator %}
-                <li role="presentation">
-                  <a href="#for-curator-tab" role="tab" data-toggle="tab">
-                    <i class="fa fa-user-secret"></i> Для куратора
+                  <a href="#student-assignments-tab" role="tab" data-toggle="tab">
+                    <i class="fa fa-list"></i>&nbsp;Задания
                   </a>
                 </li>
-                {% if student_profile %}
-                  <li role="presentation">
-                    <a href="#student-assignments-tab" role="tab" data-toggle="tab">
-                      <i class="fa fa-list"></i>&nbsp;Задания
-                    </a>
-                  </li>
-                {% endif %}
               {% endif %}
-            </ul>
-          </div>
-        {% endif %}
+            {% endif %}
+          </ul>
+        </div>
       </div>
     </div>
 
@@ -121,8 +122,13 @@
           </div>
         {% endif %}
       {% endif %}
+      {% if is_editing_allowed %}
+        <div class="tab-pane" role="tabpanel" id="connected-accounts">
+          {% include "lms/user_profile/_tab_connected_accounts.html" %}
+        </div>
+      {% endif %}
     </div>
   </div>
 
-{% include "lms/user_profile/_profile_upload_photo.html" %}
+  {% include "lms/user_profile/_profile_upload_photo.html" %}
 {% endblock content %}
