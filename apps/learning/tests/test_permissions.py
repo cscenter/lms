@@ -482,14 +482,14 @@ def test_view_gradebook():
     course = CourseFactory(teachers=[teacher])
     CourseTeacherFactory(course=course, teacher=teacher_spectator,
                          roles=CourseTeacher.roles.spectator)
-    assert teacher.has_perm(ViewOwnGradebook.name, course)
-    assert not teacher_other.has_perm(ViewOwnGradebook.name, course)
-    assert teacher_spectator.has_perm(ViewOwnGradebook.name, course)
+    assert not teacher.has_perm(ViewGradebook.name)
+    assert teacher.has_perm(ViewGradebook.name, course)
+    assert not teacher_other.has_perm(ViewGradebook.name, course)
+    assert teacher_spectator.has_perm(ViewGradebook.name, course)
     e = EnrollmentFactory(course=course)
-    assert not e.student.has_perm(ViewOwnGradebook.name, course)
-    assert not UserFactory().has_perm(ViewOwnGradebook.name, course)
+    assert not e.student.has_perm(ViewGradebook.name, course)
+    assert not UserFactory().has_perm(ViewGradebook.name, course)
     curator = CuratorFactory()
-    assert not curator.has_perm(ViewOwnGradebook.name, course)
     assert curator.has_perm(ViewGradebook.name)
 
 

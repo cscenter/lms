@@ -1039,9 +1039,9 @@ def test_view_gradebook_save_import_btn_require_editgradebook_perm(client):
         has_submit = soup.find("button", {"id": "marks-sheet-save"}) is not None
         has_import = soup.find("i", {"class": "fa fa-upload"}) is not None
         client.logout()
-        return 2 * has_submit + has_import
+        return has_submit + has_import
 
-    assert has_elements(teacher) == 3
+    assert has_elements(teacher) == 2
     assert not has_elements(spectator)
 
 
