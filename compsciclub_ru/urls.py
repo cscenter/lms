@@ -1,6 +1,6 @@
 from django.apps import apps
 from django.conf import settings
-from django.conf.urls import include, url
+from django.conf.urls import include
 from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -23,7 +23,7 @@ from learning.views import (
 admin.autodiscover()
 
 urlpatterns = i18n_patterns(
-    url(r'^$', IndexView.as_view(), name='index'),
+    path('', IndexView.as_view(), name='index'),
 
     path('register/', AsyncEmailRegistrationView.as_view(), name='registration_register'),
     path('', include('registration.backends.default.urls')),
@@ -43,9 +43,9 @@ urlpatterns = i18n_patterns(
     ])),
     path('', include('courses.urls')),
 
-    url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
-    url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(), name='teacher_detail'),
-    url(r"^schools/$", InternationalSchoolsListView.as_view(), name="international_schools_list"),
+    path('teachers/', TeachersView.as_view(), name='teachers'),
+    re_path(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(), name='teacher_detail'),
+    path("schools/", InternationalSchoolsListView.as_view(), name="international_schools_list"),
 
     prefix_default_language=False
 )
@@ -55,7 +55,7 @@ urlpatterns += [
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
 
-    url(r'^notifications/', include("notifications.urls")),
+    path('notifications/', include("notifications.urls")),
 
     path('', include('users.urls')),
 
@@ -91,6 +91,6 @@ if settings.DEBUG:
         urlpatterns += [path('rosetta/', include('rosetta.urls'))]
 
 urlpatterns += i18n_patterns(
-    url(r'^(?P<url>.*/)$', views.flatpage, name='html_pages'),
+    re_path(r'^(?P<url>.*/)$', views.flatpage, name='html_pages'),
     prefix_default_language=False
 )
