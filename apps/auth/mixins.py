@@ -60,9 +60,9 @@ class RolePermissionRequiredMixin(RolePermissionRequiredMixinBase):
 
     def check_permissions(self, request) -> None:
         permission_object = self.get_permission_object()
-        for permission in self.permission_classes:
-            # FIXME: Use only `auth.backends.RBACPermission`? Только у наших Permission есть аттрибут name :<
-            if not _user_has_perm(request.user, permission.name, obj=permission_object):
+        for permission_class in self.permission_classes:
+            permission = permission_class()
+            if not permission.has_object_permission(request, self, obj=permission_object):
                 if request.authenticators and not request.successful_authenticator:
                     raise exceptions.NotAuthenticated()
                 raise exceptions.PermissionDenied()
