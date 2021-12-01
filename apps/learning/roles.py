@@ -13,7 +13,8 @@ from courses.permissions import (
 )
 from info_blocks.permissions import ViewInternships
 from users.permissions import (
-    CreateCertificateOfParticipation, ViewCertificateOfParticipation
+    CreateCertificateOfParticipation, ViewAccountConnectedServiceProvider,
+    ViewCertificateOfParticipation
 )
 
 from .permissions import (
@@ -39,6 +40,7 @@ from .permissions import (
 # TODO: Add description to each role
 class Roles(DjangoChoices):
     CURATOR = C(5, _('Curator'), priority=0, permissions=(
+        ViewAccountConnectedServiceProvider,
         ViewCourse,
         CreateCertificateOfParticipation,
         ViewCertificateOfParticipation,
@@ -200,7 +202,7 @@ graduate_role = role_registry[Roles.GRADUATE]
 graduate_role.add_relation(ViewAssignmentAttachment, ViewAssignmentAttachmentAsLearner)
 graduate_role.add_relation(ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner)
 
-default_role = role_registry.default_role
+default_role = role_registry.anonymous_role
 default_role.add_permission(ViewCourseClassMaterials)
 
 

@@ -1,5 +1,6 @@
 import logging
 
+from social_core.backends.gitlab import GitLabOAuth2
 from social_core.backends.oauth import BaseOAuth2
 from social_core.utils import handle_http_errors
 
@@ -26,11 +27,11 @@ class RBACPermissions:
     def has_perm(self, user, perm, obj=None):
         if not user.is_active and not user.is_anonymous:
             return False
-        default_role = role_registry.default_role
+        anonymous_role = role_registry.anonymous_role
         if user.is_anonymous:
-            return self._has_perm(user, perm, {default_role}, obj)
+            return self._has_perm(user, perm, {anonymous_role}, obj)
         elif hasattr(user, 'roles'):
-            roles = [default_role]
+            roles = [anonymous_role]
             for role_code in user.roles:
                 if role_code not in role_registry:
                     logger.warning(f'Role with a code {role_code} is not '
@@ -155,3 +156,14 @@ class YandexRuOAuth2Backend(BaseOAuth2):
         return self.get_json('https://login.yandex.ru/info',
                              params={'oauth_token': access_token,
                                      'format': 'json'})
+
+
+class GitLabManyTaskOAuth2(GitLabOAuth2):
+    name = 'gitlab-manytask'
+    API_URL = 'https://gitlab.manytask.org'
+    EXTRA_DATA = [
+        ('id', 'id'),
+        ('expires_in', 'expires'),
+        ('refresh_token', 'refresh_token'),
+        ('username', 'username'),
+    ]
