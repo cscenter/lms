@@ -13,7 +13,13 @@ CourseID = int
 
 def get_teacher_courses(teacher: User) -> CourseQuerySet:
     return (Course.objects
-            .filter(teachers=teacher, course_teachers__roles=~CourseTeacher.roles.spectator)
+            .filter(teachers=teacher)
+            .select_related("meta_course", "semester", "main_branch"))
+
+
+def get_teacher_not_spectator_courses(teacher: User) -> CourseQuerySet:
+    return (Course.objects
+            .filter(teachers=teacher)
             .select_related("meta_course", "semester", "main_branch"))
 
 
