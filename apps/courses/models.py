@@ -553,7 +553,7 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
     def is_actual_teacher(self, teacher_id):
         for ct in self.course_teachers.all():
             if ct.teacher.id == teacher_id:
-                return bool(ct.roles.lecturer)
+                return not bool(ct.roles.spectator)
         return False
 
 
