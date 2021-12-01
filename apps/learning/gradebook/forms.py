@@ -2,6 +2,7 @@ from collections import namedtuple
 from typing import List, Optional
 
 from django import forms
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.forms import BoundField
@@ -181,7 +182,7 @@ class EnrollmentFinalGrade(forms.ChoiceField):
 
 class GradeBookFormFactory:
     @classmethod
-    def build_form_class(cls, user: User, gradebook: GradeBookData):
+    def build_form_class(cls, gradebook: GradeBookData, is_readonly: Optional[bool] = True):
         """
         Creates new form.Form subclass with students scores for
         each offline assignment (which student can't pass on this site) and
@@ -191,22 +192,28 @@ class GradeBookFormFactory:
         (see `CustomBoundField`) instead of the value provided to the form.
         """
         cls_dict = fields = {}
-        readonly = not user.has_perm(EditGradebook.name, gradebook.course)
+        max_number = settings.DATA_UPLOAD_MAX_NUMBER_FIELDS
+        number_of_fields_is_exceeded = (gradebook.number_of_fields > max_number)
+        is_score_readonly = (is_readonly or
+                             len(gradebook.students) > 100 or
+                             number_of_fields_is_exceeded)
+
         for student_assignments in gradebook.submissions:
             for sa in student_assignments:
                 # Student have no submissions after withdrawal
                 if not sa:
                     continue
                 assignment = sa.assignment
-                if not (assignment.is_online or gradebook.is_readonly or readonly):
+                if not (assignment.is_online or is_score_readonly):
                     k = BaseGradebookForm.GRADE_PREFIX + str(sa.id)
                     fields[k] = AssignmentScore(assignment, sa)
 
         for gs in gradebook.students.values():
             k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(gs.enrollment_id)
-            fields[k] = EnrollmentFinalGrade(gs, gradebook.course, readonly)
+            fields[k] = EnrollmentFinalGrade(gs, gradebook.course, is_readonly)
         cls_dict["_course"] = gradebook.course
-        cls_dict["is_readonly"] = readonly
+        cls_dict["is_readonly"] = is_readonly
+        cls_dict["is_score_readonly"] = is_score_readonly
         return type("GradebookForm", (BaseGradebookForm,), cls_dict)
 
     @classmethod

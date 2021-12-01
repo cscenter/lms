@@ -124,7 +124,8 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
     def get_form(self, user: User, data=None, files=None,
                  student_group: Optional[int] = None, **kwargs):
         self.data = gradebook_data(self.course, student_group)
-        cls = GradeBookFormFactory.build_form_class(user, self.data)
+        form_readonly = not user.has_perm(EditGradebook.name, self.course)
+        cls = GradeBookFormFactory.build_form_class(self.data, form_readonly)
         # Set initial data for all GET-requests
         if not data and "initial" not in kwargs:
             initial = GradeBookFormFactory.transform_to_initial(self.data)
