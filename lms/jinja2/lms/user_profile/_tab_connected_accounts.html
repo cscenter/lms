@@ -1,23 +1,26 @@
-<h4 class="mb-20">Привязанные аккаунты</h4>
-
-<div class="panel panel-default">
-  <div class="panel-body _connected-account">
-    <div>
-    <h4 class="mt-0">GitLab ManyTask</h4>
-    <span class="text-muted">uid: xxx-xlkjsd</span>
+<h4 class="mb-20">Внешние сервисы</h4>
+<div class="connected-accounts">
+  {% for backend in available_providers %}
+  <div class="panel panel-default">
+    <div class="panel-body _connected-account" data-provider="{{ backend.code }}" data-is-readonly="{{ backend.is_readonly }}">
+      <div>
+      <h4 class="mt-0 mb-5">{{ backend.name }}</h4>
+      <span class="text-muted _uid">Не подключен</span>
+      </div>
+      {% if not backend.is_readonly and profile_user.pk == request.user.pk %}
+        <form action="{{ url('auth:social:begin', backend=backend.code) }}" method="GET">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.user.get_absolute_url() }}">
+          <button type="button" class="btn btn-primary _associate" disabled="disabled"
+                  data-disconnect="{{ url('auth:social:disconnect', backend=backend.code) }}">Подключить
+          </button>
+        </form>
+      {% endif %}
     </div>
-    <a class="btn btn-danger" href="#">Отключить</a>
   </div>
+  {% endfor %}
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-body _connected-account">
-    <div>
-      <h4 class="my-0">Яндекс.Логин</h4>
-    </div>
-    <a class="btn btn-primary" href="#">Включить</a>
-  </div>
-</div>
 
 
 

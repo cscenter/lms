@@ -5,11 +5,11 @@ from learning.views.icalendar import (
     ICalAssignmentsView, ICalClassesView, ICalEventsView
 )
 from users.views import (
-    ProfileImageUpdate, UserConnectedAuthServicesView, UserDetailView, UserUpdateView
+    ConnectedAuthServicesView, ProfileImageUpdate, UserDetailView, UserUpdateView
 )
 
 user_api_patterns = [
-    path('users/<int:user>/connected-accounts/', UserConnectedAuthServicesView.as_view(), name="connected_accounts"),
+    path('users/<int:user>/connected-accounts/', ConnectedAuthServicesView.as_view(), name="connected_accounts"),
 ]
 
 urlpatterns = [

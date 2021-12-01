@@ -93,7 +93,6 @@ class ConnectedAuthService(TimestampedModel, DjangoUserMixin):
     Difference with social_django.models.UserSocialAuth:
         * `created_at` and `modified_at` field names instead of created/modified
         * UserSocialAuthManager was removed
-        * Disconnecting provider with class method is prohibited
         * Creating user with class method is prohibited
 
     Some partials like `.create_user` from the social_django app may not work
@@ -131,12 +130,13 @@ class ConnectedAuthService(TimestampedModel, DjangoUserMixin):
         return False
 
     @classmethod
-    def allowed_to_disconnect(cls, user, backend_name, association_id=None) -> bool:
-        return False
+    def allowed_to_disconnect(cls, user: User, backend_name: str,
+                              association_id: Optional[int] = None) -> bool:
+        return backend_name != "gerrit"
 
     @classmethod
-    def disconnect(cls, entry):
-        return False
+    def disconnect(cls, entry: 'ConnectedAuthService'):
+        entry.delete()
 
     @classmethod
     def username_max_length(cls) -> int:

@@ -27,11 +27,10 @@ class RBACPermissions:
     def has_perm(self, user, perm, obj=None):
         if not user.is_active and not user.is_anonymous:
             return False
-        anonymous_role = role_registry.anonymous_role
         if user.is_anonymous:
-            return self._has_perm(user, perm, {anonymous_role}, obj)
+            return self._has_perm(user, perm, {role_registry.anonymous_role}, obj)
         elif hasattr(user, 'roles'):
-            roles = [anonymous_role]
+            roles = [role_registry.anonymous_role, role_registry.authenticated_role]
             for role_code in user.roles:
                 if role_code not in role_registry:
                     logger.warning(f'Role with a code {role_code} is not '

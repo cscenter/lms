@@ -202,8 +202,8 @@ graduate_role = role_registry[Roles.GRADUATE]
 graduate_role.add_relation(ViewAssignmentAttachment, ViewAssignmentAttachmentAsLearner)
 graduate_role.add_relation(ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner)
 
-default_role = role_registry.anonymous_role
-default_role.add_permission(ViewCourseClassMaterials)
+anonymous_role = role_registry.anonymous_role
+anonymous_role.add_permission(ViewCourseClassMaterials)
 
 
 # TODO: Write util method to view all role permissions, register global roles

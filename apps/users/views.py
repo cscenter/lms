@@ -22,9 +22,9 @@ from django.views import generic
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 from api.views import APIBaseView
-from auth.mixins import PermissionRequiredMixin
+from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
 from auth.models import ConnectedAuthService
-from auth.services import get_connected_accounts
+from auth.services import get_available_service_providers, get_connected_accounts
 from core.http import AuthenticatedHttpRequest
 from core.timezone.utils import get_gmt
 from core.urls import reverse
@@ -42,7 +42,8 @@ from users.thumbnails import CropboxData, get_user_thumbnail, photo_thumbnail_cr
 from .forms import CertificateOfParticipationCreateForm, UserProfileForm
 from .models import CertificateOfParticipation, User
 from .permissions import (
-    CreateCertificateOfParticipation, ViewCertificateOfParticipation
+    CreateCertificateOfParticipation, ViewAccountConnectedServiceProvider,
+    ViewCertificateOfParticipation, ViewOwnAccountConnectedServiceProvider
 )
 from .services import (
     get_graduate_profile, get_student_profile, get_student_status_history
@@ -122,10 +123,12 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
                 (_("Events"), abs_uri(ics_url_events)),
             ]
         context['icalendars'] = icalendars
-        context['is_editing_allowed'] = (u == profile_user or u.is_curator)
+        is_editing_allowed = (u == profile_user or u.is_curator)
         is_library_installed = apps.is_installed("library")
+        context['is_editing_allowed'] = is_editing_allowed
         context['is_certificates_of_participation_enabled'] = settings.IS_CERTIFICATES_OF_PARTICIPATION_ENABLED
         context['is_library_installed'] = is_library_installed
+        context['available_providers'] = is_editing_allowed and get_available_service_providers()
         if is_library_installed and u.is_curator:
             from library.models import Borrow
             context['borrowed_books'] = (Borrow.objects
@@ -211,8 +214,10 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
         return super().form_valid(form)
 
 
-class UserConnectedAuthServicesView(APIBaseView):
-    permission_classes = (IsAuthenticated,)
+class ConnectedAuthServicesView(RolePermissionRequiredMixin, APIBaseView):
+    permission_classes = [ViewAccountConnectedServiceProvider]
+    request: AuthenticatedHttpRequest
+    account: User
 
     class InputSerializer(serializers.Serializer):
         user = serializers.IntegerField()
@@ -220,14 +225,25 @@ class UserConnectedAuthServicesView(APIBaseView):
     class OutputSerializer(serializers.ModelSerializer):
         class Meta:
             model = ConnectedAuthService
-            fields = ('provider', 'uid', 'extra_data')
+            fields = ('provider', 'uid')
 
-    def get(self, request: AuthenticatedHttpRequest, **kwargs) -> Response:
+    def setup(self, request: AuthenticatedHttpRequest, **kwargs: Any):
+        super().setup(request, **kwargs)
         serializer = self.InputSerializer(data=kwargs)
         serializer.is_valid(raise_exception=True)
-        connected_accounts = get_connected_accounts(**serializer.validated_data)
+        queryset = (User.objects
+                    .filter(pk=serializer.validated_data['user']))
+        self.account = get_object_or_404(queryset)
+
+    def get_permission_object(self) -> User:
+        return self.account
+
+    def get(self, request: AuthenticatedHttpRequest, **kwargs) -> Response:
+        connected_accounts = get_connected_accounts(user=self.account)
         data = self.OutputSerializer(connected_accounts, many=True).data
-        return Response(status=status.HTTP_200_OK, data=data)
+        return Response(status=status.HTTP_200_OK, data={
+            "edges": data
+        })
 
 
 class CertificateOfParticipationCreateView(PermissionRequiredMixin,

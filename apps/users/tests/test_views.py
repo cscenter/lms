@@ -9,16 +9,19 @@ from django.conf import settings
 from django.forms.models import model_to_dict
 from django.utils.encoding import smart_bytes, smart_str
 
+from auth.mixins import RolePermissionRequiredMixin
 from core.admin import get_admin_url
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.tests.factories import CourseFactory
+from learning.permissions import EditStudentAssignment
 from learning.settings import Branches, GradeTypes
 from learning.tests.factories import GraduateProfileFactory
 from users.constants import GenderTypes, Roles
 from users.forms import UserCreationForm
 from users.models import User, UserGroup
+from users.permissions import ViewAccountConnectedServiceProvider
 from users.tests.factories import (
     CuratorFactory, OnlineCourseRecordFactory, SHADCourseRecordFactory, StudentFactory,
     StudentProfileFactory, UserFactory, add_user_groups
@@ -365,3 +368,43 @@ def test_student_should_have_profile(client):
     assert response.status_code == 302
     user.refresh_from_db()
     assert user.groups.count() == 1
+
+
+@pytest.mark.django_db
+def test_view_user_detail_connected_providers(client, settings):
+    user1, user2 = UserFactory.create_batch(2)
+    user1.add_group(role=Roles.PROJECT_REVIEWER, site_id=settings.SITE_ID)
+    user2.add_group(role=Roles.PROJECT_REVIEWER, site_id=settings.SITE_ID)
+    client.login(user1)
+    response = client.get(user1.get_absolute_url())
+    assert response.status_code == 200
+    assert 'available_providers' in response.context_data
+    assert isinstance(response.context_data['available_providers'], list)
+    client.login(user2)
+    response = client.get(user1.get_absolute_url())
+    assert response.status_code == 200
+    assert response.context_data['available_providers'] is False
+    client.login(CuratorFactory())
+    response = client.get(user1.get_absolute_url())
+    assert response.status_code == 200
+    assert isinstance(response.context_data['available_providers'], list)
+
+
+@pytest.mark.django_db
+def test_view_connected_auth_services_smoke(client, settings, lms_resolver):
+    user1, user2 = UserFactory.create_batch(2)
+    user1.add_group(role=Roles.PROJECT_REVIEWER, site_id=settings.SITE_ID)
+    url = reverse('api:connected_accounts', subdomain=settings.LMS_SUBDOMAIN, kwargs={
+        'user': user1.pk
+    })
+    response = client.get(url)
+    assert response.status_code == 401
+    client.login(user1)
+    response = client.get(url)
+    assert response.status_code == 200
+    client.login(user2)
+    response = client.get(url)
+    assert response.status_code == 403
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, RolePermissionRequiredMixin)
+    assert resolver.func.view_class.permission_classes == [ViewAccountConnectedServiceProvider]

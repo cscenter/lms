@@ -12,11 +12,18 @@ class RolePermissionsRegistry:
     `rules.RuleSet` instance (P). Role inheritance is not supported.
     """
 
-    ANONYMOUS_ROLE_CODE = '_default'
+    _ANONYMOUS_ROLE = '_anon'
+    _AUTHENTICATED_ROLE = '_auth'
 
     def __init__(self):
         self._registry = {}
-        self._register_anonymous_role()
+        self._register_default_roles()
+
+    def _register_default_roles(self):
+        self.register(Role(id=self._ANONYMOUS_ROLE, description='Anonymous Role',
+                           priority=1000, permissions=[]))
+        self.register(Role(id=self._AUTHENTICATED_ROLE, description='Authenticated Role',
+                           priority=900, permissions=[]))
 
     def register(self, role: Role):
         """
@@ -41,12 +48,6 @@ class RolePermissionsRegistry:
                                 'registered' % role.code)
         del self._registry[role.code]
 
-    def _register_anonymous_role(self):
-        self.register(Role(id=self.ANONYMOUS_ROLE_CODE,
-                           description='Anonymous Role',
-                           priority=1000,
-                           permissions=[]))
-
     def __contains__(self, role):
         if isinstance(role, Role):
             return role.code in self._registry
@@ -67,7 +68,11 @@ class RolePermissionsRegistry:
 
     @property
     def anonymous_role(self) -> Role:
-        return self._registry[self.ANONYMOUS_ROLE_CODE]
+        return self._registry[self._ANONYMOUS_ROLE]
+
+    @property
+    def authenticated_role(self) -> Role:
+        return self._registry[self._AUTHENTICATED_ROLE]
 
     def items(self):
         return self._registry.items()
