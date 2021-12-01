@@ -551,9 +551,10 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
 
     @instance_memoize
     def is_actual_teacher(self, teacher_id):
-        # FIXME: skip spectator role if it's not filtered out on a query level with prefetch
-        return teacher_id in (ct.teacher_id for ct in
-                              self.course_teachers.filter(roles=~CourseTeacher.roles.spectator))
+        for ct in self.course_teachers.all():
+            if ct.teacher.id == teacher_id:
+                return bool(ct.roles.lecturer)
+        return False
 
 
 class CourseBranch(models.Model):
