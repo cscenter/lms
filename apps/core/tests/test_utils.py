@@ -37,9 +37,12 @@ def test_queryset_iterator(django_assert_num_queries):
     with django_assert_num_queries(2):
         for b in queryset_iterator(qs, chunk_size=100):
             pass
+    total = 0
     with django_assert_num_queries(3):
         for b in queryset_iterator(qs, chunk_size=5):
+            total += 1
             pass
+    assert total == 10
     # Make sure use_offset=True preserves queryset ordering if provided
     with django_assert_num_queries(2):
         bs = list(queryset_iterator(qs.order_by("-order"),

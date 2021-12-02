@@ -1,4 +1,5 @@
 import datetime
+import logging
 from functools import partial
 from itertools import zip_longest
 from typing import Any, Dict, Iterable, List, Optional
@@ -13,6 +14,8 @@ from django.conf import settings
 from django.core.cache import InvalidCacheBackendError, caches
 from django.db.models import Max, Min
 from django.utils import formats
+
+logger = logging.getLogger(__name__)
 
 hashids = Hashids(salt=settings.HASHIDS_SALT, min_length=8)
 
@@ -218,9 +221,11 @@ def queryset_iterator(queryset, chunk_size=1000, use_offset=False):
     else:
         queryset = queryset.order_by('pk')
         limits = queryset.aggregate(min=Min('pk'), max=Max('pk'))
+        logger.info(f'Queryset iterator chunk size: {chunk_size}, offset: {use_offset}')
         if limits['min']:
             for pk in range(limits['min'], limits['max'] + 1, chunk_size):
-                for row in queryset.filter(pk__gte=pk)[:chunk_size]:
+                logger.info(f'Next range [{pk}, {pk + chunk_size})')
+                for row in queryset.filter(pk__gte=pk, pk__lt=pk + chunk_size)[:chunk_size]:
                     yield row
 
 
