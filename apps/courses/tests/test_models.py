@@ -300,8 +300,8 @@ def test_course_is_actual_teacher():
     course = CourseFactory()
     for role in CourseTeacher.roles.itervalues():
         ct = CourseTeacherFactory(course=course, roles=role)
-        is_teacher = course.is_actual_teacher(ct.teacher)
-        if role is CourseTeacher.roles.spectator:
+        is_teacher = course.is_actual_teacher(ct.teacher.pk)
+        if role != CourseTeacher.roles.spectator:
             assert is_teacher
         else:
             assert not is_teacher
