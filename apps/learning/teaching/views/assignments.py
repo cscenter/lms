@@ -23,7 +23,7 @@ from core.exceptions import Redirect
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
 from courses.models import Assignment, Course, CourseTeacher
-from courses.permissions import ViewAssignment
+from courses.permissions import ViewAssignment, EditAssignment, DeleteAssignment
 from courses.selectors import assignments_list, course_teachers_prefetch_queryset
 from courses.services import CourseService
 from learning.api.serializers import AssignmentScoreSerializer
@@ -228,8 +228,10 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
         exec_median = AssignmentService.get_median_execution_time(self.object)
         context["execution_time_mean"] = humanize_duration(exec_mean)
         context["execution_time_median"] = humanize_duration(exec_median)
-        context["can_edit_delete"] = user.is_curator or \
-                                     self.object.course.is_actual_teacher(user.pk)
+        context["can_edit_delete"] = (
+            user.has_perm(EditAssignment.name, self.object) or
+            user.has_perm(DeleteAssignment.name, self.object)
+        )
         return context
 
 

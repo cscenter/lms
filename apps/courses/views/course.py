@@ -31,7 +31,6 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
     def get_course_queryset(self):
         teachers = Prefetch('course_teachers',
                             queryset=(CourseTeacher.objects
-                                      .filter(~CourseTeacher.has_any_hidden_role())
                                       .select_related("teacher")
                                       .order_by('teacher__last_name',
                                                 'teacher__first_name')))
