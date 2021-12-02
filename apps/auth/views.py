@@ -114,7 +114,10 @@ pass_reset_confirm_view = views.PasswordResetConfirmView.as_view(
 
 class ConnectServiceStrategy(DjangoStrategy):
     def get_backends(self) -> Iterable[str]:
-        return ['auth.backends.GitLabManyTaskOAuth2']
+        return [
+            'auth.backends.GitLabManyTaskOAuth2',
+            'social_core.backends.github.GithubOAuth2'
+        ]
 
     def authenticate(self, backend, *args, **kwargs):
         """
