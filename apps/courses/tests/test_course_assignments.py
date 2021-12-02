@@ -1,5 +1,6 @@
 import factory
 import pytest
+from bs4 import BeautifulSoup
 
 from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
@@ -8,9 +9,9 @@ from auth.mixins import PermissionRequiredMixin
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.constants import AssigneeMode
-from courses.models import Assignment, CourseGroupModes
+from courses.models import Assignment, CourseTeacher, AssignmentAttachment
 from courses.permissions import CreateAssignment, EditAssignment
-from courses.tests.factories import AssignmentFactory, CourseFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory, CourseTeacherFactory, AssignmentAttachmentFactory
 from users.tests.factories import CuratorFactory, TeacherFactory
 
 
@@ -113,18 +114,30 @@ def test_course_assignment_update(client, assert_redirect):
 
 @pytest.mark.django_db
 def test_course_assignment_delete_security(client, assert_login_redirect):
-    teacher = TeacherFactory()
-    teacher_other = TeacherFactory()
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     co = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=co, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
     a = AssignmentFactory(course=co)
     delete_url = a.get_delete_url()
     # Anonymous
     assert_login_redirect(delete_url, method='get')
     assert_login_redirect(delete_url, {}, method='post')
+
     client.login(teacher_other)
-    assert_login_redirect(delete_url, method='get')
-    assert_login_redirect(delete_url, {}, method='post')
+    response = client.get(delete_url)
+    assert response.status_code == 403
+    response = client.post(delete_url)
+    assert response.status_code == 403
     client.logout()
+
+    client.login(spectator)
+    response = client.get(delete_url)
+    assert response.status_code == 403
+    response = client.post(delete_url)
+    assert response.status_code == 403
+    client.logout()
+
     client.login(teacher)
     response = client.get(delete_url)
     assert response.status_code == 200
@@ -149,3 +162,56 @@ def test_course_assignment_delete(client, assert_redirect):
     response = client.get(teaching_assignment_list)
     assert response.status_code == 200
     assert smart_bytes(assignment.title) not in response.content
+
+
+@pytest.mark.django_db
+def test_course_assignment_attachment_delete_security(client):
+    teacher, spectator = TeacherFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+    attachment = AssignmentAttachmentFactory(assignment__course=course)
+    delete_url = attachment.get_delete_url()
+
+    client.login(spectator)
+    response = client.get(delete_url)
+    assert response.status_code == 403
+    response = client.post(delete_url)
+    assert response.status_code == 403
+    client.logout()
+
+    client.login(teacher)
+    response = client.get(delete_url)
+    assert response.status_code == 200
+    response = client.post(delete_url, follow=True)
+    assert response.status_code == 200
+
+    assert not AssignmentAttachment.objects.count()
+
+
+@pytest.mark.django_db
+def test_view_course_assignment_edit_delete_hidden_without_perm(client):
+    teacher, spectator = TeacherFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+    assignment = AssignmentFactory(course=course)
+
+    def has_elements(user):
+        url = assignment.get_teacher_url()
+        client.login(user)
+        html = client.get(url).content.decode('utf-8')
+        soup = BeautifulSoup(html, 'html.parser')
+        has_edit = soup.find("a", {
+            "href": assignment.get_update_url()
+        }) is not None
+        has_delete = soup.find("a", {
+            "href": assignment.get_delete_url()
+        }) is not None
+        client.logout()
+        return has_edit + has_delete
+
+    assert has_elements(teacher) == 2
+    assert not has_elements(spectator)
+
+

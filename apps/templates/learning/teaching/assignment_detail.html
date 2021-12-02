@@ -15,10 +15,12 @@
         {{ assignment.title }}<br>
           <small><a href="{{ assignment.course.get_absolute_url }}">{{ assignment.course }}</a></small>
       </h2>
+      {% if can_edit_delete %}
       <div class="btn-toolbar">
         <a href="{{ assignment.get_update_url }}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
         <a href="{{ assignment.get_delete_url }}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>
       </div>
+      {% endif %}
       <hr>
     </div>
   </div>

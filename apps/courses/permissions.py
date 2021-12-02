@@ -83,6 +83,21 @@ class EditOwnAssignment(Permission):
 
 
 @add_perm
+class DeleteAssignment(Permission):
+    name = "courses.delete_assignment"
+
+
+@add_perm
+class DeleteOwnAssignment(Permission):
+    name = "teaching.delete_assignment"
+
+    @staticmethod
+    @predicate
+    def rule(user, assignment: Assignment):
+        return assignment.course.is_actual_teacher(user.pk)
+
+
+@add_perm
 class ViewCourseClassMaterials(Permission):
     name = "courses.view_course_class_materials"
 

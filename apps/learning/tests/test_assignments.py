@@ -15,9 +15,9 @@ from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.constants import AssigneeMode, AssignmentFormat
-from courses.models import Assignment, AssignmentAttachment
+from courses.models import Assignment, AssignmentAttachment, CourseTeacher
 from courses.tests.factories import (
-    AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, SemesterFactory
+    AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, SemesterFactory, CourseTeacherFactory
 )
 from learning.models import StudentAssignment
 from learning.permissions import ViewAssignmentAttachment
@@ -250,3 +250,24 @@ def test_download_assignment_attachment(lms_resolver):
     resolver = lms_resolver(url)
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
     assert resolver.func.view_class.permission_required == ViewAssignmentAttachment.name
+
+
+@pytest.mark.django_db
+def test_view_course_assignment_add_hidden_without_perm(client):
+    teacher, spectator = TeacherFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+
+    def has_create_assignment_btn(user):
+        client.login(user)
+        url = course.get_absolute_url()
+        html = client.get(url).content.decode('utf-8')
+        soup = BeautifulSoup(html, 'html.parser')
+        client.logout()
+        return soup.find('a', {
+            "href": course.get_create_assignment_url()
+        }) is not None
+
+    assert has_create_assignment_btn(teacher)
+    assert not has_create_assignment_btn(spectator)

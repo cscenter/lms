@@ -9,7 +9,7 @@ from courses.permissions import (
     ChangeMetaCourse, CreateAssignment, CreateOwnAssignment, DeleteCourseClass,
     DeleteOwnCourseClass, EditAssignment, EditCourseClass, EditOwnAssignment,
     EditOwnCourseClass, ViewAssignment, ViewCourse, ViewCourseAssignments,
-    ViewCourseClassMaterials, ViewCourseContacts, ViewOwnAssignment
+    ViewCourseClassMaterials, ViewCourseContacts, ViewOwnAssignment, DeleteAssignment, DeleteOwnAssignment
 )
 from info_blocks.permissions import ViewInternships
 from users.permissions import (
@@ -33,7 +33,8 @@ from .permissions import (
     ViewOwnEnrollments, ViewOwnGradebook, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments, ViewRelatedEnrollments, ViewRelatedStudentAssignment,
     ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList, ViewStudentGroup,
-    ViewStudentGroupAsTeacher, ViewStudyMenu, ViewTeachingMenu
+    ViewStudentGroupAsTeacher, ViewStudyMenu, ViewTeachingMenu, DeleteAssignmentAttachment,
+    DeleteAssignmentAttachmentAsTeacher
 )
 
 
@@ -48,6 +49,7 @@ class Roles(DjangoChoices):
         CreateAssignment,
         EditAssignment,
         ViewAssignment,
+        DeleteAssignment,
         ViewCourseContacts,
         ViewCourseAssignments,
         ViewStudentAssignment,
@@ -66,6 +68,7 @@ class Roles(DjangoChoices):
         CreateAssignmentSolution,
         DownloadAssignmentSolutions,
         ViewAssignmentAttachment,
+        DeleteAssignmentAttachment,
         ViewAssignmentCommentAttachment,
         ViewStudentGroup,
         UpdateStudentGroup,
@@ -137,6 +140,7 @@ class Roles(DjangoChoices):
         CreateOwnAssignment,
         EditOwnAssignment,
         ViewOwnAssignment,
+        DeleteOwnAssignment,
         ViewCourseAssignments,
         ViewRelatedStudentAssignment,
         ViewStudentAssignmentList,
@@ -147,6 +151,7 @@ class Roles(DjangoChoices):
         ViewAssignmentAttachmentAsTeacher,
         CreateAssignmentCommentAsTeacher,
         ViewAssignmentCommentAttachmentAsTeacher,
+        DeleteAssignmentAttachmentAsTeacher,
         ViewOwnGradebook,
         EditOwnGradebook,
         ViewStudentGroupAsTeacher,
@@ -167,6 +172,8 @@ for code, name in Roles.choices:
 teacher_role = role_registry[Roles.TEACHER]
 teacher_role.add_relation(ViewAssignmentAttachment,
                           ViewAssignmentAttachmentAsTeacher)
+teacher_role.add_relation(DeleteAssignmentAttachment,
+                          DeleteAssignmentAttachmentAsTeacher)
 teacher_role.add_relation(CreateAssignmentComment,
                           CreateAssignmentCommentAsTeacher)
 teacher_role.add_relation(ViewAssignmentCommentAttachment,
@@ -178,6 +185,7 @@ teacher_role.add_relation(DeleteCourseClass, DeleteOwnCourseClass)
 teacher_role.add_relation(CreateAssignment, CreateOwnAssignment)
 teacher_role.add_relation(EditAssignment, EditOwnAssignment)
 teacher_role.add_relation(ViewAssignment, ViewOwnAssignment)
+teacher_role.add_relation(DeleteAssignment, DeleteOwnAssignment)
 teacher_role.add_relation(ViewEnrollments, ViewRelatedEnrollments)
 teacher_role.add_relation(ViewGradebook, ViewOwnGradebook)
 teacher_role.add_relation(EditGradebook, EditOwnGradebook)

@@ -35,7 +35,7 @@ from learning.permissions import (
     CreateAssignmentComment, DownloadAssignmentSolutions, EditOwnStudentAssignment,
     ViewStudentAssignment, ViewStudentAssignmentList
 )
-from learning.selectors import get_teacher_courses
+from learning.selectors import get_teacher_not_spectator_courses
 from learning.services import AssignmentService, StudentGroupService
 from learning.services.personal_assignment_service import (
     update_personal_assignment_score
@@ -43,6 +43,7 @@ from learning.services.personal_assignment_service import (
 from learning.settings import AssignmentScoreUpdateSource
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
+from users.models import User
 
 
 def _check_queue_filters(course: Course, query_params):
@@ -98,7 +99,7 @@ class AssignmentCheckQueueView(PermissionRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         teacher = self.request.user
-        courses = list(get_teacher_courses(teacher)
+        courses = list(get_teacher_not_spectator_courses(teacher)
                        .filter(main_branch__site=self.request.site)
                        .order_by("-semester__index", "meta_course__name"))
         if not courses:
@@ -197,7 +198,8 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
         return self.object.course
 
     def get(self, request, *args, **kwargs):
-        context = self.get_context_data(object=self.object)
+        context = self.get_context_data(user=request.user,
+                                        object=self.object)
         return self.render_to_response(context)
 
     def get_queryset(self):
@@ -208,7 +210,7 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
                                 'course__semester')
                 .prefetch_related('assignmentattachment_set'))
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, user: User, **kwargs):
         context = super().get_context_data(**kwargs)
         context['a_s_list'] = (
             StudentAssignment.objects
@@ -226,6 +228,8 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
         exec_median = AssignmentService.get_median_execution_time(self.object)
         context["execution_time_mean"] = humanize_duration(exec_mean)
         context["execution_time_median"] = humanize_duration(exec_median)
+        context["can_edit_delete"] = user.is_curator or \
+                                     self.object.course.is_actual_teacher(user.pk)
         return context
 
 

@@ -7,7 +7,7 @@ from django.conf import settings
 
 from auth.permissions import Permission, add_perm
 from courses.constants import AssignmentFormat
-from courses.models import Assignment, Course, CourseGroupModes, StudentGroupTypes
+from courses.models import Assignment, Course, CourseGroupModes, StudentGroupTypes, AssignmentAttachment
 from learning.models import (
     AssignmentGroup, CourseInvitation, Enrollment, StudentAssignment, StudentGroup
 )
@@ -255,6 +255,21 @@ class EditOwnGradebook(Permission):
 class ViewAssignmentAttachment(Permission):
     name = "learning.view_assignment_attachment"
 
+
+@add_perm
+class DeleteAssignmentAttachment(Permission):
+    name = "learning.delete_assignment_attachment"
+
+
+@add_perm
+class DeleteAssignmentAttachmentAsTeacher(Permission):
+    name = "learning.delete_own_assignment_attachment"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, attachment: AssignmentAttachment):
+        course: Course = attachment.assignment.course
+        return course.is_actual_teacher(user.pk)
 
 @add_perm
 class ViewAssignmentAttachmentAsLearner(Permission):
