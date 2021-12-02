@@ -18,6 +18,7 @@ from learning.models import (
 
 from .models import AssignmentComment, Enrollment, Event
 from .services import StudentGroupService
+from .services.enrollment_service import recreate_assignments_for_student
 
 
 class CourseTeacherAdmin(BaseModelAdmin):
@@ -126,11 +127,16 @@ class EnrollmentAdmin(BaseModelAdmin):
         if created:
             course = instance.course
             student = instance.student
-            if course.group_mode == CourseGroupModes.BRANCH:
+            if course.group_mode != CourseGroupModes.NO_GROUPS:
                 student_group = StudentGroupService.resolve(course, student,
-                                                            settings.SITE_ID)
+                                                            course.main_branch.site_id)
                 instance.student_group = student_group
         return instance
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if not change:
+            recreate_assignments_for_student(obj)
 
 
 class StudentAssignmentWatcherInlineAdmin(admin.TabularInline):

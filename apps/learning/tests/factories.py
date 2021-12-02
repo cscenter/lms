@@ -131,7 +131,7 @@ class EnrollmentFactory(factory.django.DjangoModelFactory):
         else:
             self.student_group = StudentGroupService.resolve(self.course,
                                                              self.student,
-                                                             settings.SITE_ID)
+                                                             self.course.main_branch.site_id)
 
     @factory.post_generation
     def recreate_assignments(self, create, extracted, **kwargs):
