@@ -12,6 +12,7 @@ def test_get_teacher_not_spectator_courses():
     course_one, course_two, course_three = CourseFactory.create_batch(3)
     CourseTeacherFactory(course=course_one, teacher=teacher_one,
                          roles=CourseTeacher.roles.lecturer & CourseTeacher.roles.seminar)
+
     CourseTeacherFactory(course=course_two, teacher=teacher_one,
                          roles=CourseTeacher.roles.spectator)
     CourseTeacherFactory(course=course_three, teacher=teacher_one,
