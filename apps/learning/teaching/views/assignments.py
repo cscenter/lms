@@ -198,7 +198,8 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
         return self.object.course
 
     def get(self, request, *args, **kwargs):
-        context = self.get_context_data(object=self.object)
+        context = self.get_context_data(user=request.user,
+                                        object=self.object)
         return self.render_to_response(context)
 
     def get_queryset(self):
@@ -209,7 +210,7 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
                                 'course__semester')
                 .prefetch_related('assignmentattachment_set'))
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, user: User, **kwargs):
         context = super().get_context_data(**kwargs)
         context['a_s_list'] = (
             StudentAssignment.objects

@@ -20,7 +20,6 @@ from users.tests.factories import (
 # TODO: test assignment deadline
 
 
-@pytest.mark.skip("Add PermissionRequiredMixin to the view")
 @pytest.mark.django_db
 def test_course_list_view_permissions(client, assert_login_redirect):
     url = reverse('teaching:course_list')

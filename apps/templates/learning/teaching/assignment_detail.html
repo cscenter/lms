@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load tz %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+{% load core_tags %}
+{% load markdown from core_tags %}
+
+{% block content %}{% localtime off %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>
+        <a href="{% url 'teaching:assignments_check_queue' %}"><span class="fa fa-angle-left"></span></a>
+        {{ assignment.title }}<br>
+          <small><a href="{{ assignment.course.get_absolute_url }}">{{ assignment.course }}</a></small>
+      </h2>
+      {% if can_edit_delete %}
+      <div class="btn-toolbar">
+        <a href="{{ assignment.get_update_url }}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+        <a href="{{ assignment.get_delete_url }}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>
+      </div>
+      {% endif %}
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="ubertext">
+        {% markdown 3600 "assignment_text" assignment.pk assignment.modified %}
+          {{ assignment.text }}
+        {% endmarkdown %}
+      </div>
+      <p>
+        {% call_method assignment "deadline_at_local" request.user.time_zone as assignment_deadline_at_local %}
+        {% trans "Deadline" %}:
+        {{ assignment_deadline_at_local|naturalday:"d E Y" }} {{ assignment_deadline_at_local|time:"H:i" }}
+      </p>
+      <p>
+        {% trans "Submission Type" %}: {{ assignment.get_submission_type_display|lower }}
+      </p>
+      <p>
+        {% trans "Assignment Weight" %}: {{ assignment.weight|floatdot }}
+      </p>
+        <p>
+            {% trans "Estimated Execution Time" %}: {% if assignment.ttc == None %}-{% else %}{{ assignment.get_ttc_display }}{% endif %}
+        </p>
+        <p>
+            {% trans "Mean Execution Time" %}: {{ execution_time_mean|default_if_none:"-" }}
+        </p>
+        <p>
+            {% trans "Median Execution Time" %}: {{ execution_time_median|default_if_none:"-" }}
+        </p>
+      {% if assignment.assignmentattachment_set.all %}
+      {% trans "Attached files" %}:
+      <ul class="list-unstyled">
+        {% for aa in assignment.assignmentattachment_set.all %}
+        <li>
+          <span class="assignment-attachment">
+            <i class="fa fa-file"></i>
+            <a href="{{ aa.get_download_url }}">
+              {{ aa.file_name }}
+            </a>
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </div>
+  {% if a_s_list %}
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="row">
+        <div class="col-xs-12">
+          <table class="table" width="100%">
+            <thead>
+              <th>{% trans "Student" %}</th>
+              <th width="20%">
+                {% trans "State" %}
+              </th>
+            </thead>
+            {% for a_s in a_s_list %}
+            <tr class="{{ a_s.has_unread|yesno:"unread,noop" }}">
+              <td>
+                <a href="{{ a_s.get_teacher_url }}">{{ a_s.student.get_short_name }}</a> {% if a_s.student.is_volunteer %}<span class="text-muted">{% trans "Volunteer" %}</span>{% endif %}
+              </td>
+              <td>
+                <span style="white-space: nowrap;"
+                      class="badge assignment-status {{ a_s.state.css_class }}">
+                  {{ a_s.state_display }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endlocaltime off %}{% endblock content %}
