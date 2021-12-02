@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import include, path, re_path
 
 from learning.views import EventDetailView
@@ -8,9 +9,12 @@ from users.views import (
     ConnectedAuthServicesView, ProfileImageUpdate, UserDetailView, UserUpdateView
 )
 
-user_api_patterns = [
-    path('users/<int:user>/connected-accounts/', ConnectedAuthServicesView.as_view(), name="connected_accounts"),
-]
+user_api_patterns = []
+if settings.IS_SOCIAL_ACCOUNTS_ENABLED:
+    user_api_patterns += [
+        path('users/<int:user>/connected-accounts/', ConnectedAuthServicesView.as_view(), name="connected_accounts"),
+    ]
+
 
 urlpatterns = [
     path('users/<int:pk>/', UserDetailView.as_view(), name='user_detail'),

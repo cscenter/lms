@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import views
 from django.urls import include, path
 
@@ -25,6 +26,10 @@ urlpatterns = [
     path('password_reset/done/', views.PasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', pass_reset_confirm_view, name='password_reset_confirm'),
     path('reset/done/', views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
-
-    path('social/', include((social_patterns, 'social'))),
 ]
+
+
+if settings.IS_SOCIAL_ACCOUNTS_ENABLED:
+    urlpatterns += [
+        path('social/', include((social_patterns, 'social')))
+    ]

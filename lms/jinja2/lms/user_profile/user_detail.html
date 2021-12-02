@@ -10,7 +10,8 @@
 
 {% block javascripts %}
   <script type="text/javascript">
-    window.profileAppInit = {{ appData['props']|safe }};
+    window.__CSC__.photoApp = {{ appData['props']['photo']|safe }};
+    window.__CSC__.socialAccountsApp = {{ appData['props']['socialAccounts']|safe }};
   </script>
 {% endblock javascripts %}
 
@@ -83,7 +84,7 @@
             <li class="active" role="presentation">
               <a data-toggle="tab" href="#profile-tab" aria-controls="current" role="tab" aria-expanded="true">Основная информация</a>
             </li>
-            {% if is_editing_allowed %}
+            {% if is_editing_allowed and available_providers %}
               <li role="presentation">
                 <a href="#connected-accounts" role="tab" data-toggle="tab">Аккаунты</a>
               </li>
@@ -122,7 +123,7 @@
           </div>
         {% endif %}
       {% endif %}
-      {% if is_editing_allowed %}
+      {% if is_editing_allowed and available_providers %}
         <div class="tab-pane" role="tabpanel" id="connected-accounts">
           {% include "lms/user_profile/_tab_connected_accounts.html" %}
         </div>

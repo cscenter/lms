@@ -2,10 +2,9 @@
 import json
 import os
 from collections import OrderedDict
-from typing import Any, Dict
+from typing import Any
 
 from rest_framework import serializers, status
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from django.apps import apps
@@ -13,7 +12,7 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Count, Prefetch, Q, prefetch_related_objects
+from django.db.models import Count, Prefetch, prefetch_related_objects
 from django.http import HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -43,7 +42,7 @@ from .forms import CertificateOfParticipationCreateForm, UserProfileForm
 from .models import CertificateOfParticipation, User
 from .permissions import (
     CreateCertificateOfParticipation, ViewAccountConnectedServiceProvider,
-    ViewCertificateOfParticipation, ViewOwnAccountConnectedServiceProvider
+    ViewCertificateOfParticipation
 )
 from .services import (
     get_graduate_profile, get_student_profile, get_student_status_history
@@ -128,7 +127,9 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
         context['is_editing_allowed'] = is_editing_allowed
         context['is_certificates_of_participation_enabled'] = settings.IS_CERTIFICATES_OF_PARTICIPATION_ENABLED
         context['is_library_installed'] = is_library_installed
-        context['available_providers'] = is_editing_allowed and get_available_service_providers()
+        context['available_providers'] = (settings.IS_SOCIAL_ACCOUNTS_ENABLED and
+                                          is_editing_allowed and
+                                          get_available_service_providers())
         if is_library_installed and u.is_curator:
             from library.models import Borrow
             context['borrowed_books'] = (Borrow.objects
@@ -148,16 +149,19 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
                                     'assignment__deadline_at',
                                     'assignment__title'))
         context['assignments'] = u.is_curator and assignments_qs.all()
-        # Initial data for photo cropper
+        js_app_data = {"props": {}}
         photo_data = {}
-        if context['is_editing_allowed']:
+        if is_editing_allowed:
             photo_data = {
                 "userID": profile_user.pk,
                 "photo": profile_user.photo_data
             }
-        context["appData"] = {
-            "props": json.dumps(photo_data)
-        }
+        js_app_data["props"]["photo"] = json.dumps(photo_data)
+        js_app_data["props"]["socialAccounts"] = json.dumps({
+            "isEnabled": settings.IS_SOCIAL_ACCOUNTS_ENABLED and is_editing_allowed,
+            "userID": profile_user.pk,
+        })
+        context["appData"] = js_app_data
         # Collect stats about successfully passed courses
         if u.is_curator:
             context['stats'] = profile_user.stats(context['current_semester'])

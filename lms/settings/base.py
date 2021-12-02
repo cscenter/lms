@@ -459,6 +459,7 @@ CKEDITOR_CONFIGS = {
 }
 
 IS_CERTIFICATES_OF_PARTICIPATION_ENABLED = env.bool('IS_CERTIFICATES_OF_PARTICIPATION_ENABLED', default=True)
+IS_SOCIAL_ACCOUNTS_ENABLED = env.bool('IS_SOCIAL_ACCOUNTS_ENABLED', default=True)
 
 
 # FIXME: Distribute values to production, then remove defaults
