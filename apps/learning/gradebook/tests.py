@@ -21,7 +21,9 @@ from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.constants import AssignmentFormat
 from courses.models import CourseGroupModes, CourseTeacher
-from courses.tests.factories import AssignmentFactory, CourseFactory, CourseTeacherFactory
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseTeacherFactory
+)
 from grading.tests.factories import CheckerFactory
 from learning.gradebook import (
     BaseGradebookForm, GradeBookFilterForm, GradeBookFormFactory, gradebook_data
@@ -343,7 +345,7 @@ def test_save_gradebook_form(client):
         BaseGradebookForm.FINAL_GRADE_PREFIX + str(e2.pk): '',
     }
     data = gradebook_data(co)
-    form_cls = GradeBookFormFactory.build_form_class(data, False)
+    form_cls = GradeBookFormFactory.build_form_class(data, is_readonly=False)
     form = form_cls(data=form_data)
     # Initial should be empty since we want to save only sent data
     assert not form.initial
@@ -366,11 +368,11 @@ def test_save_gradebook_form(client):
         BaseGradebookForm.FINAL_GRADE_PREFIX + str(e2.pk): '',
     }
     data = gradebook_data(co)
-    form_cls = GradeBookFormFactory.build_form_class(data, False)
+    form_cls = GradeBookFormFactory.build_form_class(data, is_readonly=False)
     form = form_cls(data=form_data)
     assert not form.is_valid()
     form_data[field_name] = 2
-    form_cls = GradeBookFormFactory.build_form_class(gradebook_data(co), False)
+    form_cls = GradeBookFormFactory.build_form_class(gradebook_data(co), is_readonly=False)
     form = form_cls(data=form_data)
     assert form.is_valid()
     form.save()
@@ -396,7 +398,7 @@ def test_save_gradebook_l10n(client):
     sa = StudentAssignment.objects.get(student=student, assignment=a)
     field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
     data = gradebook_data(co)
-    form_cls = GradeBookFormFactory.build_form_class(data, False)
+    form_cls = GradeBookFormFactory.build_form_class(data, is_readonly=False)
     form = form_cls(data={field_name: 11})
     assert form.is_valid()
     form = form_cls(data={field_name: '11.1'})
@@ -425,7 +427,7 @@ def test_save_gradebook_less_than_passing_score(client):
         field_name: 1,  # value less than passing score
     }
     data = gradebook_data(co)
-    form_cls = GradeBookFormFactory.build_form_class(data, False)
+    form_cls = GradeBookFormFactory.build_form_class(data, is_readonly=False)
     form = form_cls(data=form_data)
     assert form.is_valid()
 

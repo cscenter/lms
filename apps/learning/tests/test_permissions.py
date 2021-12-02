@@ -10,7 +10,9 @@ from courses.models import (
     Course, CourseBranch, CourseGroupModes, CourseTeacher, StudentGroupTypes
 )
 from courses.services import CourseService
-from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory, CourseTeacherFactory
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseTeacherFactory, SemesterFactory
+)
 from learning.models import EnrollmentPeriod, StudentAssignment
 from learning.permissions import (
     CreateAssignmentComment, CreateAssignmentCommentAsLearner,

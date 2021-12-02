@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from django import forms
 from django.conf import settings
@@ -14,10 +14,6 @@ from learning.models import Course, Enrollment, StudentAssignment, StudentGroup
 
 __all__ = ('ConflictError', 'BaseGradebookForm', 'AssignmentScore',
            'EnrollmentFinalGrade', 'GradeBookFormFactory', 'GradeBookFilterForm')
-
-from learning.permissions import EditGradebook
-
-from users.models import User
 
 ConflictError = namedtuple('ConflictError', ['field_name', 'unsaved_value'])
 
@@ -158,10 +154,10 @@ class AssignmentScore(ScoreField):
 
 
 class EnrollmentFinalGrade(forms.ChoiceField):
-    def __init__(self, student, course, readonly: Optional[bool] = False):
+    def __init__(self, student, course, is_readonly: Optional[bool] = False):
         widget = forms.Select(attrs={
             'initial': student.final_grade,
-            'disabled': readonly
+            'disabled': is_readonly
         })
         super().__init__(choices=course.grade_choices,
                          required=False,
@@ -182,7 +178,8 @@ class EnrollmentFinalGrade(forms.ChoiceField):
 
 class GradeBookFormFactory:
     @classmethod
-    def build_form_class(cls, gradebook: GradeBookData, is_readonly: Optional[bool] = True):
+    def build_form_class(cls, gradebook: GradeBookData, *,
+                         is_readonly: Optional[bool] = True):
         """
         Creates new form.Form subclass with students scores for
         each offline assignment (which student can't pass on this site) and
@@ -191,12 +188,12 @@ class GradeBookFormFactory:
         but stores value provided to field constructor
         (see `CustomBoundField`) instead of the value provided to the form.
         """
-        cls_dict = fields = {}
+        fields: Dict[str, forms.Field] = {}
         max_number = settings.DATA_UPLOAD_MAX_NUMBER_FIELDS
-        number_of_fields_is_exceeded = (gradebook.number_of_fields > max_number)
-        is_score_readonly = (is_readonly or
-                             len(gradebook.students) > 100 or
-                             number_of_fields_is_exceeded)
+        is_number_of_fields_exceeded = (gradebook.number_of_fields > max_number)
+        is_assignment_score_readonly = (is_readonly or
+                                        len(gradebook.students) > 100 or
+                                        is_number_of_fields_exceeded)
 
         for student_assignments in gradebook.submissions:
             for sa in student_assignments:
@@ -204,16 +201,17 @@ class GradeBookFormFactory:
                 if not sa:
                     continue
                 assignment = sa.assignment
-                if not (assignment.is_online or is_score_readonly):
+                if not (assignment.is_online or is_assignment_score_readonly):
                     k = BaseGradebookForm.GRADE_PREFIX + str(sa.id)
                     fields[k] = AssignmentScore(assignment, sa)
 
         for gs in gradebook.students.values():
             k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(gs.enrollment_id)
             fields[k] = EnrollmentFinalGrade(gs, gradebook.course, is_readonly)
+        cls_dict: Dict[str, Any] = fields
         cls_dict["_course"] = gradebook.course
         cls_dict["is_readonly"] = is_readonly
-        cls_dict["is_score_readonly"] = is_score_readonly
+        cls_dict["is_score_readonly"] = is_assignment_score_readonly
         return type("GradebookForm", (BaseGradebookForm,), cls_dict)
 
     @classmethod

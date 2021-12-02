@@ -6,7 +6,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 
 from django.contrib import messages
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Prefetch
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
@@ -124,8 +124,8 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
     def get_form(self, user: User, data=None, files=None,
                  student_group: Optional[int] = None, **kwargs):
         self.data = gradebook_data(self.course, student_group)
-        form_readonly = not user.has_perm(EditGradebook.name, self.course)
-        cls = GradeBookFormFactory.build_form_class(self.data, form_readonly)
+        can_edit_gradebook = not user.has_perm(EditGradebook.name, self.course)
+        cls = GradeBookFormFactory.build_form_class(self.data, is_readonly=can_edit_gradebook)
         # Set initial data for all GET-requests
         if not data and "initial" not in kwargs:
             initial = GradeBookFormFactory.transform_to_initial(self.data)

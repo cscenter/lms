@@ -18,10 +18,8 @@ def get_teacher_courses(teacher: User) -> CourseQuerySet:
 
 
 def get_teacher_not_spectator_courses(teacher: User) -> CourseQuerySet:
-    return (Course.objects
-            .filter(teachers=teacher,
-                    course_teachers__roles=~CourseTeacher.roles.spectator)
-            .select_related("meta_course", "semester", "main_branch"))
+    return (get_teacher_courses(teacher)
+            .filter(course_teachers__roles=~CourseTeacher.roles.spectator))
 
 
 def get_course_assignments(course: Union[CourseID, Course]) -> AssignmentQuerySet:
