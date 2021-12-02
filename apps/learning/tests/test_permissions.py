@@ -10,7 +10,7 @@ from courses.models import (
     Course, CourseBranch, CourseGroupModes, CourseTeacher, StudentGroupTypes
 )
 from courses.services import CourseService
-from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory, CourseTeacherFactory
 from learning.models import EnrollmentPeriod, StudentAssignment
 from learning.permissions import (
     CreateAssignmentComment, CreateAssignmentCommentAsLearner,
@@ -478,14 +478,18 @@ def test_update_assignment_execution_time():
 def test_view_gradebook():
     teacher = TeacherFactory()
     teacher_other = TeacherFactory()
+    teacher_spectator = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
-    assert teacher.has_perm(ViewOwnGradebook.name, course)
-    assert not teacher_other.has_perm(ViewOwnGradebook.name, course)
+    CourseTeacherFactory(course=course, teacher=teacher_spectator,
+                         roles=CourseTeacher.roles.spectator)
+    assert not teacher.has_perm(ViewGradebook.name)
+    assert teacher.has_perm(ViewGradebook.name, course)
+    assert not teacher_other.has_perm(ViewGradebook.name, course)
+    assert teacher_spectator.has_perm(ViewGradebook.name, course)
     e = EnrollmentFactory(course=course)
-    assert not e.student.has_perm(ViewOwnGradebook.name, course)
-    assert not UserFactory().has_perm(ViewOwnGradebook.name, course)
+    assert not e.student.has_perm(ViewGradebook.name, course)
+    assert not UserFactory().has_perm(ViewGradebook.name, course)
     curator = CuratorFactory()
-    assert not curator.has_perm(ViewOwnGradebook.name, course)
     assert curator.has_perm(ViewGradebook.name)
 
 
@@ -493,9 +497,13 @@ def test_view_gradebook():
 def test_edit_gradebook():
     teacher = TeacherFactory()
     teacher_other = TeacherFactory()
+    teacher_spectator = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=teacher_spectator,
+                         roles=CourseTeacher.roles.spectator)
     assert teacher.has_perm(EditGradebook.name, course)
     assert not teacher_other.has_perm(EditGradebook.name, course)
+    assert not teacher_spectator.has_perm(EditGradebook.name, course)
     e = EnrollmentFactory(course=course)
     assert not e.student.has_perm(EditGradebook.name, course)
     assert not UserFactory().has_perm(EditGradebook.name, course)
