@@ -148,7 +148,7 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
                           .order_by('assignment__course__meta_course__name',
                                     'assignment__deadline_at',
                                     'assignment__title'))
-        context['assignments'] = u.is_curator and assignments_qs.all()
+        context['personal_assignments'] = u.is_curator and assignments_qs.all()
         js_app_data = {"props": {}}
         photo_data = {}
         if is_editing_allowed:

@@ -26,7 +26,6 @@
             {% endwith -%}
           </div>
           {% if is_editing_allowed %}
-
             <div class="profile-actions">
               <a href="#user-photo-upload">{% trans %}Change photo{% endtrans %}</a>
               <a href="{{ profile_user.get_update_profile_url() }}"><i class="fa fa-cog"></i> {% trans %}Edit{% endtrans %}</a>

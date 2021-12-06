@@ -1,4 +1,4 @@
-{% if assignments %}
+{% if personal_assignments %}
   <h4 class="_mtop-30">
     {% trans %}Assignments{% endtrans %}:
     <div class="btn-group pull-right assignment-list-control" role="group">
@@ -11,7 +11,7 @@
       <th>{% trans %}Assignment{% endtrans %}</th>
       <th>{% trans %}Grade{% endtrans %}</th>
     </tr>
-    {% for course_id, student_assignments in student_assignments_by_course|groupby('assignment.course_id') %}
+    {% for course_id, student_assignments in personal_assignments|groupby('assignment.course_id') %}
       {% for a_s in student_assignments %}
         <tr>
           <td>

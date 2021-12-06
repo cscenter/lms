@@ -189,7 +189,7 @@
           </div>
           {% if student_profile.comment %}
             <span class="student-comment-metainfo pull-right">
-                {% if student_profile.comment_last_author_id %}{{ student_profile.comment_last_author.get_short_name }}, {% endif %}
+                {% if student_profile.comment_last_author_id %}{{ student_profile.comment_last_author.get_short_name() }}, {% endif %}
                 {{ student_profile.comment_changed_at|date("d.m.Y H:i") }}
               </span>
           {% endif %}
