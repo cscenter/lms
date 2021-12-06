@@ -220,7 +220,7 @@
             {% endif %}
           {% endif %}
           <div class="card">
-            <div class="card-header ch-alt p-15">Руководители</div>
+            <div class="card-header bg-gray p-15">Руководители</div>
             <div class="card-body p-15">
               {% for s in project.supervisors.all %}
                 {{ s.full_name }}
@@ -230,7 +230,7 @@
           </div>
           {% if project.supervisor_presentation or project.presentation %}
             <div class="card">
-              <div class="card-header ch-alt p-15">Презентации</div>
+              <div class="card-header bg-gray p-15">Презентации</div>
               <div class="card-body p-15">
                 {% if project.supervisor_presentation %}
                   <a class="presentation-link" href="{{ project.supervisor_presentation.url }}"><i class="fa fa-file "></i> Презентация
@@ -243,7 +243,7 @@
             </div>
           {% endif %}
           <div class="card">
-            <div class="card-header ch-alt p-15">Участники проекта</div>
+            <div class="card-header bg-gray p-15">Участники проекта</div>
             <div class="card-body p-15">
               {% for ps in project.projectstudent_set.all %}
                 <a href="{{ ps.student.get_absolute_url }}" class="profile-link">{{ ps.student.get_abbreviated_name }}</a><br>

@@ -35,25 +35,27 @@
       </div>
       <div class="row">
         <div class="col-xs-9">
+        <div class="panel-group">
 
-          <div class="panel-group">
-            <div class="c-project-description panel">
-              <div class="panel-heading">Цели и задачи проекта</div>
-              <div class="panel-collapse collapse" id="project-description" aria-expanded="false">
-                <div class="panel-body">
-                  {% markdown 3600 "project_detail_description" project.pk project.modified %}
-                    {{ project.description|default:"Описание проекта не найдено." }}
-                  {% endmarkdown %}
-                </div>
+          <div class="panel bg-gray">
+            <div class="panel-heading panel-title _arrowed">Цели и задачи проекта</div>
+            <div class="panel-collapse collapse" id="project-description" aria-expanded="false">
+              <div class="panel-body _overflow">
+                {% markdown 3600 "project_detail_description" project.pk project.modified %}
+                  {{ project.description|default:"Описание проекта не найдено." }}
+                {% endmarkdown %}
               </div>
             </div>
           </div>
+        </div>
 
-          <div class="card">
-            <div class="card-header ch-alt __report-text">Текст отчета  {% if request.user.is_curator %}
-              <a href="{% url "admin:projects_report_change" report.pk %}" target="_blank"><i
-                class="fa fa-pencil-square-o"></i></a>{% endif %}</div>
-            <div class="card-body card-padding">
+          <div class="panel panel-default">
+            <div class="panel-heading bg-gray">
+              <div class="panel-title">
+                Текст отчета {% if request.user.is_curator %}<a href="{% url "admin:projects_report_change" report.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}
+              </div>
+            </div>
+            <div class="panel-body">
               <div class="ubertext">
                 {% markdown 3600 "report_detail" report.pk report.modified %}
                   {{ report.text }}
@@ -68,29 +70,31 @@
 
           <ul class="comment-list">
             {% for comment in comments %}
+              {% call_method request.user "has_perm" "projects.change_own_reportcomment" comment as can_change_own_comment %}
+              {% call_method request.user "has_perm" "projects.change_reportcomment" as can_change_all_comments %}
               <li class="{% if comment.author == student %}student{% else %}reviewer{% endif %}">
-                {% call_method request.user "has_perm" "projects.change_own_reportcomment" comment as can_change_own_comment %}
-                {% call_method request.user "has_perm" "projects.change_reportcomment" as can_change_all_comments %}
-                <div class="csc-well assignment-comment"
-                     {% if can_change_own_comment or can_change_all_comments %}data-id="{{ comment.pk }}"{% endif %}>
-                  {% if can_change_own_comment or can_change_all_comments %}
-                    <a href="{% url "projects:report_comment_edit" project.pk report.pk comment.pk %}" class="__edit pull-right">
-                      {% if user.is_curator %}#{{ comment.pk }}{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
-                  {% endif %}
-                  <h5 class="assignment">{{ comment.author.get_full_name }}</h5>
-                  <div class="ubertext">
-                    {% markdown 3600 "assignment_comment" comment.pk comment.modified %}
-                      {{ comment.text }}
-                    {% endmarkdown %}
-                  </div>
-                  <div class="metainfo-holder">
+                <div class="panel bg-gray assignment-submission assignment-comment" {% if can_change_own_comment or can_change_all_comments %}data-id="{{ comment.pk }}"{% endif %}>
+                  <div class="panel-body">
+                    <span class="assignment-submission__date pull-right">{{ comment.created|timezone:project.get_timezone|date:"d.m.Y H:i" }}</span>
+                    <h5 class="assignment">{{ comment.author.get_full_name }}</h5>
+                    <div class="ubertext">
+                      {% markdown 3600 "report_comment" comment.pk comment.modified %}{{ comment.text }}{% endmarkdown %}
+                    </div>
                     {% if comment.attached_file %}
-                      <span class="assignment-attachment"><i class="fa fa-file"></i></span>
-                      <a href="{{ comment.get_attachment_download_url }}">{{ comment.attached_file_name }}</a>
-
+                    <div class="metainfo-holder">
+                      <div class="assignment-attachment">
+                        <i class="fa fa-file"></i> <a href="{{ comment.get_attachment_download_url }}">{{ comment.attached_file_name }}</a>
+                      </div>
+                    </div>
                     {% endif %}
-                    <span class="metainfo pull-right">{{ comment.created|timezone:project.get_timezone|date:"d.m.Y H:i" }}</span>
                   </div>
+                  {% if can_change_own_comment or can_change_all_comments %}
+                    <div class="panel-footer" style="border-top: 1px solid #eee;">
+                      <div class="clearfix">
+                        <a href="{% url "projects:report_comment_edit" project.pk report.pk comment.pk %}" class="__edit pull-right">Редактировать</a>
+                      </div>
+                    </div>
+                  {% endif %}
                 </div>
               </li>
             {% endfor %}
@@ -103,30 +107,35 @@
           {% endif %}
 
           {% if user.is_curator %}
-            <div class="card">
-              <div class="card-header ch-alt"><h2>Оценка куратора</h2></div>
-              <div class="card-body card-padding -preliminary-scores">
-                {% if can_assess %}
-                  {% crispy report_curator_assessment_form %}
-                {% else %}
-                  <ul class="list-unstyled">
-                    <li class="list-group-item">
-                      <h4 class="list-group-item-heading">Жизнь в репозитории</h4>
-                      <p class="list-group-item-text">
-                        {{ report.get_score_activity_display|default:"Нет оценки" }}<br>
-                        Комментарий: {{ report.score_activity_note|default:"-" }}
-                      </p>
-                    </li>
-                    <li class="list-group-item">
-                      <h4 class="list-group-item-heading">Качество отчета</h4>
-                      <p class="list-group-item-text">
-                        {{ report.get_score_quality_display|default:"Нет оценки" }}<br>
-                        Комментарий: {{ report.score_quality_note|default:"-" }}
-                      </p>
-                    </li>
-                  </ul>
-                {% endif %}
+            <div class="panel panel-default">
+              <div class="panel-heading bg-gray">
+                <div class="panel-title">Оценка куратора</div>
               </div>
+
+                {% if can_assess %}
+                  <div class="panel-body bg-gray p-15">
+                    {% crispy report_curator_assessment_form %}
+                  </div>
+                {% else %}
+                  <div class="panel-body px-0 py-10">
+                    <ul class="list-unstyled list-group _border-0 mb-0">
+                      <li class="list-group-item">
+                        <h4 class="list-group-item-heading">Жизнь в репозитории</h4>
+                        <p class="list-group-item-text">
+                          {{ report.get_score_activity_display|default:"Нет оценки" }}<br>
+                          Комментарий: {{ report.score_activity_note|default:"-" }}
+                        </p>
+                      </li>
+                      <li class="list-group-item">
+                        <h4 class="list-group-item-heading">Качество отчета</h4>
+                        <p class="list-group-item-text">
+                          {{ report.get_score_quality_display|default:"Нет оценки" }}<br>
+                          Комментарий: {{ report.score_quality_note|default:"-" }}
+                        </p>
+                      </li>
+                    </ul>
+                  </div>
+                {% endif %}
             </div>
           {% endif %}
 
@@ -146,8 +155,8 @@
             </div>
           {% elif is_reviewer and review_form.instance.is_completed %}
             <div class="card">
-              <div class="card-header ch-alt"><h2>Ваша итоговая оценка</h2></div>
-              <div class="card-body card-padding -preliminary-scores">
+              <div class="card-header bg-gray"><h2>Ваша итоговая оценка</h2></div>
+              <div class="card-body p-15">
                 {% include "projects/_report_preliminary_assessment.html" with review=own_review %}
               </div>
             </div>
@@ -162,7 +171,7 @@
                     {{ review.reviewer }} / <b>{% if review.is_completed %}Завершена{% else %}Не завершена{% endif %}</b>
                   </a>
                   <div class="panel-collapse collapse" id="project-review-{{ review.pk }}" aria-expanded="false">
-                    <div class="panel-body -preliminary-scores">
+                    <div class="panel-body px-0 py-10">
                       {% include "projects/_report_preliminary_assessment.html" %}
                     </div>
                   </div>
@@ -171,7 +180,7 @@
               {% for reviewer in without_reviews %}
                 <div class="panel panel-default">
                   <div class="panel-heading">
-                    <div class="panel-title no-collapse">
+                    <div class="no-collapse">
                       {{ reviewer }} / <b>Не оценивал{% if reviewer.gender == reviewer.GENDER_FEMALE %}а{% endif %}</b>
                     </div>
                   </div>
@@ -182,8 +191,7 @@
 
           {% if request.user.is_curator and report.status == report.SUMMARY %}
             <div class="csc-well" id="report-summarize-form">
-                <span href="#report-summarize-form" class="collapse-link" style="border: none;">Подведение итогов&nbsp;(
-                  {% blocktrans count counter=report_summary_form.instance.final_score trimmed %}
+                <span href="#report-summarize-form" class="collapse-link" style="border: none;">Подведение итогов&nbsp;({% blocktrans count counter=report_summary_form.instance.final_score trimmed %}
                     {{ counter }} point
                     {% plural %}
                     {{ counter }} points
@@ -192,16 +200,19 @@
             </div>
           {% elif report.is_completed %}
             {% if request.user.is_curator or is_author %}
-              <div class="card">
-                <div class="card-header ch-alt"><h2>Итоги проверки</h2></div>
-                <div class="card-body card-padding -preliminary-scores">
-                  <ul class="list-unstyled">
-                    <li class="list-group-item">
-                      <h4 class="list-group-item-heading">Суммарный балл &mdash; {{ report.final_score }}</h4>
-                      <p class="list-group-item-text">{{ report.final_score_note }}</p>
-                    </li>
-                  </ul>
-
+              <div class="panel panel-default">
+                <div class="panel-heading panel-title bg-gray">Итоги проверки</div>
+                <div class="panel-body px-0 py-10">
+                    <ul class="list-unstyled list-group _border-0 mb-0">
+                      <li class="list-group-item">
+                        <h4 class="list-group-item-heading">Суммарный балл &mdash; {% blocktrans count counter=report.final_score trimmed %}
+                    {{ counter }} point
+                    {% plural %}
+                    {{ counter }} points
+                  {% endblocktrans %}</h4>
+                        <p class="list-group-item-text">{{ report.final_score_note }}</p>
+                      </li>
+                    </ul>
                 </div>
               </div>
             {% endif %}

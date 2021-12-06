@@ -8,12 +8,14 @@
 {% block content %}
     <div class="container">
         {% if faq %}
-            <div class="panel-group panel-group-continuous">
+            <div class="panel-group">
                 {% for qa in faq %}
                     <div class="panel">
-                        <a class="panel-heading" id="question-{{ qa.pk }}" aria-expanded="false" href="#answer-{{ qa.pk }}">{{ qa.title }}</a>
+                        <a class="panel-heading _arrowed" id="question-{{ qa.pk }}" aria-expanded="false" href="#answer-{{ qa.pk }}">
+                          <span class="panel-title">{{ qa.title }}</span>
+                        </a>
                         <div class="panel-collapse collapse" id="answer-{{ qa.pk }}"  aria-expanded="false">
-                            <div class="panel-body">
+                            <div class="panel-body _arrowed">
                             {% markdown 3600 "internships_answers" qa.pk qa.modified %}
                                 {{ qa.content }}
                             {% endmarkdown %}
