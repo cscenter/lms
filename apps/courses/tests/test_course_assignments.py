@@ -207,7 +207,8 @@ def test_view_course_assignment_attachment_delete_security(client,
 @pytest.mark.django_db
 def test_view_course_assignment_edit_delete_btn_visibility(client):
     """
-    The buttons for editing and deleting an assignment should only be displayed if the user has permissions to do so.
+    The buttons for editing and deleting an assignment should
+    only be displayed if the user has permissions to do so.
     """
     teacher, spectator = TeacherFactory.create_batch(2)
     course = CourseFactory(teachers=[teacher])
