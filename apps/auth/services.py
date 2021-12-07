@@ -23,7 +23,7 @@ def get_connected_accounts(*, user: Union[User, int]) -> List[ConnectedAuthServi
 def get_available_service_providers() -> List[ServiceProvider]:
     return [
         ServiceProvider(code='gerrit', name='review.compscicenter.ru', is_readonly=True),
-        ServiceProvider(code='gitlab-manytask', name='GibLab ManyTask'),
+        ServiceProvider(code='gitlab-manytask', name='gitlab.manytask.org'),
         # ServiceProvider(code='github', name='Github'),
         # ServiceProvider(code='ya', name='Yandex.Login'),
     ]
