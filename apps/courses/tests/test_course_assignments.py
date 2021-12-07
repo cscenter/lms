@@ -6,11 +6,12 @@ from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
+from auth.permissions import perm_registry
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.constants import AssigneeMode
 from courses.models import Assignment, CourseTeacher, AssignmentAttachment
-from courses.permissions import CreateAssignment, EditAssignment
+from courses.permissions import CreateAssignment, EditAssignment, DeleteAssignmentAttachment
 from courses.tests.factories import AssignmentFactory, CourseFactory, CourseTeacherFactory, AssignmentAttachmentFactory
 from users.tests.factories import CuratorFactory, TeacherFactory
 
@@ -166,6 +167,7 @@ def test_course_assignment_delete(client, assert_redirect):
 
 @pytest.mark.django_db
 def test_view_course_assignment_attachment_delete_security(client,
+                                                           lms_resolver,
                                                            assert_login_redirect):
     teacher, spectator = TeacherFactory.create_batch(2)
     course = CourseFactory(teachers=[teacher])
@@ -173,6 +175,12 @@ def test_view_course_assignment_attachment_delete_security(client,
                          roles=CourseTeacher.roles.spectator)
     attachment = AssignmentAttachmentFactory(assignment__course=course)
     delete_url = attachment.get_delete_url()
+
+    resolver = lms_resolver(delete_url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == DeleteAssignmentAttachment.name
+    assert resolver.func.view_class.permission_required in perm_registry
+
 
     assert_login_redirect(delete_url)
 
