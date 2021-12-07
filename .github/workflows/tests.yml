@@ -13,6 +13,10 @@ on:
       - master
     types: [review_requested, ready_for_review]
 
+concurrency:
+  group: ${{ github.ref_name }}
+  cancel-in-progress: true
+
 env:
   PYTHON_IMAGE: python:3.9-slim-buster
   LOCAL_IMAGE_DJANGO_PROD: localhost:5000/lms-backend-django:latest
