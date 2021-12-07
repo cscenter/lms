@@ -253,7 +253,10 @@ def test_download_assignment_attachment(lms_resolver):
 
 
 @pytest.mark.django_db
-def test_view_course_assignment_add_hidden_without_perm(client):
+def test_view_course_assignment_add_btn_visibility(client):
+    """
+        The add assignment button is displayed only if the user has permission to do so.
+    """
     teacher, spectator = TeacherFactory.create_batch(2)
     course = CourseFactory(teachers=[teacher])
     CourseTeacherFactory(course=course, teacher=spectator,

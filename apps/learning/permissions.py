@@ -257,21 +257,6 @@ class ViewAssignmentAttachment(Permission):
 
 
 @add_perm
-class DeleteAssignmentAttachment(Permission):
-    name = "learning.delete_assignment_attachment"
-
-
-@add_perm
-class DeleteAssignmentAttachmentAsTeacher(Permission):
-    name = "learning.delete_own_assignment_attachment"
-
-    @staticmethod
-    @rules.predicate
-    def rule(user, attachment: AssignmentAttachment):
-        course: Course = attachment.assignment.course
-        return course.is_actual_teacher(user.pk)
-
-@add_perm
 class ViewAssignmentAttachmentAsLearner(Permission):
     name = "study.view_assignment_attachment"
 

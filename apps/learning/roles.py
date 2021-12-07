@@ -9,7 +9,8 @@ from courses.permissions import (
     ChangeMetaCourse, CreateAssignment, CreateOwnAssignment, DeleteCourseClass,
     DeleteOwnCourseClass, EditAssignment, EditCourseClass, EditOwnAssignment,
     EditOwnCourseClass, ViewAssignment, ViewCourse, ViewCourseAssignments,
-    ViewCourseClassMaterials, ViewCourseContacts, ViewOwnAssignment, DeleteAssignment, DeleteOwnAssignment
+    ViewCourseClassMaterials, ViewCourseContacts, ViewOwnAssignment, DeleteAssignment, DeleteOwnAssignment,
+    DeleteAssignmentAttachment, DeleteAssignmentAttachmentAsTeacher
 )
 from info_blocks.permissions import ViewInternships
 from users.permissions import (
@@ -33,8 +34,7 @@ from .permissions import (
     ViewOwnEnrollments, ViewOwnGradebook, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments, ViewRelatedEnrollments, ViewRelatedStudentAssignment,
     ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList, ViewStudentGroup,
-    ViewStudentGroupAsTeacher, ViewStudyMenu, ViewTeachingMenu, DeleteAssignmentAttachment,
-    DeleteAssignmentAttachmentAsTeacher
+    ViewStudentGroupAsTeacher, ViewStudyMenu, ViewTeachingMenu
 )
 
 

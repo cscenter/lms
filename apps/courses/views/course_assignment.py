@@ -17,9 +17,8 @@ from courses.forms import (
     StudentGroupAssigneeFormFactory
 )
 from courses.models import Assignment, AssignmentAttachment, Course, CourseGroupModes
-from courses.permissions import CreateAssignment, EditAssignment, DeleteAssignment
+from courses.permissions import CreateAssignment, EditAssignment, DeleteAssignment, DeleteAssignmentAttachment
 from courses.views.mixins import CourseURLParamsMixin
-from learning.permissions import DeleteAssignmentAttachment
 from learning.services import AssignmentService, StudentGroupService
 
 __all__ = ('AssignmentCreateView', 'AssignmentUpdateView',
@@ -195,7 +194,9 @@ class AssignmentAttachmentDeleteView(PermissionRequiredMixin, CourseURLParamsMix
     def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
         super().setup(request, *args, **kwargs)
         queryset = (AssignmentAttachment.objects
-                    .filter(pk=kwargs['pk']))
+                    .filter(pk=kwargs['pk'],
+                            assignment__course=self.course)
+                    .select_related('assignment'))
         self.attachment = get_object_or_404(queryset)
         self.attachment.assignment.course = self.course
 

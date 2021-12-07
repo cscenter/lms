@@ -165,13 +165,16 @@ def test_course_assignment_delete(client, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_course_assignment_attachment_delete_security(client):
+def test_view_course_assignment_attachment_delete_security(client,
+                                                           assert_login_redirect):
     teacher, spectator = TeacherFactory.create_batch(2)
     course = CourseFactory(teachers=[teacher])
     CourseTeacherFactory(course=course, teacher=spectator,
                          roles=CourseTeacher.roles.spectator)
     attachment = AssignmentAttachmentFactory(assignment__course=course)
     delete_url = attachment.get_delete_url()
+
+    assert_login_redirect(delete_url)
 
     client.login(spectator)
     response = client.get(delete_url)
@@ -185,12 +188,19 @@ def test_course_assignment_attachment_delete_security(client):
     assert response.status_code == 200
     response = client.post(delete_url, follow=True)
     assert response.status_code == 200
+    assert (not AssignmentAttachment.objects
+            .filter(pk=attachment.pk)
+            .count()
+    )
 
     assert not AssignmentAttachment.objects.count()
 
 
 @pytest.mark.django_db
-def test_view_course_assignment_edit_delete_hidden_without_perm(client):
+def test_view_course_assignment_edit_delete_btn_visibility(client):
+    """
+    The buttons for editing and deleting an assignment should only be displayed if the user has permissions to do so.
+    """
     teacher, spectator = TeacherFactory.create_batch(2)
     course = CourseFactory(teachers=[teacher])
     CourseTeacherFactory(course=course, teacher=spectator,

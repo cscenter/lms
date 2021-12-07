@@ -4,12 +4,12 @@ from core.utils import instance_memoize
 from courses.constants import MaterialVisibilityTypes
 from courses.models import CourseTeacher
 from courses.permissions import (
-    CreateAssignment, EditAssignment, EditCourseClass, ViewCourseClassMaterials, DeleteAssignment
+    CreateAssignment, EditAssignment, EditCourseClass, ViewCourseClassMaterials, DeleteAssignment,
+    DeleteAssignmentAttachment
 )
 from courses.tests.factories import (
     AssignmentFactory, CourseClassFactory, CourseFactory, CourseTeacherFactory, AssignmentAttachmentFactory
 )
-from learning.permissions import DeleteAssignmentAttachment
 from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
 from users.models import User

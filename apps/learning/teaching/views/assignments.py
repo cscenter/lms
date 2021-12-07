@@ -198,8 +198,7 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
         return self.object.course
 
     def get(self, request, *args, **kwargs):
-        context = self.get_context_data(user=request.user,
-                                        object=self.object)
+        context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
 
     def get_queryset(self):
@@ -210,7 +209,7 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
                                 'course__semester')
                 .prefetch_related('assignmentattachment_set'))
 
-    def get_context_data(self, user: User, **kwargs):
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['a_s_list'] = (
             StudentAssignment.objects
@@ -228,10 +227,8 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
         exec_median = AssignmentService.get_median_execution_time(self.object)
         context["execution_time_mean"] = humanize_duration(exec_mean)
         context["execution_time_median"] = humanize_duration(exec_median)
-        context["can_edit_delete"] = (
-            user.has_perm(EditAssignment.name, self.object) or
-            user.has_perm(DeleteAssignment.name, self.object)
-        )
+        context["can_edit_assignment"] = self.request.user.has_perm(EditAssignment.name, self.object)
+        context["can_delete_assignment"] = self.request.user.has_perm(DeleteAssignment.name, self.object)
         return context
 
 
