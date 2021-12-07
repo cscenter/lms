@@ -143,3 +143,13 @@ class ConnectedAuthService(TimestampedModel, DjangoUserMixin):
         username_field = cls.username_field()
         field = cls.user_model()._meta.get_field(username_field)
         return field.max_length
+
+    @property
+    def login(self) -> Optional[str]:
+        if self.provider == "gerrit":
+            return self.uid
+        elif isinstance(self.extra_data, dict):
+            if "login" in self.extra_data:
+                return self.extra_data["login"]
+            return self.extra_data.get("username", None)
+        return None

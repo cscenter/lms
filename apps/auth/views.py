@@ -2,12 +2,13 @@ from typing import Iterable
 
 from braces.views import LoginRequiredMixin
 from social_core.actions import do_auth, do_disconnect
+from social_core.exceptions import AuthAlreadyAssociated, AuthException, AuthFailed
 from social_core.utils import partial_pipeline_data, setting_url
 from social_django.strategy import DjangoStrategy
 from social_django.utils import psa
 
 from django.conf import settings
-from django.contrib import auth
+from django.contrib import auth, messages
 from django.contrib.auth import REDIRECT_FIELD_NAME, views
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
@@ -185,7 +186,12 @@ def connect_service_complete(request, backend: str, *args, **kwargs):
     else:
         # Runs authentication process through the chain:
         # ... -> strategy.authenticate -> ... backend.authenticate -> ... -> pipeline
-        user = backend.complete(user=user, *args, **kwargs)
+        try:
+            user = backend.complete(user=user, *args, **kwargs)
+        except AuthException as e:
+            messages.error(request, str(e))
+            url = user.get_absolute_url()
+            return HttpResponseRedirect(redirect_to=f"{url}#connected-accounts")
 
     # pop redirect value before the session is trashed on login(), but after
     # the pipeline so that the pipeline can change the redirect if needed
@@ -198,6 +204,7 @@ def connect_service_complete(request, backend: str, *args, **kwargs):
     if user and not isinstance(user, user_model):
         return user
 
+    messages.success(request, "Аккаунт успешно подключен")
     redirect_url = reverse('user_detail', subdomain=settings.LMS_SUBDOMAIN, kwargs={
         "pk": user.pk
     })

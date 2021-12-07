@@ -2,7 +2,7 @@
 import json
 import os
 from collections import OrderedDict
-from typing import Any
+from typing import Any, Optional
 
 from rest_framework import serializers, status
 from rest_framework.response import Response
@@ -227,9 +227,14 @@ class ConnectedAuthServicesView(RolePermissionRequiredMixin, APIBaseView):
         user = serializers.IntegerField()
 
     class OutputSerializer(serializers.ModelSerializer):
+        login = serializers.SerializerMethodField()
+
         class Meta:
             model = ConnectedAuthService
-            fields = ('provider', 'uid')
+            fields = ('provider', 'uid', 'login')
+
+        def get_login(self, obj: ConnectedAuthService) -> Optional[str]:
+            return obj.login
 
     def setup(self, request: AuthenticatedHttpRequest, **kwargs: Any):
         super().setup(request, **kwargs)
