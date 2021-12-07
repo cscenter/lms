@@ -57,12 +57,13 @@ class StudentFilter(FilterSet):
                                  method='courses_filter')
     academic_disciplines = CharInFilter(field_name='academic_disciplines', distinct=True)
     partners = NumberInFilter(field_name='partner')
+    is_paid_basis = NumberInFilter(field_name='is_paid_basis')
 
     class Meta:
         model = StudentProfile
         fields = ("name", "branches", "profile_types", "year_of_curriculum",
                   "year_of_admission", "types", "status", "cnt_enrollments",
-                  "academic_disciplines", "partners")
+                  "academic_disciplines", "partners", "is_paid_basis")
 
     @property
     def qs(self):

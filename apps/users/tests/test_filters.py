@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from core.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory, SiteFactory
 from core.tests.settings import ANOTHER_DOMAIN_ID
 from core.urls import reverse_lazy
 from courses.constants import SemesterTypes
@@ -339,3 +339,23 @@ def test_student_search_by_year_of_admission(settings, client, search_url):
     assert response.json()["count"] == len(students_3)
     assert {s.pk for s in students_3} == {r["user_id"] for r in response.json()["results"]}
 
+
+@pytest.mark.django_db
+def test_filter_student_search_by_is_paid_basis(settings, client, search_url):
+    client.login(CuratorFactory())
+    branch_spb = BranchFactory(code=Branches.SPB,
+                               site=SiteFactory(pk=settings.SITE_ID))
+    params = dict(student_profile__status="", branch=branch_spb)
+    students_1 = StudentFactory.create_batch(3, student_profile__is_paid_basis=True, **params)
+    students_2 = StudentFactory.create_batch(2, student_profile__is_paid_basis=True, **params)
+    students_3 = StudentFactory.create_batch(2, student_profile__is_paid_basis=False, **params)
+    # Empty query
+    response = client.get("{}?{}".format(search_url, "is_paid_basis="))
+    assert response.json()["count"] == 0
+    response = client.get(f"{search_url}?is_paid_basis=0")
+    assert response.json()["count"] == len(students_3)
+    assert {s.pk for s in students_3} == {r["user_id"] for r in response.json()["results"]}
+    response = client.get(f"{search_url}?is_paid_basis=1")
+    assert response.json()["count"] == len(students_1) + len(students_2)
+    response = client.get(f"{search_url}?is_paid_basis=0,1")
+    assert response.json()["count"] == len(students_1) + len(students_2) + len(students_3)

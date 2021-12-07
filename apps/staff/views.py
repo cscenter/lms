@@ -101,7 +101,8 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
             "academic_disciplines": AcademicDiscipline.objects.all(),
             "partner_tags": PartnerTag.objects.all(),
             "status": StudentStatuses.values,
-            "cnt_enrollments": range(StudentFilter.ENROLLMENTS_MAX + 1)
+            "cnt_enrollments": range(StudentFilter.ENROLLMENTS_MAX + 1),
+            "is_paid_basis": [("1", "Да"), ("0", "Нет")]
         }
         return context
 
