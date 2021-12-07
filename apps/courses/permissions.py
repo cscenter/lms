@@ -28,6 +28,11 @@ class ViewCourseInternalDescription(Permission):
 
 
 @add_perm
+class ViewCourseNews(Permission):
+    name = "courses.view_news"
+
+
+@add_perm
 class ViewCourseInternalDescriptionAsTeacher(Permission):
     name = "teaching.view_course_internal_description"
 

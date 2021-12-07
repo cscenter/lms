@@ -6,28 +6,32 @@ from django.db import IntegrityError, transaction
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 
+from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.views import ProtectedFormMixin
 from courses.forms import CourseNewsForm
 from courses.models import Course, CourseNews
 from courses.views.mixins import CourseURLParamsMixin
+from learning.permissions import CreateCourseNews, EditCourseNews, DeleteCourseNews
 from users.mixins import TeacherOnlyMixin
 
 __all__ = ('CourseNewsCreateView', 'CourseNewsUpdateView',
            'CourseNewsDeleteView')
 
 
-class CourseNewsCreateView(TeacherOnlyMixin, CourseURLParamsMixin, CreateView):
+class CourseNewsCreateView(PermissionRequiredMixin, CourseURLParamsMixin, CreateView):
     model = CourseNews
     template_name = "courses/simple_crispy_form.html"
     form_class = CourseNewsForm
+    permission_required = CreateCourseNews.name
 
     def get_form(self, **kwargs):
         form_class = self.get_form_class()
-        if not self.is_form_allowed(self.request.user, self.course):
-            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         kwargs["course"] = self.course
         return form_class(**kwargs)
+
+    def get_permission_object(self):
+        return self.course
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
@@ -45,27 +49,29 @@ class CourseNewsCreateView(TeacherOnlyMixin, CourseURLParamsMixin, CreateView):
     def get_success_url(self):
         return self.object.course.get_url_for_tab("news")
 
-    def is_form_allowed(self, user, course: Course):
-        return user.is_curator or user in course.teachers.all()
 
-
-class CourseNewsUpdateView(TeacherOnlyMixin, ProtectedFormMixin,
+class CourseNewsUpdateView(PermissionRequiredMixin, CourseURLParamsMixin,
                            UpdateView):
     model = CourseNews
     template_name = "courses/simple_crispy_form.html"
+    permission_required = EditCourseNews.name
     form_class = CourseNewsForm
+
+    def get_permission_object(self):
+        return self.course
 
     def get_success_url(self):
         return self.object.course.get_url_for_tab("news")
 
-    def is_form_allowed(self, user, obj: CourseNews):
-        return user.is_curator or user in obj.course.teachers.all()
 
-
-class CourseNewsDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
+class CourseNewsDeleteView(PermissionRequiredMixin, CourseURLParamsMixin,
                            DeleteView):
     model = CourseNews
+    permission_required = DeleteCourseNews.name
     template_name = "forms/simple_delete_confirmation.html"
+
+    def get_permission_object(self):
+        return self.course
 
     def get_success_url(self):
         """
@@ -74,5 +80,3 @@ class CourseNewsDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
         """
         return self.object.course.get_absolute_url()
 
-    def is_form_allowed(self, user, obj: CourseNews):
-        return user.is_curator or user in obj.course.teachers.all()

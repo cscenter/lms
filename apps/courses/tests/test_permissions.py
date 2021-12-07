@@ -11,6 +11,7 @@ from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseClassFactory, CourseFactory,
     CourseTeacherFactory
 )
+from learning.permissions import CreateCourseNews, EditCourseNews, DeleteCourseNews
 from learning.settings import GradeTypes, StudentStatuses
 from learning.tests.factories import EnrollmentFactory
 from users.models import User
@@ -107,6 +108,31 @@ def test_permission_delete_assignment_attachment(client):
     assert not student.has_perm(permission_name, attachment)
     assert not invited_student.has_perm(permission_name, attachment)
     assert not teacher_other.has_perm(permission_name, attachment)
+
+
+@pytest.mark.django_db
+def test_course_news_permissions(client):
+    permissions = [
+        CreateCourseNews.name,
+        EditCourseNews.name,
+        DeleteCourseNews.name
+    ]
+    for permission_name in permissions:
+        user = UserFactory()
+        student = StudentFactory()
+        curator = CuratorFactory()
+        teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
+        course = CourseFactory(teachers=[teacher])
+        CourseTeacherFactory(course=course, teacher=spectator,
+                             roles=CourseTeacher.roles.spectator)
+        invited_student = InvitedStudentFactory()
+        assert curator.has_perm(permission_name)
+        assert teacher.has_perm(permission_name, course)
+        assert not spectator.has_perm(permission_name, course)
+        assert not user.has_perm(permission_name, course)
+        assert not student.has_perm(permission_name, course)
+        assert not invited_student.has_perm(permission_name, course)
+        assert not teacher_other.has_perm(permission_name, course)
 
 
 @pytest.mark.django_db
