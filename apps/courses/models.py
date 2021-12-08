@@ -1186,7 +1186,6 @@ class AssignmentAttachment(TimeStampedModel):
         max_length=200)
 
     class Meta:
-        ordering = ["assignment", "-created"]
         verbose_name = _("Assignment attachment")
         verbose_name_plural = _("Assignment attachments")
 
