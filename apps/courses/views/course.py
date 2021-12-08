@@ -11,7 +11,7 @@ from core.views import ProtectedFormMixin
 from courses.constants import TeacherRoles
 from courses.forms import CourseEditDescriptionForm
 from courses.models import Course, CourseGroupModes, CourseTeacher
-from courses.permissions import can_view_private_materials
+from courses.permissions import can_view_private_materials, CreateAssignment
 from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
 from courses.views.mixins import CourseURLParamsMixin
@@ -31,7 +31,6 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
     def get_course_queryset(self):
         teachers = Prefetch('course_teachers',
                             queryset=(CourseTeacher.objects
-                                      .filter(~CourseTeacher.has_any_hidden_role())
                                       .select_related("teacher")
                                       .order_by('teacher__last_name',
                                                 'teacher__first_name')))
@@ -60,8 +59,10 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
                 group = 'others'
             teachers[group].extend(ts)
         role = course_access_role(course=course, user=self.request.user)
+        can_add_assignment = self.request.user.has_perm(CreateAssignment.name, course)
         context = {
             'CourseGroupModes': CourseGroupModes,
+            'can_add_assignment': can_add_assignment,
             'get_student_groups_url': get_student_groups_url,
             'course': course,
             'course_tabs': tab_list,

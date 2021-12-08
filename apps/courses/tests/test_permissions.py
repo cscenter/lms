@@ -2,11 +2,13 @@ import pytest
 
 from core.utils import instance_memoize
 from courses.constants import MaterialVisibilityTypes
+from courses.models import CourseTeacher
 from courses.permissions import (
-    CreateAssignment, EditAssignment, EditCourseClass, ViewCourseClassMaterials
+    CreateAssignment, EditAssignment, EditCourseClass, ViewCourseClassMaterials, DeleteAssignment,
+    DeleteAssignmentAttachment
 )
 from courses.tests.factories import (
-    AssignmentFactory, CourseClassFactory, CourseFactory, CourseTeacherFactory
+    AssignmentFactory, CourseClassFactory, CourseFactory, CourseTeacherFactory, AssignmentAttachmentFactory
 )
 from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
@@ -25,15 +27,18 @@ def test_permission_create_course_assignment(client):
     Curators and actual teachers have permissions to create course assignment
     """
     permission_name = CreateAssignment.name
-    teacher = TeacherFactory()
+    teacher, spectator = TeacherFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher])
     curator = CuratorFactory()
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
     user = UserFactory()
     student = StudentFactory()
     invited_student = InvitedStudentFactory()
     teacher_other = TeacherFactory()
-    course = CourseFactory(teachers=[teacher])
+    assert curator.has_perm(permission_name)
     assert teacher.has_perm(permission_name, course)
-    assert curator.has_perm(permission_name, course)
+    assert not spectator.has_perm(permission_name, course)
     assert not user.has_perm(permission_name, course)
     assert not student.has_perm(permission_name, course)
     assert not invited_student.has_perm(permission_name, course)
@@ -45,17 +50,62 @@ def test_permission_edit_course_assignment(client):
     permission_name = EditAssignment.name
     user = UserFactory()
     student = StudentFactory()
-    teacher, teacher_other = TeacherFactory.create_batch(2)
     curator = CuratorFactory()
-    invited_student = InvitedStudentFactory()
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+    invited_student = InvitedStudentFactory()
     assignment = AssignmentFactory(course=course)
+    assert curator.has_perm(permission_name)
     assert teacher.has_perm(permission_name, assignment)
-    assert curator.has_perm(permission_name, assignment)
+    assert not spectator.has_perm(permission_name, assignment)
     assert not user.has_perm(permission_name, assignment)
     assert not student.has_perm(permission_name, assignment)
     assert not invited_student.has_perm(permission_name, assignment)
     assert not teacher_other.has_perm(permission_name, assignment)
+
+
+@pytest.mark.django_db
+def test_permission_delete_course_assignment(client):
+    permission_name = DeleteAssignment.name
+    user = UserFactory()
+    student = StudentFactory()
+    curator = CuratorFactory()
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
+    course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+    invited_student = InvitedStudentFactory()
+    assignment = AssignmentFactory(course=course)
+    assert curator.has_perm(permission_name)
+    assert teacher.has_perm(permission_name, assignment)
+    assert not spectator.has_perm(permission_name, assignment)
+    assert not user.has_perm(permission_name, assignment)
+    assert not student.has_perm(permission_name, assignment)
+    assert not invited_student.has_perm(permission_name, assignment)
+    assert not teacher_other.has_perm(permission_name, assignment)
+
+
+@pytest.mark.django_db
+def test_permission_delete_assignment_attachment(client):
+    permission_name = DeleteAssignmentAttachment.name
+    user = UserFactory()
+    student = StudentFactory()
+    curator = CuratorFactory()
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
+    course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+    invited_student = InvitedStudentFactory()
+    attachment = AssignmentAttachmentFactory(assignment__course=course)
+    assert curator.has_perm(permission_name)
+    assert teacher.has_perm(permission_name, attachment)
+    assert not spectator.has_perm(permission_name, attachment)
+    assert not user.has_perm(permission_name, attachment)
+    assert not student.has_perm(permission_name, attachment)
+    assert not invited_student.has_perm(permission_name, attachment)
+    assert not teacher_other.has_perm(permission_name, attachment)
 
 
 @pytest.mark.django_db

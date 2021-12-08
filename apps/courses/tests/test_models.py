@@ -293,3 +293,15 @@ def test_assignment_attached_file_name():
     fname = "foobar.pdf"
     aa = AssignmentAttachmentFactory.create(attachment__filename=fname)
     assert re.match("^foobar(_[0-9a-zA-Z]+)?.pdf$", aa.file_name)
+
+
+@pytest.mark.parametrize("teacher_role", CourseTeacher.roles.itervalues())
+@pytest.mark.django_db
+def test_course_is_actual_teacher(teacher_role):
+    course = CourseFactory()
+    ct = CourseTeacherFactory(course=course, roles=teacher_role)
+    is_teacher = course.is_actual_teacher(ct.teacher.pk)
+    if teacher_role != CourseTeacher.roles.spectator:
+        assert is_teacher
+    else:
+        assert not is_teacher  # spectator is not actual teacher

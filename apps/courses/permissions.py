@@ -2,7 +2,7 @@ from rules import predicate
 
 from auth.permissions import Permission, add_perm
 from courses.constants import MaterialVisibilityTypes
-from courses.models import Assignment, Course, CourseClass
+from courses.models import Assignment, Course, CourseClass, AssignmentAttachment
 from learning.services import CourseRole, course_access_role
 
 
@@ -80,6 +80,37 @@ class EditOwnAssignment(Permission):
     @predicate
     def rule(user, assignment: Assignment):
         return assignment.course.is_actual_teacher(user.pk)
+
+
+@add_perm
+class DeleteAssignment(Permission):
+    name = "courses.delete_assignment"
+
+
+@add_perm
+class DeleteOwnAssignment(Permission):
+    name = "teaching.delete_assignment"
+
+    @staticmethod
+    @predicate
+    def rule(user, assignment: Assignment):
+        return assignment.course.is_actual_teacher(user.pk)
+
+
+@add_perm
+class DeleteAssignmentAttachment(Permission):
+    name = "courses.delete_assignment_attachment"
+
+
+@add_perm
+class DeleteAssignmentAttachmentAsTeacher(Permission):
+    name = "teaching.delete_assignment_attachment"
+
+    @staticmethod
+    @predicate
+    def rule(user, attachment: AssignmentAttachment):
+        course: Course = attachment.assignment.course
+        return course.is_actual_teacher(user.pk)
 
 
 @add_perm

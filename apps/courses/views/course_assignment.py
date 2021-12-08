@@ -11,18 +11,15 @@ from django.views.generic.base import TemplateResponseMixin
 from auth.mixins import PermissionRequiredMixin
 from core.http import AuthenticatedHttpRequest, HttpRequest
 from core.urls import reverse
-from core.views import ProtectedFormMixin
 from courses.constants import AssigneeMode, AssignmentFormat
 from courses.forms import (
     AssignmentForm, AssignmentResponsibleTeachersFormFactory,
     StudentGroupAssigneeFormFactory
 )
 from courses.models import Assignment, AssignmentAttachment, Course, CourseGroupModes
-from courses.permissions import CreateAssignment, EditAssignment
+from courses.permissions import CreateAssignment, EditAssignment, DeleteAssignment, DeleteAssignmentAttachment
 from courses.views.mixins import CourseURLParamsMixin
-from learning.models import StudentGroupAssignee
 from learning.services import AssignmentService, StudentGroupService
-from users.mixins import TeacherOnlyMixin
 
 __all__ = ('AssignmentCreateView', 'AssignmentUpdateView',
            'AssignmentDeleteView', 'AssignmentAttachmentDeleteView')
@@ -166,31 +163,48 @@ class AssignmentUpdateView(AssignmentCreateUpdateBaseView):
         return redirect(assignment.get_teacher_url())
 
 
-class AssignmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin, DeleteView):
-    model = Assignment
+class AssignmentDeleteView(PermissionRequiredMixin, CourseURLParamsMixin, DeleteView):
     template_name = "forms/simple_delete_confirmation.html"
+    permission_required = DeleteAssignment.name
+    assignment: Assignment
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        queryset = (Assignment.objects
+                    .filter(pk=kwargs['pk'],
+                            course=self.course))
+        self.assignment = get_object_or_404(queryset)
+        self.assignment.course = self.course
 
     def get_success_url(self):
         return reverse('teaching:assignments_check_queue')
 
-    def is_form_allowed(self, user, obj: Assignment):
-        return user.is_curator or user in obj.course.teachers.all()
+    def get_permission_object(self):
+        return self.assignment
+
+    def get_object(self):
+        return self.assignment
 
 
-class AssignmentAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
-                                     DeleteView):
-    model = AssignmentAttachment
+class AssignmentAttachmentDeleteView(PermissionRequiredMixin, CourseURLParamsMixin, DeleteView):
     template_name = "forms/simple_delete_confirmation.html"
+    permission_required = DeleteAssignmentAttachment.name
+    attachment: AssignmentAttachment
 
-    def is_form_allowed(self, user, obj):
-        return (user.is_curator or
-                user in obj.assignment.course.teachers.all())
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.object.delete()
-        self.object.attachment.delete(save=False)
-        return HttpResponseRedirect(self.get_success_url())
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        queryset = (AssignmentAttachment.objects
+                    .filter(pk=kwargs['pk'],
+                            assignment__course=self.course)
+                    .select_related('assignment'))
+        self.attachment = get_object_or_404(queryset)
+        self.attachment.assignment.course = self.course
 
     def get_success_url(self):
         return self.object.assignment.get_update_url()
+
+    def get_permission_object(self):
+        return self.attachment
+
+    def get_object(self):
+        return self.attachment

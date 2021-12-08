@@ -231,7 +231,6 @@
                 {% endif %}
               {% endif %}
             {% endif %}
-            {% set can_add_assignment = request.user.has_perm("courses.add_assignment", course) %}
             {% if can_add_assignment %}
               <a href="{{ course.get_create_assignment_url() }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans %}Add assignment{% endtrans %}</a>
             {% endif %}
