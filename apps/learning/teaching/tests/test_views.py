@@ -154,14 +154,14 @@ def test_assignment_detail_view_details(client):
     client.login(teacher)
     url = a.get_teacher_url()
     response = client.get(url)
-    assert response.context['assignment'] == a
-    assert len(response.context['a_s_list']) == 0
+    assert response.context_data['assignment'] == a
+    assert len(response.context_data['a_s_list']) == 0
     EnrollmentFactory.create(student=student, course=co)
     a_s = StudentAssignment.objects.get(student=student, assignment=a)
     response = client.get(url)
-    assert response.context['assignment'] == a
-    assert {a_s} == set(response.context['a_s_list'])
-    assert len(response.context['a_s_list']) == 1
+    assert response.context_data['assignment'] == a
+    assert {a_s} == set(response.context_data['a_s_list'])
+    assert len(response.context_data['a_s_list']) == 1
 
 
 @pytest.mark.django_db

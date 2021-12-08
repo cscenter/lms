@@ -1163,7 +1163,9 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
         bucket = self.course.semester.slug
         return f'assignments/{bucket}/{self.pk}'
 
-    def get_ttc_display(self):
+    def get_ttc_display(self) -> str:
+        if self.ttc is None:
+            return "—"
         return humanize_duration(self.ttc)
 
 

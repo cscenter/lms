@@ -1,0 +1,97 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>
+        <a href="{{ url('teaching:assignments_check_queue', subdomain=LMS_SUBDOMAIN) }}"><span class="fa fa-angle-left"></span></a>
+        {{ assignment.title }}<br>
+        <small><a href="{{ assignment.course.get_absolute_url() }}">{{ assignment.course }}</a></small>
+      </h2>
+      {% if can_edit_assignment or can_delete_assignment %}
+        <div class="btn-toolbar">
+          {% if can_edit_assignment %}
+            <a href="{{ assignment.get_update_url() }}" class="btn btn-primary" role="button">{% trans %}Edit{% endtrans %}</a>
+          {% endif %}
+          {% if can_delete_assignment %}
+            <a href="{{ assignment.get_delete_url() }}" class="btn btn-danger" role="button">{% trans %}Delete{% endtrans %}</a>
+          {% endif %}
+        </div>
+      {% endif %}
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="ubertext">
+        {{ assignment.text|markdown("assignment_text", 3600, assignment.pk, assignment.modified) }}
+      </div>
+      <p>
+        {% set assignment_deadline_at_local = assignment.deadline_at_local(tz=request.user.time_zone) %}
+        {% trans %}Deadline{% endtrans %}:
+        {{ assignment_deadline_at_local|naturalday("d E Y") }} {{ assignment_deadline_at_local|time("H:i") }}
+      </p>
+      <p>
+        {% trans %}Submission Type{% endtrans %}: {{ assignment.get_submission_type_display()|lower }}
+      </p>
+      <p>
+        {% trans %}Assignment Weight{% endtrans %}: {{ assignment.weight }}
+      </p>
+      <p>
+        {% trans %}Estimated Execution Time{% endtrans %}: {{ assignment.get_ttc_display() }}
+      </p>
+      <p>
+        {% trans %}Mean Execution Time{% endtrans %}: {{ execution_time_mean|default("—", True) }}
+      </p>
+      <p>
+        {% trans %}Median Execution Time{% endtrans %}: {{ execution_time_median|default("—", True) }}
+      </p>
+      {% if assignment.assignmentattachment_set.all() %}
+        {% trans %}Attached files{% endtrans %}:
+        <ul class="list-unstyled">
+          {% for aa in assignment.assignmentattachment_set.all() %}
+            <li>
+              <span class="assignment-attachment">
+                <i class="fa fa-file"></i>
+                <a href="{{ aa.get_download_url() }}">{{ aa.file_name }}</a>
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+  {% if a_s_list %}
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="row">
+          <div class="col-xs-12">
+            <table class="table" width="100%">
+              <thead>
+              <th>{% trans %}Student{% endtrans %}</th>
+              <th width="20%">
+                {% trans %}State{% endtrans %}
+              </th>
+              </thead>
+              {% for a_s in a_s_list %}
+                <tr class="{{ "unread" if a_s.has_unread() else "noop" }}">
+                  <td>
+                    <a href="{{ a_s.get_teacher_url() }}">{{ a_s.student.get_short_name() }}</a>
+                    {% if a_s.student.is_volunteer %}<span class="text-muted">{% trans %}Volunteer{% endtrans %}</span>{% endif %}
+                  </td>
+                  <td>
+                <span style="white-space: nowrap;" class="badge assignment-status {{ a_s.state.css_class }}">
+                  {{ a_s.state_display }}
+                </span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock content %}
