@@ -6,11 +6,12 @@ from django.utils.translation import gettext_lazy as _
 from auth.permissions import Role
 from auth.registry import role_registry
 from courses.permissions import (
-    ChangeMetaCourse, CreateAssignment, CreateOwnAssignment, DeleteCourseClass,
-    DeleteOwnCourseClass, EditAssignment, EditCourseClass, EditOwnAssignment,
-    EditOwnCourseClass, ViewAssignment, ViewCourse, ViewCourseAssignments,
-    ViewCourseClassMaterials, ViewCourseContacts, ViewOwnAssignment, DeleteAssignment, DeleteOwnAssignment,
-    DeleteAssignmentAttachment, DeleteAssignmentAttachmentAsTeacher
+    ChangeMetaCourse, CreateAssignment, CreateOwnAssignment, DeleteAssignment,
+    DeleteAssignmentAttachment, DeleteAssignmentAttachmentAsTeacher, DeleteCourseClass,
+    DeleteOwnAssignment, DeleteOwnCourseClass, EditAssignment, EditCourseClass,
+    EditOwnAssignment, EditOwnCourseClass, ViewAssignment, ViewCourse,
+    ViewCourseAssignments, ViewCourseClassMaterials, ViewCourseContacts,
+    ViewOwnAssignment
 )
 from info_blocks.permissions import ViewInternships
 from users.permissions import (

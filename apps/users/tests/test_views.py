@@ -148,6 +148,7 @@ def test_short_bio(client):
     assert user.get_short_bio() == "Some large text."
 
 
+@pytest.mark.skip("TODO: Create separated view for testimonial form.")
 @pytest.mark.django_db
 def test_graduate_can_edit_testimonial(client, settings):
     """
@@ -229,18 +230,18 @@ def test_user_detail_view(client, assert_login_redirect):
     response = client.get(student.get_absolute_url())
     assert response.status_code == 200
     assert response.context_data['profile_user'] == student
-    assert not response.context_data['is_editing_allowed']
+    assert not response.context_data['can_edit_profile']
 
 
 @pytest.mark.django_db
-def test_user_can_update_profile(client, assert_redirect):
+def test_view_user_can_update_profile(client, assert_redirect):
     test_note = "The best user in the world"
     user = StudentFactory()
     client.login(user)
     response = client.get(user.get_absolute_url())
     assert response.status_code == 200
     assert response.context_data['profile_user'] == user
-    assert response.context_data['is_editing_allowed']
+    assert response.context_data['can_edit_profile']
     assert smart_bytes(user.get_update_profile_url()) in response.content
     response = client.get(user.get_update_profile_url())
     assert b'bio' in response.content
@@ -327,6 +328,21 @@ def test_user_detail_view_should_show_links_for_online_courses(client):
     links = soup.find_all(href=oc.url)
     assert len(links) == 1
     assert oc.name == links[0].text
+
+
+@pytest.mark.django_db
+def test_view_user_detail_student_profiles_visibility(client):
+    student1, student2 = StudentFactory.create_batch(2)
+    client.login(student1)
+    response = client.get(student1.get_absolute_url())
+    assert 'student_profiles' in response.context_data
+    response = client.get(student2.get_absolute_url())
+    assert 'student_profiles' not in response.context_data
+    client.login(CuratorFactory())
+    response = client.get(student1.get_absolute_url())
+    assert 'student_profiles' in response.context_data
+    response = client.get(student2.get_absolute_url())
+    assert 'student_profiles' in response.context_data
 
 
 @pytest.mark.django_db

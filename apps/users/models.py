@@ -3,7 +3,7 @@ import os
 import uuid
 from random import choice
 from string import ascii_lowercase, digits
-from typing import Optional, Set
+from typing import List, Optional, Set
 
 from djchoices import C, DjangoChoices
 from model_utils import FieldTracker
@@ -38,10 +38,12 @@ from core.urls import reverse
 from core.utils import (
     instance_memoize, is_club_site, normalize_yandex_login, ru_en_mapping
 )
+from learning.managers import EnrollmentQuerySet
 from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from learning.utils import is_negative_grade
 from lms.utils import PublicRoute
 from notifications.base_models import EmailAddressSuspension
+from study_programs.models import StudyProgram
 from users.constants import GenderTypes
 from users.constants import Roles
 from users.constants import Roles as UserRoles
@@ -575,7 +577,7 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
             sections.append(PublicRoute.STAFF.choice)
         return sections
 
-    def stats(self, current_term):
+    def stats(self, semester, enrollments: Optional[EnrollmentQuerySet] = None):
         """
         Stats for SUCCESSFULLY completed courses and enrollments in
         requested term.
@@ -595,8 +597,9 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         in_current_term_passed = 0  # Center and club courses
         in_current_term_failed = 0  # Center and club courses
         in_current_term_in_progress = 0  # Center and club courses
-        for e in self.enrollment_set(manager='active').all():
-            in_current_term = e.course.semester_id == current_term.pk
+        enrollments = enrollments or self.enrollment_set(manager='active').all()
+        for e in enrollments:
+            in_current_term = e.course.semester_id == semester.pk
             if in_current_term:
                 in_current_term_total += 1
                 in_current_term_courses.add(e.course.meta_course_id)
@@ -637,7 +640,7 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         for c in self.shadcourserecord_set.all():
             if c.grade in GradeTypes.satisfactory_grades:
                 shad_total += 1
-            if c.semester_id == current_term.pk:
+            if c.semester_id == semester.pk:
                 in_current_term_total += 1
                 if is_negative_grade(c.grade):
                     failed_total += 1
@@ -864,6 +867,25 @@ class StudentProfile(TimeStampedModel):
         return reverse('user_ical_assignments', args=[self.pk],
                        subdomain=settings.LMS_SUBDOMAIN)
 
+    def get_status_display(self):
+        if self.status:
+            return StudentStatuses.values[self.status]
+        # Empty status means studying in progress
+        return _("Studying")
+
+    @cached_property
+    def syllabus(self) -> Optional[List[StudyProgram]]:
+        # XXX: Logic for `None` must be reimplemented in
+        # `users.services.get_student_profiles` method which injects cache
+        # into student profile objects.
+        if not self.year_of_curriculum or self.type == StudentTypes.INVITED:
+            return None
+        return list(StudyProgram.objects
+                    .select_related("academic_discipline")
+                    .prefetch_core_courses_groups()
+                    .filter(year=self.year_of_curriculum,
+                            branch_id=self.branch_id))
+
     @property
     def is_active(self):
         # FIXME: make sure profile is not expired for invited student? Should be valid only in the term of invitation
@@ -970,4 +992,4 @@ class CertificateOfParticipation(TimeStampedModel):
     def get_absolute_url(self):
         return reverse('student_reference_detail',
                        subdomain=settings.LMS_SUBDOMAIN,
-                       args=[self.student_profile_id, self.pk])
+                       args=[self.student_profile.user_id, self.pk])

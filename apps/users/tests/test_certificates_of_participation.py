@@ -27,7 +27,7 @@ def test_create_reference(client, assert_redirect):
     student_profile = StudentProfileFactory()
     form_url = reverse('student_reference_add',
                        subdomain=settings.LMS_SUBDOMAIN,
-                       args=[student_profile.id])
+                       kwargs={"user_id": student_profile.user_id})
     response = client.get(form_url)
     soup = BeautifulSoup(response.content, "html.parser")
     sig_input = soup.find(id="id_signature")
@@ -36,7 +36,7 @@ def test_create_reference(client, assert_redirect):
     student_profile = StudentProfileFactory()
     form_url = reverse('student_reference_add',
                        subdomain=settings.LMS_SUBDOMAIN,
-                       args=[student_profile.id])
+                       kwargs={"user_id": student_profile.user_id})
     form_data = {
         'note': '',
         'signature': 'admin'
@@ -78,9 +78,6 @@ def test_user_detail_reference_list_view(client):
     CertificateOfParticipationFactory(student_profile=student_profile)
     student_detail_url = student_profile.user.get_absolute_url()
     response = client.get(student_detail_url)
-    assert 'student_profile' in response.context_data
-    assert response.context_data['student_profile'] is not None
-    assert response.context_data['student_profile'].certificates_of_participation.count() == 1
     soup = BeautifulSoup(response.content, "html.parser")
     list_header = soup.find('h4', text=re.compile(_("Student references")))
     assert list_header is not None

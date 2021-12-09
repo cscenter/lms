@@ -257,10 +257,14 @@ def get_student_profile(user: User, site, profile_type=None,
 
 
 def get_student_profiles(*, user: User, site: Site,
+                         fetch_graduate_profile: Optional[bool] = False,
                          fetch_status_history: Optional[bool] = False) -> List[StudentProfile]:
+    select_related = ['branch']
+    if fetch_graduate_profile:
+        select_related.append('graduate_profile')
     student_profiles = list(StudentProfile.objects
                             .filter(user=user, site=site)
-                            .select_related('branch')
+                            .select_related(*select_related)
                             .order_by('priority', '-year_of_admission', '-pk'))
     syllabus_data = [(sp.year_of_curriculum, sp.branch_id) for sp
                      in student_profiles if sp.year_of_curriculum]

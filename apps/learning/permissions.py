@@ -7,7 +7,9 @@ from django.conf import settings
 
 from auth.permissions import Permission, add_perm
 from courses.constants import AssignmentFormat
-from courses.models import Assignment, Course, CourseGroupModes, StudentGroupTypes, AssignmentAttachment
+from courses.models import (
+    Assignment, AssignmentAttachment, Course, CourseGroupModes, StudentGroupTypes
+)
 from learning.models import (
     AssignmentGroup, CourseInvitation, Enrollment, StudentAssignment, StudentGroup
 )

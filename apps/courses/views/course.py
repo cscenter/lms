@@ -11,7 +11,7 @@ from core.views import ProtectedFormMixin
 from courses.constants import TeacherRoles
 from courses.forms import CourseEditDescriptionForm
 from courses.models import Course, CourseGroupModes, CourseTeacher
-from courses.permissions import can_view_private_materials, CreateAssignment
+from courses.permissions import CreateAssignment, can_view_private_materials
 from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
 from courses.views.mixins import CourseURLParamsMixin

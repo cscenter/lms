@@ -10,9 +10,13 @@ from auth.permissions import perm_registry
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.constants import AssigneeMode
-from courses.models import Assignment, CourseTeacher, AssignmentAttachment
-from courses.permissions import CreateAssignment, EditAssignment, DeleteAssignmentAttachment
-from courses.tests.factories import AssignmentFactory, CourseFactory, CourseTeacherFactory, AssignmentAttachmentFactory
+from courses.models import Assignment, AssignmentAttachment, CourseTeacher
+from courses.permissions import (
+    CreateAssignment, DeleteAssignmentAttachment, EditAssignment
+)
+from courses.tests.factories import (
+    AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, CourseTeacherFactory
+)
 from users.tests.factories import CuratorFactory, TeacherFactory
 
 

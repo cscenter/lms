@@ -17,7 +17,9 @@ from courses.forms import (
     StudentGroupAssigneeFormFactory
 )
 from courses.models import Assignment, AssignmentAttachment, Course, CourseGroupModes
-from courses.permissions import CreateAssignment, EditAssignment, DeleteAssignment, DeleteAssignmentAttachment
+from courses.permissions import (
+    CreateAssignment, DeleteAssignment, DeleteAssignmentAttachment, EditAssignment
+)
 from courses.views.mixins import CourseURLParamsMixin
 from learning.services import AssignmentService, StudentGroupService
 

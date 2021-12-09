@@ -25,7 +25,7 @@
               <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" alt="" />
             {% endwith -%}
           </div>
-          {% if is_editing_allowed %}
+          {% if can_edit_profile %}
             <div class="profile-actions">
               <a href="#user-photo-upload">{% trans %}Change photo{% endtrans %}</a>
               <a href="{{ profile_user.get_update_profile_url() }}"><i class="fa fa-cog"></i> {% trans %}Edit{% endtrans %}</a>
@@ -83,9 +83,14 @@
             <li class="active" role="presentation">
               <a data-toggle="tab" href="#profile-tab" aria-controls="current" role="tab" aria-expanded="true">Основная информация</a>
             </li>
-            {% if is_editing_allowed and available_providers %}
+            {% if can_edit_profile and available_providers %}
               <li role="presentation">
                 <a href="#connected-accounts" role="tab" data-toggle="tab">Аккаунты</a>
+              </li>
+            {% endif %}
+            {% if can_view_student_profiles and student_profiles %}
+              <li role="presentation">
+                <a href="#student-profiles" role="tab" data-toggle="tab">Студенческие профили</a>
               </li>
             {% endif %}
             {% if request_user.is_curator %}
@@ -94,13 +99,13 @@
                   <i class="fa fa-user-secret"></i> Для куратора
                 </a>
               </li>
-              {% if student_profile %}
-                <li role="presentation">
-                  <a href="#student-assignments-tab" role="tab" data-toggle="tab">
-                    <i class="fa fa-list"></i>&nbsp;Задания
-                  </a>
-                </li>
-              {% endif %}
+            {% endif %}
+            {% if can_view_assignments and student_profiles %}
+              <li role="presentation">
+                <a href="#student-assignments-tab" role="tab" data-toggle="tab">
+                  <i class="fa fa-list"></i>&nbsp;Задания
+                </a>
+              </li>
             {% endif %}
           </ul>
         </div>
@@ -111,20 +116,24 @@
       <div class="tab-pane active" role="tabpanel" id="profile-tab">
         {% include "lms/user_profile/_tab_account.html" %}
       </div>
-
+      {% if can_edit_profile and available_providers %}
+        <div class="tab-pane" role="tabpanel" id="connected-accounts">
+          {% include "lms/user_profile/_tab_connected_accounts.html" %}
+        </div>
+      {% endif %}
+      {% if can_view_student_profiles and student_profiles %}
+        <div class="tab-pane" role="tabpanel" id="student-profiles">
+          {% include "lms/user_profile/_tab_student_profiles.html" %}
+        </div>
+      {% endif %}
       {% if request_user.is_curator %}
         <div class="tab-pane" role="tabpanel" id="for-curator-tab">
           {% include "lms/user_profile/_tab_curators.html" %}
         </div>
-        {% if student_profile %}
-          <div class="tab-pane" role="tabpanel" id="student-assignments-tab">
-            {% include "lms/user_profile/_tab_assignments.html" %}
-          </div>
-        {% endif %}
       {% endif %}
-      {% if is_editing_allowed and available_providers %}
-        <div class="tab-pane" role="tabpanel" id="connected-accounts">
-          {% include "lms/user_profile/_tab_connected_accounts.html" %}
+      {% if can_view_assignments and student_profiles %}
+        <div class="tab-pane" role="tabpanel" id="student-assignments-tab">
+          {% include "lms/user_profile/_tab_assignments.html" %}
         </div>
       {% endif %}
     </div>

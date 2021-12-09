@@ -428,8 +428,10 @@ def test_view_student_assignment_relation():
     sa = StudentAssignmentFactory(assignment__course=course)
     assert not UserFactory().has_perm(ViewStudentAssignment.name, sa)
     assert teacher.has_perm(ViewStudentAssignment.name, sa)
+    assert not teacher.has_perm(ViewStudentAssignment.name)
     assert not teacher_other.has_perm(ViewStudentAssignment.name, sa)
     assert curator.has_perm(ViewStudentAssignment.name, sa)
+    assert curator.has_perm(ViewStudentAssignment.name)
 
 
 @pytest.mark.django_db

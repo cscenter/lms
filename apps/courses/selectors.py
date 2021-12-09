@@ -4,12 +4,21 @@ from django_filters import Filter, NumberFilter
 from django_filters.rest_framework import FilterSet
 from rest_framework.exceptions import ValidationError
 
+from django.contrib.sites.models import Site
 from django.db.models import Prefetch, Q
 
-from courses.managers import AssignmentQuerySet, CourseTeacherQuerySet
+from courses.managers import AssignmentQuerySet, CourseQuerySet, CourseTeacherQuerySet
 from courses.models import Assignment, Course, CourseTeacher
 from learning.managers import StudentAssignmentQuerySet
 from learning.models import StudentAssignment
+
+
+def get_site_courses(*, site: Site, filters: Optional[List[Q]] = None) -> CourseQuerySet:
+    filters = filters or []
+    return (Course.objects
+            .available_on_site(site)
+            .filter(*filters)
+            .select_related('semester', 'meta_course', 'main_branch'))
 
 
 def get_teachers(*, role_priority: Optional[bool] = False,

@@ -1092,8 +1092,10 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
             self.details = {}
         super().save(**kwargs)
 
-    def get_absolute_url(self):
-        return reverse('student_profile', args=[self.student_profile.user_id],
+    def get_absolute_url(self) -> Optional[str]:
+        if not (self.is_active and settings.IS_GRADUATE_PROFILE_PAGE_ENABLED):
+            return None
+        return reverse('graduate_profile', args=[self.student_profile.user_id],
                        subdomain=None)
 
     def get_thumbnail(self, geometry=ThumbnailSizes.BASE, svg=False, **options):

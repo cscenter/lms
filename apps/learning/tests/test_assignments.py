@@ -17,7 +17,8 @@ from core.urls import reverse
 from courses.constants import AssigneeMode, AssignmentFormat
 from courses.models import Assignment, AssignmentAttachment, CourseTeacher
 from courses.tests.factories import (
-    AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, SemesterFactory, CourseTeacherFactory
+    AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, CourseTeacherFactory,
+    SemesterFactory
 )
 from learning.models import StudentAssignment
 from learning.permissions import ViewAssignmentAttachment

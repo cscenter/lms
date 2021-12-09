@@ -40,7 +40,7 @@
             <li class="active" role="presentation">
               <a data-toggle="tab" href="#profile-tab" aria-controls="current" role="tab" aria-expanded="true">Профиль</a>
             </li>
-            {% if is_editing_allowed %}
+            {% if can_edit_profile %}
               <li role="presentation">
                 <a href="{{ profile_user.get_update_profile_url }}"><i class="fa fa-cog"></i> {% trans %}Edit{% endtrans %}</a>
               </li>

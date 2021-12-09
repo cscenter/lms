@@ -40,8 +40,8 @@ urlpatterns = [
     path("courses/", include('learning.invitation.urls')),
     path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
 
-    path('users/<int:student_profile_id>/reference/add/', CertificateOfParticipationCreateView.as_view(), name='student_reference_add'),
-    path('users/<int:student_profile_id>/reference/<int:reference_pk>/', CertificateOfParticipationDetailView.as_view(), name='student_reference_detail'),
+    path('users/<int:user_id>/reference/add/', CertificateOfParticipationCreateView.as_view(), name='student_reference_add'),
+    path('users/<int:user_id>/reference/<int:reference_pk>/', CertificateOfParticipationDetailView.as_view(), name='student_reference_detail'),
     path('', include('users.urls')),
 
     path('notifications/', include("notifications.urls")),

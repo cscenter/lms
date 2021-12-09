@@ -12,11 +12,10 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Count, Prefetch, prefetch_related_objects
+from django.db.models import Count, Prefetch, Q
 from django.http import HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
-from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
@@ -26,16 +25,16 @@ from auth.models import ConnectedAuthService
 from auth.services import get_available_service_providers, get_connected_accounts
 from core.http import AuthenticatedHttpRequest
 from core.timezone.utils import get_gmt
-from core.urls import reverse
 from core.views import ProtectedFormMixin
-from courses.models import Course, CourseTeacher, Semester
+from courses.models import CourseTeacher, Semester
+from courses.selectors import get_site_courses
 from files.handlers import MemoryImageUploadHandler, TemporaryImageUploadHandler
 from learning.forms import TestimonialForm
+from learning.icalendar import get_icalendar_links
 from learning.models import Enrollment, StudentAssignment
-from learning.settings import GradeTypes
-from study_programs.models import StudyProgram
+from learning.settings import GradeTypes, StudentStatuses
 from users.compat import get_graduate_profile as get_graduate_profile_compat
-from users.models import SHADCourseRecord
+from users.models import SHADCourseRecord, StudentTypes
 from users.thumbnails import CropboxData, get_user_thumbnail, photo_thumbnail_cropbox
 
 from .forms import CertificateOfParticipationCreateForm, UserProfileForm
@@ -44,14 +43,11 @@ from .permissions import (
     CreateCertificateOfParticipation, ViewAccountConnectedServiceProvider,
     ViewCertificateOfParticipation
 )
-from .services import (
-    get_graduate_profile, get_student_profile, get_student_status_history
-)
+from .services import get_student_profile, get_student_profiles
 
 
-class UserDetailView(LoginRequiredMixin, generic.DetailView):
+class UserDetailView(LoginRequiredMixin, generic.TemplateView):
     template_name = "lms/user_profile/user_detail.html"
-    context_object_name = 'profile_user'
 
     def get_queryset(self, *args, **kwargs):
         enrollments_queryset = (Enrollment.active
@@ -62,31 +58,18 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
                                 .order_by("course"))
         shad_courses_queryset = (SHADCourseRecord.objects
                                  .select_related("semester"))
-        if not self.request.user.is_authenticated:
-            enrollments_queryset = enrollments_queryset.exclude(
-                grade__in=[Enrollment.GRADES.NOT_GRADED,
-                           Enrollment.GRADES.UNSATISFACTORY])
-            shad_courses_queryset = shad_courses_queryset.exclude(
-                grade__in=[Enrollment.GRADES.NOT_GRADED,
-                           Enrollment.GRADES.UNSATISFACTORY])
-        elif self.request.user.is_curator:
-            enrollments_queryset = enrollments_queryset.annotate(
-                classes_total=Count('course__courseclass'))
+        # Construct queryset for courses available on the site
         only_public_role = ~CourseTeacher.has_any_hidden_role(lookup='course_teachers__roles')
-        co_queryset = (Course.objects
-                       .available_on_site(self.request.site)
-                       .filter(only_public_role)
-                       .select_related('semester', 'meta_course',
-                                       'main_branch'))
+        filters = [only_public_role]
         # Limit results on compsciclub.ru
         if hasattr(self.request, "branch"):
-            co_queryset = co_queryset.filter(main_branch=self.request.branch)
+            filters.append(Q(main_branch=self.request.branch))
+        site_courses_queryset = get_site_courses(site=self.request.site, filters=filters)
         prefetch_list = [
-            Prefetch('teaching_set', queryset=co_queryset.all()),
+            Prefetch('teaching_set', queryset=site_courses_queryset),
             Prefetch('shadcourserecord_set', queryset=shad_courses_queryset),
             Prefetch('enrollment_set', queryset=enrollments_queryset)
         ]
-        select_list = []
         if self.request.user.is_curator:
             prefetch_list += ['onlinecourserecord_set']
         filters = {}
@@ -95,42 +78,45 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
             filters["group__site_id"] = settings.SITE_ID
         return (auth.get_user_model()._default_manager
                 .filter(**filters)
-                .select_related(*select_list)
                 .prefetch_related(*prefetch_list)
                 .distinct('pk'))
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
         u = self.request.user
-        profile_user = context[self.context_object_name]
-        tz = profile_user.time_zone
-        context['time_zone'] = f"{get_gmt(tz)} {tz.zone}"
+        profile_user = get_object_or_404(self.get_queryset().filter(pk=kwargs['pk']))
+        is_library_installed = apps.is_installed("library")
+        is_certificates_of_participation_enabled = settings.IS_CERTIFICATES_OF_PARTICIPATION_ENABLED
+        is_social_accounts_enabled = settings.IS_SOCIAL_ACCOUNTS_ENABLED
+        can_edit_profile = (u == profile_user or u.is_curator)
+        can_view_student_profiles = (u == profile_user or u.is_curator)
+        can_view_assignments = u.is_curator
+        can_view_library = is_library_installed and u.is_curator
         icalendars = []
         if profile_user.pk == u.pk:
-            ics_url_classes = reverse('user_ical_classes',
-                                      subdomain=settings.LMS_SUBDOMAIN,
-                                      args=[u.pk])
-            ics_url_assignments = reverse('user_ical_assignments',
-                                          subdomain=settings.LMS_SUBDOMAIN,
-                                          args=[u.pk])
-            ics_url_events = reverse('ical_events',
-                                     subdomain=settings.LMS_SUBDOMAIN)
-            abs_uri = self.request.build_absolute_uri
-            icalendars = [
-                (_("Classes"), abs_uri(ics_url_classes)),
-                (_("Assignments"), abs_uri(ics_url_assignments)),
-                (_("Events"), abs_uri(ics_url_events)),
-            ]
-        context['icalendars'] = icalendars
-        is_editing_allowed = (u == profile_user or u.is_curator)
-        is_library_installed = apps.is_installed("library")
-        context['is_editing_allowed'] = is_editing_allowed
-        context['is_certificates_of_participation_enabled'] = settings.IS_CERTIFICATES_OF_PARTICIPATION_ENABLED
-        context['is_library_installed'] = is_library_installed
-        context['available_providers'] = (settings.IS_SOCIAL_ACCOUNTS_ENABLED and
-                                          is_editing_allowed and
+            icalendars = get_icalendar_links(profile_user,
+                                             url_builder=self.request.build_absolute_uri)
+        current_semester = Semester.get_current()
+        context = {
+            "StudentStatuses": StudentStatuses,
+            "profile_user": profile_user,
+            "time_zone": f"{get_gmt(profile_user.time_zone)} {profile_user.time_zone.zone}",
+            "icalendars": icalendars,
+            "is_certificates_of_participation_enabled": is_certificates_of_participation_enabled,
+            "can_edit_profile": can_edit_profile,
+            "can_view_library": can_view_library,
+            "current_semester": current_semester,
+            "can_view_student_profiles": can_view_student_profiles,
+            "can_view_assignments": can_view_assignments
+        }
+        if is_certificates_of_participation_enabled:
+            certificates = (CertificateOfParticipation.objects
+                            .filter(student_profile__user=profile_user)
+                            .order_by('student_profile__pk'))
+            context['certificates_of_participation'] = certificates
+        context['available_providers'] = (is_social_accounts_enabled and
+                                          can_edit_profile and
                                           get_available_service_providers())
-        if is_library_installed and u.is_curator:
+        if is_library_installed and can_view_library:
             from library.models import Borrow
             context['borrowed_books'] = (Borrow.objects
                                          .filter(student=profile_user)
@@ -140,48 +126,52 @@ class UserDetailView(LoginRequiredMixin, generic.DetailView):
             context['student_projects'] = get_student_projects(profile_user)
         if apps.is_installed('admission'):
             context['applicant_list'] = profile_user.applicant_set.all()
-        context['current_semester'] = Semester.get_current()
-        # Assignments sorted by course name
-        assignments_qs = (StudentAssignment.objects
-                          .for_student(profile_user)
-                          .in_term(context['current_semester'])
-                          .order_by('assignment__course__meta_course__name',
-                                    'assignment__deadline_at',
-                                    'assignment__title'))
-        context['personal_assignments'] = u.is_curator and assignments_qs.all()
+        if can_view_assignments:
+            assignments_qs = (StudentAssignment.objects
+                              .for_student(profile_user)
+                              .in_term(current_semester)
+                              .order_by('assignment__course__meta_course__name',
+                                        'assignment__deadline_at',
+                                        'assignment__title'))
+            context['personal_assignments'] = assignments_qs.all()
         js_app_data = {"props": {}}
         photo_data = {}
-        if is_editing_allowed:
+        if can_edit_profile:
             photo_data = {
                 "userID": profile_user.pk,
                 "photo": profile_user.photo_data
             }
         js_app_data["props"]["photo"] = json.dumps(photo_data)
         js_app_data["props"]["socialAccounts"] = json.dumps({
-            "isEnabled": settings.IS_SOCIAL_ACCOUNTS_ENABLED and is_editing_allowed,
+            "isEnabled": is_social_accounts_enabled and can_edit_profile,
             "userID": profile_user.pk,
         })
         context["appData"] = js_app_data
         # Collect stats about successfully passed courses
         if u.is_curator:
-            context['stats'] = profile_user.stats(context['current_semester'])
-        student_profile = get_student_profile(profile_user, self.request.site)
-        syllabus = None
-        graduate_profile = None
-        if student_profile:
-            prefetch_related_objects([student_profile],
-                                     'certificates_of_participation')
-            syllabus = (StudyProgram.objects
-                        .select_related("academic_discipline")
-                        .prefetch_core_courses_groups()
-                        .filter(year=student_profile.year_of_curriculum,
-                                branch_id=student_profile.branch_id))
-            graduate_profile = get_graduate_profile(student_profile)
-            if u.is_curator:
-                context['student_status_history'] = get_student_status_history(student_profile)
-        context['syllabus'] = syllabus
-        context['student_profile'] = student_profile
-        context['graduate_profile'] = graduate_profile
+            # TODO: add derivable classes_total field to Course model
+            queryset = (profile_user.enrollment_set(manager='active')
+                        .annotate(classes_total=Count('course__courseclass')))
+            context['stats'] = profile_user.stats(current_semester,
+                                                  enrollments=queryset)
+        if can_view_student_profiles:
+            student_profiles = get_student_profiles(user=profile_user,
+                                                    site=self.request.site,
+                                                    fetch_graduate_profile=True,
+                                                    fetch_status_history=True)
+            # Aggregate stats needed for student profiles
+            passed_courses = set()
+            in_current_term = set()
+            for enrollment in profile_user.enrollment_set.all():
+                if enrollment.grade in GradeTypes.satisfactory_grades:
+                    passed_courses.add(enrollment.course.meta_course_id)
+                if enrollment.course.semester_id == current_semester.pk:
+                    in_current_term.add(enrollment.course.meta_course_id)
+            context['student_profiles'] = student_profiles
+            context['syllabus_legend'] = {
+                'passed_courses': passed_courses,
+                'in_current_term': in_current_term
+            }
         return context
 
 
@@ -268,7 +258,9 @@ class CertificateOfParticipationCreateView(PermissionRequiredMixin,
         return initial
 
     def form_valid(self, form):
-        form.instance.student_profile_id = self.kwargs['student_profile_id']
+        user = get_object_or_404(User.objects.filter(pk=self.kwargs['user_id']))
+        student_profile = get_student_profile(user=user, site=self.request.site)
+        form.instance.student_profile_id = student_profile.pk
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -283,7 +275,7 @@ class CertificateOfParticipationDetailView(PermissionRequiredMixin,
 
     def get_queryset(self):
         return (CertificateOfParticipation.objects
-                .filter(student_profile_id=self.kwargs['student_profile_id'])
+                .filter(student_profile__user_id=self.kwargs['user_id'])
                 .select_related('student_profile'))
 
     def get_context_data(self, **kwargs):

@@ -1,4 +1,5 @@
 {% set request_user = request.user -%}
+
 {% if request_user.is_curator %}
   <table class="table table-condensed table-striped">
     <tr>
@@ -64,7 +65,7 @@
     </tr>
   </table>
 
-  {% if is_library_installed %}
+  {% if can_view_library %}
     <h4 class="_mtop-30">{% trans %}books{% endtrans %}:</h4>
     {% if borrowed_books %}
       <ul>
@@ -79,122 +80,19 @@
     {% endif %}
   {% endif %}
 
-  {% if student_profile and is_certificates_of_participation_enabled %}
+  {% if is_certificates_of_participation_enabled %}
     <h4 class="_mtop-30">{% trans %}Student references{% endtrans %}:</h4>
-    {% if student_profile.certificates_of_participation.all() %}
+    {% if certificates_of_participation %}
       <ul>
-        {% for reference in student_profile.certificates_of_participation.all() %}
+        {% for reference in certificates_of_participation %}
           <li>
             <a target="_blank" href="{{ reference.get_absolute_url() }}">{{ reference.created|date("d.m.Y") }}</a>
           </li>
         {% endfor %}
       </ul>
     {% endif %}
-    <a href="{{ url('student_reference_add', subdomain=LMS_SUBDOMAIN, student_profile_id=student_profile.pk) }}"
+    <a href="{{ url('student_reference_add', user_id=profile_user.pk, subdomain=LMS_SUBDOMAIN) }}"
        class="btn btn-primary btn-outline">{% trans %}Create reference{% endtrans %}</a>
   {% endif %}
 
-  {% if student_profile %}
-    <h4 class="_mtop-30">История статусов</h4>
-    <table class="table table-condensed table-striped">
-      {% for student_status_log_record in student_status_history %}
-        <tr>
-          <td style="width:50%;" {% if not loop.first %}class="text-muted"{% endif %}>
-            {{ student_status_log_record.get_status_display() }}
-          </td>
-          <td {% if not loop.first %}class="text-muted"{% endif %}>
-            {{ student_status_log_record.status_changed_at|date("d.m.Y") }}
-          </td>
-        </tr>
-      {% endfor %}
-      <tr>
-        <td {% if student_status_history|length > 0 %}class="text-muted"{% endif %}>Поступил</td>
-        <td {% if student_status_history|length > 0 %}class="text-muted"{% endif %}>
-          01.09.{{ student_profile.year_of_admission }}
-        </td>
-      </tr>
-    </table>
-    <h4 class="_mtop-30">{% trans %}Student info record{% endtrans %} <small><a
-      href="{{ url('admin:users_studentprofile_change', object_id=student_profile.pk) }}" target="_blank">
-      <i class="fa fa-pencil-square-o"></i>
-    </a></small></h4>
-    <table class="table table-condensed table-striped">
-      <tr>
-        <td>Отделение</td>
-        <td>{{ student_profile.branch }}</td>
-      </tr>
-      <tr>
-        <td>{% trans %}Student|admission year{% endtrans %}:</td>
-        <td>{{ student_profile.year_of_admission }}</td>
-      </tr>
-      <tr>
-        <td>Статус</td>
-        <td>{{ student_profile.get_status_display()|default("—", True) }}</td>
-      </tr>
-      <tr>
-        <td width="25%">{% trans %}University{% endtrans %}:</td>
-        <td>{{ student_profile.university|default("—", True) }}</td>
-      </tr>
-      <tr>
-        <td>{% trans %}StudentInfo|University year{% endtrans %}:</td>
-        <td>
-          {{ student_profile.get_level_of_education_on_admission_display()|default("—", True) }}</td>
-      </tr>
-      <tr>
-        <td>{% trans %}Curriculum year{% endtrans %}:</td>
-        <td>
-          {{ student_profile.year_of_curriculum|default('—', True) }}<br>
-          {% if syllabus %}
-            {% for program in syllabus %}
-              <b>{{ program.academic_discipline.name_en }}</b>
-              {% if program.course_groups.all() %}
-                <ul style="list-style-type: square;">
-                  {% for meta_course_groups in program.course_groups.all() %}
-                    <li>
-                      {% for meta_course in meta_course_groups.courses.all() %}
-                        {# Syllabus contains center courses only #}
-                        {% if meta_course.id in stats.passed.center_courses or meta_course.id in stats.passed.club_courses %}
-                          <span class="text-success">{{ meta_course.name }}</span>
-                        {% elif meta_course.id in stats.in_term.courses %}
-                          <span class="text-info">{{ meta_course.name }}</span>
-                        {% else %}
-                          {{ meta_course.name }}{% endif %}
-                        {% if not loop.last %}{% if meta_course_groups.courses.all()|length > 2 %},{% endif %} или {% endif %}
-                      {% endfor %}
-                    </li>
-                  {% endfor %}
-                </ul>
-              {% endif %}
-            {% endfor %}
-            <br>Обозначения: <span class="text-success">зелёный</span> - курс сдан / <span class="text-info">синий</span> - запись
-            в текущем семестре<br>
-          {% endif %}
-        </td>
-      </tr>
-      <tr>
-        <td>{% trans %}Areas of study{% endtrans %}:</td>
-        <td>
-          {% if student_profile.academic_disciplines.all()|length > 0 %}
-            {% for academic_discipline in student_profile.academic_disciplines.all() -%}
-              {{ academic_discipline }}{% if not loop.last %}, {% endif %}
-            {%- endfor %}
-          {% else %}—{% endif %}
-        </td>
-      </tr>
-      <tr>
-        <td>{% trans %}Comment{% endtrans %}:</td>
-        <td>
-          <div class="ubertext">
-            {{ student_profile.comment|default("—", True)|markdown("curator_note_about_student", 3600, student_profile.pk, student_profile.modified) }}
-          </div>
-          {% if student_profile.comment %}
-            <span class="student-comment-metainfo pull-right">
-                {% if student_profile.comment_last_author_id %}{{ student_profile.comment_last_author.get_short_name() }}, {% endif %}
-                {{ student_profile.comment_changed_at|date("d.m.Y H:i") }}
-              </span>
-          {% endif %}
-        </td>
-      </tr>
-    </table>
-  {% endif %}
 {% endif %}
