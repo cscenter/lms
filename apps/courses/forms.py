@@ -246,6 +246,7 @@ class AssignmentDurationField(forms.DurationField):
     default_error_messages = {
         'required': _('Enter the time spent on the assignment.'),
         'invalid': _('Enter a valid duration in a HH:MM format'),
+        'overflow': _('The number of days must be less than {max_days}.')
     }
 
     def prepare_value(self, value):
@@ -263,11 +264,22 @@ class AssignmentDurationField(forms.DurationField):
             value = datetime.timedelta(hours=hours, minutes=minutes)
         except ValueError:
             raise ValidationError(self.error_messages['invalid'], code='invalid')
+        except OverflowError:
+            raise ValidationError(self.error_messages['overflow'].format(
+                max_days=datetime.timedelta.max.days,
+            ), code='overflow')
         if value is None:
             raise ValidationError(self.error_messages['invalid'], code='invalid')
         if value.total_seconds() < 0:
             raise ValidationError(self.error_messages['invalid'],
                                   code='invalid')
+        # Intentionally don't use this value in overflow validation to be
+        # more annoying for those who wants to abuse duration field
+        max_days = 3
+        if value.days > max_days:
+            msg = _("There must be an error in the duration specified. "
+                    "Please, contact curators for this problem.")
+            raise ValidationError(msg, code='overflow')
         return value
 
 
