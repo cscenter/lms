@@ -7,13 +7,15 @@ from django.core.exceptions import ValidationError
 from core.tests.factories import BranchFactory, SiteFactory
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
-from study_programs.tests.factories import AcademicDisciplineFactory
+from study_programs.tests.factories import (
+    AcademicDisciplineFactory, StudyProgramFactory
+)
 from users.constants import Roles
 from users.models import StudentProfile, StudentTypes, UserGroup
 from users.services import (
     StudentStatusTransition, assign_or_revoke_student_role, assign_role,
     create_graduate_profiles, create_student_profile, get_student_profile_priority,
-    maybe_unassign_student_role, unassign_role
+    get_student_profiles, maybe_unassign_student_role, unassign_role
 )
 from users.tests.factories import CuratorFactory, StudentProfileFactory, UserFactory
 
@@ -272,3 +274,80 @@ def test_delete_student_profile():
     assert UserGroup.objects.filter(user=user).count() == 1
     permission_group = UserGroup.objects.get(user=user)
     assert permission_group.role == StudentTypes.to_permission_role(StudentTypes.INVITED)
+
+
+@pytest.mark.django_db
+def test_get_student_profiles(django_assert_num_queries):
+    user = UserFactory()
+    site1 = SiteFactory(domain='test1.ru')
+    site2 = SiteFactory(domain='test2.ru')
+    branch1 = BranchFactory(site=site1)
+    student_profile1 = create_student_profile(user=user, branch=branch1,
+                                              profile_type=StudentTypes.INVITED,
+                                              year_of_admission=2020)
+    student_profile2 = create_student_profile(user=user, branch=branch1,
+                                              profile_type=StudentTypes.REGULAR,
+                                              year_of_admission=2020,
+                                              year_of_curriculum=2020)
+    student_profiles = get_student_profiles(user=user, site=site1)
+    assert len(student_profiles) == 2
+    assert student_profile2.priority < student_profile1.priority
+    assert student_profile1 == student_profiles[1]
+    assert student_profile2 == student_profiles[0]  # higher priority
+    with django_assert_num_queries(3):
+        # 1) student profiles 2) empty study programs 3) status history
+        student_profiles = get_student_profiles(user=user, site=site1,
+                                                fetch_status_history=True)
+        for sp in student_profiles:
+            assert not sp.status_history.all()
+    with django_assert_num_queries(4):
+        student_profiles = get_student_profiles(user=user, site=site1)
+        for sp in student_profiles:
+            assert not sp.status_history.all()
+    with django_assert_num_queries(1):
+        assert get_student_profiles(user=user, site=site2) == []
+    with django_assert_num_queries(1):
+        get_student_profiles(user=user, site=site2, fetch_status_history=True)
+
+
+@pytest.mark.django_db
+def test_get_student_profiles_prefetch_syllabus(django_assert_num_queries):
+    user = UserFactory()
+    site1 = SiteFactory(domain='test1.ru')
+    site2 = SiteFactory(domain='test2.ru')
+    branch1 = BranchFactory(site=site1)
+    branch2 = BranchFactory(site=site2)
+    student_profile1 = create_student_profile(user=user, branch=branch1,
+                                              profile_type=StudentTypes.INVITED,
+                                              year_of_admission=2019,
+                                              year_of_curriculum=2019)
+    student_profile2 = create_student_profile(user=user, branch=branch1,
+                                              profile_type=StudentTypes.REGULAR,
+                                              year_of_admission=2020,
+                                              year_of_curriculum=2020)
+    student_profile3 = create_student_profile(user=user, branch=branch1,
+                                              profile_type=StudentTypes.REGULAR,
+                                              year_of_admission=2019,
+                                              year_of_curriculum=2019)
+    study_program_2020_1 = StudyProgramFactory(year=2020, branch=branch1)
+    study_program_2020_2 = StudyProgramFactory(year=2020, branch=branch1)
+    study_program_2019 = StudyProgramFactory(year=2019, branch=branch1)
+    study_program_other = StudyProgramFactory(year=2020, branch=branch2)
+    student_profiles = get_student_profiles(user=user, site=site1)
+    assert len(student_profiles) == 3
+    assert student_profile2 == student_profiles[0]
+    assert 'syllabus' in student_profiles[0].__dict__
+    assert student_profiles[0].syllabus == student_profile2.syllabus
+    syllabus = student_profiles[0].syllabus
+    assert len(syllabus) == 2
+    assert study_program_2020_1 in syllabus
+    assert study_program_2020_2 in syllabus
+    assert 'syllabus' in student_profiles[1].__dict__
+    assert student_profiles[1].syllabus == student_profile3.syllabus
+    syllabus = student_profiles[1].syllabus
+    assert len(syllabus) == 1
+    assert study_program_2019 in syllabus
+    assert student_profile1 == student_profiles[2]
+    assert 'syllabus' in student_profiles[1].__dict__
+    assert student_profiles[2].syllabus == student_profile1.syllabus
+    assert student_profiles[2].syllabus is None

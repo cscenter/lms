@@ -1,6 +1,7 @@
 import datetime
 from collections import defaultdict
 from enum import Enum, auto
+from itertools import islice
 from typing import Any, Dict, List, Optional, Tuple
 
 from registration.models import RegistrationProfile
@@ -9,16 +10,18 @@ from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Prefetch, Q, prefetch_related_objects
 from django.utils.timezone import now
 
 from auth.registry import role_registry
 from core.models import Branch
 from core.timezone import get_now_utc
 from core.timezone.typing import Timezone
+from core.utils import bucketize
 from courses.models import Semester
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
+from study_programs.models import StudyProgram
 from users.constants import GenderTypes, Roles
 from users.models import (
     OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User, UserGroup
@@ -251,6 +254,38 @@ def get_student_profile(user: User, site, profile_type=None,
         # Invalidate cache on user model if the profile has been changed
         student_profile.user = user
     return student_profile
+
+
+def get_student_profiles(*, user: User, site: Site,
+                         fetch_status_history: Optional[bool] = False) -> List[StudentProfile]:
+    student_profiles = list(StudentProfile.objects
+                            .filter(user=user, site=site)
+                            .select_related('branch')
+                            .order_by('priority', '-year_of_admission', '-pk'))
+    syllabus_data = [(sp.year_of_curriculum, sp.branch_id) for sp
+                     in student_profiles if sp.year_of_curriculum]
+    if syllabus_data:
+        year_of_curriculum, branch_id = syllabus_data[0]
+        in_array = Q(year=year_of_curriculum, branch_id=branch_id)
+        for year_of_curriculum, branch_id in islice(syllabus_data, 1, None):
+            in_array |= Q(year=year_of_curriculum, branch_id=branch_id)
+        queryset = (StudyProgram.objects
+                    .select_related("academic_discipline")
+                    .prefetch_core_courses_groups()
+                    .filter(in_array)
+                    .order_by('academic_discipline__name'))
+        syllabus = bucketize(queryset, key=lambda sp: (sp.year, sp.branch_id))
+        for sp in student_profiles:
+            # XXX: Keep in sync with StudentProfile.syllabus implementation
+            key = (sp.year_of_curriculum, sp.branch_id)
+            if sp.type != StudentTypes.INVITED:
+                sp.__dict__['syllabus'] = syllabus.get(key, None)
+    if fetch_status_history:
+        queryset = (StudentStatusLog.objects
+                    .order_by('-status_changed_at', '-pk'))
+        prefetch_related_objects(student_profiles,
+                                 Prefetch('status_history', queryset=queryset))
+    return student_profiles
 
 
 def update_student_status(student_profile: StudentProfile, *,
