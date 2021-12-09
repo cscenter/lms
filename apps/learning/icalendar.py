@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Callable, Iterable
+from typing import Callable, Iterable, List, Literal, NamedTuple
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -9,9 +9,12 @@ from icalendar import Event as ICalEvent
 from icalendar import Timezone, TimezoneStandard, vText, vUri
 from icalendar.prop import vInline
 
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
+from core.urls import reverse
 from courses.models import Assignment, CourseClass
 from learning.models import Event, StudentAssignment
 from users.models import User
@@ -206,3 +209,28 @@ class StudyEventICalendarEvent(ICalendarEvent):
             'last-modified': instance.modified,
             'categories': vInline('CSC,EVENT')
         }
+
+
+class ICalendarURL(NamedTuple):
+    code: Literal["classes", "assignments", "events"]
+    title: str
+    url: str
+
+
+def get_icalendar_links(account: User,
+                        url_builder: Callable[[str], str] = None) -> List[ICalendarURL]:
+    if not url_builder:
+        url_builder = str
+    url_classes = reverse('user_ical_classes',
+                          subdomain=settings.LMS_SUBDOMAIN,
+                          args=[account.pk])
+    url_assignments = reverse('user_ical_assignments',
+                              subdomain=settings.LMS_SUBDOMAIN,
+                              args=[account.pk])
+    url_events = reverse('ical_events', subdomain=settings.LMS_SUBDOMAIN)
+    urls = [
+        ICalendarURL(code="classes", title=str(_("Classes")), url=url_builder(url_classes)),
+        ICalendarURL(code="assignments", title=str(_("Assignments")), url=url_builder(url_assignments)),
+        ICalendarURL(code="events", title=str(_("Events")), url=url_builder(url_events)),
+    ]
+    return urls
