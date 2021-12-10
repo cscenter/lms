@@ -1,28 +1,26 @@
-from typing import Any, List, Union
+from typing import List
 
 from loginas.views import user_login, user_logout
 
 from django.apps import apps
 from django.contrib.admin import AdminSite
 from django.contrib.admin.views.decorators import staff_member_required
-from django.urls import URLPattern, URLResolver, include, path, re_path
+from django.urls import URLResolver, path
 from django.views.decorators.cache import never_cache
-
-URLPath = Union[URLResolver, URLPattern]
 
 
 class BaseAdminSite(AdminSite):
     enable_nav_sidebar = False
 
-    def get_urls(self) -> List[URLPath]:
-        base_patterns: List[URLPath] = super().get_urls()
-        url_patterns: List[URLPath] = []
+    def get_urls(self) -> List[URLResolver]:
+        base_patterns: List[URLResolver] = super().get_urls()
+        url_patterns: List[URLResolver] = []
 
         if apps.is_installed('loginas'):
-            url_patterns.extend([
-                re_path(r"^login/user/(?P<user_id>.+)/$", user_login, name='loginas-user-login'),
+            url_patterns += [
+                path('login/user/<str:user_id>/', user_login, name='loginas-user-login'),
                 path('logout/', user_logout, name='loginas-logout'),
-            ])
+            ]
 
         if apps.is_installed('announcements'):
             from announcements.views import AnnouncementTagAutocomplete

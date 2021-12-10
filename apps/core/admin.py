@@ -44,7 +44,7 @@ class BaseModelAdmin(admin.ModelAdmin):
         return queryset
 
 
-def get_admin_url(instance_or_qs):
+def get_admin_url(obj):
     """
     A function for extracting admin URL for an object.
 
@@ -52,18 +52,13 @@ def get_admin_url(instance_or_qs):
     "Reversing admin URLs" at
     https://docs.djangoproject.com/en/dev/ref/contrib/admin.
     """
-    if isinstance(instance_or_qs, QuerySet):
-        content_type = ContentType.objects.get_for_model(instance_or_qs.model)
-        return reverse(
-            "admin:{0.app_label}_{0.model}_changelist".format(content_type))
-    elif isinstance(instance_or_qs, Model):
-        content_type = ContentType.objects.get_for_model(
-            instance_or_qs.__class__)
+    if isinstance(obj, Model):
+        content_type = ContentType.objects.get_for_model(obj.__class__)
         return reverse(
             "admin:{0.app_label}_{0.model}_change".format(content_type),
-            args=[instance_or_qs.pk])
+            args=[obj.pk])
     else:
-        raise ValueError(f"Expected model or query, got: {instance_or_qs}")
+        raise ValueError(f"Expected model, got: {obj}")
 
 
 def urlize(instance, text=None):

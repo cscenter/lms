@@ -5,7 +5,6 @@ from django_ses.signals import bounce_received, complaint_received
 from django.db import models
 from django.dispatch import receiver
 
-from compsciclub_ru.context_processors import BRANCHES
 from core.models import City
 from notifications.service import suspend_email_address
 from users.models import User
@@ -16,8 +15,11 @@ logger = logging.getLogger()
 @receiver(models.signals.post_save, sender=City)
 @receiver(models.signals.post_delete, sender=City)
 def city_cache_clear_after_save(sender, *args, **kwargs) -> None:
-    return None  # FIXME: cache must be shared first
-    BRANCHES["CACHE"] = []
+    # FIXME: cache must be shared first
+    # TODO: move this signal directly to the cs club project
+    # from compsciclub_ru.context_processors import BRANCHES
+    # BRANCHES["CACHE"] = []
+    return None
 
 
 @receiver(bounce_received)

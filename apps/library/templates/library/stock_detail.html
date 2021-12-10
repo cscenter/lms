@@ -37,7 +37,7 @@
                 <h4>
                     <em>{{ book.author }}</em> {{ book.title }}
                     {% if user.is_authenticated and user.is_curator %}
-                        <a href="{% admin_url stock %}" target="_blank" class="btn btn-mini btn-link">
+                        <a href="{% url 'admin:library_stock_change' stock.pk %}" target="_blank" class="btn btn-mini btn-link">
                             <i class="fa fa-pencil"></i>
                         </a>
                     {% endif %}

@@ -18,8 +18,8 @@ class ScoreField(serializers.DecimalField):
 
 
 class CharSeparatedField(serializers.CharField):
-    def __init__(self, separator: Optional[str] = ",", **kwargs):
-        self.separator = separator
+    def __init__(self, separator: Optional[str] = None, **kwargs):
+        self.separator = separator or ","
         super().__init__(**kwargs)
 
     def to_internal_value(self, data):

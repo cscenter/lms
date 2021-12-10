@@ -34,7 +34,8 @@ def test_bounce_handler(settings, client, mocker):
     user.refresh_from_db()
     user2.refresh_from_db()
     assert user.email_suspension_details is not None
-    assert user.email_suspension_details['bounceSubType'] == 'General'
+    # No idea why mypy throws an error here
+    assert user.email_suspension_details['bounceSubType'] == 'General'  # type: ignore[unreachable]
     assert 'action' in user.email_suspension_details
     assert user.email_suspension_details['action'] == 'failed'
     assert 'status' in user.email_suspension_details

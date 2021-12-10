@@ -14,6 +14,7 @@ from django.views import generic
 from auth.mixins import PermissionRequiredMixin
 from core import comment_persistence
 from core.exceptions import Redirect
+from core.http import HttpRequest
 from core.urls import reverse
 from courses.calendar import CalendarEvent, TimetableEvent
 from courses.models import Course, Semester
@@ -279,6 +280,7 @@ class InternshipListView(PermissionRequiredMixin, generic.ListView):
     context_object_name = "faq"
     template_name = "learning/study/internships.html"
     permission_required = ViewInternships.name
+    request: HttpRequest
 
     def get_queryset(self):
         return (InfoBlock.objects

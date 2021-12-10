@@ -9,8 +9,8 @@
         <div id="library" class="row">
             <h2 class="content-title">
                 {% trans "library"|capfirst %}
-                {% if user.is_authenticated and user.is_curator %}
-                    <a href="{% admin_url stocks %}" target="_blank" class="btn btn-link">
+                {% if user.is_superuser %}
+                    <a href="{% url 'admin:library_stock_changelist' %}" target="_blank" class="btn btn-link">
                         <i class="fa fa-pencil"></i>
                     </a>
                 {% endif %}

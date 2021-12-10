@@ -2,7 +2,7 @@ import datetime
 import logging
 from functools import partial
 from itertools import zip_longest
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, Iterator, List, Optional
 from urllib.parse import parse_qs, urlparse
 
 import bleach
@@ -260,7 +260,7 @@ def normalize_yandex_login(value: str) -> str:
     return value.lower().replace('-', '.')
 
 
-def chunks(iterable: Iterable, n: int, fillvalue: Optional[Any] = None) -> zip_longest:
+def chunks(iterable: Iterable, n: int, fillvalue: Optional[Any] = None) -> Iterator[Any]:
     """
     Collect data into fixed-length chunks or blocks:
     Example:
@@ -285,7 +285,7 @@ def bucketize(iterable, key=None, value_transform=None) -> Dict[Any, List[Any]]:
         key = lambda x: x
     if value_transform is None:
         value_transform = lambda x: x
-    buckets = {}
+    buckets: Dict[Any, List[Any]] = {}
     for val in iterable:
         bucket_key = key(val)
         buckets.setdefault(bucket_key, []).append(value_transform(val))

@@ -12,19 +12,10 @@ from django.utils.numberformat import format
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 
-from ..admin import get_admin_url
 from ..utils import render_markdown
 
 numeric_test = re.compile(r"^\d+$")
 register = Library()
-
-
-@register.simple_tag
-def admin_url(instance_or_qs):
-    """
-    A tag for reversing admin site URLs from templates.
-    """
-    return get_admin_url(instance_or_qs)
 
 
 @register.filter
