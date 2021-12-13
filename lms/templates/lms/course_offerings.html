@@ -15,7 +15,7 @@
             <td><% if (co.is_club_course) { %><span data-title="{% trans "CS club course" %}" class="__club"></span><% } %><a href="<%-co.url%>" class="__course"><%-co.name%></a></td>
             <td>
                 <% for (var i = 0; i < co.teachers.length; i++) { %>
-                    <a class="__teacher text-nowrap" href="<%=co.teachers[i].url%>"><%=co.teachers[i].name%></a><% if (i != co.teachers.length - 1) { %>, <% } %>
+                    <a class="__teacher text-nowrap" href="/teachers/<%=co.teachers[i].id%>/"><%=co.teachers[i].name%></a><% if (i != co.teachers.length - 1) { %>, <% } %>
                 <% } %>
             </td>
         </tr>
