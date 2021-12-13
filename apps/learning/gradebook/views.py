@@ -17,8 +17,9 @@ from django.views.generic.base import TemplateResponseMixin
 
 from api.views import APIBaseView
 from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
+from auth.models import ConnectedAuthService
 from core.http import HttpRequest
-from core.utils import normalize_yandex_login
+from core.utils import bucketize, normalize_yandex_login
 from courses.constants import AssignmentFormat, SemesterTypes
 from courses.models import Assignment, Course, Semester
 from courses.utils import get_current_term_pair
@@ -227,6 +228,8 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
             _("Group"),
             _("Yandex Login"),
             _("Codeforces Handle"),
+            "gitlab.manytask.org ID",
+            "gitlab.manytask.org Login",
             _("Final grade"),
             _("Total"),
         ]
@@ -238,10 +241,17 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
                 title = a.title
             headers.append(title)
         writer.writerow(headers)
+        students = [gs.student_profile.user_id for gs in gradebook.students.values()]
+        services_queryset = (ConnectedAuthService.objects
+                             .filter(user__in=students))
+        connected_services = bucketize(services_queryset, key=lambda cs: cs.user_id)
         for gradebook_student in gradebook.students.values():
             student = gradebook_student.student
             student_profile = gradebook_student.student_profile
             student_group = gradebook_student.student_group
+            connected_providers = connected_services.get(student.pk, [])
+            connected_providers = {cp.provider: cp for cp in connected_providers}
+            gitlab_manytask = connected_providers.get('gitlab-manytask')
             writer.writerow(
                 itertools.chain(
                     [gradebook_student.enrollment_id,
@@ -253,6 +263,8 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
                      (student_group and student_group.name) or "-",
                      student.yandex_login,
                      student.codeforces_login,
+                     gitlab_manytask.uid if gitlab_manytask else "-",
+                     gitlab_manytask.login if gitlab_manytask and gitlab_manytask.login else "-",
                      gradebook_student.final_grade_display,
                      gradebook_student.total_score],
                     [(a.score if a and a.score is not None else '')

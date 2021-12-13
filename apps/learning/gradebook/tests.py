@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy
 
 from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
 from auth.permissions import perm_registry
+from auth.tests.factories import ConnectedAuthServiceFactory
 from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.constants import AssignmentFormat
@@ -92,6 +93,52 @@ def test_gradebook_download_csv(client):
         row = row_last_names.index(s.last_name)
         col = data[0].index(a.title)
         assert grade == int(data[row][col])
+
+
+@pytest.mark.django_db
+def test_view_gradebook_csv_gitlab_manytask_columns(client):
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    gradebook_url = course.get_gradebook_url(format="csv")
+    enrollment = EnrollmentFactory(course=course)
+    client.login(teacher)
+    response = client.get(gradebook_url)
+    assert response.status_code == 200
+    gradebook_csv = response.content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(gradebook_csv)) if s]
+    assert len(data) == 2
+
+    def get_column_value(table, column_name, row_index):
+        assert column_name in table[0]
+        assert row_index < len(table)
+        column_index = table[0].index(column_name)
+        return table[row_index][column_index]
+
+    assert get_column_value(data, "gitlab.manytask.org ID", 1) == "-"
+    assert get_column_value(data, "gitlab.manytask.org Login", 1) == "-"
+    # Connect service providers
+    ConnectedAuthServiceFactory(user=enrollment.student_profile.user,
+                                provider="gitlab",
+                                uid="Test UID2")
+    connected_service = ConnectedAuthServiceFactory(user=enrollment.student_profile.user,
+                                                    provider="gitlab-manytask",
+                                                    uid="Test UID",
+                                                    extra_data="")
+    response = client.get(gradebook_url)
+    assert response.status_code == 200
+    gradebook_csv = response.content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(gradebook_csv)) if s]
+    assert get_column_value(data, "gitlab.manytask.org ID", 1) == "Test UID"
+    assert get_column_value(data, "gitlab.manytask.org Login", 1) == "-"
+    # Saved login in extra data
+    connected_service.extra_data = {"login": "test-login"}
+    connected_service.save()
+    response = client.get(gradebook_url)
+    assert response.status_code == 200
+    gradebook_csv = response.content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(gradebook_csv)) if s]
+    assert get_column_value(data, "gitlab.manytask.org ID", 1) == "Test UID"
+    assert get_column_value(data, "gitlab.manytask.org Login", 1) == "test-login"
 
 
 @pytest.mark.django_db
