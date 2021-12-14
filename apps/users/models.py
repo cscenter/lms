@@ -288,6 +288,7 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         _("Phone"),
         max_length=40,
         blank=True)
+    birth_date = models.DateField(_("Date of Birth"), blank=True, null=True)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     modified = AutoLastModifiedField(_('modified'))
     photo = ImageField(
