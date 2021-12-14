@@ -916,8 +916,10 @@ class StudentStatusLog(TimestampedModel):
         on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ['-pk']
         verbose_name_plural = _("Student Status Log")
+
+    def __str__(self):
+        return str(self.pk)
 
     def get_status_display(self):
         if self.status:

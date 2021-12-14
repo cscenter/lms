@@ -211,11 +211,6 @@ class StudentProfileAdmin(BaseModelAdmin):
         }),
     ]
 
-    class Media:
-        css = {
-            'all': ('v2/css/django_admin.css',)
-        }
-
     def get_readonly_fields(self, request, obj=None):
         if obj is not None and obj.pk:
             # TODO: add user change url
