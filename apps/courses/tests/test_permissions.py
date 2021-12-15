@@ -9,7 +9,7 @@ from courses.permissions import (
 )
 from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseClassFactory, CourseFactory,
-    CourseTeacherFactory, CourseNewsFactory
+    CourseNewsFactory, CourseTeacherFactory
 )
 from learning.permissions import CreateCourseNews, DeleteCourseNews, EditCourseNews
 from learning.settings import GradeTypes, StudentStatuses
