@@ -13,18 +13,49 @@ def can_view_private_materials(role: CourseRole) -> bool:
 
 
 @add_perm
+class EditMetaCourse(Permission):
+    name = "courses.change_metacourse"
+
+
+@add_perm
 class ViewCourse(Permission):
     name = "courses.view_course"
 
 
 @add_perm
-class ViewCourseNews(Permission):
-    name = "courses.view_news"
+class ViewCourseInternalDescription(Permission):
+    name = "courses.view_course_internal_description"
 
 
 @add_perm
-class ChangeMetaCourse(Permission):
-    name = "courses.change_metacourse"
+class ViewCourseInternalDescriptionAsTeacher(Permission):
+    name = "teaching.view_course_internal_description"
+
+    @staticmethod
+    @predicate
+    def rule(user, course: Course):
+        return course.is_actual_teacher(user.pk)
+
+
+@add_perm
+class ViewCourseInternalDescriptionAsLearner(Permission):
+    name = "study.view_course_internal_description"
+
+    @staticmethod
+    @predicate
+    def rule(user, course: Course):
+        from learning.services.enrollment_service import is_course_failed_by_student
+        enrollment = user.get_enrollment(course.pk)
+        if not enrollment:
+            return False
+        student_profile = enrollment.student_profile
+        is_course_failed = is_course_failed_by_student(course, user, enrollment=enrollment)
+        return student_profile.is_active and not is_course_failed
+
+
+@add_perm
+class ViewCourseNews(Permission):
+    name = "courses.view_news"
 
 
 @add_perm

@@ -26,7 +26,7 @@ from grading.constants import CheckingSystemTypes
 from grading.models import CheckingSystem
 from grading.services import CheckerService
 
-__all__ = ('CourseForm', 'CourseEditDescriptionForm', 'CourseNewsForm',
+__all__ = ('MetaCourseForm', 'CourseUpdateForm', 'CourseNewsForm',
            'CourseClassForm', 'AssignmentForm', 'AssignmentResponsibleTeachersForm',
            'AssignmentResponsibleTeachersFormFactory',
            'StudentGroupAssigneeForm', 'StudentGroupAssigneeFormFactory')
@@ -59,7 +59,7 @@ class MultipleStudentGroupField(forms.TypedMultipleChoiceField):
         return widget_attrs
 
 
-class CourseForm(forms.ModelForm):
+class MetaCourseForm(forms.ModelForm):
     name_ru = forms.CharField(
         label=_("Course|name"),
         required=True,
@@ -95,7 +95,7 @@ class CourseForm(forms.ModelForm):
         fields = ('name_ru', 'name_en', 'description_ru', 'description_en')
 
 
-class CourseEditDescriptionForm(forms.ModelForm):
+class CourseUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -110,15 +110,17 @@ class CourseEditDescriptionForm(forms.ModelForm):
                 ),
                 template='crispy_forms/square_tabs.html'
             ),
+            Div('internal_description'),
             CANCEL_SAVE_PAIR)
         super().__init__(*args, **kwargs)
 
     class Meta:
         model = Course
-        fields = ['description_ru', 'description_en']
+        fields = ['description_ru', 'description_en', 'internal_description']
         widgets = {
             'description_ru': UbereditorWidget,
             'description_en': UbereditorWidget,
+            'internal_description': UbereditorWidget,
         }
 
 

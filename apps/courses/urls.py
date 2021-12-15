@@ -26,7 +26,7 @@ urlpatterns = [
         re_path(RE_COURSE_URI, include([
             path("", views.CourseDetailView.as_view(), name="course_detail"),
             re_path(r"^(?P<tab>news|assignments|classes|about|contacts|reviews)/$", views.CourseDetailView.as_view(), name="course_detail_with_active_tab"),
-            path("edit", views.CourseEditView.as_view(), name="course_update"),
+            path("edit", views.CourseUpdateView.as_view(), name="course_update"),
             path("news/", include([
                 path("add", views.CourseNewsCreateView.as_view(), name="course_news_create"),
                 path("<int:pk>/edit", views.CourseNewsUpdateView.as_view(), name="course_news_update"),

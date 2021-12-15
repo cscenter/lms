@@ -51,6 +51,9 @@
                 {% else %}
                   TBA
                 {% endif %}
+                {% if can_view_course_internal_description and course.internal_description %}
+                  {{ course.internal_description|markdown("course_internal_description", 3600, course.pk, course.modified) }}
+                {% endif %}
               </div>
             </div>
           {% endwith %}

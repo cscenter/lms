@@ -5,13 +5,13 @@ from courses.constants import MaterialVisibilityTypes
 from courses.models import CourseTeacher
 from courses.permissions import (
     CreateAssignment, DeleteAssignment, DeleteAssignmentAttachment, EditAssignment,
-    EditCourseClass, ViewCourseClassMaterials
+    EditCourseClass, ViewCourseClassMaterials, ViewCourseInternalDescription
 )
 from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseClassFactory, CourseFactory,
     CourseTeacherFactory
 )
-from learning.settings import GradeTypes
+from learning.settings import GradeTypes, StudentStatuses
 from learning.tests.factories import EnrollmentFactory
 from users.models import User
 from users.tests.factories import (
@@ -189,3 +189,38 @@ def test_course_class_materials_visibility_teachers(client):
     assert not teacher.has_perm(ViewCourseClassMaterials.name, course_class)
     assert course_teacher.has_perm(ViewCourseClassMaterials.name, course_class)
 
+
+@pytest.mark.django_db
+def test_view_course_internal_description():
+    permission_name = ViewCourseInternalDescription.name
+    curator = CuratorFactory()
+    teacher1, teacher_other = TeacherFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher1])
+    assert curator.has_perm(permission_name)
+    assert curator.has_perm(permission_name, course)
+    assert teacher1.has_perm(permission_name, course)
+    assert not teacher1.has_perm(permission_name)
+    assert not teacher_other.has_perm(permission_name, course)
+    assert not teacher_other.has_perm(permission_name)
+    enrollment1 = EnrollmentFactory(course=course, grade=GradeTypes.GOOD)
+    student = enrollment1.student_profile.user
+    assert not student.has_perm(permission_name)
+    assert student.has_perm(permission_name, course)
+    # Failed the course
+    enrollment1.grade = GradeTypes.UNSATISFACTORY
+    enrollment1.save()
+    instance_memoize.delete_cache(student)
+    assert not student.has_perm(permission_name, course)
+    # Inactive profile
+    enrollment1.grade = GradeTypes.GOOD
+    enrollment1.save()
+    instance_memoize.delete_cache(student)
+    assert student.has_perm(permission_name, course)
+    enrollment1.student_profile.status = StudentStatuses.EXPELLED
+    enrollment1.student_profile.save()
+    instance_memoize.delete_cache(student)
+    assert not student.has_perm(permission_name, course)
+    enrollment2 = EnrollmentFactory(grade=GradeTypes.GOOD)
+    student2 = enrollment2.student_profile.user
+    assert not student2.has_perm(permission_name)
+    assert not student2.has_perm(permission_name, course)

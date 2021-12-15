@@ -48,7 +48,10 @@
                     {% if course.description %}
                         {{ course.description|markdown("course_description", 3600, course.pk, course.modified, request.LANGUAGE_CODE) }}
                     {% else %}
-                        {{ course.meta_course.description|markdown("meta_course", 3600, course.meta_course.pk, course.meta_course.modified, request.LANGUAGE_CODE) }}
+                        TBA
+                    {% endif %}
+                    {% if can_view_course_internal_description and course.internal_description %}
+                      {{ course.internal_description|markdown("course_internal_description", 3600, course.pk, course.modified) }}
                     {% endif %}
                     </div>
                 </div>

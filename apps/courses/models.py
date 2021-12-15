@@ -273,8 +273,7 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
     )
     description = models.TextField(
         _("Description"),
-        help_text=_("LaTeX+Markdown+HTML is enabled; empty description "
-                    "will be replaced by course description"),
+        help_text=_("LaTeX+Markdown+HTML is enabled"),
         blank=True)
     internal_description = models.TextField(
         _("Internal Information"),

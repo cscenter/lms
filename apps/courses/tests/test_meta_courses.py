@@ -3,7 +3,7 @@ import pytest
 
 from auth.mixins import PermissionRequiredMixin
 from courses.models import MetaCourse
-from courses.permissions import ChangeMetaCourse
+from courses.permissions import EditMetaCourse
 from courses.tests.factories import CourseFactory, MetaCourseFactory
 from users.tests.factories import CuratorFactory, UserFactory
 
@@ -29,7 +29,7 @@ def test_meta_course_update_security(client, lms_resolver,
     update_url = meta_course.get_update_url()
     resolver = lms_resolver(update_url)
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
-    assert resolver.func.view_class.permission_required == ChangeMetaCourse.name
+    assert resolver.func.view_class.permission_required == EditMetaCourse.name
     assert resolver.func.view_class.permission_required in perm_registry
     assert_login_redirect(update_url, method='get')
     curator = CuratorFactory()

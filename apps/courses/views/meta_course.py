@@ -2,9 +2,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
-from courses.forms import CourseForm
+from courses.forms import MetaCourseForm
 from courses.models import Course, MetaCourse
-from courses.permissions import ChangeMetaCourse
+from courses.permissions import EditMetaCourse
 
 __all__ = ('MetaCourseDetailView', 'MetaCourseUpdateView')
 
@@ -28,8 +28,8 @@ class MetaCourseDetailView(LoginRequiredMixin, generic.DetailView):
 
 
 class MetaCourseUpdateView(PermissionRequiredMixin, generic.UpdateView):
-    permission_required = ChangeMetaCourse.name
+    permission_required = EditMetaCourse.name
     model = MetaCourse
     slug_url_kwarg = 'course_slug'
     template_name = "courses/simple_crispy_form.html"
-    form_class = CourseForm
+    form_class = MetaCourseForm

@@ -183,3 +183,20 @@ def test_download_course_class_attachment(client, lms_resolver, settings):
     client.login(student)
     response = client.get(download_url)
     assert isinstance(response, XAccelRedirectFileResponse)
+
+
+@pytest.mark.django_db
+def test_course_update(client, assert_redirect):
+    course = CourseFactory()
+    curator = CuratorFactory()
+    client.login(curator)
+    form = {
+        "description_ru": "foobar",
+        "internal_description": "super secret"
+    }
+    response = client.post(course.get_update_url(), form)
+    assert response.status_code == 302
+    course.refresh_from_db()
+    assert course.description_ru == "foobar"
+    assert course.internal_description == "super secret"
+
