@@ -7,6 +7,12 @@
       <td>{{ profile_user.phone|default("—", True) }}</td>
     </tr>
     <tr>
+      <td>{% trans %}Date of Birth{% endtrans %}:</td>
+      <td>
+        {% if profile_user.birth_date %}{{ profile_user.birth_date|date("d.m.Y") }}{% else %}—{% endif %}
+      </td>
+    </tr>
+    <tr>
       <td>{% trans %}Email{% endtrans %}:</td>
       <td>
         {{ profile_user.email }}

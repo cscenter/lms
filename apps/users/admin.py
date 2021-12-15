@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as _UserAdmin
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
+from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
@@ -114,7 +115,7 @@ class UserAdmin(_UserAdmin):
     fieldsets = [
         (None, {'fields': ('username', 'email', 'password')}),
         (_('Personal info'), {
-            'fields': ['gender', 'branch',
+            'fields': ['gender', 'birth_date', 'branch',
                        'last_name', 'first_name', 'patronymic', 'phone',
                        'workplace', 'photo', 'bio', 'private_contacts',
                        'social_networks', 'time_zone']}),
@@ -203,8 +204,8 @@ class StudentProfileAdmin(BaseModelAdmin):
                        'academic_disciplines']
         }),
         (_('Official Student Info'), {
-            'fields': ['is_official_student', 'birthday', 'diploma_number',
-                       'diploma_issued_on', 'diploma_issued_by']
+            'fields': ['is_official_student', 'birth_date', 'birthday',
+                       'diploma_number', 'diploma_issued_on', 'diploma_issued_by']
         }),
         (_("Curator's note"), {
             'fields': ['comment', 'comment_changed_at', 'comment_last_author']
@@ -214,10 +215,10 @@ class StudentProfileAdmin(BaseModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         if obj is not None and obj.pk:
             # TODO: add user change url
-            return ['type', 'site', 'year_of_admission',
+            return ['type', 'site', 'year_of_admission', 'birth_date',
                     'level_of_education_on_admission',
-                    'comment_changed_at', 'comment_last_author',]
-        return []
+                    'comment_changed_at', 'comment_last_author']
+        return ['birth_date']
 
     def save_model(self, request, obj: StudentProfile,
                    form: StudentProfileForm, change: bool) -> None:
@@ -231,6 +232,13 @@ class StudentProfileAdmin(BaseModelAdmin):
         if not change and  obj.status not in StudentStatuses.inactive_statuses:
             permission_role = StudentTypes.to_permission_role(obj.type)
             assign_role(account=obj.user, role=permission_role, site=obj.site)
+
+    @admin.display(description=_("Date of Birth"))
+    def birth_date(self, obj):
+        if obj.user_id and obj.user.birth_date:
+            d = formats.date_format(obj.user.birth_date, 'j E Y г.')
+            return mark_safe(d)
+        return "Не указана"
 
 
 class SHADCourseRecordAdmin(admin.ModelAdmin):

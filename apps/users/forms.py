@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.utils import is_club_site
-from core.widgets import UbereditorWidget
+from core.widgets import DateInputTextWidget, UbereditorWidget
 
 from .models import CertificateOfParticipation, User
 
@@ -20,6 +20,11 @@ class UserProfileForm(forms.ModelForm):
                   "на главную страницу.",
         required=False,
         widget=forms.Select(),)
+    birth_date = forms.DateField(
+        label=_("Date of Birth"),
+        help_text=_("Format: dd.mm.yyyy"),
+        required=False,
+        widget=DateInputTextWidget(attrs={'class': 'datepicker'}))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,7 +45,7 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('phone', 'workplace', 'bio', 'time_zone',
+        fields = ('birth_date', 'phone', 'workplace', 'bio', 'time_zone',
                   'yandex_login', 'github_login', 'stepic_id', 'codeforces_login',
                   'private_contacts')
         widgets = {

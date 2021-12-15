@@ -177,7 +177,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
 
 class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
     model = User
-    template_name = "users/user_edit.html"
+    template_name = "lms/user_profile/user_edit.html"
     form_class = UserProfileForm
 
     def is_form_allowed(self, user, obj):
