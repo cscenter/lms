@@ -276,6 +276,11 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("LaTeX+Markdown+HTML is enabled; empty description "
                     "will be replaced by course description"),
         blank=True)
+    internal_description = models.TextField(
+        _("Internal Information"),
+        help_text=_("Visible to course listeners only. "
+                    "LaTeX+Markdown+HTML is enabled."),
+        blank=True)
     survey_url = models.URLField(
         _("Survey URL"),
         blank=True,
@@ -312,7 +317,6 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         default=CourseGroupModes.BRANCH,
         help_text=_("Choose `Branch` to auto generate student groups "
                     "from course branches."))
-
     language = models.CharField(
         verbose_name=_("Language"),
         max_length=5, db_index=True,
