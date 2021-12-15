@@ -100,7 +100,7 @@ def test_student_group_service_get_choices(settings):
     groups = list(StudentGroup.objects.filter(course=course).order_by('name', 'pk'))
     choices = StudentGroupService.get_choices(course)
     assert len(choices) == 1
-    assert choices[0] == (str(groups[0].pk), groups[0].name)
+    assert choices[0] == (groups[0].pk, groups[0].name)
     branch_nsk = BranchFactory(code="nsk",
                                site=SiteFactory(domain=ANOTHER_DOMAIN))
     assert branch_nsk.site_id == ANOTHER_DOMAIN_ID
@@ -108,8 +108,8 @@ def test_student_group_service_get_choices(settings):
     assert StudentGroup.objects.filter(course=course).count() == 2
     sg1, sg2 = list(StudentGroup.objects.filter(course=course).order_by('pk'))
     choices = StudentGroupService.get_choices(course)
-    assert (str(sg1.pk), f"{sg1.name} [{TEST_DOMAIN}]") in choices
-    assert (str(sg2.pk), f"{sg2.name} [{ANOTHER_DOMAIN}]") in choices
+    assert (sg1.pk, f"{sg1.name} [{TEST_DOMAIN}]") in choices
+    assert (sg2.pk, f"{sg2.name} [{ANOTHER_DOMAIN}]") in choices
 
 
 @pytest.mark.django_db

@@ -7,13 +7,16 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.forms import BoundField
 from django.utils.encoding import force_str
+from django.utils.translation import gettext as _
 
 from core.forms import ScoreField
 from learning.gradebook.data import GradeBookData
-from learning.models import Course, Enrollment, StudentAssignment, StudentGroup
+from learning.models import Course, Enrollment, StudentAssignment
 
 __all__ = ('ConflictError', 'BaseGradebookForm', 'AssignmentScore',
            'EnrollmentFinalGrade', 'GradeBookFormFactory', 'GradeBookFilterForm')
+
+from learning.services import StudentGroupService
 
 ConflictError = namedtuple('ConflictError', ['field_name', 'unsaved_value'])
 
@@ -91,7 +94,7 @@ class BaseGradebookForm(forms.Form):
 class GradeBookFilterForm(forms.Form):
 
     student_group = forms.TypedChoiceField(
-        label='Группы',
+        label=_("Groups"),
         label_suffix='',
         coerce=int,
         empty_value=None,
@@ -101,10 +104,10 @@ class GradeBookFilterForm(forms.Form):
 
     def __init__(self, course: Course, **kwargs):
         super().__init__(**kwargs)
-        student_group = StudentGroup.objects.filter(course=course)
-        choices = [(None, 'Студенты всех групп')]
-        choices += [(sg.pk, sg.name) for sg in student_group]
-        self.fields['student_group'].choices = choices
+        self.fields['student_group'].choices = [
+            (None, 'Студенты всех групп'),
+            *StudentGroupService.get_choices(course)
+        ]
 
     def is_visible(self) -> bool:
         # Filtering only makes sense if we have at least 3 choices

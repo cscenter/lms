@@ -182,13 +182,13 @@ class StudentGroupService:
         return len(sites) if sites else 1
 
     @classmethod
-    def get_choices(cls, course: Course) -> List[Tuple[str, str]]:
+    def get_choices(cls, course: Course) -> List[Tuple[int, str]]:
         choices = []
         student_groups = CourseService.get_student_groups(course)
         sites_total = cls.unique_sites(student_groups)
         for g in student_groups:
             label = g.get_name(branch_details=sites_total > 1)
-            choices.append((str(g.pk), label))
+            choices.append((g.pk, label))
         return choices
 
     @staticmethod
