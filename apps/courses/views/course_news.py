@@ -1,3 +1,5 @@
+from typing import Any
+
 from vanilla import CreateView, DeleteView, UpdateView
 
 from django.contrib import messages
@@ -8,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
+from core.http import HttpRequest
 from core.views import ProtectedFormMixin
 from courses.forms import CourseNewsForm
 from courses.models import Course, CourseNews
@@ -56,6 +59,10 @@ class CourseNewsUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = EditCourseNews.name
     form_class = CourseNewsForm
 
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        self.object = self.get_object()
+
     def get_permission_object(self):
         return self.object
 
@@ -67,6 +74,10 @@ class CourseNewsDeleteView(PermissionRequiredMixin, DeleteView):
     model = CourseNews
     permission_required = DeleteCourseNews.name
     template_name = "forms/simple_delete_confirmation.html"
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        self.object = self.get_object()
 
     def get_permission_object(self):
         return self.object
