@@ -361,9 +361,9 @@ class ConfirmationForm(forms.ModelForm):
         help_text="Нажмите «Прислать код», затем введите код из сообщения, отправленного на email.",
         required=True,
         widget=forms.TextInput(attrs={"placeholder": "Код подтверждения"}))
+    birth_date = forms.DateField(label=_("Birthday"), required=True)
     # Student Profile data
     university = forms.CharField(label=_("University"), required=False)
-    birthday = forms.DateField(label=_("Birthday"), required=True)
 
     class Meta:
         model = User
@@ -372,7 +372,7 @@ class ConfirmationForm(forms.ModelForm):
             "email_code",
             "time_zone",
             "gender",
-            "birthday",
+            "birth_date",
             "photo",
             "phone",
             "workplace",
@@ -398,7 +398,7 @@ class ConfirmationForm(forms.ModelForm):
             "github_login": applicant.github_login,
             "workplace": applicant.workplace,
             "university": applicant.get_university_display(),
-            "birthday": applicant.birth_date,
+            "birth_date": applicant.birth_date,
         }
         kwargs["initial"] = initial
         super().__init__(**kwargs)
@@ -428,7 +428,6 @@ class ConfirmationForm(forms.ModelForm):
     def save(self, commit=True) -> User:
         account_data = AccountData.from_dict(self.cleaned_data)
         student_profile_data = StudentProfileData(
-            birthday=self.cleaned_data['birthday'],
             university=self.cleaned_data['university']
         )
         with transaction.atomic():

@@ -27,7 +27,7 @@ def test_confirmation_form_validation(settings, get_test_image):
         "email_code": "wrong",
         "time_zone": "Europe/Moscow",
         "gender": GenderTypes.FEMALE,
-        "birthday": datetime.date(2011, 1, 1),
+        "birth_date": datetime.date(2011, 1, 1),
         "phone": "+7",
     }
     files = {"photo": get_test_image(name='test.png')}

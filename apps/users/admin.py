@@ -204,7 +204,7 @@ class StudentProfileAdmin(BaseModelAdmin):
                        'academic_disciplines']
         }),
         (_('Official Student Info'), {
-            'fields': ['is_official_student', 'birth_date', 'birthday',
+            'fields': ['is_official_student', 'birth_date',
                        'diploma_number', 'diploma_issued_on', 'diploma_issued_by']
         }),
         (_("Curator's note"), {
@@ -236,7 +236,7 @@ class StudentProfileAdmin(BaseModelAdmin):
     @admin.display(description=_("Date of Birth"))
     def birth_date(self, obj):
         if obj.user_id and obj.user.birth_date:
-            d = formats.date_format(obj.user.birth_date, 'j E Y г.')
+            d = formats.date_format(obj.user.birth_date, 'd.m.Y')
             return mark_safe(d)
         return "Не указана"
 

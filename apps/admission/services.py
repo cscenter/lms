@@ -328,6 +328,7 @@ class AccountData:
     codeforces_login: str
     stepic_id: str
     github_login: str
+    birth_date: date
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
@@ -339,7 +340,6 @@ class AccountData:
 @dataclass(frozen=True)
 class StudentProfileData:
     university: str
-    birthday: date
 
 
 def get_or_create_student_profile(campaign: Campaign, user: User,

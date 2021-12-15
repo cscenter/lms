@@ -774,11 +774,6 @@ class StudentProfile(TimeStampedModel):
         help_text=_("Number of higher education diploma"),
         blank=True
     )
-    # TODO: move data to the account, then delete this field
-    birthday = models.DateField(
-        verbose_name=_("Birthday"),
-        blank=True, null=True
-    )
     diploma_issued_on = models.DateField(
         verbose_name=_("Diploma Issued on"),
         blank=True, null=True

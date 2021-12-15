@@ -354,9 +354,9 @@ ACCOUNT_DATA = AccountData(email='test@example.com',
                            private_contacts='tiktok.com/git_lover',
                            codeforces_login='handle1',
                            stepic_id='42',
-                           github_login='git_lover')
-STUDENT_PROFILE_DATA = StudentProfileData(university='University1',
-                                          birthday=datetime.date(2000, 1, 1))
+                           github_login='git_lover',
+                           birth_date=datetime.date(2000, 1, 1))
+STUDENT_PROFILE_DATA = StudentProfileData(university='University1')
 
 
 @pytest.mark.django_db
@@ -378,6 +378,7 @@ def test_create_student(settings, get_test_image):
     assert user.patronymic == applicant.patronymic
     assert user.gender == ACCOUNT_DATA.gender
     assert user.yandex_login == 'login1'
+    assert user.birth_date == ACCOUNT_DATA.birth_date
     assert applicant.user == user
     acceptance.refresh_from_db()
     assert acceptance.status == Acceptance.CONFIRMED
@@ -386,7 +387,6 @@ def test_create_student(settings, get_test_image):
         profile_type=StudentTypes.REGULAR,
         filters=[Q(year_of_admission=campaign.year)])
     assert student_profile is not None
-    assert student_profile.birthday == STUDENT_PROFILE_DATA.birthday
     assert student_profile.university == STUDENT_PROFILE_DATA.university
     assert student_profile.year_of_admission == campaign.year
     assert student_profile.type == StudentTypes.REGULAR
