@@ -5,12 +5,14 @@ from bs4 import BeautifulSoup
 from django.forms import model_to_dict
 
 from courses.models import CourseNews, CourseTeacher
-from courses.tests.factories import CourseFactory, CourseNewsFactory, CourseTeacherFactory
+from courses.tests.factories import (
+    CourseFactory, CourseNewsFactory, CourseTeacherFactory
+)
 from users.tests.factories import TeacherFactory
 
 
 @pytest.mark.django_db
-def test_course_news_create_security(client, settings, assert_login_redirect):
+def test_view_course_news_create_security(client, settings, assert_login_redirect):
     teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     course = CourseFactory.create(teachers=[teacher])
     CourseTeacherFactory(course=course, teacher=spectator,
@@ -38,7 +40,7 @@ def test_course_news_create_security(client, settings, assert_login_redirect):
 
 
 @pytest.mark.django_db
-def test_course_news_create_data(client, assert_redirect):
+def test_view_course_news_create_data(client, assert_redirect):
     teacher = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
     url = course.get_create_news_url()
@@ -55,7 +57,7 @@ def test_course_news_create_data(client, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_course_news_update(client, assert_login_redirect, assert_redirect):
+def test_view_course_news_update(client, assert_login_redirect, assert_redirect):
     """Tests permissions and update action"""
     teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     course = CourseFactory.create(teachers=[teacher])
@@ -88,7 +90,7 @@ def test_course_news_update(client, assert_login_redirect, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_course_news_delete(client, assert_login_redirect, assert_redirect):
+def test_view_course_news_delete(client, assert_login_redirect, assert_redirect):
     """Tests permissions and delete action"""
     teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     course = CourseFactory.create(teachers=[teacher])
@@ -117,7 +119,11 @@ def test_course_news_delete(client, assert_login_redirect, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_view_course_add_news_btn_hidden_without_perm(client):
+def test_view_course_add_news_btn_visibility(client):
+    """
+    The button for creating news should
+    only be displayed if the user has permissions to do so.
+    """
     teacher, spectator = TeacherFactory.create_batch(2)
     course = CourseFactory(teachers=[teacher])
     CourseTeacherFactory(course=course, teacher=spectator,
@@ -138,7 +144,11 @@ def test_view_course_add_news_btn_hidden_without_perm(client):
 
 
 @pytest.mark.django_db
-def test_view_course_edit_description_btn_hidden_without_perm(client):
+def test_view_course_edit_description_btn_visibility(client):
+    """
+    The button for editing a course description should
+    only be displayed if the user has permissions to do so.
+    """
     teacher, spectator = TeacherFactory.create_batch(2)
     course = CourseFactory(teachers=[teacher])
     CourseTeacherFactory(course=course, teacher=spectator,

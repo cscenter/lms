@@ -5,14 +5,23 @@ from courses.constants import MaterialVisibilityTypes
 from courses.models import CourseTeacher
 from courses.permissions import (
     CreateAssignment, DeleteAssignment, DeleteAssignmentAttachment, EditAssignment,
+<<<<<<< HEAD
     EditCourseClass, ViewCourseClassMaterials, ViewCourseInternalDescription
+=======
+    EditCourseClass, EditCourseDescription, ViewCourseClassMaterials
+>>>>>>> a80131097 (refactor: prepare code for review)
 )
 from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseClassFactory, CourseFactory,
     CourseTeacherFactory
 )
+<<<<<<< HEAD
 from learning.permissions import CreateCourseNews, EditCourseNews, DeleteCourseNews
 from learning.settings import GradeTypes, StudentStatuses
+=======
+from learning.permissions import CreateCourseNews, DeleteCourseNews, EditCourseNews
+from learning.settings import GradeTypes
+>>>>>>> a80131097 (refactor: prepare code for review)
 from learning.tests.factories import EnrollmentFactory
 from users.models import User
 from users.tests.factories import (

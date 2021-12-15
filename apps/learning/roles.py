@@ -22,11 +22,12 @@ from users.permissions import (
 
 from .permissions import (
     CreateAssignmentComment, CreateAssignmentCommentAsLearner,
-    CreateAssignmentCommentAsTeacher, CreateAssignmentSolution,
-    CreateOwnAssignmentSolution, CreateStudentGroup, CreateStudentGroupAsTeacher,
+    CreateAssignmentCommentAsTeacher, CreateAssignmentSolution, CreateCourseNews,
+    CreateOwnAssignmentSolution, CreateOwnCourseNews, CreateStudentGroup,
+    CreateStudentGroupAsTeacher, DeleteCourseNews, DeleteOwnCourseNews,
     DeleteStudentGroup, DeleteStudentGroupAsTeacher, DownloadAssignmentSolutions,
-    EditGradebook, EditOwnAssignmentExecutionTime, EditOwnGradebook,
-    EditOwnStudentAssignment, EditStudentAssignment, EnrollInCourse,
+    EditCourseNews, EditGradebook, EditOwnAssignmentExecutionTime, EditOwnCourseNews,
+    EditOwnGradebook, EditOwnStudentAssignment, EditStudentAssignment, EnrollInCourse,
     EnrollInCourseByInvitation, LeaveCourse, UpdateStudentGroup,
     UpdateStudentGroupAsTeacher, ViewAssignmentAttachment,
     ViewAssignmentAttachmentAsLearner, ViewAssignmentAttachmentAsTeacher,
@@ -36,9 +37,7 @@ from .permissions import (
     ViewOwnEnrollments, ViewOwnGradebook, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments, ViewRelatedEnrollments, ViewRelatedStudentAssignment,
     ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList, ViewStudentGroup,
-    ViewStudentGroupAsTeacher, ViewStudyMenu, ViewTeachingMenu,
-    CreateCourseNews, EditCourseNews, DeleteCourseNews, DeleteOwnCourseNews,
-    EditOwnCourseNews, CreateOwnCourseNews, ViewTeacherCourses
+    ViewStudentGroupAsTeacher, ViewStudyMenu, ViewTeacherCourses, ViewTeachingMenu
 )
 
 

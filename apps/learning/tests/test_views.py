@@ -36,7 +36,9 @@ def test_course_list_view_permissions(client, assert_login_redirect):
 
 
 @pytest.mark.django_db
-def test_course_list_no_add_news_btn_without_perm(client):
+def test_course_list_view_add_news_btn_visibility(client):
+    """Add news button should be hidden for users without
+    CreateCourseNews permission"""
     teacher, spectator = TeacherFactory.create_batch(2)
     course = CourseFactory(teachers=[teacher])
     CourseTeacherFactory(course=course, teacher=spectator,
@@ -139,7 +141,7 @@ def test_course_detail_view_assignment_list(client, assert_login_redirect):
 
 
 @pytest.mark.django_db
-def test_course_edit_description_security(client, assert_login_redirect):
+def test_view_course_edit_description_security(client, assert_login_redirect):
     teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     course = CourseFactory.create(teachers=[teacher])
     CourseTeacherFactory(course=course, teacher=spectator,

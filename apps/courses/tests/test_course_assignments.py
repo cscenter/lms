@@ -12,7 +12,8 @@ from core.urls import reverse
 from courses.constants import AssigneeMode
 from courses.models import Assignment, AssignmentAttachment, CourseTeacher
 from courses.permissions import (
-    CreateAssignment, DeleteAssignmentAttachment, EditAssignment, DeleteAssignmentAttachmentAsTeacher
+    CreateAssignment, DeleteAssignmentAttachment, DeleteAssignmentAttachmentAsTeacher,
+    EditAssignment
 )
 from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, CourseTeacherFactory
@@ -196,7 +197,6 @@ def test_view_course_assignment_attachment_delete_security(client,
 
     client.login(teacher)
     response = client.get(delete_url)
-    print(teacher.has_perm(DeleteAssignmentAttachmentAsTeacher.name, attachment))
     assert response.status_code == 200
     response = client.post(delete_url, follow=True)
     assert response.status_code == 200

@@ -7,11 +7,10 @@ from django.conf import settings
 
 from auth.permissions import Permission, add_perm
 from courses.constants import AssignmentFormat
-
 from courses.models import (
-    Assignment, AssignmentAttachment, Course, CourseGroupModes, StudentGroupTypes
+    Assignment, AssignmentAttachment, Course, CourseGroupModes, CourseNews,
+    StudentGroupTypes
 )
-
 from learning.models import (
     AssignmentGroup, CourseInvitation, Enrollment, StudentAssignment, StudentGroup
 )
@@ -138,7 +137,8 @@ class EditOwnCourseNews(Permission):
 
     @staticmethod
     @rules.predicate
-    def rule(user, course: Course):
+    def rule(user, news: CourseNews):
+        course = news.course
         return course.is_actual_teacher(user.pk)
 
 
@@ -153,7 +153,8 @@ class DeleteOwnCourseNews(Permission):
 
     @staticmethod
     @rules.predicate
-    def rule(user, course: Course):
+    def rule(user, news: CourseNews):
+        course = news.course
         return course.is_actual_teacher(user.pk)
 
 

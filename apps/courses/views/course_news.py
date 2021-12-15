@@ -12,7 +12,7 @@ from core.views import ProtectedFormMixin
 from courses.forms import CourseNewsForm
 from courses.models import Course, CourseNews
 from courses.views.mixins import CourseURLParamsMixin
-from learning.permissions import CreateCourseNews, EditCourseNews, DeleteCourseNews
+from learning.permissions import CreateCourseNews, DeleteCourseNews, EditCourseNews
 from users.mixins import TeacherOnlyMixin
 
 __all__ = ('CourseNewsCreateView', 'CourseNewsUpdateView',
@@ -50,28 +50,26 @@ class CourseNewsCreateView(PermissionRequiredMixin, CourseURLParamsMixin, Create
         return self.object.course.get_url_for_tab("news")
 
 
-class CourseNewsUpdateView(PermissionRequiredMixin, CourseURLParamsMixin,
-                           UpdateView):
+class CourseNewsUpdateView(PermissionRequiredMixin, UpdateView):
     model = CourseNews
     template_name = "courses/simple_crispy_form.html"
     permission_required = EditCourseNews.name
     form_class = CourseNewsForm
 
     def get_permission_object(self):
-        return self.course
+        return self.object
 
     def get_success_url(self):
         return self.object.course.get_url_for_tab("news")
 
 
-class CourseNewsDeleteView(PermissionRequiredMixin, CourseURLParamsMixin,
-                           DeleteView):
+class CourseNewsDeleteView(PermissionRequiredMixin, DeleteView):
     model = CourseNews
     permission_required = DeleteCourseNews.name
     template_name = "forms/simple_delete_confirmation.html"
 
     def get_permission_object(self):
-        return self.course
+        return self.object
 
     def get_success_url(self):
         """
