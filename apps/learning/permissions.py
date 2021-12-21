@@ -8,7 +8,7 @@ from django.conf import settings
 from auth.permissions import Permission, add_perm
 from courses.constants import AssignmentFormat
 from courses.models import (
-    Assignment, AssignmentAttachment, Course, CourseGroupModes, StudentGroupTypes
+    Assignment, Course, CourseGroupModes, StudentGroupTypes
 )
 from learning.models import (
     AssignmentGroup, CourseInvitation, Enrollment, StudentAssignment, StudentGroup
@@ -171,7 +171,7 @@ class ViewRelatedStudentAssignment(Permission):
     @rules.predicate
     def rule(user, student_assignment: StudentAssignment):
         course = student_assignment.assignment.course
-        return user in course.teachers.all()
+        return course.is_actual_teacher(user.pk)
 
 
 @add_perm
@@ -281,7 +281,8 @@ class ViewAssignmentAttachmentAsTeacher(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, assignment: Assignment):
-        return user in assignment.course.teachers.all()
+        course = assignment.course
+        return course.is_actual_teacher(user.pk)
 
 
 @add_perm
@@ -309,7 +310,8 @@ class CreateAssignmentCommentAsTeacher(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, student_assignment: StudentAssignment):
-        return user in student_assignment.assignment.course.teachers.all()
+        course = student_assignment.assignment.course
+        return course.is_actual_teacher(user.pk)
 
 
 @add_perm
@@ -356,7 +358,8 @@ class ViewAssignmentCommentAttachmentAsTeacher(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, student_assignment: StudentAssignment):
-        return user in student_assignment.assignment.course.teachers.all()
+        course = student_assignment.assignment.course
+        return course.is_actual_teacher(user.pk)
 
 
 @add_perm

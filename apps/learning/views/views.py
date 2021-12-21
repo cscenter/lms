@@ -113,7 +113,8 @@ class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
             Prefetch('assignmentcomment_set',
                      queryset=submissions),
             Prefetch('assignment__course__course_teachers',
-                     queryset=course_teachers_prefetch_queryset(role_priority=False)),
+                     queryset=course_teachers_prefetch_queryset(role_priority=False,
+                                                                hidden_roles=())),
             'assignment__assignmentattachment_set')
 
     def get_context_data(self, **kwargs):

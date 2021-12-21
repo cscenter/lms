@@ -3,7 +3,8 @@ from decimal import Decimal
 import pytest
 
 from core.urls import reverse
-from courses.tests.factories import AssignmentFactory, CourseFactory
+from courses.models import CourseTeacher
+from courses.tests.factories import AssignmentFactory, CourseFactory, CourseTeacherFactory
 from learning.api.serializers import (
     BaseStudentAssignmentSerializer, CourseAssignmentSerializer, MyCourseSerializer
 )
@@ -155,3 +156,36 @@ def test_api_update_student_assignment_score(client):
     student_assignment.refresh_from_db()
     assert student_assignment.execution_time is None
 
+
+@pytest.mark.django_db
+def test_api_update_student_assignment_assignee(client):
+    teacher, spectator = TeacherFactory.create_batch(2)
+    course = CourseFactory()
+    ct1 = CourseTeacherFactory(course=course, teacher=teacher, roles=CourseTeacher.roles.lecturer)
+    ct2 = CourseTeacherFactory(course=course, teacher=spectator, roles=CourseTeacher.roles.spectator)
+    assignment = AssignmentFactory(course=course)
+    enrollment = EnrollmentFactory(course=course, is_deleted=False)
+    student_assignment = StudentAssignment.objects.get(
+        assignment=assignment, student_id=enrollment.student_id)
+    assert student_assignment.assignee is None
+    url = reverse("learning-api:v1:my_course_student_assignment_assignee_update",
+                  kwargs={'course_id': course.pk, 'assignment_id': assignment.pk,
+                          'student_id': enrollment.student_id})
+    auth_token = client.get_api_token(teacher)
+    json_data = {
+        'assignee': ct1.pk
+    }
+    response = client.put(url, json_data,
+                          content_type='application/json',
+                          HTTP_AUTHORIZATION=f'Token {auth_token}')
+    assert response.status_code == 200
+    student_assignment.refresh_from_db()
+    assert student_assignment.assignee == ct1
+    # spectator can't be assignee
+    json_data = {
+        'assignee': ct2.pk
+    }
+    response = client.put(url, json_data,
+                          content_type='application/json',
+                          HTTP_AUTHORIZATION=f'Token {auth_token}')
+    assert response.status_code == 400

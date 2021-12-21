@@ -648,9 +648,15 @@ class CourseTeacher(models.Model):
 
     # TODO: rewrite as a generic function with bitwise operations and move to core.utils
     @classmethod
-    def has_any_hidden_role(cls, lookup='roles') -> Q:
+    def has_any_hidden_role(cls, lookup='roles', hidden_roles: Optional[tuple] = None) -> Q:
+        """Hides hidden_roles from queryset.
+        If hidden_roles is not passed then hides spectator and organizer"""
         assert lookup.endswith('roles')
-        mask = cls.roles.spectator | cls.roles.organizer
+        if hidden_roles is None:
+            hidden_roles = (cls.roles.spectator, cls.roles.organizer)
+        mask = 0
+        for hidden_role in hidden_roles:
+            mask |= hidden_role
         assert mask > 0
         # One of: `field & mask > 0` or `field + field & mask > field`
         return Q(**{f"{lookup}__lt": F(lookup) + F(lookup).bitand(mask)})

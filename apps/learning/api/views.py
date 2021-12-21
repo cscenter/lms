@@ -21,7 +21,7 @@ from core.api.fields import CharSeparatedField, ScoreField
 from core.http import AuthenticatedAPIRequest
 from courses.models import Assignment, Course
 from courses.permissions import CreateAssignment
-from courses.selectors import course_personal_assignments
+from courses.selectors import course_personal_assignments, get_course_teachers
 from learning.api.serializers import (
     BaseEnrollmentSerializer, BaseStudentAssignmentSerializer,
     CourseAssignmentSerializer, CourseNewsNotificationSerializer, MyCourseSerializer,
@@ -183,9 +183,8 @@ class StudentAssignmentAssigneeUpdate(UpdateAPIView):
             fields = ('pk', 'assignee',)
 
         def validate_assignee(self, value):
-            teachers = self.instance.assignment.course.course_teachers.all()
-            valid_values = {t for t in teachers if not t.roles.spectator}
-            if value and value not in valid_values:
+            teachers = get_course_teachers(course=self.instance.assignment.course)
+            if value and value not in teachers:
                 msg = _("Invalid course teacher %s") % value
                 raise serializers.ValidationError(msg)
             return value
