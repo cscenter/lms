@@ -282,7 +282,7 @@ class ViewAssignmentAttachmentAsTeacher(Permission):
     @rules.predicate
     def rule(user, assignment: Assignment):
         course = assignment.course
-        return course.is_actual_teacher(user.pk)
+        return user in course.teachers.all()
 
 
 @add_perm
