@@ -3,15 +3,15 @@ import tempfile
 import zipfile
 from typing import Any, Dict, Iterator, List, NamedTuple
 
-from django.contrib.auth.views import redirect_to_login
 from rest_framework import serializers
 from vanilla import TemplateView
 
 from django.contrib import messages
+from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import FileField
-from django.http import FileResponse, HttpResponseBadRequest, JsonResponse, HttpResponse
+from django.http import FileResponse, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect, resolve_url
 from django.utils.translation import gettext_lazy as _
@@ -26,7 +26,9 @@ from core.urls import reverse
 from core.utils import bucketize, render_markdown
 from courses.models import Assignment, Course, CourseTeacher
 from courses.permissions import DeleteAssignment, EditAssignment, ViewAssignment
-from courses.selectors import assignments_list, course_teachers_prefetch_queryset, get_course_teachers
+from courses.selectors import (
+    assignments_list, course_teachers_prefetch_queryset, get_course_teachers
+)
 from courses.services import CourseService
 from learning.api.serializers import AssignmentScoreSerializer
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm

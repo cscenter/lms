@@ -12,7 +12,9 @@ from core.tests.factories import BranchFactory, SiteFactory
 from core.urls import reverse
 from courses.models import CourseGroupModes, CourseTeacher
 from courses.permissions import ViewAssignment
-from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory, CourseTeacherFactory
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseTeacherFactory, SemesterFactory
+)
 from learning.models import StudentAssignment
 from learning.permissions import ViewStudentAssignment, ViewStudentAssignmentList
 from learning.settings import Branches

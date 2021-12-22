@@ -4,7 +4,9 @@ import pytest
 
 from core.urls import reverse
 from courses.models import CourseTeacher
-from courses.tests.factories import AssignmentFactory, CourseFactory, CourseTeacherFactory
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseTeacherFactory
+)
 from learning.api.serializers import (
     BaseStudentAssignmentSerializer, CourseAssignmentSerializer, MyCourseSerializer
 )
