@@ -649,7 +649,7 @@ class CourseTeacher(models.Model):
     # TODO: rewrite as a generic function with bitwise operations and move to core.utils
     @classmethod
     def has_any_hidden_role(cls, lookup='roles', hidden_roles: Optional[tuple] = None) -> Q:
-        """Hides hidden_roles from queryset.
+        """Filter users with given hidden_roles from queryset.
         If hidden_roles is not passed then hides spectator and organizer"""
         assert lookup.endswith('roles')
         if hidden_roles is None:
