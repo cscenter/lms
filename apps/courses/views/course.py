@@ -122,8 +122,8 @@ class CourseUpdateView(TeacherOnlyMixin, CourseURLParamsMixin, ProtectedFormMixi
     def get_object(self, queryset=None):
         return self.course
 
-    def get_permission_object(self):
-        return self.course
+    def is_form_allowed(self, user, obj):
+        return user.is_curator or user in obj.teachers.all()
 
     def get_initial(self):
         """Keep in mind that `initial` overrides values from model dict"""
