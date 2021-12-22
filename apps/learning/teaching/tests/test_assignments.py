@@ -15,7 +15,7 @@ from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.constants import AssigneeMode, AssignmentFormat
-from courses.models import Assignment
+from courses.models import Assignment, CourseTeacher
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseNewsFactory, CourseTeacherFactory,
     SemesterFactory
@@ -343,8 +343,10 @@ def test_create_assignment_public_form_code_review_with_yandex_checker(client, m
 
 @pytest.mark.django_db
 def test_student_assignment_detail_view_add_comment(client):
-    teacher = TeacherFactory()
+    teacher, spectator = TeacherFactory.create_batch(2)
     enrollment = EnrollmentFactory(course__teachers=[teacher])
+    CourseTeacherFactory(course=enrollment.course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
     student = enrollment.student
     a = AssignmentFactory.create(course=enrollment.course)
     a_s = (StudentAssignment.objects
@@ -356,6 +358,10 @@ def test_student_assignment_detail_view_add_comment(client):
     form_data = {
         'comment-text': "Test comment without file"
     }
+    client.login(spectator)
+    response = client.post(create_comment_url, form_data)
+    assert response.status_code == 403
+
     client.login(teacher)
     response = client.post(create_comment_url, form_data)
     assert response.status_code == 302
