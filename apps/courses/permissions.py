@@ -59,11 +59,6 @@ class ViewCourseInternalDescriptionAsLearner(Permission):
 
 
 @add_perm
-class ViewCourseNews(Permission):
-    name = "courses.view_news"
-
-
-@add_perm
 class ViewCourseContacts(Permission):
     name = "courses.can_view_contacts"
 
