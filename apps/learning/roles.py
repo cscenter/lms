@@ -8,11 +8,12 @@ from auth.registry import role_registry
 from courses.permissions import (
     CreateAssignment, CreateOwnAssignment, DeleteAssignment, DeleteAssignmentAttachment,
     DeleteAssignmentAttachmentAsTeacher, DeleteCourseClass, DeleteOwnAssignment,
-    DeleteOwnCourseClass, EditAssignment, EditCourseClass, EditMetaCourse,
-    EditOwnAssignment, EditOwnCourseClass, ViewAssignment, ViewCourse,
-    ViewCourseAssignments, ViewCourseClassMaterials, ViewCourseContacts,
-    ViewCourseInternalDescription, ViewCourseInternalDescriptionAsLearner,
-    ViewCourseInternalDescriptionAsTeacher, ViewOwnAssignment, EditCourseDescription, EditOwnCourseDescription
+    DeleteOwnCourseClass, EditAssignment, EditCourseClass, EditCourseDescription,
+    EditMetaCourse, EditOwnAssignment, EditOwnCourseClass, EditOwnCourseDescription,
+    ViewAssignment, ViewCourse, ViewCourseAssignments, ViewCourseClassMaterials,
+    ViewCourseContacts, ViewCourseInternalDescription,
+    ViewCourseInternalDescriptionAsLearner, ViewCourseInternalDescriptionAsTeacher,
+    ViewOwnAssignment
 )
 from info_blocks.permissions import ViewInternships
 from users.permissions import (

@@ -5,7 +5,9 @@ from bs4 import BeautifulSoup
 from django.forms import model_to_dict
 
 from courses.models import CourseNews, CourseTeacher
-from courses.tests.factories import CourseFactory, CourseNewsFactory, CourseTeacherFactory
+from courses.tests.factories import (
+    CourseFactory, CourseNewsFactory, CourseTeacherFactory
+)
 from users.tests.factories import TeacherFactory
 
 
