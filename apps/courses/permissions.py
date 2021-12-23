@@ -54,6 +54,21 @@ class ViewCourseInternalDescriptionAsLearner(Permission):
 
 
 @add_perm
+class EditCourseDescription(Permission):
+    name = "courses.edit_description"
+
+
+@add_perm
+class EditOwnCourseDescription(Permission):
+    name = 'teaching.edit_description'
+
+    @staticmethod
+    @predicate
+    def rule(user, course: Course):
+        return course.is_actual_teacher(user.pk)
+
+
+@add_perm
 class ViewCourseNews(Permission):
     name = "courses.view_news"
 

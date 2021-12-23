@@ -5,7 +5,7 @@ from courses.constants import MaterialVisibilityTypes
 from courses.models import CourseTeacher
 from courses.permissions import (
     CreateAssignment, DeleteAssignment, DeleteAssignmentAttachment, EditAssignment,
-    EditCourseClass, ViewCourseClassMaterials, ViewCourseInternalDescription
+    EditCourseClass, ViewCourseClassMaterials, ViewCourseInternalDescription, EditCourseDescription
 )
 from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseClassFactory, CourseFactory,
@@ -224,3 +224,24 @@ def test_view_course_internal_description():
     student2 = enrollment2.student_profile.user
     assert not student2.has_perm(permission_name)
     assert not student2.has_perm(permission_name, course)
+
+
+@pytest.mark.django_db
+def test_permission_edit_course_description(client):
+    permission_name = EditCourseDescription.name
+    user = UserFactory()
+    student = StudentFactory()
+    curator = CuratorFactory()
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
+    course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+    invited_student = InvitedStudentFactory()
+    assert curator.has_perm(permission_name)
+    assert teacher.has_perm(permission_name, course)
+    assert not spectator.has_perm(permission_name, course)
+    assert not user.has_perm(permission_name, course)
+    assert not student.has_perm(permission_name, course)
+    assert not invited_student.has_perm(permission_name, course)
+    assert not teacher_other.has_perm(permission_name, course)
+

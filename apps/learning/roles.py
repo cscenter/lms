@@ -12,7 +12,7 @@ from courses.permissions import (
     EditOwnAssignment, EditOwnCourseClass, ViewAssignment, ViewCourse,
     ViewCourseAssignments, ViewCourseClassMaterials, ViewCourseContacts,
     ViewCourseInternalDescription, ViewCourseInternalDescriptionAsLearner,
-    ViewCourseInternalDescriptionAsTeacher, ViewOwnAssignment
+    ViewCourseInternalDescriptionAsTeacher, ViewOwnAssignment, EditCourseDescription, EditOwnCourseDescription
 )
 from info_blocks.permissions import ViewInternships
 from users.permissions import (
@@ -46,6 +46,7 @@ class Roles(DjangoChoices):
         ViewAccountConnectedServiceProvider,
         ViewCourse,
         ViewCourseInternalDescription,
+        EditCourseDescription,
         CreateCertificateOfParticipation,
         ViewCertificateOfParticipation,
         EditMetaCourse,
@@ -141,6 +142,7 @@ class Roles(DjangoChoices):
     TEACHER = C(2, _('Teacher'), priority=30, permissions=(
         ViewCourse,
         ViewCourseInternalDescriptionAsTeacher,
+        EditOwnCourseDescription,
         ViewTeachingMenu,
         ViewCourseContacts,
         ViewCourseNews,
@@ -179,6 +181,8 @@ for code, name in Roles.choices:
 teacher_role = role_registry[Roles.TEACHER]
 teacher_role.add_relation(ViewCourseInternalDescription,
                           ViewCourseInternalDescriptionAsTeacher)
+teacher_role.add_relation(EditCourseDescription,
+                          EditOwnCourseDescription)
 teacher_role.add_relation(ViewAssignmentAttachment,
                           ViewAssignmentAttachmentAsTeacher)
 teacher_role.add_relation(DeleteAssignmentAttachment,

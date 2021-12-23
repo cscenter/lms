@@ -8,6 +8,7 @@ from django.utils.encoding import smart_bytes
 
 from core.timezone import now_local
 from core.urls import reverse
+from courses.models import CourseTeacher
 from courses.tests.factories import *
 from learning.tests.factories import *
 from users.tests.factories import (
@@ -118,14 +119,24 @@ def test_course_detail_view_assignment_list(client, assert_login_redirect):
 
 
 @pytest.mark.django_db
-def test_course_edit_description_security(client, assert_login_redirect):
-    teacher = TeacherFactory()
-    teacher_other = TeacherFactory()
-    co = CourseFactory.create(teachers=[teacher])
-    url = co.get_update_url()
+def test_view_course_edit_description_security(client, assert_login_redirect):
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
+    course = CourseFactory.create(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+    url = course.get_update_url()
     assert_login_redirect(url)
+
     client.login(teacher_other)
-    assert_login_redirect(url)
+    response = client.get(url)
+    assert response.status_code == 403
+    client.logout()
+
+    client.login(spectator)
+    response = client.get(url)
+    assert response.status_code == 403
+    client.logout()
+
     client.login(teacher)
     response = client.get(url)
     assert response.status_code == 200
