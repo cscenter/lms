@@ -39,7 +39,7 @@ class ViewCourseInternalDescriptionAsTeacher(Permission):
     @staticmethod
     @predicate
     def rule(user, course: Course):
-        return course.is_actual_teacher(user.pk)
+        return user in course.teachers.all()
 
 
 @add_perm

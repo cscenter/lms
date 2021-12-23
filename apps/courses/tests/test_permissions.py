@@ -259,11 +259,14 @@ def test_course_class_materials_visibility_teachers(client):
 def test_view_course_internal_description():
     permission_name = ViewCourseInternalDescription.name
     curator = CuratorFactory()
-    teacher1, teacher_other = TeacherFactory.create_batch(2)
+    teacher1, teacher_other, spectator = TeacherFactory.create_batch(3)
     course = CourseFactory(teachers=[teacher1])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
     assert curator.has_perm(permission_name)
     assert curator.has_perm(permission_name, course)
     assert teacher1.has_perm(permission_name, course)
+    assert spectator.has_perm(permission_name, course)
     assert not teacher1.has_perm(permission_name)
     assert not teacher_other.has_perm(permission_name, course)
     assert not teacher_other.has_perm(permission_name)
