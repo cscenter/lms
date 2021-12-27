@@ -12,7 +12,7 @@ from courses.permissions import (
     EditOwnAssignment, EditOwnCourseClass, ViewAssignment, ViewCourse,
     ViewCourseAssignments, ViewCourseClassMaterials, ViewCourseContacts,
     ViewCourseInternalDescription, ViewCourseInternalDescriptionAsLearner,
-    ViewCourseInternalDescriptionAsTeacher, ViewOwnAssignment
+    ViewCourseInternalDescriptionAsTeacher, ViewOwnAssignment, CreateCourseClass, CreateOwnCourseClass
 )
 from info_blocks.permissions import ViewInternships
 from users.permissions import (
@@ -58,6 +58,7 @@ class Roles(DjangoChoices):
         ViewStudentAssignment,
         ViewStudentAssignmentList,
         EditStudentAssignment,
+        CreateCourseClass,
         EditCourseClass,
         DeleteCourseClass,
         ViewCourseNews,
@@ -152,6 +153,7 @@ class Roles(DjangoChoices):
         ViewRelatedStudentAssignment,
         ViewStudentAssignmentList,
         EditOwnStudentAssignment,
+        CreateOwnCourseClass,
         EditOwnCourseClass,
         DeleteOwnCourseClass,
         ViewRelatedEnrollments,
@@ -189,6 +191,7 @@ teacher_role.add_relation(ViewAssignmentCommentAttachment,
                           ViewAssignmentCommentAttachmentAsTeacher)
 teacher_role.add_relation(ViewStudentAssignment, ViewRelatedStudentAssignment)
 teacher_role.add_relation(EditStudentAssignment, EditOwnStudentAssignment)
+teacher_role.add_relation(CreateCourseClass, CreateOwnCourseClass)
 teacher_role.add_relation(EditCourseClass, EditOwnCourseClass)
 teacher_role.add_relation(DeleteCourseClass, DeleteOwnCourseClass)
 teacher_role.add_relation(CreateAssignment, CreateOwnAssignment)

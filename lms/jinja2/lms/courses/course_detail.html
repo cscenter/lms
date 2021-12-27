@@ -237,9 +237,11 @@
             {% if can_add_assignment %}
               <a href="{{ course.get_create_assignment_url() }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans %}Add assignment{% endtrans %}</a>
             {% endif %}
+            {% if can_add_course_classes %}
+              <a href="{{ course.get_create_class_url() }}" class="btn btn-primary btn-outline btn-block">{% trans %}Add class{% endtrans %}</a>
+            {% endif %}
             {% if user.is_curator or user.is_teacher and is_actual_teacher %}
               <a href="{{ course.get_create_news_url() }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans %}Add news{% endtrans %}</a>
-              <a href="{{ course.get_create_class_url() }}" class="btn btn-primary btn-outline btn-block">{% trans %}Add class{% endtrans %}</a>
               <a href="{{ course.get_update_url() }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans %}Edit description{% endtrans %}</a>
               {% if course.group_mode == CourseGroupModes.MANUAL %}
                 <a href="{{ get_student_groups_url(course) }}" class="btn btn-primary btn-outline btn-block" role="button">Группы студентов</a>
