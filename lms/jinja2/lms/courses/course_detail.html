@@ -241,11 +241,12 @@
               <a href="{{ course.get_create_news_url() }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans %}Add news{% endtrans %}</a>
               <a href="{{ course.get_create_class_url() }}" class="btn btn-primary btn-outline btn-block">{% trans %}Add class{% endtrans %}</a>
               <a href="{{ course.get_update_url() }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans %}Edit description{% endtrans %}</a>
+            {% endif %}
+            {% if can_view_student_groups %}
               {% if course.group_mode == CourseGroupModes.MANUAL %}
                 <a href="{{ get_student_groups_url(course) }}" class="btn btn-primary btn-outline btn-block" role="button">Группы студентов</a>
               {% endif %}
             {% endif %}
-
             {% if survey_url %}
               {% if request_user_enrollment is not none or user.is_curator %}
                 <a class=" btn btn-default btn-block btn-success"

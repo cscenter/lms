@@ -43,11 +43,13 @@ def delete_enrollment_cache(user: User, course: Course):
 @pytest.mark.django_db
 def test_view_student_group():
     user = UserFactory()
-    teacher = TeacherFactory()
+    teacher, spectator = TeacherFactory.create_batch(2)
     curator = CuratorFactory()
     student = StudentFactory()
     s = SemesterFactory.create_current(for_branch=Branches.SPB)
     course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
     course_other = CourseFactory.create(semester=s, group_mode=CourseGroupModes.MANUAL)
     sg1 = StudentGroupFactory.create(course=course)
     sg2 = StudentGroupFactory.create()
@@ -58,6 +60,7 @@ def test_view_student_group():
     assert not user.has_perm(ViewStudentGroup.name, course)
     assert not student.has_perm(ViewStudentGroup.name, course)
     assert teacher.has_perm(ViewStudentGroup.name, course)
+    assert spectator.has_perm(ViewStudentGroup.name, course)
     assert not teacher.has_perm(ViewStudentGroup.name, course_other)
     assert curator.has_perm(ViewStudentGroup.name, course)
 
@@ -65,11 +68,13 @@ def test_view_student_group():
 @pytest.mark.django_db
 def test_update_student_group():
     user = UserFactory()
-    teacher = TeacherFactory()
+    teacher, spectator = TeacherFactory.create_batch(2)
     curator = CuratorFactory()
     student = StudentFactory()
     s = SemesterFactory.create_current(for_branch=Branches.SPB)
     course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
     sg1 = StudentGroupFactory.create(course=course)
     sg2 = StudentGroupFactory.create()
     EnrollmentFactory.create(student=student, course=course, student_group=sg1)
@@ -78,6 +83,7 @@ def test_update_student_group():
     assert UpdateStudentGroupAsTeacher.name in perm_registry
     assert not user.has_perm(UpdateStudentGroup.name, sg1)
     assert not student.has_perm(UpdateStudentGroup.name, sg1)
+    assert not spectator.has_perm(UpdateStudentGroup.name, sg1)
     assert teacher.has_perm(UpdateStudentGroup.name, sg1)
     assert not teacher.has_perm(UpdateStudentGroup.name, sg2)
     assert curator.has_perm(UpdateStudentGroup.name, sg1)
@@ -87,7 +93,7 @@ def test_update_student_group():
 @pytest.mark.django_db
 def test_delete_student_group():
     user = UserFactory()
-    teacher = TeacherFactory()
+    teacher, spectator = TeacherFactory.create_batch(2)
     curator = CuratorFactory()
     student = StudentFactory()
     semester = SemesterFactory.create_current(for_branch=Branches.SPB)
@@ -95,11 +101,14 @@ def test_delete_student_group():
     sg1 = StudentGroupFactory(course=course1, type=StudentGroupTypes.MANUAL)
     sg2 = StudentGroupFactory(course=course2, type=StudentGroupTypes.SYSTEM)
     sg3 = StudentGroupFactory(type=StudentGroupTypes.MANUAL)
+    CourseTeacherFactory(course=course1, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
     EnrollmentFactory(student=student, course=course1, student_group=sg1)
     assert DeleteStudentGroup.name in perm_registry
     assert DeleteStudentGroupAsTeacher.name in perm_registry
     assert not user.has_perm(DeleteStudentGroup.name, sg1)
     assert not student.has_perm(DeleteStudentGroup.name, sg1)
+    assert not spectator.has_perm(DeleteStudentGroup.name, sg1)
     assert not teacher.has_perm(DeleteStudentGroup.name, sg1), "has active student"
     assert not teacher.has_perm(DeleteStudentGroup.name, sg2), "unsupported group mode"
     assert not curator.has_perm(DeleteStudentGroup.name, sg2)
@@ -114,19 +123,21 @@ def test_delete_student_group():
 @pytest.mark.django_db
 def test_create_student_group():
     user = UserFactory()
-    teacher = TeacherFactory()
+    teacher, spectator = TeacherFactory.create_batch(2)
     curator = CuratorFactory()
     student = StudentFactory()
     s = SemesterFactory.create_current(for_branch=Branches.SPB)
     course = CourseFactory.create(semester=s, teachers=[teacher], group_mode=CourseGroupModes.MANUAL)
     course1 = CourseFactory.create(semester=s, group_mode=CourseGroupModes.MANUAL)
-
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
     assert CreateStudentGroup.name in perm_registry
     assert CreateStudentGroupAsTeacher.name in perm_registry
     assert not user.has_perm(CreateStudentGroup.name, course)
     assert not user.has_perm(CreateStudentGroup.name, course1)
     assert not student.has_perm(CreateStudentGroup.name, course)
     assert not student.has_perm(CreateStudentGroup.name, course1)
+    assert not spectator.has_perm(CreateStudentGroup.name, course)
     assert teacher.has_perm(CreateStudentGroup.name, course)
     assert not teacher.has_perm(CreateStudentGroup.name, course1)
     assert curator.has_perm(CreateStudentGroup.name, course)

@@ -11,11 +11,12 @@ from core.urls import reverse
 from courses.models import (
     CourseBranch, CourseGroupModes, CourseTeacher, StudentGroupTypes
 )
-from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory, CourseTeacherFactory
 from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.permissions import DeleteStudentGroup, ViewStudentGroup
 from learning.services import EnrollmentService, StudentGroupService
 from learning.settings import Branches, GradeTypes
+from learning.teaching.forms import StudentGroupForm
 from learning.teaching.utils import get_student_groups_url
 from learning.tests.factories import (
     CourseInvitationFactory, EnrollmentFactory, StudentGroupAssigneeFactory,
@@ -284,3 +285,19 @@ def test_view_student_group_delete(settings):
     assert Enrollment.active.filter(course=course).count() == 1
     default_sg = StudentGroup.objects.get(course=course, type=StudentGroupTypes.SYSTEM)
     assert enrollment.student_group == default_sg
+
+
+@pytest.mark.django_db
+def test_form_student_group_assignee_update_doesnt_propose_spectators(settings):
+    teacher_1, teacher_2, spectator = TeacherFactory.create_batch(3)
+    course = CourseFactory(group_mode=CourseGroupModes.MANUAL)
+    ct_1 = CourseTeacherFactory(course=course, teacher=teacher_1,
+                                roles=CourseTeacher.roles.lecturer)
+    ct_2 = CourseTeacherFactory(course=course, teacher=teacher_2,
+                                roles=CourseTeacher.roles.organizer)
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+    sg_form = StudentGroupForm(course)
+    possible_assignees = sg_form.fields['assignee'].queryset
+    assert len(possible_assignees) == 2
+    assert {ct_1, ct_2} == set(possible_assignees)

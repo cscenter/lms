@@ -432,7 +432,7 @@ class CreateStudentGroupAsTeacher(Permission):
     def rule(user: User, course: Course):
         if course.group_mode == CourseGroupModes.NO_GROUPS:
             return False
-        return user in course.teachers.all()
+        return course.is_actual_teacher(user.pk)
 
 
 @add_perm
@@ -472,7 +472,7 @@ class UpdateStudentGroupAsTeacher(Permission):
     def rule(user: User, student_group: StudentGroup):
         if student_group.type != StudentGroupTypes.MANUAL:
             return False
-        return user in student_group.course.teachers.all()
+        return student_group.course.is_actual_teacher(user.pk)
 
 
 @add_perm
@@ -498,7 +498,7 @@ class DeleteStudentGroupAsTeacher(Permission):
     def rule(user: User, student_group: StudentGroup):
         if student_group.type != StudentGroupTypes.MANUAL:
             return False
-        if user not in student_group.course.teachers.all():
+        if not student_group.course.is_actual_teacher(user.pk):
             return False
         # FIXME: The main problem that requirements below are implicit. We can't show user tips what to do to meet the requirements. + db queries are duplicated in permissions check and action method
         # Disallow student group deletion if any assignment already
