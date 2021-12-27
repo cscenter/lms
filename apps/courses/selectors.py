@@ -52,17 +52,21 @@ def get_course_teachers(*, course: Course,
                         role_priority: Optional[bool] = False) -> CourseTeacherQuerySet:
     filters = [
         Q(course=course),
-        ~CourseTeacher.has_any_hidden_role()
+        ~CourseTeacher.has_any_hidden_role(hidden_roles=(CourseTeacher.roles.spectator,))
     ]
     return get_teachers(role_priority=role_priority, filters=filters)
 
 
-def course_teachers_prefetch_queryset(*, role_priority: Optional[bool] = True) -> CourseTeacherQuerySet:
+def course_teachers_prefetch_queryset(*, role_priority: Optional[bool] = True,
+                                      hidden_roles=(CourseTeacher.roles.spectator,
+                                                    CourseTeacher.roles.organizer)) -> CourseTeacherQuerySet:
     """
     Returns public course teachers sorted by the most priority role
     within the course by default.
     """
-    filters = [~CourseTeacher.has_any_hidden_role()]
+    filters = []
+    if hidden_roles:
+        filters = [~CourseTeacher.has_any_hidden_role(hidden_roles=hidden_roles)]
     queryset = get_teachers(role_priority=role_priority, filters=filters)
     order_by = ['-most_priority_role'] if role_priority else []
     return (queryset

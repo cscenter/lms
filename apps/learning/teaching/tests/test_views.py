@@ -12,7 +12,9 @@ from core.tests.factories import BranchFactory, SiteFactory
 from core.urls import reverse
 from courses.models import CourseGroupModes, CourseTeacher
 from courses.permissions import ViewAssignment
-from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseTeacherFactory, SemesterFactory
+)
 from learning.models import StudentAssignment
 from learning.permissions import ViewStudentAssignment, ViewStudentAssignmentList
 from learning.settings import Branches
@@ -125,9 +127,10 @@ def test_assignment_detail_view_permissions(client, lms_resolver,
 def test_student_assignment_detail_view_permissions(client, lms_resolver,
                                                     assert_login_redirect):
     from auth.permissions import perm_registry
-    teacher = TeacherFactory()
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     student = StudentFactory()
     course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator, roles=CourseTeacher.roles.spectator)
     student_assignment = StudentAssignmentFactory(student=student,
                                                   assignment__course=course)
     url = student_assignment.get_teacher_url()
@@ -135,10 +138,18 @@ def test_student_assignment_detail_view_permissions(client, lms_resolver,
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
     assert resolver.func.view_class.permission_required == ViewStudentAssignment.name
     assert resolver.func.view_class.permission_required in perm_registry
+
     assert_login_redirect(url, method='get')
+
     client.login(student)
-    response = client.get(url)
-    assert response.status_code == 403
+    assert_login_redirect(url, method='get')
+
+    client.login(teacher_other)
+    assert_login_redirect(url, method='get')
+
+    client.login(spectator)
+    assert_login_redirect(url, method='get')
+
     client.login(teacher)
     response = client.get(url)
     assert response.status_code == 200
@@ -178,9 +189,10 @@ def test_assignment_contents(client):
 
 
 @pytest.mark.django_db
-def test_student_assignment_detail_view_grading_form(client):
-    teacher = TeacherFactory()
+def test_student_assignment_detail_view_grading_form(client, assert_login_redirect):
+    teacher, spectator = TeacherFactory.create_batch(2)
     co = CourseFactory.create(teachers=[teacher])
+    CourseTeacherFactory(course=co, teacher=spectator, roles=CourseTeacher.roles.spectator)
     student = StudentFactory()
     EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory.create(course=co, maximum_score=13)
@@ -204,6 +216,9 @@ def test_student_assignment_detail_view_grading_form(client):
     client.post(url, grade_form)
     assert client.post(url, grade_form).status_code == 400
     assert StudentAssignment.objects.get(pk=a_s.pk).score == 11
+    # spectator can't change grade value
+    client.login(spectator)
+    assert_login_redirect(url, method='get')
 
 
 @pytest.mark.django_db
@@ -254,4 +269,25 @@ def test_gradebook_list(client, mocker, assert_redirect):
     course2 = CourseFactory(semester=semester, teachers=[teacher])
     response = client.get(gradebooks_url)
     assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_student_assignment_detail_view_context_assignee_list(client):
+    teacher, spectator, organizer = TeacherFactory.create_batch(3)
+    co = CourseFactory.create()
+    ct_lec = CourseTeacherFactory(course=co, teacher=teacher,
+                                  roles=CourseTeacher.roles.lecturer)
+    ct_org = CourseTeacherFactory(course=co, teacher=organizer,
+                                  roles=CourseTeacher.roles.organizer)
+    CourseTeacherFactory(course=co, teacher=spectator, roles=CourseTeacher.roles.spectator)
+    student = StudentFactory()
+    EnrollmentFactory.create(student=student, course=co)
+    a = AssignmentFactory.create(course=co, maximum_score=13)
+    a_s = (StudentAssignment.objects
+           .get(assignment=a, student=student))
+    url = a_s.get_teacher_url()
+    client.login(teacher)
+    actual_teachers = client.get(url).context_data['assignee_teachers']
+    assert len(actual_teachers) == 2
+    assert {ct_lec, ct_org} == set(actual_teachers)
 

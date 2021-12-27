@@ -67,10 +67,23 @@ def test_course_teacher_has_any_hidden_role():
     assert CourseTeacher.objects.filter(CourseTeacher.has_any_hidden_role()).count() == 0
     CourseTeacherFactory(course=course, roles=CourseTeacher.roles.reviewer | CourseTeacher.roles.spectator)
     assert CourseTeacher.objects.filter(CourseTeacher.has_any_hidden_role()).count() == 1
+    assert CourseTeacher.objects.filter(CourseTeacher.has_any_hidden_role(
+        # Claims that organizer is only one hidden role:
+        hidden_roles=(CourseTeacher.roles.organizer,))
+    ).count() == 0
     CourseTeacherFactory(course=course, roles=CourseTeacher.roles.organizer | CourseTeacher.roles.spectator)
     assert CourseTeacher.objects.filter(CourseTeacher.has_any_hidden_role()).count() == 2
+    assert CourseTeacher.objects.filter(CourseTeacher.has_any_hidden_role(
+        hidden_roles=(CourseTeacher.roles.organizer,))
+    ).count() == 1
     CourseTeacherFactory(course=course, roles=CourseTeacher.roles.organizer)
+    assert CourseTeacher.objects.filter(CourseTeacher.has_any_hidden_role(
+        hidden_roles=(CourseTeacher.roles.spectator,))
+    ).count() == 2
     assert CourseTeacher.objects.filter(CourseTeacher.has_any_hidden_role()).count() == 3
+    assert CourseTeacher.objects.exclude(CourseTeacher.has_any_hidden_role(
+        hidden_roles=(CourseTeacher.roles.spectator,))
+    ).count() == 2
     assert CourseTeacher.objects.exclude(CourseTeacher.has_any_hidden_role()).count() == 1
     assert CourseTeacher.objects.exclude(CourseTeacher.has_any_hidden_role()).get() == course_teacher
     CourseTeacherFactory(course=course, roles=CourseTeacher.roles.reviewer | CourseTeacher.roles.lecturer)
