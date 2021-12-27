@@ -163,6 +163,21 @@ class ViewCourseClassMaterials(Permission):
 
 
 @add_perm
+class CreateCourseClass(Permission):
+    name = "learning.create_courseclass"
+
+
+@add_perm
+class CreateOwnCourseClass(Permission):
+    name = "teaching.create_courseclass"
+
+    @staticmethod
+    @predicate
+    def rule(user, course: Course):
+        return course.is_actual_teacher(user.pk)
+
+
+@add_perm
 class EditCourseClass(Permission):
     name = "learning.change_courseclass"
 

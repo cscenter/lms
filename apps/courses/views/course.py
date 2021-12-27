@@ -14,7 +14,7 @@ from courses.constants import TeacherRoles
 from courses.forms import CourseUpdateForm
 from courses.models import Course, CourseGroupModes, CourseTeacher
 from courses.permissions import (
-    CreateAssignment, ViewCourseInternalDescription, can_view_private_materials
+    CreateAssignment, ViewCourseInternalDescription, can_view_private_materials, CreateCourseClass
 )
 from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
@@ -66,12 +66,14 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
             teachers[group].extend(ts)
         role = course_access_role(course=course, user=self.request.user)
         can_add_assignment = self.request.user.has_perm(CreateAssignment.name, course)
+        can_add_course_classes = self.request.user.has_perm(CreateCourseClass.name, course)
         can_add_news = self.request.user.has_perm(CreateCourseNews.name, course)
         can_view_course_internal_description = self.request.user.has_perm(ViewCourseInternalDescription.name, course)
         context = {
             'CourseGroupModes': CourseGroupModes,
             'cad_add_news': can_add_news,
             'can_add_assignment': can_add_assignment,
+            'can_add_course_classes': can_add_course_classes,
             'can_view_course_internal_description': can_view_course_internal_description,
             'get_student_groups_url': get_student_groups_url,
             'course': course,
