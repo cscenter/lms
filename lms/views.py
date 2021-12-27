@@ -49,7 +49,9 @@ class CourseOfferingsView(FilterMixin, TemplateView):
 
     def get_queryset(self):
         course_teachers = Prefetch('course_teachers',
-                                   queryset=course_teachers_prefetch_queryset())
+                                   queryset=course_teachers_prefetch_queryset(
+                                       hidden_roles=(CourseTeacher.roles.spectator,)
+                                   ))
         return (Course.objects
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'main_branch')

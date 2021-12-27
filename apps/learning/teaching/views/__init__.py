@@ -1,11 +1,13 @@
 from typing import Any, Dict
 
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.views import generic
 
 from core.exceptions import Redirect
 from courses.calendar import TimetableEvent
-from courses.models import Course
+from courses.constants import TeacherRoles
+from courses.models import Course, CourseTeacher
+from courses.selectors import get_course_teachers, course_teachers_prefetch_queryset, get_teachers
 from courses.services import get_teacher_branches
 from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
@@ -65,14 +67,20 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
     template_name = "lms/teaching/course_list.html"
 
     def get_queryset(self):
-        return (Course.objects
-                .filter(teachers=self.request.user)
-                .select_related('meta_course', 'semester')
-                .prefetch_related('teachers')
-                .order_by('-semester__index', 'meta_course__name'))
+        pref = Prefetch('course_teachers',
+                        course_teachers_prefetch_queryset(hidden_roles=())
+        )
+        courses = (Course.objects
+                    .filter(teachers=self.request.user)
+                    .select_related('meta_course', 'semester')
+                    .prefetch_related(pref)
+                    .order_by('-semester__index', 'meta_course__name'))
+        return courses
+
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
+        context['SpectatorRole'] = TeacherRoles.SPECTATOR
         context['get_student_groups_url'] = get_student_groups_url
         return context
 

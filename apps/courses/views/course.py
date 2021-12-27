@@ -55,10 +55,15 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         # Teachers
         by_role = group_teachers(course.course_teachers.all())
-        teachers = {'main': [], 'others': []}
+        teachers = {'main': [], 'spectators': [], 'others': []}
+        has_organizers = False
         for role, ts in by_role.items():
-            if role in (TeacherRoles.LECTURER, TeacherRoles.SEMINAR):
+            if role in (TeacherRoles.LECTURER, TeacherRoles.SEMINAR, TeacherRoles.ORGANIZER):
+                if role == TeacherRoles.ORGANIZER:
+                    has_organizers = True
                 group = 'main'
+            elif role == TeacherRoles.SPECTATOR:
+                group = 'spectators'
             else:
                 group = 'others'
             teachers[group].extend(ts)
@@ -72,6 +77,7 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
             'get_student_groups_url': get_student_groups_url,
             'course': course,
             'course_tabs': tab_list,
+            'has_organizers': has_organizers,
             'teachers': teachers,
             'has_access_to_private_materials': can_view_private_materials(role),
             **self._get_additional_context(course)

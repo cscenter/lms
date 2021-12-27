@@ -58,8 +58,7 @@ def get_course_teachers(*, course: Course,
 
 
 def course_teachers_prefetch_queryset(*, role_priority: Optional[bool] = True,
-                                      hidden_roles=(CourseTeacher.roles.spectator,
-                                                    CourseTeacher.roles.organizer)) -> CourseTeacherQuerySet:
+                                      hidden_roles=(CourseTeacher.roles.spectator,)) -> CourseTeacherQuerySet:
     """
     Returns public course teachers sorted by the most priority role
     within the course by default.
