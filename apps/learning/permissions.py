@@ -96,8 +96,8 @@ class ViewTeachingMenu(Permission):
 
 
 @add_perm
-class ViewTeacherCourses(Permission):
-    name = 'teaching.view_teacher_courses'
+class AccessTeacherSection(Permission):
+    name = 'teaching.access_teacher_section'
 
 
 @add_perm

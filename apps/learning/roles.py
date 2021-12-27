@@ -21,7 +21,7 @@ from users.permissions import (
 )
 
 from .permissions import (
-    CreateAssignmentComment, CreateAssignmentCommentAsLearner,
+    AccessTeacherSection, CreateAssignmentComment, CreateAssignmentCommentAsLearner,
     CreateAssignmentCommentAsTeacher, CreateAssignmentSolution, CreateCourseNews,
     CreateOwnAssignmentSolution, CreateOwnCourseNews, CreateStudentGroup,
     CreateStudentGroupAsTeacher, DeleteCourseNews, DeleteOwnCourseNews,
@@ -37,17 +37,17 @@ from .permissions import (
     ViewOwnEnrollments, ViewOwnGradebook, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments, ViewRelatedEnrollments, ViewRelatedStudentAssignment,
     ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList, ViewStudentGroup,
-    ViewStudentGroupAsTeacher, ViewStudyMenu, ViewTeacherCourses, ViewTeachingMenu
+    ViewStudentGroupAsTeacher, ViewStudyMenu, ViewTeachingMenu
 )
 
 
 # TODO: Add description to each role
 class Roles(DjangoChoices):
     CURATOR = C(5, _('Curator'), priority=0, permissions=(
+        AccessTeacherSection,
         ViewAccountConnectedServiceProvider,
         ViewCourse,
         ViewCourseInternalDescription,
-        ViewTeacherCourses,
         CreateCertificateOfParticipation,
         ViewCertificateOfParticipation,
         EditMetaCourse,
@@ -144,10 +144,10 @@ class Roles(DjangoChoices):
         ViewAssignmentCommentAttachmentAsLearner,
     ))
     TEACHER = C(2, _('Teacher'), priority=30, permissions=(
+        ViewTeachingMenu,
+        AccessTeacherSection,
         ViewCourse,
         ViewCourseInternalDescriptionAsTeacher,
-        ViewTeacherCourses,
-        ViewTeachingMenu,
         ViewCourseContacts,
         ViewCourseNews,
         CreateOwnCourseNews,

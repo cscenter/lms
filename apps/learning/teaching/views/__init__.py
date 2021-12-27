@@ -12,7 +12,7 @@ from courses.utils import MonthPeriod, extended_month_date_range, get_current_te
 from courses.views.calendar import MonthEventsCalendarView
 from learning.calendar import get_all_calendar_events, get_teacher_calendar_events
 from learning.gradebook.views import GradeBookListBaseView
-from learning.permissions import CreateCourseNews, ViewTeacherCourses
+from learning.permissions import AccessTeacherSection, CreateCourseNews
 from learning.selectors import get_teacher_classes
 from learning.teaching.utils import get_student_groups_url
 from users.mixins import TeacherOnlyMixin
@@ -65,7 +65,7 @@ class CourseListView(PermissionRequiredMixin, generic.ListView):
     model = Course
     context_object_name = 'course_list'
     template_name = "lms/teaching/course_list.html"
-    permission_required = ViewTeacherCourses.name
+    permission_required = AccessTeacherSection.name
 
     def get_queryset(self):
         return (Course.objects
