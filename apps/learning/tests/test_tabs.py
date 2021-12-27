@@ -5,11 +5,11 @@ import pytest
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
 
-from courses.models import CourseNews, CourseReview
+from courses.models import CourseNews, CourseReview, CourseTeacher
 from courses.services import CourseService
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseNewsFactory, CourseReviewFactory,
-    MetaCourseFactory, SemesterFactory
+    MetaCourseFactory, SemesterFactory, CourseTeacherFactory
 )
 from learning.models import EnrollmentPeriod
 from learning.settings import Branches, GradeTypes
@@ -150,3 +150,43 @@ def test_get_course_reviews(settings):
     CourseReview(course=c4, text='zzz').save()
     assert len(CourseService.get_reviews(c1)) == 3
     assert set(CourseService.get_reviews(c1)) == {cr1, cr2, cr3}
+
+
+@pytest.mark.django_db
+def test_contacts_tab_has_no_spectator_contacts(client):
+    curator = CuratorFactory()
+    teacher_contacts = "Teacher contacts"
+    spectator_contacts = "Spectator contacts"
+    teacher = TeacherFactory(private_contacts=teacher_contacts)
+    spectator = TeacherFactory(private_contacts=spectator_contacts)
+    course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+
+    url = course.get_absolute_url()
+    client.login(curator)
+    response = client.get(url)
+    assert smart_bytes(teacher_contacts) in response.content
+    assert smart_bytes(spectator_contacts) not in response.content
+
+
+@pytest.mark.django_db
+def test_contacts_tab_has_only_organizer_contacts(client):
+    curator = CuratorFactory()
+    teacher_contacts = "Teacher contacts"
+    organizer_contacts = "Organizer contacts"
+    teacher = TeacherFactory(private_contacts=teacher_contacts)
+    organizer = TeacherFactory(private_contacts=organizer_contacts)
+    course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=organizer,
+                         roles=CourseTeacher.roles.organizer)
+
+    url = course.get_absolute_url()
+    client.login(curator)
+    response = client.get(url)
+    assert smart_bytes("Организаторы курса") in response.content
+    assert smart_bytes(organizer_contacts) in response.content
+    assert smart_bytes(teacher_contacts) not in response.content
+
+
+

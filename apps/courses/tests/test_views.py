@@ -9,15 +9,17 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.utils import formats
+from django.utils.encoding import smart_bytes
 
 from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory, LocationFactory
 from core.urls import reverse
 from courses.constants import MaterialVisibilityTypes
+from courses.models import CourseTeacher
 from courses.permissions import ViewCourseClassMaterials
 from courses.tests.factories import (
     AssignmentFactory, CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
-    CourseNewsFactory
+    CourseNewsFactory, CourseTeacherFactory
 )
 from files.response import XAccelRedirectFileResponse
 from files.views import ProtectedFileDownloadView
@@ -199,4 +201,35 @@ def test_course_update(client, assert_redirect):
     course.refresh_from_db()
     assert course.description_ru == "foobar"
     assert course.internal_description == "super secret"
+
+
+@pytest.mark.django_db
+def test_view_course_detail_teacher_contacts_visibility(client):
+    """Contacts of all teachers whose role is not Spectator
+    should be displayed on course page"""
+    lecturer_contacts = "Lecturer contacts"
+    organizer_contacts = "Organizer contacts"
+    spectator_contacts = "Spectator contacts"
+    lecturer = TeacherFactory(private_contacts=lecturer_contacts)
+    organizer = TeacherFactory(private_contacts=organizer_contacts)
+    spectator = TeacherFactory(private_contacts=spectator_contacts)
+    course = CourseFactory()
+    ct_lec = CourseTeacherFactory(course=course, teacher=lecturer,
+                                  roles=CourseTeacher.roles.lecturer)
+    ct_org = CourseTeacherFactory(course=course, teacher=organizer,
+                                  roles=CourseTeacher.roles.organizer)
+    ct_spe = CourseTeacherFactory(course=course, teacher=spectator,
+                                  roles=CourseTeacher.roles.spectator)
+
+    url = course.get_absolute_url()
+    client.login(lecturer)
+    response = client.get(url)
+
+    context_teachers = response.context_data['teachers']
+    assert set(context_teachers['main']) == {ct_lec, ct_org}
+    assert set(context_teachers['spectators']) == {ct_spe}
+    assert not context_teachers['others']
+    assert smart_bytes(lecturer.get_full_name()) in response.content
+    assert smart_bytes(organizer.get_full_name()) in response.content
+    assert smart_bytes(spectator.get_full_name()) not in response.content
 
