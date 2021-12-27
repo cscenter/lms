@@ -28,13 +28,18 @@ class ViewCourseInternalDescription(Permission):
 
 
 @add_perm
+class ViewCourseNews(Permission):
+    name = "courses.view_news"
+
+
+@add_perm
 class ViewCourseInternalDescriptionAsTeacher(Permission):
     name = "teaching.view_course_internal_description"
 
     @staticmethod
     @predicate
     def rule(user, course: Course):
-        return course.is_actual_teacher(user.pk)
+        return user in course.teachers.all()
 
 
 @add_perm
@@ -51,11 +56,6 @@ class ViewCourseInternalDescriptionAsLearner(Permission):
         student_profile = enrollment.student_profile
         is_course_failed = is_course_failed_by_student(course, user, enrollment=enrollment)
         return student_profile.is_active and not is_course_failed
-
-
-@add_perm
-class ViewCourseNews(Permission):
-    name = "courses.view_news"
 
 
 @add_perm
@@ -160,6 +160,21 @@ class ViewCourseClassMaterials(Permission):
             role = course_access_role(course=course_class.course, user=user)
             return can_view_private_materials(role)
         return False
+
+
+@add_perm
+class CreateCourseClass(Permission):
+    name = "learning.create_courseclass"
+
+
+@add_perm
+class CreateOwnCourseClass(Permission):
+    name = "teaching.create_courseclass"
+
+    @staticmethod
+    @predicate
+    def rule(user, course: Course):
+        return course.is_actual_teacher(user.pk)
 
 
 @add_perm

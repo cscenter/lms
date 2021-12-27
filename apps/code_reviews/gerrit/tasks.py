@@ -1,6 +1,5 @@
 import logging
-from decimal import Decimal
-from typing import Literal, Optional
+from typing import Optional
 
 from django_rq import job
 
@@ -18,9 +17,7 @@ from code_reviews.gerrit.services import (
     get_or_create_change, list_change_files, normalize_code_review_score
 )
 from code_reviews.models import GerritChange
-from learning.models import (
-    AssignmentComment, AssignmentSubmissionTypes, StudentAssignment
-)
+from learning.models import AssignmentComment, AssignmentSubmissionTypes
 from learning.permissions import EditStudentAssignment
 from learning.services.personal_assignment_service import (
     update_personal_assignment_score
