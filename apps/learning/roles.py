@@ -22,11 +22,12 @@ from users.permissions import (
 
 from .permissions import (
     CreateAssignmentComment, CreateAssignmentCommentAsLearner,
-    CreateAssignmentCommentAsTeacher, CreateAssignmentSolution,
-    CreateOwnAssignmentSolution, CreateStudentGroup, CreateStudentGroupAsTeacher,
+    CreateAssignmentCommentAsTeacher, CreateAssignmentSolution, CreateCourseNews,
+    CreateOwnAssignmentSolution, CreateOwnCourseNews, CreateStudentGroup,
+    CreateStudentGroupAsTeacher, DeleteCourseNews, DeleteOwnCourseNews,
     DeleteStudentGroup, DeleteStudentGroupAsTeacher, DownloadAssignmentSolutions,
-    EditGradebook, EditOwnAssignmentExecutionTime, EditOwnGradebook,
-    EditOwnStudentAssignment, EditStudentAssignment, EnrollInCourse,
+    EditCourseNews, EditGradebook, EditOwnAssignmentExecutionTime, EditOwnCourseNews,
+    EditOwnGradebook, EditOwnStudentAssignment, EditStudentAssignment, EnrollInCourse,
     EnrollInCourseByInvitation, LeaveCourse, UpdateStudentGroup,
     UpdateStudentGroupAsTeacher, ViewAssignmentAttachment,
     ViewAssignmentAttachmentAsLearner, ViewAssignmentAttachmentAsTeacher,
@@ -36,7 +37,7 @@ from .permissions import (
     ViewOwnEnrollments, ViewOwnGradebook, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments, ViewRelatedEnrollments, ViewRelatedStudentAssignment,
     ViewSchedule, ViewStudentAssignment, ViewStudentAssignmentList, ViewStudentGroup,
-    ViewStudentGroupAsTeacher, ViewStudyMenu, ViewTeachingMenu
+    ViewStudentGroupAsTeacher, ViewStudyMenu, ViewTeacherCourses, ViewTeachingMenu
 )
 
 
@@ -46,6 +47,7 @@ class Roles(DjangoChoices):
         ViewAccountConnectedServiceProvider,
         ViewCourse,
         ViewCourseInternalDescription,
+        ViewTeacherCourses,
         CreateCertificateOfParticipation,
         ViewCertificateOfParticipation,
         EditMetaCourse,
@@ -61,6 +63,9 @@ class Roles(DjangoChoices):
         EditCourseClass,
         DeleteCourseClass,
         ViewCourseNews,
+        CreateCourseNews,
+        EditCourseNews,
+        DeleteCourseNews,
         ViewCourseReviews,
         ViewLibrary,
         ViewEnrollments,
@@ -141,9 +146,13 @@ class Roles(DjangoChoices):
     TEACHER = C(2, _('Teacher'), priority=30, permissions=(
         ViewCourse,
         ViewCourseInternalDescriptionAsTeacher,
+        ViewTeacherCourses,
         ViewTeachingMenu,
         ViewCourseContacts,
         ViewCourseNews,
+        CreateOwnCourseNews,
+        EditOwnCourseNews,
+        DeleteOwnCourseNews,
         CreateOwnAssignment,
         EditOwnAssignment,
         ViewOwnAssignment,
@@ -191,6 +200,9 @@ teacher_role.add_relation(ViewStudentAssignment, ViewRelatedStudentAssignment)
 teacher_role.add_relation(EditStudentAssignment, EditOwnStudentAssignment)
 teacher_role.add_relation(EditCourseClass, EditOwnCourseClass)
 teacher_role.add_relation(DeleteCourseClass, DeleteOwnCourseClass)
+teacher_role.add_relation(CreateCourseNews, CreateOwnCourseNews)
+teacher_role.add_relation(EditCourseNews, EditOwnCourseNews)
+teacher_role.add_relation(DeleteCourseNews, DeleteOwnCourseNews)
 teacher_role.add_relation(CreateAssignment, CreateOwnAssignment)
 teacher_role.add_relation(EditAssignment, EditOwnAssignment)
 teacher_role.add_relation(ViewAssignment, ViewOwnAssignment)

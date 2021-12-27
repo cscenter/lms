@@ -8,7 +8,8 @@ from django.conf import settings
 from auth.permissions import Permission, add_perm
 from courses.constants import AssignmentFormat
 from courses.models import (
-    Assignment, AssignmentAttachment, Course, CourseGroupModes, StudentGroupTypes
+    Assignment, AssignmentAttachment, Course, CourseGroupModes, CourseNews,
+    StudentGroupTypes
 )
 from learning.models import (
     AssignmentGroup, CourseInvitation, Enrollment, StudentAssignment, StudentGroup
@@ -95,6 +96,11 @@ class ViewTeachingMenu(Permission):
 
 
 @add_perm
+class ViewTeacherCourses(Permission):
+    name = 'teaching.view_teacher_courses'
+
+
+@add_perm
 class ViewCourseNews(Permission):
     name = "learning.view_course_news"
 
@@ -103,6 +109,53 @@ class ViewCourseNews(Permission):
     def rule(user, course: Course):
         role = course_access_role(course=course, user=user)
         return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
+
+
+@add_perm
+class CreateCourseNews(Permission):
+    name = "learning.create_course_news"
+
+
+@add_perm
+class CreateOwnCourseNews(Permission):
+    name = "teaching.create_course_news"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, course: Course):
+        return course.is_actual_teacher(user.pk)
+
+
+@add_perm
+class EditCourseNews(Permission):
+    name = "learning.edit_course_news"
+
+
+@add_perm
+class EditOwnCourseNews(Permission):
+    name = "teaching.edit_course_news"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, news: CourseNews):
+        course = news.course
+        return course.is_actual_teacher(user.pk)
+
+
+@add_perm
+class DeleteCourseNews(Permission):
+    name = "learning.delete_course_news"
+
+
+@add_perm
+class DeleteOwnCourseNews(Permission):
+    name = "teaching.delete_course_news"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, news: CourseNews):
+        course = news.course
+        return course.is_actual_teacher(user.pk)
 
 
 @add_perm
