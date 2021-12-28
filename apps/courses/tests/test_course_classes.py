@@ -23,12 +23,14 @@ from courses.models import CourseClass, CourseGroupModes, CourseTeacher
 from courses.permissions import CreateCourseClass
 from courses.tests.factories import (
     CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
-    LearningSpaceFactory, SemesterFactory, CourseTeacherFactory
+    CourseTeacherFactory, LearningSpaceFactory, SemesterFactory
 )
 from learning.models import StudentGroup
 from learning.services import EnrollmentService, StudentGroupService
 from learning.tests.factories import EnrollmentFactory, StudentGroupFactory
-from users.tests.factories import CuratorFactory, StudentProfileFactory, TeacherFactory, StudentFactory
+from users.tests.factories import (
+    CuratorFactory, StudentFactory, StudentProfileFactory, TeacherFactory
+)
 
 
 @pytest.mark.django_db

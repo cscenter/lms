@@ -9,13 +9,12 @@ from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.http import AuthenticatedHttpRequest
 from core.utils import is_club_site
-from core.views import ProtectedFormMixin
 from courses.constants import TeacherRoles
 from courses.forms import CourseUpdateForm
 from courses.models import Course, CourseGroupModes, CourseTeacher
 from courses.permissions import (
-    CreateAssignment, EditCourseDescription, ViewCourseInternalDescription,
-    can_view_private_materials, CreateCourseClass
+    CreateAssignment, CreateCourseClass, EditCourseDescription,
+    ViewCourseInternalDescription, can_view_private_materials
 )
 from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
@@ -24,7 +23,6 @@ from learning.models import CourseNewsNotification
 from learning.permissions import CreateCourseNews
 from learning.services import course_access_role
 from learning.teaching.utils import get_student_groups_url
-from users.mixins import TeacherOnlyMixin
 
 __all__ = ('CourseDetailView', 'CourseUpdateView')
 
