@@ -24,7 +24,10 @@ class TeacherDetailView(LoginRequiredMixin, DetailView):
         # FIXME: move to service method and test
         courses = (Course.objects
                    .in_branches(branches)
-                   .filter(~CourseTeacher.has_any_hidden_role(lookup='course_teachers__roles'),
+                   .filter(~CourseTeacher.has_any_hidden_role(
+                                lookup='course_teachers__roles',
+                                hidden_roles=(CourseTeacher.roles.spectator,)
+                           ),
                            semester__year__gte=min_established,
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')

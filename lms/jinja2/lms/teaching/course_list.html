@@ -18,8 +18,13 @@
                   <td>{{ course.semester }}</td>
                   <td>
                     <ul class="list-unstyled margin-bottom-0">
-                      {% for teacher in course.teachers.all() %}
-                        <li><a href="{{ teacher.teacher_profile_url() }}">{{ teacher.get_full_name() }}</a></li>
+                      {% for ct in course.course_teachers.all() %}
+                        <li>
+                         <a href="{{ ct.teacher.teacher_profile_url() }}">{{ ct.teacher.get_full_name() }}</a>
+                          {% if SpectatorRole in ct.roles %}
+                             <i class="fa fa-eye" title="Наблюдатель"></i>
+                          {% endif %}
+                        </li>
                       {% endfor %}
                     </ul>
                   </td>

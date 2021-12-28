@@ -77,6 +77,11 @@ class CourseService:
     @staticmethod
     def get_contacts(course):
         teachers_by_role = group_teachers(course.course_teachers.all())
+        if teachers_by_role.get(TeacherRoles.ORGANIZER, []):
+            teachers_by_role = {
+                TeacherRoles.ORGANIZER: teachers_by_role[TeacherRoles.ORGANIZER]
+            }
+        teachers_by_role.pop(TeacherRoles.SPECTATOR, None)
         return [ct for g in teachers_by_role.values() for ct in g
                 if len(ct.teacher.private_contacts.strip()) > 0]
 
