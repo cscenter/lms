@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from vanilla import CreateView, DeleteView, UpdateView
 
@@ -11,20 +11,31 @@ from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
+from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
+from core.http import HttpRequest
 from core.urls import reverse, reverse_lazy
 from core.utils import hashids
-from core.views import ProtectedFormMixin
 from courses.forms import CourseClassForm
 from courses.models import CourseClass, CourseClassAttachment
-from courses.permissions import ViewCourseClassMaterials
+from courses.permissions import (
+    CreateCourseClass, DeleteCourseClass, EditCourseClass, ViewCourseClassMaterials
+)
 from courses.views.mixins import CourseURLParamsMixin
 from files.views import ProtectedFileDownloadView
-from users.mixins import TeacherOnlyMixin
 
 __all__ = ('CourseClassDetailView', 'CourseClassCreateView',
            'CourseClassUpdateView', 'CourseClassDeleteView',
            'CourseClassAttachmentDeleteView')
+
+
+if TYPE_CHECKING:
+    from django.views import View
+    CourseClassURLParamsBase = View
+    CourseClassFormMixinBase = View
+else:
+    CourseClassURLParamsBase = object
+    CourseClassFormMixinBase = object
 
 
 class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):
@@ -46,22 +57,30 @@ class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['attachments'] = self.object.courseclassattachment_set.all()
+        context['attachments'] = self.object.courseclassattachment_set.order_by("-created")
         return context
 
 
-class CourseClassCreateUpdateMixin(CourseURLParamsMixin):
+class CourseClassURLParamsMixin(CourseURLParamsMixin, CourseClassURLParamsBase):
+    course_class: CourseClass
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        queryset = (CourseClass.objects
+                    .filter(pk=kwargs['pk'],
+                            course=self.course)
+                    .select_related('course'))
+        self.course_class = get_object_or_404(queryset)
+
+
+class CourseClassFormMixin(CourseClassFormMixinBase):
     def get_form(self, **kwargs):
         course = self.course
-        if not self.is_form_allowed(self.request.user, course):
+        if not self.request.user.has_perm(CreateCourseClass.name, course):
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         kwargs["course"] = course
         kwargs["initial"] = self.get_initial(**kwargs)
         return CourseClassForm(locale=self.request.LANGUAGE_CODE, **kwargs)
-
-    @staticmethod
-    def is_form_allowed(user, course):
-        return user.is_curator or user in course.teachers.all()
 
     def get_initial(self, **kwargs):
         return None
@@ -90,10 +109,14 @@ class CourseClassCreateUpdateMixin(CourseURLParamsMixin):
             return super().get_success_url()
 
 
-class CourseClassCreateView(TeacherOnlyMixin,
-                            CourseClassCreateUpdateMixin, CreateView):
+class CourseClassCreateView(PermissionRequiredMixin, CourseURLParamsMixin,
+                            CourseClassFormMixin, CreateView):
     model = CourseClass
+    permission_required = CreateCourseClass.name
     template_name = "lms/courses/course_class_form.html"
+
+    def get_permission_object(self):
+        return self.course
 
     def get_initial(self, **kwargs):
         course = kwargs["course"]
@@ -135,10 +158,17 @@ class CourseClassCreateView(TeacherOnlyMixin,
         return self.form_invalid(form)
 
 
-class CourseClassUpdateView(TeacherOnlyMixin,
-                            CourseClassCreateUpdateMixin, UpdateView):
+class CourseClassUpdateView(PermissionRequiredMixin, CourseClassURLParamsMixin,
+                            CourseClassFormMixin, UpdateView):
     model = CourseClass
+    permission_required = EditCourseClass.name
     template_name = "lms/courses/course_class_form.html"
+
+    def get_permission_object(self):
+        return self.course_class
+
+    def get_object(self):
+        return self.course_class
 
     def get_success_url(self):
         msg = _("The class '%s' was successfully updated.")
@@ -147,33 +177,41 @@ class CourseClassUpdateView(TeacherOnlyMixin,
         return super().get_success_url()
 
 
-class CourseClassDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
+class CourseClassDeleteView(PermissionRequiredMixin, CourseClassURLParamsMixin,
                             DeleteView):
     model = CourseClass
+    permission_required = DeleteCourseClass.name
     template_name = "forms/simple_delete_confirmation.html"
     success_url = reverse_lazy('teaching:timetable')
 
-    def is_form_allowed(self, user, obj: CourseClass):
-        return user.is_curator or user in obj.course.teachers.all()
+    def get_permission_object(self):
+        return self.course_class
 
 
-class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
-                                      DeleteView):
+class CourseClassAttachmentDeleteView(PermissionRequiredMixin, DeleteView):
     model = CourseClassAttachment
+    permission_required = EditCourseClass.name
     template_name = "forms/simple_delete_confirmation.html"
+    attachment: CourseClassAttachment
 
-    def is_form_allowed(self, user, obj):
-        return (user.is_curator or
-                user in obj.course_class.course.teachers.all())
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        attachment_queryset = (CourseClassAttachment.objects
+                               .filter(pk=kwargs['pk'])
+                               .select_related('course_class__course'))
+        self.attachment = get_object_or_404(attachment_queryset)
+
+    def get_permission_object(self):
+        return self.attachment.course_class
+
+    def get_object(self):
+        return self.attachment
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.object.delete()
-        self.object.material.delete(save=False)
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return self.object.course_class.get_update_url()
+        self.attachment.delete()
+        self.attachment.material.delete(save=False)
+        redirect_to = self.attachment.course_class.get_update_url()
+        return HttpResponseRedirect(redirect_to)
 
 
 class CourseClassAttachmentDownloadView(ProtectedFileDownloadView):

@@ -124,15 +124,22 @@
             <th>Кампания по набору</th>
             <th>Анкеты</th>
             <th>Результаты экзамена</th>
+            <th>Собеседования</th>
           </tr>
           {% for campaign in campaigns %}
             <tr>
               <td>{{ campaign }}</td>
-              <td><a target="_blank" href="{% url 'staff:exports_report_admission_applicants' campaign.pk 'csv' %}">csv</a>, <a
-                target="_blank" href="{% url 'staff:exports_report_admission_applicants' campaign.pk 'xlsx' %}">xlsx</a></td>
-              <td><a target="_blank" href="{% url 'staff:exports_report_admission_exam' campaign.pk 'csv' %}">csv</a>, <a target="_blank"
-                                                                                                                          href="{% url 'staff:exports_report_admission_exam' campaign.pk 'xlsx' %}">xlsx</a>
+              <td>
+                <a target="_blank" href="{% url 'staff:exports_report_admission_applicants' campaign.pk 'csv' %}">csv</a>,
+                <a target="_blank" href="{% url 'staff:exports_report_admission_applicants' campaign.pk 'xlsx' %}">xlsx</a>
               </td>
+              <td>
+                <a target="_blank" href="{% url 'staff:exports_report_admission_exam' campaign.pk 'csv' %}">csv</a>,
+                <a target="_blank" href="{% url 'staff:exports_report_admission_exam' campaign.pk 'xlsx' %}">xlsx</a>
+              </td>
+              <td>
+                <a target="_blank" href="{% url 'staff:exports_report_admission_interviews' campaign.pk 'csv' %}">csv</a>,
+                <a target="_blank" href="{% url 'staff:exports_report_admission_interviews' campaign.pk 'xlsx' %}">xlsx</a></td>
             </tr>
           {% endfor %}
 

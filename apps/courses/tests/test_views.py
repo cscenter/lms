@@ -233,3 +233,26 @@ def test_view_course_detail_teacher_contacts_visibility(client):
     assert smart_bytes(organizer.get_full_name()) in response.content
     assert smart_bytes(spectator.get_full_name()) not in response.content
 
+    
+def test_view_course_edit_description_btn_visibility(client):
+    """
+    The button for editing a course description should
+    only be displayed if the user has permissions to do so.
+    """
+    teacher, spectator = TeacherFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+
+    def has_course_description_edit_btn(user):
+        client.login(user)
+        url = course.get_absolute_url()
+        html = client.get(url).content.decode('utf-8')
+        soup = BeautifulSoup(html, 'html.parser')
+        client.logout()
+        return soup.find('a', {
+            "href": course.get_update_url()
+        }) is not None
+
+    assert has_course_description_edit_btn(teacher)
+    assert not has_course_description_edit_btn(spectator)

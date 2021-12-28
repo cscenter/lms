@@ -3,6 +3,7 @@ from typing import Any, Dict
 from django.db.models import Q, Prefetch
 from django.views import generic
 
+from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from courses.calendar import TimetableEvent
 from courses.constants import TeacherRoles
@@ -13,6 +14,7 @@ from courses.utils import MonthPeriod, extended_month_date_range, get_current_te
 from courses.views.calendar import MonthEventsCalendarView
 from learning.calendar import get_all_calendar_events, get_teacher_calendar_events
 from learning.gradebook.views import GradeBookListBaseView
+from learning.permissions import AccessTeacherSection, CreateCourseNews
 from learning.selectors import get_teacher_classes
 from learning.teaching.utils import get_student_groups_url
 from users.mixins import TeacherOnlyMixin
@@ -61,10 +63,11 @@ class CalendarPersonalView(CalendarFullView):
                                            end_date=end_date)
 
 
-class CourseListView(TeacherOnlyMixin, generic.ListView):
+class CourseListView(PermissionRequiredMixin, generic.ListView):
     model = Course
     context_object_name = 'course_list'
     template_name = "lms/teaching/course_list.html"
+    permission_required = AccessTeacherSection.name
 
     def get_queryset(self):
         pref = Prefetch('course_teachers',
@@ -82,6 +85,7 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
         context = super().get_context_data(**kwargs)
         context['SpectatorRole'] = TeacherRoles.SPECTATOR
         context['get_student_groups_url'] = get_student_groups_url
+        context['CreateCourseNews'] = CreateCourseNews.name
         return context
 
 

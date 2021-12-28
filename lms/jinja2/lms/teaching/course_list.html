@@ -29,9 +29,11 @@
                     </ul>
                   </td>
                   <td>
-                    <a href="{{ course.get_create_news_url() }}">{% trans %}Add news{% endtrans %}</a>
+                    {% if request.user.has_perm(CreateCourseNews, course) %}
+                    <a href="{{ course.get_create_news_url() }}">{% trans %}Add news{% endtrans %}</a><br>
+                    {% endif %}
                     {% if course.group_mode == "manual" %}
-                      <br><a href="{{ get_student_groups_url(course) }}">Студенческие группы</a>
+                      <a href="{{ get_student_groups_url(course) }}">Студенческие группы</a>
                     {% endif %}
                   </td>
                 </tr>

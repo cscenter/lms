@@ -13,20 +13,24 @@ from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
+from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory, LocationFactory
 from core.timezone import now_local
 from core.urls import reverse
 from courses.constants import MaterialVisibilityTypes
 from courses.forms import CourseClassForm
-from courses.models import CourseClass, CourseGroupModes
+from courses.models import CourseClass, CourseGroupModes, CourseTeacher
+from courses.permissions import CreateCourseClass
 from courses.tests.factories import (
     CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
-    LearningSpaceFactory, SemesterFactory
+    CourseTeacherFactory, LearningSpaceFactory, SemesterFactory
 )
 from learning.models import StudentGroup
 from learning.services import EnrollmentService, StudentGroupService
 from learning.tests.factories import EnrollmentFactory, StudentGroupFactory
-from users.tests.factories import CuratorFactory, StudentProfileFactory, TeacherFactory
+from users.tests.factories import (
+    CuratorFactory, StudentFactory, StudentProfileFactory, TeacherFactory
+)
 
 
 @pytest.mark.django_db
@@ -81,15 +85,36 @@ def test_course_class_detail_security(client, assert_login_redirect):
 
 
 @pytest.mark.django_db
-def test_course_class_create(client):
-    teacher = TeacherFactory()
+def test_view_course_class_create(client, lms_resolver, assert_login_redirect):
+    curator = CuratorFactory()
+    teacher, spectator, teacher_other = TeacherFactory.create_batch(3)
+    student = StudentFactory()
     s = SemesterFactory.create_current()
     course = CourseFactory.create(teachers=[teacher], semester=s)
     co_other = CourseFactory.create(semester=s)
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+    EnrollmentFactory(course=course, student=student)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
     venue = LearningSpaceFactory(branch=course.main_branch)
     form.update({'venue': venue.pk})
+
     url = course.get_create_class_url()
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == CreateCourseClass.name
+
+    assert_login_redirect(url=url, method='post')
+    client.login(student)
+    assert client.get(url).status_code == 403
+    assert client.post(url, form).status_code == 403
+    client.login(spectator)
+    assert client.get(url).status_code == 403
+    assert client.post(url, form).status_code == 403
+    client.login(teacher_other)
+    assert client.get(url).status_code == 403
+    assert client.post(url, form).status_code == 403
+
     client.login(teacher)
     # should save with course = co
     assert client.post(url, form).status_code == 302
@@ -99,6 +124,11 @@ def test_course_class_create(client):
     assert form['name'] == CourseClass.objects.get(course=course).name
     form.update({'course': course.pk})
     assert client.post(url, form).status_code == 302
+    assert CourseClass.objects.filter(course=course).count() == 2
+
+    client.login(curator)
+    assert client.post(url, form).status_code == 302
+    assert CourseClass.objects.filter(course=course).count() == 3
 
 
 @pytest.mark.django_db
@@ -131,16 +161,40 @@ def test_course_class_create_and_add(client, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_course_class_update(client, assert_redirect):
-    teacher = TeacherFactory()
+def test_view_course_class_update(client, assert_login_redirect, assert_redirect):
+    curator = CuratorFactory()
+    student = StudentFactory()
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     s = SemesterFactory.create_current()
     co = CourseFactory.create(teachers=[teacher], semester=s)
+    CourseTeacherFactory(course=co, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+    EnrollmentFactory(course=co, student=student)
     cc = CourseClassFactory.create(course=co)
     url = cc.get_update_url()
-    client.login(teacher)
+
+    assert_login_redirect(url=url, method='post')
+
     form = model_to_dict(cc)
     del form['slides']
-    form['name'] += " foobar"
+    form['name'] += " changes"
+    client.login(student)
+    assert client.get(url).status_code == 403
+    assert client.post(url, form).status_code == 403
+    client.login(teacher_other)
+    assert client.get(url).status_code == 403
+    assert client.post(url, form).status_code == 403
+    client.login(spectator)
+    assert client.get(url).status_code == 403
+    assert client.post(url, form).status_code == 403
+
+    client.login(teacher)
+    assert_redirect(client.post(url, form), cc.get_absolute_url())
+    response = client.get(cc.get_absolute_url())
+    assert form['name'] == response.context_data['object'].name
+
+    client.login(curator)
+    form['name'] += " changes 2"
     assert_redirect(client.post(url, form), cc.get_absolute_url())
     response = client.get(cc.get_absolute_url())
     assert form['name'] == response.context_data['object'].name
@@ -167,21 +221,46 @@ def test_course_class_update_and_add(client, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_course_class_delete(client, assert_redirect, assert_login_redirect):
-    teacher = TeacherFactory()
+def test_view_course_class_delete(client, assert_redirect, assert_login_redirect):
+    curator = CuratorFactory()
+    student = StudentFactory()
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     s = SemesterFactory.create_current()
     co = CourseFactory.create(teachers=[teacher], semester=s)
-    cc = CourseClassFactory.create(course=co)
-    class_delete_url = cc.get_delete_url()
+    cc_1 = CourseClassFactory.create(course=co)
+    cc_2 = CourseClassFactory.create(course=co)
+    EnrollmentFactory(course=co, student=student)
+
+    class_delete_url = cc_1.get_delete_url()
     assert_login_redirect(class_delete_url)
     assert_login_redirect(class_delete_url, {}, method='post')
+
+    client.login(student)
+    assert client.get(class_delete_url).status_code == 403
+    assert client.post(class_delete_url).status_code == 403
+    client.login(teacher_other)
+    assert client.get(class_delete_url).status_code == 403
+    assert client.post(class_delete_url).status_code == 403
+    client.login(spectator)
+    assert client.get(class_delete_url).status_code == 403
+    assert client.post(class_delete_url).status_code == 403
+
     client.login(teacher)
     response = client.get(class_delete_url)
     assert response.status_code == 200
-    assert smart_bytes(cc) in response.content
+    assert smart_bytes(cc_1) in response.content
     assert_redirect(client.post(class_delete_url),
                     reverse('teaching:timetable'))
-    assert not CourseClass.objects.filter(pk=cc.pk).exists()
+    assert not CourseClass.objects.filter(pk=cc_1.pk).exists()
+
+    client.login(curator)
+    class_delete_url = cc_2.get_delete_url()
+    response = client.get(class_delete_url)
+    assert response.status_code == 200
+    assert smart_bytes(cc_2) in response.content
+    assert_redirect(client.post(class_delete_url),
+                    reverse('teaching:timetable'))
+    assert not CourseClass.objects.filter(pk=cc_2.pk).exists()
 
 
 @pytest.mark.django_db
@@ -349,3 +428,27 @@ def test_course_class_detail_view_timezone(client, settings):
     response = client.get(course_class.get_absolute_url())
     assert smart_bytes("02 января 2020, 00:00–03:00") in response.content
 
+
+@pytest.mark.django_db
+def test_view_course_add_class_btn_visibility(client):
+    """
+    The button for creating new class should
+    only be displayed if the user has permissions to do so.
+    """
+    teacher, spectator = TeacherFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+
+    def has_create_news_btn(user):
+        client.login(user)
+        url = course.get_absolute_url()
+        html = client.get(url).content.decode('utf-8')
+        soup = BeautifulSoup(html, 'html.parser')
+        client.logout()
+        return soup.find('a', {
+            "href": course.get_create_class_url()
+        }) is not None
+
+    assert has_create_news_btn(teacher)
+    assert not has_create_news_btn(spectator)

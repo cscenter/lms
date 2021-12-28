@@ -8,14 +8,14 @@ from learning.gradebook.views import (
 from staff.api.views import CreateAlumniProfiles, StudentSearchJSONView
 from staff.views import (
     AdmissionApplicantsReportView, AdmissionExamReportView,
-    CourseParticipantsIntersectionView, ExportsView, FutureGraduateDiplomasCSVView,
-    FutureGraduateDiplomasTeXView, FutureGraduateStatsView, GradeBookListView,
-    HintListView, InterviewerFacesView, InvitationStudentsProgressReportView,
-    OfficialDiplomasCSVView, OfficialDiplomasListView, OfficialDiplomasTeXView,
-    ProgressReportForSemesterView, ProgressReportFullView, StudentFacesView,
-    StudentSearchCSVView, StudentSearchView, SurveySubmissionsReportView,
-    SurveySubmissionsStatsView, WillGraduateStatsReportView, autograde_projects,
-    create_alumni_profiles
+    AdmissionInterviewsReportView, CourseParticipantsIntersectionView, ExportsView,
+    FutureGraduateDiplomasCSVView, FutureGraduateDiplomasTeXView,
+    FutureGraduateStatsView, GradeBookListView, HintListView, InterviewerFacesView,
+    InvitationStudentsProgressReportView, OfficialDiplomasCSVView,
+    OfficialDiplomasListView, OfficialDiplomasTeXView, ProgressReportForSemesterView,
+    ProgressReportFullView, StudentFacesView, StudentSearchCSVView, StudentSearchView,
+    SurveySubmissionsReportView, SurveySubmissionsStatsView,
+    WillGraduateStatsReportView, autograde_projects, create_alumni_profiles
 )
 
 app_name = 'staff'
@@ -83,6 +83,7 @@ urlpatterns = [
         path('csv/', OfficialDiplomasCSVView.as_view(), name='exports_official_diplomas_csv'),
     ])),
     path('reports/admission/<int:campaign_id>/applicants/<export_fmt:output_format>/', AdmissionApplicantsReportView.as_view(), name='exports_report_admission_applicants'),
+    path('reports/admission/<int:campaign_id>/interviews/<export_fmt:output_format>/', AdmissionInterviewsReportView.as_view(), name='exports_report_admission_interviews'),
     path('reports/admission/<int:campaign_id>/exam/<export_fmt:output_format>/', AdmissionExamReportView.as_view(), name='exports_report_admission_exam'),
     re_path(r'^reports/surveys/(?P<survey_pk>\d+)/(?P<output_format>csv|xlsx)/$', SurveySubmissionsReportView.as_view(), name='exports_report_survey_submissions'),
     re_path(r'^reports/surveys/(?P<survey_pk>\d+)/txt/$', SurveySubmissionsStatsView.as_view(), name='exports_report_survey_submissions_stats'),

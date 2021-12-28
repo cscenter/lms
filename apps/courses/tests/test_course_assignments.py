@@ -12,7 +12,8 @@ from core.urls import reverse
 from courses.constants import AssigneeMode
 from courses.models import Assignment, AssignmentAttachment, CourseTeacher
 from courses.permissions import (
-    CreateAssignment, DeleteAssignmentAttachment, EditAssignment
+    CreateAssignment, DeleteAssignmentAttachment, DeleteAssignmentAttachmentAsTeacher,
+    EditAssignment
 )
 from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, CourseTeacherFactory
@@ -184,7 +185,6 @@ def test_view_course_assignment_attachment_delete_security(client,
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
     assert resolver.func.view_class.permission_required == DeleteAssignmentAttachment.name
     assert resolver.func.view_class.permission_required in perm_registry
-
 
     assert_login_redirect(delete_url)
 
