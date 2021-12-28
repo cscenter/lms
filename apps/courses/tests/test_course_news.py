@@ -1,12 +1,11 @@
 import factory
 import pytest
-from bs4 import BeautifulSoup
 
 from django.forms import model_to_dict
 
-from courses.models import CourseNews, CourseTeacher
+from courses.models import CourseNews
 from courses.tests.factories import (
-    CourseFactory, CourseNewsFactory, CourseTeacherFactory
+    CourseFactory, CourseNewsFactory
 )
 from users.tests.factories import TeacherFactory
 
@@ -89,27 +88,3 @@ def test_course_news_delete(client, assert_login_redirect, assert_redirect):
     response = client.get(course.get_absolute_url())
     assert course_news.text.encode() not in response.content
 
-
-@pytest.mark.django_db
-def test_view_course_edit_description_btn_visibility(client):
-    """
-    The button for editing a course description should
-    only be displayed if the user has permissions to do so.
-    """
-    teacher, spectator = TeacherFactory.create_batch(2)
-    course = CourseFactory(teachers=[teacher])
-    CourseTeacherFactory(course=course, teacher=spectator,
-                         roles=CourseTeacher.roles.spectator)
-
-    def has_create_news_btn(user):
-        client.login(user)
-        url = course.get_absolute_url()
-        html = client.get(url).content.decode('utf-8')
-        soup = BeautifulSoup(html, 'html.parser')
-        client.logout()
-        return soup.find('a', {
-            "href": course.get_update_url()
-        }) is not None
-
-    assert has_create_news_btn(teacher)
-    assert not has_create_news_btn(spectator)
