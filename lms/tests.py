@@ -15,7 +15,7 @@ from courses.tests.factories import CourseFactory, CourseTeacherFactory
 from users.constants import Roles
 from users.models import StudentTypes, User
 from users.services import create_student_profile
-from users.tests.factories import UserFactory, TeacherFactory
+from users.tests.factories import TeacherFactory, UserFactory
 
 
 @pytest.mark.django_db

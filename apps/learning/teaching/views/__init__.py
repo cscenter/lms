@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from django.db.models import Q, Prefetch
+from django.db.models import Prefetch, Q
 from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
@@ -8,7 +8,9 @@ from core.exceptions import Redirect
 from courses.calendar import TimetableEvent
 from courses.constants import TeacherRoles
 from courses.models import Course, CourseTeacher
-from courses.selectors import get_course_teachers, course_teachers_prefetch_queryset, get_teachers
+from courses.selectors import (
+    course_teachers_prefetch_queryset, get_course_teachers, get_teachers
+)
 from courses.services import get_teacher_branches
 from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView

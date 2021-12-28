@@ -11,7 +11,9 @@ from core.urls import reverse
 from courses.models import (
     CourseBranch, CourseGroupModes, CourseTeacher, StudentGroupTypes
 )
-from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory, CourseTeacherFactory
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseTeacherFactory, SemesterFactory
+)
 from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.permissions import DeleteStudentGroup, ViewStudentGroup
 from learning.services import EnrollmentService, StudentGroupService

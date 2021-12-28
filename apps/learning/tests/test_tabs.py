@@ -9,7 +9,7 @@ from courses.models import CourseNews, CourseReview, CourseTeacher
 from courses.services import CourseService
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseNewsFactory, CourseReviewFactory,
-    MetaCourseFactory, SemesterFactory, CourseTeacherFactory
+    CourseTeacherFactory, MetaCourseFactory, SemesterFactory
 )
 from learning.models import EnrollmentPeriod
 from learning.settings import Branches, GradeTypes
