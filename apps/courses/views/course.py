@@ -62,12 +62,9 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
             if role in (TeacherRoles.LECTURER, TeacherRoles.SEMINAR, TeacherRoles.ORGANIZER):
                 if role == TeacherRoles.ORGANIZER:
                     has_organizers = True
-                group = 'main'
-            elif role == TeacherRoles.SPECTATOR:
-                group = 'spectators'
-            else:
-                group = 'others'
-            teachers[group].extend(ts)
+                teachers['main'].extend(ts)
+            elif role != TeacherRoles.SPECTATOR:
+                teachers['others'].extend(ts)
         role = course_access_role(course=course, user=self.request.user)
         can_add_assignment = self.request.user.has_perm(CreateAssignment.name, course)
         can_add_course_classes = self.request.user.has_perm(CreateCourseClass.name, course)

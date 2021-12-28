@@ -227,7 +227,6 @@ def test_view_course_detail_teacher_contacts_visibility(client):
 
     context_teachers = response.context_data['teachers']
     assert set(context_teachers['main']) == {ct_lec, ct_org}
-    assert set(context_teachers['spectators']) == {ct_spe}
     assert not context_teachers['others']
     assert smart_bytes(lecturer.get_full_name()) in response.content
     assert smart_bytes(organizer.get_full_name()) in response.content

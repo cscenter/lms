@@ -76,7 +76,7 @@ class CourseListView(PermissionRequiredMixin, generic.ListView):
         courses = (Course.objects
                     .filter(teachers=self.request.user)
                     .select_related('meta_course', 'semester')
-                    .prefetch_related(pref)
+                    .prefetch_related(course_teachers)
                     .order_by('-semester__index', 'meta_course__name'))
         return courses
 
