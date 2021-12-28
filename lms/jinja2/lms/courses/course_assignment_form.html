@@ -157,13 +157,14 @@
                 {% endwith %}
               </div>
             </div>
-            <div class="row {% if assignment.assignee_mode != AssigneeMode.MANUAL %}hidden{% endif %}" data-assignee-mode="{{ AssigneeMode.MANUAL }}">
+            {% set assignee_mode = assignment_form.assignee_mode.value() %}
+            <div class="row {% if assignee_mode != AssigneeMode.MANUAL %}hidden{% endif %}" data-assignee-mode="{{ AssigneeMode.MANUAL }}">
               <div class="col-xs-12">
                 <b>Выберите ответственных из списка</b>
                 {{ crispy(responsible_teachers_form) }}
               </div>
             </div>
-            <div class="row {% if assignment.assignee_mode != AssigneeMode.STUDENT_GROUP_CUSTOM %}hidden{% endif %}" data-assignee-mode="{{ AssigneeMode.STUDENT_GROUP_CUSTOM }}">
+            <div class="row {% if assignee_mode != AssigneeMode.STUDENT_GROUP_CUSTOM %}hidden{% endif %}" data-assignee-mode="{{ AssigneeMode.STUDENT_GROUP_CUSTOM }}">
               <div class="col-xs-12">
                 <table class="table">
                   <thead>
