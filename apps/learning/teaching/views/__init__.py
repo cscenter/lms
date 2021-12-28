@@ -70,7 +70,7 @@ class CourseListView(PermissionRequiredMixin, generic.ListView):
     permission_required = AccessTeacherSection.name
 
     def get_queryset(self):
-        pref = Prefetch('course_teachers',
+        course_teachers = Prefetch('course_teachers',
                         course_teachers_prefetch_queryset(hidden_roles=())
         )
         courses = (Course.objects
