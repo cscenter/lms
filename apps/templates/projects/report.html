@@ -167,7 +167,8 @@
             <div class="panel-group">
               {% for review in reviews %}
                 <div class="panel panel-default">
-                  <a class="panel-heading" href="#project-review-{{ review.pk }}">
+                  <a class="panel-heading" href="#project-review-{{ review.pk }}" data-toggle="collapse" aria-expanded="false"
+                  aria-controls="project-review-{{ review.pk }}">
                     {{ review.reviewer }} / <b>{% if review.is_completed %}Завершена{% else %}Не завершена{% endif %}</b>
                   </a>
                   <div class="panel-collapse collapse" id="project-review-{{ review.pk }}" aria-expanded="false">

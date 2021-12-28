@@ -235,7 +235,7 @@
               <label for="assignee-select">Преподаватель</label>
               <select name="assignee" id="assignee-select" class="select form-control">
                 <option value="" {% if not a_s.assignee_id %}selected{% endif %}>Не указан</option>
-                {% for course_teacher in a_s.assignment.course.course_teachers.all() %}
+                {% for course_teacher in assignee_teachers %}
                   <option value="{{ course_teacher.pk }}" {% if course_teacher.pk == a_s.assignee_id %}selected{% endif %}>
                     {{ course_teacher.teacher.get_full_name() }}
                   </option>

@@ -1,5 +1,6 @@
 import datetime
 from collections import OrderedDict
+from typing import Callable
 
 from pandas import DataFrame
 
@@ -9,7 +10,8 @@ from django.utils import formats
 from django.utils.encoding import force_str
 from django.utils.numberformat import format
 
-from admission.models import Applicant, Comment, Exam, Interview
+from admission.constants import ApplicantStatuses, InterviewSections
+from admission.models import Applicant, Campaign, Comment, Exam, Interview
 from core.reports import ReportFileOutput
 from core.urls import reverse
 
@@ -155,3 +157,50 @@ class AdmissionExamReport:
             self.campaign.branch.code,
             formats.date_format(today, "SHORT_DATE_FORMAT")
         )
+
+
+def generate_admission_interviews_report(*, campaign: Campaign,
+                                         url_builder: Callable[[str], str] = str) -> DataFrame:
+    headers = [
+        "Фамилия",
+        "Имя",
+        "Отчество",
+        "Ссылка",
+        "Статус анкеты",
+    ]
+    interview_section_indexes = {}
+    for index, (value, label) in enumerate(InterviewSections.choices):
+        headers.append(f"{label} / балл")
+        headers.append(f"{label} / комментарии")
+        interview_section_indexes[value] = 2 * index
+    interview_comments = Prefetch('interviews__comments',
+                                  queryset=(Comment.objects
+                                            .prefetch_related('interviewer')))
+    applicants = (Applicant.objects
+                  .filter(campaign=campaign,
+                          status__in=ApplicantStatuses.RESULTS_STATUSES)
+                  .order_by('pk')
+                  .prefetch_related('interviews', interview_comments))
+    data = []
+    for i, applicant in enumerate(applicants):
+        row = [
+            applicant.last_name,
+            applicant.first_name,
+            applicant.patronymic,
+            url_builder(applicant.get_absolute_url()),
+            applicant.get_status_display(),
+        ]
+        interview_details = ["" for _ in range(2 * len(InterviewSections.values))]
+        for interview in applicant.interviews.all():
+            interview_comments = ''
+            for c in interview.comments.all():
+                author = c.interviewer.get_full_name()
+                interview_comments += f'{author}: {c.score}\n{c.text}\n\n'
+            index = interview_section_indexes[interview.section]
+            interview_details[index] = interview.get_average_score_display()
+            interview_details[index + 1] = interview_comments.rstrip()
+        row.extend(interview_details)
+        assert len(row) == len(headers)
+        data.append(row)
+    return DataFrame.from_records(columns=headers, data=data)
+

@@ -1,6 +1,5 @@
 import datetime
 from collections import defaultdict
-from typing import List
 
 from django_filters import FilterSet
 from django_filters.views import BaseFilterView
@@ -19,7 +18,9 @@ from django.views import View, generic
 
 import core.utils
 from admission.models import Campaign, Interview
-from admission.reports import AdmissionApplicantsReport, AdmissionExamReport
+from admission.reports import (
+    AdmissionApplicantsReport, AdmissionExamReport, generate_admission_interviews_report
+)
 from core.http import HttpRequest
 from core.models import Branch
 from core.urls import reverse
@@ -390,6 +391,18 @@ class AdmissionApplicantsReportView(CuratorOnlyMixin, generic.base.View):
             return report.output_csv()
         elif output_format == "xlsx":
             return report.output_xlsx()
+
+
+class AdmissionInterviewsReportView(CuratorOnlyMixin, generic.base.View):
+    def get(self, request, campaign_id, output_format, **kwargs):
+        campaign_queryset = (Campaign.objects
+                             .filter(pk=campaign_id,
+                                     branch__site_id=settings.SITE_ID))
+        campaign = get_object_or_404(campaign_queryset)
+        report = generate_admission_interviews_report(campaign=campaign,
+                                                      url_builder=request.build_absolute_uri)
+        file_name = f"admission_{campaign.year}_{campaign.branch.code}_interviews"
+        return dataframe_to_response(report, output_format, file_name)
 
 
 class AdmissionExamReportView(CuratorOnlyMixin, generic.base.View):

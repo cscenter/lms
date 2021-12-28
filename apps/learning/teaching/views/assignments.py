@@ -7,12 +7,13 @@ from rest_framework import serializers
 from vanilla import TemplateView
 
 from django.contrib import messages
+from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import FileField
-from django.http import FileResponse, HttpResponseBadRequest, JsonResponse
+from django.http import FileResponse, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.middleware.csrf import get_token
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, resolve_url
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
@@ -20,11 +21,14 @@ from django.views.generic.edit import BaseUpdateView
 from auth.mixins import PermissionRequiredMixin
 from core.api.fields import CharSeparatedField
 from core.exceptions import Redirect
+from core.http import HttpRequest
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
 from courses.models import Assignment, Course, CourseTeacher
 from courses.permissions import DeleteAssignment, EditAssignment, ViewAssignment
-from courses.selectors import assignments_list, course_teachers_prefetch_queryset
+from courses.selectors import (
+    assignments_list, course_teachers_prefetch_queryset, get_course_teachers
+)
 from courses.services import CourseService
 from learning.api.serializers import AssignmentScoreSerializer
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
@@ -62,7 +66,8 @@ def _check_queue_filters(course: Course, query_params):
         })
     # Course teachers
     course_teachers = [{"value": "unset", "label": "Не назначен", "selected": False}]
-    teachers_qs = (course_teachers_prefetch_queryset(role_priority=False)
+    teachers_qs = (course_teachers_prefetch_queryset(role_priority=False,
+                                                     hidden_roles=(CourseTeacher.roles.spectator,))
                    .filter(course=course))
     for course_teacher in teachers_qs:
         value = course_teacher.pk
@@ -237,6 +242,11 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
     template_name = "lms/teaching/student_assignment_detail.html"
     permission_required = ViewStudentAssignment.name
 
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if not self.has_permission():
+            return redirect_to_login(request.get_full_path())
+        return super().dispatch(request, *args, **kwargs)
+
     def get_permission_object(self):
         return self.student_assignment
 
@@ -261,6 +271,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         context['score_form'] = AssignmentScoreForm(
             initial={'score': a_s.score},
             maximum_score=a_s.assignment.maximum_score)
+        context['assignee_teachers'] = get_course_teachers(course=course)
         context['comment_form'].helper.form_action = reverse(
             'teaching:assignment_comment_create',
             kwargs={'pk': a_s.pk})

@@ -8,12 +8,11 @@ from auth.registry import role_registry
 from courses.permissions import (
     CreateAssignment, CreateOwnAssignment, DeleteAssignment, DeleteAssignmentAttachment,
     DeleteAssignmentAttachmentAsTeacher, DeleteCourseClass, DeleteOwnAssignment,
-    DeleteOwnCourseClass, EditAssignment, EditCourseClass, EditCourseDescription,
-    EditMetaCourse, EditOwnAssignment, EditOwnCourseClass, EditOwnCourseDescription,
-    ViewAssignment, ViewCourse, ViewCourseAssignments, ViewCourseClassMaterials,
-    ViewCourseContacts, ViewCourseInternalDescription,
-    ViewCourseInternalDescriptionAsLearner, ViewCourseInternalDescriptionAsTeacher,
-    ViewOwnAssignment
+    DeleteOwnCourseClass, EditAssignment, EditCourseDescription, EditOwnCourseDescription,
+    EditCourseClass, EditMetaCourse, EditOwnAssignment, EditOwnCourseClass, ViewAssignment,
+    ViewCourse, ViewCourseAssignments, ViewCourseClassMaterials, ViewCourseContacts,
+    ViewCourseInternalDescription, ViewCourseInternalDescriptionAsLearner,
+    ViewCourseInternalDescriptionAsTeacher, ViewOwnAssignment, CreateCourseClass, CreateOwnCourseClass
 )
 from info_blocks.permissions import ViewInternships
 from users.permissions import (
@@ -22,12 +21,13 @@ from users.permissions import (
 )
 
 from .permissions import (
-    CreateAssignmentComment, CreateAssignmentCommentAsLearner,
-    CreateAssignmentCommentAsTeacher, CreateAssignmentSolution,
-    CreateOwnAssignmentSolution, CreateStudentGroup, CreateStudentGroupAsTeacher,
+    AccessTeacherSection, CreateAssignmentComment, CreateAssignmentCommentAsLearner,
+    CreateAssignmentCommentAsTeacher, CreateAssignmentSolution, CreateCourseNews,
+    CreateOwnAssignmentSolution, CreateOwnCourseNews, CreateStudentGroup,
+    CreateStudentGroupAsTeacher, DeleteCourseNews, DeleteOwnCourseNews,
     DeleteStudentGroup, DeleteStudentGroupAsTeacher, DownloadAssignmentSolutions,
-    EditGradebook, EditOwnAssignmentExecutionTime, EditOwnGradebook,
-    EditOwnStudentAssignment, EditStudentAssignment, EnrollInCourse,
+    EditCourseNews, EditGradebook, EditOwnAssignmentExecutionTime, EditOwnCourseNews,
+    EditOwnGradebook, EditOwnStudentAssignment, EditStudentAssignment, EnrollInCourse,
     EnrollInCourseByInvitation, LeaveCourse, UpdateStudentGroup,
     UpdateStudentGroupAsTeacher, ViewAssignmentAttachment,
     ViewAssignmentAttachmentAsLearner, ViewAssignmentAttachmentAsTeacher,
@@ -44,6 +44,7 @@ from .permissions import (
 # TODO: Add description to each role
 class Roles(DjangoChoices):
     CURATOR = C(5, _('Curator'), priority=0, permissions=(
+        AccessTeacherSection,
         ViewAccountConnectedServiceProvider,
         ViewCourse,
         ViewCourseInternalDescription,
@@ -60,9 +61,13 @@ class Roles(DjangoChoices):
         ViewStudentAssignment,
         ViewStudentAssignmentList,
         EditStudentAssignment,
+        CreateCourseClass,
         EditCourseClass,
         DeleteCourseClass,
         ViewCourseNews,
+        CreateCourseNews,
+        EditCourseNews,
+        DeleteCourseNews,
         ViewCourseReviews,
         ViewLibrary,
         ViewEnrollments,
@@ -141,12 +146,16 @@ class Roles(DjangoChoices):
         ViewAssignmentCommentAttachmentAsLearner,
     ))
     TEACHER = C(2, _('Teacher'), priority=30, permissions=(
+        ViewTeachingMenu,
+        AccessTeacherSection,
         ViewCourse,
         ViewCourseInternalDescriptionAsTeacher,
         EditOwnCourseDescription,
-        ViewTeachingMenu,
         ViewCourseContacts,
         ViewCourseNews,
+        CreateOwnCourseNews,
+        EditOwnCourseNews,
+        DeleteOwnCourseNews,
         CreateOwnAssignment,
         EditOwnAssignment,
         ViewOwnAssignment,
@@ -155,6 +164,7 @@ class Roles(DjangoChoices):
         ViewRelatedStudentAssignment,
         ViewStudentAssignmentList,
         EditOwnStudentAssignment,
+        CreateOwnCourseClass,
         EditOwnCourseClass,
         DeleteOwnCourseClass,
         ViewRelatedEnrollments,
@@ -194,8 +204,12 @@ teacher_role.add_relation(ViewAssignmentCommentAttachment,
                           ViewAssignmentCommentAttachmentAsTeacher)
 teacher_role.add_relation(ViewStudentAssignment, ViewRelatedStudentAssignment)
 teacher_role.add_relation(EditStudentAssignment, EditOwnStudentAssignment)
+teacher_role.add_relation(CreateCourseClass, CreateOwnCourseClass)
 teacher_role.add_relation(EditCourseClass, EditOwnCourseClass)
 teacher_role.add_relation(DeleteCourseClass, DeleteOwnCourseClass)
+teacher_role.add_relation(CreateCourseNews, CreateOwnCourseNews)
+teacher_role.add_relation(EditCourseNews, EditOwnCourseNews)
+teacher_role.add_relation(DeleteCourseNews, DeleteOwnCourseNews)
 teacher_role.add_relation(CreateAssignment, CreateOwnAssignment)
 teacher_role.add_relation(EditAssignment, EditOwnAssignment)
 teacher_role.add_relation(ViewAssignment, ViewOwnAssignment)
