@@ -14,7 +14,8 @@ from courses.constants import TeacherRoles
 from courses.forms import CourseUpdateForm
 from courses.models import Course, CourseGroupModes, CourseTeacher
 from courses.permissions import (
-    CreateAssignment, ViewCourseInternalDescription, can_view_private_materials, CreateCourseClass
+    CreateAssignment, EditCourseDescription, ViewCourseInternalDescription,
+    can_view_private_materials, CreateCourseClass
 )
 from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
@@ -69,12 +70,14 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
         can_add_course_classes = self.request.user.has_perm(CreateCourseClass.name, course)
         can_add_news = self.request.user.has_perm(CreateCourseNews.name, course)
         can_view_course_internal_description = self.request.user.has_perm(ViewCourseInternalDescription.name, course)
+        can_edit_description = self.request.user.has_perm(EditCourseDescription.name, course)
         context = {
             'CourseGroupModes': CourseGroupModes,
             'cad_add_news': can_add_news,
             'can_add_assignment': can_add_assignment,
             'can_add_course_classes': can_add_course_classes,
             'can_view_course_internal_description': can_view_course_internal_description,
+            'can_edit_description': can_edit_description,
             'get_student_groups_url': get_student_groups_url,
             'course': course,
             'course_tabs': tab_list,
@@ -115,17 +118,18 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
         }
 
 
-class CourseUpdateView(TeacherOnlyMixin, CourseURLParamsMixin, ProtectedFormMixin,
+class CourseUpdateView(PermissionRequiredMixin, CourseURLParamsMixin,
                        generic.UpdateView):
     model = Course
     template_name = "courses/simple_crispy_form.html"
+    permission_required = EditCourseDescription.name
     form_class = CourseUpdateForm
 
     def get_object(self, queryset=None):
         return self.course
 
-    def is_form_allowed(self, user, obj):
-        return user.is_curator or user in obj.teachers.all()
+    def get_permission_object(self):
+        return self.course
 
     def get_initial(self):
         """Keep in mind that `initial` overrides values from model dict"""

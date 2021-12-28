@@ -8,9 +8,9 @@ from auth.registry import role_registry
 from courses.permissions import (
     CreateAssignment, CreateOwnAssignment, DeleteAssignment, DeleteAssignmentAttachment,
     DeleteAssignmentAttachmentAsTeacher, DeleteCourseClass, DeleteOwnAssignment,
-    DeleteOwnCourseClass, EditAssignment, EditCourseClass, EditMetaCourse,
-    EditOwnAssignment, EditOwnCourseClass, ViewAssignment, ViewCourse,
-    ViewCourseAssignments, ViewCourseClassMaterials, ViewCourseContacts,
+    DeleteOwnCourseClass, EditAssignment, EditCourseDescription, EditOwnCourseDescription,
+    EditCourseClass, EditMetaCourse, EditOwnAssignment, EditOwnCourseClass, ViewAssignment,
+    ViewCourse, ViewCourseAssignments, ViewCourseClassMaterials, ViewCourseContacts,
     ViewCourseInternalDescription, ViewCourseInternalDescriptionAsLearner,
     ViewCourseInternalDescriptionAsTeacher, ViewOwnAssignment, CreateCourseClass, CreateOwnCourseClass
 )
@@ -48,6 +48,7 @@ class Roles(DjangoChoices):
         ViewAccountConnectedServiceProvider,
         ViewCourse,
         ViewCourseInternalDescription,
+        EditCourseDescription,
         CreateCertificateOfParticipation,
         ViewCertificateOfParticipation,
         EditMetaCourse,
@@ -149,6 +150,7 @@ class Roles(DjangoChoices):
         AccessTeacherSection,
         ViewCourse,
         ViewCourseInternalDescriptionAsTeacher,
+        EditOwnCourseDescription,
         ViewCourseContacts,
         ViewCourseNews,
         CreateOwnCourseNews,
@@ -190,6 +192,8 @@ for code, name in Roles.choices:
 teacher_role = role_registry[Roles.TEACHER]
 teacher_role.add_relation(ViewCourseInternalDescription,
                           ViewCourseInternalDescriptionAsTeacher)
+teacher_role.add_relation(EditCourseDescription,
+                          EditOwnCourseDescription)
 teacher_role.add_relation(ViewAssignmentAttachment,
                           ViewAssignmentAttachmentAsTeacher)
 teacher_role.add_relation(DeleteAssignmentAttachment,

@@ -14,10 +14,11 @@ from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory, LocationFactory
 from core.urls import reverse
 from courses.constants import MaterialVisibilityTypes
+from courses.models import CourseTeacher
 from courses.permissions import ViewCourseClassMaterials
 from courses.tests.factories import (
     AssignmentFactory, CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
-    CourseNewsFactory
+    CourseNewsFactory, CourseTeacherFactory
 )
 from files.response import XAccelRedirectFileResponse
 from files.views import ProtectedFileDownloadView
@@ -200,3 +201,27 @@ def test_course_update(client, assert_redirect):
     assert course.description_ru == "foobar"
     assert course.internal_description == "super secret"
 
+
+@pytest.mark.django_db
+def test_view_course_edit_description_btn_visibility(client):
+    """
+    The button for editing a course description should
+    only be displayed if the user has permissions to do so.
+    """
+    teacher, spectator = TeacherFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+
+    def has_course_description_edit_btn(user):
+        client.login(user)
+        url = course.get_absolute_url()
+        html = client.get(url).content.decode('utf-8')
+        soup = BeautifulSoup(html, 'html.parser')
+        client.logout()
+        return soup.find('a', {
+            "href": course.get_update_url()
+        }) is not None
+
+    assert has_course_description_edit_btn(teacher)
+    assert not has_course_description_edit_btn(spectator)

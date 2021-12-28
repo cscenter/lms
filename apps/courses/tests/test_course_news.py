@@ -118,6 +118,7 @@ def test_view_course_news_delete(client, assert_login_redirect, assert_redirect)
     assert course_news.text.encode() not in response.content
 
 
+
 @pytest.mark.django_db
 def test_view_course_add_news_btn_visibility(client):
     """
