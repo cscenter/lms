@@ -233,7 +233,8 @@ def test_view_course_detail_teacher_contacts_visibility(client):
     assert smart_bytes(organizer.get_full_name()) in response.content
     assert smart_bytes(spectator.get_full_name()) not in response.content
 
-    
+
+@pytest.mark.django_db
 def test_view_course_edit_description_btn_visibility(client):
     """
     The button for editing a course description should
