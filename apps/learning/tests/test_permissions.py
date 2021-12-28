@@ -341,11 +341,11 @@ def test_enroll_in_course_by_invitation(settings):
 @pytest.mark.django_db
 def test_create_assignment_comment():
     user = UserFactory()
-    teacher = TeacherFactory()
-    teacher_other = TeacherFactory()
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     curator = CuratorFactory()
     student_other = StudentFactory()
     course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator, roles=CourseTeacher.roles.spectator)
     assert CreateAssignmentComment.name in perm_registry
     assert CreateAssignmentCommentAsTeacher in perm_registry
     assert CreateAssignmentCommentAsLearner in perm_registry
@@ -356,12 +356,14 @@ def test_create_assignment_comment():
     assert StudentAssignment.objects.count() == 1
     sa = StudentAssignment.objects.first()
     assert teacher.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
+    assert not spectator.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
     assert not teacher_other.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
     assert not curator.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
     assert not user.has_perm(CreateAssignmentCommentAsTeacher.name, sa)
     assert curator.has_perm(CreateAssignmentComment.name, sa)
     # Now check relation
     assert teacher.has_perm(CreateAssignmentComment.name, sa)
+    assert not spectator.has_perm(CreateAssignmentComment.name, sa)
     assert not teacher_other.has_perm(CreateAssignmentComment.name, sa)
     assert not student_other.has_perm(CreateAssignmentComment.name, sa)
     assert student.has_perm(CreateAssignmentComment.name, sa)
@@ -385,13 +387,17 @@ def test_view_assignment_comment_attachment():
     assert not user.has_perm(ViewAssignmentCommentAttachment.name)
     curator = CuratorFactory()
     assert curator.has_perm(ViewAssignmentCommentAttachment.name)
-    teacher = TeacherFactory()
+    teacher, spectator = TeacherFactory.create_batch(2)
     # Relation check permissions on object only
     assert not teacher.has_perm(ViewAssignmentCommentAttachment.name)
     comment = AssignmentCommentFactory(author=teacher)
     comment.student_assignment.assignment.course.teachers.add(teacher)
+    course = comment.student_assignment.assignment.course
+    CourseTeacherFactory(course=course, teacher=spectator, roles=CourseTeacher.roles.spectator)
     assert teacher.has_perm(ViewAssignmentCommentAttachment.name,
                             comment.student_assignment)
+    assert not spectator.has_perm(ViewAssignmentCommentAttachment.name,
+                                  comment.student_assignment)
     student = StudentFactory()
     comment = AssignmentCommentFactory(author=student)
     course = comment.student_assignment.assignment.course
@@ -413,13 +419,14 @@ def test_view_assignment_comment_attachment():
 @pytest.mark.django_db
 def test_view_student_assignment_as_teacher():
     curator = CuratorFactory()
-    teacher = TeacherFactory()
-    teacher_other = TeacherFactory()
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator, roles=CourseTeacher.roles.spectator)
     sa = StudentAssignmentFactory(assignment__course=course)
     assert not ViewRelatedStudentAssignment.rule(UserFactory(), sa)
     assert teacher.has_perm(ViewRelatedStudentAssignment.name, sa)
     assert not teacher_other.has_perm(ViewRelatedStudentAssignment.name, sa)
+    assert not spectator.has_perm(ViewRelatedStudentAssignment.name, sa)
     assert not curator.has_perm(ViewRelatedStudentAssignment.name, sa)
     # `expelled` status on a student profile doesn't affect a teacher role
     StudentProfileFactory(user=teacher, status=StudentStatuses.EXPELLED)
@@ -433,12 +440,14 @@ def test_view_student_assignment_relation():
     `teacher.has_perm(ViewRelatedStudentAssignment.name, sa)`
     """
     curator = CuratorFactory()
-    teacher = TeacherFactory()
-    teacher_other = TeacherFactory()
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator, roles=CourseTeacher.roles.spectator)
     sa = StudentAssignmentFactory(assignment__course=course)
     assert not UserFactory().has_perm(ViewStudentAssignment.name, sa)
     assert teacher.has_perm(ViewStudentAssignment.name, sa)
+    assert not spectator.has_perm(ViewStudentAssignment.name)
+    assert not spectator.has_perm(ViewStudentAssignment.name, sa)
     assert not teacher.has_perm(ViewStudentAssignment.name)
     assert not teacher_other.has_perm(ViewStudentAssignment.name, sa)
     assert curator.has_perm(ViewStudentAssignment.name, sa)
@@ -448,13 +457,14 @@ def test_view_student_assignment_relation():
 @pytest.mark.django_db
 def test_edit_own_student_assignment():
     curator = CuratorFactory()
-    teacher = TeacherFactory()
-    teacher_other = TeacherFactory()
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator, roles=CourseTeacher.roles.spectator)
     sa = StudentAssignmentFactory(assignment__course=course)
     assert not EditOwnStudentAssignment.rule(UserFactory(), sa)
     assert EditOwnStudentAssignment.rule(teacher, sa)
     assert not EditOwnStudentAssignment.rule(teacher_other, sa)
+    assert not EditOwnStudentAssignment.rule(spectator, sa)
     assert not EditOwnStudentAssignment.rule(curator, sa)
     # Teacher of the same meta course can't edit assignments where he's
     # not participated

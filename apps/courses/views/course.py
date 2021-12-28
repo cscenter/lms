@@ -5,6 +5,7 @@ from django.contrib.auth.views import redirect_to_login
 from django.db.models import Prefetch
 from django.views import generic
 
+from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.http import AuthenticatedHttpRequest
 from core.utils import is_club_site
@@ -13,13 +14,14 @@ from courses.constants import TeacherRoles
 from courses.forms import CourseUpdateForm
 from courses.models import Course, CourseGroupModes, CourseTeacher
 from courses.permissions import (
-    CreateAssignment, ViewCourseInternalDescription, can_view_private_materials
+    CreateAssignment, EditCourseDescription, ViewCourseInternalDescription,
+    can_view_private_materials, CreateCourseClass
 )
 from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import CourseNewsNotification
-from learning.permissions import ViewStudentGroup
+from learning.permissions import CreateCourseNews, ViewStudentGroup
 from learning.services import course_access_role
 from learning.teaching.utils import get_student_groups_url
 from users.mixins import TeacherOnlyMixin
@@ -65,12 +67,18 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
             teachers[group].extend(ts)
         role = course_access_role(course=course, user=self.request.user)
         can_add_assignment = self.request.user.has_perm(CreateAssignment.name, course)
+        can_add_course_classes = self.request.user.has_perm(CreateCourseClass.name, course)
+        can_add_news = self.request.user.has_perm(CreateCourseNews.name, course)
         can_view_course_internal_description = self.request.user.has_perm(ViewCourseInternalDescription.name, course)
+        can_edit_description = self.request.user.has_perm(EditCourseDescription.name, course)
         can_view_student_groups = self.request.user.has_perm(ViewStudentGroup.name, course)
         context = {
             'CourseGroupModes': CourseGroupModes,
+            'cad_add_news': can_add_news,
             'can_add_assignment': can_add_assignment,
+            'can_add_course_classes': can_add_course_classes,
             'can_view_course_internal_description': can_view_course_internal_description,
+            'can_edit_description': can_edit_description,
             'can_view_student_groups': can_view_student_groups,
             'get_student_groups_url': get_student_groups_url,
             'course': course,
@@ -112,13 +120,17 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
         }
 
 
-class CourseUpdateView(TeacherOnlyMixin, CourseURLParamsMixin, ProtectedFormMixin,
+class CourseUpdateView(PermissionRequiredMixin, CourseURLParamsMixin,
                        generic.UpdateView):
     model = Course
     template_name = "courses/simple_crispy_form.html"
+    permission_required = EditCourseDescription.name
     form_class = CourseUpdateForm
 
     def get_object(self, queryset=None):
+        return self.course
+
+    def get_permission_object(self):
         return self.course
 
     def get_initial(self):
@@ -131,5 +143,3 @@ class CourseUpdateView(TeacherOnlyMixin, CourseURLParamsMixin, ProtectedFormMixi
             initial["description_en"] = self.object.meta_course.description_en
         return initial
 
-    def is_form_allowed(self, user, obj):
-        return user.is_curator or user in obj.teachers.all()
