@@ -20,7 +20,7 @@ from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import CourseNewsNotification
-from learning.permissions import CreateCourseNews
+from learning.permissions import CreateCourseNews, ViewStudentGroup
 from learning.services import course_access_role
 from learning.teaching.utils import get_student_groups_url
 
@@ -69,6 +69,7 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
         can_add_news = self.request.user.has_perm(CreateCourseNews.name, course)
         can_view_course_internal_description = self.request.user.has_perm(ViewCourseInternalDescription.name, course)
         can_edit_description = self.request.user.has_perm(EditCourseDescription.name, course)
+        can_view_student_groups = self.request.user.has_perm(ViewStudentGroup.name, course)
         context = {
             'CourseGroupModes': CourseGroupModes,
             'cad_add_news': can_add_news,
@@ -76,6 +77,7 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
             'can_add_course_classes': can_add_course_classes,
             'can_view_course_internal_description': can_view_course_internal_description,
             'can_edit_description': can_edit_description,
+            'can_view_student_groups': can_view_student_groups,
             'get_student_groups_url': get_student_groups_url,
             'course': course,
             'course_tabs': tab_list,

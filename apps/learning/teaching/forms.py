@@ -3,8 +3,10 @@ from typing import Any
 from crispy_forms.helper import FormHelper
 
 from django import forms
+from django.db.models import Q
 
 from courses.models import Course, CourseTeacher, StudentGroupTypes
+from courses.selectors import get_teachers
 from learning.models import StudentGroup
 from learning.services import StudentGroupService
 
@@ -30,9 +32,11 @@ class StudentGroupForm(forms.ModelForm):
         # Set type for new student groups
         if self.instance.pk is None:
             self.instance.type = StudentGroupTypes.MANUAL
-        course_teachers = (CourseTeacher.objects
-                           .filter(course=course)
-                           .select_related('teacher'))
+        filters = [
+            Q(course=course),
+            Q(roles=~CourseTeacher.roles.spectator)
+        ]
+        course_teachers = get_teachers(filters=filters)
         self.fields['assignee'].queryset = course_teachers
         self.helper = FormHelper(self)
         self.helper.form_tag = False
