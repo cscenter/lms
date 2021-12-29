@@ -88,6 +88,7 @@ def get_course_students_by_stepik_id(course_id) -> Dict[CSVColumnValue, int]:
     """
     enrollments = (Enrollment.active
                    .filter(course_id=course_id)
+                   .select_related('student')
                    .only("student_id", "student__stepic_id"))
     enrolled_students = {}
     for enrollment in enrollments.iterator():
@@ -103,6 +104,7 @@ def get_course_students_by_yandex_login(course_id) -> Dict[CSVColumnValue, int]:
     """
     enrollments = (Enrollment.active
                    .filter(course_id=course_id)
+                   .select_related('student')
                    .only("student_id", "student__yandex_login_normalized"))
     enrolled_students = {}
     for enrollment in enrollments.iterator():
