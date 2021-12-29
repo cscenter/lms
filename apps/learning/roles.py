@@ -9,11 +9,12 @@ from courses.permissions import (
     CreateAssignment, CreateCourseClass, CreateOwnAssignment, CreateOwnCourseClass,
     DeleteAssignment, DeleteAssignmentAttachment, DeleteAssignmentAttachmentAsTeacher,
     DeleteCourseClass, DeleteOwnAssignment, DeleteOwnCourseClass, EditAssignment,
-    EditCourseClass, EditCourseDescription, EditMetaCourse, EditOwnAssignment,
-    EditOwnCourseClass, EditOwnCourseDescription, ViewAssignment, ViewCourse,
-    ViewCourseAssignments, ViewCourseClassMaterials, ViewCourseContacts,
-    ViewCourseInternalDescription, ViewCourseInternalDescriptionAsLearner,
-    ViewCourseInternalDescriptionAsTeacher, ViewOwnAssignment
+    EditCourse, EditCourseClass, EditMetaCourse, EditOwnAssignment, EditOwnCourse,
+    EditOwnCourseClass, ViewAssignment, ViewCourse, ViewCourseAssignments,
+    ViewCourseClassMaterials, ViewCourseContacts, ViewCourseContactsAsLearner,
+    ViewCourseContactsAsTeacher, ViewCourseInternalDescription,
+    ViewCourseInternalDescriptionAsLearner, ViewCourseInternalDescriptionAsTeacher,
+    ViewOwnAssignment
 )
 from info_blocks.permissions import ViewInternships
 from users.permissions import (
@@ -49,7 +50,7 @@ class Roles(DjangoChoices):
         ViewAccountConnectedServiceProvider,
         ViewCourse,
         ViewCourseInternalDescription,
-        EditCourseDescription,
+        EditCourse,
         CreateCertificateOfParticipation,
         ViewCertificateOfParticipation,
         EditMetaCourse,
@@ -90,7 +91,7 @@ class Roles(DjangoChoices):
         ViewCourse,
         ViewCourseInternalDescriptionAsLearner,
         ViewStudyMenu,
-        ViewCourseContacts,
+        ViewCourseContactsAsLearner,
         ViewCourseAssignments,
         ViewCourseNews,
         ViewCourseReviews,
@@ -119,7 +120,7 @@ class Roles(DjangoChoices):
         ViewCourse,
         ViewCourseInternalDescriptionAsLearner,
         ViewStudyMenu,
-        ViewCourseContacts,
+        ViewCourseContactsAsLearner,
         ViewCourseAssignments,
         ViewCourseNews,
         ViewCourseReviews,
@@ -140,6 +141,7 @@ class Roles(DjangoChoices):
     ))
     GRADUATE = C(3, _('Graduate'), permissions=(
         ViewCourse,
+        ViewCourseContactsAsLearner,
         ViewCourseInternalDescriptionAsLearner,
         ViewOwnEnrollments,
         ViewOwnStudentAssignment,
@@ -151,8 +153,8 @@ class Roles(DjangoChoices):
         AccessTeacherSection,
         ViewCourse,
         ViewCourseInternalDescriptionAsTeacher,
-        EditOwnCourseDescription,
-        ViewCourseContacts,
+        EditOwnCourse,
+        ViewCourseContactsAsTeacher,
         ViewCourseNews,
         CreateOwnCourseNews,
         EditOwnCourseNews,
@@ -191,10 +193,12 @@ for code, name in Roles.choices:
 
 # Add relations
 teacher_role = role_registry[Roles.TEACHER]
+teacher_role.add_relation(ViewCourseContacts,
+                          ViewCourseContactsAsTeacher)
 teacher_role.add_relation(ViewCourseInternalDescription,
                           ViewCourseInternalDescriptionAsTeacher)
-teacher_role.add_relation(EditCourseDescription,
-                          EditOwnCourseDescription)
+teacher_role.add_relation(EditCourse,
+                          EditOwnCourse)
 teacher_role.add_relation(ViewAssignmentAttachment,
                           ViewAssignmentAttachmentAsTeacher)
 teacher_role.add_relation(DeleteAssignmentAttachment,
@@ -228,6 +232,8 @@ for role in (Roles.STUDENT, Roles.VOLUNTEER, Roles.PARTNER, Roles.INVITED):
     student_role = role_registry[role]
     student_role.add_relation(ViewAssignmentAttachment,
                               ViewAssignmentAttachmentAsLearner)
+    student_role.add_relation(ViewCourseContacts,
+                              ViewCourseContactsAsLearner)
     student_role.add_relation(ViewCourseInternalDescription,
                               ViewCourseInternalDescriptionAsLearner)
     student_role.add_relation(CreateAssignmentComment,
@@ -240,6 +246,7 @@ for role in (Roles.STUDENT, Roles.VOLUNTEER, Roles.PARTNER, Roles.INVITED):
 graduate_role = role_registry[Roles.GRADUATE]
 graduate_role.add_relation(ViewAssignmentAttachment, ViewAssignmentAttachmentAsLearner)
 graduate_role.add_relation(ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner)
+graduate_role.add_relation(ViewCourseContacts, ViewCourseContactsAsLearner)
 graduate_role.add_relation(ViewCourseInternalDescription, ViewCourseInternalDescriptionAsLearner)
 
 anonymous_role = role_registry.anonymous_role

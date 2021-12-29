@@ -111,16 +111,18 @@ class CourseUpdateForm(forms.ModelForm):
                 template='crispy_forms/square_tabs.html'
             ),
             Div('internal_description'),
+            Div('contacts'),
             CANCEL_SAVE_PAIR)
         super().__init__(*args, **kwargs)
 
     class Meta:
         model = Course
-        fields = ['description_ru', 'description_en', 'internal_description']
+        fields = ['description_ru', 'description_en', 'internal_description', 'contacts']
         widgets = {
             'description_ru': UbereditorWidget,
             'description_en': UbereditorWidget,
             'internal_description': UbereditorWidget,
+            'contacts': UbereditorWidget
         }
 
 
