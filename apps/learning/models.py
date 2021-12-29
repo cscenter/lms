@@ -575,6 +575,8 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
 
     objects = StudentAssignmentManager()
 
+    tracker = FieldTracker(fields=['score'])
+
     derivable_fields = [
         'execution_time',
         'first_student_comment_at',

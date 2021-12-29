@@ -19,6 +19,8 @@ from learning.models import (
 from .models import AssignmentComment, Enrollment, Event
 from .services import StudentGroupService
 from .services.enrollment_service import recreate_assignments_for_student
+from .services.personal_assignment_service import update_personal_assignment_score
+from .settings import AssignmentScoreUpdateSource
 
 
 class CourseTeacherAdmin(BaseModelAdmin):
@@ -183,16 +185,27 @@ class StudentAssignmentAdmin(BaseModelAdmin):
     exclude = ['watchers']
     inlines = [StudentAssignmentWatcherInlineAdmin, AssignmentScoreAuditLogAdminInline]
 
+    class Media:
+        css = {
+            'all': ('v2/css/django_admin.css',)
+        }
+
     def get_readonly_fields(self, request, obj=None):
         if obj:
             return ['student', 'assignment', 'score_changed', 'state_display']
         else:
             return ['score_changed', 'state_display']
 
-    class Media:
-        css = {
-            'all': ('v2/css/django_admin.css',)
-        }
+    def save_model(self, request, obj, form, change):
+        is_score_has_changed = obj.tracker.has_changed('score') or (not change and obj.score is not None)
+        score_old = obj.tracker.previous('score')
+        super().save_model(request, obj, form, change)
+        if is_score_has_changed:
+            update_personal_assignment_score(student_assignment=obj,
+                                             changed_by=request.user,
+                                             score_old=score_old,
+                                             score_new=obj.score,
+                                             source=AssignmentScoreUpdateSource.FORM_ADMIN)
 
 
 class EventAdmin(BaseModelAdmin):

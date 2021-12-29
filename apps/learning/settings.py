@@ -110,12 +110,12 @@ class GradeTypes(DjangoChoices):
 
 
 class AssignmentScoreUpdateSource(TextChoices):
-    API = 'api'
-    API_YANDEX_CONTEST = 'api-ya.contest'
-    CSV_YANDEX_LOGIN = 'csv-ya.login'
-    CSV_STEPIK = 'csv-stepik'
-    CSV_ENROLLMENT = 'csv-enrollment'
-    FORM_ADMIN = 'admin'
-    FORM_ASSIGNMENT = 'form'
-    FORM_GRADEBOOK = 'gradebook'
-    WEBHOOK_GERRIT = 'webhook-gerrit'
+    API = 'api', _("REST API")
+    API_YANDEX_CONTEST = 'api-ya.contest', _("Yandex.Contest")
+    CSV_YANDEX_LOGIN = 'csv-ya.login', _("Imported from CSV by Yandex.Login")
+    CSV_STEPIK = 'csv-stepik', _("Imported from CSV by stepik.org ID")
+    CSV_ENROLLMENT = 'csv-enrollment', _("Imported from CSV by LMS Student ID")
+    FORM_ADMIN = 'admin', _("Admin Panel")
+    FORM_ASSIGNMENT = 'form', _("Form on Assignment Detail Page")
+    FORM_GRADEBOOK = 'gradebook', _("Gradebook")
+    WEBHOOK_GERRIT = 'webhook-gerrit', _("Gerrit Webhook")
