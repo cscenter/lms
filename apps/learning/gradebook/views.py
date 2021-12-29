@@ -32,11 +32,14 @@ from learning.gradebook import (
 )
 from learning.gradebook.services import (
     assignment_import_scores_from_csv, assignment_import_scores_from_yandex_contest,
-    get_assignment_checker, get_course_students, get_course_students_by_stepik_id,
-    get_course_students_by_yandex_login
+    get_assignment_checker
 )
 from learning.models import StudentGroup
 from learning.permissions import EditGradebook, ViewGradebook
+from learning.services.personal_assignment_service import (
+    get_personal_assignments_by_enrollment_id, get_personal_assignments_by_stepik_id,
+    get_personal_assignments_by_yandex_login
+)
 
 __all__ = [
     "GradeBookView",
@@ -44,6 +47,7 @@ __all__ = [
     "ImportAssignmentScoresByYandexLoginView"
 ]
 
+from learning.settings import AssignmentScoreUpdateSource
 from users.models import StudentTypes, User
 
 
@@ -321,32 +325,38 @@ class ImportAssignmentScoresBaseView(PermissionRequiredMixin, generic.View):
         return HttpResponseRedirect(url)
 
 
+class ImportAssignmentScoresByEnrollmentIDView(ImportAssignmentScoresBaseView):
+    def _import_scores(self, assignment, csv_file):
+        by_enrollment = get_personal_assignments_by_enrollment_id(assignment=assignment)
+        return assignment_import_scores_from_csv(csv_file,
+                                                 required_headers=['id', 'score'],
+                                                 lookup_column_name='id',
+                                                 student_assignments=by_enrollment,
+                                                 changed_by=self.request.user,
+                                                 audit_log_source=AssignmentScoreUpdateSource.CSV_ENROLLMENT)
+
+
 class ImportAssignmentScoresByStepikIDView(ImportAssignmentScoresBaseView):
     def _import_scores(self, assignment, csv_file):
-        with_stepik_id = get_course_students_by_stepik_id(assignment.course_id)
-        return assignment_import_scores_from_csv(assignment, csv_file,
+        with_stepik_id = get_personal_assignments_by_stepik_id(assignment=assignment)
+        return assignment_import_scores_from_csv(csv_file,
                                                  required_headers=['stepic_id', 'score'],
-                                                 enrolled_students=with_stepik_id,
-                                                 lookup_column_name='stepic_id')
+                                                 lookup_column_name='stepic_id',
+                                                 student_assignments=with_stepik_id,
+                                                 changed_by=self.request.user,
+                                                 audit_log_source=AssignmentScoreUpdateSource.CSV_STEPIK)
 
 
 class ImportAssignmentScoresByYandexLoginView(ImportAssignmentScoresBaseView):
     def _import_scores(self, assignment, csv_file):
-        with_yandex_login = get_course_students_by_yandex_login(assignment.course_id)
-        return assignment_import_scores_from_csv(assignment, csv_file,
+        with_yandex_login = get_personal_assignments_by_yandex_login(assignment=assignment)
+        return assignment_import_scores_from_csv(csv_file,
                                                  required_headers=['login', 'score'],
-                                                 enrolled_students=with_yandex_login,
                                                  lookup_column_name='login',
-                                                 transform=normalize_yandex_login)
-
-
-class ImportAssignmentScoresByEnrollmentIDView(ImportAssignmentScoresBaseView):
-    def _import_scores(self, assignment, csv_file):
-        course_students = get_course_students(assignment.course_id)
-        return assignment_import_scores_from_csv(assignment, csv_file,
-                                                 required_headers=['id', 'score'],
-                                                 enrolled_students=course_students,
-                                                 lookup_column_name='id')
+                                                 student_assignments=with_yandex_login,
+                                                 changed_by=self.request.user,
+                                                 audit_log_source=AssignmentScoreUpdateSource.CSV_YANDEX_LOGIN,
+                                                 transform_value=normalize_yandex_login)
 
 
 class GradebookImportScoresFromYandexContest(RolePermissionRequiredMixin, APIBaseView):

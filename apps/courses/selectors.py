@@ -107,7 +107,7 @@ def personal_assignments_list(*, filters: Optional[Dict[str, Any]] = None,
     filter_set = filter_class(filters, base_queryset)
     if not filter_set.is_valid():
         raise ValidationError(filter_set.errors)
-    return filter_set.qs
+    return filter_set.qs.order_by()
 
 
 def course_personal_assignments(*, course: Course, filters: Optional[Dict[str, Any]] = None,

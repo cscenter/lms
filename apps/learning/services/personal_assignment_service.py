@@ -11,7 +11,8 @@ from django.utils.timezone import now
 from core.timezone import get_now_utc
 from core.typings import assert_never
 from courses.constants import AssigneeMode
-from courses.models import CourseTeacher
+from courses.models import Assignment, CourseTeacher
+from courses.selectors import personal_assignments_list
 from grading.services import CheckerSubmissionService
 from learning.models import (
     AssignmentComment, AssignmentScoreAuditLog, AssignmentSubmissionTypes, Enrollment,
@@ -165,7 +166,10 @@ def update_personal_assignment_score(*, student_assignment: StudentAssignment,
     if score_new == score_old:
         return student_assignment
     if score_new is not None and score_new > student_assignment.assignment.maximum_score:
-        raise ValueError("Score value is greater than the maximum score")
+        raise ValidationError(f"Score {score_new} is greater than the maximum "
+                              f"score {student_assignment.assignment.maximum_score}",
+                              code="score_overflow")
+    # TODO: support concurrent update?
     student_assignment.score = score_new
     student_assignment.save(update_fields=['score'])
 
@@ -266,3 +270,60 @@ def maybe_set_assignee_for_personal_assignment(submission: AssignmentComment) ->
     student_assignment.trigger_auto_assign = False
     student_assignment.modified = now()
     student_assignment.save(update_fields=update_fields)
+
+
+def get_personal_assignments_by_enrollment_id(*, assignment: Assignment) -> Dict[str, StudentAssignment]:
+    """
+    Returns map of enrollment ID to personal assignment for the *assignment*.
+    Takes into account active course students only.
+    """
+    enrollments_ = (Enrollment.active
+                    .filter(course_id=assignment.course_id)
+                    .values("student_id", "pk"))
+    enrollments = {e['student_id']: e['pk'] for e in enrollments_}
+    filters = {"assignments": [assignment.pk]}
+    student_assignments = list(personal_assignments_list(filters=filters)
+                               .only("pk", "score", "student_id"))
+    by_enrollment = {}
+    for sa in student_assignments:
+        if sa.student_id in enrollments:
+            sa.assignment = assignment
+            enrollment_id = enrollments[sa.student_id]
+            by_enrollment[str(enrollment_id)] = sa
+    return by_enrollment
+
+
+def get_personal_assignments_by_yandex_login(*, assignment: Assignment) -> Dict[str, StudentAssignment]:
+    """
+    Returns personal assignments of students that provided yandex login
+    in their account.
+    """
+    filters = {"assignments": [assignment.pk]}
+    student_assignments = list(personal_assignments_list(filters=filters)
+                               .select_related('student')
+                               .only("pk", "score", "student__yandex_login_normalized"))
+    with_yandex_login = {}
+    for sa in student_assignments:
+        yandex_login = sa.student.yandex_login_normalized
+        if yandex_login:
+            sa.assignment = assignment
+            with_yandex_login[str(yandex_login)] = sa
+    return with_yandex_login
+
+
+def get_personal_assignments_by_stepik_id(*, assignment: Assignment) -> Dict[str, StudentAssignment]:
+    """
+    Returns personal assignments of students that provided stepik ID in
+    their account.
+    """
+    filters = {"assignments": [assignment.pk]}
+    student_assignments = list(personal_assignments_list(filters=filters)
+                               .select_related('student')
+                               .only("pk", "score", "student__stepic_id"))
+    with_stepik_id = {}
+    for sa in student_assignments:
+        stepik_id = sa.student.stepic_id
+        if stepik_id:
+            sa.assignment = assignment
+            with_stepik_id[str(stepik_id)] = sa
+    return with_stepik_id
