@@ -6,14 +6,15 @@ from django.utils.translation import gettext_lazy as _
 from auth.permissions import Role
 from auth.registry import role_registry
 from courses.permissions import (
-    CreateAssignment, CreateOwnAssignment, DeleteAssignment, DeleteAssignmentAttachment,
-    DeleteAssignmentAttachmentAsTeacher, DeleteCourseClass, DeleteOwnAssignment,
-    DeleteOwnCourseClass, EditAssignment, EditCourse, EditOwnCourse,
-    EditCourseClass, EditMetaCourse, EditOwnAssignment, EditOwnCourseClass, ViewAssignment,
-    ViewCourse, ViewCourseAssignments, ViewCourseClassMaterials, ViewCourseContacts,
-    ViewCourseContactsAsTeacher, ViewCourseContactsAsLearner,
-    ViewCourseInternalDescription, ViewCourseInternalDescriptionAsLearner,
-    ViewCourseInternalDescriptionAsTeacher, ViewOwnAssignment, CreateCourseClass, CreateOwnCourseClass
+    CreateAssignment, CreateCourseClass, CreateOwnAssignment, CreateOwnCourseClass,
+    DeleteAssignment, DeleteAssignmentAttachment, DeleteAssignmentAttachmentAsTeacher,
+    DeleteCourseClass, DeleteOwnAssignment, DeleteOwnCourseClass, EditAssignment,
+    EditCourse, EditCourseClass, EditMetaCourse, EditOwnAssignment, EditOwnCourse,
+    EditOwnCourseClass, ViewAssignment, ViewCourse, ViewCourseAssignments,
+    ViewCourseClassMaterials, ViewCourseContacts, ViewCourseContactsAsLearner,
+    ViewCourseContactsAsTeacher, ViewCourseInternalDescription,
+    ViewCourseInternalDescriptionAsLearner, ViewCourseInternalDescriptionAsTeacher,
+    ViewOwnAssignment
 )
 from info_blocks.permissions import ViewInternships
 from users.permissions import (

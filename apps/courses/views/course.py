@@ -13,9 +13,8 @@ from courses.constants import TeacherRoles
 from courses.forms import CourseUpdateForm
 from courses.models import Course, CourseGroupModes, CourseTeacher
 from courses.permissions import (
-    CreateAssignment, CreateCourseClass, EditCourse,
-    ViewCourseInternalDescription, can_view_private_materials,
-    ViewCourseContacts
+    CreateAssignment, CreateCourseClass, EditCourse, ViewCourseContacts,
+    ViewCourseInternalDescription, can_view_private_materials
 )
 from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list

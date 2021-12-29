@@ -5,9 +5,9 @@ from core.utils import instance_memoize
 from courses.constants import MaterialVisibilityTypes
 from courses.models import CourseTeacher
 from courses.permissions import (
-    CreateAssignment, DeleteAssignment, DeleteAssignmentAttachment, EditAssignment,
-    CreateCourseClass, DeleteCourseClass, EditCourseClass, EditCourse,
-    ViewCourseClassMaterials, ViewCourseInternalDescription, ViewCourseContacts
+    CreateAssignment, CreateCourseClass, DeleteAssignment, DeleteAssignmentAttachment,
+    DeleteCourseClass, EditAssignment, EditCourse, EditCourseClass,
+    ViewCourseClassMaterials, ViewCourseContacts, ViewCourseInternalDescription
 )
 from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseClassFactory, CourseFactory,
