@@ -280,6 +280,11 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("Visible to course listeners only. "
                     "LaTeX+Markdown+HTML is enabled."),
         blank=True)
+    contacts = models.TextField(
+        _("Contacts"),
+        help_text=_("Visible to course listeners only. "
+                    "LaTeX+Markdown+HTML is enabled."),
+        blank=True)
     survey_url = models.URLField(
         _("Survey URL"),
         blank=True,

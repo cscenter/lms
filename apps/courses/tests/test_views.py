@@ -23,7 +23,8 @@ from courses.tests.factories import (
 )
 from files.response import XAccelRedirectFileResponse
 from files.views import ProtectedFileDownloadView
-from learning.settings import Branches
+from learning.settings import Branches, GradeTypes
+from learning.tests.factories import EnrollmentFactory
 from users.constants import Roles
 from users.tests.factories import (
     CuratorFactory, StudentFactory, StudentProfileFactory, TeacherFactory, UserFactory
@@ -256,3 +257,30 @@ def test_view_course_edit_description_btn_visibility(client):
 
     assert has_course_description_edit_btn(teacher)
     assert not has_course_description_edit_btn(spectator)
+
+
+@pytest.mark.django_db
+def test_view_course_detail_contacts_visibility(client):
+    user = UserFactory()
+    curator = CuratorFactory()
+    course_student, student = StudentFactory.create_batch(2)
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
+    contacts = "Some contacts"
+    course = CourseFactory(teachers=[teacher], contacts=contacts)
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+    EnrollmentFactory(course=course, student=course_student,
+                      grade=GradeTypes.GOOD)
+    url = course.get_absolute_url()
+
+    def has_contacts_header(user):
+        client.login(user)
+        response = client.get(url)
+        return smart_bytes(contacts) in response.content
+
+    assert not has_contacts_header(user)
+    assert not has_contacts_header(student)
+    assert not has_contacts_header(teacher_other)
+    assert has_contacts_header(curator)
+    assert has_contacts_header(teacher)
+    assert has_contacts_header(course_student)

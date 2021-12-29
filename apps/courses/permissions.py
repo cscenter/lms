@@ -59,12 +59,12 @@ class ViewCourseInternalDescriptionAsLearner(Permission):
 
 
 @add_perm
-class EditCourseDescription(Permission):
+class EditCourse(Permission):
     name = "courses.edit_description"
 
 
 @add_perm
-class EditOwnCourseDescription(Permission):
+class EditOwnCourse(Permission):
     name = 'teaching.edit_description'
 
     @staticmethod
@@ -76,6 +76,13 @@ class EditOwnCourseDescription(Permission):
 @add_perm
 class ViewCourseContacts(Permission):
     name = "courses.can_view_contacts"
+
+    @staticmethod
+    @predicate
+    def rule(user, course: Course):
+        if user.is_curator or user in course.teachers.all():
+            return True
+        return user.get_enrollment(course.pk)
 
 
 @add_perm

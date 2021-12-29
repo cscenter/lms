@@ -13,8 +13,9 @@ from courses.constants import TeacherRoles
 from courses.forms import CourseUpdateForm
 from courses.models import Course, CourseGroupModes, CourseTeacher
 from courses.permissions import (
-    CreateAssignment, CreateCourseClass, EditCourseDescription,
-    ViewCourseInternalDescription, can_view_private_materials
+    CreateAssignment, CreateCourseClass, EditCourse,
+    ViewCourseInternalDescription, can_view_private_materials,
+    ViewCourseContacts
 )
 from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
@@ -65,18 +66,21 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
                 teachers['main'].extend(ts)
             elif role != TeacherRoles.SPECTATOR:
                 teachers['others'].extend(ts)
-        role = course_access_role(course=course, user=self.request.user)
-        can_add_assignment = self.request.user.has_perm(CreateAssignment.name, course)
-        can_add_course_classes = self.request.user.has_perm(CreateCourseClass.name, course)
-        can_add_news = self.request.user.has_perm(CreateCourseNews.name, course)
-        can_view_course_internal_description = self.request.user.has_perm(ViewCourseInternalDescription.name, course)
-        can_edit_description = self.request.user.has_perm(EditCourseDescription.name, course)
-        can_view_student_groups = self.request.user.has_perm(ViewStudentGroup.name, course)
+        user = self.request.user
+        role = course_access_role(course=course, user=user)
+        can_add_assignment = user.has_perm(CreateAssignment.name, course)
+        can_add_course_classes = user.has_perm(CreateCourseClass.name, course)
+        can_add_news = user.has_perm(CreateCourseNews.name, course)
+        can_view_course_contacts = user.has_perm(ViewCourseContacts.name, course)
+        can_view_course_internal_description = user.has_perm(ViewCourseInternalDescription.name, course)
+        can_edit_description = user.has_perm(EditCourse.name, course)
+        can_view_student_groups = user.has_perm(ViewStudentGroup.name, course)
         context = {
             'CourseGroupModes': CourseGroupModes,
             'cad_add_news': can_add_news,
             'can_add_assignment': can_add_assignment,
             'can_add_course_classes': can_add_course_classes,
+            'can_view_course_contacts': can_view_course_contacts,
             'can_view_course_internal_description': can_view_course_internal_description,
             'can_edit_description': can_edit_description,
             'can_view_student_groups': can_view_student_groups,
@@ -125,7 +129,7 @@ class CourseUpdateView(PermissionRequiredMixin, CourseURLParamsMixin,
                        generic.UpdateView):
     model = Course
     template_name = "courses/simple_crispy_form.html"
-    permission_required = EditCourseDescription.name
+    permission_required = EditCourse.name
     form_class = CourseUpdateForm
 
     def get_object(self, queryset=None):

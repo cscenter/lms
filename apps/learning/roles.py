@@ -6,14 +6,13 @@ from django.utils.translation import gettext_lazy as _
 from auth.permissions import Role
 from auth.registry import role_registry
 from courses.permissions import (
-    CreateAssignment, CreateCourseClass, CreateOwnAssignment, CreateOwnCourseClass,
-    DeleteAssignment, DeleteAssignmentAttachment, DeleteAssignmentAttachmentAsTeacher,
-    DeleteCourseClass, DeleteOwnAssignment, DeleteOwnCourseClass, EditAssignment,
-    EditCourseClass, EditCourseDescription, EditMetaCourse, EditOwnAssignment,
-    EditOwnCourseClass, EditOwnCourseDescription, ViewAssignment, ViewCourse,
-    ViewCourseAssignments, ViewCourseClassMaterials, ViewCourseContacts,
+    CreateAssignment, CreateOwnAssignment, DeleteAssignment, DeleteAssignmentAttachment,
+    DeleteAssignmentAttachmentAsTeacher, DeleteCourseClass, DeleteOwnAssignment,
+    DeleteOwnCourseClass, EditAssignment, EditCourse, EditOwnCourse,
+    EditCourseClass, EditMetaCourse, EditOwnAssignment, EditOwnCourseClass, ViewAssignment,
+    ViewCourse, ViewCourseAssignments, ViewCourseClassMaterials, ViewCourseContacts,
     ViewCourseInternalDescription, ViewCourseInternalDescriptionAsLearner,
-    ViewCourseInternalDescriptionAsTeacher, ViewOwnAssignment
+    ViewCourseInternalDescriptionAsTeacher, ViewOwnAssignment, CreateCourseClass, CreateOwnCourseClass
 )
 from info_blocks.permissions import ViewInternships
 from users.permissions import (
@@ -49,7 +48,7 @@ class Roles(DjangoChoices):
         ViewAccountConnectedServiceProvider,
         ViewCourse,
         ViewCourseInternalDescription,
-        EditCourseDescription,
+        EditCourse,
         CreateCertificateOfParticipation,
         ViewCertificateOfParticipation,
         EditMetaCourse,
@@ -151,7 +150,7 @@ class Roles(DjangoChoices):
         AccessTeacherSection,
         ViewCourse,
         ViewCourseInternalDescriptionAsTeacher,
-        EditOwnCourseDescription,
+        EditOwnCourse,
         ViewCourseContacts,
         ViewCourseNews,
         CreateOwnCourseNews,
@@ -193,8 +192,8 @@ for code, name in Roles.choices:
 teacher_role = role_registry[Roles.TEACHER]
 teacher_role.add_relation(ViewCourseInternalDescription,
                           ViewCourseInternalDescriptionAsTeacher)
-teacher_role.add_relation(EditCourseDescription,
-                          EditOwnCourseDescription)
+teacher_role.add_relation(EditCourse,
+                          EditOwnCourse)
 teacher_role.add_relation(ViewAssignmentAttachment,
                           ViewAssignmentAttachmentAsTeacher)
 teacher_role.add_relation(DeleteAssignmentAttachment,

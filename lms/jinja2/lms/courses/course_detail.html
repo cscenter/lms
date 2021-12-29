@@ -54,6 +54,10 @@
                 {% if can_view_course_internal_description and course.internal_description %}
                   {{ course.internal_description|markdown("course_internal_description", 3600, course.pk, course.modified) }}
                 {% endif %}
+                {% if can_view_course_contacts and course.contacts %}
+                  <h3>{% trans %}Контакты {% endtrans %}</h3>
+                  {{ course.contacts|markdown("course_contacts", 3600, course.pk, course.modified) }}
+                {% endif %}
               </div>
             </div>
           {% endwith %}

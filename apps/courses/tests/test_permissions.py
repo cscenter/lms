@@ -5,9 +5,9 @@ from core.utils import instance_memoize
 from courses.constants import MaterialVisibilityTypes
 from courses.models import CourseTeacher
 from courses.permissions import (
-    CreateAssignment, CreateCourseClass, DeleteAssignment, DeleteAssignmentAttachment,
-    DeleteCourseClass, EditAssignment, EditCourseClass, EditCourseDescription,
-    ViewCourseClassMaterials, ViewCourseInternalDescription
+    CreateAssignment, DeleteAssignment, DeleteAssignmentAttachment, EditAssignment,
+    CreateCourseClass, DeleteCourseClass, EditCourseClass, EditCourse,
+    ViewCourseClassMaterials, ViewCourseInternalDescription, ViewCourseContacts
 )
 from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseClassFactory, CourseFactory,
@@ -344,7 +344,7 @@ def test_view_course_internal_description():
 
 @pytest.mark.django_db
 def test_permission_edit_course_description(client):
-    permission_name = EditCourseDescription.name
+    permission_name = EditCourse.name
     user = UserFactory()
     student = StudentFactory()
     curator = CuratorFactory()
@@ -360,4 +360,25 @@ def test_permission_edit_course_description(client):
     assert not student.has_perm(permission_name, course)
     assert not invited_student.has_perm(permission_name, course)
     assert not teacher_other.has_perm(permission_name, course)
+
+
+@pytest.mark.django_db
+def test_permission_view_course_contacts(client):
+    permission_name = ViewCourseContacts.name
+    user = UserFactory()
+    curator = CuratorFactory()
+    course_student, student = StudentFactory.create_batch(2)
+    teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
+    course = CourseFactory(teachers=[teacher])
+    CourseTeacherFactory(course=course, teacher=spectator,
+                         roles=CourseTeacher.roles.spectator)
+    EnrollmentFactory(course=course, student=course_student,
+                      grade=GradeTypes.GOOD)
+
+    assert not user.has_perm(permission_name, course)
+    assert not student.has_perm(permission_name, course)
+    assert not teacher_other.has_perm(permission_name, course)
+    assert curator.has_perm(permission_name)
+    assert course_student.has_perm(permission_name, course)
+    assert teacher.has_perm(permission_name, course)
 
