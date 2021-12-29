@@ -199,12 +199,15 @@ class StudentAssignmentAdmin(BaseModelAdmin):
     def save_model(self, request, obj, form, change):
         is_score_has_changed = obj.tracker.has_changed('score') or (not change and obj.score is not None)
         score_old = obj.tracker.previous('score')
+        # Save object with an old score, then upgrade it with a new score value
+        score_new = obj.score
+        obj.score = score_old
         super().save_model(request, obj, form, change)
         if is_score_has_changed:
             update_personal_assignment_score(student_assignment=obj,
                                              changed_by=request.user,
                                              score_old=score_old,
-                                             score_new=obj.score,
+                                             score_new=score_new,
                                              source=AssignmentScoreUpdateSource.FORM_ADMIN)
 
 

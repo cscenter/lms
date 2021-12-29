@@ -1,7 +1,7 @@
 import logging
 from datetime import timedelta
 from decimal import Decimal
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
@@ -162,16 +162,22 @@ def get_draft_solution(user: User, student_assignment: StudentAssignment):
 
 def update_personal_assignment_score(*, student_assignment: StudentAssignment,
                                      changed_by: User, score_old: Decimal, score_new: Decimal,
-                                     source: AssignmentScoreUpdateSource) -> StudentAssignment:
+                                     source: AssignmentScoreUpdateSource) -> Tuple[bool, StudentAssignment]:
     if score_new == score_old:
-        return student_assignment
+        # Consider as a successful update
+        return True, student_assignment
     if score_new is not None and score_new > student_assignment.assignment.maximum_score:
         raise ValidationError(f"Score {score_new} is greater than the maximum "
                               f"score {student_assignment.assignment.maximum_score}",
                               code="score_overflow")
-    # TODO: support concurrent update?
+
+    updated = (StudentAssignment.objects
+               .filter(pk=student_assignment.pk, score=score_old)
+               .update(score=score_new))
+    if not updated:
+        return False, student_assignment
+
     student_assignment.score = score_new
-    student_assignment.save(update_fields=['score'])
 
     audit_log = AssignmentScoreAuditLog(student_assignment=student_assignment,
                                         changed_by=changed_by,
@@ -180,7 +186,7 @@ def update_personal_assignment_score(*, student_assignment: StudentAssignment,
                                         source=source)
     audit_log.save()
 
-    return student_assignment
+    return True, student_assignment
 
 
 # TODO: remove
