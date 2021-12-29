@@ -77,12 +77,25 @@ class EditOwnCourse(Permission):
 class ViewCourseContacts(Permission):
     name = "courses.can_view_contacts"
 
+
+@add_perm
+class ViewCourseContactsAsTeacher(Permission):
+    name = "teaching.can_view_contacts"
+
     @staticmethod
     @predicate
     def rule(user, course: Course):
-        if user.is_curator or user in course.teachers.all():
-            return True
-        return user.get_enrollment(course.pk)
+        return user in course.teachers.all()
+
+
+@add_perm
+class ViewCourseContactsAsLearner(Permission):
+    name = "learning.can_view_contacts"
+
+    @staticmethod
+    @predicate
+    def rule(user, course: Course):
+        return bool(user.get_enrollment(course.pk))
 
 
 @add_perm

@@ -11,6 +11,7 @@ from courses.permissions import (
     DeleteOwnCourseClass, EditAssignment, EditCourse, EditOwnCourse,
     EditCourseClass, EditMetaCourse, EditOwnAssignment, EditOwnCourseClass, ViewAssignment,
     ViewCourse, ViewCourseAssignments, ViewCourseClassMaterials, ViewCourseContacts,
+    ViewCourseContactsAsTeacher, ViewCourseContactsAsLearner,
     ViewCourseInternalDescription, ViewCourseInternalDescriptionAsLearner,
     ViewCourseInternalDescriptionAsTeacher, ViewOwnAssignment, CreateCourseClass, CreateOwnCourseClass
 )
@@ -89,7 +90,7 @@ class Roles(DjangoChoices):
         ViewCourse,
         ViewCourseInternalDescriptionAsLearner,
         ViewStudyMenu,
-        ViewCourseContacts,
+        ViewCourseContactsAsLearner,
         ViewCourseAssignments,
         ViewCourseNews,
         ViewCourseReviews,
@@ -118,7 +119,7 @@ class Roles(DjangoChoices):
         ViewCourse,
         ViewCourseInternalDescriptionAsLearner,
         ViewStudyMenu,
-        ViewCourseContacts,
+        ViewCourseContactsAsLearner,
         ViewCourseAssignments,
         ViewCourseNews,
         ViewCourseReviews,
@@ -139,6 +140,7 @@ class Roles(DjangoChoices):
     ))
     GRADUATE = C(3, _('Graduate'), permissions=(
         ViewCourse,
+        ViewCourseContactsAsLearner,
         ViewCourseInternalDescriptionAsLearner,
         ViewOwnEnrollments,
         ViewOwnStudentAssignment,
@@ -151,7 +153,7 @@ class Roles(DjangoChoices):
         ViewCourse,
         ViewCourseInternalDescriptionAsTeacher,
         EditOwnCourse,
-        ViewCourseContacts,
+        ViewCourseContactsAsTeacher,
         ViewCourseNews,
         CreateOwnCourseNews,
         EditOwnCourseNews,
@@ -190,6 +192,8 @@ for code, name in Roles.choices:
 
 # Add relations
 teacher_role = role_registry[Roles.TEACHER]
+teacher_role.add_relation(ViewCourseContacts,
+                          ViewCourseContactsAsTeacher)
 teacher_role.add_relation(ViewCourseInternalDescription,
                           ViewCourseInternalDescriptionAsTeacher)
 teacher_role.add_relation(EditCourse,
@@ -227,6 +231,8 @@ for role in (Roles.STUDENT, Roles.VOLUNTEER, Roles.PARTNER, Roles.INVITED):
     student_role = role_registry[role]
     student_role.add_relation(ViewAssignmentAttachment,
                               ViewAssignmentAttachmentAsLearner)
+    student_role.add_relation(ViewCourseContacts,
+                              ViewCourseContactsAsLearner)
     student_role.add_relation(ViewCourseInternalDescription,
                               ViewCourseInternalDescriptionAsLearner)
     student_role.add_relation(CreateAssignmentComment,
@@ -239,6 +245,7 @@ for role in (Roles.STUDENT, Roles.VOLUNTEER, Roles.PARTNER, Roles.INVITED):
 graduate_role = role_registry[Roles.GRADUATE]
 graduate_role.add_relation(ViewAssignmentAttachment, ViewAssignmentAttachmentAsLearner)
 graduate_role.add_relation(ViewAssignmentCommentAttachment, ViewAssignmentCommentAttachmentAsLearner)
+graduate_role.add_relation(ViewCourseContacts, ViewCourseContactsAsLearner)
 graduate_role.add_relation(ViewCourseInternalDescription, ViewCourseInternalDescriptionAsLearner)
 
 anonymous_role = role_registry.anonymous_role
