@@ -18,7 +18,7 @@ from django.views.generic.base import TemplateResponseMixin
 from api.views import APIBaseView
 from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
 from auth.models import ConnectedAuthService
-from core.http import HttpRequest
+from core.http import AuthenticatedHttpRequest, HttpRequest
 from core.utils import bucketize, normalize_yandex_login
 from courses.constants import AssignmentFormat, SemesterTypes
 from courses.models import Assignment, Course, Semester
@@ -271,17 +271,20 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
 
 
 class ImportAssignmentScoresBaseView(PermissionRequiredMixin, generic.View):
+    course: Course
     permission_required = EditGradebook.name
 
-    def setup(self, request, *args, **kwargs):
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
         super().setup(request, *args, **kwargs)
-        course_id = kwargs['course_id']
-        self.course = get_object_or_404(Course.objects.filter(pk=course_id))
+        queryset = (Course.objects
+                    .filter(pk=kwargs['course_id'])
+                    .select_related('meta_course', 'main_branch', 'semester'))
+        self.course = get_object_or_404(queryset)
 
-    def get_permission_object(self):
+    def get_permission_object(self) -> Course:
         return self.course
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: AuthenticatedHttpRequest, *args: Any, **kwargs: Any):
         try:
             assignment_id = int(request.POST['assignment'])
             csv_file = request.FILES['csv_file']
@@ -331,9 +334,9 @@ class ImportAssignmentScoresByYandexLoginView(ImportAssignmentScoresBaseView):
     def _import_scores(self, assignment, csv_file):
         with_yandex_login = get_course_students_by_yandex_login(assignment.course_id)
         return assignment_import_scores_from_csv(assignment, csv_file,
-                                                 required_headers=['yandex_login', 'score'],
+                                                 required_headers=['login', 'score'],
                                                  enrolled_students=with_yandex_login,
-                                                 lookup_column_name='yandex_login',
+                                                 lookup_column_name='login',
                                                  transform=normalize_yandex_login)
 
 

@@ -29,8 +29,9 @@ from grading.tests.factories import CheckerFactory
 from learning.gradebook import (
     BaseGradebookForm, GradeBookFilterForm, GradeBookFormFactory, gradebook_data
 )
-from learning.gradebook.services import get_course_students_by_stepik_id, \
-    assignment_import_scores_from_csv
+from learning.gradebook.services import (
+    assignment_import_scores_from_csv, get_course_students_by_stepik_id
+)
 from learning.models import Enrollment, StudentAssignment
 from learning.permissions import EditGradebook, ViewGradebook
 from learning.settings import Branches, GradeTypes, StudentStatuses
@@ -736,7 +737,7 @@ header1,header2,score
     assert messages[0].level == messages_constants.ERROR
     #
     csv_data = b"""
-yandex_login,header2,score
+login,header2,score
 yandex-login1,1,10
 YANDEX-login2,2,20
 ,3,30
