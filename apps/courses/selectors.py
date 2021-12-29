@@ -92,11 +92,11 @@ def assignments_list(*, filters: Optional[Dict[str, Any]] = None,
 class BasePersonalAssignmentFilter(FilterSet):
     # FIXME: right now this filter does not validate anything and expects valid array
     assignments = Filter(field_name='assignment__id', lookup_expr='in')
-    assignment__course = NumberFilter(field_name='assignment__course', lookup_expr='exact')
+    course = NumberFilter(field_name='assignment__course', lookup_expr='exact')
 
     class Meta:
         model = StudentAssignment
-        fields = ('assignments', 'assignment__course')
+        fields = ('assignments', 'course')
 
 
 def personal_assignments_list(*, filters: Optional[Dict[str, Any]] = None,
@@ -113,7 +113,7 @@ def personal_assignments_list(*, filters: Optional[Dict[str, Any]] = None,
 def course_personal_assignments(*, course: Course, filters: Optional[Dict[str, Any]] = None,
                                 filter_class: Optional[FilterSet] = None) -> StudentAssignmentQuerySet:
     filters = filters or {}
-    filters.update({'assignment__course': course.pk})
+    filters.update({'course': course.pk})
     prefetch_assignments = Prefetch('assignment',
                                     queryset=(Assignment.objects
                                               .filter(course=course)
