@@ -20,7 +20,9 @@ from core.urls import reverse
 from courses.admin import AssignmentAdmin
 from courses.constants import AssigneeMode, AssignmentFormat
 from courses.models import Assignment, CourseTeacher
-from courses.tests.factories import AssignmentFactory, CourseFactory, CourseNewsFactory
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseNewsFactory, CourseTeacherFactory
+)
 from learning.models import AssignmentNotification, CourseNewsNotification
 from learning.services.enrollment_service import (
     EnrollmentService, is_course_failed_by_student
@@ -249,12 +251,9 @@ def test_assignment_setup_assignees_admin_form(client):
 
 @pytest.mark.django_db
 def test_assignment_submission_notifications_for_teacher(client):
-    t1, t2, t3, t4 = TeacherFactory.create_batch(4)
-    course = CourseFactory(teachers=[t1, t2, t3, t4])
-    for ct in CourseTeacher.objects.filter(course=course):
-        ct.roles = CourseTeacher.roles.reviewer
-        ct.save()
-    course_teacher1 = CourseTeacher.objects.get(course=course, teacher=t1)
+    course = CourseFactory()
+    course_teacher1, *rest_course_teachers = CourseTeacherFactory.create_batch(4,
+        course=course, roles=CourseTeacher.roles.reviewer)
     course_teacher1.notify_by_default = False
     course_teacher1.save()
     # Leave a comment from student
@@ -262,17 +261,17 @@ def test_assignment_submission_notifications_for_teacher(client):
     assert not is_course_failed_by_student(course, student)
     client.login(student)
     assert Assignment.objects.count() == 0
-    sa = StudentAssignmentFactory(student=student, assignment__course=course)
-    assignment = sa.assignment
-    assignment.assignee_mode = AssigneeMode.MANUAL
-    assignment.save()
+    assignment = AssignmentFactory(course=course,
+                                   assignee_mode=AssigneeMode.MANUAL,
+                                   assignees=rest_course_teachers)
+    student_assignment = StudentAssignmentFactory(student=student, assignment=assignment)
     student_create_comment_url = reverse("study:assignment_comment_create",
-                                         kwargs={"pk": sa.pk})
+                                         kwargs={"pk": student_assignment.pk})
     client.post(student_create_comment_url,
                 {'comment-text': 'test first comment'})
     notifications = [n.user.pk for n in AssignmentNotification.objects.all()]
     assert len(notifications) == 3
-    assert t1.pk not in notifications
+    assert course_teacher1.teacher_id not in notifications
 
 
 @pytest.mark.django_db

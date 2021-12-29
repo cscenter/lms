@@ -218,8 +218,6 @@ class AssignmentFactory(factory.django.DjangoModelFactory):
         if extracted:
             for co_teacher in extracted:
                 self.assignees.add(co_teacher)
-        else:
-            AssignmentService.setup_assignees(self)
 
 
 class AssignmentAttachmentFactory(factory.django.DjangoModelFactory):

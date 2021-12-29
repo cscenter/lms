@@ -13,7 +13,9 @@ from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.constants import AssigneeMode, AssignmentFormat
 from courses.models import CourseTeacher
-from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
+from courses.tests.factories import (
+    AssignmentFactory, CourseFactory, CourseTeacherFactory, SemesterFactory
+)
 from courses.utils import get_current_term_pair
 from grading.constants import CheckingSystemTypes, YandexCompilers
 from grading.tests.factories import CheckerFactory
@@ -128,24 +130,21 @@ def test_student_assignment_detail_view_comment(client):
 def test_new_comment_on_assignment_page(client, assert_redirect):
     semester = SemesterFactory.create_current()
     student_profile = StudentProfileFactory()
-    teacher = TeacherFactory()
-    teacher2 = TeacherFactory()
-    course = CourseFactory(main_branch=student_profile.branch, semester=semester,
-                           teachers=[teacher, teacher2])
-    for ct in CourseTeacher.objects.filter(course=course):
-        ct.roles = CourseTeacher.roles.reviewer
-        ct.save()
+    course = CourseFactory(main_branch=student_profile.branch, semester=semester)
+    course_teacher1, course_teacher2 = CourseTeacherFactory.create_batch(2, course=course,
+                                                        roles=CourseTeacher.roles.reviewer)
     EnrollmentFactory(student_profile=student_profile,
                       student=student_profile.user,
                       course=course)
-    assignment = AssignmentFactory(course=course, assignee_mode=AssigneeMode.MANUAL)
-    a_s = (StudentAssignment.objects
-           .filter(assignment=assignment, student=student_profile.user)
-           .get())
+    assignment = AssignmentFactory(course=course, assignee_mode=AssigneeMode.MANUAL,
+                                   assignees=[course_teacher1, course_teacher2])
+    personal_assignment = (StudentAssignment.objects
+                           .filter(assignment=assignment, student=student_profile.user)
+                           .get())
     client.login(student_profile.user)
-    detail_url = a_s.get_student_url()
+    detail_url = personal_assignment.get_student_url()
     create_comment_url = reverse("study:assignment_comment_create",
-                                 kwargs={"pk": a_s.pk})
+                                 kwargs={"pk": personal_assignment.pk})
     recipients_count = 2
     assert AssignmentNotification.objects.count() == 1
     n = AssignmentNotification.objects.first()
@@ -184,8 +183,8 @@ def test_new_comment_on_assignment_page(client, assert_redirect):
     # Publish another comment. This one should override draft comment.
     # But first create draft comment from another teacher and make sure
     # it won't be published on publishing new comment from the first teacher
-    teacher2_draft = AssignmentCommentFactory(author=teacher2,
-                                              student_assignment=a_s,
+    teacher2_draft = AssignmentCommentFactory(author=course_teacher2.teacher,
+                                              student_assignment=personal_assignment,
                                               is_published=False)
     assert AssignmentComment.published.count() == 1
     draft = AssignmentComment.objects.get(text=form_data['comment-text'])
