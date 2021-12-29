@@ -208,48 +208,6 @@ def test_assignment_setup_assignees_public_form(client):
 
 
 @pytest.mark.django_db
-def test_assignment_setup_assignees_admin_form(client):
-    """
-    Make sure `Assignment.assignees` are prepopulated by the course
-    homework reviewers
-    """
-    admin = CuratorFactory()
-    client.login(admin)
-    from django.contrib.admin.sites import AdminSite
-    t1, t2, t3, t4 = TeacherFactory.create_batch(4)
-    co = CourseFactory.create(teachers=[t1, t2, t3, t4])
-    for ct in CourseTeacher.objects.filter(course=co):
-        ct.roles = CourseTeacher.roles.reviewer
-        ct.save()
-    ma = AssignmentAdmin(Assignment, AdminSite())
-    a = AssignmentFactory.build()
-    # Send data with empty assignees list
-    post_data = {
-        'course': co.pk,
-        'title': a.title,
-        'assignee_mode': AssigneeMode.STUDENT_GROUP_DEFAULT,
-        'submission_type': AssignmentFormat.ONLINE,
-        'text': a.text,
-        'passing_score': 0,
-        'maximum_score': 5,
-        'weight': 1,
-        'time_zone': 'Europe/Moscow',
-        'deadline_at_0': str(a.deadline_at.date()),
-        'deadline_at_1': '00:00'
-    }
-    response = client.post(reverse('admin:courses_assignment_add'), post_data)
-    assert (Assignment.objects.count() == 1)
-    assert len(Assignment.objects.order_by('id').all()[0].assignees.all()) == 4
-    # Specifying teacher list on creation doesn't affect notification settings
-    co_t1, co_t2, co_t3, co_t4 = CourseTeacher.objects.filter(course=co).all()
-    post_data['assignees'] = [co_t1.pk, co_t2.pk]
-    response = client.post(reverse('admin:courses_assignment_add'), post_data)
-    assert (Assignment.objects.count() == 2)
-    assert len(Assignment.objects.order_by('id').all()[0].assignees.all()) == 4
-    assert len(Assignment.objects.order_by('id').all()[1].assignees.all()) == 4
-
-
-@pytest.mark.django_db
 def test_assignment_submission_notifications_for_teacher(client):
     course = CourseFactory()
     course_teacher1, *rest_course_teachers = CourseTeacherFactory.create_batch(4,

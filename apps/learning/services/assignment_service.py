@@ -24,26 +24,14 @@ class AssignmentService:
                 (AssignmentAttachment.objects
                  .create(assignment=assignment, attachment=attachment))
 
-    # TODO: remove
-    @staticmethod
-    def setup_assignees(assignment: Assignment):
-        """
-        Copy course homework reviewers to the assignment settings for further
-        customization.
-        """
-        course_reviewers = assignment.course.course_teachers.filter(
-            roles=CourseTeacher.roles.reviewer
-        )
-        assignment.assignees.add(*course_reviewers)
-
     @staticmethod
     def set_responsible_teachers(assignment: Assignment, *, teachers: List[int]) -> None:
         assignment.assignees.clear()
         assignment.assignees.add(*teachers)
 
     @classmethod
-    def recreate_student_assignment(cls, assignment: Assignment,
-                                    enrollment: Enrollment) -> Optional[StudentAssignment]:
+    def create_or_restore_student_assignment(cls, assignment: Assignment,
+                                             enrollment: Enrollment) -> Optional[StudentAssignment]:
         """
         Creates or restores record for tracking student progress on assignment
         if the assignment is not restricted for the student's group.

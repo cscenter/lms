@@ -138,7 +138,7 @@ def update_course_learners_count(course_id: int) -> None:
 def recreate_assignments_for_student(enrollment: Enrollment) -> None:
     """Resets progress for existing and creates missing assignments"""
     for a in enrollment.course.assignment_set.all():
-        AssignmentService.recreate_student_assignment(a, enrollment)
+        AssignmentService.create_or_restore_student_assignment(a, enrollment)
 
 
 def is_course_failed_by_student(course: Course, student: User,

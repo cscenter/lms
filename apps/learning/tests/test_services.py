@@ -151,14 +151,14 @@ def test_assignment_service_bulk_create_personal_assignments_notifications(setti
     assert AssignmentNotification.objects.count() == 3
     # 1 already exist
     StudentAssignment.objects.all().delete()
-    AssignmentService.recreate_student_assignment(assignment, enrollment1)
+    AssignmentService.create_or_restore_student_assignment(assignment, enrollment1)
     AssignmentNotification.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment)
     assert AssignmentNotification.objects.count() == 2
     # 1 exist, 1 soft deleted
     StudentAssignment.objects.all().delete()
-    AssignmentService.recreate_student_assignment(assignment, enrollment1)
-    student_assignment2 = AssignmentService.recreate_student_assignment(assignment, enrollment2)
+    AssignmentService.create_or_restore_student_assignment(assignment, enrollment1)
+    student_assignment2 = AssignmentService.create_or_restore_student_assignment(assignment, enrollment2)
     student_assignment2.delete()
     assert student_assignment2.is_deleted
     AssignmentNotification.objects.all().delete()

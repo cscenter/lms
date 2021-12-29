@@ -245,7 +245,6 @@ class AssignmentAdmin(admin.ModelAdmin):
         created = not change
         if created:
             AssignmentService.bulk_create_student_assignments(form.instance)
-            AssignmentService.setup_assignees(form.instance)
 
     @meta(_("Created"), admin_order_field='created')
     def created_utc(self, obj):
