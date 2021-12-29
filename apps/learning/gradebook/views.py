@@ -30,12 +30,10 @@ from grading.api.yandex_contest import (
 from learning.gradebook import (
     BaseGradebookForm, GradeBookFilterForm, GradeBookFormFactory, gradebook_data
 )
-from learning.gradebook.imports import (
-    get_course_students, get_course_students_by_stepik_id,
-    get_course_students_by_yandex_login, import_assignment_scores
-)
 from learning.gradebook.services import (
-    assignment_import_scores_from_yandex_contest, get_assignment_checker
+    assignment_import_scores_from_csv, assignment_import_scores_from_yandex_contest,
+    get_assignment_checker, get_course_students, get_course_students_by_stepik_id,
+    get_course_students_by_yandex_login
 )
 from learning.models import StudentGroup
 from learning.permissions import EditGradebook, ViewGradebook
@@ -322,31 +320,30 @@ class ImportAssignmentScoresBaseView(PermissionRequiredMixin, generic.View):
 
 class ImportAssignmentScoresByStepikIDView(ImportAssignmentScoresBaseView):
     def _import_scores(self, assignment, csv_file):
-        csv_file = self.request.FILES['csv_file']
         with_stepik_id = get_course_students_by_stepik_id(assignment.course_id)
-        return import_assignment_scores(assignment, csv_file,
-                                        required_headers=['stepic_id', 'score'],
-                                        enrolled_students=with_stepik_id,
-                                        lookup_column_name='stepic_id')
+        return assignment_import_scores_from_csv(assignment, csv_file,
+                                                 required_headers=['stepic_id', 'score'],
+                                                 enrolled_students=with_stepik_id,
+                                                 lookup_column_name='stepic_id')
 
 
 class ImportAssignmentScoresByYandexLoginView(ImportAssignmentScoresBaseView):
     def _import_scores(self, assignment, csv_file):
         with_yandex_login = get_course_students_by_yandex_login(assignment.course_id)
-        return import_assignment_scores(assignment, csv_file,
-                                        required_headers=['yandex_login', 'score'],
-                                        enrolled_students=with_yandex_login,
-                                        lookup_column_name='yandex_login',
-                                        transform=normalize_yandex_login)
+        return assignment_import_scores_from_csv(assignment, csv_file,
+                                                 required_headers=['yandex_login', 'score'],
+                                                 enrolled_students=with_yandex_login,
+                                                 lookup_column_name='yandex_login',
+                                                 transform=normalize_yandex_login)
 
 
 class ImportAssignmentScoresByEnrollmentIDView(ImportAssignmentScoresBaseView):
     def _import_scores(self, assignment, csv_file):
         course_students = get_course_students(assignment.course_id)
-        return import_assignment_scores(assignment, csv_file,
-                                        required_headers=['id', 'score'],
-                                        enrolled_students=course_students,
-                                        lookup_column_name='id')
+        return assignment_import_scores_from_csv(assignment, csv_file,
+                                                 required_headers=['id', 'score'],
+                                                 enrolled_students=course_students,
+                                                 lookup_column_name='id')
 
 
 class GradebookImportScoresFromYandexContest(RolePermissionRequiredMixin, APIBaseView):

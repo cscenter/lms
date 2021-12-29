@@ -29,9 +29,8 @@ from grading.tests.factories import CheckerFactory
 from learning.gradebook import (
     BaseGradebookForm, GradeBookFilterForm, GradeBookFormFactory, gradebook_data
 )
-from learning.gradebook.imports import (
-    get_course_students_by_stepik_id, import_assignment_scores
-)
+from learning.gradebook.services import get_course_students_by_stepik_id, \
+    assignment_import_scores_from_csv
 from learning.models import Enrollment, StudentAssignment
 from learning.permissions import EditGradebook, ViewGradebook
 from learning.settings import Branches, GradeTypes, StudentStatuses
@@ -640,10 +639,10 @@ def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
                                                  expected_score))
         csv_file = BytesIO(csv_input)
         with_stepik_id = get_course_students_by_stepik_id(assignment.course_id)
-        import_assignment_scores(assignment, csv_file,
-                                 required_headers=['stepic_id', 'score'],
-                                 enrolled_students=with_stepik_id,
-                                 lookup_column_name='stepic_id')
+        assignment_import_scores_from_csv(assignment, csv_file,
+                                          required_headers=['stepic_id', 'score'],
+                                          enrolled_students=with_stepik_id,
+                                          lookup_column_name='stepic_id')
         a_s = StudentAssignment.objects.get(student=student,
                                             assignment=assignment)
         if hasattr(expected_score, "replace"):
