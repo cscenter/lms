@@ -62,12 +62,15 @@ else:
     FILE_UPLOAD_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_PERMISSIONS', default=0o664)
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     MEDIA_ROOT = env.str('DJANGO_PUBLIC_MEDIA_ROOT')
-    # Resolve relative paths as relative to the ROOT_DIR
     if MEDIA_ROOT.startswith('.'):
+        # Relative path must be relative to the ROOT_DIR
         MEDIA_ROOT = str(ROOT_DIR.joinpath(MEDIA_ROOT).resolve())
     MEDIA_URL = '/media/'
     PRIVATE_FILE_STORAGE = 'files.storage.PrivateFileSystemStorage'
     PRIVATE_MEDIA_ROOT = env.str('DJANGO_PRIVATE_MEDIA_ROOT')
+    if PRIVATE_MEDIA_ROOT.startswith('.'):
+        # Relative path must be relative to the ROOT_DIR
+        PRIVATE_MEDIA_ROOT = str(ROOT_DIR.joinpath(PRIVATE_MEDIA_ROOT).resolve())
     PRIVATE_MEDIA_URL = '/media/private/'
 
 # Static Files Settings
