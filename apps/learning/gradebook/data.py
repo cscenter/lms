@@ -66,17 +66,6 @@ class GradebookAssignment:
     assignment: Assignment
 
 
-@dataclass
-class PersonalAssignmentData:
-    assignment: Assignment
-    id: int
-    score: Optional[Decimal]
-    weight_score: Optional[Decimal]
-    teacher_url: str
-    student_id: int
-    state_short: str
-
-
 class GradeBookData:
     # Magic "100" constant - width of assignment column
     ASSIGNMENT_COLUMN_WIDTH = 100
@@ -120,6 +109,12 @@ class GradeBookData:
         max_number = settings.DATA_UPLOAD_MAX_NUMBER_FIELDS
         number_of_fields_is_exceeded = (self.number_of_fields > max_number)
         return len(self.students) > 100 or number_of_fields_is_exceeded
+
+    def get_personal_assignment(self, student_id: int,
+                                assignment_id: int) -> StudentAssignment:
+        student_index = self.students[student_id].index
+        assignment_index = self.assignments[assignment_id].index
+        return self.student_assignments[student_index][assignment_index]
 
 
 def gradebook_data(course: Course, student_group: Optional[int] = None) -> GradeBookData:
@@ -211,16 +206,7 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
         student_index = enrolled_students[student_id].index
         gradebook_assignment = assignments[student_assignment.assignment_id]
         student_assignment.assignment = gradebook_assignment.assignment
-        data = PersonalAssignmentData(
-            assignment=gradebook_assignment.assignment,
-            id=student_assignment.id,
-            score=student_assignment.score,
-            weight_score=student_assignment.weight_score,
-            teacher_url=student_assignment.get_teacher_url(),
-            student_id=student_assignment.student_id,
-            state_short=student_assignment.state_short
-        )
-        student_assignments[student_index][gradebook_assignment.index] = data
+        student_assignments[student_index][gradebook_assignment.index] = student_assignment
     # Aggregate student total score
     for student_id in enrolled_students:
         gradebook_student = enrolled_students[student_id]

@@ -401,7 +401,7 @@ def test_save_gradebook_form(client):
     assert form.is_valid()
     assert len(form.changed_data) == 1
     assert field_name in form.changed_data
-    conflicts = form.save()
+    conflicts = form.save(data, changed_by=teacher)
     assert not conflicts
     e1.refresh_from_db()
     e2.refresh_from_db()
@@ -424,7 +424,7 @@ def test_save_gradebook_form(client):
     form_cls = GradeBookFormFactory.build_form_class(gradebook_data(co), is_readonly=False)
     form = form_cls(data=form_data)
     assert form.is_valid()
-    form.save()
+    form.save(data, changed_by=teacher)
     sa11.refresh_from_db(), sa12.refresh_from_db()
     assert sa11.score == 2
     assert sa12.score is None

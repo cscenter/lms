@@ -99,7 +99,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.data = None
+        self.gradebook = None
         self.is_for_staff = kwargs.get('is_for_staff', False)
 
     def get(self, request, *args, **kwargs):
@@ -126,18 +126,18 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
 
     def get_form(self, user: User, data=None, files=None,
                  student_group: Optional[int] = None, **kwargs):
-        self.data = gradebook_data(self.course, student_group)
+        self.gradebook = gradebook_data(self.course, student_group)
         can_edit_gradebook = user.has_perm(EditGradebook.name, self.course)
-        cls = GradeBookFormFactory.build_form_class(self.data, is_readonly=not can_edit_gradebook)
+        cls = GradeBookFormFactory.build_form_class(self.gradebook, is_readonly=not can_edit_gradebook)
         # Set initial data for all GET-requests
         if not data and "initial" not in kwargs:
-            initial = GradeBookFormFactory.transform_to_initial(self.data)
+            initial = GradeBookFormFactory.transform_to_initial(self.gradebook)
             kwargs["initial"] = initial
         return cls(data=data, files=files, **kwargs)
 
     def form_valid(self, form: BaseGradebookForm,
                    student_group: Optional[StudentGroup] = None):
-        conflicts_on_save = form.save()
+        conflicts_on_save = form.save(self.gradebook, changed_by=self.request.user)
         if conflicts_on_save:
             msg = _("<b>Внимание, часть данных не была сохранена!</b><br>"
                     "В процессе редактирования данные были "
@@ -169,8 +169,8 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
         student_group = None
         if filter_form.is_valid():
             student_group = filter_form.cleaned_data['student_group']
-        self.data = gradebook_data(self.course, student_group=student_group)
-        current_data = GradeBookFormFactory.transform_to_initial(self.data)
+        self.gradebook = gradebook_data(self.course, student_group=student_group)
+        current_data = GradeBookFormFactory.transform_to_initial(self.gradebook)
         data = form.data.copy()
         for k, v in current_data.items():
             if k not in data:
@@ -186,7 +186,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
             'form': form,
             'filter_form': filter_form,
             "StudentTypes": StudentTypes,
-            "gradebook": self.data,
+            "gradebook": self.gradebook,
             'AssignmentFormat': AssignmentFormat
         }
         # TODO: Move to the model

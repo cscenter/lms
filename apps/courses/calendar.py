@@ -3,7 +3,7 @@ from abc import ABC
 from calendar import Calendar
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Callable, Iterable, List, NewType
+from typing import Any, Callable, Iterable, List, NewType, Optional
 
 import attr
 from dateutil.relativedelta import relativedelta
@@ -71,7 +71,7 @@ class CalendarEventFactory:
 
     @classmethod
     def _from_course_class(cls, course_class: CourseClass, time_zone: Timezone,
-                           url_builder: Callable = None, **kwargs):
+                           url_builder: Optional[Callable] = None, **kwargs: Any):
         if url_builder:
             url = url_builder(course_class)
         else:

@@ -10,6 +10,7 @@ from django.utils.encoding import force_str
 from django.utils.translation import gettext as _
 
 from core.forms import ScoreField
+from courses.models import Assignment
 from learning.gradebook.data import GradeBookData
 from learning.models import Course, Enrollment, StudentAssignment
 
@@ -17,6 +18,11 @@ __all__ = ('ConflictError', 'BaseGradebookForm', 'AssignmentScore',
            'EnrollmentFinalGrade', 'GradeBookFormFactory', 'GradeBookFilterForm')
 
 from learning.services import StudentGroupService
+from learning.services.personal_assignment_service import (
+    update_personal_assignment_score
+)
+from learning.settings import AssignmentScoreUpdateSource
+from users.models import User
 
 ConflictError = namedtuple('ConflictError', ['field_name', 'unsaved_value'])
 
@@ -53,37 +59,36 @@ class BaseGradebookForm(forms.Form):
             initial_value = None
         return initial_value
 
-    def save(self) -> List[ConflictError]:
-        final_grade_updated = False
+    def save(self, gradebook: GradeBookData, changed_by: User) -> List[ConflictError]:
         errors = []
         for field_name in self.changed_data:
             if field_name.startswith(self.ASSIGNMENT_SCORE_PREFIX):
-                current_value = self._get_initial_value(field_name)
-                new_value = self.cleaned_data[field_name]
-                field = self.fields[field_name]
-                # This is not a conflict situation when new value already in db
-                updated = (StudentAssignment.objects
-                           .filter(pk=field.student_assignment_id)
-                           .filter(Q(score=current_value) | Q(score=new_value))
-                           .update(score=new_value))
+                field: AssignmentScore = self.fields[field_name]
+                student_assignment = gradebook.get_personal_assignment(field.student_id,
+                                                                       field.assignment_id)
+                score_old = self._get_initial_value(field_name)
+                score_new = self.cleaned_data[field_name]
+                updated, _ = update_personal_assignment_score(student_assignment=student_assignment,
+                                                              changed_by=changed_by,
+                                                              score_old=score_old,
+                                                              score_new=score_new,
+                                                              source=AssignmentScoreUpdateSource.FORM_GRADEBOOK)
                 if not updated:
                     ce = ConflictError(field_name=field_name,
-                                       unsaved_value=new_value)
+                                       unsaved_value=score_new)
                     errors.append(ce)
             elif field_name.startswith(self.FINAL_GRADE_PREFIX):
-                current_value = self._get_initial_value(field_name)
-                new_value = self.cleaned_data[field_name]
-                field = self.fields[field_name]
+                grade_old = self._get_initial_value(field_name)
+                grade_new = self.cleaned_data[field_name]
+                field: EnrollmentFinalGrade = self.fields[field_name]
                 updated = (Enrollment.objects
                            .filter(pk=field.enrollment_id)
-                           .filter(Q(grade=current_value) | Q(grade=new_value))
-                           .update(grade=new_value))
+                           .filter(Q(grade=grade_old) | Q(grade=grade_new))
+                           .update(grade=grade_new))
                 if not updated:
                     ce = ConflictError(field_name=field_name,
-                                       unsaved_value=new_value)
+                                       unsaved_value=grade_new)
                     errors.append(ce)
-                else:
-                    final_grade_updated = True
         self._conflicts = bool(errors)
         return errors
 
@@ -131,8 +136,9 @@ class CustomBoundField(BoundField):
 
 
 class AssignmentScore(ScoreField):
-    def __init__(self, assignment, submission):
-        score = submission.score
+    def __init__(self, assignment: Assignment,
+                 student_assignment: StudentAssignment) -> None:
+        score = student_assignment.score
         widget = forms.TextInput(attrs={
             'class': 'cell __assignment __input',
             'max': assignment.maximum_score,
@@ -144,7 +150,9 @@ class AssignmentScore(ScoreField):
                          show_hidden_initial=True,
                          widget=widget)
         # Used to simplify `form.save()` method
-        self.student_assignment_id = submission.id
+        self.student_assignment_id = student_assignment.id
+        self.student_id = student_assignment.student_id
+        self.assignment_id = student_assignment.assignment.id
         self.submission_score = score
         self.hidden_initial_value = self.submission_score
 
