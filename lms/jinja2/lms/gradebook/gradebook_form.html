@@ -138,14 +138,14 @@
                     {% if gradebook.assignments %}
                       <div class="cell __total_score {{ loop.cycle('', 'even') }}">{{ gradebook_student.total_score }}</div>
                     {% endif %}
-                    {% for student_progress in gradebook.submissions[gradebook_student.index] %}
-                      {% if student_progress %}
-                        {% if student_progress.assignment.is_online or form.is_score_readonly%}
+                    {% for personal_assignment_data in gradebook.student_assignments[gradebook_student.index] %}
+                      {% if personal_assignment_data %}
+                        {% if personal_assignment_data.assignment.is_online or form.is_score_readonly%}
                           <div class="cell __assignment __score">
-                            <a href="{{ student_progress.get_teacher_url() }}">{{ student_progress.get_state() }}</a>
+                            <a href="{{ personal_assignment_data.teacher_url }}">{{ personal_assignment_data.state_short }}</a>
                           </div>
                         {% else %}
-                          {{ form.get_assignment_widget(student_progress.id) }}
+                          {{ form.get_assignment_widget(personal_assignment_data.id) }}
                         {% endif %}
                       {% else %}
                         <div class="cell __assignment __expelled"></div>

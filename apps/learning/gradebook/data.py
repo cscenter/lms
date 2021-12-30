@@ -14,8 +14,7 @@ from courses.models import Assignment, Course
 from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.settings import GradeTypes
 
-__all__ = ('GradebookStudent', 'StudentProgress', 'GradeBookData',
-           'gradebook_data')
+__all__ = ('GradebookStudent', 'GradeBookData', 'gradebook_data')
 
 
 class GradebookStudent:
@@ -67,42 +66,15 @@ class GradebookAssignment:
     assignment: Assignment
 
 
-class StudentProgress:
-    def __init__(self, student_assignment: StudentAssignment,
-                 assignment: Assignment):
-        student_assignment.assignment = assignment
-        self._student_assignment = student_assignment
-
-    @property
-    def id(self):
-        return self._student_assignment.id
-
-    @property
-    def score(self):
-        return self._student_assignment.score
-
-    @property
-    def weight_score(self):
-        return self._student_assignment.weight_score
-
-    # TODO: remove?
-    @property
-    def assignment_id(self):
-        return self._student_assignment.assignment_id
-
-    @property
-    def assignment(self):
-        return self._student_assignment.assignment
-
-    def get_teacher_url(self):
-        return self._student_assignment.get_teacher_url()
-
-    @property
-    def student_id(self):
-        return self._student_assignment.student_id
-
-    def get_state(self):
-        return self._student_assignment.state_short
+@dataclass
+class PersonalAssignmentData:
+    assignment: Assignment
+    id: int
+    score: Optional[Decimal]
+    weight_score: Optional[Decimal]
+    teacher_url: str
+    student_id: int
+    state_short: str
 
 
 class GradeBookData:
@@ -113,18 +85,18 @@ class GradeBookData:
                  course: Course,
                  students: Dict[int, GradebookStudent],
                  assignments: Dict[int, GradebookAssignment],
-                 submissions,
-                 show_weight=False):
+                 student_assignments: np.ndarray,
+                 show_weight: Optional[bool] = False):
         """
-        X-axis of submissions ndarray is students data.
+        X-axis of student_assignments ndarray is students data.
         We make some assertions on that, but still can fail in case
         of NxN array.
         """
         self.course = course
-        assert submissions.shape == (len(students), len(assignments))
+        assert student_assignments.shape == (len(students), len(assignments))
         self.students = students
         self.assignments = assignments
-        self.submissions = submissions
+        self.student_assignments = student_assignments
         self.show_weight = show_weight
 
     def get_table_width(self):
@@ -168,7 +140,7 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
             1: GradebookAssignment(...)
             ...
         ),
-        submissions = [
+        student_assignments = [
             [
                     {
                         "id" : 1,  # student_assignment_id
@@ -218,15 +190,14 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
     for index, a in enumerate(queryset.iterator()):
         assignments[a.pk] = GradebookAssignment(index, assignment=a)
     # Collect students progress
-    submissions = np.empty((len(enrolled_students), len(assignments)),
-                           dtype=object)
-    queryset = StudentAssignment.objects.filter(assignment__course_id=course.pk)
+    student_assignments = np.empty((len(enrolled_students), len(assignments)),
+                                   dtype=object)
+    filters = [Q(assignment__course_id=course.pk)]
     if student_group is not None:
-        queryset = queryset.filter(
-            Q(assignment__assignmentgroup__group=student_group) |
-            Q(assignment__assignmentgroup__group__isnull=True)
-        )
-    queryset = (queryset
+        filters.append(Q(assignment__assignmentgroup__group=student_group) |
+                       Q(assignment__assignmentgroup__group__isnull=True))
+    queryset = (StudentAssignment.objects
+                .filter(*filters)
                 .only("pk",
                       "score",
                       "meta",
@@ -239,14 +210,23 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
             continue
         student_index = enrolled_students[student_id].index
         gradebook_assignment = assignments[student_assignment.assignment_id]
-        submissions[student_index][gradebook_assignment.index] = StudentProgress(
-            student_assignment, gradebook_assignment.assignment)
+        student_assignment.assignment = gradebook_assignment.assignment
+        data = PersonalAssignmentData(
+            assignment=gradebook_assignment.assignment,
+            id=student_assignment.id,
+            score=student_assignment.score,
+            weight_score=student_assignment.weight_score,
+            teacher_url=student_assignment.get_teacher_url(),
+            student_id=student_assignment.student_id,
+            state_short=student_assignment.state_short
+        )
+        student_assignments[student_index][gradebook_assignment.index] = data
     # Aggregate student total score
     for student_id in enrolled_students:
         gradebook_student = enrolled_students[student_id]
-        student_submissions = submissions[gradebook_student.index]
+        student_progress = student_assignments[gradebook_student.index]
         total_score = Decimal(0)
-        for s in student_submissions:
+        for s in student_progress:
             if s is not None and s.weight_score is not None:
                 total_score += s.weight_score
         total_score = normalize_score(total_score)
@@ -255,5 +235,5 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
     return GradeBookData(course=course,
                          students=enrolled_students,
                          assignments=assignments,
-                         submissions=submissions,
+                         student_assignments=student_assignments,
                          show_weight=show_weight)

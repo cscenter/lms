@@ -171,7 +171,7 @@ def test_nonempty_gradebook_view(client):
         assert smart_bytes(as_.title) in response.content
         for s in students:
             a_s = StudentAssignment.objects.get(student=s, assignment=as_)
-            assert response.context_data['form'].GRADE_PREFIX + str(a_s.pk) in response.context_data['form'].fields
+            assert response.context_data['form'].ASSIGNMENT_SCORE_PREFIX + str(a_s.pk) in response.context_data['form'].fields
 
 
 @pytest.mark.django_db
@@ -195,7 +195,7 @@ def test_save_gradebook(client, assert_redirect):
     for submission, grade in pairs:
         enrollment = Enrollment.active.get(student=submission.student,
                                            course=course)
-        field_name = BaseGradebookForm.GRADE_PREFIX + str(submission.pk)
+        field_name = BaseGradebookForm.ASSIGNMENT_SCORE_PREFIX + str(submission.pk)
         form[field_name] = grade
         field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(enrollment.pk)
         form["initial-" + field_name] = GradeTypes.NOT_GRADED
@@ -250,10 +250,10 @@ def test_gradebook_data(settings):
     data = gradebook_data(co)
     s3_index = 0
     a2_index = 2
-    s3_a2_progress = data.submissions[s3_index][a2_index]
+    s3_a2_progress = data.student_assignments[s3_index][a2_index]
     assert s3_a2_progress is not None
     assert s3_a2_progress.score == 3
-    for row in data.submissions:
+    for row in data.student_assignments:
         for cell in row:
             assert cell is not None
     # Check total score
@@ -271,12 +271,12 @@ def test_gradebook_data(settings):
     data = gradebook_data(co)
     s5_index = 4
     new_a_index = 3
-    for x, row in enumerate(data.submissions):
+    for x, row in enumerate(data.student_assignments):
         for y, cell in enumerate(row):
             if x == s5_index and y == new_a_index:
-                assert data.submissions[x][y] is None
+                assert data.student_assignments[x][y] is None
             else:
-                assert data.submissions[x][y] is not None
+                assert data.student_assignments[x][y] is not None
 
 
 @pytest.mark.django_db
@@ -286,14 +286,13 @@ def test_empty_gradebook_data():
     data = gradebook_data(co)
     assert len(data.assignments) == 0
     assert len(data.students) == 0
-    assert len(data.submissions) == 0
+    assert len(data.student_assignments) == 0
     e1, e2, e3, e4, e5 = EnrollmentFactory.create_batch(5, course=co)
     data = gradebook_data(co)
     assert len(data.assignments) == 0
     assert len(data.students) == 5
-    assert len(data.submissions) == 5
-    s1_submissions = data.submissions[0]
-    assert len(s1_submissions) == 0
+    assert len(data.student_assignments) == 5
+    assert len(data.student_assignments[0]) == 0
 
 
 @pytest.mark.django_db
@@ -411,7 +410,7 @@ def test_save_gradebook_form(client):
     # Now change one of submission grade
     sa11 = StudentAssignment.objects.get(student_id=e1.student_id, assignment=a1)
     sa12 = StudentAssignment.objects.get(student_id=e1.student_id, assignment=a2)
-    field_name = BaseGradebookForm.GRADE_PREFIX + str(sa11.pk)
+    field_name = BaseGradebookForm.ASSIGNMENT_SCORE_PREFIX + str(sa11.pk)
     form_data = {
         field_name: -5,  # invalid value
         # Empty value should be discarded
@@ -446,7 +445,7 @@ def test_save_gradebook_l10n(client):
                           submission_type=AssignmentFormat.NO_SUBMIT,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
-    field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
+    field_name = BaseGradebookForm.ASSIGNMENT_SCORE_PREFIX + str(sa.pk)
     data = gradebook_data(co)
     form_cls = GradeBookFormFactory.build_form_class(data, is_readonly=False)
     form = form_cls(data={field_name: 11})
@@ -472,7 +471,7 @@ def test_save_gradebook_less_than_passing_score(client):
                           submission_type=AssignmentFormat.NO_SUBMIT,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
-    field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
+    field_name = BaseGradebookForm.ASSIGNMENT_SCORE_PREFIX + str(sa.pk)
     form_data = {
         field_name: 1,  # value less than passing score
     }
@@ -497,7 +496,7 @@ def test_gradebook_view_form_invalid(client):
     sa.score = 7
     sa.save()
     final_grade_field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(e.pk)
-    field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
+    field_name = BaseGradebookForm.ASSIGNMENT_SCORE_PREFIX + str(sa.pk)
     response = client.get(co.get_gradebook_url())
     assert response.status_code == 200
     form = response.context_data['form']
@@ -526,7 +525,7 @@ def test_gradebook_view_form_conflict(client):
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a, score=None)
     final_grade_field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(e.pk)
-    field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
+    field_name = BaseGradebookForm.ASSIGNMENT_SCORE_PREFIX + str(sa.pk)
     response = client.get(co.get_gradebook_url())
     assert response.status_code == 200
     form = response.context_data['form']
@@ -1020,7 +1019,7 @@ def test_view_gradebook_filtered_data_editable(client, assert_redirect):
 
     # but after filtering should be editable: students count < 100
     client.login(teacher)
-    field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
+    field_name = BaseGradebookForm.ASSIGNMENT_SCORE_PREFIX + str(sa.pk)
     grade = 3
     form = {
         field_name: grade
@@ -1043,7 +1042,7 @@ def test_gradebook_data_filtering_restricted_assignments(client, assert_redirect
     assert data.assignments.get(assignment.pk) is not None
     assert data.assignments.get(assignment_restricted_1.pk) is not None
     assert data.assignments.get(assignment_restricted_2.pk) is None
-    tasks = map(lambda sp: sp.assignment_id, data.submissions[0])
+    tasks = map(lambda sp: sp.assignment.id, data.student_assignments[0])
     assert set(tasks) == {assignment.pk, assignment_restricted_1.pk}
 
     data = gradebook_data(course=course, student_group=group_two.pk)
@@ -1051,7 +1050,7 @@ def test_gradebook_data_filtering_restricted_assignments(client, assert_redirect
     assert data.assignments.get(assignment.pk) is not None
     assert data.assignments.get(assignment_restricted_1.pk) is None
     assert data.assignments.get(assignment_restricted_2.pk) is not None
-    tasks = map(lambda sp: sp.assignment_id, data.submissions[0])
+    tasks = map(lambda sp: sp.assignment.pk, data.student_assignments[0])
     assert set(tasks) == {assignment.pk, assignment_restricted_2.pk}
 
     data = gradebook_data(course=course)
@@ -1059,16 +1058,16 @@ def test_gradebook_data_filtering_restricted_assignments(client, assert_redirect
     assert data.assignments.get(assignment.pk) is not None
     assert data.assignments.get(assignment_restricted_1.pk) is not None
     assert data.assignments.get(assignment_restricted_2.pk) is not None
-    stud_0_subs, stud_1_subs = data.submissions
+    stud_0_subs, stud_1_subs = data.student_assignments
     for submission in stud_0_subs:
         if submission is not None:
-            assert submission.assignment_id in {
+            assert submission.assignment.id in {
                 assignment.pk,
                 assignment_restricted_1.pk
             }
     for submission in stud_1_subs:
         if submission is not None:
-            assert submission.assignment_id in {
+            assert submission.assignment.id in {
                 assignment.pk,
                 assignment_restricted_2.pk
             }
@@ -1128,7 +1127,7 @@ def test_view_gradebook_readonly_without_editgradebook_perm(client):
     gradebook_url = course.get_gradebook_url()
     response = client.get(gradebook_url)
     gradebook = response.context_data['gradebook']
-    assert gradebook.submissions
+    assert gradebook.student_assignments
 
     html = response.content.decode('utf-8')
     soup = BeautifulSoup(html, "html.parser")

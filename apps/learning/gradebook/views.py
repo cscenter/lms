@@ -127,8 +127,8 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
     def get_form(self, user: User, data=None, files=None,
                  student_group: Optional[int] = None, **kwargs):
         self.data = gradebook_data(self.course, student_group)
-        can_edit_gradebook = not user.has_perm(EditGradebook.name, self.course)
-        cls = GradeBookFormFactory.build_form_class(self.data, is_readonly=can_edit_gradebook)
+        can_edit_gradebook = user.has_perm(EditGradebook.name, self.course)
+        cls = GradeBookFormFactory.build_form_class(self.data, is_readonly=not can_edit_gradebook)
         # Set initial data for all GET-requests
         if not data and "initial" not in kwargs:
             initial = GradeBookFormFactory.transform_to_initial(self.data)
@@ -270,7 +270,7 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
                      gradebook_student.final_grade_display,
                      gradebook_student.total_score],
                     [(a.score if a and a.score is not None else '')
-                     for a in gradebook.submissions[gradebook_student.index]]))
+                     for a in gradebook.student_assignments[gradebook_student.index]]))
         return response
 
 

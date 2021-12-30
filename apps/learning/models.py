@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import os.path
+from decimal import Decimal
 from secrets import token_urlsafe
 from typing import Optional
 
@@ -682,7 +683,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             return self.state.label
 
     @property
-    def state_short(self):
+    def state_short(self) -> str:
         if self.score is not None:
             return "{0}/{1}".format(self.score,
                                     self.assignment.maximum_score)
@@ -690,7 +691,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             return self.state.abbr
 
     @property
-    def weight_score(self):
+    def weight_score(self) -> Optional[Decimal]:
         return (self.assignment.weight * self.score) if self.score else None
 
     def get_execution_time_display(self):

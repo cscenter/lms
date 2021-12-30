@@ -22,7 +22,7 @@ ConflictError = namedtuple('ConflictError', ['field_name', 'unsaved_value'])
 
 
 class BaseGradebookForm(forms.Form):
-    GRADE_PREFIX = "sa_"
+    ASSIGNMENT_SCORE_PREFIX = "sa_"
     FINAL_GRADE_PREFIX = "final_grade_"
 
     is_readonly: bool
@@ -35,7 +35,7 @@ class BaseGradebookForm(forms.Form):
         return self[self.FINAL_GRADE_PREFIX + str(enrollment_id)]
 
     def get_assignment_widget(self, student_assignment_id):
-        bound_field = self[self.GRADE_PREFIX + str(student_assignment_id)]
+        bound_field = self[self.ASSIGNMENT_SCORE_PREFIX + str(student_assignment_id)]
         if bound_field.errors:
             bound_field.field.widget.attrs["class"] += " __unsaved"
         return bound_field
@@ -57,7 +57,7 @@ class BaseGradebookForm(forms.Form):
         final_grade_updated = False
         errors = []
         for field_name in self.changed_data:
-            if field_name.startswith(self.GRADE_PREFIX):
+            if field_name.startswith(self.ASSIGNMENT_SCORE_PREFIX):
                 current_value = self._get_initial_value(field_name)
                 new_value = self.cleaned_data[field_name]
                 field = self.fields[field_name]
@@ -198,14 +198,14 @@ class GradeBookFormFactory:
                                         len(gradebook.students) > 100 or
                                         is_number_of_fields_exceeded)
 
-        for student_assignments in gradebook.submissions:
-            for sa in student_assignments:
-                # Student have no submissions after withdrawal
+        for student_progress in gradebook.student_assignments:
+            for sa in student_progress:
+                # Student has no record for tracking progress after withdrawal
                 if not sa:
                     continue
                 assignment = sa.assignment
                 if not (assignment.is_online or is_assignment_score_readonly):
-                    k = BaseGradebookForm.GRADE_PREFIX + str(sa.id)
+                    k = BaseGradebookForm.ASSIGNMENT_SCORE_PREFIX + str(sa.id)
                     fields[k] = AssignmentScore(assignment, sa)
 
         for gs in gradebook.students.values():
@@ -220,15 +220,15 @@ class GradeBookFormFactory:
     @classmethod
     def transform_to_initial(cls, gradebook: GradeBookData):
         initial = {}
-        for student_submissions in gradebook.submissions:
-            for submission in student_submissions:
-                # Student have no submissions after withdrawal
-                if not submission:
+        for student_progress in gradebook.student_assignments:
+            for student_assignment in student_progress:
+                # Student has no record for tracking progress after withdrawal
+                if not student_assignment:
                     continue
-                assignment = submission.assignment
+                assignment = student_assignment.assignment
                 if not assignment.is_online:
-                    k = BaseGradebookForm.GRADE_PREFIX + str(submission.id)
-                    initial[k] = submission.score
+                    k = BaseGradebookForm.ASSIGNMENT_SCORE_PREFIX + str(student_assignment.id)
+                    initial[k] = student_assignment.score
         for gs in gradebook.students.values():
             k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(gs.enrollment_id)
             initial[k] = gs.final_grade
