@@ -60,6 +60,7 @@ LDAP_DB_SUFFIX = env.str('LDAP_DB_SUFFIX', default="dc=review,dc=compscicenter,d
 LDAP_CLIENT_USERNAME = env.str('LDAP_CLIENT_USERNAME', default="admin")
 LDAP_CLIENT_PASSWORD = env.str('LDAP_CLIENT_PASSWORD')
 LDAP_SYNC_PASSWORD = env.bool('LDAP_SYNC_PASSWORD', default=True)
+LDAP_OVER_SSL_ENABLED = env.bool('LDAP_OVER_SSL_ENABLED', default=True)
 GERRIT_API_URI = env.str('GERRIT_API_URI', default="https://review.compscicenter.ru/a/")
 GERRIT_CLIENT_USERNAME = env.str('GERRIT_CLIENT_USERNAME', default="admin")
 GERRIT_CLIENT_HTTP_PASSWORD = env.str('GERRIT_CLIENT_HTTP_PASSWORD')

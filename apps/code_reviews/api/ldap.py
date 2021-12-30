@@ -39,6 +39,9 @@ ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_DEMAND)
 if platform.system() != 'Darwin':
     ldap.set_option(ldap.OPT_X_TLS_CACERTFILE,
                     settings.LDAP_TLS_TRUSTED_CA_CERT_FILE)
+if not getattr(settings, "LDAP_OVER_SSL_ENABLED", True):
+    ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+    ldap.set_option(ldap.OPT_X_TLS_NEWCTX, 0)
 
 
 class LDAPClient:
