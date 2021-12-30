@@ -4,7 +4,9 @@ from django.views.generic.base import RedirectView
 from courses.urls import RE_COURSE_URI
 from learning.api.views import CourseNewsUnreadNotificationsView
 from learning.gradebook import views as gv
-from learning.teaching.api.student_groups import StudentGroupTransferStudentsView
+from learning.teaching.api.views import (
+    PersonalAssignmentScoreAuditLogView, StudentGroupTransferStudentsView
+)
 from learning.teaching.views import (
     CalendarFullView, CalendarPersonalView, CourseListView, GradeBookListView
 )
@@ -39,6 +41,10 @@ student_group_api_patterns = [
 
 import_scores_api_patterns = [
     path('<int:course_id>/import/yandex-contest/', gv.GradebookImportScoresFromYandexContest.as_view(), name='yandex_contest')
+]
+
+scores_api_patterns = [
+    path('personal-assignments/<int:student_assignment_id>/score-audit-log/', PersonalAssignmentScoreAuditLogView.as_view(), name='audit_log')
 ]
 
 urlpatterns = [
@@ -76,5 +82,6 @@ urlpatterns = [
     path('api/', include(([
         path('', include((student_group_api_patterns, 'student-groups'))),
         path('scores/', include((import_scores_api_patterns, 'import-scores'))),
+        path('v1/', include((scores_api_patterns, 'scores'))),
     ], 'api'))),
 ]

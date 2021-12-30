@@ -62,7 +62,7 @@
                   <hr class="deadline">
                 </li>
               {% endif %}
-              <li class="{{ "student" if comment.author == a_s.student else "teacher"}}">
+              <li class="{{ "student" if comment.author == a_s.student else "teacher" }}">
                 <div class="panel bg-gray assignment-submission assignment-{{ comment.type }}"
                      {% if request_user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
                   <div class="panel-body">
@@ -80,7 +80,8 @@
                         {% for submission_attachment in comment.attachments.all() %}
                           {% if submission_attachment.file_name %}
                             <div class="assignment-attachment">
-                              <i class="fa fa-file"></i> <a href="{{ submission_attachment.get_download_url() }}">{{ submission_attachment.file_name }}</a>
+                              <i class="fa fa-file"></i> <a
+                              href="{{ submission_attachment.get_download_url() }}">{{ submission_attachment.file_name }}</a>
                             </div>
                           {% endif %}
                         {% endfor %}
@@ -98,9 +99,11 @@
                   {% if show_panel_footer %}
                     <div class="panel-footer" style="border-top: 1px solid #eee;">
                       <div class="clearfix">
-                      {% if show_execution_time %}<span class="mr-5"><i class="fa fa-clock-o"></i> {{ comment.get_execution_time_display() }}</span>{% endif %}
-                      {% if checker_submission %}
-                          {% if show_execution_time %}<i class="fa fa-tasks"></i> {% endif %}{{ checker_submission.checking_system_choice.label }}
+                        {% if show_execution_time %}
+                          <span class="mr-5"><i class="fa fa-clock-o"></i> {{ comment.get_execution_time_display() }}</span>{% endif %}
+                        {% if checker_submission %}
+                          {% if show_execution_time %}
+                            <i class="fa fa-tasks"></i> {% endif %}{{ checker_submission.checking_system_choice.label }}
                           {% if checker_submission.report_url %}
                             <a class="pull-right nowrap submission-status {{ checker_submission.status_choice.css_class }}" target="_blank"
                                href="{{ checker_submission.report_url }}">{{ checker_submission.verdict_or_status }}</a>
@@ -109,8 +112,9 @@
                             {{ checker_submission.verdict_or_status }}
                           </span>
                           {% endif %}
-                      {% endif %}
-                      {% if can_edit_comment %}<a href="{{ comment.get_update_url() }}" class="__edit pull-right">Редактировать</a>{% endif %}
+                        {% endif %}
+                        {% if can_edit_comment %}
+                          <a href="{{ comment.get_update_url() }}" class="__edit pull-right">Редактировать</a>{% endif %}
                       </div>
                     </div>
                   {% endif %}
@@ -135,10 +139,16 @@
         {% endif %}
 
         <h5 class="assignment">{% trans %}Grade{% endtrans %}</h5>
-        {% if is_actual_teacher %}
+        {% if can_edit_score %}
           {{ crispy(score_form) }}
         {% else %}
           <span class="nowrap badge assignment-status {{ a_s.state.css_class }}">{{ a_s.state_display }}</span>
+        {% endif %}
+
+        {% if show_score_audit_log %}
+          <div class="mt-5">
+            <a href="{{ url("teaching:api:scores:audit_log", student_assignment_id=a_s.pk) }}" class="assignment-score-audit-log"><i class="fa fa-history" aria-hidden="true"></i> История изменений</a>
+          </div>
         {% endif %}
 
         <h5 class="assignment">{% trans %}Student{% endtrans %}</h5>
@@ -202,6 +212,43 @@
     </div>
   </div>
 
+  {% include "lms/layouts/_modal.html" %}
+
+  <script type="text/template" id="assignment-score-audit-log-table">
+    <% if (edges.length > 0) { %>
+    <table class="table table-condensed mb-0">
+      <thead>
+        <tr>
+          <th>Дата&nbsp;изменения</th>
+          <th>Было</th>
+          <th>Стало</th>
+          <th>Кем&nbsp;изменено</th>
+          <th>Источник</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% edges.forEach(function(node) { %>
+          <tr>
+            <td><%-node.createdAt%></td>
+            <td>
+              <% if (node.scoreOld !== null) { %>
+                <%-node.scoreOld%>
+              <% } else { %>
+                &mdash;
+              <% } %>
+            </td>
+            <td><%-node.scoreNew%></td>
+            <td><%-node.author%></td>
+            <td><%-node.source%></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } else { %>
+      Записей в логе не найдено.
+    <% }; %>
+  </script>
+
   <div id="update-comment-model-form" class="modal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
@@ -210,7 +257,7 @@
           <h4 class="modal-title">Редактировать комментарий</h4>
           <p class="text-muted">
             Пожалуйста, не меняйте смысл комментария, т.к. студент потенциально мог его прочитать в текущей версии и
-            начать отвечать.<br/>В таком случае лучше написать новый.
+            начать отвечать.<br />В таком случае лучше написать новый.
           </p>
         </div>
         <div class="inner"></div>
@@ -251,4 +298,5 @@
       </div>
     </div>
   </div>
+
 {% endblock content %}

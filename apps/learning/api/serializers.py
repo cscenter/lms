@@ -12,7 +12,7 @@ from users.models import StudentProfile, User
 class UserSerializer(DynamicFieldsModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'patronymic', 'gender')
+        fields = ('id', 'first_name', 'last_name', 'patronymic', 'gender', 'username')
 
 
 class StudentProfileSerializer(DynamicFieldsModelSerializer):

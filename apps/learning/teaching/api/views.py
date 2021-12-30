@@ -1,5 +1,8 @@
 from typing import Any
 
+from djangorestframework_camel_case.render import (
+    CamelCaseBrowsableAPIRenderer, CamelCaseJSONRenderer
+)
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
@@ -10,10 +13,12 @@ from django.shortcuts import get_object_or_404
 
 from api.views import APIBaseView
 from auth.mixins import RolePermissionRequiredMixin
-from core.http import HttpRequest
-from learning.models import Enrollment, StudentGroup
-from learning.permissions import UpdateStudentGroup
+from core.http import AuthenticatedHttpRequest, HttpRequest
+from learning.api.serializers import UserSerializer
+from learning.models import AssignmentScoreAuditLog, StudentAssignment, StudentGroup
+from learning.permissions import EditStudentAssignment, UpdateStudentGroup
 from learning.services import StudentGroupService
+from learning.settings import AssignmentScoreUpdateSource
 from learning.teaching.utils import get_student_groups_url
 
 
@@ -57,3 +62,36 @@ class StudentGroupTransferStudentsView(RolePermissionRequiredMixin, APIBaseView)
         redirect_to = get_student_groups_url(self.student_group.course)
         return HttpResponseRedirect(redirect_to)
         # return Response(status=status.HTTP_200_OK)
+
+
+class PersonalAssignmentScoreAuditLogView(RolePermissionRequiredMixin, APIBaseView):
+    student_assignment: StudentAssignment
+    permission_classes = [EditStudentAssignment]
+    renderer_classes = (CamelCaseJSONRenderer, CamelCaseBrowsableAPIRenderer)
+
+    class OutputSerializer(serializers.ModelSerializer):
+        changed_by = UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic', 'username'))
+
+        class Meta:
+            model = AssignmentScoreAuditLog
+            fields = ('created_at', 'changed_by', 'score_old', 'score_new', 'source')
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any):
+        super().setup(request, *args, **kwargs)
+        queryset = (StudentAssignment.objects
+                    .filter(pk=kwargs['student_assignment_id'])
+                    .select_related('assignment__course'))
+        self.student_assignment = get_object_or_404(queryset)
+
+    def get_permission_object(self) -> StudentAssignment:
+        return self.student_assignment
+
+    def get(self, request: AuthenticatedHttpRequest, **kwargs) -> Response:
+        audit_log = (AssignmentScoreAuditLog.objects
+                     .filter(student_assignment=self.student_assignment)
+                     .order_by('-created_at'))
+        data = self.OutputSerializer(audit_log, many=True).data
+        return Response(status=status.HTTP_200_OK, data={
+            "edges": data,
+            "sources": {k: v for k, v in AssignmentScoreUpdateSource.choices}
+        })

@@ -56,7 +56,7 @@ def test_assignments_check_queue_view_permissions(client, lms_resolver,
 
 
 @pytest.mark.django_db
-def test_assignments_check_queue_view(settings, client):
+def test_view_assignments_check_queue(settings, client):
     teacher = TeacherFactory(time_zone=pytz.timezone('Asia/Novosibirsk'))
     client.login(teacher)
     url = reverse('teaching:assignments_check_queue')
@@ -100,7 +100,7 @@ def test_assignments_check_queue_view(settings, client):
 
 
 @pytest.mark.django_db
-def test_assignment_detail_view_permissions(client, lms_resolver,
+def test_view_assignment_detail_permissions(client, lms_resolver,
                                             assert_login_redirect):
     from auth.permissions import perm_registry
     teacher = TeacherFactory()
@@ -124,7 +124,7 @@ def test_assignment_detail_view_permissions(client, lms_resolver,
 
 
 @pytest.mark.django_db
-def test_student_assignment_detail_view_permissions(client, lms_resolver,
+def test_view_student_assignment_detail_permissions(client, lms_resolver,
                                                     assert_login_redirect):
     from auth.permissions import perm_registry
     teacher, teacher_other, spectator = TeacherFactory.create_batch(3)

@@ -161,8 +161,9 @@ def get_draft_solution(user: User, student_assignment: StudentAssignment):
 
 
 def update_personal_assignment_score(*, student_assignment: StudentAssignment,
-                                     changed_by: User, score_old: Decimal, score_new: Decimal,
-                                     source: AssignmentScoreUpdateSource) -> Tuple[bool, StudentAssignment]:
+                                     changed_by: User, source: AssignmentScoreUpdateSource,
+                                     score_old: Optional[Decimal],
+                                     score_new: Optional[Decimal]) -> Tuple[bool, StudentAssignment]:
     if score_new == score_old:
         # Consider as a successful update
         return True, student_assignment
@@ -173,7 +174,7 @@ def update_personal_assignment_score(*, student_assignment: StudentAssignment,
 
     updated = (StudentAssignment.objects
                .filter(pk=student_assignment.pk, score=score_old)
-               .update(score=score_new))
+               .update(score=score_new, score_changed=get_now_utc()))
     if not updated:
         return False, student_assignment
 

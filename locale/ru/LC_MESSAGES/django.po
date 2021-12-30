@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-12-29 16:35+0000\n"
-"PO-Revision-Date: 2021-12-29 16:38+0000\n"
-"Last-Translator: Сергей Жеревчук <pacabest@gmail.com>\n"
+"PO-Revision-Date: 2021-12-30 14:49+0000\n"
+"Last-Translator:  Жеревчук <pacabest@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -2225,7 +2225,7 @@ msgstr "Импорт из CSV-файла по stepik.org ID"
 
 #: apps/learning/settings.py:117
 msgid "Imported from CSV by LMS Student ID"
-msgstr "Импорт из CSV-файла по индентификатору студента"
+msgstr "Импорт из CSV-файла по идентификатору студента"
 
 #: apps/learning/settings.py:118
 msgid "Admin Panel"

@@ -1,3 +1,4 @@
+import datetime
 import os.path
 import tempfile
 import zipfile
@@ -37,7 +38,7 @@ from learning.models import (
 )
 from learning.permissions import (
     CreateAssignmentComment, DownloadAssignmentSolutions, EditOwnStudentAssignment,
-    ViewStudentAssignment, ViewStudentAssignmentList
+    EditStudentAssignment, ViewStudentAssignment, ViewStudentAssignmentList
 )
 from learning.selectors import get_teacher_not_spectator_courses
 from learning.services import AssignmentService, StudentGroupService
@@ -275,13 +276,17 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         context['comment_form'].helper.form_action = reverse(
             'teaching:assignment_comment_create',
             kwargs={'pk': a_s.pk})
+        # Some estimates on showing audit log link or not.
+        context['show_score_audit_log'] = (a_s.score is not None or
+                                           a_s.score_changed - a_s.created > datetime.timedelta(seconds=2))
+        context['can_edit_score'] = self.request.user.has_perm(EditStudentAssignment.name, a_s)
         return context
 
     def post(self, request, *args, **kwargs):
         # TODO: rewrite with API call
         if 'grading_form' in request.POST:
             sa = self.student_assignment
-            if not request.user.has_perm(EditOwnStudentAssignment.name, sa):
+            if not request.user.has_perm(EditStudentAssignment.name, sa):
                 raise PermissionDenied
 
             serializer = AssignmentScoreSerializer(data=request.POST,
