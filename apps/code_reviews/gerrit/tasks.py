@@ -120,15 +120,23 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
                      f"username {username} has not been found.")
         return
 
+
     assignment = student_assignment.assignment
     score_old = normalize_code_review_score(score_old, assignment)
     score_new = normalize_code_review_score(score_new, assignment)
+
+    logger.info(f"Posting score {score_old} -> {score_new} for personal "
+                f"assignment {student_assignment.pk}")
 
     score_current = student_assignment.score
     if score_current is not None and score_current != score_old:
         # FIXME: log warning instead after score update logging will be implemented
         raise ValidationError("Abort operation since current score value "
                               "differs from the expected.")
+
+    # Cast Gerrit webhook value to None if it's the first score update.
+    if not score_old and not score_current:
+        score_old = score_current
 
     # Check site permissions of the main branch of the course
     access_groups = changed_by.get_site_groups(assignment.course.main_branch.site_id)
