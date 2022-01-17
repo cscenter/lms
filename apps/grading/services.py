@@ -1,8 +1,11 @@
 from typing import Any, List, Tuple
 
+from core.typings import assert_never
 from grading.constants import CheckingSystemTypes, YandexCompilers
 from grading.models import Checker, CheckingSystem, Submission
-from grading.utils import resolve_yandex_contest_problem_alias
+from grading.utils import (
+    ParsedYandexContestURL, YandexContestScoreSource, parse_yandex_contest_url
+)
 from learning.models import AssignmentComment
 
 
@@ -20,33 +23,34 @@ class CheckerService:
                 if compiler[0] in contest_compilers]
 
     @staticmethod
-    def resolve_yandex_contest_problem_alias(checker_url: str) -> Tuple[int, str]:
-        return resolve_yandex_contest_problem_alias(checker_url)
+    def parse_yandex_contest_url(checker_url: str) -> ParsedYandexContestURL:
+        return parse_yandex_contest_url(checker_url)
 
     @classmethod
-    def get_or_create_checker_from_url(cls, checking_system: CheckingSystem, checker_url: str) -> Checker:
-        """
-        Option commit=False is used to validate URL during assignment form clean
-        """
-        if checking_system.type != CheckingSystemTypes.YANDEX:
+    def get_or_create_checker_from_url(cls, checking_system: CheckingSystem,
+                                       checker_url: str) -> Checker:
+        supported_types = {CheckingSystemTypes.YANDEX}
+        if checking_system.type not in supported_types:
             raise CheckerURLError("Checking system type is not supported")
-        try:
-            contest_id, problem_alias = cls.resolve_yandex_contest_problem_alias(checker_url)
-        except ValueError as e:
-            raise CheckerURLError(str(e))
-        checker, _ = Checker.objects.get_or_create(
-            checking_system=checking_system,
-            settings__contest_id=contest_id,
-            settings__problem_id=problem_alias,
-            defaults={
-                'url': checker_url,
-                'settings': {
-                    'contest_id': contest_id,
-                    'problem_id': problem_alias
-                }
-            }
-        )
-        return checker
+        if checking_system.type == CheckingSystemTypes.YANDEX:
+            try:
+                parsed_url = cls.parse_yandex_contest_url(checker_url)
+            except ValueError as e:
+                raise CheckerURLError(str(e))
+            checker_settings = parsed_url.as_dict()
+            checker_filters = {"checking_system": checking_system}
+            for key, value in checker_settings.items():
+                checker_filters[f"settings__{key}"] = value
+            checker, _ = Checker.objects.get_or_create(
+                defaults={
+                    'url': checker_url,
+                    'settings': checker_settings
+                },
+                **checker_filters
+            )
+            return checker
+        else:
+            assert_never(checking_system.type)
 
 
 class CheckerSubmissionService:

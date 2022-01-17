@@ -381,7 +381,7 @@ class AssignmentForm(TimezoneAwareModelForm):
                 if checking_system.type != CheckingSystemTypes.YANDEX:
                     self.add_error('checker_url', "Checking system type is not supported")
                 try:
-                    CheckerService.resolve_yandex_contest_problem_alias(checker_url)
+                    CheckerService.parse_yandex_contest_url(checker_url)
                 except ValueError as e:
                     self.add_error('checker_url', str(e))
             elif checker_url:

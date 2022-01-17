@@ -13,9 +13,11 @@ from core.utils import normalize_yandex_login
 logger = logging.getLogger(__name__)
 
 
-YANDEX_SUBMISSION_REPORT_URL = 'https://contest.yandex.ru/contest/{contest_id}/run-report/{run_id}/'
-YANDEX_CONTEST_PROBLEM_URL = 'https://contest.yandex.ru/contest/{contest_id}/problems/{problem_id}/'
-YANDEX_CONTEST_PROBLEM_REGEX = re.compile(r"/contest\/(?P<contest_id>[\d]+)\/problems\/(?P<problem_alias>[a-zA-Z0-9]*)(?P<trailing_slash>[\/]?)")
+YANDEX_CONTEST_URL = 'https://contest.yandex.ru/contest/{contest_id}/'
+YANDEX_CONTEST_REGEX = re.compile(r"/contest/(?P<contest_id>[\d]+)(?P<trailing_slash>[/]?)")
+YANDEX_SUBMISSION_REPORT_URL = YANDEX_CONTEST_URL + 'run-report/{run_id}/'
+YANDEX_CONTEST_PROBLEM_URL = YANDEX_CONTEST_URL + 'problems/{problem_id}/'
+YANDEX_CONTEST_PROBLEM_REGEX = re.compile(r"/contest/(?P<contest_id>[\d]+)/problems/(?P<problem_alias>[a-zA-Z0-9]*)(?P<trailing_slash>[/]?)")
 YANDEX_CONTEST_DOMAIN = "contest.yandex.ru"
 
 

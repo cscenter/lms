@@ -23,7 +23,7 @@ from courses.tests.factories import (
 from grading.constants import CheckingSystemTypes
 from grading.models import Checker
 from grading.tests.factories import CheckerFactory, CheckingSystemFactory
-from grading.utils import get_yandex_contest_problem_url
+from grading.utils import get_yandex_contest_url
 from learning.models import (
     AssignmentComment, AssignmentNotification, CourseNewsNotification, Enrollment,
     StudentAssignment, StudentGroup
@@ -240,7 +240,7 @@ def test_course_assignment_form_create_with_checking_system(client, mocker):
     checking_system = CheckingSystemFactory.create(
         type=CheckingSystemTypes.YANDEX
     )
-    checking_system_url = get_yandex_contest_problem_url(15, 'D')
+    checking_system_url = get_yandex_contest_url(15, 'D')
     form.update({
         'course': co.pk,
         'submission_type': AssignmentFormat.CODE_REVIEW,

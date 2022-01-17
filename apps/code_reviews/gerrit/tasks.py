@@ -120,7 +120,6 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
                      f"username {username} has not been found.")
         return
 
-
     assignment = student_assignment.assignment
     score_old = normalize_code_review_score(score_old, assignment)
     score_new = normalize_code_review_score(score_new, assignment)

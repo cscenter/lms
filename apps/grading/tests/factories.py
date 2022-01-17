@@ -2,7 +2,7 @@ import factory
 from factory.fuzzy import FuzzyInteger, FuzzyText
 
 from grading.models import Checker, CheckingSystem, Submission
-from grading.utils import get_yandex_contest_problem_url
+from grading.utils import get_yandex_contest_url
 from learning.models import AssignmentSubmissionTypes
 from learning.tests.factories import AssignmentCommentFactory
 
@@ -19,7 +19,7 @@ class CheckingSystemFactory(factory.django.DjangoModelFactory):
 
 class CheckerFactory(factory.django.DjangoModelFactory):
     checking_system = factory.SubFactory(CheckingSystemFactory)
-    url = factory.Sequence(lambda n: get_yandex_contest_problem_url(n, n))
+    url = factory.Sequence(lambda n: get_yandex_contest_url(n, n))
     settings = factory.Dict({
         'contest_id': FuzzyInteger(0, 100),
         'problem_id': factory.Iterator(['A', 'B', 'C', 'D'])
