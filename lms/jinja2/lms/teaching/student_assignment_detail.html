@@ -237,7 +237,9 @@
                 &mdash;
               <% } %>
             </td>
-            <td><%-node.scoreNew%></td>
+            <td>
+              <% if (node.scoreNew !== null) { %><%-node.scoreNew%><% } else { %>&mdash;<% } %>
+            </td>
             <td><%-node.author%></td>
             <td><%-node.source%></td>
           </tr>

@@ -29,10 +29,10 @@ class CheckerService:
     @classmethod
     def get_or_create_checker_from_url(cls, checking_system: CheckingSystem,
                                        checker_url: str) -> Checker:
-        supported_types = {CheckingSystemTypes.YANDEX}
+        supported_types = {CheckingSystemTypes.YANDEX_CONTEST}
         if checking_system.type not in supported_types:
             raise CheckerURLError("Checking system type is not supported")
-        if checking_system.type == CheckingSystemTypes.YANDEX:
+        if checking_system.type == CheckingSystemTypes.YANDEX_CONTEST:
             try:
                 parsed_url = cls.parse_yandex_contest_url(checker_url)
             except ValueError as e:

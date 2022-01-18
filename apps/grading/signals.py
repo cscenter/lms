@@ -7,22 +7,26 @@ from courses.models import Assignment
 from grading.constants import CheckingSystemTypes, SubmissionStatus
 from grading.models import Submission
 from grading.tasks import (
-    add_new_submission_to_checking_system, retrieve_yandex_contest_checker_compilers
+    add_new_submission_to_checking_system,
+    update_checker_yandex_contest_problem_compilers
 )
+from grading.utils import YandexContestScoreSource
 
 
 @receiver(post_save, sender=Assignment)
-def retrieve_yandex_contest_compilers(sender, instance: Assignment,
-                                      *args, **kwargs):
+def retrieve_yandex_contest_problem_compilers(sender, instance: Assignment,
+                                              *args, **kwargs):
     """
     Triggered on every save for assigment with checker to allow updating
     compiler list on demand by clicking "Save" button on assignment form.
     """
-    if instance.checker:
-        if instance.checker.checking_system.type == CheckingSystemTypes.YANDEX:
-            retrieve_yandex_contest_checker_compilers.delay(
-                checker_id=instance.checker.pk, retries=3
-            )
+    checker = instance.checker
+    if not (checker and checker.checking_system.type == CheckingSystemTypes.YANDEX_CONTEST):
+        return
+    if checker.settings.get('score_input') != YandexContestScoreSource.PROBLEM.value:
+        return
+    update_checker_yandex_contest_problem_compilers.delay(checker_id=instance.checker.pk,
+                                                          retries=3)
 
 
 @receiver(post_save, sender=Submission)

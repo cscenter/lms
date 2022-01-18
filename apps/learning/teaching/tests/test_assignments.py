@@ -231,14 +231,14 @@ def test_create_assignment_public_form_restricted_to_settings(client):
 
 @pytest.mark.django_db
 def test_course_assignment_form_create_with_checking_system(client, mocker):
-    mock_compiler_sync = mocker.patch('grading.tasks.retrieve_yandex_contest_checker_compilers')
+    mock_compiler_sync = mocker.patch('grading.tasks.update_checker_yandex_contest_problem_compilers')
     teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     checking_system = CheckingSystemFactory.create(
-        type=CheckingSystemTypes.YANDEX
+        type=CheckingSystemTypes.YANDEX_CONTEST
     )
     checking_system_url = get_yandex_contest_url(15, 'D')
     form.update({
@@ -309,11 +309,11 @@ def test_create_assignment_public_form_code_review_without_checker(client):
 
 @pytest.mark.django_db
 def test_create_assignment_public_form_code_review_with_yandex_checker(client, mocker):
-    mock_compiler_sync = mocker.patch('grading.tasks.retrieve_yandex_contest_checker_compilers')
+    mock_compiler_sync = mocker.patch('grading.tasks.update_checker_yandex_contest_problem_compilers')
     teacher = TeacherFactory()
     course = CourseFactory(semester=SemesterFactory.create_current(),
                            teachers=[teacher])
-    checking_system = CheckingSystemFactory(type=CheckingSystemTypes.YANDEX)
+    checking_system = CheckingSystemFactory(type=CheckingSystemTypes.YANDEX_CONTEST)
     add_url = course.get_create_assignment_url()
     form_data = {
         "submission_type": AssignmentFormat.CODE_REVIEW,

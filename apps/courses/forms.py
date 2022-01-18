@@ -378,7 +378,7 @@ class AssignmentForm(TimezoneAwareModelForm):
             checking_system = cleaned_data.get('checking_system')
             checker_url = cleaned_data.get('checker_url')
             if checking_system:
-                if checking_system.type != CheckingSystemTypes.YANDEX:
+                if checking_system.type != CheckingSystemTypes.YANDEX_CONTEST:
                     self.add_error('checker_url', "Checking system type is not supported")
                 try:
                     CheckerService.parse_yandex_contest_url(checker_url)

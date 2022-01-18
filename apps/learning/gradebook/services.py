@@ -3,15 +3,20 @@ import logging
 from decimal import Decimal
 from typing import IO, Callable, Dict, List, Optional
 
+from rest_framework import serializers
+
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from core.typings import assert_never
 from courses.constants import AssignmentFormat
 from courses.models import Assignment
 from grading.api.yandex_contest import (
-    ProblemStatus, YandexContestAPI, yandex_contest_scoreboard_iterator
+    ProblemStatus, YandexContestAPI, YandexContestParticipantProgress,
+    yandex_contest_scoreboard_iterator
 )
 from grading.models import Checker
+from grading.utils import YandexContestScoreSource
 from learning.forms import AssignmentScoreForm
 from learning.models import Enrollment, StudentAssignment
 from learning.services.personal_assignment_service import (
@@ -34,15 +39,13 @@ def get_assignment_checker(assignment: Assignment) -> Checker:
     return assignment.checker
 
 
-def assignment_import_scores_from_yandex_contest(*, client: YandexContestAPI,
+def assignment_import_scores_from_yandex_contest(*, checker: Checker,
                                                  assignment: Assignment,
                                                  triggered_by: User) -> None:
-    checker = get_assignment_checker(assignment)
     contest_id = checker.settings['contest_id']
-    problem_alias = checker.settings['problem_id']
 
-    # There is no API call to check that yandex contest problem max score is
-    # synchronized with the assignment max score.
+    # Note: There is no API call to check that yandex contest problem max
+    # score is synchronized with the assignment max score.
     enrolled_students = (Enrollment.active
                          .filter(course_id=assignment.course_id)
                          .exclude(student_profile__user__yandex_login_normalized='')
@@ -52,27 +55,42 @@ def assignment_import_scores_from_yandex_contest(*, client: YandexContestAPI,
                 for e in enrolled_students}
     student_assignments = StudentAssignment.objects.filter(assignment=assignment).order_by()
     student_assignments = {s.student_id: s for s in student_assignments}
+
+    access_token = checker.checking_system.settings['access_token']
+    client = YandexContestAPI(access_token=access_token, refresh_token=access_token)
     for participant_results in yandex_contest_scoreboard_iterator(client, contest_id):
         if participant_results.yandex_login not in students:
             continue
         student = students[participant_results.yandex_login]
-        gen = (pr for pr in participant_results.problems if pr.problem_alias == problem_alias)
-        problem_results = next(gen, None)
-        if not problem_results:
-            raise ValidationError("Problem was not found", code="malformed")
-        if problem_results.status == ProblemStatus.NOT_SUBMITTED:
+        # Student could leave the course or is on academic leave
+        if student.pk not in student_assignments:
             continue
-        # Student could left the course or is on academic leave
-        if student.pk in student_assignments:
-            student_assignment = student_assignments[student.pk]
-            assert student_assignment.assignment_id == assignment.pk
-            student_assignment.assignment = assignment
-            student_assignment.student = student
-            update_personal_assignment_score(student_assignment=student_assignment,
-                                             changed_by=triggered_by,
-                                             score_old=student_assignment.score,
-                                             score_new=problem_results.score,
-                                             source=AssignmentScoreUpdateSource.API_YANDEX_CONTEST)
+        student_assignment = student_assignments[student.pk]
+        assert student_assignment.assignment_id == assignment.pk
+        student_assignment.assignment = assignment
+        student_assignment.student = student
+
+        score_old = student_assignment.score
+        score_input = checker.settings.get('score_input')
+        if score_input == YandexContestScoreSource.PROBLEM.value:
+            problem_alias = checker.settings['problem_id']
+            gen = (pr for pr in participant_results.problems if pr.problem_alias == problem_alias)
+            problem_results = next(gen, None)
+            if not problem_results:
+                raise serializers.ParseError("Problem was not found")
+            if problem_results.status == ProblemStatus.NOT_SUBMITTED and score_old is None:
+                continue
+            score_new = problem_results.score
+        elif score_input == YandexContestScoreSource.CONTEST.value:
+            score_new = participant_results.score_total
+        else:
+            raise serializers.ParseError("Unknown score input")
+
+        update_personal_assignment_score(student_assignment=student_assignment,
+                                         changed_by=triggered_by,
+                                         score_old=score_old,
+                                         score_new=score_new,
+                                         source=AssignmentScoreUpdateSource.API_YANDEX_CONTEST)
 
 
 def assignment_import_scores_from_csv(csv_file: IO,

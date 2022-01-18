@@ -36,7 +36,7 @@ class CheckingSystem(models.Model):
         return self.name
 
     def clean(self):
-        if self.type == CheckingSystemTypes.YANDEX:
+        if self.type == CheckingSystemTypes.YANDEX_CONTEST:
             has_access_token = 'access_token' in self.settings
             use_participant_oauth = ('use_participant_oauth' in self.settings
                                      and self.settings['use_participant_oauth'])
@@ -69,7 +69,7 @@ class Checker(models.Model):
                 f' [{", ".join(f"{k}: {v}" for k, v in self.settings.items())}]')
 
     def clean(self):
-        if self.checking_system.type == CheckingSystemTypes.YANDEX:
+        if self.checking_system.type == CheckingSystemTypes.YANDEX_CONTEST:
             required_settings = ['contest_id', 'problem_id']
             for key in required_settings:
                 if key not in self.settings:
@@ -124,7 +124,7 @@ class Submission(models.Model):
 
     @property
     def report_url(self) -> Optional[str]:
-        if self.checking_system_choice.value == CheckingSystemTypes.YANDEX:
+        if self.checking_system_choice.value == CheckingSystemTypes.YANDEX_CONTEST:
             required_attributes = ['contestId', 'runId']
             for attr in required_attributes:
                 if attr not in self.meta:

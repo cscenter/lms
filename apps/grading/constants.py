@@ -51,7 +51,7 @@ class YandexCompilers(DjangoChoices):
 
 
 class CheckingSystemTypes(DjangoChoices):
-    YANDEX = ChoiceItem('ya', _("Yandex.Contest"))
+    YANDEX_CONTEST = ChoiceItem('ya', _("Yandex.Contest"))
 
 
 class SubmissionStatus(DjangoChoices):

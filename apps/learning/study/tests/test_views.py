@@ -299,13 +299,13 @@ def test_add_solution(client):
 
 @pytest.mark.django_db
 def test_add_solution_review_code_type(client, mocker):
-    mocker.patch('grading.tasks.retrieve_yandex_contest_checker_compilers')
+    mocker.patch('grading.tasks.update_checker_yandex_contest_problem_compilers')
     mocker.patch('grading.tasks.add_new_submission_to_checking_system')
     student = UserFactory()
     student_profile = StudentProfileFactory(user=student)
     course = CourseFactory(ask_ttc=False)
     enrollment = EnrollmentFactory(course=course, student=student, student_profile=student_profile)
-    code_review_checker = CheckerFactory(checking_system__type=CheckingSystemTypes.YANDEX,
+    code_review_checker = CheckerFactory(checking_system__type=CheckingSystemTypes.YANDEX_CONTEST,
                                          settings={'compilers': [YandexCompilers.c11], 'contest_id': 42, 'problem_id': 42})
     assignment = AssignmentFactory(course=course,
                                    submission_type=AssignmentFormat.CODE_REVIEW,

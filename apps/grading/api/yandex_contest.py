@@ -1,7 +1,7 @@
 import logging
 import re
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import ROUND_DOWN, Decimal
 from enum import Enum, IntEnum
 from typing import Iterator, List, Optional, Union
 
@@ -335,8 +335,12 @@ class YandexContestProblemResult:
 class YandexContestParticipantProgress:
     participant_id: int
     yandex_login: str
-    score_total: str
+    score_total: Decimal
     problems: List[YandexContestProblemResult]
+
+
+def truncate_decimal(value: Decimal, decimal_places: int) -> Decimal:
+    return value.quantize(Decimal(10) ** -decimal_places, rounding=ROUND_DOWN)
 
 
 def yandex_contest_scoreboard_iterator(client: YandexContestAPI, contest_id: int,
@@ -354,10 +358,9 @@ def yandex_contest_scoreboard_iterator(client: YandexContestAPI, contest_id: int
             problems = []
             for index, data in enumerate(row['problemResults']):
                 problem_status = ProblemStatus(data['status'])
-                # TODO: how to reuse logic from AssignmentScore?
                 if problem_status == ProblemStatus.ACCEPTED:
                     score_str: str = data['score'].replace(',', '.')
-                    score = round(Decimal(score_str), ndigits=2)
+                    score = truncate_decimal(Decimal(score_str), decimal_places=2)
                 elif problem_status == ProblemStatus.NOT_ACCEPTED:
                     score = 0
                 else:
@@ -370,10 +373,12 @@ def yandex_contest_scoreboard_iterator(client: YandexContestAPI, contest_id: int
                     submission_delay=data['submitDelay'],
                 )
                 problems.append(problem_result)
+            score_total_str: str = row['score'].replace(',', '.')
+            score_total = truncate_decimal(Decimal(score_total_str), decimal_places=2)
             participant_progress = YandexContestParticipantProgress(
                 participant_id=row['participantInfo']['id'],
                 yandex_login=normalize_yandex_login(row['participantInfo']['login']),
-                score_total=row['score'],
+                score_total=score_total,
                 problems=problems
             )
             yield participant_progress

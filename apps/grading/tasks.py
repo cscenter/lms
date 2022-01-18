@@ -10,6 +10,8 @@ from django.db import transaction
 from grading.api.yandex_contest import (
     ContestAPIError, SubmissionVerdict, Unavailable, YandexContestAPI
 )
+from grading.constants import CheckingSystemTypes
+from grading.utils import YandexContestScoreSource
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +27,18 @@ def get_submission(submission_id) -> Optional["Submission"]:
 
 
 @job('default')
-def retrieve_yandex_contest_checker_compilers(checker_id, *, retries):
+def update_checker_yandex_contest_problem_compilers(checker_id, *, retries):
     from grading.models import Checker
     checker = (Checker.objects
                .filter(pk=checker_id)
                .first())
     if not checker:
         return "Checker not found"
+    if checker.checking_system.type != CheckingSystemTypes.YANDEX_CONTEST:
+        return "Checker is not supported"
+    if checker.settings.get('score_input') != YandexContestScoreSource.PROBLEM.value:
+        return "Action is not supported"
+
     access_token = checker.checking_system.settings['access_token']
     api = YandexContestAPI(
         access_token=access_token,
@@ -45,7 +52,7 @@ def retrieve_yandex_contest_checker_compilers(checker_id, *, retries):
         if retries:
             scheduler = django_rq.get_scheduler('default')
             scheduler.enqueue_in(timedelta(minutes=10),
-                                 retrieve_yandex_contest_checker_compilers,
+                                 update_checker_yandex_contest_problem_compilers,
                                  checker_id,
                                  retries=retries - 1)
             logger.info("Remote server is unavailable. "
@@ -63,8 +70,7 @@ def retrieve_yandex_contest_checker_compilers(checker_id, *, retries):
         checker.settings['compilers'] = problem['compilers']
         checker.save(update_fields=['settings'])
         return "Done"
-    logger.error(f"Did not find problem {problem_id} "
-                 f"in contest {contest_id}")
+    logger.error(f"Problem {problem_id} not found in contest {contest_id}")
     raise
 
 

@@ -23,7 +23,7 @@ def test_get_available_compiler_choices():
 
 @pytest.mark.django_db
 def test_get_or_create_checker_from_url_throws_invalid_url():
-    checking_system = CheckingSystemFactory(type=CheckingSystemTypes.YANDEX)
+    checking_system = CheckingSystemFactory(type=CheckingSystemTypes.YANDEX_CONTEST)
     checking_system_url = get_yandex_contest_url(0, 'A')
     with pytest.raises(CheckerURLError) as e:
         CheckerService.get_or_create_checker_from_url(checking_system,
@@ -33,11 +33,11 @@ def test_get_or_create_checker_from_url_throws_invalid_url():
 
 @pytest.mark.django_db
 def test_get_or_create_checker_from_url_valid_problem_url():
-    checking_system = CheckingSystemFactory(type=CheckingSystemTypes.YANDEX)
+    checking_system = CheckingSystemFactory(type=CheckingSystemTypes.YANDEX_CONTEST)
     checking_system_url = get_yandex_contest_url(15, 'D')
     checker = CheckerService.get_or_create_checker_from_url(checking_system,
                                                             checking_system_url)
-    assert checker.checking_system.type == CheckingSystemTypes.YANDEX
+    assert checker.checking_system.type == CheckingSystemTypes.YANDEX_CONTEST
     assert checker.url == checking_system_url
     assert checker.settings['score_input'] == YandexContestScoreSource.PROBLEM.value
     assert checker.settings['contest_id'] == 15
@@ -46,11 +46,11 @@ def test_get_or_create_checker_from_url_valid_problem_url():
 
 @pytest.mark.django_db
 def test_get_or_create_checker_from_url_valid_contest_url():
-    checking_system = CheckingSystemFactory(type=CheckingSystemTypes.YANDEX)
+    checking_system = CheckingSystemFactory(type=CheckingSystemTypes.YANDEX_CONTEST)
     checking_system_url = get_yandex_contest_url(15, problem_id=None)
     checker = CheckerService.get_or_create_checker_from_url(checking_system,
                                                             checking_system_url)
-    assert checker.checking_system.type == CheckingSystemTypes.YANDEX
+    assert checker.checking_system.type == CheckingSystemTypes.YANDEX_CONTEST
     assert checker.url == checking_system_url
     assert checker.settings['score_input'] == YandexContestScoreSource.CONTEST.value
     assert checker.settings['contest_id'] == 15

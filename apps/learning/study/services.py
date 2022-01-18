@@ -26,7 +26,7 @@ def get_solution_form(student_assignment: StudentAssignment,
         # FIXME: return None
         form = AssignmentSolutionDefaultForm(assignment, data=data, files=files)
     elif (assignment_format == AssignmentFormat.CODE_REVIEW
-          and assignment.checker_id and assignment.checker.checking_system.type == CheckingSystemTypes.YANDEX):
+          and assignment.checker_id and assignment.checker.checking_system.type == CheckingSystemTypes.YANDEX_CONTEST):
         form = AssignmentSolutionYandexContestForm(assignment, data=data, files=files)
     else:
         form = AssignmentSolutionDefaultForm(assignment, data=data, files=files)
