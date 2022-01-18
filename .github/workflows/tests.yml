@@ -68,10 +68,10 @@ jobs:
 
       - name: Debug
         run: |
-          ls -la /tmp/.buildx-django-cache
-          ls -la /tmp/.buildx-django-cache/blobs/sha256
-          ls -la /tmp/.buildx-django-cache/ingest
-          cat /tmp/.buildx-django-cache/index.json
+          [ -d /tmp/.buildx-django-cache ] && ls -la /tmp/.buildx-django-cache
+          [ -d /tmp/.buildx-django-cache/blobs/sha256 ] && ls -la /tmp/.buildx-django-cache/blobs/sha256
+          [ -d /tmp/.buildx-django-cache/ingest ] && ls -la /tmp/.buildx-django-cache/ingest
+          [ -f /tmp/.buildx-django-cache/index.json ] && cat /tmp/.buildx-django-cache/index.json
 
       - name: Build Django image with production dependencies | header image
         uses: docker/build-push-action@v2
@@ -87,10 +87,10 @@ jobs:
 
       - name: Debug
         run: |
-          ls -la /tmp/.buildx-django-cache-new
-          ls -la /tmp/.buildx-django-cache-new/ingest
-          ls -la /tmp/.buildx-django-cache-new/blobs/sha256
-          cat /tmp/.buildx-django-cache-new/index.json
+          [ -d /tmp/.buildx-django-cache-new ] && ls -la /tmp/.buildx-django-cache-new
+          [ -d /tmp/.buildx-django-cache-new/blobs/sha256 ] && ls -la /tmp/.buildx-django-cache-new/blobs/sha256
+          [ -d /tmp/.buildx-django-cache-new/ingest ] && ls -la /tmp/.buildx-django-cache-new/ingest
+          [ -f /tmp/.buildx-django-cache-new/index.json ] && cat /tmp/.buildx-django-cache-new/index.json
 
       - name: Build Django image with dev dependencies | full image
         uses: docker/build-push-action@v2
