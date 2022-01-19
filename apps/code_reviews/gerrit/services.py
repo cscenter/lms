@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db.models import prefetch_related_objects
 from django.utils import translation
 
-from code_reviews.api.gerrit import Gerrit
+from code_reviews.api.gerrit import Gerrit, GerritAPIError
 from code_reviews.api.ldap import LDAPClient, init_ldap_connection
 from code_reviews.gerrit.constants import GerritRobotMessages
 from code_reviews.gerrit.ldap_service import (
@@ -180,8 +180,8 @@ def init_project_for_course(course: Course, skip_users: Optional[bool] = False):
 def add_student_to_project(*, gerrit_client: Gerrit,
                            student_profile: StudentProfile,
                            course: Course,
-                           students_group_uuid=None,
-                           ldap_client: Optional[LDAPClient] = None):
+                           ldap_client: LDAPClient,
+                           students_group_uuid=None):
     user = student_profile.user
     if students_group_uuid is None:
         students_group_name = get_students_group_name(course)
@@ -284,7 +284,7 @@ def add_assignment_comment_about_new_change(student_assignment: StudentAssignmen
     return comment
 
 
-def create_change(client, student_assignment: StudentAssignment) -> Optional[GerritChange]:
+def create_change(client, student_assignment: StudentAssignment) -> GerritChange:
     """
     Create new change in Gerrit and store info in GerritChange model.
     """
@@ -301,15 +301,13 @@ def create_change(client, student_assignment: StudentAssignment) -> Optional[Ger
     project_name = get_project_name(course)
     project_res = client.get_project(project_name)
     if not project_res.ok:
-        logger.error(f"Project {project_name} not found")
-        return None
+        raise GerritAPIError(f"Project {project_name} not found")
 
     # Check that student branch exists
     branch_name = get_branch_name(student_profile, course)
     branch_res = client.get_branch(project_name, branch_name)
     if not branch_res.ok:
-        logger.error(f"Branch {branch_name} of {project_name} not found")
-        return None
+        raise GerritAPIError(f"Branch {branch_name} of {project_name} not found")
 
     change_subject = f'{student_assignment.assignment.title} ' \
                      f'({student_assignment.student.get_full_name()})'
@@ -317,7 +315,7 @@ def create_change(client, student_assignment: StudentAssignment) -> Optional[Ger
     change_res = client.create_change(project_name, branch_name,
                                       subject=change_subject)
     if not change_res.created:
-        return None
+        raise GerritAPIError(f"Failed to create new change")
     change_id = change_res.json['id']
     logger.info(f'Created change {change_id}')
     site = student_assignment.assignment.course.main_branch.site

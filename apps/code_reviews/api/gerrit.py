@@ -10,6 +10,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 # TODO: refactor based on this article https://medium.com/@hakibenita/working-with-apis-the-pythonic-way-484784ed1ce0 (see exceptions part)
+from rest_framework.exceptions import APIException
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,10 @@ for attr in REQUIRED_SETTINGS:
     if not hasattr(settings, attr):
         raise ImproperlyConfigured(
             "Please add {0!r} to your settings module".format(attr))
+
+
+class GerritAPIError(APIException):
+    pass
 
 
 class ResponseStatus(IntEnum):
