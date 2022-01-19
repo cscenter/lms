@@ -6,6 +6,40 @@ ssh -p 29418 admin@review.compscicenter.ru gerrit flush-caches --cache projects
 # TODO: run gc?
 ```
 
+
+```python
+# Create ldap account
+from code_reviews.api.ldap import ldap_client
+from code_reviews.gerrit.ldap_service import connect_gerrit_auth_provider
+from users.models import User
+
+user = User.objects.get(pk=...)
+with ldap_client() as client:
+    connect_gerrit_auth_provider(client, user)
+
+# Add student to project
+from code_reviews.api.gerrit import Gerrit
+from code_reviews.api.ldap import ldap_client
+from code_reviews.gerrit.services import add_student_to_project
+from courses.models import Course
+from django.conf import settings
+from learning.models import Enrollment
+
+COURSE_ID = ...
+USER_ID = ...
+
+course = Course.objects.get(pk=COURSE_ID)
+enrollment = Enrollment.objects.get(course=course, student_profile__user__pk=USER_ID)
+with ldap_client() as ld_client:
+    gerrit_client = Gerrit(settings.GERRIT_API_URI,
+                              auth=(settings.GERRIT_CLIENT_USERNAME,
+                                    settings.GERRIT_CLIENT_HTTP_PASSWORD))
+    add_student_to_project(gerrit_client=gerrit_client,
+                           student_profile=enrollment.student_profile,
+                           course=course,
+                           ldap_client=ld_client)
+```
+
 ### Инициализация проекта для курса
 
 Убедиться, что для преподавателей и студентов созданы ldap-аккаунты:
