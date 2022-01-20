@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext_noop
 
 AUTUMN_TERM_START = '1 sep'
-SPRING_TERM_START = '20 jan'  # XXX: spring term must be later than 1 jan
+SPRING_TERM_START = '2 feb'  # XXX: spring term must be later than 1 jan
 SUMMER_TERM_START = '1 jul'
 
 
