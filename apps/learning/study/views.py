@@ -15,6 +15,7 @@ from auth.mixins import PermissionRequiredMixin
 from core import comment_persistence
 from core.exceptions import Redirect
 from core.http import HttpRequest
+from core.timezone import get_now_utc
 from core.urls import reverse
 from courses.calendar import CalendarEvent, TimetableEvent
 from courses.models import Course, Semester
@@ -96,9 +97,10 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
     permission_required = ViewOwnStudentAssignments.name
 
     def get_queryset(self, current_term):
+        today = get_now_utc().date()
         return (StudentAssignment.objects
                 .for_student(self.request.user)
-                .in_term(current_term)
+                .filter(assignment__course__completed_at__gt=today)
                 .order_by('assignment__deadline_at',
                           'assignment__course__meta_course__name',
                           'pk'))

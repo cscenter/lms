@@ -37,7 +37,7 @@ from users.tests.factories import (
 
 
 @pytest.mark.django_db
-def test_student_assignment_detail_view_permissions(client, lms_resolver,
+def test_view_student_assignment_detail_permissions(client, lms_resolver,
                                                     assert_login_redirect):
     from auth.permissions import perm_registry
     teacher = TeacherFactory()
@@ -59,7 +59,7 @@ def test_student_assignment_detail_view_permissions(client, lms_resolver,
 
 
 @pytest.mark.django_db
-def test_student_assignment_detail_view_handle_no_permission(client):
+def test_view_student_assignment_detail_handle_no_permission(client):
     teacher = TeacherFactory()
     client.login(teacher)
     course = CourseFactory(teachers=[teacher])
@@ -71,7 +71,7 @@ def test_student_assignment_detail_view_handle_no_permission(client):
 
 
 @pytest.mark.django_db
-def test_assignment_contents(client):
+def test_view_personal_assignment_contents(client):
     student_profile = StudentProfileFactory()
     student = student_profile.user
     semester = SemesterFactory.create_current()
@@ -90,7 +90,7 @@ def test_assignment_contents(client):
 
 
 @pytest.mark.django_db
-def test_student_assignment_detail_view_comment(client):
+def test_view_student_assignment_detail_comment(client):
     student_profile = StudentProfileFactory()
     student = student_profile.user
     semester = SemesterFactory.create_current()
@@ -127,7 +127,7 @@ def test_student_assignment_detail_view_comment(client):
 
 
 @pytest.mark.django_db
-def test_new_comment_on_assignment_page(client, assert_redirect):
+def test_view_new_comment_on_assignment_page(client, assert_redirect):
     semester = SemesterFactory.create_current()
     student_profile = StudentProfileFactory()
     course = CourseFactory(main_branch=student_profile.branch, semester=semester)
@@ -204,7 +204,7 @@ def test_new_comment_on_assignment_page(client, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_solution_form_is_visible_by_default(client):
+def test_view_solution_form_is_visible_by_default(client):
     student_profile = StudentProfileFactory()
     student = student_profile.user
     course = CourseFactory(main_branch=student_profile.branch,
@@ -231,7 +231,7 @@ def test_solution_form_is_visible_by_default(client):
 
 
 @pytest.mark.django_db
-def test_add_solution(client):
+def test_view_student_assignment_add_solution(client):
     student_profile = StudentProfileFactory()
     student = student_profile.user
     semester = SemesterFactory.create_current()
@@ -298,7 +298,7 @@ def test_add_solution(client):
 
 
 @pytest.mark.django_db
-def test_add_solution_review_code_type(client, mocker):
+def test_view_student_assignment_add_solution_review_code_type(client, mocker):
     mocker.patch('grading.tasks.update_checker_yandex_contest_problem_compilers')
     mocker.patch('grading.tasks.add_new_submission_to_checking_system')
     student = UserFactory()
@@ -326,7 +326,7 @@ def test_add_solution_review_code_type(client, mocker):
 
 
 @pytest.mark.django_db
-def test_add_solution_for_assignment_without_solutions(client):
+def test_view_student_assignment_post_solution_for_assignment_without_solutions(client):
     student_profile = StudentProfileFactory()
     student = student_profile.user
     course = CourseFactory(main_branch=student_profile.branch,
@@ -359,7 +359,7 @@ def test_add_solution_for_assignment_without_solutions(client):
 
 
 @pytest.mark.django_db
-def test_assignment_comment_author_should_be_resolved(client):
+def test_view_student_assignment_comment_author_should_be_resolved(client):
     student = StudentFactory()
     sa = StudentAssignmentFactory(student=student)
     create_comment_url = reverse("study:assignment_comment_create",
@@ -376,7 +376,7 @@ def test_assignment_comment_author_should_be_resolved(client):
 
 
 @pytest.mark.django_db
-def test_assignment_comment_author_cannot_be_modified_by_user(client):
+def test_view_assignment_comment_author_cannot_be_modified_by_user(client):
     student1, student2 = StudentFactory.create_batch(2)
     sa1 = StudentAssignmentFactory(student=student1)
     sa2 = StudentAssignmentFactory(student=student2)
@@ -397,7 +397,7 @@ def test_assignment_comment_author_cannot_be_modified_by_user(client):
 
 
 @pytest.mark.django_db
-def test_student_courses_list(client, lms_resolver, assert_login_redirect):
+def test_view_student_courses_list(client, lms_resolver, assert_login_redirect):
     url = reverse('study:course_list')
     resolver = lms_resolver(url)
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
@@ -464,7 +464,7 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
 
 
 @pytest.mark.django_db
-def test_course_list_course_not_in_student_branch(client, lms_resolver, assert_login_redirect):
+def test_view_course_list_course_not_in_student_branch(client, lms_resolver, assert_login_redirect):
     url = reverse('study:course_list')
     student_profile_spb = StudentProfileFactory(branch__code=Branches.SPB)
     student_spb = student_profile_spb.user

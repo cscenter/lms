@@ -10,6 +10,7 @@ from django.utils.timezone import now
 
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
+from core.timezone import get_now_utc
 from core.urls import reverse
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from courses.utils import get_current_term_pair
@@ -28,7 +29,7 @@ from users.tests.factories import StudentFactory, StudentProfileFactory
 
 
 @pytest.mark.django_db
-def test_access_student_assignment_teacher(client, assert_login_redirect):
+def test_view_student_assignment_as_teacher(client, assert_login_redirect):
     """
     Redirects course teacher to the appropriate teaching/ section.
     """
@@ -53,7 +54,7 @@ def test_access_student_assignment_teacher(client, assert_login_redirect):
 
 
 @pytest.mark.django_db
-def test_access_student_assignment_regular_student(client):
+def test_view_student_assignment_as_regular_student(client):
     teacher = TeacherFactory()
     past_year = datetime.datetime.now().year - 3
     past_semester = SemesterFactory.create(year=past_year)
@@ -94,7 +95,7 @@ def test_access_student_assignment_regular_student(client):
 
 
 @pytest.mark.django_db
-def test_access_student_assignment_failed_course(client):
+def test_view_student_assignment_failed_course(client):
     past_year = datetime.datetime.now().year - 3
     past_semester = SemesterFactory.create(year=past_year)
     teacher = TeacherFactory()
@@ -134,7 +135,7 @@ def test_access_student_assignment_failed_course(client):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
-def test_access_student_assignment_inactive_student(inactive_status, client,
+def test_view_student_assignment_inactive_student(inactive_status, client,
                                                     settings):
     """
     Inactive student could see student assignment only if he has any
@@ -186,7 +187,7 @@ def test_access_student_assignment_inactive_student(inactive_status, client,
 
 
 @pytest.mark.django_db
-def test_course_list(client, settings):
+def test_view_course_list(client, settings):
     student_profile = StudentProfileFactory(branch__code=Branches.SPB)
     client.login(student_profile.user)
     s = SemesterFactory.create_current()
@@ -197,7 +198,7 @@ def test_course_list(client, settings):
 
 
 @pytest.mark.django_db
-def test_projects_on_assignment_list_page(client):
+def test_view_projects_on_assignment_list_page(client):
     url = reverse("study:assignment_list")
     branch_spb = BranchFactory(code=Branches.SPB)
     current_term = SemesterFactory.create_current()
@@ -249,7 +250,7 @@ def test_projects_on_assignment_list_page(client):
 
 
 @pytest.mark.django_db
-def test_assignment_list_view_permissions(client, lms_resolver,
+def test_view_assignment_list_permissions(client, lms_resolver,
                                           assert_login_redirect):
     from auth.permissions import perm_registry
     url = reverse('study:assignment_list')
@@ -266,48 +267,59 @@ def test_assignment_list_view_permissions(client, lms_resolver,
 
 
 @pytest.mark.django_db
-def test_assignment_list_view(client):
+def test_view_assignment_list(client):
     url = reverse('study:assignment_list')
-    student = StudentFactory()
-    s = SemesterFactory.create_current(for_branch=Branches.SPB)
-    course = CourseFactory(semester=s)
-    as1 = AssignmentFactory.create_batch(2, course=course)
+    branch = BranchFactory(code="spb")
+    student = StudentFactory(branch=branch)
+    current_term = SemesterFactory.create_current(for_branch=branch.code)
+    course = CourseFactory(semester=current_term)
+    assignments1 = AssignmentFactory.create_batch(2, course=course)
     client.login(student)
-    # no assignments yet
+    # No assignments
     response = client.get(url)
     assert len(response.context_data['assignment_list_open']) == 0
     assert len(response.context_data['assignment_list_archive']) == 0
-    # enroll at course offering, assignments are shown
+    # Enroll in the course
     EnrollmentFactory(student=student, course=course)
     response = client.get(url)
     assert len(response.context_data['assignment_list_open']) == 2
     assert len(response.context_data['assignment_list_archive']) == 0
-    # add a few assignments, they should show up
-    as2 = AssignmentFactory.create_batch(3, course=course)
+    # Add more assignments to the course
+    assignments2 = AssignmentFactory.create_batch(3, course=course)
     response = client.get(url)
+    assert len(assignments1) + len(assignments2) == len(response.context_data['assignment_list_open'])
     assert {(StudentAssignment.objects.get(assignment=a, student=student))
-            for a in (as1 + as2)} == set(response.context_data['assignment_list_open'])
-    assert len(as1) + len(as2) == len(response.context_data['assignment_list_open'])
-    # Add few old assignments from current semester with expired deadline
+            for a in (assignments1 + assignments2)} == set(response.context_data['assignment_list_open'])
+    # Add assignments from the current semester with an expired deadline
     deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
                    - datetime.timedelta(days=1))
     as_olds = AssignmentFactory.create_batch(2, course=course,
                                              deadline_at=deadline_at)
     response = client.get(url)
-    for a in as1 + as2 + as_olds:
+    for a in assignments1 + assignments2 + as_olds:
         assert smart_bytes(a.title) in response.content
     for a in as_olds:
         assert smart_bytes(a.title) in response.content
     assert {StudentAssignment.objects.get(assignment=a, student=student)
-            for a in (as1 + as2)} == set(response.context_data['assignment_list_open'])
+            for a in (assignments1 + assignments2)} == set(response.context_data['assignment_list_open'])
     assert {StudentAssignment.objects.get(assignment=a, student=student)
             for a in as_olds} == set(response.context_data['assignment_list_archive'])
-    # Now add assignment from the past semester
-    old_s = SemesterFactory.create_prev(s)
-    old_co = CourseFactory.create(semester=old_s)
-    as_past = AssignmentFactory(course=old_co)
+    # Add assignment from the past semester
+    today = get_now_utc().date()
+    previous_term = SemesterFactory.create_prev(current_term)
+    past = previous_term.term_pair.ends_on - datetime.timedelta(days=2)
+    course_old = CourseFactory(semester=previous_term, completed_at=past)
+    assert course_old.completed_at < today
+    past_assignment = AssignmentFactory(course=course_old)
+    EnrollmentFactory(student=student, course=course_old)
+    personal_assignment_past = StudentAssignment.objects.get(assignment=past_assignment,
+                                                             student=student)
     response = client.get(url)
-    assert as_past not in response.context_data['assignment_list_archive']
+    assert personal_assignment_past not in response.context_data['assignment_list_archive']
+    course_old.completed_at = today + datetime.timedelta(days=1)
+    course_old.save()
+    response = client.get(url)
+    assert personal_assignment_past in response.context_data['assignment_list_archive']
 
 
 @pytest.mark.django_db
@@ -340,8 +352,8 @@ def test_assignment_list_view_context_unenrolled_course(client):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("learner_factory", [StudentFactory, VolunteerFactory])
-def test_deadline_l10n_on_student_assignment_list_page(learner_factory,
-                                                       settings, client):
+def test_view_deadline_l10n_on_student_assignment_list_page(learner_factory,
+                                                            settings, client):
     settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
@@ -414,7 +426,7 @@ def test_deadline_l10n_on_student_assignment_list_page(learner_factory,
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
-def test_course_list_student_with_inactive_status(inactive_status, client):
+def test_view_course_list_student_with_inactive_status(inactive_status, client):
     inactive_student = StudentFactory(student_profile__status=inactive_status)
     client.login(inactive_student)
     url = reverse('study:course_list')

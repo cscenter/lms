@@ -1,7 +1,7 @@
 import datetime
 from calendar import monthrange
 from dataclasses import dataclass, field
-from typing import Iterator
+from typing import Iterator, Optional
 
 import attr
 import pytz
@@ -59,6 +59,12 @@ class TermPair:
     def starts_at(self, tz: Timezone):
         return get_term_starts_at(self.year, self.type, tz)
 
+    @property
+    def ends_on(self) -> datetime.date:
+        next_term = self.get_next()
+        ends_at = next_term.starts_at(pytz.UTC) - datetime.timedelta(days=1)
+        return ends_at.date()
+
 
 @dataclass
 class MonthPeriod:
@@ -108,7 +114,7 @@ def get_current_term_pair(tz: Timezone = settings.DEFAULT_TIMEZONE) -> TermPair:
 
 
 def convert_term_parts_to_datetime(year, term_start,
-                                   tz=pytz.UTC) -> datetime.datetime:
+                                   tz: Optional[Timezone] = pytz.UTC) -> datetime.datetime:
     dt_naive = dparser.parse(term_start).replace(year=year)
     return tz.localize(dt_naive)
 

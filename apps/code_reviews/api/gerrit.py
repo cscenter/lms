@@ -5,12 +5,11 @@ from enum import IntEnum
 from urllib.parse import quote_plus, urljoin
 
 import requests
+# TODO: refactor based on this article https://medium.com/@hakibenita/working-with-apis-the-pythonic-way-484784ed1ce0 (see exceptions part)
+from rest_framework.exceptions import APIException
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-
-# TODO: refactor based on this article https://medium.com/@hakibenita/working-with-apis-the-pythonic-way-484784ed1ce0 (see exceptions part)
-from rest_framework.exceptions import APIException
 
 logger = logging.getLogger(__name__)
 
