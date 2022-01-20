@@ -101,22 +101,20 @@ def get_course_assignments(course, user, user_role=None) -> List[Assignment]:
     if user_role in student_roles:
         assignments = assignments.prefetch_student_scores(user)
     assignments = assignments.all()  # enable query caching
-    for a in assignments:
+    for assignment in assignments:
         to_details = None
         if user_role in student_roles:
-            # FIXME: спрятать реализацию в метод
-            assignment_progress = a.studentassignment_set.first()
-            if assignment_progress is not None:
+            student_assignment = assignment.studentassignment_set.first()
+            if student_assignment is not None:
                 if user_role == CourseRole.STUDENT_RESTRICT:
-                    # Hide the link if student didn't send any comment on
-                    # assignment (first comment is considered as a solution)
-                    if not assignment_progress.student_comments_cnt:
+                    # Hide details if the student didn't post any solution
+                    if not (student_assignment.score or student_assignment.solutions_total):
                         continue
-                to_details = assignment_progress.get_student_url()
+                to_details = student_assignment.get_student_url()
             else:
                 logger.info(f"no StudentAssignment for student ID "
-                            f"{user.pk}, assignment ID {a.pk}")
+                            f"{user.pk}, assignment ID {assignment.pk}")
         elif user_role in [CourseRole.TEACHER, CourseRole.CURATOR]:
-            to_details = a.get_teacher_url()
-        setattr(a, 'magic_link', to_details)
+            to_details = assignment.get_teacher_url()
+        setattr(assignment, 'magic_link', to_details)
     return assignments
