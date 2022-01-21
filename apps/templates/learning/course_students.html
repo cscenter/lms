@@ -26,8 +26,8 @@
     </style>
     <div class="container">
         <h2 class="hidden-print">
-            <a href="{{ course.get_absolute_url }}">{{ course }}</a><br>
-            <small>{{ course.main_branch.name }}</small>
+            <a href="{{ course.get_absolute_url }}">{{ course.name }}</a><br>
+            <small>{{ course.main_branch.name }} / {{ course.semester }}</small>
         </h2>
         {% if enrollments %}
             <div class="c-student-faces">
