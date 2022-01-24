@@ -131,16 +131,11 @@ class AssignmentCheckQueueView(PermissionRequiredMixin, TemplateView):
         course_id = serializer.validated_data.get('course') or courses[0].pk
         course = next((c for c in courses if c.pk == course_id))
         filters = _check_queue_filters(course, serializer.validated_data)
-        score_states = {}
-        for key in StudentAssignment.States.values:
-            choice = StudentAssignment.States.get_choice(key)
-            score_states[key] = choice.abbr
         return {
             "app_data": {
                 "props": {
                     "timeZone": str(self.request.user.time_zone),
                     "csrfToken": get_token(self.request),
-                    "scoreStates": score_states,
                     "courseOptions": course_options,
                     "courseTeachers": filters["courseTeachers"],
                     "courseGroups": filters["courseGroups"]
