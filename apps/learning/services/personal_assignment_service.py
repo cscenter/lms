@@ -10,7 +10,7 @@ from django.utils.timezone import now
 
 from core.timezone import get_now_utc
 from core.typings import assert_never
-from courses.constants import AssigneeMode
+from courses.constants import AssigneeMode, AssignmentStatuses
 from courses.models import Assignment, CourseTeacher
 from courses.selectors import personal_assignments_list
 from grading.services import CheckerSubmissionService
@@ -158,6 +158,20 @@ def get_draft_comment(user: User, student_assignment: StudentAssignment):
 def get_draft_solution(user: User, student_assignment: StudentAssignment):
     return _get_draft_submission(user, student_assignment,
                                  AssignmentSubmissionTypes.SOLUTION)
+
+
+def update_personal_assignment_status(student_assignment: StudentAssignment,
+                                     status_old: AssignmentStatuses,
+                                     status_new: AssignmentStatuses)-> Tuple[bool, StudentAssignment]:
+    if status_old == status_new:
+        return True, student_assignment
+    if status_new in student_assignment.get_allowed_statuses():
+        updated = (StudentAssignment.objects
+                   .filter(pk=student_assignment.pk, status=status_old)
+                   .update(status=status_new))
+        if not updated:
+            return False, student_assignment
+    raise ValueError(f"Wrong status {status_new} for student assignment")
 
 
 def update_personal_assignment_score(*, student_assignment: StudentAssignment,

@@ -14,7 +14,7 @@ from django.db import transaction
 from django.db.models import FileField
 from django.http import FileResponse, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.middleware.csrf import get_token
-from django.shortcuts import get_object_or_404, redirect, resolve_url
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
@@ -34,10 +34,11 @@ from courses.services import CourseService
 from learning.api.serializers import AssignmentScoreSerializer
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
 from learning.models import (
-    AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
+    AssignmentComment, AssignmentSubmissionTypes, Enrollment,
+    StudentAssignment,
 )
 from learning.permissions import (
-    CreateAssignmentComment, DownloadAssignmentSolutions, EditOwnStudentAssignment,
+    CreateAssignmentComment, DownloadAssignmentSolutions,
     EditStudentAssignment, ViewStudentAssignment, ViewStudentAssignmentList
 )
 from learning.selectors import get_teacher_not_spectator_courses
@@ -48,7 +49,6 @@ from learning.services.personal_assignment_service import (
 from learning.settings import AssignmentScoreUpdateSource
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
-from users.models import User
 
 
 def _check_queue_filters(course: Course, query_params):

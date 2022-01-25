@@ -11,7 +11,7 @@ from django.db import IntegrityError, transaction
 from django.utils.encoding import smart_str
 
 from core.tests.factories import BranchFactory, LocationFactory, SiteFactory
-from courses.constants import AssignmentFormat, SemesterTypes
+from courses.constants import AssignmentFormat, SemesterTypes, AssignmentStatuses
 from courses.models import CourseGroupModes, CourseNews, Semester
 from courses.tests.factories import (
     AssignmentFactory, CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
@@ -112,56 +112,27 @@ def test_student_assignment_is_submission_received():
 
 
 @pytest.mark.django_db
-def test_student_assignment_state():
-    import datetime
-
-    from django.utils import timezone
-    student = StudentFactory()
-    a_online = AssignmentFactory.create(
-        passing_score=5, maximum_score=10,
-        submission_type=AssignmentFormat.ONLINE,
-        deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
-    )
-    ctx = {'student': student, 'assignment': a_online}
-    sa = StudentAssignment(score=0, **ctx)
-    assert sa.state.value == sa.States.UNSATISFACTORY
-    sa = StudentAssignment(score=4, **ctx)
-    assert sa.state.value == sa.States.UNSATISFACTORY
-    sa = StudentAssignment(score=5, **ctx)
-    assert sa.state.value == sa.States.CREDIT
-    sa = StudentAssignment(score=8, **ctx)
-    assert sa.state.value == sa.States.GOOD
-    sa = StudentAssignment(score=10, **ctx)
-    assert sa.state.value == sa.States.EXCELLENT
-    sa = StudentAssignment(**ctx)
-    assert sa.state.value == sa.States.NOT_SUBMITTED
-    a_offline = AssignmentFactory.create(
-        passing_score=5, maximum_score=10,
-        submission_type=AssignmentFormat.NO_SUBMIT,
-        deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
-    )
-    ctx['assignment'] = a_offline
-    sa = StudentAssignment(**ctx)
-    assert sa.state.value == sa.States.NOT_CHECKED
-
-
-@pytest.mark.django_db
 def test_student_assignment_state_display():
-    sa = StudentAssignmentFactory(score=30, assignment__maximum_score=50)
-    assert smart_str(sa.assignment.maximum_score) in sa.state_display
-    assert smart_str(sa.score) in sa.state_display
     sa = StudentAssignmentFactory(assignment__maximum_score=50)
-    assert sa.state_display == StudentAssignment.States.labels.NOT_SUBMITTED
+    assert sa.state_display == AssignmentStatuses.NOT_SUBMITTED.label
+    AssignmentCommentFactory(student_assignment=sa,
+                             type=AssignmentSubmissionTypes.SOLUTION)
+    sa.refresh_from_db()
+    assert sa.state_display == AssignmentStatuses.ON_CHECKING.label
+    sa.score = 30
+    expected_display = f"{sa.score}/{sa.assignment.maximum_score}"
+    assert sa.state_display == expected_display
 
 
 @pytest.mark.django_db
-def test_student_assignment_state_short():
-    sa = StudentAssignmentFactory(score=30, assignment__maximum_score=50)
-    assert smart_str(sa.assignment.maximum_score) in sa.state_short
-    assert smart_str(sa.score) in sa.state_short
+def test_student_assignment_score_display():
     sa = StudentAssignmentFactory(assignment__maximum_score=50)
-    state = StudentAssignment.States.get_choice(StudentAssignment.States.NOT_SUBMITTED)
-    assert state.abbr in sa.state_short
+    assert sa.score_display == "—"
+    sa.status = AssignmentStatuses.ON_CHECKING
+    assert sa.score_display == "…"
+    sa.score = 30
+    expected_display = f"{sa.score}/{sa.assignment.maximum_score}"
+    assert sa.score_display == expected_display
 
 
 @pytest.mark.django_db

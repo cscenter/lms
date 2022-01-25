@@ -1,4 +1,4 @@
-from djchoices import C, DjangoChoices
+from djchoices import C, DjangoChoices, ChoiceItem
 
 from django.db.models.enums import TextChoices
 from django.utils.translation import gettext_lazy as _
@@ -62,6 +62,15 @@ class AssignmentFormat(DjangoChoices):
     NO_SUBMIT = C("other", _("No Submission"))  # on paper, etc
 
     with_checker = {CODE_REVIEW.value, YANDEX_CONTEST.value}
+
+
+class AssignmentStatuses(TextChoices):
+    # TODO: describe each status
+    NEW = 'new', _("AssignmentStatus|New"),  # TODO: remove after integration
+    NOT_SUBMITTED = 'not_submitted', _("AssignmentStatus|Not submitted"),
+    ON_CHECKING = 'on_checking', _("AssignmentStatus|On checking"),
+    NEED_FIXES = 'need_fixes', _("AssignmentStatus|Need fixes"),
+    COMPLETED = 'completed', _("AssignmentStatus|Completed")
 
 
 class AssigneeMode(TextChoices):
