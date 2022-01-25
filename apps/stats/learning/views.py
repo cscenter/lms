@@ -119,6 +119,8 @@ class AssignmentsStats(APIView):
                                   .select_related("assignment")
                                   .only("pk", "assignment_id", "student_id",
                                         "score",
+                                        "status",
+                                        "meta",
                                         "first_student_comment_at",
                                         "assignment__course_id",
                                         "assignment__maximum_score",

@@ -120,7 +120,6 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
         assignments = CharSeparatedField(label='test', allow_blank=True, required=False)
 
     class OutputSerializer(serializers.ModelSerializer):
-        state = serializers.SerializerMethodField()
         score = ScoreField(coerce_to_string=True)
         student = UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic'))
         assignee = inline_serializer(fields={
@@ -131,11 +130,8 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
 
         class Meta:
             model = StudentAssignment
-            fields = ('id', 'assignment_id', 'score', 'state', 'student',
+            fields = ('id', 'assignment_id', 'score', 'status', 'student',
                       'assignee', 'activity')
-
-        def get_state(self, obj: StudentAssignment):
-            return obj.state.value
 
         def get_activity(self, obj: StudentAssignment) -> Optional[str]:
             """Returns latest activity."""

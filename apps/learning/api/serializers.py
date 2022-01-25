@@ -47,12 +47,10 @@ class CourseNewsNotificationSerializer(serializers.ModelSerializer):
 
 
 class BaseStudentAssignmentSerializer(serializers.ModelSerializer):
-    state = serializers.SerializerMethodField()
-
     class Meta:
         model = StudentAssignment
-        fields = ('pk', 'score', 'state', 'student_id')
-        read_only_fields = ['state', 'student_id']
+        fields = ('pk', 'score', 'status', 'student_id')
+        read_only_fields = ['status', 'student_id']
 
     def validate_score(self, value):
         max_score = self.instance.assignment.maximum_score
@@ -60,9 +58,6 @@ class BaseStudentAssignmentSerializer(serializers.ModelSerializer):
             msg = _("Score can't be larger than %s") % max_score
             raise serializers.ValidationError(msg)
         return value
-
-    def get_state(self, obj):
-        return obj.state.value
 
 
 # TODO: inline
