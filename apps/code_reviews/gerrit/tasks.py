@@ -17,10 +17,11 @@ from code_reviews.gerrit.services import (
     get_or_create_change, list_change_files, normalize_code_review_score
 )
 from code_reviews.models import GerritChange
+from courses.constants import AssignmentStatuses
 from learning.models import AssignmentComment, AssignmentSubmissionTypes
 from learning.permissions import EditStudentAssignment
 from learning.services.personal_assignment_service import (
-    update_personal_assignment_score
+    update_personal_assignment_score, update_personal_assignment_status
 )
 from learning.settings import AssignmentScoreUpdateSource
 from users.models import User
@@ -151,4 +152,7 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
                                          score_old=score_old,
                                          score_new=score_new,
                                          source=AssignmentScoreUpdateSource.WEBHOOK_GERRIT)
+        update_personal_assignment_status(student_assignment=student_assignment,
+                                          status_old=AssignmentStatuses(student_assignment.status),
+                                          status_new=AssignmentStatuses.NEED_FIXES)
     return student_assignment.pk

@@ -640,7 +640,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         return f" /{self.assignment.maximum_score}"
 
     @property
-    def state_display(self):
+    def state_display(self) -> str:
         # TODO: replace hybrid state with detached score_display & status
         if self.score is not None:
             return self.score_display
