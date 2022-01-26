@@ -627,13 +627,11 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         statuses = self.assignment.get_assignment_statuses()
         if self.is_submission_received:
             statuses.remove(AssignmentStatuses.NOT_SUBMITTED)
-        if self.score is not None:
-            statuses.remove(AssignmentStatuses.ON_CHECKING)
         return statuses
 
     @property
     def score_display(self) -> str:
-        if self.score:
+        if self.score is not None:
             return f"{self.score}/{self.assignment.maximum_score}"
         if self.status == AssignmentStatuses.NOT_SUBMITTED:
             return "—"
@@ -641,18 +639,13 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             return "…"
         return f" /{self.assignment.maximum_score}"
 
-
     @property
     def state_display(self):
-        # TODO: replace with score_display & status
+        # TODO: replace hybrid state with detached score_display & status
         if self.score is not None:
             return self.score_display
         else:
-            if not self.assignment.is_online or self.is_submission_received:
-                return AssignmentStatuses.ON_CHECKING.label
-            else:
-                return AssignmentStatuses.NOT_SUBMITTED.label
-
+            return AssignmentStatuses(self.status).label
 
     @property
     def weight_score(self) -> Optional[Decimal]:

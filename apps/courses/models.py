@@ -1164,7 +1164,7 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
     def get_assignment_statuses(self) -> List[AssignmentStatuses]:
         statuses = [
             AssignmentStatuses.NOT_SUBMITTED,
-            AssignmentStatuses.NOT_CHECKED,
+            AssignmentStatuses.ON_CHECKING,
             AssignmentStatuses.COMPLETED
         ]
         if self.submission_type in [AssignmentFormat.ONLINE, AssignmentFormat.CODE_REVIEW]:

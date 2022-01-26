@@ -92,7 +92,9 @@ def create_assignment_solution(*, personal_assignment: StudentAssignment,
                                  text=message,
                                  attached_file=attachment)
     solution.save()
-
+    update_personal_assignment_status(student_assignment=personal_assignment,
+                                      status_old=AssignmentStatuses(personal_assignment.status),
+                                      status_new=AssignmentStatuses.ON_CHECKING)
     from learning.tasks import update_student_assignment_stats
     update_student_assignment_stats.delay(personal_assignment.pk)
 
@@ -160,17 +162,16 @@ def get_draft_solution(user: User, student_assignment: StudentAssignment):
                                  AssignmentSubmissionTypes.SOLUTION)
 
 
-def update_personal_assignment_status(student_assignment: StudentAssignment,
-                                     status_old: AssignmentStatuses,
-                                     status_new: AssignmentStatuses)-> Tuple[bool, StudentAssignment]:
+def update_personal_assignment_status(*, student_assignment: StudentAssignment,
+                                      status_old: AssignmentStatuses,
+                                      status_new: AssignmentStatuses) -> Tuple[bool, StudentAssignment]:
     if status_old == status_new:
         return True, student_assignment
     if status_new in student_assignment.get_allowed_statuses():
         updated = (StudentAssignment.objects
                    .filter(pk=student_assignment.pk, status=status_old)
                    .update(status=status_new))
-        if not updated:
-            return False, student_assignment
+        return updated, student_assignment
     raise ValueError(f"Wrong status {status_new} for student assignment")
 
 

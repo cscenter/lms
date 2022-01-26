@@ -301,6 +301,15 @@ def test_soft_delete_student_assignment():
 
 
 @pytest.mark.django_db
+def test_student_assignment_get_allowed_statuses():
+    sa = StudentAssignmentFactory(assignment__submission_type=AssignmentFormat.ONLINE)
+    AssignmentCommentFactory(student_assignment=sa,
+                             type=AssignmentSubmissionTypes.SOLUTION)
+    sa.refresh_from_db()
+    assert AssignmentStatuses.NOT_SUBMITTED not in sa.get_allowed_statuses()
+
+
+@pytest.mark.django_db
 def test_learning_space_full_name():
     location = LocationFactory(name='Zombie', address='ZombieLand')
     learning_space = LearningSpaceFactory(location=location, name='')
