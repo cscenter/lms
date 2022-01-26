@@ -17,8 +17,8 @@
 
 {% block content %}
   <div class="container">
-    <h1 class="mb-30">Очередь проверки</h1>
     {% if app_data is not defined or app_data.props.courseOptions is not defined %}
+      <h1 class="mb-30">Очередь проверки</h1>
       Вы не были добавлены ни в одно прочтение курса в качестве преподавателя.
     {% else %}
 
