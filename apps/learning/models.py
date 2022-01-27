@@ -623,27 +623,25 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         except ValueError:
             return False
 
-    def get_allowed_statuses(self):
-        statuses = self.assignment.get_assignment_statuses
-        if self.is_submission_received:
-            statuses.remove(AssignmentStatuses.NOT_SUBMITTED)
-        return statuses
+    def is_status_transition_allowed(self, status_new):
+        statuses = self.assignment.assignment_statuses
+        if status_new == AssignmentStatuses.NOT_SUBMITTED and self.is_submission_received:
+            return False
+        return status_new in statuses
 
-    @property
-    def score_display(self) -> str:
+    def get_score_display(self) -> str:
         if self.score is not None:
-            return f"{self.score}/{self.assignment.maximum_score}"
-        if self.status == AssignmentStatuses.NOT_SUBMITTED:
-            return "—"
-        if self.status == AssignmentStatuses.ON_CHECKING:
-            return "…"
-        return f" /{self.assignment.maximum_score}"
+            return str(self.score)
+        return "—"
+
+    def get_score_verbose_display(self) -> str:
+        return f"{self.get_score_display()}/{self.assignment.maximum_score}"
 
     @property
     def state_display(self) -> str:
         # TODO: replace hybrid state with detached score_display & status
         if self.score is not None:
-            return self.score_display
+            return self.get_score_verbose_display()
         else:
             return AssignmentStatuses(self.status).label
 

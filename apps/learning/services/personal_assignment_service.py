@@ -167,11 +167,12 @@ def update_personal_assignment_status(*, student_assignment: StudentAssignment,
                                       status_new: AssignmentStatuses) -> Tuple[bool, StudentAssignment]:
     if status_old == status_new:
         return True, student_assignment
-    if status_new not in student_assignment.get_allowed_statuses():
+    if not student_assignment.is_status_transition_allowed(status_new):
         raise ValueError(f"Wrong status {status_new} for student assignment")
     updated = (StudentAssignment.objects
                .filter(pk=student_assignment.pk, status=status_old)
                .update(status=status_new))
+    print(updated, status_old, status_new)
     if updated:
         student_assignment.status = status_new
     return updated, student_assignment

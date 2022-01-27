@@ -125,14 +125,12 @@ def test_student_assignment_state_display():
 
 
 @pytest.mark.django_db
-def test_student_assignment_score_display():
+def test_student_assignment_get_score_verbose_display():
     sa = StudentAssignmentFactory(assignment__maximum_score=50)
-    assert sa.score_display == "—"
-    sa.status = AssignmentStatuses.ON_CHECKING
-    assert sa.score_display == "…"
+    assert sa.get_score_verbose_display() == f"—/{sa.assignment.maximum_score}"
     sa.score = 30
     expected_display = f"{sa.score}/{sa.assignment.maximum_score}"
-    assert sa.score_display == expected_display
+    assert sa.get_score_verbose_display() == expected_display
 
 
 @pytest.mark.django_db
@@ -301,12 +299,12 @@ def test_soft_delete_student_assignment():
 
 
 @pytest.mark.django_db
-def test_student_assignment_get_allowed_statuses():
+def test_student_assignment_is_status_transition_allowed():
     sa = StudentAssignmentFactory(assignment__submission_type=AssignmentFormat.ONLINE)
     AssignmentCommentFactory(student_assignment=sa,
                              type=AssignmentSubmissionTypes.SOLUTION)
     sa.refresh_from_db()
-    assert AssignmentStatuses.NOT_SUBMITTED not in sa.get_allowed_statuses()
+    assert not sa.is_status_transition_allowed(AssignmentStatuses.NOT_SUBMITTED)
 
 
 @pytest.mark.django_db
