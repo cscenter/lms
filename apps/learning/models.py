@@ -490,12 +490,6 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
                         DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'assignment'
 
-    # TODO: remove with .last_comment_from field
-    class CommentAuthorTypes(DjangoChoices):
-        NOBODY = ChoiceItem(0)
-        STUDENT = ChoiceItem(1)
-        TEACHER = ChoiceItem(2)
-
     class States(DjangoChoices):
         NOT_SUBMITTED = ChoiceItem(
             "not_submitted", _("Assignment|not submitted"),
@@ -575,8 +569,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
     last_comment_from = models.PositiveSmallIntegerField(
         verbose_name=_("The author type of the latest comment"),
         editable=False,
-        choices=CommentAuthorTypes.choices,
-        default=CommentAuthorTypes.NOBODY)
+        blank=True, null=True)
     meta = models.JSONField(encoder=JSONEncoder, blank=True, null=True,
                             editable=False)
 
