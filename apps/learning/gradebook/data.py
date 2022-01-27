@@ -196,6 +196,8 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
                 .filter(*filters)
                 .only("pk",
                       "score",
+                      "penalty",
+                      "status",
                       "meta",
                       "assignment_id",
                       "student_id")
@@ -229,4 +231,6 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
 def get_student_assignment_state(student_assignment: StudentAssignment) -> str:
     if student_assignment.status == AssignmentStatuses.ON_CHECKING:
         return "…"
+    elif student_assignment.final_score is None:
+        return "—"
     return student_assignment.get_score_verbose_display()
