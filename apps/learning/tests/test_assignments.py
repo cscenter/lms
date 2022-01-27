@@ -66,16 +66,16 @@ def test_security_course_detail(client):
 
 
 @pytest.mark.django_db
-def test_student_assignment_model_weight_score():
+def test_student_assignment_model_weighted_score():
     assignment = AssignmentFactory(weight=1, maximum_score=10, passing_score=2)
     student_assignment = StudentAssignment(assignment=assignment, score=2)
-    assert student_assignment.weight_score == 2
+    assert student_assignment.weighted_score == 2
     assignment.weight = Decimal('.5')
-    assert student_assignment.weight_score == 1
+    assert student_assignment.weighted_score == 1
     assignment.weight = Decimal('0.00')
-    assert student_assignment.weight_score == 0
+    assert student_assignment.weighted_score == 0
     assignment.weight = Decimal('0.01')
-    assert student_assignment.weight_score == Decimal('0.02')
+    assert student_assignment.weighted_score == Decimal('0.02')
 
 
 @pytest.mark.django_db

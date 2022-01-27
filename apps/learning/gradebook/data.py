@@ -213,8 +213,8 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
         student_progress = student_assignments[gradebook_student.index]
         total_score = Decimal(0)
         for s in student_progress:
-            if s is not None and s.weight_score is not None:
-                total_score += s.weight_score
+            if s is not None and s.weighted_score is not None:
+                total_score += s.weighted_score
         total_score = normalize_score(total_score)
         setattr(gradebook_student, "total_score", total_score)
     show_weight = any(ga.assignment.weight < 1 for ga in assignments.values())

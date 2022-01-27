@@ -8,12 +8,10 @@ from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from core.typings import assert_never
 from courses.constants import AssignmentFormat
 from courses.models import Assignment
 from grading.api.yandex_contest import (
-    ProblemStatus, YandexContestAPI, YandexContestParticipantProgress,
-    yandex_contest_scoreboard_iterator
+    ProblemStatus, YandexContestAPI, yandex_contest_scoreboard_iterator
 )
 from grading.models import Checker
 from grading.utils import YandexContestScoreSource

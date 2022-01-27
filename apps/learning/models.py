@@ -690,7 +690,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             return self.state.abbr
 
     @property
-    def weight_score(self) -> Optional[Decimal]:
+    def weighted_score(self) -> Optional[Decimal]:
         return (self.assignment.weight * self.score) if self.score else None
 
     def get_execution_time_display(self):
