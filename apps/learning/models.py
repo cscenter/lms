@@ -686,6 +686,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         else:
             return score
 
+    # FIXME: remove? .weighted_final_score must be preferred over this prop
     @property
     def weighted_score(self) -> Optional[Decimal]:
         if self.score is None:

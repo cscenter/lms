@@ -33,7 +33,7 @@
         {{ assignment_deadline_at_local|naturalday("d E Y") }} {{ assignment_deadline_at_local|time("H:i") }}
       </p>
       <p>
-        {% trans %}Submission Type{% endtrans %}: {{ assignment.get_submission_type_display()|lower }}
+        {% trans %}Assignment Format{% endtrans %}: {{ assignment.get_submission_type_display()|lower }}
       </p>
       <p>
         {% trans %}Assignment Weight{% endtrans %}: {{ assignment.weight }}

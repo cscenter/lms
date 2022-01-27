@@ -143,7 +143,7 @@
                 <h5 class="assignment">{% trans "Deadline" %}</h5>
                 <span class="nowrap">{{ a_s.assignment.deadline_at|timezone:time_zone|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at|timezone:time_zone|time:"H:i" }}</span>
 
-                <h5 class="assignment">{% trans "Submission Type" %}</h5>
+                <h5 class="assignment">{% trans "Assignment Format" %}</h5>
                 {{ a_s.assignment.get_submission_type_display }}
 
                 <h5 class="assignment">{% trans "Passing score" %}</h5>

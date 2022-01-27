@@ -1,6 +1,6 @@
 import os.path
 from datetime import datetime, timedelta
-from typing import NamedTuple, Optional, List
+from typing import List, NamedTuple, Optional
 
 import pytz
 from bitfield import BitField
@@ -30,7 +30,8 @@ from core.timezone.typing import Timezone
 from core.urls import reverse
 from core.utils import get_youtube_video_id, hashids, instance_memoize
 from courses.constants import (
-    AssigneeMode, AssignmentFormat, MaterialVisibilityTypes, TeacherRoles, AssignmentStatuses
+    AssigneeMode, AssignmentFormat, AssignmentStatuses, MaterialVisibilityTypes,
+    TeacherRoles
 )
 from courses.utils import TermPair, get_current_term_pair
 from files.models import ConfigurableStorageFileField
@@ -1047,9 +1048,9 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
         on_delete=models.PROTECT)
     deadline_at = TimezoneAwareDateTimeField(_("Assignment|deadline"))
     time_zone = TimeZoneField(_("Time Zone"))
-    # TODO: rename to solution_format
+    # TODO: rename to .format
     submission_type = models.CharField(
-        verbose_name=_("Submission Type"),
+        verbose_name=_("Assignment Format"),
         max_length=42,
         choices=AssignmentFormat.choices
     )

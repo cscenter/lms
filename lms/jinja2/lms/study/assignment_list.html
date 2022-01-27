@@ -25,7 +25,7 @@
             <th></th>
             <th width="20%">{% trans %}Course{% endtrans %}</th>
             <th width="17%">{% trans %}State{% endtrans %}</th>
-            <th width="15%">{% trans %}Submission Type{% endtrans %}</th>
+            <th width="15%">{% trans %}Assignment Format{% endtrans %}</th>
             </thead>
             {% for a_s in assignment_list_open %}
               <tr class="{{ "unread" if a_s.has_unread() else "noop" }}">
@@ -87,7 +87,7 @@
             <th></th>
             <th width="20%">{% trans %}Course{% endtrans %}</th>
             <th width="17%">{% trans %}State{% endtrans %}</th>
-            <th width="15%">{% trans %}Submission Type{% endtrans %}</th>
+            <th width="15%">{% trans %}Assignment Format{% endtrans %}</th>
             </thead>
             {% for a_s in assignment_list_archive %}
               <tr class="{{ "unread" if a_s.has_unread() else "noop" }}">

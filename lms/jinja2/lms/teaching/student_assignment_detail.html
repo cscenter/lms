@@ -195,7 +195,7 @@
           {{ a_s.assignment.deadline_at_local(tz=time_zone)|naturalday("d E Y") }} {{ a_s.assignment.deadline_at_local(tz=time_zone)|time("H:i") }}
         </span>
 
-        <h5 class="assignment">{% trans %}Submission Type{% endtrans %}</h5>
+        <h5 class="assignment">{% trans %}Assignment Format{% endtrans %}</h5>
         {{ a_s.assignment.get_submission_type_display() }}
 
         <h5 class="assignment">{% trans %}Passing score{% endtrans %}</h5>
