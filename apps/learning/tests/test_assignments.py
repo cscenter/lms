@@ -66,7 +66,40 @@ def test_security_course_detail(client):
 
 
 @pytest.mark.django_db
-def test_student_assignment_model_weighted_score():
+def test_model_student_assignment_final_score():
+    assignment1 = AssignmentFactory(weight=1, maximum_score=10, passing_score=2,
+                                    submission_type=AssignmentFormat.NO_SUBMIT)
+    student_assignment = StudentAssignment(assignment=assignment1,
+                                           score=Decimal('2.34'))
+    assert student_assignment.penalty is None
+    assert student_assignment.final_score == student_assignment.score
+    assert student_assignment.final_score == Decimal('2.34')
+    student_assignment.penalty = Decimal('1.11')
+    assert student_assignment.final_score == Decimal('3.45')
+    student_assignment.score = None
+    assert student_assignment.final_score == Decimal('1.11')
+    student_assignment.penalty = None
+    assert student_assignment.final_score is None
+
+
+@pytest.mark.django_db
+def test_model_student_assignment_final_score_penalty_assignment_format():
+    assignment = AssignmentFactory(weight=1, maximum_score=10, passing_score=2,
+                                   submission_type=AssignmentFormat.PENALTY)
+    student_assignment = StudentAssignment(assignment=assignment,
+                                           score=Decimal('2.34'),
+                                           penalty=Decimal('0.22'))
+    assert student_assignment.final_score == -Decimal('2.34')
+    # Real penalty value in a score field
+    student_assignment.score = None
+    student_assignment.penalty = Decimal('0.33')
+    assert student_assignment.final_score is None
+    student_assignment.penalty = None
+    assert student_assignment.final_score is None
+
+
+@pytest.mark.django_db
+def test_model_student_assignment_weighted_score():
     assignment = AssignmentFactory(weight=1, maximum_score=10, passing_score=2)
     student_assignment = StudentAssignment(assignment=assignment, score=2)
     assert student_assignment.weighted_score == 2
@@ -76,6 +109,27 @@ def test_student_assignment_model_weighted_score():
     assert student_assignment.weighted_score == 0
     assignment.weight = Decimal('0.01')
     assert student_assignment.weighted_score == Decimal('0.02')
+    student_assignment.score = Decimal(0)
+    assert student_assignment.weighted_score == Decimal(0)
+
+
+@pytest.mark.django_db
+def test_model_student_assignment_weighted_final_score():
+    assignment = AssignmentFactory(weight=1, maximum_score=10, passing_score=2)
+    student_assignment = StudentAssignment(assignment=assignment, score=None,
+                                           penalty=None)
+    assert student_assignment.final_score is None
+    assert student_assignment.weighted_final_score is None
+    student_assignment.score = 2
+    assert student_assignment.weighted_final_score == 2
+    assignment.weight = Decimal('.5')
+    assert student_assignment.weighted_final_score == 1
+    assignment.weight = Decimal('0.00')
+    assert student_assignment.weighted_final_score == 0
+    assignment.weight = Decimal('0.01')
+    assert student_assignment.weighted_final_score == Decimal('0.02')
+    student_assignment.score = Decimal(0)
+    assert student_assignment.weighted_final_score == Decimal(0)
 
 
 @pytest.mark.django_db

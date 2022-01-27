@@ -345,15 +345,15 @@ def test_total_score(client):
 
 
 @pytest.mark.django_db
-def test_total_score_weight(client):
+def test_total_score_weighted(client):
     teacher = TeacherFactory()
-    co = CourseFactory(teachers=[teacher])
+    course = CourseFactory(teachers=[teacher])
     client.login(teacher)
     student = StudentFactory()
-    EnrollmentFactory(student=student, course=co)
-    a1 = AssignmentFactory(course=co, weight=Decimal('1.00'), maximum_score=10)
-    a2 = AssignmentFactory(course=co, weight=Decimal('0.3'), maximum_score=20)
-    a3 = AssignmentFactory(course=co, weight=Decimal('0.3'), maximum_score=3)
+    EnrollmentFactory(student=student, course=course)
+    a1 = AssignmentFactory(course=course, weight=Decimal('1.00'), maximum_score=10)
+    a2 = AssignmentFactory(course=course, weight=Decimal('0.3'), maximum_score=20)
+    a3 = AssignmentFactory(course=course, weight=Decimal('0.3'), maximum_score=3)
     sa1 = StudentAssignment.objects.get(student=student, assignment=a1)
     sa2 = StudentAssignment.objects.get(student=student, assignment=a2)
     sa1.score = 3
@@ -361,16 +361,24 @@ def test_total_score_weight(client):
     sa2.score = 12
     sa2.save()
     expected_total_score = 3 * a1.weight + 12 * a2.weight
-    response = client.get(co.get_gradebook_url())
+    response = client.get(course.get_gradebook_url())
     head_student = next(iter(response.context_data['gradebook'].students.values()))
     assert head_student.total_score == expected_total_score
-    a4 = AssignmentFactory(course=co, weight=Decimal('0'), maximum_score=3)
+    a4 = AssignmentFactory(course=course, weight=Decimal('0'), maximum_score=3)
     sa4 = StudentAssignment.objects.get(student=student, assignment=a4)
     sa4.score = 2
     sa4.save()
-    response = client.get(co.get_gradebook_url())
+    response = client.get(course.get_gradebook_url())
     head_student = next(iter(response.context_data['gradebook'].students.values()))
     assert head_student.total_score == expected_total_score
+    a5 = AssignmentFactory(course=course, maximum_score=3,
+                           submission_type=AssignmentFormat.PENALTY)
+    sa5 = StudentAssignment.objects.get(student=student, assignment=a5)
+    sa5.score = 2
+    sa5.save()
+    response = client.get(course.get_gradebook_url())
+    head_student = next(iter(response.context_data['gradebook'].students.values()))
+    assert head_student.total_score == expected_total_score - 2
 
 
 @pytest.mark.django_db

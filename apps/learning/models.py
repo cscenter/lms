@@ -32,7 +32,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location, Timestamp
 from core.timezone import TimezoneAwareMixin, now_local
 from core.urls import reverse
 from core.utils import hashids
-from courses.constants import AssignmentStatuses
+from courses.constants import AssignmentFormat, AssignmentStatuses
 from courses.models import Assignment, Course, CourseNews, Semester, StudentGroupTypes
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
@@ -522,6 +522,8 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         null=True,
         blank=True)
     # Note: not in use, added for further customisation
+    # TODO: rename current ScoreField implementation to PositiveScoreField,
+    #  ScoreField should allow to store negative values
     penalty = ScoreField(
         verbose_name=_("Penalty"),
         null=True,
@@ -666,8 +668,35 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             return AssignmentStatuses(self.status).label
 
     @property
+    def final_score(self) -> Optional[Decimal]:
+        """Returns sum of score and penalty points."""
+        score: Optional[Decimal] = self.score
+        penalty: Optional[Decimal] = self.penalty
+        # For `penalty` assignment format we store negative penalty value in a
+        # score field which could store only positive values
+        if self.assignment.submission_type == AssignmentFormat.PENALTY:
+            if self.score is not None:
+                score, penalty = Decimal(0), -self.score
+            else:
+                penalty = None
+        if score is None:
+            return penalty
+        elif penalty is not None:
+            return score + penalty
+        else:
+            return score
+
+    @property
     def weighted_score(self) -> Optional[Decimal]:
-        return (self.assignment.weight * self.score) if self.score else None
+        if self.score is None:
+            return None
+        return self.assignment.weight * self.score
+
+    @property
+    def weighted_final_score(self) -> Optional[Decimal]:
+        if self.final_score is None:
+            return None
+        return self.assignment.weight * self.final_score
 
     def get_execution_time_display(self):
         return humanize_duration(self.execution_time)

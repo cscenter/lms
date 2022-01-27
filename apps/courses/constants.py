@@ -59,6 +59,7 @@ class AssignmentFormat(DjangoChoices):
     YANDEX_CONTEST = C("ya.contest", _("Yandex.Contest"))
     EXTERNAL = C("external", _("External Service"))
     CODE_REVIEW = C("code_review", _("Code Review Submission"))
+    PENALTY = C("penalty", _("Penalty"))
     NO_SUBMIT = C("other", _("No Submission"))  # on paper, etc
 
     with_checker = {CODE_REVIEW.value, YANDEX_CONTEST.value}

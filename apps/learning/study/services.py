@@ -22,6 +22,8 @@ def get_solution_form(student_assignment: StudentAssignment,
         return None
     elif assignment_format == AssignmentFormat.YANDEX_CONTEST:
         return None
+    elif assignment_format == AssignmentFormat.PENALTY:
+        return None
     elif assignment_format == AssignmentFormat.EXTERNAL:
         # FIXME: return None
         form = AssignmentSolutionDefaultForm(assignment, data=data, files=files)
