@@ -533,6 +533,12 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         verbose_name=_("Grade"),
         null=True,
         blank=True)
+    # Note: not in use, added for further customisation
+    penalty = ScoreField(
+        verbose_name=_("Penalty"),
+        null=True,
+        blank=True,
+        editable=False)
     score_changed = MonitorField(
         verbose_name=_("Assignment|grade changed"),
         monitor='score')
@@ -772,6 +778,10 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
         upload_to=assignment_comment_attachment_upload_to,
         storage=private_storage,
         blank=True)
+    meta = models.JSONField(
+        encoder=JSONEncoder,
+        blank=True, null=True,
+        editable=False)
 
     tracker = FieldTracker(fields=['is_published'])
 
