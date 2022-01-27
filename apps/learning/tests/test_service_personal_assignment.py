@@ -242,4 +242,3 @@ def test_update_personal_assignment_status():
     sa.refresh_from_db()
     assert updated
     assert sa.status == AssignmentStatuses.NEED_FIXES
-
