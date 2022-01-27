@@ -483,11 +483,26 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
                         DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'assignment'
 
-    # TODO: remove with .last_comment_from field
-    class CommentAuthorTypes(DjangoChoices):
-        NOBODY = ChoiceItem(0)
-        STUDENT = ChoiceItem(1)
-        TEACHER = ChoiceItem(2)
+    class States(DjangoChoices):
+        NOT_SUBMITTED = ChoiceItem(
+            "not_submitted", _("Assignment|not submitted"),
+            abbr="—", css_class="not-submitted")
+        NOT_CHECKED = ChoiceItem(
+            "not_checked", _("Assignment|not checked"),
+            abbr="…", css_class="not-checked")
+        UNSATISFACTORY = ChoiceItem(
+            "unsatisfactory", _("Assignment|unsatisfactory"),
+            abbr="2", css_class="unsatisfactory")
+        CREDIT = ChoiceItem(
+            "pass", _("Assignment|pass"),
+            abbr="3", css_class="pass")
+        GOOD = ChoiceItem(
+            "good", _("Assignment|good"),
+            abbr="4", css_class="good")
+        EXCELLENT = ChoiceItem(
+            "excellent", _("Assignment|excellent"),
+            abbr="5", css_class="excellent")
+
 
     assignment = models.ForeignKey(
         Assignment,
@@ -506,6 +521,12 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         verbose_name=_("Grade"),
         null=True,
         blank=True)
+    # Note: not in use, added for further customisation
+    penalty = ScoreField(
+        verbose_name=_("Penalty"),
+        null=True,
+        blank=True,
+        editable=False)
     score_changed = MonitorField(
         verbose_name=_("Assignment|grade changed"),
         monitor='score')
@@ -542,8 +563,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
     last_comment_from = models.PositiveSmallIntegerField(
         verbose_name=_("The author type of the latest comment"),
         editable=False,
-        choices=CommentAuthorTypes.choices,
-        default=CommentAuthorTypes.NOBODY)
+        blank=True, null=True)
     meta = models.JSONField(encoder=JSONEncoder, blank=True, null=True,
                             editable=False)
 
@@ -646,7 +666,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             return AssignmentStatuses(self.status).label
 
     @property
-    def weight_score(self) -> Optional[Decimal]:
+    def weighted_score(self) -> Optional[Decimal]:
         return (self.assignment.weight * self.score) if self.score else None
 
     def get_execution_time_display(self):
@@ -727,6 +747,10 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
         upload_to=assignment_comment_attachment_upload_to,
         storage=private_storage,
         blank=True)
+    meta = models.JSONField(
+        encoder=JSONEncoder,
+        blank=True, null=True,
+        editable=False)
 
     tracker = FieldTracker(fields=['is_published'])
 

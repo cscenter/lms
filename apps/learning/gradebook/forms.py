@@ -10,6 +10,7 @@ from django.utils.encoding import force_str
 from django.utils.translation import gettext as _
 
 from core.forms import ScoreField
+from courses.constants import AssignmentFormat
 from courses.models import Assignment
 from learning.gradebook.data import GradeBookData
 from learning.models import Course, Enrollment, StudentAssignment
@@ -31,7 +32,7 @@ class BaseGradebookForm(forms.Form):
     ASSIGNMENT_SCORE_PREFIX = "sa_"
     FINAL_GRADE_PREFIX = "final_grade_"
 
-    is_readonly: bool
+    _is_score_readonly: bool
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,6 +46,22 @@ class BaseGradebookForm(forms.Form):
         if bound_field.errors:
             bound_field.field.widget.attrs["class"] += " __unsaved"
         return bound_field
+
+    def is_widget_enabled(self, student_assignment: StudentAssignment) -> bool:
+        return self.is_assignment_widget_enabled(student_assignment,
+                                                 self._is_score_readonly)
+
+    @staticmethod
+    def is_assignment_widget_enabled(student_assignment: StudentAssignment,
+                                     is_readonly: bool) -> bool:
+        if is_readonly:
+            return False
+        assignment = student_assignment.assignment
+        # Disallow editing yandex contest results with gradebook form,
+        # teachers should use import functionality instead
+        if assignment.submission_type == AssignmentFormat.YANDEX_CONTEST:
+            return False
+        return not assignment.is_online
 
     def _get_initial_value(self, field_name):
         initial_prefixed_name = self.add_initial_prefix(field_name)
@@ -212,7 +229,7 @@ class GradeBookFormFactory:
                 if not sa:
                     continue
                 assignment = sa.assignment
-                if not (assignment.is_online or is_assignment_score_readonly):
+                if BaseGradebookForm.is_assignment_widget_enabled(sa, is_assignment_score_readonly):
                     k = BaseGradebookForm.ASSIGNMENT_SCORE_PREFIX + str(sa.id)
                     fields[k] = AssignmentScore(assignment, sa)
 
@@ -221,8 +238,8 @@ class GradeBookFormFactory:
             fields[k] = EnrollmentFinalGrade(gs, gradebook.course, is_readonly)
         cls_dict: Dict[str, Any] = fields
         cls_dict["_course"] = gradebook.course
+        cls_dict["_is_score_readonly"] = is_assignment_score_readonly
         cls_dict["is_readonly"] = is_readonly
-        cls_dict["is_score_readonly"] = is_assignment_score_readonly
         return type("GradebookForm", (BaseGradebookForm,), cls_dict)
 
     @classmethod
