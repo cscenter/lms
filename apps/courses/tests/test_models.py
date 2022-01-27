@@ -318,7 +318,7 @@ def test_assignment_attached_file_name():
 @pytest.mark.django_db
 def test_assignment_get_allowed_statuses(submission_type, need_fixes_allowed):
     a = AssignmentFactory(submission_type=submission_type)
-    assert need_fixes_allowed == (AssignmentStatuses.NEED_FIXES in a.assignment_statuses)
+    assert need_fixes_allowed == (AssignmentStatuses.NEED_FIXES in a.statuses)
 
 
 @pytest.mark.parametrize("teacher_role", CourseTeacher.roles.itervalues())

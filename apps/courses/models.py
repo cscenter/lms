@@ -1162,7 +1162,7 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
         return self.deadline_at < timezone.now()
 
     @cached_property
-    def assignment_statuses(self) -> List[AssignmentStatuses]:
+    def statuses(self) -> List[AssignmentStatuses]:
         statuses = [
             AssignmentStatuses.NOT_SUBMITTED,
             AssignmentStatuses.ON_CHECKING,

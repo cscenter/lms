@@ -171,7 +171,7 @@ def update_personal_assignment_status(*, student_assignment: StudentAssignment,
         raise ValueError(f"Wrong status {status_new} for student assignment")
     updated = (StudentAssignment.objects
                .filter(pk=student_assignment.pk, status=status_old)
-               .update(status=status_new))
+               .update(status=status_new, modified=get_now_utc()))
     if updated:
         student_assignment.status = status_new
     return updated, student_assignment

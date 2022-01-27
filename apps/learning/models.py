@@ -644,7 +644,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             return False
 
     def is_status_transition_allowed(self, status_new):
-        statuses = self.assignment.assignment_statuses
+        statuses = self.assignment.statuses
         if status_new == AssignmentStatuses.NOT_SUBMITTED and self.is_submission_received:
             return False
         return status_new in statuses
