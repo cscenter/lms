@@ -10,7 +10,7 @@ from django.db.models import Prefetch
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN, TEST_DOMAIN
-from courses.constants import MaterialVisibilityTypes, SemesterTypes
+from courses.constants import MaterialVisibilityTypes, SemesterTypes, AssignmentFormat, AssignmentStatuses
 from courses.models import Assignment, Course, CourseClass, CourseTeacher
 from courses.selectors import course_teachers_prefetch_queryset
 from courses.tests.factories import (
@@ -306,6 +306,19 @@ def test_assignment_attached_file_name():
     fname = "foobar.pdf"
     aa = AssignmentAttachmentFactory.create(attachment__filename=fname)
     assert re.match("^foobar(_[0-9a-zA-Z]+)?.pdf$", aa.file_name)
+
+
+@pytest.mark.parametrize("submission_type,need_fixes_allowed", [
+    (AssignmentFormat.ONLINE, True),
+    (AssignmentFormat.YANDEX_CONTEST, False),
+    (AssignmentFormat.NO_SUBMIT, False),
+    (AssignmentFormat.CODE_REVIEW, True),
+    (AssignmentFormat.EXTERNAL, False)
+])
+@pytest.mark.django_db
+def test_assignment_get_allowed_statuses(submission_type, need_fixes_allowed):
+    a = AssignmentFactory(submission_type=submission_type)
+    assert need_fixes_allowed == (AssignmentStatuses.NEED_FIXES in a.assignment_statuses)
 
 
 @pytest.mark.parametrize("teacher_role", CourseTeacher.roles.itervalues())

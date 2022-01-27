@@ -64,6 +64,15 @@ class AssignmentFormat(DjangoChoices):
     with_checker = {CODE_REVIEW.value, YANDEX_CONTEST.value}
 
 
+class AssignmentStatuses(TextChoices):
+    # TODO: describe each status
+    NEW = 'new', _("AssignmentStatus|New"),  # TODO: remove after integration
+    NOT_SUBMITTED = 'not_submitted', _("AssignmentStatus|Not submitted"),
+    ON_CHECKING = 'on_checking', _("AssignmentStatus|On checking"),
+    NEED_FIXES = 'need_fixes', _("AssignmentStatus|Need fixes"),
+    COMPLETED = 'completed', _("AssignmentStatus|Completed")
+
+
 class AssigneeMode(TextChoices):
     DISABLED = 'off', _('Without a responsible person')
     MANUAL = 'manual', _('Choose from the list')

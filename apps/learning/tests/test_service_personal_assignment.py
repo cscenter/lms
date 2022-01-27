@@ -1,12 +1,13 @@
 import pytest
 
-from courses.constants import AssigneeMode
+from courses.constants import AssigneeMode, AssignmentFormat, AssignmentStatuses
 from courses.models import CourseGroupModes, CourseTeacher
 from courses.tests.factories import AssignmentFactory, CourseFactory
-from learning.models import Enrollment, PersonalAssignmentActivity, StudentAssignment
+from learning.models import Enrollment, PersonalAssignmentActivity, StudentAssignment, AssignmentSubmissionTypes
 from learning.services import EnrollmentService
 from learning.services.personal_assignment_service import (
-    create_assignment_comment, resolve_assignees_for_personal_assignment
+    create_assignment_comment, resolve_assignees_for_personal_assignment, update_personal_assignment_status,
+    create_assignment_solution
 )
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory,
@@ -173,3 +174,71 @@ def test_maybe_set_assignee_for_personal_assignment():
     student_assignment.refresh_from_db()
     assert student_assignment.trigger_auto_assign is False
     assert student_assignment.assignee == course_teacher1
+
+
+@pytest.mark.django_db
+def test_create_assignment_solution_changes_status():
+    sa = StudentAssignmentFactory(assignment__submission_type=AssignmentFormat.ONLINE)
+    student = sa.student
+    assert sa.status == AssignmentStatuses.NOT_SUBMITTED
+    create_assignment_solution(personal_assignment=sa,
+                               created_by=student,
+                               message="solution")
+    sa.refresh_from_db()
+    assert sa.status == AssignmentStatuses.ON_CHECKING
+
+
+@pytest.mark.django_db
+def test_update_personal_assignment_status():
+    sa = StudentAssignmentFactory(assignment__submission_type=AssignmentFormat.NO_SUBMIT)
+
+    assert sa.status == AssignmentStatuses.NOT_SUBMITTED
+    updated, _ = update_personal_assignment_status(student_assignment=sa,
+                                                   status_old=AssignmentStatuses.NOT_SUBMITTED,
+                                                   status_new=AssignmentStatuses.NOT_SUBMITTED)
+    sa.refresh_from_db()
+    assert updated
+
+    # testing case when status_old is wrong
+    updated, _ = update_personal_assignment_status(student_assignment=sa,
+                                                   status_old=AssignmentStatuses.ON_CHECKING,
+                                                   status_new=AssignmentStatuses.NOT_SUBMITTED)
+    assert not updated
+
+    # submission is needed for the next test
+    AssignmentCommentFactory(student_assignment=sa,
+                             type=AssignmentSubmissionTypes.SOLUTION)
+    sa.refresh_from_db()
+    # it changes status automatically
+    assert sa.status == AssignmentStatuses.ON_CHECKING
+
+    # test forbidden statuses
+    with pytest.raises(ValueError):
+        # status NOT_SUBMITTED not allowed if submission exists
+        update_personal_assignment_status(student_assignment=sa,
+                                          status_old=AssignmentStatuses.ON_CHECKING,
+                                          status_new=AssignmentStatuses.NOT_SUBMITTED)
+    with pytest.raises(ValueError):
+        # NEED_FIXES not allowed for NO_SUBMIT assignment format
+        update_personal_assignment_status(student_assignment=sa,
+                                          status_old=AssignmentStatuses.ON_CHECKING,
+                                          status_new=AssignmentStatuses.NEED_FIXES)
+
+    updated, _ = update_personal_assignment_status(student_assignment=sa,
+                                                   status_old=AssignmentStatuses.ON_CHECKING,
+                                                   status_new=AssignmentStatuses.COMPLETED)
+    sa.refresh_from_db()
+    assert updated
+    assert sa.status == AssignmentStatuses.COMPLETED
+
+    sa = StudentAssignmentFactory(assignment__submission_type=AssignmentFormat.ONLINE)
+    AssignmentCommentFactory(student_assignment=sa,
+                             type=AssignmentSubmissionTypes.SOLUTION)
+    sa.refresh_from_db()
+    # NEED_FIXES allowed for ONLINE assignment format
+    updated, _ = update_personal_assignment_status(student_assignment=sa,
+                                                   status_old=AssignmentStatuses.ON_CHECKING,
+                                                   status_new=AssignmentStatuses.NEED_FIXES)
+    sa.refresh_from_db()
+    assert updated
+    assert sa.status == AssignmentStatuses.NEED_FIXES

@@ -142,7 +142,7 @@
                       {% if student_assignment %}
                         {% if not form.is_widget_enabled(student_assignment) %}
                           <div class="cell __assignment __score">
-                            <a href="{{ student_assignment.get_teacher_url() }}">{{ student_assignment.state_short }}</a>
+                            <a href="{{ student_assignment.get_teacher_url() }}">{{ get_student_assignment_state(student_assignment) }}</a>
                           </div>
                         {% else %}
                           {{ form.get_assignment_widget(student_assignment.id) }}

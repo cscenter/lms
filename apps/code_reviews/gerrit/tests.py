@@ -11,6 +11,7 @@ from code_reviews.gerrit.services import normalize_code_review_score
 from code_reviews.gerrit.tasks import import_gerrit_code_review_score
 from code_reviews.tests.factories import GerritChangeFactory
 from core.urls import reverse
+from courses.constants import AssignmentStatuses
 from courses.tests.factories import AssignmentFactory
 from learning.permissions import EditStudentAssignment
 from users.tests.factories import CuratorFactory, TeacherFactory
@@ -70,13 +71,12 @@ def test_services_normalize_code_review_score():
     assert normalize_code_review_score(1, assignment) == Decimal('14.5')
 
 
-
-
 @pytest.mark.django_db
 def test_task_import_gerrit_code_review_score(settings):
     gerrit_change = GerritChangeFactory()
     student_assignment = gerrit_change.student_assignment
     assert student_assignment.score is None
+    assert student_assignment.status == AssignmentStatuses.NOT_SUBMITTED
     gerrit_auth = ConnectedAuthServiceFactory(provider='gerrit')
     # Score already set by someone and value differs from the previous update
     student_assignment.score = 0
@@ -103,9 +103,11 @@ def test_task_import_gerrit_code_review_score(settings):
                                     score_new=2,
                                     username=teacher_connected.uid)
     student_assignment.refresh_from_db()
+    assert student_assignment.status == AssignmentStatuses.COMPLETED
     import_gerrit_code_review_score(change_id=gerrit_change.change_id,
                                     score_old=2,
                                     score_new=1,
                                     username=teacher_connected.uid)
     student_assignment.refresh_from_db()
     assert student_assignment.score == student_assignment.assignment.maximum_score // 2
+    assert student_assignment.status == AssignmentStatuses.NEED_FIXES

@@ -142,7 +142,7 @@
         {% if can_edit_score %}
           {{ crispy(score_form) }}
         {% else %}
-          <span class="nowrap badge assignment-status {{ a_s.state.css_class }}">{{ a_s.state_display }}</span>
+          <span class="nowrap badge assignment-status">{{ a_s.state_display }}</span>
         {% endif %}
 
         {% if show_score_audit_log %}

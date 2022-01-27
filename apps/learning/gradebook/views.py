@@ -30,9 +30,10 @@ from grading.api.yandex_contest import (
 from learning.gradebook import (
     BaseGradebookForm, GradeBookFilterForm, GradeBookFormFactory, gradebook_data
 )
+from learning.gradebook.data import get_student_assignment_state
 from learning.gradebook.services import (
     assignment_import_scores_from_csv, assignment_import_scores_from_yandex_contest,
-    get_assignment_checker
+    get_assignment_checker,
 )
 from learning.models import StudentGroup
 from learning.permissions import EditGradebook, ViewGradebook
@@ -185,9 +186,10 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
             'view': self,
             'form': form,
             'filter_form': filter_form,
-            "StudentTypes": StudentTypes,
-            "gradebook": self.gradebook,
-            'AssignmentFormat': AssignmentFormat
+            'StudentTypes': StudentTypes,
+            'gradebook': self.gradebook,
+            'AssignmentFormat': AssignmentFormat,
+            'get_student_assignment_state': get_student_assignment_state
         }
         # TODO: Move to the model
         filter_kwargs = {}

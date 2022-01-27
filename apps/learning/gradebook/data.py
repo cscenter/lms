@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.utils.functional import cached_property
 
 from core.db.utils import normalize_score
+from courses.constants import AssignmentStatuses
 from courses.models import Assignment, Course
 from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.settings import GradeTypes
@@ -223,3 +224,9 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
                          assignments=assignments,
                          student_assignments=student_assignments,
                          show_weight=show_weight)
+
+
+def get_student_assignment_state(student_assignment: StudentAssignment) -> str:
+    if student_assignment.status == AssignmentStatuses.ON_CHECKING:
+        return "…"
+    return student_assignment.get_score_verbose_display()

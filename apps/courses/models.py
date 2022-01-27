@@ -1,6 +1,6 @@
 import os.path
 from datetime import datetime, timedelta
-from typing import NamedTuple, Optional
+from typing import NamedTuple, Optional, List
 
 import pytz
 from bitfield import BitField
@@ -30,7 +30,7 @@ from core.timezone.typing import Timezone
 from core.urls import reverse
 from core.utils import get_youtube_video_id, hashids, instance_memoize
 from courses.constants import (
-    AssigneeMode, AssignmentFormat, MaterialVisibilityTypes, TeacherRoles
+    AssigneeMode, AssignmentFormat, MaterialVisibilityTypes, TeacherRoles, AssignmentStatuses
 )
 from courses.utils import TermPair, get_current_term_pair
 from files.models import ConfigurableStorageFileField
@@ -1160,6 +1160,18 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
     @property
     def deadline_is_exceeded(self):
         return self.deadline_at < timezone.now()
+
+    @cached_property
+    def assignment_statuses(self) -> List[AssignmentStatuses]:
+        statuses = [
+            AssignmentStatuses.NOT_SUBMITTED,
+            AssignmentStatuses.ON_CHECKING,
+            AssignmentStatuses.COMPLETED
+        ]
+        # Only assignments that can be submitted via LMS can have the status NEED_FIXES
+        if self.submission_type in [AssignmentFormat.ONLINE, AssignmentFormat.CODE_REVIEW]:
+            statuses.append(AssignmentStatuses.NEED_FIXES)
+        return statuses
 
     @property
     def is_online(self):

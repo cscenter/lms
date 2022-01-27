@@ -32,6 +32,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location, Timestamp
 from core.timezone import TimezoneAwareMixin, now_local
 from core.urls import reverse
 from core.utils import hashids
+from courses.constants import AssignmentStatuses
 from courses.models import Assignment, Course, CourseNews, Semester, StudentGroupTypes
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
@@ -472,14 +473,6 @@ class Invitation(TimeStampedModel):
                 .exists())
 
 
-class AssignmentStatuses(DjangoChoices):
-    # TODO: describe each status
-    NEW = ChoiceItem('new', _("AssignmentStatus|New"))
-    CHECK = ChoiceItem('check', _("AssignmentStatus|Check"))
-    ACCEPTED = ChoiceItem('accept', _("AssignmentStatus|Accepted"))
-    REWORK = ChoiceItem('rework', _("AssignmentStatus|Rework"))
-
-
 class PersonalAssignmentActivity(models.TextChoices):
     STUDENT_COMMENT = 'sc'
     TEACHER_COMMENT = 'tc'
@@ -510,6 +503,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             "excellent", _("Assignment|excellent"),
             abbr="5", css_class="excellent")
 
+
     assignment = models.ForeignKey(
         Assignment,
         verbose_name=_("StudentAssignment|assignment"),
@@ -521,8 +515,8 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
     status = models.CharField(
         verbose_name=_("StudentAssignment|Status"),
         choices=AssignmentStatuses.choices,
-        default=AssignmentStatuses.NEW,
-        max_length=10)
+        default=AssignmentStatuses.NOT_SUBMITTED,
+        max_length=13)
     score = ScoreField(
         verbose_name=_("Grade"),
         null=True,
@@ -642,29 +636,6 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         return any(c.author_id == user.pk for c in
                    self.assignmentcomment_set(manager='published').all())
 
-    @cached_property
-    def state(self) -> ChoiceItem:
-        score = self.score
-        assignment = self.assignment
-        passing_score = assignment.passing_score
-        maximum_score = assignment.maximum_score
-        satisfactory_range = maximum_score - passing_score
-        if score is None:
-            if not assignment.is_online or self.is_submission_received:
-                state = StudentAssignment.States.NOT_CHECKED
-            else:
-                state = StudentAssignment.States.NOT_SUBMITTED
-        else:
-            if score < passing_score or score == 0:
-                state = StudentAssignment.States.UNSATISFACTORY
-            elif score < passing_score + 0.4 * satisfactory_range:
-                state = StudentAssignment.States.CREDIT
-            elif score < passing_score + 0.8 * satisfactory_range:
-                state = StudentAssignment.States.GOOD
-            else:
-                state = StudentAssignment.States.EXCELLENT
-        return StudentAssignment.States.get_choice(state)
-
     @property
     def is_submission_received(self):
         try:
@@ -672,22 +643,27 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         except ValueError:
             return False
 
-    @property
-    def state_display(self):
+    def is_status_transition_allowed(self, status_new):
+        statuses = self.assignment.assignment_statuses
+        if status_new == AssignmentStatuses.NOT_SUBMITTED and self.is_submission_received:
+            return False
+        return status_new in statuses
+
+    def get_score_display(self) -> str:
         if self.score is not None:
-            return "{0} ({1}/{2})".format(self.state.label,
-                                          self.score,
-                                          self.assignment.maximum_score)
-        else:
-            return self.state.label
+            return str(self.score)
+        return "—"
+
+    def get_score_verbose_display(self) -> str:
+        return f"{self.get_score_display()}/{self.assignment.maximum_score}"
 
     @property
-    def state_short(self) -> str:
+    def state_display(self) -> str:
+        # TODO: replace hybrid state with detached score_display & status
         if self.score is not None:
-            return "{0}/{1}".format(self.score,
-                                    self.assignment.maximum_score)
+            return self.get_score_verbose_display()
         else:
-            return self.state.abbr
+            return AssignmentStatuses(self.status).label
 
     @property
     def weighted_score(self) -> Optional[Decimal]:
