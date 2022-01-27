@@ -1161,12 +1161,14 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
     def deadline_is_exceeded(self):
         return self.deadline_at < timezone.now()
 
+    @cached_property
     def get_assignment_statuses(self) -> List[AssignmentStatuses]:
         statuses = [
             AssignmentStatuses.NOT_SUBMITTED,
             AssignmentStatuses.ON_CHECKING,
             AssignmentStatuses.COMPLETED
         ]
+        # Only assignments of type ONLINE, CODE_REVIEW can have status NEED_FIXES
         if self.submission_type in [AssignmentFormat.ONLINE, AssignmentFormat.CODE_REVIEW]:
             statuses.append(AssignmentStatuses.NEED_FIXES)
         return statuses

@@ -103,6 +103,7 @@ def test_task_import_gerrit_code_review_score(settings):
                                     score_new=2,
                                     username=teacher_connected.uid)
     student_assignment.refresh_from_db()
+    assert student_assignment.status == AssignmentStatuses.COMPLETED
     import_gerrit_code_review_score(change_id=gerrit_change.change_id,
                                     score_old=2,
                                     score_new=1,

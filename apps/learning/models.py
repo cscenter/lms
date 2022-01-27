@@ -624,7 +624,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             return False
 
     def get_allowed_statuses(self):
-        statuses = self.assignment.get_assignment_statuses()
+        statuses = self.assignment.get_assignment_statuses
         if self.is_submission_received:
             statuses.remove(AssignmentStatuses.NOT_SUBMITTED)
         return statuses
