@@ -230,11 +230,13 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
 
 
 def get_student_assignment_state(student_assignment: StudentAssignment) -> str:
-    has_solution_statuses = [AssignmentStatuses.ON_CHECKING,
-                             AssignmentStatuses.NEED_FIXES,
-                             AssignmentStatuses.COMPLETED]
     if student_assignment.final_score is not None:
         return student_assignment.get_score_verbose_display()
-    elif student_assignment.status in has_solution_statuses:
+    # `...` means student submitted a solution, let's try to reproduce
+    # this behavior with statuses.
+    has_solution = {AssignmentStatuses.ON_CHECKING,
+                    AssignmentStatuses.NEED_FIXES,
+                    AssignmentStatuses.COMPLETED}
+    if student_assignment.status in has_solution:
         return "…"
     return "—"
