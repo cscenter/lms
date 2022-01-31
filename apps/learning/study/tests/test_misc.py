@@ -354,25 +354,25 @@ def test_assignment_list_view_context_unenrolled_course(client):
 @pytest.mark.parametrize("learner_factory", [StudentFactory, VolunteerFactory])
 def test_view_deadline_l10n_on_student_assignment_list_page(learner_factory,
                                                             settings, client):
+    url = reverse('study:assignment_list')
     settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
-    branch_spb = BranchFactory(code=Branches.SPB)
-    branch_nsk = BranchFactory(code=Branches.NSK)
+    branch_spb = BranchFactory(code="spb")
+    branch_nsk = BranchFactory(code="nsk")
     FORMAT_DATE_PART = 'd E Y'
     FORMAT_TIME_PART = 'H:i'
     # This day will be in archive block (1 jan 2017 15:00 in UTC)
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     # Assignment will be created with the past date, but we will see it on
-    # assignments page since course offering semester set to current
+    # assignments' page since course semester set to current
     current_term = SemesterFactory.create_current()
     assignment = AssignmentFactory(deadline_at=dt,
                                    time_zone=pytz.timezone('Europe/Moscow'),
-                                   course__main_branch__code=Branches.SPB,
-                                   course__semester_id=current_term.pk)
-    student = learner_factory(branch__code=Branches.SPB)
-    sa = StudentAssignmentFactory(assignment=assignment, student=student)
-    client.login(student)
-    url_learning_assignments = reverse('study:assignment_list')
-    response = client.get(url_learning_assignments)
+                                   course__main_branch__code=branch_spb.code,
+                                   course__semester=current_term)
+    student_spb = learner_factory(branch=branch_spb)
+    sa = StudentAssignmentFactory(assignment=assignment, student=student_spb)
+    client.login(student_spb)
+    response = client.get(url)
     html = BeautifulSoup(response.content, "html.parser")
     # Note: On this page used `naturalday` filter, so use passed datetime
     year_part = formats.date_format(assignment.deadline_at_local(),
@@ -384,17 +384,17 @@ def test_view_deadline_l10n_on_student_assignment_list_page(learner_factory,
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Test `upcoming` block
-    now_year = get_current_term_pair(branch_spb.get_timezone()).year
-    dt = dt.replace(year=now_year + 1, month=2, hour=14)
+    now_academic_year = get_current_term_pair(branch_spb.get_timezone()).academic_year
+    dt = datetime.datetime(now_academic_year + 2, 2, 1, 14, 0, 0, 0, tzinfo=pytz.UTC)
     assignment.deadline_at = dt
     assignment.save()
     year_part = formats.date_format(assignment.deadline_at_local(),
                                     FORMAT_DATE_PART)
-    assert year_part == "01 февраля {}".format(now_year + 1)
+    assert year_part == "01 февраля {}".format(now_academic_year + 2)
     time_part = formats.date_format(assignment.deadline_at_local(),
                                     FORMAT_TIME_PART)
     assert time_part == "17:00"
-    response = client.get(url_learning_assignments)
+    response = client.get(url)
     html = BeautifulSoup(response.content, "html.parser")
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
@@ -403,9 +403,9 @@ def test_view_deadline_l10n_on_student_assignment_list_page(learner_factory,
     assignment_nsk = AssignmentFactory(deadline_at=dt,
                                        course__main_branch=branch_nsk,
                                        course__semester=current_term)
-    StudentAssignmentFactory(assignment=assignment_nsk, student=student)
-    client.login(student)
-    response = client.get(url_learning_assignments)
+    StudentAssignmentFactory(assignment=assignment_nsk, student=student_spb)
+    client.login(student_spb)
+    response = client.get(url)
     assert response.context_data["tz_override"] == branch_spb.get_timezone()
     year_part = formats.date_format(assignment_nsk.deadline_at_local(),
                                     FORMAT_DATE_PART)
@@ -420,7 +420,7 @@ def test_view_deadline_l10n_on_student_assignment_list_page(learner_factory,
     # Users without learner permission role has no access to the page
     user = UserFactory()
     client.login(user)
-    response = client.get(url_learning_assignments)
+    response = client.get(url)
     assert response.status_code == 403
 
 
