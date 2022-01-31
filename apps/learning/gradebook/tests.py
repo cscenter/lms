@@ -20,17 +20,17 @@ from auth.permissions import perm_registry
 from auth.tests.factories import ConnectedAuthServiceFactory
 from core.tests.factories import BranchFactory
 from core.urls import reverse
-from courses.constants import AssignmentFormat
+from courses.constants import AssignmentFormat, AssignmentStatuses
 from courses.models import CourseGroupModes, CourseTeacher
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseTeacherFactory
 )
 from grading.tests.factories import CheckerFactory
 from learning.gradebook import (
-    BaseGradebookForm, GradeBookFilterForm, GradeBookFormFactory, gradebook_data
+    BaseGradebookForm, GradeBookFilterForm, GradeBookFormFactory, gradebook_data, get_student_assignment_state
 )
 from learning.gradebook.services import assignment_import_scores_from_csv
-from learning.models import Enrollment, StudentAssignment
+from learning.models import Enrollment, StudentAssignment, AssignmentSubmissionTypes
 from learning.permissions import EditGradebook, ViewGradebook
 from learning.services.personal_assignment_service import (
     get_personal_assignments_by_stepik_id
@@ -38,7 +38,8 @@ from learning.services.personal_assignment_service import (
 from learning.settings import (
     AssignmentScoreUpdateSource, Branches, GradeTypes, StudentStatuses
 )
-from learning.tests.factories import EnrollmentFactory, StudentGroupFactory
+from learning.tests.factories import EnrollmentFactory, StudentGroupFactory, StudentAssignmentFactory, \
+    AssignmentCommentFactory
 from users.models import StudentTypes
 from users.services import get_student_profile
 from users.tests.factories import (
@@ -1146,3 +1147,25 @@ def test_view_gradebook_readonly_without_editgradebook_perm(client):
         "name": f"final_grade_{enrollment.pk}"
     })
     assert final_grade_widget.get('disabled') == ''
+
+
+@pytest.mark.django_db
+def test_get_student_assignment_state():
+    sa = StudentAssignmentFactory()
+    assert get_student_assignment_state(sa) == "—"
+    AssignmentCommentFactory(student_assignment=sa,
+                             type=AssignmentSubmissionTypes.SOLUTION)
+    assert get_student_assignment_state(sa) == "…"
+    sa.score = 0
+    assert get_student_assignment_state(sa) == sa.get_score_verbose_display()
+    sa.score = None
+    has_solution_statuses = [AssignmentStatuses.ON_CHECKING,
+                             AssignmentStatuses.NEED_FIXES,
+                             AssignmentStatuses.COMPLETED]
+    for status in has_solution_statuses:
+        sa.status = status
+        assert get_student_assignment_state(sa) == "…"
+    sa.score = 1
+    sa.status = AssignmentStatuses.NOT_SUBMITTED
+    assert get_student_assignment_state(sa) == sa.get_score_verbose_display()
+
