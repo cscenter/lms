@@ -1159,12 +1159,12 @@ def test_get_student_assignment_state():
     sa.score = 0
     assert get_student_assignment_state(sa) == sa.get_score_verbose_display()
     sa.score = None
-    has_solution_statuses = [AssignmentStatuses.ON_CHECKING,
-                             AssignmentStatuses.NEED_FIXES,
-                             AssignmentStatuses.COMPLETED]
-    for status in has_solution_statuses:
-        sa.status = status
-        assert get_student_assignment_state(sa) == "…"
+    sa.status = AssignmentStatuses.ON_CHECKING
+    assert get_student_assignment_state(sa) == "…"
+    sa.status = AssignmentStatuses.NEED_FIXES
+    assert get_student_assignment_state(sa) == "…"
+    sa.status = AssignmentStatuses.COMPLETED
+    assert get_student_assignment_state(sa) == "…"
     sa.score = 1
     sa.status = AssignmentStatuses.NOT_SUBMITTED
     assert get_student_assignment_state(sa) == sa.get_score_verbose_display()
