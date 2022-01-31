@@ -15,7 +15,8 @@ from courses.models import Assignment, Course
 from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.settings import GradeTypes
 
-__all__ = ('GradebookStudent', 'GradeBookData', 'gradebook_data')
+__all__ = ('GradebookStudent', 'GradeBookData', 'gradebook_data',
+           'get_student_assignment_state')
 
 
 class GradebookStudent:
@@ -229,8 +230,11 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
 
 
 def get_student_assignment_state(student_assignment: StudentAssignment) -> str:
-    if student_assignment.status == AssignmentStatuses.ON_CHECKING:
+    has_solution_statuses = [AssignmentStatuses.ON_CHECKING,
+                             AssignmentStatuses.NEED_FIXES,
+                             AssignmentStatuses.COMPLETED]
+    if student_assignment.final_score is not None:
+        return student_assignment.get_score_verbose_display()
+    elif student_assignment.status in has_solution_statuses:
         return "…"
-    elif student_assignment.final_score is None:
-        return "—"
-    return student_assignment.get_score_verbose_display()
+    return "—"
