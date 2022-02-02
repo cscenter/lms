@@ -1,9 +1,12 @@
-# -*- coding: utf-8 -*-
-
 from datetime import datetime
+
+import pytz
 
 from django.core.management.base import BaseCommand
 
+from courses.constants import SemesterTypes
+from courses.models import Semester
+from courses.utils import TermPair
 from learning.models import AssignmentNotification, CourseNewsNotification
 
 
@@ -12,15 +15,20 @@ def report(s):
 
 
 class Command(BaseCommand):
-    help = "Removes useless notifications"
+    help = "Removes read notifications from previous academic years"
 
     def handle(self, *args, **options):
-        objects = AssignmentNotification.objects.filter(is_unread=False)
-        report("{0} AssignmentNotifications to delete".format(objects.count()))
-        objects.delete()
-        report("done")
+        current_semester = Semester.get_current()
+        academic_year_start = TermPair(year=current_semester.academic_year,
+                                       type=SemesterTypes.AUTUMN)
+        starts_at = academic_year_start.starts_at(pytz.UTC)
+        objects = (AssignmentNotification.objects
+                   .filter(is_unread=False,
+                           created__lt=starts_at))
+        deleted, _ = objects.delete()
+        report(f"{deleted} AssignmentNotifications older than {starts_at} were deleted")
         objects = (CourseNewsNotification.objects
-                   .filter(is_unread=False))
-        report(f"{objects.count()} CourseNewsNotifications to delete")
-        objects.delete()
-        report("done")
+                   .filter(is_unread=False,
+                           created__lt=starts_at))
+        deleted, _ = objects.delete()
+        report(f"{deleted} CourseNewsNotifications older than {starts_at} were deleted")
