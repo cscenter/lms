@@ -215,7 +215,7 @@ def get_email_connection(site_settings: SiteConfiguration):
                                    use_tls=site_settings.email_use_tls,
                                    use_ssl=site_settings.email_use_ssl)
     elif issubclass(email_backend, SESBackend):
-        # AWS settings are shared among projects
+        # XXX: AWS settings are shared between YDS and CSCenter sites only!
         connection = email_backend()
     else:
         connection = get_connection(site_settings.email_backend,
@@ -223,7 +223,8 @@ def get_email_connection(site_settings: SiteConfiguration):
     return connection
 
 
-def send_assignment_notifications(site_configurations, stdout) -> None:
+def send_assignment_notifications(site_configurations: Dict[int, SiteConfiguration],
+                                  stdout) -> None:
     prefetch = [
         'user__groups',
         'student_assignment',
@@ -247,7 +248,8 @@ def send_assignment_notifications(site_configurations, stdout) -> None:
         send_notification(notification, template, context, stdout, site_settings)
 
 
-def send_course_news_notifications(site_configurations, stdout) -> None:
+def send_course_news_notifications(site_configurations: Dict[int, SiteConfiguration],
+                                   stdout) -> None:
     prefetch = [
         'user__groups',
         'course_offering_news__course',
