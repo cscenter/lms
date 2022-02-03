@@ -33,7 +33,6 @@ django-extensions = "*"
 # Fixtures
 testfixtures = "*"
 factory_boy = "==3.2.1"
-fakeredis = "*"
 # Test framework
 pytest = "*"
 pytest-django = "*"
