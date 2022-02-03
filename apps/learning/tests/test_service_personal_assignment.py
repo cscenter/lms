@@ -3,11 +3,13 @@ import pytest
 from courses.constants import AssigneeMode, AssignmentFormat, AssignmentStatuses
 from courses.models import CourseGroupModes, CourseTeacher
 from courses.tests.factories import AssignmentFactory, CourseFactory
-from learning.models import Enrollment, PersonalAssignmentActivity, StudentAssignment, AssignmentSubmissionTypes
+from learning.models import (
+    AssignmentSubmissionTypes, Enrollment, PersonalAssignmentActivity, StudentAssignment
+)
 from learning.services import EnrollmentService
 from learning.services.personal_assignment_service import (
-    create_assignment_comment, resolve_assignees_for_personal_assignment, update_personal_assignment_status,
-    create_assignment_solution
+    create_assignment_comment, create_assignment_solution,
+    resolve_assignees_for_personal_assignment, update_personal_assignment_status
 )
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory,

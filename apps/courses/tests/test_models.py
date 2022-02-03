@@ -10,7 +10,9 @@ from django.db.models import Prefetch
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN, TEST_DOMAIN
-from courses.constants import MaterialVisibilityTypes, SemesterTypes, AssignmentFormat, AssignmentStatuses
+from courses.constants import (
+    AssignmentFormat, AssignmentStatuses, MaterialVisibilityTypes, SemesterTypes
+)
 from courses.models import Assignment, Course, CourseClass, CourseTeacher
 from courses.selectors import course_teachers_prefetch_queryset
 from courses.tests.factories import (

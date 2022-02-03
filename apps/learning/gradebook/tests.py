@@ -27,10 +27,11 @@ from courses.tests.factories import (
 )
 from grading.tests.factories import CheckerFactory
 from learning.gradebook import (
-    BaseGradebookForm, GradeBookFilterForm, GradeBookFormFactory, gradebook_data, get_student_assignment_state
+    BaseGradebookForm, GradeBookFilterForm, GradeBookFormFactory,
+    get_student_assignment_state, gradebook_data
 )
 from learning.gradebook.services import assignment_import_scores_from_csv
-from learning.models import Enrollment, StudentAssignment, AssignmentSubmissionTypes
+from learning.models import AssignmentSubmissionTypes, Enrollment, StudentAssignment
 from learning.permissions import EditGradebook, ViewGradebook
 from learning.services.personal_assignment_service import (
     get_personal_assignments_by_stepik_id
@@ -38,8 +39,10 @@ from learning.services.personal_assignment_service import (
 from learning.settings import (
     AssignmentScoreUpdateSource, Branches, GradeTypes, StudentStatuses
 )
-from learning.tests.factories import EnrollmentFactory, StudentGroupFactory, StudentAssignmentFactory, \
-    AssignmentCommentFactory
+from learning.tests.factories import (
+    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory,
+    StudentGroupFactory
+)
 from users.models import StudentTypes
 from users.services import get_student_profile
 from users.tests.factories import (

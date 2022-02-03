@@ -34,12 +34,11 @@ from courses.services import CourseService
 from learning.api.serializers import AssignmentScoreSerializer
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
 from learning.models import (
-    AssignmentComment, AssignmentSubmissionTypes, Enrollment,
-    StudentAssignment,
+    AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
 )
 from learning.permissions import (
-    CreateAssignmentComment, DownloadAssignmentSolutions,
-    EditStudentAssignment, ViewStudentAssignment, ViewStudentAssignmentList
+    CreateAssignmentComment, DownloadAssignmentSolutions, EditStudentAssignment,
+    ViewStudentAssignment, ViewStudentAssignmentList
 )
 from learning.selectors import get_teacher_not_spectator_courses
 from learning.services import AssignmentService, StudentGroupService

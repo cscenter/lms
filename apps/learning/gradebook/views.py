@@ -33,7 +33,7 @@ from learning.gradebook import (
 from learning.gradebook.data import get_student_assignment_state
 from learning.gradebook.services import (
     assignment_import_scores_from_csv, assignment_import_scores_from_yandex_contest,
-    get_assignment_checker,
+    get_assignment_checker
 )
 from learning.models import StudentGroup
 from learning.permissions import EditGradebook, ViewGradebook
