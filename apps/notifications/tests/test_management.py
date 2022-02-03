@@ -2,10 +2,14 @@ from io import StringIO as OutputIO
 from unittest.mock import MagicMock
 
 import pytest
+import pytz
 
 from django.core import mail, management
 
 from core.tests.factories import BranchFactory
+from courses.constants import SemesterTypes
+from courses.tests.factories import SemesterFactory
+from courses.utils import TermPair
 from learning.models import AssignmentNotification
 from learning.tests.factories import (
     AssignmentNotificationFactory, CourseFactory, CourseNewsNotificationFactory,
@@ -16,7 +20,7 @@ from users.tests.factories import CuratorFactory, StudentFactory, TeacherFactory
 
 
 @pytest.mark.django_db
-def test_notifications(client, settings, mocker):
+def test_command_notify(settings, mocker):
     mocker.patch('core.locks.get_shared_connection', MagicMock())
     settings.DEFAULT_URL_SCHEME = 'https'
     out = OutputIO()
@@ -53,6 +57,21 @@ def test_notifications(client, settings, mocker):
     assert conn.is_notified
     assert course.get_absolute_url() in mail.outbox[0].body
     assert "sending notification for" in out.getvalue()
+
+
+@pytest.mark.django_db
+def test_command_notification_cleanup(client, settings):
+    current_term = SemesterFactory.create_current()
+    semester = TermPair(year=current_term.academic_year - 1,
+                        type=SemesterTypes.AUTUMN)
+    notification1, notification2 = AssignmentNotificationFactory.create_batch(
+        2, is_notified=True, is_unread=False)
+    notification1.created = semester.starts_at(pytz.UTC)
+    notification1.save()
+    out = OutputIO()
+    management.call_command("notification_cleanup", stdout=out)
+    assert "1 AssignmentNotifications" in out.getvalue()
+    assert AssignmentNotification.objects.filter(pk=notification2.pk).exists()
 
 
 @pytest.mark.django_db
