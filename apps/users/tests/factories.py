@@ -13,7 +13,7 @@ from users.models import (
 __all__ = ('User', 'SHADCourseRecord', 'CertificateOfParticipation',
            'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',
            'StudentFactory', 'TeacherFactory', 'VolunteerFactory',
-           'OnlineCourseRecordFactory',  'StudentProfileFactory',
+           'InvitedStudentFactory', 'OnlineCourseRecordFactory',  'StudentProfileFactory',
            'SHADCourseRecordFactory', 'CertificateOfParticipationFactory')
 
 from users.services import assign_role

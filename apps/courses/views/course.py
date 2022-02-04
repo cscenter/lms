@@ -20,7 +20,7 @@ from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import CourseNewsNotification
-from learning.permissions import CreateCourseNews, ViewStudentGroup
+from learning.permissions import CreateCourseNews, ViewOwnEnrollments, ViewStudentGroup
 from learning.services import course_access_role
 from learning.teaching.utils import get_student_groups_url
 
@@ -96,7 +96,7 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
     def _get_additional_context(self, course, **kwargs):
         request_user = self.request.user
         tz_override = request_user.time_zone
-        if request_user.has_perm("study.view_own_enrollments"):
+        if request_user.has_perm(ViewOwnEnrollments.name):
             request_user_enrollment = request_user.get_enrollment(course.pk)
         else:
             request_user_enrollment = None

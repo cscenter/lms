@@ -904,10 +904,10 @@ def test_gradebook_import_scores_from_yandex_contest_permissions(settings, clien
     assert response.status_code == 404
 
 
-def generate_course(group_one_size: Optional[int] = 5,
-                    group_two_size: Optional[int] = 5,
-                    group_one_type: Optional[str] = StudentTypes.REGULAR,
-                    group_two_type: Optional[str] = StudentTypes.INVITED):
+def generate_course(group_one_size: int = 5,
+                    group_two_size: int = 5,
+                    group_one_type: str = StudentTypes.REGULAR,
+                    group_two_type: str = StudentTypes.INVITED):
     teacher = TeacherFactory()
     branch = BranchFactory(code=Branches.SPB)
     course = CourseFactory(main_branch=branch, teachers=[teacher],
