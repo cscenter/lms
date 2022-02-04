@@ -39,7 +39,7 @@ class EnrollmentService:
 
     @classmethod
     def enroll(cls, student_profile: StudentProfile, course: Course,
-               reason_entry: Optional[str] = '',
+               reason_entry: str = '',
                student_group: Optional[StudentGroup] = None, **attrs: Any) -> Enrollment:
         if course.group_mode != CourseGroupModes.NO_GROUPS and not student_group:
             raise ValidationError("Provide student group value")
@@ -101,7 +101,7 @@ class EnrollmentService:
         return enrollment
 
     @classmethod
-    def leave(cls, enrollment: Enrollment, reason_leave: Optional[str] = '') -> None:
+    def leave(cls, enrollment: Enrollment, reason_leave: str = '') -> None:
         update_fields = ['is_deleted']
         enrollment.is_deleted = True
         if reason_leave:

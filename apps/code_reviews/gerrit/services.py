@@ -57,7 +57,7 @@ def get_students_group_name(course: Course) -> str:
     return f"{project_name}-students"
 
 
-def init_project_for_course(course: Course, skip_users: Optional[bool] = False):
+def init_project_for_course(course: Course, skip_users: bool = False):
     """
     Init gerrit project:
     1. Create reviewers group if not exists

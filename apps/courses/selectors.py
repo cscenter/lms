@@ -21,7 +21,7 @@ def get_site_courses(*, site: Site, filters: Optional[List[Q]] = None) -> Course
             .select_related('semester', 'meta_course', 'main_branch'))
 
 
-def get_teachers(*, role_priority: Optional[bool] = False,
+def get_teachers(*, role_priority: bool = False,
                  filters: Optional[List[Q]] = None) -> CourseTeacherQuerySet:
     """
     Returns course teachers queryset. Use `role_priority=True` to annotate
@@ -49,7 +49,7 @@ def get_reviewers() -> CourseTeacherQuerySet:
 
 # FIXME: move to the service method
 def get_course_teachers(*, course: Course,
-                        role_priority: Optional[bool] = False) -> CourseTeacherQuerySet:
+                        role_priority: bool = False) -> CourseTeacherQuerySet:
     filters = [
         Q(course=course),
         ~CourseTeacher.has_any_hidden_role(hidden_roles=(CourseTeacher.roles.spectator,))
@@ -57,7 +57,7 @@ def get_course_teachers(*, course: Course,
     return get_teachers(role_priority=role_priority, filters=filters)
 
 
-def course_teachers_prefetch_queryset(*, role_priority: Optional[bool] = True,
+def course_teachers_prefetch_queryset(*, role_priority: bool = True,
                                       hidden_roles=(CourseTeacher.roles.spectator,)) -> CourseTeacherQuerySet:
     """
     Returns public course teachers sorted by the most priority role

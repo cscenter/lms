@@ -344,7 +344,7 @@ def truncate_decimal(value: Decimal, decimal_places: int) -> Decimal:
 
 
 def yandex_contest_scoreboard_iterator(client: YandexContestAPI, contest_id: int,
-                                       batch_size: Optional[int] = 50) -> Iterator[YandexContestParticipantProgress]:
+                                       batch_size: int = 50) -> Iterator[YandexContestParticipantProgress]:
     paging = {
         "page_size": batch_size,
         "page": 1

@@ -480,7 +480,7 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         full_name = smart_str(" ".join(p for p in parts if p).strip())
         return full_name or self.username
 
-    def get_short_name(self, last_name_first: Optional[bool] = False) -> str:
+    def get_short_name(self, last_name_first: bool = False) -> str:
         parts = [self.first_name, self.last_name]
         if last_name_first:
             parts.reverse()

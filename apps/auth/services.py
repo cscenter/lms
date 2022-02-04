@@ -9,7 +9,7 @@ from users.models import User
 class ServiceProvider:
     name: str
     code: str
-    is_readonly: Optional[bool] = False
+    is_readonly: bool = False
 
 
 def get_connected_accounts(*, user: Union[User, int]) -> List[ConnectedAuthService]:

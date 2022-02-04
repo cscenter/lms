@@ -108,7 +108,7 @@ def get_student_progress(queryset,
 
 def get_or_create_graduate_profile(*, student_profile: StudentProfile,
                                    graduated_on: datetime.date,
-                                   is_visible: Optional[bool] = True) -> Tuple[GraduateProfile, bool]:
+                                   is_visible: bool = True) -> Tuple[GraduateProfile, bool]:
     """
     Note:
         Can be used inside transaction only.
@@ -257,8 +257,8 @@ def get_student_profile(user: User, site, profile_type=None,
 
 
 def get_student_profiles(*, user: User, site: Site,
-                         fetch_graduate_profile: Optional[bool] = False,
-                         fetch_status_history: Optional[bool] = False) -> List[StudentProfile]:
+                         fetch_graduate_profile: bool = False,
+                         fetch_status_history: bool = False) -> List[StudentProfile]:
     select_related = ['branch']
     if fetch_graduate_profile:
         select_related.append('graduate_profile')

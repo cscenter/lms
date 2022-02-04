@@ -77,7 +77,7 @@ class GradeBookData:
                  students: Dict[int, GradebookStudent],
                  assignments: Dict[int, GradebookAssignment],
                  student_assignments: np.ndarray,
-                 show_weight: Optional[bool] = False):
+                 show_weight: bool = False):
         """
         X-axis of student_assignments ndarray is students data.
         We make some assertions on that, but still can fail in case

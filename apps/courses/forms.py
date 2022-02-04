@@ -351,7 +351,7 @@ class AssignmentForm(TimezoneAwareModelForm):
         choices=AssigneeMode.choices,
         required=True)
 
-    def __init__(self, course: Course, locale: Optional[str] = "en", **kwargs: Any):
+    def __init__(self, course: Course, locale: str = "en", **kwargs: Any):
         super().__init__(**kwargs)
         self.instance.course = course
         self.fields['ttc'].required = course.ask_ttc
@@ -491,7 +491,7 @@ class StudentGroupAssigneeFormFactory:
     field_prefix = StudentGroupAssigneeForm.field_prefix
 
     @classmethod
-    def build_form_class(cls, course: Course, is_required: Optional[bool] = False):
+    def build_form_class(cls, course: Course, is_required: bool = False):
         student_groups = CourseService.get_student_groups(course)
         course_teachers = get_course_teachers(course=course)
         cls_dict = {'student_groups': student_groups}
@@ -527,7 +527,7 @@ class StudentGroupAssigneeFormFactory:
         return initial
 
     @classmethod
-    def build_form(cls, course: Course, *, is_required: Optional[bool] = True,
+    def build_form(cls, course: Course, *, is_required: bool = True,
                    assignment: Optional[Assignment] = None, **form_kwargs: Any) -> StudentGroupAssigneeForm:
         form_class = cls.build_form_class(course, is_required)
         form_kwargs.setdefault("initial", cls.get_initial_state(course, assignment))

@@ -23,7 +23,7 @@ from api.views import APIBaseView
 from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
 from auth.models import ConnectedAuthService
 from auth.services import get_available_service_providers, get_connected_accounts
-from core.http import AuthenticatedHttpRequest
+from core.http import AuthenticatedHttpRequest, HttpRequest
 from core.timezone.utils import get_gmt
 from core.views import ProtectedFormMixin
 from courses.models import CourseTeacher, Semester
@@ -226,7 +226,7 @@ class ConnectedAuthServicesView(RolePermissionRequiredMixin, APIBaseView):
         def get_login(self, obj: ConnectedAuthService) -> Optional[str]:
             return obj.login
 
-    def setup(self, request: AuthenticatedHttpRequest, **kwargs: Any):
+    def setup(self, request: HttpRequest, **kwargs: Any) -> None:
         super().setup(request, **kwargs)
         serializer = self.InputSerializer(data=kwargs)
         serializer.is_valid(raise_exception=True)

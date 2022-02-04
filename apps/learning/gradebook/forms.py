@@ -182,7 +182,7 @@ class AssignmentScore(ScoreField):
 
 
 class EnrollmentFinalGrade(forms.ChoiceField):
-    def __init__(self, student, course, is_readonly: Optional[bool] = False):
+    def __init__(self, student, course, is_readonly: bool = False):
         widget = forms.Select(attrs={
             'initial': student.final_grade,
             'disabled': is_readonly
@@ -207,7 +207,7 @@ class EnrollmentFinalGrade(forms.ChoiceField):
 class GradeBookFormFactory:
     @classmethod
     def build_form_class(cls, gradebook: GradeBookData, *,
-                         is_readonly: Optional[bool] = True):
+                         is_readonly: bool = True):
         """
         Creates new form.Form subclass with students scores for
         each offline assignment (which student can't pass on this site) and
