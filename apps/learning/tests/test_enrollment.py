@@ -28,12 +28,6 @@ from users.tests.factories import (
     InvitedStudentFactory, StudentFactory, StudentProfileFactory
 )
 
-# TODO: запись кем-то без группы INVITED.
-# TODO: после регистрации у чуваков есть необходимые поля и группы. Нужно ли тестить отправку email? вроде как асинхронно высылается, значит надо (мб моки уже есть в текстах клуба, хз)
-
-
-# TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)
-
 
 @pytest.mark.django_db
 def test_service_enroll(settings):
