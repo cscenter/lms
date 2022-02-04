@@ -8,7 +8,8 @@ from learning.teaching.api.views import (
     PersonalAssignmentScoreAuditLogView, StudentGroupTransferStudentsView
 )
 from learning.teaching.views import (
-    CalendarFullView, CalendarPersonalView, CourseListView, GradeBookListView
+    CalendarFullView, CalendarPersonalView, CourseListView, CourseStudentProgressView,
+    GradeBookListView
 )
 from learning.teaching.views import TimetableView as TeacherTimetable
 from learning.teaching.views.assignments import (
@@ -56,6 +57,11 @@ urlpatterns = [
     path('courses/', include([
         path('', CourseListView.as_view(), name='course_list'),
         path('', include((student_group_patterns, 'student_groups'))),
+        re_path(RE_COURSE_URI, include([
+            path('students/', include([
+                path('<int:enrollment_id>/', CourseStudentProgressView.as_view(), name='student-progress'),
+            ]))
+        ])),
         # TODO: separate api views?
         path("news/<int:news_pk>/stats", CourseNewsUnreadNotificationsView.as_view(), name="course_news_unread"),
     ])),

@@ -168,6 +168,7 @@ class ViewCourseReviews(Permission):
         return course.enrollment_is_open
 
 
+# FIXME: bad naming?
 @add_perm
 class ViewEnrollments(Permission):
     """
@@ -176,7 +177,7 @@ class ViewEnrollments(Permission):
     Note:
         Related Permissions use `course` instance as a permission object.
     """
-    name = "learning.view_enrollment"
+    name = "learning.view_enrollments"
 
     @staticmethod
     @rules.predicate
@@ -185,8 +186,8 @@ class ViewEnrollments(Permission):
 
 
 @add_perm
-class ViewRelatedEnrollments(Permission):
-    name = "teaching.view_enrollment"
+class ViewCourseEnrollments(Permission):
+    name = "teaching.view_enrollments"
 
     @staticmethod
     @rules.predicate
@@ -194,15 +195,41 @@ class ViewRelatedEnrollments(Permission):
         return course.is_actual_teacher(user.pk)
 
 
+# FIXME: bad naming
 @add_perm
-class ViewLibrary(Permission):
-    name = "study.view_library"
+class ViewOwnEnrollments(Permission):
+    name = "study.view_own_enrollments"
     rule = has_active_status
 
 
 @add_perm
-class ViewOwnEnrollments(Permission):
-    name = "study.view_own_enrollments"
+class ViewEnrollment(Permission):
+    name = "learning.view_enrollment"
+
+
+@add_perm
+class ViewCourseEnrollment(Permission):
+    name = "teaching.view_enrollment"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user: User, enrollment: Enrollment) -> bool:
+        return enrollment.course.is_actual_teacher(user.pk)
+
+
+@add_perm
+class ViewOwnEnrollment(Permission):
+    name = "study.view_enrollment"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user: User, enrollment: Enrollment) -> bool:
+        return enrollment.student_id == user.pk
+
+
+@add_perm
+class ViewLibrary(Permission):
+    name = "study.view_library"
     rule = has_active_status
 
 

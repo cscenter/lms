@@ -29,6 +29,15 @@ def update_personal_assignment_stats(*, personal_assignment: StudentAssignment) 
     """
     Calculates and fully replaces personal assignment stats stored
     in a `stats` property of the .meta json field.
+
+    Full Example:
+        {
+            "comments": 1,
+            "solutions": 2,
+            "activity": "sc",  // code of the latest activity
+            "solution": "2020-11-03T19:38:44Z", // the latest submission datetime
+            "comment": "2020-11-03T19:38:44Z" // the latest comment datetime
+        }
     """
     solutions_count = Count(
         Case(When(type=AssignmentSubmissionTypes.SOLUTION,
@@ -62,14 +71,17 @@ def update_personal_assignment_stats(*, personal_assignment: StudentAssignment) 
     meta = personal_assignment.meta or {}
     stats = {
         'comments': latest_submission.comments_total,
-        'activity': {
-            'code': str(latest_activity),
-            'dt': latest_submission.created.replace(microsecond=0)
-        }
+        'activity': str(latest_activity),
     }
     # Omit default or null values to save space
     if latest_submission.solutions_total:
         stats['solutions'] = latest_submission.solutions_total
+    if latest_submission.type == AssignmentSubmissionTypes.SOLUTION:
+        stats['solution'] = latest_submission.created.replace(microsecond=0)
+    elif latest_submission.type == AssignmentSubmissionTypes.COMMENT:
+        stats['comment'] = latest_submission.created.replace(microsecond=0)
+    else:
+        assert_never(latest_submission.type)
     meta['stats'] = stats
     (StudentAssignment.objects
      .filter(pk=personal_assignment.pk)

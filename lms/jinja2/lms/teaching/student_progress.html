@@ -1,0 +1,59 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block content %}
+  {% set student_profile = enrollment.student_profile %}
+  {% set course = enrollment.course %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        {{ student_profile.user.get_full_name() }}<br>
+        {% with im = student_profile.user.get_thumbnail(student_profile.user.ThumbnailSize.BASE, use_stub=True) -%}
+          <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" alt="" /><br>
+        {% endwith -%}
+        {{ student_profile.get_type_display() }}, Статус: {{ student_profile.get_status_display()|lower }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12">
+        <h2>
+          <a href="{{ course.get_absolute_url() }}">{{ course.name }}</a><br>
+          <small>{{ course.semester }}</small>
+        </h2>
+        Оценка за курс: {{ enrollment.get_grade_display() }}<br>
+        {% if student_assignments %}
+          Сумма баллов: {{ enrollment.total_score }}<br>
+          <table class="table table-bordered">
+            <thead>
+            <tr class="active">
+              <th>Название задания</th>
+              <th>Дедлайн</th>
+              <th>Время отправки последнего решения</th>
+              <th>Проверяющий</th>
+              <th>Балл</th>
+              <th>Статус</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for student_assignment in student_assignments %}
+              <tr>
+                <td>
+                  <a href="{{ student_assignment.get_student_url() }}">{{ student_assignment.assignment.title }}</a>
+                </td>
+                <td>{{ student_assignment.assignment.deadline_at_local(tz=request.user.time_zone)|date("d.m.Y H:i") }}</td>
+                <td>?</td>
+                <td>
+                  {% if student_assignment.assignee %}{{ student_assignment.assignee.teacher.get_full_name() }}{% else %}—{% endif %}
+                </td>
+                <td>{{ student_assignment.get_score_verbose_display() }}</td>
+                <td>{{ student_assignment.get_status_display() }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          Задания не найдены.
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock content %}

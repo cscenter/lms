@@ -20,11 +20,12 @@ from learning.permissions import (
     DeleteStudentGroup, DeleteStudentGroupAsTeacher, EditGradebook,
     EditOwnAssignmentExecutionTime, EditOwnStudentAssignment, EnrollInCourse,
     EnrollPermissionObject, InvitationEnrollPermissionObject, UpdateStudentGroup,
-    UpdateStudentGroupAsTeacher, ViewAssignmentCommentAttachment, ViewGradebook,
-    ViewOwnGradebook, ViewRelatedStudentAssignment, ViewStudentAssignment,
-    ViewStudentGroup, ViewStudentGroupAsTeacher
+    UpdateStudentGroupAsTeacher, ViewAssignmentCommentAttachment, ViewCourseEnrollment,
+    ViewEnrollment, ViewGradebook, ViewOwnEnrollment, ViewOwnGradebook,
+    ViewRelatedStudentAssignment, ViewStudentAssignment, ViewStudentGroup,
+    ViewStudentGroupAsTeacher
 )
-from learning.services import CourseRole, course_access_role
+from learning.services import CourseRole, EnrollmentService, course_access_role
 from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import (
     AssignmentCommentFactory, CourseInvitationFactory, EnrollmentFactory,
@@ -536,3 +537,36 @@ def test_edit_gradebook():
     assert curator.has_perm(EditGradebook.name)
     assert not curator.has_perm(ViewOwnGradebook.name, course)
 
+
+@pytest.mark.django_db
+def test_view_enrollment():
+    semester = SemesterFactory.create_current(for_branch="sbp")
+    course = CourseFactory(semester=semester, group_mode=CourseGroupModes.MANUAL)
+    course_other = CourseFactory.create(semester=semester, group_mode=CourseGroupModes.MANUAL)
+    student_profile1, student_profile2 = StudentProfileFactory.create_batch(2)
+    user = UserFactory()
+    curator = CuratorFactory()
+    student1 = student_profile1.user
+    student_other = StudentFactory()
+    teacher, spectator, teacher_other = TeacherFactory.create_batch(3)
+    CourseTeacherFactory(course=course, teacher=spectator, roles=CourseTeacher.roles.spectator)
+    CourseTeacherFactory(course=course, teacher=teacher, roles=CourseTeacher.roles.lecturer)
+    enrollment = EnrollmentService.enroll(student_profile1, course,
+                                          student_group=StudentGroupFactory(course=course),
+                                          reason_entry='test enrollment')
+    enrollment_other = EnrollmentService.enroll(student_profile2, course_other,
+                                                student_group=StudentGroupFactory(course=course_other),
+                                                reason_entry='test enrollment')
+    assert ViewEnrollment.name in perm_registry
+    assert ViewCourseEnrollment.name in perm_registry
+    assert ViewOwnEnrollment.name in perm_registry
+    assert not user.has_perm(ViewEnrollment.name)
+    assert not user.has_perm(ViewEnrollment.name, enrollment)
+    assert not student_other.has_perm(ViewEnrollment.name, enrollment)
+    assert not student1.has_perm(ViewEnrollment.name, enrollment_other)
+    assert not teacher_other.has_perm(ViewEnrollment.name, enrollment)
+    assert curator.has_perm(ViewEnrollment.name)
+    assert curator.has_perm(ViewEnrollment.name, enrollment)
+    assert teacher.has_perm(ViewEnrollment.name, enrollment)
+    assert not spectator.has_perm(ViewEnrollment.name, enrollment)
+    assert student1.has_perm(ViewEnrollment.name, enrollment)

@@ -1,22 +1,28 @@
-from typing import Any, Dict
+from decimal import Decimal
+from typing import Any, Dict, Iterable
+
+from vanilla import TemplateView
 
 from django.db.models import Prefetch, Q
+from django.shortcuts import get_object_or_404
 from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
+from core.db.utils import normalize_score
 from core.exceptions import Redirect
+from core.http import HttpRequest
 from courses.calendar import TimetableEvent
 from courses.constants import TeacherRoles
-from courses.models import Course, CourseTeacher
-from courses.selectors import (
-    course_teachers_prefetch_queryset, get_course_teachers, get_teachers
-)
+from courses.models import Course
+from courses.selectors import course_teachers_prefetch_queryset
 from courses.services import get_teacher_branches
 from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
+from courses.views.mixins import CourseURLParamsMixin
 from learning.calendar import get_all_calendar_events, get_teacher_calendar_events
 from learning.gradebook.views import GradeBookListBaseView
-from learning.permissions import AccessTeacherSection, CreateCourseNews
+from learning.models import Enrollment, StudentAssignment
+from learning.permissions import AccessTeacherSection, CreateCourseNews, ViewEnrollment
 from learning.selectors import get_teacher_classes
 from learning.teaching.utils import get_student_groups_url
 from users.mixins import TeacherOnlyMixin
@@ -82,7 +88,6 @@ class CourseListView(PermissionRequiredMixin, generic.ListView):
                     .order_by('-semester__index', 'meta_course__name'))
         return courses
 
-
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context['SpectatorRole'] = TeacherRoles.SPECTATOR
@@ -110,5 +115,47 @@ class GradeBookListView(TeacherOnlyMixin, GradeBookListBaseView):
                     raise Redirect(to=course.get_gradebook_url())
         context = {
             "semester_list": self.object_list
+        }
+        return context
+
+
+# FIXME: accept enrollment argument and do prefetch_related inside?
+# FIXME: enrollment.get_student_assignments?
+def _get_total_score(student_assignments: Iterable[StudentAssignment]) -> Decimal:
+    total_score = Decimal(0)
+    for s in student_assignments:
+        if s is not None and s.final_score is not None:
+            total_score += s.weighted_final_score
+    return normalize_score(total_score)
+
+
+class CourseStudentProgressView(CourseURLParamsMixin, PermissionRequiredMixin,
+                                TemplateView):
+    enrollment: Enrollment
+    permission_required = ViewEnrollment.name
+    template_name = "lms/teaching/student_progress.html"
+
+    def setup(self, request: HttpRequest, **kwargs: Any) -> None:
+        super().setup(request, **kwargs)
+        queryset = (Enrollment.active
+                    .filter(pk=kwargs['enrollment_id'],
+                            course=self.course)
+                    .select_related("student_profile__user"))
+        self.enrollment = get_object_or_404(queryset)
+        self.enrollment.course = self.course
+
+    def get_permission_object(self) -> Enrollment:
+        return self.enrollment
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        student_assignments = (StudentAssignment.objects
+                               .filter(student=self.enrollment.student_profile.user,
+                                       assignment__course=self.course)
+                               .select_related('assignment', 'assignee__teacher'))
+        # TODO: enrollment.total_score
+        self.enrollment.total_score = _get_total_score(student_assignments)
+        context = {
+            "enrollment": self.enrollment,
+            "student_assignments": student_assignments
         }
         return context

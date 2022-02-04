@@ -7,19 +7,17 @@ from testfixtures import LogCapture
 
 from django.utils.encoding import smart_bytes
 
+from auth.mixins import PermissionRequiredMixin
+from auth.permissions import perm_registry
 from core.timezone import now_local
 from core.urls import reverse
 from courses.models import CourseTeacher
 from courses.tests.factories import *
+from learning.permissions import ViewEnrollment
 from learning.tests.factories import *
 from users.tests.factories import (
     CuratorFactory, StudentFactory, TeacherFactory, UserFactory
 )
-
-# TODO: Написать тест, который проверяет, что по-умолчанию в форму
-# редактирования описания ПРОЧТЕНИЯ подставляется описание из курса. И описание прочтения, если оно уже есть.
-# TODO: test redirects on course offering page if tab exists but user has no access
-# TODO: test assignment deadline
 
 
 @pytest.mark.django_db
@@ -172,3 +170,26 @@ def test_events_smoke(client):
     assert response.status_code == 200
     assert evt.name.encode() in response.content
     assert smart_bytes(evt.venue.get_absolute_url()) in response.content
+
+
+@pytest.mark.django_db
+def test_view_course_student_progress_security(client, lms_resolver):
+    student = StudentFactory()
+    enrollment = EnrollmentFactory(student=student)
+    url = reverse('teaching:student-progress', kwargs={
+        "enrollment_id": enrollment.pk,
+        **enrollment.course.url_kwargs
+    })
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == ViewEnrollment.name
+    assert resolver.func.view_class.permission_required in perm_registry
+    user = UserFactory()
+    response = client.get(url)
+    assert response.status_code == 302
+    client.login(user)
+    response = client.get(url)
+    assert response.status_code == 403
+    client.login(student)
+    response = client.get(url)
+    assert response.status_code == 200

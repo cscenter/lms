@@ -503,7 +503,6 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             "excellent", _("Assignment|excellent"),
             abbr="5", css_class="excellent")
 
-
     assignment = models.ForeignKey(
         Assignment,
         verbose_name=_("StudentAssignment|assignment"),

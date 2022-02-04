@@ -85,7 +85,10 @@ def test_update_personal_assignment_stats():
     student_assignment.refresh_from_db()
     assert isinstance(student_assignment.meta, dict)
     assert student_assignment.meta['stats']['comments'] == 1
-    assert student_assignment.meta['stats']['activity']['code'] == PersonalAssignmentActivity.TEACHER_COMMENT
+    assert student_assignment.meta['stats']['activity'] == PersonalAssignmentActivity.TEACHER_COMMENT
+    assert "comment" in student_assignment.meta['stats']
+    assert "solution" not in student_assignment.meta['stats']
+    assert "solutions" not in student_assignment.meta['stats']
 
 
 @pytest.mark.django_db

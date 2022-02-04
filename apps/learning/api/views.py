@@ -1,4 +1,4 @@
-from typing import Any, Optional, Type
+from typing import Any, Dict, Optional, Type
 
 from djangorestframework_camel_case.render import (
     CamelCaseBrowsableAPIRenderer, CamelCaseJSONRenderer
@@ -27,7 +27,9 @@ from learning.api.serializers import (
     CourseAssignmentSerializer, CourseNewsNotificationSerializer, MyCourseSerializer,
     UserSerializer
 )
-from learning.models import CourseNewsNotification, Enrollment, StudentAssignment
+from learning.models import (
+    CourseNewsNotification, Enrollment, PersonalAssignmentActivity, StudentAssignment
+)
 from learning.permissions import EditStudentAssignment, ViewEnrollments
 
 
@@ -133,11 +135,24 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
             fields = ('id', 'assignment_id', 'score', 'status', 'student',
                       'assignee', 'activity')
 
-        def get_activity(self, obj: StudentAssignment) -> Optional[str]:
-            """Returns latest activity."""
+        def get_activity(self, obj: StudentAssignment) -> Optional[Dict[str, Any]]:
+            """Returns activity stats."""
             if not obj.meta or 'stats' not in obj.meta:
                 return None
-            return obj.meta['stats'].get('activity', None)
+            stats = obj.meta['stats']
+            if not stats or 'activity' not in stats:
+                return None
+            # Backward compatibility
+            if isinstance(stats['activity'], dict):
+                return stats['activity']
+            if stats['activity'] == PersonalAssignmentActivity.SOLUTION:
+                dt = stats['solution']
+            else:
+                dt = stats['comment']
+            return {
+                "code": stats["activity"],
+                "dt": dt
+            }
 
     def initial(self, request, *args, **kwargs):
         self.course = get_object_or_404(Course.objects.get_queryset(), pk=kwargs['course_id'])
