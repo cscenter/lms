@@ -72,9 +72,10 @@ MARKDOWN_ALLOWED_TAGS = [
 ]
 MARKDOWN_ALLOWED_ATTRS = {
     '*': ['class'],
-    'a': ['href'],
+    'a': ['href', 'aria-expanded', 'role', 'data-toggle'],
     'img': ['src'],
-    'iframe': ['src', 'height', 'width', 'allowfullscreen', 'frameborder']
+    'iframe': ['src', 'height', 'width', 'allowfullscreen', 'frameborder'],
+    'div': ['id', 'role', 'aria-labelledby', 'aria-expanded']
 }
 
 
