@@ -3,7 +3,7 @@ from crispy_forms.utils import render_crispy_form
 from django.contrib.messages import DEFAULT_LEVELS, get_messages
 
 from core.menu import Menu
-from jinja2 import contextfunction
+from jinja2 import pass_context
 
 
 def messages(request):
@@ -37,6 +37,6 @@ def generate_menu(menu_name, request, root_id=None):
     return Menu.process(request, name=menu_name)
 
 
-@contextfunction
+@pass_context
 def crispy(context, form):
     return render_crispy_form(form, context=context)

@@ -20,10 +20,10 @@ class OpenRegistrationCampaignField(serializers.PrimaryKeyRelatedField):
 
 class ApplicationFormSerializer(serializers.ModelSerializer):
     where_did_you_learn = serializers.MultipleChoiceField(
-        WHERE_DID_YOU_LEARN,
+        choices=WHERE_DID_YOU_LEARN,
         allow_empty=False)
     preferred_study_programs = serializers.MultipleChoiceField(
-        Applicant.STUDY_PROGRAMS,
+        choices=Applicant.STUDY_PROGRAMS,
         allow_empty=False,
         error_messages={
             'empty': 'Выберите интересующие вас направления обучения'
