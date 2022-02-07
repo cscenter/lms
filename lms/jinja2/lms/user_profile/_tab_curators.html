@@ -3,26 +3,6 @@
 {% if request_user.is_curator %}
   <table class="table table-condensed table-striped">
     <tr>
-      <td>{% trans %}Phone{% endtrans %}:</td>
-      <td>{{ profile_user.phone|default("—", True) }}</td>
-    </tr>
-    <tr>
-      <td>{% trans %}Date of Birth{% endtrans %}:</td>
-      <td>
-        {% if profile_user.birth_date %}{{ profile_user.birth_date|date("d.m.Y") }}{% else %}—{% endif %}
-      </td>
-    </tr>
-    <tr>
-      <td>{% trans %}Email{% endtrans %}:</td>
-      <td>
-        {{ profile_user.email }}
-      </td>
-    </tr>
-    <tr>
-      <td>{% trans %}Workplace{% endtrans %}:</td>
-      <td>{{ profile_user.workplace|default("—", True) }}</td>
-    </tr>
-    <tr>
       <td>Группы</td>
       <td>
         {% for group in profile_user.site_groups %}
@@ -57,7 +37,7 @@
     <tr>
       <td>Социальные сети</td>
       <td>
-        {{ profile_user.social_networks|default("-", True) }}
+        {{ profile_user.social_networks|default("—", True) }}
       </td>
     </tr>
     <tr>

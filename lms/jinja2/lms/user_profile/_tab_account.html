@@ -29,7 +29,7 @@
             {% if request_user.is_authenticated %}
               <a href="{{ ps.project.get_absolute_url() }}">
             {% endif %}
-              {{ ps.project.name }}, {{ ps.project.semester }}
+            {{ ps.project.name }}, {{ ps.project.semester }}
             {% if request_user.is_authenticated %}</a>
             {% endif %} /{{ ps.get_status_display()|lower }}/<br>
           </li>
@@ -57,8 +57,8 @@
             {% endfor %}
           </ul>
         </li>
-        {% elif request_user.is_curator %}
-          <li>Нет зачтённых онлайн-курсов</li>
+      {% elif request_user.is_curator %}
+        <li>Нет зачтённых онлайн-курсов</li>
       {% endif %}
     {% endwith %}
   {% endif %}
@@ -84,8 +84,33 @@
     <table class="table table-condensed table-striped">
       {% if profile_user.pk == request_user.pk or request_user.is_curator %}
         <tr>
+          <td>{% trans %}Email{% endtrans %}:</td>
+          <td>
+            {{ profile_user.email }}
+            {% if profile_user.is_email_suspended %}
+              <div class="text-danger">
+                Отправка email приостановлена (Статус {{ profile_user.email_suspension_details['status'] }}). Обратитесь к кураторам за подробностями.
+              </div>
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
           <td>{% trans %}Time Zone{% endtrans %}</td>
           <td>{{ time_zone }}</td>
+        </tr>
+        <tr>
+          <td>{% trans %}Phone{% endtrans %}:</td>
+          <td>{{ profile_user.phone|default("—", True) }}</td>
+        </tr>
+        <tr>
+          <td>{% trans %}Workplace{% endtrans %}:</td>
+          <td>{{ profile_user.workplace|default("—", True) }}</td>
+        </tr>
+        <tr>
+          <td>{% trans %}Date of Birth{% endtrans %}:</td>
+          <td>
+            {% if profile_user.birth_date %}{{ profile_user.birth_date|date("d.m.Y") }}{% else %}—{% endif %}
+          </td>
         </tr>
       {% endif %}
       {% if icalendars %}
@@ -124,7 +149,8 @@
         <td>Codeforces</td>
         <td>
           {% if profile_user.codeforces_login %}
-            <a href="https://codeforces.com/profile/{{ profile_user.codeforces_login }}" target="_blank">{{ profile_user.codeforces_login }}</a>
+            <a href="https://codeforces.com/profile/{{ profile_user.codeforces_login }}"
+               target="_blank">{{ profile_user.codeforces_login }}</a>
           {% else %}
             —
           {% endif %}

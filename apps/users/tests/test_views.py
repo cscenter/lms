@@ -205,18 +205,25 @@ def test_duplicate_check(client):
 
 @pytest.mark.django_db
 def test_email_on_detail(client):
-    """Email field should be displayed only to curators (superuser)"""
+    """
+    Email field should be displayed only to curators (superuser) and
+    the user himself.
+    """
     student_mail = "student@student.mail"
     student = StudentFactory(email=student_mail)
     client.login(student)
     url = student.get_absolute_url()
     response = client.get(url)
-    assert smart_bytes(student_mail) not in response.content
+    assert smart_bytes(student_mail) in response.content
     # check with curator credentials
     curator = CuratorFactory()
     client.login(curator)
     response = client.get(url)
     assert smart_bytes(student_mail) in response.content
+    student_other = StudentFactory()
+    client.login(student_other)
+    response = client.get(url)
+    assert smart_bytes(student_mail) not in response.content
 
 
 @pytest.mark.django_db

@@ -7,5 +7,10 @@ class EmailAddressSuspension(models.Model):
         blank=True, null=True,
         editable=False)
 
+    @property
+    def is_email_suspended(self):
+        return (isinstance(self.email_suspension_details, dict) and
+                self.email_suspension_details.get('bounceType') == 'Permanent')
+
     class Meta:
         abstract = True
