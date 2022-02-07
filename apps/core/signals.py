@@ -24,11 +24,15 @@ def city_cache_clear_after_save(sender, *args, **kwargs) -> None:
 
 @receiver(bounce_received)
 def bounce_handler(sender, mail_obj, bounce_obj, *args, **kwargs):
+    """
+    https://docs.aws.amazon.com/ses/latest/dg/notification-contents.html#bounce-object
+    """
     if bounce_obj['bounceType'] == 'Permanent':
         for bounced_recipient in bounce_obj['bouncedRecipients']:
             email_address = bounced_recipient.pop('emailAddress')
             reason = {
                 'timestamp': bounce_obj['timestamp'],
+                'bounceType': bounce_obj['bounceType'],
                 'bounceSubType': bounce_obj['bounceSubType'],
                 **bounced_recipient
             }
