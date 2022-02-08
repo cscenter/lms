@@ -1,6 +1,5 @@
 import datetime
 
-import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
@@ -8,7 +7,6 @@ from bs4 import BeautifulSoup
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
-from core.models import Branch
 from core.tests.factories import BranchFactory, SiteFactory
 from core.urls import reverse
 from courses.models import CourseGroupModes, CourseTeacher
@@ -23,10 +21,8 @@ from learning.settings import Branches
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
 )
-from users.constants import Roles
-from users.models import User
 from users.tests.factories import (
-    CuratorFactory, StudentFactory, TeacherFactory, UserFactory
+    CuratorFactory, StudentFactory, TeacherFactory
 )
 
 

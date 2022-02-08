@@ -28,7 +28,7 @@ from learning.permissions import (
     ViewAssignmentAttachment, ViewAssignmentCommentAttachment
 )
 from learning.services.personal_assignment_service import (
-    create_assignment_comment, get_draft_comment
+    create_assignment_comment
 )
 from users.mixins import TeacherOnlyMixin
 
