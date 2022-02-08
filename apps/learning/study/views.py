@@ -27,6 +27,7 @@ from info_blocks.models import InfoBlock
 from info_blocks.permissions import ViewInternships
 from learning import utils
 from learning.calendar import get_all_calendar_events, get_student_calendar_events
+from learning.forms import AssignmentCommentForm
 from learning.models import Enrollment, StudentAssignment
 from learning.permissions import (
     CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution,
@@ -34,6 +35,7 @@ from learning.permissions import (
     ViewOwnStudentAssignments
 )
 from learning.selectors import get_student_classes
+from learning.services.personal_assignment_service import get_draft_comment
 from learning.study.services import get_solution_form, save_solution_form
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import (
@@ -154,11 +156,13 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         sa = self.student_assignment
-        comment_form = context['comment_form']
+        draft_comment = get_draft_comment(self.request.user, self.student_assignment)
+        comment_form = AssignmentCommentForm(instance=draft_comment)
         add_comment_url = reverse('study:assignment_comment_create',
                                   kwargs={'pk': sa.pk})
         comment_form.helper.form_action = add_comment_url
         # Format datetime in student timezone
+        context['comment_form'] = comment_form
         context['time_zone'] = self.request.user.time_zone
         context['solution_form'] = get_solution_form(sa)
         return context

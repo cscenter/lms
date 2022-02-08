@@ -1,8 +1,9 @@
 import os
+from typing import Optional
 
 from crispy_forms.bootstrap import FormActions, StrictButton
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import HTML, BaseInput, Div, Field, Hidden, Layout, Submit
+from crispy_forms.layout import HTML, BaseInput, Div, Field, Hidden, Layout, Submit, Row, Column, ButtonHolder
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -11,10 +12,11 @@ from django.utils.translation import gettext_lazy as _
 from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.widgets import UbereditorWidget
+from courses.constants import AssignmentStatuses
 from courses.forms import AssignmentDurationField
 from courses.models import Assignment
 from grading.services import CheckerService
-from learning.models import AssignmentSubmissionTypes, GraduateProfile
+from learning.models import AssignmentSubmissionTypes, GraduateProfile, StudentAssignment
 
 from .models import AssignmentComment
 
@@ -70,9 +72,85 @@ class AssignmentCommentForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if (not cleaned_data.get("text")
-                and not cleaned_data.get("attached_file")):
+            and not cleaned_data.get("attached_file")):
             raise forms.ValidationError(
                 _("Either text or file should be non-empty"))
+        return cleaned_data
+
+
+class AssignmentReviewForm(forms.Form):
+    prefix = "review"
+
+    text = forms.CharField(
+        label=False,
+        required=False,
+        widget=UbereditorWidget(attrs={'data-quicksend': 'true',
+                                       'data-local-persist': 'true',
+                                       'data-helper-formatting': 'true'}))
+
+    attached_file = forms.FileField(
+        label="",
+        required=False,
+        widget=JesnyFileInput)
+
+    score = ScoreField(required=False, label="")
+    old_score = ScoreField(widget=forms.HiddenInput(), required=False)
+
+    status = forms.ChoiceField(
+        label="",
+        required=False,
+        choices=AssignmentStatuses.choices)
+    old_status = forms.ChoiceField(
+        widget=forms.HiddenInput(),
+        required=False,
+        choices=AssignmentStatuses.choices,
+    )
+
+    def __init__(self, student_assignment: StudentAssignment,
+                       draft_comment: Optional[AssignmentComment] = None,
+                       *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.student_assignment = student_assignment
+        self.draft_comment = draft_comment
+        score = student_assignment.score
+        status = student_assignment.status
+        if draft_comment is not None:
+            self.draft_comment.type = AssignmentSubmissionTypes.COMMENT
+            if draft_comment.meta:
+                score = draft_comment.meta.get('score', score)
+                status = draft_comment.meta.get('status', status)
+        self.initial = {
+            'text': '' if draft_comment is None else draft_comment.text,
+            'score': score,
+            'status': status,
+            'old_score': student_assignment.score,
+            'old_status': student_assignment.status
+        }
+        # need for correct validation
+        self.fields['status'].choices = [(status, status.label)
+                                         for status in student_assignment.assignment.statuses
+                                         if student_assignment.is_status_transition_allowed(status)
+                                         ]
+        self.helper = FormHelper(self)
+        maximum_score = student_assignment.assignment.maximum_score
+        self.fields['score'].widget.attrs.update({'max': maximum_score})
+
+    def clean(self):
+        cleaned_data = super().clean()
+        text = cleaned_data.get("text")
+        file = cleaned_data.get("attached_file")
+        score = cleaned_data.get('score')
+        status = cleaned_data.get('status')
+        old_score = cleaned_data.get('old_score')
+        old_status = cleaned_data.get('old_status')
+        if not (text or file) and (score, status) == (old_score, old_status):
+            raise forms.ValidationError(
+                _("Nothing to send or update"), code='nothing_to_update')
+        score = cleaned_data.get('score', None)
+        maximum_score = self.student_assignment.assignment.maximum_score
+        if score and score > maximum_score:
+            msg = _("Score can't be larger than maximum one ({0})", )
+            raise forms.ValidationError(msg.format(maximum_score), code='too_high_score')
         return cleaned_data
 
 
@@ -129,7 +207,7 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
     def clean(self):
         cleaned_data = super().clean()
         if (not cleaned_data.get("text")
-                and not cleaned_data.get("attached_file")):
+            and not cleaned_data.get("attached_file")):
             raise forms.ValidationError(
                 _("Either text or file should be non-empty"))
         return cleaned_data

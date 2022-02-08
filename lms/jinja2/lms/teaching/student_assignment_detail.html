@@ -1,5 +1,7 @@
 {% extends "lms/layouts/v1_base.html" %}
 
+{% import "lms/macros/_forms.jinja2" as forms %}
+
 {% block title %}{{ a_s.student.get_short_name() }} - {{ a_s.assignment.title }}{% endblock %}
 
 {% block body_attrs %} data-init-sections="studentAssignment"{% endblock body_attrs %}
@@ -126,7 +128,63 @@
 
         {% set can_create_comment = request_user.has_perm("learning.create_assignment_comment", a_s) %}
         {% if can_create_comment %}
-          <div class="csc-well">{{ crispy(comment_form) }}</div>
+          <div class="csc-well">
+            <form action method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              {% if comment_form.non_field_errors() %}
+                <div class="alert alert-danger">
+                  {{ comment_form.non_field_errors() }}
+                </div>
+              {% endif %}
+              <div class="row">
+                <div class="col-xs-12">
+                  {{ forms.field(comment_form['text'], hide_label=True) }}
+                  <div>
+                    {{ comment_form.attached_file }}
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-15">
+                <div class="col-sm-5">
+                  <div class="input-group">
+                    <span class="input-group-addon">Оценка:</span>
+                    {{ forms.field(comment_form['score'], hide_label=True) }}
+                    <span class="input-group-addon" id="addon_score">из 5</span>
+                  </div>
+                  {% if comment_form['score'].errors -%}
+                    <div class="help-block alert alert-danger p-5">
+                      {% for e in comment_form['score'].errors %}
+                        {{ e }}<br>
+                      {% endfor %}
+                    </div>
+                  {%- endif %}
+                  {{ forms.field(comment_form['old_score'], hide_label=True) }}
+
+                </div>
+                  <div class="col-sm-7">
+                    <div class="input-group"><span class="input-group-addon">Статус задания:</span>
+                      {{ forms.select(name="review-status", id="id_review-status", options=statuses, selected=comment_form.initial['status'], classes="form-control") }}
+                    </div>
+                    {% if comment_form['status'].errors -%}
+                      <div class="help-block alert alert-danger p-5">
+                        {% for e in comment_form['status'].errors %}
+                            {{ e }}<br>
+                        {% endfor %}
+                      </div>
+                    {%- endif %}
+                    {{ forms.field(comment_form['old_status'], hide_label=True) }}
+                  </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="pull-right"><input type="submit" name="save-draft" value="Сохранить черновик" class="btn btn-link"
+                                                 id="submit-id-review-save-draft">
+                    <input type="submit" name="save" value="Отправить комментарий" class="btn btn-primary" id="submit-id-review-save">
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
         {% endif %}
       </div>
 
@@ -139,11 +197,7 @@
         {% endif %}
 
         <h5 class="assignment">{% trans %}Grade{% endtrans %}</h5>
-        {% if can_edit_score %}
-          {{ crispy(score_form) }}
-        {% else %}
           <span class="nowrap badge assignment-status">{{ a_s.state_display }}</span>
-        {% endif %}
 
         {% if show_score_audit_log %}
           <div class="mt-5">

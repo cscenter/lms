@@ -3,6 +3,7 @@ import datetime
 import factory
 import pytest
 import pytz
+from bs4 import BeautifulSoup
 
 from django.utils.encoding import smart_bytes
 
@@ -17,6 +18,7 @@ from courses.tests.factories import (
 )
 from learning.models import StudentAssignment
 from learning.permissions import ViewStudentAssignment, ViewStudentAssignmentList
+from learning.services.personal_assignment_service import create_assignment_solution
 from learning.settings import Branches
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
@@ -140,18 +142,24 @@ def test_view_student_assignment_detail_permissions(client, lms_resolver,
     assert resolver.func.view_class.permission_required in perm_registry
 
     assert_login_redirect(url, method='get')
+    assert_login_redirect(url, method='post')
 
     client.login(student)
     assert_login_redirect(url, method='get')
+    assert_login_redirect(url, method='post')
 
     client.login(teacher_other)
     assert_login_redirect(url, method='get')
+    assert_login_redirect(url, method='post')
 
     client.login(spectator)
     assert_login_redirect(url, method='get')
+    assert_login_redirect(url, method='post')
 
     client.login(teacher)
     response = client.get(url)
+    assert response.status_code == 200
+    response = client.post(url)
     assert response.status_code == 200
 
 
@@ -189,39 +197,6 @@ def test_assignment_contents(client):
 
 
 @pytest.mark.django_db
-def test_student_assignment_detail_view_grading_form(client, assert_login_redirect):
-    teacher, spectator = TeacherFactory.create_batch(2)
-    co = CourseFactory.create(teachers=[teacher])
-    CourseTeacherFactory(course=co, teacher=spectator, roles=CourseTeacher.roles.spectator)
-    student = StudentFactory()
-    EnrollmentFactory.create(student=student, course=co)
-    a = AssignmentFactory.create(course=co, maximum_score=13)
-    a_s = (StudentAssignment.objects
-           .get(assignment=a, student=student))
-    url = a_s.get_teacher_url()
-    grade_form = {
-        'grading_form': True,
-        'score': 11
-    }
-    client.login(teacher)
-    response = client.post(url, grade_form)
-    assert response.status_code == 302
-    assert response.url == url
-    assert StudentAssignment.objects.get(pk=a_s.pk).score == 11
-    response = client.get(url)
-    assert b"value=\"11\"" in response.content
-    assert smart_bytes("/{}".format(13)) in response.content
-    # wrong grading value can't be set
-    grade_form['score'] = 42
-    client.post(url, grade_form)
-    assert client.post(url, grade_form).status_code == 400
-    assert StudentAssignment.objects.get(pk=a_s.pk).score == 11
-    # spectator can't change grade value
-    client.login(spectator)
-    assert_login_redirect(url, method='get')
-
-
-@pytest.mark.django_db
 def test_student_assignment_detail_view_context_next_unchecked(client):
     teacher = TeacherFactory()
     student = StudentFactory()
@@ -240,13 +215,13 @@ def test_student_assignment_detail_view_context_next_unchecked(client):
     url1 = a_s1.get_teacher_url()
     url2 = a_s2.get_teacher_url()
     client.login(teacher)
-    assert client.get(url1).context['next_student_assignment'] is None
-    assert client.get(url2).context['next_student_assignment'] is None
+    assert client.get(url1).context_data['next_student_assignment'] is None
+    assert client.get(url2).context_data['next_student_assignment'] is None
     [AssignmentCommentFactory.create(author=a_s.student,
                                      student_assignment=a_s)
      for a_s in [a_s1, a_s2]]
-    assert client.get(url1).context['next_student_assignment'] == a_s2
-    assert client.get(url2).context['next_student_assignment'] == a_s1
+    assert client.get(url1).context_data['next_student_assignment'] == a_s2
+    assert client.get(url2).context_data['next_student_assignment'] == a_s1
 
 
 @pytest.mark.django_db
@@ -290,4 +265,26 @@ def test_student_assignment_detail_view_context_assignee_list(client):
     actual_teachers = client.get(url).context_data['assignee_teachers']
     assert len(actual_teachers) == 2
     assert {ct_lec, ct_org} == set(actual_teachers)
+
+
+@pytest.mark.django_db
+def test_view_student_assignment_detail_forbidden_statuses_disabled(client):
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course,
+                                  assignment__maximum_score=5)
+    create_assignment_solution(personal_assignment=sa,
+                               created_by=sa.student,
+                               message="solution")
+    sa.refresh_from_db()
+    client.login(teacher)
+    url = sa.get_teacher_url()
+    response = client.get(url)
+    soup = BeautifulSoup(response.content, "html.parser")
+    widget = soup.find("select", attrs={"id": "id_review-status"})
+    for option in widget.findChildren("option"):
+        db_value = option['value']
+        should_be_disabled = not sa.is_status_transition_allowed(db_value)
+        is_disabled = option.has_attr('disabled')
+        assert should_be_disabled == is_disabled
 

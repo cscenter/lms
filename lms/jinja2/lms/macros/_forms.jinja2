@@ -30,7 +30,7 @@
                 {% if not popover_help_text and bound_field.help_text -%}
                     <div class="help-block">{{ bound_field.help_text }}</div>
                 {%- endif %}
-                {% if bound_field.errors -%}
+                {% if show_errors and bound_field.errors -%}
                     <div class="help-block">
                     {% for e in bound_field.errors %}
                         {{ e }}<br>
@@ -41,3 +41,14 @@
         </div>
     {% endif %}
 {%- endmacro %}
+
+{% macro select(name, id, options, selected, classes="form-control") -%}
+    <select name={{ name }} class={{ classes }} id={{ id }}>
+        {% for option in options %}
+            <option value={{ option.value }} {% if option.value == selected %} selected {% endif %}
+                    {% if 'disabled' in option and option.disabled %} disabled {% endif %}>
+                {{ option.label }}
+            </option>
+        {% endfor %}
+    </select>
+{% endmacro %}
