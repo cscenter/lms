@@ -72,7 +72,7 @@ class AssignmentCommentForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if (not cleaned_data.get("text")
-            and not cleaned_data.get("attached_file")):
+                and not cleaned_data.get("attached_file")):
             raise forms.ValidationError(
                 _("Either text or file should be non-empty"))
         return cleaned_data
@@ -207,7 +207,7 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
     def clean(self):
         cleaned_data = super().clean()
         if (not cleaned_data.get("text")
-            and not cleaned_data.get("attached_file")):
+                and not cleaned_data.get("attached_file")):
             raise forms.ValidationError(
                 _("Either text or file should be non-empty"))
         return cleaned_data

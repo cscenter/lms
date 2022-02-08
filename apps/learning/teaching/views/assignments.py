@@ -212,14 +212,14 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
         context = super().get_context_data(**kwargs)
         context['a_s_list'] = (
             StudentAssignment.objects
-                .filter(assignment__pk=self.object.pk)
-                .select_related('assignment',
-                                'assignment__course',
-                                'assignment__course__meta_course',
-                                'assignment__course__semester',
-                                'student')
-                .prefetch_related('student__groups')
-                .order_by('student__last_name', 'student__first_name'))
+            .filter(assignment__pk=self.object.pk)
+            .select_related('assignment',
+                            'assignment__course',
+                            'assignment__course__meta_course',
+                            'assignment__course__semester',
+                            'student')
+            .prefetch_related('student__groups')
+            .order_by('student__last_name', 'student__first_name'))
         # Note: it's possible to return values instead and
         # making 1 db hit instead of 3
         exec_mean = AssignmentService.get_mean_execution_time(self.object)

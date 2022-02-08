@@ -124,7 +124,7 @@ def test_assignment_detail_deadline_l10n(settings, client):
 
 
 @pytest.mark.django_db
-def test_view_student_assignment_update_score(client):
+def test_view_student_assignment_detail_update_score(client):
     """
     Make sure we can remove zeroed grade for student assignment and use both
     1.23 and 1,23 formats
