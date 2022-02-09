@@ -662,8 +662,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     assert 'comment_form' in response.context_data
     form = response.context_data['comment_form']
     assert 'status' in form.errors and len(form.errors['status']) == 1
-    expected_error = "Select a valid choice." \
-                     " not_submitted is not one of the available choices."
+    expected_error = "Please select a valid status"
     assert expected_error == form.errors['status'][0]
     # one was published by teacher above and one from student
     assert AssignmentComment.objects.count() == 2
