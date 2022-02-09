@@ -126,11 +126,6 @@ class AssignmentReviewForm(forms.Form):
             'old_score': student_assignment.score,
             'old_status': student_assignment.status
         }
-        # need for correct validation
-        self.fields['status'].choices = [(status, status.label)
-                                         for status in student_assignment.assignment.statuses
-                                         if student_assignment.is_status_transition_allowed(status)
-                                         ]
         self.helper = FormHelper(self)
         maximum_score = student_assignment.assignment.maximum_score
         self.fields['score'].widget.attrs.update({'max': maximum_score})
@@ -144,13 +139,16 @@ class AssignmentReviewForm(forms.Form):
         old_score = cleaned_data.get('old_score')
         old_status = cleaned_data.get('old_status')
         if not (text or file) and (score, status) == (old_score, old_status):
-            raise forms.ValidationError(
+            raise ValidationError(
                 _("Nothing to send or update"), code='nothing_to_update')
         score = cleaned_data.get('score', None)
         maximum_score = self.student_assignment.assignment.maximum_score
         if score and score > maximum_score:
             msg = _("Score can't be larger than maximum one ({0})", )
-            raise forms.ValidationError(msg.format(maximum_score), code='too_high_score')
+            raise ValidationError(msg.format(maximum_score), code='too_high_score')
+        if not self.student_assignment.is_status_transition_allowed(status):
+            msg = f"Status {_(AssignmentStatuses(status).label)} is not allowed"
+            raise ValidationError({"status": [msg]})
         return cleaned_data
 
 
