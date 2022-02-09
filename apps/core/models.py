@@ -7,6 +7,7 @@ from model_utils.fields import AutoCreatedField, AutoLastModifiedField
 
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.utils.encoding import force_bytes, force_str, smart_str
 from django.utils.functional import cached_property
@@ -29,6 +30,7 @@ BranchId = NewType('BranchId', int)
 # TODO: Move to shared cache since it's hard to clear in all processes
 BRANCH_CACHE: Dict[Union[BranchId, BranchNaturalKey], "Branch"] = {}
 BRANCH_SITE_CACHE: Dict[SiteId, List[BranchId]] = {}
+SITE_CONFIGURATION_CACHE = {}
 
 
 LATEX_MARKDOWN_HTML_ENABLED = _(
@@ -46,6 +48,45 @@ TIMEZONES = (
     'Asia/Yekaterinburg',
     'Asia/Novosibirsk',
 )
+
+
+class SiteConfigurationManager(models.Manager):
+    use_in_migrations = False
+
+    def get_by_site_id(self, site_id: int) -> "SiteConfiguration":
+        if site_id not in SITE_CONFIGURATION_CACHE:
+            site_configuration = self.get(site_id=site_id)
+            SITE_CONFIGURATION_CACHE[site_id] = site_configuration
+        return SITE_CONFIGURATION_CACHE[site_id]
+
+    def get_current(self, request=None) -> "SiteConfiguration":
+        """
+        Return the current site configuration based on the SITE_ID in the
+        project's settings. If SITE_ID isn't defined, return the site
+        configuration matching ``request.site``.
+
+        The ``SiteConfiguration`` object is cached the
+        first time it's retrieved from the database.
+        """
+        if getattr(settings, 'SITE_ID', None):
+            site_id = settings.SITE_ID
+        elif request:
+            site_id = request.site.pk
+        else:
+            raise ImproperlyConfigured(
+                "Set the SITE_ID setting or pass a request to "
+                "SiteConfiguration.objects.get_current() to fix this error."
+            )
+        return self.get_by_site_id(site_id)
+
+    @staticmethod
+    def clear_cache() -> None:
+        """Clear the ``SiteConfiguration`` object cache."""
+        global SITE_CONFIGURATION_CACHE
+        SITE_CONFIGURATION_CACHE = {}
+
+    def get_by_natural_key(self, domain: str) -> "SiteConfiguration":
+        return self.get(site__domain=domain)
 
 
 class SiteConfiguration(ConfigurationModel):
@@ -105,6 +146,9 @@ class SiteConfiguration(ConfigurationModel):
     instagram_access_token = models.CharField(
         max_length=420,
         blank=True, null=True)
+
+    default_manager = models.Manager()
+    objects = SiteConfigurationManager()
 
     class Meta:
         verbose_name = "Site Configuration"
@@ -199,7 +243,7 @@ class BranchManager(models.Manager):
         return BRANCH_CACHE[key]
 
     @staticmethod
-    def clear_cache():
+    def clear_cache() -> None:
         """Clear the ``Branch`` object caches."""
         global BRANCH_CACHE, BRANCH_SITE_CACHE
         BRANCH_CACHE = {}

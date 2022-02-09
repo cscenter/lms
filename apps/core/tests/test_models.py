@@ -1,12 +1,12 @@
 import pytest
 
 from core.models import Branch, SiteConfiguration
-from core.tests.factories import BranchFactory, SiteFactory
+from core.tests.factories import BranchFactory, SiteConfigurationFactory, SiteFactory
 from core.tests.settings import TEST_DOMAIN, TEST_DOMAIN_ID
 
 
 @pytest.mark.django_db
-def test_branch_manager_get_current(rf, settings):
+def test_manager_branch_get_current(rf, settings):
     branch_code1 = 'test'
     branch_code2 = 'test2'
     branch1 = BranchFactory(code=branch_code1, site_id=TEST_DOMAIN_ID)
@@ -36,7 +36,23 @@ def test_branch_manager_get_current(rf, settings):
 
 
 @pytest.mark.django_db
-def test_site_configuration(rf, settings):
+def test_manager_site_configuration_get_current(rf, settings):
+    site1 = SiteFactory(domain='example1.org')
+    site_configuration1 = SiteConfigurationFactory(site=site1)
+    site2 = SiteFactory(domain='example2.org')
+    site_configuration2 = SiteConfigurationFactory(site=site2)
+    settings.SITE_ID = site2.pk
+    request = rf.request()
+    request.site = site1
+    request.path = '/'
+    assert SiteConfiguration.objects.get_current() == site_configuration2
+    assert SiteConfiguration.objects.get_current(request) == site_configuration2
+    settings.SITE_ID = None
+    assert SiteConfiguration.objects.get_current(request) == site_configuration1
+
+
+@pytest.mark.django_db
+def test_model_site_configuration_encrypt_decrypt(rf, settings):
     settings.SECRET_KEY = 'short'
     value = 'secret_value'
     encrypted = SiteConfiguration.encrypt(value)
