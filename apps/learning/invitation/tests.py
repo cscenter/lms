@@ -11,7 +11,7 @@ from core.urls import reverse
 from courses.tests.factories import SemesterFactory
 from learning.invitation.forms import InvitationRegistrationForm
 from learning.invitation.views import (
-    InvitationURLParamsMixin, complete_student_profile, student_profile_is_valid
+    InvitationURLParamsMixin, complete_student_profile, is_student_profile_valid
 )
 from learning.tests.factories import CourseInvitationFactory
 from users.constants import GenderTypes, Roles
@@ -40,20 +40,19 @@ def test_invitation_view(client, lms_resolver, assert_redirect, settings):
     client.login(user)
     response = client.get(url)
     site = SiteFactory(id=settings.SITE_ID)
-    assert not student_profile_is_valid(user, site, invitation)
+    assert not is_student_profile_valid(user, site, invitation)
     assert response.status_code == 302
     # FIXME check url to complete profile view
     complete_student_profile(user, site, invitation)
     response = client.get(url)
     assert response.status_code == 200
-    assert 'view' in response.context_data
-    assert hasattr(response.context_data['view'], 'invitation')
-    assert response.context_data['view'].invitation == invitation
+    assert 'invitation' in response.context_data
+    assert response.context_data['invitation'] == invitation
     # Make sure we select courses for target invitation only
     CourseInvitationFactory()
     response = client.get(url)
-    assert len(response.context_data['course_invitation_list']) == 1
-    assert response.context_data['course_invitation_list'][0] == course_invitation
+    assert len(response.context_data['invitation_course_list']) == 1
+    assert response.context_data['invitation_course_list'][0] == course_invitation
 
 
 @pytest.mark.django_db

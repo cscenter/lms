@@ -19,17 +19,17 @@ from learning.permissions import (
     CreateAssignmentCommentAsTeacher, CreateStudentGroup, CreateStudentGroupAsTeacher,
     DeleteStudentGroup, DeleteStudentGroupAsTeacher, EditGradebook,
     EditOwnAssignmentExecutionTime, EditOwnStudentAssignment, EnrollInCourse,
-    EnrollPermissionObject, InvitationEnrollPermissionObject, UpdateStudentGroup,
-    UpdateStudentGroupAsTeacher, ViewAssignmentCommentAttachment, ViewCourseEnrollment,
-    ViewEnrollment, ViewGradebook, ViewOwnEnrollment, ViewOwnGradebook,
-    ViewRelatedStudentAssignment, ViewStudentAssignment, ViewStudentGroup,
-    ViewStudentGroupAsTeacher
+    EnrollInCourseByInvitation, EnrollPermissionObject,
+    InvitationEnrollPermissionObject, UpdateStudentGroup, UpdateStudentGroupAsTeacher,
+    ViewAssignmentCommentAttachment, ViewCourseEnrollment, ViewEnrollment,
+    ViewGradebook, ViewOwnEnrollment, ViewOwnGradebook, ViewRelatedStudentAssignment,
+    ViewStudentAssignment, ViewStudentGroup, ViewStudentGroupAsTeacher
 )
 from learning.services import CourseRole, EnrollmentService, course_access_role
 from learning.settings import Branches, GradeTypes, StudentStatuses
 from learning.tests.factories import (
     AssignmentCommentFactory, CourseInvitationFactory, EnrollmentFactory,
-    StudentAssignmentFactory, StudentGroupFactory
+    GraduateFactory, StudentAssignmentFactory, StudentGroupFactory
 )
 from users.models import ExtendedAnonymousUser, StudentTypes, User
 from users.tests.factories import (
@@ -307,12 +307,11 @@ def test_leave_course(settings):
 
 
 @pytest.mark.django_db
-def test_enroll_in_course_by_invitation(settings):
-    branch_spb = BranchFactory(code=Branches.SPB)
+def test_permission_enroll_in_course_by_invitation(settings):
+    assert EnrollInCourseByInvitation.name in perm_registry
+    branch_spb = BranchFactory(code="spb")
     today = now_local(branch_spb.get_timezone())
-    yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
-    branch_spb = BranchFactory(code=Branches.SPB)
     term = SemesterFactory.create_current(
         for_branch=branch_spb.code,
         enrollment_period__ends_on=tomorrow.date())
@@ -325,18 +324,21 @@ def test_enroll_in_course_by_invitation(settings):
     course_invitation = CourseInvitationFactory(course=course)
     perm_obj = InvitationEnrollPermissionObject(course_invitation,
                                                 student_profile)
-    assert student.has_perm("learning.enroll_in_course_by_invitation",
-                            perm_obj)
-    # Invitation activity depends on semester settings.
-    # Also this condition checked internally in `learning.enroll_in_course`
-    # predicate
+    assert student.has_perm(EnrollInCourseByInvitation.name, perm_obj)
+    user = UserFactory()
+    assert not user.has_perm(EnrollInCourseByInvitation.name, perm_obj)
+    graduate = GraduateFactory()
+    assert not graduate.has_perm(EnrollInCourseByInvitation.name, perm_obj)
+    # Invitation availability depends on the semester settings.
     ep = EnrollmentPeriod.objects.get(site_id=settings.SITE_ID,
                                       semester=course.semester)
+    yesterday = today - datetime.timedelta(days=1)
     ep.ends_on = yesterday.date()
     ep.save()
+    course_invitation.refresh_from_db()
+    assert not course_invitation.is_active
     assert not course.enrollment_is_open
-    assert not student.has_perm("learning.enroll_in_course_by_invitation",
-                                perm_obj)
+    assert not student.has_perm(EnrollInCourseByInvitation.name, perm_obj)
 
 
 @pytest.mark.django_db

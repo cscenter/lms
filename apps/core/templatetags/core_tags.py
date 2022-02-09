@@ -219,16 +219,6 @@ def can_enroll_in_course(user, course, student_profile):
     return user.has_perm(EnrollInCourse.name, perm_obj)
 
 
-@register.simple_tag
-def can_enroll_in_course_by_invitation(user, course_invitation, student_profile):
-    from learning.permissions import (
-        EnrollInCourseByInvitation, InvitationEnrollPermissionObject
-    )
-    perm_obj = InvitationEnrollPermissionObject(course_invitation,
-                                                student_profile)
-    return user.has_perm(EnrollInCourseByInvitation.name, perm_obj)
-
-
 @register.filter
 def file_name(value):
     return os.path.basename(value.file.name)

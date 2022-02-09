@@ -422,6 +422,7 @@ class CourseInvitation(models.Model):
             kwargs={"course_token": self.token, **self.course.url_kwargs},
             subdomain=settings.LMS_SUBDOMAIN)
 
+    @property
     def is_active(self):
         return self.course.enrollment_is_open
 
