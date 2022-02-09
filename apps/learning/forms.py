@@ -126,7 +126,6 @@ class AssignmentReviewForm(forms.Form):
             'old_score': student_assignment.score,
             'old_status': student_assignment.status
         }
-        self.helper = FormHelper(self)
         maximum_score = student_assignment.assignment.maximum_score
         self.fields['score'].widget.attrs.update({'max': maximum_score})
 
@@ -282,6 +281,7 @@ class AssignmentModalCommentForm(forms.ModelForm):
 
 
 class AssignmentScoreForm(forms.Form):
+    # TODO: not used for its intended purpose, to be removed
     score = ScoreField(required=False, label="")
 
     def __init__(self, *args, **kwargs):

@@ -437,4 +437,4 @@ def append_review_updating_text(*, message: str,
             appended = f"*Оценка была изменена. Новая оценка: {new_score}.*"
         else:
             appended = f"*Статус был изменён. Новый статус: {status_label}.*"
-    return appended + f"\n\n{message}"
+    return f"{appended}\n\n{message}"
