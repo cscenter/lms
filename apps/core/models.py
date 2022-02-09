@@ -140,6 +140,12 @@ class SiteConfiguration(ConfigurationModel):
         max_length=10,
         blank=True,
         null=True)
+    lms_domain = models.CharField(
+        "Domain Name for Learning Management System",
+        max_length=100,
+        blank=True,
+        # XXX: There is no lms domain name for CS Club site
+        null=True)
     default_branch_code = models.CharField(
         "Branch code",
         max_length=10)
