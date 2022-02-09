@@ -1,12 +1,12 @@
 from datetime import timedelta
-from typing import Optional
+from typing import List, Optional, Tuple
 
 from django.utils.translation import gettext_lazy as _
 
 from learning.settings import GradeTypes
 
 
-def grade_to_mark(grade):
+def grade_to_mark(grade: str) -> int:
     """
     Converts grade to some score for easier grades comparison.
 
@@ -37,11 +37,11 @@ def grade_to_mark(grade):
     raise ValueError("Unknown grade type")
 
 
-def is_negative_grade(grade):
+def is_negative_grade(grade) -> bool:
     return grade in GradeTypes.unsatisfactory_grades
 
 
-def split_on_condition(iterable, predicate):
+def split_on_condition(iterable, predicate) -> Tuple[List, List]:
     true_lst, false_lst = [], []
     for x in iterable:
         if predicate(x):
