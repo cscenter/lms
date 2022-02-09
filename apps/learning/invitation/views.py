@@ -155,9 +155,11 @@ class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
                 last_name=data['last_name'],
                 patronymic=data.get('patronymic', ''))
             registration_profile = create_registration_profile(user=new_user)
-            create_student_profile(user=new_user, branch=invitation.branch,
+            create_student_profile(user=new_user,
+                                   branch=invitation.branch,
                                    profile_type=StudentTypes.INVITED,
-                                   year_of_admission=invitation.semester.academic_year)
+                                   year_of_admission=invitation.semester.academic_year,
+                                   invitation=invitation)
         activation_url = reverse("invitation:activate", kwargs={
             "token": invitation.token,
             "activation_key": registration_profile.activation_key
