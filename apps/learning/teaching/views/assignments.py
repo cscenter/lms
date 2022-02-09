@@ -288,7 +288,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
     def form_invalid(self, form):
         msg = "<br>".join("<br>".join(errors)
                           for errors in form.errors.values())
-        messages.error(self.request, "Данные не сохранены!<br>" + msg)
+        messages.error(self.request, "Данные не сохранены!<br>" + msg, extra_tags="timeout")
         context = self.get_context_data()
         self.student_assignment.refresh_from_db()
         sa = self.student_assignment
@@ -344,7 +344,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                         form.add_error('score', _('Warning, score was replaced with actual!'))
                     elif e.code == "overwriting_status":
                         form.add_error('status', _('Warning, status was replaced with actual!'))
-                message = e.args[0] if e.args else str(e)
+                message = str(e.args[0] if e.args else e)
                 messages.error(self.request, message=message, extra_tags='timeout')
         return self.form_invalid(form)
 

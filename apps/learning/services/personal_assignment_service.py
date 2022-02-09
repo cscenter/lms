@@ -9,7 +9,7 @@ from django.db.models import (
     Case, Count, DateTimeField, F, IntegerField, Max, When, Window
 )
 from django.utils.timezone import now
-
+from django.utils.translation import gettext_lazy as _
 from core.timezone import get_now_utc
 from core.typings import assert_never
 from core.utils import NOT_SET
@@ -246,7 +246,7 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
                                       attachment: Optional[UploadedFile] = None,
                                       ) -> AssignmentComment:
     if not (message or attachment) and (new_score, new_status) == (old_score, old_status):
-        raise ValidationError("Nothing to send or update", code='nothing_to_update')
+        raise ValidationError(_("Nothing to send or update"), code='nothing_to_update')
     if not is_draft:
         updated, sa = update_personal_assignment_score(student_assignment=student_assignment,
                                                        changed_by=reviewer,
@@ -254,15 +254,15 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
                                                        score_new=new_score,
                                                        source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT)
         if not updated:
-            raise ValidationError("Looks like the score has been changed while you're reviewing."
-                                  "Check and rewrite it if needed.", code="overwriting_score")
+            raise ValidationError(_("Looks like the score has been changed while you're reviewing."
+                                  "Check and rewrite it if needed."), code="overwriting_score")
         updated, sa = update_personal_assignment_status(student_assignment=sa,
                                                         status_old=old_status,
                                                         status_new=new_status,
                                                         )
         if not updated:
-            raise ValidationError("Looks like the status has been changed while you're reviewing."
-                                  "Check and rewrite it if needed", code="overwriting_status")
+            raise ValidationError(_("Looks like the status has been changed while you're reviewing."
+                                  "Check and rewrite it if needed"), code="overwriting_status")
     return create_assignment_comment(personal_assignment=student_assignment,
                                      created_by=reviewer,
                                      score=new_score,

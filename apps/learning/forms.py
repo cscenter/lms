@@ -147,7 +147,7 @@ class AssignmentReviewForm(forms.Form):
             msg = _("Score can't be larger than maximum one ({0})", )
             raise ValidationError(msg.format(maximum_score), code='too_high_score')
         if not self.student_assignment.is_status_transition_allowed(status):
-            raise ValidationError({"status": "Please select a valid status"})
+            raise ValidationError({"status": _("Please select a valid status")})
         return cleaned_data
 
 
