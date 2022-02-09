@@ -23,7 +23,7 @@
         <h2 class="h3">Законченные направления</h2>
         <div class="mb-10">
           {% for academic_discipline in graduate_profile.academic_disciplines.all() %}
-            <a href="/syllabus/on-campus/{{ academic_discipline.code }}/">{{ academic_discipline.name }}</a>{% if not loop.last %}, {% endif %}
+            <a href="/syllabus/{{ academic_discipline.code }}/">{{ academic_discipline.name }}</a>{% if not loop.last %}, {% endif %}
           {%- endfor %}
         </div>
 
