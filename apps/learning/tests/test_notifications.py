@@ -286,8 +286,7 @@ def test_new_assignment_notification_context(site_domain, lms_subdomain, rf, set
     assert AssignmentNotification.objects.count() == 1
     an = AssignmentNotification.objects.first()
     participant_branch = enrollment.student_profile.branch
-    context = get_assignment_notification_context(an, participant_branch,
-                                                  site_settings)
+    context = get_assignment_notification_context(an, participant_branch)
     student_url = abs_url(an.student_assignment.get_student_url())
     parsed_url = urlparse(student_url)
     relative_student_url = parsed_url.path
@@ -366,8 +365,7 @@ def test_new_course_news_notification_context(site_domain, lms_subdomain, settin
     cn = CourseNewsNotificationFactory(course_offering_news__course=course,
                                        user=student)
     participant_branch = enrollment.student_profile.branch
-    context = get_course_news_notification_context(cn, participant_branch,
-                                                   site_settings)
+    context = get_course_news_notification_context(cn, participant_branch)
     assert context['course_link'] == abs_url(course.get_absolute_url())
     site2 = SiteFactory(domain=f'another.{site_domain}')
     site2_settings = SiteConfigurationFactory(site=site2, lms_domain='test.com')
@@ -375,7 +373,7 @@ def test_new_course_news_notification_context(site_domain, lms_subdomain, settin
     cn = CourseNewsNotificationFactory(
         course_offering_news__course=course,
         user=StudentFactory(branch=branch_nsk))
-    context = get_course_news_notification_context(cn, branch_nsk, site2_settings)
+    context = get_course_news_notification_context(cn, branch_nsk)
     assert context['course_link'].startswith(f'https://{site2_settings.lms_domain}')
 
 

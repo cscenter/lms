@@ -3,7 +3,7 @@ import smtplib
 import time
 from datetime import datetime
 from functools import partial
-from typing import Dict
+from typing import Dict, Optional
 
 from django_ses import SESBackend
 
@@ -145,8 +145,8 @@ def get_assignment_notification_template(notification: AssignmentNotification):
     return EMAIL_TEMPLATES[template_code]
 
 
-def get_lms_domain_name(branch: Branch, site_settings: SiteConfiguration) -> str:
-    assert branch.site_id == site_settings.site_id
+def get_lms_domain_name(branch: Branch) -> str:
+    site_settings = SiteConfiguration.objects.get_by_site_id(branch.site_id)
     if site_settings.lms_domain:
         domain_name = site_settings.lms_domain
     else:
@@ -168,11 +168,10 @@ def _get_abs_url_builder(domain_name):
 
 def get_assignment_notification_context(
         notification: AssignmentNotification,
-        participant_branch: Branch,
-        site_settings: SiteConfiguration) -> Dict:
+        participant_branch: Branch) -> Dict:
     a_s = notification.student_assignment
     tz_override = notification.user.time_zone
-    domain_name = get_lms_domain_name(participant_branch, site_settings)
+    domain_name = get_lms_domain_name(participant_branch)
     abs_url_builder = _get_abs_url_builder(domain_name)
     context = {
         'a_s_link_student': abs_url_builder(a_s.get_student_url()),
@@ -191,9 +190,8 @@ def get_assignment_notification_context(
 
 def get_course_news_notification_context(
         notification: CourseNewsNotification,
-        participant_branch: Branch,
-        site_settings: SiteConfiguration) -> Dict:
-    domain_name = get_lms_domain_name(participant_branch, site_settings)
+        participant_branch: Branch) -> Dict:
+    domain_name = get_lms_domain_name(participant_branch)
     abs_url_builder = _get_abs_url_builder(domain_name)
     course = notification.course_offering_news.course
     context = {
@@ -243,9 +241,8 @@ def send_assignment_notifications(site_configurations: Dict[int, SiteConfigurati
         template = get_assignment_notification_template(notification)
         course = notification.student_assignment.assignment.course
         branch = resolve_course_participant_branch(course, notification.user)
+        context = get_assignment_notification_context(notification, branch)
         site_settings: SiteConfiguration = site_configurations[branch.site_id]
-        context = get_assignment_notification_context(
-            notification, branch, site_settings)
         send_notification(notification, template, context, stdout, site_settings)
 
 
@@ -265,9 +262,8 @@ def send_course_news_notifications(site_configurations: Dict[int, SiteConfigurat
         template = EMAIL_TEMPLATES['new_course_news']
         course = notification.course_offering_news.course
         branch = resolve_course_participant_branch(course, notification.user)
+        context = get_course_news_notification_context(notification, branch)
         site_settings: SiteConfiguration = site_configurations[branch.site_id]
-        context = get_course_news_notification_context(notification,
-                                                       branch, site_settings)
         send_notification(notification, template, context, stdout, site_settings)
 
 
@@ -285,6 +281,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         translation.activate(settings.LANGUAGE_CODE)
 
+        SiteConfiguration.objects.clear_cache()
         # SMTP settings must be resolved at runtime since any course could be
         # shared across different sites and e.g. site1 must know how to
         # send emails from @site2 email domain.

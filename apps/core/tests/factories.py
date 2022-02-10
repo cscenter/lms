@@ -22,6 +22,7 @@ class SiteFactory(factory.django.DjangoModelFactory):
 
     domain = TEST_DOMAIN
     name = factory.Sequence(lambda n: "Site Name %03d" % n)
+    # TODO: create default site configuration
 
 
 class SiteConfigurationFactory(factory.django.DjangoModelFactory):

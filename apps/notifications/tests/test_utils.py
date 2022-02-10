@@ -1,5 +1,6 @@
 import pytest
 
+from core.models import SiteConfiguration
 from core.tests.factories import BranchFactory, SiteConfigurationFactory, SiteFactory
 from notifications.management.commands.notify import get_lms_domain_name
 
@@ -12,8 +13,8 @@ def test_get_lms_domain_name_is_defined(settings):
     other_branch = BranchFactory(site=site, code='other')
     site_settings = SiteConfigurationFactory(site=site, lms_domain=site.domain,
                                              default_branch_code=main_branch.code)
-    assert get_lms_domain_name(main_branch, site_settings) == site.domain
-    assert get_lms_domain_name(other_branch, site_settings) == site.domain
+    assert get_lms_domain_name(main_branch) == site.domain
+    assert get_lms_domain_name(other_branch) == site.domain
 
 
 @pytest.mark.parametrize("domain_name", ['example.com', 'lk.example.com'])
@@ -24,8 +25,10 @@ def test_get_lms_domain_name_is_undefined(domain_name, settings):
     other_branch = BranchFactory(site=site, code='other')
     site_settings = SiteConfigurationFactory(site=site, lms_domain=None,
                                              default_branch_code=main_branch.code)
-    assert get_lms_domain_name(main_branch, site_settings) == site.domain
+    assert get_lms_domain_name(main_branch) == site.domain
     # Prepend subdomain to the url if branch != site default branch
-    assert get_lms_domain_name(other_branch, site_settings) == f"{other_branch.code}.{site.domain}"
+    assert get_lms_domain_name(other_branch) == f"{other_branch.code}.{site.domain}"
     site_settings.default_branch_code = other_branch.code
-    assert get_lms_domain_name(other_branch, site_settings) == site.domain
+    site_settings.save()
+    SiteConfiguration.objects.clear_cache()
+    assert get_lms_domain_name(other_branch) == site.domain
