@@ -121,7 +121,6 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
         site1_conf = SiteConfigurationFactory(site=site1)
         site2 = SiteFactory(domain=ANOTHER_DOMAIN)
         site2_conf = SiteConfigurationFactory(site=site2)
-        site2_conf.lms_subdomain = None
         site2_conf.save()
 
         # Create cities

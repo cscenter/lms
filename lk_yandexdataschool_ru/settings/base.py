@@ -26,6 +26,7 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["lk.yandexdataschool.r
 WSGI_APPLICATION = 'lk_yandexdataschool_ru.wsgi.application'
 ROOT_URLCONF = 'lk_yandexdataschool_ru.urls'
 LMS_SUBDOMAIN = None
+LMS_DOMAIN = 'lk.yandexdataschool.ru'
 LMS_CURATOR_EMAIL = 'shadcurators@yandex.ru'
 LMS_MENU = 'lk_yandexdataschool_ru.menu'
 if YANDEX_METRIKA_ID is None:

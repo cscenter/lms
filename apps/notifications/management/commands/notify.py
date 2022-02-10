@@ -145,18 +145,19 @@ def get_assignment_notification_template(notification: AssignmentNotification):
     return EMAIL_TEMPLATES[template_code]
 
 
-def get_domain_name(branch: Branch, site_settings: SiteConfiguration) -> str:
-    domain_name = branch.site.domain
-    if site_settings.lms_subdomain:
-        subdomain = site_settings.lms_subdomain
+def get_lms_domain_name(branch: Branch, site_settings: SiteConfiguration) -> str:
+    assert branch.site_id == site_settings.site_id
+    if site_settings.lms_domain:
+        domain_name = site_settings.lms_domain
     else:
-        # This naive conversion works with regular students only
+        domain_name = branch.site.domain
+        # It's assumed that the site domain name doesn't have lms subdomain
         subdomain = branch.code.lower()
         # spb.compsciclub.ru -> compsciclub.ru
         if subdomain == site_settings.default_branch_code:
             subdomain = ''
-    if subdomain and not domain_name.startswith(subdomain):
-        domain_name = f"{subdomain}.{domain_name}"
+        if subdomain and not domain_name.startswith(subdomain):
+            domain_name = f"{subdomain}.{domain_name}"
     return domain_name
 
 
@@ -171,7 +172,7 @@ def get_assignment_notification_context(
         site_settings: SiteConfiguration) -> Dict:
     a_s = notification.student_assignment
     tz_override = notification.user.time_zone
-    domain_name = get_domain_name(participant_branch, site_settings)
+    domain_name = get_lms_domain_name(participant_branch, site_settings)
     abs_url_builder = _get_abs_url_builder(domain_name)
     context = {
         'a_s_link_student': abs_url_builder(a_s.get_student_url()),
@@ -192,7 +193,7 @@ def get_course_news_notification_context(
         notification: CourseNewsNotification,
         participant_branch: Branch,
         site_settings: SiteConfiguration) -> Dict:
-    domain_name = get_domain_name(participant_branch, site_settings)
+    domain_name = get_lms_domain_name(participant_branch, site_settings)
     abs_url_builder = _get_abs_url_builder(domain_name)
     course = notification.course_offering_news.course
     context = {

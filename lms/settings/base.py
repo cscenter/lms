@@ -31,6 +31,7 @@ REVERSE_TO_LMS_URL_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
 # Default scheme for `core.urls.reverse`
 DEFAULT_URL_SCHEME = env.str("REVERSE_URL_SCHEME", default="https")
 LMS_SUBDOMAIN: Optional[str] = None
+LMS_DOMAIN: Optional[str] = None
 
 SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', default=True)
 SESSION_COOKIE_DOMAIN = env.str('DJANGO_SESSION_COOKIE_DOMAIN', default=None)

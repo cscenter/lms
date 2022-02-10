@@ -32,7 +32,7 @@ class Command(BaseCommand):
         SiteConfiguration.objects.update_or_create(
             site_id=settings.SITE_ID,
             defaults={
-                "lms_subdomain": settings.LMS_SUBDOMAIN,
+                "lms_domain": settings.LMS_DOMAIN,
                 "default_branch_code": settings.DEFAULT_BRANCH_CODE,
                 "default_from_email": settings.DEFAULT_FROM_EMAIL,
                 "email_backend": settings.EMAIL_BACKEND,

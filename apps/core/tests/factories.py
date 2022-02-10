@@ -31,7 +31,6 @@ class SiteConfigurationFactory(factory.django.DjangoModelFactory):
 
     site = factory.SubFactory(SiteFactory)
     enabled = True
-    lms_subdomain = 'my'
     lms_domain = 'my.example.com'
     default_branch_code = 'spb'
     default_from_email = 'noreply@example.com'

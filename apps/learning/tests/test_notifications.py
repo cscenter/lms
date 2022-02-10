@@ -1,3 +1,4 @@
+import copy
 import datetime
 from io import StringIO
 from unittest.mock import MagicMock
@@ -11,7 +12,7 @@ from django.contrib.sites.models import Site
 from django.core import mail, management
 
 from core.models import SiteConfiguration
-from core.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory, SiteConfigurationFactory, SiteFactory
 from core.tests.settings import (
     ANOTHER_DOMAIN, ANOTHER_DOMAIN_ID, TEST_DOMAIN, TEST_DOMAIN_ID
 )
@@ -257,23 +258,33 @@ def test_new_assignment_generate_notifications(settings):
     assert AssignmentNotification.objects.count() == 3
 
 
+@pytest.mark.parametrize("site_domain,lms_subdomain",
+                         [('example.com', 'my'),
+                          ('lk.example.com', None)])
 @pytest.mark.django_db
-def test_new_assignment_notification_context(client, settings):
-    settings.SITE_ID = 1
+def test_new_assignment_notification_context(site_domain, lms_subdomain, rf, settings):
+    request = rf.request()
+    request.path = '/'
+    abs_url = request.build_absolute_uri
+    site = SiteFactory(domain=site_domain)
+    lms_domain = site_domain if not lms_subdomain else f"{lms_subdomain}.{site_domain}"
+    site_settings = SiteConfigurationFactory(site=site, lms_domain=lms_domain)
+    settings.SITE_ID = site.pk
+    # Test configuration should correctly resolve lms urls after
+    # changing settings.LMS_SUBDOMAIN
+    subdomain_urlconfs = copy.deepcopy(settings.SUBDOMAIN_URLCONFS)
+    lms_urlconf = subdomain_urlconfs[settings.LMS_SUBDOMAIN]
+    subdomain_urlconfs[lms_subdomain] = lms_urlconf
+    settings.LMS_SUBDOMAIN = lms_subdomain
+    settings.SUBDOMAIN_URLCONFS = subdomain_urlconfs
     settings.DEFAULT_URL_SCHEME = 'https'
-    abs_url = client.get('', secure=True).wsgi_request.build_absolute_uri
-    current_domain = get_domain()
-    assert current_domain == TEST_DOMAIN
-    if settings.LMS_SUBDOMAIN:
-        current_domain = f"{settings.LMS_SUBDOMAIN}.{current_domain}"
-    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_spb = BranchFactory(site=site, code="spb")
     course = CourseFactory(main_branch=branch_spb)
-    enrollment = EnrollmentFactory(course=course, student__branch=branch_spb)
+    enrollment = EnrollmentFactory(course=course)
     student = enrollment.student
     assignment = AssignmentFactory(course=course)
     assert AssignmentNotification.objects.count() == 1
     an = AssignmentNotification.objects.first()
-    site_settings = SiteConfiguration.objects.get(site_id=settings.SITE_ID)
     participant_branch = enrollment.student_profile.branch
     context = get_assignment_notification_context(an, participant_branch,
                                                   site_settings)
@@ -281,12 +292,12 @@ def test_new_assignment_notification_context(client, settings):
     parsed_url = urlparse(student_url)
     relative_student_url = parsed_url.path
     assert context['a_s_link_student'] == student_url
-    assert parsed_url.hostname == current_domain
+    assert parsed_url.hostname == site_settings.lms_domain
     assert context['a_s_link_student'] == f"https://{parsed_url.hostname}{relative_student_url}"
     teacher_url = abs_url(an.student_assignment.get_teacher_url())
     assert context['a_s_link_teacher'] == teacher_url
     parsed_url = urlparse(teacher_url)
-    assert parsed_url.hostname == current_domain
+    assert parsed_url.hostname == site_settings.lms_domain
     assignment_link = abs_url(an.student_assignment.assignment.get_teacher_url())
     assert context['assignment_link'] == assignment_link
     assert context['course_name'] == str(course.meta_course)
@@ -328,30 +339,44 @@ def test_new_assignment_notification_context_timezone(settings, mocker):
     assert "22:00 04 февраля" in mail.outbox[0].body
 
 
+@pytest.mark.parametrize("site_domain,lms_subdomain",
+                         [('example.com', 'my'),
+                          ('lk.example.com', None)])
 @pytest.mark.django_db
-def test_new_course_news_notification_context(settings, client):
-    settings.SITE_ID = TEST_DOMAIN_ID
+def test_new_course_news_notification_context(site_domain, lms_subdomain, settings, rf):
+    site = SiteFactory(domain=site_domain)
+    settings.SITE_ID = site.pk
+    lms_domain = site_domain if not lms_subdomain else f"{lms_subdomain}.{site_domain}"
+    site_settings = SiteConfigurationFactory(site=site, lms_domain=lms_domain)
+    # Test configuration should correctly resolve lms urls after
+    # changing settings.LMS_SUBDOMAIN
+    subdomain_urlconfs = copy.deepcopy(settings.SUBDOMAIN_URLCONFS)
+    lms_urlconf = subdomain_urlconfs[settings.LMS_SUBDOMAIN]
+    subdomain_urlconfs[lms_subdomain] = lms_urlconf
+    settings.LMS_SUBDOMAIN = lms_subdomain
+    settings.SUBDOMAIN_URLCONFS = subdomain_urlconfs
     settings.DEFAULT_URL_SCHEME = 'https'
-    abs_url = client.get('', secure=True).wsgi_request.build_absolute_uri
-    assert get_domain() == TEST_DOMAIN
-    course = CourseFactory()
+    request = rf.request()
+    request.path = '/'
+    abs_url = request.build_absolute_uri
+    branch_spb = BranchFactory(site=site, code="spb")
+    course = CourseFactory(main_branch=branch_spb)
     student = StudentFactory(branch=course.main_branch)
     enrollment = EnrollmentFactory(course=course, student=student)
     cn = CourseNewsNotificationFactory(course_offering_news__course=course,
                                        user=student)
-    site_settings = SiteConfiguration.objects.get(site_id=settings.SITE_ID)
     participant_branch = enrollment.student_profile.branch
     context = get_course_news_notification_context(cn, participant_branch,
                                                    site_settings)
     assert context['course_link'] == abs_url(course.get_absolute_url())
-    another_site = Site.objects.get(pk=ANOTHER_DOMAIN_ID)
-    branch = BranchFactory(code=settings.DEFAULT_BRANCH_CODE, site=another_site)
+    site2 = SiteFactory(domain=f'another.{site_domain}')
+    site2_settings = SiteConfigurationFactory(site=site2, lms_domain='test.com')
+    branch_nsk = BranchFactory(code="nsk", site=site2)
     cn = CourseNewsNotificationFactory(
         course_offering_news__course=course,
-        user=StudentFactory(branch=branch))
-    site_settings = SiteConfiguration.objects.get(site_id=ANOTHER_DOMAIN_ID)
-    context = get_course_news_notification_context(cn, branch, site_settings)
-    assert context['course_link'].startswith(f'https://{ANOTHER_DOMAIN}')
+        user=StudentFactory(branch=branch_nsk))
+    context = get_course_news_notification_context(cn, branch_nsk, site2_settings)
+    assert context['course_link'].startswith(f'https://{site2_settings.lms_domain}')
 
 
 @pytest.mark.django_db

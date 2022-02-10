@@ -37,7 +37,6 @@ def test_command_notify(settings, mocker):
     management.call_command("notify", stdout=out)
     assert len(mail.outbox) == 1
     assert AssignmentNotification.objects.get(pk=an.pk).is_notified
-    assert an.student_assignment.get_teacher_url() in mail.outbox[0].body
     assert "sending notification for" in out.getvalue()
 
     out = OutputIO()
@@ -55,7 +54,6 @@ def test_command_notify(settings, mocker):
     assert len(mail.outbox) == 1
     conn.refresh_from_db()
     assert conn.is_notified
-    assert course.get_absolute_url() in mail.outbox[0].body
     assert "sending notification for" in out.getvalue()
 
 

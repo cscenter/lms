@@ -135,6 +135,7 @@ class SiteConfiguration(ConfigurationModel):
         help_text="Whether to use an implicit TLS (secure) connection when "
                   "talking to the SMTP server.",
         null=True)
+    # deprecated
     lms_subdomain = models.CharField(
         "LMS Subdomain",
         max_length=10,
@@ -159,6 +160,9 @@ class SiteConfiguration(ConfigurationModel):
     class Meta:
         verbose_name = "Site Configuration"
         db_table = "site_configurations"
+
+    def __str__(self) -> str:
+        return f"[SiteConfiguration] site: {self.site_id} domain: {self.site}"
 
     @classmethod
     def _get_fernet_key(cls):

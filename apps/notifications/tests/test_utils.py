@@ -1,34 +1,31 @@
 import pytest
 
-from django.contrib.sites.models import Site
-
-from core.models import SiteConfiguration
-from core.tests.factories import BranchFactory
-from courses.tests.factories import CourseFactory
-from notifications.management.commands.notify import get_domain_name
+from core.tests.factories import BranchFactory, SiteConfigurationFactory, SiteFactory
+from notifications.management.commands.notify import get_lms_domain_name
 
 
 @pytest.mark.django_db
-def test_get_domain_name(settings):
-    site = Site.objects.get(pk=settings.SITE_ID)
+def test_get_lms_domain_name_is_defined(settings):
+    """Case when lms domain is defined in site configuration"""
+    site = SiteFactory(domain='example.com')
     main_branch = BranchFactory(site=site)
     other_branch = BranchFactory(site=site, code='other')
-    site_settings = SiteConfiguration.objects.get(site_id=site.pk)
-    course = CourseFactory(main_branch=main_branch)
-    site_settings.lms_subdomain = None
-    site_settings.default_branch_code = main_branch.code
-    assert get_domain_name(main_branch, site_settings) == site.domain
-    # Include subdomain in the url if course main branch != default site branch
-    assert get_domain_name(other_branch, site_settings) == f"{other_branch.code}.{site.domain}"
+    site_settings = SiteConfigurationFactory(site=site, lms_domain=site.domain,
+                                             default_branch_code=main_branch.code)
+    assert get_lms_domain_name(main_branch, site_settings) == site.domain
+    assert get_lms_domain_name(other_branch, site_settings) == site.domain
+
+
+@pytest.mark.parametrize("domain_name", ['example.com', 'lk.example.com'])
+@pytest.mark.django_db
+def test_get_lms_domain_name_is_undefined(domain_name, settings):
+    site = SiteFactory(domain=domain_name)
+    main_branch = BranchFactory(site=site)
+    other_branch = BranchFactory(site=site, code='other')
+    site_settings = SiteConfigurationFactory(site=site, lms_domain=None,
+                                             default_branch_code=main_branch.code)
+    assert get_lms_domain_name(main_branch, site_settings) == site.domain
+    # Prepend subdomain to the url if branch != site default branch
+    assert get_lms_domain_name(other_branch, site_settings) == f"{other_branch.code}.{site.domain}"
     site_settings.default_branch_code = other_branch.code
-    assert get_domain_name(other_branch, site_settings) == site.domain
-    # LMS subdomain has higher priority
-    site_settings.lms_subdomain = "my"
-    assert get_domain_name(main_branch, site_settings) == f"my.{site.domain}"
-    site_settings.lms_subdomain = None
-    # Make sure LMS subdomain is not already included in a base domain
-    site_settings.lms_subdomain = 'lk'
-    main_branch.site.domain = 'example.com'
-    assert get_domain_name(main_branch, site_settings) == f"lk.example.com"
-    main_branch.site.domain = 'lk.example.com'
-    assert get_domain_name(main_branch, site_settings) == f"lk.example.com"
+    assert get_lms_domain_name(other_branch, site_settings) == site.domain
