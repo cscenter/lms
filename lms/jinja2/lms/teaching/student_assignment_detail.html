@@ -151,8 +151,11 @@
           </div>
         {% endif %}
 
-        <h5 class="assignment">{% trans %}Student{% endtrans %}</h5>
-        <a href="{{ a_s.student.get_absolute_url() }}">{{ a_s.student.get_full_name() }}</a>
+        <h5 class="assignment">
+          {% trans %}Student{% endtrans %}
+        </h5>
+        <a href="{{ a_s.student.get_absolute_url() }}">{{ a_s.student.get_full_name() }}</a><br>
+        <a class="text-muted" href="{{ student_course_progress_url }}">Успеваемость по курсу</a>
 
         <h5 class="assignment">{% trans %}Time Spent on Assignment{% endtrans %}</h5>
         <span>

@@ -263,6 +263,11 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                          ungraded_base.filter(pk__lt=a_s.pk).first())
         context['next_student_assignment'] = next_ungraded
         context['is_actual_teacher'] = course.is_actual_teacher(user.pk)
+        enrollment = a_s.student.get_enrollment(course.pk)
+        context['student_course_progress_url'] = reverse('teaching:student-progress', kwargs={
+            "enrollment_id": enrollment.pk,
+            **course.url_kwargs
+        })
         context['score_form'] = AssignmentScoreForm(
             initial={'score': a_s.score},
             maximum_score=a_s.assignment.maximum_score)

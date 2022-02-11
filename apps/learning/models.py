@@ -4,7 +4,7 @@ import os
 import os.path
 from decimal import Decimal
 from secrets import token_urlsafe
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from djchoices import C, ChoiceItem, DjangoChoices
 from model_utils import FieldTracker
@@ -638,10 +638,25 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         return any(c.author_id == user.pk for c in
                    self.assignmentcomment_set(manager='published').all())
 
+    # TODO -> @cached_property
+    @property
+    def stats(self) -> Optional[Dict[str, Any]]:
+        if (self.meta is None or not isinstance(self.meta, dict) or
+                'stats' not in self.meta):
+            return None
+        stats = {}
+        for key, value in self.meta['stats'].items():
+            if key == 'comment' or key == 'solution':
+                # TODO: more safe to use drf serializer since we use JSONEncoder
+                #  from this lib
+                value = datetime.datetime.fromisoformat(value.replace('Z', '+00:00'))
+            stats[key] = value
+        return stats
+
     @property
     def is_submission_received(self):
         try:
-            return self.meta is not None and self.meta.get('stats', {}).get('solutions', 0) > 0
+            return self.stats is not None and self.stats.get('solutions', 0) > 0
         except ValueError:
             return False
 
