@@ -135,12 +135,6 @@ class SiteConfiguration(ConfigurationModel):
         help_text="Whether to use an implicit TLS (secure) connection when "
                   "talking to the SMTP server.",
         null=True)
-    # deprecated
-    lms_subdomain = models.CharField(
-        "LMS Subdomain",
-        max_length=10,
-        blank=True,
-        null=True)
     lms_domain = models.CharField(
         "Domain Name for Learning Management System",
         max_length=100,
