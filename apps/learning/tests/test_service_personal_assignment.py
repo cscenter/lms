@@ -1,15 +1,18 @@
 import pytest
+from future.backports.datetime import timedelta
 
 from courses.constants import AssigneeMode, AssignmentFormat, AssignmentStatuses
 from courses.models import CourseGroupModes, CourseTeacher
 from courses.tests.factories import AssignmentFactory, CourseFactory
 from learning.models import (
-    AssignmentSubmissionTypes, Enrollment, PersonalAssignmentActivity, StudentAssignment
+    AssignmentComment, AssignmentSubmissionTypes, Enrollment,
+    PersonalAssignmentActivity, StudentAssignment
 )
 from learning.services import EnrollmentService
 from learning.services.personal_assignment_service import (
     create_assignment_comment, create_assignment_solution,
-    resolve_assignees_for_personal_assignment, update_personal_assignment_status
+    resolve_assignees_for_personal_assignment, update_personal_assignment_stats,
+    update_personal_assignment_status
 )
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory,
@@ -72,16 +75,17 @@ def test_resolve_assignees_for_personal_assignment(settings):
 def test_update_personal_assignment_stats():
     curator = CuratorFactory()
     student_assignment = StudentAssignmentFactory()
+    # Do not calculate stats with a draft submissions
     create_assignment_comment(personal_assignment=student_assignment,
                               is_draft=True,
                               created_by=curator,
                               message='Comment message')
     student_assignment.refresh_from_db()
     assert student_assignment.meta is None
-    comment = create_assignment_comment(personal_assignment=student_assignment,
-                                        is_draft=False,
-                                        created_by=curator,
-                                        message='Comment message')
+    comment1 = create_assignment_comment(personal_assignment=student_assignment,
+                                         is_draft=False,
+                                         created_by=curator,
+                                         message='Comment message')
     student_assignment.refresh_from_db()
     assert isinstance(student_assignment.meta, dict)
     assert student_assignment.meta['stats']['comments'] == 1
@@ -89,6 +93,27 @@ def test_update_personal_assignment_stats():
     assert "comment" in student_assignment.meta['stats']
     assert "solution" not in student_assignment.meta['stats']
     assert "solutions" not in student_assignment.meta['stats']
+    # Emulate `late` processing of subsequent submissions
+    solution1 = create_assignment_solution(personal_assignment=student_assignment,
+                                           created_by=student_assignment.student,
+                                           message="solution")
+    solution2 = create_assignment_solution(personal_assignment=student_assignment,
+                                           created_by=student_assignment.student,
+                                           message="solution2")
+    fixed_dt = solution2.created + timedelta(minutes=2)
+    AssignmentComment.objects.filter(pk=solution2.pk).update(created=fixed_dt)
+    comment2 = create_assignment_comment(personal_assignment=student_assignment,
+                                         is_draft=False,
+                                         created_by=curator,
+                                         message='Comment message')
+    update_personal_assignment_stats(personal_assignment=student_assignment)
+    student_assignment.refresh_from_db()
+    assert student_assignment.stats['comments'] == 2
+    assert 'solution' in student_assignment.stats
+    assert student_assignment.stats['solution'] == fixed_dt.replace(microsecond=0)
+    assert 'solutions' in student_assignment.stats
+    assert student_assignment.stats['solutions'] == 2
+    assert student_assignment.stats['activity'] == PersonalAssignmentActivity.SOLUTION
 
 
 @pytest.mark.django_db

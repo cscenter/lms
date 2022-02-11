@@ -5,7 +5,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
-from django.db.models import Case, Count, F, IntegerField, When, Window
+from django.db.models import (
+    Case, Count, DateTimeField, F, IntegerField, Max, When, Window
+)
 from django.utils.timezone import now
 
 from core.timezone import get_now_utc
@@ -43,14 +45,24 @@ def update_personal_assignment_stats(*, personal_assignment: StudentAssignment) 
         Case(When(type=AssignmentSubmissionTypes.SOLUTION,
                   then=1),
              output_field=IntegerField()))
+    solution_latest = Max(
+        Case(When(type=AssignmentSubmissionTypes.SOLUTION,
+                  then=F('created')),
+             output_field=DateTimeField()))
+    comment_latest = Max(
+        Case(When(type=AssignmentSubmissionTypes.COMMENT,
+                  then=F('created')),
+             output_field=DateTimeField()))
     window = {
         'partition_by': [F('student_assignment_id')],
         'order_by': F('created').asc()
     }
     latest_submission = (AssignmentComment.published
                          .filter(student_assignment_id=personal_assignment.pk)
-                         .annotate(comments_total=Window(expression=Count('*'), **window),
-                                   solutions_total=Window(expression=solutions_count, **window))
+                         .annotate(submissions_total=Window(expression=Count('*'), **window),
+                                   solutions_total=Window(expression=solutions_count, **window),
+                                   solution_latest=Window(expression=solution_latest, **window),
+                                   comment_latest=Window(expression=comment_latest, **window))
                          .order_by('created')
                          .last())
     if latest_submission is None:
@@ -69,20 +81,18 @@ def update_personal_assignment_stats(*, personal_assignment: StudentAssignment) 
     # Django 3.2 doesn't support partial update of the json field,
     # better to select_for_update
     meta = personal_assignment.meta or {}
-    stats = {
-        'comments': latest_submission.comments_total,
+    comments_total = latest_submission.submissions_total - latest_submission.solutions_total
+    new_stats = {
+        'comments': comments_total,
         'activity': str(latest_activity),
     }
     # Omit default or null values to save space
     if latest_submission.solutions_total:
-        stats['solutions'] = latest_submission.solutions_total
-    if latest_submission.type == AssignmentSubmissionTypes.SOLUTION:
-        stats['solution'] = latest_submission.created.replace(microsecond=0)
-    elif latest_submission.type == AssignmentSubmissionTypes.COMMENT:
-        stats['comment'] = latest_submission.created.replace(microsecond=0)
-    else:
-        assert_never(latest_submission.type)
-    meta['stats'] = stats
+        new_stats['solutions'] = latest_submission.solutions_total
+        new_stats['solution'] = latest_submission.solution_latest.replace(microsecond=0)
+    if latest_submission.comment_latest:
+        new_stats['comment'] = latest_submission.comment_latest.replace(microsecond=0)
+    meta['stats'] = new_stats
     (StudentAssignment.objects
      .filter(pk=personal_assignment.pk)
      .update(meta=meta))
