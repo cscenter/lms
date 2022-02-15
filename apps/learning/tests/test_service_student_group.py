@@ -15,16 +15,19 @@ from learning.services.student_group_service import (
     GroupEnrollmentKeyError, StudentGroupError
 )
 from learning.tests.factories import (
-    EnrollmentFactory, StudentGroupAssigneeFactory, StudentGroupFactory
+    EnrollmentFactory, InvitationFactory, StudentGroupAssigneeFactory,
+    StudentGroupFactory
 )
-from users.tests.factories import StudentFactory
+from users.models import StudentTypes
+from users.tests.factories import StudentFactory, StudentProfileFactory
 
 
 @pytest.mark.django_db
 def test_student_group_service_create_no_groups_mode(settings):
     course = CourseFactory(group_mode=CourseGroupModes.NO_GROUPS)
     with pytest.raises(StudentGroupError) as e:
-        StudentGroupService.create(course, branch=course.main_branch)
+        StudentGroupService.create(course, group_type=StudentGroupTypes.BRANCH,
+                                   branch=course.main_branch)
 
 
 @pytest.mark.django_db
@@ -33,13 +36,13 @@ def test_student_group_service_create_with_branch_mode(settings):
     course = CourseFactory(main_branch=branch1,
                            group_mode=CourseGroupModes.BRANCH)
     with pytest.raises(ValidationError) as e:
-        StudentGroupService.create(course)
+        StudentGroupService.create(course, group_type=StudentGroupTypes.BRANCH)
     with pytest.raises(ValidationError) as e:
-        StudentGroupService.create(course, branch=branch2)
+        StudentGroupService.create(course, group_type=StudentGroupTypes.BRANCH, branch=branch2)
     assert e.value.code == 'malformed'
-    student_group1 = StudentGroupService.create(course, branch=branch1)
+    student_group1 = StudentGroupService.create(course, group_type=StudentGroupTypes.BRANCH, branch=branch1)
     assert list(StudentGroup.objects.all()) == [student_group1]
-    StudentGroupService.create(course, branch=branch1)  # repeat
+    StudentGroupService.create(course, group_type=StudentGroupTypes.BRANCH, branch=branch1)  # repeat
     assert StudentGroup.objects.count() == 1
 
 
@@ -48,47 +51,84 @@ def test_student_group_service_create_manual_group(settings):
     course1, course2 = CourseFactory.create_batch(2, group_mode=CourseGroupModes.MANUAL)
     # Empty group name
     with pytest.raises(ValidationError) as e:
-        StudentGroupService.create(course1)
+        StudentGroupService.create(course1, group_type=StudentGroupTypes.MANUAL)
     assert e.value.code == 'required'
-    student_group = StudentGroupService.create(course1, name='test')
+    student_group = StudentGroupService.create(course1, group_type=StudentGroupTypes.MANUAL, name='test')
     assert list(StudentGroup.objects.all()) == [student_group]
     # Non unique student group name for the course
     with pytest.raises(ValidationError) as e:
-        StudentGroupService.create(course1, name='test')
-    StudentGroupService.create(course2, name='test')
+        StudentGroupService.create(course1, group_type=StudentGroupTypes.MANUAL, name='test')
+    StudentGroupService.create(course2, group_type=StudentGroupTypes.MANUAL, name='test')
 
 
 @pytest.mark.django_db
-def test_student_group_service_resolve(settings):
+def test_student_group_service_resolve():
     branch_spb = BranchFactory(code="spb")
     branch_nsk = BranchFactory(code="nsk")
     course = CourseFactory(main_branch=branch_spb,
-                           group_mode=StudentGroupTypes.BRANCH)
+                           group_mode=CourseGroupModes.BRANCH)
     assert StudentGroup.objects.filter(course=course).count() == 1
-    student_group = StudentGroup.objects.get(course=course)
+    student_spb_group = StudentGroup.objects.get(course=course)
+    assert student_spb_group.type == StudentGroupTypes.BRANCH
+    student_spb_profile = StudentProfileFactory(branch=branch_spb)
+    student_nsk_profile = StudentProfileFactory(branch=branch_nsk)
+    assert StudentGroupService.resolve(course, student_profile=student_spb_profile) == student_spb_group
+    assert StudentGroupService.resolve(course, student_profile=student_spb_profile,
+                                       enrollment_key='wrong_key') == student_spb_group
     sg_other = StudentGroupFactory(course=course)
-    student_spb = StudentFactory(branch=branch_spb)
-    student_nsk = StudentFactory(branch=branch_nsk)
-    assert StudentGroupService.resolve(course, student_spb, settings.SITE_ID) == student_group
-    assert StudentGroupService.resolve(course, student_spb, settings.SITE_ID,
-                                       enrollment_key='wrong_key') == student_group
     found = StudentGroupService.resolve(
-        course, student_spb, settings.SITE_ID,
+        course, student_profile=student_spb_profile,
         enrollment_key=sg_other.enrollment_key)
-    assert found == student_group
-    student_group = StudentGroupService.resolve(course, student_nsk, settings.SITE_ID)
-    assert student_group.type == StudentGroupTypes.SYSTEM
+    assert found == student_spb_group
+    student_spb_group = StudentGroupService.resolve(course, student_profile=student_nsk_profile)
+    assert student_spb_group.type == StudentGroupTypes.SYSTEM
     course.group_mode = CourseGroupModes.MANUAL
     assert StudentGroupService.resolve(
-        course, student_spb, settings.SITE_ID,
+        course, student_profile=student_spb_profile,
         enrollment_key=sg_other.enrollment_key) == sg_other
     with pytest.raises(GroupEnrollmentKeyError):
-        StudentGroupService.resolve(course, student_spb, settings.SITE_ID, enrollment_key='wrong')
-    student_group = StudentGroupService.resolve(course, student_spb, settings.SITE_ID, enrollment_key=None)
-    assert student_group.type == StudentGroupTypes.SYSTEM
+        StudentGroupService.resolve(course, student_profile=student_spb_profile, enrollment_key='wrong')
+    student_spb_group = StudentGroupService.resolve(course, student_profile=student_spb_profile, enrollment_key=None)
+    assert student_spb_group.type == StudentGroupTypes.SYSTEM
     course.group_mode = 'unknown'
-    with pytest.raises(GroupEnrollmentKeyError):
-        StudentGroupService.resolve(course, student_spb, settings.SITE_ID, enrollment_key='wrong')
+    with pytest.raises(StudentGroupError):
+        StudentGroupService.resolve(course, student_profile=student_spb_profile, enrollment_key='wrong')
+
+
+@pytest.mark.django_db
+def test_student_group_service_resolve_invitation():
+    branch_spb = BranchFactory(code="spb")
+    student_spb_profile = StudentProfileFactory(branch=branch_spb)
+    course = CourseFactory(main_branch=branch_spb,
+                           group_mode=CourseGroupModes.BRANCH)
+    student_spb_group = StudentGroup.objects.get(course=course)
+    assert student_spb_group.type == StudentGroupTypes.BRANCH
+    invitation = InvitationFactory(semester=course.semester, courses=[course])
+    resolved_group = StudentGroupService.resolve(course, student_profile=student_spb_profile,
+                                                 invitation=invitation)
+    assert resolved_group == student_spb_group
+    assert not StudentGroup.objects.filter(course=course, type=StudentGroupTypes.INVITE).exists()
+    # Manually create student group associated with an invitation
+    invitation_group = StudentGroupService.create(course, group_type=StudentGroupTypes.INVITE,
+                                                  invitation=invitation)
+    resolved_group = StudentGroupService.resolve(course, student_profile=student_spb_profile,
+                                                 invitation=invitation)
+    # Regular students still go to the group-branch
+    assert resolved_group == student_spb_group
+    student_spb_profile.type = StudentTypes.INVITED
+    resolved_group = StudentGroupService.resolve(course, student_profile=student_spb_profile,
+                                                 invitation=invitation)
+    assert resolved_group == invitation_group
+    # Test creating invitation group on the fly
+    invitation_group.delete()
+    course.group_mode = CourseGroupModes.INVITE_AND_BRANCH
+    resolved_group = StudentGroupService.resolve(course, student_profile=student_spb_profile,
+                                                 invitation=invitation)
+    assert resolved_group.type == StudentGroupTypes.INVITE
+    assert resolved_group.invitation == invitation
+    resolved_group2 = StudentGroupService.resolve(course, student_profile=student_spb_profile,
+                                                  invitation=invitation)
+    assert resolved_group == resolved_group2
 
 
 @pytest.mark.django_db

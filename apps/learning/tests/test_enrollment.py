@@ -43,8 +43,7 @@ def test_service_enroll(settings):
     assert enrollment.reason_entry == reason_entry
     assert not enrollment.is_deleted
     assert enrollment.student_group_id == student_group.pk
-    student_group = StudentGroupService.resolve(course, student_profile2.user,
-                                                settings.SITE_ID)
+    student_group = StudentGroupService.resolve(course, student_profile=student_profile2)
     enrollment = EnrollmentService.enroll(student_profile2, course,
                                           reason_entry='test enrollment',
                                           student_group=student_group)

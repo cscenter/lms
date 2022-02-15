@@ -1,6 +1,7 @@
 import pytest
 from bs4 import BeautifulSoup
 
+from django.core.exceptions import ValidationError
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
@@ -21,13 +22,31 @@ from learning.settings import Branches, GradeTypes
 from learning.teaching.forms import StudentGroupForm
 from learning.teaching.utils import get_student_groups_url
 from learning.tests.factories import (
-    CourseInvitationFactory, EnrollmentFactory, StudentGroupAssigneeFactory,
-    StudentGroupFactory
+    CourseInvitationFactory, EnrollmentFactory, InvitationFactory,
+    StudentGroupAssigneeFactory, StudentGroupFactory
 )
 from users.tests.factories import (
     CuratorFactory, InvitedStudentFactory, StudentFactory, StudentProfileFactory,
     TeacherFactory
 )
+
+
+@pytest.mark.django_db
+def test_model_student_group_mutually_exclusive_fields(settings):
+    course = CourseFactory()
+    student_group = StudentGroup(type=StudentGroupTypes.BRANCH,
+                                 name='test',
+                                 course=course)
+    with pytest.raises(ValidationError) as e:
+        student_group.full_clean()
+    student_group.branch = BranchFactory()
+    student_group.full_clean()
+    student_group.invitation = InvitationFactory(semester=course.semester)
+    with pytest.raises(ValidationError) as e:
+        student_group.full_clean()
+    student_group.type = StudentGroupTypes.INVITE
+    student_group.branch = None
+    student_group.full_clean()
 
 
 @pytest.mark.django_db
@@ -281,7 +300,7 @@ def test_view_student_group_delete(settings):
     enrollment.refresh_from_db()
     assert enrollment.student_group == StudentGroupService.get_or_create_default_group(course)
     # Re-enter the course
-    student_group = StudentGroupService.resolve(course, enrollment.student, site=settings.SITE_ID)
+    student_group = StudentGroupService.resolve(course, student_profile=enrollment.student_profile)
     EnrollmentService.enroll(enrollment.student_profile, course, student_group=student_group)
     enrollment.refresh_from_db()
     assert Enrollment.active.filter(course=course).count() == 1

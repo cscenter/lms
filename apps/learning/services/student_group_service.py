@@ -1,10 +1,11 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
-from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 from core.models import Branch
+from core.typings import assert_never
 from core.utils import bucketize
 from courses.constants import AssigneeMode
 from courses.models import (
@@ -12,10 +13,11 @@ from courses.models import (
 )
 from courses.services import CourseService
 from learning.models import (
-    AssignmentGroup, CourseClassGroup, Enrollment, StudentGroup, StudentGroupAssignee
+    AssignmentGroup, CourseClassGroup, Enrollment, Invitation, StudentGroup,
+    StudentGroupAssignee
 )
 from learning.services.assignment_service import AssignmentService
-from users.models import StudentProfile, User
+from users.models import StudentProfile, StudentTypes
 
 CourseTeacherId = int
 StudentGroupId = int
@@ -31,16 +33,17 @@ class GroupEnrollmentKeyError(StudentGroupError):
 
 class StudentGroupService:
     @staticmethod
-    def create(course: Course, branch: Optional[Branch] = None,
-               **attrs: Any) -> StudentGroup:
+    def create(course: Course, *, group_type: str, **attrs: Any) -> StudentGroup:
         if course.group_mode == CourseGroupModes.NO_GROUPS:
-            raise StudentGroupError(f"Course group mode {course.group_mode} does not support student groups")
-        if branch is not None:
+            raise StudentGroupError(f"Course group mode {course.group_mode} "
+                                    f"does not support student groups")
+        if group_type == StudentGroupTypes.BRANCH:
+            branch: Branch = attrs.pop('branch', None)
             if branch not in course.branches.all():
-                raise ValidationError(f"Branch {branch} must be a course branch", code='malformed')
+                raise ValidationError(f"Branch {branch} must be a course branch", code="malformed")
             group, _ = (StudentGroup.objects.get_or_create(
+                type=group_type,
                 course_id=course.pk,
-                type=StudentGroupTypes.BRANCH,
                 branch_id=branch.pk,
                 defaults={
                     "name_ru": branch.name_ru,
@@ -48,25 +51,37 @@ class StudentGroupService:
                     **attrs,
                 }))
             return group
-        else:
+        elif group_type == StudentGroupTypes.INVITE:
+            invitation: Invitation = attrs.pop('invitation')
+            if invitation.semester_id != course.semester_id:
+                raise ValidationError("Invitation semester does not match course semester",
+                                      code="malformed")
+            # TODO: provide explicit array of valid fields for attrs.
+            group = StudentGroup(
+                **attrs,
+                type=group_type,
+                course=course,
+                invitation=invitation,
+                name=invitation.name)
+            group.save()
+            return group
+        elif group_type == StudentGroupTypes.MANUAL:
             group_name = attrs.pop('name', None)
             if not group_name:
-                raise ValidationError('Provide a unique name for group', code='required')
-            new_group = StudentGroup(
+                raise ValidationError('Provide a unique non-empty name', code='required')
+            group = StudentGroup(
                 **attrs,
                 course_id=course.pk,
                 type=StudentGroupTypes.MANUAL,
                 name=group_name)
-            new_group.full_clean()
-            new_group.save()
-            return new_group
+            group.save()
+            return group
+        else:
+            assert_never(group_type)
 
     @staticmethod
     def update(student_group: StudentGroup, *, name: str):
         student_group.name = name
-        # Name uniqueness must be avoided for branch student group type,
-        # but it's not allowed to update this type of groups right now
-        student_group.full_clean()
         student_group.save()
 
     @classmethod
@@ -115,16 +130,35 @@ class StudentGroupService:
          .update(student_group=default_group))
 
     @classmethod
-    def resolve(cls, course: Course, student: User, site: Union[Site, int],
-                enrollment_key: str = None):
-        """
-        Returns the target or associated student group for the course. Assumed
-        that student is not enrolled in the course.
-        """
-        if course.group_mode == CourseGroupModes.BRANCH:
-            student_profile = student.get_student_profile(site)
-            if not student_profile:
-                return
+    def resolve(cls, course: Course, *, student_profile: StudentProfile,
+                invitation: Optional[Invitation] = None,
+                enrollment_key: Optional[str] = None):
+        """Returns the target student group for unenrolled student."""
+        # Invitation has the highest priority even if the course group mode
+        # doesn't support invites.
+        # Use case: Regular students divide by branch, but students
+        # enrolled by the specific invitation link (others could be ignored)
+        # go to the student group associated with this invitation.
+        if invitation is not None and student_profile.type == StudentTypes.INVITED:
+            student_group = (StudentGroup.objects
+                             .filter(course=course,
+                                     type=StudentGroupTypes.INVITE,
+                                     invitation=invitation)
+                             .first())
+            if student_group is not None:
+                return student_group
+        if (course.group_mode == CourseGroupModes.BRANCH or
+                course.group_mode == CourseGroupModes.INVITE_AND_BRANCH):
+            if course.group_mode == CourseGroupModes.INVITE_AND_BRANCH:
+                if invitation is not None and student_profile.type == StudentTypes.INVITED:
+                    student_group, created = StudentGroup.objects.get_or_create(
+                        course=course,
+                        type=StudentGroupTypes.INVITE,
+                        invitation=invitation,
+                        defaults={
+                            "name": invitation.name,
+                        })
+                    return student_group
             student_group = (StudentGroup.objects
                              .filter(course=course,
                                      type=StudentGroupTypes.BRANCH,
@@ -143,12 +177,13 @@ class StudentGroupService:
                                                     type=StudentGroupTypes.MANUAL,
                                                     enrollment_key=enrollment_key)
                 except StudentGroup.DoesNotExist:
-                    raise GroupEnrollmentKeyError
+                    # In fact, there is no enrollment key support right now
+                    msg = _("Please, check your group enrollment key")
+                    raise GroupEnrollmentKeyError(msg)
             else:
                 student_group = cls.get_or_create_default_group(course)
                 return student_group
-        # FIXME: raise correct exception
-        raise GroupEnrollmentKeyError
+        raise StudentGroupError(f"Course group mode {course.group_mode} is not supported")
 
     @staticmethod
     def get_or_create_default_group(course: Course) -> StudentGroup:
@@ -165,6 +200,7 @@ class StudentGroupService:
             course=course,
             type=StudentGroupTypes.SYSTEM,
             branch_id__isnull=True,
+            invitation_id__isnull=True,
             defaults={
                 "name_en": "Others",
                 "name_ru": "Другие"

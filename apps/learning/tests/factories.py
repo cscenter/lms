@@ -130,8 +130,7 @@ class EnrollmentFactory(factory.django.DjangoModelFactory):
             self.student_group = extracted
         else:
             self.student_group = StudentGroupService.resolve(self.course,
-                                                             self.student,
-                                                             self.course.main_branch.site_id)
+                                                             student_profile=self.student_profile)
 
     @factory.post_generation
     def recreate_assignments(self, create, extracted, **kwargs):

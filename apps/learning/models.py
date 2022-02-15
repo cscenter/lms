@@ -67,12 +67,11 @@ class StudentGroup(TimeStampedModel):
         verbose_name=_("Course offering"),
         related_name="student_groups",
         on_delete=models.CASCADE)
-    meta = PrettyJSONField(
-        verbose_name=_("Meta"),
-        blank=True,
-        null=True,
-    )
-    # Note: better to place in `meta`, but now we support only `branch` mode
+    enrollment_key = models.CharField(
+        verbose_name=_("Enrollment key"),
+        max_length=128,
+        blank=True)
+    # Note: Consider moving mutually exclusive fields to the separated model
     branch = models.ForeignKey(
         Branch,
         verbose_name=_("Branch"),
@@ -80,10 +79,13 @@ class StudentGroup(TimeStampedModel):
         on_delete=models.PROTECT,
         blank=True,
         null=True)
-    enrollment_key = models.CharField(
-        verbose_name=_("Enrollment key"),
-        max_length=128,
-        blank=True)
+    invitation = models.ForeignKey(
+        'learning.Invitation',
+        verbose_name=_("Invitation"),
+        related_name="+",  # Disable backwards relation
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True)
 
     class Meta:
         verbose_name = _("Student Group")
@@ -96,19 +98,32 @@ class StudentGroup(TimeStampedModel):
         created = self.pk is None
         if created and not self.enrollment_key:
             self.enrollment_key = token_urlsafe(18)  # 24 chars in base64
+        self.full_clean()  # enforce validation on .get_or_create() calls
         super().save(**kwargs)
 
     def clean(self):
         if self.type == StudentGroupTypes.BRANCH and not self.branch_id:
             msg = _("Branch is not specified for the `branch` group type")
+            raise ValidationError(msg, code='branch')
+        elif self.type == StudentGroupTypes.INVITE and not self.invitation_id:
+            msg = _("Invite is not specified for the `invite` group type")
             raise ValidationError(msg, code='invalid')
+        elif self.type == StudentGroupTypes.INVITE and self.invitation_id:
+            if self.invitation.semester_id != self.course.semester_id:
+                msg = "Invitation semester does not match course semester"
+                raise ValidationError(msg, code='malformed')
+        mutually_exclusive = ['branch', 'invitation']
+        if sum(getattr(self, field_name, None) is not None for field_name in mutually_exclusive) > 1:
+            msg = _(f"Fields {mutually_exclusive} are mutually exclusive")
+            raise ValidationError(msg, code='malformed')
         if self.course_id and self.name:
-            groups_with_the_same_name = (StudentGroup.objects
-                                         .exclude(pk=self.pk)
-                                         .filter(name__iexact=self.name,
-                                                 branch_id=self.branch_id,
-                                                 course_id=self.course_id))
-            if groups_with_the_same_name.exists():
+            the_same_name = (StudentGroup.objects
+                             .exclude(pk=self.pk)
+                             .filter(name__iexact=self.name,
+                                     branch_id=self.branch_id,
+                                     invitation_id=self.invitation_id,
+                                     course_id=self.course_id))
+            if the_same_name.exists():
                 msg = _("A student group with the same name already exists in the course")
                 raise ValidationError(msg, code='unique')
 
@@ -133,6 +148,9 @@ class StudentGroup(TimeStampedModel):
     def get_name(self, branch_details=True) -> str:
         if self.type == StudentGroupTypes.BRANCH and branch_details:
             return f"{self.name} [{self.branch.site}]"
+        elif self.type == StudentGroupTypes.INVITE:
+            suffix = str(_("Invitation")).lower()
+            return f"{self.name} [{suffix}]"
         return self.name
 
 
@@ -447,6 +465,10 @@ class Invitation(TimeStampedModel):
     class Meta:
         verbose_name = _("Invitation")
         verbose_name_plural = _("Invitations")
+        constraints = [
+            models.UniqueConstraint(fields=('semester', 'name'),
+                                    name='unique_name_per_semester'),
+        ]
 
     def __str__(self):
         return self.name

@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 
 from auth.mixins import PermissionRequiredMixin
 from core.http import AuthenticatedHttpRequest, HttpRequest
+from courses.models import StudentGroupTypes
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import StudentGroup, StudentGroupAssignee
 from learning.permissions import (
@@ -104,6 +105,7 @@ class StudentGroupCreateView(PermissionRequiredMixin, CourseURLParamsMixin, Crea
     def form_valid(self, form):
         with transaction.atomic():
             student_group = StudentGroupService.create(self.course,
+                                                       group_type=StudentGroupTypes.MANUAL,
                                                        name=form.cleaned_data['name'])
             assignee = form.cleaned_data.get('assignee')
             if assignee:

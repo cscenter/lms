@@ -27,7 +27,9 @@ def manage_student_group_for_course_root_branch(sender, instance, created,
 def create_student_group_from_course_branch(sender, instance: CourseBranch,
                                             created, *args, **kwargs):
     if created and instance.course.group_mode == CourseGroupModes.BRANCH:
-        StudentGroupService.create(instance.course, branch=instance.branch)
+        StudentGroupService.create(instance.course,
+                                   group_type=StudentGroupTypes.BRANCH,
+                                   branch=instance.branch)
 
 
 @receiver(post_delete, sender=CourseBranch)

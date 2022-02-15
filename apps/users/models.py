@@ -809,7 +809,7 @@ class StudentProfile(TimeStampedModel):
         editable=False,
         blank=True, null=True,
         related_name="student_profiles",
-        on_delete=models.PROTECT)
+        on_delete=models.SET_NULL)
 
     tracker = FieldTracker(fields=['status'])
 

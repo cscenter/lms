@@ -1,6 +1,7 @@
+from typing import Any
+
 from vanilla import FormView, GenericView
 
-from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -9,6 +10,7 @@ from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
+from core.http import HttpRequest
 from core.urls import reverse
 from courses.views.mixins import CourseURLParamsMixin
 from learning.forms import CourseEnrollmentForm
@@ -20,7 +22,7 @@ from learning.permissions import (
 from learning.services import EnrollmentService
 from learning.services.enrollment_service import AlreadyEnrolled, CourseCapacityFull
 from learning.services.student_group_service import (
-    GroupEnrollmentKeyError, StudentGroupService
+    StudentGroupError, StudentGroupService
 )
 
 
@@ -46,17 +48,14 @@ class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
     def form_valid(self, form):
         reason_entry = form.cleaned_data["reason"].strip()
         user = self.request.user
+        student_profile = user.get_student_profile(self.request.site)
         try:
-            student_group = StudentGroupService.resolve(self.course, user,
-                                                        settings.SITE_ID)
-        except GroupEnrollmentKeyError:
-            # In fact, there is no enrollment key support right now
-            msg = _("Please, check your group enrollment key")
-            messages.error(self.request, msg, extra_tags='timeout')
+            student_group = StudentGroupService.resolve(self.course,
+                                                        student_profile=student_profile)
+        except StudentGroupError as e:
+            messages.error(self.request, str(e), extra_tags='timeout')
             raise Redirect(to=self.course.get_absolute_url())
         try:
-            site = self.request.site
-            student_profile = user.get_student_profile(site)
             EnrollmentService.enroll(student_profile, self.course,
                                      reason_entry=reason_entry,
                                      student_group=student_group)
@@ -110,6 +109,7 @@ class CourseUnenrollView(PermissionRequiredMixin, CourseURLParamsMixin,
 
 class CourseInvitationEnrollView(PermissionRequiredMixin,
                                  CourseURLParamsMixin, GenericView):
+    course_invitation: CourseInvitation
     permission_required = EnrollInCourseByInvitation.name
 
     def get_permission_object(self):
@@ -118,15 +118,15 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
         return InvitationEnrollPermissionObject(self.course_invitation,
                                                 student_profile)
 
-    def setup(self, request, *args, **kwargs):
-        super().setup(request, *args, **kwargs)
+    def setup(self, request: HttpRequest, **kwargs: Any) -> None:
+        super().setup(request, **kwargs)
         qs = (CourseInvitation.objects
               .select_related('invitation')
               .filter(token=kwargs['course_token'],
                       course=self.course))
-        self.course_invitation: CourseInvitation = get_object_or_404(qs)
+        self.course_invitation = get_object_or_404(qs)
 
-    def has_permission(self):
+    def has_permission(self) -> bool:
         if super().has_permission():
             return True
         if self.course.is_capacity_limited and not self.course.places_left:
@@ -138,18 +138,15 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
 
     def post(self, request, *args, **kwargs):
         invitation = self.course_invitation.invitation
-        user = request.user
+        student_profile = request.user.get_student_profile(self.request.site)
         try:
-            resolved_group = StudentGroupService.resolve(self.course, user,
-                                                         settings.SITE_ID)
-        except GroupEnrollmentKeyError:
-            # In fact, there is no enrollment key support right now
-            msg = _("Please, check your group enrollment key")
-            messages.error(self.request, msg, extra_tags='timeout')
+            resolved_group = StudentGroupService.resolve(self.course,
+                                                         student_profile=student_profile,
+                                                         invitation=invitation)
+        except StudentGroupError as e:
+            messages.error(self.request, str(e), extra_tags='timeout')
             raise Redirect(to=self.course.get_absolute_url())
         try:
-            site = self.request.site
-            student_profile = user.get_student_profile(site)
             EnrollmentService.enroll(student_profile, self.course,
                                      reason_entry='',
                                      invitation=invitation,

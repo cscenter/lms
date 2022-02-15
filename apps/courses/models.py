@@ -229,16 +229,18 @@ class MetaCourse(TimeStampedModel):
 class StudentGroupTypes(DjangoChoices):
     SYSTEM = C('system', _('System'))
     MANUAL = C('manual', _('Manual'))
+    # TODO: protected - manual group with enrollment key
     BRANCH = C('branch', _('Branch'))
+    INVITE = C('invite', _('Invitation'))
 
 
 class CourseGroupModes(DjangoChoices):
     # Enrollment.student_group is nullable, so keep this mode
     # here even if it's not really supported
     NO_GROUPS = C('no_groups', _('No Groups'))
-    # TODO: add `manual with enrollment key`?
     MANUAL = C('manual', _('Manual'))
-    BRANCH = C('branch', _('Branch'))
+    BRANCH = C('branch', _('Branches'))
+    INVITE_AND_BRANCH = C('invite_and_branch', _('Invitations and Branches'))
 
 
 class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):

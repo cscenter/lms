@@ -57,7 +57,7 @@ class StudentGroupAdmin(TranslationAdmin, BaseModelAdmin):
         'course__main_branch'
     ]
     search_fields = ['course__meta_course__name']
-    raw_id_fields = ('course',)
+    raw_id_fields = ('course', 'invitation')
 
     inlines = [
         StudentGroupAssigneeInline,
@@ -128,10 +128,8 @@ class EnrollmentAdmin(BaseModelAdmin):
         instance = super().save_form(request, form, change)
         if created:
             course = instance.course
-            student = instance.student
             if course.group_mode != CourseGroupModes.NO_GROUPS:
-                student_group = StudentGroupService.resolve(course, student,
-                                                            course.main_branch.site_id)
+                student_group = StudentGroupService.resolve(course, student_profile=instance.student_profile)
                 instance.student_group = student_group
         return instance
 
@@ -239,9 +237,14 @@ class CourseInlineAdmin(admin.TabularInline):
 
 
 class InvitationAdmin(BaseModelAdmin):
-    list_display = ('name', 'semester', 'get_link')
+    list_display = ('name', 'branch', 'semester', 'get_link')
+    list_select_related = ['branch__site', 'semester']
     inlines = (CourseInlineAdmin, )
-    list_filter = ('branch', 'semester')
+    list_filter = [
+        'branch__site',
+        'branch',
+        ('semester', AdminRelatedDropdownFilter),
+    ]
     readonly_fields = ('token',)
     exclude = ('courses',)
 
