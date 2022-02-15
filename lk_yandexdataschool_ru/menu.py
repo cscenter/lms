@@ -89,7 +89,9 @@ top_menu = [
         children=[
             MenuItem(pgettext_lazy("menu", "Ведомости"), reverse('staff:gradebook_list'), weight=10),
             MenuItem(pgettext_lazy("menu", "Поиск студентов"), reverse('staff:student_search'), weight=20),
-            MenuItem(pgettext_lazy("menu", "Файлы"), reverse('staff:exports'), weight=30),
+            MenuItem(pgettext_lazy("menu", "Файлы"), reverse('staff:exports'), weight=30, selected_patterns=[
+                r"^/staff/reports/enrollment-invitations/"
+            ]),
             MenuItem(pgettext_lazy("menu", "Полезное"), reverse('staff:staff_warehouse'), weight=40),
             MenuItem(pgettext_lazy("menu", "Фейсбук"), reverse('staff:student_faces'), weight=50),
             MenuItem(pgettext_lazy("menu", "Пересечения"), reverse('staff:course_participants_intersection'), weight=60),

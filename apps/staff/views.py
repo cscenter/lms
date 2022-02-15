@@ -37,7 +37,7 @@ from learning.reports import (
 )
 from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
-from staff.filters import StudentProfileFilter
+from staff.filters import EnrollmentInvitationFilter, StudentProfileFilter
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.tex import generate_tex_student_profile_for_diplomas
@@ -116,10 +116,6 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         prev_term = current_term.get_prev()
         graduation_form = GraduationForm()
         graduation_form.helper.form_action = reverse('staff:create_alumni_profiles')
-        invitations = core.utils.bucketize(Invitation.objects
-                                           .select_related('branch')
-                                           .order_by('branch', 'name'),
-                                           key=lambda i: i.branch)
         official_diplomas_dates = (GraduateProfile.objects
                                    .for_site(self.request.site)
                                    .with_official_diploma()
@@ -135,7 +131,6 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
                           .filter(branch__in=branches)
                           .select_related("branch")
                           .order_by("-year", "branch__name")),
-            "invitations": invitations,
             "branches": branches,
             "official_diplomas_dates": official_diplomas_dates,
         }
@@ -369,6 +364,41 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
         report = ProgressReportForSemester(semester)
         file_name = "sheet_{}_{}".format(semester.year, semester.type)
         return dataframe_to_response(report.generate(), output_format, file_name)
+
+
+class EnrollmentInvitationListView(CuratorOnlyMixin, TemplateView):
+    template_name = "lms/staff/enrollment_invitations.html"
+
+    class InputSerializer(serializers.Serializer):
+        branch = serializers.ChoiceField(required=True, choices=())
+
+    def get(self, request, *args, **kwargs):
+        site_branches = Branch.objects.for_site(site_id=settings.SITE_ID)
+        assert len(site_branches) > 0
+        serializer = self.InputSerializer(data=request.GET)
+        serializer.fields['branch'].choices = [(b.pk, b.name) for b in site_branches]
+        if not serializer.initial_data:
+            branch = site_branches[0]
+            current_term = get_current_term_pair(branch.get_timezone())
+            url = f"{request.path}?branch={branch.pk}&semester={current_term.slug}"
+            return HttpResponseRedirect(url)
+        serializer.is_valid(raise_exception=False)
+        # Filterset knows how to validate input data too
+        invitations = (Invitation.objects
+                       .select_related('branch', 'semester')
+                       .order_by('-semester__index', 'name'))
+        filter_set = EnrollmentInvitationFilter(site_branches,
+                                                data=self.request.GET,
+                                                queryset=invitations)
+        context = self.get_context_data(filter_set, **kwargs)
+        return self.render_to_response(context)
+
+    def get_context_data(self, filter_set: FilterSet, **kwargs):
+        context = {
+            'filter_form': filter_set.form,
+            'enrollment_invitations': filter_set.qs,
+        }
+        return context
 
 
 class InvitationStudentsProgressReportView(CuratorOnlyMixin, View):

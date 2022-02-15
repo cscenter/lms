@@ -55,18 +55,7 @@
           </div>
           <div class="list-group-item">
             <h4 class="list-group-item-heading">Приглашенные студенты</h4>
-            {% for branch, branch_invitations in invitations.items %}
-              {{ branch }}
-              <ul>
-                {% for invitation in branch_invitations %}
-                  <li>
-                    <a target="_blank"
-                       href="{% url 'staff:students_progress_report_for_invitation' invitation.pk 'csv' %}">{{ invitation.name }}</a>
-                  </li>
-                {% endfor %}
-              </ul>
-            {% endfor %}
-
+            <a href="{% url 'staff:enrollment_invitations_list' %}">Перейти к списку</a>
           </div>
         </div>
         <h2>Проекты</h2>

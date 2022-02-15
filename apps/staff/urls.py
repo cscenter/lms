@@ -8,14 +8,15 @@ from learning.gradebook.views import (
 from staff.api.views import CreateAlumniProfiles, StudentSearchJSONView
 from staff.views import (
     AdmissionApplicantsReportView, AdmissionExamReportView,
-    AdmissionInterviewsReportView, CourseParticipantsIntersectionView, ExportsView,
-    FutureGraduateDiplomasCSVView, FutureGraduateDiplomasTeXView,
-    FutureGraduateStatsView, GradeBookListView, HintListView, InterviewerFacesView,
-    InvitationStudentsProgressReportView, OfficialDiplomasCSVView,
-    OfficialDiplomasListView, OfficialDiplomasTeXView, ProgressReportForSemesterView,
-    ProgressReportFullView, StudentFacesView, StudentSearchCSVView, StudentSearchView,
-    SurveySubmissionsReportView, SurveySubmissionsStatsView,
-    WillGraduateStatsReportView, autograde_projects, create_alumni_profiles
+    AdmissionInterviewsReportView, CourseParticipantsIntersectionView,
+    EnrollmentInvitationListView, ExportsView, FutureGraduateDiplomasCSVView,
+    FutureGraduateDiplomasTeXView, FutureGraduateStatsView, GradeBookListView,
+    HintListView, InterviewerFacesView, InvitationStudentsProgressReportView,
+    OfficialDiplomasCSVView, OfficialDiplomasListView, OfficialDiplomasTeXView,
+    ProgressReportForSemesterView, ProgressReportFullView, StudentFacesView,
+    StudentSearchCSVView, StudentSearchView, SurveySubmissionsReportView,
+    SurveySubmissionsStatsView, WillGraduateStatsReportView, autograde_projects,
+    create_alumni_profiles
 )
 
 app_name = 'staff'
@@ -65,17 +66,19 @@ urlpatterns = [
 
     path('exports/', ExportsView.as_view(), name='exports'),
 
-    # FIXME: Is it useful?
     re_path(r'^reports/learning/will_graduate/(?P<output_format>csv|xlsx)/$', WillGraduateStatsReportView.as_view(), name='exports_report_will_graduate'),
     re_path(r'^reports/future-graduates/(?P<branch_id>\d+)/', include([
         path('stats/', FutureGraduateStatsView.as_view(), name='export_future_graduates_stats'),
         path('tex/', FutureGraduateDiplomasTeXView.as_view(), name='exports_future_graduates_diplomas_tex'),
         path('csv/', FutureGraduateDiplomasCSVView.as_view(), name='exports_future_graduates_diplomas_csv'),
     ])),
+    path('reports/enrollment-invitations/', include([
+        path('', EnrollmentInvitationListView.as_view(), name='enrollment_invitations_list'),
+        re_path(r'^(?P<invitation_id>\d+)/(?P<output_format>csv|xlsx)/$', InvitationStudentsProgressReportView.as_view(), name='students_progress_report_for_invitation'),
+    ])),
     path('reports/students-progress/', include([
         re_path(r'^(?P<output_format>csv|xlsx)/(?P<on_duplicate>max|last)/$', ProgressReportFullView.as_view(), name='students_progress_report'),
         re_path(r'^terms/(?P<term_year>\d+)/(?P<term_type>\w+)/(?P<output_format>csv|xlsx)/$', ProgressReportForSemesterView.as_view(), name='students_progress_report_for_term'),
-        re_path(r'^invitations/(?P<invitation_id>\d+)/(?P<output_format>csv|xlsx)/$', InvitationStudentsProgressReportView.as_view(), name='students_progress_report_for_invitation'),
     ])),
     re_path(r'^reports/official-diplomas/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/', include([
         path('list/', OfficialDiplomasListView.as_view(), name='exports_official_diplomas_list'),

@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.models import Branch
 from courses.utils import get_current_term_pair
+from learning.models import Invitation
 from users.models import StudentProfile, StudentTypes
 
 
@@ -61,6 +62,48 @@ class StudentProfileFilter(django_filters.FilterSet):
     @property
     def qs(self):
         # Prevents returning all records
+        if not self.is_bound or not self.is_valid():
+            return self.queryset.none()
+        return super().qs
+
+
+class EnrollmentInvitationFilter(django_filters.FilterSet):
+    branch = django_filters.ChoiceFilter(
+        label="Отделение",
+        required=True,
+        empty_label=None,
+        choices=())
+    name = django_filters.CharFilter(
+        label="Название",
+        lookup_expr='icontains')
+
+    class Meta:
+        model = StudentProfile
+        fields = ['branch', 'name']
+
+    def __init__(self, site_branches: List[Branch], data=None, **kwargs):
+        assert len(site_branches) > 0
+        super().__init__(data=data, **kwargs)
+        self.filters['branch'].extra["choices"] = [(b.pk, b.name) for b in site_branches]
+
+    @property
+    def form(self):
+        if not hasattr(self, '_form'):
+            self._form = super().form
+            self._form.helper = FormHelper()
+            self._form.helper.form_method = "GET"
+            self._form.helper.layout = Layout(
+                Row(
+                    Div("branch", css_class="col-xs-3"),
+                    Div("name", css_class="col-xs-6"),
+                    Div(Submit('', _('Filter'), css_class="btn-block -inline-submit"),
+                        css_class="col-xs-3"),
+                ))
+        return self._form
+
+    @property
+    def qs(self):
+        # Do not return all records by default
         if not self.is_bound or not self.is_valid():
             return self.queryset.none()
         return super().qs

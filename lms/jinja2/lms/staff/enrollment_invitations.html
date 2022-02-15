@@ -1,0 +1,51 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block body_attrs %} class="gray"{% endblock body_attrs %}
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <h2 class="mt-0 mb-30">Приглашения</h2>
+        {{ crispy(filter_form) }}
+
+      <div class="panel">
+        <div class="panel-body">
+            {% if enrollment_invitations %}
+              <table class="table">
+                <thead>
+                <tr>
+                  <th>Название</th>
+                  <th>Семестр</th>
+                  <th>Ведомость</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for invitation in enrollment_invitations %}
+                  <tr>
+                    <td>
+                      <a target="_blank"
+                         href="{{ url('admin:learning_invitation_change', object_id=invitation.pk) }}">
+                        {{ invitation.name }}
+                      </a>
+                    </td>
+                    <td class="nowrap">{{ invitation.semester }}</td>
+                    <td>
+                      <a target="_blank" href="{{ url('staff:students_progress_report_for_invitation', invitation_id=invitation.pk, output_format='csv') }}">csv</a>,
+                      <a target="_blank" href="{{ url('staff:students_progress_report_for_invitation', invitation_id=invitation.pk, output_format='xlsx') }}">xlsx</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            {% else %}
+              <div class="empty">Приглашения не найдены. Задайте другие параметры поиска.</div>
+            {% endif %}
+        </div>
+      </div>
+
+
+      </div>
+    </div>
+  </div>
+{% endblock content %}
