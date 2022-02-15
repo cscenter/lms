@@ -30,7 +30,7 @@
                 {% if not popover_help_text and bound_field.help_text -%}
                     <div class="help-block">{{ bound_field.help_text }}</div>
                 {%- endif %}
-                {% if show_errors and bound_field.errors -%}
+                {% if bound_field.errors -%}
                     <div class="help-block">
                     {% for e in bound_field.errors %}
                         {{ e }}<br>

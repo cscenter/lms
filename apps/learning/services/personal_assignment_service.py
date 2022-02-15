@@ -1,7 +1,7 @@
 import logging
 from datetime import timedelta
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
@@ -12,7 +12,7 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from core.timezone import get_now_utc
 from core.typings import assert_never
-from core.utils import NOT_SET
+from core.utils import NOT_SET, NotSetType
 from courses.constants import AssigneeMode, AssignmentStatuses
 from courses.models import Assignment, CourseTeacher
 from courses.selectors import personal_assignments_list
@@ -141,13 +141,19 @@ def create_assignment_solution_and_check(*, personal_assignment: StudentAssignme
 def create_assignment_comment(*, personal_assignment: StudentAssignment,
                               is_draft: bool, created_by: User,
                               message: Optional[str] = None,
-                              # because None is valid score:
-                              score: Decimal = NOT_SET,
+                              score: Union[Decimal, None, NotSetType] = NOT_SET,
                               status: Optional[AssignmentStatuses] = None,
                               attachment: Optional[UploadedFile] = None) -> AssignmentComment:
-    if not (message or attachment or (score, status) != (NOT_SET, None)):
-        raise ValidationError("Provide either text or a file.", code="malformed")
-
+    old_score = personal_assignment.score
+    old_status = personal_assignment.status
+    if not (message or attachment):
+        if (score, status) == (NOT_SET, None):
+            # This error for users that can't change status and score
+            raise ValidationError(_("Either text or file should be non-empty"), code="malformed")
+        elif (score, status) == (old_score, old_status):
+            # And this is for those who can
+            raise ValidationError(_("At least one text, file, score, status should be provided"),
+                                  code='nothing_to_update')
     comment = get_draft_comment(created_by, personal_assignment)
     if comment is None:
         comment = AssignmentComment(student_assignment=personal_assignment,
@@ -160,10 +166,13 @@ def create_assignment_comment(*, personal_assignment: StudentAssignment,
     if (score, status) != (NOT_SET, None):
         comment.meta = comment.meta if comment.meta else {}
         # if field exist then it was provided (not necessarily updated)
-        if score != NOT_SET:
+        if score is not NOT_SET:
             comment.meta['score'] = score
         if status is not None:
             comment.meta['status'] = status
+        if not is_draft:
+            comment.meta['old_score'] = personal_assignment.score
+            comment.meta['old_status'] = personal_assignment.status
     comment.save()
 
     from learning.tasks import update_student_assignment_stats
@@ -245,8 +254,23 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
                                       message: str = "",
                                       attachment: Optional[UploadedFile] = None,
                                       ) -> AssignmentComment:
+    """
+    Creates an AssignmentComment.
+    Score and status are only updating if the comment is not a draft.
+    The update may fail if old_status or old_score
+     are not equal to the values in StudentAssignment.
+    On successful update of score and status these values (old and new)
+    are also storing in AssignmentComment.meta
+    """
     if not (message or attachment) and (new_score, new_status) == (old_score, old_status):
         raise ValidationError(_("Nothing to send or update"), code='nothing_to_update')
+    comment = create_assignment_comment(personal_assignment=student_assignment,
+                                        created_by=reviewer,
+                                        score=new_score,
+                                        status=new_status,
+                                        is_draft=is_draft,
+                                        message=message,
+                                        attachment=attachment)
     if not is_draft:
         updated, sa = update_personal_assignment_score(student_assignment=student_assignment,
                                                        changed_by=reviewer,
@@ -255,21 +279,15 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
                                                        source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT)
         if not updated:
             raise ValidationError(_("Looks like the score has been changed while you're reviewing."
-                                  "Check and rewrite it if needed."), code="overwriting_score")
+                                    "Check and rewrite it if needed."), code="overwriting_score")
         updated, sa = update_personal_assignment_status(student_assignment=sa,
                                                         status_old=old_status,
                                                         status_new=new_status,
                                                         )
         if not updated:
             raise ValidationError(_("Looks like the status has been changed while you're reviewing."
-                                  "Check and rewrite it if needed"), code="overwriting_status")
-    return create_assignment_comment(personal_assignment=student_assignment,
-                                     created_by=reviewer,
-                                     score=new_score,
-                                     status=new_status,
-                                     is_draft=is_draft,
-                                     message=message,
-                                     attachment=attachment)
+                                    "Check and rewrite it if needed"), code="overwriting_status")
+    return comment
 
 
 # TODO: remove
@@ -418,23 +436,26 @@ def get_personal_assignments_by_stepik_id(*, assignment: Assignment) -> Dict[str
     return with_stepik_id
 
 
-def append_review_updating_text(*, message: str,
-                                old_score: Decimal,
-                                new_score: Decimal,
-                                old_status: AssignmentStatuses,
-                                new_status: AssignmentStatuses):
+def get_score_status_changing_message(comment: AssignmentComment):
+    if not isinstance(comment.meta, dict):
+        return ""
+    new_score = comment.meta.get('score', None)
+    new_status = comment.meta.get('status', None)
+    old_score = comment.meta.get('old_score', None)
+    old_status = comment.meta.get('old_status', None)
+
     score_changed = old_score != new_score
     status_changed = old_status != new_status
-    appended = ''
+    changing_message = ''
     if new_score is None:
         new_score = "без оценки"
     status_label = AssignmentStatuses(new_status).label
     if score_changed or status_changed:
         if score_changed and status_changed:
-            appended = f"*Оценка и статус задания были изменены. " \
-                  f"Новая оценка: {new_score}. Новый статус: {status_label}.*"
+            changing_message = f"Оценка и статус задания были изменены. " \
+                       f"Новая оценка: {new_score}. Новый статус: {status_label}."
         elif score_changed:
-            appended = f"*Оценка была изменена. Новая оценка: {new_score}.*"
+            changing_message = f"Оценка была изменена. Новая оценка: {new_score}."
         else:
-            appended = f"*Статус был изменён. Новый статус: {status_label}.*"
-    return f"{appended}\n\n{message}"
+            changing_message = f"Статус был изменён. Новый статус: {status_label}."
+    return changing_message

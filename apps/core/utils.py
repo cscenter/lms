@@ -19,7 +19,12 @@ logger = logging.getLogger(__name__)
 
 hashids = Hashids(salt=settings.HASHIDS_SALT, min_length=8)
 
-NOT_SET = object()
+
+class NotSetType:
+    pass
+
+
+NOT_SET = NotSetType()
 
 # Some details here https://github.com/Anomareh/Hoep
 MARKDOWN_EXTENSIONS = (h.EXT_FENCED_CODE |

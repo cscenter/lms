@@ -7,6 +7,7 @@ from crispy_forms.layout import HTML, BaseInput, Div, Field, Hidden, Layout, Sub
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 
 from core.forms import ScoreField
@@ -72,7 +73,7 @@ class AssignmentCommentForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if (not cleaned_data.get("text")
-                and not cleaned_data.get("attached_file")):
+            and not cleaned_data.get("attached_file")):
             raise forms.ValidationError(
                 _("Either text or file should be non-empty"))
         return cleaned_data
@@ -107,16 +108,16 @@ class AssignmentReviewForm(forms.Form):
     )
 
     def __init__(self, student_assignment: StudentAssignment,
-                       draft_comment: Optional[AssignmentComment] = None,
-                       *args, **kwargs):
-        super().__init__(*args, **kwargs)
+                 draft_comment: Optional[AssignmentComment] = None,
+                 **kwargs):
+        super().__init__(**kwargs)
         self.student_assignment = student_assignment
         self.draft_comment = draft_comment
         score = student_assignment.score
         status = student_assignment.status
         if draft_comment is not None:
-            self.draft_comment.type = AssignmentSubmissionTypes.COMMENT
-            if draft_comment.meta:
+            assert self.draft_comment.type == AssignmentSubmissionTypes.COMMENT
+            if isinstance(draft_comment.meta, dict):
                 score = draft_comment.meta.get('score', score)
                 status = draft_comment.meta.get('status', status)
         self.initial = {
@@ -127,24 +128,20 @@ class AssignmentReviewForm(forms.Form):
             'old_status': student_assignment.status
         }
         maximum_score = student_assignment.assignment.maximum_score
+        self.fields['score'].validators.append(MaxValueValidator(limit_value=maximum_score))
         self.fields['score'].widget.attrs.update({'max': maximum_score})
 
     def clean(self):
         cleaned_data = super().clean()
         text = cleaned_data.get("text")
         file = cleaned_data.get("attached_file")
-        score = cleaned_data.get('score')
+        score = cleaned_data.get('score', None)
         status = cleaned_data.get('status')
         old_score = cleaned_data.get('old_score')
         old_status = cleaned_data.get('old_status')
         if not (text or file) and (score, status) == (old_score, old_status):
             raise ValidationError(
                 _("Nothing to send or update"), code='nothing_to_update')
-        score = cleaned_data.get('score', None)
-        maximum_score = self.student_assignment.assignment.maximum_score
-        if score and score > maximum_score:
-            msg = _("Score can't be larger than maximum one ({0})", )
-            raise ValidationError(msg.format(maximum_score), code='too_high_score')
         if not self.student_assignment.is_status_transition_allowed(status):
             raise ValidationError({"status": _("Please select a valid status")})
         return cleaned_data
@@ -203,7 +200,7 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
     def clean(self):
         cleaned_data = super().clean()
         if (not cleaned_data.get("text")
-                and not cleaned_data.get("attached_file")):
+            and not cleaned_data.get("attached_file")):
             raise forms.ValidationError(
                 _("Either text or file should be non-empty"))
         return cleaned_data

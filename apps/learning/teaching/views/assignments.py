@@ -43,7 +43,7 @@ from learning.permissions import (
 from learning.selectors import get_teacher_not_spectator_courses
 from learning.services import AssignmentService, StudentGroupService
 from learning.services.personal_assignment_service import (
-    get_draft_comment, create_personal_assignment_review, append_review_updating_text
+    get_draft_comment, create_personal_assignment_review, get_score_status_changing_message
 )
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
@@ -280,6 +280,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
             for status in sa.assignment.statuses
         ]
         # Some estimates on showing audit log link or not.
+        context['get_score_status_changing_message'] = get_score_status_changing_message
         context['show_score_audit_log'] = (sa.score is not None or
                                            sa.score_changed - sa.created > datetime.timedelta(seconds=2))
         context['can_edit_score'] = self.request.user.has_perm(EditStudentAssignment.name, sa)
@@ -317,13 +318,6 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
             try:
                 with transaction.atomic():
                     is_draft = "save-draft" in self.request.POST
-                    text = form.cleaned_data['text']
-                    if not is_draft:
-                        text = append_review_updating_text(message=text,
-                                                           old_score=form.cleaned_data['old_score'],
-                                                           new_score=form.cleaned_data['score'],
-                                                           old_status=form.cleaned_data['old_status'],
-                                                           new_status=form.cleaned_data['status'])
                     create_personal_assignment_review(
                         student_assignment=sa,
                         reviewer=self.request.user,
@@ -332,7 +326,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                         new_score=form.cleaned_data['score'],
                         old_status=form.cleaned_data['old_status'],
                         new_status=form.cleaned_data['status'],
-                        message=text,
+                        message=form.cleaned_data['text'],
                         attachment=form.cleaned_data['attached_file'],
                     )
                     if form.cleaned_data['text']:

@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load tz %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+{% load core_tags %}
+{% load static %}
+{% load markdown call_method from core_tags %}
+{% load render_bundle from webpack_loader %}
+
+{% block title %}{{ a_s.student.get_short_name }} - {{ a_s.assignment.title }}{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript">
+        window.__CSC__.config.localStorage.hashes = Object.assign((window.__CSC__.config.localStorage.hashes || {}), {{ hashes_json|safe }});
+    </script>
+    {% render_bundle 'learning' 'js' 'V1' %}
+{% endblock javascripts %}
+
+
+{% block content %}
+{% localtime off %}
+<div class="container" id="student-submission-comments">
+  <div class="row">
+    <div class="col-xs-12 h2-and-buttons">
+      <h2>
+        <a href="{% url 'study:assignment_list' %}"><span class="fa fa-angle-left"></span></a>
+        {{ a_s.assignment.title }} <br>
+            <a class="small" href="{{ a_s.assignment.course.get_absolute_url }}">{{ a_s.assignment.course }}</a>
+      </h2>
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-9">
+      <div class="csc-well">
+        <div class="ubertext">
+          {% markdown 3600 "assignment_text" a_s.assignment.pk a_s.assignment.modified %}
+            {{ a_s.assignment.text }}
+          {% endmarkdown %}
+        </div>
+        {% with aas=a_s.assignment.assignmentattachment_set.all %}
+          {% if aas %}
+            <ul class="list-unstyled">
+              {% for aa in aas %}
+                <li>
+                  <span class="assignment-attachment">
+                    <i class="fa fa-file"></i> <a href="{{ aa.get_download_url }}">{{ aa.file_name }}</a>
+                  </span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+      </div>
+      {% if a_s.assignmentcomment_set.all %}
+        <ul class="comment-list">
+        {% for comment in a_s.assignmentcomment_set.all %}
+            {# Should be ok for comparing python int type with None #}
+            {% if first_comment_after_deadline and comment.pk == first_comment_after_deadline.pk %}
+                <li><hr class="deadline"></li>
+            {% endif %}
+            <li class="{% if comment.author == a_s.student %}student{% else %}teacher{% endif %}">
+                <div class="panel bg-gray assignment-submission assignment-{{ comment.type }}" {% if user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
+                    <div class="panel-body">
+                        <span class="assignment-submission__date pull-right">{{ comment.created|timezone:time_zone|date:"d.m.Y H:i" }}</span>
+                        <h5 class="assignment">{{ comment.author }}</h5>
+                        {{ get_score_status_changing_message(comment)}}
+                        {% if comment.text %}
+                        <div class="ubertext">
+                          {% markdown 3600 "assignment_comment" comment.pk comment.modified %}
+                            {{ comment.text }}
+                          {% endmarkdown %}
+                        </div>
+                        {% endif %}
+                        {% if comment.attached_file %}
+                            <div class="metainfo-holder">
+                                <span class="assignment-attachment"><i class="fa fa-file"></i> <a href="{{ comment.get_attachment_download_url }}">{{ comment.attached_file_name }}</a></span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% with checker_submission=comment.submission %}
+                      {% if checker_submission %}
+                          <div class="panel-footer" style="border-top: 1px solid #eee;">
+                          {{ checker_submission.checking_system_choice.label }}
+                            {% if checker_submission.report_url %}
+                              <a class="pull-right nowrap submission-status {{ checker_submission.status_choice.css_class }}" target="_blank" href="{{ checker_submission.report_url }}">
+                                {{ checker_submission.verdict_or_status }}
+                              </a>
+                            {% else %}
+                              <span class="pull-right nowrap submission-status {{ checker_submission.status_choice.css_class }}">{{ checker_submission.verdict_or_status }}</span>
+                            {% endif %}
+                          </div>
+                      {% endif %}
+                    {% endwith %}
+
+                    {% if comment.type == 'comment' %}{% if is_actual_teacher and comment.author_id == user.pk and not comment.is_stale_for_edit or user.is_curator %}
+                      <div class="panel-footer clearfix" style="border-top: 1px solid #eee;">
+                          <a href="{{ comment.get_update_url }}" class="__edit pull-right">{% if user.is_curator %}Редактировать{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
+                      </div>
+                    {% endif %}{% endif %}
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+        <div class="mt-30 assignment-actions">
+            {% if solution_form %}<button id="add-solution" class="btn btn-lg btn-link active">Добавить решение</button>{% endif %}
+            <button id="add-comment" class="btn btn-lg btn-link {% if not solution_form %}active{% endif %}">Написать комментарий</button>
+        </div>
+        <div id="comment-form-wrapper" class="csc-well {% if solution_form %}hidden{% endif %}">
+            {% crispy comment_form %}
+        </div>
+        {% if solution_form %}
+            <div id="solution-form-wrapper" class="csc-well">
+                 {% crispy solution_form %}
+            </div>
+        {% endif %}
+    </div>
+
+        <div class="col-xs-3">
+            <div class="-submission" id="o-sidebar">
+
+                <h5 class="assignment">{% trans "Grade" %}</h5>
+                <span class="nowrap badge assignment-status">{{ a_s.state_display }}</span>
+
+                {% if one_teacher %}
+                    <h5 class="assignment">{% trans "Professor" %}</h5>
+                {% else %}
+                    <h5 class="assignment">{% trans "Professors" %}</h5>
+                {% endif %}
+                <ul class="list-unstyled">
+                    {% for course_teacher in a_s.assignment.course.course_teachers.all %}
+                        <li>
+                            <a href="{{ course_teacher.teacher.teacher_profile_url }}">{{ course_teacher.teacher.get_full_name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <h5 class="assignment">{% trans "Student" %}</h5>
+                <a href="{{ a_s.student.get_absolute_url }}">{{ a_s.student.get_full_name }}</a>
+
+                <h5 class="assignment">{% trans "Deadline" %}</h5>
+                <span class="nowrap">{{ a_s.assignment.deadline_at|timezone:time_zone|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at|timezone:time_zone|time:"H:i" }}</span>
+
+                <h5 class="assignment">{% trans "Assignment Format" %}</h5>
+                {{ a_s.assignment.get_submission_type_display }}
+
+                <h5 class="assignment">{% trans "Passing score" %}</h5>
+                <span class="nowrap">{{ a_s.assignment.passing_score }} {% trans "out of" %} {{ a_s.assignment.maximum_score }}</span>
+
+                <h5 class="assignment">{% trans "Assignment created" %}</h5>
+                {{ a_s.assignment.created_local|date:"d E Y" }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{#  XXX: Due to bug with `fade` class and `shown.bs.modal` event put this html code here  #}
+<div id='update-comment-model-form' class='modal' tabindex='-1' role='dialog'>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Редактировать комментарий</h4>
+                <p class="text-muted">Пожалуйста, не меняйте смысл комментария, т.к. студент потенциально мог его прочитать в текущей версии и начать отвечать.<br>В таком случае лучше написать новый.</p>
+            </div>
+            <div class="inner"></div>
+        </div>
+    </div>
+</div>
+{% endlocaltime off %}
+{% endblock content %}
