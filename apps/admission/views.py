@@ -599,8 +599,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             # Try to find user preferred current campaign id
             campaign = get_default_campaign_for_user(user)
             if not campaign:
-                messages.error(self.request, "Нет активных кампаний по набору.")
-                today_local = timezone.now()  # stub
+                return HttpResponseRedirect(reverse("admission:applicants:list"))
             else:
                 today_local = now_local(campaign.branch.get_timezone())
             date = formats.date_format(today_local, "SHORT_DATE_FORMAT")
