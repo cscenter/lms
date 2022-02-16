@@ -94,13 +94,15 @@ class AssignmentReviewForm(forms.Form):
         required=False,
         widget=JesnyFileInput)
 
-    score = ScoreField(required=False, label="")
+    score = ScoreField(required=False, label="", show_hidden_initial=True)
     old_score = ScoreField(widget=forms.HiddenInput(), required=False)
 
     status = forms.ChoiceField(
         label="",
         required=False,
-        choices=AssignmentStatuses.choices)
+        choices=AssignmentStatuses.choices,
+        show_hidden_initial=True
+    )
     old_status = forms.ChoiceField(
         widget=forms.HiddenInput(),
         required=False,

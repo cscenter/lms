@@ -45,7 +45,7 @@ from learning.services import AssignmentService, StudentGroupService
 from learning.services.personal_assignment_service import (
     get_draft_comment, create_personal_assignment_review
 )
-from learning.utils import humanize_duration
+from learning.utils import humanize_duration, get_score_status_changing_message
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
 
 
@@ -284,6 +284,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         context['show_score_audit_log'] = (sa.score is not None or
                                            sa.score_changed - sa.created > datetime.timedelta(seconds=2))
         context['can_edit_score'] = self.request.user.has_perm(EditStudentAssignment.name, sa)
+        context['get_score_status_changing_message'] = get_score_status_changing_message
         return context
 
     def form_invalid(self, form):
