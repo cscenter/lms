@@ -570,3 +570,81 @@ def test_create_personal_assignment_review_concurrent_update():
     assert sa.score is None
     assert sa.status == AssignmentStatuses.NOT_SUBMITTED
     assert AssignmentComment.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_create_assignment_comment_meta():
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course,
+                                  assignment__maximum_score=5)
+    comment = create_personal_assignment_review(
+        student_assignment=sa,
+        is_draft=False,
+        reviewer=teacher,
+        message="",
+        old_score=sa.score,
+        old_status=sa.status,
+        new_score=Decimal('1'),
+        new_status=AssignmentStatuses.ON_CHECKING
+    )
+    assert comment.meta == {
+        "score": Decimal('1'),
+        "status": AssignmentStatuses.ON_CHECKING,
+        "old_score": None,
+        "old_status": AssignmentStatuses.NOT_SUBMITTED
+    }
+
+    sa.refresh_from_db()
+    comment = create_personal_assignment_review(
+        student_assignment=sa,
+        is_draft=False,
+        reviewer=teacher,
+        message="",
+        old_score=sa.score,
+        old_status=sa.status,
+        new_score=None,
+        new_status=AssignmentStatuses.COMPLETED
+    )
+    assert comment.meta == {
+        "score": None,
+        "status": AssignmentStatuses.COMPLETED,
+        "old_score": Decimal('1'),
+        "old_status": AssignmentStatuses.ON_CHECKING
+    }
+
+    sa.refresh_from_db()
+    comment = create_personal_assignment_review(
+        student_assignment=sa,
+        is_draft=False,
+        reviewer=teacher,
+        message="",
+        old_score=sa.score,
+        old_status=sa.status,
+        new_score=Decimal('2'),
+        new_status=sa.status
+    )
+    assert comment.meta == {
+        "score": Decimal('2'),
+        "status": AssignmentStatuses.COMPLETED,
+        "old_score": None,
+        "old_status": AssignmentStatuses.COMPLETED
+    }
+
+    sa.refresh_from_db()
+    comment = create_personal_assignment_review(
+        student_assignment=sa,
+        is_draft=False,
+        reviewer=teacher,
+        message="",
+        old_score=sa.score,
+        old_status=AssignmentStatuses.COMPLETED,
+        new_score=sa.score,
+        new_status=AssignmentStatuses.NEED_FIXES
+    )
+    assert comment.meta == {
+        "score": Decimal('2'),
+        "status": AssignmentStatuses.NEED_FIXES,
+        "old_score": Decimal('2'),
+        "old_status": AssignmentStatuses.COMPLETED
+    }
