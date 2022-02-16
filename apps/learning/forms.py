@@ -94,14 +94,13 @@ class AssignmentReviewForm(forms.Form):
         required=False,
         widget=JesnyFileInput)
 
-    score = ScoreField(required=False, label="", show_hidden_initial=True)
-    old_score = ScoreField(widget=forms.HiddenInput(), required=False)
+    score = ScoreField(required=False, label="")
+    old_score = ScoreField(required=False, widget=forms.HiddenInput())
 
     status = forms.ChoiceField(
         label="",
         required=False,
-        choices=AssignmentStatuses.choices,
-        show_hidden_initial=True
+        choices=AssignmentStatuses.choices
     )
     old_status = forms.ChoiceField(
         widget=forms.HiddenInput(),
@@ -115,15 +114,17 @@ class AssignmentReviewForm(forms.Form):
         super().__init__(**kwargs)
         self.student_assignment = student_assignment
         self.draft_comment = draft_comment
+        text = ''
         score = student_assignment.score
         status = student_assignment.status
         if draft_comment is not None:
+            text = draft_comment.text
             assert self.draft_comment.type == AssignmentSubmissionTypes.COMMENT
             if isinstance(draft_comment.meta, dict):
                 score = draft_comment.meta.get('score', score)
                 status = draft_comment.meta.get('status', status)
         self.initial = {
-            'text': '' if draft_comment is None else draft_comment.text,
+            'text': text,
             'score': score,
             'status': status,
             'old_score': student_assignment.score,

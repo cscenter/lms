@@ -153,7 +153,7 @@
                   <div class="col-sm-7">
                       {{ forms.select(name="review-status", id="id_review-status", options=statuses, prepend_text="Статус задания:",
                        selected=comment_form.initial['status'], errors=comment_form['status'].errors, classes="form-control") }}
-                    {{ forms.field(comment_form['old_status'], hide_label=True) }}
+                      {{ forms.field(comment_form['old_status'], hide_label=True) }}
                   </div>
               </div>
               <div class="row">
