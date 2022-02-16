@@ -42,6 +42,7 @@ class StudentGroupListView(PermissionRequiredMixin, CourseURLParamsMixin, ListVi
             'course': self.course,
             'student_group_list': student_groups,
             'get_create_student_group_url': get_create_student_group_url,
+            'StudentGroupTypes': StudentGroupTypes,
             'permissions': {
                 'create_student_group': CreateStudentGroup.name
             }
