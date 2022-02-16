@@ -513,7 +513,7 @@ class CreateStudentGroupAsTeacher(Permission):
     @staticmethod
     @rules.predicate
     def rule(user: User, course: Course):
-        if course.group_mode == CourseGroupModes.NO_GROUPS:
+        if course.group_mode != CourseGroupModes.MANUAL:
             return False
         return course.is_actual_teacher(user.pk)
 
