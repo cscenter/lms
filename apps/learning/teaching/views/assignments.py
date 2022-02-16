@@ -43,7 +43,7 @@ from learning.permissions import (
 from learning.selectors import get_teacher_not_spectator_courses
 from learning.services import AssignmentService, StudentGroupService
 from learning.services.personal_assignment_service import (
-    get_draft_comment, create_personal_assignment_review, get_score_status_changing_message
+    get_draft_comment, create_personal_assignment_review
 )
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
@@ -269,6 +269,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         })
         context['assignee_teachers'] = get_course_teachers(course=course)
         draft_comment = get_draft_comment(user, sa)
+        context['max_score'] = str(sa.assignment.maximum_score)
         context['comment_form'] = AssignmentReviewForm(student_assignment=sa,
                                                        draft_comment=draft_comment)
         context['statuses'] = [
@@ -280,7 +281,6 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
             for status in sa.assignment.statuses
         ]
         # Some estimates on showing audit log link or not.
-        context['get_score_status_changing_message'] = get_score_status_changing_message
         context['show_score_audit_log'] = (sa.score is not None or
                                            sa.score_changed - sa.created > datetime.timedelta(seconds=2))
         context['can_edit_score'] = self.request.user.has_perm(EditStudentAssignment.name, sa)
@@ -333,11 +333,6 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                         comment_persistence.add_to_gc(form.cleaned_data['text'])
                 return redirect(sa.get_teacher_url())
             except ValidationError as e:
-                if e.code:
-                    if e.code == "overwriting_score":
-                        form.add_error('score', _('Warning, score was replaced with actual!'))
-                    elif e.code == "overwriting_status":
-                        form.add_error('status', _('Warning, status was replaced with actual!'))
                 message = str(e.args[0] if e.args else e)
                 messages.error(self.request, message=message, extra_tags='timeout')
         return self.form_invalid(form)

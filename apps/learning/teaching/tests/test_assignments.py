@@ -614,9 +614,6 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     response = client.post(url, data=form_data)
     assert response.status_code == 200
     assert 'comment_form' in response.context_data
-    form = response.context_data['comment_form']
-    assert 'score' in form.errors and len(form.errors['score']) == 1
-    assert 'Warning, score was replaced with actual!' == form.errors['score'][0]
     sa.refresh_from_db()
     assert sa.score == 1
     assert sa.status == AssignmentStatuses.ON_CHECKING
@@ -635,9 +632,6 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     response = client.post(url, data=form_data)
     assert response.status_code == 200
     assert 'comment_form' in response.context_data
-    form = response.context_data['comment_form']
-    assert 'status' in form.errors and len(form.errors['status']) == 1
-    assert 'Warning, status was replaced with actual!' == form.errors['status'][0]
     assert AssignmentComment.objects.count() == 1
     sa.refresh_from_db()
     assert sa.score == 1

@@ -44,7 +44,7 @@ from learning.managers import (
 from learning.settings import (
     ENROLLMENT_DURATION, AssignmentScoreUpdateSource, GradeTypes, GradingSystems
 )
-from learning.utils import humanize_duration
+from learning.utils import humanize_duration, get_score_status_changing_message
 from users.constants import ThumbnailSizes
 from users.models import StudentProfile
 from users.thumbnails import ThumbnailMixin, get_stub_factory, get_thumbnail
@@ -868,6 +868,10 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
     @property
     def attached_file_name(self):
         return os.path.basename(self.attached_file.name)
+
+    @property
+    def score_status_changed_display(self) -> str:
+        return get_score_status_changing_message(self)
 
     def get_attachment_download_url(self):
         return reverse("study:download_assignment_comment_attachment", kwargs={

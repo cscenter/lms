@@ -278,14 +278,14 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
                                                        score_new=new_score,
                                                        source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT)
         if not updated:
-            raise ValidationError(_("Looks like the score has been changed while you're reviewing."
+            raise ValidationError(_("Looks like the score has been changed while you're reviewing. "
                                     "Check and rewrite it if needed."), code="overwriting_score")
         updated, sa = update_personal_assignment_status(student_assignment=sa,
                                                         status_old=old_status,
                                                         status_new=new_status,
                                                         )
         if not updated:
-            raise ValidationError(_("Looks like the status has been changed while you're reviewing."
+            raise ValidationError(_("Looks like the status has been changed while you're reviewing. "
                                     "Check and rewrite it if needed"), code="overwriting_status")
     return comment
 
@@ -436,26 +436,3 @@ def get_personal_assignments_by_stepik_id(*, assignment: Assignment) -> Dict[str
     return with_stepik_id
 
 
-def get_score_status_changing_message(comment: AssignmentComment):
-    if not isinstance(comment.meta, dict):
-        return ""
-    new_score = comment.meta.get('score', None)
-    new_status = comment.meta.get('status', None)
-    old_score = comment.meta.get('old_score', None)
-    old_status = comment.meta.get('old_status', None)
-
-    score_changed = old_score != new_score
-    status_changed = old_status != new_status
-    changing_message = ''
-    if new_score is None:
-        new_score = "без оценки"
-    status_label = AssignmentStatuses(new_status).label
-    if score_changed or status_changed:
-        if score_changed and status_changed:
-            changing_message = f"Оценка и статус задания были изменены. " \
-                       f"Новая оценка: {new_score}. Новый статус: {status_label}."
-        elif score_changed:
-            changing_message = f"Оценка была изменена. Новая оценка: {new_score}."
-        else:
-            changing_message = f"Статус был изменён. Новый статус: {status_label}."
-    return changing_message

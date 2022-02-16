@@ -42,13 +42,28 @@
     {% endif %}
 {%- endmacro %}
 
-{% macro select(name, id, options, selected, classes="form-control") -%}
-    <select name={{ name }} class={{ classes }} id={{ id }}>
-        {% for option in options %}
-            <option value={{ option.value }} {% if option.value == selected %} selected {% endif %}
-                    {% if 'disabled' in option and option.disabled %} disabled {% endif %}>
-                {{ option.label }}
-            </option>
-        {% endfor %}
-    </select>
+{% macro select(name, id, options, selected, errors=[], prepend_text="", append_text="", classes="form-control") -%}
+    <div class="form-group{% if errors %} has-error{% endif -%}">
+        <div class="controls">
+            <div class="input-group">
+                {% if prepend_text %}<span class="input-group-addon">{{ prepend_text }}</span>{% endif %}
+                <select name={{ name }} class={{ classes }} id={{ id }}>
+                    {% for option in options %}
+                        <option value={{ option.value }} {% if option.value == selected %} selected {% endif %}
+                                {% if 'disabled' in option and option.disabled %} disabled {% endif %}>
+                            {{ option.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% if append_text %}<span class="input-group-addon">{{ append_text }}</span>{% endif %}
+            </div>
+            {% if errors -%}
+              <div class="help-block">
+                {% for e in errors %}
+                    {{ e }}<br>
+                {% endfor %}
+              </div>
+            {%- endif %}
+        </div>
+    </div>
 {% endmacro %}
