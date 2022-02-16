@@ -29,16 +29,18 @@
       </div>
       <div id="student_list" class="col-xs-12">
         <h3 class="mb-15">Студенты</h3>
-        {% if student_profiles %}
+        {% if enrollments %}
           <table class="table table-borderless">
-            {% for student_profile in student_profiles %}
+            {% for enrollment in enrollments %}
+              {% set student_profile = enrollment.student_profile %}
               <tr>
                 <td style="width: 40px;">
                   <span class="text-muted">{{ loop.index }}</span>
                 </td>
                 <td class="align-middle">
-                  <a
-                    href="{{ student_profile.user.get_absolute_url() }}">{{ student_profile.user.get_full_name(last_name_first=True) }}</a>
+                  <a href="{{ student_profile.user.get_absolute_url() }}">
+                    {{ student_profile.user.get_full_name(last_name_first=True) }}
+                  </a>
                 </td>
               </tr>
             {% endfor %}

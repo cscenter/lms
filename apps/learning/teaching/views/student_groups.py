@@ -82,7 +82,7 @@ class StudentGroupDetailView(PermissionRequiredMixin, CourseURLParamsMixin, Deta
             'course': self.course,
             'student_group': student_group,
             'assigned_teachers': StudentGroupService.get_assignees(student_group),
-            'student_profiles': StudentGroupService.get_student_profiles(student_group),
+            'enrollments': StudentGroupService.get_enrollments(student_group),
             'get_student_groups_url': get_student_groups_url,
             'permissions': {
                 'update_student_group': UpdateStudentGroup.name,
@@ -153,7 +153,7 @@ class StudentGroupUpdateView(PermissionRequiredMixin, CourseURLParamsMixin, Upda
     def get_context_data(self, **kwargs: Any):
         context = {
             'transfer_form': StudentGroupStudentsTransferForm(self.student_group),
-            'student_profiles': StudentGroupService.get_student_profiles(self.student_group),
+            'enrollments': StudentGroupService.get_enrollments(self.student_group),
             **kwargs
         }
         return context

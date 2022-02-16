@@ -125,8 +125,8 @@ class AssignmentService:
                 break
             AssignmentNotification.objects.bulk_create(batch, batch_size)
 
-    @staticmethod
-    def bulk_remove_student_assignments(assignment: Assignment,
+    @classmethod
+    def bulk_remove_student_assignments(cls, assignment: Assignment,
                                         for_groups: Iterable[Union[int, None]] = None):
         filters = [Q(assignment=assignment)]
         if for_groups is not None:
@@ -141,18 +141,31 @@ class AssignmentService:
                         .values_list('student_id', flat=True))
             filters.append(Q(student__in=students))
         to_delete = list(StudentAssignment.objects.filter(*filters))
+        cls.remove_student_assignments(to_delete)
+
+    @classmethod
+    def remove_assignment_for_students(cls, assignment: Assignment, *,
+                                       enrollments: Iterable[Enrollment]) -> None:
+        students = [e.student_id for e in enrollments]
+        student_assignments = list(StudentAssignment.objects
+                                   .filter(assignment=assignment,
+                                           student_id__in=students))
+        AssignmentService.remove_student_assignments(student_assignments)
+
+    @staticmethod
+    def remove_student_assignments(student_assignments: List[StudentAssignment]):
         using = router.db_for_write(StudentAssignment)
-        SoftDeleteService(using).delete(to_delete)
+        SoftDeleteService(using).delete(student_assignments)
         # Hard delete notifications
         (AssignmentNotification.objects
-         .filter(student_assignment__in=to_delete)
+         .filter(student_assignment__in=student_assignments)
          .delete())
 
     @classmethod
     def sync_student_assignments(cls, assignment: Assignment):
         """
-        Sync student assignments with assignment restriction requirements
-        by deleting or creating missing records.
+        Sync student assignments by deleting or creating missing records
+        after assignment visibility settings have been changed.
         """
         ss = (StudentAssignment.objects
               .filter(assignment=assignment)

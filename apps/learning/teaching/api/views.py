@@ -31,7 +31,7 @@ class StudentGroupTransferStudentsView(RolePermissionRequiredMixin, APIBaseView)
             required=True,
             queryset=StudentGroup.objects.get_queryset())
         ids = serializers.ListField(
-            label="Student Profiles",
+            label="Enrollments",
             child=serializers.IntegerField(min_value=1),
             min_length=1,
             allow_empty=False)
@@ -55,7 +55,7 @@ class StudentGroupTransferStudentsView(RolePermissionRequiredMixin, APIBaseView)
         with transaction.atomic():
             StudentGroupService.transfer_students(source=self.student_group,
                                                   destination=destination_student_group,
-                                                  student_profiles=serializer.validated_data['ids'])
+                                                  enrollments=serializer.validated_data['ids'])
 
         msg = f"Студенты успешно перенесены в группу {destination_student_group.name}"
         messages.success(self.request, msg, extra_tags='timeout')

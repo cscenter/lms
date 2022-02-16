@@ -14,7 +14,6 @@ else:
     from django.db.models.deletion import Collector
 
 
-
 class SoftDeleteService:
     """
     Supports `deleted_at` field value update for models that implement

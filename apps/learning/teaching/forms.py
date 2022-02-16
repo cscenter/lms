@@ -50,7 +50,7 @@ class StudentGroupStudentsTransferForm(forms.Form):
 
     def __init__(self, student_group: StudentGroup, **kwargs: Any):
         super().__init__(**kwargs)
-        student_groups = StudentGroupService.get_groups_available_for_student_transfer(student_group)
+        student_groups = StudentGroupService.get_groups_for_safe_transfer(student_group)
         choices = ((sg.pk, sg.get_name(branch_details=True)) for sg in student_groups)
         self.fields['student_group'].choices = [('', '-------'), *choices]
         self.helper = FormHelper(self)

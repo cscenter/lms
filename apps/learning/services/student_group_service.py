@@ -1,6 +1,8 @@
+import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
@@ -13,14 +15,17 @@ from courses.models import (
 )
 from courses.services import CourseService
 from learning.models import (
-    AssignmentGroup, CourseClassGroup, Enrollment, Invitation, StudentGroup,
-    StudentGroupAssignee
+    AssignmentGroup, CourseClassGroup, Enrollment, Invitation, StudentAssignment,
+    StudentGroup, StudentGroupAssignee
 )
 from learning.services.assignment_service import AssignmentService
 from users.models import StudentProfile, StudentTypes
 
 CourseTeacherId = int
 StudentGroupId = int
+
+
+logger = logging.getLogger(__name__)
 
 
 class StudentGroupError(Exception):
@@ -315,24 +320,19 @@ class StudentGroupService:
         StudentGroupAssignee.objects.bulk_create(to_add)
 
     @staticmethod
-    def get_student_profiles(student_group: StudentGroup) -> List[StudentProfile]:
-        """
-        Returns student profiles of users enrolled in the course.
-
-        Note:
-            Profiles are sorted by the student's last name.
-        """
-        return list(StudentProfile.objects
-                    .filter(enrollment__is_deleted=False,
-                            enrollment__student_group=student_group)
-                    .select_related('user')
-                    .order_by('user__last_name'))
+    def get_enrollments(student_group: StudentGroup) -> List[Enrollment]:
+        return list(Enrollment.active
+                    .filter(student_group=student_group)
+                    .select_related('student_profile__user')
+                    .order_by('student_profile__user__last_name'))
 
     @staticmethod
-    def get_groups_available_for_student_transfer(source_group: StudentGroup) -> List[StudentGroup]:
+    def get_groups_for_safe_transfer(source_group: StudentGroup) -> List[StudentGroup]:
         """
         Returns list of target student groups where students of the source
-        student group could be transferred to.
+        student group could be transferred to without loosing any progress.
+
+        Unsafe transfer means that some personal assignments may be deleted.
         """
         student_groups = list(StudentGroup.objects
                               .filter(course_id=source_group.course_id)
@@ -372,26 +372,44 @@ class StudentGroupService:
 
     @classmethod
     def transfer_students(cls, *, source: StudentGroup, destination: StudentGroup,
-                          student_profiles: List[int]) -> None:
+                          enrollments: List[int], safe: bool = True) -> None:
+        """
+        Note:
+            Unsafe transfer means some personal assignments may be
+            deleted due to the difference in assignment visibility settings.
+        """
         if source.course_id != destination.course_id:
             raise ValidationError("Invalid destination", code="invalid")
-        safe_transfer_to = cls.get_groups_available_for_student_transfer(source)
-        if destination not in safe_transfer_to:
-            raise ValidationError("Invalid destination", code="unsafe")
-        (Enrollment.objects
-         .filter(course=source.course,
-                 student_group=source,
-                 student_profile__in=student_profiles)
-         .update(student_group_id=destination))
-        # After students were transferred to the target group create missing
-        # personal assignments
+        # TODO: validate enrollments? Need to change API
+        if safe:
+            safe_transfer_to = cls.get_groups_for_safe_transfer(source)
+            if destination not in safe_transfer_to:
+                raise ValidationError("Invalid destination", code="unsafe")
+        updated = (Enrollment.objects
+                   .filter(course=source.course,
+                           student_group=source,
+                           pk__in=enrollments)
+                   .update(student_group=destination))
+        if updated != len(enrollments):
+            # Enrollments are not in a source group
+            raise IntegrityError("Some students have not been moved. Abort")
+
         source_group_assignments = cls.available_assignments(source)
         target_group_assignments = cls.available_assignments(destination)
         # Assignments that are not available in the source group, but
         # available in the target group
         in_target_group_only = set(target_group_assignments).difference(source_group_assignments)
-        # Create missing personal assignments
+        # Create missing personal assignments after students transfer
         for assignment in in_target_group_only:
             AssignmentService.bulk_create_student_assignments(assignment=assignment,
                                                               for_groups=[destination.pk])
-
+        if not safe:
+            in_source_group_only = set(source_group_assignments).difference(target_group_assignments)
+            for assignment in in_source_group_only:
+                enrollments = list(Enrollment.objects
+                                   .filter(pk__in=enrollments,
+                                           # Remove records for modified enrollments only
+                                           student_group=destination))
+                logger.info(f"Delete assignment {assignment} for enrollments {enrollments}")
+                AssignmentService.remove_assignment_for_students(assignment,
+                                                                 enrollments=enrollments)

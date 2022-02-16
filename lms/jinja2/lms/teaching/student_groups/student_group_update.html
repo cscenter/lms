@@ -26,7 +26,7 @@
         </div>
       </div>
     </form>
-    {% if transfer_form['student_group'].field.choices|length > 0 and  student_profiles %}
+    {% if transfer_form['student_group'].field.choices|length > 0 and enrollments %}
       <h2 class="mb-20">Перенести студентов</h2>
       <form method="POST" action="{{ url('teaching:api:student-groups:transfer', source_student_group=student_group.pk) }}" name="transfer-students">
         {% csrf_token %}
@@ -49,10 +49,11 @@
           </tr>
           </thead>
           <tbody>
-          {% for student_profile in student_profiles %}
+          {% for enrollment in enrollments %}
+            {% set student_profile = enrollment.student_profile %}
             <tr>
               <td class="align-middle">
-                <input type="checkbox" name="ids" class="form-check-input" value="{{ student_profile.pk }}" id="student_{{ loop.index }}" />
+                <input type="checkbox" name="ids" class="form-check-input" value="{{ enrollment.pk }}" id="student_{{ loop.index }}" />
               </td>
               <td>
                 <label for="student_{{ loop.index }}" style="font-weight: normal;">{{ student_profile.user.get_full_name(last_name_first=True) }}</label>
