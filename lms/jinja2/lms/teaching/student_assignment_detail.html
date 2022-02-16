@@ -70,7 +70,7 @@
                   <div class="panel-body">
                     <span class="assignment-submission__date pull-right">{{ comment.created_local(tz=time_zone)|date("d.m.Y H:i") }}</span>
                     <h5 class="assignment">{{ comment.author }}</h5>
-                    {{ get_score_status_changing_message(comment) }}
+                    <div class="text-muted">{{ get_score_status_changing_message(comment) }}</div>
                     {% if comment.text %}
                       <div class="ubertext">
                         {{ comment.text|markdown("assignment_comment", 3600, comment.pk, comment.modified) }}

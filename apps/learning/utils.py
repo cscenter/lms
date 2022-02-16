@@ -76,10 +76,10 @@ def get_score_status_changing_message(comment):
     status_label = AssignmentStatuses(new_status).label
     if score_changed or status_changed:
         if score_changed and status_changed:
-            changing_message = f"Оценка и статус задания были изменены. " \
-                       f"Новая оценка: {new_score}. Новый статус: {status_label}."
+            changing_message = f"Оценка и статус задания были изменены.<br>" \
+                       f"Новая оценка: {new_score}.<br>Новый статус: {status_label}."
         elif score_changed:
-            changing_message = f"Оценка была изменена. Новая оценка: {new_score}."
+            changing_message = f"Оценка была изменена.<br>Новая оценка: {new_score}."
         else:
-            changing_message = f"Статус был изменён. Новый статус: {status_label}."
+            changing_message = f"Статус был изменён.<br>Новый статус: {status_label}."
     return changing_message
