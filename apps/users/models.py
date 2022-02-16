@@ -850,7 +850,7 @@ class StudentProfile(TimeStampedModel):
             raise ValidationError({"year_of_admission": msg})
 
     def __str__(self):
-        return f"{self.user.get_full_name()} [{self.site.domain}]"
+        return f"[StudentProfile] id: {self.pk} name: {self.user.get_full_name()} site: {self.site.domain}"
 
     def get_absolute_url(self, subdomain=None):
         return reverse('user_detail', args=[self.user_id],
