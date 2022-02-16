@@ -1,0 +1,153 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block title %}{{ a_s.student.get_short_name() }} - {{ a_s.assignment.title }}{% endblock %}
+
+{% block javascripts %}
+  <script type="text/javascript">
+    window.__CSC__.config.localStorage.hashes = Object.assign((window.__CSC__.config.localStorage.hashes || {}), {{ hashes_json|safe }});
+  </script>
+  {{ render_bundle('learning', config='V1', extension='js') }}
+{% endblock javascripts %}
+
+
+{% block content %}
+  <div class="container" id="student-submission-comments">
+    <div class="row">
+      <div class="col-xs-12 h2-and-buttons">
+        <h2>
+          <a href="{{ url('study:assignment_list') }}"><span class="fa fa-angle-left"></span></a>
+          {{ a_s.assignment.title }} <br>
+          <a class="small" href="{{ a_s.assignment.course.get_absolute_url() }}">{{ a_s.assignment.course }}</a>
+        </h2>
+        <hr>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-9">
+        <div class="csc-well">
+          <div class="ubertext">
+            {{ a_s.assignment.text|markdown("assignment_text", 3600, a_s.assignment.pk, a_s.assignment.modified) }}
+          </div>
+          {% with assignment_attachments = a_s.assignment.assignmentattachment_set.all() %}
+            {% if assignment_attachments %}
+              <ul class="list-unstyled">
+                {% for aa in assignment_attachments %}
+                  <li>
+                      <span class="assignment-attachment">
+                        <i class="fa fa-file"></i> <a href="{{ aa.get_download_url() }}">{{ aa.file_name }}</a>
+                      </span>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          {% endwith %}
+        </div>
+        {% set assignment_submissions = a_s.assignmentcomment_set.all() %}
+        {% if assignment_submissions %}
+          <ul class="comment-list">
+            {% for comment in assignment_submissions %}
+              {# Should be ok for comparing python int type with None #}
+              {% if first_comment_after_deadline and comment.pk == first_comment_after_deadline.pk %}
+                <li>
+                  <hr class="deadline">
+                </li>
+              {% endif %}
+              <li class="{{ "student" if comment.author == a_s.student else "teacher" }}">
+                <div class="panel bg-gray assignment-submission assignment-{{ comment.type }}"
+                     {% if request.user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
+                  <div class="panel-body">
+                    <span class="assignment-submission__date pull-right">{{ comment.created_local(tz=time_zone)|date("d.m.Y H:i") }}</span>
+                    <h5 class="assignment">{{ comment.author }}</h5>
+                    {% if comment.text %}
+                      <div class="ubertext">
+                        {{ comment.text|markdown("assignment_comment", 3600, comment.pk, comment.modified) }}
+                      </div>
+                    {% endif %}
+                    {% if comment.attached_file %}
+                      <div class="metainfo-holder">
+                        <span class="assignment-attachment">
+                          <i class="fa fa-file"></i> <a href="{{ comment.get_attachment_download_url() }}">{{ comment.attached_file_name }}</a>
+                        </span>
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  {% with checker_submission = comment.submission %}
+                    {% if checker_submission %}
+                      <div class="panel-footer" style="border-top: 1px solid #eee;">
+                        <div class="clearfix">
+                        {{ checker_submission.checking_system_choice.label }}
+                        {% if checker_submission.report_url %}
+                          <a class="pull-right nowrap submission-status {{ checker_submission.status_choice.css_class }}" target="_blank"
+                             href="{{ checker_submission.report_url }}">
+                            {{ checker_submission.verdict_or_status }}
+                          </a>
+                        {% else %}
+                          <span
+                            class="pull-right nowrap submission-status {{ checker_submission.status_choice.css_class }}">{{ checker_submission.verdict_or_status }}</span>
+                        {% endif %}
+                        </div>
+                      </div>
+                    {% endif %}
+                  {% endwith %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        <div class="mt-30 assignment-actions">
+          {% if solution_form %}
+            <button id="add-solution" class="btn btn-lg btn-link active">Добавить решение</button>{% endif %}
+          <button id="add-comment" class="btn btn-lg btn-link {% if not solution_form %}active{% endif %}">Написать комментарий</button>
+        </div>
+        <div id="comment-form-wrapper" class="csc-well {% if solution_form %}hidden{% endif %}">
+          {{ crispy(comment_form) }}
+        </div>
+        {% if solution_form %}
+          <div id="solution-form-wrapper" class="csc-well">
+            {{ crispy(solution_form) }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col-xs-3">
+        <div class="-submission" id="o-sidebar">
+
+          <h5 class="assignment">{% trans %}Grade{% endtrans %}</h5>
+          <span class="nowrap badge assignment-status">{{ a_s.state_display }}</span>
+
+          {% if one_teacher %}
+            <h5 class="assignment">{% trans %}Professor{% endtrans %}</h5>
+          {% else %}
+            <h5 class="assignment">{% trans %}Professors{% endtrans %}</h5>
+          {% endif %}
+          <ul class="list-unstyled">
+            {% for course_teacher in a_s.assignment.course.course_teachers.all() %}
+              <li>
+                <a href="{{ course_teacher.teacher.teacher_profile_url() }}">{{ course_teacher.teacher.get_full_name() }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+
+          <h5 class="assignment">{% trans %}Student{% endtrans %}</h5>
+          <a href="{{ a_s.student.get_absolute_url() }}">{{ a_s.student.get_full_name() }}</a>
+
+          <h5 class="assignment">{% trans %}Deadline{% endtrans %}</h5>
+          {{ a_s.assignment.deadline_at_local(tz=time_zone)|naturalday("d E Y") }} {{ a_s.assignment.deadline_at_local(tz=time_zone)|time("H:i") }}
+
+          <h5 class="assignment">{% trans %}Assignment Format{% endtrans %}</h5>
+          {{ a_s.assignment.get_submission_type_display() }}
+
+          <h5 class="assignment">{% trans %}Passing score{% endtrans %}</h5>
+          {{ a_s.assignment.passing_score }} {% trans %}out of{% endtrans %} {{ a_s.assignment.maximum_score }}
+
+          <h5 class="assignment">{% trans %}Assignment Weight{% endtrans %}</h5>
+          <span class="nowrap">{{ a_s.assignment.weight }}</span>
+
+          <h5 class="assignment">{% trans %}Assignment created{% endtrans %}</h5>
+          {{ a_s.assignment.created_local()|date("d E Y") }}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

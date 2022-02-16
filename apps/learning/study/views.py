@@ -134,7 +134,7 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
 
 class StudentAssignmentDetailView(PermissionRequiredMixin,
                                   AssignmentSubmissionBaseView):
-    template_name = "learning/study/student_assignment_detail.html"
+    template_name = "lms/study/student_assignment_detail.html"
     permission_required = ViewOwnStudentAssignment.name
 
     def get_permission_object(self):
