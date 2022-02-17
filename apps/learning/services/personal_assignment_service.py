@@ -265,10 +265,11 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
                                       attachment: Optional[UploadedFile] = None,
                                       ) -> AssignmentComment:
     """
-    Creates an AssignmentComment.
-    Score and status are only updating if the comment is not a draft.
-    On successful update of score and status these values (old and new)
-    are also storing in AssignmentComment.meta
+    Updates assignment score and/or status on publishing review,
+    posts a new comment in a published or draft state.
+
+    New comment on publishing review stores log of the score and status
+    changes in a .meta field.
     """
     is_score_changed = score_new != score_old
     is_status_changed = status_new != status_old
