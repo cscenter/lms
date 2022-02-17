@@ -578,7 +578,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     assert response.status_code == 200
     assert 'comment_form' in response.context_data
     form = response.context_data['comment_form']
-    assert "Nothing to send or update" in form.non_field_errors()
+    assert "Nothing to update" in form.non_field_errors()
 
     # test that review was published and score, status has been changed
     form_data = {

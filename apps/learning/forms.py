@@ -116,18 +116,18 @@ class AssignmentReviewForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        text = cleaned_data.get("text")
-        file = cleaned_data.get("attached_file")
-        score = cleaned_data.get('score', None)
-        score_old = cleaned_data.get('score_old', None)
+        is_comment_added = cleaned_data.get("text") or cleaned_data.get("attached_file")
+        # TODO: what if not all data are valid
         status = cleaned_data.get('status')
         old_status = cleaned_data.get('old_status')
-        if not (text or file) and (score, status) == (score_old, old_status):
-            raise ValidationError(
-                _("Nothing to send or update"), code='nothing_to_update')
-        print(status, self.student_assignment.is_status_transition_allowed(status))
+        has_status_changed = status != old_status
         if not self.student_assignment.is_status_transition_allowed(status):
             raise ValidationError({"status": _("Please select a valid status")})
+        score = cleaned_data.get('score', None)
+        score_old = cleaned_data.get('score_old', None)
+        has_score_changed = score != score_old
+        if not (is_comment_added or has_status_changed or has_score_changed):
+            raise ValidationError(_("Form is empty"), code='empty')
         return cleaned_data
 
 

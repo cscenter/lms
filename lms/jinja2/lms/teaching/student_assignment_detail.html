@@ -133,8 +133,8 @@
             <form action="" method="post" enctype="multipart/form-data">
               {% csrf_token %}
               {% if comment_form.non_field_errors() %}
-                <div class="alert alert-danger">
-                  {{ comment_form.non_field_errors() }}
+                <div class="text-danger">
+                  {% for error in comment_form.non_field_errors()  %}{{ error }}<br>{% endfor %}
                 </div>
               {% endif %}
               <div class="row">
@@ -179,7 +179,7 @@
         {% endif %}
 
         <h5 class="assignment">{% trans %}Grade{% endtrans %}</h5>
-          <span class="nowrap badge assignment-status">{{ a_s.state_display }}</span>
+        <span class="nowrap badge assignment-status">{{ a_s.get_status_display() }} ({{ a_s.get_score_verbose_display() }})</span>
 
         {% if show_score_audit_log %}
           <div class="mt-5">

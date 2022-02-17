@@ -451,11 +451,9 @@ def get_assignment_update_history_message(comment: AssignmentComment) -> str:
     is_score_changed = score_old != score_new
     is_status_changed = old_status != new_status
     if is_score_changed and is_status_changed:
-        text = (f"Оценка и статус задания были изменены.<br>"
-                f"Новая оценка: {score_new}.<br>"
-                f"Новый статус: {status_label}.")
+        text = (f"Выставлена новая оценка: <code>{score_new}</code> и новый статус: {status_label}.")
     elif is_score_changed:
-        text = f"Оценка была изменена.<br>Новая оценка: {score_new}."
+        text = f"Выставлена новая оценка: <code>{score_new}</code>"
     elif is_status_changed:
-        text = f"Статус был изменён.<br>Новый статус: {status_label}."
+        text = f"Выставлен новый статус: {status_label}"
     return text
