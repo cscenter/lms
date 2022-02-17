@@ -145,6 +145,7 @@ class AssignmentReviewForm(forms.Form):
         if not (text or file) and (score, status) == (old_score, old_status):
             raise ValidationError(
                 _("Nothing to send or update"), code='nothing_to_update')
+        print(status, self.student_assignment.is_status_transition_allowed(status))
         if not self.student_assignment.is_status_transition_allowed(status):
             raise ValidationError({"status": _("Please select a valid status")})
         return cleaned_data

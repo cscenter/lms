@@ -26,6 +26,7 @@ from core.exceptions import Redirect
 from core.http import HttpRequest
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
+from courses.constants import AssignmentStatuses
 from courses.models import Assignment, Course, CourseTeacher
 from courses.permissions import DeleteAssignment, EditAssignment, ViewAssignment
 from courses.selectors import (
@@ -272,13 +273,10 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         context['max_score'] = str(sa.assignment.maximum_score)
         context['comment_form'] = AssignmentReviewForm(student_assignment=sa,
                                                        draft_comment=draft_comment)
-        context['statuses'] = [
-            {
-                "value": status,
-                "label": status.label,
-                "disabled": not sa.is_status_transition_allowed(status)
-            }
-            for status in sa.assignment.statuses
+        context['disabled_statuses'] = [
+            status[0]
+            for status in AssignmentStatuses.choices
+            if not sa.is_status_transition_allowed(status[0])
         ]
         # Some estimates on showing audit log link or not.
         context['show_score_audit_log'] = (sa.score is not None or
