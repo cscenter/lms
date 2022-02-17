@@ -148,7 +148,7 @@
               <div class="row">
                 <div class="col-sm-5">
                   {{ forms.field(comment_form['score'], hide_label=True, prepend_text='Оценка:', append_text='из ' + max_score) }}
-                  {{ forms.field(comment_form['old_score'], hide_label=True) }}
+                  {{ forms.field(comment_form['score_old'], hide_label=True) }}
                 </div>
                   <div class="col-sm-7">
                       {{ forms.select_new(comment_form['status'], hide_label=True, disabled=disabled_statuses, prepend_text="Статус задания:") }}

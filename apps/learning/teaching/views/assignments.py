@@ -295,7 +295,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         form_data = self.request.POST.copy()
         form_data['review-score'] = sa.score
         form_data['review-status'] = sa.status
-        form_data['review-old_score'] = sa.score
+        form_data['review-score_old'] = sa.score
         form_data['review-old_status'] = sa.status
         new_form = AssignmentReviewForm(data=form_data,
                                         student_assignment=sa)
@@ -321,8 +321,8 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                         student_assignment=sa,
                         reviewer=self.request.user,
                         is_draft=is_draft,
-                        old_score=form.cleaned_data['old_score'],
-                        new_score=form.cleaned_data['score'],
+                        score_old=form.cleaned_data['score_old'],
+                        score_new=form.cleaned_data['score'],
                         old_status=form.cleaned_data['old_status'],
                         new_status=form.cleaned_data['status'],
                         message=form.cleaned_data['text'],

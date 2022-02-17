@@ -377,8 +377,8 @@ def test_create_personal_assignment_review():
                                           reviewer=teacher,
                                           is_draft=False,
                                           message="",
-                                          old_score=sa.score,
-                                          new_score=sa.score,
+                                          score_old=sa.score,
+                                          score_new=sa.score,
                                           old_status=sa.status,
                                           new_status=sa.status
                                           )
@@ -390,8 +390,8 @@ def test_create_personal_assignment_review():
                                                 reviewer=teacher,
                                                 is_draft=False,
                                                 message="Some message",
-                                                old_score=sa.score,
-                                                new_score=sa.score,
+                                                score_old=sa.score,
+                                                score_new=sa.score,
                                                 old_status=sa.status,
                                                 new_status=sa.status
                                                 )
@@ -405,8 +405,8 @@ def test_create_personal_assignment_review():
                                                 reviewer=teacher,
                                                 is_draft=False,
                                                 message="",
-                                                old_score=sa.score,
-                                                new_score=Decimal('0'),
+                                                score_old=sa.score,
+                                                score_new=Decimal('0'),
                                                 old_status=sa.status,
                                                 new_status=sa.status
                                                 )
@@ -420,8 +420,8 @@ def test_create_personal_assignment_review():
                                                 reviewer=teacher,
                                                 is_draft=False,
                                                 message="",
-                                                old_score=sa.score,
-                                                new_score=sa.score,
+                                                score_old=sa.score,
+                                                score_new=sa.score,
                                                 old_status=sa.status,
                                                 new_status=AssignmentStatuses.NEED_FIXES
                                                 )
@@ -436,8 +436,8 @@ def test_create_personal_assignment_review():
                                                 is_draft=False,
                                                 message="",
                                                 attachment=SimpleUploadedFile("1", b"hello world"),
-                                                old_score=sa.score,
-                                                new_score=sa.score,
+                                                score_old=sa.score,
+                                                score_new=sa.score,
                                                 old_status=sa.status,
                                                 new_status=sa.status
                                                 )
@@ -457,8 +457,8 @@ def test_create_personal_assignment_review():
                                               reviewer=teacher,
                                               is_draft=False,
                                               message="Some text",
-                                              old_score=sa.score,
-                                              new_score=Decimal('6'),
+                                              score_old=sa.score,
+                                              score_new=Decimal('6'),
                                               old_status=sa.status,
                                               new_status=AssignmentStatuses.COMPLETED
                                               )
@@ -479,8 +479,8 @@ def test_create_personal_assignment_review():
                                               reviewer=teacher,
                                               is_draft=False,
                                               message="Some text",
-                                              old_score=sa.score,
-                                              new_score=Decimal('5'),
+                                              score_old=sa.score,
+                                              score_new=Decimal('5'),
                                               old_status=sa.status,
                                               new_status=AssignmentStatuses.NOT_SUBMITTED
                                               )
@@ -499,15 +499,15 @@ def test_create_personal_assignment_review_concurrent_update():
     course = CourseFactory(teachers=[teacher])
     sa = StudentAssignmentFactory(assignment__course=course,
                                   assignment__maximum_score=5)
-    # Irrelevant old_score
+    # Irrelevant score_old
     with pytest.raises(ValidationError) as exc_info:
         with transaction.atomic():
             create_personal_assignment_review(student_assignment=sa,
                                               reviewer=teacher,
                                               is_draft=False,
-                                              message="Irrelevant old_score != new_score",
-                                              old_score=Decimal('3'),
-                                              new_score=Decimal('5'),
+                                              message="Irrelevant score_old != score_new",
+                                              score_old=Decimal('3'),
+                                              score_new=Decimal('5'),
                                               old_status=sa.status,
                                               new_status=AssignmentStatuses.NEED_FIXES
                                               )
@@ -523,9 +523,9 @@ def test_create_personal_assignment_review_concurrent_update():
             create_personal_assignment_review(student_assignment=sa,
                                               reviewer=teacher,
                                               is_draft=False,
-                                              message="Irrelevant old_score == new_score",
-                                              old_score=Decimal('0'),
-                                              new_score=Decimal('0'),
+                                              message="Irrelevant score_old == score_new",
+                                              score_old=Decimal('0'),
+                                              score_new=Decimal('0'),
                                               old_status=sa.status,
                                               new_status=AssignmentStatuses.NEED_FIXES
                                               )
@@ -543,8 +543,8 @@ def test_create_personal_assignment_review_concurrent_update():
                                               reviewer=teacher,
                                               is_draft=False,
                                               message="Irrelevant old_status != new_status",
-                                              old_score=sa.score,
-                                              new_score=Decimal('5'),
+                                              score_old=sa.score,
+                                              score_new=Decimal('5'),
                                               old_status=AssignmentStatuses.COMPLETED,
                                               new_status=AssignmentStatuses.NEED_FIXES
                                               )
@@ -562,8 +562,8 @@ def test_create_personal_assignment_review_concurrent_update():
                                               reviewer=teacher,
                                               is_draft=False,
                                               message="Irrelevant old_status == new_status",
-                                              old_score=sa.score,
-                                              new_score=Decimal('5'),
+                                              score_old=sa.score,
+                                              score_new=Decimal('5'),
                                               old_status=AssignmentStatuses.NEED_FIXES,
                                               new_status=AssignmentStatuses.NEED_FIXES
                                               )
@@ -585,15 +585,15 @@ def test_create_assignment_comment_meta():
         is_draft=False,
         reviewer=teacher,
         message="",
-        old_score=sa.score,
+        score_old=sa.score,
         old_status=sa.status,
-        new_score=Decimal('1'),
+        score_new=Decimal('1'),
         new_status=AssignmentStatuses.ON_CHECKING
     )
     assert comment.meta == {
         "score": Decimal('1'),
         "status": AssignmentStatuses.ON_CHECKING,
-        "old_score": None,
+        "score_old": None,
         "old_status": AssignmentStatuses.NOT_SUBMITTED
     }
 
@@ -603,15 +603,15 @@ def test_create_assignment_comment_meta():
         is_draft=False,
         reviewer=teacher,
         message="",
-        old_score=sa.score,
+        score_old=sa.score,
         old_status=sa.status,
-        new_score=None,
+        score_new=None,
         new_status=AssignmentStatuses.COMPLETED
     )
     assert comment.meta == {
         "score": None,
         "status": AssignmentStatuses.COMPLETED,
-        "old_score": Decimal('1'),
+        "score_old": Decimal('1'),
         "old_status": AssignmentStatuses.ON_CHECKING
     }
 
@@ -621,15 +621,15 @@ def test_create_assignment_comment_meta():
         is_draft=False,
         reviewer=teacher,
         message="",
-        old_score=sa.score,
+        score_old=sa.score,
         old_status=sa.status,
-        new_score=Decimal('2'),
+        score_new=Decimal('2'),
         new_status=sa.status
     )
     assert comment.meta == {
         "score": Decimal('2'),
         "status": AssignmentStatuses.COMPLETED,
-        "old_score": None,
+        "score_old": None,
         "old_status": AssignmentStatuses.COMPLETED
     }
 
@@ -639,14 +639,14 @@ def test_create_assignment_comment_meta():
         is_draft=False,
         reviewer=teacher,
         message="",
-        old_score=sa.score,
+        score_old=sa.score,
         old_status=AssignmentStatuses.COMPLETED,
-        new_score=sa.score,
+        score_new=sa.score,
         new_status=AssignmentStatuses.NEED_FIXES
     )
     assert comment.meta == {
         "score": Decimal('2'),
         "status": AssignmentStatuses.NEED_FIXES,
-        "old_score": Decimal('2'),
+        "score_old": Decimal('2'),
         "old_status": AssignmentStatuses.COMPLETED
     }

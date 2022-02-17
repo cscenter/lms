@@ -97,7 +97,7 @@ class AssignmentReviewForm(forms.Form):
         widget=JesnyFileInput)
 
     score = ScoreField(required=False, label="")
-    old_score = ScoreField(required=False, widget=forms.HiddenInput())
+    score_old = ScoreField(required=False, widget=forms.HiddenInput())
 
     status = forms.ChoiceField(
         label="",
@@ -129,7 +129,7 @@ class AssignmentReviewForm(forms.Form):
             'text': text,
             'score': score,
             'status': status,
-            'old_score': student_assignment.score,
+            'score_old': student_assignment.score,
             'old_status': student_assignment.status
         }
         maximum_score = student_assignment.assignment.maximum_score
@@ -142,9 +142,9 @@ class AssignmentReviewForm(forms.Form):
         file = cleaned_data.get("attached_file")
         score = cleaned_data.get('score', None)
         status = cleaned_data.get('status')
-        old_score = cleaned_data.get('old_score')
+        score_old = cleaned_data.get('score_old')
         old_status = cleaned_data.get('old_status')
-        if not (text or file) and (score, status) == (old_score, old_status):
+        if not (text or file) and (score, status) == (score_old, old_status):
             raise ValidationError(
                 _("Nothing to send or update"), code='nothing_to_update')
         print(status, self.student_assignment.is_status_transition_allowed(status))

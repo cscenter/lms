@@ -138,7 +138,7 @@ def test_view_student_assignment_detail_update_score(client):
     sa.assignment.save()
     assert sa.score is None
     form = {"review-score": 0,
-            "review-old_score": "",
+            "review-score_old": "",
             "review-status": sa.status,
             "review-old_status": sa.status}
     client.login(teacher)
@@ -147,7 +147,7 @@ def test_view_student_assignment_detail_update_score(client):
     sa.refresh_from_db()
     assert sa.score == 0
     form = {"review-score": "",
-            "review-old_score": 0,
+            "review-score_old": 0,
             "review-status": sa.status,
             "review-old_status": sa.status}
     response = client.post(sa.get_teacher_url(), form, follow=True)
@@ -155,14 +155,14 @@ def test_view_student_assignment_detail_update_score(client):
     sa.refresh_from_db()
     assert sa.score is None
     form = {"review-score": "1.22",
-            "review-old_score": "",
+            "review-score_old": "",
             "review-status": sa.status,
             "review-old_status": sa.status}
     client.post(sa.get_teacher_url(), form, follow=True)
     sa.refresh_from_db()
     assert sa.score == Decimal("1.22")
     form = {"review-score": "2,34",
-            "review-old_score": 1.22,
+            "review-score_old": 1.22,
             "review-status": sa.status,
             "review-old_status": sa.status}
     client.post(sa.get_teacher_url(), form, follow=True)
@@ -423,7 +423,7 @@ def test_view_student_assignment_detail_draft_comment_notifications(client, asse
     AssignmentNotification.objects.all().delete()
     form_data = {
         "review-score": "",
-        "review-old_score": "",
+        "review-score_old": "",
         "review-status": sa.status,
         "review-old_status": sa.status,
         'review-text': "Test comment with file",
@@ -441,7 +441,7 @@ def test_view_student_assignment_detail_draft_comment_notifications(client, asse
     AssignmentNotification.objects.all().delete()
     form_data = {
         "review-score": "",
-        "review-old_score": "",
+        "review-score_old": "",
         "review-status": sa.status,
         "review-old_status": sa.status,
         'review-text': "Test comment 2 with file",
@@ -468,7 +468,7 @@ def test_view_student_assignment_detail_draft_comment_notifications(client, asse
     assert AssignmentComment.published.count() == 1
     form_data = {
         "review-score": "",
-        "review-old_score": "",
+        "review-score_old": "",
         "review-status": sa.status,
         "review-old_status": sa.status,
         'review-text': "Updated test comment 2 with file",
@@ -501,7 +501,7 @@ def test_view_student_assignment_detail_draft_review_remembers_score_and_status(
     # providing only score is ok
     form_data = {
         "review-score": 1,
-        "review-old_score": "",
+        "review-score_old": "",
         "review-status": sa.status,
         "review-old_status": sa.status,
         'review-text': "",
@@ -518,7 +518,7 @@ def test_view_student_assignment_detail_draft_review_remembers_score_and_status(
     # providing only status is ok
     form_data = {
         "review-score": "",
-        "review-old_score": "",
+        "review-score_old": "",
         "review-status": AssignmentStatuses.ON_CHECKING,
         "review-old_status": sa.status,
         'review-text': "",
@@ -534,7 +534,7 @@ def test_view_student_assignment_detail_draft_review_remembers_score_and_status(
 
     form_data = {
         "review-score": 2,
-        "review-old_score": "",
+        "review-score_old": "",
         "review-status": AssignmentStatuses.NEED_FIXES,
         "review-old_status": sa.status,
         'review-text': "some text",
@@ -567,7 +567,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     # empty form
     form_data = {
         "review-score": "",
-        "review-old_score": "",
+        "review-score_old": "",
         "review-status": sa.status,
         "review-old_status": sa.status,
         'review-text': "",
@@ -583,7 +583,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     # test that review was published and score, status has been changed
     form_data = {
         "review-score": 1,
-        "review-old_score": "",
+        "review-score_old": "",
         "review-status": AssignmentStatuses.ON_CHECKING,
         "review-old_status": sa.status,
         'review-text': "review-text",
@@ -600,12 +600,12 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     assert smart_bytes(form_data['review-text']) in response.content
     assert smart_bytes("some_attachment") in response.content
 
-    # test wrong old_score
+    # test wrong score_old
     # it also covers concurrent update
     sa.refresh_from_db()
     form_data = {
         "review-score": 1,
-        "review-old_score": "",
+        "review-score_old": "",
         "review-status": AssignmentStatuses.COMPLETED,
         "review-old_status": sa.status,
         'review-text': "review-text",
@@ -623,7 +623,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     # it also covers concurrent update
     form_data = {
         "review-score": 2,
-        "review-old_score": 1,
+        "review-score_old": 1,
         "review-status": AssignmentStatuses.NEED_FIXES,
         "review-old_status": AssignmentStatuses.COMPLETED,
         'review-text': "review-text",
@@ -644,7 +644,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     # Provided forbidden status
     form_data = {
         "review-score": 3,
-        "review-old_score": 1,
+        "review-score_old": 1,
         # AssignmentStatuses.NOT_SUBMITTED is not allowed
         "review-status": AssignmentStatuses.NOT_SUBMITTED,
         "review-old_status": AssignmentStatuses.ON_CHECKING,
