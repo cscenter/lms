@@ -272,34 +272,13 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         context['assignee_teachers'] = get_course_teachers(course=course)
         context['max_score'] = str(sa.assignment.maximum_score)
         context['review_form'] = AssignmentReviewForm(student_assignment=sa,
-                                                       draft_comment=get_draft_comment(user, sa))
+                                                      draft_comment=get_draft_comment(user, sa))
         # Some estimates on showing audit log link or not.
         context['show_score_audit_log'] = (sa.score is not None or
                                            sa.score_changed - sa.created > datetime.timedelta(seconds=2))
         context['can_edit_score'] = self.request.user.has_perm(EditStudentAssignment.name, sa)
         context['get_score_status_changing_message'] = get_assignment_update_history_message
         return context
-
-    def form_invalid(self, form):
-        msg = "<br>".join("<br>".join(errors)
-                          for errors in form.errors.values())
-        messages.error(self.request, "Данные не сохранены!<br>" + msg, extra_tags="timeout")
-        context = self.get_context_data()
-        self.student_assignment.refresh_from_db()
-        sa = self.student_assignment
-        form_data = self.request.POST.copy()
-        form_data['review-score'] = sa.score
-        form_data['review-status'] = sa.status
-        form_data['review-score_old'] = sa.score
-        form_data['review-old_status'] = sa.status
-        new_form = AssignmentReviewForm(data=form_data,
-                                        student_assignment=sa)
-        for field, errors in form.errors.items():
-            for error in errors:
-                if error not in new_form.errors.get(field, []):
-                    new_form.add_error(field, error)
-        context['review_form'] = new_form
-        return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):
         sa = self.student_assignment
@@ -318,8 +297,8 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                         is_draft=is_draft,
                         score_old=form.cleaned_data['score_old'],
                         score_new=form.cleaned_data['score'],
-                        old_status=form.cleaned_data['old_status'],
-                        new_status=form.cleaned_data['status'],
+                        status_old=form.cleaned_data['status_old'],
+                        status_new=form.cleaned_data['status'],
                         message=form.cleaned_data['text'],
                         attachment=form.cleaned_data['attached_file'],
                     )
@@ -330,6 +309,23 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                 message = str(e.args[0] if e.args else e)
                 messages.error(self.request, message=message, extra_tags='timeout')
         return self.form_invalid(form)
+
+    def form_invalid(self, form: AssignmentReviewForm):
+        msg = "<br>".join("<br>".join(errors) for errors in form.errors.values())
+        messages.error(self.request, "Данные не сохранены!<br>" + msg, extra_tags="timeout")
+        context = self.get_context_data()
+        # In case of a failed concurrent update renew form data with an actual
+        # DB values.
+        self.student_assignment.refresh_from_db()
+        form_data = form.data.copy()
+        sa = self.student_assignment
+        form_data['review-score'] = sa.score
+        form_data['review-score_old'] = sa.score
+        form_data['review-status'] = sa.status
+        form_data['review-status_old'] = sa.status
+        form.data = form_data
+        context['review_form'] = form
+        return self.render_to_response(context)
 
 
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,

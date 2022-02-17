@@ -231,25 +231,25 @@ def test_update_personal_assignment_status():
     sa = StudentAssignmentFactory(assignment__submission_type=AssignmentFormat.NO_SUBMIT)
 
     assert sa.status == AssignmentStatuses.NOT_SUBMITTED
-    updated, _ = update_personal_assignment_status(student_assignment=sa,
-                                                   status_old=AssignmentStatuses.NOT_SUBMITTED,
-                                                   status_new=AssignmentStatuses.NOT_SUBMITTED)
+    updated = update_personal_assignment_status(student_assignment=sa,
+                                                status_old=AssignmentStatuses.NOT_SUBMITTED,
+                                                status_new=AssignmentStatuses.NOT_SUBMITTED)
     sa.refresh_from_db()
     assert updated
 
     # testing case when status_old is wrong
-    updated, _ = update_personal_assignment_status(student_assignment=sa,
-                                                   status_old=AssignmentStatuses.ON_CHECKING,
-                                                   status_new=AssignmentStatuses.NOT_SUBMITTED)
+    updated = update_personal_assignment_status(student_assignment=sa,
+                                                status_old=AssignmentStatuses.ON_CHECKING,
+                                                status_new=AssignmentStatuses.NOT_SUBMITTED)
     assert not updated
 
     # fake status change is not successful if db value was changed
     sa.status = AssignmentStatuses.ON_CHECKING
     sa.save()
     # fake: status_old == status_new, so db update is not required
-    updated, _ = update_personal_assignment_status(student_assignment=sa,
-                                                   status_old=AssignmentStatuses.NOT_SUBMITTED,
-                                                   status_new=AssignmentStatuses.NOT_SUBMITTED)
+    updated = update_personal_assignment_status(student_assignment=sa,
+                                                status_old=AssignmentStatuses.NOT_SUBMITTED,
+                                                status_new=AssignmentStatuses.NOT_SUBMITTED)
     # it's not successful because because db_status != status_old
     assert not updated
     assert sa.status == AssignmentStatuses.ON_CHECKING
@@ -275,9 +275,9 @@ def test_update_personal_assignment_status():
                                           status_old=AssignmentStatuses.ON_CHECKING,
                                           status_new=AssignmentStatuses.NEED_FIXES)
 
-    updated, _ = update_personal_assignment_status(student_assignment=sa,
-                                                   status_old=AssignmentStatuses.ON_CHECKING,
-                                                   status_new=AssignmentStatuses.COMPLETED)
+    updated = update_personal_assignment_status(student_assignment=sa,
+                                                status_old=AssignmentStatuses.ON_CHECKING,
+                                                status_new=AssignmentStatuses.COMPLETED)
     sa.refresh_from_db()
     assert updated
     assert sa.status == AssignmentStatuses.COMPLETED
@@ -287,16 +287,16 @@ def test_update_personal_assignment_status():
                              type=AssignmentSubmissionTypes.SOLUTION)
     sa.refresh_from_db()
     # NEED_FIXES allowed for ONLINE assignment format
-    updated, _ = update_personal_assignment_status(student_assignment=sa,
-                                                   status_old=AssignmentStatuses.ON_CHECKING,
-                                                   status_new=AssignmentStatuses.NEED_FIXES)
+    updated = update_personal_assignment_status(student_assignment=sa,
+                                                status_old=AssignmentStatuses.ON_CHECKING,
+                                                status_new=AssignmentStatuses.NEED_FIXES)
     sa.refresh_from_db()
     assert updated
     assert sa.status == AssignmentStatuses.NEED_FIXES
 
 
 @pytest.mark.django_db
-def test_create_empty_assignment_comment():
+def test_create_assignment_comment_empty():
     teacher = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
     sa = StudentAssignmentFactory(assignment__course=course)
@@ -318,30 +318,46 @@ def test_create_empty_assignment_comment():
     assert AssignmentComment.objects.filter(is_published=True).count() == 1
     comment.delete()
 
+
+@pytest.mark.django_db
+def test_create_assignment_comment_with_meta():
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course)
+
     comment = create_assignment_comment(personal_assignment=sa, message="",
-                                        status=AssignmentStatuses.NOT_SUBMITTED,
-                                        is_draft=True, created_by=teacher)
+                                        is_draft=True, created_by=teacher,
+                                        meta={"status": AssignmentStatuses.NOT_SUBMITTED})
     assert AssignmentComment.objects.filter(is_published=False).count() == 1
     assert comment.meta['status'] == AssignmentStatuses.NOT_SUBMITTED
     assert 'score' not in comment.meta
+    with pytest.raises(ValidationError):
+        comment = create_assignment_comment(personal_assignment=sa, message="",
+                                            is_draft=False, created_by=teacher,
+                                            meta={"status": AssignmentStatuses.NOT_SUBMITTED})
     comment = create_assignment_comment(personal_assignment=sa, message="",
-                                        status=AssignmentStatuses.NOT_SUBMITTED,
-                                        is_draft=False, created_by=teacher)
+                                        is_draft=False, created_by=teacher,
+                                        meta={
+                                            "status": AssignmentStatuses.NOT_SUBMITTED,
+                                            "status_old": sa.status
+                                        })
     assert AssignmentComment.objects.filter(is_published=True).count() == 1
     assert AssignmentComment.objects.filter(is_published=False).count() == 0
     comment.delete()
 
     comment = create_assignment_comment(personal_assignment=sa, message="",
-                                        score=None, is_draft=True,
-                                        created_by=teacher)
+                                        is_draft=True,
+                                        created_by=teacher,
+                                        meta={"score": None})
     assert AssignmentComment.objects.filter(is_published=False).count() == 1
     assert comment.meta['score'] == None
     assert 'status' not in comment.meta
     comment.delete()
 
     comment = create_assignment_comment(personal_assignment=sa, message="",
-                                        score=Decimal('0'), is_draft=True,
-                                        created_by=teacher)
+                                        is_draft=True,
+                                        created_by=teacher,
+                                        meta={"score": Decimal('0')})
     assert AssignmentComment.objects.filter(is_published=False).count() == 1
     assert comment.meta['score'] == 0
     assert 'status' not in comment.meta
@@ -379,10 +395,10 @@ def test_create_personal_assignment_review():
                                           message="",
                                           score_old=sa.score,
                                           score_new=sa.score,
-                                          old_status=sa.status,
-                                          new_status=sa.status
+                                          status_old=sa.status,
+                                          status_new=sa.status
                                           )
-    assert exc_info.value.code == 'nothing_to_update'
+    assert exc_info.value.code == 'empty'
     assert AssignmentComment.objects.count() == 0
 
     # Only the message has been provided
@@ -392,8 +408,8 @@ def test_create_personal_assignment_review():
                                                 message="Some message",
                                                 score_old=sa.score,
                                                 score_new=sa.score,
-                                                old_status=sa.status,
-                                                new_status=sa.status
+                                                status_old=sa.status,
+                                                status_new=sa.status
                                                 )
     assert comment.is_published
     assert comment.text == "Some message"
@@ -407,8 +423,8 @@ def test_create_personal_assignment_review():
                                                 message="",
                                                 score_old=sa.score,
                                                 score_new=Decimal('0'),
-                                                old_status=sa.status,
-                                                new_status=sa.status
+                                                status_old=sa.status,
+                                                status_new=sa.status
                                                 )
     assert comment.is_published
     assert comment.text == ""
@@ -422,8 +438,8 @@ def test_create_personal_assignment_review():
                                                 message="",
                                                 score_old=sa.score,
                                                 score_new=sa.score,
-                                                old_status=sa.status,
-                                                new_status=AssignmentStatuses.NEED_FIXES
+                                                status_old=sa.status,
+                                                status_new=AssignmentStatuses.NEED_FIXES
                                                 )
     assert comment.is_published
     assert comment.text == ""
@@ -438,8 +454,8 @@ def test_create_personal_assignment_review():
                                                 attachment=SimpleUploadedFile("1", b"hello world"),
                                                 score_old=sa.score,
                                                 score_new=sa.score,
-                                                old_status=sa.status,
-                                                new_status=sa.status
+                                                status_old=sa.status,
+                                                status_new=sa.status
                                                 )
     assert comment.is_published
     assert comment.text == ""
@@ -459,8 +475,8 @@ def test_create_personal_assignment_review():
                                               message="Some text",
                                               score_old=sa.score,
                                               score_new=Decimal('6'),
-                                              old_status=sa.status,
-                                              new_status=AssignmentStatuses.COMPLETED
+                                              status_old=sa.status,
+                                              status_new=AssignmentStatuses.COMPLETED
                                               )
     sa.refresh_from_db()  # atomic doesn't restore state
     assert exc_info.value.code == 'score_overflow'
@@ -481,8 +497,8 @@ def test_create_personal_assignment_review():
                                               message="Some text",
                                               score_old=sa.score,
                                               score_new=Decimal('5'),
-                                              old_status=sa.status,
-                                              new_status=AssignmentStatuses.NOT_SUBMITTED
+                                              status_old=sa.status,
+                                              status_new=AssignmentStatuses.NOT_SUBMITTED
                                               )
     sa.refresh_from_db()
     assert exc_info.value.code == 'status_not_allowed'
@@ -508,10 +524,10 @@ def test_create_personal_assignment_review_concurrent_update():
                                               message="Irrelevant score_old != score_new",
                                               score_old=Decimal('3'),
                                               score_new=Decimal('5'),
-                                              old_status=sa.status,
-                                              new_status=AssignmentStatuses.NEED_FIXES
+                                              status_old=sa.status,
+                                              status_new=AssignmentStatuses.NEED_FIXES
                                               )
-    assert exc_info.value.code == 'overwriting_score'
+    assert exc_info.value.code == 'concurrent'
     sa.refresh_from_db()
     assert sa.score is None
     assert sa.status == AssignmentStatuses.NOT_SUBMITTED
@@ -526,29 +542,29 @@ def test_create_personal_assignment_review_concurrent_update():
                                               message="Irrelevant score_old == score_new",
                                               score_old=Decimal('0'),
                                               score_new=Decimal('0'),
-                                              old_status=sa.status,
-                                              new_status=AssignmentStatuses.NEED_FIXES
+                                              status_old=sa.status,
+                                              status_new=AssignmentStatuses.NEED_FIXES
                                               )
-    assert exc_info.value.code == 'overwriting_score'
+    assert exc_info.value.code == 'concurrent'
     sa.refresh_from_db()
     assert sa.score is None
     assert sa.status == AssignmentStatuses.NOT_SUBMITTED
     assert AssignmentComment.objects.count() == 0
 
-    # Irrelevant old_status
+    # Irrelevant status_old
     sa.refresh_from_db()
     with pytest.raises(ValidationError) as exc_info:
         with transaction.atomic():
             create_personal_assignment_review(student_assignment=sa,
                                               reviewer=teacher,
                                               is_draft=False,
-                                              message="Irrelevant old_status != new_status",
+                                              message="Irrelevant status_old != new_status",
                                               score_old=sa.score,
                                               score_new=Decimal('5'),
-                                              old_status=AssignmentStatuses.COMPLETED,
-                                              new_status=AssignmentStatuses.NEED_FIXES
+                                              status_old=AssignmentStatuses.COMPLETED,
+                                              status_new=AssignmentStatuses.NEED_FIXES
                                               )
-    assert exc_info.value.code == 'overwriting_status'
+    assert exc_info.value.code == 'concurrent'
     sa.refresh_from_db()
     assert sa.score is None
     assert sa.status == AssignmentStatuses.NOT_SUBMITTED
@@ -561,13 +577,13 @@ def test_create_personal_assignment_review_concurrent_update():
             create_personal_assignment_review(student_assignment=sa,
                                               reviewer=teacher,
                                               is_draft=False,
-                                              message="Irrelevant old_status == new_status",
+                                              message="Irrelevant status_old == new_status",
                                               score_old=sa.score,
                                               score_new=Decimal('5'),
-                                              old_status=AssignmentStatuses.NEED_FIXES,
-                                              new_status=AssignmentStatuses.NEED_FIXES
+                                              status_old=AssignmentStatuses.NEED_FIXES,
+                                              status_new=AssignmentStatuses.NEED_FIXES
                                               )
-    assert exc_info.value.code == 'overwriting_status'
+    assert exc_info.value.code == 'concurrent'
     sa.refresh_from_db()
     assert sa.score is None
     assert sa.status == AssignmentStatuses.NOT_SUBMITTED
@@ -586,15 +602,15 @@ def test_create_assignment_comment_meta():
         reviewer=teacher,
         message="",
         score_old=sa.score,
-        old_status=sa.status,
+        status_old=sa.status,
         score_new=Decimal('1'),
-        new_status=AssignmentStatuses.ON_CHECKING
+        status_new=AssignmentStatuses.ON_CHECKING
     )
     assert comment.meta == {
         "score": Decimal('1'),
         "status": AssignmentStatuses.ON_CHECKING,
         "score_old": None,
-        "old_status": AssignmentStatuses.NOT_SUBMITTED
+        "status_old": AssignmentStatuses.NOT_SUBMITTED
     }
 
     sa.refresh_from_db()
@@ -604,15 +620,15 @@ def test_create_assignment_comment_meta():
         reviewer=teacher,
         message="",
         score_old=sa.score,
-        old_status=sa.status,
+        status_old=sa.status,
         score_new=None,
-        new_status=AssignmentStatuses.COMPLETED
+        status_new=AssignmentStatuses.COMPLETED
     )
     assert comment.meta == {
         "score": None,
         "status": AssignmentStatuses.COMPLETED,
         "score_old": Decimal('1'),
-        "old_status": AssignmentStatuses.ON_CHECKING
+        "status_old": AssignmentStatuses.ON_CHECKING
     }
 
     sa.refresh_from_db()
@@ -622,15 +638,15 @@ def test_create_assignment_comment_meta():
         reviewer=teacher,
         message="",
         score_old=sa.score,
-        old_status=sa.status,
+        status_old=sa.status,
         score_new=Decimal('2'),
-        new_status=sa.status
+        status_new=sa.status
     )
     assert comment.meta == {
         "score": Decimal('2'),
         "status": AssignmentStatuses.COMPLETED,
         "score_old": None,
-        "old_status": AssignmentStatuses.COMPLETED
+        "status_old": AssignmentStatuses.COMPLETED
     }
 
     sa.refresh_from_db()
@@ -640,13 +656,13 @@ def test_create_assignment_comment_meta():
         reviewer=teacher,
         message="",
         score_old=sa.score,
-        old_status=AssignmentStatuses.COMPLETED,
+        status_old=AssignmentStatuses.COMPLETED,
         score_new=sa.score,
-        new_status=AssignmentStatuses.NEED_FIXES
+        status_new=AssignmentStatuses.NEED_FIXES
     )
     assert comment.meta == {
         "score": Decimal('2'),
         "status": AssignmentStatuses.NEED_FIXES,
         "score_old": Decimal('2'),
-        "old_status": AssignmentStatuses.COMPLETED
+        "status_old": AssignmentStatuses.COMPLETED
     }

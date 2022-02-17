@@ -80,7 +80,7 @@ class AssignmentReviewForm(forms.Form):
         widget=DisableOptionSelectWidget,
         choices=AssignmentStatuses.choices
     )
-    old_status = forms.ChoiceField(
+    status_old = forms.ChoiceField(
         widget=forms.HiddenInput(),
         required=True,
         choices=AssignmentStatuses.choices,
@@ -105,7 +105,7 @@ class AssignmentReviewForm(forms.Form):
             'score': score,
             'score_old': student_assignment.score,
             'status': status,
-            'old_status': student_assignment.status
+            'status_old': student_assignment.status
         }
         maximum_score = student_assignment.assignment.maximum_score
         self.fields['score'].validators.append(MaxValueValidator(limit_value=maximum_score))
@@ -119,15 +119,15 @@ class AssignmentReviewForm(forms.Form):
         is_comment_added = cleaned_data.get("text") or cleaned_data.get("attached_file")
         # TODO: what if not all data are valid
         status = cleaned_data.get('status')
-        old_status = cleaned_data.get('old_status')
-        has_status_changed = status != old_status
+        status_old = cleaned_data.get('status_old')
+        has_status_changed = status != status_old
         if not self.student_assignment.is_status_transition_allowed(status):
             raise ValidationError({"status": _("Please select a valid status")})
         score = cleaned_data.get('score', None)
         score_old = cleaned_data.get('score_old', None)
         has_score_changed = score != score_old
         if not (is_comment_added or has_status_changed or has_score_changed):
-            raise ValidationError(_("Form is empty"), code='empty')
+            raise ValidationError(_("Form is empty."), code='empty')
         return cleaned_data
 
 

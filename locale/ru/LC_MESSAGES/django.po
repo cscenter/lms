@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-16 12:40+0000\n"
-"PO-Revision-Date: 2022-02-16 16:09+0000\n"
-"Last-Translator:   <admin@admin.admin>\n"
+"POT-Creation-Date: 2022-02-17 17:04+0000\n"
+"PO-Revision-Date: 2022-02-17 17:05+0000\n"
+"Last-Translator: Сергей Жеревчук <pacabest@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -676,13 +676,13 @@ msgstr ""
 #: lms/jinja2/lms/study/assignment_list.html:86
 #: lms/jinja2/lms/study/student_assignment_detail.html:136
 #: lms/jinja2/lms/teaching/assignment_detail.html:32
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:231
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:233
 msgid "Deadline"
 msgstr "Срок сдачи"
 
 #: apps/courses/forms.py:314 apps/courses/models.py:1064
 #: lms/jinja2/lms/study/student_assignment_detail.html:142
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:239
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:241
 msgid "Passing score"
 msgstr "Проходной балл"
 
@@ -693,7 +693,7 @@ msgstr "Максимальный балл"
 #: apps/courses/forms.py:320 apps/courses/models.py:1072
 #: lms/jinja2/lms/study/student_assignment_detail.html:145
 #: lms/jinja2/lms/teaching/assignment_detail.html:39
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:244
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:246
 msgid "Assignment Weight"
 msgstr "Вес задания"
 
@@ -713,7 +713,7 @@ msgstr ""
 "Сколько, по вашему мнению, студенту потребуется времени, чтобы выполнить "
 "задание?"
 
-#: apps/courses/forms.py:333 apps/learning/forms.py:169
+#: apps/courses/forms.py:333 apps/learning/forms.py:150
 msgid "hours:minutes"
 msgstr "часы:минуты"
 
@@ -1116,7 +1116,7 @@ msgstr "Приложения к занятию"
 #: lms/jinja2/lms/study/assignment_list.html:90
 #: lms/jinja2/lms/study/student_assignment_detail.html:139
 #: lms/jinja2/lms/teaching/assignment_detail.html:36
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:236
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:238
 msgid "Assignment Format"
 msgstr "Формат задания"
 
@@ -1240,7 +1240,7 @@ msgstr "Вопросы"
 #: apps/users/models.py:948 apps/users/models.py:980
 #: lms/jinja2/lms/study/student_assignment_detail.html:133
 #: lms/jinja2/lms/teaching/assignment_detail.html:72
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:190
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:192
 msgid "Student"
 msgstr "Студент"
 
@@ -1324,8 +1324,9 @@ msgstr "Убедитесь, что указаны следующие настр�
 msgid "Assignment Submission"
 msgstr "Посылка к заданию"
 
-#: apps/grading/models.py:93 apps/users/models.py:216 apps/users/models.py:743
-#: apps/users/models.py:903 lms/jinja2/lms/staff/student_search.html:69
+#: apps/grading/models.py:93 apps/learning/forms.py:78
+#: apps/users/models.py:216 apps/users/models.py:743 apps/users/models.py:903
+#: lms/jinja2/lms/staff/student_search.html:69
 msgid "Status"
 msgstr "Статус"
 
@@ -1434,79 +1435,68 @@ msgstr "Невалидный преподаватель курса %s"
 msgid "Learning"
 msgstr "Обучение"
 
-#: apps/learning/forms.py:56
-msgid "Update Draft"
-msgstr "Обновить черновик"
+#: apps/learning/forms.py:63 apps/learning/models.py:782
+#: apps/users/models.py:791
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:137
+msgid "Comment"
+msgstr "Комментарий"
 
-#: apps/learning/forms.py:58
-msgid "Save Draft"
-msgstr "Сохранить черновик"
-
-#: apps/learning/forms.py:63
-msgid "Send Comment"
-msgstr "Отправить комментарий"
-
-#: apps/learning/forms.py:78 apps/learning/forms.py:208
-#: apps/learning/services/personal_assignment_service.py:152
-msgid "Either text or file should be non-empty"
-msgstr "Требуется текст или приложенный файл"
-
-#: apps/learning/forms.py:147
-#: apps/learning/services/personal_assignment_service.py:266
-msgid "Nothing to send or update"
-msgstr "Пожалуйста, заполните корректно поля формы."
-
-#: apps/learning/forms.py:149
+#: apps/learning/forms.py:125
 msgid "Please select a valid status"
 msgstr "Пожалуйста, выберите разрешенный статус."
 
-#: apps/learning/forms.py:165
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:195
+#: apps/learning/forms.py:130
+msgid "Form is empty."
+msgstr "Недостаточно данных."
+
+#: apps/learning/forms.py:146
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:197
 msgid "Time Spent on Assignment"
 msgstr "Время, затраченное на выполнение задания"
 
-#: apps/learning/forms.py:170
+#: apps/learning/forms.py:151
 msgid ""
 "Requires the full format including minutes. Do not include the time of "
 "previous submissions."
 msgstr ""
 "Укажите полный формат HH:MM. Время предыдущих посылок учитывать не нужно."
 
-#: apps/learning/forms.py:198 apps/learning/forms.py:247
+#: apps/learning/forms.py:179 apps/learning/forms.py:228
 msgid "Send Solution"
 msgstr "Отправить решение"
 
-#: apps/learning/forms.py:215
+#: apps/learning/forms.py:189
+#: apps/learning/services/personal_assignment_service.py:149
+#: apps/learning/study/forms.py:50
+msgid "Either text or file should be non-empty"
+msgstr "Требуется текст или приложенный файл"
+
+#: apps/learning/forms.py:196
 msgid "File name is not provided"
 msgstr "Не указано имя файла"
 
-#: apps/learning/forms.py:219
+#: apps/learning/forms.py:200
 #, python-format
 msgid "`%(value)s` file name has no extension"
 msgstr "У имени файла `%(value)s` не найдено расширение"
 
-#: apps/learning/forms.py:226
+#: apps/learning/forms.py:207
 msgid "Compiler"
 msgstr "Компилятор"
 
-#: apps/learning/forms.py:229
+#: apps/learning/forms.py:210
 msgid "Solution file"
 msgstr "Файл решения"
 
-#: apps/learning/forms.py:256
+#: apps/learning/forms.py:237
 msgid "File should be non-empty"
 msgstr "Должен быть прикреплен файл"
 
-#: apps/learning/forms.py:279
+#: apps/learning/forms.py:260
 msgid "Text should be non-empty"
 msgstr "Требуется текст"
 
-#: apps/learning/forms.py:308
-#, python-brace-format
-msgid "Score can't be larger than maximum one ({0})"
-msgstr "Оценка не может быть больше максимальной ({0})"
-
-#: apps/learning/forms.py:337
+#: apps/learning/forms.py:288
 msgid "Почему вы выбрали этот курс?"
 msgstr ""
 
@@ -1576,7 +1566,7 @@ msgstr "Пустой альбом"
 msgid "Header '{}' not found"
 msgstr "Заголовок '{}' не найден"
 
-#: apps/learning/gradebook/services.py:157
+#: apps/learning/gradebook/services.py:159
 msgid "Invalid score format '{}'"
 msgstr "Неверный формат оценки '{}'"
 
@@ -1685,7 +1675,7 @@ msgid "A student group with the same name already exists in the course"
 msgstr ""
 
 #: apps/learning/models.py:170 apps/learning/models.py:559
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:205
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:207
 msgid "Assignee"
 msgstr "Проверяющий"
 
@@ -1864,7 +1854,7 @@ msgstr "Статус"
 
 #: apps/learning/models.py:543 lms/jinja2/lms/study/course_list.html:100
 #: lms/jinja2/lms/study/student_assignment_detail.html:117
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:180
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:182
 #: lms/jinja2/lms/user_profile/_tab_assignments.html:12
 msgid "Grade"
 msgstr "Оценка"
@@ -1923,11 +1913,6 @@ msgstr "Источник"
 #: apps/learning/models.py:767
 msgid "Assignment score audit log"
 msgstr "Лог изменения оценки"
-
-#: apps/learning/models.py:782 apps/users/models.py:791
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:137
-msgid "Comment"
-msgstr "Комментарий"
 
 #: apps/learning/models.py:783
 msgid "Solution"
@@ -2132,33 +2117,27 @@ msgstr "Приглашенный студент"
 msgid "Graduate"
 msgstr "Выпускник"
 
-#: apps/learning/services/personal_assignment_service.py:155
-msgid "At least one text, file, score, status should be provided"
+#: apps/learning/services/personal_assignment_service.py:156
+#, fuzzy
+#| msgid "At least one text, file, score, status should be provided"
+msgid "At least one of text, file, meta.score, meta.status must be provided"
 msgstr ""
 "Хотя бы одно из полей: текст, файл, оценка, статус должно быть изменено или "
 "заполнено."
 
-#: apps/learning/services/personal_assignment_service.py:281
-#| msgid ""
-#| "Looks like the score has been changed while you're reviewing.Check and "
-#| "rewrite it if needed."
-msgid ""
-"Looks like the score has been changed while you're reviewing. Check and "
-"rewrite it if needed."
-msgstr ""
-"В процессе проведения вами ревью оценка была изменена извне. Пожалуйста, "
-"перепроверьте её и измените, если требуется."
+#: apps/learning/services/personal_assignment_service.py:279
+#, fuzzy
+#| msgid "Nothing to send or update"
+msgid "Nothing to process"
+msgstr "Пожалуйста, заполните корректно поля формы."
 
 #: apps/learning/services/personal_assignment_service.py:288
-#| msgid ""
-#| "Looks like the status has been changed while you're reviewing.Check and "
-#| "rewrite it if needed"
 msgid ""
-"Looks like the status has been changed while you're reviewing. Check and "
-"rewrite it if needed"
+"The score or status has been changed by someone. Review the changes to "
+"resolve the conflict."
 msgstr ""
-"В процессе проведения вами ревью статус был изменен извне. Пожалуйста, "
-"перепроверьте его и измените, если требуется."
+"Оценка или статус уже были кем-то изменены. Посмотрите изменения и "
+"пересохраните форму, если потребуется."
 
 #: apps/learning/services/student_group_service.py:186
 msgid "Please, check your group enrollment key"
@@ -2308,11 +2287,23 @@ msgstr "Ведомость"
 msgid "Gerrit Webhook"
 msgstr "Геррит"
 
-#: apps/learning/study/views.py:181
+#: apps/learning/study/forms.py:30
+msgid "Update Draft"
+msgstr "Обновить черновик"
+
+#: apps/learning/study/forms.py:32
+msgid "Save Draft"
+msgstr "Сохранить черновик"
+
+#: apps/learning/study/forms.py:37
+msgid "Send Comment"
+msgstr "Отправить комментарий"
+
+#: apps/learning/study/views.py:182
 msgid "Comment successfully saved"
 msgstr "Комментарий успешно сохранен."
 
-#: apps/learning/study/views.py:216
+#: apps/learning/study/views.py:217
 msgid "Solution successfully saved"
 msgstr "Решение успешно сохранено."
 
@@ -2347,7 +2338,7 @@ msgstr "Осталось мест"
 msgid "Enroll in"
 msgstr "Записаться"
 
-#: apps/learning/utils.py:59
+#: apps/learning/utils.py:58
 msgid "{} hrs {:02d} min"
 msgstr "{} ч. {:02d} мин."
 
@@ -3494,7 +3485,7 @@ msgstr "Добавить новость"
 msgid "Add class"
 msgstr "Добавить занятие"
 
-#: lms/jinja2/lms/courses/course_detail.html:264
+#: lms/jinja2/lms/courses/course_detail.html:262
 msgid "Start survey"
 msgstr "Оставить отзыв о курсе"
 
@@ -3630,7 +3621,7 @@ msgstr "Архив"
 #: lms/jinja2/lms/study/course_list.html:71
 #: lms/jinja2/lms/study/student_assignment_detail.html:123
 #: lms/jinja2/lms/teaching/course_list.html:12
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:219
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:221
 msgid "Professors"
 msgstr "Преподаватели"
 
@@ -3647,17 +3638,17 @@ msgid "Enroll"
 msgstr "Записаться"
 
 #: lms/jinja2/lms/study/student_assignment_detail.html:121
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:217
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:219
 msgid "Professor"
 msgstr "Преподаватель"
 
 #: lms/jinja2/lms/study/student_assignment_detail.html:143
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:241
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:243
 msgid "out of"
 msgstr "из"
 
 #: lms/jinja2/lms/study/student_assignment_detail.html:148
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:247
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:249
 msgid "Assignment created"
 msgstr "Задание добавлено"
 
@@ -3673,11 +3664,11 @@ msgstr "Среднее время выполнения"
 msgid "Median Execution Time"
 msgstr "Медианное время выполнения"
 
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:176
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:178
 msgid "Next unchecked[assignment]"
 msgstr "Следующее непроверенное"
 
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:198
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:200
 msgid "No value is specified"
 msgstr "Не указано"
 
@@ -3735,6 +3726,24 @@ msgstr "осенний"
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
+
+#~ msgid ""
+#~ "Looks like the score has been changed while you're reviewing. Check and "
+#~ "rewrite it if needed."
+#~ msgstr ""
+#~ "В процессе проведения вами ревью оценка была изменена извне. Пожалуйста, "
+#~ "перепроверьте её и измените, если требуется."
+
+#~ msgid ""
+#~ "Looks like the status has been changed while you're reviewing. Check and "
+#~ "rewrite it if needed"
+#~ msgstr ""
+#~ "В процессе проведения вами ревью статус был изменен извне. Пожалуйста, "
+#~ "перепроверьте его и измените, если требуется."
+
+#, python-brace-format
+#~ msgid "Score can't be larger than maximum one ({0})"
+#~ msgstr "Оценка не может быть больше максимальной ({0})"
 
 #~ msgid "Warning, score was replaced with actual!"
 #~ msgstr "Внимание ваша оценка была заменена на актуальную"
