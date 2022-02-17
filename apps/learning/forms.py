@@ -75,14 +75,14 @@ class AssignmentReviewForm(forms.Form):
     score_old = ScoreField(required=False, widget=forms.HiddenInput())
 
     status = forms.ChoiceField(
-        label="",
-        required=False,
+        label=_("Status"),
+        required=True,
         widget=DisableOptionSelectWidget,
         choices=AssignmentStatuses.choices
     )
     old_status = forms.ChoiceField(
         widget=forms.HiddenInput(),
-        required=False,
+        required=True,
         choices=AssignmentStatuses.choices,
     )
 
@@ -119,8 +119,8 @@ class AssignmentReviewForm(forms.Form):
         text = cleaned_data.get("text")
         file = cleaned_data.get("attached_file")
         score = cleaned_data.get('score', None)
+        score_old = cleaned_data.get('score_old', None)
         status = cleaned_data.get('status')
-        score_old = cleaned_data.get('score_old')
         old_status = cleaned_data.get('old_status')
         if not (text or file) and (score, status) == (score_old, old_status):
             raise ValidationError(
