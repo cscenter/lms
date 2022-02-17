@@ -471,7 +471,7 @@ class Invitation(TimeStampedModel):
         ]
 
     def __str__(self):
-        return self.name
+        return f"[Invitation] id: {self.pk} name: {self.name}"
 
     @transaction.atomic
     def save(self, **kwargs):
