@@ -11,7 +11,7 @@ from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN, TEST_DOMAIN
 from courses.constants import (
-    AssignmentFormat, AssignmentStatuses, MaterialVisibilityTypes, SemesterTypes
+    AssignmentFormat, AssignmentStatus, MaterialVisibilityTypes, SemesterTypes
 )
 from courses.models import Assignment, Course, CourseClass, CourseTeacher
 from courses.selectors import course_teachers_prefetch_queryset
@@ -320,7 +320,7 @@ def test_assignment_attached_file_name():
 @pytest.mark.django_db
 def test_assignment_get_allowed_statuses(submission_type, need_fixes_allowed):
     a = AssignmentFactory(submission_type=submission_type)
-    assert need_fixes_allowed == (AssignmentStatuses.NEED_FIXES in a.statuses)
+    assert need_fixes_allowed == (AssignmentStatus.NEED_FIXES in a.statuses)
 
 
 @pytest.mark.parametrize("teacher_role", CourseTeacher.roles.itervalues())

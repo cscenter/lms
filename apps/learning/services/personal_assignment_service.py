@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from core.timezone import get_now_utc
 from core.typings import assert_never
 from core.utils import Empty, _empty
-from courses.constants import AssigneeMode, AssignmentStatuses
+from courses.constants import AssigneeMode, AssignmentStatus
 from courses.models import Assignment, CourseTeacher
 from courses.selectors import personal_assignments_list
 from grading.services import CheckerSubmissionService
@@ -117,8 +117,8 @@ def create_assignment_solution(*, personal_assignment: StudentAssignment,
                                  attached_file=attachment)
     solution.save()
     update_personal_assignment_status(student_assignment=personal_assignment,
-                                      status_old=AssignmentStatuses(personal_assignment.status),
-                                      status_new=AssignmentStatuses.ON_CHECKING)
+                                      status_old=AssignmentStatus(personal_assignment.status),
+                                      status_new=AssignmentStatus.ON_CHECKING)
     from learning.tasks import update_student_assignment_stats
     update_student_assignment_stats.delay(personal_assignment.pk)
 
@@ -163,7 +163,7 @@ def create_assignment_comment(*, personal_assignment: StudentAssignment,
                 raise ValidationError("Missing old score value in meta", code='malformed')
             if 'status_old' in meta:
                 try:
-                    AssignmentStatuses(meta['status_old'])
+                    AssignmentStatus(meta['status_old'])
                 except ValueError:
                     raise ValidationError("Wrong old status value in meta", code='malformed')
             elif status is not None:
@@ -215,8 +215,8 @@ def get_draft_solution(user: User, student_assignment: StudentAssignment):
 
 
 def update_personal_assignment_status(*, student_assignment: StudentAssignment,
-                                      status_old: AssignmentStatuses,
-                                      status_new: AssignmentStatuses) -> bool:
+                                      status_old: AssignmentStatus,
+                                      status_new: AssignmentStatus) -> bool:
     if not student_assignment.is_status_transition_allowed(status_new):
         raise ValidationError(f"Wrong status {status_new} for student assignment", code="status_not_allowed")
     updated = (StudentAssignment.objects
@@ -259,8 +259,8 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
                                       is_draft: bool,
                                       score_old: Optional[Decimal],
                                       score_new: Optional[Decimal],
-                                      status_old: AssignmentStatuses,
-                                      status_new: AssignmentStatuses,
+                                      status_old: AssignmentStatus,
+                                      status_new: AssignmentStatus,
                                       message: Optional[str] = None,
                                       attachment: Optional[UploadedFile] = None,
                                       ) -> AssignmentComment:
@@ -462,7 +462,7 @@ def get_assignment_update_history_message(comment: AssignmentComment) -> str:
     is_status_changed = status_old != status_new
     if score_new is None:
         score_new = "без оценки"
-    status_label = AssignmentStatuses(status_new).label
+    status_label = AssignmentStatus(status_new).label
     text = ''
     if is_score_changed and is_status_changed:
         text = f"Выставлена новая оценка: <code>{score_new}</code> и новый статус: {status_label}."

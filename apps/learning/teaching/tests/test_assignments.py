@@ -14,7 +14,7 @@ from django.utils.encoding import smart_bytes
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.constants import AssigneeMode, AssignmentFormat, AssignmentStatuses
+from courses.constants import AssigneeMode, AssignmentFormat, AssignmentStatus
 from courses.models import Assignment, CourseTeacher
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseNewsFactory, CourseTeacherFactory,
@@ -519,7 +519,7 @@ def test_view_student_assignment_detail_draft_review_remembers_score_and_status(
     form_data = {
         "review-score": "",
         "review-score_old": "",
-        "review-status": AssignmentStatuses.ON_CHECKING,
+        "review-status": AssignmentStatus.ON_CHECKING,
         "review-status_old": sa.status,
         'review-text': "",
         'review-attached_file': "",
@@ -528,14 +528,14 @@ def test_view_student_assignment_detail_draft_review_remembers_score_and_status(
     response = client.post(url, data=form_data, follow=True)
     assert 'review_form' in response.context_data
     form = response.context_data['review_form']
-    assert form['status'].value() == AssignmentStatuses.ON_CHECKING
+    assert form['status'].value() == AssignmentStatus.ON_CHECKING
     sa.refresh_from_db()
-    assert sa.status == AssignmentStatuses.NOT_SUBMITTED
+    assert sa.status == AssignmentStatus.NOT_SUBMITTED
 
     form_data = {
         "review-score": 2,
         "review-score_old": "",
-        "review-status": AssignmentStatuses.NEED_FIXES,
+        "review-status": AssignmentStatus.NEED_FIXES,
         "review-status_old": sa.status,
         'review-text': "some text",
         'review-attached_file': "",
@@ -549,7 +549,7 @@ def test_view_student_assignment_detail_draft_review_remembers_score_and_status(
     assert form['text'].value() == form_data['review-text']
     sa.refresh_from_db()
     assert sa.score is None
-    assert sa.status == AssignmentStatuses.NOT_SUBMITTED
+    assert sa.status == AssignmentStatus.NOT_SUBMITTED
 
     assert AssignmentComment.objects.filter(is_published=True).count() == 0
     assert AssignmentComment.objects.count() == 1
@@ -584,7 +584,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     form_data = {
         "review-score": 1,
         "review-score_old": "",
-        "review-status": AssignmentStatuses.ON_CHECKING,
+        "review-status": AssignmentStatus.ON_CHECKING,
         "review-status_old": sa.status,
         'review-text': "review-text",
         'review-attached_file': SimpleUploadedFile("some_attachment.txt", b"content"),
@@ -592,7 +592,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     response = client.post(url, data=form_data, follow=True)
     sa.refresh_from_db()
     assert sa.score == 1
-    assert sa.status == AssignmentStatuses.ON_CHECKING
+    assert sa.status == AssignmentStatus.ON_CHECKING
     comments = AssignmentComment.objects.filter(is_published=True)
     assert comments.count() == 1
     comment = comments.get()
@@ -606,7 +606,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     form_data = {
         "review-score": 1,
         "review-score_old": "",
-        "review-status": AssignmentStatuses.COMPLETED,
+        "review-status": AssignmentStatus.COMPLETED,
         "review-status_old": sa.status,
         'review-text': "review-text",
         'review-attached_file': "",
@@ -616,7 +616,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     assert 'review_form' in response.context_data
     sa.refresh_from_db()
     assert sa.score == 1
-    assert sa.status == AssignmentStatuses.ON_CHECKING
+    assert sa.status == AssignmentStatus.ON_CHECKING
     assert AssignmentComment.objects.count() == 1
 
     # test wrong old status
@@ -624,8 +624,8 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     form_data = {
         "review-score": 2,
         "review-score_old": 1,
-        "review-status": AssignmentStatuses.NEED_FIXES,
-        "review-status_old": AssignmentStatuses.COMPLETED,
+        "review-status": AssignmentStatus.NEED_FIXES,
+        "review-status_old": AssignmentStatus.COMPLETED,
         'review-text': "review-text",
         'review-attached_file': "",
     }
@@ -635,7 +635,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     assert AssignmentComment.objects.count() == 1
     sa.refresh_from_db()
     assert sa.score == 1
-    assert sa.status == AssignmentStatuses.ON_CHECKING
+    assert sa.status == AssignmentStatus.ON_CHECKING
 
     create_assignment_solution(personal_assignment=sa,
                                created_by=sa.student,
@@ -645,9 +645,9 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     form_data = {
         "review-score": 3,
         "review-score_old": 1,
-        # AssignmentStatuses.NOT_SUBMITTED is not allowed
-        "review-status": AssignmentStatuses.NOT_SUBMITTED,
-        "review-status_old": AssignmentStatuses.ON_CHECKING,
+        # AssignmentStatus.NOT_SUBMITTED is not allowed
+        "review-status": AssignmentStatus.NOT_SUBMITTED,
+        "review-status_old": AssignmentStatus.ON_CHECKING,
         'review-text': "review-text",
         'review-attached_file': "",
     }
@@ -662,5 +662,5 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     assert AssignmentComment.objects.count() == 2
     sa.refresh_from_db()
     assert sa.score == 1
-    assert sa.status == AssignmentStatuses.ON_CHECKING
+    assert sa.status == AssignmentStatus.ON_CHECKING
 

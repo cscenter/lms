@@ -32,7 +32,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location, Timestamp
 from core.timezone import TimezoneAwareMixin, now_local
 from core.urls import reverse
 from core.utils import hashids
-from courses.constants import AssignmentFormat, AssignmentStatuses
+from courses.constants import AssignmentFormat, AssignmentStatus
 from courses.models import Assignment, Course, CourseNews, Semester, StudentGroupTypes
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
@@ -536,8 +536,8 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         on_delete=models.CASCADE)
     status = models.CharField(
         verbose_name=_("StudentAssignment|Status"),
-        choices=AssignmentStatuses.choices,
-        default=AssignmentStatuses.NOT_SUBMITTED,
+        choices=AssignmentStatus.choices,
+        default=AssignmentStatus.NOT_SUBMITTED,
         max_length=13)
     score = ScoreField(
         verbose_name=_("Grade"),
@@ -684,7 +684,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
 
     def is_status_transition_allowed(self, status_new):
         statuses = self.assignment.statuses
-        if status_new == AssignmentStatuses.NOT_SUBMITTED and self.is_submission_received:
+        if status_new == AssignmentStatus.NOT_SUBMITTED and self.is_submission_received:
             return False
         return status_new in statuses
 
@@ -702,7 +702,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         if self.score is not None:
             return self.get_score_verbose_display()
         else:
-            return AssignmentStatuses(self.status).label
+            return AssignmentStatus(self.status).label
 
     @property
     def final_score(self) -> Optional[Decimal]:

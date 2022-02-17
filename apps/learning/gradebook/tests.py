@@ -20,7 +20,7 @@ from auth.permissions import perm_registry
 from auth.tests.factories import ConnectedAuthServiceFactory
 from core.tests.factories import BranchFactory
 from core.urls import reverse
-from courses.constants import AssignmentFormat, AssignmentStatuses
+from courses.constants import AssignmentFormat, AssignmentStatus
 from courses.models import CourseGroupModes, CourseTeacher
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseTeacherFactory
@@ -1162,13 +1162,13 @@ def test_get_student_assignment_state():
     sa.score = 0
     assert get_student_assignment_state(sa) == sa.get_score_verbose_display()
     sa.score = None
-    sa.status = AssignmentStatuses.ON_CHECKING
+    sa.status = AssignmentStatus.ON_CHECKING
     assert get_student_assignment_state(sa) == "…"
-    sa.status = AssignmentStatuses.NEED_FIXES
+    sa.status = AssignmentStatus.NEED_FIXES
     assert get_student_assignment_state(sa) == "…"
-    sa.status = AssignmentStatuses.COMPLETED
+    sa.status = AssignmentStatus.COMPLETED
     assert get_student_assignment_state(sa) == "…"
     sa.score = 1
-    sa.status = AssignmentStatuses.NOT_SUBMITTED
+    sa.status = AssignmentStatus.NOT_SUBMITTED
     assert get_student_assignment_state(sa) == sa.get_score_verbose_display()
 

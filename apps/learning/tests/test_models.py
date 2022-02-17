@@ -11,7 +11,7 @@ from django.db import IntegrityError, transaction
 from django.utils.encoding import smart_str
 
 from core.tests.factories import BranchFactory, LocationFactory, SiteFactory
-from courses.constants import AssignmentFormat, AssignmentStatuses, SemesterTypes
+from courses.constants import AssignmentFormat, AssignmentStatus, SemesterTypes
 from courses.models import CourseGroupModes, CourseNews, Semester
 from courses.tests.factories import (
     AssignmentFactory, CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
@@ -114,11 +114,11 @@ def test_student_assignment_is_submission_received():
 @pytest.mark.django_db
 def test_student_assignment_state_display():
     sa = StudentAssignmentFactory(assignment__maximum_score=50)
-    assert sa.state_display == AssignmentStatuses.NOT_SUBMITTED.label
+    assert sa.state_display == AssignmentStatus.NOT_SUBMITTED.label
     AssignmentCommentFactory(student_assignment=sa,
                              type=AssignmentSubmissionTypes.SOLUTION)
     sa.refresh_from_db()
-    assert sa.state_display == AssignmentStatuses.ON_CHECKING.label
+    assert sa.state_display == AssignmentStatus.ON_CHECKING.label
     sa.score = 30
     expected_display = f"{sa.score}/{sa.assignment.maximum_score}"
     assert sa.state_display == expected_display
@@ -304,7 +304,7 @@ def test_student_assignment_is_status_transition_allowed():
     AssignmentCommentFactory(student_assignment=sa,
                              type=AssignmentSubmissionTypes.SOLUTION)
     sa.refresh_from_db()
-    assert not sa.is_status_transition_allowed(AssignmentStatuses.NOT_SUBMITTED)
+    assert not sa.is_status_transition_allowed(AssignmentStatus.NOT_SUBMITTED)
 
 
 @pytest.mark.django_db

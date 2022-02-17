@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.utils.functional import cached_property
 
 from core.db.utils import normalize_score
-from courses.constants import AssignmentStatuses
+from courses.constants import AssignmentStatus
 from courses.models import Assignment, Course
 from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.settings import GradeTypes
@@ -234,9 +234,9 @@ def get_student_assignment_state(student_assignment: StudentAssignment) -> str:
         return student_assignment.get_score_verbose_display()
     # `...` means student submitted a solution, let's try to reproduce
     # this behavior with statuses.
-    has_solution = {AssignmentStatuses.ON_CHECKING,
-                    AssignmentStatuses.NEED_FIXES,
-                    AssignmentStatuses.COMPLETED}
+    has_solution = {AssignmentStatus.ON_CHECKING,
+                    AssignmentStatus.NEED_FIXES,
+                    AssignmentStatus.COMPLETED}
     if student_assignment.status in has_solution:
         return "…"
     return "—"

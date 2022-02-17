@@ -26,7 +26,7 @@ from core.exceptions import Redirect
 from core.http import HttpRequest
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
-from courses.constants import AssignmentStatuses
+from courses.constants import AssignmentStatus
 from courses.models import Assignment, Course, CourseTeacher
 from courses.permissions import DeleteAssignment, EditAssignment, ViewAssignment
 from courses.selectors import (

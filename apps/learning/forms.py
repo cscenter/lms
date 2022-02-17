@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.widgets import UbereditorWidget
-from courses.constants import AssignmentStatuses
+from courses.constants import AssignmentStatus
 from courses.forms import AssignmentDurationField
 from courses.models import Assignment
 from grading.services import CheckerService
@@ -78,12 +78,12 @@ class AssignmentReviewForm(forms.Form):
         label=_("Status"),
         required=True,
         widget=DisableOptionSelectWidget,
-        choices=AssignmentStatuses.choices
+        choices=AssignmentStatus.choices
     )
     status_old = forms.ChoiceField(
         widget=forms.HiddenInput(),
         required=True,
-        choices=AssignmentStatuses.choices,
+        choices=AssignmentStatus.choices,
     )
 
     def __init__(self, student_assignment: StudentAssignment,
@@ -110,7 +110,7 @@ class AssignmentReviewForm(forms.Form):
         maximum_score = student_assignment.assignment.maximum_score
         self.fields['score'].validators.append(MaxValueValidator(limit_value=maximum_score))
         self.fields['score'].widget.attrs.update({'max': maximum_score})
-        disabled_statuses = [status for status in AssignmentStatuses.values
+        disabled_statuses = [status for status in AssignmentStatus.values
                              if not student_assignment.is_status_transition_allowed(status)]
         self.fields['status'].widget.disabled_options = disabled_statuses
 

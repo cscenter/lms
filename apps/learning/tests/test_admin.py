@@ -3,9 +3,7 @@ import pytest
 from core.admin import get_admin_url
 from core.urls import reverse
 from courses.tests.factories import AssignmentFactory, CourseFactory
-from learning.models import (
-    AssignmentScoreAuditLog, AssignmentStatuses, StudentAssignment
-)
+from learning.models import AssignmentScoreAuditLog, AssignmentStatus, StudentAssignment
 from learning.settings import AssignmentScoreUpdateSource
 from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import CuratorFactory
@@ -13,7 +11,7 @@ from users.tests.factories import CuratorFactory
 
 def _student_assignment_form(assignment, enrollment, **overwrite):
     data = {
-        "status": AssignmentStatuses.NEW,
+        "status": AssignmentStatus.NEW,
         "assignment": assignment.pk,
         "student": enrollment.student_profile.user_id,
         "score": "",

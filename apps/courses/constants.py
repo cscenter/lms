@@ -65,7 +65,7 @@ class AssignmentFormat(DjangoChoices):
     with_checker = {CODE_REVIEW.value, YANDEX_CONTEST.value}
 
 
-class AssignmentStatuses(TextChoices):
+class AssignmentStatus(TextChoices):
     # TODO: describe each status
     NEW = 'new', _("AssignmentStatus|New"),  # TODO: remove after integration
     NOT_SUBMITTED = 'not_submitted', _("AssignmentStatus|Not submitted"),
