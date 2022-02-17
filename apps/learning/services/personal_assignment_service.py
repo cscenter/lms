@@ -267,8 +267,6 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
     """
     Creates an AssignmentComment.
     Score and status are only updating if the comment is not a draft.
-    The update may fail if status_old or score_old
-     are not equal to the values in StudentAssignment.
     On successful update of score and status these values (old and new)
     are also storing in AssignmentComment.meta
     """
@@ -284,7 +282,6 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
     if not is_draft:
         meta['score_old'] = score_old
         meta['status_old'] = status_old
-    if not is_draft:
         msg = _("The score or status has been changed by someone. "
                 "Review the changes to resolve the conflict.")
         updated, sa = update_personal_assignment_score(student_assignment=student_assignment,
@@ -459,16 +456,16 @@ def get_assignment_update_history_message(comment: AssignmentComment) -> str:
         return ""
     score_new = comment.meta.get('score', None)
     score_old = comment.meta.get('score_old', None)
-    new_status = comment.meta.get('status', None)
+    is_score_changed = score_old != score_new
+    status_new = comment.meta.get('status', None)
     status_old = comment.meta.get('status_old', None)
+    is_status_changed = status_old != status_new
     if score_new is None:
         score_new = "без оценки"
-    status_label = AssignmentStatuses(new_status).label
+    status_label = AssignmentStatuses(status_new).label
     text = ''
-    is_score_changed = score_old != score_new
-    is_status_changed = status_old != new_status
     if is_score_changed and is_status_changed:
-        text = (f"Выставлена новая оценка: <code>{score_new}</code> и новый статус: {status_label}.")
+        text = f"Выставлена новая оценка: <code>{score_new}</code> и новый статус: {status_label}."
     elif is_score_changed:
         text = f"Выставлена новая оценка: <code>{score_new}</code>"
     elif is_status_changed:
