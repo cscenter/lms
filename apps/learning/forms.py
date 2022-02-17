@@ -304,36 +304,6 @@ class AssignmentModalCommentForm(forms.ModelForm):
         return cleaned_data
 
 
-class AssignmentScoreForm(forms.Form):
-    # TODO: not used for its intended purpose, to be removed
-    score = ScoreField(required=False, label="")
-
-    def __init__(self, *args, **kwargs):
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Div(Hidden('grading_form', 'true'),
-                Field('score', css_class='input-grade'),
-                HTML("/" + str(kwargs.get('maximum_score'))),
-                HTML("&nbsp;&nbsp;"),
-                StrictButton('<i class="fa fa-floppy-o"></i>',
-                             css_class="btn-primary",
-                             type="submit"),
-                css_class="form-inline"))
-        if 'maximum_score' in kwargs:
-            self.maximum_score = kwargs['maximum_score']
-            self.helper['score'].update_attributes(max=self.maximum_score)
-            del kwargs['maximum_score']
-        super().__init__(*args, **kwargs)
-
-    def clean(self):
-        cleaned_data = super().clean()
-        score = cleaned_data.get('score', None)
-        if score and score > self.maximum_score:
-            msg = _("Score can't be larger than maximum one ({0})")
-            raise forms.ValidationError(msg.format(self.maximum_score))
-        return cleaned_data
-
-
 class TestimonialForm(forms.ModelForm):
     class Meta:
         model = GraduateProfile

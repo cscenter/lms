@@ -8,6 +8,7 @@ from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from core.forms import ScoreField
 from courses.constants import AssignmentFormat
 from courses.models import Assignment
 from grading.api.yandex_contest import (
@@ -15,7 +16,6 @@ from grading.api.yandex_contest import (
 )
 from grading.models import Checker
 from grading.utils import YandexContestScoreSource
-from learning.forms import AssignmentScoreForm
 from learning.models import Enrollment, StudentAssignment
 from learning.services.personal_assignment_service import (
     update_personal_assignment_score
@@ -149,10 +149,12 @@ def _validate_headers(reader: csv.DictReader,
     return errors
 
 
+_score_field = ScoreField()
+
+
 def _score_to_python(raw_value: str) -> Optional[Decimal]:
-    score_field = AssignmentScoreForm.declared_fields['score']
     try:
-        cleaned_value = score_field.clean(raw_value)
+        cleaned_value = _score_field.clean(raw_value)
     except ValidationError:
         msg = _("Invalid score format '{}'").format(raw_value)
         raise ValidationError(msg, code="invalid_score")
