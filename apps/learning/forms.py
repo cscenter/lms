@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 from crispy_forms.bootstrap import FormActions, StrictButton
 from crispy_forms.helper import FormHelper
@@ -74,11 +74,29 @@ class AssignmentCommentForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        if (not cleaned_data.get("text")
-            and not cleaned_data.get("attached_file")):
-            raise forms.ValidationError(
-                _("Either text or file should be non-empty"))
+        if not cleaned_data.get("text") and not cleaned_data.get("attached_file"):
+            raise forms.ValidationError(_("Either text or file should be non-empty"))
         return cleaned_data
+
+
+class DisableOptionSelectWidget(forms.Select):
+    def __init__(self, *args, **kwargs):
+        self._disabled_values = []
+        super().__init__(*args, **kwargs)
+
+    @property
+    def disabled_options(self):
+        return self._disabled_values
+
+    @disabled_options.setter
+    def disabled_options(self, value: List[Any]):
+        self._disabled_values = value
+
+    def create_option(self, name, value, *args, **kwargs) -> Dict[str, Any]:
+        option_data = super().create_option(name, value, *args, **kwargs)
+        if value in self.disabled_options:
+            option_data['attrs']['disabled'] = 'disabled'
+        return option_data
 
 
 class AssignmentReviewForm(forms.Form):
@@ -102,6 +120,7 @@ class AssignmentReviewForm(forms.Form):
     status = forms.ChoiceField(
         label="",
         required=False,
+        widget=DisableOptionSelectWidget,
         choices=AssignmentStatuses.choices
     )
     old_status = forms.ChoiceField(
@@ -135,6 +154,9 @@ class AssignmentReviewForm(forms.Form):
         maximum_score = student_assignment.assignment.maximum_score
         self.fields['score'].validators.append(MaxValueValidator(limit_value=maximum_score))
         self.fields['score'].widget.attrs.update({'max': maximum_score})
+        disabled_statuses = [status for status in AssignmentStatuses.values
+                             if not student_assignment.is_status_transition_allowed(status)]
+        self.fields['status'].widget.disabled_options = disabled_statuses
 
     def clean(self):
         cleaned_data = super().clean()

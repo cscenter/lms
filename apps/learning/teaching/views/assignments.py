@@ -44,7 +44,8 @@ from learning.permissions import (
 from learning.selectors import get_enrollment, get_teacher_not_spectator_courses
 from learning.services import AssignmentService, StudentGroupService
 from learning.services.personal_assignment_service import (
-    create_personal_assignment_review, get_draft_comment, get_assignment_update_history_message
+    create_personal_assignment_review, get_assignment_update_history_message,
+    get_draft_comment
 )
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView

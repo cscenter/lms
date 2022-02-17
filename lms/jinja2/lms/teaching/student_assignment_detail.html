@@ -151,7 +151,7 @@
                   {{ forms.field(comment_form['score_old'], hide_label=True) }}
                 </div>
                   <div class="col-sm-7">
-                      {{ forms.select_new(comment_form['status'], hide_label=True, disabled=disabled_statuses, prepend_text="Статус задания:") }}
+                      {{ forms.field(comment_form['status'], hide_label=True, prepend_text="Статус задания:") }}
                       {{ forms.field(comment_form['old_status'], hide_label=True) }}
                   </div>
               </div>
