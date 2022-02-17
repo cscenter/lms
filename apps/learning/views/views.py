@@ -19,7 +19,7 @@ from courses.models import AssignmentAttachment
 from courses.selectors import course_teachers_prefetch_queryset
 from courses.views.mixins import CourseURLParamsMixin
 from files.views import ProtectedFileDownloadView
-from learning.forms import AssignmentCommentForm
+from learning.study.forms import AssignmentCommentForm
 from learning.models import (
     AssignmentComment, AssignmentNotification, CourseNewsNotification, Event,
     StudentAssignment, SubmissionAttachment

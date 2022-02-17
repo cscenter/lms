@@ -27,7 +27,7 @@ from info_blocks.models import InfoBlock
 from info_blocks.permissions import ViewInternships
 from learning import utils
 from learning.calendar import get_all_calendar_events, get_student_calendar_events
-from learning.forms import AssignmentCommentForm
+from learning.study.forms import AssignmentCommentForm
 from learning.models import Enrollment, StudentAssignment
 from learning.permissions import (
     CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution,

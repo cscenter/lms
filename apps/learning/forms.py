@@ -1,9 +1,9 @@
 import os
 from typing import Any, Dict, List, Optional
 
-from crispy_forms.bootstrap import FormActions, StrictButton
+from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import HTML, BaseInput, Div, Field, Hidden, Layout, Submit
+from crispy_forms.layout import BaseInput, Div, Layout, Submit
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -34,49 +34,6 @@ class SubmitLink(BaseInput):
 
 class JesnyFileInput(forms.ClearableFileInput):
     template_name = 'widgets/file_input.html'
-
-
-class AssignmentCommentForm(forms.ModelForm):
-    prefix = "comment"
-
-    text = forms.CharField(
-        label=False,
-        # help_text=_(LATEX_MARKDOWN_ENABLED),
-        required=False,
-        widget=UbereditorWidget(attrs={'data-quicksend': 'true',
-                                       'data-local-persist': 'true',
-                                       'data-helper-formatting': 'true'}))
-    attached_file = forms.FileField(
-        label="",
-        required=False,
-        widget=JesnyFileInput)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.instance.type = AssignmentSubmissionTypes.COMMENT
-        if self.instance and self.instance.pk:
-            draft_button_label = _('Update Draft')
-        else:
-            draft_button_label = _('Save Draft')
-        self.helper = FormHelper(self)
-        self.helper.layout = Layout(
-            Div('text', css_class='form-group-5'),
-            Div('attached_file'),
-            Div(Submit('save', _('Send Comment'),
-                       css_id=f'submit-id-{self.prefix}-save'),
-                SubmitLink('save-draft', draft_button_label,
-                           css_id=f'submit-id-{self.prefix}-save-draft'),
-                css_class="form-group"))
-
-    class Meta:
-        model = AssignmentComment
-        fields = ('text', 'attached_file')
-
-    def clean(self):
-        cleaned_data = super().clean()
-        if not cleaned_data.get("text") and not cleaned_data.get("attached_file"):
-            raise forms.ValidationError(_("Either text or file should be non-empty"))
-        return cleaned_data
 
 
 class DisableOptionSelectWidget(forms.Select):
