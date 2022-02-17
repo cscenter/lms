@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 from django.db.models import Q, QuerySet
 
@@ -9,6 +9,18 @@ from learning.models import Enrollment, Event
 from users.models import User
 
 CourseID = int
+
+
+def get_enrollment(*, course: Course, student: User) -> Optional[Enrollment]:
+    enrollment = (Enrollment.objects
+                  .filter(student=student, course=course)
+                  .select_related('student_profile')
+                  .order_by()
+                  .first())
+    if enrollment is not None:
+        enrollment.course = course
+        enrollment.student = student
+    return enrollment
 
 
 def get_teacher_courses(teacher: User) -> CourseQuerySet:
