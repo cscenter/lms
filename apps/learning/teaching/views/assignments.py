@@ -40,7 +40,7 @@ from learning.permissions import (
     CreateAssignmentComment, DownloadAssignmentSolutions, EditStudentAssignment,
     ViewStudentAssignment, ViewStudentAssignmentList
 )
-from learning.selectors import get_teacher_not_spectator_courses
+from learning.selectors import get_enrollment, get_teacher_not_spectator_courses
 from learning.services import AssignmentService, StudentGroupService
 from learning.services.personal_assignment_service import (
     update_personal_assignment_score
@@ -263,7 +263,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                          ungraded_base.filter(pk__lt=a_s.pk).first())
         context['next_student_assignment'] = next_ungraded
         context['is_actual_teacher'] = course.is_actual_teacher(user.pk)
-        enrollment = a_s.student.get_enrollment(course.pk)
+        enrollment = get_enrollment(course=course, student=a_s.student)
         context['student_course_progress_url'] = reverse('teaching:student-progress', kwargs={
             "enrollment_id": enrollment.pk,
             **course.url_kwargs
