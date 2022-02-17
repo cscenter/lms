@@ -1,5 +1,11 @@
+from decimal import Decimal
+
 import pytest
 from future.backports.datetime import timedelta
+
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import transaction
 
 from courses.constants import AssigneeMode, AssignmentFormat, AssignmentStatuses
 from courses.models import CourseGroupModes, CourseTeacher
@@ -11,9 +17,11 @@ from learning.models import (
 from learning.services import EnrollmentService
 from learning.services.personal_assignment_service import (
     create_assignment_comment, create_assignment_solution,
-    resolve_assignees_for_personal_assignment, update_personal_assignment_stats,
+    create_personal_assignment_review, resolve_assignees_for_personal_assignment,
+    update_personal_assignment_score, update_personal_assignment_stats,
     update_personal_assignment_status
 )
+from learning.settings import AssignmentScoreUpdateSource
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory,
     StudentGroupAssigneeFactory, StudentGroupFactory
@@ -223,17 +231,30 @@ def test_update_personal_assignment_status():
     sa = StudentAssignmentFactory(assignment__submission_type=AssignmentFormat.NO_SUBMIT)
 
     assert sa.status == AssignmentStatuses.NOT_SUBMITTED
-    updated, _ = update_personal_assignment_status(student_assignment=sa,
-                                                   status_old=AssignmentStatuses.NOT_SUBMITTED,
-                                                   status_new=AssignmentStatuses.NOT_SUBMITTED)
+    updated = update_personal_assignment_status(student_assignment=sa,
+                                                status_old=AssignmentStatuses.NOT_SUBMITTED,
+                                                status_new=AssignmentStatuses.NOT_SUBMITTED)
     sa.refresh_from_db()
     assert updated
 
     # testing case when status_old is wrong
-    updated, _ = update_personal_assignment_status(student_assignment=sa,
-                                                   status_old=AssignmentStatuses.ON_CHECKING,
-                                                   status_new=AssignmentStatuses.NOT_SUBMITTED)
+    updated = update_personal_assignment_status(student_assignment=sa,
+                                                status_old=AssignmentStatuses.ON_CHECKING,
+                                                status_new=AssignmentStatuses.NOT_SUBMITTED)
     assert not updated
+
+    # fake status change is not successful if db value was changed
+    sa.status = AssignmentStatuses.ON_CHECKING
+    sa.save()
+    # fake: status_old == status_new, so db update is not required
+    updated = update_personal_assignment_status(student_assignment=sa,
+                                                status_old=AssignmentStatuses.NOT_SUBMITTED,
+                                                status_new=AssignmentStatuses.NOT_SUBMITTED)
+    # it's not successful because because db_status != status_old
+    assert not updated
+    assert sa.status == AssignmentStatuses.ON_CHECKING
+    sa.status = AssignmentStatuses.NOT_SUBMITTED
+    sa.save()
 
     # submission is needed for the next test
     AssignmentCommentFactory(student_assignment=sa,
@@ -243,20 +264,20 @@ def test_update_personal_assignment_status():
     assert sa.status == AssignmentStatuses.ON_CHECKING
 
     # test forbidden statuses
-    with pytest.raises(ValueError):
+    with pytest.raises(ValidationError):
         # status NOT_SUBMITTED not allowed if submission exists
         update_personal_assignment_status(student_assignment=sa,
                                           status_old=AssignmentStatuses.ON_CHECKING,
                                           status_new=AssignmentStatuses.NOT_SUBMITTED)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValidationError):
         # NEED_FIXES not allowed for NO_SUBMIT assignment format
         update_personal_assignment_status(student_assignment=sa,
                                           status_old=AssignmentStatuses.ON_CHECKING,
                                           status_new=AssignmentStatuses.NEED_FIXES)
 
-    updated, _ = update_personal_assignment_status(student_assignment=sa,
-                                                   status_old=AssignmentStatuses.ON_CHECKING,
-                                                   status_new=AssignmentStatuses.COMPLETED)
+    updated = update_personal_assignment_status(student_assignment=sa,
+                                                status_old=AssignmentStatuses.ON_CHECKING,
+                                                status_new=AssignmentStatuses.COMPLETED)
     sa.refresh_from_db()
     assert updated
     assert sa.status == AssignmentStatuses.COMPLETED
@@ -266,9 +287,382 @@ def test_update_personal_assignment_status():
                              type=AssignmentSubmissionTypes.SOLUTION)
     sa.refresh_from_db()
     # NEED_FIXES allowed for ONLINE assignment format
-    updated, _ = update_personal_assignment_status(student_assignment=sa,
-                                                   status_old=AssignmentStatuses.ON_CHECKING,
-                                                   status_new=AssignmentStatuses.NEED_FIXES)
+    updated = update_personal_assignment_status(student_assignment=sa,
+                                                status_old=AssignmentStatuses.ON_CHECKING,
+                                                status_new=AssignmentStatuses.NEED_FIXES)
     sa.refresh_from_db()
     assert updated
     assert sa.status == AssignmentStatuses.NEED_FIXES
+
+
+@pytest.mark.django_db
+def test_create_assignment_comment_empty():
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course)
+    with pytest.raises(ValidationError):
+        create_assignment_comment(personal_assignment=sa, message="",
+                                  is_draft=True, created_by=teacher)
+    with pytest.raises(ValidationError):
+        create_assignment_comment(personal_assignment=sa, message="",
+                                  is_draft=False, created_by=teacher)
+    create_assignment_comment(personal_assignment=sa, message="",
+                              is_draft=True, created_by=teacher,
+                              attachment=SimpleUploadedFile("1", b""))
+    assert AssignmentComment.objects.filter(is_published=False).count() == 1
+
+    comment = create_assignment_comment(personal_assignment=sa, message="",
+                                        is_draft=False, created_by=teacher,
+                                        attachment=SimpleUploadedFile("2", b""))
+    assert AssignmentComment.objects.filter(is_published=False).count() == 0
+    assert AssignmentComment.objects.filter(is_published=True).count() == 1
+    comment.delete()
+
+
+@pytest.mark.django_db
+def test_create_assignment_comment_with_meta():
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course)
+
+    comment = create_assignment_comment(personal_assignment=sa, message="",
+                                        is_draft=True, created_by=teacher,
+                                        meta={"status": AssignmentStatuses.NOT_SUBMITTED})
+    assert AssignmentComment.objects.filter(is_published=False).count() == 1
+    assert comment.meta['status'] == AssignmentStatuses.NOT_SUBMITTED
+    assert 'score' not in comment.meta
+    with pytest.raises(ValidationError):
+        comment = create_assignment_comment(personal_assignment=sa, message="",
+                                            is_draft=False, created_by=teacher,
+                                            meta={"status": AssignmentStatuses.NOT_SUBMITTED})
+    comment = create_assignment_comment(personal_assignment=sa, message="",
+                                        is_draft=False, created_by=teacher,
+                                        meta={
+                                            "status": AssignmentStatuses.NOT_SUBMITTED,
+                                            "status_old": sa.status
+                                        })
+    assert AssignmentComment.objects.filter(is_published=True).count() == 1
+    assert AssignmentComment.objects.filter(is_published=False).count() == 0
+    comment.delete()
+
+    comment = create_assignment_comment(personal_assignment=sa, message="",
+                                        is_draft=True,
+                                        created_by=teacher,
+                                        meta={"score": None})
+    assert AssignmentComment.objects.filter(is_published=False).count() == 1
+    assert comment.meta['score'] == None
+    assert 'status' not in comment.meta
+    comment.delete()
+
+    comment = create_assignment_comment(personal_assignment=sa, message="",
+                                        is_draft=True,
+                                        created_by=teacher,
+                                        meta={"score": Decimal('0')})
+    assert AssignmentComment.objects.filter(is_published=False).count() == 1
+    assert comment.meta['score'] == 0
+    assert 'status' not in comment.meta
+
+
+# TODO: write full test for update method
+@pytest.mark.django_db
+def test_update_personal_assignment_score_fake_update():
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course)
+    # fake: score_old  == score_new, so DB updating is not required
+    updated, _ = update_personal_assignment_score(student_assignment=sa,
+                                                  score_old=Decimal('0'),
+                                                  score_new=Decimal('0'),
+                                                  changed_by=teacher,
+                                                  source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT)
+    # it's not successful because db_score != score_old
+    assert not updated
+    assert sa.score is None
+
+
+@pytest.mark.django_db
+def test_create_personal_assignment_review():
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course,
+                                  assignment__maximum_score=5)
+
+    # Nothing to update
+    with pytest.raises(ValidationError) as exc_info:
+        create_personal_assignment_review(student_assignment=sa,
+                                          reviewer=teacher,
+                                          is_draft=False,
+                                          message="",
+                                          score_old=sa.score,
+                                          score_new=sa.score,
+                                          status_old=sa.status,
+                                          status_new=sa.status
+                                          )
+    assert exc_info.value.code == 'empty'
+    assert AssignmentComment.objects.count() == 0
+
+    # Only the message has been provided
+    comment = create_personal_assignment_review(student_assignment=sa,
+                                                reviewer=teacher,
+                                                is_draft=False,
+                                                message="Some message",
+                                                score_old=sa.score,
+                                                score_new=sa.score,
+                                                status_old=sa.status,
+                                                status_new=sa.status
+                                                )
+    assert comment.is_published
+    assert comment.text == "Some message"
+    assert comment.meta['score'] == sa.score
+    assert comment.meta['status'] == sa.status
+
+    # Only the score has been changed.
+    comment = create_personal_assignment_review(student_assignment=sa,
+                                                reviewer=teacher,
+                                                is_draft=False,
+                                                message="",
+                                                score_old=sa.score,
+                                                score_new=Decimal('0'),
+                                                status_old=sa.status,
+                                                status_new=sa.status
+                                                )
+    assert comment.is_published
+    assert comment.text == ""
+    assert comment.meta['score'] == 0
+    assert comment.meta['status'] == sa.status
+
+    # Only the status has been changed.
+    comment = create_personal_assignment_review(student_assignment=sa,
+                                                reviewer=teacher,
+                                                is_draft=False,
+                                                message="",
+                                                score_old=sa.score,
+                                                score_new=sa.score,
+                                                status_old=sa.status,
+                                                status_new=AssignmentStatuses.NEED_FIXES
+                                                )
+    assert comment.is_published
+    assert comment.text == ""
+    assert comment.meta['score'] == 0
+    assert comment.meta['status'] == AssignmentStatuses.NEED_FIXES
+
+    # Only the file has been provided.
+    comment = create_personal_assignment_review(student_assignment=sa,
+                                                reviewer=teacher,
+                                                is_draft=False,
+                                                message="",
+                                                attachment=SimpleUploadedFile("1", b"hello world"),
+                                                score_old=sa.score,
+                                                score_new=sa.score,
+                                                status_old=sa.status,
+                                                status_new=sa.status
+                                                )
+    assert comment.is_published
+    assert comment.text == ""
+    assert b"hello world" in comment.attached_file
+    assert comment.meta['score'] == 0
+    assert comment.meta['status'] == AssignmentStatuses.NEED_FIXES
+
+    assert AssignmentComment.objects.count() == 4
+    AssignmentComment.objects.all().delete()
+
+    #  Score overflow
+    with pytest.raises(ValidationError) as exc_info:
+        with transaction.atomic():
+            create_personal_assignment_review(student_assignment=sa,
+                                              reviewer=teacher,
+                                              is_draft=False,
+                                              message="Some text",
+                                              score_old=sa.score,
+                                              score_new=Decimal('6'),
+                                              status_old=sa.status,
+                                              status_new=AssignmentStatuses.COMPLETED
+                                              )
+    sa.refresh_from_db()  # atomic doesn't restore state
+    assert exc_info.value.code == 'score_overflow'
+    assert sa.score != 6
+    assert sa.status != AssignmentStatuses.COMPLETED
+    assert AssignmentComment.objects.count() == 0
+
+    # Provided forbidden status
+    create_assignment_solution(personal_assignment=sa,
+                               created_by=sa.student,
+                               message="solution")
+    sa.refresh_from_db()  # above method changes StudentAssignment
+    with pytest.raises(ValidationError) as exc_info:
+        with transaction.atomic():
+            create_personal_assignment_review(student_assignment=sa,
+                                              reviewer=teacher,
+                                              is_draft=False,
+                                              message="Some text",
+                                              score_old=sa.score,
+                                              score_new=Decimal('5'),
+                                              status_old=sa.status,
+                                              status_new=AssignmentStatuses.NOT_SUBMITTED
+                                              )
+    sa.refresh_from_db()
+    assert exc_info.value.code == 'status_not_allowed'
+    assert sa.score != 5
+    assert sa.status != AssignmentStatuses.NOT_SUBMITTED
+    assert AssignmentComment.objects.exclude(author=sa.student).count() == 0
+
+    # TODO: add negative score value test
+
+
+@pytest.mark.django_db
+def test_create_personal_assignment_review_concurrent_update():
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course,
+                                  assignment__maximum_score=5)
+    # Irrelevant score_old
+    with pytest.raises(ValidationError) as exc_info:
+        with transaction.atomic():
+            create_personal_assignment_review(student_assignment=sa,
+                                              reviewer=teacher,
+                                              is_draft=False,
+                                              message="Irrelevant score_old != score_new",
+                                              score_old=Decimal('3'),
+                                              score_new=Decimal('5'),
+                                              status_old=sa.status,
+                                              status_new=AssignmentStatuses.NEED_FIXES
+                                              )
+    assert exc_info.value.code == 'concurrent'
+    sa.refresh_from_db()
+    assert sa.score is None
+    assert sa.status == AssignmentStatuses.NOT_SUBMITTED
+    assert AssignmentComment.objects.count() == 0
+
+    # Fake score update
+    with pytest.raises(ValidationError) as exc_info:
+        with transaction.atomic():
+            create_personal_assignment_review(student_assignment=sa,
+                                              reviewer=teacher,
+                                              is_draft=False,
+                                              message="Irrelevant score_old == score_new",
+                                              score_old=Decimal('0'),
+                                              score_new=Decimal('0'),
+                                              status_old=sa.status,
+                                              status_new=AssignmentStatuses.NEED_FIXES
+                                              )
+    assert exc_info.value.code == 'concurrent'
+    sa.refresh_from_db()
+    assert sa.score is None
+    assert sa.status == AssignmentStatuses.NOT_SUBMITTED
+    assert AssignmentComment.objects.count() == 0
+
+    # Irrelevant status_old
+    sa.refresh_from_db()
+    with pytest.raises(ValidationError) as exc_info:
+        with transaction.atomic():
+            create_personal_assignment_review(student_assignment=sa,
+                                              reviewer=teacher,
+                                              is_draft=False,
+                                              message="Irrelevant status_old != new_status",
+                                              score_old=sa.score,
+                                              score_new=Decimal('5'),
+                                              status_old=AssignmentStatuses.COMPLETED,
+                                              status_new=AssignmentStatuses.NEED_FIXES
+                                              )
+    assert exc_info.value.code == 'concurrent'
+    sa.refresh_from_db()
+    assert sa.score is None
+    assert sa.status == AssignmentStatuses.NOT_SUBMITTED
+    assert AssignmentComment.objects.count() == 0
+
+    # Fake status update
+    sa.refresh_from_db()
+    with pytest.raises(ValidationError) as exc_info:
+        with transaction.atomic():
+            create_personal_assignment_review(student_assignment=sa,
+                                              reviewer=teacher,
+                                              is_draft=False,
+                                              message="Irrelevant status_old == new_status",
+                                              score_old=sa.score,
+                                              score_new=Decimal('5'),
+                                              status_old=AssignmentStatuses.NEED_FIXES,
+                                              status_new=AssignmentStatuses.NEED_FIXES
+                                              )
+    assert exc_info.value.code == 'concurrent'
+    sa.refresh_from_db()
+    assert sa.score is None
+    assert sa.status == AssignmentStatuses.NOT_SUBMITTED
+    assert AssignmentComment.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_create_assignment_comment_meta():
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course,
+                                  assignment__maximum_score=5)
+    comment = create_personal_assignment_review(
+        student_assignment=sa,
+        is_draft=False,
+        reviewer=teacher,
+        message="",
+        score_old=sa.score,
+        status_old=sa.status,
+        score_new=Decimal('1'),
+        status_new=AssignmentStatuses.ON_CHECKING
+    )
+    assert comment.meta == {
+        "score": Decimal('1'),
+        "status": AssignmentStatuses.ON_CHECKING,
+        "score_old": None,
+        "status_old": AssignmentStatuses.NOT_SUBMITTED
+    }
+
+    sa.refresh_from_db()
+    comment = create_personal_assignment_review(
+        student_assignment=sa,
+        is_draft=False,
+        reviewer=teacher,
+        message="",
+        score_old=sa.score,
+        status_old=sa.status,
+        score_new=None,
+        status_new=AssignmentStatuses.COMPLETED
+    )
+    assert comment.meta == {
+        "score": None,
+        "status": AssignmentStatuses.COMPLETED,
+        "score_old": Decimal('1'),
+        "status_old": AssignmentStatuses.ON_CHECKING
+    }
+
+    sa.refresh_from_db()
+    comment = create_personal_assignment_review(
+        student_assignment=sa,
+        is_draft=False,
+        reviewer=teacher,
+        message="",
+        score_old=sa.score,
+        status_old=sa.status,
+        score_new=Decimal('2'),
+        status_new=sa.status
+    )
+    assert comment.meta == {
+        "score": Decimal('2'),
+        "status": AssignmentStatuses.COMPLETED,
+        "score_old": None,
+        "status_old": AssignmentStatuses.COMPLETED
+    }
+
+    sa.refresh_from_db()
+    comment = create_personal_assignment_review(
+        student_assignment=sa,
+        is_draft=False,
+        reviewer=teacher,
+        message="",
+        score_old=sa.score,
+        status_old=AssignmentStatuses.COMPLETED,
+        score_new=sa.score,
+        status_new=AssignmentStatuses.NEED_FIXES
+    )
+    assert comment.meta == {
+        "score": Decimal('2'),
+        "status": AssignmentStatuses.NEED_FIXES,
+        "score_old": Decimal('2'),
+        "status_old": AssignmentStatuses.COMPLETED
+    }

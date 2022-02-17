@@ -58,6 +58,7 @@
                   <div class="panel-body">
                     <span class="assignment-submission__date pull-right">{{ comment.created_local(tz=time_zone)|date("d.m.Y H:i") }}</span>
                     <h5 class="assignment">{{ comment.author }}</h5>
+                    <div class="text-muted">{{ get_score_status_changing_message(comment) }}</div>
                     {% if comment.text %}
                       <div class="ubertext">
                         {{ comment.text|markdown("assignment_comment", 3600, comment.pk, comment.modified) }}
@@ -114,7 +115,7 @@
         <div class="-submission" id="o-sidebar">
 
           <h5 class="assignment">{% trans %}Grade{% endtrans %}</h5>
-          <span class="nowrap badge assignment-status">{{ a_s.state_display }}</span>
+          <span class="nowrap badge assignment-status">{{ a_s.get_status_display() }} ({{ a_s.get_score_verbose_display() }})</span>
 
           {% if one_teacher %}
             <h5 class="assignment">{% trans %}Professor{% endtrans %}</h5>

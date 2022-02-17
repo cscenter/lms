@@ -19,7 +19,6 @@ from courses.models import AssignmentAttachment
 from courses.selectors import course_teachers_prefetch_queryset
 from courses.views.mixins import CourseURLParamsMixin
 from files.views import ProtectedFileDownloadView
-from learning.forms import AssignmentCommentForm
 from learning.models import (
     AssignmentComment, AssignmentNotification, CourseNewsNotification, Event,
     StudentAssignment, SubmissionAttachment
@@ -27,9 +26,8 @@ from learning.models import (
 from learning.permissions import (
     ViewAssignmentAttachment, ViewAssignmentCommentAttachment
 )
-from learning.services.personal_assignment_service import (
-    create_assignment_comment, get_draft_comment
-)
+from learning.services.personal_assignment_service import create_assignment_comment
+from learning.study.forms import AssignmentCommentForm
 from users.mixins import TeacherOnlyMixin
 
 logger = logging.getLogger(__name__)
@@ -130,15 +128,12 @@ class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
         cs_after_deadline = (c for c in sa.assignmentcomment_set.all() if
                              c.created >= deadline_at)
         first_comment_after_deadline = next(cs_after_deadline, None)
-        draft_comment = get_draft_comment(user, self.student_assignment)
-        comment_form = AssignmentCommentForm(instance=draft_comment)
         context = {
             'a_s': sa,
             'time_zone': user.time_zone,
             'first_comment_after_deadline': first_comment_after_deadline,
             'one_teacher': len(sa.assignment.course.course_teachers.all()) == 1,
             'hashes_json': comment_persistence.get_garbage_collection(),
-            'comment_form': comment_form,
         }
         return context
 

@@ -1,5 +1,7 @@
 {% extends "lms/layouts/v1_base.html" %}
 
+{% import "lms/macros/_forms.jinja2" as forms %}
+
 {% block title %}{{ a_s.student.get_short_name() }} - {{ a_s.assignment.title }}{% endblock %}
 
 {% block body_attrs %} data-init-sections="studentAssignment"{% endblock body_attrs %}
@@ -68,6 +70,7 @@
                   <div class="panel-body">
                     <span class="assignment-submission__date pull-right">{{ comment.created_local(tz=time_zone)|date("d.m.Y H:i") }}</span>
                     <h5 class="assignment">{{ comment.author }}</h5>
+                    <div class="text-muted">{{ get_score_status_changing_message(comment) }}</div>
                     {% if comment.text %}
                       <div class="ubertext">
                         {{ comment.text|markdown("assignment_comment", 3600, comment.pk, comment.modified) }}
@@ -126,7 +129,45 @@
 
         {% set can_create_comment = request_user.has_perm("learning.create_assignment_comment", a_s) %}
         {% if can_create_comment %}
-          <div class="csc-well">{{ crispy(comment_form) }}</div>
+          <div class="csc-well">
+            <form action="" method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              {% if review_form.non_field_errors() %}
+                <div class="text-danger mb-20">
+                  <b>Форма не сохранена</b><br>
+                  {% for error in review_form.non_field_errors()  %}{{ error }}<br>{% endfor %}
+                </div>
+              {% endif %}
+              <div class="row">
+                <div class="col-xs-12">
+                  {{ forms.field(review_form['text']) }}
+                </div>
+              </div>
+              <div class="row">
+                  <div class="col-xs-12">
+                      {{ review_form['attached_file'] }}
+                  </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-5">
+                  {{ forms.field(review_form['score'], hide_label=True, prepend_text='<b>Оценка</b>', append_text='из ' + max_score) }}
+                  {{ forms.field(review_form['score_old'], hide_label=True) }}
+                </div>
+                  <div class="col-sm-7">
+                      {{ forms.field(review_form['status'], hide_label=True, prepend_text="<b>Статус задания</b>") }}
+                      {{ forms.field(review_form['status_old'], hide_label=True) }}
+                  </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-12">
+                  <div class="pull-right">
+                    <input type="submit" name="save-draft" value="Сохранить черновик" class="btn btn-link" id="submit-id-review-save-draft">
+                    <input type="submit" name="save" value="Отправить" class="btn btn-primary" id="submit-id-review-save">
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
         {% endif %}
       </div>
 
@@ -139,11 +180,7 @@
         {% endif %}
 
         <h5 class="assignment">{% trans %}Grade{% endtrans %}</h5>
-        {% if can_edit_score %}
-          {{ crispy(score_form) }}
-        {% else %}
-          <span class="nowrap badge assignment-status">{{ a_s.state_display }}</span>
-        {% endif %}
+        <span class="nowrap badge assignment-status">{{ a_s.get_status_display() }} ({{ a_s.get_score_verbose_display() }})</span>
 
         {% if show_score_audit_log %}
           <div class="mt-5">

@@ -1,7 +1,7 @@
 import logging
 from datetime import timedelta
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
@@ -9,9 +9,11 @@ from django.db.models import (
     Case, Count, DateTimeField, F, IntegerField, Max, When, Window
 )
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 
 from core.timezone import get_now_utc
 from core.typings import assert_never
+from core.utils import Empty, _empty
 from courses.constants import AssigneeMode, AssignmentStatuses
 from courses.models import Assignment, CourseTeacher
 from courses.selectors import personal_assignments_list
@@ -140,9 +142,32 @@ def create_assignment_solution_and_check(*, personal_assignment: StudentAssignme
 def create_assignment_comment(*, personal_assignment: StudentAssignment,
                               is_draft: bool, created_by: User,
                               message: Optional[str] = None,
-                              attachment: Optional[UploadedFile] = None) -> AssignmentComment:
-    if not message and not attachment:
-        raise ValidationError("Provide either text or a file.", code="malformed")
+                              attachment: Optional[UploadedFile] = None,
+                              meta: Optional[Dict[str, Any]] = None) -> AssignmentComment:
+    if meta is None:
+        if not (message or attachment):
+            raise ValidationError(_("Either text or file should be non-empty"),
+                                  code='malformed')
+    else:
+        score = meta.get('score', _empty)
+        status = meta.get('status', None)
+        values = (message, attachment, score is not _empty, status is not None)
+        if not any(values):
+            msg = _("At least one of text, file, meta.score, meta.status must be provided")
+            raise ValidationError(msg, code='malformed')
+        if not is_draft:
+            if 'score_old' in meta:
+                if not (meta['score_old'] is None or isinstance(meta['score_old'], Decimal)):
+                    raise ValidationError("Wrong old status value in meta", code='malformed')
+            elif score is not _empty:
+                raise ValidationError("Missing old score value in meta", code='malformed')
+            if 'status_old' in meta:
+                try:
+                    AssignmentStatuses(meta['status_old'])
+                except ValueError:
+                    raise ValidationError("Wrong old status value in meta", code='malformed')
+            elif status is not None:
+                raise ValidationError("Missing old status value in meta", code='malformed')
 
     comment = get_draft_comment(created_by, personal_assignment)
     if comment is None:
@@ -153,6 +178,11 @@ def create_assignment_comment(*, personal_assignment: StudentAssignment,
     comment.text = message
     comment.attached_file = attachment
     comment.created = get_now_utc()  # TODO: write test
+    if meta is not None:
+        comment.meta = {
+            **(comment.meta or {}),
+            **meta
+        }
     comment.save()
 
     from learning.tasks import update_student_assignment_stats
@@ -186,26 +216,21 @@ def get_draft_solution(user: User, student_assignment: StudentAssignment):
 
 def update_personal_assignment_status(*, student_assignment: StudentAssignment,
                                       status_old: AssignmentStatuses,
-                                      status_new: AssignmentStatuses) -> Tuple[bool, StudentAssignment]:
-    if status_old == status_new:
-        return True, student_assignment
+                                      status_new: AssignmentStatuses) -> bool:
     if not student_assignment.is_status_transition_allowed(status_new):
-        raise ValueError(f"Wrong status {status_new} for student assignment")
+        raise ValidationError(f"Wrong status {status_new} for student assignment", code="status_not_allowed")
     updated = (StudentAssignment.objects
                .filter(pk=student_assignment.pk, status=status_old)
                .update(status=status_new, modified=get_now_utc()))
     if updated:
         student_assignment.status = status_new
-    return updated, student_assignment
+    return updated
 
 
 def update_personal_assignment_score(*, student_assignment: StudentAssignment,
                                      changed_by: User, source: AssignmentScoreUpdateSource,
                                      score_old: Optional[Decimal],
                                      score_new: Optional[Decimal]) -> Tuple[bool, StudentAssignment]:
-    if score_new == score_old:
-        # Consider as a successful update
-        return True, student_assignment
     if score_new is not None and score_new > student_assignment.assignment.maximum_score:
         raise ValidationError(f"Score {score_new} is greater than the maximum "
                               f"score {student_assignment.assignment.maximum_score}",
@@ -218,15 +243,69 @@ def update_personal_assignment_score(*, student_assignment: StudentAssignment,
         return False, student_assignment
 
     student_assignment.score = score_new
-
-    audit_log = AssignmentScoreAuditLog(student_assignment=student_assignment,
-                                        changed_by=changed_by,
-                                        score_old=score_old,
-                                        score_new=score_new,
-                                        source=source)
-    audit_log.save()
+    if score_new != score_old:
+        audit_log = AssignmentScoreAuditLog(student_assignment=student_assignment,
+                                            changed_by=changed_by,
+                                            score_old=score_old,
+                                            score_new=score_new,
+                                            source=source)
+        audit_log.save()
 
     return True, student_assignment
+
+
+def create_personal_assignment_review(*, student_assignment: StudentAssignment,
+                                      reviewer: User,
+                                      is_draft: bool,
+                                      score_old: Optional[Decimal],
+                                      score_new: Optional[Decimal],
+                                      status_old: AssignmentStatuses,
+                                      status_new: AssignmentStatuses,
+                                      message: Optional[str] = None,
+                                      attachment: Optional[UploadedFile] = None,
+                                      ) -> AssignmentComment:
+    """
+    Creates an AssignmentComment.
+    Score and status are only updating if the comment is not a draft.
+    The update may fail if status_old or score_old
+     are not equal to the values in StudentAssignment.
+    On successful update of score and status these values (old and new)
+    are also storing in AssignmentComment.meta
+    """
+    is_score_changed = score_new != score_old
+    is_status_changed = status_new != status_old
+    has_comment = message or attachment
+    if not (has_comment or is_score_changed or is_status_changed):
+        raise ValidationError(_("Nothing to process"), code='empty')
+    meta = {
+        "score": score_new,
+        "status": status_new
+    }
+    if not is_draft:
+        meta['score_old'] = score_old
+        meta['status_old'] = status_old
+    if not is_draft:
+        msg = _("The score or status has been changed by someone. "
+                "Review the changes to resolve the conflict.")
+        updated, sa = update_personal_assignment_score(student_assignment=student_assignment,
+                                                       changed_by=reviewer,
+                                                       score_old=score_old,
+                                                       score_new=score_new,
+                                                       source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT)
+        if not updated:
+            raise ValidationError(msg, code="concurrent")
+        updated = update_personal_assignment_status(student_assignment=sa,
+                                                    status_old=status_old,
+                                                    status_new=status_new)
+        if not updated:
+            raise ValidationError(msg, code="concurrent")
+    comment = create_assignment_comment(personal_assignment=student_assignment,
+                                        created_by=reviewer,
+                                        is_draft=is_draft,
+                                        message=message,
+                                        attachment=attachment,
+                                        meta=meta)
+    return comment
 
 
 # TODO: remove
@@ -373,3 +452,25 @@ def get_personal_assignments_by_stepik_id(*, assignment: Assignment) -> Dict[str
             sa.assignment = assignment
             with_stepik_id[str(stepik_id)] = sa
     return with_stepik_id
+
+
+def get_assignment_update_history_message(comment: AssignmentComment) -> str:
+    if not isinstance(comment.meta, dict):
+        return ""
+    score_new = comment.meta.get('score', None)
+    score_old = comment.meta.get('score_old', None)
+    new_status = comment.meta.get('status', None)
+    status_old = comment.meta.get('status_old', None)
+    if score_new is None:
+        score_new = "без оценки"
+    status_label = AssignmentStatuses(new_status).label
+    text = ''
+    is_score_changed = score_old != score_new
+    is_status_changed = status_old != new_status
+    if is_score_changed and is_status_changed:
+        text = (f"Выставлена новая оценка: <code>{score_new}</code> и новый статус: {status_label}.")
+    elif is_score_changed:
+        text = f"Выставлена новая оценка: <code>{score_new}</code>"
+    elif is_status_changed:
+        text = f"Выставлен новый статус: {status_label}"
+    return text

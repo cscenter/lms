@@ -9,10 +9,10 @@ from vanilla import TemplateView
 
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import FileField
-from django.http import FileResponse, HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import FileResponse, HttpResponse, JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
@@ -20,19 +20,20 @@ from django.views import generic
 from django.views.generic.edit import BaseUpdateView
 
 from auth.mixins import PermissionRequiredMixin
+from core import comment_persistence
 from core.api.fields import CharSeparatedField
 from core.exceptions import Redirect
 from core.http import HttpRequest
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
+from courses.constants import AssignmentStatuses
 from courses.models import Assignment, Course, CourseTeacher
 from courses.permissions import DeleteAssignment, EditAssignment, ViewAssignment
 from courses.selectors import (
     assignments_list, course_teachers_prefetch_queryset, get_course_teachers
 )
 from courses.services import CourseService
-from learning.api.serializers import AssignmentScoreSerializer
-from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
+from learning.forms import AssignmentModalCommentForm, AssignmentReviewForm
 from learning.models import (
     AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
 )
@@ -43,9 +44,9 @@ from learning.permissions import (
 from learning.selectors import get_enrollment, get_teacher_not_spectator_courses
 from learning.services import AssignmentService, StudentGroupService
 from learning.services.personal_assignment_service import (
-    update_personal_assignment_score
+    create_personal_assignment_review, get_assignment_update_history_message,
+    get_draft_comment
 )
-from learning.settings import AssignmentScoreUpdateSource
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
 
@@ -248,8 +249,8 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        a_s = self.student_assignment
-        course = a_s.assignment.course
+        sa = self.student_assignment
+        course = sa.assignment.course
         # FIXME: переписать с union + first, перенести в manager
         ungraded_base = (StudentAssignment.objects
                          .filter(score__isnull=True,
@@ -259,56 +260,72 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                                  assignment__course__course_teachers__roles=~CourseTeacher.roles.spectator)
                          .order_by('assignment__deadline_at', 'pk')
                          .only('pk'))
-        next_ungraded = (ungraded_base.filter(pk__gt=a_s.pk).first() or
-                         ungraded_base.filter(pk__lt=a_s.pk).first())
+        next_ungraded = (ungraded_base.filter(pk__gt=sa.pk).first() or
+                         ungraded_base.filter(pk__lt=sa.pk).first())
         context['next_student_assignment'] = next_ungraded
         context['is_actual_teacher'] = course.is_actual_teacher(user.pk)
-        enrollment = get_enrollment(course=course, student=a_s.student)
+        enrollment = get_enrollment(course=course, student=sa.student)
         context['student_course_progress_url'] = reverse('teaching:student-progress', kwargs={
             "enrollment_id": enrollment.pk,
             **course.url_kwargs
         })
-        context['score_form'] = AssignmentScoreForm(
-            initial={'score': a_s.score},
-            maximum_score=a_s.assignment.maximum_score)
         context['assignee_teachers'] = get_course_teachers(course=course)
-        context['comment_form'].helper.form_action = reverse(
-            'teaching:assignment_comment_create',
-            kwargs={'pk': a_s.pk})
+        context['max_score'] = str(sa.assignment.maximum_score)
+        context['review_form'] = AssignmentReviewForm(student_assignment=sa,
+                                                      draft_comment=get_draft_comment(user, sa))
         # Some estimates on showing audit log link or not.
-        context['show_score_audit_log'] = (a_s.score is not None or
-                                           a_s.score_changed - a_s.created > datetime.timedelta(seconds=2))
-        context['can_edit_score'] = self.request.user.has_perm(EditStudentAssignment.name, a_s)
+        context['show_score_audit_log'] = (sa.score is not None or
+                                           sa.score_changed - sa.created > datetime.timedelta(seconds=2))
+        context['can_edit_score'] = self.request.user.has_perm(EditStudentAssignment.name, sa)
+        context['get_score_status_changing_message'] = get_assignment_update_history_message
         return context
 
     def post(self, request, *args, **kwargs):
-        # TODO: rewrite with API call
-        if 'grading_form' in request.POST:
-            sa = self.student_assignment
-            if not request.user.has_perm(EditStudentAssignment.name, sa):
-                raise PermissionDenied
-
-            serializer = AssignmentScoreSerializer(data=request.POST,
-                                                   instance=sa)
-            if serializer.is_valid():
+        sa = self.student_assignment
+        if not request.user.has_perm(EditStudentAssignment.name, sa):
+            raise PermissionDenied
+        form = AssignmentReviewForm(data=request.POST,
+                                    files=request.FILES,
+                                    student_assignment=sa)
+        if form.is_valid():
+            try:
                 with transaction.atomic():
-                    update_personal_assignment_score(student_assignment=sa,
-                                                     changed_by=request.user,
-                                                     score_old=sa.score,
-                                                     score_new=serializer.validated_data['score'],
-                                                     source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT)
-                if sa.score is None:
-                    messages.info(self.request, _("Score was deleted"),
-                                  extra_tags='timeout')
-                else:
-                    messages.success(self.request, _("Score successfully saved"),
-                                     extra_tags='timeout')
+                    is_draft = "save-draft" in self.request.POST
+                    create_personal_assignment_review(
+                        student_assignment=sa,
+                        reviewer=self.request.user,
+                        is_draft=is_draft,
+                        score_old=form.cleaned_data['score_old'],
+                        score_new=form.cleaned_data['score'],
+                        status_old=form.cleaned_data['status_old'],
+                        status_new=form.cleaned_data['status'],
+                        message=form.cleaned_data['text'],
+                        attachment=form.cleaned_data['attached_file'],
+                    )
+                    if form.cleaned_data['text']:
+                        comment_persistence.add_to_gc(form.cleaned_data['text'])
                 return redirect(sa.get_teacher_url())
-            else:
-                # not sure if we can do anything more meaningful here.
-                # it shouldn't happen, after all.
-                return HttpResponseBadRequest(_("Grading form is invalid") +
-                                              "{}".format(serializer.errors))
+            except ValidationError as e:
+                message = str(e.args[0] if e.args else e)
+                messages.error(self.request, message=message, extra_tags='timeout')
+        return self.form_invalid(form)
+
+    def form_invalid(self, form: AssignmentReviewForm):
+        msg = "<br>".join("<br>".join(errors) for errors in form.errors.values())
+        messages.error(self.request, "Данные не сохранены!<br>" + msg, extra_tags="timeout")
+        context = self.get_context_data()
+        # In case of a failed concurrent update renew form data with an actual
+        # DB values.
+        self.student_assignment.refresh_from_db()
+        form_data = form.data.copy()
+        sa = self.student_assignment
+        form_data['review-score'] = sa.score
+        form_data['review-score_old'] = sa.score
+        form_data['review-status'] = sa.status
+        form_data['review-status_old'] = sa.status
+        form.data = form_data
+        context['review_form'] = form
+        return self.render_to_response(context)
 
 
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
