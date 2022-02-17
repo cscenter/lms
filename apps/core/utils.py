@@ -1,4 +1,5 @@
 import datetime
+import enum
 import logging
 from functools import partial
 from itertools import zip_longest
@@ -20,11 +21,11 @@ logger = logging.getLogger(__name__)
 hashids = Hashids(salt=settings.HASHIDS_SALT, min_length=8)
 
 
-class NotSetType:
-    pass
+class Empty(enum.Enum):
+    token = 0
 
 
-NOT_SET = NotSetType()
+_empty = Empty.token
 
 # Some details here https://github.com/Anomareh/Hoep
 MARKDOWN_EXTENSIONS = (h.EXT_FENCED_CODE |

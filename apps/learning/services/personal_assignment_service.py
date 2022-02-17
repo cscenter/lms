@@ -10,9 +10,10 @@ from django.db.models import (
 )
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
+
 from core.timezone import get_now_utc
 from core.typings import assert_never
-from core.utils import NOT_SET, NotSetType
+from core.utils import Empty, _empty
 from courses.constants import AssigneeMode, AssignmentStatuses
 from courses.models import Assignment, CourseTeacher
 from courses.selectors import personal_assignments_list
@@ -141,13 +142,13 @@ def create_assignment_solution_and_check(*, personal_assignment: StudentAssignme
 def create_assignment_comment(*, personal_assignment: StudentAssignment,
                               is_draft: bool, created_by: User,
                               message: Optional[str] = None,
-                              score: Union[Decimal, None, NotSetType] = NOT_SET,
+                              score: Union[Decimal, None, Empty] = _empty,
                               status: Optional[AssignmentStatuses] = None,
                               attachment: Optional[UploadedFile] = None) -> AssignmentComment:
     old_score = personal_assignment.score
     old_status = personal_assignment.status
     if not (message or attachment):
-        if (score, status) == (NOT_SET, None):
+        if (score, status) == (_empty, None):
             # This error for users that can't change status and score
             raise ValidationError(_("Either text or file should be non-empty"), code="malformed")
         elif (score, status) == (old_score, old_status):
@@ -163,10 +164,10 @@ def create_assignment_comment(*, personal_assignment: StudentAssignment,
     comment.text = message
     comment.attached_file = attachment
     comment.created = get_now_utc()  # TODO: write test
-    if (score, status) != (NOT_SET, None):
+    if (score, status) != (_empty, None):
         comment.meta = comment.meta if comment.meta else {}
         # if field exist then it was provided (not necessarily updated)
-        if score is not NOT_SET:
+        if score is not _empty:
             comment.meta['score'] = score
         if status is not None:
             comment.meta['status'] = status

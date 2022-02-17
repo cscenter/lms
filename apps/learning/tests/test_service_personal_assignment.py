@@ -1,10 +1,11 @@
 from decimal import Decimal
 
 import pytest
+from future.backports.datetime import timedelta
+
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import transaction
-from future.backports.datetime import timedelta
 
 from courses.constants import AssigneeMode, AssignmentFormat, AssignmentStatuses
 from courses.models import CourseGroupModes, CourseTeacher
@@ -16,8 +17,9 @@ from learning.models import (
 from learning.services import EnrollmentService
 from learning.services.personal_assignment_service import (
     create_assignment_comment, create_assignment_solution,
-    resolve_assignees_for_personal_assignment, update_personal_assignment_stats,
-    update_personal_assignment_status, update_personal_assignment_score, create_personal_assignment_review
+    create_personal_assignment_review, resolve_assignees_for_personal_assignment,
+    update_personal_assignment_score, update_personal_assignment_stats,
+    update_personal_assignment_status
 )
 from learning.settings import AssignmentScoreUpdateSource
 from learning.tests.factories import (

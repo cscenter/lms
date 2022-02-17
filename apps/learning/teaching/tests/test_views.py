@@ -21,9 +21,7 @@ from learning.settings import Branches
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
 )
-from users.tests.factories import (
-    CuratorFactory, StudentFactory, TeacherFactory
-)
+from users.tests.factories import CuratorFactory, StudentFactory, TeacherFactory
 
 
 @pytest.mark.django_db

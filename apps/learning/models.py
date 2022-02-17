@@ -44,7 +44,7 @@ from learning.managers import (
 from learning.settings import (
     ENROLLMENT_DURATION, AssignmentScoreUpdateSource, GradeTypes, GradingSystems
 )
-from learning.utils import humanize_duration, get_score_status_changing_message
+from learning.utils import get_score_status_changing_message, humanize_duration
 from users.constants import ThumbnailSizes
 from users.models import StudentProfile
 from users.thumbnails import ThumbnailMixin, get_stub_factory, get_thumbnail

@@ -27,9 +27,7 @@ from learning.models import (
 from learning.permissions import (
     ViewAssignmentAttachment, ViewAssignmentCommentAttachment
 )
-from learning.services.personal_assignment_service import (
-    create_assignment_comment
-)
+from learning.services.personal_assignment_service import create_assignment_comment
 from users.mixins import TeacherOnlyMixin
 
 logger = logging.getLogger(__name__)

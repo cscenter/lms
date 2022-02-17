@@ -17,7 +17,9 @@ from courses.constants import AssignmentStatuses
 from courses.forms import AssignmentDurationField
 from courses.models import Assignment
 from grading.services import CheckerService
-from learning.models import AssignmentSubmissionTypes, GraduateProfile, StudentAssignment
+from learning.models import (
+    AssignmentSubmissionTypes, GraduateProfile, StudentAssignment
+)
 
 from .models import AssignmentComment
 
