@@ -35,9 +35,8 @@ from learning.permissions import (
     ViewOwnStudentAssignments
 )
 from learning.selectors import get_student_classes
-from learning.services.personal_assignment_service import get_draft_comment
+from learning.services.personal_assignment_service import get_draft_comment, get_assignment_update_history_message
 from learning.study.services import get_solution_form, save_solution_form
-from learning.utils import get_score_status_changing_message
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import (
     AssignmentCommentUpsertView, StudentAssignmentURLParamsMixin
@@ -166,7 +165,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         context['comment_form'] = comment_form
         context['time_zone'] = self.request.user.time_zone
         context['solution_form'] = get_solution_form(sa)
-        context['get_score_status_changing_message'] = get_score_status_changing_message
+        context['get_score_status_changing_message'] = get_assignment_update_history_message
         return context
 
 

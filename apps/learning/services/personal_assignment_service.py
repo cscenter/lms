@@ -437,3 +437,25 @@ def get_personal_assignments_by_stepik_id(*, assignment: Assignment) -> Dict[str
     return with_stepik_id
 
 
+def get_assignment_update_history_message(comment: AssignmentComment) -> str:
+    if not isinstance(comment.meta, dict):
+        return ""
+    new_score = comment.meta.get('score', None)
+    old_score = comment.meta.get('old_score', None)
+    new_status = comment.meta.get('status', None)
+    old_status = comment.meta.get('old_status', None)
+    if new_score is None:
+        new_score = "без оценки"
+    status_label = AssignmentStatuses(new_status).label
+    text = ''
+    is_score_changed = old_score != new_score
+    is_status_changed = old_status != new_status
+    if is_score_changed and is_status_changed:
+        text = (f"Оценка и статус задания были изменены.<br>"
+                f"Новая оценка: {new_score}.<br>"
+                f"Новый статус: {status_label}.")
+    elif is_score_changed:
+        text = f"Оценка была изменена.<br>Новая оценка: {new_score}."
+    elif is_status_changed:
+        text = f"Статус был изменён.<br>Новый статус: {status_label}."
+    return text
