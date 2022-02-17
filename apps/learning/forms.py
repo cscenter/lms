@@ -103,7 +103,7 @@ class AssignmentReviewForm(forms.Form):
     prefix = "review"
 
     text = forms.CharField(
-        label=False,
+        label=_("Comment"),
         required=False,
         widget=UbereditorWidget(attrs={'data-quicksend': 'true',
                                        'data-local-persist': 'true',
