@@ -131,24 +131,23 @@ class AssignmentReviewForm(forms.Form):
 
     def __init__(self, student_assignment: StudentAssignment,
                  draft_comment: Optional[AssignmentComment] = None,
-                 **kwargs):
+                 **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.student_assignment = student_assignment
-        self.draft_comment = draft_comment
         text = ''
         score = student_assignment.score
         status = student_assignment.status
         if draft_comment is not None:
+            assert draft_comment.type == AssignmentSubmissionTypes.COMMENT
             text = draft_comment.text
-            assert self.draft_comment.type == AssignmentSubmissionTypes.COMMENT
             if isinstance(draft_comment.meta, dict):
                 score = draft_comment.meta.get('score', score)
                 status = draft_comment.meta.get('status', status)
         self.initial = {
             'text': text,
             'score': score,
-            'status': status,
             'score_old': student_assignment.score,
+            'status': status,
             'old_status': student_assignment.status
         }
         maximum_score = student_assignment.assignment.maximum_score
