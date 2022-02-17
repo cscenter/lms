@@ -270,15 +270,9 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
             **course.url_kwargs
         })
         context['assignee_teachers'] = get_course_teachers(course=course)
-        draft_comment = get_draft_comment(user, sa)
         context['max_score'] = str(sa.assignment.maximum_score)
         context['comment_form'] = AssignmentReviewForm(student_assignment=sa,
-                                                       draft_comment=draft_comment)
-        context['disabled_statuses'] = [
-            status[0]
-            for status in AssignmentStatuses.choices
-            if not sa.is_status_transition_allowed(status[0])
-        ]
+                                                       draft_comment=get_draft_comment(user, sa))
         # Some estimates on showing audit log link or not.
         context['show_score_audit_log'] = (sa.score is not None or
                                            sa.score_changed - sa.created > datetime.timedelta(seconds=2))
