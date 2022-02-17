@@ -132,29 +132,30 @@
           <div class="csc-well">
             <form action="" method="post" enctype="multipart/form-data">
               {% csrf_token %}
-              {% if comment_form.non_field_errors() %}
-                <div class="text-danger">
-                  {% for error in comment_form.non_field_errors()  %}{{ error }}<br>{% endfor %}
+              {% if review_form.non_field_errors() %}
+                <div class="text-danger mb-20">
+                  <b>Форма не сохранена</b><br>
+                  {% for error in review_form.non_field_errors()  %}{{ error }}<br>{% endfor %}
                 </div>
               {% endif %}
               <div class="row">
                 <div class="col-xs-12">
-                  {{ forms.field(comment_form['text']) }}
+                  {{ forms.field(review_form['text']) }}
                 </div>
               </div>
               <div class="row">
                   <div class="col-xs-12">
-                      {{ comment_form['attached_file'] }}
+                      {{ review_form['attached_file'] }}
                   </div>
               </div>
               <div class="row">
                 <div class="col-sm-5">
-                  {{ forms.field(comment_form['score'], hide_label=True, prepend_text='<b>Оценка</b>', append_text='из ' + max_score) }}
-                  {{ forms.field(comment_form['score_old'], hide_label=True) }}
+                  {{ forms.field(review_form['score'], hide_label=True, prepend_text='<b>Оценка</b>', append_text='из ' + max_score) }}
+                  {{ forms.field(review_form['score_old'], hide_label=True) }}
                 </div>
                   <div class="col-sm-7">
-                      {{ forms.field(comment_form['status'], hide_label=True, prepend_text="<b>Статус задания</b>") }}
-                      {{ forms.field(comment_form['old_status'], hide_label=True) }}
+                      {{ forms.field(review_form['status'], hide_label=True, prepend_text="<b>Статус задания</b>") }}
+                      {{ forms.field(review_form['old_status'], hide_label=True) }}
                   </div>
               </div>
               <div class="row">

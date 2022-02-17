@@ -271,7 +271,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         })
         context['assignee_teachers'] = get_course_teachers(course=course)
         context['max_score'] = str(sa.assignment.maximum_score)
-        context['comment_form'] = AssignmentReviewForm(student_assignment=sa,
+        context['review_form'] = AssignmentReviewForm(student_assignment=sa,
                                                        draft_comment=get_draft_comment(user, sa))
         # Some estimates on showing audit log link or not.
         context['show_score_audit_log'] = (sa.score is not None or
@@ -298,7 +298,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
             for error in errors:
                 if error not in new_form.errors.get(field, []):
                     new_form.add_error(field, error)
-        context['comment_form'] = new_form
+        context['review_form'] = new_form
         return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):

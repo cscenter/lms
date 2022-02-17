@@ -453,8 +453,8 @@ def test_view_student_assignment_detail_draft_comment_notifications(client, asse
     assert AssignmentComment.objects.count() == 2
     assert AssignmentNotification.objects.count() == 0
     response = client.get(teacher_detail_url)
-    assert 'comment_form' in response.context_data
-    form = response.context_data['comment_form']
+    assert 'review_form' in response.context_data
+    form = response.context_data['review_form']
     assert form_data['review-text'] == form['text'].value()
     # TODO: write a test to save the file in draft
     #  after the bug with its disappearance will be fixed
@@ -509,8 +509,8 @@ def test_view_student_assignment_detail_draft_review_remembers_score_and_status(
         'save-draft': 'Submit button text'
     }
     response = client.post(url, data=form_data, follow=True)
-    assert 'comment_form' in response.context_data
-    form = response.context_data['comment_form']
+    assert 'review_form' in response.context_data
+    form = response.context_data['review_form']
     assert form['score'].value() == 1
     sa.refresh_from_db()
     assert sa.score is None
@@ -526,8 +526,8 @@ def test_view_student_assignment_detail_draft_review_remembers_score_and_status(
         'save-draft': 'Submit button text'
     }
     response = client.post(url, data=form_data, follow=True)
-    assert 'comment_form' in response.context_data
-    form = response.context_data['comment_form']
+    assert 'review_form' in response.context_data
+    form = response.context_data['review_form']
     assert form['status'].value() == AssignmentStatuses.ON_CHECKING
     sa.refresh_from_db()
     assert sa.status == AssignmentStatuses.NOT_SUBMITTED
@@ -542,8 +542,8 @@ def test_view_student_assignment_detail_draft_review_remembers_score_and_status(
         'save-draft': 'Submit button text'
     }
     response = client.post(url, data=form_data, follow=True)
-    assert 'comment_form' in response.context_data
-    form = response.context_data['comment_form']
+    assert 'review_form' in response.context_data
+    form = response.context_data['review_form']
     assert form['score'].value() == form_data['review-score']
     assert form['status'].value() == form_data['review-status']
     assert form['text'].value() == form_data['review-text']
@@ -576,9 +576,9 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     }
     response = client.post(url, data=form_data)
     assert response.status_code == 200
-    assert 'comment_form' in response.context_data
-    form = response.context_data['comment_form']
-    assert "Nothing to update" in form.non_field_errors()
+    assert 'review_form' in response.context_data
+    form = response.context_data['review_form']
+    assert "Form is empty" in form.non_field_errors()
 
     # test that review was published and score, status has been changed
     form_data = {
@@ -613,7 +613,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     }
     response = client.post(url, data=form_data)
     assert response.status_code == 200
-    assert 'comment_form' in response.context_data
+    assert 'review_form' in response.context_data
     sa.refresh_from_db()
     assert sa.score == 1
     assert sa.status == AssignmentStatuses.ON_CHECKING
@@ -631,7 +631,7 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     }
     response = client.post(url, data=form_data)
     assert response.status_code == 200
-    assert 'comment_form' in response.context_data
+    assert 'review_form' in response.context_data
     assert AssignmentComment.objects.count() == 1
     sa.refresh_from_db()
     assert sa.score == 1
@@ -653,8 +653,8 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     }
     response = client.post(url, data=form_data)
     assert response.status_code == 200
-    assert 'comment_form' in response.context_data
-    form = response.context_data['comment_form']
+    assert 'review_form' in response.context_data
+    form = response.context_data['review_form']
     assert 'status' in form.errors and len(form.errors['status']) == 1
     expected_error = "Please select a valid status"
     assert expected_error == form.errors['status'][0]
