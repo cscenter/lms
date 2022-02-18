@@ -150,7 +150,7 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
                                           score_new=score_new,
                                           status_old=student_assignment.status,
                                           status_new=status_new,
-                                          message=_("Updated from Gerrit"),
+                                          message=_("Update in Gerrit"),
                                           source=AssignmentScoreUpdateSource.WEBHOOK_GERRIT
                                           )
     return student_assignment.pk

@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-17 17:04+0000\n"
-"PO-Revision-Date: 2022-02-17 17:05+0000\n"
-"Last-Translator: Сергей Жеревчук <pacabest@gmail.com>\n"
+"POT-Creation-Date: 2022-02-18 15:12+0000\n"
+"PO-Revision-Date: 2022-02-18 15:14+0000\n"
+"Last-Translator:   <admin@admin.admin>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -125,6 +125,11 @@ msgid ""
 msgstr ""
 "Решение было отправлено на код-ревью. За ходом проверки Вы можете следить по"
 " ссылке: {link}."
+
+#: apps/code_reviews/gerrit/tasks.py:153
+#| msgid "Update Draft"
+msgid "Update in Gerrit"
+msgstr "Обновление в Gerrit"
 
 #: apps/code_reviews/models.py:11 apps/learning/models.py:746
 msgid "Student Assignment"
@@ -713,7 +718,7 @@ msgstr ""
 "Сколько, по вашему мнению, студенту потребуется времени, чтобы выполнить "
 "задание?"
 
-#: apps/courses/forms.py:333 apps/learning/forms.py:150
+#: apps/courses/forms.py:333 apps/learning/forms.py:152
 msgid "hours:minutes"
 msgstr "часы:минуты"
 
@@ -1426,7 +1431,7 @@ msgstr "Ссылка с приглашением"
 msgid "Score can't be larger than %s"
 msgstr "Оценка не может быть больше %s"
 
-#: apps/learning/api/views.py:199
+#: apps/learning/api/views.py:200
 #, python-format
 msgid "Invalid course teacher %s"
 msgstr "Невалидный преподаватель курса %s"
@@ -1441,62 +1446,62 @@ msgstr "Обучение"
 msgid "Comment"
 msgstr "Комментарий"
 
-#: apps/learning/forms.py:125
+#: apps/learning/forms.py:127
 msgid "Please select a valid status"
 msgstr "Пожалуйста, выберите разрешенный статус."
 
-#: apps/learning/forms.py:130
+#: apps/learning/forms.py:132
 msgid "Form is empty."
 msgstr "Недостаточно данных."
 
-#: apps/learning/forms.py:146
+#: apps/learning/forms.py:148
 #: lms/jinja2/lms/teaching/student_assignment_detail.html:197
 msgid "Time Spent on Assignment"
 msgstr "Время, затраченное на выполнение задания"
 
-#: apps/learning/forms.py:151
+#: apps/learning/forms.py:153
 msgid ""
 "Requires the full format including minutes. Do not include the time of "
 "previous submissions."
 msgstr ""
 "Укажите полный формат HH:MM. Время предыдущих посылок учитывать не нужно."
 
-#: apps/learning/forms.py:179 apps/learning/forms.py:228
+#: apps/learning/forms.py:181 apps/learning/forms.py:230
 msgid "Send Solution"
 msgstr "Отправить решение"
 
-#: apps/learning/forms.py:189
+#: apps/learning/forms.py:191
 #: apps/learning/services/personal_assignment_service.py:149
 #: apps/learning/study/forms.py:50
 msgid "Either text or file should be non-empty"
 msgstr "Требуется текст или приложенный файл"
 
-#: apps/learning/forms.py:196
+#: apps/learning/forms.py:198
 msgid "File name is not provided"
 msgstr "Не указано имя файла"
 
-#: apps/learning/forms.py:200
+#: apps/learning/forms.py:202
 #, python-format
 msgid "`%(value)s` file name has no extension"
 msgstr "У имени файла `%(value)s` не найдено расширение"
 
-#: apps/learning/forms.py:207
+#: apps/learning/forms.py:209
 msgid "Compiler"
 msgstr "Компилятор"
 
-#: apps/learning/forms.py:210
+#: apps/learning/forms.py:212
 msgid "Solution file"
 msgstr "Файл решения"
 
-#: apps/learning/forms.py:237
+#: apps/learning/forms.py:239
 msgid "File should be non-empty"
 msgstr "Должен быть прикреплен файл"
 
-#: apps/learning/forms.py:260
+#: apps/learning/forms.py:262
 msgid "Text should be non-empty"
 msgstr "Требуется текст"
 
-#: apps/learning/forms.py:288
+#: apps/learning/forms.py:290
 msgid "Почему вы выбрали этот курс?"
 msgstr ""
 
@@ -2131,7 +2136,7 @@ msgstr ""
 msgid "Nothing to process"
 msgstr "Пожалуйста, заполните корректно поля формы."
 
-#: apps/learning/services/personal_assignment_service.py:288
+#: apps/learning/services/personal_assignment_service.py:287
 msgid ""
 "The score or status has been changed by someone. Review the changes to "
 "resolve the conflict."
@@ -3565,7 +3570,7 @@ msgstr "Выйти"
 msgid "Members Area"
 msgstr "Личный кабинет"
 
-#: lms/jinja2/lms/layouts/v1_base.html:63 lms/templates/base.html:61
+#: lms/jinja2/lms/layouts/v1_base.html:66 lms/templates/base.html:61
 msgid "гг."
 msgstr ""
 
