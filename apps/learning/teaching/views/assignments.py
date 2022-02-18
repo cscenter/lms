@@ -47,6 +47,7 @@ from learning.services.personal_assignment_service import (
     create_personal_assignment_review, get_assignment_update_history_message,
     get_draft_comment
 )
+from learning.settings import AssignmentScoreUpdateSource
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
 
@@ -299,6 +300,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                         score_new=form.cleaned_data['score'],
                         status_old=form.cleaned_data['status_old'],
                         status_new=form.cleaned_data['status'],
+                        source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT,
                         message=form.cleaned_data['text'],
                         attachment=form.cleaned_data['attached_file'])
                 if form.cleaned_data['text']:

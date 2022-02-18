@@ -261,9 +261,9 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
                                       score_new: Optional[Decimal],
                                       status_old: AssignmentStatus,
                                       status_new: AssignmentStatus,
+                                      source: AssignmentScoreUpdateSource,
                                       message: Optional[str] = None,
                                       attachment: Optional[UploadedFile] = None,
-                                      source: AssignmentScoreUpdateSource = AssignmentScoreUpdateSource.FORM_ASSIGNMENT
                                       ) -> AssignmentComment:
     """
     Updates assignment score and/or status on publishing review,
