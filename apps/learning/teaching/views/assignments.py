@@ -288,9 +288,9 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                                     files=request.FILES,
                                     student_assignment=sa)
         if form.is_valid():
+            is_draft = "save-draft" in self.request.POST
             try:
                 with transaction.atomic():
-                    is_draft = "save-draft" in self.request.POST
                     create_personal_assignment_review(
                         student_assignment=sa,
                         reviewer=self.request.user,
@@ -300,10 +300,11 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
                         status_old=form.cleaned_data['status_old'],
                         status_new=form.cleaned_data['status'],
                         message=form.cleaned_data['text'],
-                        attachment=form.cleaned_data['attached_file'],
-                    )
-                    if form.cleaned_data['text']:
-                        comment_persistence.add_to_gc(form.cleaned_data['text'])
+                        attachment=form.cleaned_data['attached_file'])
+                if form.cleaned_data['text']:
+                    comment_persistence.add_to_gc(form.cleaned_data['text'])
+                message = "Данные успешно сохранены"
+                messages.success(self.request, message=message, extra_tags='timeout')
                 return redirect(sa.get_teacher_url())
             except ValidationError as e:
                 message = str(e.args[0] if e.args else e)
