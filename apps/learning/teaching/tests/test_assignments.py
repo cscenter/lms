@@ -664,3 +664,25 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     assert sa.score == 1
     assert sa.status == AssignmentStatus.ON_CHECKING
 
+
+@pytest.mark.parametrize('assignment_format', AssignmentFormat.values)
+@pytest.mark.django_db
+def test_form_assignment_review_correct_statuses(client, assignment_format):
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course,
+                                  assignment__submission_type=assignment_format)
+    client.login(teacher)
+    url = sa.get_teacher_url()
+    form = client.get(url).context_data['review_form']
+    choices = [choice[0] for choice in form['status'].field.choices]
+    expected_statuses = [
+        AssignmentStatus.NOT_SUBMITTED,
+        AssignmentStatus.ON_CHECKING,
+        AssignmentStatus.COMPLETED
+    ]
+    if assignment_format in [AssignmentFormat.ONLINE, AssignmentFormat.CODE_REVIEW]:
+        expected_statuses.append(AssignmentStatus.NEED_FIXES)
+    assert len(choices) == len(expected_statuses)
+    assert set(choices) == set(expected_statuses)
+
