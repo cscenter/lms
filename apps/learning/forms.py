@@ -77,13 +77,11 @@ class AssignmentReviewForm(forms.Form):
     status = forms.ChoiceField(
         label=_("Status"),
         required=True,
-        widget=DisableOptionSelectWidget,
-        choices=AssignmentStatus.choices
+        widget=DisableOptionSelectWidget
     )
     status_old = forms.ChoiceField(
         widget=forms.HiddenInput(),
-        required=True,
-        choices=AssignmentStatus.choices,
+        required=True
     )
 
     def __init__(self, student_assignment: StudentAssignment,
@@ -110,6 +108,10 @@ class AssignmentReviewForm(forms.Form):
         maximum_score = student_assignment.assignment.maximum_score
         self.fields['score'].validators.append(MaxValueValidator(limit_value=maximum_score))
         self.fields['score'].widget.attrs.update({'max': maximum_score})
+        assignment_statuses = [(s.value, s.label)
+                               for s in student_assignment.assignment.statuses]
+        self.fields['status'].choices = assignment_statuses
+        self.fields['status_old'].choices = assignment_statuses
         disabled_statuses = [status for status in AssignmentStatus.values
                              if not student_assignment.is_status_transition_allowed(status)]
         self.fields['status'].widget.disabled_options = disabled_statuses
