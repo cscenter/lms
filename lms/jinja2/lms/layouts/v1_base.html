@@ -25,22 +25,25 @@
     <script>
       // Global Configuration
       window.__CSC__ = {
-          config: {
-              csrfCookieName: "{{ CSRF_COOKIE_NAME }}",
-              sentryDSN: "{{ SENTRY_DSN }}",
-              JS_SRC: {
-                MATHJAX: "//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML",
-                HIGHLIGHTJS: "{{ static("v1/js/vendor/highlight.pack.js") }}",
-              },
-              // Used to reflow editor on tab toggle event
-              uberEditors: [],
-              localStorage: {
-                  // Map from hash to dummy value (effectively a set)
-                  hashes: []
-              }
+        profile: {
+          timezone: "{{ request.user.time_zone|string }}"
+        },
+        config: {
+          csrfCookieName: "{{ CSRF_COOKIE_NAME }}",
+          sentryDSN: "{{ SENTRY_DSN }}",
+          JS_SRC: {
+            MATHJAX: '//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML',
+            HIGHLIGHTJS: "{{ static("v1/js/vendor/highlight.pack.js") }}"
           },
-          notifications: {{ messages(request)|tojson }},
-      }
+          // Used to reflow editor on tab toggle event
+          uberEditors: [],
+          localStorage: {
+            // Map from hash to dummy value (effectively a set)
+            hashes: []
+          }
+        },
+        notifications: {{ messages(request)|tojson }},
+      };
     </script>
   </head>
 
