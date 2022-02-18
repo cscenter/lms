@@ -665,9 +665,12 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     assert sa.status == AssignmentStatus.ON_CHECKING
 
 
-@pytest.mark.parametrize('assignment_format', AssignmentFormat.values)
+__has_need_fixes = [AssignmentFormat.ONLINE, AssignmentFormat.CODE_REVIEW]
+
+
+@pytest.mark.parametrize('assignment_format', __has_need_fixes)
 @pytest.mark.django_db
-def test_form_assignment_review_correct_statuses(client, assignment_format):
+def test_view_form_assignment_review_status_choices(client, assignment_format):
     teacher = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
     sa = StudentAssignmentFactory(assignment__course=course,
@@ -675,14 +678,35 @@ def test_form_assignment_review_correct_statuses(client, assignment_format):
     client.login(teacher)
     url = sa.get_teacher_url()
     form = client.get(url).context_data['review_form']
-    choices = [choice[0] for choice in form['status'].field.choices]
+    values = [choice[0] for choice in form['status'].field.choices]
+    expected_statuses = [
+        AssignmentStatus.NOT_SUBMITTED,
+        AssignmentStatus.ON_CHECKING,
+        AssignmentStatus.COMPLETED,
+        AssignmentStatus.NEED_FIXES
+    ]
+    assert len(values) == len(expected_statuses)
+    assert set(values) == set(expected_statuses)
+    assert form['status'].field.choices == form['status_old'].field.choices
+
+
+@pytest.mark.parametrize('assignment_format', [v for v in AssignmentFormat.values if v not in __has_need_fixes])
+@pytest.mark.django_db
+def test_view_form_assignment_review_status_choices(client, assignment_format):
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course,
+                                  assignment__submission_type=assignment_format)
+    client.login(teacher)
+    url = sa.get_teacher_url()
+    form = client.get(url).context_data['review_form']
+    values = [choice[0] for choice in form['status'].field.choices]
     expected_statuses = [
         AssignmentStatus.NOT_SUBMITTED,
         AssignmentStatus.ON_CHECKING,
         AssignmentStatus.COMPLETED
     ]
-    if assignment_format in [AssignmentFormat.ONLINE, AssignmentFormat.CODE_REVIEW]:
-        expected_statuses.append(AssignmentStatus.NEED_FIXES)
-    assert len(choices) == len(expected_statuses)
-    assert set(choices) == set(expected_statuses)
+    assert len(values) == len(expected_statuses)
+    assert set(values) == set(expected_statuses)
+    assert form['status'].field.choices == form['status_old'].field.choices
 
