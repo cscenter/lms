@@ -79,6 +79,7 @@ class CourseAssignmentList(RolePermissionRequiredMixin, ApiErrorsMixin, ListAPIV
                 .order_by('-deadline_at'))
 
 
+# FIXME: return all records with deletedAt info (useful for queue)
 class CourseStudentsList(RolePermissionRequiredMixin, APIBaseView):
     """List of students enrolled in the course."""
     authentication_classes = [SessionAuthentication, TokenAuthentication]
@@ -123,7 +124,7 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
 
     class OutputSerializer(serializers.ModelSerializer):
         score = ScoreField(coerce_to_string=True)
-        student = UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic'))
+        student = UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic', 'username'))
         assignee = inline_serializer(fields={
             "id": serializers.IntegerField(),
             "teacher": UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic'))
