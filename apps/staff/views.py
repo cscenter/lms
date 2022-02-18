@@ -407,7 +407,7 @@ class InvitationStudentsProgressReportView(CuratorOnlyMixin, View):
                                        .filter(pk=invitation_id))
         report = ProgressReportForInvitation(invitation)
         term = invitation.semester
-        file_name = f"sheet_{term.year}_{term.type}"
+        file_name = f"sheet_invitation_{invitation.pk}_{term.year}_{term.type}"
         return dataframe_to_response(report.generate(), output_format,
                                      file_name)
 
