@@ -28,6 +28,7 @@ class ImageAdmin(admin.ModelAdmin):
     list_display = ('title', 'user', 'order', 'album', 'width', 'height')
     raw_id_fields = ('user', )
     list_filter = ('album', )
+    list_select_related = ('user', 'album')
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'course':
