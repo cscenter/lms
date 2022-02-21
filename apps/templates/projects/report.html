@@ -9,6 +9,8 @@
 {% load user_thumbnail from user_thumbnail %}
 {% load render_bundle from webpack_loader %}
 
+{% block body_attrs %} data-init-sections="projects/report"{% endblock body_attrs %}
+
 {% block hightlight_styles %}
   <link href="{% static "v1/css/vendor/highlight-styles/github.css" %}" rel="stylesheet">
 {% endblock hightlight_styles %}
@@ -18,6 +20,7 @@
   <script type="text/javascript">
     window.__CSC__.config.localStorage.hashes = {{ clean_comments_json|safe }};
   </script>
+  {# FIXME: Check that we need scripts from `learning` on this page #}
   {% render_bundle 'learning' 'js' 'V1' %}
 {% endblock javascripts %}
 
@@ -154,9 +157,11 @@
               </div>
             </div>
           {% elif is_reviewer and review_form.instance.is_completed %}
-            <div class="card">
-              <div class="card-header bg-gray"><h2>Ваша итоговая оценка</h2></div>
-              <div class="card-body p-15">
+            <div class="panel panel-default">
+              <div class="panel-heading bg-gray">
+                <h3 class="h3 m-0">Ваша итоговая оценка</h3>
+              </div>
+              <div class="panel-body">
                 {% include "projects/_report_preliminary_assessment.html" with review=own_review %}
               </div>
             </div>
@@ -172,7 +177,7 @@
                     {{ review.reviewer }} / <b>{% if review.is_completed %}Завершена{% else %}Не завершена{% endif %}</b>
                   </a>
                   <div class="panel-collapse collapse" id="project-review-{{ review.pk }}" aria-expanded="false">
-                    <div class="panel-body px-0 py-10">
+                    <div class="panel-body">
                       {% include "projects/_report_preliminary_assessment.html" %}
                     </div>
                   </div>
