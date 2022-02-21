@@ -393,7 +393,7 @@ class ReportView(FormMixin, generic.DetailView):
     model = Report
     http_method_names = ["get", "post", "put"]
     context_object_name = "report"
-    template_name = "projects/report.html"
+    template_name = "lms/projects/project_report.html"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

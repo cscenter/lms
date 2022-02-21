@@ -1,6 +1,6 @@
 from crispy_forms.bootstrap import FieldWithButtons, FormActions, StrictButton
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import HTML, Div, Layout, Submit
+from crispy_forms.layout import HTML, Div, Field, Layout, Submit
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
@@ -76,12 +76,12 @@ class ReportStatusForm(forms.ModelForm):
         self.helper.form_show_labels = False
         self.helper.form_action = self.instance.get_update_url()
         self.helper.layout = Layout(
-            FieldWithButtons("status", StrictButton(
-                '<i class="fa fa-floppy-o" aria-hidden="true"></i>',
-                name="update_status_form",
-                type="submit",
-                css_class="btn btn-primary")),
-        )
+            FieldWithButtons(
+                Field("status", css_class='form-control'),
+                StrictButton('<i class="fa fa-floppy-o" aria-hidden="true"></i>',
+                             name="update_status_form",
+                             type="submit",
+                             css_class="btn btn-primary")))
 
     def clean(self):
         cleaned_data = super(ReportStatusForm, self).clean()

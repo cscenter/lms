@@ -736,6 +736,7 @@ class Report(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel):
         if self.file:
             return os.path.basename(self.file.name)
 
+    @property
     def file_url(self):
         return reverse("projects:download_report_attachment", kwargs={
             "sid": hashids.encode(self.pk),
