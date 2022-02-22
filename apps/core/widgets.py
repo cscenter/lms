@@ -88,3 +88,7 @@ class TimeInputTextWidget(forms.TimeInput):
         }
         fmt = format or TIME_FORMAT_RU
         super().__init__(attrs=attrs, format=fmt)
+
+
+class JasnyFileInputWidget(forms.ClearableFileInput):
+    template_name = 'widgets/file_input.html'

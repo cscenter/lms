@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
-from core.widgets import UbereditorWidget
+from core.widgets import UbereditorWidget, JasnyFileInputWidget
 from courses.constants import AssignmentStatus
 from courses.forms import AssignmentDurationField
 from courses.models import Assignment
@@ -30,10 +30,6 @@ class SubmitLink(BaseInput):
     def __init__(self, *args, **kwargs):
         self.field_classes = 'btn btn-link'
         super().__init__(*args, **kwargs)
-
-
-class JesnyFileInput(forms.ClearableFileInput):
-    template_name = 'widgets/file_input.html'
 
 
 class DisableOptionSelectWidget(forms.Select):
@@ -69,7 +65,7 @@ class AssignmentReviewForm(forms.Form):
     attached_file = forms.FileField(
         label="",
         required=False,
-        widget=JesnyFileInput)
+        widget=JasnyFileInputWidget)
 
     score = ScoreField(required=False, label="")
     score_old = ScoreField(required=False, widget=forms.HiddenInput())
@@ -166,7 +162,7 @@ class AssignmentSolutionDefaultForm(AssignmentSolutionBaseForm):
     attached_file = forms.FileField(
         label="",
         required=False,
-        widget=JesnyFileInput)
+        widget=JasnyFileInputWidget)
 
     class Meta:
         model = AssignmentComment
@@ -212,7 +208,7 @@ class AssignmentSolutionYandexContestForm(AssignmentSolutionBaseForm):
         label=_("Solution file"),
         required=True,
         validators=[validate_attachment_has_file_extension],
-        widget=JesnyFileInput)
+        widget=JasnyFileInputWidget)
 
     class Meta:
         model = AssignmentComment

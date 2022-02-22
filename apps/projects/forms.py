@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from core import comment_persistence
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.urls import reverse_lazy
-from core.widgets import UbereditorWidget
+from core.widgets import JasnyFileInputWidget, UbereditorWidget
 from projects.models import (
     PracticeCriteria, ProjectStudent, Report, ReportComment, Review
 )
@@ -102,7 +102,7 @@ class ReportCommentForm(forms.ModelForm):
     attached_file = forms.FileField(
         label="",
         required=False,
-        widget=forms.FileInput)
+        widget=JasnyFileInputWidget)
 
     def __init__(self, *args, **kwargs):
         report = kwargs.pop('report', None)
@@ -110,11 +110,9 @@ class ReportCommentForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div('text'),
-            Div(Div('attached_file',
-                    Div(Submit('new_comment_form', _('Send')),
-                        css_class='pull-right'),
-                    css_class="form-inline"),
-                css_class="form-group"))
+            Div('attached_file', css_class='form-group'),
+            Div(Submit('new_comment_form', _('Send'), css_class='pull-right'),
+                css_class='form-group clearfix'))
         super(ReportCommentForm, self).__init__(*args, **kwargs)
         # Append required data not represented in form fields
         self.instance.report = report

@@ -4,8 +4,8 @@ from crispy_forms.layout import Div, Layout, Submit
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from core.widgets import UbereditorWidget
-from learning.forms import JesnyFileInput, SubmitLink
+from core.widgets import UbereditorWidget, JasnyFileInputWidget
+from learning.forms import SubmitLink
 from learning.models import AssignmentComment, AssignmentSubmissionTypes
 
 
@@ -21,7 +21,7 @@ class AssignmentCommentForm(forms.ModelForm):
     attached_file = forms.FileField(
         label="",
         required=False,
-        widget=JesnyFileInput)
+        widget=JasnyFileInputWidget)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
