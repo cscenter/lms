@@ -138,7 +138,9 @@ class AssignmentCheckQueueView(PermissionRequiredMixin, TemplateView):
                     "csrfToken": get_token(self.request),
                     "courseOptions": course_options,
                     "courseTeachers": filters["courseTeachers"],
-                    "courseGroups": filters["courseGroups"]
+                    "courseGroups": filters["courseGroups"],
+                    "statusOptions": [{'value': v, 'label': str(l)} for v, l in AssignmentStatus.choices
+                                      if v != AssignmentStatus.NEW]
                 },
                 "state": {
                     "course": course.pk,
