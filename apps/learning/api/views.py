@@ -129,31 +129,24 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
             "id": serializers.IntegerField(),
             "teacher": UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic'))
         })
-        activity = serializers.SerializerMethodField()
+        first_solution_at = serializers.SerializerMethodField()
 
         class Meta:
             model = StudentAssignment
             fields = ('id', 'assignment_id', 'score', 'status', 'student',
-                      'assignee', 'activity')
+                      'assignee', 'first_solution_at')
 
-        def get_activity(self, obj: StudentAssignment) -> Optional[Dict[str, Any]]:
-            """Returns activity stats."""
+        def get_first_solution_at(self, obj: StudentAssignment) -> Optional[str]:
             if not obj.meta or 'stats' not in obj.meta:
                 return None
             stats = obj.meta['stats']
-            if not stats or 'activity' not in stats:
+            if not stats or 'solutions' not in stats:
                 return None
-            # Backward compatibility
-            if isinstance(stats['activity'], dict):
-                return stats['activity']
-            if stats['activity'] == PersonalAssignmentActivity.SOLUTION:
-                dt = stats['solution']
+            # Backward compatibility, remove after deploying LMS-240
+            if isinstance(stats['solutions'], int):
+                return stats['solution']
             else:
-                dt = stats['comment']
-            return {
-                "code": stats["activity"],
-                "dt": dt
-            }
+                return stats['solutions']['first']
 
     def initial(self, request, *args, **kwargs):
         self.course = get_object_or_404(Course.objects.get_queryset(), pk=kwargs['course_id'])
