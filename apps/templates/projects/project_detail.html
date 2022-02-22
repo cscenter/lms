@@ -10,6 +10,7 @@
 
 {% block content %}{% localtime off %}
   <div class="container">
+    <h2 class="mt-0">{{ project.name }}</h2>
     <ol class=" breadcrumb projects">
       <li class="active">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект / {{ project.semester }}
         {% if request.user.is_curator %}<a href="{% url "admin:projects_project_change" object_id=project.pk %}" target="_blank"><i
@@ -29,10 +30,9 @@
         </nav>
       {% endif %}
     {% endif %}
-    <div id="project-detail-page">
+    <div id="project-detail-page" class="p-30">
       <div class="row">
         <div class="col-xs-8">
-          <h2 class="project-name">{{ project.name }}</h2>
           {% if project.description %}
             <div class="ubertext">
               {% markdown 3600 "project_detail_description" project.pk project.modified %}
@@ -196,8 +196,8 @@
 
         </div>
         <div class="col-xs-4">
-          <div class="links">
-            {% if can_enroll %}
+          {% if can_enroll %}
+            <div class="mb-10">
               {% if project.is_active and not you_enrolled %}
                 <form method="post" action="{% url 'projects:reviewer_project_enroll' pk=project.pk %}">
                   {% csrf_token %}
@@ -206,13 +206,13 @@
               {% elif project.is_active %}
                 <div class="you-enrolled">Вы подписаны на проект</div>
               {% endif %}
-            {% endif %}
-          </div>
+            </div>
+          {% endif %}
 
           {% if request.user.is_project_reviewer or request.user.is_curator %}
             {% if  project.reviewers.all %}
-              <div class="reviewers-list">
-                <h5>Проверяющие:</h5>
+              <div class="mb-20">
+                <h5 class="mt-0">Проверяющие:</h5>
                 {% for reviewer in project.reviewers.all %}
                   {{ reviewer }}<br>
                 {% endfor %}
