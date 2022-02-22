@@ -80,31 +80,47 @@ def test_resolve_assignees_for_personal_assignment(settings):
 
 
 @pytest.mark.django_db
-def test_update_personal_assignment_stats():
+def test_service_update_personal_assignment_stats_unpublished():
+    """Do not calculate stats for a draft submission."""
     curator = CuratorFactory()
     student_assignment = StudentAssignmentFactory()
-    # Do not calculate stats with a draft submissions
     create_assignment_comment(personal_assignment=student_assignment,
                               is_draft=True,
                               created_by=curator,
                               message='Comment message')
     student_assignment.refresh_from_db()
     assert student_assignment.meta is None
+
+
+@pytest.mark.django_db
+def test_service_update_personal_assignment_stats_published():
+    curator = CuratorFactory()
+    student_assignment = StudentAssignmentFactory()
     comment1 = create_assignment_comment(personal_assignment=student_assignment,
                                          is_draft=False,
                                          created_by=curator,
-                                         message='Comment message')
+                                         message='Comment1 message')
     student_assignment.refresh_from_db()
     assert isinstance(student_assignment.meta, dict)
     assert student_assignment.meta['stats']['comments'] == 1
     assert student_assignment.meta['stats']['activity'] == PersonalAssignmentActivity.TEACHER_COMMENT
-    assert "comment" in student_assignment.meta['stats']
-    assert "solution" not in student_assignment.meta['stats']
     assert "solutions" not in student_assignment.meta['stats']
-    # Emulate `late` processing of subsequent submissions
     solution1 = create_assignment_solution(personal_assignment=student_assignment,
                                            created_by=student_assignment.student,
                                            message="solution")
+    update_personal_assignment_stats(personal_assignment=student_assignment)
+    student_assignment.refresh_from_db()
+    assert student_assignment.stats['activity'] == PersonalAssignmentActivity.SOLUTION
+    assert student_assignment.stats['comments'] == 1
+    assert 'solutions' in student_assignment.stats
+    solutions_stats = student_assignment.stats['solutions']
+    assert 'count' in solutions_stats
+    assert solutions_stats['count'] == 1
+    assert 'first' in solutions_stats
+    assert solutions_stats['first'] == solution1.created.replace(microsecond=0)
+    assert 'last' in solutions_stats
+    assert solutions_stats['last'] == solution1.created.replace(microsecond=0)
+    # Emulate `late` stats processing
     solution2 = create_assignment_solution(personal_assignment=student_assignment,
                                            created_by=student_assignment.student,
                                            message="solution2")
@@ -113,15 +129,21 @@ def test_update_personal_assignment_stats():
     comment2 = create_assignment_comment(personal_assignment=student_assignment,
                                          is_draft=False,
                                          created_by=curator,
-                                         message='Comment message')
+                                         message='Comment2 message')
+    solution2.refresh_from_db()
+    assert solution2.created > comment2.created
     update_personal_assignment_stats(personal_assignment=student_assignment)
     student_assignment.refresh_from_db()
     assert student_assignment.stats['comments'] == 2
-    assert 'solution' in student_assignment.stats
-    assert student_assignment.stats['solution'] == fixed_dt.replace(microsecond=0)
-    assert 'solutions' in student_assignment.stats
-    assert student_assignment.stats['solutions'] == 2
     assert student_assignment.stats['activity'] == PersonalAssignmentActivity.SOLUTION
+    assert 'solutions' in student_assignment.stats
+    solutions_stats = student_assignment.stats['solutions']
+    assert 'count' in solutions_stats
+    assert solutions_stats['count'] == 2
+    assert 'first' in solutions_stats
+    assert solutions_stats['first'] == comment1.created.replace(microsecond=0)
+    assert 'last' in solutions_stats
+    assert solutions_stats['last'] == fixed_dt.replace(microsecond=0)
 
 
 @pytest.mark.django_db

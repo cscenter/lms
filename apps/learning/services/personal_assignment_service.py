@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.db.models import (
-    Case, Count, DateTimeField, F, IntegerField, Max, When, Window
+    Case, Count, DateTimeField, F, IntegerField, Max, Min, When, Window
 )
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -31,28 +31,30 @@ logger = logging.getLogger(__name__)
 
 def update_personal_assignment_stats(*, personal_assignment: StudentAssignment) -> None:
     """
-    Calculates and fully replaces personal assignment stats stored
-    in a `stats` property of the .meta json field.
+    Calculates personal assignment stats and saves it in a `stats` property
+    of the .meta json field.
 
     Full Example:
         {
             "comments": 1,
-            "solutions": 2,
+            "solutions": {
+                "count": 3,
+                "first": "2020-11-03T19:38:44Z", // datetime of the first submission
+                "last": "2020-11-03T19:39:44Z"
+            },
             "activity": "sc",  // code of the latest activity
-            "solution": "2020-11-03T19:38:44Z", // the latest submission datetime
-            "comment": "2020-11-03T19:38:44Z" // the latest comment datetime
         }
     """
     solutions_count = Count(
         Case(When(type=AssignmentSubmissionTypes.SOLUTION,
                   then=1),
              output_field=IntegerField()))
-    solution_latest = Max(
+    solution_first = Min(
         Case(When(type=AssignmentSubmissionTypes.SOLUTION,
                   then=F('created')),
              output_field=DateTimeField()))
-    comment_latest = Max(
-        Case(When(type=AssignmentSubmissionTypes.COMMENT,
+    solution_latest = Max(
+        Case(When(type=AssignmentSubmissionTypes.SOLUTION,
                   then=F('created')),
              output_field=DateTimeField()))
     window = {
@@ -63,8 +65,8 @@ def update_personal_assignment_stats(*, personal_assignment: StudentAssignment) 
                          .filter(student_assignment_id=personal_assignment.pk)
                          .annotate(submissions_total=Window(expression=Count('*'), **window),
                                    solutions_total=Window(expression=solutions_count, **window),
-                                   solution_latest=Window(expression=solution_latest, **window),
-                                   comment_latest=Window(expression=comment_latest, **window))
+                                   solution_first=Window(expression=solution_first, **window),
+                                   solution_latest=Window(expression=solution_latest, **window))
                          .order_by('created')
                          .last())
     if latest_submission is None:
@@ -83,17 +85,19 @@ def update_personal_assignment_stats(*, personal_assignment: StudentAssignment) 
     # Django 3.2 doesn't support partial update of the json field,
     # better to select_for_update
     meta = personal_assignment.meta or {}
+    new_stats = {'activity': str(latest_activity)}
     comments_total = latest_submission.submissions_total - latest_submission.solutions_total
-    new_stats = {
-        'comments': comments_total,
-        'activity': str(latest_activity),
-    }
+    if comments_total:
+        new_stats['comments'] = comments_total
     # Omit default or null values to save space
     if latest_submission.solutions_total:
-        new_stats['solutions'] = latest_submission.solutions_total
-        new_stats['solution'] = latest_submission.solution_latest.replace(microsecond=0)
-    if latest_submission.comment_latest:
-        new_stats['comment'] = latest_submission.comment_latest.replace(microsecond=0)
+        solution_stats = {
+            'count': latest_submission.solutions_total,
+            'first': latest_submission.solution_first.replace(microsecond=0),
+        }
+        if latest_submission.solutions_total > 1:
+            solution_stats['last'] = latest_submission.solution_latest.replace(microsecond=0)
+        new_stats['solutions'] = solution_stats
     meta['stats'] = new_stats
     (StudentAssignment.objects
      .filter(pk=personal_assignment.pk)

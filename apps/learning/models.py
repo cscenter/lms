@@ -668,17 +668,30 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             return None
         stats = {}
         for key, value in self.meta['stats'].items():
-            if key == 'comment' or key == 'solution':
-                # TODO: more safe to use drf serializer since we use JSONEncoder
-                #  from this lib
-                value = datetime.datetime.fromisoformat(value.replace('Z', '+00:00'))
+            if key == 'solutions':
+                solution_stats = {}
+                for k, v in value.items():
+                    if k == 'first' or k == 'last':
+                        # TODO: use drf serializer since we use JSONEncoder
+                        #  from this lib
+                        v = datetime.datetime.fromisoformat(v.replace('Z', '+00:00'))
+                    solution_stats[k] = v
+                if 'last' not in solution_stats:
+                    solution_stats['last'] = solution_stats['first']
+                value = solution_stats
             stats[key] = value
         return stats
 
     @property
     def is_submission_received(self):
+        stats = self.stats
         try:
-            return self.stats is not None and self.stats.get('solutions', 0) > 0
+            if stats is None or not stats.get('solutions', None):
+                return False
+            # Backward compatibility: remove after stats recalculation
+            if isinstance(stats['solutions'], int):
+                return stats['solutions'] > 0
+            return stats['solutions'].get('count', 0) > 0
         except ValueError:
             return False
 

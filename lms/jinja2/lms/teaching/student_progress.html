@@ -45,8 +45,8 @@
                 </td>
                 <td>{{ student_assignment.assignment.deadline_at_local(tz=request.user.time_zone)|date("d.m.Y H:i") }}</td>
                 <td>
-                  {% if student_assignment.stats and student_assignment.stats['solution'] is defined %}
-                    {{ student_assignment.stats['solution'].astimezone(request.user.time_zone)|date("d.m.Y H:i") }}
+                  {% if student_assignment.stats and student_assignment.stats['solutions'] is defined %}
+                    {{ student_assignment.stats['solutions']['last'].astimezone(request.user.time_zone)|date("d.m.Y H:i") }}
                     {% else %}
                     &mdash;
                   {% endif %}
