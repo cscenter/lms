@@ -864,6 +864,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
             # FIXME: move side effects outside model saving, e.g. to on_commit
             # TODO: replace with self.student_assignment.('first_student_comment_at')
             update_student_assignment_derivable_fields(self)
+            # FIXME: add transaction.on_commit()
             generate_notifications_about_new_submission.delay(
                 assignment_submission_id=self.pk)
 

@@ -100,6 +100,7 @@ def convert_ipynb_files(sender, instance: AssignmentComment, *args, **kwargs):
         return
     if instance.attached_file_name.endswith('.ipynb'):
         kwargs = {'assignment_submission_id': instance.pk}
+        # FIXME: add transaction.on_commit
         convert_assignment_submission_ipynb_file_to_html.delay(**kwargs)
 
 

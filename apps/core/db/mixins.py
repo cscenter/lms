@@ -85,6 +85,7 @@ class DerivableFieldsMixin(ModelMixinBase):
             raise TypeError('DerivableFieldsMixin needs a model instance')
 
         content_type = ContentType.objects.get_for_model(self)
+        # FIXME: investigate do we need transaction.on_commit here or not
         compute_model_fields.delay(content_type.id, self.pk, derivable_fields)
 
     @classmethod

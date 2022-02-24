@@ -112,6 +112,7 @@ class ApplicationFormSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         instance = super().save(**kwargs)
         if instance.pk:
+            # TODO: better to add transaction.on_commit
             register_in_yandex_contest.delay(instance.pk,
                                              settings.LANGUAGE_CODE)
         return instance
