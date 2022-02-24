@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
-from core.widgets import UbereditorWidget, JasnyFileInputWidget
+from core.widgets import JasnyFileInputWidget, UbereditorWidget
 from courses.constants import AssignmentStatus
 from courses.forms import AssignmentDurationField
 from courses.models import Assignment

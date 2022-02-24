@@ -4,7 +4,7 @@ from crispy_forms.layout import Div, Layout, Submit
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from core.widgets import UbereditorWidget, JasnyFileInputWidget
+from core.widgets import JasnyFileInputWidget, UbereditorWidget
 from learning.forms import SubmitLink
 from learning.models import AssignmentComment, AssignmentSubmissionTypes
 

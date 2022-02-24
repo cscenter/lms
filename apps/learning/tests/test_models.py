@@ -72,7 +72,7 @@ def test_models__str__(mocker):
 
 
 @pytest.mark.django_db
-def test_student_assignment_is_submission_received():
+def test_student_assignment_is_submission_received(django_capture_on_commit_callbacks):
     student = StudentFactory()
     teacher = TeacherFactory()
     student_assignment = StudentAssignmentFactory(
@@ -81,32 +81,37 @@ def test_student_assignment_is_submission_received():
         assignment__submission_type=AssignmentFormat.ONLINE)
     # teacher comments first
     assert not student_assignment.is_submission_received
-    AssignmentCommentFactory(student_assignment=student_assignment,
-                             author=teacher,
-                             type=AssignmentSubmissionTypes.COMMENT)
+    with django_capture_on_commit_callbacks(execute=True):
+        AssignmentCommentFactory(student_assignment=student_assignment,
+                                 author=teacher,
+                                 type=AssignmentSubmissionTypes.COMMENT)
     student_assignment.refresh_from_db()
     assert student_assignment.meta is not None
     assert not student_assignment.is_submission_received
-    AssignmentCommentFactory(student_assignment=student_assignment,
-                             author=student,
-                             type=AssignmentSubmissionTypes.SOLUTION)
+    with django_capture_on_commit_callbacks(execute=True):
+        AssignmentCommentFactory(student_assignment=student_assignment,
+                                 author=student,
+                                 type=AssignmentSubmissionTypes.SOLUTION)
     student_assignment.refresh_from_db()
     assert student_assignment.is_submission_received
     # student comments first
-    student_assignment = StudentAssignmentFactory(
-        student=student,
-        assignment__course__teachers=[teacher],
-        assignment__submission_type=AssignmentFormat.ONLINE)
+    with django_capture_on_commit_callbacks(execute=True):
+        student_assignment = StudentAssignmentFactory(
+            student=student,
+            assignment__course__teachers=[teacher],
+            assignment__submission_type=AssignmentFormat.ONLINE)
     student_assignment.refresh_from_db()
     assert not student_assignment.is_submission_received
-    AssignmentCommentFactory(student_assignment=student_assignment,
-                             type=AssignmentSubmissionTypes.COMMENT,
-                             author=student)
+    with django_capture_on_commit_callbacks(execute=True):
+        AssignmentCommentFactory(student_assignment=student_assignment,
+                                 type=AssignmentSubmissionTypes.COMMENT,
+                                 author=student)
     student_assignment.refresh_from_db()
     assert not student_assignment.is_submission_received
-    AssignmentCommentFactory(student_assignment=student_assignment,
-                             type=AssignmentSubmissionTypes.SOLUTION,
-                             author=student)
+    with django_capture_on_commit_callbacks(execute=True):
+        AssignmentCommentFactory(student_assignment=student_assignment,
+                                 type=AssignmentSubmissionTypes.SOLUTION,
+                                 author=student)
     student_assignment.refresh_from_db()
     assert student_assignment.is_submission_received
 
@@ -299,10 +304,11 @@ def test_soft_delete_student_assignment():
 
 
 @pytest.mark.django_db
-def test_student_assignment_is_status_transition_allowed():
+def test_student_assignment_is_status_transition_allowed(django_capture_on_commit_callbacks):
     sa = StudentAssignmentFactory(assignment__submission_type=AssignmentFormat.ONLINE)
-    AssignmentCommentFactory(student_assignment=sa,
-                             type=AssignmentSubmissionTypes.SOLUTION)
+    with django_capture_on_commit_callbacks(execute=True):
+        AssignmentCommentFactory(student_assignment=sa,
+                                 type=AssignmentSubmissionTypes.SOLUTION)
     sa.refresh_from_db()
     assert not sa.is_status_transition_allowed(AssignmentStatus.NOT_SUBMITTED)
 

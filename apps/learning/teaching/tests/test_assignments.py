@@ -242,14 +242,14 @@ def test_create_assignment_public_form_restricted_to_settings(client):
 
 
 @pytest.mark.django_db
-def test_course_assignment_form_create_with_checking_system(client, mocker):
+def test_course_assignment_form_create_with_checking_system(client, mocker, django_capture_on_commit_callbacks):
     mock_compiler_sync = mocker.patch('grading.tasks.update_checker_yandex_contest_problem_compilers')
     teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
-    checking_system = CheckingSystemFactory.create(
+    checking_system = CheckingSystemFactory(
         type=CheckingSystemTypes.YANDEX_CONTEST
     )
     checking_system_url = get_yandex_contest_url(15, 'D')
@@ -265,7 +265,8 @@ def test_course_assignment_form_create_with_checking_system(client, mocker):
     })
     url = co.get_create_assignment_url()
     client.login(teacher)
-    response = client.post(url, prefixed_form(form, "assignment"))
+    with django_capture_on_commit_callbacks(execute=True):
+        response = client.post(url, prefixed_form(form, "assignment"))
     assert response.status_code == 302
     assert Assignment.objects.count() == 1
     assert Checker.objects.count() == 1
@@ -556,7 +557,7 @@ def test_view_student_assignment_detail_draft_review_remembers_score_and_status(
 
 
 @pytest.mark.django_db
-def test_view_student_assignment_detail_add_review(client, assert_redirect):
+def test_view_student_assignment_detail_add_review(client, assert_redirect, django_capture_on_commit_callbacks):
     teacher = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
     sa = StudentAssignmentFactory(assignment__course=course,
@@ -637,9 +638,10 @@ def test_view_student_assignment_detail_add_review(client, assert_redirect):
     assert sa.score == 1
     assert sa.status == AssignmentStatus.ON_CHECKING
 
-    create_assignment_solution(personal_assignment=sa,
-                               created_by=sa.student,
-                               message="solution")
+    with django_capture_on_commit_callbacks(execute=True):
+        create_assignment_solution(personal_assignment=sa,
+                                   created_by=sa.student,
+                                   message="solution")
     sa.refresh_from_db()
     # Provided forbidden status
     form_data = {

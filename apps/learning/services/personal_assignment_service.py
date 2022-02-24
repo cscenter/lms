@@ -1,10 +1,12 @@
 import logging
 from datetime import timedelta
 from decimal import Decimal
+from functools import partial
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
+from django.db import transaction
 from django.db.models import (
     Case, Count, DateTimeField, F, IntegerField, Max, Min, When, Window
 )
@@ -124,7 +126,8 @@ def create_assignment_solution(*, personal_assignment: StudentAssignment,
                                       status_old=AssignmentStatus(personal_assignment.status),
                                       status_new=AssignmentStatus.ON_CHECKING)
     from learning.tasks import update_student_assignment_stats
-    update_student_assignment_stats.delay(personal_assignment.pk)
+    update_stats = partial(update_student_assignment_stats.delay, personal_assignment.pk)
+    transaction.on_commit(update_stats)
 
     return solution
 
@@ -190,7 +193,8 @@ def create_assignment_comment(*, personal_assignment: StudentAssignment,
     comment.save()
 
     from learning.tasks import update_student_assignment_stats
-    update_student_assignment_stats.delay(personal_assignment.pk)
+    update_stats = partial(update_student_assignment_stats.delay, personal_assignment.pk)
+    transaction.on_commit(update_stats)
 
     return comment
 

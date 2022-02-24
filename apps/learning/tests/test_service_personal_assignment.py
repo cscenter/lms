@@ -93,13 +93,14 @@ def test_service_update_personal_assignment_stats_unpublished():
 
 
 @pytest.mark.django_db
-def test_service_update_personal_assignment_stats_published():
+def test_service_update_personal_assignment_stats_published(django_capture_on_commit_callbacks):
     curator = CuratorFactory()
     student_assignment = StudentAssignmentFactory()
-    comment1 = create_assignment_comment(personal_assignment=student_assignment,
-                                         is_draft=False,
-                                         created_by=curator,
-                                         message='Comment1 message')
+    with django_capture_on_commit_callbacks(execute=True):
+        comment1 = create_assignment_comment(personal_assignment=student_assignment,
+                                             is_draft=False,
+                                             created_by=curator,
+                                             message='Comment1 message')
     student_assignment.refresh_from_db()
     assert isinstance(student_assignment.meta, dict)
     assert student_assignment.meta['stats']['comments'] == 1
@@ -249,7 +250,7 @@ def test_create_assignment_solution_changes_status():
 
 
 @pytest.mark.django_db
-def test_update_personal_assignment_status():
+def test_update_personal_assignment_status(django_capture_on_commit_callbacks):
     sa = StudentAssignmentFactory(assignment__submission_type=AssignmentFormat.NO_SUBMIT)
 
     assert sa.status == AssignmentStatus.NOT_SUBMITTED
@@ -279,8 +280,10 @@ def test_update_personal_assignment_status():
     sa.save()
 
     # submission is needed for the next test
-    AssignmentCommentFactory(student_assignment=sa,
-                             type=AssignmentSubmissionTypes.SOLUTION)
+    with django_capture_on_commit_callbacks(execute=True) as callbacks:
+        AssignmentCommentFactory(student_assignment=sa,
+                                 type=AssignmentSubmissionTypes.SOLUTION)
+    assert len(callbacks) == 1
     sa.refresh_from_db()
     # it changes status automatically
     assert sa.status == AssignmentStatus.ON_CHECKING
@@ -403,7 +406,7 @@ def test_update_personal_assignment_score_fake_update():
 
 
 @pytest.mark.django_db
-def test_create_personal_assignment_review():
+def test_create_personal_assignment_review(django_capture_on_commit_callbacks):
     teacher = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
     sa = StudentAssignmentFactory(assignment__course=course,
@@ -512,11 +515,13 @@ def test_create_personal_assignment_review():
     assert sa.status != AssignmentStatus.COMPLETED
     assert AssignmentComment.objects.count() == 0
 
-    # Provided forbidden status
-    create_assignment_solution(personal_assignment=sa,
-                               created_by=sa.student,
-                               message="solution")
-    sa.refresh_from_db()  # above method changes StudentAssignment
+    # Update personal assignment status to `on_checking`
+    with django_capture_on_commit_callbacks(execute=True):
+        create_assignment_solution(personal_assignment=sa,
+                                   created_by=sa.student,
+                                   message="solution")
+    sa.refresh_from_db()
+    # Create review with a forbidden status
     with pytest.raises(ValidationError) as exc_info:
         with transaction.atomic():
             create_personal_assignment_review(student_assignment=sa,
