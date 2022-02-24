@@ -258,7 +258,8 @@ def update_personal_assignment_score(*, student_assignment: StudentAssignment,
     return True, student_assignment
 
 
-def create_personal_assignment_review(*, student_assignment: StudentAssignment,
+def create_personal_assignment_review(*,
+                                      student_assignment: StudentAssignment,
                                       reviewer: User,
                                       is_draft: bool,
                                       score_old: Optional[Decimal],
@@ -267,8 +268,7 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
                                       status_new: AssignmentStatus,
                                       source: AssignmentScoreUpdateSource,
                                       message: Optional[str] = None,
-                                      attachment: Optional[UploadedFile] = None,
-                                      ) -> AssignmentComment:
+                                      attachment: Optional[UploadedFile] = None) -> AssignmentComment:
     """
     Updates assignment score and/or status on publishing review,
     posts a new comment in a published or draft state.

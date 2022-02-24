@@ -75,6 +75,10 @@ def test_services_normalize_code_review_score():
 def test_task_import_gerrit_code_review_score(settings):
     gerrit_change = GerritChangeFactory()
     student_assignment = gerrit_change.student_assignment
+    assignment = student_assignment.assignment
+    maximum_score = 20
+    assignment.maximum_score = maximum_score
+    assignment.save()
     assert student_assignment.score is None
     assert student_assignment.status == AssignmentStatus.NOT_SUBMITTED
     # Gerrit user without permissions
@@ -100,8 +104,7 @@ def test_task_import_gerrit_code_review_score(settings):
     assert student_assignment.score is None
     assert student_assignment.status == AssignmentStatus.NEED_FIXES
 
-    # Gerrit can overwrite teacher score in LMS
-    # Only if new_score == assignment.maximum_score
+    # Gerrit overwrites score in LMS if new score value == assignment.maximum_score
     import_gerrit_code_review_score(change_id=gerrit_change.change_id,
                                     score_old=0,
                                     score_new=1,
@@ -111,7 +114,6 @@ def test_task_import_gerrit_code_review_score(settings):
     assert student_assignment.status == AssignmentStatus.NEED_FIXES
 
     # Gerrit overwrites score to max_score even if score_old is incorrect
-    maximum_score = student_assignment.assignment.maximum_score
     import_gerrit_code_review_score(change_id=gerrit_change.change_id,
                                     score_old=2,
                                     score_new=2,
@@ -126,5 +128,5 @@ def test_task_import_gerrit_code_review_score(settings):
                                     score_new=1,
                                     username=teacher_connected.uid)
     student_assignment.refresh_from_db()
-    assert student_assignment.status == AssignmentStatus.NEED_FIXES
     assert student_assignment.score == maximum_score
+    assert student_assignment.status == AssignmentStatus.NEED_FIXES

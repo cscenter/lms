@@ -122,17 +122,19 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
         return
 
     assignment = student_assignment.assignment
-    score_old = normalize_code_review_score(score_old, assignment)
-    score_new = normalize_code_review_score(score_new, assignment)
+
+    # Old score value from Gerrit is not actually used.
+    score_old = student_assignment.score
+    gerrit_score = normalize_code_review_score(score_new, assignment)
+    if gerrit_score == assignment.maximum_score:
+        status_new = AssignmentStatus.COMPLETED
+        score_new = gerrit_score
+    else:
+        status_new = AssignmentStatus.NEED_FIXES
+        score_new = student_assignment.score
 
     logger.info(f"Posting score {score_old} -> {score_new} for personal "
                 f"assignment {student_assignment.pk}")
-
-    status_new = AssignmentStatus.NEED_FIXES
-    if score_new == assignment.maximum_score:
-        status_new = AssignmentStatus.COMPLETED
-    else:
-        score_new = student_assignment.score
 
     # Check site permissions of the main branch of the course
     access_groups = changed_by.get_site_groups(assignment.course.main_branch.site_id)
@@ -151,6 +153,5 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
                                           status_old=student_assignment.status,
                                           status_new=status_new,
                                           message=_("Update in Gerrit"),
-                                          source=AssignmentScoreUpdateSource.WEBHOOK_GERRIT
-                                          )
+                                          source=AssignmentScoreUpdateSource.WEBHOOK_GERRIT)
     return student_assignment.pk
