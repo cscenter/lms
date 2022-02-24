@@ -4,8 +4,8 @@ from typing import Optional
 from django_rq import job
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils.translation import gettext_lazy as _
 
 from auth.models import ConnectedAuthService
 from code_reviews.api.gerrit import Gerrit
@@ -21,7 +21,7 @@ from courses.constants import AssignmentStatus
 from learning.models import AssignmentComment, AssignmentSubmissionTypes
 from learning.permissions import EditStudentAssignment
 from learning.services.personal_assignment_service import (
-    update_personal_assignment_score, update_personal_assignment_status
+    create_personal_assignment_review
 )
 from learning.settings import AssignmentScoreUpdateSource
 from users.models import User
@@ -128,15 +128,11 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
     logger.info(f"Posting score {score_old} -> {score_new} for personal "
                 f"assignment {student_assignment.pk}")
 
-    score_current = student_assignment.score
-    if score_current is not None and score_current != score_old:
-        # FIXME: log warning instead after score update logging will be implemented
-        raise ValidationError("Abort operation since current score value "
-                              "differs from the expected.")
-
-    # Cast Gerrit webhook value to None if it's the first score update.
-    if not score_old and not score_current:
-        score_old = score_current
+    status_new = AssignmentStatus.NEED_FIXES
+    if score_new == assignment.maximum_score:
+        status_new = AssignmentStatus.COMPLETED
+    else:
+        score_new = student_assignment.score
 
     # Check site permissions of the main branch of the course
     access_groups = changed_by.get_site_groups(assignment.course.main_branch.site_id)
@@ -147,15 +143,14 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
         return None
 
     with transaction.atomic():
-        update_personal_assignment_score(student_assignment=student_assignment,
-                                         changed_by=changed_by,
-                                         score_old=score_old,
-                                         score_new=score_new,
-                                         source=AssignmentScoreUpdateSource.WEBHOOK_GERRIT)
-        status_new = AssignmentStatus.NEED_FIXES
-        if score_new == student_assignment.assignment.maximum_score:
-            status_new = AssignmentStatus.COMPLETED
-        update_personal_assignment_status(student_assignment=student_assignment,
-                                          status_old=AssignmentStatus(student_assignment.status),
-                                          status_new=status_new)
+        create_personal_assignment_review(student_assignment=student_assignment,
+                                          reviewer=changed_by,
+                                          is_draft=False,
+                                          score_old=student_assignment.score,
+                                          score_new=score_new,
+                                          status_old=student_assignment.status,
+                                          status_new=status_new,
+                                          message=_("Update in Gerrit"),
+                                          source=AssignmentScoreUpdateSource.WEBHOOK_GERRIT
+                                          )
     return student_assignment.pk

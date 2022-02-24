@@ -418,7 +418,8 @@ def test_create_personal_assignment_review():
                                           score_old=sa.score,
                                           score_new=sa.score,
                                           status_old=sa.status,
-                                          status_new=sa.status
+                                          status_new=sa.status,
+                                          source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
                                           )
     assert exc_info.value.code == 'empty'
     assert AssignmentComment.objects.count() == 0
@@ -431,7 +432,8 @@ def test_create_personal_assignment_review():
                                                 score_old=sa.score,
                                                 score_new=sa.score,
                                                 status_old=sa.status,
-                                                status_new=sa.status
+                                                status_new=sa.status,
+                                                source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
                                                 )
     assert comment.is_published
     assert comment.text == "Some message"
@@ -446,7 +448,8 @@ def test_create_personal_assignment_review():
                                                 score_old=sa.score,
                                                 score_new=Decimal('0'),
                                                 status_old=sa.status,
-                                                status_new=sa.status
+                                                status_new=sa.status,
+                                                source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
                                                 )
     assert comment.is_published
     assert comment.text == ""
@@ -461,7 +464,8 @@ def test_create_personal_assignment_review():
                                                 score_old=sa.score,
                                                 score_new=sa.score,
                                                 status_old=sa.status,
-                                                status_new=AssignmentStatus.NEED_FIXES
+                                                status_new=AssignmentStatus.NEED_FIXES,
+                                                source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
                                                 )
     assert comment.is_published
     assert comment.text == ""
@@ -477,7 +481,8 @@ def test_create_personal_assignment_review():
                                                 score_old=sa.score,
                                                 score_new=sa.score,
                                                 status_old=sa.status,
-                                                status_new=sa.status
+                                                status_new=sa.status,
+                                                source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
                                                 )
     assert comment.is_published
     assert comment.text == ""
@@ -498,7 +503,8 @@ def test_create_personal_assignment_review():
                                               score_old=sa.score,
                                               score_new=Decimal('6'),
                                               status_old=sa.status,
-                                              status_new=AssignmentStatus.COMPLETED
+                                              status_new=AssignmentStatus.COMPLETED,
+                                              source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
                                               )
     sa.refresh_from_db()  # atomic doesn't restore state
     assert exc_info.value.code == 'score_overflow'
@@ -520,7 +526,8 @@ def test_create_personal_assignment_review():
                                               score_old=sa.score,
                                               score_new=Decimal('5'),
                                               status_old=sa.status,
-                                              status_new=AssignmentStatus.NOT_SUBMITTED
+                                              status_new=AssignmentStatus.NOT_SUBMITTED,
+                                              source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
                                               )
     sa.refresh_from_db()
     assert exc_info.value.code == 'status_not_allowed'
@@ -547,7 +554,8 @@ def test_create_personal_assignment_review_concurrent_update():
                                               score_old=Decimal('3'),
                                               score_new=Decimal('5'),
                                               status_old=sa.status,
-                                              status_new=AssignmentStatus.NEED_FIXES
+                                              status_new=AssignmentStatus.NEED_FIXES,
+                                              source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
                                               )
     assert exc_info.value.code == 'concurrent'
     sa.refresh_from_db()
@@ -565,7 +573,8 @@ def test_create_personal_assignment_review_concurrent_update():
                                               score_old=Decimal('0'),
                                               score_new=Decimal('0'),
                                               status_old=sa.status,
-                                              status_new=AssignmentStatus.NEED_FIXES
+                                              status_new=AssignmentStatus.NEED_FIXES,
+                                              source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
                                               )
     assert exc_info.value.code == 'concurrent'
     sa.refresh_from_db()
@@ -584,7 +593,8 @@ def test_create_personal_assignment_review_concurrent_update():
                                               score_old=sa.score,
                                               score_new=Decimal('5'),
                                               status_old=AssignmentStatus.COMPLETED,
-                                              status_new=AssignmentStatus.NEED_FIXES
+                                              status_new=AssignmentStatus.NEED_FIXES,
+                                              source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
                                               )
     assert exc_info.value.code == 'concurrent'
     sa.refresh_from_db()
@@ -603,7 +613,8 @@ def test_create_personal_assignment_review_concurrent_update():
                                               score_old=sa.score,
                                               score_new=Decimal('5'),
                                               status_old=AssignmentStatus.NEED_FIXES,
-                                              status_new=AssignmentStatus.NEED_FIXES
+                                              status_new=AssignmentStatus.NEED_FIXES,
+                                              source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
                                               )
     assert exc_info.value.code == 'concurrent'
     sa.refresh_from_db()
@@ -626,7 +637,8 @@ def test_create_assignment_comment_meta():
         score_old=sa.score,
         status_old=sa.status,
         score_new=Decimal('1'),
-        status_new=AssignmentStatus.ON_CHECKING
+        status_new=AssignmentStatus.ON_CHECKING,
+        source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
     )
     assert comment.meta == {
         "score": Decimal('1'),
@@ -644,7 +656,8 @@ def test_create_assignment_comment_meta():
         score_old=sa.score,
         status_old=sa.status,
         score_new=None,
-        status_new=AssignmentStatus.COMPLETED
+        status_new=AssignmentStatus.COMPLETED,
+        source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
     )
     assert comment.meta == {
         "score": None,
@@ -662,7 +675,8 @@ def test_create_assignment_comment_meta():
         score_old=sa.score,
         status_old=sa.status,
         score_new=Decimal('2'),
-        status_new=sa.status
+        status_new=sa.status,
+        source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
     )
     assert comment.meta == {
         "score": Decimal('2'),
@@ -680,7 +694,8 @@ def test_create_assignment_comment_meta():
         score_old=sa.score,
         status_old=AssignmentStatus.COMPLETED,
         score_new=sa.score,
-        status_new=AssignmentStatus.NEED_FIXES
+        status_new=AssignmentStatus.NEED_FIXES,
+        source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
     )
     assert comment.meta == {
         "score": Decimal('2'),

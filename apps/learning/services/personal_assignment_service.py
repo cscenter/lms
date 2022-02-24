@@ -265,6 +265,7 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
                                       score_new: Optional[Decimal],
                                       status_old: AssignmentStatus,
                                       status_new: AssignmentStatus,
+                                      source: AssignmentScoreUpdateSource,
                                       message: Optional[str] = None,
                                       attachment: Optional[UploadedFile] = None,
                                       ) -> AssignmentComment:
@@ -293,7 +294,7 @@ def create_personal_assignment_review(*, student_assignment: StudentAssignment,
                                                        changed_by=reviewer,
                                                        score_old=score_old,
                                                        score_new=score_new,
-                                                       source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT)
+                                                       source=source)
         if not updated:
             raise ValidationError(msg, code="concurrent")
         updated = update_personal_assignment_status(student_assignment=sa,
