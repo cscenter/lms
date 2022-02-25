@@ -712,9 +712,11 @@ def test_create_assignment_solution_meta(client):
     sa = StudentAssignmentFactory(assignment__course=course,
                                   assignment__maximum_score=5)
     assert sa.status == AssignmentStatus.NOT_SUBMITTED
-    solution = create_assignment_solution(personal_assignment=sa,
-                                          created_by=sa.student,
-                                          message="solution")
+    with transaction.atomic():
+        solution = create_assignment_solution(personal_assignment=sa,
+                                              created_by=sa.student,
+                                              message="solution")
+    sa.refresh_from_db()
     assert sa.status == AssignmentStatus.ON_CHECKING
     assert solution.meta == {
         "score": None,
@@ -724,9 +726,12 @@ def test_create_assignment_solution_meta(client):
     }
     sa.score = 5
     sa.status = AssignmentStatus.NEED_FIXES
-    solution = create_assignment_solution(personal_assignment=sa,
-                                          created_by=sa.student,
-                                          message="solution")
+    sa.save()
+    with transaction.atomic():
+        solution = create_assignment_solution(personal_assignment=sa,
+                                              created_by=sa.student,
+                                              message="solution")
+    sa.refresh_from_db()
     assert solution.meta == {
         "score": sa.score,
         "score_old": sa.score,

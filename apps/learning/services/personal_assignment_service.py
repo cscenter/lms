@@ -111,12 +111,18 @@ def create_assignment_solution(*, personal_assignment: StudentAssignment,
                                attachment: Optional[UploadedFile] = None) -> AssignmentComment:
     if not message and not attachment:
         raise ValidationError("Provide either text or a file.", code="malformed")
+    personal_assignment = (StudentAssignment.objects
+                           .select_for_update()
+                           .get(pk=personal_assignment.pk))
     meta = {
         'score_old': personal_assignment.score,
         'score': personal_assignment.score,
         'status_old': personal_assignment.status,
         'status': AssignmentStatus.ON_CHECKING
     }
+    update_personal_assignment_status(student_assignment=personal_assignment,
+                                      status_old=AssignmentStatus(personal_assignment.status),
+                                      status_new=AssignmentStatus.ON_CHECKING)
     solution = AssignmentComment(student_assignment=personal_assignment,
                                  author=created_by,
                                  type=AssignmentSubmissionTypes.SOLUTION,
@@ -126,9 +132,6 @@ def create_assignment_solution(*, personal_assignment: StudentAssignment,
                                  meta=meta,
                                  attached_file=attachment)
     solution.save()
-    update_personal_assignment_status(student_assignment=personal_assignment,
-                                      status_old=AssignmentStatus(personal_assignment.status),
-                                      status_new=AssignmentStatus.ON_CHECKING)
     from learning.tasks import update_student_assignment_stats
     update_student_assignment_stats.delay(personal_assignment.pk)
 
