@@ -708,3 +708,33 @@ def test_create_assignment_comment_meta():
         "score_old": Decimal('2'),
         "status_old": AssignmentStatus.COMPLETED
     }
+
+
+@pytest.mark.django_db
+def test_create_assignment_solution_meta(client):
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course,
+                                  assignment__maximum_score=5)
+    assert sa.status == AssignmentStatus.NOT_SUBMITTED
+    solution = create_assignment_solution(personal_assignment=sa,
+                                          created_by=sa.student,
+                                          message="solution")
+    assert sa.status == AssignmentStatus.ON_CHECKING
+    assert solution.meta == {
+        "score": None,
+        "score_old": None,
+        "status": AssignmentStatus.ON_CHECKING,
+        "status_old": AssignmentStatus.NOT_SUBMITTED
+    }
+    sa.score = 5
+    sa.status = AssignmentStatus.NEED_FIXES
+    solution = create_assignment_solution(personal_assignment=sa,
+                                          created_by=sa.student,
+                                          message="solution")
+    assert solution.meta == {
+        "score": sa.score,
+        "score_old": sa.score,
+        "status": AssignmentStatus.ON_CHECKING,
+        "status_old": AssignmentStatus.NEED_FIXES
+    }

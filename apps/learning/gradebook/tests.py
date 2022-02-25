@@ -3,7 +3,6 @@ import datetime
 import io
 from decimal import Decimal
 from io import BytesIO, StringIO
-from typing import Optional
 
 import pytest
 import pytz
