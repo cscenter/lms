@@ -112,17 +112,17 @@ def create_assignment_solution(*, personal_assignment: StudentAssignment,
     if not message and not attachment:
         raise ValidationError("Provide either text or a file.", code="malformed")
     # Locking StudentAssignment to prevent concurrent update
-    (StudentAssignment.objects
-     .select_for_update()
-     .get(pk=personal_assignment.pk))
+    sa = (StudentAssignment.objects
+          .select_for_update()
+          .get(pk=personal_assignment.pk))
     meta = {
-        'score_old': personal_assignment.score,
-        'score': personal_assignment.score,
-        'status_old': personal_assignment.status,
+        'score_old': sa.score,
+        'score': sa.score,
+        'status_old': sa.status,
         'status': AssignmentStatus.ON_CHECKING
     }
     update_personal_assignment_status(student_assignment=personal_assignment,
-                                      status_old=AssignmentStatus(personal_assignment.status),
+                                      status_old=AssignmentStatus(sa.status),
                                       status_new=AssignmentStatus.ON_CHECKING)
     solution = AssignmentComment(student_assignment=personal_assignment,
                                  author=created_by,
