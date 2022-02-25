@@ -729,6 +729,7 @@ def test_create_assignment_solution_meta(client):
     }
     sa.score = 5
     sa.status = AssignmentStatus.NEED_FIXES
+    sa.save()
     solution = create_assignment_solution(personal_assignment=sa,
                                           created_by=sa.student,
                                           message="solution")
