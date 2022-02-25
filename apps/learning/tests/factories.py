@@ -3,7 +3,6 @@ import datetime
 import factory
 
 from django.conf import settings
-from django.db import transaction
 from django.utils import timezone
 
 from core.tests.factories import BranchFactory, LocationFactory, SiteFactory
