@@ -3,7 +3,6 @@ import datetime
 import io
 from decimal import Decimal
 from io import BytesIO, StringIO
-from typing import Optional
 
 import pytest
 import pytz
@@ -12,7 +11,6 @@ from bs4 import BeautifulSoup
 from django.contrib.messages import constants as messages_constants
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db import transaction
 from django.utils.encoding import force_bytes, smart_bytes
 from django.utils.translation import gettext_lazy
 
@@ -1159,7 +1157,6 @@ def test_get_student_assignment_state():
     assert get_student_assignment_state(sa) == "—"
     AssignmentCommentFactory(student_assignment=sa,
                              type=AssignmentSubmissionTypes.SOLUTION)
-    sa.refresh_from_db()
     assert get_student_assignment_state(sa) == "…"
     sa.score = 0
     assert get_student_assignment_state(sa) == sa.get_score_verbose_display()

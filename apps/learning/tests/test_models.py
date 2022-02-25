@@ -322,21 +322,17 @@ def test_student_assignment_execution_time():
     solution1 = AssignmentCommentFactory(student_assignment=student_assignment,
                                          type=AssignmentSubmissionTypes.SOLUTION,
                                          execution_time=timedelta(hours=2))
-    student_assignment.refresh_from_db()
     solution2 = AssignmentCommentFactory(student_assignment=student_assignment,
                                          type=AssignmentSubmissionTypes.SOLUTION,
                                          execution_time=timedelta(minutes=3))
-    student_assignment.refresh_from_db()
     # Doesn't take into account even if an exec time has been provided
     comment1 = AssignmentCommentFactory(student_assignment=student_assignment,
                                         type=AssignmentSubmissionTypes.COMMENT,
                                         execution_time=timedelta(hours=2))
     # student_assignment.compute_fields("execution_time")
-    student_assignment.refresh_from_db()
     assert student_assignment.execution_time == timedelta(hours=2, minutes=3)
     # Recalculate on removing solution through admin interface
     solution2.delete()
-    student_assignment.refresh_from_db()
     assert student_assignment.execution_time == timedelta(hours=2)
 
 

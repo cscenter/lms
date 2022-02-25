@@ -89,12 +89,11 @@ class AssignmentCommentFactory(factory.django.DjangoModelFactory):
                                                 message=kwargs['text'],
                                                 attachment=kwargs['attached_file'])
         elif kwargs['type'] == AssignmentSubmissionTypes.SOLUTION:
-            with transaction.atomic():
-                comment = create_assignment_solution(personal_assignment=kwargs['student_assignment'],
-                                                     created_by=kwargs['author'],
-                                                     execution_time=kwargs.get('execution_time'),
-                                                     message=kwargs['text'],
-                                                     attachment=kwargs['attached_file'])
+            comment = create_assignment_solution(personal_assignment=kwargs['student_assignment'],
+                                                 created_by=kwargs['author'],
+                                                 execution_time=kwargs.get('execution_time'),
+                                                 message=kwargs['text'],
+                                                 attachment=kwargs['attached_file'])
         else:
             raise ValueError()
         # Consider to move valid kwargs to the create_assignment_comment/_solution
