@@ -103,6 +103,12 @@
         </div>
         <div id="comment-form-wrapper" class="csc-well {% if solution_form %}hidden{% endif %}">
           {{ crispy(comment_form) }}
+          <div class="text-muted">
+            {% trans -%}
+            Comment doesn't change status.<br>
+            For the teacher to see an update to the solution, use the «Send solution» tab.
+            {%- endtrans %}
+          </div>
         </div>
         {% if solution_form %}
           <div id="solution-form-wrapper" class="csc-well">

@@ -1,5 +1,5 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Div, Layout, Submit, HTML
+from crispy_forms.layout import HTML, Div, Layout, Submit
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
@@ -38,9 +38,7 @@ class AssignmentCommentForm(forms.ModelForm):
                        css_id=f'submit-id-{self.prefix}-save'),
                 SubmitLink('save-draft', draft_button_label,
                            css_id=f'submit-id-{self.prefix}-save-draft'),
-                css_class="form-group"),
-            HTML(_("Comment doesn't change status.<br>"
-                   "For the teacher to see an update to the solution, use the «Send solution» tab.")))
+                css_class="form-group"))
 
     class Meta:
         model = AssignmentComment
