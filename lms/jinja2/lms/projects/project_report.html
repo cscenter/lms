@@ -195,11 +195,11 @@
                 <span href="#report-summarize-form" class="collapse-link" style="border: none;">
                 {% with counter = report_summary_form.instance.final_score %}
                   Подведение итогов&nbsp;(
-                  {%- trans  %}
+                  {%- trans  -%}
                     {{ counter }} point
-                    {% pluralize %}
+                    {%- pluralize -%}
                     {{ counter }} points
-                  {% endtrans %}){% endwith %}
+                  {%- endtrans %}){% endwith %}
                 </span>
             {{ crispy(report_summary_form) }}
           </div>
@@ -211,11 +211,11 @@
                 <ul class="list-unstyled list-group _border-0 mb-0">
                   <li class="list-group-item">
                     {% with counter = report.final_score %}
-                    <h4 class="list-group-item-heading">Суммарный балл &mdash; {% trans %}
+                    <h4 class="list-group-item-heading">Суммарный балл &mdash; {% trans -%}
                       {{ counter }} point
-                      {% pluralize %}
+                      {%- pluralize -%}
                       {{ counter }} points
-                    {% endtrans %}
+                    {%- endtrans %}
                     </h4>
                     {% endwith %}
                     <p class="list-group-item-text">{{ report.final_score_note }}</p>
