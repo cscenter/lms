@@ -122,7 +122,7 @@ django-taggit = "==2.1.0"
 sqlparse = "==0.4.2"
 django-loginas = "==0.3.10"
 # Cannot be updated until this issue is resolved https://github.com/django-webpack/webpack-bundle-tracker/issues/63
-django-webpack-loader = "==0.7.0"
+django-webpack-loader = "==1.4.1"
 XlsxWriter = "==3.0.2"
 # FIXME: it's nbconvert dependency remove?
 jupyter_client = "==7.0.6"
