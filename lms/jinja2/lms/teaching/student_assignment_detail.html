@@ -4,13 +4,12 @@
 
 {% block title %}{{ a_s.student.get_short_name() }} - {{ a_s.assignment.title }}{% endblock %}
 
-{% block body_attrs %} data-init-sections="studentAssignment"{% endblock body_attrs %}
+{% block body_attrs %} data-init-sections="components/fileinput,studentAssignment"{% endblock body_attrs %}
 
 {% block javascripts %}
   <script type="text/javascript">
     window.__CSC__.config.localStorage.hashes = Object.assign((window.__CSC__.config.localStorage.hashes || {}), {{ hashes_json|safe }});
   </script>
-  {{ render_bundle('learning', config='V1', extension='js') }}
   {{ render_bundle('teaching', config='V1', extension='js') }}
 {% endblock javascripts %}
 

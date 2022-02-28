@@ -1,18 +1,15 @@
 {% extends "lms/layouts/v1_base.html" %}
 
-{% block body_attrs %} data-init-sections="projects/report"{% endblock body_attrs %}
+{% block body_attrs %} data-init-sections="projects/report,components/fileinput"{% endblock body_attrs %}
 
 {% block hightlight_styles %}
   <link href="{{ static('v1/css/vendor/highlight-styles/github.css') }}" rel="stylesheet">
 {% endblock hightlight_styles %}
 
 {% block javascripts %}
-  {#    TODO: append instead of replace #}
   <script type="text/javascript">
-    window.__CSC__.config.localStorage.hashes = {{ clean_comments_json|safe }};
+    window.__CSC__.config.localStorage.hashes = Object.assign((window.__CSC__.config.localStorage.hashes || {}), {{ clean_comments_json|safe }});
   </script>
-  {# FIXME: Check that we need scripts from `learning` on this page #}
-  {{ render_bundle('learning', config='V1', extension='js') }}
 {% endblock javascripts %}
 
 
