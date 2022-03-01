@@ -11,7 +11,7 @@ from learning.api.serializers import (
     BaseStudentAssignmentSerializer, CourseAssignmentSerializer, MyCourseSerializer
 )
 from learning.models import StudentAssignment
-from learning.tests.factories import EnrollmentFactory
+from learning.tests.factories import EnrollmentFactory, StudentAssignmentFactory
 from users.tests.factories import TeacherFactory
 
 
@@ -191,3 +191,28 @@ def test_api_update_student_assignment_assignee(client):
                           content_type='application/json',
                           HTTP_AUTHORIZATION=f'Token {auth_token}')
     assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_api_view_personal_assignment_list(client):
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    url = reverse('learning-api:v1:personal_assignments', kwargs={
+        'course_id': course.pk
+    })
+    auth_token = client.get_api_token(teacher)
+    response = client.get(url, content_type='application/json',
+                          HTTP_AUTHORIZATION=f'Token {auth_token}')
+    assert response.status_code == 200
+    assert response.json() == []
+    assignment = AssignmentFactory(course=course)
+    student_assignment1, student_assignment2 = StudentAssignmentFactory.create_batch(2, assignment=assignment)
+    StudentAssignmentFactory()  # Personal assignment from another course
+    student_assignment1.delete()  # soft-deleted
+    assert StudentAssignment.trash.filter(assignment=assignment).count() == 1
+    response = client.get(url, content_type='application/json',
+                          HTTP_AUTHORIZATION=f'Token {auth_token}')
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert response.json()[0]['id'] == student_assignment2.pk
+

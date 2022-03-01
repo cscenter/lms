@@ -142,11 +142,7 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
             stats = obj.meta['stats']
             if not stats or 'solutions' not in stats:
                 return None
-            # Backward compatibility, remove after deploying LMS-240
-            if isinstance(stats['solutions'], int):
-                return stats['solution']
-            else:
-                return stats['solutions']['first']
+            return stats['solutions']['first']
 
     def initial(self, request, *args, **kwargs):
         self.course = get_object_or_404(Course.objects.get_queryset(), pk=kwargs['course_id'])
