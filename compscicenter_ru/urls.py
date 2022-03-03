@@ -59,6 +59,7 @@ urlpatterns += [
     path('videos/', views.CourseVideoListView.as_view(), name='video_list'),
 
     path('api/', include('compscicenter_ru.api.urls')),
+    path('api/', include('universities.urls')),
 
     path('', include('publications.urls')),
 

@@ -327,6 +327,7 @@ INSTALLED_APPS = [
 
     'core.apps.CoreConfig',
     'menu',
+    'universities.apps.UniversitiesConfig',
     # django.contrib.static with a customized list of ignore patterns
     'files.apps.StaticFilesConfig',
     'files.apps.MediaFilesConfig',
