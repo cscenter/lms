@@ -32,7 +32,7 @@ migrate:
 	python manage.py migrate $(DJANGO_POSTFIX)
 
 msg:
-	python manage.py maketranslation -l ru --ignore=public/*
+	python manage.py makemessages -l ru --ignore=public/*
 
 # https://code.djangoproject.com/ticket/24159
 # Should set apps in LOCALE_PATHS explicitly until patch been released

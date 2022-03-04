@@ -148,7 +148,6 @@ class SiteConfiguration(ConfigurationModel):
         max_length=420,
         blank=True, null=True)
 
-    default_manager = models.Manager()
     objects = SiteConfigurationManager()
 
     class Meta:
