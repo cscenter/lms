@@ -473,12 +473,17 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         help_text=_("Applicant|admin_note"),
         blank=True,
         null=True)
+    # Key-value store for fields specific to admission campaigns
+    data = models.JSONField(
+        _("Data"),
+        blank=True,
+        null=True)
     # Any useful data like application form integration log
+    # FIXME: merge into data json field, then remove
     meta = models.JSONField(
         blank=True,
-        editable=False,
-        default=dict,
-    )
+        null=True,
+        editable=False)
 
     class Meta:
         verbose_name = _("Applicant")
