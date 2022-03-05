@@ -1,6 +1,8 @@
+import datetime
 from decimal import Decimal
 
 import pytest
+from rest_framework.fields import DateTimeField
 
 from core.urls import reverse
 from courses.models import CourseTeacher
@@ -11,6 +13,9 @@ from learning.api.serializers import (
     BaseStudentAssignmentSerializer, CourseAssignmentSerializer, MyCourseSerializer
 )
 from learning.models import StudentAssignment
+from learning.services.personal_assignment_service import (
+    create_assignment_solution, update_personal_assignment_stats
+)
 from learning.tests.factories import EnrollmentFactory, StudentAssignmentFactory
 from users.tests.factories import TeacherFactory
 
@@ -215,4 +220,37 @@ def test_api_view_personal_assignment_list(client):
     assert response.status_code == 200
     assert len(response.json()) == 1
     assert response.json()[0]['id'] == student_assignment2.pk
+
+
+@pytest.mark.django_db
+def test_api_view_personal_assignment_output_serializer(lms_resolver, django_capture_on_commit_callbacks):
+    student_assignment = StudentAssignmentFactory()
+    url = reverse('learning-api:v1:personal_assignments', kwargs={
+        'course_id': student_assignment.assignment.course.pk
+    })
+    resolver = lms_resolver(url)
+    serializer_class = resolver.func.view_class.OutputSerializer
+    json_data = serializer_class(student_assignment).data
+    assert json_data['solution_at'] is None
+    with django_capture_on_commit_callbacks(execute=True):
+        solution1 = create_assignment_solution(personal_assignment=student_assignment,
+                                               created_by=student_assignment.student,
+                                               message="solution1")
+    student_assignment.refresh_from_db()
+    json_data = serializer_class(student_assignment).data
+    serialize_dt = DateTimeField().to_representation
+
+    assert json_data['solution_at'] == serialize_dt(student_assignment.stats['solutions']['first'])
+    # Add second solution
+    solution2 = create_assignment_solution(personal_assignment=student_assignment,
+                                           created_by=student_assignment.student,
+                                           message="solution1")
+    solution2.created = solution2.created + datetime.timedelta(hours=2)
+    solution2.save()
+    update_personal_assignment_stats(personal_assignment=student_assignment)
+    student_assignment.refresh_from_db()
+    json_data = serializer_class(student_assignment).data
+    assert json_data['solution_at'] == serialize_dt(solution2.created.replace(microsecond=0))
+    assert json_data['solution_at'] == serialize_dt(student_assignment.stats['solutions']['last'])
+    assert student_assignment.stats['solutions']['last'] != student_assignment.stats['solutions']['first']
 

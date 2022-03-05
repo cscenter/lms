@@ -129,20 +129,21 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
             "id": serializers.IntegerField(),
             "teacher": UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic'))
         })
-        first_solution_at = serializers.SerializerMethodField()
+        solution_at = serializers.SerializerMethodField()
 
         class Meta:
             model = StudentAssignment
             fields = ('id', 'assignment_id', 'score', 'status', 'student',
-                      'assignee', 'first_solution_at')
+                      'assignee', 'solution_at')
 
-        def get_first_solution_at(self, obj: StudentAssignment) -> Optional[str]:
+        def get_solution_at(self, obj: StudentAssignment) -> Optional[str]:
+            """Returns the datetime of the latest solution."""
             if not obj.meta or 'stats' not in obj.meta:
                 return None
             stats = obj.meta['stats']
             if not stats or 'solutions' not in stats:
                 return None
-            return stats['solutions']['first']
+            return stats['solutions'].get('last', stats['solutions']['first'])
 
     def initial(self, request, *args, **kwargs):
         self.course = get_object_or_404(Course.objects.get_queryset(), pk=kwargs['course_id'])
