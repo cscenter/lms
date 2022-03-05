@@ -121,7 +121,6 @@ class AssignmentsStats(APIView):
                                         "score",
                                         "status",
                                         "meta",
-                                        "first_student_comment_at",
                                         "assignment__course_id",
                                         "assignment__maximum_score",
                                         "assignment__passing_score",

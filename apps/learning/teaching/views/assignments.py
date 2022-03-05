@@ -257,7 +257,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         # FIXME: переписать с union + first, перенести в manager
         ungraded_base = (StudentAssignment.objects
                          .filter(score__isnull=True,
-                                 first_student_comment_at__isnull=False,
+                                 meta__stats__has_key='solutions',
                                  assignment__course=course,
                                  assignment__course__teachers=user,
                                  assignment__course__course_teachers__roles=~CourseTeacher.roles.spectator)

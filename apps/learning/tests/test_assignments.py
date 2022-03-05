@@ -133,35 +133,6 @@ def test_model_student_assignment_weighted_final_score():
 
 
 @pytest.mark.django_db
-def test_student_assignment_first_student_comment_at(curator):
-    teacher = TeacherFactory.create()
-    student = StudentFactory.create()
-    co = CourseFactory.create(teachers=[teacher])
-    EnrollmentFactory.create(student=student, course=co)
-    assignment = AssignmentFactory.create(course=co)
-    sa = StudentAssignment.objects.get(assignment=assignment)
-    assert sa.first_student_comment_at is None
-    AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
-    sa.refresh_from_db()
-    assert sa.first_student_comment_at is None
-    AssignmentCommentFactory.create(student_assignment=sa, author=curator)
-    sa.refresh_from_db()
-    assert sa.first_student_comment_at is None
-    AssignmentCommentFactory.create(student_assignment=sa, author=student)
-    sa.refresh_from_db()
-    assert sa.first_student_comment_at is not None
-    first_student_comment_at = sa.first_student_comment_at
-    # Make sure it doesn't changed
-    AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
-    sa.refresh_from_db()
-    assert sa.first_student_comment_at == first_student_comment_at
-    # Second comment from student shouldn't change time
-    AssignmentCommentFactory.create(student_assignment=sa, author=student)
-    sa.refresh_from_db()
-    assert sa.first_student_comment_at == first_student_comment_at
-
-
-@pytest.mark.django_db
 def test_first_comment_after_deadline(client):
     dt = datetime.datetime(2017, 1, 1, 23, 58, 0, 0, tzinfo=pytz.UTC)
     branch_spb = BranchFactory(code=Branches.SPB)

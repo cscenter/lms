@@ -578,16 +578,6 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         editable=False,
         help_text=_("The time spent by the student executing this task"),
     )
-    # TODO: deprecated, remove after migrating to .meta field
-    first_student_comment_at = models.DateTimeField(
-        _("First Student Comment At"),
-        null=True,
-        editable=False)
-    # TODO: deprecated, remove after migrating to .meta field
-    last_comment_from = models.PositiveSmallIntegerField(
-        verbose_name=_("The author type of the latest comment"),
-        editable=False,
-        blank=True, null=True)
     meta = models.JSONField(encoder=JSONEncoder, blank=True, null=True,
                             editable=False)
 
@@ -595,10 +585,7 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
 
     tracker = FieldTracker(fields=['score'])
 
-    derivable_fields = [
-        'execution_time',
-        'first_student_comment_at',
-    ]
+    derivable_fields = ['execution_time']
 
     class Meta:
         ordering = ["assignment", "student"]
@@ -624,22 +611,6 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
         execution_time = time_spent['total']  # Could be None
         if self.execution_time != execution_time:
             self.execution_time = execution_time
-            return True
-        return False
-
-    def _compute_first_student_comment_at(self):
-        first_student_comment = (AssignmentComment.objects
-                                 .filter(student_assignment=self,
-                                         type=AssignmentSubmissionTypes.COMMENT,
-                                         author_id=self.student_id)
-                                 .order_by('created')
-                                 .values('created')
-                                 .first())
-        if not first_student_comment:
-            return False
-        first_student_comment_at = first_student_comment['created']
-        if self.first_student_comment_at != first_student_comment_at:
-            self.first_student_comment_at = first_student_comment_at
             return True
         return False
 
@@ -848,8 +819,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
 
     def save(self, **kwargs):
         from learning.services.personal_assignment_service import (
-            maybe_set_assignee_for_personal_assignment,
-            update_student_assignment_derivable_fields
+            maybe_set_assignee_for_personal_assignment
         )
         from learning.tasks import generate_notifications_about_new_submission
         created = self.pk is None
@@ -861,9 +831,6 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
         # Send notifications on publishing submission
         if has_been_published:
             maybe_set_assignee_for_personal_assignment(self)
-            # FIXME: move side effects outside model saving, e.g. to on_commit
-            # TODO: replace with self.student_assignment.('first_student_comment_at')
-            update_student_assignment_derivable_fields(self)
             # FIXME: add transaction.on_commit()
             generate_notifications_about_new_submission.delay(
                 assignment_submission_id=self.pk)

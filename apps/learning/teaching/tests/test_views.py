@@ -191,7 +191,7 @@ def test_assignment_contents(client):
 
 
 @pytest.mark.django_db
-def test_student_assignment_detail_view_context_next_unchecked(client):
+def test_student_assignment_detail_view_context_next_unchecked(client, django_capture_on_commit_callbacks):
     teacher = TeacherFactory()
     student = StudentFactory()
     co = CourseFactory.create(teachers=[teacher])
@@ -211,9 +211,11 @@ def test_student_assignment_detail_view_context_next_unchecked(client):
     client.login(teacher)
     assert client.get(url1).context_data['next_student_assignment'] is None
     assert client.get(url2).context_data['next_student_assignment'] is None
-    [AssignmentCommentFactory.create(author=a_s.student,
-                                     student_assignment=a_s)
-     for a_s in [a_s1, a_s2]]
+    with django_capture_on_commit_callbacks(execute=True):
+        for student_assignment in [a_s1, a_s2]:
+            create_assignment_solution(personal_assignment=student_assignment,
+                                       created_by=student_assignment.student,
+                                       message="solution")
     assert client.get(url1).context_data['next_student_assignment'] == a_s2
     assert client.get(url2).context_data['next_student_assignment'] == a_s1
 

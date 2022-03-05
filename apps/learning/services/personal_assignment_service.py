@@ -325,29 +325,6 @@ def create_personal_assignment_review(*,
     return comment
 
 
-# TODO: remove
-def update_student_assignment_derivable_fields(comment):
-    """
-    Optimize db queries by reimplementing next logic:
-        student_assignment.compute_fields('first_student_comment_at')
-    """
-    if not comment.pk:
-        return
-    sa: StudentAssignment = comment.student_assignment
-    fields = {"modified": now()}
-    if comment.author_id == sa.student_id:
-        # FIXME: includes solutions. is it ok?
-        other_comments = (sa.assignmentcomment_set(manager='published')
-                          .filter(author_id=comment.author_id)
-                          .exclude(pk=comment.pk))
-        is_first_comment = not other_comments.exists()
-        if is_first_comment:
-            fields["first_student_comment_at"] = comment.created
-    StudentAssignment.objects.filter(pk=sa.pk).update(**fields)
-    for attr_name, attr_value in fields.items():
-        setattr(sa, attr_name, attr_value)
-
-
 def resolve_assignees_for_personal_assignment(student_assignment: StudentAssignment) -> List[CourseTeacher]:
     """
     Returns candidates who can be auto-assign as a responsible teacher for the
