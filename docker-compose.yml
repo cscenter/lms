@@ -27,6 +27,7 @@ services:
       context: .
       dockerfile: docker-files/app/dev.Dockerfile
       args:
+        - FRONTEND_IMAGE=lms-frontend-webpack
         - BASE_IMAGE=lms-backend-django
     image: lms-backend-django-tests
     environment:
@@ -36,6 +37,7 @@ services:
     depends_on:
       - db
       - redis
+      - django
   rqworker:
     container_name: lms-task-queue
     image: lms-backend-django
@@ -44,6 +46,8 @@ services:
      - REDIS_HOST=lms-redis-cluster
      - REDIS_PASSWORD=secret-password
     command: python manage.py rqworker high default
+    depends_on:
+      - django
   nginx:
     container_name: lms-nginx
     build:
