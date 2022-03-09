@@ -1,12 +1,20 @@
 version: '3'
 
 services:
+  django-common:
+    build:
+      context: .
+      dockerfile: docker-files/app/common.Dockerfile
+    image: lms-backend-django-prod-deps
+    command: /bin/true
   django:
     container_name: lms-django
     build:
       context: .
       dockerfile: docker-files/app/Dockerfile
       args:
+        - BASE_IMAGE=lms-backend-django-prod-deps
+        - FRONTEND_IMAGE=lms-webpack-bundles
         - DJANGO_STATIC_ROOT=/var/www/static/
         - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
     image: lms-backend-django
@@ -21,14 +29,14 @@ services:
     depends_on:
       - db
       - redis
+      - django-common
   django-tests:
     container_name: lms-django-tests
     build:
       context: .
       dockerfile: docker-files/app/dev.Dockerfile
       args:
-        - FRONTEND_IMAGE=lms-frontend-webpack
-        - BASE_IMAGE=lms-backend-django
+        - BASE_IMAGE=lms-backend-django-prod-deps
     image: lms-backend-django-tests
     environment:
      - PROJECT_MODULE_NAME=compscicenter_ru
