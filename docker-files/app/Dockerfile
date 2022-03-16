@@ -28,4 +28,9 @@ RUN ENV_FILE=/var/www/code/lms/settings/.env.example \
     DJANGO_STATIC_ROOT=${DJANGO_STATIC_ROOT} \
     python manage.py collectstatic --noinput --ignore "webpack-stats-v*.json"
 
+USER ${APP_USER}
+
+# Start uWSGI
+COPY docker-files/app/uwsgi.ini /etc/uwsgi.ini
 CMD ["uwsgi", "--ini", "/etc/uwsgi.ini", "--show-config"]
+

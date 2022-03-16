@@ -24,7 +24,6 @@ services:
      - REDIS_HOST=lms-redis-cluster
      - REDIS_PASSWORD=secret-password
     volumes:
-      - uwsgi-sockets:/var/run/uwsgi-sockets
       - static-data:/var/www/static
     depends_on:
       - db
@@ -68,7 +67,6 @@ services:
     volumes:
       - static-data:/var/www/static
       - media-data:/var/www/media
-      - uwsgi-sockets:/var/run/uwsgi-sockets
     environment:
       - PROJECT_MODULE_NAME=compscicenter_ru
       - MAIN_DOMAIN=compscicenter.ru
@@ -97,7 +95,6 @@ services:
       - REDIS_PASSWORD=secret-password
 
 volumes:
-  uwsgi-sockets:
   static-data:
   media-data:
     external:
