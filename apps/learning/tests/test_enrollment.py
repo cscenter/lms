@@ -8,11 +8,13 @@ from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
+from code_reviews.gerrit.signals import post_save_teacher
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse
-from courses.models import CourseBranch, CourseGroupModes
+from courses.constants import AssignmentFormat
+from courses.models import CourseBranch, CourseGroupModes, CourseTeacher
 from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFactory
 from learning.models import (
     Enrollment, EnrollmentPeriod, StudentAssignment, StudentGroup
@@ -25,7 +27,7 @@ from learning.tests.factories import (
 )
 from users.services import get_student_profile
 from users.tests.factories import (
-    InvitedStudentFactory, StudentFactory, StudentProfileFactory
+    InvitedStudentFactory, StudentFactory, StudentProfileFactory, TeacherFactory
 )
 
 
@@ -479,3 +481,41 @@ def test_enrollment_populate_assignments(client):
     assignments = [sa.assignment for sa in student_assignments]
     assert assignment_all in assignments
     assert assignment_spb in assignments
+
+
+@pytest.mark.django_db
+def test_enrollment_add_student_to_project(mocker):
+    course = CourseFactory()
+    mocked = mocker.patch("code_reviews.gerrit.tasks.add_student_to_gerrit_project.delay")
+    AssignmentFactory(course=course,
+                      submission_type=AssignmentFormat.ONLINE)
+    EnrollmentFactory(course=course)
+    # Not called because there is no code review assignments
+    mocked.assert_not_called()
+    mocked.reset_mock()
+
+    AssignmentFactory(course=course,
+                      submission_type=AssignmentFormat.CODE_REVIEW)
+    EnrollmentFactory(course=course)
+    mocked.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_enrollment_add_teacher_to_project(mocker):
+    course = CourseFactory()
+    mocked = mocker.patch("code_reviews.gerrit.tasks.add_teacher_to_gerrit_project.delay")
+    AssignmentFactory(course=course,
+                      submission_type=AssignmentFormat.ONLINE)
+    t1, t2 = TeacherFactory.create_batch(2)
+    CourseTeacher(course=course, teacher=t1).save()
+    # Not called because there is no code review assignments
+    mocked.assert_not_called()
+    mocked.reset_mock()
+
+    AssignmentFactory(course=course,
+                      submission_type=AssignmentFormat.CODE_REVIEW)
+    CourseTeacher(course=course, teacher=t2).save()
+    mocked.assert_called_once()
+
+
+

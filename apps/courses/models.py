@@ -618,6 +618,8 @@ class CourseTeacher(models.Model):
         _("Notifications"),
         default=True)
 
+    tracker = FieldTracker(fields=['teacher'])
+
     class Meta:
         verbose_name = _("Course Teacher")
         verbose_name_plural = _("Course Teachers")

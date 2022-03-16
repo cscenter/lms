@@ -11,14 +11,16 @@ from auth.models import ConnectedAuthService
 from code_reviews.api.gerrit import Gerrit
 from code_reviews.api.ldap import ldap_client
 from code_reviews.gerrit.ldap_service import (
-    get_ldap_username, update_ldap_user_password_hash
+    get_ldap_username, update_ldap_user_password_hash, connect_gerrit_auth_provider
 )
 from code_reviews.gerrit.services import (
-    get_or_create_change, list_change_files, normalize_code_review_score
+    get_or_create_change, list_change_files, normalize_code_review_score, get_reviewers_group_name,
+    add_student_to_project
 )
 from code_reviews.models import GerritChange
 from courses.constants import AssignmentStatus
-from learning.models import AssignmentComment, AssignmentSubmissionTypes
+from courses.models import Course
+from learning.models import AssignmentComment, AssignmentSubmissionTypes, Enrollment
 from learning.permissions import EditStudentAssignment
 from learning.services.personal_assignment_service import (
     create_personal_assignment_review
@@ -155,3 +157,31 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
                                           message=_("Update in Gerrit"),
                                           source=AssignmentScoreUpdateSource.WEBHOOK_GERRIT)
     return student_assignment.pk
+
+
+@job('default')
+def add_student_to_gerrit_project(enrollment: Enrollment):
+    gerrit_client = Gerrit(settings.GERRIT_API_URI,
+                           auth=(settings.GERRIT_CLIENT_USERNAME,
+                                 settings.GERRIT_CLIENT_HTTP_PASSWORD))
+    with ldap_client() as client:
+        course = enrollment.course
+        connect_gerrit_auth_provider(client, enrollment.student)
+        add_student_to_project(gerrit_client=gerrit_client,
+                               ldap_client=client,
+                               student_profile=enrollment.student_profile,
+                               course=course)
+
+
+@job('default')
+def add_teacher_to_gerrit_project(course: Course, teacher: settings.AUTH_USER_MODEL):
+    gerrit_client = Gerrit(settings.GERRIT_API_URI,
+                           auth=(settings.GERRIT_CLIENT_USERNAME,
+                                 settings.GERRIT_CLIENT_HTTP_PASSWORD))
+    with ldap_client() as client:
+        connect_gerrit_auth_provider(client, teacher)
+    reviewers_group_name = get_reviewers_group_name(course)
+    reviewers_group_res = gerrit_client.get_group(reviewers_group_name)
+    reviewers_group_uuid = reviewers_group_res.data["id"]
+    teacher_login = get_ldap_username(teacher)
+    gerrit_client.create_group_member(reviewers_group_uuid, teacher_login)
