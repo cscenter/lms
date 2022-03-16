@@ -8,6 +8,7 @@ from django.db.models.signals import post_save
 
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
+from courses.constants import AssignmentFormat
 from courses.models import Course, CourseGroupModes
 from learning.models import Enrollment, StudentGroup
 from learning.services import AssignmentService
@@ -136,9 +137,18 @@ def update_course_learners_count(course_id: int) -> None:
 
 
 def recreate_assignments_for_student(enrollment: Enrollment) -> None:
-    """Resets progress for existing and creates missing assignments"""
+    """
+    Resets progress for existing and creates missing assignments
+    Adds a student to the gerrit project if the course has code review assignments
+    """
+    has_code_review = False
     for a in enrollment.course.assignment_set.all():
         AssignmentService.create_or_restore_student_assignment(a, enrollment)
+        if a.submission_type == AssignmentFormat.CODE_REVIEW:
+            has_code_review = True
+    if has_code_review:
+        from code_reviews.gerrit.tasks import add_student_to_gerrit_project
+        add_student_to_gerrit_project.delay(enrollment)
 
 
 def is_course_failed_by_student(course: Course, student: User,
