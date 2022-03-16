@@ -7,7 +7,7 @@ services:
       dockerfile: docker-files/app/common.Dockerfile
     image: lms-backend-django-prod-deps
     command: /bin/true
-  django:
+  uwsgi:
     container_name: lms-django
     build:
       context: .
@@ -45,17 +45,18 @@ services:
     depends_on:
       - db
       - redis
-      - django
+      - uwsgi
   rqworker:
     container_name: lms-task-queue
     image: lms-backend-django
     restart: always
     environment:
-     - REDIS_HOST=lms-redis-cluster
-     - REDIS_PASSWORD=secret-password
+      - DEBUG=0
+      - REDIS_HOST=lms-redis-cluster
+      - REDIS_PASSWORD=secret-password
     command: python manage.py rqworker high default
     depends_on:
-      - django
+      - uwsgi
   nginx:
     container_name: lms-nginx
     build:
@@ -73,7 +74,7 @@ services:
       - MAIN_DOMAIN=compscicenter.ru
     depends_on:
       - redis
-      - django
+      - uwsgi
   db:
     container_name: db
     image: postgres:12-alpine

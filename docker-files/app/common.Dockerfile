@@ -10,7 +10,7 @@ RUN pip install --upgrade pip \
     && pip uninstall -y pipenv
 
 FROM python:3.9-slim-buster
-LABEL maintainer="sergey.zherevchuk@jetbrains.com"
+LABEL maintainer="webmaster@compscicenter.ru"
 
 # Create a group and user to run our app. Use the same sid/gid
 # as nginx container use
