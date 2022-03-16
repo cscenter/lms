@@ -1,15 +1,11 @@
 FROM nginx:1.21-alpine
-LABEL maintainer="sergey.zherevchuk@jetbrains.com"
+LABEL maintainer="webmaster@compscicenter.ru"
 
-RUN rm /etc/nginx/conf.d/default.conf
-COPY ./conf.d/default.conf /etc/nginx/conf.d/
-COPY ./conf.d/*.template /etc/nginx/templates/
+COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./site.conf /etc/nginx/conf.d/site.conf
 
-EXPOSE 80
+# Default nginx entrypoint scripts need root privileges, remove them
+RUN rm /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+RUN rm /docker-entrypoint.d/20-envsubst-on-templates.sh
 
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-
-
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 8080
