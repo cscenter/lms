@@ -6,7 +6,7 @@ verify_ssl = true
 [dev-packages]
 pywatchman = "*"
 colour-runner = "==0.1.1"
-ipython = "*"
+ipython = "==8.1.0"
 Werkzeug = "*"
 # Code Quality
 pydocstyle = "*"
@@ -68,7 +68,7 @@ boto = "*"
 # Event messages verification for AWS SNS
 M2Crypto = "*"
 # Mailing
-django-ses = "==2.6.0"
+django-ses = "==2.6.1"
 django-post_office = "==3.6.0"
 # Markdown
 hoep = {editable = true,git = "https://github.com/pacahon/Hoep.git",ref = "0d4c0507dcb34d1b63a099c8b08656b66394bc37"}
@@ -94,9 +94,9 @@ django-storages = "==1.12.3"
 django-dbbackup = "==3.3.0"
 django-import-export = "==2.7.1"
 tablib = "==3.2.0"
-nbconvert = "==6.4.2"
+nbconvert = "==6.4.4"
 django-js-reverse = "==0.9.1"
-numpy = "==1.22.2"
+numpy = "==1.22.3"
 icalendar = "==4.0.9"
 django-ical = "==1.8.3"
 python-dateutil = "==2.8.2"
@@ -105,7 +105,7 @@ python-ldap = "==3.4.0"
 attrs = "==21.4.0"
 django-choices = "==1.7.2"
 django-vanilla-views = "==3.0.0"
-django-autocomplete-light = "==3.9.1"
+django-autocomplete-light = "==3.9.4"
 django-mptt = "==0.13.4"
 django-bootstrap-pagination = "==1.7.1"
 django-bitfield = "==2.1.0"
