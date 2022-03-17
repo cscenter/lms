@@ -1,17 +1,17 @@
 from .base import *
 
 INTERNAL_IPS = ["127.0.0.1", "::1"]
+
 if DEBUG:
-    INSTALLED_APPS += [
-        'django_extensions',
-        # 'template_timings_panel',
-    ]
-    # Django debug toolbar support
-    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
-    INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
-    DEBUG_TOOLBAR_CONFIG = {
-        'SHOW_TOOLBAR_CALLBACK': lambda request: request.headers.get('x-requested-with') != 'XMLHttpRequest'
-    }
+    INSTALLED_APPS += ['django_extensions']
+    try:
+        # Enable Django debug toolbar
+        import debug_toolbar
+
+        MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+        INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
+    except ModuleNotFoundError as err:
+        warnings.warn(str(err), ImportWarning)
 
     # Translate .po files with UI
     INSTALLED_APPS = INSTALLED_APPS + ['rosetta']
