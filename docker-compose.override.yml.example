@@ -1,0 +1,40 @@
+version: '3.4'
+
+services:
+  uwsgi:
+    env_file:
+      - compscicenter_ru/settings/.env
+    environment:
+      - DATABASE_URL=postgresql://csc:password@host.docker.internal:5432/cscdb
+      - REDIS_HOST=lms-redis-cluster
+      - REDIS_PASSWORD=secret-password
+      - WEBPACK_ASSETS_ROOT=/var/www/frontend-code/assets/
+    volumes:
+      - lms-repository:/var/www/code
+  django-tests:
+    env_file:
+      - compscicenter_ru/settings/.env
+    environment:
+      - DATABASE_URL=postgresql://csc:FooBar@db:5432/cscdb
+      - REDIS_HOST=lms-redis-cluster
+      - REDIS_PASSWORD=secret-password
+  rqworker:
+    env_file:
+      - compscicenter_ru/settings/.env
+    environment:
+      - RECAPTCHA_PRIVATE_KEY=test
+      - RECAPTCHA_PUBLIC_KEY=test
+    volumes:
+      - lms-repository:/var/www/code
+  rqworker-host:
+    container_name: lms-task-queue-host
+    image: lms-backend-django
+    restart: always
+    env_file:
+      - compscicenter_ru/settings/.env
+    environment:
+      - REDIS_HOST=host.docker.internal
+      - DATABASE_URL=postgresql://csc:password@host.docker.internal:5432/cscdb
+      - RECAPTCHA_PRIVATE_KEY=test
+      - RECAPTCHA_PUBLIC_KEY=test
+    command: python manage.py rqworker high default

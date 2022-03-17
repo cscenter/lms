@@ -68,9 +68,6 @@ services:
     volumes:
       - static-data:/var/www/static
       - media-data:/var/www/media
-    environment:
-      - PROJECT_MODULE_NAME=compscicenter_ru
-      - MAIN_DOMAIN=compscicenter.ru
     depends_on:
       - redis
       - uwsgi
