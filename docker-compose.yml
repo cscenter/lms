@@ -1,4 +1,4 @@
-version: '3'
+version: '3.4'
 
 services:
   django-common:
@@ -20,9 +20,10 @@ services:
     image: lms-backend-django
     restart: always
     environment:
-     - PROJECT_MODULE_NAME=compscicenter_ru
-     - REDIS_HOST=lms-redis-cluster
-     - REDIS_PASSWORD=secret-password
+      - DATABASE_URL=postgresql://csc:FooBar@db:5432/cscdb
+      - PROJECT_MODULE_NAME=compscicenter_ru
+      - REDIS_HOST=lms-redis-cluster
+      - REDIS_PASSWORD=secret-password
     volumes:
       - static-data:/var/www/static
     depends_on:
@@ -97,9 +98,15 @@ services:
 volumes:
   static-data:
   media-data:
-    external:
-      name: lms-media
+    name: lms-media
+    external: true
   redis-data:
-    external:
-      name: lms-redis-data
+    name: lms-redis-data
+    external: true
   postgres-data:
+  lms-repository:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: .
