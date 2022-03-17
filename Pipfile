@@ -137,6 +137,9 @@ django-simple-history = "*"
 django-static-compress = "==2.0.0"
 webdavclient3 = "*"
 djangorestframework-camel-case = "*"
+# FIXME: pylint 2.12.2 possibly conflicting dependencies found: astroid==2.9.3, wrapt [required: >=1.11,<1.14, installed: 1.14.0]
+#  remove after new pyling version release
+wrapt = "==1.13.3"
 
 [requires]
 python_version = "3.9"
