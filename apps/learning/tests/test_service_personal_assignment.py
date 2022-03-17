@@ -1,7 +1,7 @@
+from datetime import timedelta
 from decimal import Decimal
 
 import pytest
-from future.backports.datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
