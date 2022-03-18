@@ -110,9 +110,7 @@ jobs:
 
       - name: Login to Yandex Cloud Container Registry
         id: login-cr
-        uses: yc-actions/yc-cr-login@v1
-        with:
-          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+        run: echo "${{ secrets.YC_REGISTRY_JSON_CREDENTIALS }}" | docker login --username json_key --password-stdin cr.yandex
 
       - name: Build final backend app image
         uses: docker/build-push-action@v2
