@@ -6,8 +6,10 @@ env:
   PYTHON_IMAGE: python:3.9-slim-buster
   LOCAL_IMAGE_FRONTEND: localhost:5000/lms-frontend-webpack:latest
   LOCAL_IMAGE_DJANGO: localhost:5000/lms-backend-django:latest
-  REMOTE_IMAGE_BACKEND_DJANGO: 297302290031.dkr.ecr.eu-central-1.amazonaws.com/lms-uwsgi:${{ github.run_number }}
-  REMOTE_IMAGE_BACKEND_NGINX: 297302290031.dkr.ecr.eu-central-1.amazonaws.com/lms-nginx:${{ github.run_number }}
+  AWS_REMOTE_IMAGE_BACKEND_DJANGO: 297302290031.dkr.ecr.eu-central-1.amazonaws.com/lms-uwsgi:${{ github.run_number }}
+  AWS_REMOTE_IMAGE_BACKEND_NGINX: 297302290031.dkr.ecr.eu-central-1.amazonaws.com/lms-nginx:${{ github.run_number }}
+  YC_REMOTE_IMAGE_BACKEND_DJANGO: cr.yandex/crp117orrt9bf62s55e2/backend-django:${{ github.run_number }}
+  YC_REMOTE_IMAGE_BACKEND_NGINX: cr.yandex/crp117orrt9bf62s55e2/backend-nginx:${{ github.run_number }}
 
 jobs:
   build:
@@ -106,6 +108,12 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-django-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-django-cache-new
 
+      - name: Login to Yandex Cloud Container Registry
+        id: login-cr
+        uses: yc-actions/yc-cr-login@v1
+        with:
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+
       - name: Build final backend app image
         uses: docker/build-push-action@v2
         with:
@@ -120,7 +128,7 @@ jobs:
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
             FRONTEND_IMAGE=${{ env.LOCAL_IMAGE_FRONTEND }}
             BASE_IMAGE=${{ env.LOCAL_IMAGE_DJANGO }}
-          tags: ${{ env.REMOTE_IMAGE_BACKEND_DJANGO }}
+          tags: ${{ env.AWS_REMOTE_IMAGE_BACKEND_DJANGO }},${{ env.YC_REMOTE_IMAGE_BACKEND_DJANGO }}
 
       - name: Build backend nginx image
         uses: docker/build-push-action@v2
@@ -130,7 +138,7 @@ jobs:
           push: true
           load: false
           builder: ${{ steps.buildx.outputs.name }}
-          tags: ${{ env.REMOTE_IMAGE_BACKEND_NGINX }}
+          tags: ${{ env.AWS_REMOTE_IMAGE_BACKEND_NGINX }},${{ env.YC_REMOTE_IMAGE_BACKEND_NGINX }}
 
       - name: Debug
         run: docker images
