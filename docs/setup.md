@@ -5,13 +5,12 @@
 # Fox linux users
 sudo apt-get install libjpeg-dev libpng-dev libpq-dev libxml2-dev libxslt1-dev libmagic-dev
 # For mac users
-brew install libpng libjpeg libpqxx libmagic swig
+brew install libpng libjpeg libpqxx libmagic swig curl
 # Install libraries that depend on openssl
-brew install curl-openssl
 PYCURL_SSL_LIBRARY=openssl LDFLAGS="-L/usr/local/opt/openssl@1.1/lib -L/usr/local/opt/curl-openssl/lib" CPPFLAGS="-I/usr/local/opt/openssl@1.1/include -I/usr/local/opt/curl-openssl/include" pip install --compile --no-cache-dir pycurl
 LDFLAGS="-L$(brew --prefix openssl)/lib" CFLAGS="-I$(brew --prefix openssl)/include" SWIG_FEATURES="-cpperraswarn -includeall -I$(brew --prefix openssl)/include" pip install m2crypto
 # for fish shell
-env PYCURL_SSL_LIBRARY=openssl LDFLAGS="-L"(brew --prefix openssl)"/lib -L/usr/local/opt/curl-openssl/lib" CPPFLAGS="-I"(brew --prefix openssl)"/include -I/usr/local/opt/curl-openssl/include" pip install --compile --no-cache-dir pycurl
+env PYCURL_SSL_LIBRARY=openssl LDFLAGS="-L"(brew --prefix openssl)"/lib -L/usr/local/opt/curl/lib" CPPFLAGS="-I"(brew --prefix openssl)"/include -I/usr/local/opt/curl/include" pip install --compile --no-cache-dir pycurl
 env LDFLAGS="-L"(brew --prefix openssl)"/lib" CFLAGS="-I"(brew --prefix openssl)"/include" SWIG_FEATURES="-cpperraswarn -includeall -I"(brew --prefix openssl)"/include" pip install m2crypto
 
 ```
