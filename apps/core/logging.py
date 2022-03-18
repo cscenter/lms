@@ -1,5 +1,16 @@
 import logging
 
+from pythonjsonlogger.jsonlogger import JsonFormatter as BaseFormatter
+
+
+class JsonFormatter(BaseFormatter):
+    def add_fields(self, log_record, record, message_dict):
+        super().add_fields(log_record, record, message_dict)
+        if log_record.get('level'):
+            log_record['level'] = log_record['level'].upper()
+        else:
+            log_record['level'] = record.levelname
+
 
 class SQLFormatter(logging.Formatter):
     """

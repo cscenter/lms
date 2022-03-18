@@ -88,6 +88,7 @@ cryptography = "*"
 djangorestframework = "==3.13.1"
 rest-pandas = "==1.1.0"
 # Misc
+python-json-logger = "*"
 requests = "==2.27.1"
 django-model-utils = "==4.2.0"
 django-storages = "==1.12.3"

@@ -471,3 +471,105 @@ SOCIAL_AUTH_GITLAB_MANYTASK_KEY = env.str('SOCIAL_AUTH_GITLAB_MANYTASK_KEY', def
 SOCIAL_AUTH_GITLAB_MANYTASK_SECRET = env.str('SOCIAL_AUTH_GITLAB_MANYTASK_SECRET', default='')
 SOCIAL_AUTH_GITHUB_KEY = env.str('SOCIAL_AUTH_GITHUB_KEY', default='')
 SOCIAL_AUTH_GITHUB_SECRET = env.str('SOCIAL_AUTH_GITHUB_SECRET', default='')
+
+
+LOG_FORMAT = env.str('LOG_FORMAT', default='json')
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+        'json': {
+            '()': 'core.logging.JsonFormatter',
+            'format': '%(level)s %(name)s %(message)s',
+        },
+        'sql': {
+            '()': 'core.logging.SQLFormatter',
+            'format': '[%(duration).3f] %(statement)s',
+        },
+        'rq_console': {
+            'format': '%(asctime)s %(message)s',
+            'datefmt': '%H:%M:%S',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': LOG_FORMAT
+        },
+        'sql': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'sql',
+            'level': 'DEBUG',
+        },
+        'null': {
+            'class': 'logging.NullHandler',
+        },
+        'rq_console': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'class': 'rq.utils.ColorizingStreamHandler',
+            'formatter': 'rq_console',
+            'exclude': ['%(asctime)s'],
+        },
+    },
+    'loggers': {
+        # root logger
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'WARNING',
+            'propagate': True,
+        },
+        'django.db.backends': {
+            'handlers': ['null'],
+            'level': 'DEBUG' if DEBUG else 'ERROR',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'ERROR',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.utils.autoreload': {
+            'handlers': ['console' if DEBUG else 'null'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'django.db.backends.schema': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.template': {
+            'handlers': ['console'],
+            'level': 'WARNING' if DEBUG else 'ERROR',
+            'propagate': False,
+        },
+        "rq.worker": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            'propagate': False,
+        },
+        "post_office": {
+            "handlers": ["console"],
+            "level": 'DEBUG' if DEBUG else 'ERROR',
+            "propagate": False,
+        },
+    },
+}

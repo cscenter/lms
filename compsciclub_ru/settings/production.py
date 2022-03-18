@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-import logging
-
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
@@ -26,43 +23,4 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
         'LOCATION': '/tmp/django_cache_club'
     }
-}
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-        }
-    },
-    'loggers': {
-        'django.db.backends': {
-            'level': 'ERROR',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'django.request': {
-            'level': 'ERROR',
-            'handlers': ['console'],
-            'propagate': True,
-        },
-        'django.template': {
-            'level': 'ERROR',
-            'handlers': ['console'],
-            'propagate': True,
-        },
-        "rq.worker": {
-            "level": "WARNING",
-            "handlers": ["console"],
-            'propagate': False,
-        },
-    },
 }
