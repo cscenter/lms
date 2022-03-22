@@ -141,6 +141,9 @@ jobs:
           push: true
           load: false
           builder: ${{ steps.buildx.outputs.name }}
+          build-args: |
+            DJANGO_STATIC_ROOT=/var/www/static/
+            DJANGO_IMAGE=${{ env.YC_REMOTE_IMAGE_BACKEND_DJANGO }}
           tags: ${{ env.AWS_REMOTE_IMAGE_BACKEND_NGINX }},${{ env.YC_REMOTE_IMAGE_BACKEND_NGINX }}
 
       - name: Debug
