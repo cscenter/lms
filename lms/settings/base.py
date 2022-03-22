@@ -117,6 +117,7 @@ DATABASES = {
 MIDDLEWARE = [
     # TODO: Return SecurityMiddleware or configure security with nginx-ingress
     #  https://docs.djangoproject.com/en/4.0/ref/middleware/#module-django.middleware.security
+    'core.middleware.HealthCheckMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     # EN language is not supported at this moment anyway
