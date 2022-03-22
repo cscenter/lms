@@ -1,7 +1,9 @@
 import logging
 
 from django.conf import settings
-from django.http.response import HttpResponseRedirect
+from django.http.response import (
+    HttpResponse, HttpResponseRedirect, HttpResponseServerError
+)
 
 from core.exceptions import Redirect
 from core.models import Branch
@@ -66,3 +68,31 @@ class HardCodedLocaleMiddleware:
     def __call__(self, request):
         request.LANGUAGE_CODE = settings.LANGUAGE_CODE
         return self.get_response(request)
+
+
+class HealthCheckMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.method == "GET":
+            if request.path == "/health-check/":
+                return HttpResponse("OK")
+            elif request.path == "/readiness/":
+                return self.readiness(request)
+        return self.get_response(request)
+
+    @staticmethod
+    def readiness(request):
+        try:
+            from django.db import connections
+            for name in connections:
+                cursor = connections[name].cursor()
+                cursor.execute("SELECT 1;")
+                row = cursor.fetchone()
+                if row is None:
+                    return HttpResponseServerError("db: invalid response")
+        except Exception as e:
+            logger.exception(e)
+            return HttpResponseServerError("db: cannot connect to database.")
+        return HttpResponse("OK")

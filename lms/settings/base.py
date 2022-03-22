@@ -28,6 +28,12 @@ REVERSE_TO_LMS_URL_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
                                  'files', 'surveys', 'library', 'admission',
                                  'auth', 'courses', 'learning-api')
 
+SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", default=True)
+SECURE_REDIRECT_EXEMPT = [
+    r'^health-check/$',
+    r'^readiness/$',
+]
+
 # Default scheme for `core.urls.reverse`
 DEFAULT_URL_SCHEME = env.str("REVERSE_URL_SCHEME", default="https")
 LMS_SUBDOMAIN: Optional[str] = None
@@ -109,6 +115,9 @@ DATABASES = {
 
 
 MIDDLEWARE = [
+    # TODO: Return SecurityMiddleware or configure security with nginx-ingress
+    #  https://docs.djangoproject.com/en/4.0/ref/middleware/#module-django.middleware.security
+    'core.middleware.HealthCheckMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     # EN language is not supported at this moment anyway
