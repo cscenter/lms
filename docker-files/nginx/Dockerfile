@@ -5,7 +5,7 @@ FROM nginx:1.21-alpine
 LABEL maintainer="webmaster@compscicenter.ru"
 
 ARG DJANGO_STATIC_ROOT=/var/www/static/
-COPY --from=django ${DJANGO_STATIC_ROOT} ${WEBPACK_ASSETS_ROOT}
+COPY --from=django ${DJANGO_STATIC_ROOT} ${DJANGO_STATIC_ROOT}
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./site.conf /etc/nginx/conf.d/site.conf
 
