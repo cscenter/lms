@@ -490,3 +490,66 @@ def test_view_course_list_course_not_in_student_branch(client, lms_resolver, ass
     assert len(response.context_data['ongoing_enrolled']) == 1
     assert len(response.context_data['archive']) == 1
     assert response.context_data['archive'] == [course]
+
+
+@pytest.mark.django_db
+def test_view_student_assignment_list_course_filter_choices(client):
+    course_one, course_two = CourseFactory.create_batch(2, semester=SemesterFactory.create_current())
+    student = StudentFactory()
+    EnrollmentFactory(course=course_one, student=student)
+    EnrollmentFactory(course=course_two, student=student)
+    url = reverse('study:assignment_list')
+    client.login(student)
+    response = client.get(url)
+    assert response.status_code == 200
+    filter_form = response.context['course_filter_form']
+    course_choices_pk = set(cc[0] for cc in filter_form.fields['course'].choices)
+    assert len(course_choices_pk) == 3
+    assert course_choices_pk == {None, course_one.pk, course_two.pk}
+
+
+@pytest.mark.django_db
+def test_view_student_assignment_list_course_filtering(client):
+    course_one, course_two = CourseFactory.create_batch(2, semester=SemesterFactory.create_current())
+    student = StudentFactory()
+    EnrollmentFactory(course=course_one, student=student)
+    EnrollmentFactory(course=course_two, student=student)
+    a_one = AssignmentFactory(course=course_one)
+    a_two = AssignmentFactory(course=course_two)
+    sa_one = StudentAssignment.objects.get(student=student, assignment=a_one)
+    sa_two = StudentAssignment.objects.get(student=student, assignment=a_two)
+    url = reverse('study:assignment_list')
+    client.login(student)
+
+    response = client.get(url)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert len(open_assignments) == 2
+
+    form_data = {
+        "course": course_one.pk
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert open_assignments == [sa_one]
+    assert f'course={course_one.pk}' in response.redirect_chain[-1][0]
+
+    form_data = {
+        "course": course_two.pk
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert open_assignments == [sa_two]
+    assert f'course={course_two.pk}' in response.redirect_chain[-1][0]
+
+    form_data = {
+        "course": ''
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa_one, sa_two}
+    assert 'course=' not in response.redirect_chain[-1][0]
+

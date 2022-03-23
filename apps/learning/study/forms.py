@@ -1,10 +1,13 @@
+from typing import List
+
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import HTML, Div, Layout, Submit
+from crispy_forms.layout import Div, Layout, Submit, Row
 
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from core.widgets import JasnyFileInputWidget, UbereditorWidget
+from courses.models import Course
 from learning.forms import SubmitLink
 from learning.models import AssignmentComment, AssignmentSubmissionTypes
 
@@ -49,3 +52,32 @@ class AssignmentCommentForm(forms.ModelForm):
         if not cleaned_data.get("text") and not cleaned_data.get("attached_file"):
             raise forms.ValidationError(_("Either text or file should be non-empty"))
         return cleaned_data
+
+
+class StudentAssignmentListFilter(forms.Form):
+
+    course = forms.TypedChoiceField(
+        label=_("Course"),
+        label_suffix='',
+        coerce=int,
+        empty_value=None,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+
+    def __init__(self, enrolled_in: List[int], **kwargs):
+        super().__init__(**kwargs)
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Div('course', css_class='col-xs-8'),
+                Div(Submit('apply', _('Применить'),
+                           css_class="btn btn-primary btn-outline "
+                                     "btn-block -inline-submit"),
+                    css_class="col-xs-4"),
+            ))
+        courses = (Course.objects.filter(pk__in=enrolled_in).select_related("meta_course"))
+        self.fields['course'].choices = [
+            (None, 'Все курсы'),
+            *[(c.pk, c.name) for c in courses]
+        ]
