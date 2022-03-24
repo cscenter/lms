@@ -496,7 +496,9 @@ if DEBUG:
 
         MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
         INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
-        SHOW_TOOLBAR_CALLBACK = 'core.middleware.show_debug_toolbar'
+        DEBUG_TOOLBAR_CONFIG = {
+            'SHOW_TOOLBAR_CALLBACK': 'core.middleware.show_debug_toolbar'
+        }
     except ModuleNotFoundError as err:
         warnings.warn(str(err), ImportWarning)
 
