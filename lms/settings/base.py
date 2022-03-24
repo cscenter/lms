@@ -120,13 +120,13 @@ MIDDLEWARE = [
     #  https://docs.djangoproject.com/en/4.0/ref/middleware/#module-django.middleware.security
     'core.middleware.HealthCheckMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'auth.middleware.AuthenticationMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     # EN language is not supported at this moment anyway
     'core.middleware.HardCodedLocaleMiddleware',
     'subdomains.middleware.SubdomainURLRoutingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'notifications.middleware.UnreadNotificationsCacheMiddleware',
     'core.middleware.RedirectMiddleware',
@@ -493,8 +493,9 @@ if DEBUG:
 
         hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
         INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "::1"]
-
-        MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+        # `show_debug_toolbar` logic depends on auth middleware
+        position = MIDDLEWARE.index('auth.middleware.AuthenticationMiddleware')
+        MIDDLEWARE.insert(position + 1, 'debug_toolbar.middleware.DebugToolbarMiddleware')
         INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
         DEBUG_TOOLBAR_CONFIG = {
             'SHOW_TOOLBAR_CALLBACK': 'core.middleware.show_debug_toolbar'
