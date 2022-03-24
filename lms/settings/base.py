@@ -1,4 +1,5 @@
 import logging
+import socket
 import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -483,6 +484,21 @@ SOCIAL_AUTH_GITHUB_SECRET = env.str('SOCIAL_AUTH_GITHUB_SECRET', default='')
 
 
 LOG_FORMAT = env.str('LOG_FORMAT', default='json')
+
+
+if DEBUG:
+    # Django Debug Toolbar
+    try:
+        import debug_toolbar
+
+        hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+        INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "::1"]
+
+        MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+        INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
+        SHOW_TOOLBAR_CALLBACK = 'core.middleware.show_debug_toolbar'
+    except ModuleNotFoundError as err:
+        warnings.warn(str(err), ImportWarning)
 
 
 LOGGING = {
