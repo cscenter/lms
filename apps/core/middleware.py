@@ -13,9 +13,8 @@ logger = logging.getLogger(__name__)
 
 def show_debug_toolbar(request) -> bool:
     """Function to determine whether to show the toolbar on a given page"""
-    return (settings.DEBUG and
-            request.META.get("REMOTE_ADDR") in settings.INTERNAL_IPS and
-            request.user.is_superuser)
+    return settings.DEBUG and (request.META.get("REMOTE_ADDR") in settings.INTERNAL_IPS or
+                               request.user.is_superuser)
 
 
 class RedirectMiddleware:
