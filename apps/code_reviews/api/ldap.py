@@ -35,13 +35,10 @@ ldapmodule_trace_level = 1
 ldapmodule_trace_file = sys.stderr
 # ldap.set_option(ldap.OPT_DEBUG_LEVEL, 255)
 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_DEMAND)
-# XXX: On Mac OS add trusted CA to the keychain store.
+# XXX: Doesn't work on Mac OS
 if platform.system() != 'Darwin':
     ldap.set_option(ldap.OPT_X_TLS_CACERTFILE,
                     settings.LDAP_TLS_TRUSTED_CA_CERT_FILE)
-if not getattr(settings, "LDAP_OVER_SSL_ENABLED", True):
-    ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
-    ldap.set_option(ldap.OPT_X_TLS_NEWCTX, 0)
 
 
 class LDAPClient:
@@ -110,11 +107,14 @@ class LDAPClient:
 def init_ldap_connection(*, uri: str, dn: str, password: str,
                          timeout: Optional[int] = 5, **options: Any) -> LDAPObject:
     """Returns LDAP connection binded over TLS."""
-    # Always check server certificate
-    ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_DEMAND)
     try:
         connection = ldap.initialize(uri, **options)
         connection.protocol_version = ldap.VERSION3
+        if not getattr(settings, "LDAP_OVER_SSL_ENABLED", True):
+            connection.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+        else:
+            connection.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_DEMAND)
+        connection.set_option(ldap.OPT_X_TLS_NEWCTX, 0)
         connection.network_timeout = timeout  # in seconds
         # Fail if TLS is not available.
         connection.start_tls_s()
