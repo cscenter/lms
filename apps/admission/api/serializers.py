@@ -1,9 +1,10 @@
+from django.conf import settings
 from rest_framework import serializers
 from rest_framework.fields import TimeField
 
 from django.utils import formats
 
-from admission.models import InterviewSlot
+from admission.models import InterviewSlot, Campaign
 
 
 class InterviewSlotBaseSerializer(serializers.ModelSerializer):
@@ -16,3 +17,12 @@ class InterviewSlotBaseSerializer(serializers.ModelSerializer):
 
     def get_stream(self, obj):
         return formats.date_format(obj.stream.date, "SHORT_DATE_FORMAT")
+
+
+class OpenRegistrationCampaignField(serializers.PrimaryKeyRelatedField):
+    def get_queryset(self):
+        if self.queryset:
+            return self.queryset.all()
+        return (Campaign.with_open_registration()
+                .filter(branch__site_id=settings.SITE_ID))
+

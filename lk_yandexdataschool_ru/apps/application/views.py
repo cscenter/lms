@@ -1,28 +1,20 @@
-# -*- coding: utf-8 -*-
+from django.views.generic import TemplateView
 
-
-from django.conf import settings
-from django.db.models import F
-
-from django.middleware.csrf import get_token
-
-from django.views.generic.base import TemplateView
-
-from admission.constants import WHERE_DID_YOU_LEARN
-from admission.models import Applicant, Campaign
-from auth.views import BACKEND_PREFIX
+from admission.models import Campaign
 from core.models import University
 from core.urls import reverse
+from django.conf import settings
+from django.db.models import F
+from django.middleware.csrf import get_token
+
 from learning.settings import AcademicDegreeLevels
 
-STRATEGY = 'social_django.strategy.DjangoStrategy'
-# Override `user` attribute to prevent accidental user creation
-STORAGE = __name__ + '.DjangoStorageCustom'
+BACKEND_PREFIX = 'application_ya'
 SESSION_LOGIN_KEY = f"{BACKEND_PREFIX}_login"
 
 
 class ApplicationFormView(TemplateView):
-    template_name = "compscicenter_ru/admission/application_form.html"
+    template_name = "lk_yandexdataschool_ru/application_form.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -41,22 +33,16 @@ class ApplicationFormView(TemplateView):
                             .order_by("name"))
             levels_of_education = [{"value": k, "label": str(v).lower()} for k, v in
                                    AcademicDegreeLevels.values.items()]
-            study_programs = [{"value": k, "label": v} for k, v in
-                              Applicant.STUDY_PROGRAMS]
-            sources = [{"value": k, "label": v} for k, v in WHERE_DID_YOU_LEARN]
-
             yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
             context['app'] = {
                 'props': {
-                    'endpoint': reverse('public-api:v2:applicant_create'),
+                    'endpoint': reverse('applicant_create'),
                     'csrfToken': get_token(self.request),
                     'authCompleteUrl': reverse('auth:auth_complete'),
                     'authBeginUrl': reverse('auth:auth_begin'),
                     'campaigns': list(active_campaigns),
                     'universities': list(universities),
                     'educationLevelOptions': levels_of_education,
-                    'studyProgramOptions': study_programs,
-                    'sourceOptions': sources
                 },
                 'state': {
                     'isYandexPassportAccessAllowed': bool(yandex_passport_access),

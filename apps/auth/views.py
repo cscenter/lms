@@ -1,22 +1,20 @@
 from typing import Iterable
 
 from braces.views import LoginRequiredMixin
-from social_core.actions import do_auth, do_disconnect
-from social_core.exceptions import AuthAlreadyAssociated, AuthException, AuthFailed
+from social_core.actions import do_disconnect
+from social_core.exceptions import AuthException
 from social_core.utils import partial_pipeline_data, setting_url
-from social_django.strategy import DjangoStrategy
 from social_django.utils import psa
 
 from django.conf import settings
 from django.contrib import auth, messages
-from django.contrib.auth import REDIRECT_FIELD_NAME, views
+from django.contrib.auth import views
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.utils.decorators import method_decorator
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import generic
-from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_POST
 
@@ -24,6 +22,24 @@ from auth.forms import AsyncPasswordResetForm, LoginForm
 from auth.storage import SocialServiceStorage
 from core.urls import reverse, reverse_lazy
 from users.constants import Roles
+
+from functools import wraps
+
+from social_core.actions import do_auth
+from social_core.exceptions import MissingBackend, SocialAuthBaseException
+from social_core.storage import UserMixin
+from social_core.utils import user_is_authenticated
+from social_django.models import DjangoStorage
+from social_django.strategy import DjangoStrategy
+from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.http.response import Http404
+from django.shortcuts import render
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
+from auth.backends import YandexRuOAuth2Backend
+
+
+BACKEND_PREFIX = 'application_ya'
 
 
 class LoginView(generic.FormView):
@@ -220,3 +236,68 @@ def connect_service_complete(request, backend: str, *args, **kwargs):
 def disconnect_service(request, backend: str):
     return do_disconnect(request.backend, request.user, association_id=None,
                          redirect_name=REDIRECT_FIELD_NAME)
+
+
+class DjangoStorageCustom(DjangoStorage):
+    user = UserMixin
+
+
+def redirect_to(redirect_url):
+    """Used for yandex oauth view to pass redirect url pattern name"""
+    def _wrapper(f):
+        @wraps(f)
+        def _inner(*args, **kwargs):
+            return f(*args, redirect_url=redirect_url, **kwargs)
+        return _inner
+    return _wrapper
+
+
+@never_cache
+@redirect_to("auth:auth_complete")
+def yandex_login_access(request, *args, **kwargs):
+    redirect_url = reverse(kwargs.pop("redirect_url"))
+    request.social_strategy = DjangoStrategy(DjangoStorageCustom, request,
+                                             *args, **kwargs)
+    if not hasattr(request, 'strategy'):
+        request.strategy = request.social_strategy
+    try:
+        request.backend = YandexRuOAuth2Backend(request.social_strategy, redirect_url)
+    except MissingBackend:
+        raise Http404('Backend not found')
+    return do_auth(request.backend, redirect_name=REDIRECT_FIELD_NAME)
+
+
+@never_cache
+@csrf_exempt
+@redirect_to("auth:auth_complete")
+def yandex_login_access_complete(request, *args, **kwargs):
+    """
+    Authentication complete view. Our main goal - to retrieve user yandex login.
+    """
+    redirect_url = reverse(kwargs.pop("redirect_url"))
+    request.social_strategy = DjangoStrategy(DjangoStorageCustom, request,
+                                             *args, **kwargs)
+    if not hasattr(request, 'strategy'):
+        request.strategy = request.social_strategy
+    try:
+        request.backend = YandexRuOAuth2Backend(request.social_strategy,
+                                                redirect_url)
+    except MissingBackend:
+        raise Http404('Backend not found')
+
+    user = request.user
+    backend = request.backend
+
+    is_authenticated = user_is_authenticated(user)
+    user = user if is_authenticated else None
+
+    # Note: Pipeline is never called since we prevent user authentication
+    try:
+        auth_data = backend.complete(user=user, *args, **kwargs)
+        for field_name in ["login", "sex"]:
+            key = f"{BACKEND_PREFIX}_{field_name}"
+            backend.strategy.session_set(key, auth_data.get(field_name))
+        context = {"yandex_login": auth_data.get("login", "")}
+    except SocialAuthBaseException as e:
+        context = {"error": str(e)}
+    return render(request, 'admission/social_close_popup.html', context=context)

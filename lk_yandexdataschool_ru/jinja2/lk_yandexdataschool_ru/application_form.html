@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <meta charset="utf-8">
+  <title>Набор в ШАД 2022</title>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" type="image/png" href="{{ static("v2/img/favicon.png") }}">
+  <link href="{{ static("v2/dist/css/main.css") }}" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+  <script type="text/javascript">
+      window.__CSC__ = {
+          config: {
+              csrfCookieName: "{{ CSRF_COOKIE_NAME }}",
+              sentryDSN: "{{ SENTRY_DSN }}",
+          },
+          notifications: {{ messages(request)|tojson }},
+          sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
+      };
+  </script>
+</head>
+<body>
+  <div class="svg-inline">{% block sprites %}{% endblock sprites %}</div>
+  <div class="container page-content">
+    {% if show_form %}
+      <div class="row">
+        <div class="col-12">
+          <a id="application-form-anchor"></a>
+          <div class="card _inverted">
+            <div class="card__header _big">
+              <h2>Анкета на поступление</h2>
+            </div>
+            <div class="card__content _big">
+              <div id="YDSApplicationForm" data-init='{{ app|tojson }}' class="__react-root"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</body>
+    {{ render_bundle('common', config='V2') }}
+    {{ render_bundle('main', config='V2') }}
+</html>
