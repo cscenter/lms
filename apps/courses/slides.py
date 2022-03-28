@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import posixpath
 
-import webdav.client as wc
+import webdav3.client as wc
+from webdav3.exceptions import WebDavException
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -38,21 +37,9 @@ def mkdirs(client, path):
             client.mkdir(path)
 
 
-def upload_slides(local_file, path, academic_year, retries=3):
-    options = {
-        'webdav_hostname': "https://webdav.yandex.ru",
-        'webdav_login': settings.YANDEX_DISK_USERNAME,
-        'webdav_password': settings.YANDEX_DISK_PASSWORD
-    }
-    client = wc.Client(options)
-
-    local_path = local_file.name
-    academic_period = "{}-{}".format(academic_year, academic_year + 1)
-    remote_path = posixpath.join(settings.YANDEX_DISK_SLIDES_ROOT,
-                                 academic_period,
-                                 path)
+def upload_file(webdav_client, local_path, remote_path, retries=3):
     try:
-        if client.check(remote_path):
+        if webdav_client.check(remote_path):
             logger.debug("Resource {} already exists".format(remote_path))
             return
     except wc.MethodNotSupported:
@@ -61,16 +48,16 @@ def upload_slides(local_file, path, academic_year, retries=3):
         # existence of each directory in the path or just ignore
         # this type of error due to yandex webdav api supports PROPFIND
         pass
-    except wc.WebDavException as e:
+    except WebDavException as e:
         logger.error(e)
         return
 
     exc = None
     for i in range(retries):
         try:
-            mkdirs(client, remote_path)
-            client.upload_sync(remote_path=remote_path, local_path=local_path)
-        except wc.WebDavException as webdav_exc:
+            mkdirs(webdav_client, remote_path)
+            webdav_client.upload_sync(remote_path=remote_path, local_path=local_path)
+        except WebDavException as webdav_exc:
             exc = webdav_exc
         else:
             logger.debug("Slides successfully uploaded on Yandex.Disk "

@@ -14,7 +14,7 @@ isort = "*"
 pylint = "*"
 pylint-django = "*"
 mypy = "==0.931"
-django-stubs = "==1.9.0"
+django-stubs = "==1.10.1"
 djangorestframework-stubs = "*"
 types-pytz = "*"
 types-bleach = "*"
@@ -127,7 +127,6 @@ django-webpack-loader = "==1.4.1"
 XlsxWriter = "==3.0.3"
 # FIXME: it's nbconvert dependency remove?
 jupyter_client = "==7.1.2"
-webdavclient = "==1.0.8"
 isoweek = "*"
 django-subdomains = {git = "https://github.com/pacahon/django-subdomains.git",ref = "4096c2dc82f9f5e511e8c8f78d31e804ac028b5d"}
 django-simple-menu = "*"
@@ -143,4 +142,4 @@ djangorestframework-camel-case = "*"
 wrapt = "==1.13.3"
 
 [requires]
-python_version = "3.9"
+python_version = "3.10"
