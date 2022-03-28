@@ -2,12 +2,9 @@
 Settings that are not used by club site
 """
 
-from typing import List
-
 from .base import *
 
 INSTALLED_APPS += [
-    'dbbackup',
     'lms',
     'post_office',
     'django_jinja',

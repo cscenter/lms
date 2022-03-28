@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8649d677da6e41875da13eb4b70aa8ec36126776f9c5b477037fa2c1ea4c3b9e"
+            "sha256": "555559fb6571777c8e30a75ff40131541dffdb77b31606dba942470a48c5bfca"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -361,13 +361,6 @@
             ],
             "index": "pypi",
             "version": "==1.14.0"
-        },
-        "django-dbbackup": {
-            "hashes": [
-                "sha256:bb109735cae98b64ad084e5b461b7aca2d7b39992f10c9ed9435e3ebb6fb76c8"
-            ],
-            "index": "pypi",
-            "version": "==3.3.0"
         },
         "django-environ": {
             "hashes": [

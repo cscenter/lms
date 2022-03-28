@@ -27,24 +27,6 @@ CACHES['default'] = {
     'LOCATION': '/tmp/django_cache'
 }
 
-# django-dbbackup settings
-DBBACKUP_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-DBBACKUP_TMP_DIR = '/shared/backup_tmp'
-DBBACKUP_DATE_FORMAT = '%d-%m-%Y-%H'
-DBBACKUP_FILENAME_TEMPLATE = 'backups/{servername}/{datetime}/{content_type}.{extension}'
-DBBACKUP_MEDIA_FILENAME_TEMPLATE = 'backups/{servername}/{datetime}/{content_type}.{extension}'
-# Credentials for user with access to S3 bucket
-DBBACKUP_S3_ACCESS_KEY = env.str('DBBACKUP_S3_ACCESS_KEY')
-DBBACKUP_S3_SECRET_KEY = env.str('DBBACKUP_S3_SECRET_KEY')
-DBBACKUP_STORAGE_OPTIONS = {
-    'location': '',
-    'bucket_name': 'cscenter',
-    'region_name': 'eu-central-1',
-    'access_key': DBBACKUP_S3_ACCESS_KEY,
-    'secret_key': DBBACKUP_S3_SECRET_KEY,
-    'default_acl': None,
-}
-
 POST_OFFICE = {
     'LOG_LEVEL': 1,  # Log only failed emails
     'BACKENDS': {
