@@ -1,4 +1,4 @@
-FROM python:3.9-slim-buster AS builder
+FROM python:3.10-slim-buster AS builder
 
 # Python requirements
 COPY Pipfile* /tmp/
@@ -9,7 +9,7 @@ RUN pip install --upgrade pip \
     && pipenv lock --python /usr/local/bin/python --requirements --keep-outdated --dev-only > /tmp/requirements-dev.txt \
     && pip uninstall -y pipenv
 
-FROM python:3.9-slim-buster
+FROM python:3.10-slim-buster
 LABEL maintainer="webmaster@compscicenter.ru"
 
 # Create a group and user to run our app. Use the same sid/gid
@@ -20,7 +20,6 @@ RUN groupadd --gid=101 ${APP_USER} && useradd --no-log-init --uid=101 --gid ${AP
 # Install packages needed to run your application (not build deps):
 #   libpcre3 -- regular expressions support
 #   postgresql-client -- for running database commands
-# TODO: remove python-pycurl?
 #   git -- some app dependencies (like Hoep) are stored on github
 #   gosu -- drop root priviligies in docker-entrypoint.sh
 # We need to recreate the /usr/share/man/man{1..8} directories first because
@@ -31,7 +30,6 @@ RUN set -ex \
     gettext \
     git \
     gosu \
-    python-pycurl \
     ldap-utils \
     postgresql-client \
     " \
@@ -45,7 +43,6 @@ COPY --from=builder /tmp/requirements-*.txt /tmp/
 # Install build deps, then run `pip install`,
 # then remove unneeded build deps all in a single step.
 #   swig, libssl-dev -- dependencies for m2crypto (used by django-ses). XXX: openssl already installed
-#   libcurl4-gnutls-dev - pycurl dependency
 #   libsasl2-dev python-dev libldap2-dev libssl-dev - python-ldap dependencies
 RUN set -ex \
     && BUILD_DEPS=" \
@@ -58,14 +55,13 @@ RUN set -ex \
     libjpeg-dev \
     libpng-dev \
     libmagic-dev \
-    libcurl4-gnutls-dev \
     libgnutls28-dev \
     libldap2-dev \
     libsasl2-dev \
     " \
     && apt-get update && apt-get install -y --no-install-recommends $BUILD_DEPS \
     && pip install --upgrade pip \
-    && pip install --no-cache-dir uwsgi==2.0.18 \
+    && pip install --no-cache-dir uwsgi==2.0.20 \
     && pip install --no-cache-dir -r /tmp/requirements-prod.txt \
     \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPS \
