@@ -482,6 +482,21 @@ SOCIAL_AUTH_GITLAB_MANYTASK_SECRET = env.str('SOCIAL_AUTH_GITLAB_MANYTASK_SECRET
 SOCIAL_AUTH_GITHUB_KEY = env.str('SOCIAL_AUTH_GITHUB_KEY', default='')
 SOCIAL_AUTH_GITHUB_SECRET = env.str('SOCIAL_AUTH_GITHUB_SECRET', default='')
 
+# Mailing Settings
+AWS_SES_ACCESS_KEY_ID = env.str('AWS_SES_ACCESS_KEY_ID')
+AWS_SES_SECRET_ACCESS_KEY = env.str('AWS_SES_SECRET_ACCESS_KEY')
+AWS_SES_REGION_NAME = env.str('AWS_SES_REGION_NAME', default='eu-west-1')
+AWS_SES_REGION_ENDPOINT = env.str('AWS_SES_REGION_ENDPOINT', default='email.eu-west-1.amazonaws.com')
+AWS_SES_VERIFY_EVENT_SIGNATURES = True  # verify signature of signed complaints, bounces
+AWS_SES_CONFIGURATION_SET = 'lms'
+POST_OFFICE = {
+    'BACKENDS': {
+        'ses': 'django.core.mail.backends.console.EmailBackend',
+        'BATCH_SIZE': 10,
+        'LOG_LEVEL': 1
+    }
+}
+
 
 LOG_FORMAT = env.str('LOG_FORMAT', default='json')
 

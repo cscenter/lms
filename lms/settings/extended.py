@@ -78,17 +78,3 @@ YANDEX_DISK_CLIENT_SECRET = env.str('YANDEX_DISK_CLIENT_SECRET')
 YANDEX_DISK_ACCESS_TOKEN = env.str('YANDEX_DISK_ACCESS_TOKEN')
 YANDEX_DISK_REFRESH_TOKEN = env.str('YANDEX_DISK_REFRESH_TOKEN')
 
-# Mailing Settings
-AWS_SES_ACCESS_KEY_ID = env.str('AWS_SES_ACCESS_KEY_ID')
-AWS_SES_SECRET_ACCESS_KEY = env.str('AWS_SES_SECRET_ACCESS_KEY')
-AWS_SES_REGION_NAME = env.str('AWS_SES_REGION_NAME', default='eu-west-1')
-AWS_SES_REGION_ENDPOINT = env.str('AWS_SES_REGION_ENDPOINT', default='email.eu-west-1.amazonaws.com')
-AWS_SES_VERIFY_EVENT_SIGNATURES = True  # verify signature of signed complaints, bounces
-AWS_SES_CONFIGURATION_SET = 'lms'
-POST_OFFICE = {
-    'BACKENDS': {
-        'ses': 'django.core.mail.backends.console.EmailBackend',
-        'BATCH_SIZE': 10,
-        'LOG_LEVEL': 1
-    }
-}
