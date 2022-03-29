@@ -36,6 +36,7 @@ SUBDOMAIN_URLCONFS = {
 
 # FIXME: lms.base там другие миддлвары.
 MIDDLEWARE = [
+    'core.middleware.HealthCheckMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'django.middleware.locale.LocaleMiddleware',
