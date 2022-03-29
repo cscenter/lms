@@ -118,7 +118,7 @@ class PublicMediaS3Storage(S3Boto3Storage):
         'ACL': 'public-read',
     }
     url_protocol = 'https:'
-    # querystring_auth = False
+    querystring_auth = False
 
 
 class PrivateMediaS3Storage(S3Boto3Storage):
