@@ -20,14 +20,5 @@ CACHES['default'] = {
     'LOCATION': '/tmp/django_cache'
 }
 
-POST_OFFICE = {
-    'LOG_LEVEL': 1,  # Log only failed emails
-    'BACKENDS': {
-        'ses': 'django_ses.SESBackend',
-        'BATCH_SIZE': 10,
-        'LOG_LEVEL': 1
-    }
-}
-
 # XXX: Enable AWS SES backend on CS Center and CS Club, then remove this setting
 EMAIL_BACKEND = 'django_ses.SESBackend'

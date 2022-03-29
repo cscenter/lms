@@ -24,3 +24,6 @@ CACHES = {
         'LOCATION': '/tmp/django_cache_club'
     }
 }
+
+# Remove this setting? cs club is configured for AWS SES
+POST_OFFICE['BACKENDS']['ses'] = EMAIL_BACKEND

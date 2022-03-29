@@ -26,12 +26,3 @@ CACHES['default'] = {
     'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
     'LOCATION': '/tmp/django_cache'
 }
-
-POST_OFFICE = {
-    'LOG_LEVEL': 1,  # Log only failed emails
-    'BACKENDS': {
-        'ses': 'django_ses.SESBackend',
-        'BATCH_SIZE': 10,
-        'LOG_LEVEL': 1
-    }
-}
