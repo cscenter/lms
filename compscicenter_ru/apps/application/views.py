@@ -10,7 +10,7 @@ from django.views.generic.base import TemplateView
 
 from admission.constants import WHERE_DID_YOU_LEARN
 from admission.models import Applicant, Campaign
-from auth.views import BACKEND_PREFIX
+from auth.views import ADMISSION_APPLICATION_BACKEND_PREFIX
 from core.models import University
 from core.urls import reverse
 from learning.settings import AcademicDegreeLevels
@@ -18,7 +18,7 @@ from learning.settings import AcademicDegreeLevels
 STRATEGY = 'social_django.strategy.DjangoStrategy'
 # Override `user` attribute to prevent accidental user creation
 STORAGE = __name__ + '.DjangoStorageCustom'
-SESSION_LOGIN_KEY = f"{BACKEND_PREFIX}_login"
+SESSION_LOGIN_KEY = f"{ADMISSION_APPLICATION_BACKEND_PREFIX}_login"
 
 
 class ApplicationFormView(TemplateView):
@@ -50,8 +50,8 @@ class ApplicationFormView(TemplateView):
                 'props': {
                     'endpoint': reverse('public-api:v2:applicant_create'),
                     'csrfToken': get_token(self.request),
-                    'authCompleteUrl': reverse('auth:auth_complete'),
-                    'authBeginUrl': reverse('auth:auth_begin'),
+                    'authCompleteUrl': reverse('auth:application:complete'),
+                    'authBeginUrl': reverse('auth:application:begin'),
                     'campaigns': list(active_campaigns),
                     'universities': list(universities),
                     'educationLevelOptions': levels_of_education,

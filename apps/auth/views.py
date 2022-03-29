@@ -39,7 +39,7 @@ from django.views.decorators.csrf import csrf_exempt
 from auth.backends import YandexRuOAuth2Backend
 
 
-BACKEND_PREFIX = 'application_ya'
+ADMISSION_APPLICATION_BACKEND_PREFIX = 'application_ya'
 
 
 class LoginView(generic.FormView):
@@ -253,7 +253,7 @@ def redirect_to(redirect_url):
 
 
 @never_cache
-@redirect_to("auth:auth_complete")
+@redirect_to("auth:application:complete")
 def yandex_login_access(request, *args, **kwargs):
     redirect_url = reverse(kwargs.pop("redirect_url"))
     request.social_strategy = DjangoStrategy(DjangoStorageCustom, request,
@@ -269,7 +269,7 @@ def yandex_login_access(request, *args, **kwargs):
 
 @never_cache
 @csrf_exempt
-@redirect_to("auth:auth_complete")
+@redirect_to("auth:application:complete")
 def yandex_login_access_complete(request, *args, **kwargs):
     """
     Authentication complete view. Our main goal - to retrieve user yandex login.
@@ -295,7 +295,7 @@ def yandex_login_access_complete(request, *args, **kwargs):
     try:
         auth_data = backend.complete(user=user, *args, **kwargs)
         for field_name in ["login", "sex"]:
-            key = f"{BACKEND_PREFIX}_{field_name}"
+            key = f"{ADMISSION_APPLICATION_BACKEND_PREFIX}_{field_name}"
             backend.strategy.session_set(key, auth_data.get(field_name))
         context = {"yandex_login": auth_data.get("login", "")}
     except SocialAuthBaseException as e:

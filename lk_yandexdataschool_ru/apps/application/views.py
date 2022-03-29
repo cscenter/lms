@@ -1,6 +1,7 @@
 from django.views.generic import TemplateView
 
 from admission.models import Campaign
+from auth.views import ADMISSION_APPLICATION_BACKEND_PREFIX
 from core.models import University
 from core.urls import reverse
 from django.conf import settings
@@ -9,8 +10,7 @@ from django.middleware.csrf import get_token
 
 from learning.settings import AcademicDegreeLevels
 
-BACKEND_PREFIX = 'application_ya'
-SESSION_LOGIN_KEY = f"{BACKEND_PREFIX}_login"
+SESSION_LOGIN_KEY = f"{ADMISSION_APPLICATION_BACKEND_PREFIX}_login"
 
 
 class ApplicationFormView(TemplateView):
@@ -38,8 +38,8 @@ class ApplicationFormView(TemplateView):
                 'props': {
                     'endpoint': reverse('applicant_create'),
                     'csrfToken': get_token(self.request),
-                    'authCompleteUrl': reverse('auth:auth_complete'),
-                    'authBeginUrl': reverse('auth:auth_begin'),
+                    'authCompleteUrl': reverse('auth:application:complete'),
+                    'authBeginUrl': reverse('auth:application:begin'),
                     'campaigns': list(active_campaigns),
                     'universities': list(universities),
                     'educationLevelOptions': levels_of_education,

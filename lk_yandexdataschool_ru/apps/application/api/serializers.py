@@ -252,7 +252,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                 fields=('email', 'campaign'),
                 message="Если вы уже зарегистрировали анкету на "
                         "указанный email и хотите внести изменения, "
-                        "напишите на info@compscicenter.ru с этой почты.")
+                        "напишите на shad@yandex-team.ru с этой почты.")
         ]
 
     def __init__(self, instance=None, data=empty, **kwargs):

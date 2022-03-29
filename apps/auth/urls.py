@@ -16,6 +16,11 @@ social_patterns = [
     path('disconnect/<str:backend>/', disconnect_service, name='disconnect'),
 ]
 
+yandex_access_patterns = [
+    path('yandex_access/', yandex_login_access, name='begin'),
+    path('yandex_access/complete/', yandex_login_access_complete, name='complete')
+]
+
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(permanent=False), name='logout'),
@@ -27,9 +32,9 @@ urlpatterns = [
     path('password_reset/done/', views.PasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', pass_reset_confirm_view, name='password_reset_confirm'),
     path('reset/done/', views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
-    path('yandex_access/', yandex_login_access, name='auth_begin'),
-    path('yandex_access/complete/', yandex_login_access_complete, name='auth_complete')
+    path('', include((yandex_access_patterns, 'application')))
 ]
+
 
 
 if settings.IS_SOCIAL_ACCOUNTS_ENABLED:
