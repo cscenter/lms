@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: "{{ k8s_namespace}}"
+  name: "{{ backend_service_name }}-backend"
+spec:
+  replicas: {{ backend_replicas }}
+  revisionHistoryLimit: {{ revision_history_limit | default('3') }}
+  selector:
+    matchLabels:
+      app: "{{ backend_service_name }}-backend"
+  strategy:
+    rollingUpdate:
+      maxUnavailable: {{ backend_max_unavailable | default('1') }}
+      maxSurge: {{ backend_max_surge | default('1') }}
+  template:
+    metadata:
+      labels:
+        app: "{{ backend_service_name }}-backend"
+    spec:
+      terminationGracePeriodSeconds: {{ termination_grace_period_seconds | default('30') }}
+      securityContext:
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: "{{ backend_service_name }}-backend-nginx"
+        - name: uwsgi-config
+          configMap:
+            name: "{{ backend_service_name }}-backend-uwsgi"
+        # TODO: remove after tests
+#        - name: static
+#          emptyDir: {}
+      containers:
+        - name: nginx
+          image: {{ docker_registry }}/{{ backend_nginx_image_name }}:{{ backend_nginx_image_tag }}
+          ports:
+            - containerPort: {{ backend_nginx_container_port }}
+          readinessProbe:
+            httpGet:
+              path: {{ health_check_endpoint }}
+              port: {{ backend_nginx_container_port }}
+            initialDelaySeconds: 5
+            timeoutSeconds: 15
+            periodSeconds: 30
+          lifecycle:
+            preStop:
+              exec:
+                command: [ '/bin/sh', '-c', 'sleep 5' ]
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d/
+              name: nginx-config
+#            - mountPath: /var/www/static/
+#              name: static
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+        - name: django
+          image: "{{ docker_registry }}/{{ backend_django_image_name }}:{{ backend_django_image_tag }}"
+          # FIXME: debug!
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 0
+          ports:
+            - containerPort: {{ backend_django_container_port }}
+          readinessProbe:
+            httpGet:
+              path: "{{ health_check_endpoint }}/"
+              port: {{ backend_django_container_port }}
+            initialDelaySeconds: 5
+            timeoutSeconds: 15
+            periodSeconds: 30
+          lifecycle:
+            preStop:
+              exec:
+                command: [ '/bin/sh', '-c', 'sleep 5' ]
+          volumeMounts:
+            - mountPath: /etc/uwsgi/
+              name: uwsgi-config
+#            - mountPath: /var/www/static/
+#              name: static
+          command: ["/bin/bash"]
+          args: ["-c", "pip install django-debug-toolbar==3.2.2; uwsgi --ini /etc/uwsgi/uwsgi.ini --show-config"]
+          resources:
+            requests:
+#              cpu: 100m
+              memory: 256Mi
+            limits:
+#              cpu: 200m
+              memory: 1024Mi
+          env:
+            {% filter indent(width=12) %}{% include 'app-env.yaml' %}{% endfilter %}

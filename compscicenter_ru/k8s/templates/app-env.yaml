@@ -1,0 +1,168 @@
+- name: DEBUG
+  value: "0"
+- name: PROJECT_MODULE_NAME
+  value: "compscicenter_ru"
+- name: DJANGO_SETTINGS_MODULE
+  value: "compscicenter_ru.settings.production"
+- name: DJANGO_STATIC_ROOT
+  value: "/var/www/static/"
+- name: DJANGO_SECRET_KEY
+  valueFrom:
+    secretKeyRef:
+      key: DJANGO_SECRET_KEY
+      name: "{{ backend_service_name }}-backend"
+- name: DATABASE_URL
+  valueFrom:
+    secretKeyRef:
+      key: DATABASE_URL
+      name: "{{ backend_service_name }}-backend"
+# Direct connection to the redis master without tls
+- name: REDIS_HOST
+  valueFrom:
+    secretKeyRef:
+      key: REDIS_HOST
+      name: "{{ backend_service_name }}-backend"
+- name: REDIS_PORT
+  valueFrom:
+    secretKeyRef:
+      key: REDIS_PORT
+      name: "{{ backend_service_name }}-backend"
+- name: REDIS_SSL
+  valueFrom:
+    secretKeyRef:
+      key: REDIS_SSL
+      name: "{{ backend_service_name }}-backend"
+- name: REDIS_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      key: REDIS_PASSWORD
+      name: "{{ backend_service_name }}-backend"
+- name: REDIS_DB
+  value: "1"
+- name: DJANGO_DB_SECRET_KEY
+  valueFrom:
+    secretKeyRef:
+      key: DJANGO_DB_SECRET_KEY
+      name: "{{ backend_service_name }}-backend"
+- name: HASHIDS_SALT
+  valueFrom:
+    secretKeyRef:
+      key: HASHIDS_SALT
+      name: "{{ backend_service_name }}-backend"
+- name: RECAPTCHA_PUBLIC_KEY
+  value: "6Ld2I7UUAAAAAMXFidlDOGnTTFQ3Zv3IhOcXbYoa"
+- name: RECAPTCHA_PRIVATE_KEY
+  valueFrom:
+    secretKeyRef:
+      key: RECAPTCHA_PRIVATE_KEY
+      name: "{{ backend_service_name }}-backend"
+- name: DJANGO_ALLOWED_HOSTS
+  value: "*"
+- name: DJANGO_EMAIL_ADDRESS
+  value: "noreply@compscicenter.ru"
+- name: DJANGO_EMAIL_HOST
+  value: "smtp.yandex.ru"
+- name: DJANGO_EMAIL_PORT
+  value: "465"
+- name: DJANGO_EMAIL_HOST_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      key: DJANGO_EMAIL_HOST_PASSWORD
+      name: "{{ backend_service_name }}-backend"
+- name: SOCIAL_AUTH_YANDEXRU_KEY
+  value: "9990b75d62a541f88812b6ce8b39574f"
+- name: SOCIAL_AUTH_YANDEXRU_SECRET
+  valueFrom:
+    secretKeyRef:
+      key: SOCIAL_AUTH_YANDEXRU_SECRET
+      name: "{{ backend_service_name }}-backend"
+# webdavclient3 settings
+- name: YANDEX_DISK_USERNAME
+  value: "csc-slides@yandex.ru"
+- name: YANDEX_DISK_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      key: YANDEX_DISK_PASSWORD
+      name: "{{ backend_service_name }}-backend"
+# yandex disk rest api settings (used in projects app)
+- name: YANDEX_DISK_CLIENT_ID
+  value: "6de37ef184a340cbba57fc24d2111b1d"
+- name: YANDEX_DISK_CLIENT_SECRET
+  valueFrom:
+    secretKeyRef:
+      key: YANDEX_DISK_CLIENT_SECRET
+      name: "{{ backend_service_name }}-backend"
+- name: YANDEX_DISK_ACCESS_TOKEN
+  valueFrom:
+    secretKeyRef:
+      key: YANDEX_DISK_ACCESS_TOKEN
+      name: "{{ backend_service_name }}-backend"
+- name: YANDEX_DISK_REFRESH_TOKEN
+  valueFrom:
+    secretKeyRef:
+      key: YANDEX_DISK_REFRESH_TOKEN
+      name: "{{ backend_service_name }}-backend"
+- name: AWS_S3_ENDPOINT_URL
+  valueFrom:
+    secretKeyRef:
+      key: AWS_S3_ENDPOINT_URL
+      name: "{{ backend_service_name }}-backend"
+- name: AWS_S3_REGION_NAME
+  valueFrom:
+    secretKeyRef:
+      key: AWS_S3_REGION_NAME
+      name: "{{ backend_service_name }}-backend"
+# Custom domain property exists for CDN purposes, but without this value
+# django-storages signs url first, then removes querystring auth if needed
+# which could be slow on a page with many files
+- name: AWS_S3_CUSTOM_DOMAIN
+  value: "storage.yandexcloud.net/lms-vault"
+- name: AWS_S3_ACCESS_KEY_ID
+  valueFrom:
+    secretKeyRef:
+      key: AWS_S3_ACCESS_KEY_ID
+      name: "{{ backend_service_name }}-backend"
+- name: AWS_S3_SECRET_ACCESS_KEY
+  valueFrom:
+    secretKeyRef:
+      key: AWS_S3_SECRET_ACCESS_KEY
+      name: "{{ backend_service_name }}-backend"
+- name: AWS_SES_ACCESS_KEY_ID
+  value: "AKIAJZ44WHPOEURR4TZA"
+- name: AWS_SES_SECRET_ACCESS_KEY
+  valueFrom:
+    secretKeyRef:
+      key: AWS_SES_SECRET_ACCESS_KEY
+      name: "{{ backend_service_name }}-backend"
+- name: LDAP_SYNC_PASSWORD
+  value: "0"
+- name: LDAP_CLIENT_URI
+  value: "ldap://review.compscicenter.ru:389"
+- name: LDAP_DB_SUFFIX
+  value: "dc=review,dc=compscicenter,dc=ru"
+- name: LDAP_CLIENT_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      key: LDAP_CLIENT_PASSWORD
+      name: "{{ backend_service_name }}-backend"
+# FIXME: how to specify LDAP_TLS_TRUSTED_CA_CERT_FILE? instead of copy to the image
+- name: GERRIT_API_URI
+  value: "https://review.compscicenter.ru/a/"
+- name: GERRIT_CLIENT_HTTP_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      key: GERRIT_CLIENT_HTTP_PASSWORD
+      name: "{{ backend_service_name }}-backend"
+- name: SENTRY_DSN
+  value: "https://f2a254aefeae4aeaa09657771205672f@sentry.io/13763"
+# Social auth
+- name: SOCIAL_AUTH_GITLAB_MANYTASK_KEY
+  valueFrom:
+    secretKeyRef:
+      key: SOCIAL_AUTH_GITLAB_MANYTASK_KEY
+      name: "{{ backend_service_name }}-backend"
+- name: SOCIAL_AUTH_GITLAB_MANYTASK_SECRET
+  valueFrom:
+    secretKeyRef:
+      key: SOCIAL_AUTH_GITLAB_MANYTASK_SECRET
+      name: "{{ backend_service_name }}-backend"

@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: clear-sessions
+  namespace: "{{ k8s_namespace}}"
+spec:
+  # https://crontab.guru/#7_0_*_*_*
+  schedule: "7 0 * * *"
+  concurrencyPolicy: Replace
+  suspend: false
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: clear-sessions
+              image: "{{ docker_registry }}/{{ backend_django_image_name }}:{{ backend_django_image_tag }}"
+              imagePullPolicy: IfNotPresent
+              command: [ "/bin/sh" ]
+              args: [ "-c", "python manage.py clearsessions" ]
+              env:
+                {% filter indent(width=16) %}{% include 'app-env.yaml' %}{% endfilter %}
+          restartPolicy: Never

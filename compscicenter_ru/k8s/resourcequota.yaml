@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: "cscenter-resourcequota"
+spec:
+  hard:
+    pods: "100"
