@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: django-post-office
+  namespace: "{{ k8s_namespace}}"
+spec:
+  # https://crontab.guru/#*_*_*_*_*
+  schedule: "* * * * *"
+  concurrencyPolicy: Replace
+  suspend: false
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            description: "Send queued emails with amazon SES"
+        spec:
+          containers:
+            - name: post-office
+              image: "{{ docker_registry }}/{{ backend_django_image_name }}:{{ backend_django_image_tag }}"
+              imagePullPolicy: IfNotPresent
+              command: [ "/bin/sh" ]
+              args: [ "-c", "python manage.py send_queued_mail"]
+              env:
+                {% filter indent(width=16) %}{% include 'app-env.yaml' %}{% endfilter %}
+          restartPolicy: Never

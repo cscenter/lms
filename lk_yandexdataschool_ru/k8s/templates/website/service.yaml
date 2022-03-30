@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: "{{ k8s_namespace}}"
+  name: "{{ backend_service_name }}-backend"
+spec:
+  type: ClusterIP
+  ports:
+    - name: nginx
+      port: {{ backend_nginx_service_port }}
+      targetPort: {{ backend_nginx_container_port }}
+    - name: django
+      port: {{ backend_django_service_port }}
+      targetPort: {{ backend_django_container_port }}
+  selector:
+    app: "{{ backend_service_name }}-backend"

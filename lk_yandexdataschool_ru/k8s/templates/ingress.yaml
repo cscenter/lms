@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: "{{ k8s_namespace }}"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+    nginx.ingress.kubernetes.io/proxy-body-size: 10m
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      {% for domain in domains -%}
+      - {{ domain }}
+      {% endfor %}
+      secretName: "letsencrypt-{{ k8s_namespace }}"
+  rules:
+  {% for domain in domains -%}
+  - host: {{ domain }}
+    http:
+      paths:
+        - path: /static/
+          backend:
+            serviceName: "{{ backend_service_name }}-backend"
+            servicePort: {{ backend_nginx_service_port }}
+        - path: /
+          backend:
+            serviceName: "{{ backend_service_name }}-backend"
+            servicePort: {{ backend_django_service_port }}
+  {% endfor %}

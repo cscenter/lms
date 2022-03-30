@@ -1,0 +1,42 @@
+---
+common:
+  k8s_namespace: yds-prod
+  docker_registry: cr.yandex/crp117orrt9bf62s55e2
+  # Copy id from the `yc lockbox secret list` output
+  shared_lockbox_secret_id: e6qhjsn2s75jr8b9ie4k
+  yandex_lockbox_secret_id: e6qun1pcga4pfpqtb17d
+
+  health_check_endpoint: /health-check
+  backend_service_name: website
+
+  backend_nginx_image_name: "backend-nginx"
+  backend_nginx_image_tag: "{{ env='BACKEND_BUILD_NUMBER' }}"
+  backend_nginx_service_port: 8080
+  backend_nginx_container_port: 8080
+
+  backend_django_image_name: "backend-django"
+  backend_django_image_tag: "{{ env='BACKEND_BUILD_NUMBER' }}"
+  backend_django_service_port: 8001
+  backend_django_container_port: 8001
+
+  backend_replicas: 2
+
+  domains:
+    - lk.yandexdataschool.ru
+
+
+prod:
+  templates:
+    - template: ingress.yaml
+      tags: ingress
+    - template: secrets.yaml
+      tags: secrets
+    - template: ^website/.*.yaml$
+      tags: website
+    - template: ^queue/.*.yaml$
+      tags: queue
+    - template: ^scheduler/.*.yaml$
+      tags: scheduler
+# Issue: k8s-handle is outdated, render cronjob manifests `k8s-handle render`, then apply them `kubectl apply -f /tmp/k8s-handle/`
+#    - template: ^periodic-tasks/.*.yaml$
+#      tags: cron-jobs

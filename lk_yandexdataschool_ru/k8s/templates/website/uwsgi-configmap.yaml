@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ backend_service_name }}-backend-uwsgi"
+data:
+  uwsgi.ini: |
+    {% filter indent(width=4) %}{% include 'website/uwsgi.ini' %}{% endfilter %}
