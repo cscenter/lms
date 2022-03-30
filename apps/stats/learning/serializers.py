@@ -13,8 +13,7 @@ class StudentAssignmentStatsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentAssignment
-        fields = ("id", "sent", "first_student_comment_at", "score", "user_id",
-                  "status")
+        fields = ("id", "sent", "first_solution_at", "score", "user_id", "status")
 
     def get_sent(self, obj: StudentAssignment) -> int:
         return int(obj.score is not None or obj.is_submission_received)
