@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: "{{ k8s_namespace}}"
+  name: "queue"
+spec:
+  replicas: 1
+  revisionHistoryLimit: {{ revision_history_limit | default('3') }}
+  selector:
+    matchLabels:
+      app: "queue"
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: "queue"
+    spec:
+      terminationGracePeriodSeconds: {{ termination_grace_period_seconds | default('30') }}
+      securityContext:
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+      containers:
+        - name: worker
+          image: "{{ docker_registry }}/{{ backend_django_image_name }}:{{ backend_django_image_tag }}"
+          lifecycle:
+            preStop:
+              exec:
+                command: [ '/bin/sh', '-c', 'sleep 5' ]
+          command: ["/bin/sh"]
+          args: ["-c", "python manage.py rqworker high default"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          env:
+            {% filter indent(width=12) %}{% include 'app-env.yaml' %}{% endfilter %}

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: "csclub-prod-resourcequota"
+spec:
+  hard:
+    pods: "100"
