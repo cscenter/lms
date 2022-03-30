@@ -3,8 +3,12 @@ from rest_framework.exceptions import ValidationError
 
 from django.conf import settings
 from django.utils.timezone import now
+from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.fields import empty
 
+from admission.api.serializers import OpenRegistrationCampaignField
 from admission.models import Applicant, Campaign
+from admission.tasks import register_in_yandex_contest
 from core.models import University
 from learning.settings import AcademicDegreeLevels
 
@@ -115,6 +119,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
             # Personal info
             "last_name", "first_name", "patronymic", "yandex_login",
             "email", "phone", "living_place", "birth_date",
+
             # Education
             "university", "university_other", "is_studying", "faculty",
             "level_of_education", "year_of_graduation",
@@ -176,3 +181,127 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         if not University.objects.filter(pk=attrs['university']).exists():
             raise ValidationError(f"University with pk=`{attrs['university']}` does not exist")
         return attrs
+
+
+class ApplicationYDSFormSerializer(serializers.ModelSerializer):
+    campaign = OpenRegistrationCampaignField(
+        label='Отделение',
+        error_messages={
+            'does_not_exist': 'Приемная кампания окончена либо не существует',
+            'incorrect_type': 'Некорректное значение идентификатора кампании'
+        })
+    ml_experience = serializers.CharField(
+        write_only=True,
+        label='Изучали ли вы раньше машинное обучение/анализ данных? Каким образом? '
+              'Какие навыки удалось приобрести, какие проекты сделать?')
+    university_city = serializers.CharField(
+        write_only=True,
+        max_length=255,
+        label='Город, в котором расположен университет'
+    )
+    ticket_access = serializers.BooleanField(
+        write_only=True,
+        label='Мне был предоставлен билет на прошлом отборе в ШАД'
+    )
+    magistracy_and_shad = serializers.BooleanField(
+        write_only=True,
+        label='Планируете ли вы поступать в этом году на одну из совместных с ШАД магистерских программ?'
+    )
+    email_subscription = serializers.BooleanField(
+        write_only=True,
+        label='Я согласен (-на) на получение новостной и рекламной рассылки от АНО ДПО "ШАД" и ООО "ЯНДЕКС'
+    )
+    # FIXME: Replace with hidden field since real value stores in session
+    yandex_login = serializers.CharField(max_length=80)
+
+    class Meta:
+        model = Applicant
+        fields = (
+            # Personal info
+            "last_name", "first_name", "patronymic",
+            "email", "phone", "birth_date", "living_place",
+
+            # Accounts
+            "yandex_login",
+
+            # Education
+            "university_city", "university", "university_other",
+            "faculty", "is_studying", "level_of_education", "year_of_graduation",
+
+            # YDS
+            "campaign",
+            "motivation",
+            "ml_experience",
+            "ticket_access",
+            "magistracy_and_shad",
+            "email_subscription",
+
+            # Source
+            "where_did_you_learn_other",
+        )
+        extra_kwargs = {
+            'university': {
+                'error_messages': {
+                    'does_not_exist': 'Университет не найден среди допустимых значений'
+                }
+            },
+        }
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Applicant.objects.all(),
+                fields=('email', 'campaign'),
+                message="Если вы уже зарегистрировали анкету на "
+                        "указанный email и хотите внести изменения, "
+                        "напишите на shad@yandex-team.ru с этой почты.")
+        ]
+
+    def __init__(self, instance=None, data=empty, **kwargs):
+        super().__init__(instance, data, **kwargs)
+        self.fields["living_place"].required = True
+        if data is not empty and data:
+            if "university_other" in data:
+                # Make university optional cause its value should be empty in
+                # case when `university_other` value provided. Set value
+                # later in `.validate` method.
+                self.fields["university"].required = False
+            if data.get("is_studying"):
+                self.fields["level_of_education"].required = True
+
+    def create(self, validated_data):
+        data = {**validated_data}
+        data['data'] = {
+            'ticket_access': data.get('ticket_access'),
+            'university_city': data.get('university_city'),
+            'magistracy_and_shad': data.get('magistracy_and_shad'),
+            'email_subscription': data.get('email_subscription')
+        }
+        data['experience'] = data['ml_experience']
+        # Remove fields that are actually not present on Applicant model
+        custom_fields = []
+        all_fields = [f.name for f in Applicant._meta.get_fields(include_hidden=True)]
+        for field_name in data:
+            if field_name not in all_fields:
+                custom_fields.append(field_name)
+        for field_name in custom_fields:
+            if field_name in data:
+                del data[field_name]
+        return super().create(data)
+
+    def save(self, **kwargs):
+        instance = super().save(**kwargs)
+        if instance.pk:
+            # TODO: better to add transaction.on_commit
+            register_in_yandex_contest.delay(instance.pk,
+                                             settings.LANGUAGE_CODE)
+        return instance
+
+    def validate(self, attrs):
+        if not attrs.get('is_studying') and 'level_of_education' in attrs:
+            del attrs['level_of_education']
+        if attrs.get('university_other'):
+            university, created = University.objects.get_or_create(
+                abbr="other", city_id=None,
+                defaults={"name": "Другое"})
+            attrs['university'] = university
+        return attrs
+

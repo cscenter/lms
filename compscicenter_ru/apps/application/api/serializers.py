@@ -4,18 +4,11 @@ from rest_framework.validators import UniqueTogetherValidator
 
 from django.conf import settings
 
+from admission.api.serializers import OpenRegistrationCampaignField
 from admission.constants import WHERE_DID_YOU_LEARN
 from admission.models import Applicant, Campaign
 from admission.tasks import register_in_yandex_contest
 from core.models import University
-
-
-class OpenRegistrationCampaignField(serializers.PrimaryKeyRelatedField):
-    def get_queryset(self):
-        if self.queryset:
-            return self.queryset.all()
-        return (Campaign.with_open_registration()
-                .filter(branch__site_id=settings.SITE_ID))
 
 
 class ApplicationFormSerializer(serializers.ModelSerializer):

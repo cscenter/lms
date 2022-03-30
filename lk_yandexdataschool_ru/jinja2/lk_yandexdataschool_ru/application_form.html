@@ -1,0 +1,24 @@
+{% extends "lms/layouts/v2_base.html" %}
+{% block title %}Набор в ШАД 2022{% endblock %}
+{% block menu %}{% endblock %}
+{% block content %}
+  <div class="svg-inline">{% block sprites %}{% endblock sprites %}</div>
+  <div class="container page-content">
+    {% if show_form %}
+      <div class="row">
+        <div class="col-12">
+          <a id="application-form-anchor"></a>
+          <div class="card _inverted">
+            <div class="card__header _big">
+              <h2>Анкета на поступление</h2>
+            </div>
+            <div class="card__content _big">
+              <div id="YDSApplicationForm" data-init='{{ app|tojson }}' class="__react-root"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
+{% block footer %}{% endblock %}

@@ -36,7 +36,7 @@ SUBDOMAIN_URLCONFS = {
 }
 
 INSTALLED_APPS += [
-    'application.apps.ApplicationConfig',
+    'application.apps.ApplicationConfig'
 ]
 
 ESTABLISHED = 2007
@@ -46,9 +46,11 @@ DEFAULT_BRANCH_CODE = "msk"
 # Template customization
 FAVICON_PATH = 'v1/img/shad/favicon.ico'
 LOGO_PATH = 'v1/img/shad/logo.svg'
+PROJECT_DIR = Path(__file__).parents[1]
 
 for template in TEMPLATES:
     if "Jinja2" in template["BACKEND"]:
+        template["DIRS"] = [str(PROJECT_DIR / "jinja2")] + template["DIRS"]
         template["OPTIONS"]["constants"]["YANDEX_METRIKA_ID"] = YANDEX_METRIKA_ID
         update_constants = [
             ("ESTABLISHED", ESTABLISHED),
@@ -57,6 +59,8 @@ for template in TEMPLATES:
         ]
         for option, value in update_constants:
             template["OPTIONS"]["constants"][option] = value
+    elif "DjangoTemplates" in template["BACKEND"]:
+        template["DIRS"] = [str(PROJECT_DIR / "templates")] + template["DIRS"]
 
 
 # Application form webhook authorization token. Send it over https only.
