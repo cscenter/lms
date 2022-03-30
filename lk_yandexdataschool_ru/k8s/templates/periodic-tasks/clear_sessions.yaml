@@ -13,6 +13,9 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          labels:
+            name: clear-sessions
         spec:
           containers:
             - name: clear-sessions

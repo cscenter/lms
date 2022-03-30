@@ -13,6 +13,9 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          labels:
+            name: clear-notifications
         spec:
           containers:
             - name: clear-notifications

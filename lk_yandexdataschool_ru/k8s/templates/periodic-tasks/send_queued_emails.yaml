@@ -15,7 +15,7 @@ spec:
       template:
         metadata:
           labels:
-            description: "Send queued emails with amazon SES"
+            name: django-post-office
         spec:
           containers:
             - name: post-office

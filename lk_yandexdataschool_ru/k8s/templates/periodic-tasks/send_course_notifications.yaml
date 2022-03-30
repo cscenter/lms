@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: notifications
+  name: course-notifications
   namespace: "{{ k8s_namespace}}"
 spec:
   # https://crontab.guru/#*/5_*_*_*_*
@@ -13,6 +13,9 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          labels:
+            name: course-notifications
         spec:
           containers:
             - name: notifications
