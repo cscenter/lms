@@ -30,9 +30,6 @@ spec:
         - name: uwsgi-config
           configMap:
             name: "{{ backend_service_name }}-backend-uwsgi"
-        # TODO: remove after tests
-#        - name: static
-#          emptyDir: {}
       containers:
         - name: nginx
           image: {{ docker_registry }}/{{ backend_nginx_image_name }}:{{ backend_nginx_image_tag }}
@@ -52,8 +49,6 @@ spec:
           volumeMounts:
             - mountPath: /etc/nginx/conf.d/
               name: nginx-config
-#            - mountPath: /var/www/static/
-#              name: static
           resources:
             requests:
               cpu: 50m
@@ -63,10 +58,6 @@ spec:
               memory: 128Mi
         - name: django
           image: "{{ docker_registry }}/{{ backend_django_image_name }}:{{ backend_django_image_tag }}"
-          # FIXME: debug!
-          securityContext:
-            allowPrivilegeEscalation: false
-            runAsUser: 0
           ports:
             - containerPort: {{ backend_django_container_port }}
           readinessProbe:
@@ -83,10 +74,8 @@ spec:
           volumeMounts:
             - mountPath: /etc/uwsgi/
               name: uwsgi-config
-#            - mountPath: /var/www/static/
-#              name: static
           command: ["/bin/bash"]
-          args: ["-c", "pip install django-debug-toolbar==3.2.2; uwsgi --ini /etc/uwsgi/uwsgi.ini --show-config"]
+          args: ["-c", "uwsgi --ini /etc/uwsgi/uwsgi.ini --show-config"]
           resources:
             requests:
 #              cpu: 100m
