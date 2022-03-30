@@ -50,6 +50,10 @@ urlpatterns = i18n_patterns(
     prefix_default_language=False
 )
 
+# Placing this urls under `admin` namespace needs a lot of customization
+if apps.is_installed('django_rq'):
+    urlpatterns += [path('narnia/django-rq/', include('django_rq.urls'))]
+
 urlpatterns += [
     path('robots.txt', TemplateView.as_view(template_name="compsciclub_ru/robots.txt", content_type="text/plain"), name='robots_txt'),
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
