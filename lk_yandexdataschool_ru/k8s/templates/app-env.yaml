@@ -70,7 +70,7 @@
       key: DJANGO_EMAIL_HOST_PASSWORD
       name: "{{ backend_service_name }}-backend"
 - name: SOCIAL_AUTH_YANDEXRU_KEY
-  value: "9990b75d62a541f88812b6ce8b39574f"
+  value: "0f8c753d4f3348d7a3e2b2017461d7c6"
 - name: SOCIAL_AUTH_YANDEXRU_SECRET
   valueFrom:
     secretKeyRef:
