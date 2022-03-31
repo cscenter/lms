@@ -82,6 +82,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
               'Какие навыки удалось приобрести, какие проекты сделать?')
     new_track = AliasedChoiceField(
         required=False,
+        write_only=True,
         choices=[
             ('Да', True, 'Да'),
             ('Нет', False, 'Нет'),
@@ -190,6 +191,51 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'does_not_exist': 'Приемная кампания окончена либо не существует',
             'incorrect_type': 'Некорректное значение идентификатора кампании'
         })
+    shad_plus_rash = AliasedChoiceField(
+        required=True,
+        write_only=True,
+        choices=[
+            (True, True, 'Да'),
+            (False, False, 'Нет'),
+        ],
+        label='Планируете ли вы поступать на совместную программу ШАД и РЭШ?'
+    )
+    rash_agreement = serializers.BooleanField(
+        required=False,
+        write_only=True
+    )
+    new_track = AliasedChoiceField(
+        required=True,
+        write_only=True,
+        choices=[
+            (True, True, 'Да'),
+            (False, False, 'Нет'),
+        ],
+        label='Планируете ли вы воспользоваться новым треком поступления?'
+    )
+    new_track_scientific_articles = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        label='Есть ли у вас научные статьи? Если да, то дайте их координаты.')
+    new_track_projects = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        label='Есть ли у вас открытые проекты вашего авторства, или в которых вы участвовали '
+              'в составе команды, на github или на каком-либо из подобных сервисов? '
+              'Если да, дайте ссылки на них.')
+    new_track_tech_articles = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        label='Есть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.')
+    new_track_project_details = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        label='Расскажите более подробно о каком-нибудь из своих проектов. Что хотелось сделать? '
+              'Какие нетривиальные технические решения вы использовали? '
+              'В чём были трудности и как вы их преодолевали? '
+              'Пожалуйста, сохраните свой ответ в файле .pdf, выложите его на Яндекс.Диск и поместите сюда ссылку. '
+              'Если у вас уже есть статья на эту тему и вы давали на неё ссылку в предыдущем вопросе, '
+              'то можете поставить здесь прочерк.')
     ml_experience = serializers.CharField(
         write_only=True,
         label='Изучали ли вы раньше машинное обучение/анализ данных? Каким образом? '
@@ -236,6 +282,17 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             "magistracy_and_shad",
             "email_subscription",
 
+            # Rash
+            "shad_plus_rash",
+            "rash_agreement",
+
+            # New track
+            "new_track",
+            "new_track_scientific_articles",
+            "new_track_projects",
+            "new_track_tech_articles",
+            "new_track_project_details",
+
             # Source
             "where_did_you_learn_other",
         )
@@ -255,8 +312,11 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                         "напишите на shad@yandex-team.ru с этой почты.")
         ]
 
+    # TODO: ATTENTION ADD DATA VERSION
+
     def __init__(self, instance=None, data=empty, **kwargs):
         super().__init__(instance, data, **kwargs)
+        self.fields["patronymic"].required = True
         self.fields["living_place"].required = True
         if data is not empty and data:
             if "university_other" in data:
@@ -266,14 +326,27 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                 self.fields["university"].required = False
             if data.get("is_studying"):
                 self.fields["level_of_education"].required = True
+            if data.get("shad_plus_rash"):
+                self.fields['rash_agreement'].required = True
 
     def create(self, validated_data):
         data = {**validated_data}
         data['data'] = {
+            'shad_agreement': data.get('agreement'),
+            'new_track': data.get('new_track'),
+            'new_track_scientific_articles': data.get('new_track_scientific_articles'),
+            'new_track_projects': data.get('new_track_projects'),
+            'new_track_tech_articles': data.get('new_track_tech_articles'),
+            'new_track_project_details': data.get('new_track_project_details'),
+
+            'shad_plus_rash': data.get('shad_plus_rash'),
+            'rash_agreement': data.get('rash_agreement'),
+
             'ticket_access': data.get('ticket_access'),
             'university_city': data.get('university_city'),
             'magistracy_and_shad': data.get('magistracy_and_shad'),
-            'email_subscription': data.get('email_subscription')
+            'email_subscription': data.get('email_subscription'),
+            'data_format_version': '0.1'
         }
         data['experience'] = data['ml_experience']
         # Remove fields that are actually not present on Applicant model
@@ -304,4 +377,3 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                 defaults={"name": "Другое"})
             attrs['university'] = university
         return attrs
-

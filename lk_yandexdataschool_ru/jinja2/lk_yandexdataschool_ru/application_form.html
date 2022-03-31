@@ -4,7 +4,6 @@
 {% block content %}
   <div class="svg-inline">{% block sprites %}{% endblock sprites %}</div>
   <div class="container page-content">
-    {% if show_form %}
       <div class="row">
         <div class="col-12">
           <a id="application-form-anchor"></a>
@@ -13,12 +12,20 @@
               <h2>Анкета на поступление</h2>
             </div>
             <div class="card__content _big">
-              <div id="YDSApplicationForm" data-init='{{ app|tojson }}' class="__react-root"></div>
+              {% if show_form %}
+                <div class="card__title">
+                    <h2 class="mb-3">Набор в ШАД 2022</h2>
+                </div>
+                <div id="YDSApplicationForm" data-init='{{ app|tojson }}' class="__react-root"></div>
+              {% else %}
+                <div class="card__title">
+                    <h2 class="mb-3">Новый набор стартует ориентировочно в апреле 2022.</h2>
+                </div>
+              {% endif %}
             </div>
           </div>
         </div>
       </div>
-    {% endif %}
   </div>
 {% endblock %}
 {% block footer %}{% endblock %}
