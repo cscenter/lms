@@ -192,7 +192,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'incorrect_type': 'Некорректное значение идентификатора кампании'
         })
     shad_plus_rash = AliasedChoiceField(
-        required=True,
+        required=False,
         write_only=True,
         choices=[
             (True, True, 'Да'),
@@ -205,7 +205,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         write_only=True
     )
     new_track = AliasedChoiceField(
-        required=True,
+        required=False,
         write_only=True,
         choices=[
             (True, True, 'Да'),
@@ -257,6 +257,10 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         write_only=True,
         label='Я согласен (-на) на получение новостной и рекламной рассылки от АНО ДПО "ШАД" и ООО "ЯНДЕКС'
     )
+    shad_agreement = serializers.BooleanField(
+        required=True,
+        write_only=True
+    )
     # FIXME: Replace with hidden field since real value stores in session
     yandex_login = serializers.CharField(max_length=80)
 
@@ -281,6 +285,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             "ticket_access",
             "magistracy_and_shad",
             "email_subscription",
+            "shad_agreement",
 
             # Rash
             "shad_plus_rash",
@@ -328,11 +333,19 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                 self.fields["level_of_education"].required = True
             if data.get("shad_plus_rash"):
                 self.fields['rash_agreement'].required = True
+            msk_campaign_pk = (Campaign.with_open_registration()
+                               .filter(branch__site_id=settings.SITE_ID,
+                                       branch__code='msk')
+                               .get()
+                               .pk)
+            if data.get('campaign') == str(msk_campaign_pk):
+                self.fields["new_track"].required = True
+                self.fields["shad_plus_rash"].required = True
 
     def create(self, validated_data):
         data = {**validated_data}
         data['data'] = {
-            'shad_agreement': data.get('agreement'),
+            'shad_agreement': data.get('shad_agreement'),
             'new_track': data.get('new_track'),
             'new_track_scientific_articles': data.get('new_track_scientific_articles'),
             'new_track_projects': data.get('new_track_projects'),
@@ -376,4 +389,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                 abbr="other", city_id=None,
                 defaults={"name": "Другое"})
             attrs['university'] = university
+        if attrs.get('shad_plus_rash') and not attrs.get('rash_agreement'):
+            raise ValidationError("Необходимо согласиться с политикой РЭШ в отношении персональных данных.")
         return attrs
