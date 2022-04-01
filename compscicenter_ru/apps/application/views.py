@@ -11,6 +11,7 @@ from django.views.generic.base import TemplateView
 from admission.constants import WHERE_DID_YOU_LEARN
 from admission.models import Applicant, Campaign
 from auth.views import ADMISSION_APPLICATION_BACKEND_PREFIX
+
 from core.models import University
 from core.urls import reverse
 from learning.settings import AcademicDegreeLevels
