@@ -333,14 +333,13 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                 self.fields["level_of_education"].required = True
             if data.get("shad_plus_rash"):
                 self.fields['rash_agreement'].required = True
-            msk_campaign_pk = (Campaign.with_open_registration()
-                               .filter(branch__site_id=settings.SITE_ID,
-                                       branch__code='msk')
-                               .get()
-                               .pk)
-            if data.get('campaign') == str(msk_campaign_pk):
-                self.fields["new_track"].required = True
-                self.fields["shad_plus_rash"].required = True
+            msk_campaign = (Campaign.with_open_registration()
+                            .filter(branch__site_id=settings.SITE_ID,
+                                    branch__code='msk'))
+            if msk_campaign:
+                if data.get('campaign') == str(msk_campaign.get().pk):
+                    self.fields["new_track"].required = True
+                    self.fields["shad_plus_rash"].required = True
 
     def create(self, validated_data):
         data = {**validated_data}
