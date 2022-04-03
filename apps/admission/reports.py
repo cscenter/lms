@@ -27,7 +27,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 .filter(campaign=self.campaign.pk)
                 .select_related("exam", "online_test")
                 .prefetch_related(
-                    "university",
+                    "university_legacy",
                     Prefetch(
                         "interviews",
                         queryset=(Interview.objects

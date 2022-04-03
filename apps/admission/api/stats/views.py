@@ -66,7 +66,7 @@ class CampaignStagesByUniversities(ReadOnlyModelViewSet):
         campaign_id = self.kwargs.get('campaign_id')
         return (Applicant.objects
                 .filter(campaign_id=campaign_id)
-                .values('university_id', 'university__name')
+                .values('university_legacy_id', 'university_legacy__name')
                 .annotate(application_form=Count("campaign_id"),
                           testing=TestingCountAnnotation,
                           examination=ExaminationCountAnnotation,
@@ -190,7 +190,7 @@ class CampaignResultsByUniversities(ListRenderersMixin, PandasView):
         qs = (Applicant.objects
               .filter(campaign_id=campaign_id,
                       status__in=STATUSES)
-              .values('university_id', 'university__name', 'status')
+              .values('university_legacy_id', 'university_legacy__name', 'status')
               .annotate(total=Count("status")))
         return qs
 
@@ -230,7 +230,7 @@ class CampaignStatsTestingScoreByUniversities(ListRenderersMixin, PandasView):
         campaign_id = self.kwargs.get('campaign_id')
         return (Test.objects
                 .filter(applicant__campaign_id=campaign_id)
-                .values('score', 'applicant__university__name')
+                .values('score', 'applicant__university_legacy__name')
                 .annotate(total=Count('score')))
 
 
@@ -259,7 +259,7 @@ class CampaignStatsExamScoreByUniversities(ListRenderersMixin, PandasView):
         campaign_id = self.kwargs.get('campaign_id')
         return (Exam.objects
                 .filter(applicant__campaign_id=campaign_id)
-                .values('score', 'applicant__university__name')
+                .values('score', 'applicant__university_legacy__name')
                 .annotate(total=Count('score')))
 
 

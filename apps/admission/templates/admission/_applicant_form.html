@@ -14,9 +14,9 @@
       <dd>{{ applicant_form.instance.get_level_of_education_display }}</dd>
     {% elif field.name == 'living_place' %}
       <dd>{{ applicant_form.instance.get_living_place_display|default:"<не указано>" }}</dd>
-    {% elif field.name == 'university' %}
+    {% elif field.name == 'university_legacy' %}
       <dd>{% if applicant_form.instance.university_other %}{{ applicant_form.instance.university_other }}{% else %}
-        {{ applicant_form.instance.university.name }}{% endif %}</dd>
+        {{ applicant_form.instance.university_legacy.name }}{% endif %}</dd>
     {% elif field.name == 'where_did_you_learn' %}
       <dd>{{ field.value }}{% if applicant_form.where_did_you_learn_other.value %}.
         {{ applicant_form.where_did_you_learn_other.value }}{% endif %}</dd>

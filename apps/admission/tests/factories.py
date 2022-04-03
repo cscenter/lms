@@ -56,7 +56,7 @@ class ApplicantFactory(factory.django.DjangoModelFactory):
     last_name = factory.Sequence(lambda n: "Surname %03d" % n)
     email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
     phone = factory.Sequence(lambda n: '123-555-%04d' % n)
-    university = factory.SubFactory(UniversityFactory)
+    university_legacy = factory.SubFactory(UniversityFactory)
     yandex_login = factory.Sequence(lambda n: "yandex_login_%03d" % n)
     faculty = factory.Sequence(lambda n: "faculty_%03d" % n)
     level_of_education = factory.fuzzy.FuzzyChoice([x for x, _ in

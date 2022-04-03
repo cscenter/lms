@@ -46,8 +46,8 @@
                     <td class="applicant">
                       <a href="{{ applicant.get_absolute_url() }}">{{ applicant.full_name }}</a><br>
                       {% if applicant.university_other %}{{ applicant.university_other }}
-                      {% elif applicant.university.abbr %}{{ applicant.university.abbr }}
-                      {% elif applicant.university.name %}{{ applicant.university.name }}
+                      {% elif applicant.university_legacy.abbr %}{{ applicant.university_legacy.abbr }}
+                      {% elif applicant.university_legacy.name %}{{ applicant.university_legacy.name }}
                       {% endif %}
                     </td>
                     <td>{% if applicant.admin_note %}{{ applicant.admin_note }}{% else %}-{% endif %}</td>
