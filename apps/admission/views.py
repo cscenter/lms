@@ -75,7 +75,7 @@ def get_applicant_context(request, applicant_id) -> Dict[str, Any]:
     branches = Branch.objects.for_site(site_id=settings.SITE_ID)
     qs = (Applicant.objects
           .select_related("exam", "campaign__branch__site",
-                          "online_test", "university")
+                          "online_test", "university_legacy")
           .filter(campaign__branch__in=branches,
                   pk=applicant_id))
     applicant = get_object_or_404(qs)
@@ -262,7 +262,7 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
 
         applicants = (get_applicants_for_invitation(campaign=campaign,
                                                     section=section)
-                      .select_related("exam", "online_test", "campaign", "university",
+                      .select_related("exam", "online_test", "campaign", "university_legacy",
                                       "campaign__branch")
                       .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1, output_field=ScoreField())),
                                 test__score_coalesce=Coalesce('online_test__score', Value(-1)))
@@ -408,7 +408,7 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
         return (
             Applicant.objects
             .filter(campaign__branch__in=branches)
-            .select_related("exam", "online_test", "campaign", "university",
+            .select_related("exam", "online_test", "campaign", "university_legacy",
                             "campaign__branch")
             .prefetch_related("interviews")
             .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1, output_field=ScoreField())),
@@ -879,7 +879,7 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
             Applicant.objects
             .filter(campaign=self.selected_campaign,
                     status__in=ApplicantStatuses.RESULTS_STATUSES)
-            .select_related("exam", "online_test", "university")
+            .select_related("exam", "online_test", "university_legacy")
             .prefetch_related(
                 Prefetch(
                     'interviews',

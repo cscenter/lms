@@ -75,8 +75,8 @@
                       </form>
                     {% endif %}
                   {% endif %}<br>
-                  {% if applicant.university_other %}{{ applicant.university_other }}{% else %}{% if applicant.university.abbr %}
-                    {{ applicant.university.abbr }}{% else %}{{ applicant.university.name }}{% endif %}{% endif %}
+                  {% if applicant.university_other %}{{ applicant.university_other }}{% else %}{% if applicant.university_legacy.abbr %}
+                    {{ applicant.university_legacy.abbr }}{% else %}{{ applicant.university_legacy.name }}{% endif %}{% endif %}
                   {% if applicant.level_of_education %}<br>{{ applicant.get_level_of_education_display() }}{% endif %}
                 </td>
                 <td>{{ applicant.campaign.branch.name }},&nbsp;{{ applicant.campaign.year }}</td>

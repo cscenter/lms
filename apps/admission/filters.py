@@ -291,18 +291,18 @@ class ResultsFilter(django_filters.FilterSet):
     status = ApplicantStatusFilter(empty_label=None,
                                    choices=ApplicantFinalStatusForm.FINAL_CHOICES,
                                    label=_("Status"))
-    university = django_filters.ChoiceFilter(label=_("University"))
+    university_legacy = django_filters.ChoiceFilter(label=_("University"))
 
     class Meta:
         model = Applicant
-        fields = ['status', 'university', 'level_of_education']
+        fields = ['status', 'university_legacy', 'level_of_education']
 
     def __init__(self, *args, branch_code, **kwargs):
         super().__init__(*args, **kwargs)
         # Get universities based on requested branch
         qs = University.objects.order_by("name")
         university_choices = [(u.id, u.name) for u in qs.all()]
-        self.filters['university'].extra["choices"] = university_choices
+        self.filters['university_legacy'].extra["choices"] = university_choices
 
     @property
     def form(self):
@@ -313,7 +313,7 @@ class ResultsFilter(django_filters.FilterSet):
             self._form.helper.layout = Layout(
                 Row(
                     Div("status", css_class="col-xs-3"),
-                    Div("university", css_class="col-xs-3"),
+                    Div("university_legacy", css_class="col-xs-3"),
                     Div("level_of_education", css_class="col-xs-3"),
                     Div(Submit('', _('Filter'),
                                css_class="btn-block -inline-submit"),

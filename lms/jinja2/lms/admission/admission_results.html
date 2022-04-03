@@ -55,8 +55,8 @@
                       <a href="{{ url("admission:applicants:detail", pk=applicant.pk) }}">{{ applicant.full_name }}</a><br>
                       {% if applicant.university_other %}
                         {{ applicant.university_other }}
-                      {% elif applicant.university %}
-                        {% if applicant.university.abbr %}{{ applicant.university.abbr }}{% else %}{{ applicant.university.name }}{% endif %}
+                      {% elif applicant.university_legacy %}
+                        {% if applicant.university_legacy.abbr %}{{ applicant.university_legacy.abbr }}{% else %}{{ applicant.university_legacy.name }}{% endif %}
                       {% endif %}
                     </td>
                     <td>

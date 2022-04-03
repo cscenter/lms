@@ -20,11 +20,11 @@ class CampaignResultsTimelineSerializer(PandasSerializer):
 class CampaignResultsByUniversitiesSerializer(PandasSerializer):
     def transform_dataframe(self, dataframe):
         return (dataframe
-                .pivot_table(index='university__name',
+                .pivot_table(index='university_legacy__name',
                              columns='status',
                              values='total',
                              fill_value=0)
-                .reset_index('university__name'))
+                .reset_index('university_legacy__name'))
 
 
 class CampaignResultsByEducationLevelSerializer(PandasSerializer):
@@ -46,7 +46,7 @@ class ScoreByUniversitiesSerializer(PandasSerializer):
     def transform_dataframe(self, dataframe):
         return (dataframe
                 .pivot_table(index='score',
-                             columns='applicant__university__name',
+                             columns='applicant__university_legacy__name',
                              values='total',
                              fill_value=0))
 

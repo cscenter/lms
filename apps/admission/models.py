@@ -354,7 +354,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         blank=True)
     # Education
     is_studying = models.BooleanField(_("Are you studying?"), null=True)
-    university = models.ForeignKey(
+    university_legacy = models.ForeignKey(
         'core.University',
         verbose_name=_("Applicant|University"),
         on_delete=models.PROTECT,
@@ -564,8 +564,8 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     def get_university_display(self) -> Optional[str]:
         if self.university_other:
             return self.university_other
-        elif self.university:
-            return self.university.abbr or self.university.name
+        elif self.university_legacy:
+            return self.university_legacy.abbr or self.university_legacy.name
         return None
 
     # FIXME: filter by site
