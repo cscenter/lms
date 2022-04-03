@@ -7,7 +7,7 @@ from learning.models import StudentAssignment
 
 class StudentAssignmentStatsSerializer(serializers.ModelSerializer):
     sent = serializers.SerializerMethodField()
-    first_solution_at = serializers.DateTimeField()
+    first_solution_at = serializers.SerializerMethodField()
     score = serializers.IntegerField()
     user_id = serializers.PrimaryKeyRelatedField(source="student", read_only=True)
 
