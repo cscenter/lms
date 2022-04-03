@@ -32,5 +32,5 @@ Cheat sheet
 # Set default namespace
 kubectl config set-context --current --namespace=yds-prod
 # Load data
-cat ./sites.json | kubectl exec --stdin website-backend-5d55dfc6f5-qvpkv -c django -- ./manage.py loaddata --settings=lk_yandexdataschool_ru.settings.production --format=json -
+cat ./sites.json | kubectl exec --stdin website-backend-5d55dfc6f5-qvpkv -c django -- ./manage.py loaddata --format=json -
 ```

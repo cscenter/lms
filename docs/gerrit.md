@@ -66,7 +66,7 @@ ldapadd -H ldap:// -x -D "cn=admin,dc=review,dc=compscicenter,dc=ru" -w "***REMO
 ```python
 from code_reviews.gerrit.services import *
 from learning.models import Course
-course_id = 984
+course_id = 1014
 course = Course.objects.get(pk=course_id)
 init_project_for_course(course)
 ```
