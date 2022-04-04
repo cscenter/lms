@@ -187,7 +187,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
 
 class UniversityCitySerializer(serializers.Serializer):
     is_exists = serializers.BooleanField()
-    pk = serializers.IntegerField(required=False, allow_null=True)
+    pk = serializers.IntegerField(required=False)
     city_name = serializers.CharField(required=False, max_length=255)
 
 
