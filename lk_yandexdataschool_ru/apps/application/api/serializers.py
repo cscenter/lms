@@ -9,7 +9,8 @@ from django.utils.timezone import now
 from admission.api.serializers import OpenRegistrationCampaignField
 from admission.models import Applicant, Campaign
 from admission.tasks import register_in_yandex_contest
-from core.models import University
+from core.models import University as UniversityLegacy
+from universities.models import University
 from learning.settings import AcademicDegreeLevels
 
 from .fields import AliasedChoiceField
@@ -133,7 +134,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         data = {**validated_data}
-        data['university'] = University.objects.get(pk=data['university'])
+        data['university'] = UniversityLegacy.objects.get(pk=data['university'])
         # Contact fields about scientific and programming experiences into one
         experience = ""
         for field_name in ('scientific_work', 'programming_experience'):
@@ -179,9 +180,15 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         except Campaign.DoesNotExist:
             raise ValidationError(f"Current campaign for branch code `{attrs['branch']}` "
                                   f"in {current_year} does not exist")
-        if not University.objects.filter(pk=attrs['university']).exists():
+        if not UniversityLegacy.objects.filter(pk=attrs['university']).exists():
             raise ValidationError(f"University with pk=`{attrs['university']}` does not exist")
         return attrs
+
+
+class UniversityCitySerializer(serializers.Serializer):
+    is_exists = serializers.BooleanField()
+    pk = serializers.IntegerField(required=False)
+    city_name = serializers.CharField(required=False, max_length=255)
 
 
 class ApplicationYDSFormSerializer(serializers.ModelSerializer):
@@ -240,11 +247,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         write_only=True,
         label='Изучали ли вы раньше машинное обучение/анализ данных? Каким образом? '
               'Какие навыки удалось приобрести, какие проекты сделать?')
-    university_city = serializers.CharField(
-        write_only=True,
-        max_length=255,
-        label='Город, в котором расположен университет'
-    )
     ticket_access = serializers.BooleanField(
         write_only=True,
         label='Мне был предоставлен билет на прошлом отборе в ШАД'
@@ -261,6 +263,8 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         required=True,
         write_only=True
     )
+    university = serializers.PrimaryKeyRelatedField(queryset=University.objects.all())
+    university_city = UniversityCitySerializer(write_only=True)
     # FIXME: Replace with hidden field since real value stores in session
     yandex_login = serializers.CharField(max_length=80)
 
@@ -317,8 +321,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                         "напишите на shad@yandex-team.ru с этой почты.")
         ]
 
-    # TODO: ATTENTION ADD DATA VERSION
-
     def __init__(self, instance=None, data=empty, **kwargs):
         super().__init__(instance, data, **kwargs)
         self.fields["patronymic"].required = True
@@ -345,6 +347,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         data = {**validated_data}
         data['data'] = {
+            'university_city': data.get('university_city'),
             'shad_agreement': data.get('shad_agreement'),
             'new_track': data.get('new_track'),
             'new_track_scientific_articles': data.get('new_track_scientific_articles'),
@@ -356,7 +359,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'rash_agreement': data.get('rash_agreement'),
 
             'ticket_access': data.get('ticket_access'),
-            'university_city': data.get('university_city'),
             'magistracy_and_shad': data.get('magistracy_and_shad'),
             'email_subscription': data.get('email_subscription'),
             'data_format_version': '0.1'
@@ -384,11 +386,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if not attrs.get('is_studying') and 'level_of_education' in attrs:
             del attrs['level_of_education']
-        if attrs.get('university_other'):
-            university, created = University.objects.get_or_create(
-                abbr="other", city_id=None,
-                defaults={"name": "Другое"})
-            attrs['university'] = university
         if attrs.get('shad_plus_rash') and not attrs.get('rash_agreement'):
             raise ValidationError("Необходимо согласиться с политикой РЭШ в отношении персональных данных.")
         return attrs

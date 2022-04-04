@@ -354,6 +354,12 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         blank=True)
     # Education
     is_studying = models.BooleanField(_("Are you studying?"), null=True)
+    university = models.ForeignKey(
+        'universities.University',
+        verbose_name=_("Universities|University"),
+        on_delete=models.PROTECT,
+        blank=True, null=True
+    )
     university_legacy = models.ForeignKey(
         'core.University',
         verbose_name=_("Applicant|University"),
