@@ -335,8 +335,8 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                 self.fields['rash_agreement'].required = True
             msk_campaign = (Campaign.with_open_registration()
                             .filter(branch__site_id=settings.SITE_ID,
-                                    branch__code='msk'))
-            if msk_campaign:
+                                    branch__code='msk').first())
+            if msk_campaign is not None:
                 if data.get('campaign') == str(msk_campaign.get().pk):
                     self.fields["new_track"].required = True
                     self.fields["shad_plus_rash"].required = True
