@@ -310,7 +310,7 @@ class Branch(TimezoneAwareMixin, models.Model):
         elif self.site.domain == 'compsciclub.ru':
             return 'CS клуб <spbinfo@compsciclub.ru>'
         elif self.site.domain == 'lk.yandexdataschool.ru':
-            return 'ШАД <noreply@yandexdataschool.ru>'
+            return 'Школа анализа данных <noreply@yandexdataschool.ru>'
 
 
 class Location(TimezoneAwareMixin, models.Model):

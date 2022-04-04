@@ -10,8 +10,8 @@ from admission.api.serializers import OpenRegistrationCampaignField
 from admission.models import Applicant, Campaign
 from admission.tasks import register_in_yandex_contest
 from core.models import University as UniversityLegacy
-from universities.models import University
 from learning.settings import AcademicDegreeLevels
+from universities.models import University
 
 from .fields import AliasedChoiceField
 
