@@ -134,7 +134,8 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         data = {**validated_data}
-        data['university'] = UniversityLegacy.objects.get(pk=data['university'])
+        data['university_legacy'] = UniversityLegacy.objects.get(pk=data['university'])
+        del data['university']
         # Contact fields about scientific and programming experiences into one
         experience = ""
         for field_name in ('scientific_work', 'programming_experience'):
