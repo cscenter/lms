@@ -3,14 +3,13 @@ from django.views.generic import TemplateView
 from admission.models import Campaign
 from auth.views import ADMISSION_APPLICATION_BACKEND_PREFIX
 
-from core.models import University
 from core.urls import reverse
-from django.conf import settings
 from django.db.models import F
 from django.middleware.csrf import get_token
 
 from learning.settings import AcademicDegreeLevels
 
+from django.conf import settings
 SESSION_LOGIN_KEY = f"{ADMISSION_APPLICATION_BACKEND_PREFIX}_login"
 
 
@@ -27,11 +26,6 @@ class ApplicationFormView(TemplateView):
         show_form = len(active_campaigns) > 0
         context["show_form"] = show_form
         if show_form:
-            universities = (University.objects
-                            .exclude(abbr='other')
-                            .annotate(value=F('id'), label=F('name'))
-                            .values('value', 'label', 'city_id')
-                            .order_by("name"))
             levels_of_education = [{"value": k, "label": str(v).lower()} for k, v in
                                    AcademicDegreeLevels.values.items()]
             yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
@@ -41,8 +35,9 @@ class ApplicationFormView(TemplateView):
                     'csrfToken': get_token(self.request),
                     'authCompleteUrl': reverse('auth:application:complete'),
                     'authBeginUrl': reverse('auth:application:begin'),
+                    'endpointCities': reverse('universities:v1:cities'),
+                    'endpointUniversities': reverse('universities:v1:universities'),
                     'campaigns': list(active_campaigns),
-                    'universities': list(universities),
                     'educationLevelOptions': levels_of_education,
                 },
                 'state': {

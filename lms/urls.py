@@ -50,6 +50,7 @@ urlpatterns = [
     path('surveys/', include("surveys.urls")),
     path('', include('projects.urls')),
     path('', include('admission.urls')),
+    path('', include('universities.urls')),
     path('ses/event-webhook/', SESEventWebhookView.as_view(), name='aws_ses_events_webhook'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
