@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework.fields import empty
+from rest_framework.validators import UniqueTogetherValidator
 
 from django.conf import settings
 from django.utils.timezone import now
-from rest_framework.validators import UniqueTogetherValidator
-from rest_framework.fields import empty
 
 from admission.api.serializers import OpenRegistrationCampaignField
 from admission.models import Applicant, Campaign
@@ -335,9 +335,10 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                 self.fields['rash_agreement'].required = True
             msk_campaign = (Campaign.with_open_registration()
                             .filter(branch__site_id=settings.SITE_ID,
-                                    branch__code='msk').first())
+                                    branch__code='msk')
+                            .first())
             if msk_campaign is not None:
-                if data.get('campaign') == str(msk_campaign.get().pk):
+                if data.get('campaign') == str(msk_campaign.pk):
                     self.fields["new_track"].required = True
                     self.fields["shad_plus_rash"].required = True
 
