@@ -47,7 +47,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
             ('Другое', AcademicDegreeLevels.OTHER),
         ]
     )
-    university = AliasedChoiceField(
+    university_legacy = AliasedChoiceField(
         choices=[
             ('БГУ', 20),
             ('БГУИР', 21),
@@ -123,7 +123,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
             "email", "phone", "living_place", "birth_date",
 
             # Education
-            "university", "university_other", "is_studying", "faculty",
+            "university_legacy", "university_other", "is_studying", "faculty",
             "level_of_education", "year_of_graduation",
 
             "where_did_you_learn_other", "motivation",
@@ -134,7 +134,7 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         data = {**validated_data}
-        data['university'] = UniversityLegacy.objects.get(pk=data['university'])
+        data['university_legacy'] = UniversityLegacy.objects.get(pk=data['university_legacy'])
         # Contact fields about scientific and programming experiences into one
         experience = ""
         for field_name in ('scientific_work', 'programming_experience'):
@@ -180,8 +180,8 @@ class ApplicantYandexFormSerializer(serializers.ModelSerializer):
         except Campaign.DoesNotExist:
             raise ValidationError(f"Current campaign for branch code `{attrs['branch']}` "
                                   f"in {current_year} does not exist")
-        if not UniversityLegacy.objects.filter(pk=attrs['university']).exists():
-            raise ValidationError(f"University with pk=`{attrs['university']}` does not exist")
+        if not UniversityLegacy.objects.filter(pk=attrs['university_legacy']).exists():
+            raise ValidationError(f"University with pk=`{attrs['university_legacy']}` does not exist")
         return attrs
 
 
