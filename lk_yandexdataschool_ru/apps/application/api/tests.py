@@ -127,14 +127,14 @@ def test_applicant_form_serializer(settings, mocker):
     mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
     mocked_api.return_value = 200, 1
     data = {**post_data['params']}
-    data['university_legacy'] = 'Другое'
+    data['university'] = 'Другое'
     serializer = ApplicantYandexFormSerializer(data=data)
     is_valid = serializer.is_valid(raise_exception=False)
     assert not is_valid
     branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
     contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
-    university, _ = University.objects.update_or_create(pk=1, defaults={"name": data['university_legacy']})
+    university, _ = University.objects.update_or_create(pk=1, defaults={"name": data['university']})
     serializer = ApplicantYandexFormSerializer(data=data)
     serializer.is_valid(raise_exception=False)
     assert not serializer.errors
@@ -173,7 +173,7 @@ def test_applicant_form_serializer_min_fields(settings, mocker):
         'birth_date': '2021-03-10',
         'living_place': 'Санкт-Петербург',
         'branch': branch.name,
-        'university_legacy': university.name,
+        'university': university.name,
         'is_studying': 'Нет',
         'faculty': 'ИФФ',
         'year_of_graduation': '2012',
@@ -212,7 +212,7 @@ def test_applicant_form_serializer_save_new_track_fields(settings, mocker):
         'birth_date': '2021-03-01',
         'living_place': 'Воркута, Республика Коми, Россия',
         'branch': 'Москва',
-        'university_legacy': 'Другое',
+        'university': 'Другое',
         'university_other': 'Государственный левополушарный',
         'is_studying': 'Да',
         'level_of_education': 'Другое',
