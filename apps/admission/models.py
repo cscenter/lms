@@ -358,7 +358,6 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         'universities.University',
         verbose_name=_("Universities|University"),
         on_delete=models.PROTECT,
-        to_field='external_id',
         blank=True, null=True
     )
     university_legacy = models.ForeignKey(

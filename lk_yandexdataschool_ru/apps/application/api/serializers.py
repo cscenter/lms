@@ -321,8 +321,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                         "напишите на shad@yandex-team.ru с этой почты.")
         ]
 
-    # TODO: ATTENTION ADD DATA VERSION
-
     def __init__(self, instance=None, data=empty, **kwargs):
         super().__init__(instance, data, **kwargs)
         self.fields["patronymic"].required = True
