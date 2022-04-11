@@ -6,50 +6,51 @@ from rest_framework.exceptions import ValidationError
 
 from django.utils.timezone import now
 
-from admission.models import Contest
+from admission.models import Contest, Applicant
 from admission.tests.factories import CampaignFactory, ContestFactory
 from core.models import University
 from core.tests.factories import BranchFactory
 from core.urls import reverse
 from learning.settings import AcademicDegreeLevels
+from universities.tests.factories import UniversityFactory
 
 from .fields import AliasedChoiceField
-from .serializers import ApplicantYandexFormSerializer
+from .serializers import ApplicantYandexFormSerializer, ApplicationYDSFormSerializer, UniversityCitySerializer
 
 post_data = {
-  "jsonrpc": "2.0",
-  "method": "admission:form.add",
-  "id": "21067737",
-  "params": {
-    "id": "473801197",
-    "SecretToken": "",
-    "yandex_login": "rochon",
-    "last_name": "Иванов",
-    "first_name": "Сергей",
-    "patronymic": "Викторович",
-    "email": "sergey.zherevchuk@jetbrains.com",
-    "phone": "+7 91233456789",
-    "living_place": "Санкт-Петербург",
-    "birth_date": "1988-11-19",
-    "branch": "Заочное отделение",
-    "university": "Другое",
-    "university_other": "ЛИТМО",
-    "is_studying": "Да",
-    "level_of_education": "1 (магистратура)",
-    "faculty": "ИФФ",
-    "year_of_graduation": "2012",
-    "where_did_you_learn_other": "Интернет",
-    "scientific_work": "Не было",
-    "programming_experience": "-",
-    "motivation": "Да я не поступаю, если честно...",
-    "ml_experience": "Не изучал",
-    "shad_plus_rash": "Да",
-    "new_track": "Да",
-    "new_track_scientific_articles": "У меня нет научных статей.",
-    "new_track_projects": "Есть ли у вас открытые проекты вашего авторства, или в которых вы участвовали в составе команды, на github или на каком-либо из подобных сервисов? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас открытые проекты вашего авторства, или в которых вы участвовали в составе команды, на github или на каком-либо из подобных сервисов? Если да, дайте ссылки на них.",
-    "new_track_tech_articles": "Есть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.",
-    "new_track_project_details": "Расскажите более подробно о каком-нибудь из своих проектов. Что хотелось сделать? Какие нетривиальные технические решения вы использовали? В чём были трудности и как вы их преодолевали? Пожалуйста, сохраните свой ответ в файле .pdf, выложите его на Яндекс.Диск и поместите сюда ссылку. Если у вас уже есть статья на эту тему и вы давали на неё ссылку в предыдущем вопросе, то можете поставить здесь прочерк.\r\n\r\nhttps://ya.ru/"
-  },
+    "jsonrpc": "2.0",
+    "method": "admission:form.add",
+    "id": "21067737",
+    "params": {
+        "id": "473801197",
+        "SecretToken": "",
+        "yandex_login": "rochon",
+        "last_name": "Иванов",
+        "first_name": "Сергей",
+        "patronymic": "Викторович",
+        "email": "sergey.zherevchuk@jetbrains.com",
+        "phone": "+7 91233456789",
+        "living_place": "Санкт-Петербург",
+        "birth_date": "1988-11-19",
+        "branch": "Заочное отделение",
+        "university": "Другое",
+        "university_other": "ЛИТМО",
+        "is_studying": "Да",
+        "level_of_education": "1 (магистратура)",
+        "faculty": "ИФФ",
+        "year_of_graduation": "2012",
+        "where_did_you_learn_other": "Интернет",
+        "scientific_work": "Не было",
+        "programming_experience": "-",
+        "motivation": "Да я не поступаю, если честно...",
+        "ml_experience": "Не изучал",
+        "shad_plus_rash": "Да",
+        "new_track": "Да",
+        "new_track_scientific_articles": "У меня нет научных статей.",
+        "new_track_projects": "Есть ли у вас открытые проекты вашего авторства, или в которых вы участвовали в составе команды, на github или на каком-либо из подобных сервисов? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас открытые проекты вашего авторства, или в которых вы участвовали в составе команды, на github или на каком-либо из подобных сервисов? Если да, дайте ссылки на них.",
+        "new_track_tech_articles": "Есть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.\r\n\r\nЕсть ли у вас посты или статьи о технологиях? Если да, дайте ссылки на них.",
+        "new_track_project_details": "Расскажите более подробно о каком-нибудь из своих проектов. Что хотелось сделать? Какие нетривиальные технические решения вы использовали? В чём были трудности и как вы их преодолевали? Пожалуйста, сохраните свой ответ в файле .pdf, выложите его на Яндекс.Диск и поместите сюда ссылку. Если у вас уже есть статья на эту тему и вы давали на неё ссылку в предыдущем вопросе, то можете поставить здесь прочерк.\r\n\r\nhttps://ya.ru/"
+    },
 }
 
 
@@ -76,6 +77,7 @@ def test_aliased_choices_field_with_serializer():
                 ('two', 2, 'Two'),
             ]
         )
+
     s = TestSerializer(data={'field': 'one'})
     assert s.is_valid()
     assert s.validated_data == {'field': 1}
@@ -232,3 +234,293 @@ def test_applicant_form_serializer_save_new_track_fields(settings, mocker):
     serializer.is_valid(raise_exception=False)
     assert not serializer.errors
     instance = serializer.save()
+
+
+yds_post_data = {
+    "last_name": "Иванов",
+    "first_name": "Иван",
+    "patronymic": "Иванович",
+    "yandex_login": "ivanov",
+    "email": "somemail@mail.com",
+    "phone": "89991234567",
+    "birth_date": "2000-01-01",
+    "living_place": "Санкт-Петербург",
+    "faculty": "Факультет",
+    "is_studying": False,
+    "year_of_graduation": "2022",
+    "motivation": "Зачем вы поступаете в ШАД?",
+    "ml_experience": "Изучали ли вы раньше машинное обучение/анализ данных?",
+    "campaign": None,
+    "shad_agreement": True,
+    "rash_agreement": False,
+    "magistracy_and_shad": False,
+    "ticket_access": True,
+    "email_subscription": True,
+    "university": None,
+    "university_city": {"is_exists": False, "city_name": "Петергоф"}
+}
+
+
+@pytest.mark.django_db
+def test_application_YDS_form_serializer(settings, mocker):
+    mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
+    mocked_api.return_value = 200, 1
+    data = {**yds_post_data}
+    university = UniversityFactory()
+    data['university'] = university.pk
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert not serializer.is_valid(raise_exception=False)
+    branch = BranchFactory(code='msk', site_id=settings.SITE_ID)
+    campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    data['campaign'] = campaign.pk
+    data.update({
+        'new_track': True,
+        'new_track_project_details': "new_track_project_details",
+        'new_track_projects': 'new_track_projects',
+        'new_track_scientific_articles': 'new_track_scientific_articles',
+        'new_track_tech_articles': 'new_track_tech_articles',
+        'shad_plus_rash': True,
+        'rash_agreement': True,
+        'magistracy_and_shad': True,
+        'is_studying': True,
+        'level_of_education': AcademicDegreeLevels.MASTER_1,
+    })
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert serializer.is_valid(raise_exception=True)
+    assert not serializer.errors
+    instance = serializer.save()
+    assert instance.campaign == campaign
+    assert date(year=2000, month=1, day=1) == instance.birth_date
+    assert instance.is_studying
+    assert instance.level_of_education == AcademicDegreeLevels.MASTER_1
+    one2one = ['first_name', 'last_name', 'patronymic', 'email', 'phone', 'living_place',
+               'motivation', 'faculty', 'yandex_login']
+    for field_name in one2one:
+        assert data[field_name] == getattr(instance, field_name)
+    assert instance.year_of_graduation == int(data['year_of_graduation'])
+    assert instance.experience == data['ml_experience']
+    assert instance.data == {
+        "utm": None,
+        "shad_agreement": True,
+        "ticket_access": True,
+        "magistracy_and_shad": True,
+        "email_subscription": True,
+        "university_city": data["university_city"],
+        "data_format_version": '0.1',
+        'shad_plus_rash': True,
+        "rash_agreement": True,
+        'new_track': True,
+        'new_track_project_details': "new_track_project_details",
+        'new_track_projects': "new_track_projects",
+        'new_track_scientific_articles': "new_track_scientific_articles",
+        'new_track_tech_articles': "new_track_tech_articles"
+    }
+
+
+@pytest.mark.django_db
+def test_application_YDS_form_serializer_min_fields(settings, mocker):
+    mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
+    mocked_api.return_value = 200, 1
+    data = {**yds_post_data}
+    university = UniversityFactory()
+    data['university'] = university.pk
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert not serializer.is_valid(raise_exception=False)
+    branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
+    campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    data['campaign'] = campaign.pk
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert serializer.is_valid(raise_exception=True)
+    assert not serializer.errors
+    instance = serializer.save()
+    assert instance.campaign == campaign
+    assert date(year=2000, month=1, day=1) == instance.birth_date
+    assert not instance.is_studying
+    one2one = ['first_name', 'last_name', 'patronymic', 'email', 'phone', 'living_place',
+               'motivation', 'faculty', 'yandex_login']
+    for field_name in one2one:
+        assert data[field_name] == getattr(instance, field_name)
+    assert instance.year_of_graduation == int(data['year_of_graduation'])
+    assert instance.experience == data['ml_experience']
+    pprint(instance.data)
+    assert instance.data == {
+        "utm": None,
+        "shad_agreement": True,
+        "ticket_access": True,
+        "university_city": data["university_city"],
+        "email_subscription": True,
+        "data_format_version": '0.1',
+        "magistracy_and_shad": False,
+        'shad_plus_rash': None,
+        "rash_agreement": False,
+        'new_track': None,
+        'new_track_project_details': None,
+        'new_track_projects': None,
+        'new_track_scientific_articles': None,
+        'new_track_tech_articles': None,
+    }
+
+
+@pytest.mark.django_db
+def test_application_YDS_form_serializer_msk_required_fields(settings, mocker):
+    mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
+    mocked_api.return_value = 200, 1
+    data = {**yds_post_data}
+    university = UniversityFactory()
+    data['university'] = university.pk
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert not serializer.is_valid(raise_exception=False)
+    branch = BranchFactory(code='msk', site_id=settings.SITE_ID)
+    campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    data['campaign'] = campaign.pk
+
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert not serializer.is_valid()
+    assert 'shad_plus_rash' in serializer.errors
+    assert 'new_track' in serializer.errors
+
+    data['shad_plus_rash'] = True
+    data['new_track'] = True
+    del data['rash_agreement']
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert not serializer.is_valid()
+
+    data['rash_agreement'] = False
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert not serializer.is_valid()
+
+    data['rash_agreement'] = True
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert serializer.is_valid()
+
+
+@pytest.mark.django_db
+def test_application_YDS_form_serializer_university_field(settings, mocker):
+    mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
+    mocked_api.return_value = 200, 1
+    data = {**yds_post_data}
+    university = UniversityFactory()
+    data['university'] = university.pk
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert not serializer.is_valid(raise_exception=False)
+    branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
+    campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    data['campaign'] = campaign.pk
+
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert serializer.is_valid()
+
+    del data['university']
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert not serializer.is_valid()
+
+    data['university_other'] = 'Петергофское тех. училище'
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert serializer.is_valid()
+
+
+@pytest.mark.django_db
+def test_university_city_serializer(settings, mocker):
+    serializer = UniversityCitySerializer(data={})
+    assert not serializer.is_valid()
+
+    serializer = UniversityCitySerializer(data={"is_exists": True})
+    assert not serializer.is_valid()
+    assert "pk" in serializer.errors
+
+    serializer = UniversityCitySerializer(data={"is_exists": True, "pk": 1})
+    assert serializer.is_valid()
+
+    serializer = UniversityCitySerializer(data={"is_exists": False})
+    assert not serializer.is_valid()
+    assert "city_name" in serializer.errors
+
+    serializer = UniversityCitySerializer(data={"is_exists": False, "city_name": "Петергоф"})
+    assert serializer.is_valid()
+
+
+@pytest.mark.django_db
+def test_application_YDS_form_serializer_university_city_field(settings, mocker):
+    mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
+    mocked_api.return_value = 200, 1
+    data = {**yds_post_data}
+    university = UniversityFactory()
+    data['university'] = university.pk
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert not serializer.is_valid(raise_exception=False)
+    branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
+    campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    data['campaign'] = campaign.pk
+
+    del data['university_city']
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert not serializer.is_valid()
+
+    data['university_city'] = dict()
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert not serializer.is_valid()
+
+    data['university_city'] = {"is_exists": False, "city_name": "Петергоф"}
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert serializer.is_valid(raise_exception=True)
+
+    data['university_city'] = {"is_exists": True, "pk": 1}
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert serializer.is_valid()
+
+
+@pytest.mark.django_db
+def test_application_YDS_form_creates(settings, client):
+    data = {**yds_post_data}
+    university = UniversityFactory()
+    data['university'] = university.pk
+    branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
+    campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    data['campaign'] = campaign.pk
+    url = reverse('applicant_create')
+    session = client.session
+    session["application_ya_login"] = data['yandex_login']
+    session.save()
+    response = client.post(url, data=data, content_type='application/json')
+    assert response.status_code == 201
+    assert Applicant.objects.exists()
+
+
+@pytest.mark.django_db
+def test_application_YDS_form_serializer_test_utm(settings, mocker):
+    mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
+    mocked_api.return_value = 200, 1
+    data = {**yds_post_data}
+    university = UniversityFactory()
+    data['university'] = university.pk
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert not serializer.is_valid(raise_exception=False)
+
+    branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
+    campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    data['campaign'] = campaign.pk
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert serializer.is_valid(raise_exception=True)
+    assert not serializer.errors
+    instance = serializer.save()
+    assert instance.data['utm'] is None
+
+    data['email'] = "abc@def.ghi"
+    data['utm'] = {
+        "utm_source": "source",
+        "utm_medium": "medium",
+        "utm_campaign": "campaign",
+        "utm_term": "term",
+        "utm_content": "content"
+    }
+    serializer = ApplicationYDSFormSerializer(data=data)
+    assert serializer.is_valid(raise_exception=True)
+    instance = serializer.save()
+    assert instance.data["utm"] == data['utm']

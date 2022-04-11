@@ -25,12 +25,15 @@ class ApplicationFormView(TemplateView):
                             .values('value', 'label', 'id'))
         show_form = len(active_campaigns) > 0
         context["show_form"] = show_form
+        utm_params = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]
+        utm = {param: self.request.GET.get(param) for param in utm_params}
         if show_form:
             levels_of_education = [{"value": k, "label": str(v).lower()} for k, v in
                                    AcademicDegreeLevels.values.items()]
             yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
             context['app'] = {
                 'props': {
+                    'utm': utm,
                     'endpoint': reverse('applicant_create'),
                     'csrfToken': get_token(self.request),
                     'authCompleteUrl': reverse('auth:application:complete'),
