@@ -301,7 +301,7 @@ def test_application_YDS_form_serializer(settings, mocker):
     assert instance.year_of_graduation == int(data['year_of_graduation'])
     assert instance.experience == data['ml_experience']
     assert instance.data == {
-        "utm": None,
+        "utm": {},
         "shad_agreement": True,
         "ticket_access": True,
         "magistracy_and_shad": True,
@@ -344,9 +344,8 @@ def test_application_YDS_form_serializer_min_fields(settings, mocker):
         assert data[field_name] == getattr(instance, field_name)
     assert instance.year_of_graduation == int(data['year_of_graduation'])
     assert instance.experience == data['ml_experience']
-    pprint(instance.data)
     assert instance.data == {
-        "utm": None,
+        "utm": {},
         "shad_agreement": True,
         "ticket_access": True,
         "university_city": data["university_city"],
@@ -510,7 +509,7 @@ def test_application_YDS_form_serializer_test_utm(settings, mocker):
     assert serializer.is_valid(raise_exception=True)
     assert not serializer.errors
     instance = serializer.save()
-    assert instance.data['utm'] is None
+    assert instance.data['utm'] == {}
 
     data['email'] = "abc@def.ghi"
     data['utm'] = {

@@ -376,6 +376,8 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         utm = data.get('utm')
         if utm is not None:
             utm = {key: value for key, value in utm.items() if value}
+        else:
+            utm = {}
         data['data'] = {
             'utm': utm,
             'university_city': data.get('university_city'),
