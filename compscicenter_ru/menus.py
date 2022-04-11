@@ -54,10 +54,6 @@ public_menu = [
         selected_patterns=[
             r"^/events/"
         ])
-    # MenuItem(
-    #     "Фонд",
-    #     "/fund/",
-    #     weight=200),
 ]
 
 
