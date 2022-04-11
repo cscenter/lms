@@ -191,8 +191,25 @@ class UniversityCitySerializer(serializers.Serializer):
     pk = serializers.IntegerField(required=False)
     city_name = serializers.CharField(required=False, max_length=255)
 
+    def __init__(self, instance=None, data=empty, **kwargs):
+        super().__init__(instance, data, **kwargs)
+        if data is not empty and data:
+            if data['is_exists'] is True:
+                self.fields["pk"].required = True
+            elif data['is_exists'] is False:
+                self.fields["city_name"].required = True
+
+
+class UTMSerializer(serializers.Serializer):
+    utm_source = serializers.CharField(allow_null=True, allow_blank=True)
+    utm_medium = serializers.CharField(allow_null=True, allow_blank=True)
+    utm_campaign = serializers.CharField(allow_null=True, allow_blank=True)
+    utm_term = serializers.CharField(allow_null=True, allow_blank=True)
+    utm_content = serializers.CharField(allow_null=True, allow_blank=True)
+
 
 class ApplicationYDSFormSerializer(serializers.ModelSerializer):
+    utm = UTMSerializer(required=False, write_only=True)
     campaign = OpenRegistrationCampaignField(
         label='Отделение',
         error_messages={
@@ -265,7 +282,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         write_only=True
     )
     university = serializers.PrimaryKeyRelatedField(queryset=University.objects.all())
-    university_city = UniversityCitySerializer(write_only=True)
+    university_city = UniversityCitySerializer(required=True, write_only=True)
     # FIXME: Replace with hidden field since real value stores in session
     yandex_login = serializers.CharField(max_length=80)
 
@@ -304,7 +321,16 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             "new_track_project_details",
 
             # Source
+            "utm",
             "where_did_you_learn_other",
+
+            # version 2.0
+            # add utm field with optional inner str fields:
+            #     utm_source
+            #     utm_medium
+            #     utm_campaign
+            #     utm_term
+            #     utm_content
         )
         extra_kwargs = {
             'university': {
@@ -341,13 +367,19 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                                     branch__code='msk')
                             .first())
             if msk_campaign is not None:
-                if data.get('campaign') == str(msk_campaign.pk):
+                if data.get('campaign') == msk_campaign.pk:
                     self.fields["new_track"].required = True
                     self.fields["shad_plus_rash"].required = True
 
     def create(self, validated_data):
         data = {**validated_data}
+        utm = data.get('utm')
+        if utm is not None:
+            utm = {key: value for key, value in utm.items() if value}
+        else:
+            utm = {}
         data['data'] = {
+            'utm': utm,
             'university_city': data.get('university_city'),
             'shad_agreement': data.get('shad_agreement'),
             'new_track': data.get('new_track'),
