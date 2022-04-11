@@ -25,7 +25,6 @@ urlpatterns += [
     path('', views.IndexView.as_view(), name='index'),
     path('robots.txt', TemplateView.as_view(template_name="compscicenter_ru/robots.txt", content_type="text/plain"), name='robots_txt'),
     path('stayhome/', TemplateView.as_view(template_name='compscicenter_ru/stayhome.html'), name='stay_home'),
-    path('fund/', TemplateView.as_view(template_name='compscicenter_ru/fund.html'), name='fund'),
     # About section
     path('history/', TemplateView.as_view(template_name='compscicenter_ru/history.html'), name='history'),
     path('team/', views.TeamView.as_view(), name='team'),
