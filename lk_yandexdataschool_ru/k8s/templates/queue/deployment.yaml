@@ -23,6 +23,13 @@ spec:
         runAsUser: 101
         runAsGroup: 101
         fsGroup: 101
+      volumes:
+        - name: ldap-certs
+          secret:
+            secretName: {{ backend_service_name }}-backend
+            items:
+              - key: LDAP_CA_CERT_FILE
+                path: ca.crt
       containers:
         - name: worker
           image: "{{ docker_registry }}/{{ backend_django_image_name }}:{{ backend_django_image_tag }}"
@@ -30,6 +37,9 @@ spec:
             preStop:
               exec:
                 command: [ '/bin/sh', '-c', 'sleep 5' ]
+          volumeMounts:
+            - mountPath: /etc/ldap/certs/
+              name: ldap-certs
           command: ["/bin/sh"]
           args: ["-c", "python manage.py rqworker high default"]
           resources:
