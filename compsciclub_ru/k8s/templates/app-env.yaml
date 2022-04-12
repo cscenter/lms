@@ -132,12 +132,13 @@
   value: "ldap://review.compscicenter.ru:389"
 - name: LDAP_DB_SUFFIX
   value: "dc=review,dc=compscicenter,dc=ru"
+- name: LDAP_TLS_TRUSTED_CA_CERT_FILE
+  value: "/etc/ldap/certs/ca.crt"
 - name: LDAP_CLIENT_PASSWORD
   valueFrom:
     secretKeyRef:
       key: LDAP_CLIENT_PASSWORD
       name: "{{ backend_service_name }}-backend"
-# FIXME: how to specify LDAP_TLS_TRUSTED_CA_CERT_FILE? instead of copy to the image
 - name: GERRIT_API_URI
   value: "https://review.compscicenter.ru/a/"
 - name: GERRIT_CLIENT_HTTP_PASSWORD
