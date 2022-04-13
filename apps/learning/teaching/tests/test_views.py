@@ -1,4 +1,5 @@
 import datetime
+from itertools import chain
 
 import pytest
 import pytz
@@ -9,6 +10,7 @@ from django.utils.encoding import smart_bytes
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory, SiteFactory
 from core.urls import reverse
+from courses.constants import AssignmentFormat
 from courses.models import CourseGroupModes, CourseTeacher
 from courses.permissions import ViewAssignment
 from courses.tests.factories import (
@@ -284,3 +286,25 @@ def test_view_student_assignment_detail_forbidden_statuses_disabled(client):
         is_disabled = option.has_attr('disabled')
         assert should_be_disabled == is_disabled
 
+
+@pytest.mark.django_db
+def test_assignments_check_queue_view_default_selected_assignment(client):
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    online_assignments = AssignmentFactory.create_batch(size=3,
+                                                        course=course,
+                                                        submission_type=AssignmentFormat.ONLINE)
+    review_assignments = AssignmentFactory.create_batch(size=2,
+                                                        course=course,
+                                                        submission_type=AssignmentFormat.CODE_REVIEW)
+    AssignmentFactory(course=course, submission_type=AssignmentFormat.NO_SUBMIT)
+    AssignmentFactory(course=course, submission_type=AssignmentFormat.PENALTY)
+    AssignmentFactory(course=course, submission_type=AssignmentFormat.EXTERNAL)
+    AssignmentFactory(course=course, submission_type=AssignmentFormat.YANDEX_CONTEST)
+    client.login(teacher)
+    url = reverse('teaching:assignments_check_queue')
+    response = client.get(f"{url}?course={course.pk}")
+    data = response.context_data['app_data']['state']
+    selected_assignments = set(data['selectedAssignments'])
+    expected_selected = set(a.pk for a in chain(online_assignments, review_assignments))
+    assert expected_selected == selected_assignments

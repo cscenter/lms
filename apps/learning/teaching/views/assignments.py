@@ -26,7 +26,7 @@ from core.exceptions import Redirect
 from core.http import HttpRequest
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
-from courses.constants import AssignmentStatus
+from courses.constants import AssignmentStatus, AssignmentFormat
 from courses.models import Assignment, Course, CourseTeacher
 from courses.permissions import DeleteAssignment, EditAssignment, ViewAssignment
 from courses.selectors import (
@@ -60,11 +60,13 @@ def _check_queue_filters(course: Course, query_params):
     assignments = []
     assignments_filter = query_params.get('assignments', {})
     assignments_queryset = assignments_list(filters={"course": course}).order_by('-deadline_at', 'title')
+    types_for_select = [AssignmentFormat.ONLINE, AssignmentFormat.CODE_REVIEW]
     for i, assignment in enumerate(assignments_queryset):
+        is_selected = assignment.submission_type in types_for_select
         assignments.append({
             "value": assignment.pk,
             "label": assignment.title,
-            "selected": str(assignment.pk) in assignments_filter if assignments_filter else i < 2
+            "selected": str(assignment.pk) in assignments_filter if assignments_filter else is_selected
         })
     # Course teachers
     course_teachers = [{"value": "unset", "label": "Не назначен", "selected": False}]
