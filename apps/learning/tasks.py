@@ -22,7 +22,7 @@ def convert_assignment_submission_ipynb_file_to_html(*, assignment_submission_id
         logger.debug(f"Submission with id={assignment_submission_id} not found")
         return
     file_name = submission.attached_file.name + '.html'
-    # Actually it could any file with the same name
+    # Actually it could be any file with the same name
     file_field = SubmissionAttachment._meta.get_field('attachment')
     if file_field.storage.exists(file_name):
         return
