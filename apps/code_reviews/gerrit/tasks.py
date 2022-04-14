@@ -160,7 +160,8 @@ def import_gerrit_code_review_score(*, change_id: str, score_old: int,
 
 
 @job('default')
-def add_student_to_gerrit_project(enrollment: Enrollment):
+def add_student_to_gerrit_project(enrollment_id: int):
+    enrollment = Enrollment.objects.get(pk=enrollment_id)
     gerrit_client = Gerrit(settings.GERRIT_API_URI,
                            auth=(settings.GERRIT_CLIENT_USERNAME,
                                  settings.GERRIT_CLIENT_HTTP_PASSWORD))
@@ -174,7 +175,9 @@ def add_student_to_gerrit_project(enrollment: Enrollment):
 
 
 @job('default')
-def add_teacher_to_gerrit_project(course: Course, teacher: settings.AUTH_USER_MODEL):
+def add_teacher_to_gerrit_project(course_id: int, teacher_id: int):
+    course = Course.objects.get(pk=course_id)
+    teacher = User.objects.get(pk=teacher_id)
     gerrit_client = Gerrit(settings.GERRIT_API_URI,
                            auth=(settings.GERRIT_CLIENT_USERNAME,
                                  settings.GERRIT_CLIENT_HTTP_PASSWORD))

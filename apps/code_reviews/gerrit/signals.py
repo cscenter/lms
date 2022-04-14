@@ -27,9 +27,9 @@ def post_save_teacher(sender, instance: CourseTeacher, created, *args, **kwargs)
     if created or instance.tracker.has_changed('teacher'):
         course = instance.course
         teacher = instance.teacher
-        has_code_review_assignments = bool(Assignment.objects
-                                           .filter(course=course,
-                                                   submission_type=AssignmentFormat.CODE_REVIEW)
-                                           .count())
+        has_code_review_assignments = (Assignment.objects
+                                       .filter(course=course,
+                                               submission_type=AssignmentFormat.CODE_REVIEW)
+                                       .exists())
         if has_code_review_assignments:
-            add_teacher_to_gerrit_project.delay(course, teacher)
+            add_teacher_to_gerrit_project.delay(course.pk, teacher.pk)
