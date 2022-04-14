@@ -135,7 +135,7 @@
       key: AWS_SES_SECRET_ACCESS_KEY
       name: "{{ backend_service_name }}-backend"
 - name: LDAP_SYNC_PASSWORD
-  value: "0"
+  value: "1"
 - name: LDAP_CLIENT_URI
   value: "ldap://review.compscicenter.ru:389"
 - name: LDAP_DB_SUFFIX
