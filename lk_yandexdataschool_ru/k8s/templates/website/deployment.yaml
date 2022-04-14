@@ -18,6 +18,18 @@ spec:
       labels:
         app: "{{ backend_service_name }}-backend"
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - {{ backend_service_name }}-backend
+                topologyKey: kubernetes.io/hostname
       terminationGracePeriodSeconds: {{ termination_grace_period_seconds | default('30') }}
       securityContext:
         runAsUser: 101
