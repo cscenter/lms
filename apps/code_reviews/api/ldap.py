@@ -34,11 +34,6 @@ for attr in REQUIRED_SETTINGS:
 ldapmodule_trace_level = 1
 ldapmodule_trace_file = sys.stderr
 # ldap.set_option(ldap.OPT_DEBUG_LEVEL, 255)
-ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_DEMAND)
-# XXX: Doesn't work on Mac OS
-if platform.system() != 'Darwin':
-    ldap.set_option(ldap.OPT_X_TLS_CACERTFILE,
-                    settings.LDAP_TLS_TRUSTED_CA_CERT_FILE)
 
 
 class LDAPClient:
@@ -114,6 +109,9 @@ def init_ldap_connection(*, uri: str, dn: str, password: str,
             connection.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
         else:
             connection.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_DEMAND)
+        # XXX: Doesn't work on macOS
+        if platform.system() != 'Darwin':
+            connection.set_option(ldap.OPT_X_TLS_CACERTFILE, settings.LDAP_TLS_TRUSTED_CA_CERT_FILE)
         connection.set_option(ldap.OPT_X_TLS_NEWCTX, 0)
         connection.network_timeout = timeout  # in seconds
         # Fail if TLS is not available.
