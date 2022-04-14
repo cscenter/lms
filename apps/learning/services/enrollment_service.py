@@ -148,7 +148,7 @@ def recreate_assignments_for_student(enrollment: Enrollment) -> None:
             has_code_review = True
     if has_code_review:
         from code_reviews.gerrit.tasks import add_student_to_gerrit_project
-        add_student_to_gerrit_project.delay(enrollment)
+        transaction.on_commit(lambda: add_student_to_gerrit_project.delay(enrollment.pk))
 
 
 def is_course_failed_by_student(course: Course, student: User,
