@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: send-project-notifications
+  namespace: "{{ k8s_namespace}}"
+spec:
+  # https://crontab.guru/#*/5_*_*_*_*
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Replace
+  suspend: false
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            description: send-project-notifications
+        spec:
+          containers:
+            - name: send-project-notifications
+              image: "{{ docker_registry }}/{{ backend_django_image_name }}:{{ backend_django_image_tag }}"
+              imagePullPolicy: IfNotPresent
+              command: [ "/bin/sh" ]
+              args: [ "-c", "python manage.py send_notifications"]
+              env:
+                {% filter indent(width=16) %}{% include 'app-env.yaml' %}{% endfilter %}
+          restartPolicy: Never
