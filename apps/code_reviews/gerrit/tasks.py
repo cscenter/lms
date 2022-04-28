@@ -187,4 +187,7 @@ def add_teacher_to_gerrit_project(course_id: int, teacher_id: int):
     reviewers_group_res = gerrit_client.get_group(reviewers_group_name)
     reviewers_group_uuid = reviewers_group_res.data["id"]
     teacher_login = get_ldap_username(teacher)
-    gerrit_client.create_group_member(reviewers_group_uuid, teacher_login)
+    response = gerrit_client.create_group_member(reviewers_group_uuid, teacher_login)
+    if not response.ok:
+        logger.error(f"Couldn't add new reviewers to group "
+                     f"{reviewers_group_uuid}. Message: {response.text}")
