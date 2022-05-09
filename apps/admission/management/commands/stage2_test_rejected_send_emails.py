@@ -3,8 +3,6 @@ from post_office.models import Email
 from post_office.utils import get_email_template
 
 from django.core.management.base import BaseCommand
-from django.db import transaction
-from django.db.models import Q
 
 from admission.models import Applicant
 from admission.services import get_email_from
@@ -13,10 +11,7 @@ from ._utils import CurrentCampaignMixin, EmailTemplateMixin
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
-    help = """
-    Updates applicant status to REJECTED_BY_TEST if they failed testing, then
-    send notification to them.
-    """
+    help = """Sends email to applicants about failing the test."""
 
     TEMPLATE_PATTERN = "admission-{year}-{branch_code}-testing-fail"
 
@@ -39,9 +34,8 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             email_from = get_email_from(campaign)
 
             applicants = (Applicant.objects
-                          .filter(campaign_id=campaign.pk)
-                          .filter(Q(online_test__score__lt=testing_passing_score) |
-                                  Q(online_test__score__isnull=True))
+                          .filter(campaign_id=campaign.pk,
+                                  status=Applicant.REJECTED_BY_TEST)
                           .values("pk",
                                   "online_test__score",
                                   "online_test__yandex_contest_id",
@@ -51,32 +45,31 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             generated = 0
             for a in applicants:
                 total += 1
+                score = 0 if a["online_test__score"] is None else int(a["online_test__score"])
+                if score >= testing_passing_score:
+                    msg = f"\tWARN Applicant {a['pk']} has passing score >= campaign passing score."
+                    self.stdout.write(msg)
+
                 recipients = [a["email"]]
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
-                    score = 0 if a["online_test__score"] is None else int(a["online_test__score"])
-                    assert score < testing_passing_score
                     context = {
                         'YANDEX_LOGIN': a["yandex_login"],
                         'TEST_SCORE': score,
                         'TEST_CONTEST_ID': a["online_test__yandex_contest_id"],
                     }
-                    with transaction.atomic():
-                        (Applicant.objects
-                         .filter(pk=a["pk"])
-                         .update(status=Applicant.REJECTED_BY_TEST))
-                        mail.send(
-                            recipients,
-                            sender=email_from,
-                            template=template,
-                            context=context,
-                            # If emails rendered on delivery, they will store
-                            # value of the template id. It makes `exists`
-                            # method above works correctly.
-                            render_on_delivery=True,
-                            backend='ses',
-                        )
-                        generated += 1
+                    mail.send(
+                        recipients,
+                        sender=email_from,
+                        template=template,
+                        context=context,
+                        # If emails rendered on delivery, they will store
+                        # value of the template id. It makes `exists`
+                        # method above works correctly.
+                        render_on_delivery=True,
+                        backend='ses',
+                    )
+                    generated += 1
             self.stdout.write(f"    total: {total}")
             self.stdout.write(f"    updated: {generated}")
         self.stdout.write("Done")

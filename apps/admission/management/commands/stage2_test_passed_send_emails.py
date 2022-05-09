@@ -4,7 +4,6 @@ from post_office.utils import get_email_template
 
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
-from django.db import transaction
 
 from admission.models import Applicant
 from admission.services import get_email_from
@@ -16,12 +15,10 @@ from ._utils import (
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     help = """
-    Updates applicant status to PERMIT_TO_EXAM if they passed testing
-    (score >= passing_score) and sends email to applicant about this event.
+    Sends email to applicants about passing the test.
 
-    Note:
-        Generate exam records with preserved contest id first if email
-        includes link to the exam contest or use --skip-exam-invitation
+    Generate exam records with preserved contest id first if email
+    includes link to the exam contest or use --skip-exam-invitation
     """
 
     TEMPLATE_PATTERN = "admission-{year}-{branch_code}-testing-success"
@@ -55,7 +52,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
 
             applicants = (Applicant.objects
                           .filter(campaign=campaign,
-                                  online_test__score__gte=campaign.online_test_passing_score)
+                                  status=Applicant.PERMIT_TO_EXAM)
                           .values("pk",
                                   "online_test__score",
                                   "online_test__yandex_contest_id",
@@ -67,9 +64,11 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             generated = 0
             for a in applicants:
                 total += 1
-                if a["status"] is not None:
-                    msg = f"\tApplicant {a['pk']} already has status {a['status']}. Skip"
+                if a["online_test__score"] < campaign.online_test_passing_score:
+                    msg = f"\tWARN Applicant {a['pk']} has passing score lower than in campaign requirements."
                     self.stdout.write(msg)
+                if not skip_exam_invitation and a["exam__yandex_contest_id"] is None:
+                    self.stdout.write(f"No exam contest id were provided for applicant {a['pk']}. Skip")
                     continue
                 recipients = [a["email"]]
                 if not Email.objects.filter(to=recipients,
@@ -80,26 +79,18 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                         'TEST_CONTEST_ID': a["online_test__yandex_contest_id"],
                         'EXAM_CONTEST_ID': a["exam__yandex_contest_id"],
                     }
-                    if not skip_exam_invitation and context['EXAM_CONTEST_ID'] is None:
-                        self.stdout.write(f"No exam contest id were provided for applicant {a['pk']}. Skip")
-                        continue
-                    # Update status and send email
-                    with transaction.atomic():
-                        (Applicant.objects
-                         .filter(pk=a["pk"])
-                         .update(status=Applicant.PERMIT_TO_EXAM))
-                        mail.send(
-                            recipients,
-                            sender=email_from,
-                            template=template,
-                            context=context,
-                            # If emails rendered on delivery, they will store
-                            # value of the template id. It makes `exists`
-                            # method above works correctly.
-                            render_on_delivery=True,
-                            backend='ses',
-                        )
-                        generated += 1
+                    mail.send(
+                        recipients,
+                        sender=email_from,
+                        template=template,
+                        context=context,
+                        # If emails rendered on delivery, they will store
+                        # value of the template id. It makes `exists`
+                        # method above works correctly.
+                        render_on_delivery=True,
+                        backend='ses',
+                    )
+                    generated += 1
             self.stdout.write(f"    total: {total}")
             self.stdout.write(f"    updated: {generated}")
         self.stdout.write("Done")

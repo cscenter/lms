@@ -5,13 +5,12 @@
 
 Production stack: AWS, ubuntu 16.04 LTS, nginx, uwsgi, python3.7, Django 2.2.x, postgresql 11, redis (for queue), rq workers managed by `systemd`
 
-Section | Description
---- | ---
-[about.md](https://github.com/cscenter/site/tree/master/docs/about.md) | For details on architecture and general concerns (april 9, 2015, in Russian).
-[setup.md](https://github.com/cscenter/site/tree/master/docs/setup.md) | Some notes about dev and production setup.
-[deploy.md](https://github.com/cscenter/site/tree/master/docs/deploy.md) | Deploy easy and fast with ansible 2.x or manually.
-[i18n.md](https://github.com/cscenter/site/tree/master/docs/i18n.md) | Notes about translation (in Russian)
-
+| Section                                                                  | Description                                                                   |
+|--------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| [about.md](https://github.com/cscenter/site/tree/master/docs/about.md)   | For details on architecture and general concerns (april 9, 2015, in Russian). |
+| [setup.md](https://github.com/cscenter/site/tree/master/docs/setup.md)   | Some notes about dev and production setup.                                    |
+| [deploy.md](https://github.com/cscenter/site/tree/master/docs/deploy.md) | Deploy easy and fast with ansible 2.x or manually.                            |
+| [i18n.md](https://github.com/cscenter/site/tree/master/docs/i18n.md)     | Notes about translation (in Russian)                                          |
 
 #### Snippets
 
