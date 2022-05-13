@@ -1,5 +1,7 @@
 {% extends "lms/layouts/v1_base.html" %}
 
+{% block body_attrs %} class="gray" data-init-sections="selectpickers"{% endblock body_attrs %}
+
 {% block content %}
   <div class="container">
     {% if not assignment_list_open and not assignment_list_archive %}
@@ -14,7 +16,7 @@
         </div>
       </div>
     {% endif %}
-    {{ crispy(course_filter_form) }}
+    {{ crispy(filter_form) }}
     {% if assignment_list_open %}
       <div class="row">
         <div class="col-xs-12">

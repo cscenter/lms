@@ -1,4 +1,5 @@
 from typing import Iterable, List
+from urllib import parse
 
 from django.shortcuts import redirect
 from isoweek import Week
@@ -114,13 +115,16 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
                          enrolled_in_courses: List[int],
                          current_term: Semester, **kwargs):
         student = self.request.user
-        assignment_list = self.get_queryset(current_term)
         filter_course = kwargs.get("course", None)
-        if filter_course is not None:
-            assignment_list = filter(
-                lambda sa: sa.assignment.course_id == filter_course,
-                assignment_list
-            )
+        filter_formats = kwargs.get("formats", [])
+        filter_statuses = kwargs.get("statuses", [])
+        assignment_list = filter(
+            lambda sa:
+            (filter_course is None or sa.assignment.course_id == filter_course) and
+            (not filter_formats or sa.assignment.submission_type in filter_formats) and
+            (not filter_statuses or sa.status in filter_statuses),
+            self.get_queryset(current_term)
+        )
         in_progress, archive = utils.split_on_condition(
             assignment_list,
             lambda sa: not sa.assignment.deadline_is_exceeded and
@@ -133,7 +137,7 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
             reporting_periods = get_project_reporting_periods(student,
                                                               current_term)
         context = {
-            'course_filter_form': filter_form,
+            'filter_form': filter_form,
             'assignment_list_open': in_progress,
             'assignment_list_archive': archive,
             'tz_override': student.time_zone,
@@ -145,13 +149,18 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
         current_term = Semester.get_current()
         enrolled_in = get_current_semester_active_courses(request.user, current_term)
         filter_form = StudentAssignmentListFilter(enrolled_in, data=request.GET)
-        filter_course = None
+        filter_formats, filter_statuses, filter_course = [], [], None
         if filter_form.is_valid():
+            filter_formats = filter_form.cleaned_data["format"]
+            filter_statuses = filter_form.cleaned_data["status"]
             filter_course = filter_form.cleaned_data["course"]
         context = self.get_context_data(filter_form=filter_form,
                                         enrolled_in_courses=enrolled_in,
                                         current_term=current_term,
-                                        course=filter_course, **kwargs)
+                                        course=filter_course,
+                                        formats=filter_formats,
+                                        statuses=filter_statuses,
+                                        **kwargs)
         return self.render_to_response(context)
 
     def post(self, request, *args, **kwargs):
@@ -162,10 +171,15 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
         filter_course = None
         if filter_form.is_valid():
             filter_course = filter_form.cleaned_data["course"]
+            filter_formats = filter_form.cleaned_data["format"]
+            filter_statuses = filter_form.cleaned_data["status"]
             url = reverse('study:assignment_list')
-            if filter_course is not None:
-                url = f"{url}?course={filter_course}"
-            return redirect(url)
+            params = parse.urlencode({
+                'course': [] if filter_course is None else filter_course,
+                'format': filter_formats,
+                'status': filter_statuses
+            }, doseq=True)
+            return redirect(f"{url}?{params}")
         context = self.get_context_data(filter_form=filter_form,
                                         enrolled_in_courses=enrolled_in,
                                         current_term=current_term,

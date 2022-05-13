@@ -11,7 +11,7 @@ from django.utils.encoding import smart_bytes
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.urls import reverse
-from courses.constants import AssigneeMode, AssignmentFormat
+from courses.constants import AssigneeMode, AssignmentFormat, AssignmentStatus
 from courses.models import CourseTeacher
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseTeacherFactory, SemesterFactory
@@ -493,7 +493,7 @@ def test_view_course_list_course_not_in_student_branch(client, lms_resolver, ass
 
 
 @pytest.mark.django_db
-def test_view_student_assignment_list_course_filter_choices(client):
+def test_view_student_assignment_list_filter_course_choices(client):
     course_one, course_two = CourseFactory.create_batch(2, semester=SemesterFactory.create_current())
     student = StudentFactory()
     EnrollmentFactory(course=course_one, student=student)
@@ -502,7 +502,7 @@ def test_view_student_assignment_list_course_filter_choices(client):
     client.login(student)
     response = client.get(url)
     assert response.status_code == 200
-    filter_form = response.context['course_filter_form']
+    filter_form = response.context['filter_form']
     course_choices_pk = set(cc[0] for cc in filter_form.fields['course'].choices)
     assert len(course_choices_pk) == 3
     assert course_choices_pk == {None, course_one.pk, course_two.pk}
@@ -552,4 +552,269 @@ def test_view_student_assignment_list_course_filtering(client):
     open_assignments = response.context['assignment_list_open']
     assert set(open_assignments) == {sa_one, sa_two}
     assert 'course=' not in response.redirect_chain[-1][0]
+
+
+@pytest.mark.django_db
+def test_view_student_assignment_list_filter_status_choices(client):
+    student = StudentFactory()
+    url = reverse('study:assignment_list')
+    client.login(student)
+    response = client.get(url)
+    assert response.status_code == 200
+    filter_form = response.context['filter_form']
+    statuses = set(status[0] for status in filter_form.fields['status'].choices)
+    assert len(statuses) == len(AssignmentStatus.choices) - 1
+    all_statuses = set(map(lambda status: status[0], AssignmentStatus.choices))
+    assert all_statuses.difference(statuses) == {AssignmentStatus.NEW}
+
+
+@pytest.mark.django_db
+def test_view_student_assignment_list_filter_assignment_format_choices(client):
+    student = StudentFactory()
+    url = reverse('study:assignment_list')
+    client.login(student)
+    response = client.get(url)
+    assert response.status_code == 200
+    filter_form = response.context['filter_form']
+    formats = set(status[0] for status in filter_form.fields['format'].choices)
+    assert len(formats) == len(AssignmentFormat.choices)
+    all_formats = set(map(lambda status: status[0], AssignmentFormat.choices))
+    assert formats == all_formats
+
+
+@pytest.mark.django_db
+def test_view_student_assignment_list_assignment_status_filtering(client):
+    course_one, course_two = CourseFactory.create_batch(2, semester=SemesterFactory.create_current())
+    student = StudentFactory()
+    EnrollmentFactory(course=course_one, student=student)
+    EnrollmentFactory(course=course_two, student=student)
+    AssignmentFactory.create_batch(size=4, course=course_one)
+    a_two = AssignmentFactory(course=course_two)
+    sa1_c1, sa2_c1, sa3_c1, sa4_c1 = StudentAssignment.objects.filter(student=student,
+                                                                    assignment__course=course_one)
+    sa_c2 = StudentAssignment.objects.get(student=student, assignment=a_two)
+    sa2_c1.status = AssignmentStatus.ON_CHECKING
+    sa3_c1.status = AssignmentStatus.NEED_FIXES
+    sa4_c1.status = AssignmentStatus.COMPLETED
+    sa2_c1.save()
+    sa3_c1.save()
+    sa4_c1.save()
+    url = reverse('study:assignment_list')
+    client.login(student)
+
+    response = client.get(url)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert len(open_assignments) == 5
+
+    form_data = {
+        "status": []
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa1_c1, sa2_c1, sa3_c1, sa4_c1, sa_c2}
+    assert response.redirect_chain[-1][0][-1] == '?'  # /learning/assignments/?
+
+    form_data = {
+        "status": [AssignmentStatus.NOT_SUBMITTED]
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa1_c1, sa_c2}
+    assert f"status={AssignmentStatus.NOT_SUBMITTED}" in response.redirect_chain[-1][0]
+
+    # Status NEW not allowed, so filter is not working
+    form_data = {
+        "status": [AssignmentStatus.NEW]
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa1_c1, sa2_c1, sa3_c1, sa4_c1, sa_c2}
+
+    form_data = {
+        "status": [AssignmentStatus.ON_CHECKING,
+                   AssignmentStatus.NEED_FIXES,
+                   AssignmentStatus.COMPLETED]
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa2_c1, sa3_c1, sa4_c1}
+    assert f"status={AssignmentStatus.ON_CHECKING}" in response.redirect_chain[-1][0]
+    assert f"status={AssignmentStatus.NEED_FIXES}" in response.redirect_chain[-1][0]
+    assert f"status={AssignmentStatus.COMPLETED}" in response.redirect_chain[-1][0]
+
+
+@pytest.mark.django_db
+def test_view_student_assignment_list_assignment_format_filtering(client):
+    course_one, course_two = CourseFactory.create_batch(2, semester=SemesterFactory.create_current())
+    student = StudentFactory()
+    EnrollmentFactory(course=course_one, student=student)
+    EnrollmentFactory(course=course_two, student=student)
+    a1_c1 = AssignmentFactory(course=course_one, submission_type=AssignmentFormat.NO_SUBMIT)
+    a2_c1 = AssignmentFactory(course=course_one, submission_type=AssignmentFormat.ONLINE)
+    a3_c1 = AssignmentFactory(course=course_one, submission_type=AssignmentFormat.CODE_REVIEW)
+    a1_c2 = AssignmentFactory(course=course_two, submission_type=AssignmentFormat.NO_SUBMIT)
+    sa1_c1 = StudentAssignment.objects.get(student=student, assignment=a1_c1)
+    sa2_c1 = StudentAssignment.objects.get(student=student, assignment=a2_c1)
+    sa3_c1 = StudentAssignment.objects.get(student=student, assignment=a3_c1)
+    sa1_c2 = StudentAssignment.objects.get(student=student, assignment=a1_c2)
+    url = reverse('study:assignment_list')
+    client.login(student)
+
+    response = client.get(url)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert len(open_assignments) == 4
+
+    form_data = {
+        "format": []
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa1_c1, sa2_c1, sa3_c1, sa1_c2}
+    assert response.redirect_chain[-1][0][-1] == '?'  # /learning/assignments/?
+
+    form_data = {
+        "format": [AssignmentFormat.NO_SUBMIT]
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa1_c1, sa1_c2}
+    assert f"format={AssignmentFormat.NO_SUBMIT}" in response.redirect_chain[-1][0]
+
+    form_data = {
+        "format": [AssignmentFormat.ONLINE,
+                   AssignmentFormat.CODE_REVIEW]
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa2_c1, sa3_c1}
+    assert f"format={AssignmentFormat.ONLINE}" in response.redirect_chain[-1][0]
+    assert f"format={AssignmentFormat.CODE_REVIEW}" in response.redirect_chain[-1][0]
+
+
+@pytest.mark.django_db
+def test_view_student_assignment_list_filtering(client):
+    course_one, course_two = CourseFactory.create_batch(2, semester=SemesterFactory.create_current())
+    student = StudentFactory()
+    EnrollmentFactory(course=course_one, student=student)
+    EnrollmentFactory(course=course_two, student=student)
+    a1_c1 = AssignmentFactory(course=course_one, submission_type=AssignmentFormat.NO_SUBMIT)
+    a2_c1 = AssignmentFactory(course=course_one, submission_type=AssignmentFormat.ONLINE)
+    a3_c1 = AssignmentFactory(course=course_one, submission_type=AssignmentFormat.CODE_REVIEW)
+
+    sa1_c1 = StudentAssignment.objects.get(student=student, assignment=a1_c1)
+    sa2_c1 = StudentAssignment.objects.get(student=student, assignment=a2_c1)
+    sa3_c1 = StudentAssignment.objects.get(student=student, assignment=a3_c1)
+
+    sa1_c1.status = AssignmentStatus.NOT_SUBMITTED
+    sa2_c1.status = AssignmentStatus.ON_CHECKING
+    sa3_c1.status = AssignmentStatus.NEED_FIXES
+    sa1_c1.save()
+    sa2_c1.save()
+    sa3_c1.save()
+
+    a1_c2 = AssignmentFactory(course=course_two, submission_type=AssignmentFormat.NO_SUBMIT)
+    a2_c2 = AssignmentFactory(course=course_two, submission_type=AssignmentFormat.YANDEX_CONTEST)
+    a3_c2 = AssignmentFactory(course=course_two, submission_type=AssignmentFormat.EXTERNAL)
+
+    sa1_c2 = StudentAssignment.objects.get(student=student, assignment=a1_c2)
+    sa2_c2 = StudentAssignment.objects.get(student=student, assignment=a2_c2)
+    sa3_c2 = StudentAssignment.objects.get(student=student, assignment=a3_c2)
+
+    sa1_c2.status = AssignmentStatus.NOT_SUBMITTED
+    sa2_c2.status = AssignmentStatus.COMPLETED
+    sa1_c2.status = AssignmentStatus.NOT_SUBMITTED
+    sa1_c2.save()
+    sa2_c2.save()
+    sa3_c2.save()
+
+    url = reverse('study:assignment_list')
+    client.login(student)
+
+    response = client.get(url)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert len(open_assignments) == 6
+
+    form_data = {
+        "course": '',
+        "status": [],
+        "format": []
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa1_c1, sa2_c1, sa3_c1, sa1_c2, sa2_c2, sa3_c2}
+    assert response.redirect_chain[-1][0][-1] == '?'  # /learning/assignments/?
+
+    form_data = {
+        "course": course_two.pk,
+        "format": [AssignmentFormat.NO_SUBMIT, AssignmentFormat.EXTERNAL],
+        "status": [AssignmentStatus.COMPLETED]
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert not set(open_assignments)
+    assert f"course={course_two.pk}" in response.redirect_chain[-1][0]
+    assert f"format={AssignmentFormat.NO_SUBMIT}" in response.redirect_chain[-1][0]
+    assert f"format={AssignmentFormat.EXTERNAL}" in response.redirect_chain[-1][0]
+    assert f"status={AssignmentStatus.COMPLETED}" in response.redirect_chain[-1][0]
+
+    form_data["status"] = [AssignmentStatus.NOT_SUBMITTED]
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa1_c2, sa3_c2}
+    assert f"status={AssignmentStatus.NOT_SUBMITTED}" in response.redirect_chain[-1][0]
+
+    form_data = {
+        "course": '',
+        "format": [AssignmentFormat.NO_SUBMIT],
+        "status": [AssignmentStatus.NOT_SUBMITTED]
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa1_c1, sa1_c2}
+    assert f"format={AssignmentFormat.NO_SUBMIT}" in response.redirect_chain[-1][0]
+    assert f"status={AssignmentStatus.NOT_SUBMITTED}" in response.redirect_chain[-1][0]
+
+
+    form_data = {
+        "course": '',
+        "format": [AssignmentFormat.ONLINE, AssignmentFormat.CODE_REVIEW,
+                   AssignmentFormat.YANDEX_CONTEST, AssignmentFormat.EXTERNAL],
+        "status": [AssignmentStatus.NOT_SUBMITTED, AssignmentStatus.ON_CHECKING,
+                   AssignmentStatus.NEED_FIXES, AssignmentStatus.COMPLETED]
+    }
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa2_c1, sa3_c1, sa2_c2, sa3_c2}
+
+    assert f"format={AssignmentFormat.ONLINE}" in response.redirect_chain[-1][0]
+    assert f"format={AssignmentFormat.CODE_REVIEW}" in response.redirect_chain[-1][0]
+    assert f"format={AssignmentFormat.YANDEX_CONTEST}" in response.redirect_chain[-1][0]
+    assert f"format={AssignmentFormat.EXTERNAL}" in response.redirect_chain[-1][0]
+
+    assert f"status={AssignmentStatus.NOT_SUBMITTED}" in response.redirect_chain[-1][0]
+    assert f"status={AssignmentStatus.ON_CHECKING}" in response.redirect_chain[-1][0]
+    assert f"status={AssignmentStatus.NEED_FIXES}" in response.redirect_chain[-1][0]
+    assert f"status={AssignmentStatus.COMPLETED}" in response.redirect_chain[-1][0]
+
+    # forbidden status AssignmentStatus.NEW for filter
+    form_data["status"].append(AssignmentStatus.NEW)
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    open_assignments = response.context['assignment_list_open']
+    assert set(open_assignments) == {sa1_c1, sa2_c1, sa3_c1, sa1_c2, sa2_c2, sa3_c2}
 
