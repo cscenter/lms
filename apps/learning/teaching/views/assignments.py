@@ -1,9 +1,11 @@
+import csv
 import datetime
 import os.path
 import tempfile
 import zipfile
 from typing import Any, Dict, Iterator, List, NamedTuple
 
+from django.conf import settings
 from rest_framework import serializers
 from vanilla import TemplateView
 
@@ -12,7 +14,7 @@ from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import FileField
-from django.http import FileResponse, HttpResponse, JsonResponse
+from django.http import FileResponse, HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
@@ -20,6 +22,7 @@ from django.views import generic
 from django.views.generic.edit import BaseUpdateView
 
 from auth.mixins import PermissionRequiredMixin
+from code_reviews.gerrit.constants import GerritRobotMessages
 from core import comment_persistence
 from core.api.fields import CharSeparatedField
 from core.exceptions import Redirect
@@ -219,14 +222,14 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
         context = super().get_context_data(**kwargs)
         context['a_s_list'] = (
             StudentAssignment.objects
-            .filter(assignment__pk=self.object.pk)
-            .select_related('assignment',
-                            'assignment__course',
-                            'assignment__course__meta_course',
-                            'assignment__course__semester',
-                            'student')
-            .prefetch_related('student__groups')
-            .order_by('student__last_name', 'student__first_name'))
+                .filter(assignment__pk=self.object.pk)
+                .select_related('assignment',
+                                'assignment__course',
+                                'assignment__course__meta_course',
+                                'assignment__course__semester',
+                                'student')
+                .prefetch_related('student__groups')
+                .order_by('student__last_name', 'student__first_name'))
         # Note: it's possible to return values instead and
         # making 1 db hit instead of 3
         exec_mean = AssignmentService.get_mean_execution_time(self.object)
@@ -235,7 +238,66 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
         context["execution_time_median"] = humanize_duration(exec_median)
         context["can_edit_assignment"] = self.request.user.has_perm(EditAssignment.name, self.object)
         context["can_delete_assignment"] = self.request.user.has_perm(DeleteAssignment.name, self.object)
+        context["can_download_status_report"] = self.object.submission_type in [AssignmentFormat.ONLINE,
+                                                                                AssignmentFormat.CODE_REVIEW] \
+                                                and self.request.user.has_perm(ViewAssignment.name, self.object)
+        context['status_report_href'] = reverse('teaching:assignment_status_report_csv', kwargs={'pk': self.object.pk})
         return context
+
+
+class AssignmentStatusChangeReportCSVView(PermissionRequiredMixin, generic.base.View):
+    permission_required = ViewAssignment.name
+
+    def get(self, request, pk):
+        assignment = get_object_or_404(Assignment, pk=pk)
+        if assignment.submission_type not in [AssignmentFormat.ONLINE, AssignmentFormat.CODE_REVIEW]:
+            return HttpResponseBadRequest()
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        filename = f"{datetime.date.today()}-status-changes_pk-{assignment.pk}.csv"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        writer = csv.writer(response)
+        headers = [
+            "first_last_name",
+            "task",
+            "reviewer",
+            "action",
+            "timestamp"
+        ]
+        writer.writerow(headers)
+        comments = (AssignmentComment.objects
+                    .filter(is_published=True,
+                            student_assignment__assignment=assignment)
+                    .select_related('author',
+                                    'student_assignment__student')
+                    .order_by('student_assignment__student', 'created'))
+        for comment in comments:
+            title = assignment.title
+            for_student = comment.student_assignment.student.get_short_name()
+            comment_author = comment.author.get_short_name()
+            created = int(comment.created.timestamp())
+            score_changed = False
+            action_text = None
+            if isinstance(comment.meta, dict) and 'score_old' in comment.meta and 'score' in comment.meta:
+                score_changed = comment.meta['score_old'] != comment.meta['score']
+                if score_changed:
+                    action_text = 'оценка обновлена'
+            is_comment_from_student = comment_author == for_student
+            is_publish_online_solution = is_comment_from_student and\
+                                         assignment.submission_type == AssignmentFormat.ONLINE and\
+                                         comment.type == AssignmentSubmissionTypes.SOLUTION
+            gerrit_bot_message = GerritRobotMessages.CHANGE_CREATED.format(link='')[:-1]  # remove '.'
+            is_publish_review_solution = comment.author.username == settings.GERRIT_ROBOT_USERNAME and\
+                                         gerrit_bot_message in comment.text
+            if is_publish_online_solution or is_publish_review_solution:
+                action_text = 'решение отправлено на проверку'
+                if is_publish_review_solution:
+                    # Solution has been sent from student not from gerrit.bot:
+                    comment_author = for_student
+            elif not score_changed and not is_comment_from_student:
+                action_text = 'получен комментарий от ревьювера'
+            if action_text is not None:
+                writer.writerow([for_student, title, comment_author, action_text, created])
+        return response
 
 
 class StudentAssignmentDetailView(PermissionRequiredMixin,
