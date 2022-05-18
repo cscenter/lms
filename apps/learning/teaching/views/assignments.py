@@ -36,6 +36,7 @@ from courses.selectors import (
     assignments_list, course_teachers_prefetch_queryset, get_course_teachers
 )
 from courses.services import CourseService
+from grading.constants import SubmissionStatus
 from learning.forms import AssignmentModalCommentForm, AssignmentReviewForm
 from learning.models import (
     AssignmentComment, AssignmentSubmissionTypes, Enrollment, StudentAssignment
@@ -239,17 +240,20 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
         context["can_edit_assignment"] = self.request.user.has_perm(EditAssignment.name, self.object)
         context["can_delete_assignment"] = self.request.user.has_perm(DeleteAssignment.name, self.object)
         context["can_download_status_report"] = self.object.submission_type in [AssignmentFormat.ONLINE,
-                                                                                AssignmentFormat.CODE_REVIEW] \
-                                                and self.request.user.has_perm(ViewAssignment.name, self.object)
+                                                                                AssignmentFormat.CODE_REVIEW]
         context['status_report_href'] = reverse('teaching:assignment_status_report_csv', kwargs={'pk': self.object.pk})
         return context
 
 
-class AssignmentStatusChangeReportCSVView(PermissionRequiredMixin, generic.base.View):
+class AssignmentStatusChangeReportCSVView(PermissionRequiredMixin, generic.DetailView):
+    model = Assignment
     permission_required = ViewAssignment.name
 
-    def get(self, request, pk):
-        assignment = get_object_or_404(Assignment, pk=pk)
+    def get_permission_object(self):
+        return self.get_object().course
+
+    def get(self, request, *args, **kwargs):
+        assignment = self.get_object()
         if assignment.submission_type not in [AssignmentFormat.ONLINE, AssignmentFormat.CODE_REVIEW]:
             return HttpResponseBadRequest()
         response = HttpResponse(content_type='text/csv; charset=utf-8')
@@ -268,6 +272,7 @@ class AssignmentStatusChangeReportCSVView(PermissionRequiredMixin, generic.base.
                     .filter(is_published=True,
                             student_assignment__assignment=assignment)
                     .select_related('author',
+                                    'submission',
                                     'student_assignment__student')
                     .order_by('student_assignment__student', 'created'))
         for comment in comments:
@@ -275,25 +280,26 @@ class AssignmentStatusChangeReportCSVView(PermissionRequiredMixin, generic.base.
             for_student = comment.student_assignment.student.get_short_name()
             comment_author = comment.author.get_short_name()
             created = int(comment.created.timestamp())
-            score_changed = False
             action_text = None
-            if isinstance(comment.meta, dict) and 'score_old' in comment.meta and 'score' in comment.meta:
-                score_changed = comment.meta['score_old'] != comment.meta['score']
-                if score_changed:
-                    action_text = 'оценка обновлена'
+            if not isinstance(comment.meta, dict) or \
+                'status' not in comment.meta or 'status_old' not in comment.meta:
+                continue
             is_comment_from_student = comment_author == for_student
-            is_publish_online_solution = is_comment_from_student and\
-                                         assignment.submission_type == AssignmentFormat.ONLINE and\
-                                         comment.type == AssignmentSubmissionTypes.SOLUTION
-            gerrit_bot_message = GerritRobotMessages.CHANGE_CREATED.format(link='')[:-1]  # remove '.'
-            is_publish_review_solution = comment.author.username == settings.GERRIT_ROBOT_USERNAME and\
-                                         gerrit_bot_message in comment.text
-            if is_publish_online_solution or is_publish_review_solution:
+            is_publish_online_solution = is_comment_from_student and \
+                                         assignment.submission_type == AssignmentFormat.ONLINE and \
+                                         comment.meta['status'] == AssignmentStatus.ON_CHECKING
+            is_publish_review_solution = assignment.submission_type == AssignmentFormat.CODE_REVIEW and \
+                                         comment.type == AssignmentSubmissionTypes.SOLUTION and \
+                                         comment.submission.status == SubmissionStatus.PASSED
+            is_status_changed_on_needfixes = comment.meta['status'] != comment.meta['status_old'] and \
+                                             comment.meta['status'] == AssignmentStatus.NEED_FIXES
+            is_status_changed_on_completed = comment.meta['status'] != comment.meta['status_old'] and \
+                                             comment.meta['status'] == AssignmentStatus.COMPLETED
+            if is_status_changed_on_completed:
+                action_text = 'оценка обновлена'
+            elif is_publish_online_solution or is_publish_review_solution:
                 action_text = 'решение отправлено на проверку'
-                if is_publish_review_solution:
-                    # Solution has been sent from student not from gerrit.bot:
-                    comment_author = for_student
-            elif not score_changed and not is_comment_from_student:
+            elif is_status_changed_on_needfixes:
                 action_text = 'получен комментарий от ревьювера'
             if action_text is not None:
                 writer.writerow([for_student, title, comment_author, action_text, created])
