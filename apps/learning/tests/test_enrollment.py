@@ -8,7 +8,6 @@ from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
-from code_reviews.gerrit.signals import post_save_teacher
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
@@ -484,7 +483,7 @@ def test_enrollment_populate_assignments(client):
 
 
 @pytest.mark.django_db
-def test_enrollment_add_student_to_project(mocker):
+def test_enrollment_add_student_to_project(mocker, django_capture_on_commit_callbacks):
     course = CourseFactory()
     mocked = mocker.patch("code_reviews.gerrit.tasks.add_student_to_gerrit_project.delay")
     AssignmentFactory(course=course,
@@ -496,7 +495,8 @@ def test_enrollment_add_student_to_project(mocker):
 
     AssignmentFactory(course=course,
                       submission_type=AssignmentFormat.CODE_REVIEW)
-    EnrollmentFactory(course=course)
+    with django_capture_on_commit_callbacks(execute=True):
+        EnrollmentFactory(course=course)
     mocked.assert_called_once()
 
 
