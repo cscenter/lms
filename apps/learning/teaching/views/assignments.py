@@ -36,6 +36,7 @@ from courses.selectors import (
     assignments_list, course_teachers_prefetch_queryset, get_course_teachers
 )
 from courses.services import CourseService
+from grading.api.yandex_contest import SubmissionVerdict
 from grading.constants import SubmissionStatus
 from learning.forms import AssignmentModalCommentForm, AssignmentReviewForm
 from learning.models import (
@@ -241,11 +242,11 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
         context["can_delete_assignment"] = self.request.user.has_perm(DeleteAssignment.name, self.object)
         context["can_download_status_report"] = self.object.submission_type in [AssignmentFormat.ONLINE,
                                                                                 AssignmentFormat.CODE_REVIEW]
-        context['status_report_href'] = reverse('teaching:assignment_status_report_csv', kwargs={'pk': self.object.pk})
+        context['status_report_href'] = reverse('teaching:assignment_status_log_csv', kwargs={'pk': self.object.pk})
         return context
 
 
-class AssignmentStatusChangeReportCSVView(PermissionRequiredMixin, generic.DetailView):
+class AssignmentStatusLogCSVView(PermissionRequiredMixin, generic.DetailView):
     model = Assignment
     permission_required = ViewAssignment.name
 
@@ -290,7 +291,8 @@ class AssignmentStatusChangeReportCSVView(PermissionRequiredMixin, generic.Detai
                                          comment.meta['status'] == AssignmentStatus.ON_CHECKING
             is_publish_review_solution = assignment.submission_type == AssignmentFormat.CODE_REVIEW and \
                                          comment.type == AssignmentSubmissionTypes.SOLUTION and \
-                                         comment.submission.status == SubmissionStatus.PASSED
+                                         comment.submission.status == SubmissionStatus.PASSED and \
+                                         comment.submission.verdict_or_status == SubmissionVerdict.OK.value
             is_status_changed_on_needfixes = comment.meta['status'] != comment.meta['status_old'] and \
                                              comment.meta['status'] == AssignmentStatus.NEED_FIXES
             is_status_changed_on_completed = comment.meta['status'] != comment.meta['status_old'] and \
