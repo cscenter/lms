@@ -1,5 +1,7 @@
-from typing import Iterable
+from typing import Iterable, List
+from urllib import parse
 
+from django.shortcuts import redirect
 from isoweek import Week
 from vanilla import GenericModelView, TemplateView
 
@@ -37,8 +39,8 @@ from learning.selectors import get_student_classes
 from learning.services.personal_assignment_service import (
     get_assignment_update_history_message, get_draft_comment
 )
-from learning.study.forms import AssignmentCommentForm
-from learning.study.services import get_solution_form, save_solution_form
+from learning.study.forms import AssignmentCommentForm, StudentAssignmentListFilter
+from learning.study.services import get_solution_form, save_solution_form, get_current_semester_active_courses
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import (
     AssignmentCommentUpsertView, StudentAssignmentURLParamsMixin
@@ -109,17 +111,24 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
                           'assignment__course__meta_course__name',
                           'pk'))
 
-    def get_context_data(self, **kwargs):
-        current_term = Semester.get_current()
+    def get_context_data(self, filter_form: StudentAssignmentListFilter,
+                         enrolled_in_courses: List[int],
+                         current_term: Semester, **kwargs):
         student = self.request.user
-        assignment_list = self.get_queryset(current_term)
-        enrolled_in = (Enrollment.active
-                       .filter(course__semester=current_term, student=student)
-                       .values_list("course", flat=True))
+        filter_course = kwargs.get("course", None)
+        filter_formats = kwargs.get("formats", [])
+        filter_statuses = kwargs.get("statuses", [])
+        assignment_list = filter(
+            lambda sa:
+            (filter_course is None or sa.assignment.course_id == filter_course) and
+            (not filter_formats or sa.assignment.submission_type in filter_formats) and
+            (not filter_statuses or sa.status in filter_statuses),
+            self.get_queryset(current_term)
+        )
         in_progress, archive = utils.split_on_condition(
             assignment_list,
             lambda sa: not sa.assignment.deadline_is_exceeded and
-                       sa.assignment.course_id in enrolled_in)
+                       sa.assignment.course_id in enrolled_in_courses)
         archive.reverse()
         # Map student projects in current term to related reporting periods
         reporting_periods = None
@@ -128,12 +137,54 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
             reporting_periods = get_project_reporting_periods(student,
                                                               current_term)
         context = {
+            'filter_form': filter_form,
             'assignment_list_open': in_progress,
             'assignment_list_archive': archive,
             'tz_override': student.time_zone,
             'reporting_periods': reporting_periods
         }
         return context
+
+    def get(self, request, *args, **kwargs):
+        current_term = Semester.get_current()
+        enrolled_in = get_current_semester_active_courses(request.user, current_term)
+        filter_form = StudentAssignmentListFilter(enrolled_in, data=request.GET)
+        filter_formats, filter_statuses, filter_course = [], [], None
+        if filter_form.is_valid():
+            filter_formats = filter_form.cleaned_data["format"]
+            filter_statuses = filter_form.cleaned_data["status"]
+            filter_course = filter_form.cleaned_data["course"]
+        context = self.get_context_data(filter_form=filter_form,
+                                        enrolled_in_courses=enrolled_in,
+                                        current_term=current_term,
+                                        course=filter_course,
+                                        formats=filter_formats,
+                                        statuses=filter_statuses,
+                                        **kwargs)
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        current_term = Semester.get_current()
+        enrolled_in = get_current_semester_active_courses(request.user, Semester.get_current())
+        filter_form = StudentAssignmentListFilter(enrolled_in,
+                                                  data=request.POST)
+        filter_course = None
+        if filter_form.is_valid():
+            filter_course = filter_form.cleaned_data["course"]
+            filter_formats = filter_form.cleaned_data["format"]
+            filter_statuses = filter_form.cleaned_data["status"]
+            url = reverse('study:assignment_list')
+            params = parse.urlencode({
+                'course': [] if filter_course is None else filter_course,
+                'format': filter_formats,
+                'status': filter_statuses
+            }, doseq=True)
+            return redirect(f"{url}?{params}")
+        context = self.get_context_data(filter_form=filter_form,
+                                        enrolled_in_courses=enrolled_in,
+                                        current_term=current_term,
+                                        course=filter_course, **kwargs)
+        return self.render_to_response(context)
 
 
 class StudentAssignmentDetailView(PermissionRequiredMixin,

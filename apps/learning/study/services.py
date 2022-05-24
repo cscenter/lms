@@ -2,12 +2,13 @@ from typing import Optional
 
 from core.urls import reverse
 from courses.constants import AssignmentFormat
+from courses.models import Semester
 from grading.constants import CheckingSystemTypes
 from learning.forms import (
     AssignmentSolutionBaseForm, AssignmentSolutionDefaultForm,
     AssignmentSolutionYandexContestForm
 )
-from learning.models import AssignmentComment, StudentAssignment
+from learning.models import AssignmentComment, StudentAssignment, Enrollment
 from learning.services.personal_assignment_service import (
     create_assignment_solution, create_assignment_solution_and_check
 )
@@ -68,3 +69,9 @@ def save_solution_form(*, form: AssignmentSolutionBaseForm,
     else:
         raise ValueError(f"{form.__class__} is not supported")
     return submission
+
+
+def get_current_semester_active_courses(student: User, current_term: Semester):
+    return (Enrollment.active
+            .filter(course__semester=current_term, student=student)
+            .values_list("course", flat=True))
