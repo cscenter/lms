@@ -161,7 +161,7 @@ def monitor_submission_status_in_yandex_contest(submission_id,
                              delay_min=1, timeout=5)
         logger.info(f"Remote server is unavailable. "
                     f"Repeat job in 10 minutes.")
-        return f"Requeue job in 10 minutes"
+        return f"Unavailable. Requeue job in 10 minutes. "
     except ContestAPIError as e:
         raise
     # Wait until remote submission check is not finished
@@ -178,7 +178,7 @@ def monitor_submission_status_in_yandex_contest(submission_id,
                              delay_min=delay_min + 1)
         logger.info(f"Submission check {remote_submission_id} is not finished. "
                     f"Rerun in {delay_min} minutes.")
-        return f"Requeue job in {delay_min} minutes"
+        return f"ContestAPIError. Requeue job in {delay_min} minutes"
     # TODO: Investigate how to escape html and store it in json
     # TODO: g.e. look at encoders in simplejson
     json_data.pop("source", None)

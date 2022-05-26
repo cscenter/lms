@@ -259,24 +259,24 @@ class YandexContestAPI:
     @staticmethod
     def request_and_check(url, method, **kwargs):
         assert method in ('post', 'get')
-        try:
-            response = getattr(requests, method)(url, **kwargs)
-            response.raise_for_status()
-            return response
-        # Some of the network problems
-        except (requests.ConnectionError, requests.Timeout) as e:
-            raise Unavailable() from e
-        # Client 4xx or server 5xx HTTP errors
-        except requests.exceptions.HTTPError as e:
-            response = e.response
-            try:
-                s = response.status_code
-                ResponseStatus(s)  # known statuses
-                raise ContestAPIError(code=s, message=response.text) from e
-            except ValueError:
-                # Unpredictable client or server error
-                logger.exception("Contest API service had internal error.")
-                raise Unavailable() from e
+        # try:
+        response = getattr(requests, method)(url, **kwargs)
+        response.raise_for_status()
+        return response
+        # # Some of the network problems
+        # except (requests.ConnectionError, requests.Timeout) as e:
+        #     raise Unavailable() from e
+        # # Client 4xx or server 5xx HTTP errors
+        # except requests.exceptions.HTTPError as e:
+        #     response = e.response
+        #     try:
+        #         s = response.status_code
+        #         ResponseStatus(s)  # known statuses
+        #         raise ContestAPIError(code=s, message=response.text) from e
+        #     except ValueError:
+        #         # Unpredictable client or server error
+        #         logger.exception("Contest API service had internal error.")
+        #         raise Unavailable() from e
 
     # FIXME: api.contest(42).participant(1).info()
     def participant_info(self, contest_id, participant_id):
