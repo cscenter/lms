@@ -227,7 +227,7 @@ class YandexContestAPI:
 
     # FIXME: api.contest(42).submission(1)
     def submission_details(self, contest_id, submission_id,
-                           full=False, timeout: Optional[int] = 1):
+                           full=False, timeout: Optional[int] = 10):
         """Provide `full=True` to get all details like checker log"""
         headers = self.base_headers
         url = self.SUBMISSION_URL.format(contest_id=contest_id,
