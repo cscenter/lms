@@ -151,14 +151,14 @@ def monitor_submission_status_in_yandex_contest(submission_id,
     try:
         status, json_data = api.submission_details(
             checker.settings['contest_id'],
-            remote_submission_id, full=True)
+            remote_submission_id, full=True, timeout=10)
     except Unavailable as e:
         scheduler = django_rq.get_scheduler('default')
         scheduler.enqueue_in(timedelta(minutes=10),
                              monitor_submission_status_in_yandex_contest,
                              submission_id,
                              remote_submission_id,
-                             delay_min=1, timeout=5)
+                             delay_min=1)
         logger.info(f"Remote server is unavailable. "
                     f"Repeat job in 10 minutes.")
         return f"Unavailable. Requeue job in 10 minutes. "
