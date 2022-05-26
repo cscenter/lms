@@ -96,7 +96,7 @@ def add_new_submission_to_checking_system(submission_id, *, retries):
     files = {'file': ('test.txt', submission_content)}
     try:
         status, json_data = api.add_submission(checker.settings['contest_id'],
-                                               files=files, **data)
+                                               files=files, timeout=5, **data)
     except Unavailable as e:
         if retries:
             scheduler = django_rq.get_scheduler('default')
@@ -158,7 +158,7 @@ def monitor_submission_status_in_yandex_contest(submission_id,
                              monitor_submission_status_in_yandex_contest,
                              submission_id,
                              remote_submission_id,
-                             delay_min=1)
+                             delay_min=1, timeout=5)
         logger.info(f"Remote server is unavailable. "
                     f"Repeat job in 10 minutes.")
         return f"Requeue job in 10 minutes"
