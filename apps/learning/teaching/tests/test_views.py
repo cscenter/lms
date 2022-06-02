@@ -9,6 +9,7 @@ from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory, SiteFactory
+from core.timezone import now_local
 from core.urls import reverse
 from courses.constants import AssignmentFormat
 from courses.models import CourseGroupModes, CourseTeacher
@@ -123,11 +124,14 @@ def test_view_assignment_detail_permissions(client, lms_resolver,
 
 @pytest.mark.django_db
 def test_view_student_assignment_detail_permissions(client, lms_resolver,
-                                                    assert_login_redirect):
+                                                    assert_login_redirect,
+                                                    assert_redirect):
     from auth.permissions import perm_registry
     teacher, teacher_other, spectator = TeacherFactory.create_batch(3)
     student = StudentFactory()
-    course = CourseFactory(teachers=[teacher])
+    today = now_local(student.time_zone).date()
+    next_day = today + datetime.timedelta(days=1)
+    course = CourseFactory(teachers=[teacher], completed_at=next_day)
     CourseTeacherFactory(course=course, teacher=spectator, roles=CourseTeacher.roles.spectator)
     student_assignment = StudentAssignmentFactory(student=student,
                                                   assignment__course=course)
@@ -141,7 +145,8 @@ def test_view_student_assignment_detail_permissions(client, lms_resolver,
     assert_login_redirect(url, method='post')
 
     client.login(student)
-    assert_login_redirect(url, method='get')
+    response = client.get(url)
+    assert_redirect(response, student_assignment.get_student_url())
     assert_login_redirect(url, method='post')
 
     client.login(teacher_other)

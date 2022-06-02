@@ -39,7 +39,7 @@ from learning.models import (
 )
 from learning.permissions import (
     CreateAssignmentComment, DownloadAssignmentSolutions, EditStudentAssignment,
-    ViewStudentAssignment, ViewStudentAssignmentList
+    ViewStudentAssignment, ViewStudentAssignmentList, ViewOwnStudentAssignment
 )
 from learning.selectors import get_enrollment, get_teacher_not_spectator_courses
 from learning.services import AssignmentService, StudentGroupService
@@ -245,6 +245,10 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         if not self.has_permission():
+            has_student_permission = request.user.has_perm(ViewOwnStudentAssignment.name,
+                                                           self.student_assignment)
+            if has_student_permission and request.method == "GET":
+                return redirect(self.student_assignment.get_student_url())
             return redirect_to_login(request.get_full_path())
         return super().dispatch(request, *args, **kwargs)
 
