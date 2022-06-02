@@ -1,4 +1,6 @@
+import csv
 import datetime
+import io
 from itertools import chain
 
 import pytest
@@ -11,16 +13,19 @@ from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory, SiteFactory
 from core.timezone import now_local
 from core.urls import reverse
-from courses.constants import AssignmentFormat
+from courses.constants import AssignmentFormat, AssignmentStatus
 from courses.models import CourseGroupModes, CourseTeacher
 from courses.permissions import ViewAssignment
 from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseTeacherFactory, SemesterFactory
 )
-from learning.models import StudentAssignment
+from grading.api.yandex_contest import SubmissionVerdict
+from grading.constants import SubmissionStatus
+from grading.tests.factories import SubmissionFactory
+from learning.models import StudentAssignment, AssignmentSubmissionTypes
 from learning.permissions import ViewStudentAssignment, ViewStudentAssignmentList
-from learning.services.personal_assignment_service import create_assignment_solution
-from learning.settings import Branches
+from learning.services.personal_assignment_service import create_assignment_solution, create_personal_assignment_review
+from learning.settings import Branches, AssignmentScoreUpdateSource
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
 )
@@ -313,3 +318,224 @@ def test_assignments_check_queue_view_default_selected_assignment(client):
     selected_assignments = set(data['selectedAssignments'])
     expected_selected = set(a.pk for a in chain(online_assignments, review_assignments))
     assert expected_selected == selected_assignments
+
+
+@pytest.mark.django_db
+def test_view_assignment_status_log_csv_permission(client, lms_resolver, assert_login_redirect):
+    from auth.permissions import perm_registry
+    teacher = TeacherFactory()
+    student = StudentFactory()
+    course = CourseFactory(teachers=[teacher])
+    EnrollmentFactory(course=course, student=student)
+    assignment = AssignmentFactory(course=course,
+                                   submission_type=AssignmentFormat.ONLINE)
+    url = reverse('teaching:assignment_status_log_csv', args=[assignment.pk])
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == ViewAssignment.name
+    assert resolver.func.view_class.permission_required in perm_registry
+    assert_login_redirect(url, method='get')
+    client.login(student)
+    response = client.get(url)
+    assert response.status_code == 403
+    client.login(teacher)
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_view_assignment_status_log_csv_wrong_format(client, lms_resolver, assert_login_redirect):
+    teacher = TeacherFactory()
+    student = StudentFactory()
+    course = CourseFactory(teachers=[teacher])
+    EnrollmentFactory(course=course, student=student)
+    assignment = AssignmentFactory(course=course,
+                                   submission_type=AssignmentFormat.NO_SUBMIT)
+    url = reverse('teaching:assignment_status_log_csv', args=[assignment.pk])
+    client.login(teacher)
+    response = client.get(url)
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_view_assignment_status_log_csv_online_assignments(client):
+    teacher = TeacherFactory()
+    student_one, student_two = StudentFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher])
+    EnrollmentFactory(course=course, student=student_one)
+    EnrollmentFactory(course=course, student=student_two)
+    assignment = AssignmentFactory(course=course, submission_type=AssignmentFormat.ONLINE)
+    csv_download_url = reverse('teaching:assignment_status_log_csv', args=[assignment.pk])
+    client.login(teacher)
+    table_headers = ['first_last_name', 'task', 'reviewer', 'action', 'timestamp']
+    response = client.get(csv_download_url)
+    assert response.status_code == 200
+    assert response['Content-Type'] == 'text/csv; charset=utf-8'
+    status_log_csv = response.content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
+    assert data == [table_headers]
+
+    sa_one = StudentAssignment.objects.get(student=student_one)
+    sa_two = StudentAssignment.objects.get(student=student_two)
+
+    # just student comment
+    AssignmentCommentFactory(student_assignment=sa_one, author=student_one)
+    status_log_csv = client.get(csv_download_url).content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
+    assert data == [table_headers]
+
+    AssignmentCommentFactory(student_assignment=sa_one, author=student_one,
+                             type=AssignmentSubmissionTypes.SOLUTION)
+    status_log_csv = client.get(csv_download_url).content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
+    expected_created_student1_row = [
+        student_one.get_short_name(),
+        assignment.title,
+        student_one.get_short_name(),
+        'решение отправлено на проверку',
+    ]
+    assert len(data) == 2
+    assert data[1][:-1] == expected_created_student1_row
+
+    # submission
+    AssignmentCommentFactory(student_assignment=sa_two, author=student_two,
+                             type=AssignmentSubmissionTypes.SOLUTION)
+    status_log_csv = client.get(csv_download_url).content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
+    expected_created_student2_row = [
+        student_two.get_short_name(),
+        assignment.title,
+        student_two.get_short_name(),
+        'решение отправлено на проверку',
+    ]
+    assert len(data) == 3
+    assert data[1][:-1] == expected_created_student1_row
+    assert data[2][:-1] == expected_created_student2_row
+
+    # just teacher comment
+    create_personal_assignment_review(student_assignment=sa_one,
+                                      reviewer=teacher,
+                                      is_draft=False,
+                                      message="Just a comment",
+                                      score_old=sa_one.score,
+                                      score_new=sa_one.score,
+                                      status_old=sa_one.status,
+                                      status_new=sa_one.status,
+                                      source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
+                                      )
+    status_log_csv = client.get(csv_download_url).content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
+    assert len(data) == 3
+    assert data[1][:-1] == expected_created_student1_row
+    assert data[2][:-1] == expected_created_student2_row
+
+    # review with need fixes
+    create_personal_assignment_review(student_assignment=sa_one,
+                                      reviewer=teacher,
+                                      is_draft=False,
+                                      message="",
+                                      score_old=sa_one.score,
+                                      score_new=sa_one.score,
+                                      status_old=sa_one.status,
+                                      status_new=AssignmentStatus.NEED_FIXES,
+                                      source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
+                                      )
+    status_log_csv = client.get(csv_download_url).content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
+    expected_need_fixes_row = [
+        student_one.get_short_name(),
+        assignment.title,
+        teacher.get_short_name(),
+        'получен комментарий от ревьювера'
+    ]
+    assert len(data) == 4
+    # order [student, created_timestamp]
+    assert data[1][:-1] == expected_created_student1_row
+    assert data[2][:-1] == expected_need_fixes_row
+    assert data[3][:-1] == expected_created_student2_row
+
+    # review with completed
+    create_personal_assignment_review(student_assignment=sa_two,
+                                      reviewer=teacher,
+                                      is_draft=False,
+                                      message="",
+                                      score_old=sa_two.score,
+                                      score_new=sa_two.score,
+                                      status_old=sa_two.status,
+                                      status_new=AssignmentStatus.COMPLETED,
+                                      source=AssignmentScoreUpdateSource.FORM_ASSIGNMENT
+                                      )
+    status_log_csv = client.get(csv_download_url).content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
+    expected_completed_row = [
+        student_two.get_short_name(),
+        assignment.title,
+        teacher.get_short_name(),
+        'оценка обновлена'
+    ]
+    assert len(data) == 5
+    assert data[1][:-1] == expected_created_student1_row
+    assert data[2][:-1] == expected_need_fixes_row
+    assert data[3][:-1] == expected_created_student2_row
+    assert data[4][:-1] == expected_completed_row
+
+
+@pytest.mark.django_db
+def test_view_assignment_status_log_csv_online_assignments(client):
+    teacher = TeacherFactory()
+    student_one, student_two = StudentFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher])
+    EnrollmentFactory(course=course, student=student_one)
+    EnrollmentFactory(course=course, student=student_two)
+    assignment = AssignmentFactory(course=course, submission_type=AssignmentFormat.CODE_REVIEW)
+    csv_download_url = reverse('teaching:assignment_status_log_csv', args=[assignment.pk])
+    sa_one = StudentAssignment.objects.get(student=student_one)
+    sa_two = StudentAssignment.objects.get(student=student_two)
+    client.login(teacher)
+
+    # not tested
+    comment_new = AssignmentCommentFactory(student_assignment=sa_one, author=student_one,
+                                           type=AssignmentSubmissionTypes.SOLUTION)
+    SubmissionFactory(assignment_submission=comment_new,
+                      status=SubmissionStatus.NEW)
+
+    # on checking
+    comment_checking = AssignmentCommentFactory(student_assignment=sa_one, author=student_one,
+                                                type=AssignmentSubmissionTypes.SOLUTION)
+    SubmissionFactory(assignment_submission=comment_checking,
+                      status=SubmissionStatus.CHECKING)
+
+    # tests failed
+    comment_failed = AssignmentCommentFactory(student_assignment=sa_two, author=student_two,
+                                              type=AssignmentSubmissionTypes.SOLUTION)
+    SubmissionFactory(assignment_submission=comment_failed,
+                      status=SubmissionStatus.PASSED,
+                      meta={'verdict': SubmissionVerdict.WA.value})
+
+    table_headers = ['first_last_name', 'task', 'reviewer', 'action', 'timestamp']
+    status_log_csv = client.get(csv_download_url).content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
+    assert data == [table_headers]
+
+    # just comments
+    AssignmentCommentFactory(student_assignment=sa_two, author=student_two)
+    AssignmentCommentFactory(student_assignment=sa_two, author=teacher)
+
+    # successful submission
+    comment_ok = AssignmentCommentFactory(student_assignment=sa_two, author=student_two,
+                                          type=AssignmentSubmissionTypes.SOLUTION)
+    SubmissionFactory(assignment_submission=comment_ok,
+                      status=SubmissionStatus.PASSED,
+                      meta={'verdict': SubmissionVerdict.OK.value})
+
+    status_log_csv = client.get(csv_download_url).content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
+    expected_created_student1_row = [
+        student_two.get_short_name(),
+        assignment.title,
+        student_two.get_short_name(),
+        'решение отправлено на проверку'
+    ]
+    assert len(data) == 2
+    assert data[1][:-1] == expected_created_student1_row
+
