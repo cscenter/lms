@@ -31,7 +31,7 @@ urlpatterns += [
     path('teachers/', views.TeachersView.as_view(), name='teachers'),
     path('teachers/<int:pk>/', views.TeacherDetailView.as_view(), name='teacher_detail'),
     path('testimonials/', views.TestimonialsListView.as_view(), name='testimonials'),
-    path('students/<int:student_id>/', views.GraduateProfileView.as_view(), name='graduate_profile'),
+    path('students/<int:student_profile_id>/', views.GraduateProfileView.as_view(), name='graduate_profile'),
     # TODO: move redirect to nginx?
     path('pages/questions/', RedirectView.as_view(url='/enrollment/program/', permanent=True)),
     re_path(r'^(?P<year>20[0-9]{2})/$', views.AlumniHonorBoardView.as_view(), name='alumni_honor'),

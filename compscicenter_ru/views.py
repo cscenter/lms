@@ -451,9 +451,8 @@ def timeline_element_factory(obj) -> TimelineElement:
 
 
 class GraduateProfileView(generic.DetailView):
-    # FIXME: directly use student profile id (or slug?)
-    slug_field = 'student_profile__user_id'
-    slug_url_kwarg = "student_id"
+    slug_field = 'student_profile__id'
+    slug_url_kwarg = "student_profile_id"
     template_name = "compscicenter_ru/profiles/graduate.html"
 
     def get_queryset(self):
