@@ -88,7 +88,7 @@ class SiteCourseSerializer(serializers.ModelSerializer):
 
 
 class StudentProfilePublicSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source="user_id")
+    id = serializers.IntegerField()
     name = serializers.CharField(source="user.first_name")
     surname = serializers.CharField(source="user.last_name")
     patronymic = serializers.CharField(source="user.patronymic")
