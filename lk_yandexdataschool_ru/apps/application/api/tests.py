@@ -261,6 +261,7 @@ yds_post_data = {
 }
 
 
+@pytest.mark.skip("Uncomment after revert from OZON application version")
 @pytest.mark.django_db
 def test_application_YDS_form_serializer(settings, mocker):
     mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
@@ -318,6 +319,7 @@ def test_application_YDS_form_serializer(settings, mocker):
     }
 
 
+@pytest.mark.skip("Uncomment after revert from OZON application version")
 @pytest.mark.django_db
 def test_application_YDS_form_serializer_min_fields(settings, mocker):
     mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')

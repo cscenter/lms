@@ -281,6 +281,11 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         required=True,
         write_only=True
     )
+
+    preferred_study_program_notes = serializers.CharField(
+        required=False,
+        default="Поступающий с Ozon Masters"
+    )
     university = serializers.PrimaryKeyRelatedField(queryset=University.objects.all())
     university_city = UniversityCitySerializer(required=True, write_only=True)
     # FIXME: Replace with hidden field since real value stores in session
@@ -323,14 +328,18 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # Source
             "utm",
             "where_did_you_learn_other",
+            "preferred_study_program_notes"  # for OZON students
 
-            # version 2.0
+            # version 0.2, but in the data field it's still 0.1
             # add utm field with optional inner str fields:
             #     utm_source
             #     utm_medium
             #     utm_campaign
             #     utm_term
             #     utm_content
+
+            # version 0.3
+            # add field is_for_ozon with True value
         )
         extra_kwargs = {
             'university': {
@@ -380,6 +389,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             utm = {}
         data['data'] = {
             'utm': utm,
+            'is_for_ozon': True,
             'university_city': data.get('university_city'),
             'shad_agreement': data.get('shad_agreement'),
             'new_track': data.get('new_track'),
@@ -394,7 +404,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'ticket_access': data.get('ticket_access'),
             'magistracy_and_shad': data.get('magistracy_and_shad'),
             'email_subscription': data.get('email_subscription'),
-            'data_format_version': '0.1'
+            'data_format_version': '0.3'
         }
         data['experience'] = data['ml_experience']
         # Remove fields that are actually not present on Applicant model
