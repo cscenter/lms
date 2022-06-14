@@ -7,6 +7,7 @@ from django.conf import settings
 from django.utils.timezone import now
 
 from admission.api.serializers import OpenRegistrationCampaignField
+from admission.constants import ApplicantStatuses
 from admission.models import Applicant, Campaign
 from admission.tasks import register_in_yandex_contest
 from core.models import University as UniversityLegacy
@@ -286,6 +287,8 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         required=False,
         default="Поступающий с Ozon Masters"
     )
+
+    status = serializers.HiddenField(default=ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED)
     university = serializers.PrimaryKeyRelatedField(queryset=University.objects.all())
     university_city = UniversityCitySerializer(required=True, write_only=True)
     # FIXME: Replace with hidden field since real value stores in session
@@ -328,7 +331,8 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # Source
             "utm",
             "where_did_you_learn_other",
-            "preferred_study_program_notes"  # for OZON students
+            "preferred_study_program_notes",  # for OZON students
+            "status"  # interview to be scheduled for OZON students
 
             # version 0.2, but in the data field it's still 0.1
             # add utm field with optional inner str fields:
