@@ -37,6 +37,6 @@ prod:
       tags: queue
     - template: ^scheduler/.*.yaml$
       tags: scheduler
-# Issue: k8s-handle is outdated, render cronjob manifests `k8s-handle render`, then apply them `kubectl apply -f /tmp/k8s-handle/`
-#    - template: ^periodic-tasks/.*.yaml$
-#      tags: cron-jobs
+# Issue: k8s-handle is outdated, render cronjob manifests `k8s-handle render -s prod`, then apply them `kubectl apply -f /tmp/k8s-handle/`
+    - template: ^periodic-tasks/.*.yaml$
+      tags: cron-jobs

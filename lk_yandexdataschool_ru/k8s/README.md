@@ -33,4 +33,7 @@ Cheat sheet
 kubectl config set-context --current --namespace=yds-prod
 # Load data
 cat ./sites.json | kubectl exec --stdin website-backend-5d55dfc6f5-qvpkv -c django -- ./manage.py loaddata --format=json -
+# Copy a file to container, then you can run something like `./manage.py shell < cmd.py`:
+kubectl cp cmd.py yds-prod/website-backend-744f8db7c5-8rw4g:/var/www/code/cmd.py -c django
+
 ```

@@ -146,7 +146,7 @@ class ApplicantAdmin(admin.ModelAdmin):
     list_filter = [CampaignListFilter, 'status']
     search_fields = ('yandex_login', 'yandex_login_q', 'stepic_id',
                      'first_name', 'last_name', 'email', 'phone')
-    raw_id_fields = ('user',)
+    raw_id_fields = ('user', 'university')
 
     @meta(_("Created"), admin_order_field="created")
     def created_local(self, obj):
