@@ -46,7 +46,7 @@ pytest-pythonpath = "*"
 [packages]
 # Core
 pytz = "*"
-Django = "==3.2.12"
+Django = "==3.2.13"
 django-environ = "==0.8.1"
 rules = "*"
 # DB
