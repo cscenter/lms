@@ -6,8 +6,6 @@ env:
   PYTHON_IMAGE: python:3.9-slim-buster
   LOCAL_IMAGE_FRONTEND: localhost:5000/lms-frontend-webpack:latest
   LOCAL_IMAGE_DJANGO: localhost:5000/lms-backend-django:latest
-  AWS_REMOTE_IMAGE_BACKEND_DJANGO: 297302290031.dkr.ecr.eu-central-1.amazonaws.com/lms-uwsgi:${{ github.run_number }}
-  AWS_REMOTE_IMAGE_BACKEND_NGINX: 297302290031.dkr.ecr.eu-central-1.amazonaws.com/lms-nginx:${{ github.run_number }}
   YC_REMOTE_IMAGE_BACKEND_DJANGO: cr.yandex/crp117orrt9bf62s55e2/backend-django:${{ github.run_number }}
   YC_REMOTE_IMAGE_BACKEND_NGINX: cr.yandex/crp117orrt9bf62s55e2/backend-nginx:${{ github.run_number }}
 
@@ -131,7 +129,7 @@ jobs:
             SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
             FRONTEND_IMAGE=${{ env.LOCAL_IMAGE_FRONTEND }}
             BASE_IMAGE=${{ env.LOCAL_IMAGE_DJANGO }}
-          tags: ${{ env.AWS_REMOTE_IMAGE_BACKEND_DJANGO }},${{ env.YC_REMOTE_IMAGE_BACKEND_DJANGO }}
+          tags: ${{ env.YC_REMOTE_IMAGE_BACKEND_DJANGO }}
 
       - name: Build backend nginx image
         uses: docker/build-push-action@v2
@@ -144,7 +142,7 @@ jobs:
           build-args: |
             DJANGO_STATIC_ROOT=/var/www/static/
             DJANGO_IMAGE=${{ env.YC_REMOTE_IMAGE_BACKEND_DJANGO }}
-          tags: ${{ env.AWS_REMOTE_IMAGE_BACKEND_NGINX }},${{ env.YC_REMOTE_IMAGE_BACKEND_NGINX }}
+          tags: ${{ env.YC_REMOTE_IMAGE_BACKEND_NGINX }}
 
       - name: Debug
         run: docker images
