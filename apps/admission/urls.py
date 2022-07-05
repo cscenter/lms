@@ -10,7 +10,7 @@ from admission.views import (
     ConfirmationOfAcceptanceForStudiesView, InterviewAssignmentDetailView,
     InterviewCommentUpsertView, InterviewDetailView, InterviewInvitationCreateView,
     InterviewInvitationListView, InterviewListView, InterviewResultsDispatchView,
-    InterviewResultsView
+    InterviewResultsView, InterviewListCSVView
 )
 
 app_name = 'admission'
@@ -29,6 +29,7 @@ interview_invitation_patterns = [
 
 interview_patterns = [
     path('', InterviewListView.as_view(), name='list'),
+    path('download_csv', InterviewListCSVView.as_view(), name='csv_list'),
     path('<int:pk>/', InterviewDetailView.as_view(), name='detail'),
     path('interviews/<int:pk>/comment', InterviewCommentUpsertView.as_view(), name='comment'),
     path('assignments/<int:pk>/', InterviewAssignmentDetailView.as_view(), name='assignment'),

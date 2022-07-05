@@ -1,4 +1,6 @@
+import csv
 import datetime
+import io
 
 import pytest
 from bs4 import BeautifulSoup
@@ -25,7 +27,9 @@ from core.tests.factories import BranchFactory, SiteFactory
 from core.timezone import get_now_utc, now_local
 from core.urls import reverse
 from learning.settings import Branches
+from users.mixins import CuratorOnlyMixin
 from users.tests.factories import CuratorFactory, UserFactory
+
 
 # TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
 # TODO: Проверить время отправки напоминания, время/дату собеседования
@@ -45,12 +49,12 @@ def test_simple_interviews_list(client, curator, settings):
     today_local_nsk_date = formats.date_format(today_local_nsk,
                                                "SHORT_DATE_FORMAT")
     interview1, interview2, interview3 = InterviewFactory.create_batch(3,
-        interviewers=[interviewer],
-        date=today_local_nsk,
-        section=InterviewSections.ALL_IN_ONE,
-        status=Interview.COMPLETED,
-        applicant__status=Applicant.INTERVIEW_COMPLETED,
-        applicant__campaign=campaign)
+                                                                       interviewers=[interviewer],
+                                                                       date=today_local_nsk,
+                                                                       section=InterviewSections.ALL_IN_ONE,
+                                                                       status=Interview.COMPLETED,
+                                                                       applicant__status=Applicant.INTERVIEW_COMPLETED,
+                                                                       applicant__campaign=campaign)
     interview2.date = today_local_nsk + datetime.timedelta(days=1)
     interview2.save()
     interview3.date = today_local_nsk + datetime.timedelta(days=2)
@@ -91,6 +95,83 @@ def test_simple_interviews_list(client, curator, settings):
     url = format_url(campaign.pk, today_local_nsk_date, "") + f"&my_interviews=1"
     response = client.get(url)
     assert len(response.context["interviews"]) == 0
+
+
+@pytest.mark.django_db
+def test_view_interview_list_csv_security(client, curator, settings,
+                                          assert_login_redirect,
+                                          lms_resolver):
+    url = reverse("admission:interviews:csv_list")
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, CuratorOnlyMixin)
+    assert_login_redirect(url, method='get')
+
+    interviewer = InterviewerFactory()
+    branch_spb = Branch.objects.get(code=Branches.SPB, site_id=settings.SITE_ID)
+    campaign = CampaignFactory(current=True, branch=branch_spb)
+    today_local_spb = now_local(branch_spb.get_timezone()).date()
+    InterviewFactory(interviewers=[interviewer],
+                     date=today_local_spb,
+                     section=InterviewSections.ALL_IN_ONE,
+                     status=Interview.COMPLETED,
+                     applicant__status=Applicant.INTERVIEW_COMPLETED,
+                     applicant__campaign=campaign)
+    client.login(interviewer)
+    assert_login_redirect(url, method='get')
+
+    client.login(curator)
+    url = f'{reverse("admission:interviews:csv_list")}' \
+          f'?campaign={campaign.pk}' \
+          f'&date_from={today_local_spb.strftime("%d.%m.%Y")}' \
+          f'&date_to={today_local_spb.strftime("%d.%m.%Y")}'
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_view_interview_list_csv(client, curator, settings):
+    curator.branch = Branch.objects.get(code=Branches.SPB,
+                                        site_id=settings.SITE_ID)
+    curator.save()
+    client.login(curator)
+    interviewer = InterviewerFactory()
+    branch_spb = Branch.objects.get(code=Branches.SPB, site_id=settings.SITE_ID)
+    campaign = CampaignFactory(current=True, branch=branch_spb)
+    today_local_spb = now_local(branch_spb.get_timezone()).date()
+    interview1, interview2, interview3 = InterviewFactory.create_batch(3,
+                                                                       interviewers=[interviewer],
+                                                                       date=today_local_spb,
+                                                                       section=InterviewSections.ALL_IN_ONE,
+                                                                       status=Interview.COMPLETED,
+                                                                       applicant__status=Applicant.INTERVIEW_COMPLETED,
+                                                                       applicant__campaign=campaign)
+    interview2.date += datetime.timedelta(hours=23, minutes=59, seconds=59)
+    interview2.save()
+    interview3.date += datetime.timedelta(days=1)
+    interview3.save()
+    url = f'{reverse("admission:interviews:csv_list")}' \
+          f'?campaign={campaign.pk}' \
+          f'&date_from={today_local_spb.strftime("%d.%m.%Y")}' \
+          f'&date_to={today_local_spb.strftime("%d.%m.%Y")}'
+    response = client.get(url)
+    status_log_csv = response.content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv))]
+    headers = ['date', 'time (Europe/Moscow)', 'applicant_name', 'interviewer_name']
+    assert len(data) == 3
+    assert data[0] == headers
+    assert data[1] == ['05.07.2022', '03:00', 'Surname 000 Name 000 Patronymic 000', 'Petrov001 Ivan001']
+    assert data[2] == ['06.07.2022', '02:59', 'Surname 001 Name 001 Patronymic 001', 'Petrov001 Ivan001']
+    url = f'{reverse("admission:interviews:csv_list")}' \
+          f'?campaign={campaign.pk}' \
+          f'&date_from={(today_local_spb + datetime.timedelta(days=1)).strftime("%d.%m.%Y")}' \
+          f'&date_to={(today_local_spb + datetime.timedelta(days=1)).strftime("%d.%m.%Y")}'
+    response = client.get(url)
+    status_log_csv = response.content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv))]
+    assert len(data) == 2
+    assert data[0] == headers
+    assert data[1] == ['06.07.2022', '03:00', 'Surname 002 Name 002 Patronymic 002', 'Petrov001 Ivan001']
+
 
 @pytest.mark.django_db
 def test_interview_invitations_create_view(client, settings):

@@ -208,6 +208,7 @@ class InterviewsCuratorFilterForm(forms.Form):
                 Div('date', css_class="col-xs-4"),
                 Div(Submit('', _('Filter'),
                            css_class="btn-block -inline-submit"),
+                    Submit('download_csv', 'Скачать', css_class="btn-block -inline-primary"),
                     css_class="col-xs-2"),
             ),
             Row(

@@ -1,6 +1,8 @@
+import csv
 import uuid
+import zoneinfo
 from collections import Counter
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import Any, Dict, Optional
 from urllib import parse
 
@@ -19,10 +21,10 @@ from django.db import IntegrityError, transaction
 from django.db.models import Avg, Case, Count, Prefetch, Q, Value, When
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
-from django.http import HttpResponseNotFound, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseNotFound, HttpResponseRedirect, JsonResponse, HttpResponse
 from django.http.response import Http404, HttpResponseForbidden
 from django.middleware.csrf import get_token
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse as django_reverse
 from django.utils import formats, timezone
 from django.utils.translation import gettext_lazy as _
@@ -611,6 +613,14 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             }, doseq=True)
             url = "{}?{}".format(reverse("admission:interviews:list"), params)
             return HttpResponseRedirect(redirect_to=url)
+        if 'download_csv' in request.GET:
+            campaign = request.GET.get('campaign')
+            date_from = request.GET.get('date_from')
+            date_to = request.GET.get('date_to')
+            return redirect(reverse('admission:interviews:csv_list') +
+                            f"?campaign={campaign}"
+                            f"&date_from={date_from}"
+                            f"&date_to={date_to}")
         return super().get(request, *args, **kwargs)
 
     def get_filterset_class(self):
@@ -670,6 +680,43 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             q = q.filter(applicant__campaign_id__in=current_campaigns,
                          interviewers=self.request.user)
         return q
+
+
+class InterviewListCSVView(CuratorOnlyMixin, generic.base.View):
+    def get(self, request, *args, **kwargs):
+        date_from = datetime.strptime(request.GET.get('date_from'), '%d.%m.%Y')
+        date_to = datetime.strptime(request.GET.get('date_to'), '%d.%m.%Y')
+        campaign = int(request.GET.get('campaign'))
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        filename = f"interviews_{date_from.strftime('%d.%m.%Y')}_{date_to.strftime('%d.%m.%Y')}.csv"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        writer = csv.writer(response)
+        time_zone = zoneinfo.ZoneInfo('Europe/Moscow')
+        if self.request.user.time_zone:
+            time_zone = self.request.user.time_zone
+        headers = [
+            "date",
+            f"time ({time_zone})",
+            "applicant_name",
+            "interviewer_name",
+        ]
+        writer.writerow(headers)
+        interviews = (Interview.objects
+                      .select_related('applicant')
+                      .prefetch_related('interviewers')
+                      .filter(applicant__campaign=campaign,
+                              date__date__gte=date_from.strftime("%Y-%m-%d"),
+                              date__date__lte=date_to.strftime("%Y-%m-%d")))
+        for interview in interviews:
+            dt = interview.date.astimezone(time_zone)
+            writer.writerow([
+                dt.date().strftime("%d.%m.%Y"),
+                dt.time().strftime("%H:%M"),
+                interview.applicant.full_name,
+                ', '.join(map(lambda u: u.get_full_name(last_name_first=True),
+                              interview.interviewers.all()))
+            ])
+        return response
 
 
 class InterviewDetailView(InterviewerOnlyMixin, generic.TemplateView):
