@@ -706,7 +706,8 @@ class InterviewListCSVView(CuratorOnlyMixin, generic.base.View):
                       .prefetch_related('interviewers')
                       .filter(applicant__campaign=campaign,
                               date__date__gte=date_from.strftime("%Y-%m-%d"),
-                              date__date__lte=date_to.strftime("%Y-%m-%d")))
+                              date__date__lte=date_to.strftime("%Y-%m-%d"))
+                      .order_by('date'))
         for interview in interviews:
             dt = interview.date.astimezone(time_zone)
             writer.writerow([
