@@ -157,20 +157,22 @@ def test_view_interview_list_csv(client, curator, settings):
     status_log_csv = response.content.decode('utf-8')
     data = [s for s in csv.reader(io.StringIO(status_log_csv))]
     headers = ['date', 'time (Europe/Moscow)', 'applicant_name', 'interviewer_name']
+    today = today_local_spb.strftime("%d.%m.%Y")
+    tomorrow = (today_local_spb + datetime.timedelta(days=1)).strftime("%d.%m.%Y")
     assert len(data) == 3
     assert data[0] == headers
-    assert data[1] == ['05.07.2022', '03:00', 'Surname 000 Name 000 Patronymic 000', 'Petrov001 Ivan001']
-    assert data[2] == ['06.07.2022', '02:59', 'Surname 001 Name 001 Patronymic 001', 'Petrov001 Ivan001']
+    assert data[1][:2] == [today, '03:00']
+    assert data[2][:2] == [tomorrow, '02:59']
     url = f'{reverse("admission:interviews:csv_list")}' \
           f'?campaign={campaign.pk}' \
-          f'&date_from={(today_local_spb + datetime.timedelta(days=1)).strftime("%d.%m.%Y")}' \
-          f'&date_to={(today_local_spb + datetime.timedelta(days=1)).strftime("%d.%m.%Y")}'
+          f'&date_from={tomorrow}' \
+          f'&date_to={tomorrow}'
     response = client.get(url)
     status_log_csv = response.content.decode('utf-8')
     data = [s for s in csv.reader(io.StringIO(status_log_csv))]
     assert len(data) == 2
     assert data[0] == headers
-    assert data[1] == ['06.07.2022', '03:00', 'Surname 002 Name 002 Patronymic 002', 'Petrov001 Ivan001']
+    assert data[1][:2] == [tomorrow, '03:00']
 
 
 @pytest.mark.django_db
