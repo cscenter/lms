@@ -1,4 +1,4 @@
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_delete, post_save, pre_delete
 from django.dispatch import receiver
 
 from admission.constants import InterviewSections
@@ -55,8 +55,8 @@ def __sync_applicant_status(interview):
 
 
 # TODO: add tests
-@receiver(post_delete, sender=Interview)
-def post_delete_interview(sender, instance, *args, **kwargs):
+@receiver(pre_delete, sender=Interview)
+def pre_delete_interview(sender, instance, *args, **kwargs):
     interview = instance
     applicant = interview.applicant
     (Applicant.objects
