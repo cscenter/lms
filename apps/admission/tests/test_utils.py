@@ -1,12 +1,13 @@
 import datetime
 
 import pytest
+from django.utils.timezone import now
 from post_office.models import STATUS as EMAIL_STATUS
 from post_office.models import Email, EmailTemplate
 
 from admission.constants import INVITATION_EXPIRED_IN_HOURS, InterviewSections
-from admission.models import Interview, InterviewInvitation
-from admission.services import create_invitation
+from admission.models import Interview, InterviewInvitation, InterviewSlot
+from admission.services import create_invitation, EmailQueueService
 from admission.tests.factories import (
     ApplicantFactory, CommentFactory, InterviewerFactory, InterviewFactory,
     InterviewStreamFactory
@@ -127,3 +128,39 @@ def test_generate_interview_feedback_email():
     interview.refresh_from_db()
     assert interview.status == Interview.COMPLETED
     assert Email.objects.count() == 1
+
+
+@pytest.mark.django_db
+def test_remove_interview_reminder_email():
+    email_template, _ = EmailTemplate.objects.update_or_create(name='interview-reminder-template')
+    date = (now() + datetime.timedelta(days=2)).date()
+    stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
+                                    end_at=datetime.time(15, 0),
+                                    duration=30,
+                                    section=InterviewSections.ALL_IN_ONE,
+                                    date=date,
+                                    with_assignments=False,
+                                    campaign__current=True)
+    slot1, slot2 = InterviewSlot.objects.filter(stream=stream)
+    interview1 = InterviewFactory(slot=slot1,
+                                  status=Interview.APPROVED,
+                                  section=InterviewSections.MATH,
+                                  applicant__campaign__branch__code=Branches.SPB,
+                                  applicant__campaign__template_interview_feedback=email_template)
+    applicant = interview1.applicant
+    interview2 = InterviewFactory(slot=slot2,
+                                  applicant=applicant,
+                                  status=Interview.APPROVED,
+                                  section=InterviewSections.PROGRAMMING,
+                                  applicant__campaign__branch__code=Branches.SPB,
+                                  applicant__campaign__template_interview_feedback=email_template)
+    slot1.save()
+    slot2.save()
+    EmailQueueService.generate_interview_reminder(interview1, stream)
+    EmailQueueService.generate_interview_reminder(interview2, stream)
+    assert Email.objects.count() == 2
+
+    interview1.delete()
+    emails = Email.objects.all()
+    assert emails.count() == 1
+    assert emails[0].context['SECTION'] == InterviewSections.get_choice(InterviewSections.PROGRAMMING).label

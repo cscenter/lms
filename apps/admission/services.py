@@ -602,12 +602,24 @@ class EmailQueueService:
                  .filter(interview=interview)
                  .select_related('stream', 'stream__interview_format'))
         for slot in slots:
+            campaign = interview.applicant.campaign
             interview_format = slot.stream.interview_format
+            stream = slot.stream
+            meeting_at = get_meeting_time(interview.date_local(), stream)
+            expected_context_json = {
+                "BRANCH": campaign.branch.name,
+                "SECTION": interview.get_section_display(),
+                "DATE": meeting_at.strftime(DATE_FORMAT_RU),
+                "TIME": meeting_at.strftime("%H:%M"),
+                "DIRECTIONS": stream.venue.directions
+            }
             (Email.objects
              .filter(template_id=interview_format.reminder_template_id,
-                     to=interview.applicant.email)
+                     to=interview.applicant.email,
+                     context=expected_context_json)
              .exclude(status=EMAIL_STATUS.sent)
              .delete())
+
 
     @staticmethod
     def generate_interview_feedback_email(interview: Interview) -> None:
