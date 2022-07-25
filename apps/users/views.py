@@ -54,7 +54,8 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
                                 .select_related('course',
                                                 'course__main_branch',
                                                 'course__semester',
-                                                'course__meta_course',)
+                                                'course__meta_course',
+                                                'course__main_branch__site__site_configuration')
                                 .order_by("course"))
         shad_courses_queryset = (SHADCourseRecord.objects
                                  .select_related("semester"))

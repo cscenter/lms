@@ -15,7 +15,7 @@
           </li>
         {% endif %}
       </ul>
-
+      {% with is_secure = request.is_secure() %}
       <div class="tab-content">
         <div class="tab-pane active" id="current" role="tabpanel">
           {% if ongoing_enrolled or ongoing_rest %}
@@ -30,11 +30,13 @@
               {% for course in ongoing_enrolled %}
                 <tr class="{{ "unread" if course.has_unread() else "noop" }}">
                   <td>
-                    <a href="{{ course.get_absolute_url() }}" class="title">{{ course.meta_course.name }}</a>
+                    {% with enrollment = enrollments[course.pk] %}
+                    <a href="{{ course.build_absolute_uri(site=enrollment.student_profile.site, is_secure=is_secure) }}" class="title">
+                      {{ course.meta_course.name }}
+                    </a>
                     {%- if request.site.pk != course.main_branch.site_id and course.is_club_course -%}
                       <span>, курс CS клуба</span>{% endif %}
                     &nbsp;&nbsp;
-                    {% with enrollment = enrollments[course.pk] %}
                       <span class="badge assignment-status {{ course.grading_system.css_class }} {{ enrollment.grade }}">
                         {{ enrollment.grade_honest }}
                       </span>
@@ -104,17 +106,19 @@
               <tbody>
               {% for course in archive %}
                 <tr class="{{ "unread" if course.has_unread() else "noop" }}">
+                  {% with enrollment = enrollments[course.pk] %}
                   <td>
-                    <a href="{{ course.get_absolute_url() }}">{{ course.meta_course.name }}</a>
+                    <a href="{{ course.build_absolute_uri(site=enrollment.student_profile.site, is_secure=is_secure) }}">
+                      {{ course.meta_course.name }}
+                    </a>
                   </td>
                   <td>
-                    {% with enrollment = enrollments[course.pk] %}
                       <span class="badge assignment-status {{ course.grading_system.css_class }} {{ enrollment.grade }}">
                       {{ enrollment.grade_honest }}
                     </span>
-                    {% endwith %}
                   </td>
                   <td>{{ course.semester }}</td>
+                  {% endwith %}
                 </tr>
               {% endfor %}
               </tbody>
@@ -122,6 +126,7 @@
           </div>
         {% endif %}
       </div>
+    {% endwith %}
     </div>
   </div>
 {% endblock content %}

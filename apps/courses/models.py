@@ -4,6 +4,7 @@ from typing import List, NamedTuple, Optional
 
 import pytz
 from bitfield import BitField
+from django.contrib.sites.models import Site
 from djchoices import C, DjangoChoices
 from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
@@ -28,6 +29,7 @@ from core.timezone import TimezoneAwareMixin, now_local
 from core.timezone.fields import TimezoneAwareDateTimeField
 from core.timezone.typing import Timezone
 from core.urls import reverse
+from django.urls import reverse as django_reverse
 from core.utils import get_youtube_video_id, hashids, instance_memoize
 from courses.constants import (
     AssigneeMode, AssignmentFormat, AssignmentStatus, MaterialVisibilityTypes,
@@ -468,6 +470,18 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
             route_name = 'courses:course_detail_with_active_tab'
             url_kwargs = {**self.url_kwargs, "tab": tab}
         return reverse(route_name, kwargs=url_kwargs, **options)
+
+    def build_absolute_uri(self, site: Optional[Site] = None, is_secure: bool = True):
+        # Use django_reverse because get_absolute_url returns url with scheme and domain on CSC site.
+        url = django_reverse('courses:course_detail', kwargs=self.url_kwargs,
+                             urlconf='lms.urls')
+        scheme = f"http{'s' if is_secure else ''}://"
+        if not isinstance(site, Site):
+            site = self.main_branch.site
+        lms_domain = site.site_configuration.lms_domain
+        if not isinstance(lms_domain, str):
+            lms_domain = self.main_branch.site.domain
+        return scheme + lms_domain + url
 
     def get_url_for_tab(self, active_tab):
         kwargs = {**self.url_kwargs, "tab": active_tab}

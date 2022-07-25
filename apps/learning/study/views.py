@@ -282,8 +282,9 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
         auth_user = self.request.user
         student_enrollments = (Enrollment.active
                                .filter(student_id=auth_user)
-                               .select_related("course")
-                               .only('id', 'grade', 'course_id', 'course__grading_type'))
+                               .select_related("course", "student_profile__site__site_configuration")
+                               .only('id', 'grade', 'course_id', 'course__grading_type',
+                                     "student_profile__site__site_configuration"))
         student_enrollments = {e.course_id: e for e in student_enrollments}
         # Get current term course offerings available in student branch
         # and all courses that student enrolled in
