@@ -1,3 +1,4 @@
+import copy
 import datetime
 import re
 
@@ -8,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Prefetch
 
 from core.models import Branch
-from core.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory, SiteFactory, SiteConfigurationFactory
 from core.tests.settings import ANOTHER_DOMAIN, TEST_DOMAIN
 from courses.constants import (
     AssignmentFormat, AssignmentStatus, MaterialVisibilityTypes, SemesterTypes
@@ -333,3 +334,33 @@ def test_course_is_actual_teacher(teacher_role):
         assert is_teacher
     else:
         assert not is_teacher  # spectator is not actual teacher
+
+
+@pytest.mark.parametrize("site_domain,lms_subdomain",
+                         [('example.com', 'my'),
+                          ('lk.example.com', None)])
+@pytest.mark.django_db
+def test_course_build_absolute_uri(site_domain, lms_subdomain, settings):
+    site = SiteFactory(domain=site_domain)
+    lms_domain = site_domain if not lms_subdomain else f"{lms_subdomain}.{site_domain}"
+    SiteConfigurationFactory(site=site, lms_domain=lms_domain)
+
+    another_site = SiteFactory(domain='random.site')
+    SiteConfigurationFactory(site=another_site, lms_domain='your.random.site')
+    branch = BranchFactory(site__domain=site_domain)
+    course = CourseFactory(main_branch=branch)
+
+    assert course.build_absolute_uri().startswith('https://')
+    url = course.build_absolute_uri(is_secure=False)
+    assert url.startswith('http://')
+
+    subdomain_urlconfs = copy.deepcopy(settings.SUBDOMAIN_URLCONFS)
+    lms_urlconf = subdomain_urlconfs[settings.LMS_SUBDOMAIN]
+    subdomain_urlconfs[lms_subdomain] = lms_urlconf
+    settings.SITE_ID = site.pk
+    settings.LMS_SUBDOMAIN = lms_subdomain
+    settings.SUBDOMAIN_URLCONFS = subdomain_urlconfs
+    assert url == course.get_absolute_url()
+
+    url = course.build_absolute_uri(site=another_site)
+    assert url.startswith('https://your.random.site/')
