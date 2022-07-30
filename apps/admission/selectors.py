@@ -62,7 +62,8 @@ def get_acceptance(*, year: int, access_key: str,
                 .filter(*filters,
                         access_key=access_key,
                         applicant__campaign__year=year)
-                .select_related('applicant__campaign__branch')
+                .select_related('applicant__campaign__branch',
+                                'applicant__university')
                 .get())
     except Acceptance.DoesNotExist:
         return None

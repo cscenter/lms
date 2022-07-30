@@ -9,7 +9,7 @@ from django.utils import timezone
 from admission.tests.factories import ApplicantFactory, CampaignFactory
 from application.api.serializers import ApplicationFormSerializer
 from application.views import SESSION_LOGIN_KEY
-from core.tests.factories import BranchFactory, UniversityFactory
+from core.tests.factories import BranchFactory, LegacyUniversityFactory
 from core.timezone import now_local
 from core.urls import reverse
 from learning.settings import Branches
@@ -76,7 +76,7 @@ def test_application_form_preferred_study_programs(client):
     campaign = CampaignFactory(current=True, branch__code=Branches.SPB,
                                application_starts_at=today - timedelta(days=2),
                                application_ends_at=today + timedelta(days=2))
-    university = UniversityFactory()
+    university = LegacyUniversityFactory()
     form_data = build_application_form(campaign=campaign, university=university)
     if "preferred_study_programs" in form_data:
         del form_data["preferred_study_programs"]
@@ -99,7 +99,7 @@ def test_application_form_living_place(client):
                                branch=branch,
                                application_starts_at=today - timedelta(days=2),
                                application_ends_at=today + timedelta(days=2))
-    university = UniversityFactory()
+    university = LegacyUniversityFactory()
     form_data = build_application_form(campaign=campaign, university=university)
     if "living_place" in form_data:
         del form_data["living_place"]

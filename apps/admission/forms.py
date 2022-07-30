@@ -363,7 +363,6 @@ class ConfirmationForm(forms.ModelForm):
         widget=forms.TextInput(attrs={"placeholder": "Код подтверждения"}))
     birth_date = forms.DateField(label=_("Birthday"), required=True)
     # Student Profile data
-    university = forms.CharField(label=_("University"), required=False)
 
     class Meta:
         model = User
@@ -376,7 +375,6 @@ class ConfirmationForm(forms.ModelForm):
             "photo",
             "phone",
             "workplace",
-            "university",
             "private_contacts",
             # Read-only fields (some of them are not a part of User model)
             "yandex_login",
@@ -397,7 +395,6 @@ class ConfirmationForm(forms.ModelForm):
             "stepic_id": applicant.stepic_id,
             "github_login": applicant.github_login,
             "workplace": applicant.workplace,
-            "university": applicant.get_university_display(),
             "birth_date": applicant.birth_date,
         }
         kwargs["initial"] = initial
@@ -428,7 +425,7 @@ class ConfirmationForm(forms.ModelForm):
     def save(self, commit=True) -> User:
         account_data = AccountData.from_dict(self.cleaned_data)
         student_profile_data = StudentProfileData(
-            university=self.cleaned_data['university']
+            university=self.acceptance.applicant.university.name
         )
         with transaction.atomic():
             user = create_student(self.acceptance, account_data, student_profile_data)

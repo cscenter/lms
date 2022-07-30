@@ -99,7 +99,7 @@ class LocationFactory(factory.django.DjangoModelFactory):
     description = factory.Sequence(lambda n: "location for tests %03d" % n)
 
 
-class UniversityFactory(factory.django.DjangoModelFactory):
+class LegacyUniversityFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = University
 
