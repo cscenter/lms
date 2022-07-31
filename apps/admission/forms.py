@@ -425,7 +425,7 @@ class ConfirmationForm(forms.ModelForm):
     def save(self, commit=True) -> User:
         account_data = AccountData.from_dict(self.cleaned_data)
         student_profile_data = StudentProfileData(
-            university=self.acceptance.applicant.university.name
+            university=self.acceptance.applicant.get_university_display()
         )
         with transaction.atomic():
             user = create_student(self.acceptance, account_data, student_profile_data)
