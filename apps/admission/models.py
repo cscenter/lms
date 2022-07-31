@@ -568,7 +568,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
             return None
 
     def get_university_display(self) -> Optional[str]:
-        if self.university:
+        if self.university is not None:
             return self.university.name
         elif self.university_other:
             return self.university_other
