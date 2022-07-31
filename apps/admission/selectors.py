@@ -63,7 +63,8 @@ def get_acceptance(*, year: int, access_key: str,
                         access_key=access_key,
                         applicant__campaign__year=year)
                 .select_related('applicant__campaign__branch',
-                                'applicant__university')
+                                'applicant__university',
+                                'applicant__university_legacy')
                 .get())
     except Acceptance.DoesNotExist:
         return None

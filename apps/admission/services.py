@@ -398,7 +398,7 @@ def create_student(acceptance: Acceptance, account_data: AccountData,
     user.save()
     student_data = {
         "level_of_education_on_admission": applicant.level_of_education,
-        "university": applicant.university.name,
+        "university": applicant.get_university_display(),
         **asdict(student_profile_data)
     }
     get_or_create_student_profile(applicant.campaign, user, data=student_data)
@@ -443,7 +443,7 @@ def create_student_from_applicant(applicant: Applicant):
     student_data = {
         "year_of_curriculum": applicant.campaign.year,
         "level_of_education_on_admission": applicant.level_of_education,
-        "university": applicant.university.name,
+        "university": applicant.get_university_display(),
     }
     get_or_create_student_profile(applicant.campaign, user, data=student_data)
     return user
