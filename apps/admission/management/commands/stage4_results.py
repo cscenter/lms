@@ -57,7 +57,10 @@ class Command(EmailTemplateMixin, CustomizeQueryMixin,
         self.stdout.write(f"Invite to create student profile [statuses]: {' '.join(invite_to_registration)}")
 
         manager = self.get_manager(Applicant, options)
-        applicants = manager.filter(campaign_id=campaign.pk)
+        applicants = manager.filter(campaign_id=campaign.pk,
+                                    status__in=[ApplicantStatuses.ACCEPT,
+                                                ApplicantStatuses.REJECTED_BY_INTERVIEW,
+                                                ApplicantStatuses.REJECTED_BY_INTERVIEW_WITH_BONUS])
 
         statuses = applicants.values_list('status', flat=True).distinct()
         self.stdout.write(f"Participants with final statuses were found:")
