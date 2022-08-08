@@ -46,7 +46,7 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('birth_date', 'phone', 'workplace', 'bio', 'time_zone',
-                  'yandex_login', 'github_login', 'stepic_id', 'codeforces_login',
+                  'telegram_username', 'yandex_login', 'github_login', 'stepic_id', 'codeforces_login',
                   'private_contacts')
         widgets = {
             'bio': UbereditorWidget,
@@ -61,6 +61,7 @@ class UserProfileForm(forms.ModelForm):
                 "{}; {}"
                 .format(LATEX_MARKDOWN_ENABLED,
                         _("will be shown only to logged-in users"))),
+            'telegram_username': '@&lt;<b>username</b>&gt; в настройках профиля Telegram',
             'yandex_login': _("<b>YANDEX.ID</b>@yandex.ru"),
             'github_login': "github.com/<b>GITHUB-ID</b>",
             'stepic_id': _("stepik.org/users/<b>USER_ID</b>"),
