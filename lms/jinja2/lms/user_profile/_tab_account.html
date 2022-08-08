@@ -126,6 +126,15 @@
         </tr>
       {% endif %}
       <tr>
+        <td>Telegram</td>
+        <td>{% if profile_user.telegram_username %}
+          <a href="https://t.me/{{ profile_user.telegram_username }}" target="_blank">{{ profile_user.telegram_username }}</a>
+        {% else %}
+          —
+        {% endif %}
+        </td>
+      </tr>
+      <tr>
         <td>Yandex</td>
         <td>{{ profile_user.yandex_login|default("—", True) }}</td>
       </tr>

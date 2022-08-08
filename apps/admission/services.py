@@ -323,6 +323,7 @@ class AccountData:
     gender: str
     photo: UploadedFile
     phone: str
+    telegram_username: str
     workplace: str
     private_contacts: str
     codeforces_login: str

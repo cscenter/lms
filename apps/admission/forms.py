@@ -362,6 +362,12 @@ class ConfirmationForm(forms.ModelForm):
         required=True,
         widget=forms.TextInput(attrs={"placeholder": "Код подтверждения"}))
     birth_date = forms.DateField(label=_("Birthday"), required=True)
+    telegram_username = forms.CharField(
+        label="Имя пользователя в Telegram",
+        help_text="@&lt;<b>username</b>&gt; в настройках профиля Telegram."
+                  "<br>Поставьте прочерк «-», если аккаунт отсутствует.",
+        required=True
+    )
     # Student Profile data
 
     class Meta:
@@ -374,6 +380,7 @@ class ConfirmationForm(forms.ModelForm):
             "birth_date",
             "photo",
             "phone",
+            "telegram_username",
             "workplace",
             "private_contacts",
             # Read-only fields (some of them are not a part of User model)
@@ -411,6 +418,11 @@ class ConfirmationForm(forms.ModelForm):
         code = self.cleaned_data.get('authorization_code')
         if code != self.acceptance.confirmation_code:
             raise ValidationError(_("Authorization code is not valid"))
+
+    def clean_telegram_username(self):
+        telegram_username = self.cleaned_data.get('telegram_username')
+        telegram_username = telegram_username.replace('@', '')
+        return "" if len(telegram_username) == 1 else telegram_username
 
     def clean(self):
         email = self.cleaned_data.get('email')

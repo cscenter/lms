@@ -140,6 +140,40 @@ def test_github_login_validation():
 
 
 @pytest.mark.django_db
+def test_telegram_username_validation(settings):
+    user = UserFactory.build()
+    with pytest.raises(ValidationError):
+        # too short
+        user.telegram_username = "user"
+        user.clean_fields()
+    with pytest.raises(ValidationError):
+        # leading symbol should be a-zA-Z
+        user.telegram_username = "1user"
+        user.clean_fields()
+    with pytest.raises(ValidationError):
+        # double underscores prohibited
+        user.telegram_username = "us__er"
+        user.clean_fields()
+    with pytest.raises(ValidationError):
+        # should end with a-zA-Z0-9
+        user.telegram_username = "u5er_"
+        user.clean_fields()
+    with pytest.raises(ValidationError):
+        # hyphens are prohibited
+        user.telegram_username = "u5-er"
+        user.clean_fields()
+    # blank = True
+    user.telegram_username = ""
+    user.clean_fields()
+    user.telegram_username = "u5_er"
+    user.clean_fields()
+    user.telegram_username = "u1234"
+    user.clean_fields()
+    user.telegram_username = "u_s_e_r"
+    user.clean_fields()
+
+
+@pytest.mark.django_db
 def test_student_profile_year_of_admission():
     branch = BranchFactory(established=2011)
     with pytest.raises(ValidationError):

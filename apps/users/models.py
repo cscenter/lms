@@ -59,6 +59,10 @@ YANDEX_DOMAINS = ["yandex.ru", "narod.ru", "yandex.ua",
 
 logger = logging.getLogger(__name__)
 
+# Telegram username may only contain alphanumeric characters or
+# single underscores. Should begin only with letter and end with alphanumeric.
+TELEGRAM_USERNAME_VALIDATOR = RegexValidator(regex="^(?!.*__.*)[a-z A-Z]\w{3,30}[a-zA-Z0-9]$")
+
 # Github username may only contain alphanumeric characters or
 # single hyphens, and cannot begin or end with a hyphen
 GITHUB_LOGIN_VALIDATOR = RegexValidator(regex="^[a-zA-Z0-9](-?[a-zA-Z0-9])*$")
@@ -322,6 +326,11 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         _("Github Login"),
         max_length=80,
         validators=[GITHUB_LOGIN_VALIDATOR],
+        blank=True)
+    telegram_username = models.CharField(
+        _("Telegram"),
+        validators=[TELEGRAM_USERNAME_VALIDATOR],
+        max_length=32,
         blank=True)
     codeforces_login = models.CharField(
         _("Codeforces Handle"),

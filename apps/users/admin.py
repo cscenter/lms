@@ -121,7 +121,8 @@ class UserAdmin(_UserAdmin):
                        'social_networks', 'time_zone']}),
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        ]}),
-        (_('External services'), {'fields': ['yandex_login', 'stepic_id',
+        (_('External services'), {'fields': ['telegram_username',
+                                             'yandex_login', 'stepic_id',
                                              'github_login', 'anytask_url',
                                              'codeforces_login']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
