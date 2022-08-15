@@ -179,7 +179,7 @@
         {% endif %}
 
         <h5 class="assignment">{% trans %}Grade{% endtrans %}</h5>
-        <span class="nowrap badge assignment-status">{{ a_s.get_status_display() }} ({{ a_s.get_score_verbose_display() }})</span>
+        <span class="nowrap badge assignment-status {{ a_s.status_css_class }}">{{ a_s.get_status_display() }} ({{ a_s.get_score_verbose_display() }})</span>
 
         {% if show_score_audit_log %}
           <div class="mt-5">
