@@ -506,26 +506,6 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
                         DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'assignment'
 
-    class States(DjangoChoices):
-        NOT_SUBMITTED = ChoiceItem(
-            "not_submitted", _("Assignment|not submitted"),
-            abbr="—", css_class="not-submitted")
-        NOT_CHECKED = ChoiceItem(
-            "not_checked", _("Assignment|not checked"),
-            abbr="…", css_class="not-checked")
-        UNSATISFACTORY = ChoiceItem(
-            "unsatisfactory", _("Assignment|unsatisfactory"),
-            abbr="2", css_class="unsatisfactory")
-        CREDIT = ChoiceItem(
-            "pass", _("Assignment|pass"),
-            abbr="3", css_class="pass")
-        GOOD = ChoiceItem(
-            "good", _("Assignment|good"),
-            abbr="4", css_class="good")
-        EXCELLENT = ChoiceItem(
-            "excellent", _("Assignment|excellent"),
-            abbr="5", css_class="excellent")
-
     assignment = models.ForeignKey(
         Assignment,
         verbose_name=_("StudentAssignment|assignment"),
@@ -687,6 +667,15 @@ class StudentAssignment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel,
             return self.get_score_verbose_display()
         else:
             return AssignmentStatus(self.status).label
+
+    @property
+    def status_css_class(self) -> str:
+        return {
+            AssignmentStatus.NOT_SUBMITTED.value: "not-submitted",
+            AssignmentStatus.ON_CHECKING.value: "on-checking",
+            AssignmentStatus.NEED_FIXES.value: "need-fixes",
+            AssignmentStatus.COMPLETED.value: "completed"
+        }.get(self.status, "")
 
     @property
     def final_score(self) -> Optional[Decimal]:

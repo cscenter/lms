@@ -67,10 +67,10 @@ class AssignmentFormat(DjangoChoices):
 
 class AssignmentStatus(TextChoices):
     # TODO: describe each status
-    NEW = 'new', _("AssignmentStatus|New"),  # TODO: remove after integration
-    NOT_SUBMITTED = 'not_submitted', _("AssignmentStatus|Not submitted"),
-    ON_CHECKING = 'on_checking', _("AssignmentStatus|On checking"),
-    NEED_FIXES = 'need_fixes', _("AssignmentStatus|Need fixes"),
+    NEW = 'new', _("AssignmentStatus|New")  # TODO: remove after integration
+    NOT_SUBMITTED = 'not_submitted', _("AssignmentStatus|Not submitted")
+    ON_CHECKING = 'on_checking', _("AssignmentStatus|On checking")
+    NEED_FIXES = 'need_fixes', _("AssignmentStatus|Need fixes")
     COMPLETED = 'completed', _("AssignmentStatus|Completed")
 
 
