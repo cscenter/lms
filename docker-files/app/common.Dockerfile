@@ -5,8 +5,8 @@ COPY Pipfile* /tmp/
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir pipenv \
     && cd /tmp/ \
-    && pipenv requirements --python /usr/local/bin/python > /tmp/requirements-prod.txt \
-    && pipenv requirements --python /usr/local/bin/python --dev-only > /tmp/requirements-dev.txt \
+    && pipenv --python /usr/local/bin/python requirements > /tmp/requirements-prod.txt \
+    && pipenv --python /usr/local/bin/python requirements --dev-only > /tmp/requirements-dev.txt \
     && pip uninstall -y pipenv
 
 FROM python:3.10-slim-buster
