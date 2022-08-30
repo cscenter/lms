@@ -75,6 +75,7 @@ class GradeTypes(DjangoChoices):
     EXCELLENT = C('excellent', _("Excellent"), system=(
         GradingSystems.BASE, GradingSystems.BINARY_PLUS_EXCELLENT
     ), order=14)
+    RE_CREDIT = C('re-credit', _("Enrollment|Re-credit"), system='__all__', order=15)
 
     ONE = C('one', '1', system=(GradingSystems.TEN_POINT,), order=1)
     TWO = C('two', '2', system=(GradingSystems.TEN_POINT,), order=2)
@@ -89,7 +90,7 @@ class GradeTypes(DjangoChoices):
 
     excellent_grades = {EXCELLENT.value, NINE.value, TEN.value}
     good_grades = {GOOD.value, SEVEN.value, EIGHT.value}
-    satisfactory_grades = {CREDIT.value, GOOD.value, EXCELLENT.value,
+    satisfactory_grades = {CREDIT.value, RE_CREDIT.value, GOOD.value, EXCELLENT.value,
                            FOUR.value, FIVE.value, SIX.value, SEVEN.value, EIGHT.value, NINE.value, TEN.value}
     unsatisfactory_grades = {NOT_GRADED.value, UNSATISFACTORY.value,
                              ONE.value, TWO.value, THREE.value}
