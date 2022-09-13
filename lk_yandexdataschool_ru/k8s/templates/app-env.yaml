@@ -128,7 +128,7 @@
       key: AWS_S3_SECRET_ACCESS_KEY
       name: "{{ backend_service_name }}-backend"
 - name: AWS_SES_ACCESS_KEY_ID
-  value: "AKIAJZ44WHPOEURR4TZA"
+  value: "AKIAVZ6EOKZ53EWVXK5K"
 - name: AWS_SES_SECRET_ACCESS_KEY
   valueFrom:
     secretKeyRef:
