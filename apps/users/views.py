@@ -4,6 +4,7 @@ import os
 from collections import OrderedDict
 from typing import Any, Optional
 
+from django.contrib.sites.models import Site
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
@@ -33,6 +34,7 @@ from learning.forms import TestimonialForm
 from learning.icalendar import get_icalendar_links
 from learning.models import Enrollment, StudentAssignment
 from learning.settings import GradeTypes, StudentStatuses
+from learning.utils import grade_to_base_system
 from users.compat import get_graduate_profile as get_graduate_profile_compat
 from users.models import SHADCourseRecord, StudentTypes
 from users.thumbnails import CropboxData, get_user_thumbnail, photo_thumbnail_cropbox
@@ -107,7 +109,8 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             "can_view_library": can_view_library,
             "current_semester": current_semester,
             "can_view_student_profiles": can_view_student_profiles,
-            "can_view_assignments": can_view_assignments
+            "can_view_assignments": can_view_assignments,
+            "is_yds_site": self.request.site.pk == settings.YDS_SITE_ID
         }
         if is_certificates_of_participation_enabled:
             certificates = (CertificateOfParticipation.objects
@@ -271,8 +274,22 @@ class CertificateOfParticipationCreateView(PermissionRequiredMixin,
 class CertificateOfParticipationDetailView(PermissionRequiredMixin,
                                            generic.DetailView):
     pk_url_kwarg = 'reference_pk'
-    template_name = "users/reference_detail.html"
+    template_name = "users/reference_csc_detail.html"
     permission_required = ViewCertificateOfParticipation.name
+
+    ALLOWED_TEMPLATE_NAMES = [
+        'csc',
+        'shad_ru_with_courses',
+        'shad_ru_without_courses',
+        'shad_en_with_courses',
+        'shad_en_graduated'
+    ]
+
+    def get_template_names(self):
+        template_name = self.request.GET.get('style')
+        if template_name not in self.ALLOWED_TEMPLATE_NAMES:
+            template_name = self.ALLOWED_TEMPLATE_NAMES[0]
+        return [f"users/reference_{template_name}_detail.html"]
 
     def get_queryset(self):
         return (CertificateOfParticipation.objects
@@ -282,7 +299,7 @@ class CertificateOfParticipationDetailView(PermissionRequiredMixin,
     def get_context_data(self, **kwargs):
         from learning.reports import ProgressReport
         student_info = (User.objects
-                        .student_progress(exclude_grades=GradeTypes.unsatisfactory_grades)
+                        .student_progress(exclude_grades=[*GradeTypes.unsatisfactory_grades, GradeTypes.RE_CREDIT])
                         .get(pk=self.object.student_profile.user_id))
         courses_qs = (ProgressReport().get_courses_queryset((student_info,)))
         courses = {c.pk: c for c in courses_qs}

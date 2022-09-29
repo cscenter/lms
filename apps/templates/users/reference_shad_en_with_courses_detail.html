@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% load core_tags %}
+
+{% block content %}
+    {% with student=certificate_of_participation.student_profile.user %}
+      <page size="A4" id="reference-yds-page" xmlns="http://www.w3.org/1999/html">
+        <img src="{% static "v1/img/shad_top_reference.png" %}" id="reference-page-header">
+        <div id="reference-yds-page-body">
+          <div class="text-center text-large mb-30"><b>ACADEMIC TRANSCRIPT</b></div>
+          <p class="text-justify">
+            Is given to {{ certificate_of_participation.signature }} in order to confirm that he completed the following courses
+            from Yandex School of Data Analysis<sup>1</sup>:
+          </p>
+            <table class="table table-condensed table-bordered p-0">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>DISCIPLINE</th>
+                  <th>MARK</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for course_id, enrollment in user_enrollments.items %}
+                    <tr>
+                      <td>{{ forloop.counter }}</td>
+                      <td>{{ enrollment.course.meta_course.name_en}}</td>
+                      <td>{{ enrollment.grade_in_base_system|capfirst }}</td>
+                    </tr>
+                {% endfor %}
+                {% for shad in shads %}
+                    <tr>
+                      <td>{{ forloop.counter }}</td>
+                      <td>{{ shad.name }}</td>
+                      <td>{{ shad.grade_display }}</td>
+                    </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div id="reference-yds-page-note">
+                {{ certificate_of_participation.note }}<br>
+            </div>
+        </div>
+        <div id="reference-yds-page-en-curator-signature">
+          <span>
+                  <b style="float: left;">Chief Operating Officer</b>
+                  <b style="float: right;">Esenina Aleksandra</b>
+          </span>
+          <img id="reference-yds-page-stamp" src="{% static "v1/img/stamp-signature-shad.png" %}">
+        </div>
+        <div id="reference-yds-page-en-footer-information">
+            <div class="cursive"></div>
+            <div>
+              <span class="footnote">1</span>
+              <span>
+                Official Site:
+                <a href="https://academy.yandex.com/dataschool/">https://academy.yandex.com/dataschool/</a>
+              </span>
+            </div>
+            <div>
+              <span class="footnote"></span>
+              <span>
+                Information about the courses:
+                <a href="https://academy.yandex.com/dataschool/education">https://academy.yandex.com/dataschool/education</a>
+              </span>
+            </div>
+        </div>
+    </page>
+    {% endwith %}
+{% endblock content %}
