@@ -18,7 +18,7 @@ class Command(BaseCommand):
         # Prevents deleting notifications from the spring term
         # if we are at the beginning of the academic year
         if current_semester.type == SemesterTypes.AUTUMN:
-            past_semester = TermPair(year=current_semester.academic_year - 1,
+            past_semester = TermPair(year=current_semester.academic_year,
                                      type=SemesterTypes.SPRING)
         else:
             past_semester = TermPair(year=current_semester.academic_year,
