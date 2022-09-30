@@ -43,7 +43,7 @@ from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from learning.utils import is_negative_grade
 from lms.utils import PublicRoute
 from notifications.base_models import EmailAddressSuspension
-from study_programs.models import StudyProgram
+from study_programs.models import StudyProgram, AcademicDiscipline
 from users.constants import GenderTypes
 from users.constants import Roles
 from users.constants import Roles as UserRoles
@@ -891,6 +891,10 @@ class StudentProfile(TimeStampedModel):
                     .prefetch_core_courses_groups()
                     .filter(year=self.year_of_curriculum,
                             branch_id=self.branch_id))
+
+    @cached_property
+    def academic_discipline(self) -> AcademicDiscipline:
+        return self.academic_disciplines.first()
 
     @property
     def is_active(self):

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% load core_tags %}
+
+{% block content %}
+    {% with student=certificate_of_participation.student_profile.user %}
+      <page size="A4" id="reference-yds-page" xmlns="http://www.w3.org/1999/html">
+        <img src="{% static "v1/img/shad_top_reference.png" %}" id="reference-page-header">
+        <div id="reference-yds-page-body">
+          <p class="text-justify">
+            Настоящим подтверждаем, что
+            {{ student.get_full_name }} проходит обучение в Школе анализа данных
+            по программе профессиональной переподготовки «{{ certificate_of_participation.student_profile.academic_discipline.name_ru }}».
+          </p>
+          <p class="text-justify">
+            Срок обучения: с 1 сентября {{ certificate_of_participation.student_profile.year_of_admission }} года
+              по 31 мая {{ certificate_of_participation.student_profile.year_of_admission|add:2}} года.</p>
+          <p class="text-justify">{{ certificate_of_participation.note }}</p>
+        </div>
+        <div id="reference-yds-page-ru-curator-signature">
+            <div class="date mb-10">{{ certificate_of_participation.created|date:"d E Y" }}</div>
+            <div class="left">
+                <p>
+                  <b>Куратор</b><br>
+                  <span style="float: left;">По доверенности от 15 августа 2022 г.</span>
+                  <span style="float: right;"><b>Есенина А. И.</b></span>
+                </p>
+            </div>
+            <img id="reference-yds-page-stamp" src="{% static "v1/img/stamp-signature-shad.png" %}">
+        </div>
+    </page>
+    {% endwith %}
+{% endblock content %}

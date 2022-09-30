@@ -309,6 +309,10 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
     is_published_in_video = models.BooleanField(
         _("Published in video section"),
         default=False)
+    is_visible_in_certificates = models.BooleanField(
+        _("Do we see this course in certificates and diplomas?"),
+        default=True
+    )
     main_branch = models.ForeignKey(Branch,
                                     verbose_name=_("Main Branch"),
                                     related_name="courses",

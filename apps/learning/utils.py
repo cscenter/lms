@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple
 
 from django.utils.translation import gettext_lazy as _
 
-from learning.settings import GradeTypes
+from learning.settings import GradeTypes, GradingSystems
 
 
 def grade_to_mark(grade: str) -> int:
@@ -35,6 +35,19 @@ def grade_to_mark(grade: str) -> int:
     elif grade == GradeTypes.TEN:
         return 10
     raise ValueError("Unknown grade type")
+
+
+def grade_to_base_system(grade: str):
+    if grade in GradeTypes.get_grades_for_grading_system(GradingSystems.BASE):
+        return grade
+    elif grade in [*GradeTypes.excellent_grades, GradeTypes.CREDIT]:
+        return GradeTypes.EXCELLENT
+    elif grade in GradeTypes.good_grades:
+        return GradeTypes.GOOD
+    elif grade in [GradeTypes.FOUR, GradeTypes.FIVE, GradeTypes.SIX]:
+        return GradeTypes.CREDIT
+    elif grade in GradeTypes.unsatisfactory_grades:
+        return GradeTypes.UNSATISFACTORY
 
 
 def is_negative_grade(grade) -> bool:
