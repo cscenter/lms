@@ -341,7 +341,7 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         max_length=12,
         help_text=_("Default visibility for class materials."),
         choices=MaterialVisibilityTypes.choices,
-        default=MaterialVisibilityTypes.PARTICIPANTS)
+        default=MaterialVisibilityTypes.COURSE_PARTICIPANTS)
     # TODO: recalculate on deleting course class
     public_videos_count = models.PositiveIntegerField(default=0, editable=False)
     public_slides_count = models.PositiveIntegerField(
