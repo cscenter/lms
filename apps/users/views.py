@@ -4,7 +4,6 @@ import os
 from collections import OrderedDict
 from typing import Any, Optional
 
-from django.contrib.sites.models import Site
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
@@ -34,9 +33,8 @@ from learning.forms import TestimonialForm
 from learning.icalendar import get_icalendar_links
 from learning.models import Enrollment, StudentAssignment
 from learning.settings import GradeTypes, StudentStatuses
-from learning.utils import grade_to_base_system
 from users.compat import get_graduate_profile as get_graduate_profile_compat
-from users.models import SHADCourseRecord, StudentTypes
+from users.models import SHADCourseRecord
 from users.thumbnails import CropboxData, get_user_thumbnail, photo_thumbnail_cropbox
 
 from .forms import CertificateOfParticipationCreateForm, UserProfileForm
@@ -176,6 +174,9 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
                 'passed_courses': passed_courses,
                 'in_current_term': in_current_term
             }
+            if student_profiles:
+                main_profile = student_profiles[0]  # because of profile ordering
+                context['academic_disciplines'] = ", ".join(d.name for d in main_profile.academic_disciplines.all())
         return context
 
 
