@@ -85,6 +85,12 @@
   <div class="accounts">
     <table class="table table-condensed table-striped">
       {% if profile_user.pk == request_user.pk or request_user.is_curator %}
+        {% if academic_disciplines %}
+        <tr>
+          <td>Направление обучения</td>
+          <td>{{ academic_disciplines }}</td>
+        </tr>
+        {% endif %}
         <tr>
           <td>{% trans %}Email{% endtrans %}:</td>
           <td>
