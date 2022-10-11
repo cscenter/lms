@@ -133,3 +133,43 @@ def test_invitation_register_view(client, assert_redirect, settings, mocker):
             site_name=site.name,
             activation_url=abs_url(activation_url),
             language_code=settings.LANGUAGE_CODE)
+
+
+@pytest.mark.django_db
+def test_invitation_view_enrolled_students_log(client, lms_resolver, assert_redirect, settings):
+    future = now() + datetime.timedelta(days=3)
+    current_term = SemesterFactory.create_current(
+        enrollment_period__ends_on=future.date())
+    course_invitation = CourseInvitationFactory(course__semester=current_term)
+    invitation = course_invitation.invitation
+    url = invitation.get_absolute_url()
+    client.get(url)
+    # Anonymous user working
+    assert not invitation.enrolled_students.count()
+
+    user = UserFactory()
+    client.login(user)
+    client.get(url)
+    # User without profile should register profile
+    assert not invitation.enrolled_students.count()
+
+    site = SiteFactory(id=settings.SITE_ID)
+    complete_student_profile(user, site, invitation)
+    response = client.get(url)
+    assert response.status_code == 200
+    # User with completed profile should be added to enrolled_students set
+    assert invitation.enrolled_students.count() == 1
+
+    response = client.get(url)
+    assert response.status_code == 200
+    # There should be no double entry
+    assert invitation.enrolled_students.count() == 1
+
+    user_two = UserFactory()
+    complete_student_profile(user_two, site, invitation)
+    client.login(user_two)
+    response = client.get(url)
+    assert response.status_code == 200
+    profile_one = user.get_student_profile()
+    profile_two = user_two.get_student_profile()
+    assert set(invitation.enrolled_students.all()) == {profile_one, profile_two}

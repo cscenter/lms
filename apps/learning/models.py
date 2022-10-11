@@ -466,6 +466,14 @@ class Invitation(TimeStampedModel):
         through=CourseInvitation,
         verbose_name=_("Courses"))
 
+    enrolled_students = models.ManyToManyField(
+        StudentProfile,
+        verbose_name=_("Enrolled students"),
+        related_name="invitations",
+        help_text=_("Students who took advantage of the invitation"),
+        blank=True
+    )
+
     class Meta:
         verbose_name = _("Invitation")
         verbose_name_plural = _("Invitations")
