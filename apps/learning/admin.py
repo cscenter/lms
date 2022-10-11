@@ -246,7 +246,7 @@ class InvitationAdmin(BaseModelAdmin):
         ('semester', AdminRelatedDropdownFilter),
     ]
     readonly_fields = ('token',)
-    exclude = ('courses',)
+    exclude = ('courses', 'enrolled_students')
 
     @meta(_("Invitation Link"))
     def get_link(self, obj):

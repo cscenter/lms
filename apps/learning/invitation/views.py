@@ -89,6 +89,9 @@ class InvitationView(InvitationURLParamsMixin, TemplateView):
                                   kwargs={"token": self.invitation.token},
                                   subdomain=settings.LMS_SUBDOMAIN)
             return HttpResponseRedirect(redirect_to=redirect_to)
+        # Correct because on this line user already has working profile
+        profile = self.request.user.get_student_profile(request.site)
+        self.invitation.enrolled_students.add(profile)
         context = self.get_context_data()
         return self.render_to_response(context)
 
