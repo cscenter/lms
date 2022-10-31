@@ -177,6 +177,8 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             if student_profiles:
                 main_profile = student_profiles[0]  # because of profile ordering
                 context['academic_disciplines'] = ", ".join(d.name for d in main_profile.academic_disciplines.all())
+                if main_profile.invitation:
+                    context['invitation'] = main_profile.invitation
         return context
 
 

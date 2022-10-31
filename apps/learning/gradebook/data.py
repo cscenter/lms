@@ -61,6 +61,13 @@ class GradebookStudent:
     def student_type(self) -> str:
         return self.student_profile.type
 
+    @property
+    def invitation(self) -> Optional[str]:
+        invitation = self.student_profile.invitation
+        if invitation:
+            return invitation.name
+        return None
+
 
 @dataclass
 class GradebookAssignment:
@@ -129,7 +136,8 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
                 "final_grade": "good",
                 "total_score": 23,
                 "enrollment_id": 1,
-                "type": "invited"  # StudentTypes.INVITED
+                "type": "invited",  # StudentTypes.INVITED
+                "invitation": "Invitation name"
             ),
             ...
         ),
@@ -162,6 +170,7 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
     enrollments = (course_enrollments
                    .select_related("student",
                                    "student_profile__branch",
+                                   "student_profile__invitation",
                                    "student_group")
                    .order_by("student__last_name", "pk"))
     for index, e in enumerate(enrollments.iterator()):
