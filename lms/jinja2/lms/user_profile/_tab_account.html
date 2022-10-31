@@ -85,6 +85,16 @@
   <div class="accounts">
     <table class="table table-condensed table-striped">
       {% if profile_user.pk == request_user.pk or request_user.is_curator %}
+        {% if invitation and request_user.is_curator %}
+          <tr>
+            <td>Приглашение</td>
+            <td>
+              <a target="_blank" href="{{ url('admin:learning_invitation_change', object_id=invitation.pk) }}">
+              {{ invitation.name }}
+              </a>
+            </td>
+          </tr>
+        {% endif %}
         {% if academic_disciplines %}
         <tr>
           <td>Направление обучения</td>

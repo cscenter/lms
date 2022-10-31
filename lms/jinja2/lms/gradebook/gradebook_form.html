@@ -129,7 +129,7 @@
                     <a class="cell __student {{ loop.cycle('', 'even') }}" href="{{ student.get_absolute_url() }}"
                        title="{{ student.username }}">
                       {% if gradebook_student.student_type == StudentTypes.INVITED %}
-                        <i style="font-size:14px" class="fa" title="Приглашённый студент">&#xf069;</i>
+                        <i style="font-size:14px" class="fa" title="{{ gradebook_student.invitation }}">&#xf069;</i>
                       {% endif %} {{ student.get_abbreviated_short_name() }}
                     </a>
                     <div class="cell __final_grade {{ loop.cycle('', 'even') }}">
