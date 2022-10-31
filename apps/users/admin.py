@@ -230,7 +230,7 @@ class StudentProfileAdmin(BaseModelAdmin):
                 update_student_status(obj, new_status=form.cleaned_data['status'],
                                       editor=request.user)
         super().save_model(request, obj, form, change)
-        if not change and  obj.status not in StudentStatuses.inactive_statuses:
+        if not change and obj.status not in StudentStatuses.inactive_statuses:
             permission_role = StudentTypes.to_permission_role(obj.type)
             assign_role(account=obj.user, role=permission_role, site=obj.site)
 

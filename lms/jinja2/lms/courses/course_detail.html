@@ -239,6 +239,11 @@
                     </button>
                   </form>
                 {% endif %}
+              {% elif can_enroll_by_invitation %}
+                <form method="post" action="{{ course_invitation.get_absolute_url() }}">
+                  {% csrf_token %}
+                  <button class="btn btn-primary" type="submit">Записаться по приглашению</button>
+                </form>
               {% endif %}
             {% endif %}
             {% if can_add_assignment %}

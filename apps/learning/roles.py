@@ -14,7 +14,7 @@ from courses.permissions import (
     ViewCourseClassMaterials, ViewCourseContacts, ViewCourseContactsAsLearner,
     ViewCourseContactsAsTeacher, ViewCourseInternalDescription,
     ViewCourseInternalDescriptionAsLearner, ViewCourseInternalDescriptionAsTeacher,
-    ViewOwnAssignment
+    ViewOwnAssignment, ViewCourseAsInvited
 )
 from info_blocks.permissions import ViewInternships
 from users.permissions import (
@@ -120,7 +120,7 @@ class Roles(DjangoChoices):
     PARTNER = C(13, _("Master's Degree Student"), priority=50,
                 permissions=STUDENT.permissions)
     INVITED = C(11, _('Invited User'), permissions=(
-        ViewCourse,
+        ViewCourseAsInvited,
         ViewCourseInternalDescriptionAsLearner,
         ViewStudyMenu,
         ViewCourseContactsAsLearner,
@@ -251,6 +251,10 @@ for role in (Roles.STUDENT, Roles.VOLUNTEER, Roles.PARTNER, Roles.INVITED):
                               ViewAssignmentCommentAttachmentAsLearner)
     student_role.add_relation(ViewEnrollment,
                               ViewOwnEnrollment)
+
+invited_role = role_registry[Roles.INVITED]
+invited_role.add_relation(ViewCourse,
+                          ViewCourseAsInvited)
 
 graduate_role = role_registry[Roles.GRADUATE]
 graduate_role.add_relation(ViewAssignmentAttachment, ViewAssignmentAttachmentAsLearner)
