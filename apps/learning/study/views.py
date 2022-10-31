@@ -29,7 +29,7 @@ from info_blocks.models import InfoBlock
 from info_blocks.permissions import ViewInternships
 from learning import utils
 from learning.calendar import get_all_calendar_events, get_student_calendar_events
-from learning.models import Enrollment, StudentAssignment
+from learning.models import Enrollment, StudentAssignment, CourseInvitation
 from learning.permissions import (
     CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution,
     EnrollPermissionObject, ViewCourses, ViewOwnStudentAssignment,
@@ -46,6 +46,7 @@ from learning.views.views import (
     AssignmentCommentUpsertView, StudentAssignmentURLParamsMixin
 )
 from users.constants import Roles
+from users.models import StudentTypes
 from users.services import get_student_profile
 
 
@@ -286,18 +287,28 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
                                .only('id', 'grade', 'course_id', 'course__grading_type',
                                      "student_profile__site__site_configuration"))
         student_enrollments = {e.course_id: e for e in student_enrollments}
-        # Get current term course offerings available in student branch
+        # Get current term course offerings available in student branch,
+        # courses in this term available via invitation
         # and all courses that student enrolled in
         student_profile = get_student_profile(auth_user, self.request.site)
         current_term = get_current_term_pair(auth_user.time_zone)
         current_term_index = current_term.index
-        in_student_branch = Q(coursebranch__branch=student_profile.branch_id)
-        in_current_term = Q(semester__index=current_term_index)
         enrolled_in = Q(id__in=list(student_enrollments))
+        in_current_term = Q(semester__index=current_term_index)
+        if student_profile.type == StudentTypes.INVITED:
+            student_invitations = student_profile.invitations.all()
+            courses_pk = [ci.course_id for ci in (CourseInvitation
+                                                  .objects
+                                                  .filter(invitation__in=student_invitations)
+                                                  .only('course_id'))]
+            has_invitation = Q(id__in=courses_pk)
+            qs = Course.objects.filter((has_invitation & in_current_term) | enrolled_in)
+        else:
+            in_student_branch = Q(coursebranch__branch=student_profile.branch_id)
+            qs = Course.objects.filter((in_student_branch & in_current_term) | enrolled_in)
         prefetch_teachers = Prefetch('course_teachers',
                                      queryset=course_teachers_prefetch_queryset())
-        courses = (Course.objects
-                   .filter((in_student_branch & in_current_term) | enrolled_in)
+        courses = (qs
                    .select_related('meta_course', 'semester', 'main_branch')
                    .distinct()
                    .order_by('-semester__index', 'meta_course__name', 'pk')

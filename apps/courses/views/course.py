@@ -14,21 +14,23 @@ from courses.forms import CourseUpdateForm
 from courses.models import Course, CourseGroupModes, CourseTeacher
 from courses.permissions import (
     CreateAssignment, CreateCourseClass, EditCourse, ViewCourseContacts,
-    ViewCourseInternalDescription, can_view_private_materials
+    ViewCourseInternalDescription, can_view_private_materials, ViewCourse
 )
 from courses.services import group_teachers
 from courses.tabs import CourseInfoTab, TabNotFound, get_course_tab_list
 from courses.views.mixins import CourseURLParamsMixin
-from learning.models import CourseNewsNotification
-from learning.permissions import CreateCourseNews, ViewOwnEnrollments, ViewStudentGroup
+from learning.models import CourseNewsNotification, CourseInvitation
+from learning.permissions import CreateCourseNews, ViewOwnEnrollments, ViewStudentGroup, EnrollInCourseByInvitation, \
+    InvitationEnrollPermissionObject
 from learning.services import course_access_role
 from learning.teaching.utils import get_student_groups_url
 
 __all__ = ('CourseDetailView', 'CourseUpdateView')
 
 
-class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
+class CourseDetailView(PermissionRequiredMixin, CourseURLParamsMixin, DetailView):
     model = Course
+    permission_required = ViewCourse.name
     template_name = "lms/courses/course_detail.html"
     context_object_name = 'course'
     request: AuthenticatedHttpRequest
@@ -41,6 +43,9 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
                                                 'teacher__first_name')))
         return (super().get_course_queryset()
                 .prefetch_related(teachers, "branches"))
+
+    def get_permission_object(self):
+        return self.course
 
     def get_object(self):
         return self.course
@@ -74,6 +79,13 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
         can_view_course_internal_description = user.has_perm(ViewCourseInternalDescription.name, course)
         can_edit_description = user.has_perm(EditCourse.name, course)
         can_view_student_groups = user.has_perm(ViewStudentGroup.name, course)
+
+        student_profile = user.get_student_profile()
+        invitations = student_profile.invitations.all() if student_profile else []
+        course_invitation = CourseInvitation.objects.filter(course=self.course,
+                                                            invitation__in=invitations).first()
+        perm_obj = InvitationEnrollPermissionObject(course_invitation, student_profile)
+        can_enroll_by_invitation = user.has_perm(EnrollInCourseByInvitation.name, perm_obj)
         context = {
             'CourseGroupModes': CourseGroupModes,
             'cad_add_news': can_add_news,
@@ -83,12 +95,14 @@ class CourseDetailView(LoginRequiredMixin, CourseURLParamsMixin, DetailView):
             'can_view_course_internal_description': can_view_course_internal_description,
             'can_edit_description': can_edit_description,
             'can_view_student_groups': can_view_student_groups,
+            'can_enroll_by_invitation': can_enroll_by_invitation,
             'get_student_groups_url': get_student_groups_url,
             'course': course,
             'course_tabs': tab_list,
             'has_organizers': has_organizers,
             'teachers': teachers,
             'has_access_to_private_materials': can_view_private_materials(role),
+            'course_invitation': course_invitation,
             **self._get_additional_context(course)
         }
         return context

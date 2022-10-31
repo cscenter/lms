@@ -3,6 +3,7 @@ from rules import predicate
 from auth.permissions import Permission, add_perm
 from courses.constants import MaterialVisibilityTypes
 from courses.models import Assignment, AssignmentAttachment, Course, CourseClass
+from learning.models import CourseInvitation
 from learning.services import CourseRole, course_access_role
 
 
@@ -20,6 +21,26 @@ class EditMetaCourse(Permission):
 @add_perm
 class ViewCourse(Permission):
     name = "courses.view_course"
+
+
+@add_perm
+class ViewCourseAsInvited(Permission):
+    name = "courses.view_course_as_invited"
+
+    @staticmethod
+    @predicate
+    def rule(user, course: Course):
+        student_profile = user.get_student_profile()
+        if student_profile is None:
+            return False
+        if user.get_enrollment(course.pk):
+            return True
+        invitations = student_profile.invitations.all()
+        return (CourseInvitation
+                .objects
+                .filter(course=course,
+                        invitation__in=invitations)
+                .exists())
 
 
 @add_perm

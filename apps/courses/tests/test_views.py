@@ -10,22 +10,27 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.utils import formats
 from django.utils.encoding import smart_bytes
+from django.utils.timezone import now
 
 from auth.permissions import perm_registry
-from core.tests.factories import BranchFactory, LocationFactory
+from core.tests.factories import BranchFactory, LocationFactory, SiteFactory
 from core.urls import reverse
 from courses.constants import MaterialVisibilityTypes
 from courses.models import CourseTeacher
 from courses.permissions import ViewCourseClassMaterials
 from courses.tests.factories import (
     AssignmentFactory, CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
-    CourseNewsFactory, CourseTeacherFactory
+    CourseNewsFactory, CourseTeacherFactory, SemesterFactory
 )
 from files.response import XAccelRedirectFileResponse
 from files.views import ProtectedFileDownloadView
-from learning.settings import Branches, GradeTypes
-from learning.tests.factories import EnrollmentFactory
+from learning.models import Enrollment
+from learning.settings import Branches, GradeTypes, StudentStatuses
+from learning.invitation.views import complete_student_profile
+from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
 from users.constants import Roles
+from users.models import StudentProfile
+from users.services import update_student_status
 from users.tests.factories import (
     CuratorFactory, StudentFactory, StudentProfileFactory, TeacherFactory, UserFactory
 )
@@ -284,3 +289,51 @@ def test_view_course_detail_contacts_visibility(client):
     assert has_contacts_header(curator)
     assert has_contacts_header(teacher)
     assert has_contacts_header(course_student)
+
+
+@pytest.mark.django_db
+def test_view_course_detail_enroll_by_invitation(client):
+    future = now() + datetime.timedelta(days=3)
+    current_term = SemesterFactory.create_current(
+        enrollment_period__ends_on=future.date())
+    site = SiteFactory(id=settings.SITE_ID)
+    student = UserFactory()
+    course_invitation = CourseInvitationFactory(course__semester=current_term)
+    complete_student_profile(student, site, course_invitation.invitation)
+
+    course = course_invitation.course
+    regular_profile = StudentProfileFactory(user=student)
+    client.login(student)
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 200
+    assert 'Enroll in the course' in response.content.decode('utf-8')
+
+    curator = CuratorFactory()
+    update_student_status(student_profile=regular_profile,
+                          new_status=StudentStatuses.ACADEMIC_LEAVE,
+                          editor=curator)
+
+    current_profile = student.get_student_profile()
+    assert current_profile != regular_profile
+
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 403
+
+    client.get(course_invitation.invitation.get_absolute_url())
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 200
+    html = response.content.decode('utf-8')
+    assert 'Записаться по приглашению' in html
+    assert 'Enroll in the course' not in html
+
+    url = course_invitation.get_absolute_url()
+    response = client.post(url, follow=True)
+    assert response.redirect_chain[-1][0] == course.get_absolute_url()
+    assert Enrollment.objects.filter(invitation=course_invitation.invitation).exists()
+
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 200
+    html = response.content.decode('utf-8')
+    assert 'Записаться по приглашению' not in html
+    assert 'Enroll in the course' not in html
+    assert 'Unenroll from the course' in html

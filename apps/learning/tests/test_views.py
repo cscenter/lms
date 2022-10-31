@@ -3,20 +3,27 @@ import logging
 
 import pytest
 from bs4 import BeautifulSoup
+from django.conf import settings
+from django.utils.timezone import now
 from testfixtures import LogCapture
 
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
 from auth.permissions import perm_registry
+from core.tests.factories import SiteFactory
 from core.timezone import now_local
 from core.urls import reverse
 from courses.models import CourseTeacher
 from courses.tests.factories import *
+from learning.invitation.views import complete_student_profile
 from learning.permissions import ViewEnrollment
+from learning.settings import GradeTypes, StudentStatuses
 from learning.tests.factories import *
+from users.models import StudentTypes, StudentProfile
+from users.services import update_student_status
 from users.tests.factories import (
-    CuratorFactory, StudentFactory, TeacherFactory, UserFactory
+    CuratorFactory, StudentFactory, TeacherFactory, UserFactory, StudentProfileFactory
 )
 
 
@@ -59,7 +66,7 @@ def test_course_list_view_add_news_btn_visibility(client):
 def test_course_detail_view_basic_get(client, assert_login_redirect):
     course = CourseFactory()
     assert_login_redirect(course.get_absolute_url())
-    client.login(UserFactory())
+    client.login(StudentFactory())
     response = client.get(course.get_absolute_url())
     assert response.status_code == 200
     url = reverse('courses:course_detail', kwargs={
@@ -70,6 +77,159 @@ def test_course_detail_view_basic_get(client, assert_login_redirect):
         "semester_type": "autumn",
     })
     assert client.get(url).status_code == 404
+
+
+@pytest.mark.django_db
+def test_course_detail_view_invited_permission(client):
+    future = now() + datetime.timedelta(days=3)
+    current_term = SemesterFactory.create_current(
+        enrollment_period__ends_on=future.date())
+
+    invitation_1 = CourseInvitationFactory(course__semester=current_term)
+    invitation_2 = CourseInvitationFactory(course__semester=current_term)
+    student = StudentFactory(student_profile__type=StudentTypes.INVITED)
+
+    client.login(student)
+    response = client.get(invitation_1.course.get_absolute_url())
+    assert response.status_code == 403
+
+    invitation = invitation_1.invitation
+    response = client.get(invitation.get_absolute_url())
+    assert response.status_code == 200
+    assert 'Записаться' in response.content.decode('utf-8')
+    response = client.get(invitation_1.course.get_absolute_url())
+    assert response.status_code == 200
+    response = client.get(invitation_2.course.get_absolute_url())
+    assert response.status_code == 403
+
+    invitation_1.invitation.delete()
+    response = client.get(invitation_1.course.get_absolute_url())
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_course_detail_view_enrolled_invited_capabilities(client):
+    future = now() + datetime.timedelta(days=3)
+    current_term = SemesterFactory.create_current(
+        enrollment_period__ends_on=future.date())
+    course_invitation = CourseInvitationFactory(course__semester=current_term)
+    course = course_invitation.course
+
+    student = StudentFactory(student_profile__type=StudentTypes.INVITED)
+    client.login(student)
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 403
+
+    url = course_invitation.get_absolute_url()
+    site = SiteFactory(id=settings.SITE_ID)
+    complete_student_profile(student, site, course_invitation.invitation)
+    response = client.get(course_invitation.invitation.get_absolute_url())
+    assert response.status_code == 200
+    assert 'Записаться' in response.content.decode('utf-8')
+    response = client.post(url, follow=True)
+    assert response.redirect_chain[-1][0] == course.get_absolute_url()
+
+    enrollment = Enrollment.objects.get(invitation=course_invitation.invitation)
+    enrollment.invitation = None
+    enrollment.save()
+    course_invitation.invitation.delete()
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 200
+
+    enrollment.grade = GradeTypes.UNSATISFACTORY
+    enrollment.save()
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 200
+
+    enrollment.delete()
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_course_detail_view_inactive_regular_active_invited_profile_permission(client):
+    future = now() + datetime.timedelta(days=3)
+    current_term = SemesterFactory.create_current(
+        enrollment_period__ends_on=future.date())
+    previous_term = SemesterFactory.create_prev(term=current_term)
+    course_invitation = CourseInvitationFactory(course__semester=current_term)
+    course = course_invitation.course
+    invitation = course_invitation.invitation
+
+    student = StudentFactory(student_profile__type=StudentTypes.INVITED)
+    site = SiteFactory(id=settings.SITE_ID)
+    complete_student_profile(student, site, invitation)
+    regular_profile = StudentProfileFactory(user=student, year_of_admission=previous_term.year - 1)
+
+    client.login(student)
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 200
+
+    enrollment = EnrollmentFactory(student=student,
+                                   student_profile=regular_profile)
+    response = client.get(enrollment.course.get_absolute_url())
+    assert response.status_code == 200
+
+    curator = CuratorFactory()
+    update_student_status(student_profile=regular_profile,
+                          new_status=StudentStatuses.ACADEMIC_LEAVE,
+                          editor=curator)
+
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 403
+    response = client.get(enrollment.course.get_absolute_url())
+    assert response.status_code == 200
+    enrollment.grade = GradeTypes.UNSATISFACTORY
+    enrollment.save()
+    response = client.get(enrollment.course.get_absolute_url())
+    assert response.status_code == 200
+    enrollment.is_deleted = True
+    enrollment.save()
+    response = client.get(enrollment.course.get_absolute_url())
+    assert response.status_code == 403
+
+    client.get(invitation.get_absolute_url())
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_course_detail_view_inactive_invited_profile_permission(client):
+    future = now() + datetime.timedelta(days=3)
+    current_term = SemesterFactory.create_current(
+        enrollment_period__ends_on=future.date())
+    previous_term = SemesterFactory.create_prev(term=current_term)
+    site = SiteFactory(id=settings.SITE_ID)
+    course_invitation = CourseInvitationFactory(course__semester=previous_term)
+    student = UserFactory()
+    complete_student_profile(student, site, course_invitation.invitation)
+    student_profile = StudentProfile.objects.get(user=student)
+    old_course = CourseFactory(semester=previous_term)
+    enrollment = EnrollmentFactory(course=old_course, student=student, student_profile=student_profile)
+
+    client.login(student)
+    course_invitation.invitation.enrolled_students.add(student_profile)
+    response = client.get(course_invitation.course.get_absolute_url())
+    assert response.status_code == 200
+
+    response = client.get(old_course.get_absolute_url())
+    assert response.status_code == 200
+
+    enrollment.grade = GradeTypes.UNSATISFACTORY
+    response = client.get(old_course.get_absolute_url())
+    assert response.status_code == 200
+
+    course_invitation = CourseInvitationFactory(course__semester=current_term)
+    complete_student_profile(student, site, course_invitation.invitation)
+    new_student_profile = StudentProfile.objects.get(user=student)
+    assert student.get_student_profile() == new_student_profile
+
+    response = client.get(old_course.get_absolute_url())
+    assert response.status_code == 200
+
+    # Because not has been enrolled through old profile
+    response = client.get(course_invitation.course.get_absolute_url())
+    assert response.status_code == 403
 
 
 @pytest.mark.django_db

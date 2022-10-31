@@ -1,11 +1,12 @@
 from collections import OrderedDict
 from itertools import groupby
 
+from django.contrib.auth.views import redirect_to_login
 from django_filters.views import FilterMixin
 from rest_framework.renderers import JSONRenderer
 from vanilla import TemplateView
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.http import HttpResponseRedirect
 from django.utils.translation import pgettext_lazy
 from django.views import View
@@ -16,9 +17,12 @@ from courses.constants import SemesterTypes
 from courses.models import Course, CourseTeacher
 from courses.selectors import course_teachers_prefetch_queryset
 from courses.utils import TermPair, get_current_term_pair
+from learning.models import CourseInvitation, Enrollment
 from lms.api.serializers import OfferingsCourseSerializer
 from lms.filters import CoursesFilter
 from lms.utils import PublicRoute, PublicRouteException, group_terms_by_academic_year
+from users.models import StudentTypes
+from users.services import get_student_profile
 
 
 class IndexView(View):
@@ -47,12 +51,37 @@ class CourseOfferingsView(FilterMixin, TemplateView):
     filterset_class = CoursesFilter
     template_name = "lms/course_offerings.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
+        user = self.request.user
         course_teachers = Prefetch('course_teachers',
                                    queryset=course_teachers_prefetch_queryset(
                                        hidden_roles=(CourseTeacher.roles.spectator,)
                                    ))
-        return (Course.objects
+
+        courses = Course.objects
+        student_profile = user.get_student_profile(site=self.request.site)
+        if student_profile is None:
+            courses = courses.none()
+        elif student_profile.type == StudentTypes.INVITED:
+            student_enrollments = (Enrollment.active
+                                   .filter(student_id=user)
+                                   .select_related("course")
+                                   .only('id', 'course_id'))
+            student_enrollments = {e.course_id: e for e in student_enrollments}
+            student_invitations = student_profile.invitations.all()
+            courses_pk = [ci.course_id for ci in (CourseInvitation
+                                                  .objects
+                                                  .filter(invitation__in=student_invitations)
+                                                  .only('course_id'))]
+            enrolled_in = Q(id__in=list(student_enrollments))
+            has_invitation = Q(id__in=courses_pk)
+            courses = courses.filter(enrolled_in | has_invitation)
+        return (courses
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'main_branch')
                 .only("pk", "main_branch_id", "grading_type",

@@ -1,15 +1,18 @@
+import datetime
 from datetime import timedelta
 
 import pytest
 from bs4 import BeautifulSoup
+from django.conf import settings
 
 from django.contrib.messages import get_messages
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import smart_bytes
+from django.utils.timezone import now
 
 from auth.mixins import PermissionRequiredMixin
-from core.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory, SiteFactory
 from core.urls import reverse
 from courses.constants import AssigneeMode, AssignmentFormat, AssignmentStatus
 from courses.models import CourseTeacher
@@ -20,17 +23,20 @@ from courses.utils import get_current_term_pair
 from grading.constants import CheckingSystemTypes, YandexCompilers
 from grading.tests.factories import CheckerFactory
 from learning.forms import AssignmentSolutionYandexContestForm
+from learning.invitation.views import complete_student_profile
 from learning.models import (
     AssignmentComment, AssignmentNotification, AssignmentSubmissionTypes,
     StudentAssignment
 )
 from learning.permissions import ViewCourses, ViewOwnStudentAssignment
-from learning.settings import Branches
+from learning.settings import Branches, StudentStatuses, GradeTypes
 from learning.tests.factories import (
-    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
+    AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory, CourseInvitationFactory
 )
+from users.models import StudentTypes, StudentProfile
+from users.services import update_student_status
 from users.tests.factories import (
-    StudentFactory, StudentProfileFactory, TeacherFactory, UserFactory
+    StudentFactory, StudentProfileFactory, TeacherFactory, UserFactory, CuratorFactory
 )
 
 # TODO: test ViewOwnAssignment in test_permissions.py
@@ -404,6 +410,8 @@ def test_view_student_courses_list(client, lms_resolver, assert_login_redirect):
     assert resolver.func.view_class.permission_required == ViewCourses.name
     student_profile_spb = StudentProfileFactory(branch__code=Branches.SPB)
     student_spb = student_profile_spb.user
+    assert_login_redirect(url)
+
     client.login(student_spb)
     response = client.get(url)
     assert response.status_code == 200
@@ -490,6 +498,101 @@ def test_view_course_list_course_not_in_student_branch(client, lms_resolver, ass
     assert len(response.context_data['ongoing_enrolled']) == 1
     assert len(response.context_data['archive']) == 1
     assert response.context_data['archive'] == [course]
+
+
+@pytest.mark.django_db
+def test_view_student_courses_list_as_invited(client):
+    url = reverse('study:course_list')
+    site = SiteFactory(id=settings.SITE_ID)
+    future = now() + datetime.timedelta(days=3)
+    current_term = SemesterFactory.create_current(
+        enrollment_period__ends_on=future.date())
+    student = UserFactory()
+    regular_profile = StudentProfileFactory(user=student,
+                                            type=StudentTypes.REGULAR,
+                                            branch__code=Branches.SPB)
+    client.login(student)
+
+    all_courses = CourseFactory.create_batch(3, semester=current_term,
+                                             main_branch=regular_profile.branch)
+    enrolled, unenrolled, rest = all_courses
+    EnrollmentFactory(student=student,
+                      student_profile=regular_profile,
+                      course=enrolled,
+                      grade=GradeTypes.UNSATISFACTORY)
+    EnrollmentFactory(student=student,
+                      student_profile=regular_profile,
+                      course=unenrolled,
+                      is_deleted=True)
+
+    prev_year = current_term.year - 1
+    archived = CourseFactory(semester__year=prev_year)
+    EnrollmentFactory(student=student,
+                      student_profile=regular_profile,
+                      course=archived)
+
+    response = client.get(url)
+    assert len(response.context_data['ongoing_enrolled']) == 1
+    assert len(response.context_data['ongoing_rest']) == 2
+    assert len(response.context_data['archive']) == 1
+
+    curator = CuratorFactory()
+    update_student_status(student_profile=regular_profile,
+                          new_status=StudentStatuses.ACADEMIC_LEAVE,
+                          editor=curator)
+
+    StudentProfileFactory(user=student,
+                          type=StudentTypes.INVITED)
+    course_invitation = CourseInvitationFactory(course__semester=current_term)
+    complete_student_profile(student, site, course_invitation.invitation)
+    response = client.get(url)
+    assert len(response.context_data['ongoing_enrolled']) == 1
+    assert len(response.context_data['ongoing_rest']) == 0
+    assert len(response.context_data['archive']) == 1
+
+    client.get(course_invitation.invitation.get_absolute_url())
+    response = client.get(url)
+    assert len(response.context_data['ongoing_rest']) == 1
+
+    client.post(course_invitation.get_absolute_url(), follow=True)
+    response = client.get(url)
+    assert len(response.context_data['ongoing_enrolled']) == 2
+    assert len(response.context_data['ongoing_rest']) == 0
+    assert len(response.context_data['archive']) == 1
+
+
+@pytest.mark.django_db
+def test_view_student_courses_list_old_invited_profile(client):
+    url = reverse('study:course_list')
+    future = now() + datetime.timedelta(days=3)
+    current_term = SemesterFactory.create_current(
+        enrollment_period__ends_on=future.date())
+    previous_term = SemesterFactory.create_prev(term=current_term)
+    site = SiteFactory(id=settings.SITE_ID)
+    course_invitation = CourseInvitationFactory(course__semester=previous_term)
+    student = UserFactory()
+    complete_student_profile(student, site, course_invitation.invitation)
+    student_profile = StudentProfile.objects.get(user=student)
+
+    prev_term_course = CourseFactory(semester=previous_term)
+    EnrollmentFactory(course=prev_term_course,
+                      student=student,
+                      student_profile=student_profile,
+                      grade=GradeTypes.UNSATISFACTORY)
+
+    client.login(student)
+    response = client.get(url)
+    assert len(response.context_data['ongoing_enrolled']) == 0
+    assert len(response.context_data['ongoing_rest']) == 0
+    assert len(response.context_data['archive']) == 1
+
+    course_invitation.invitation.enrolled_students.add(student_profile)
+    # Even if student has invitation(not used) in previous term
+    # the course should not to appear as archive / ongoing_rest
+    response = client.get(url)
+    assert len(response.context_data['ongoing_enrolled']) == 0
+    assert len(response.context_data['ongoing_rest']) == 0
+    assert len(response.context_data['archive']) == 1
 
 
 @pytest.mark.django_db

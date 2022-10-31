@@ -17,7 +17,7 @@ from learning.models import (
 from learning.services import CourseRole, course_access_role
 from learning.services.enrollment_service import is_course_failed_by_student
 from learning.settings import StudentStatuses
-from users.models import StudentProfile, User
+from users.models import StudentProfile, User, StudentTypes
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +47,12 @@ def enroll_in_course(user, permission_object: EnrollPermissionObject):
         logger.debug("Permissions for student with inactive profile "
                      "are restricted")
         return False
+    if student_profile.type == StudentTypes.INVITED:
+        invitations = student_profile.invitations.all()
+        course_invitation = (CourseInvitation.objects
+                             .filter(invitation__in=invitations,
+                                     course=permission_object.course))
+        return course_invitation.exists() and course_invitation.first().is_active
     if course.main_branch_id != student_profile.branch_id:  # avoid db hit
         if not any(b.pk == student_profile.branch_id for b in course.branches.all()):
             logger.debug("Student with branch %s could not enroll in the "
