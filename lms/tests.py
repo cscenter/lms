@@ -124,6 +124,7 @@ def test_view_course_offerings(client):
                                   type=SemesterTypes.SUMMER)
     spring_term = SemesterFactory(year=autumn_term.year - 1,
                                   type=SemesterTypes.SPRING)
+
     student = UserFactory()
     regular_profile = StudentProfileFactory(user=student)
     client.login(student)
@@ -144,6 +145,22 @@ def test_view_course_offerings(client):
     EnrollmentFactory(student=student,
                       student_profile=regular_profile,
                       course=enrolled_prev)
+    response = client.get(url)
+    terms_courses = list(response.context_data['courses'].values())
+    assert len(terms_courses) == 2  # two terms
+    founded_courses = sum(map(len, terms_courses))
+    assert founded_courses == len(autumn_courses) + len(spring_courses)
+
+    curator = CuratorFactory()
+    client.login(curator)
+    response = client.get(url)
+    terms_courses = list(response.context_data['courses'].values())
+    assert len(terms_courses) == 2  # two terms
+    founded_courses = sum(map(len, terms_courses))
+    assert founded_courses == len(autumn_courses) + len(spring_courses)
+
+    teacher = TeacherFactory()
+    client.login(teacher)
     response = client.get(url)
     terms_courses = list(response.context_data['courses'].values())
     assert len(terms_courses) == 2  # two terms
