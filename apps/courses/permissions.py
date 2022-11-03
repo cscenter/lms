@@ -211,7 +211,7 @@ class ViewCourseClassMaterials(Permission):
         if visibility == MaterialVisibilityTypes.PUBLIC:
             return True
         elif visibility == MaterialVisibilityTypes.PARTICIPANTS:
-            return user.has_perm(ViewCourse.name)
+            return user.has_perm(ViewCourse.name, course_class.course)
         elif visibility == MaterialVisibilityTypes.COURSE_PARTICIPANTS:
             role = course_access_role(course=course_class.course, user=user)
             return can_view_private_materials(role)

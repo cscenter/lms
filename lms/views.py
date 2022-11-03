@@ -65,22 +65,23 @@ class CourseOfferingsView(FilterMixin, TemplateView):
 
         courses = Course.objects
         student_profile = user.get_student_profile(site=self.request.site)
-        if student_profile is None:
-            courses = courses.none()
-        elif student_profile.type == StudentTypes.INVITED:
-            student_enrollments = (Enrollment.active
-                                   .filter(student_id=user)
-                                   .select_related("course")
-                                   .only('id', 'course_id'))
-            student_enrollments = {e.course_id: e for e in student_enrollments}
-            student_invitations = student_profile.invitations.all()
-            courses_pk = [ci.course_id for ci in (CourseInvitation
-                                                  .objects
-                                                  .filter(invitation__in=student_invitations)
-                                                  .only('course_id'))]
-            enrolled_in = Q(id__in=list(student_enrollments))
-            has_invitation = Q(id__in=courses_pk)
-            courses = courses.filter(enrolled_in | has_invitation)
+        if not user.is_curator and not user.is_teacher:
+            if student_profile is None:
+                courses = courses.none()
+            elif student_profile.type == StudentTypes.INVITED:
+                student_enrollments = (Enrollment.active
+                                       .filter(student_id=user)
+                                       .select_related("course")
+                                       .only('id', 'course_id'))
+                student_enrollments = {e.course_id: e for e in student_enrollments}
+                student_invitations = student_profile.invitations.all()
+                courses_pk = [ci.course_id for ci in (CourseInvitation
+                                                      .objects
+                                                      .filter(invitation__in=student_invitations)
+                                                      .only('course_id'))]
+                enrolled_in = Q(id__in=list(student_enrollments))
+                has_invitation = Q(id__in=courses_pk)
+                courses = courses.filter(enrolled_in | has_invitation)
         return (courses
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'main_branch')
