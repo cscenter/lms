@@ -110,6 +110,14 @@ class GradeTypes(DjangoChoices):
         return [grade[0] for grade in cls.get_choices_for_grading_system(grading_system)]
 
 
+class EnrollmentGradeUpdateSource(TextChoices):
+    GRADEBOOK = 'gradebook', _("Gradebook")
+    CSV_YANDEX_LOGIN = 'csv-ya.login', _("Imported from CSV by Yandex.Login")
+    CSV_STEPIK = 'csv-stepik', _("Imported from CSV by stepik.org ID")
+    CSV_ENROLLMENT = 'csv-enrollment', _("Imported from CSV by LMS Student ID")
+    FORM_ADMIN = 'admin', _("Admin Panel")
+
+
 class AssignmentScoreUpdateSource(TextChoices):
     API = 'api', _("REST API")
     API_YANDEX_CONTEST = 'api-ya.contest', _("Yandex.Contest")

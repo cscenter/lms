@@ -42,7 +42,7 @@ from learning.managers import (
     GraduateProfileDefaultManager, StudentAssignmentManager
 )
 from learning.settings import (
-    ENROLLMENT_DURATION, AssignmentScoreUpdateSource, GradeTypes, GradingSystems
+    ENROLLMENT_DURATION, AssignmentScoreUpdateSource, GradeTypes, GradingSystems, EnrollmentGradeUpdateSource
 )
 from learning.utils import humanize_duration, grade_to_base_system
 from users.constants import ThumbnailSizes
@@ -402,6 +402,38 @@ class Enrollment(TimezoneAwareMixin, TimeStampedModel):
     @property
     def grade_in_base_system(self):
         return grade_to_base_system(self.grade)
+
+
+class EnrollmentGradeLog(TimestampedModel):
+    grade_changed_at = models.DateTimeField(
+        verbose_name=_("Entry Added"),
+        default=timezone.now)
+    grade = models.CharField(
+        choices=GradeTypes.choices,
+        verbose_name=_("Enrollment|grade"),
+        max_length=100)
+    enrollment = models.ForeignKey(
+        Enrollment,
+        verbose_name=_("Enrollment"),
+        related_name="grade_history",
+        on_delete=models.CASCADE)
+    entry_author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Author"),
+        on_delete=models.CASCADE)
+    source = models.CharField(
+        verbose_name=_("Source"),
+        choices=EnrollmentGradeUpdateSource.choices,
+        max_length=15)
+
+    class Meta:
+        verbose_name_plural = _("Enrollment Grade Log")
+
+    def __str__(self):
+        return str(self.pk)
+
+    def get_grade_display(self):
+        return GradeTypes.values[self.grade]
 
 
 class CourseInvitation(models.Model):

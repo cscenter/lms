@@ -12,6 +12,7 @@ from django.contrib.messages import constants as messages_constants
 from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import force_bytes, smart_bytes
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy
 
 from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
@@ -30,13 +31,13 @@ from learning.gradebook import (
     get_student_assignment_state, gradebook_data
 )
 from learning.gradebook.services import assignment_import_scores_from_csv
-from learning.models import AssignmentSubmissionTypes, Enrollment, StudentAssignment
+from learning.models import AssignmentSubmissionTypes, Enrollment, StudentAssignment, EnrollmentGradeLog
 from learning.permissions import EditGradebook, ViewGradebook
 from learning.services.personal_assignment_service import (
     get_personal_assignments_by_stepik_id
 )
 from learning.settings import (
-    AssignmentScoreUpdateSource, Branches, GradeTypes, StudentStatuses
+    AssignmentScoreUpdateSource, Branches, GradeTypes, StudentStatuses, EnrollmentGradeUpdateSource
 )
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory,
@@ -418,6 +419,13 @@ def test_save_gradebook_form(client):
     e2.refresh_from_db()
     assert e1.grade == GradeTypes.GOOD
     assert e2.grade == GradeTypes.EXCELLENT
+    e1_log = EnrollmentGradeLog.objects.get(enrollment=e1)
+    assert not EnrollmentGradeLog.objects.filter(enrollment=e2).exists()
+    assert e1_log.grade == GradeTypes.GOOD
+    assert e1_log.entry_author == teacher
+    assert e1_log.source == EnrollmentGradeUpdateSource.GRADEBOOK
+    assert e1_log.grade_changed_at - now() < datetime.timedelta(seconds=5)
+
     # Now change one of submission grade
     sa11 = StudentAssignment.objects.get(student_id=e1.student_id, assignment=a1)
     sa12 = StudentAssignment.objects.get(student_id=e1.student_id, assignment=a2)
@@ -442,7 +450,8 @@ def test_save_gradebook_form(client):
     e1.refresh_from_db(), e2.refresh_from_db()
     assert e1.grade == GradeTypes.GOOD
     assert e2.grade == GradeTypes.EXCELLENT
-
+    assert EnrollmentGradeLog.objects.filter(enrollment=e1).count() == 1
+    assert not EnrollmentGradeLog.objects.filter(enrollment=e2).exists()
 
 @pytest.mark.django_db
 def test_save_gradebook_l10n(client):
@@ -578,6 +587,7 @@ def test_gradebook_view_form_conflict(client):
     assert sa.score == 4
     e.refresh_from_db()
     assert e.grade == GradeTypes.GOOD
+    assert EnrollmentGradeLog.objects.filter(enrollment=e).count() == 1
     client.login(teacher2)
     form_data[final_grade_field_name] = GradeTypes.EXCELLENT
     response = client.post(co.get_gradebook_url(), form_data)
@@ -596,6 +606,8 @@ def test_gradebook_view_form_conflict(client):
     # same as current user input. Do not treat this case as a conflict.
     e.refresh_from_db()
     assert e.grade == GradeTypes.GOOD
+    assert EnrollmentGradeLog.objects.filter(enrollment=e).count() == 1
+
     sa.refresh_from_db()
     assert sa.score == 4
     form_data[final_grade_field_name] = GradeTypes.GOOD
@@ -605,6 +617,7 @@ def test_gradebook_view_form_conflict(client):
     assert e.grade == GradeTypes.GOOD
     sa.refresh_from_db()
     assert sa.score == 4
+    assert EnrollmentGradeLog.objects.filter(enrollment=e).count() == 2
 
 
 @pytest.mark.django_db

@@ -13,14 +13,14 @@ from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseGroupModes, CourseTeacher
 from learning.models import (
     AssignmentScoreAuditLog, CourseInvitation, GraduateProfile, Invitation,
-    StudentAssignment, StudentGroup, StudentGroupAssignee
+    StudentAssignment, StudentGroup, StudentGroupAssignee, EnrollmentGradeLog
 )
 
 from .models import AssignmentComment, Enrollment, Event
 from .services import StudentGroupService
-from .services.enrollment_service import recreate_assignments_for_student
+from .services.enrollment_service import recreate_assignments_for_student, update_enrollment_grade
 from .services.personal_assignment_service import update_personal_assignment_score
-from .settings import AssignmentScoreUpdateSource
+from .settings import AssignmentScoreUpdateSource, EnrollmentGradeUpdateSource
 
 
 class CourseTeacherAdmin(BaseModelAdmin):
@@ -96,6 +96,21 @@ class AssignmentCommentAdmin(BaseModelAdmin):
     get_assignment_name.short_description = _("Asssignment|name")
 
 
+class EnrollmentGradeLogAdminInline(admin.TabularInline):
+    list_select_related = ['student_profile', 'entry_author']
+    model = EnrollmentGradeLog
+    extra = 0
+    show_change_link = True
+    readonly_fields = ('grade_changed_at', 'source', 'grade', 'entry_author')
+    ordering = ['-grade_changed_at', '-pk']
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 class EnrollmentAdmin(BaseModelAdmin):
     list_select_related = ['course', 'course__semester', 'course__meta_course',
                            'course__main_branch', 'student']
@@ -111,6 +126,7 @@ class EnrollmentAdmin(BaseModelAdmin):
     exclude = ['grade_changed']
     raw_id_fields = ("student", "course", "invitation", "student_profile",
                      "student_group")
+    inlines = [EnrollmentGradeLogAdminInline]
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
@@ -134,6 +150,14 @@ class EnrollmentAdmin(BaseModelAdmin):
         return instance
 
     def save_model(self, request, obj, form, change):
+        if change:
+            if "grade" in form.changed_data:
+                # there is no concurrency check
+                update_enrollment_grade(obj,
+                                        editor=request.user,
+                                        old_grade=Enrollment.objects.get(pk=obj.pk).grade,
+                                        new_grade=form.cleaned_data['grade'],
+                                        source=EnrollmentGradeUpdateSource.FORM_ADMIN)
         super().save_model(request, obj, form, change)
         if not change:
             recreate_assignments_for_student(obj)

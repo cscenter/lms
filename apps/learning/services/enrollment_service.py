@@ -1,6 +1,7 @@
+import datetime
 from typing import Any, Optional
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import transaction
 from django.db.models import Count, F, Func, OuterRef, Q, Subquery, TextField, Value
 from django.db.models.functions import Coalesce, Concat
@@ -10,11 +11,12 @@ from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
 from courses.constants import AssignmentFormat
 from courses.models import Course, CourseGroupModes
-from learning.models import Enrollment, StudentGroup
+from learning.models import Enrollment, StudentGroup, EnrollmentGradeLog
 from learning.services import AssignmentService
 from learning.services.notification_service import (
     remove_course_notifications_for_student
 )
+from learning.settings import GradeTypes, EnrollmentGradeUpdateSource
 from users.models import StudentProfile, User
 
 
@@ -166,3 +168,32 @@ def is_course_failed_by_student(course: Course, student: User,
                     course=course,
                     grade__in=bad_grades)
             .exists())
+
+
+def update_enrollment_grade(enrollment: Enrollment, *,
+                            old_grade: str, new_grade: str,
+                            editor: User, source: EnrollmentGradeUpdateSource,
+                            grade_changed_at: Optional[datetime.date] = None) -> [bool, Enrollment]:
+    from learning.permissions import EditGradebook
+    if not editor.has_perm(EditGradebook.name, enrollment.course):
+        raise PermissionDenied
+    if new_grade not in GradeTypes.values or old_grade not in GradeTypes.values:
+        raise ValidationError("Unknown Enrollment Grade", code="invalid")
+    if source not in EnrollmentGradeUpdateSource.values:
+        raise ValidationError("Unknown Enrollment Grade change Source", code="invalid")
+    updated = (Enrollment.objects
+               .filter(pk=enrollment.pk, grade__in=[old_grade, new_grade])
+               .update(grade=new_grade))
+    if not updated:
+        return updated, enrollment
+    enrollment.grade = new_grade
+
+    log_entry = EnrollmentGradeLog(grade=new_grade,
+                                   enrollment_id=enrollment.pk,
+                                   entry_author=editor,
+                                   source=source)
+    if grade_changed_at:
+        log_entry.grade_changed_at = grade_changed_at
+    log_entry.save()
+
+    return updated, enrollment
