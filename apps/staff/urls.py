@@ -3,7 +3,8 @@ from django.urls import include, path, re_path, register_converter
 from courses.urls import RE_COURSE_URI
 from learning.gradebook.views import (
     GradeBookCSVView, GradeBookView, ImportAssignmentScoresByEnrollmentIDView,
-    ImportAssignmentScoresByStepikIDView, ImportAssignmentScoresByYandexLoginView
+    ImportAssignmentScoresByStepikIDView, ImportAssignmentScoresByYandexLoginView,
+    ImportCourseGradesByEnrollmentIDView, ImportCourseGradesByYandexLoginView, ImportCourseGradesByStepikIDView
 )
 from staff.api.views import CreateAlumniProfiles, StudentSearchJSONView
 from staff.views import (
@@ -43,9 +44,12 @@ urlpatterns = [
             path('csv/', GradeBookCSVView.as_view(permission_required="teaching.view_gradebook"), name='gradebook_csv'),
         ])),
         path('<int:course_id>/import/', include([
-            path('stepic', ImportAssignmentScoresByStepikIDView.as_view(), name='gradebook_import_scores_by_stepik_id'),
-            path('yandex', ImportAssignmentScoresByYandexLoginView.as_view(), name='gradebook_import_scores_by_yandex_login'),
-            path('enrollments', ImportAssignmentScoresByEnrollmentIDView.as_view(), name='gradebook_import_scores_by_enrollment_id'),
+            path('assignments-stepik', ImportAssignmentScoresByStepikIDView.as_view(), name='gradebook_import_scores_by_stepik_id'),
+            path('assignments-yandex', ImportAssignmentScoresByYandexLoginView.as_view(), name='gradebook_import_scores_by_yandex_login'),
+            path('assignments-enrollments', ImportAssignmentScoresByEnrollmentIDView.as_view(), name='gradebook_import_scores_by_enrollment_id'),
+            path('course-grades-stepik', ImportCourseGradesByStepikIDView.as_view(), name='gradebook_import_course_grades_by_stepik_id'),
+            path('course-grades-yandex', ImportCourseGradesByYandexLoginView.as_view(), name='gradebook_import_course_grades_by_yandex_login'),
+            path('course-grades-enrollments', ImportCourseGradesByEnrollmentIDView.as_view(), name='gradebook_import_course_grades_by_enrollment_id')
         ])),
     ])),
 

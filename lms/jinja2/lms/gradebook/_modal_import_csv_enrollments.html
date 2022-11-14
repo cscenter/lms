@@ -1,7 +1,7 @@
 {% if view.is_for_staff %}
-  {% set form_url = url('staff:gradebook_import_scores_by_enrollment_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
+  {% set score_form_url = url('staff:gradebook_import_scores_by_enrollment_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
 {% else %}
-  {% set form_url = url('teaching:gradebook_import_scores_by_enrollment_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
+  {% set score_form_url = url('teaching:gradebook_import_scores_by_enrollment_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
 {% endif %}
 <div id="import-scores-from-csv-enrollments" class="modal fade">
   <div class="modal-dialog">
@@ -10,7 +10,7 @@
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4 class="modal-title">{% trans %}Import scores from CSV{% endtrans %}</h4>
       </div>
-      <form action="{{ form_url }}" enctype="multipart/form-data" method="POST">
+      <form action="{{ score_form_url }}" enctype="multipart/form-data" method="POST">
         {% csrf_token %}
         <div class="modal-body">
           <div class="form-group">
@@ -41,6 +41,52 @@
             <pre><code>id,full name,score
 1,Ivanov I,7
 2,Ivanova A,42</code></pre>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">{% trans %}Close{% endtrans %}</button>
+          <button type="submit" class="btn btn-primary">{% trans %}Import{% endtrans %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if view.is_for_staff %}
+  {% set course_form_url = url('staff:gradebook_import_course_grades_by_enrollment_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
+{% else %}
+  {% set course_form_url = url('teaching:gradebook_import_course_grades_by_enrollment_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
+{% endif %}
+<div id="import-grades-from-csv-enrollments" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Импорт оценок за курс из CSV-файла по enrollment_id</h4>
+      </div>
+      <form action="{{ course_form_url }}" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="csv-choose-file">2. {% trans %}Choose csv file{% endtrans %}</label>
+            <input id="input-id" name="csv_file" value="2" type="file" required>
+            <div class="help-block">
+              Формат файла:<br>
+              <ul>
+                <li>Значения разделяются запятой.</li>
+                <li>Первая строка содержит заголовки. Для успешного импорта необходимы <code>id</code> и <code>Итоговая оценка</code>.</li>
+                <li>Остальные строки содержат как минимум идентификатор студента и его оценку за курс в соответствующих колонках.</li>
+              </ul>
+              <p>Получить идентификаторы студентов можно скачав ведомость курса в csv формате, она содержит целевую колонку <code>id</code>.</p>
+              Пример содержимого файла:<br>
+            </div>
+            <pre><code>id,Итоговая оценка
+1,Отлично
+2,Хорошо
+3,Зачет
+5,Перезачтено
+8,Незачет
+13,Без оценки</code></pre>
           </div>
         </div>
         <div class="modal-footer">

@@ -5,22 +5,23 @@ from typing import IO, Callable, Dict, List, Optional
 
 from rest_framework import serializers
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.translation import gettext_lazy as _
 
 from core.forms import ScoreField
 from courses.constants import AssignmentFormat
-from courses.models import Assignment
+from courses.models import Assignment, Course
 from grading.api.yandex_contest import (
     ProblemStatus, YandexContestAPI, yandex_contest_scoreboard_iterator
 )
 from grading.models import Checker
 from grading.utils import YandexContestScoreSource
 from learning.models import Enrollment, StudentAssignment
+from learning.services.enrollment_service import update_enrollment_grade
 from learning.services.personal_assignment_service import (
     update_personal_assignment_score
 )
-from learning.settings import AssignmentScoreUpdateSource
+from learning.settings import AssignmentScoreUpdateSource, EnrollmentGradeUpdateSource, GradeTypes
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -137,6 +138,79 @@ def assignment_import_scores_from_csv(csv_file: IO,
             continue
         imported += 1
     return found, imported
+
+
+def enrollment_import_grades_from_csv(csv_file: IO,
+                                      course: Course,
+                                      required_headers: List[CSVColumnName],
+                                      lookup_column_name: CSVColumnName,
+                                      enrollments: Dict[CSVColumnValue, Enrollment],
+                                      changed_by: User,
+                                      grade_log_source: EnrollmentGradeUpdateSource,
+                                      transform_value: Optional[Callable[[CSVColumnValue], CSVColumnValue]] = None):
+    # Remove BOM by using 'utf-8-sig'
+    f = (bs.decode("utf-8-sig") for bs in csv_file)
+    reader = csv.DictReader(f)
+    reader.fieldnames = [name.lower() for name in reader.fieldnames]
+    errors = _validate_headers(reader, required_headers)
+    if errors:
+        raise ValidationError("<br>".join(errors))
+
+    logger.info(f"Start processing csv")
+
+    found = 0
+    imported = 0
+    errors = []
+    for row_number, row in enumerate(reader, start=1):
+        raw_lookup_value = row[lookup_column_name].strip()
+        if transform_value:
+            lookup_value = transform_value(raw_lookup_value)
+        else:
+            lookup_value = raw_lookup_value
+        if lookup_value not in enrollments:
+            error_msg = f'Строка {row_number}: студент с идентификатором "{raw_lookup_value}" не найден.'
+            logger.warning(error_msg)
+            errors.append(error_msg)
+            continue
+        found += 1
+        enrollment = enrollments[lookup_value]
+        try:
+            grade = GradeTypes.get_choice_from_russian_label(row['итоговая оценка'])
+            grade_tuple = (grade.value, grade.label)
+            if not GradeTypes.is_suitable_for_grading_system(grade_tuple, course.grading_system.value):
+                raise ValidationError(f"оценка '{row['итоговая оценка']}' не подходит для системы оценивая этого курса"
+                                      f", идентификатор студента '{raw_lookup_value}'.")
+        except (KeyError, ValidationError) as e:
+            logger.warning(e)
+            errors.append(f'Строка {row_number}: {e.message if isinstance(e, ValidationError) else e}')
+            continue
+        try:
+            is_success, _ = update_enrollment_grade(enrollment,
+                                                    editor=changed_by,
+                                                    old_grade=enrollment.grade,
+                                                    new_grade=grade.value,
+                                                    source=grade_log_source)
+            if not is_success:
+                error_msg = f"Строка {row_number}: обновление не произошла из-за конфликта с внешним изменением."
+                errors.append(error_msg)
+                logger.warning(error_msg)
+            logger.info(f"Enrollment grade has been updated from {enrollment.grade}"
+                        f" to {grade.value} for {enrollment}")
+        except PermissionDenied:
+            logger.error(f"You have no permission to change enrollment grade via csv-import.")
+            raise
+        except ValidationError as ve:
+            error_msg = f"Строка {row_number}: некорректная оценка '{row['итоговая оценка']}'" \
+                        f" для студента с идентификатором '{raw_lookup_value}' ({ve.message})."
+            logger.error(error_msg)
+            errors.append(error_msg)
+            continue
+        except Exception as e:
+            logger.error(e)
+            errors.append(str(e))
+            continue
+        imported += 1
+    return found, imported, errors
 
 
 def _validate_headers(reader: csv.DictReader,

@@ -1,6 +1,6 @@
 import csv
 import itertools
-from typing import Any, Optional
+from typing import Any, Optional, IO
 
 from rest_framework import serializers, status
 from rest_framework.response import Response
@@ -33,10 +33,11 @@ from learning.gradebook import (
 from learning.gradebook.data import get_student_assignment_state
 from learning.gradebook.services import (
     assignment_import_scores_from_csv, assignment_import_scores_from_yandex_contest,
-    get_assignment_checker
+    get_assignment_checker, enrollment_import_grades_from_csv
 )
-from learning.models import StudentGroup
+from learning.models import StudentGroup, Enrollment
 from learning.permissions import EditGradebook, ViewGradebook
+from learning.services.enrollment_service import get_enrollments_by_stepik_id, get_enrollments_by_yandex_login
 from learning.services.personal_assignment_service import (
     get_personal_assignments_by_enrollment_id, get_personal_assignments_by_stepik_id,
     get_personal_assignments_by_yandex_login
@@ -48,7 +49,7 @@ __all__ = [
     "ImportAssignmentScoresByYandexLoginView"
 ]
 
-from learning.settings import AssignmentScoreUpdateSource
+from learning.settings import AssignmentScoreUpdateSource, EnrollmentGradeUpdateSource
 from users.models import StudentTypes, User
 
 
@@ -76,15 +77,15 @@ class GradeBookListBaseView(generic.ListView):
 
     def get_queryset(self):
         return (Semester.objects
-                .filter(index__lte=self.get_term_threshold())
-                .exclude(type=SemesterTypes.SUMMER)
-                .order_by('-index')
-                .prefetch_related(
-                    Prefetch(
-                        "course_set",
-                        queryset=self.get_course_queryset(),
-                        to_attr="course_offerings"
-                    )))
+            .filter(index__lte=self.get_term_threshold())
+            .exclude(type=SemesterTypes.SUMMER)
+            .order_by('-index')
+            .prefetch_related(
+            Prefetch(
+                "course_set",
+                queryset=self.get_course_queryset(),
+                to_attr="course_offerings"
+            )))
 
 
 class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
@@ -231,6 +232,7 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
             _("Role"),
             _("Group"),
             _("Yandex Login"),
+            "stepik_id",
             _("Codeforces Handle"),
             "gitlab.manytask.org ID",
             "gitlab.manytask.org Login",
@@ -266,6 +268,7 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
                      student_profile.get_type_display(),
                      (student_group and student_group.name) or "-",
                      student.yandex_login,
+                     student.stepic_id,
                      student.codeforces_login,
                      gitlab_manytask.uid if gitlab_manytask else "-",
                      gitlab_manytask.login if gitlab_manytask and gitlab_manytask.login else "-",
@@ -342,8 +345,8 @@ class ImportAssignmentScoresByStepikIDView(ImportAssignmentScoresBaseView):
     def _import_scores(self, assignment, csv_file):
         with_stepik_id = get_personal_assignments_by_stepik_id(assignment=assignment)
         return assignment_import_scores_from_csv(csv_file,
-                                                 required_headers=['stepic_id', 'score'],
-                                                 lookup_column_name='stepic_id',
+                                                 required_headers=['stepik_id', 'score'],
+                                                 lookup_column_name='stepik_id',
                                                  student_assignments=with_stepik_id,
                                                  changed_by=self.request.user,
                                                  audit_log_source=AssignmentScoreUpdateSource.CSV_STEPIK)
@@ -358,6 +361,91 @@ class ImportAssignmentScoresByYandexLoginView(ImportAssignmentScoresBaseView):
                                                  student_assignments=with_yandex_login,
                                                  changed_by=self.request.user,
                                                  audit_log_source=AssignmentScoreUpdateSource.CSV_YANDEX_LOGIN,
+                                                 transform_value=normalize_yandex_login)
+
+
+class ImportCourseGradesBaseView(PermissionRequiredMixin, generic.View):
+    course: Course
+    permission_required = EditGradebook.name
+
+    def setup(self, request: HttpRequest, *args: Any, **kwargs: Any) -> None:
+        super().setup(request, *args, **kwargs)
+        queryset = (Course.objects
+                    .filter(pk=kwargs['course_id'])
+                    .select_related('meta_course', 'main_branch', 'semester'))
+        self.course = get_object_or_404(queryset)
+
+    def get_permission_object(self) -> Course:
+        return self.course
+
+    def post(self, request: AuthenticatedHttpRequest, *args: Any, **kwargs: Any):
+        try:
+            csv_file = request.FILES['csv_file']
+        except (MultiValueDictKeyError, ValueError, TypeError):
+            return HttpResponseBadRequest()
+        self.import_grades(self.course, csv_file)
+        return self.get_redirect_url()
+
+    def import_grades(self, assignment, csv_file):
+        try:
+            found, imported, errors = self._import_grades(self.course, csv_file)
+            msg = _("Успешно импортированы записи для курса {} - для {} из {} строк "
+                    "с верными идентификаторами студентов.").format(
+                self.course, imported, found)
+            messages.info(self.request, msg, extra_tags='timeout')
+            if errors:
+                raise ValidationError("<br>".join(errors), code='not critical')
+        except ValidationError as e:
+            msg = '<b>Не все записи были обработаны.</b><br>'
+            if e.code != 'not critical':
+                msg += '<b>Импорт прекращен из-за ошибки:</b><br>'
+            messages.error(self.request, msg + e.message, extra_tags='timeout')
+        except UnicodeDecodeError as e:
+            messages.error(self.request, str(e), extra_tags='timeout')
+
+    def _import_grades(self, course: Course, csv_file: IO):
+        raise NotImplementedError
+
+    def get_redirect_url(self):
+        namespace = self.request.resolver_match.namespace
+        url = self.course.get_gradebook_url(url_name=f'{namespace}:gradebook')
+        return HttpResponseRedirect(url)
+
+
+class ImportCourseGradesByEnrollmentIDView(ImportCourseGradesBaseView):
+    def _import_grades(self, course: Course, csv_file: IO):
+        enrollments = {str(e.pk): e for e in Enrollment.active.filter(course=course)}
+        return enrollment_import_grades_from_csv(csv_file,
+                                                 course=course,
+                                                 required_headers=['id', 'итоговая оценка'],
+                                                 lookup_column_name='id',
+                                                 enrollments=enrollments,
+                                                 changed_by=self.request.user,
+                                                 grade_log_source=EnrollmentGradeUpdateSource.CSV_ENROLLMENT)
+
+
+class ImportCourseGradesByStepikIDView(ImportCourseGradesBaseView):
+    def _import_grades(self, course: Course, csv_file: IO):
+        with_stepik_id = get_enrollments_by_stepik_id(course)
+        return enrollment_import_grades_from_csv(csv_file,
+                                                 course=course,
+                                                 required_headers=['stepik_id', 'итоговая оценка'],
+                                                 lookup_column_name='stepik_id',
+                                                 enrollments=with_stepik_id,
+                                                 changed_by=self.request.user,
+                                                 grade_log_source=EnrollmentGradeUpdateSource.CSV_STEPIK)
+
+
+class ImportCourseGradesByYandexLoginView(ImportCourseGradesBaseView):
+    def _import_grades(self, course: Course, csv_file: IO):
+        with_yandex_login = get_enrollments_by_yandex_login(course)
+        return enrollment_import_grades_from_csv(csv_file,
+                                                 course=course,
+                                                 required_headers=['логин на яндексе', 'итоговая оценка'],
+                                                 lookup_column_name='логин на яндексе',
+                                                 enrollments=with_yandex_login,
+                                                 changed_by=self.request.user,
+                                                 grade_log_source=EnrollmentGradeUpdateSource.CSV_YANDEX_LOGIN,
                                                  transform_value=normalize_yandex_login)
 
 

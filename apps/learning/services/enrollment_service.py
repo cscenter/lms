@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Optional
+from typing import Any, Optional, Dict
 
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.db import transaction
@@ -197,3 +197,19 @@ def update_enrollment_grade(enrollment: Enrollment, *,
     log_entry.save()
 
     return updated, enrollment
+
+
+def get_enrollments_by_stepik_id(course: Course) -> Dict[str, Enrollment]:
+    enrollments = (Enrollment.active
+                   .filter(course=course)
+                   .select_related("student"))
+    return {str(e.student.stepic_id): e
+            for e in enrollments if e.student.stepic_id}
+
+
+def get_enrollments_by_yandex_login(course: Course) -> Dict[str, Enrollment]:
+    enrollments = (Enrollment.active
+                   .filter(course=course)
+                   .select_related("student"))
+    return {e.student.yandex_login_normalized: e
+            for e in enrollments if e.student.yandex_login_normalized}

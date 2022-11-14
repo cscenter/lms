@@ -1,6 +1,7 @@
 from enum import Enum, unique
 
-from djchoices import C, DjangoChoices
+from django.core.exceptions import ValidationError
+from djchoices import C, DjangoChoices, ChoiceItem
 
 from django.conf import settings
 from django.db.models import TextChoices
@@ -64,29 +65,41 @@ class GradeTypes(DjangoChoices):
     """
     Used as grade choices for the Enrollment model.
     """
-    NOT_GRADED = C('not_graded', _("Not graded"), system='__all__', order=0)
+    NOT_GRADED = C('not_graded', _("Not graded"), system='__all__',
+                   russian_label="Без оценки", order=0)
     UNSATISFACTORY = C('unsatisfactory', _("Enrollment|Unsatisfactory"), system=(
         GradingSystems.BASE, GradingSystems.BINARY, GradingSystems.BINARY_PLUS_EXCELLENT
-    ), order=11)
+    ), russian_label="Незачет", order=11)
     CREDIT = C('pass', _("Enrollment|Pass"), system=(
         GradingSystems.BASE, GradingSystems.BINARY, GradingSystems.BINARY_PLUS_EXCELLENT
-    ), order=12)
-    GOOD = C('good', _("Good"), system=(GradingSystems.BASE,), order=13)
+    ), russian_label="Зачет", order=12)
+    GOOD = C('good', _("Good"), system=(GradingSystems.BASE,), russian_label="Хорошо", order=13)
     EXCELLENT = C('excellent', _("Excellent"), system=(
         GradingSystems.BASE, GradingSystems.BINARY_PLUS_EXCELLENT
-    ), order=14)
-    RE_CREDIT = C('re-credit', _("Enrollment|Re-credit"), system='__all__', order=15)
+    ), russian_label="Отлично", order=14)
+    RE_CREDIT = C('re-credit', _("Enrollment|Re-credit"), system='__all__',
+                  russian_label="Перезачтено", order=15)
 
-    ONE = C('one', '1', system=(GradingSystems.TEN_POINT,), order=1)
-    TWO = C('two', '2', system=(GradingSystems.TEN_POINT,), order=2)
-    THREE = C('three', '3', system=(GradingSystems.TEN_POINT,), order=3)
-    FOUR = C('four', '4', system=(GradingSystems.TEN_POINT,), order=4)
-    FIVE = C('five', '5', system=(GradingSystems.TEN_POINT,), order=5)
-    SIX = C('six', '6', system=(GradingSystems.TEN_POINT,), order=6)
-    SEVEN = C('seven', '7', system=(GradingSystems.TEN_POINT,), order=7)
-    EIGHT = C('eight', '8', system=(GradingSystems.TEN_POINT,), order=8)
-    NINE = C('nine', '9', system=(GradingSystems.TEN_POINT,), order=9)
-    TEN = C('ten', '10', system=(GradingSystems.TEN_POINT,), order=10)
+    ONE = C('one', '1', system=(GradingSystems.TEN_POINT,),
+            russian_label="1", order=1)
+    TWO = C('two', '2', system=(GradingSystems.TEN_POINT,),
+            russian_label="2", order=2)
+    THREE = C('three', '3', system=(GradingSystems.TEN_POINT,),
+              russian_label="3", order=3)
+    FOUR = C('four', '4', system=(GradingSystems.TEN_POINT,),
+             russian_label="4", order=4)
+    FIVE = C('five', '5', system=(GradingSystems.TEN_POINT,),
+             russian_label="5", order=5)
+    SIX = C('six', '6', system=(GradingSystems.TEN_POINT,),
+            russian_label="6", order=6)
+    SEVEN = C('seven', '7', system=(GradingSystems.TEN_POINT,),
+              russian_label="7", order=7)
+    EIGHT = C('eight', '8', system=(GradingSystems.TEN_POINT,),
+              russian_label="8", order=8)
+    NINE = C('nine', '9', system=(GradingSystems.TEN_POINT,),
+             russian_label="9", order=9)
+    TEN = C('ten', '10', system=(GradingSystems.TEN_POINT,),
+            russian_label="10", order=10)
 
     excellent_grades = {EXCELLENT.value, NINE.value, TEN.value}
     good_grades = {GOOD.value, SEVEN.value, EIGHT.value}
@@ -108,6 +121,16 @@ class GradeTypes(DjangoChoices):
     @classmethod
     def get_grades_for_grading_system(cls, grading_system):
         return [grade[0] for grade in cls.get_choices_for_grading_system(grading_system)]
+
+    @classmethod
+    def get_choice_from_russian_label(cls, russian_label: str) -> ChoiceItem:
+        label = (russian_label.lower()
+                 .replace('ё', 'е').capitalize())
+        for db_value, _ in cls.choices:
+            choice = cls.get_choice(db_value)
+            if choice.russian_label == label:
+                return choice
+        raise ValidationError(f"Оценки '{russian_label}' не существует.")
 
 
 class EnrollmentGradeUpdateSource(TextChoices):

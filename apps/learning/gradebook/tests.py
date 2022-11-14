@@ -31,6 +31,7 @@ from learning.gradebook import (
     get_student_assignment_state, gradebook_data
 )
 from learning.gradebook.services import assignment_import_scores_from_csv
+from learning.gradebook.views import ImportCourseGradesBaseView
 from learning.models import AssignmentSubmissionTypes, Enrollment, StudentAssignment, EnrollmentGradeLog
 from learning.permissions import EditGradebook, ViewGradebook
 from learning.services.personal_assignment_service import (
@@ -48,6 +49,7 @@ from users.services import get_student_profile
 from users.tests.factories import (
     CuratorFactory, StudentFactory, TeacherFactory, UserFactory
 )
+
 
 # TODO: test redirect to gradebook for teachers if only 1 course in current term
 
@@ -164,7 +166,7 @@ def test_nonempty_gradebook_view(client):
     response = client.get(url)
     for student in students:
         name = "{} {}.".format(student.last_name,
-                                    student.first_name[0])
+                               student.first_name[0])
         assert smart_bytes(name) in response.content
     for as_ in as_online:
         assert smart_bytes(as_.title) in response.content
@@ -175,7 +177,8 @@ def test_nonempty_gradebook_view(client):
         assert smart_bytes(as_.title) in response.content
         for s in students:
             a_s = StudentAssignment.objects.get(student=s, assignment=as_)
-            assert response.context_data['form'].ASSIGNMENT_SCORE_PREFIX + str(a_s.pk) in response.context_data['form'].fields
+            assert response.context_data['form'].ASSIGNMENT_SCORE_PREFIX + str(a_s.pk) in response.context_data[
+                'form'].fields
 
 
 @pytest.mark.django_db
@@ -195,7 +198,7 @@ def test_save_gradebook(client, assert_redirect):
     pairs = zip([StudentAssignment.objects.get(student=student, assignment=a)
                  for student in students
                  for a in [a1, a2]],
-        [2, 3, 4, 5])
+                [2, 3, 4, 5])
     for submission, grade in pairs:
         enrollment = Enrollment.active.get(student=submission.student,
                                            course=course)
@@ -453,6 +456,7 @@ def test_save_gradebook_form(client):
     assert EnrollmentGradeLog.objects.filter(enrollment=e1).count() == 1
     assert not EnrollmentGradeLog.objects.filter(enrollment=e2).exists()
 
+
 @pytest.mark.django_db
 def test_save_gradebook_l10n(client):
     """Input value for grade value can be int or decimal"""
@@ -661,14 +665,14 @@ def test_gradebook_import_assignment_scores_from_csv_by_stepik_id_smoke(client, 
     assignments = AssignmentFactory.create_batch(3, course=co)
     assignment = assignments[0]
     for expected_score in [13, Decimal('13.42'), '12.34', '"34,56"']:
-        csv_input = force_bytes("stepic_id,score\n"
+        csv_input = force_bytes("stepik_id,score\n"
                                 "{},{}\n".format(student.stepic_id,
                                                  expected_score))
         csv_file = BytesIO(csv_input)
         with_stepik_id = get_personal_assignments_by_stepik_id(assignment=assignment)
         assignment_import_scores_from_csv(csv_file,
-                                          required_headers=['stepic_id', 'score'],
-                                          lookup_column_name='stepic_id',
+                                          required_headers=['stepik_id', 'score'],
+                                          lookup_column_name='stepik_id',
                                           student_assignments=with_stepik_id,
                                           changed_by=teacher,
                                           audit_log_source=AssignmentScoreUpdateSource.CSV_STEPIK)
@@ -712,7 +716,7 @@ header1,header2,score
     assert len(messages) == 1
     assert messages[0].level == messages_constants.ERROR
     csv_data = b"""
-stepic_id,header2,score
+stepik_id,header2,score
 2,2,42
 3,3,1
 4,3,1
@@ -938,7 +942,7 @@ def generate_course(group_one_size: int = 5,
 
 @pytest.mark.django_db
 def test_view_gradebook_student_profile_shows_student_type(client):
-    teacher, course, regular_students, invited_students,\
+    teacher, course, regular_students, invited_students, \
     group_one, group_two = generate_course()
     gradebook = gradebook_data(course)
     for pk, students_gradebook, in gradebook.students.items():
@@ -984,7 +988,7 @@ def test_gradebook_data_returns_only_selected_group():
 
 @pytest.mark.django_db
 def test_view_gradebook_filter_form_integration_test(client):
-    teacher, course, regular_students, invited_students,\
+    teacher, course, regular_students, invited_students, \
     group_one, group_two = generate_course(group_one_size=6, group_two_size=4)
     client.login(teacher)
     no_filter_url = course.get_gradebook_url()
@@ -1009,7 +1013,7 @@ def test_view_gradebook_filter_form_integration_test(client):
 
 @pytest.mark.django_db
 def test_view_gradebook_query_param_marks_selected_group(client):
-    teacher, course, regular_student, invited_students,\
+    teacher, course, regular_student, invited_students, \
     group_one, group_two = generate_course()
     client.login(teacher)
     course.get_gradebook_url(student_group=group_one.pk)
@@ -1021,7 +1025,7 @@ def test_view_gradebook_query_param_marks_selected_group(client):
 
 @pytest.mark.django_db
 def test_view_gradebook_submitting_remember_selected_group(client):
-    teacher, course, regular_student,\
+    teacher, course, regular_student, \
     invited_students, group_one, group_two = generate_course()
     client.login(teacher)
     filter_first_url = course.get_gradebook_url(student_group=group_one.pk)
@@ -1032,7 +1036,7 @@ def test_view_gradebook_submitting_remember_selected_group(client):
 
 @pytest.mark.django_db
 def test_view_gradebook_filtered_data_editable(client, assert_redirect):
-    teacher, course, group_one_students, group_two_students,\
+    teacher, course, group_one_students, group_two_students, \
     group_one, group_two = generate_course(group_one_size=50, group_two_size=51)
     assignment = AssignmentFactory(course=course, submission_type=AssignmentFormat.NO_SUBMIT)
     sa = StudentAssignment.objects.get(student=group_one_students[0], assignment=assignment)
@@ -1184,3 +1188,301 @@ def test_get_student_assignment_state():
     sa.status = AssignmentStatus.NOT_SUBMITTED
     assert get_student_assignment_state(sa) == sa.get_score_verbose_display()
 
+
+@pytest.mark.parametrize('teaching_dispatch_name,staff_dispatch_name',
+                         [('teaching:gradebook_import_course_grades_by_enrollment_id',
+                           'staff:gradebook_import_course_grades_by_enrollment_id'),
+                          ('teaching:gradebook_import_course_grades_by_yandex_login',
+                           'staff:gradebook_import_course_grades_by_yandex_login'),
+                          ('teaching:gradebook_import_course_grades_by_stepik_id',
+                           'staff:gradebook_import_course_grades_by_stepik_id')])
+@pytest.mark.django_db
+def test_gradebook_import_course_grades_permissions(teaching_dispatch_name,
+                                                    staff_dispatch_name,
+                                                    client, lms_resolver,
+                                                    assert_login_redirect):
+    curator = CuratorFactory()
+    teacher1, teacher2, spectator = TeacherFactory.create_batch(3)
+    course = CourseFactory(teachers=[teacher1])
+    CourseTeacherFactory(teacher=spectator, course=course, roles=CourseTeacher.roles.spectator)
+    teaching_url = reverse(teaching_dispatch_name, args=[course.pk])
+    staff_url = reverse(teaching_dispatch_name, args=[course.pk])
+    resolver_teaching = lms_resolver(teaching_url)
+    resolver_staff = lms_resolver(staff_url)
+    assert resolver_teaching.func.view_class == resolver_staff.func.view_class
+    assert issubclass(resolver_teaching.func.view_class, PermissionRequiredMixin)
+    assert issubclass(resolver_teaching.func.view_class, ImportCourseGradesBaseView)
+    assert resolver_teaching.func.view_class.permission_required == EditGradebook.name
+    assert EditGradebook.name in perm_registry
+
+    assert_login_redirect(teaching_url, method='post')
+
+    client.login(UserFactory())
+    response = client.post(teaching_url, data={}, content_type='application/json')
+    assert response.status_code == 403
+
+    client.login(teacher2)
+    response = client.post(teaching_url, data={}, content_type='application/json')
+    assert response.status_code == 403
+
+    e = EnrollmentFactory(course=course)
+    client.login(e.student)
+    response = client.post(teaching_url, data={}, content_type='application/json')
+    assert response.status_code == 403
+
+    client.login(spectator)
+    response = client.post(teaching_url, data={}, content_type='application/json')
+    assert response.status_code == 403
+
+    client.login(teacher1)
+    response = client.post(teaching_url, data={}, content_type='application/json')
+    assert response.status_code == 400
+
+    client.login(curator)
+    response = client.post(teaching_url, data={}, content_type='application/json')
+    assert response.status_code == 400
+
+
+@pytest.mark.parametrize('id_column_name,dispatch_view_name',
+                         [('id', 'teaching:gradebook_import_course_grades_by_enrollment_id'),
+                          ('логин на яндексе', 'teaching:gradebook_import_course_grades_by_yandex_login'),
+                          ('stepik_id', 'teaching:gradebook_import_course_grades_by_stepik_id')])
+@pytest.mark.django_db
+def test_gradebook_import_course_grades_wrong_headers(id_column_name, dispatch_view_name, client):
+    teacher = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    url = reverse(dispatch_view_name, args=[course.pk])
+    e = EnrollmentFactory(course=course)
+    assignment = AssignmentFactory.create(
+        course=course,
+        submission_type=AssignmentFormat.NO_SUBMIT,
+        maximum_score=500)
+
+    client.login(teacher)
+    csv_data = force_bytes(f"""
+wrong_id_header,header2,Итоговая оценка
+{e.id},1,Отлично
+""".strip())
+
+    form = {'csv_file': SimpleUploadedFile("data.csv", csv_data)}
+    response = client.post(url, form, follow=True)
+    assert response.status_code == 200
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert messages[0].level == messages_constants.ERROR
+    assert f"Header '{id_column_name}' not found" in str(messages[0])
+
+    csv_data = force_bytes(f"""
+{id_column_name},header2,WrongGradeColumn
+{e.id},1,Отлично
+""".strip())
+
+    form = {'csv_file': SimpleUploadedFile("data.csv", csv_data)}
+    response = client.post(url, form, follow=True)
+    assert response.status_code == 200
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert messages[0].level == messages_constants.ERROR
+    assert f"Header 'итоговая оценка' not found" in str(messages[0])
+
+
+    csv_data = force_bytes(f"""
+WrongIDColumn,header2,WrongGradeColumn
+{e.id},1,Отлично
+""".strip())
+
+    form = {'csv_file': SimpleUploadedFile("data.csv", csv_data)}
+    response = client.post(url, form, follow=True)
+    assert response.status_code == 200
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert messages[0].level == messages_constants.ERROR
+    assert f"Header 'итоговая оценка' not found" in str(messages[0])
+    assert f"Header '{id_column_name}' not found" in str(messages[0])
+
+    csv_data = force_bytes(f"""
+
+totally-invalid-headers
+{e.id},1,Отлично
+""".strip())
+    form = {'csv_file': SimpleUploadedFile("data.csv", csv_data)}
+    response = client.post(url, form, follow=True)
+    assert response.status_code == 200
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert messages[0].level == messages_constants.ERROR
+    assert f"Header 'итоговая оценка' not found" in str(messages[0])
+    assert f"Header '{id_column_name}' not found" in str(messages[0])
+
+
+    e.refresh_from_db()
+    assert e.grade == GradeTypes.NOT_GRADED
+    assert not EnrollmentGradeLog.objects.count()
+
+
+@pytest.mark.django_db
+def test_gradebook_import_course_grades_by_enrollment_id(client):
+    teacher = TeacherFactory()
+    client.login(teacher)
+    course = CourseFactory(teachers=[teacher])
+    import_csv_url = reverse('teaching:gradebook_import_course_grades_by_enrollment_id',
+                             args=[course.pk])
+    e1, e2, e3 = EnrollmentFactory.create_batch(3, course=course)
+    assignment = AssignmentFactory.create(
+        course=course,
+        submission_type=AssignmentFormat.NO_SUBMIT,
+        maximum_score=500)
+    csv_data = force_bytes(f"""
+id,header2,Итоговая оценка
+{e1.id},1,Отлично
+0,3,1
+,1,1
+{e2.id},2,Перезачтено
+{e2.id},2,cadabra
+incorrect-id,2,Отлично
+{e3.id},3,Незачтено
+{e3.id},3,Незачёт
+{e3.id},3,Зачёт
+{e3.id},3,1
+""".strip())
+    form = {'csv_file': SimpleUploadedFile("data.csv", csv_data)}
+    response = client.post(import_csv_url, form, follow=True)
+    assert response.status_code == 200
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 2
+    assert messages[0].level == messages_constants.INFO
+    assert messages[1].level == messages_constants.ERROR
+    assert 'для 4 из 7 строк с верными идентификаторами студентов' in str(messages[0])
+    assert all(error_msg in str(messages[1]) for error_msg in [
+        'Строка 2: студент с идентификатором "0" не найден.',
+        'Строка 3: студент с идентификатором "" не найден.',
+        "Строка 5: Оценки 'cadabra' не существует.",
+        'Строка 6: студент с идентификатором "incorrect-id" не найден.',
+        "Строка 7: Оценки 'Незачтено' не существует.",
+        f"Строка 10: оценка '1' не подходит для системы оценивая этого курса, идентификатор студента '{e3.id}'."
+    ])
+    e1.refresh_from_db()
+    e2.refresh_from_db()
+    e3.refresh_from_db()
+    assert e1.grade == GradeTypes.EXCELLENT
+    assert e2.grade == GradeTypes.RE_CREDIT
+    assert e3.grade == GradeTypes.CREDIT
+    assert EnrollmentGradeLog.objects.count() == 4
+    log1, log2 = EnrollmentGradeLog.objects.filter(enrollment=e3).order_by('grade_changed_at')
+    assert log1.grade == GradeTypes.UNSATISFACTORY
+    assert log2.grade == GradeTypes.CREDIT
+    assert log2.entry_author == teacher
+
+
+@pytest.mark.django_db
+def test_gradebook_import_course_grades_by_stepik_id(client):
+    teacher = TeacherFactory()
+    course = CourseFactory.create(teachers=[teacher])
+    import_csv_url = reverse('teaching:gradebook_import_course_grades_by_stepik_id',
+                             args=[course.pk])
+    student1 = StudentFactory(branch__code=Branches.SPB, stepic_id='2')
+    student2 = StudentFactory(branch__code=Branches.SPB, stepic_id=None)
+    student3 = StudentFactory(branch__code=Branches.SPB, stepic_id='4')
+    e1 = EnrollmentFactory(student=student1, course=course)
+    e2 = EnrollmentFactory(student=student2, course=course)
+    e3 = EnrollmentFactory(student=student3, course=course)
+    assignment = AssignmentFactory.create(
+        course=course,
+        submission_type=AssignmentFormat.NO_SUBMIT,
+        maximum_score=50)
+    client.login(teacher)
+    csv_data = force_bytes(f"""
+stepik_id,header2,Итоговая оценка
+{student1.stepic_id},1,Отлично
+3,3,1
+,2,Перезачтено
+{student1.stepic_id},2,cadabra
+incorrect-id,2,Отлично
+{student3.stepic_id},3,Незачет
+{student3.stepic_id},3,зачёт
+{student3.stepic_id},3,1
+""".strip())
+    form = {'csv_file': SimpleUploadedFile("data.csv", csv_data)}
+    response = client.post(import_csv_url, form, follow=True)
+    assert response.status_code == 200
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 2
+    assert messages[0].level == messages_constants.INFO
+    assert messages[1].level == messages_constants.ERROR
+    assert 'для 3 из 5 строк с верными идентификаторами студентов' in str(messages[0])
+    assert all(error_msg in str(messages[1]) for error_msg in [
+        'Строка 2: студент с идентификатором "3" не найден.',
+        'Строка 3: студент с идентификатором "" не найден.',
+        "Строка 4: Оценки 'cadabra' не существует.",
+        'Строка 5: студент с идентификатором "incorrect-id" не найден.',
+        "Строка 8: оценка '1' не подходит для системы оценивая этого курса,"
+        f" идентификатор студента '{student3.stepic_id}'."
+    ])
+    e1.refresh_from_db()
+    e2.refresh_from_db()
+    e3.refresh_from_db()
+    assert e1.grade == GradeTypes.EXCELLENT
+    assert e2.grade == GradeTypes.NOT_GRADED
+    assert e3.grade == GradeTypes.CREDIT
+    assert EnrollmentGradeLog.objects.count() == 3
+    log1, log2 = EnrollmentGradeLog.objects.filter(enrollment=e3).order_by('grade_changed_at')
+    assert log1.grade == GradeTypes.UNSATISFACTORY
+    assert log2.grade == GradeTypes.CREDIT
+    assert log1.entry_author == teacher
+
+
+@pytest.mark.django_db
+def test_gradebook_import_course_grades_by_yandex_login(client):
+    teacher = TeacherFactory()
+    course = CourseFactory.create(teachers=[teacher])
+    import_csv_url = reverse('teaching:gradebook_import_course_grades_by_yandex_login',
+                             args=[course.pk])
+    student1 = StudentFactory(branch__code=Branches.SPB, yandex_login='Yandex-login1')
+    student2 = StudentFactory(branch__code=Branches.SPB, yandex_login='')
+    student3 = StudentFactory(branch__code=Branches.SPB, yandex_login='Yandex-login3')
+    e1 = EnrollmentFactory(student=student1, course=course)
+    e2 = EnrollmentFactory(student=student2, course=course)
+    e3 = EnrollmentFactory(student=student3, course=course)
+    assignment = AssignmentFactory.create(
+        course=course,
+        submission_type=AssignmentFormat.NO_SUBMIT,
+        maximum_score=50)
+    client.login(teacher)
+    csv_data = force_bytes(f"""
+Логин на Яндексе,header2,Итоговая оценка
+{student1.yandex_login},1,Отлично
+3,3,1
+,2,Перезачтено
+{student1.yandex_login},2,cadabra
+incorrect-id,2,Отлично
+{student3.yandex_login},3,Незачет
+{student3.yandex_login},3,зачёт
+{student3.yandex_login},3,1
+""".strip())
+    form = {'csv_file': SimpleUploadedFile("data.csv", csv_data)}
+    response = client.post(import_csv_url, form, follow=True)
+    assert response.status_code == 200
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 2
+    assert messages[0].level == messages_constants.INFO
+    assert messages[1].level == messages_constants.ERROR
+    assert 'для 3 из 5 строк с верными идентификаторами студентов' in str(messages[0])
+    assert all(error_msg in str(messages[1]) for error_msg in [
+        'Строка 2: студент с идентификатором "3" не найден.',
+        'Строка 3: студент с идентификатором "" не найден.',
+        "Строка 4: Оценки 'cadabra' не существует.",
+        'Строка 5: студент с идентификатором "incorrect-id" не найден.',
+        "Строка 8: оценка '1' не подходит для системы оценивая этого курса, идентификатор студента"
+        f" '{student3.yandex_login}'."
+    ])
+    e1.refresh_from_db()
+    e2.refresh_from_db()
+    e3.refresh_from_db()
+    assert e1.grade == GradeTypes.EXCELLENT
+    assert e2.grade == GradeTypes.NOT_GRADED
+    assert e3.grade == GradeTypes.CREDIT
+    assert EnrollmentGradeLog.objects.count() == 3
+    log1, log2 = EnrollmentGradeLog.objects.filter(enrollment=e3).order_by('grade_changed_at')
+    assert log1.grade == GradeTypes.UNSATISFACTORY
+    assert log2.grade == GradeTypes.CREDIT
+    assert log1.entry_author == teacher

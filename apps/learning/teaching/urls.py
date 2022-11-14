@@ -81,9 +81,12 @@ urlpatterns = [
             path('csv/', gv.GradeBookCSVView.as_view(), name='gradebook_csv'),
         ])),
         path('<int:course_id>/import/csv/', include([
-            path('stepik', gv.ImportAssignmentScoresByStepikIDView.as_view(), name='gradebook_import_scores_by_stepik_id'),
-            path('yandex-login', gv.ImportAssignmentScoresByYandexLoginView.as_view(), name='gradebook_import_scores_by_yandex_login'),
-            path('enrollments', gv.ImportAssignmentScoresByEnrollmentIDView.as_view(), name='gradebook_import_scores_by_enrollment_id'),
+            path('assignments-stepik', gv.ImportAssignmentScoresByStepikIDView.as_view(), name='gradebook_import_scores_by_stepik_id'),
+            path('assignments-yandex-login', gv.ImportAssignmentScoresByYandexLoginView.as_view(), name='gradebook_import_scores_by_yandex_login'),
+            path('assignments-enrollments', gv.ImportAssignmentScoresByEnrollmentIDView.as_view(), name='gradebook_import_scores_by_enrollment_id'),
+            path('course-grades-stepik', gv.ImportCourseGradesByStepikIDView.as_view(), name='gradebook_import_course_grades_by_stepik_id'),
+            path('course-grades-yandex', gv.ImportCourseGradesByYandexLoginView.as_view(), name='gradebook_import_course_grades_by_yandex_login'),
+            path('course-grades-enrollments', gv.ImportCourseGradesByEnrollmentIDView.as_view(), name='gradebook_import_course_grades_by_enrollment_id')
         ])),
     ])),
     path('api/', include(([
