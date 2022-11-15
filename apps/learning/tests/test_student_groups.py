@@ -147,7 +147,9 @@ def test_student_group_resolving_on_enrollment_admin(client, settings):
         'course': course.pk,
         'student': student.pk,
         'student_profile': student.get_student_profile(settings.SITE_ID).pk,
-        'grade': GradeTypes.NOT_GRADED
+        'grade': GradeTypes.NOT_GRADED,
+        'grade_history-TOTAL_FORMS': 0,
+        'grade_history-INITIAL_FORMS': 0
     }
     curator = CuratorFactory()
     client.login(curator)

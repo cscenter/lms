@@ -1,7 +1,7 @@
 {% if view.is_for_staff %}
-  {% set form_url = url('staff:gradebook_import_scores_by_stepik_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
+  {% set score_form_url = url('staff:gradebook_import_scores_by_stepik_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
 {% else %}
-  {% set form_url = url('teaching:gradebook_import_scores_by_stepik_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
+  {% set score_form_url = url('teaching:gradebook_import_scores_by_stepik_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
 {% endif %}
 <div id="import-scores-from-csv-stepik" class="modal fade">
   <div class="modal-dialog">
@@ -10,7 +10,7 @@
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4 class="modal-title">{% trans %}Import stepik statements{% endtrans %}</h4>
       </div>
-      <form action="{{ form_url }}" enctype="multipart/form-data" method="POST">
+      <form action="{{ score_form_url }}" enctype="multipart/form-data" method="POST">
         {% csrf_token %}
         <div class="modal-body">
           <div class="form-group">
@@ -30,8 +30,56 @@
             <label for="csv-choose-file">2. {% trans %}Select csv file{% endtrans %}</label>
             <input id="input-id" name="csv_file" value="2" type="file" required>
             <div class="help-block">Значения должны быть разделены запятой. Первая строка - заголовки.<br>Пример содержимого файла:</div>
-            <pre><code>stepic_id,score
+            <pre><code>stepik_id,score
 1,7</code></pre>
+            <div class="alert alert-block alert-warning">
+              Студенты могут указать произвольный Stepik ID в своём профиле, а значит есть вероятность импортировать чужие результаты.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">{% trans %}Close{% endtrans %}</button>
+          <button type="submit" class="btn btn-primary">{% trans %}Import{% endtrans %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if view.is_for_staff %}
+  {% set grade_form_url = url('staff:gradebook_import_course_grades_by_stepik_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
+{% else %}
+  {% set grade_form_url = url('teaching:gradebook_import_course_grades_by_stepik_id', course_id=gradebook.course.pk, subdomain=LMS_SUBDOMAIN) %}
+{% endif %}
+<div id="import-grades-from-csv-stepik" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Импорт оценок за курс из CSV-файла по stepik.org ID</h4>
+      </div>
+      <form action="{{ grade_form_url }}" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="csv-choose-file">2. {% trans %}Select csv file{% endtrans %}</label>
+            <input id="input-id" name="csv_file" value="2" type="file" required>
+            <div class="help-block">Формат файла:<br>
+              <ul>
+                <li>Значения разделяются запятой.</li>
+                <li>Первая строка содержит заголовки. Для успешного импорта необходимы <code>stepik_id</code> и <code>Итоговая оценка</code>.</li>
+                <li>Остальные строки содержат как минимум идентификатор и оценку за курс в соответствующих колонках.</li>
+              </ul>
+              <p>Получить идентификаторы <code>stepik_id</code> студентов можно скачав ведомость курса в csv формате, она содержит целевую колонку <code>stepik_id</code>.</p>
+              Пример содержимого файла:<br>
+            </div>
+            <pre><code>stepik_id,Итоговая оценка
+1,Отлично
+2,Хорошо
+5,Зачет
+14,Перезачтено
+42,Незачет
+132,Без оценки</code></pre>
             <div class="alert alert-block alert-warning">
               Студенты могут указать произвольный Stepik ID в своём профиле, а значит есть вероятность импортировать чужие результаты.
             </div>

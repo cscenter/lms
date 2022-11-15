@@ -1,6 +1,8 @@
 from datetime import timedelta
 
 import pytest
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.utils.timezone import now
 
 from core.tests.factories import BranchFactory
 from courses.constants import AssigneeMode
@@ -9,18 +11,19 @@ from courses.tests.factories import (
     AssignmentFactory, CourseFactory, CourseTeacherFactory
 )
 from learning.models import (
-    AssignmentNotification, Enrollment, StudentAssignment, StudentGroup
+    AssignmentNotification, Enrollment, StudentAssignment, StudentGroup, EnrollmentGradeLog
 )
 from learning.services import AssignmentService
+from learning.services.enrollment_service import update_enrollment_grade
 from learning.services.notification_service import (
     create_notifications_about_new_submission
 )
-from learning.settings import Branches, StudentStatuses
+from learning.settings import Branches, StudentStatuses, GradeTypes, EnrollmentGradeUpdateSource
 from learning.tests.factories import (
     AssignmentCommentFactory, AssignmentNotificationFactory, EnrollmentFactory,
     StudentAssignmentFactory, StudentGroupAssigneeFactory
 )
-from users.tests.factories import StudentProfileFactory
+from users.tests.factories import StudentProfileFactory, StudentFactory, CuratorFactory, TeacherFactory
 
 
 @pytest.mark.django_db
@@ -342,3 +345,149 @@ def test_create_notifications_about_new_submission():
     notifications = (AssignmentNotification.objects
                      .filter(student_assignment=student_assignment))
     assert notifications.count() == 2
+
+
+@pytest.mark.django_db
+def test_update_enrollment_grade_permissions():
+    student = StudentFactory()
+
+    enrollment = EnrollmentFactory(student=student)
+
+    grade_changed_at = now()
+    with pytest.raises(PermissionDenied):
+        update_enrollment_grade(enrollment=enrollment,
+                                old_grade=enrollment.grade,
+                                new_grade=GradeTypes.EXCELLENT,
+                                editor=student,
+                                grade_changed_at=grade_changed_at,
+                                source=EnrollmentGradeUpdateSource.GRADEBOOK)
+
+    curator = CuratorFactory()
+    update_enrollment_grade(enrollment=enrollment,
+                            old_grade=enrollment.grade,
+                            new_grade=GradeTypes.EXCELLENT,
+                            editor=curator,
+                            grade_changed_at=grade_changed_at,
+                            source=EnrollmentGradeUpdateSource.GRADEBOOK)
+    enrollment.refresh_from_db()
+    assert enrollment.grade == GradeTypes.EXCELLENT
+    logs = EnrollmentGradeLog.objects.all()
+    assert logs.count() == 1
+    log = logs.first()
+    assert log.grade == GradeTypes.EXCELLENT
+    assert log.entry_author == curator
+    assert log.grade_changed_at == grade_changed_at
+    assert log.source == EnrollmentGradeUpdateSource.GRADEBOOK
+
+    teacher, another_teacher, spectator = TeacherFactory.create_batch(3)
+    CourseTeacherFactory(teacher=teacher, course=enrollment.course)
+    update_enrollment_grade(enrollment=enrollment,
+                            old_grade=enrollment.grade,
+                            new_grade=GradeTypes.CREDIT,
+                            editor=teacher,
+                            grade_changed_at=grade_changed_at,
+                            source=EnrollmentGradeUpdateSource.GRADEBOOK)
+    enrollment.refresh_from_db()
+    assert enrollment.grade == GradeTypes.CREDIT  # changed in db
+
+    with pytest.raises(PermissionDenied):
+        CourseTeacherFactory(teacher=another_teacher, course=CourseFactory())
+        update_enrollment_grade(enrollment=enrollment,
+                                old_grade=enrollment.grade,
+                                new_grade=GradeTypes.GOOD,
+                                editor=another_teacher,
+                                grade_changed_at=grade_changed_at,
+                                source=EnrollmentGradeUpdateSource.GRADEBOOK)
+
+    CourseTeacherFactory(teacher=spectator, course=enrollment.course,
+                         roles=CourseTeacher.roles.spectator)
+    with pytest.raises(PermissionDenied) as e:
+        CourseTeacherFactory(teacher=another_teacher, course=CourseFactory())
+        update_enrollment_grade(enrollment=enrollment,
+                                old_grade=enrollment.grade,
+                                new_grade=GradeTypes.GOOD,
+                                editor=spectator,
+                                grade_changed_at=grade_changed_at,
+                                source=EnrollmentGradeUpdateSource.GRADEBOOK)
+
+
+@pytest.mark.django_db
+def test_update_enrollment_grade_validation():
+    enrollment = EnrollmentFactory()
+    curator = CuratorFactory()
+
+    with pytest.raises(ValidationError):
+        update_enrollment_grade(enrollment=enrollment,
+                                old_grade=enrollment.grade,
+                                new_grade='incorrect grade',
+                                editor=curator,
+                                source=EnrollmentGradeUpdateSource.GRADEBOOK)
+
+    with pytest.raises(ValidationError):
+        update_enrollment_grade(enrollment=enrollment,
+                                old_grade=enrollment.grade,
+                                new_grade=GradeTypes.GOOD,
+                                editor=curator,
+                                source='incorrect source')
+
+
+@pytest.mark.django_db
+def test_update_enrollment_grade_concurrency():
+    enrollment = EnrollmentFactory()
+    curator = CuratorFactory()
+
+    updated, _ = update_enrollment_grade(enrollment=enrollment,
+                                         old_grade=enrollment.grade,
+                                         new_grade=GradeTypes.GOOD,
+                                         editor=curator,
+                                         source=EnrollmentGradeUpdateSource.GRADEBOOK)
+    assert updated
+    assert enrollment.grade == GradeTypes.GOOD  # changed on instance level
+    enrollment.refresh_from_db()
+    assert enrollment.grade == GradeTypes.GOOD  # changed in db
+    logs = EnrollmentGradeLog.objects.all()
+    assert logs.count() == 1
+    log = logs.first()
+    assert log.grade == GradeTypes.GOOD
+
+    updated, _ = update_enrollment_grade(enrollment=enrollment,
+                                         old_grade=GradeTypes.CREDIT,
+                                         new_grade=GradeTypes.EXCELLENT,
+                                         editor=curator,
+                                         source=EnrollmentGradeUpdateSource.GRADEBOOK)
+    assert not updated
+    assert enrollment.grade == GradeTypes.GOOD  # not changed on instance level
+    enrollment.refresh_from_db()
+    assert enrollment.grade == GradeTypes.GOOD  # not changed in db
+    logs = EnrollmentGradeLog.objects.all()
+    assert logs.count() == 1  # there is no new logs
+
+    # External grade change
+    (Enrollment.objects.
+        filter(pk=enrollment.pk)
+        .update(grade=GradeTypes.CREDIT))
+    enrollment.grade = GradeTypes.UNSATISFACTORY
+    updated, _ = update_enrollment_grade(enrollment=enrollment,
+                                         old_grade=GradeTypes.CREDIT,
+                                         new_grade=GradeTypes.EXCELLENT,
+                                         editor=curator,
+                                         source=EnrollmentGradeUpdateSource.GRADEBOOK)
+    assert updated
+    assert enrollment.grade == GradeTypes.EXCELLENT  # instance value has been changed
+    enrollment.refresh_from_db()
+    assert enrollment.grade == GradeTypes.EXCELLENT  # db values has been changed
+    logs = EnrollmentGradeLog.objects.all()
+    assert logs.count() == 2
+
+    # instance value is correct, but old_grade argument not
+    updated, _ = update_enrollment_grade(enrollment=enrollment,
+                                         old_grade=GradeTypes.RE_CREDIT,
+                                         new_grade=GradeTypes.CREDIT,
+                                         editor=curator,
+                                         source=EnrollmentGradeUpdateSource.GRADEBOOK)
+    assert not updated
+    assert enrollment.grade == GradeTypes.EXCELLENT  # instance value has been changed
+    enrollment.refresh_from_db()
+    assert enrollment.grade == GradeTypes.EXCELLENT  # db values has been changed
+    logs = EnrollmentGradeLog.objects.all()
+    assert logs.count() == 2

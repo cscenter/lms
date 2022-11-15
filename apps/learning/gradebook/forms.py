@@ -19,10 +19,11 @@ __all__ = ('ConflictError', 'BaseGradebookForm', 'AssignmentScore',
            'EnrollmentFinalGrade', 'GradeBookFormFactory', 'GradeBookFilterForm')
 
 from learning.services import StudentGroupService
+from learning.services.enrollment_service import update_enrollment_grade
 from learning.services.personal_assignment_service import (
     update_personal_assignment_score
 )
-from learning.settings import AssignmentScoreUpdateSource
+from learning.settings import AssignmentScoreUpdateSource, EnrollmentGradeUpdateSource
 from users.models import User
 
 ConflictError = namedtuple('ConflictError', ['field_name', 'unsaved_value'])
@@ -98,10 +99,11 @@ class BaseGradebookForm(forms.Form):
                 grade_old = self._get_initial_value(field_name)
                 grade_new = self.cleaned_data[field_name]
                 field: EnrollmentFinalGrade = self.fields[field_name]
-                updated = (Enrollment.objects
-                           .filter(pk=field.enrollment_id)
-                           .filter(Q(grade=grade_old) | Q(grade=grade_new))
-                           .update(grade=grade_new))
+                enrollment = gradebook.students[field.student_id]._enrollment
+                updated, _ = update_enrollment_grade(enrollment=enrollment,
+                                                     old_grade=grade_old, new_grade=grade_new,
+                                                     editor=changed_by,
+                                                     source=EnrollmentGradeUpdateSource.GRADEBOOK)
                 if not updated:
                     ce = ConflictError(field_name=field_name,
                                        unsaved_value=grade_new)
@@ -114,7 +116,6 @@ class BaseGradebookForm(forms.Form):
 
 
 class GradeBookFilterForm(forms.Form):
-
     student_group = forms.TypedChoiceField(
         label=_("Groups"),
         label_suffix='',
@@ -142,6 +143,7 @@ class CustomBoundField(BoundField):
     Shows `hidden_initial_value` value provided to field constructor
     on rendering hidden widget.
     """
+
     def as_hidden(self, attrs=None, **kwargs):
         """
         Returns a string of HTML for representing this as an <input type="hidden">.
@@ -192,6 +194,7 @@ class EnrollmentFinalGrade(forms.ChoiceField):
                          show_hidden_initial=True,
                          widget=widget)
         # Used to simplify `form.save()` method
+        self.student_id = student.id
         self.enrollment_id = student.enrollment_id
         self.final_grade = student.final_grade
         self.hidden_initial_value = self.final_grade

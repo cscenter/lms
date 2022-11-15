@@ -43,7 +43,7 @@
             <div class="btn-group">
               <a class="btn btn-default" data-toggle="dropdown"><i class="fa fa-upload"></i> Импорт оценок <span class="caret"></span></a>
               <ul class="dropdown-menu pull-right" role="menu">
-                <li class="dropdown-header">Из CSV-файла</li>
+                <li class="dropdown-header">Импорт оценок за задачи из CSV-файла</li>
                 <li role="presentation">
                   <a href="#import-scores-from-csv-enrollments" role="menuitem" data-toggle="modal">&nbsp;&nbsp;по идентификатору студента</a>
                 </li>
@@ -59,6 +59,16 @@
                     <a href="#import-scores-from-yandex-contest" role="menuitem" data-toggle="modal">Из Яндекс.Контеста</a>
                   </li>
                 {% endif %}
+                <li class="dropdown-header">Импорт оценок за курс из CSV-файла</li>
+                <li role="presentation">
+                  <a href="#import-grades-from-csv-enrollments" role="menuitem" data-toggle="modal">&nbsp;&nbsp;по идентификатору студента</a>
+                </li>
+                <li role="presentation">
+                  <a href="#import-grades-from-csv-stepik" role="menuitem" data-toggle="modal">&nbsp;&nbsp;по stepik.org ID</a>
+                </li>
+                <li role="presentation">
+                  <a href="#import-grades-from-csv-yandex-login" role="menuitem" data-toggle="modal">&nbsp;&nbsp;по Яндекс.Логину</a>
+                </li>
               </ul>
             </div>
             {% endif %}
