@@ -100,11 +100,12 @@ class EnrollmentGradeLogAdminInline(admin.TabularInline):
     list_select_related = ['student_profile', 'entry_author']
     model = EnrollmentGradeLog
     extra = 0
-    show_change_link = True
-    readonly_fields = ('grade_changed_at', 'source', 'grade', 'entry_author')
     ordering = ['-grade_changed_at', '-pk']
 
     def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
         return False
 
     def has_delete_permission(self, request, obj=None):

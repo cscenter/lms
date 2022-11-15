@@ -427,13 +427,10 @@ class EnrollmentGradeLog(TimestampedModel):
         max_length=15)
 
     class Meta:
-        verbose_name_plural = _("Enrollment Grade Log")
+        verbose_name_plural = "Лог изменения оценки"
 
     def __str__(self):
         return str(self.pk)
-
-    def get_grade_display(self):
-        return GradeTypes.values[self.grade]
 
 
 class CourseInvitation(models.Model):

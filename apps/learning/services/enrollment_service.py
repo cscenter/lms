@@ -185,7 +185,7 @@ def update_enrollment_grade(enrollment: Enrollment, *,
                .filter(pk=enrollment.pk, grade__in=[old_grade, new_grade])
                .update(grade=new_grade))
     if not updated:
-        return updated, enrollment
+        return False, enrollment
     enrollment.grade = new_grade
 
     log_entry = EnrollmentGradeLog(grade=new_grade,
@@ -196,7 +196,7 @@ def update_enrollment_grade(enrollment: Enrollment, *,
         log_entry.grade_changed_at = grade_changed_at
     log_entry.save()
 
-    return updated, enrollment
+    return True, enrollment
 
 
 def get_enrollments_by_stepik_id(course: Course) -> Dict[str, Enrollment]:

@@ -163,10 +163,9 @@ def enrollment_import_grades_from_csv(csv_file: IO,
     errors = []
     for row_number, row in enumerate(reader, start=1):
         raw_lookup_value = row[lookup_column_name].strip()
+        lookup_value = raw_lookup_value
         if transform_value:
             lookup_value = transform_value(raw_lookup_value)
-        else:
-            lookup_value = raw_lookup_value
         if lookup_value not in enrollments:
             error_msg = f'Строка {row_number}: студент с идентификатором "{raw_lookup_value}" не найден.'
             logger.warning(error_msg)
