@@ -1,7 +1,7 @@
 from django.views.generic import TemplateView
 
 from admission.models import Campaign
-from auth.views import ADMISSION_APPLICATION_BACKEND_PREFIX
+from auth.views import YANDEX_OAUTH_BACKEND_PREFIX
 
 from core.urls import reverse
 from django.db.models import F
@@ -10,7 +10,7 @@ from django.middleware.csrf import get_token
 from learning.settings import AcademicDegreeLevels
 
 from django.conf import settings
-SESSION_LOGIN_KEY = f"{ADMISSION_APPLICATION_BACKEND_PREFIX}_login"
+SESSION_LOGIN_KEY = f"{YANDEX_OAUTH_BACKEND_PREFIX}_login"
 
 
 class ApplicationFormView(TemplateView):

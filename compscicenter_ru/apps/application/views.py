@@ -10,7 +10,7 @@ from django.views.generic.base import TemplateView
 
 from admission.constants import WHERE_DID_YOU_LEARN
 from admission.models import Applicant, Campaign
-from auth.views import ADMISSION_APPLICATION_BACKEND_PREFIX
+from auth.views import YANDEX_OAUTH_BACKEND_PREFIX
 
 from core.models import University
 from core.urls import reverse
@@ -19,7 +19,7 @@ from learning.settings import AcademicDegreeLevels
 STRATEGY = 'social_django.strategy.DjangoStrategy'
 # Override `user` attribute to prevent accidental user creation
 STORAGE = __name__ + '.DjangoStorageCustom'
-SESSION_LOGIN_KEY = f"{ADMISSION_APPLICATION_BACKEND_PREFIX}_login"
+SESSION_LOGIN_KEY = f"{YANDEX_OAUTH_BACKEND_PREFIX}_login"
 
 
 class ApplicationFormView(TemplateView):

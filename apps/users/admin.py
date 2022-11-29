@@ -19,7 +19,7 @@ from users.forms import UserChangeForm, UserCreationForm
 from .import_export import UserRecordResource
 from .models import (
     CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
-    StudentStatusLog, StudentTypes, User, UserGroup
+    StudentStatusLog, StudentTypes, User, UserGroup, YandexUserData
 )
 from .services import assign_role, update_student_status
 
@@ -87,6 +87,19 @@ class UserGroupInlineAdmin(admin.TabularInline):
         }
 
 
+class YandexUserDataInlineAdmin(admin.StackedInline):
+    model = YandexUserData
+    fk_name = 'user'
+    extra = 0
+    fields = ['uid', 'login', 'display_name', 'changed_by', 'modified_at']
+    readonly_fields = ['user', 'uid', 'changed_by', 'modified_at']
+    exclude = ['first_name', 'last_name', 'real_name']
+    can_delete = True
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 class UserAdmin(_UserAdmin):
     add_form = UserCreationForm
     add_fieldsets = (
@@ -99,7 +112,7 @@ class UserAdmin(_UserAdmin):
     form = UserChangeForm
     change_form_template = 'admin/user_change_form.html'
     ordering = ['last_name', 'first_name']
-    inlines = [OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
+    inlines = [YandexUserDataInlineAdmin, OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
                UserGroupInlineAdmin]
     readonly_fields = ['last_login', 'date_joined']
     list_display = ['id', 'username', 'email', 'first_name', 'last_name',
@@ -140,6 +153,15 @@ class UserAdmin(_UserAdmin):
         if "comment" in form.changed_data:
             obj.comment_last_author = request.user
         super().save_model(request, obj, form, change)
+
+    def save_formset(self, request, form, formset, change):
+        for form in formset.forms:
+            if isinstance(form.instance, YandexUserData):
+                obj = form.instance
+                obj.changed_by = request.user
+                obj.save()
+        formset.save()
+
 
 
 class StudentStatusLogAdminInline(admin.TabularInline):

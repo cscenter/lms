@@ -140,6 +140,38 @@
           </td>
         </tr>
       {% endif %}
+      {% if profile_user.pk == request_user.pk or request_user.is_curator or request_user.is_teacher %}
+        <tr>
+          <td>Yandex</td>
+          <td>
+            {% with verified_yandex=profile_user.yandex_data %}
+              {% if verified_yandex %}
+                {{ profile_user.yandex_data.login|default("—", True) }}
+                {% if request.user.pk == profile_user.pk %}
+                  <a href={{ yandex_oauth_url }}>[Изменить]</a>
+                {% else %}
+                  ({{profile_user.yandex_data.uid}})
+                {% endif %}
+              {% else %}
+                {% if profile_user.yandex_login %}
+                  {{ profile_user.yandex_login }}
+                  {% if request.user.pk == profile_user.pk %}
+                    <a class="text-danger" href={{ yandex_oauth_url }}>[Подтвердить]</a>
+                  {% else %}
+                    <span class="text-danger">[Не подтверждено]</span>
+                  {% endif %}
+                {% else %}
+                  {% if request.user.pk == profile_user.pk %}
+                    <a class="text-danger" href={{ yandex_oauth_url }}>[Войти через Яндекс]</a>
+                  {% else %}
+                    <span class="text-danger">[Аккаунт не подключён]</span>
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endwith %}
+          </td>
+        </tr>
+      {% endif %}
       {% if icalendars %}
         <tr>
           <td>.iCal-календари</td>
@@ -150,10 +182,6 @@
           </td>
         </tr>
       {% endif %}
-      <tr>
-        <td>Yandex</td>
-        <td>{{ profile_user.yandex_login|default("—", True) }}</td>
-      </tr>
       <tr>
         <td>Github</td>
         <td>{% if profile_user.github_login %}

@@ -237,6 +237,47 @@ def user_photo_upload_to(instance: "User", filename):
     return f"profiles/{bucket}/{file_name}{ext}"
 
 
+class YandexUserData(TimestampedModel):
+    """
+    This data is obtained from Yandex ID API.
+    These constraints obtained experimentally from web-version:
+        len(login) = 1..30
+        len(display_name) = 1..60
+        len(first_name) = 1..50
+        len(last_name) = 0..50
+        len(real_name) = len(first_name + ' ' + last_name) = 1..101
+    ATTENTION:
+        yandex login can be blank and in common it's not unique!!!
+        Instead, use the UID everywhere.
+    """
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("User"),
+        related_name="yandex_data",
+        on_delete=models.CASCADE)
+    login = models.CharField(_("Yandex Login"), max_length=64, blank=True)
+    uid = models.CharField(_("Yandex UID"), max_length=64, unique=True)
+
+    first_name = models.CharField(_('first name'), max_length=64, blank=True)
+    last_name = models.CharField(_('last name'), max_length=64, blank=True)
+    display_name = models.CharField(_("Display Name"), max_length=130, blank=True)
+    real_name = models.CharField(_("Real name"), max_length=130, blank=True)
+
+    # It can be helpful to determine students with problems in the login field.
+    # The login can be generated automatically on the Yandex side so it can be useless.
+    # Therefore curators must change the login field manually for the data import to work.
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Changed by"),
+        related_name="+",
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
+    class Meta:
+        verbose_name = _("Data from Yandex.ID")
+
+
 class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
            UserThumbnailMixin, EmailAddressSuspension, AbstractBaseUser):
     TIMEZONE_AWARE_FIELD_NAME = "time_zone"
@@ -521,6 +562,11 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         parts = [p.lower() for p in parts if p] or [self.username.lower()]
         # TODO: remove apostrophe
         return ".".join(parts).translate(ru_en_mapping)
+
+    def get_yandex_login(self):
+        if hasattr(self, 'yandex_data') and self.yandex_data is not None:
+            return normalize_yandex_login(self.yandex_data.login)
+        return self.yandex_login_normalized
 
     @property
     def photo_data(self):

@@ -4,6 +4,7 @@ from crispy_forms.layout import Div, Layout, Submit
 from django import forms
 from django.contrib.auth.forms import UserChangeForm as _UserChangeForm
 from django.contrib.auth.forms import UserCreationForm as _UserCreationForm
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
 
 from core.models import LATEX_MARKDOWN_ENABLED
@@ -25,16 +26,29 @@ class UserProfileForm(forms.ModelForm):
         help_text=_("Format: dd.mm.yyyy"),
         required=False,
         widget=DateInputTextWidget(attrs={'class': 'datepicker'}))
+    yandex_login = forms.CharField(
+        max_length=64,
+        label="Логин из Яндекс.Контеста",
+        help_text="<b>YANDEX.ID</b>@yandex.ru обновлено будет только в YandexUserData",
+        required=False
+    )
 
     def __init__(self, *args, **kwargs):
+        self.editor = kwargs.pop('editor')
+        self.student = kwargs.pop('student')
         super().__init__(*args, **kwargs)
         option_empty = ('', 'Отключен')
         user_options = self.instance.get_redirect_options()
         self.fields['index_redirect'].choices = [option_empty] + user_options
-
         self.helper = FormHelper()
         show_fields = list(UserProfileForm.Meta.fields)
-
+        if self.editor.is_curator:
+            if not hasattr(self.student, 'yandex_data'):
+                field = self.fields['yandex_login']
+                field.help_text = "Сначала студент должен привязать аккаунт к Яндекс.ID"
+                field.disabled = True
+        else:
+            show_fields.remove('yandex_login')
         if is_club_site():
             show_fields.extend(['first_name', 'last_name', 'patronymic'])
         else:
@@ -42,6 +56,11 @@ class UserProfileForm(forms.ModelForm):
 
         self.helper.layout = Layout(Div(*show_fields))
         self.helper.form_tag = False
+
+    def clean_yandex_login(self):
+        if self.editor.is_curator:
+            return self.cleaned_data['yandex_login']
+        return ''
 
     class Meta:
         model = User
@@ -62,7 +81,6 @@ class UserProfileForm(forms.ModelForm):
                 .format(LATEX_MARKDOWN_ENABLED,
                         _("will be shown only to logged-in users"))),
             'telegram_username': '@&lt;<b>username</b>&gt; в настройках профиля Telegram',
-            'yandex_login': _("<b>YANDEX.ID</b>@yandex.ru"),
             'github_login': "github.com/<b>GITHUB-ID</b>",
             'stepic_id': _("stepik.org/users/<b>USER_ID</b>"),
             'codeforces_login': _("codeforces.com/profile/<b>HANDLE</b>"),

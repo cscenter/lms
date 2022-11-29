@@ -5,7 +5,8 @@ from django.urls import include, path
 
 from auth.views import (
     LoginView, LogoutView, connect_service_begin, connect_service_complete,
-    disconnect_service, pass_reset_confirm_view, pass_reset_view, yandex_login_access, yandex_login_access_complete
+    disconnect_service, pass_reset_confirm_view, pass_reset_view, yandex_login_access_admission,
+    yandex_login_access_admission_complete, yandex_profile_oauth_data_access, yandex_profile_oauth_data_complete
 )
 
 app_name = 'auth'
@@ -16,9 +17,14 @@ social_patterns = [
     path('disconnect/<str:backend>/', disconnect_service, name='disconnect'),
 ]
 
-yandex_access_patterns = [
-    path('yandex_access/', yandex_login_access, name='begin'),
-    path('yandex_access/complete/', yandex_login_access_complete, name='complete')
+yandex_application_access_patterns = [
+    path('yandex_access/', yandex_login_access_admission, name='begin'),
+    path('yandex_access/complete/', yandex_login_access_admission_complete, name='complete')
+]
+
+yandex_profile_data_access_patterns = [
+    path('yandex_profile_oauth_access/', yandex_profile_oauth_data_access, name='yandex_begin'),
+    path('yandex_profile_oauth_access/complete/', yandex_profile_oauth_data_complete, name='yandex_complete')
 ]
 
 urlpatterns = [
@@ -32,7 +38,8 @@ urlpatterns = [
     path('password_reset/done/', views.PasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', pass_reset_confirm_view, name='password_reset_confirm'),
     path('reset/done/', views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
-    path('', include((yandex_access_patterns, 'application')))
+    path('', include((yandex_application_access_patterns, 'application'))),
+    path('', include((yandex_profile_data_access_patterns, 'users')))
 ]
 
 

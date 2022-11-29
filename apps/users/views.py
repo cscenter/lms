@@ -4,6 +4,7 @@ import os
 from collections import OrderedDict
 from typing import Any, Optional
 
+from django.utils.timezone import now
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
@@ -25,6 +26,7 @@ from auth.models import ConnectedAuthService
 from auth.services import get_available_service_providers, get_connected_accounts
 from core.http import AuthenticatedHttpRequest, HttpRequest
 from core.timezone.utils import get_gmt
+from core.urls import reverse
 from core.views import ProtectedFormMixin
 from courses.models import CourseTeacher, Semester
 from courses.selectors import get_site_courses
@@ -34,7 +36,7 @@ from learning.icalendar import get_icalendar_links
 from learning.models import Enrollment, StudentAssignment
 from learning.settings import GradeTypes, StudentStatuses
 from users.compat import get_graduate_profile as get_graduate_profile_compat
-from users.models import SHADCourseRecord
+from users.models import SHADCourseRecord, YandexUserData
 from users.thumbnails import CropboxData, get_user_thumbnail, photo_thumbnail_cropbox
 
 from .forms import CertificateOfParticipationCreateForm, UserProfileForm
@@ -84,7 +86,11 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         u = self.request.user
-        profile_user = get_object_or_404(self.get_queryset().filter(pk=kwargs['pk']))
+        profile_user = get_object_or_404(
+            self.get_queryset()
+                .filter(pk=kwargs['pk'])
+                .select_related('yandex_data')
+        )
         is_library_installed = apps.is_installed("library")
         is_certificates_of_participation_enabled = settings.IS_CERTIFICATES_OF_PARTICIPATION_ENABLED
         is_social_accounts_enabled = settings.IS_SOCIAL_ACCOUNTS_ENABLED
@@ -108,6 +114,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             "current_semester": current_semester,
             "can_view_student_profiles": can_view_student_profiles,
             "can_view_assignments": can_view_assignments,
+            "yandex_oauth_url": reverse('auth:users:yandex_begin'),
             "is_yds_site": self.request.site.pk == settings.YDS_SITE_ID
         }
         if is_certificates_of_participation_enabled:
@@ -187,6 +194,13 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
     template_name = "lms/user_profile/user_edit.html"
     form_class = UserProfileForm
 
+    def get_form_kwargs(self):
+        kwargs = super(UserUpdateView, self).get_form_kwargs()
+        kwargs.update({'editor': self.request.user,
+                       'student': self.object,
+                       'initial': {'yandex_login': self.object.get_yandex_login()}})
+        return kwargs
+
     def is_form_allowed(self, user, obj):
         return obj.pk == user.pk or user.is_curator
 
@@ -212,6 +226,14 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
                 testimonial = testimonial_form.cleaned_data['testimonial']
                 graduate_profile.testimonial = testimonial
                 graduate_profile.save()
+        yandex_login = form.cleaned_data['yandex_login']
+        if yandex_login and self.request.user.is_curator:
+            (YandexUserData.objects
+             .filter(user=self.object)
+             .exclude(login=yandex_login)
+             .update(login=yandex_login,
+                     changed_by=self.request.user,
+                     modified_at=now()))
         return super().form_valid(form)
 
 

@@ -1,6 +1,7 @@
 from typing import Iterable
 
 from braces.views import LoginRequiredMixin
+from django.db import IntegrityError
 from social_core.actions import do_disconnect
 from social_core.exceptions import AuthException
 from social_core.utils import partial_pipeline_data, setting_url
@@ -10,7 +11,7 @@ from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.auth import views
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.utils.decorators import method_decorator
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import generic
@@ -37,9 +38,9 @@ from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from auth.backends import YandexRuOAuth2Backend
+from users.models import YandexUserData
 
-
-ADMISSION_APPLICATION_BACKEND_PREFIX = 'application_ya'
+YANDEX_OAUTH_BACKEND_PREFIX = 'application_ya'
 
 
 class LoginView(generic.FormView):
@@ -252,38 +253,38 @@ def redirect_to(redirect_url):
     return _wrapper
 
 
+def connect_yandexru_oauth_backend(view):
+    @wraps(view)
+    def wrapper(request, *args, **kwargs):
+        redirect_url = reverse(kwargs.pop("redirect_url"))
+        request.social_strategy = DjangoStrategy(DjangoStorageCustom, request,
+                                                 *args, **kwargs)
+        if not hasattr(request, 'strategy'):
+            request.strategy = request.social_strategy
+        try:
+            request.backend = YandexRuOAuth2Backend(request.social_strategy,
+                                                    redirect_url)
+        except MissingBackend:
+            raise Http404('Backend not found')
+        return view(request, *args, **kwargs)
+    return wrapper
+
+
 @never_cache
 @redirect_to("auth:application:complete")
-def yandex_login_access(request, *args, **kwargs):
-    redirect_url = reverse(kwargs.pop("redirect_url"))
-    request.social_strategy = DjangoStrategy(DjangoStorageCustom, request,
-                                             *args, **kwargs)
-    if not hasattr(request, 'strategy'):
-        request.strategy = request.social_strategy
-    try:
-        request.backend = YandexRuOAuth2Backend(request.social_strategy, redirect_url)
-    except MissingBackend:
-        raise Http404('Backend not found')
+@connect_yandexru_oauth_backend
+def yandex_login_access_admission(request, *args, **kwargs):
     return do_auth(request.backend, redirect_name=REDIRECT_FIELD_NAME)
 
 
 @never_cache
 @csrf_exempt
 @redirect_to("auth:application:complete")
-def yandex_login_access_complete(request, *args, **kwargs):
+@connect_yandexru_oauth_backend
+def yandex_login_access_admission_complete(request, *args, **kwargs):
     """
     Authentication complete view. Our main goal - to retrieve user yandex login.
     """
-    redirect_url = reverse(kwargs.pop("redirect_url"))
-    request.social_strategy = DjangoStrategy(DjangoStorageCustom, request,
-                                             *args, **kwargs)
-    if not hasattr(request, 'strategy'):
-        request.strategy = request.social_strategy
-    try:
-        request.backend = YandexRuOAuth2Backend(request.social_strategy,
-                                                redirect_url)
-    except MissingBackend:
-        raise Http404('Backend not found')
 
     user = request.user
     backend = request.backend
@@ -295,9 +296,55 @@ def yandex_login_access_complete(request, *args, **kwargs):
     try:
         auth_data = backend.complete(user=user, *args, **kwargs)
         for field_name in ["login", "sex"]:
-            key = f"{ADMISSION_APPLICATION_BACKEND_PREFIX}_{field_name}"
+            key = f"{YANDEX_OAUTH_BACKEND_PREFIX}_{field_name}"
             backend.strategy.session_set(key, auth_data.get(field_name))
         context = {"yandex_login": auth_data.get("login", "")}
     except SocialAuthBaseException as e:
         context = {"error": str(e)}
     return render(request, 'admission/social_close_popup.html', context=context)
+
+
+@never_cache
+@redirect_to("auth:users:yandex_complete")
+@connect_yandexru_oauth_backend
+def yandex_profile_oauth_data_access(request, *args, **kwargs):
+    return do_auth(request.backend, redirect_name=REDIRECT_FIELD_NAME)
+
+
+@never_cache
+@csrf_exempt
+@redirect_to("auth:users:yandex_complete")
+@connect_yandexru_oauth_backend
+def yandex_profile_oauth_data_complete(request, *args, **kwargs):
+    """
+    Authentication complete view. Our main goal - to retrieve user yandex login.
+    """
+
+    user = request.user
+    backend = request.backend
+
+    if not user_is_authenticated(user):
+        return HttpResponse('401 Unauthorized', status=401)
+    # Note: Pipeline is never called since we prevent user authentication
+    try:
+        auth_data = backend.complete(user=user, *args, **kwargs)
+        fields = ["id", "login", "display_name", "real_name", "first_name", "last_name"]
+        yandex_data = {field_name: auth_data.get(field_name) for field_name in fields}
+        yandex_data["uid"] = yandex_data.pop("id")
+        obj, created = YandexUserData.objects.get_or_create(user=user)
+        for field_name, value in yandex_data.items():
+            # Be careful, don't let 'id' appear here
+            setattr(obj, field_name, value)
+        obj.changed_by = None
+        obj.save()
+        messages.success(request, 'Ваш профиль был успешно подключён!')
+    except IntegrityError:
+        messages.error(request, "Данный аккаунт уже подключен к другому профилю, обратитесь к кураторам!",
+                       extra_tags='timeout')
+        YandexUserData.objects.filter(user=user).delete()
+    except Exception as e:
+        messages.error(request, str(e), extra_tags='timeout')
+    url = reverse('user_detail', args=[request.user.pk],
+                  subdomain=settings.LMS_SUBDOMAIN)
+    return HttpResponseRedirect(redirect_to=url)
+
