@@ -3,7 +3,7 @@ FROM python:3.10-slim-buster AS builder
 # Python requirements
 COPY Pipfile* /tmp/
 RUN pip install --upgrade pip \
-    && pip install --no-cache-dir pipenv \
+    && pip install --no-cache-dir pipenv==2022.11.11 \
     && cd /tmp/ \
     && pipenv --python /usr/local/bin/python requirements > /tmp/requirements-prod.txt \
     && pipenv --python /usr/local/bin/python requirements --dev-only > /tmp/requirements-dev.txt \
