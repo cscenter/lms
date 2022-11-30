@@ -325,7 +325,7 @@ def test_view_assignment_list(client):
 @pytest.mark.django_db
 def test_assignment_list_view_context_unenrolled_course(client):
     """
-    Course assignments (even with future deadline) must be placed under archive
+    Course assignments (even with future deadline) should not be visible
     if student left the course
     """
     url = reverse('study:assignment_list')
@@ -347,7 +347,7 @@ def test_assignment_list_view_context_unenrolled_course(client):
     response = client.post(course.get_unenroll_url(), form)
     response = client.get(url)
     assert len(response.context_data['assignment_list_open']) == 0
-    assert len(response.context_data['assignment_list_archive']) == 2
+    assert len(response.context_data['assignment_list_archive']) == 0
 
 
 @pytest.mark.django_db

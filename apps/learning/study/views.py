@@ -105,9 +105,16 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
 
     def get_queryset(self, current_term):
         today = get_now_utc().date()
+        left_enrollments = Enrollment.objects.filter(
+            student=self.request.user,
+            is_deleted=True,
+            course__completed_at__gt=today
+        )
+        left_courses = [e.course_id for e in left_enrollments]
         return (StudentAssignment.objects
                 .for_student(self.request.user)
                 .filter(assignment__course__completed_at__gt=today)
+                .exclude(assignment__course__pk__in=left_courses)
                 .order_by('assignment__deadline_at',
                           'assignment__course__meta_course__name',
                           'pk'))
