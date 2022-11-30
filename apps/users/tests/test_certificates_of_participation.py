@@ -44,7 +44,7 @@ def test_create_reference(client, assert_redirect):
     response = client.post(form_url, form_data)
     assert CertificateOfParticipation.objects.count() == 1
     ref = CertificateOfParticipation.objects.first()
-    expected_url = ref.get_absolute_url()
+    expected_url = f"{student_profile.user.get_absolute_url()}#for-curator-tab"
     assert_redirect(response, expected_url)
 
 
