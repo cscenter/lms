@@ -293,7 +293,8 @@ class CertificateOfParticipationCreateView(PermissionRequiredMixin,
         return super().form_valid(form)
 
     def get_success_url(self):
-        return self.object.get_absolute_url()
+        user = get_object_or_404(User.objects.filter(pk=self.kwargs['user_id']))
+        return f"{user.get_absolute_url()}#for-curator-tab"
 
 
 class CertificateOfParticipationDetailView(PermissionRequiredMixin,
