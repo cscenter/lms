@@ -6,13 +6,12 @@
 {% block content %}
     {% with student=certificate_of_participation.student_profile.user %}
       <page size="A4" id="reference-yds-page" xmlns="http://www.w3.org/1999/html">
-        <img src="{% static "v1/img/shad_top_reference.png" %}" id="reference-page-header">
+        <img src="{% static "v1/img/shad_top_reference_en.png" %}" id="reference-page-header">
         <div id="reference-yds-page-body">
           <div class="text-center text-large mb-30"><b>ACADEMIC TRANSCRIPT</b></div>
           <p class="text-justify">
             Is given to {{ certificate_of_participation.signature }} in order to confirm that he graduated from the program
-            “{{ certificate_of_participation.student_profile.academic_discipline.name_en }}” at
-            the Independent Non-Profit Organization of Continuing Professional Education “School of Data Analysis”.<sup>1</sup></p>
+            “{{ certificate_of_participation.student_profile.academic_discipline.name_en }}” at “School of Data Analysis”.<sup>1</sup></p>
             <p style="text-indent: 0";>Education Period: 2 years (September 1, {{ certificate_of_participation.student_profile.year_of_admission }} -
               May 20, {{ certificate_of_participation.student_profile.year_of_admission|add:2 }}).</p>
             <p style="text-indent: 0;">{{ certificate_of_participation.signature }} completed following courses:</p>
