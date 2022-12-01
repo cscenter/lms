@@ -262,11 +262,13 @@ class AssignmentStatusLogCSVView(PermissionRequiredMixin, generic.DetailView):
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         writer = csv.writer(response)
         headers = [
-            "first_last_name",
+            "student",
+            "student_id",
             "task",
-            "reviewer",
+            "comment_author",
+            "comment_author_id",
             "action",
-            "timestamp"
+            "comment_posted_ISO"
         ]
         writer.writerow(headers)
         comments = (AssignmentComment.objects
@@ -278,14 +280,14 @@ class AssignmentStatusLogCSVView(PermissionRequiredMixin, generic.DetailView):
                     .order_by('student_assignment__student', 'created'))
         for comment in comments:
             title = assignment.title
-            for_student = comment.student_assignment.student.get_short_name()
-            comment_author = comment.author.get_short_name()
-            created = int(comment.created.timestamp())
+            student = comment.student_assignment.student
+            comment_author = comment.author
+            created = comment.created.isoformat()
             action_text = None
             if not isinstance(comment.meta, dict) or \
                 'status' not in comment.meta or 'status_old' not in comment.meta:
                 continue
-            is_comment_from_student = comment_author == for_student
+            is_comment_from_student = comment_author == student
             is_publish_online_solution = is_comment_from_student and \
                                          assignment.submission_type == AssignmentFormat.ONLINE and \
                                          comment.meta['status'] == AssignmentStatus.ON_CHECKING
@@ -304,7 +306,9 @@ class AssignmentStatusLogCSVView(PermissionRequiredMixin, generic.DetailView):
             elif is_status_changed_on_needfixes:
                 action_text = 'получен комментарий от ревьювера'
             if action_text is not None:
-                writer.writerow([for_student, title, comment_author, action_text, created])
+                writer.writerow([student.get_short_name(), student.pk, title,
+                                 comment_author.get_short_name(), comment_author.pk,
+                                 action_text, created])
         return response
 
 
