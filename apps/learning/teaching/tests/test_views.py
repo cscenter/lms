@@ -512,7 +512,15 @@ def test_view_assignment_status_log_csv_online_assignments(client):
                       status=SubmissionStatus.PASSED,
                       meta={'verdict': SubmissionVerdict.WA.value})
 
-    table_headers = ['first_last_name', 'task', 'reviewer', 'action', 'timestamp']
+    table_headers = [
+            "student",
+            "student_id",
+            "task",
+            "comment_author",
+            "comment_author_id",
+            "action",
+            "comment_posted_ISO"
+        ]
     status_log_csv = client.get(csv_download_url).content.decode('utf-8')
     data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
     assert data == [table_headers]
@@ -532,8 +540,10 @@ def test_view_assignment_status_log_csv_online_assignments(client):
     data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
     expected_created_student1_row = [
         student_two.get_short_name(),
+        str(student_two.pk),
         assignment.title,
         student_two.get_short_name(),
+        str(student_two.pk),
         'решение отправлено на проверку'
     ]
     assert len(data) == 2
