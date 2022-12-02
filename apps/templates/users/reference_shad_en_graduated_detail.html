@@ -17,7 +17,8 @@
         <div id="reference-yds-page-body">
           <div class="text-center text-large mb-30"><b>ACADEMIC TRANSCRIPT</b></div>
           <p class="text-justify">
-            Is given to {{ certificate_of_participation.signature }} in order to confirm that he graduated from the program
+            Is given to {{ certificate_of_participation.signature }} in order to confirm that
+            {% if student.gender == student.GENDER_FEMALE %}s{% endif %}he graduated from the program
             “{{ certificate_of_participation.student_profile.academic_discipline.name_en }}” at “School of Data Analysis”.<sup>1</sup></p>
             <p style="text-indent: 0";>Education Period: 2 years (September 1, {{ certificate_of_participation.student_profile.year_of_admission }} -
               May 20, {{ certificate_of_participation.student_profile.year_of_admission|add:2 }}).</p>
