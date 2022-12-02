@@ -281,11 +281,6 @@ class CertificateOfParticipationCreateView(PermissionRequiredMixin,
     form_class = CertificateOfParticipationCreateForm
     permission_required = CreateCertificateOfParticipation.name
 
-    def get_initial(self):
-        initial = super().get_initial()
-        initial['signature'] = self.request.user.get_full_name()
-        return initial
-
     def form_valid(self, form):
         user = get_object_or_404(User.objects.filter(pk=self.kwargs['user_id']))
         student_profile = get_student_profile(user=user, site=self.request.site)

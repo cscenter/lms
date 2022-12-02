@@ -19,33 +19,55 @@ from users.tests.factories import (
 
 @pytest.mark.django_db
 def test_create_reference(client, assert_redirect):
-    """Check FIO substitute in signature input field
-       Check redirect to reference detail after form submit
+    """
+       Check redirect to student's #for-curator-tab after form submit
+       Check that student name on english is used instead of russian
+        in the english version of reference.
+       Note: signature is used as student name in english reference versions.
     """
     curator = CuratorFactory()
     client.login(curator)
-    student_profile = StudentProfileFactory()
-    form_url = reverse('student_reference_add',
-                       subdomain=settings.LMS_SUBDOMAIN,
-                       kwargs={"user_id": student_profile.user_id})
-    response = client.get(form_url)
-    soup = BeautifulSoup(response.content, "html.parser")
-    sig_input = soup.find(id="id_signature")
-    assert sig_input.attrs.get('value') == curator.get_full_name()
 
     student_profile = StudentProfileFactory()
     form_url = reverse('student_reference_add',
                        subdomain=settings.LMS_SUBDOMAIN,
                        kwargs={"user_id": student_profile.user_id})
+    note = 'Some note'
+    student_name_on_english = 'Student name on english'
     form_data = {
-        'note': '',
-        'signature': 'admin'
+        'note': note,
+        'signature': student_name_on_english
     }
     response = client.post(form_url, form_data)
     assert CertificateOfParticipation.objects.count() == 1
     ref = CertificateOfParticipation.objects.first()
     expected_url = f"{student_profile.user.get_absolute_url()}#for-curator-tab"
     assert_redirect(response, expected_url)
+
+    url_ru_courses = f"{ref.get_absolute_url()}?style=shad_ru_with_courses"
+    url_ru_without_courses = f"{ref.get_absolute_url()}?style=shad_ru_without_courses"
+    url_en_courses = f"{ref.get_absolute_url()}?style=shad_en_with_courses"
+    url_en_graduated = f"{ref.get_absolute_url()}?style=shad_en_graduated"
+
+    html = client.get(url_ru_courses).content.decode('utf-8')
+    assert note in html
+    assert student_name_on_english not in html
+    assert student_profile.user.get_full_name() in html
+
+    html = client.get(url_ru_without_courses).content.decode('utf-8')
+    assert note in html
+    assert student_name_on_english not in html
+    assert student_profile.user.get_full_name() in html
+
+    html = client.get(url_en_courses).content.decode('utf-8')
+    assert note in html
+    assert student_name_on_english in html
+    assert student_profile.user.get_full_name() not in html
+
+    html = client.get(url_en_graduated).content.decode('utf-8')
+    assert note in html
+    assert student_name_on_english in html
+    assert student_profile.user.get_full_name() not in html
 
 
 @pytest.mark.django_db

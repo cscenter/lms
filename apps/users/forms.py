@@ -103,6 +103,10 @@ class CertificateOfParticipationCreateForm(forms.ModelForm):
     class Meta:
         model = CertificateOfParticipation
         fields = ['signature', 'note']
+        help_texts = {
+            'signature': 'Укажите ФИО студента на латинице (необходимо для английской версии справки).',
+            'note': 'Дополнительная информация'
+        }
 
 
 class UserCreationForm(_UserCreationForm):
