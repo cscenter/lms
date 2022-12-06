@@ -146,3 +146,32 @@ def test_reference_detail(client, assert_login_redirect, settings):
     expected_enrollments_count = 1
     assert len(es) == expected_enrollments_count
 
+
+@pytest.mark.django_db
+def test_certificate_of_participant_hidden_course(client):
+    student = StudentFactory()
+    curator = CuratorFactory()
+    course = CourseFactory()
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    EnrollmentFactory(
+        course=course,
+        student=student_profile.user,
+        student_profile=student_profile,
+        grade=GradeTypes.GOOD
+    )
+    reference = CertificateOfParticipationFactory(
+        student_profile=student_profile,
+        signature="English Student Name"
+    )
+    url = reference.get_absolute_url()
+    client.login(curator)
+
+    response = client.get(url)
+    data = response.content.decode('utf-8')
+    assert course.name in data
+
+    course.is_visible_in_certificates = False
+    course.save()
+    response = client.get(url)
+    data = response.content.decode('utf-8')
+    assert course.name not in data
