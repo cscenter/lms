@@ -61,16 +61,21 @@ class UserQuerySet(query.QuerySet):
                            group__site_id=site_id)
 
     def student_progress(self, exclude_grades: List[str] = None,
-                         until_term: "Semester" = None):
+                         until_term: "Semester" = None,
+                         exclude_invisible_courses=False):
         """
         Prefetch student progress: courses, shad/online courses and projects
 
         Parameters:
             exclude_grades: Filter out records with provided grade values
             until_term: Get records before this term (inclusive)
+            exclude_invisible_courses: Remove courses that marked as invisible
+             in references and diplomas
         """
-
         enrollment_filters = []
+        if exclude_invisible_courses:
+            q_ = Q(course__is_visible_in_certificates=True)
+            enrollment_filters.append(q_)
         if until_term:
             q_ = Q(course__semester__index__lte=until_term.index)
             enrollment_filters.append(q_)
