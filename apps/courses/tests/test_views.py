@@ -337,3 +337,4 @@ def test_view_course_detail_enroll_by_invitation(client):
     assert 'Записаться по приглашению' not in html
     assert 'Enroll in the course' not in html
     assert 'Unenroll from the course' in html
+

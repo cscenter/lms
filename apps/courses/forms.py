@@ -1,13 +1,16 @@
 import datetime
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Set
 
-from crispy_forms.bootstrap import Tab, TabHolder
+from crispy_forms.bootstrap import Tab, TabHolder, StrictButton
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Div, Layout
+from crispy_forms.layout import Div, Layout, Row, Button, Column, HTML, Field
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.forms import BaseFormSet
+from django.forms.formsets import formset_factory
+from django.forms.widgets import SelectMultiple
 from django.utils.translation import gettext_lazy as _
 
 from core.forms import CANCEL_SAVE_PAIR
@@ -18,7 +21,7 @@ from core.utils import bucketize
 from core.widgets import DateInputTextWidget, TimeInputTextWidget, UbereditorWidget
 from courses.constants import AssigneeMode, AssignmentFormat, ClassTypes
 from courses.models import (
-    Assignment, Course, CourseClass, CourseNews, LearningSpace, MetaCourse
+    Assignment, Course, CourseClass, CourseNews, LearningSpace, MetaCourse, CourseTeacher
 )
 from courses.selectors import get_course_teachers
 from courses.services import CourseService
@@ -32,7 +35,7 @@ __all__ = ('MetaCourseForm', 'CourseUpdateForm', 'CourseNewsForm',
            'StudentGroupAssigneeForm', 'StudentGroupAssigneeFormFactory')
 
 from courses.utils import execution_time_string
-from learning.models import StudentGroup, StudentGroupAssignee
+from learning.models import StudentGroup, StudentGroupAssignee, StudentGroupTeacherBucket
 from learning.services import StudentGroupService
 
 DROP_ATTACHMENT_LINK = '<a href="{}"><i class="fa fa-trash-o"></i>&nbsp;{}</a>'
@@ -532,3 +535,165 @@ class StudentGroupAssigneeFormFactory:
         form_class = cls.build_form_class(course, is_required)
         form_kwargs.setdefault("initial", cls.get_initial_state(course, assignment))
         return form_class(**form_kwargs)
+
+
+class AssignmentStudentGroupTeachersBucketForm(forms.Form):
+    prefix = 'bucket'
+
+    def __init__(self, allowed_student_groups: List[StudentGroup],
+                 course_teachers: List[CourseTeacher], *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['student_groups'] = forms.TypedMultipleChoiceField(
+            label=_("Student Groups"),
+            choices=[(sg.pk, sg.get_name()) for sg in allowed_student_groups],
+            coerce=int,
+            required=True,
+            # widget=SelectMultiple(attrs={"size": 1, "class": "bs-select-hidden multiple-select"}),
+            # TODO: выбрать нормальный виджет
+            # TODO: с этим виджетом проблемы, потому что id элементов при копировании сложно изменять через JS
+        )
+        self.fields['teachers'] = forms.TypedMultipleChoiceField(
+            label=_("Teachers"),
+            choices=[(ct.pk, ct.get_abbreviated_name()) for ct in course_teachers],
+            coerce=int,
+            # widget=SelectMultiple(attrs={"size": 1, "class": "bs-select-hidden multiple-select"}),
+        )
+        self.__init_helper()
+
+    def __init_helper(self):
+        self.helper = FormHelper()
+        self.helper.disable_csrf = True
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Row(
+                Column(
+                    Row('student_groups'),
+                    Row(
+                        Button('fill_all_sg', "Заполнить всё", css_id=f"id_{self.prefix}-FILL-SG"),
+                        Button('clean_all_sg', "Очистить всё", css_id=f"id_{self.prefix}-CLEAR-SG")
+                    ),
+                    css_class="col-xs-5 m-15"
+                ),
+                Column(
+                    Row('teachers'),
+                    Row(
+                        Button('fill_all_ct', "Заполнить всё", css_id=f"id_{self.prefix}-FILL-CT"),
+                        Button('clean_all_ct', "Очистить всё", css_id=f"id_{self.prefix}-CLEAR-CT")
+                    ),
+                    css_class="col-xs-5 m-10"
+                ),
+                Column(
+                    "DELETE",
+                    css_class="col-xs-1 align-self-end"
+                ),
+                css_class="bucket-form mb-25"
+            ),
+        )
+
+
+class BaseAssignmentStudentGroupTeachersBucketFormSet(BaseFormSet):
+
+    def __init__(self, course: Course,
+                 available_student_groups_pk: Set[int] = None,
+                 *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.course = course
+        self.available_student_groups_pk = available_student_groups_pk
+
+    def to_internal(self):
+        return [
+            {
+                "student_groups": form.cleaned_data['student_groups'],
+                "teachers": form.cleaned_data['teachers']
+            } for form in self.forms if not (self.can_delete and self._should_delete_form(form))
+        ]
+
+    def clean(self):
+        if any(self.errors):
+            return
+        course_groups = CourseService.get_student_groups(self.course)
+        if not self.available_student_groups_pk:
+            self.available_student_groups_pk = {sg.pk for sg in course_groups}
+        labels = {sg.pk: sg.get_name() for sg in CourseService.get_student_groups(self.course)}
+        assignation = dict()
+        for index, form in enumerate(self.forms):
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            form_groups_pk = set(form.cleaned_data.get('student_groups', {}))
+            if not form_groups_pk:
+                # TODO: Браузер не передаёт данные незаполненных форм,
+                #  поэтому она билдится и считается bounded и проходит валидацию
+                raise ValidationError(f"Удалите пустую форму №{index + 1}.")
+            for student_group_pk in form_groups_pk:
+                if student_group_pk in assignation:
+                    form.add_error('student_groups',
+                                   f'Студенческая группа {labels[student_group_pk]} уже добавлена в бакет №'
+                                   f'{assignation[student_group_pk] + 1}')
+                elif student_group_pk not in self.available_student_groups_pk:
+                    form.add_error("student_groups",
+                                   f'Студенческая группа {labels[student_group_pk]} не находится в списке'
+                                   f' "Доступно для групп" задания.')
+                else:
+                    assignation[student_group_pk] = index
+                    self.available_student_groups_pk.remove(student_group_pk)
+        if self.available_student_groups_pk:
+            unassigned_sg_labels = '<br> — '.join(labels[sg] for sg in self.available_student_groups_pk)
+            raise ValidationError(f"Добавьте следующие студенческие группы в бакеты:<br> — {unassigned_sg_labels}.")
+
+
+class AssignmentStudentGroupTeachersBucketFormSetFactory:
+    prefix = AssignmentStudentGroupTeachersBucketForm.prefix
+
+    @classmethod
+    def build_formset_class(cls, assignment: Assignment):
+        AssignmentStudentGroupTeachersBucketFormSet = formset_factory(
+            AssignmentStudentGroupTeachersBucketForm,
+            extra=0 if assignment else 1,
+            formset=BaseAssignmentStudentGroupTeachersBucketFormSet,
+            can_delete=True
+        )
+        return AssignmentStudentGroupTeachersBucketFormSet
+
+    @classmethod
+    def get_initial_state(cls, assignment: Assignment):
+        buckets = StudentGroupTeacherBucket.objects.filter(assignment=assignment)
+        initial = [
+            {
+                "student_groups": [sg.pk for sg in bucket.groups.all()],
+                "teachers": [ct.pk for ct in bucket.teachers.all()]
+            }
+            for bucket in buckets
+        ]
+        return initial
+
+    @classmethod
+    def get_available_student_groups_pks(cls, assignment_form: AssignmentForm) -> Optional[Set[int]]:
+        if assignment_form.is_bound:
+            if assignment_form.is_valid():
+                return set(assignment_form.cleaned_data['restricted_to'])
+        return None
+
+    @classmethod
+    def build_formset(cls, course: Course, *, assignment: Optional[Assignment] = None,
+                      assignment_form: AssignmentForm,
+                      **formset_kwargs: Any) -> BaseAssignmentStudentGroupTeachersBucketFormSet:
+        all_student_groups = CourseService.get_student_groups(course)
+        course_teachers = get_course_teachers(course=course)
+        formset_class = cls.build_formset_class(assignment)
+        form_kwargs = {
+                "allowed_student_groups": all_student_groups,
+                "course_teachers": course_teachers
+        }
+        if assignment and not formset_kwargs.get('data'):
+            initial = cls.get_initial_state(assignment)
+            formset_kwargs.setdefault('initial', initial)
+        available_sgs = cls.get_available_student_groups_pks(assignment_form)
+        buckets_formset = formset_class(
+            course,
+            available_student_groups_pk=available_sgs,
+            prefix=cls.prefix,
+            form_kwargs=form_kwargs,
+            **formset_kwargs
+        )
+        return buckets_formset
+

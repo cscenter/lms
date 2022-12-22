@@ -10,11 +10,12 @@ from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from courses.models import CourseGroupModes, CourseTeacher
+from courses.models import CourseGroupModes, CourseTeacher, Assignment, Course
 from learning.models import (
     AssignmentScoreAuditLog, CourseInvitation, GraduateProfile, Invitation,
-    StudentAssignment, StudentGroup, StudentGroupAssignee, EnrollmentGradeLog
+    StudentAssignment, StudentGroup, StudentGroupAssignee, EnrollmentGradeLog, StudentGroupTeacherBucket
 )
+from .forms import StudentGroupTeacherBucketAdminForm
 
 from .models import AssignmentComment, Enrollment, Event
 from .services import StudentGroupService
@@ -232,6 +233,60 @@ class StudentAssignmentAdmin(BaseModelAdmin):
                                              score_old=score_old,
                                              score_new=score_new,
                                              source=AssignmentScoreUpdateSource.FORM_ADMIN)
+
+
+class StudentGroupTeacherBucketCourseFilter(admin.SimpleListFilter):
+    title = _('Course')
+    parameter_name = 'course_id'
+
+    def lookups(self, request, model_admin):
+        semester_id = request.GET.get('assignment__course__semester__id__exact')
+        if semester_id:
+            courses = Course.objects.filter(semester__id=semester_id).select_related('meta_course')
+            return ((c.pk, c.name) for c in courses)
+
+    def queryset(self, request, queryset):
+        semester_id = request.GET.get('assignment__course__semester__id__exact')
+        if self.value() and semester_id:
+            course = Course.objects.get(pk=self.value())
+            if course.semester_id == int(semester_id):
+                return queryset.filter(assignment__course=course)
+        return queryset
+
+
+class StudentGroupTeacherBucketAssignmentFilter(admin.SimpleListFilter):
+    title = _('Assignment')
+    parameter_name = 'assignment_id'
+
+    def lookups(self, request, model_admin):
+        course_id = request.GET.get('course_id')
+        if course_id:
+            assignments = Assignment.objects.filter(course_id=course_id)
+            return ((a.pk, a.title) for a in assignments)
+
+    def queryset(self, request, queryset):
+        course_id = request.GET.get('course_id')
+        if self.value() and course_id:
+            assignment = Assignment.objects.get(pk=self.value())
+            if assignment.course_id == int(course_id):
+                return queryset.filter(assignment_id=self.value())
+        return queryset
+
+
+@admin.register(StudentGroupTeacherBucket)
+class StudentGroupTeacherBucketAdmin(BaseModelAdmin):
+
+    form = StudentGroupTeacherBucketAdminForm
+    fields = (('groups', 'teachers', 'assignment'),)
+    readonly_fields = ['assignment']
+    list_display = ['assignment']
+    list_select_related = ['assignment', 'assignment__course']
+    list_filter = ['assignment__course__semester',
+                   StudentGroupTeacherBucketCourseFilter,
+                   StudentGroupTeacherBucketAssignmentFilter]
+
+    def has_add_permission(self, request) -> bool:
+        return False
 
 
 class EventAdmin(BaseModelAdmin):

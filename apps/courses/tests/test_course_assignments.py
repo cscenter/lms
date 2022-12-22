@@ -1,3 +1,5 @@
+import datetime
+
 import factory
 import pytest
 from bs4 import BeautifulSoup
@@ -9,7 +11,8 @@ from auth.mixins import PermissionRequiredMixin
 from auth.permissions import perm_registry
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.constants import AssigneeMode
+from courses.constants import AssigneeMode, AssignmentFormat
+from courses.forms import AssignmentStudentGroupTeachersBucketFormSetFactory, AssignmentForm
 from courses.models import Assignment, AssignmentAttachment, CourseTeacher
 from courses.permissions import (
     CreateAssignment, DeleteAssignmentAttachment, DeleteAssignmentAttachmentAsTeacher,
@@ -18,6 +21,8 @@ from courses.permissions import (
 from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, CourseTeacherFactory
 )
+from learning.models import StudentGroup, StudentGroupTeacherBucket
+from learning.tests.factories import StudentGroupFactory
 from users.tests.factories import CuratorFactory, TeacherFactory
 
 
@@ -113,6 +118,570 @@ def test_course_assignment_update(client, assert_redirect):
     assert_redirect(response, a.get_teacher_url())
     a.refresh_from_db()
     assert a.title == new_title
+
+
+def create_assignment_form():
+    future = datetime.date.today() + datetime.timedelta(3)
+    form = {
+        'title': 'Assignment title',
+        'submission_type': AssignmentFormat.ONLINE,
+        'text': 'some text',
+        'passing_score': 2,
+        'maximum_score': 5,
+        'weight': 1,
+        'time_zone': 'Europe/Moscow',
+        'deadline_at_0': future.strftime(DATE_FORMAT_RU),
+        'deadline_at_1': '00:00',
+        'assignee_mode': AssigneeMode.STUDENT_GROUP_BALANCED
+    }
+    return prefixed_form(form, "assignment")
+
+
+def get_assignment_course_models():
+    course = CourseFactory()
+    ct1, ct2 = CourseTeacherFactory.create_batch(2, course=course)
+    sg0 = StudentGroup.objects.first()
+    sg1, sg2 = StudentGroupFactory.create_batch(2, course=course)
+    url = course.get_create_assignment_url()
+    return course, url, ct1, ct2, sg0, sg1, sg2
+
+
+@pytest.mark.django_db
+def test_course_assignment_create_balanced_mode_one_bucket(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 1,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk, sg1.pk, sg2.pk],
+        '0-teachers': ct1.pk,
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    a = Assignment.objects.first()
+    assert a.assignee_mode == AssigneeMode.STUDENT_GROUP_BALANCED
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 1
+    bucket = buckets.first()
+    assert set(bucket.groups.all()) == {sg0, sg1, sg2}
+    assert set(bucket.teachers.all()) == {ct1}
+
+
+@pytest.mark.django_db
+def test_course_assignment_create_balanced_mode_few_buckets(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 2,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk, sg1.pk],
+        '0-teachers': ct1.pk,
+        '1-student_groups': [sg2.pk],
+        '1-teachers': [ct2.pk, ct1.pk]
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    a = Assignment.objects.first()
+    assert a.assignee_mode == AssigneeMode.STUDENT_GROUP_BALANCED
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+    bucket_1 = buckets.first()
+    bucket_2 = buckets.last()
+    assert set(bucket_1.groups.all()) == {sg0, sg1}
+    assert set(bucket_1.teachers.all()) == {ct1}
+    assert set(bucket_2.groups.all()) == {sg2}
+    assert set(bucket_2.teachers.all()) == {ct1, ct2}
+
+
+@pytest.mark.django_db
+def test_course_assignment_create_balanced_mode_delete_bucket(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 3,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk, sg1.pk],
+        '0-teachers': [ct1.pk, ct2.pk],
+        '1-student_groups': [sg2.pk],
+        '1-teachers': ct2.pk,
+        '2-student_groups': [sg0.pk, sg1.pk],
+        '2-teachers': ct1.pk,
+        '2-DELETE': 'on'
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    a = Assignment.objects.first()
+    assert a.assignee_mode == AssigneeMode.STUDENT_GROUP_BALANCED
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+    bucket_1 = buckets.first()
+    bucket_2 = buckets.last()
+    assert set(bucket_1.groups.all()) == {sg0, sg1}
+    assert set(bucket_1.teachers.all()) == {ct1, ct2}
+    assert set(bucket_2.groups.all()) == {sg2}
+    assert set(bucket_2.teachers.all()) == {ct2}
+
+
+@pytest.mark.django_db
+def test_course_assignment_create_balanced_mode_no_buckets_error(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 0,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    assert not Assignment.objects.exists()
+    assert not StudentGroupTeacherBucket.objects.exists()
+    assert 'Добавьте следующие студенческие группы в бакеты' in response.content.decode('utf-8')
+
+
+@pytest.mark.django_db
+def test_course_assignment_create_balanced_mode_delete_empty_bucket_required(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 1,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    assert not Assignment.objects.exists()
+    assert not StudentGroupTeacherBucket.objects.exists()
+    content = response.content.decode('utf-8')
+    assert 'Удалите пустую форму №1' in content
+
+
+@pytest.mark.django_db
+def test_course_assignment_create_balanced_mode_all_buckets_deleted_error(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 3,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk, sg1.pk],
+        '0-teachers': [ct1.pk, ct2.pk],
+        '0-DELETE': 'on',
+        '1-student_groups': [sg2.pk],
+        '1-teachers': ct2.pk,
+        '1-DELETE': 'on',
+        '2-student_groups': [sg0.pk, sg1.pk],
+        '2-teachers': ct1.pk,
+        '2-DELETE': 'on'
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    assert not Assignment.objects.exists()
+    assert not StudentGroupTeacherBucket.objects.exists()
+    assert 'Добавьте следующие студенческие группы в бакеты' in response.content.decode('utf-8')
+
+
+@pytest.mark.django_db
+def test_course_assignment_create_balanced_mode_teacher_required(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 2,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk, sg1.pk],
+        '1-student_groups': [sg2.pk],
+        '1-teachers': ct2.pk,
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    assert not Assignment.objects.exists()
+    assert not StudentGroupTeacherBucket.objects.exists()
+    form_data['bucket-0-teachers'] = ct2.pk
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    a = Assignment.objects.first()
+    assert a.assignee_mode == AssigneeMode.STUDENT_GROUP_BALANCED
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+
+
+@pytest.mark.django_db
+def test_course_assignment_create_balanced_mode_all_students_groups_in_buckets_required(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 2,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk],
+        '0-teachers': ct1.pk,
+        '1-student_groups': [sg2.pk],
+        '1-teachers': ct2.pk,
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    assert not Assignment.objects.exists()
+    assert not StudentGroupTeacherBucket.objects.exists()
+    form_data['bucket-0-student_groups'].append(sg1.pk)
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    a = Assignment.objects.first()
+    assert a.assignee_mode == AssigneeMode.STUDENT_GROUP_BALANCED
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+
+
+@pytest.mark.django_db
+def test_course_assignment_create_balanced_mode_buckets_student_groups_intersection_error(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 2,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk, sg1.pk],
+        '0-teachers': ct1.pk,
+        '1-student_groups': [sg1.pk, sg2.pk],
+        '1-teachers': ct2.pk,
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    assert not Assignment.objects.exists()
+    assert not StudentGroupTeacherBucket.objects.exists()
+    assert f"Студенческая группа {sg1.name} уже добавлена в бакет №1" in response.content.decode('utf-8')
+    form_data['bucket-1-student_groups'].pop(0)
+    response = client.post(url, form_data, follow=True)
+    assert response.status_code == 200
+    a = Assignment.objects.first()
+    assert a.assignee_mode == AssigneeMode.STUDENT_GROUP_BALANCED
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+
+
+@pytest.mark.django_db
+def test_course_assignment_update_balanced_mode_add_bucket(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 1,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk, sg1.pk, sg2.pk],
+        '0-teachers': ct1.pk,
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    client.post(url, form_data, follow=True)
+    a = Assignment.objects.first()
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 1
+    url = a.get_update_url()
+    form_data['bucket-TOTAL_FORMS'] = 2
+    form_data['bucket-0-student_groups'].pop(2)
+    form_data['bucket-1-student_groups'] = sg2.pk
+    form_data['bucket-1-teachers'] = ct2.pk
+
+    client.post(url, form_data, follow=True)
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+    bucket1 = buckets.first()
+    bucket2 = buckets.last()
+    assert set(bucket1.groups.all()) == {sg0, sg1}
+    assert set(bucket1.teachers.all()) == {ct1}
+    assert set(bucket2.groups.all()) == {sg2}
+    assert set(bucket2.teachers.all()) == {ct2}
+
+
+@pytest.mark.django_db
+def test_course_assignment_update_balanced_mode_remembers_bucket_appointment(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    course2 = CourseFactory()
+    # Check that these groups are not in options.
+    sg11, sg12 = StudentGroupFactory.create_batch(2, course=course2)
+    ct11, ct12 = CourseTeacherFactory.create_batch(2, course=course2)
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 2,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk, sg1.pk],
+        '0-teachers': ct1.pk,
+        '1-student_groups': [sg2.pk],
+        '1-teachers': ct2.pk
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    client.post(url, form_data, follow=True)
+    a = Assignment.objects.first()
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+    url = a.get_update_url()
+    response = client.get(url)
+    formset = response.context['buckets_formset']
+    assert len(formset.forms) == 2
+    form1, form2 = formset.forms
+    assert form1.initial == {
+        'student_groups': [sg0.pk, sg1.pk],
+        'teachers': [ct1.pk]
+    }
+    assert form2.initial == {
+        'student_groups': [sg2.pk],
+        'teachers': [ct2.pk]
+    }
+
+
+@pytest.mark.django_db
+def test_course_assignment_update_balanced_mode_restricted_to_student_groups(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 2,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk],
+        '0-teachers': ct1.pk,
+        '1-student_groups': [sg1.pk],
+        '1-teachers': ct2.pk
+    }
+    # Actually allowed to. So sg2 is restricted
+    form_data['assignment-restricted_to'] = [sg0.pk, sg1.pk]
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    client.post(url, form_data, follow=True)
+    a = Assignment.objects.first()
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+    bucket1 = buckets.first()
+    bucket2 = buckets.last()
+    assert set(bucket1.groups.all()) == {sg0}
+    assert set(bucket1.teachers.all()) == {ct1}
+    assert set(bucket2.groups.all()) == {sg1}
+    assert set(bucket2.teachers.all()) == {ct2}
+
+    url = a.get_update_url()
+    response = client.get(url)
+    formset = response.context['buckets_formset']
+    assert len(formset.forms) == 2
+    form1, form2 = formset.forms
+    student_groups = form1.fields['student_groups'].choices
+    # sg2 is restricted but should be possible to choice, because the sg2 can become allowed
+    assert set(sg[0] for sg in student_groups) == {sg0.pk, sg1.pk, sg2.pk}
+
+    form_data['bucket-1-student_groups'].append(sg2.pk)
+    response = client.post(url, form_data)
+    error_msg = f"Студенческая группа {sg2.name} не находится" \
+                " в списке &quot;Доступно для групп&quot; задания."
+    assert error_msg in response.content.decode('utf-8')
+    del form_data['assignment-restricted_to']
+
+    response = client.post(url, form_data)
+    assert error_msg not in response.content.decode('utf-8')
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+    bucket1 = buckets.first()
+    bucket2 = buckets.last()
+    assert set(bucket1.groups.all()) == {sg0}
+    assert set(bucket1.teachers.all()) == {ct1}
+    assert set(bucket2.groups.all()) == {sg1, sg2}
+    assert set(bucket2.teachers.all()) == {ct2}
+
+
+@pytest.mark.django_db
+def test_course_assignment_update_balanced_mode_teachers_list(client):
+    course1, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    course2 = CourseFactory()
+    # Check that teachers of another course are not in options.
+    ct11, ct12 = CourseTeacherFactory.create_batch(2, course=course2)
+    sg11, sg12 = StudentGroupFactory.create_batch(2, course=course2)
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 2,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk],
+        '0-teachers': ct1.pk,
+        '1-student_groups': [sg1.pk, sg2.pk],
+        '1-teachers': ct2.pk
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    client.post(url, form_data, follow=True)
+    a = Assignment.objects.first()
+    url = a.get_update_url()
+    response = client.get(url)
+
+    formset = response.context['buckets_formset']
+    assert len(formset.forms) == 2
+    form1, form2 = formset.forms
+    teachers = form1.fields['teachers'].choices
+    assert set(ct[0] for ct in teachers) == {ct1.pk, ct2.pk}
+
+
+@pytest.mark.django_db
+def test_course_assignment_update_balanced_mode_swap_buckets(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 2,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk, sg1.pk],
+        '0-teachers': ct1.pk,
+        '1-student_groups': [sg2.pk],
+        '1-teachers': ct2.pk
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    client.post(url, form_data, follow=True)
+
+    a = Assignment.objects.first()
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+    bucket1 = buckets.first()
+    bucket2 = buckets.last()
+    assert set(bucket1.groups.all()) == {sg0, sg1}
+    assert set(bucket1.teachers.all()) == {ct1}
+    assert set(bucket2.groups.all()) == {sg2}
+    assert set(bucket2.teachers.all()) == {ct2}
+
+
+    url = a.get_update_url()
+    form_data['bucket-TOTAL_FORMS'] = 2
+    form_data['bucket-0-student_groups'] = sg2.pk
+    form_data['bucket-0-teachers'] = ct2.pk
+    form_data['bucket-1-student_groups'] = [sg0.pk, sg1.pk]
+    form_data['bucket-1-teachers'] = ct1.pk
+    client.post(url, form_data, follow=True)
+
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+    bucket1 = buckets.first()
+    bucket2 = buckets.last()
+    assert set(bucket1.groups.all()) == {sg2}
+    assert set(bucket1.teachers.all()) == {ct2}
+    assert set(bucket2.groups.all()) == {sg0, sg1}
+    assert set(bucket2.teachers.all()) == {ct1}
+
+
+@pytest.mark.django_db
+def test_course_assignment_update_balanced_mode_delete_bucket(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 2,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk, sg1.pk],
+        '0-teachers': ct1.pk,
+        '1-student_groups': [sg2.pk],
+        '1-teachers': ct2.pk
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    client.post(url, form_data, follow=True)
+
+    a = Assignment.objects.first()
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+    bucket1 = buckets.first()
+    bucket2 = buckets.last()
+    assert set(bucket1.groups.all()) == {sg0, sg1}
+    assert set(bucket1.teachers.all()) == {ct1}
+    assert set(bucket2.groups.all()) == {sg2}
+    assert set(bucket2.teachers.all()) == {ct2}
+
+    url = a.get_update_url()
+    form_data['bucket-TOTAL_FORMS'] = 2
+    form_data['bucket-0-student_groups'].append(sg2.pk)
+    form_data['bucket-1-DELETE'] = 'on'
+    client.post(url, form_data, follow=True)
+
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 1
+    bucket1 = buckets.first()
+    assert set(bucket1.groups.all()) == {sg0, sg1, sg2}
+    assert set(bucket1.teachers.all()) == {ct1}
+
+
+@pytest.mark.django_db
+def test_course_assignment_update_balanced_mode_validation_error_doesnt_change_state(client):
+    course, url, ct1, ct2, sg0, sg1, sg2 = get_assignment_course_models()
+    client.login(ct1.teacher)
+    form_data = create_assignment_form()
+    assignment_formset = {
+        'TOTAL_FORMS': 2,
+        'INITIAL_FORMS': 0,
+        'MIN_NUM_FORMS': 0,
+        'MAX_NUM_FORMS': 1000,
+        '0-student_groups': [sg0.pk, sg1.pk],
+        '0-teachers': ct1.pk,
+        '1-student_groups': [sg2.pk],
+        '1-teachers': ct2.pk,
+    }
+    form_data.update(prefixed_form(assignment_formset, 'bucket'))
+    client.post(url, form_data, follow=True)
+
+    a = Assignment.objects.first()
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+    bucket1 = buckets.first()
+    bucket2 = buckets.last()
+    assert set(bucket1.groups.all()) == {sg0, sg1}
+    assert set(bucket1.teachers.all()) == {ct1}
+    assert set(bucket2.groups.all()) == {sg2}
+    assert set(bucket2.teachers.all()) == {ct2}
+
+    url = a.get_update_url()
+    form_data.pop('bucket-1-teachers')
+    form_data['bucket-2-student_groups'] = sg1.pk
+    form_data['bucket-2-teachers'] = ct2.pk
+    form_data['bucket-TOTAL_FORMS'] = 3
+    client.post(url, form_data, follow=True)
+
+    buckets = StudentGroupTeacherBucket.objects.all()
+    assert buckets.count() == 2
+    bucket1 = buckets.first()
+    bucket2 = buckets.last()
+    assert set(bucket1.groups.all()) == {sg0, sg1}
+    assert set(bucket1.teachers.all()) == {ct1}
+    assert set(bucket2.groups.all()) == {sg2}
+    assert set(bucket2.teachers.all()) == {ct2}
 
 
 # TODO: test fail on updating `course` attribute?
