@@ -16,14 +16,17 @@ from courses.models import (
 from courses.services import CourseService
 from learning.models import (
     AssignmentGroup, CourseClassGroup, Enrollment, Invitation, StudentAssignment,
-    StudentGroup, StudentGroupAssignee
+    StudentGroup, StudentGroupAssignee, StudentGroupTeacherBucket
 )
 from learning.services.assignment_service import AssignmentService
 from users.models import StudentProfile, StudentTypes
 
 CourseTeacherId = int
 StudentGroupId = int
-
+Bucket = dict
+# Bucket structure:
+#   student_groups: [pk`s of student_groups]
+#   teachers: [pk`s of course_teachers]
 
 logger = logging.getLogger(__name__)
 
@@ -318,6 +321,17 @@ class StudentGroupService:
                 to_add.append(obj)
         StudentGroupAssignee.objects.filter(assignment=assignment).delete()
         StudentGroupAssignee.objects.bulk_create(to_add)
+
+    @staticmethod
+    def set_bucket_assignation_for_assignment(*, assignment: Assignment,
+                                              data: List[Bucket]):
+        to_create = []
+        StudentGroupTeacherBucket.objects.filter(assignment=assignment).delete()
+        for bucket in data:
+            obj = StudentGroupTeacherBucket.objects.create(assignment=assignment)
+            obj.groups.set(bucket['student_groups'])
+            obj.teachers.set(bucket['teachers'])
+        StudentGroupTeacherBucket.objects.bulk_create(to_create)
 
     @staticmethod
     def get_enrollments(student_group: StudentGroup) -> List[Enrollment]:

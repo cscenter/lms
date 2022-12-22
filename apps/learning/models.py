@@ -33,7 +33,7 @@ from core.timezone import TimezoneAwareMixin, now_local
 from core.urls import reverse
 from core.utils import hashids
 from courses.constants import AssignmentFormat, AssignmentStatus
-from courses.models import Assignment, Course, CourseNews, Semester, StudentGroupTypes
+from courses.models import Assignment, Course, CourseNews, Semester, StudentGroupTypes, CourseTeacher
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
 from learning.managers import (
@@ -199,6 +199,35 @@ class StudentGroupAssignee(models.Model):
                 self.assignment.course_id != self.student_group.course_id):
             msg = _('Assignment was not found among the course assignments for the selected student group.')
             raise ValidationError(msg)
+
+
+class StudentGroupTeacherBucket(models.Model):
+    """
+        The StudentGroupTeacherBucket allows you to select a list of teachers
+         to be appointed to students HWs in the selected student groups.
+        Buckets with same assignment must not overlap by student_groups,
+         but teachers can overlap.
+        At best, the student_groups union in all assignment buckets should consist of
+         all student groups that have access to that assignment.
+    """
+    assignment = models.ForeignKey(
+        'courses.Assignment',
+        verbose_name=_("Assignment"),
+        related_name='buckets',
+        on_delete=models.CASCADE)
+    groups = models.ManyToManyField(
+        StudentGroup,
+        related_name='buckets',
+        verbose_name=_("Groups"))
+    teachers = models.ManyToManyField(
+        CourseTeacher,
+        related_name='buckets',
+        verbose_name=_("Teachers")
+    )
+
+    class Meta:
+        verbose_name = _("Student groups teachers bucket")
+        verbose_name_plural = _("Student groups teachers buckets")
 
 
 class AssignmentGroup(models.Model):

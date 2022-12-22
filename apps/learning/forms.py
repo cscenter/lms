@@ -8,17 +8,19 @@ from crispy_forms.layout import BaseInput, Div, Layout, Submit
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from core.forms import ScoreField
 from core.models import LATEX_MARKDOWN_ENABLED
+from core.urls import reverse
 from core.widgets import JasnyFileInputWidget, UbereditorWidget
 from courses.constants import AssignmentStatus
 from courses.forms import AssignmentDurationField
-from courses.models import Assignment
+from courses.models import Assignment, CourseTeacher
 from grading.services import CheckerService
 from learning.models import (
-    AssignmentSubmissionTypes, GraduateProfile, StudentAssignment
+    AssignmentSubmissionTypes, GraduateProfile, StudentAssignment, StudentGroupTeacherBucket, StudentGroup
 )
 
 from .models import AssignmentComment
@@ -291,3 +293,39 @@ class CourseEnrollmentForm(forms.Form):
         super().__init__(**kwargs)
         self.helper = FormHelper(self)
         self.helper.layout.append(Submit('enroll', 'Записаться на курс'))
+
+
+class StudentGroupTeacherBucketAdminForm(forms.ModelForm):
+
+    def __init__(self, *args, instance=None, **kwargs):
+        super().__init__(*args, instance=instance, **kwargs)
+        if instance:
+            self.fields['groups'].queryset = StudentGroup.objects.filter(
+                course_id=instance.assignment.course_id
+            )
+            self.fields['teachers'].queryset = CourseTeacher.objects.filter(
+                course_id=instance.assignment.course_id
+            )
+
+    class Meta:
+        model = StudentGroupTeacherBucket
+        fields = ['groups', 'teachers', 'assignment']
+
+    def clean_groups(self):
+        selected_groups = self.cleaned_data['groups']
+        assignment = self.instance.assignment
+        bucket_pk = self.instance.pk
+        buckets_with_same_groups = (StudentGroupTeacherBucket.objects
+            .exclude(pk=bucket_pk)
+            .filter(assignment=assignment,
+                    groups__in=selected_groups)
+        )
+        if buckets_with_same_groups.exists():
+            # It can be only one because of validation constraints
+            bucket = buckets_with_same_groups.first()
+            bucket_url = reverse('admin:learning_studentgroupteacherbucket_change', args=[bucket.pk])
+            raise ValidationError(
+                mark_safe(f"Выбранные студенческие группы пересекаться с "
+                          f'<a href="{bucket_url}"><b>другим бакетом</b></a>.'
+                          f'<br>Бакеты задания не должны пересекаться.'))
+        return selected_groups

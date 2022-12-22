@@ -79,3 +79,4 @@ class AssigneeMode(TextChoices):
     MANUAL = 'manual', _('Choose from the list')
     STUDENT_GROUP_DEFAULT = 'sg_default', _('Student Group - Default')
     STUDENT_GROUP_CUSTOM = 'sg_custom', _('Student Group - Custom')
+    STUDENT_GROUP_BALANCED = 'sg_balance', _('Student Group - Balanced')

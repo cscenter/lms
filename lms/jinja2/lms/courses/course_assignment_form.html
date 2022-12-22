@@ -152,6 +152,8 @@
                         <dd>Список ответственных берётся из настроек студенческой группы, с которой связан студент. Убедитесь, что вы указали ответственного для каждой студенческой группы (сейчас разрешено указывать только одного ответственного).</dd>
                         <dt>Студенческие группы вручную</dt>
                         <dd>В этом режиме можно кастомизировать ответственных студенческих групп для текущего задания.</dd>
+                        <dt>Студенческие группы сбалансированно</dt>
+                        <dd>Распределите <b>все</b> студенческие группы по <b>непересекающимся</b> бакетам, назначьте преподавателей, что <b>могут</b> проверять задания в каждом из бакетов. Система будет стремиться назначать проверяющих так, чтобы у них была равномерная нагрузка. </dd>
                       </dl>
                     </div>
                     {{ forms.field(field, hide_label=True) }}
@@ -191,6 +193,31 @@
                   </tbody>
                 </table>
               </div>
+            </div>
+
+            <div class="row {% if assignee_mode != AssigneeMode.STUDENT_GROUP_BALANCED %}hidden{% endif %}" data-assignee-mode="{{ AssigneeMode.STUDENT_GROUP_BALANCED }}">
+              <div id="buckets-formset" class="col-xs-12">
+                {{ buckets_formset.management_form }}
+                {% for bucket_form in buckets_formset %}
+                    {{ crispy(bucket_form) }}
+                {% endfor %}
+                {% with errors = buckets_formset.non_form_errors() %}
+                  {% if errors %}
+                      <div class="alert alert-block alert-danger">
+                        <ul>
+                          {% for error in errors %}
+                             <li>{{ error }}</li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                  {% endif %}
+                {% endwith %}
+                <div id="buckets-empty-form" style="display: none;">
+                    {{ crispy(buckets_formset.empty_form) }}
+                </div>
+              </div>
+
+              <button id="add-form" class="btn btn-info btn-block m-15">Добавить бакет</button>
             </div>
           </fieldset>
 
