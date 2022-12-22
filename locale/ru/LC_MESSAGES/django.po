@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-12-22 09:29+0000\n"
-"PO-Revision-Date: 2022-12-22 09:37+0000\n"
+"PO-Revision-Date: 2022-12-22 11:07+0000\n"
 "Last-Translator: Админ Админов <admin@admin.admin>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -974,7 +974,7 @@ msgstr "Публиковать в разделе «Видео»"
 
 #: apps/courses/models.py:313
 msgid "Do we see this course in certificates and diplomas?"
-msgstr "Отображается ли курс в справках и дипломах?"
+msgstr "Отображается ли курс в справках и дипломах"
 
 #: apps/courses/models.py:317 apps/courses/models.py:599
 msgid "Main Branch"
