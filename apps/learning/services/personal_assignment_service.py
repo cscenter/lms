@@ -440,7 +440,7 @@ def maybe_set_assignee_for_personal_assignment(submission_id: int) -> None:
     """
     submission = (AssignmentComment.objects
                   .select_related("student_assignment",
-                                  "student_assignment__assignee"
+                                  "student_assignment__assignee",
                                   "student_assignment__assignment")
                   .get(pk=submission_id))
     student_assignment = submission.student_assignment
