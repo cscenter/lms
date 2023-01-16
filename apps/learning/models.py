@@ -877,10 +877,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
             smart_str(self.student_assignment.student.get_full_name())))
 
     def save(self, **kwargs):
-        from learning.services.personal_assignment_service import (
-            maybe_set_assignee_for_personal_assignment
-        )
-        from learning.tasks import generate_notifications_about_new_submission
+        from learning.tasks import handle_submission_assignee_and_notifications
         created = self.pk is None
         is_published_before = bool(self.tracker.previous('is_published'))
         super().save(**kwargs)
@@ -889,9 +886,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
                                                     not is_published_before)
         # Send notifications on publishing submission
         if has_been_published:
-            maybe_set_assignee_for_personal_assignment(self)
-            # FIXME: add transaction.on_commit()
-            generate_notifications_about_new_submission.delay(
+            handle_submission_assignee_and_notifications.delay(
                 assignment_submission_id=self.pk)
 
     def created_local(self, tz=None):

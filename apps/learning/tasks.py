@@ -8,7 +8,7 @@ from learning.services.notification_service import (
     create_notifications_about_new_submission
 )
 from learning.services.personal_assignment_service import (
-    update_personal_assignment_stats
+    update_personal_assignment_stats, maybe_set_assignee_for_personal_assignment
 )
 
 logger = logging.getLogger(__file__)
@@ -44,6 +44,13 @@ def update_student_assignment_stats(student_assignment_id: int) -> None:
     if not student_assignment:
         return
     update_personal_assignment_stats(personal_assignment=student_assignment)
+
+
+@job('high')
+def handle_submission_assignee_and_notifications(assignment_submission_id: int):
+    maybe_set_assignee_for_personal_assignment(assignment_submission_id)
+    # P.S. Moved from AssignmentComment.save(): FIXME: add transaction.on_commit()
+    generate_notifications_about_new_submission.delay(assignment_submission_id=assignment_submission_id)
 
 
 @job('high')

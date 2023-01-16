@@ -1,10 +1,11 @@
 import logging
+from collections import defaultdict
 from datetime import timedelta
 from decimal import Decimal
 from functools import partial
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, MultipleObjectsReturned
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
 from django.db.models import (
@@ -15,14 +16,14 @@ from django.utils.translation import gettext_lazy as _
 
 from core.timezone import get_now_utc
 from core.typings import assert_never
-from core.utils import Empty, _empty
+from core.utils import _empty
 from courses.constants import AssigneeMode, AssignmentStatus
 from courses.models import Assignment, CourseTeacher
 from courses.selectors import personal_assignments_list
 from grading.services import CheckerSubmissionService
 from learning.models import (
     AssignmentComment, AssignmentScoreAuditLog, AssignmentSubmissionTypes, Enrollment,
-    PersonalAssignmentActivity, StudentAssignment
+    PersonalAssignmentActivity, StudentAssignment, StudentGroup, StudentGroupTeacherBucket
 )
 from learning.services import StudentGroupService
 from learning.settings import AssignmentScoreUpdateSource
@@ -325,6 +326,80 @@ def create_personal_assignment_review(*,
     return comment
 
 
+def calculate_teachers_overall_expected_load_in_bucket(bucket: StudentGroupTeacherBucket) -> dict:
+    """
+        For each teacher in a bucket calculates amount of expected load
+         over all buckets in which teacher is.
+        In all baskets in which the teacher is located, the expected load will be the same.
+    """
+    candidates = list(t.id for t in bucket.teachers.only("teacher_id"))
+    related_buckets = (StudentGroupTeacherBucket.objects
+                       .filter(assignment=bucket.assignment_id,
+                               teachers__in=candidates)
+                       .distinct()
+                       .prefetch_related("groups", "teachers"))
+    student_group_field = "student__enrollment__student_group"
+    # for each group calculate count of expected solutions
+    expected_groups_load = (StudentAssignment.objects
+                            .filter(assignee__isnull=True,
+                                    assignment=bucket.assignment_id,
+                                    student__enrollment__is_deleted=False,
+                                    student__enrollment__student_group__buckets__in=related_buckets)
+                            .values(student_group_field)
+                            .annotate(count=Count(student_group_field))
+                            .order_by())
+    expected_groups_load = {sa[student_group_field]: sa["count"] for sa in expected_groups_load}
+    expected_teachers_loads = defaultdict(int)
+    for rel_bucket in related_buckets:
+        rel_bucket_teachers = rel_bucket.teachers.only("teacher_id")
+        for group in rel_bucket.groups.only("id"):
+            exp_group_load = expected_groups_load.get(group.id, 0)
+            for teacher in rel_bucket_teachers:
+                if teacher.id in candidates:
+                    expected_teachers_loads[teacher.id] += exp_group_load / len(rel_bucket_teachers)
+    return {k: v for k, v in expected_teachers_loads.items() if k in candidates}
+
+
+def get_assignee_with_minimal_load(student_assignment: StudentAssignment) -> List[CourseTeacher]:
+    student_id = student_assignment.student_id
+    assignment = student_assignment.assignment
+    try:
+        enrollment = (Enrollment.active
+                      .select_related('student_group')
+                      .get(course_id=assignment.course_id,
+                           student_id=student_id))
+    except Enrollment.DoesNotExist:
+        logger.info(f"User {student_assignment.student_id} has left the course.")
+        return []
+    student_group_id = enrollment.student_group_id
+    assignees_load = (StudentAssignment.objects
+                      .filter(assignee__isnull=False,
+                              assignment=assignment)
+                      .values('assignee_id')
+                      .annotate(assignee_count=Count('assignee_id'))
+                      .order_by())
+    buckets = (StudentGroupTeacherBucket.objects
+               .filter(assignment=assignment)
+               .prefetch_related('groups', 'teachers'))
+    try:
+        target_bucket = buckets.get(groups__in=[student_group_id])
+    except StudentGroupTeacherBucket.DoesNotExist:
+        logger.info(f"StudentGroup {student_group_id} in none of the buckets.")
+        return []
+    except MultipleObjectsReturned:
+        logger.error(f"Buckets are in inconsistent states.")
+        raise
+    teachers_load = calculate_teachers_overall_expected_load_in_bucket(target_bucket)
+    for sa in assignees_load:
+        if sa['assignee_id'] in teachers_load:
+            teachers_load[sa['assignee_id']] += sa['assignee_count']
+    result = []
+    if teachers_load:
+        min_load_teacher_pk = min(teachers_load.items(), key=lambda item: item[1])[0]
+        result.append(CourseTeacher.objects.get(pk=min_load_teacher_pk))
+    return result
+
+
 def resolve_assignees_for_personal_assignment(student_assignment: StudentAssignment) -> List[CourseTeacher]:
     """
     Returns candidates who can be auto-assign as a responsible teacher for the
@@ -339,6 +414,8 @@ def resolve_assignees_for_personal_assignment(student_assignment: StudentAssignm
         return []
     elif assignee_mode == AssigneeMode.MANUAL:
         return list(assignment.assignees.all())
+    elif assignee_mode == AssigneeMode.STUDENT_GROUP_BALANCED:
+        return get_assignee_with_minimal_load(student_assignment)
     elif assignee_mode in {AssigneeMode.STUDENT_GROUP_DEFAULT, AssigneeMode.STUDENT_GROUP_CUSTOM}:
         try:
             enrollment = (Enrollment.active
@@ -356,11 +433,16 @@ def resolve_assignees_for_personal_assignment(student_assignment: StudentAssignm
         assert_never(assignee_mode)
 
 
-def maybe_set_assignee_for_personal_assignment(submission: AssignmentComment) -> None:
+def maybe_set_assignee_for_personal_assignment(submission_id: int) -> None:
     """
     This handler helps to assign responsible teacher for the personal
     assignment when any student activity occurs.
     """
+    submission = (AssignmentComment.objects
+                  .select_related("student_assignment",
+                                  "student_assignment__assignee"
+                                  "student_assignment__assignment")
+                  .get(pk=submission_id))
     student_assignment = submission.student_assignment
     # Trigger on student activity
     if submission.author_id != student_assignment.student_id:
