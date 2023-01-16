@@ -1,5 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal
+from typing import List, Dict, Tuple, Set
 
 import pytest
 
@@ -9,17 +10,18 @@ from django.db import transaction
 
 from courses.constants import AssigneeMode, AssignmentFormat, AssignmentStatus
 from courses.models import CourseGroupModes, CourseTeacher
-from courses.tests.factories import AssignmentFactory, CourseFactory
+from courses.tests.factories import AssignmentFactory, CourseFactory, CourseTeacherFactory
 from learning.models import (
     AssignmentComment, AssignmentSubmissionTypes, Enrollment,
-    PersonalAssignmentActivity, StudentAssignment
+    PersonalAssignmentActivity, StudentAssignment, StudentGroupTeacherBucket
 )
-from learning.services import EnrollmentService
+from learning.services import EnrollmentService, StudentGroupService
 from learning.services.personal_assignment_service import (
     create_assignment_comment, create_assignment_solution,
     create_personal_assignment_review, resolve_assignees_for_personal_assignment,
     update_personal_assignment_score, update_personal_assignment_stats,
-    update_personal_assignment_status
+    update_personal_assignment_status, get_assignee_with_minimal_load,
+    calculate_teachers_overall_expected_load_in_bucket
 )
 from learning.settings import AssignmentScoreUpdateSource
 from learning.tests.factories import (
@@ -739,3 +741,494 @@ def test_create_assignment_solution_meta(client):
         "status": AssignmentStatus.ON_CHECKING,
         "status_old": AssignmentStatus.NEED_FIXES
     }
+
+
+StudentGroups = Tuple
+Teachers = Set[int]
+
+
+def create_buckets_testing_environment(group_sizes: List[int],
+                                       buckets_structs: Dict[StudentGroups, Teachers]) -> Dict:
+    course = CourseFactory()
+    enrollments = EnrollmentFactory.create_batch(sum(group_sizes), course=course)
+    teachers_primary_ids = set()
+    for teachers in buckets_structs.values():
+        teachers_primary_ids.update(teachers)
+    teachers = CourseTeacherFactory.create_batch(len(teachers_primary_ids),
+                                                 course=course)
+    a = AssignmentFactory(course=course, assignee_mode=AssigneeMode.STUDENT_GROUP_BALANCED)
+    student_groups = StudentGroupFactory.create_batch(len(group_sizes) - 1, course=course)
+    if enrollments:
+        student_groups.insert(0, enrollments[0].student_group)
+    else:
+        student_groups.insert(0, course.student_groups.first())
+    transferred_cnt = group_sizes[0]
+    for group_number in range(1, len(group_sizes)):
+        group_size = group_sizes[group_number]
+        to_move = enrollments[transferred_cnt:transferred_cnt + group_size]
+        StudentGroupService.transfer_students(source=student_groups[0],
+                                              destination=student_groups[group_number],
+                                              enrollments=[enrollment.pk for enrollment in to_move])
+        transferred_cnt += group_size
+    buckets = []
+    for bucket_sgs, bucket_teachers in buckets_structs.items():
+        bucket = StudentGroupTeacherBucket.objects.create(assignment=a)
+        bucket.groups.set(student_groups[i] for i in bucket_sgs)
+        bucket.teachers.set(teachers[i] for i in bucket_teachers)
+        bucket.save()
+        buckets.append(bucket)
+    result = {
+        "course": course,
+        "teachers": teachers,
+        "student_groups": student_groups,
+        "buckets": buckets
+    }
+    return result
+
+
+@pytest.mark.django_db
+def test_calculate_teachers_load_one_bucket_empty_group(client):
+    course, teachers, student_groups, buckets = create_buckets_testing_environment(
+        group_sizes=[0],
+        buckets_structs={
+            (0,): {0},
+        }
+    ).values()
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 0.0}
+
+
+@pytest.mark.django_db
+def test_calculate_teachers_load_operations(client):
+    course, teachers, student_groups, buckets = create_buckets_testing_environment(
+        group_sizes=[0, 1, 4],
+        buckets_structs={
+            (0, 1, 2): {0},
+        }
+    ).values()
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 5.}
+
+    # Add teacher
+    ct_extra = CourseTeacherFactory.create(course=course)
+    buckets[0].teachers.add(ct_extra)
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 2.5, ct_extra.pk: 2.5}
+
+    # Leave course
+    sg3_e1 = student_groups[2].enrollments.first()
+    sg3_e1.is_deleted = True
+    sg3_e1.save()
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 2., ct_extra.pk: 2.}
+
+    # Solution submitted
+    sg3_e4 = student_groups[2].enrollments.last()
+    sg3_sa4 = sg3_e4.student.studentassignment_set.first()
+    sg3_sa4.assignee = teachers[0]
+    sg3_sa4.save()
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 1.5, ct_extra.pk: 1.5}
+
+    # Add student group
+    sg4 = StudentGroupFactory.create(course=course)
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 1.5, ct_extra.pk: 1.5}
+
+    # Add two students to student group
+    sg4_e6, sg4_e7 = EnrollmentFactory.create_batch(2, course=course, student_group=sg4)
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 1.5, ct_extra.pk: 1.5}
+
+    # Add student group to bucket
+    bucket = StudentGroupTeacherBucket.objects.create(assignment=sg3_sa4.assignment)
+    bucket.groups.add(sg4)
+    bucket.teachers.add(ct_extra)
+    bucket.save()
+    buckets.append(bucket)
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 1.5, ct_extra.pk: 3.5}
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[1])
+    assert load == {ct_extra.pk: 3.5}
+
+    # Submit from new student
+    sg4_sa1 = sg4_e6.student.studentassignment_set.first()
+    sg4_sa1.assignee = ct_extra
+    sg4_sa1.save()
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 1.5, ct_extra.pk: 2.5}
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[1])
+    assert load == {ct_extra.pk: 2.5}
+
+    # Add teacher to new bucket
+    bucket.teachers.add(teachers[0])
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 2., ct_extra.pk: 2.}
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[1])
+    assert load == {teachers[0].pk: 2., ct_extra.pk: 2.}
+
+    # Teacher leave the course
+    ct_extra.delete()
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    # +1 because of assignee in submission from new student was ct_extra
+    assert load == {teachers[0].pk: 5.}
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[1])
+    assert load == {teachers[0].pk: 5.}
+
+
+@pytest.mark.django_db
+def test_calculate_teachers_load_one_teacher_per_bucket(client):
+    course, teachers, student_groups, buckets = create_buckets_testing_environment(
+        group_sizes=[0, 1, 2, 3],
+        buckets_structs={
+            (0,): {0},
+            (1,): {1},
+            (2,): {2},
+            (3,): {3}
+        }
+    ).values()
+
+    for index in range(len(buckets)):
+        load = calculate_teachers_overall_expected_load_in_bucket(buckets[index])
+        assert load == {teachers[index].pk: index}
+
+    sg2_e1 = student_groups[1].enrollments.first()
+    sg2_sa = sg2_e1.student.studentassignment_set.first()
+    sg2_sa.assignee = teachers[1]
+    sg2_sa.save()
+
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[1])
+    assert load == {teachers[1].pk: 0.}
+
+    # Transfer student to another student group (and bucket)
+    sg2_e1 = student_groups[2].enrollments.first()
+    StudentGroupService.transfer_students(source=student_groups[2],
+                                          destination=student_groups[0],
+                                          enrollments=[sg2_e1.pk])
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 1.0}
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[2])
+    assert load == {teachers[2].pk: 1.0}
+
+    # Transferred student unenrolled
+    sg2_e1.is_delete = True
+    sg2_e1.save()
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 0.0}
+
+    # Teacher leave the course
+    teachers[0].delete()
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {}
+
+    teachers[2].delete()
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {}
+
+
+@pytest.mark.django_db
+def test_calculate_teachers_load_in_two_buckets(client):
+    course, teachers, student_groups, buckets = create_buckets_testing_environment(
+        group_sizes=[1, 2, 3, 0],
+        buckets_structs={
+            (0, 1): {0},
+            (2, 3): {0, 1, 2},
+        }
+    ).values()
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 4.0}
+
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[1])
+    assert load == {
+        teachers[0].pk: 4.0,
+        teachers[1].pk: 1.0,
+        teachers[2].pk: 1.0
+    }
+
+    sg1_enrollments = student_groups[0].enrollments.prefetch_related("student__studentassignment_set")
+    sg1_sa = sg1_enrollments.first().student.studentassignment_set.first()
+    sg1_sa.assignee = teachers[0]
+    sg1_sa.save()
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {teachers[0].pk: 3.0}
+
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[1])
+    assert load == {
+        teachers[0].pk: 3.0,
+        teachers[1].pk: 1.0,
+        teachers[2].pk: 1.0
+    }
+
+    sg2_enrollments = student_groups[1].enrollments.prefetch_related("student__studentassignment_set")
+    sg2_sa1 = sg2_enrollments.first().student.studentassignment_set.first()
+    sg2_sa2 = sg2_enrollments.last().student.studentassignment_set.first()
+    sg2_sa1.assignee = teachers[0]
+    sg2_sa1.save()
+    sg2_sa2.assignee = teachers[1]  # teacher from another bucket
+    sg2_sa2.save()
+
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {
+        teachers[0].pk: 1.0
+    }
+
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[1])
+    assert load == {
+        teachers[0].pk: 1.0,
+        teachers[1].pk: 1.0,
+        teachers[2].pk: 1.0
+    }
+
+    sg3_enrollments = student_groups[2].enrollments.prefetch_related("student__studentassignment_set")
+    sg3_sa1, sg3_sa2, sg3_sa3 = [e.student.studentassignment_set.first() for e in sg3_enrollments.all()]
+    sg3_sa1.assignee = teachers[0]
+    sg3_sa1.save()
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {
+        teachers[0].pk: 2.0 / 3.0
+    }
+
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[1])
+    assert load == {
+        teachers[0].pk: 2.0 / 3.0,
+        teachers[1].pk: 2.0 / 3.0,
+        teachers[2].pk: 2.0 / 3.0
+    }
+
+    sg3_sa2.assignee = teachers[1]
+    sg3_sa3.assignee = teachers[1]
+    sg3_sa2.save()
+    sg3_sa3.save()
+
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert load == {
+        teachers[0].pk: 0.0
+    }
+
+    load = calculate_teachers_overall_expected_load_in_bucket(buckets[1])
+    assert load == {
+        teachers[0].pk: 0.0,
+        teachers[1].pk: 0.0,
+        teachers[2].pk: 0.0
+    }
+
+
+@pytest.mark.django_db
+def test_calculate_teachers_load_all_teachers_per_bucket():
+    course, teachers, student_groups, buckets = create_buckets_testing_environment(
+        group_sizes=[1, 1, 1, 1, 1, 1],
+        buckets_structs={
+            (0, 1): {0, 1, 2},
+            (2, 3): {0, 1, 2},
+            (4, 5): {0, 1, 2}
+        }
+    ).values()
+
+    TWO = sum(1. / 3 for _ in range(6))
+    exp_load = {teachers[0].pk: TWO, teachers[1].pk: TWO, teachers[2].pk: TWO}
+    for i in range(len(buckets)):
+        act_load = calculate_teachers_overall_expected_load_in_bucket(buckets[i])
+        assert exp_load == act_load
+
+    sg1_e = student_groups[0].enrollments.first()
+    sg1_sa = sg1_e.student.studentassignment_set.first()
+    sg1_sa.assignee = teachers[0]
+    sg1_sa.save()
+    FIVE_THIRDS = sum(1. / 3 for _ in range(5))
+    exp_load = {teachers[0].pk: FIVE_THIRDS, teachers[1].pk: FIVE_THIRDS, teachers[2].pk: FIVE_THIRDS}
+    for i in range(len(buckets)):
+        act_load = calculate_teachers_overall_expected_load_in_bucket(buckets[i])
+        assert exp_load == act_load
+
+    buckets[0].teachers.remove(teachers[0])
+    ELEVEN_SIXTH = 1. / 2 + 1. / 3 + 1. / 3 + 1. / 3 + 1. / 3
+    exp_load = {teachers[1].pk: ELEVEN_SIXTH, teachers[2].pk: ELEVEN_SIXTH}
+    act_load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert exp_load == act_load
+    exp_load[teachers[0].pk] = 2. / 3 + 2. / 3
+    for i in range(1, len(buckets)):
+        act_load = calculate_teachers_overall_expected_load_in_bucket(buckets[i])
+        assert exp_load == act_load
+
+
+@pytest.mark.django_db
+def test_calculate_teachers_load_assignments_load_independency():
+    course, teachers, student_groups, buckets = create_buckets_testing_environment(
+        group_sizes=[1, 1, 1, 1, 1, 1],
+        buckets_structs={
+            (0, 1): {0, 1, 2},
+            (2, 3): {0, 1, 2},
+            (4, 5): {0, 1, 2}
+        }
+    ).values()
+
+    exp_load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    a = AssignmentFactory(course=course, assignee_mode=AssigneeMode.STUDENT_GROUP_BALANCED)
+    bucket = StudentGroupTeacherBucket.objects.create(assignment=a)
+    bucket.groups.set(student_groups[:2])
+    bucket.teachers.set([teachers[0]])
+    bucket.save()
+    act_load = calculate_teachers_overall_expected_load_in_bucket(buckets[0])
+    assert exp_load == act_load
+
+    act_load = calculate_teachers_overall_expected_load_in_bucket(bucket)
+    assert {teachers[0].pk: 2.0} == act_load
+
+
+@pytest.mark.django_db
+def test_get_assignee_with_minimal_load_one_bucket():
+    course, teachers, student_groups, buckets = create_buckets_testing_environment(
+        group_sizes=[0, 1, 2, 3],  # One group not in any of buckets
+        buckets_structs={
+            (0, 1, 2): {0, 1}
+        }
+    ).values()
+
+    sg2_sa = student_groups[1].enrollments.first().student.studentassignment_set.first()
+    assignee_one = get_assignee_with_minimal_load(sg2_sa)[0]
+    sg2_sa.assignee = assignee_one
+    sg2_sa.save()
+
+    assignee_two = get_assignee_with_minimal_load(sg2_sa)[0]
+    assert assignee_one != assignee_two
+
+    sg3_enrollments = student_groups[2].enrollments.prefetch_related("student__studentassignment_set")
+    sg3_sa1, sg3_sa2 = [e.student.studentassignment_set.first() for e in sg3_enrollments]
+
+    assignee = get_assignee_with_minimal_load(sg3_sa1)[0]
+    assert assignee == assignee_two
+    sg3_sa1.assignee = assignee
+    sg3_sa1.save()
+
+    assignee = get_assignee_with_minimal_load(sg3_sa2)[0]
+    assert assignee == assignee_one
+    sg3_sa2.assignee = assignee
+    sg3_sa2.save()
+
+    sg4_enrollments = student_groups[3].enrollments.prefetch_related("student__studentassignment_set")
+    sg4_sa = sg4_enrollments.first().student.studentassignment_set.first()
+    assignee_list = get_assignee_with_minimal_load(sg4_sa)
+    assert not assignee_list
+
+
+@pytest.mark.django_db
+def test_get_assignee_with_minimal_load_several_buckets():
+    course, teachers, student_groups, buckets = create_buckets_testing_environment(
+        group_sizes=[2, 2, 2, 2, 2, 2, 3],  # One group not in any of buckets
+        buckets_structs={
+            (0, 1): {0, 1},
+            (2, 3): {0, 2},
+            (4, 5): {3, 4},
+            (6,): {}
+        }
+    ).values()
+
+    sg2_sa = student_groups[1].enrollments.first().student.studentassignment_set.first()
+    assignee = get_assignee_with_minimal_load(sg2_sa)[0]
+    # Because this teacher have more load in another buckets
+    assert assignee == teachers[1]
+
+    sg3_enrollments = student_groups[2].enrollments.prefetch_related("student__studentassignment_set")
+    sg3_sa1, sg3_sa2 = [e.student.studentassignment_set.first() for e in sg3_enrollments]
+    assignee = get_assignee_with_minimal_load(sg3_sa1)[0]
+    # Same reason
+    assert assignee == teachers[2]
+
+    # Add more actual load on teacher[1]
+    # Now load is ct0=4, ct1=2
+    sg7_enrollments = student_groups[6].enrollments.prefetch_related("student__studentassignment_set")
+    sg7_sa1, sg7_sa2, sg7_sa3 = [e.student.studentassignment_set.first() for e in sg7_enrollments]
+    sg7_sa1.assignee = teachers[1]
+    sg7_sa1.save()
+    sg7_sa2.assignee = teachers[1]
+    sg7_sa2.save()
+
+    assignee = get_assignee_with_minimal_load(sg2_sa)[0]
+    # Due to actual workload, teacher[0] has become preferred.
+    assert assignee == teachers[0]
+
+    # But only in first bucket, in the second situation has no changes.
+    # Load: ct0=4, ct2=2
+    assignee = get_assignee_with_minimal_load(sg3_sa1)[0]
+    assert assignee == teachers[2]
+
+    # Let's balance the load: add more to ct2
+    sg1_enrollments = student_groups[0].enrollments.prefetch_related("student__studentassignment_set")
+    sg1_sa1, sg1_sa2 = [e.student.studentassignment_set.first() for e in sg1_enrollments]
+    sg1_sa1.assignee = teachers[2]
+    sg1_sa2.assignee = teachers[2]
+    sg1_sa1.save()
+    sg1_sa2.save()
+    assignee = get_assignee_with_minimal_load(sg3_sa1)[0]
+    # Now teachers[0] more preferable
+    assert assignee == teachers[0]
+
+    # Make imbalanced again
+    sg3_sa1.assignee = teachers[0]
+    sg7_sa3.assignee = teachers[0]
+    sg3_sa1.save()
+    sg7_sa3.save()
+    assignee = get_assignee_with_minimal_load(sg3_sa2)[0]
+    assert assignee == teachers[2]
+
+    sg5_enrollments = student_groups[4].enrollments.prefetch_related("student__studentassignment_set")
+    sg5_sa1, sg5_sa2 = [e.student.studentassignment_set.first() for e in sg5_enrollments]
+    assignee = get_assignee_with_minimal_load(sg5_sa1)[0]
+    assert assignee == teachers[3]
+    sg5_sa1.assignee = teachers[3]
+    sg5_sa1.save()
+
+    assignee = get_assignee_with_minimal_load(sg5_sa2)[0]
+    assert assignee == teachers[4]
+
+    assignee_list = get_assignee_with_minimal_load(sg7_sa1)
+    assert not assignee_list
+
+
+@pytest.mark.django_db
+def test_get_assignee_with_minial_load_assignment_load_independency():
+    course, teachers, student_groups, buckets = create_buckets_testing_environment(
+        group_sizes=[1, 1],
+        buckets_structs={
+            (0,): {0, 1},
+            (1,): {0, 1},
+        }
+    ).values()
+
+    a = AssignmentFactory(course=course, assignee_mode=AssigneeMode.STUDENT_GROUP_BALANCED)
+    bucket = StudentGroupTeacherBucket.objects.create(assignment=a)
+    bucket.groups.set(student_groups)
+    bucket.teachers.set(teachers)
+    bucket.save()
+
+    sg1_a1_sa = (student_groups[0].enrollments.first()
+                 .student.studentassignment_set.filter(assignment__course=course)
+                 .first())
+    assignee_a1_sa1 = get_assignee_with_minimal_load(sg1_a1_sa)[0]
+    assert assignee_a1_sa1 == teachers[0]
+
+    # Assignments independency
+    sg1_a2_sa = (student_groups[0].enrollments.first()
+                 .student.studentassignment_set.filter(assignment=a)
+                 .first())
+    sg1_a2_sa.assignee = teachers[0]
+    sg1_a2_sa.save()
+    # Nothing changed for assignment1
+    assignee_a1_sa1 = get_assignee_with_minimal_load(sg1_a1_sa)[0]
+    assert assignee_a1_sa1 == teachers[0]
+    # But changes in assignment2
+    assignee_a2_sa1 = get_assignee_with_minimal_load(sg1_a2_sa)[0]
+    assert assignee_a2_sa1 == teachers[1]
+
+    # Add actual load on dependent teacher-bucket
+    sg2_a1_sa = (student_groups[1].enrollments.first()
+                 .student.studentassignment_set.filter(assignment__course=course)
+                 .first())
+    sg2_a1_sa.assignee = teachers[1]
+    sg2_a1_sa.save()
+    assignee_a1_sa1 = get_assignee_with_minimal_load(sg1_a1_sa)[0]
+    assert assignee_a1_sa1 == teachers[0]
+
+    # Independency check in both directions
+    assignee_a2_sa1 = get_assignee_with_minimal_load(sg1_a2_sa)[0]
+    assert assignee_a2_sa1 == teachers[1]
