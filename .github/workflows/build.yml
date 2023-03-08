@@ -90,6 +90,7 @@ jobs:
           context: ./lms-frontend
           file: ./lms-frontend/Dockerfile
           push: true
+          provenance: false
           load: false
           builder: ${{ steps.buildx.outputs.name }}
           build-args: |
@@ -110,6 +111,7 @@ jobs:
           context: ./lms-backend/
           file: ./lms-backend/docker-files/app/common.Dockerfile
           push: true
+          provenance: false
           builder: ${{ steps.buildx.outputs.name }}
           tags: ${{ env.LOCAL_IMAGE_DJANGO }}
           cache-from: type=local,src=/tmp/.buildx-django-cache
@@ -121,6 +123,7 @@ jobs:
           context: ./lms-backend/
           file: ./lms-backend/docker-files/app/Dockerfile
           push: true
+          provenance: false
           load: false
           builder: ${{ steps.buildx.outputs.name }}
           build-args: |
@@ -137,6 +140,7 @@ jobs:
           context: ./lms-backend/docker-files/nginx/
           file: ./lms-backend/docker-files/nginx/Dockerfile
           push: true
+          provenance: false
           load: false
           builder: ${{ steps.buildx.outputs.name }}
           build-args: |
