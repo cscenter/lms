@@ -261,7 +261,6 @@ yds_post_data = {
 }
 
 
-@pytest.mark.skip("Uncomment after revert from OZON application version")
 @pytest.mark.django_db
 def test_application_YDS_form_serializer(settings, mocker):
     mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
@@ -308,7 +307,7 @@ def test_application_YDS_form_serializer(settings, mocker):
         "magistracy_and_shad": True,
         "email_subscription": True,
         "university_city": data["university_city"],
-        "data_format_version": '0.1',
+        "data_format_version": '0.4',
         'shad_plus_rash': True,
         "rash_agreement": True,
         'new_track': True,
@@ -319,7 +318,6 @@ def test_application_YDS_form_serializer(settings, mocker):
     }
 
 
-@pytest.mark.skip("Uncomment after revert from OZON application version")
 @pytest.mark.django_db
 def test_application_YDS_form_serializer_min_fields(settings, mocker):
     mocked_api = mocker.patch('grading.api.yandex_contest.YandexContestAPI.register_in_contest')
@@ -352,7 +350,7 @@ def test_application_YDS_form_serializer_min_fields(settings, mocker):
         "ticket_access": True,
         "university_city": data["university_city"],
         "email_subscription": True,
-        "data_format_version": '0.1',
+        "data_format_version": '0.4',
         "magistracy_and_shad": False,
         'shad_plus_rash': None,
         "rash_agreement": False,
