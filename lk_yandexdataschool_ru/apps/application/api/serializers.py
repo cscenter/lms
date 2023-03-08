@@ -7,7 +7,6 @@ from django.conf import settings
 from django.utils.timezone import now
 
 from admission.api.serializers import OpenRegistrationCampaignField
-from admission.constants import ApplicantStatuses
 from admission.models import Applicant, Campaign
 from admission.tasks import register_in_yandex_contest
 from core.models import University as UniversityLegacy
@@ -283,12 +282,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         write_only=True
     )
 
-    preferred_study_program_notes = serializers.CharField(
-        required=False,
-        default="Поступающий с Ozon Masters"
-    )
-
-    status = serializers.HiddenField(default=ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED)
     university = serializers.PrimaryKeyRelatedField(queryset=University.objects.all())
     university_city = UniversityCitySerializer(required=True, write_only=True)
     # FIXME: Replace with hidden field since real value stores in session
@@ -331,8 +324,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # Source
             "utm",
             "where_did_you_learn_other",
-            "preferred_study_program_notes",  # for OZON students
-            "status"  # interview to be scheduled for OZON students
 
             # version 0.2, but in the data field it's still 0.1
             # add utm field with optional inner str fields:
@@ -344,6 +335,10 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
 
             # version 0.3
             # add field is_for_ozon with True value
+
+            # version 0.4
+            # remove field is_for_ozon
+
         )
         extra_kwargs = {
             'university': {
@@ -393,7 +388,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             utm = {}
         data['data'] = {
             'utm': utm,
-            'is_for_ozon': True,
             'university_city': data.get('university_city'),
             'shad_agreement': data.get('shad_agreement'),
             'new_track': data.get('new_track'),
@@ -408,7 +402,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'ticket_access': data.get('ticket_access'),
             'magistracy_and_shad': data.get('magistracy_and_shad'),
             'email_subscription': data.get('email_subscription'),
-            'data_format_version': '0.3'
+            'data_format_version': '0.4'
         }
         data['experience'] = data['ml_experience']
         # Remove fields that are actually not present on Applicant model

@@ -9,6 +9,6 @@ from lms.urls import urlpatterns
 urlpatterns += [
     path('admission/applications/', ApplicationFormCreateTaskView.as_view(), name='admission_application_form_new_task'),
     path('applicant_create', ApplicantCreateFromYDSFormAPIView.as_view(), name='applicant_create'),
-    path('ozon-apply', ApplicationFormView.as_view(), name='application_form'),
+    path('apply-2023-super-secret-link-dont-share', ApplicationFormView.as_view(), name='application_form'),
     path('', include('admission.urls_appointment')),
 ]
