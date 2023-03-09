@@ -87,10 +87,10 @@ jobs:
       - name: Build frontend image
         uses: docker/build-push-action@v2
         with:
+          version: v0.9.1
           context: ./lms-frontend
           file: ./lms-frontend/Dockerfile
           push: true
-          provenance: false
           load: false
           builder: ${{ steps.buildx.outputs.name }}
           build-args: |
@@ -108,10 +108,10 @@ jobs:
       - name: Build image with django dependencies
         uses: docker/build-push-action@v2
         with:
+          version: v0.9.1
           context: ./lms-backend/
           file: ./lms-backend/docker-files/app/common.Dockerfile
           push: true
-          provenance: false
           builder: ${{ steps.buildx.outputs.name }}
           tags: ${{ env.LOCAL_IMAGE_DJANGO }}
           cache-from: type=local,src=/tmp/.buildx-django-cache
@@ -120,10 +120,10 @@ jobs:
       - name: Build final backend app image
         uses: docker/build-push-action@v2
         with:
+          version: v0.9.1
           context: ./lms-backend/
           file: ./lms-backend/docker-files/app/Dockerfile
           push: true
-          provenance: false
           load: false
           builder: ${{ steps.buildx.outputs.name }}
           build-args: |
@@ -137,10 +137,10 @@ jobs:
       - name: Build backend nginx image
         uses: docker/build-push-action@v2
         with:
+          version: v0.9.1
           context: ./lms-backend/docker-files/nginx/
           file: ./lms-backend/docker-files/nginx/Dockerfile
           push: true
-          provenance: false
           load: false
           builder: ${{ steps.buildx.outputs.name }}
           build-args: |
