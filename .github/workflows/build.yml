@@ -88,6 +88,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           version: v0.9.1
+          provenance: false
           context: ./lms-frontend
           file: ./lms-frontend/Dockerfile
           push: true
@@ -109,6 +110,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           version: v0.9.1
+          provenance: false
           context: ./lms-backend/
           file: ./lms-backend/docker-files/app/common.Dockerfile
           push: true
@@ -121,6 +123,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           version: v0.9.1
+          provenance: false
           context: ./lms-backend/
           file: ./lms-backend/docker-files/app/Dockerfile
           push: true
@@ -138,6 +141,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           version: v0.9.1
+          provenance: false
           context: ./lms-backend/docker-files/nginx/
           file: ./lms-backend/docker-files/nginx/Dockerfile
           push: true
