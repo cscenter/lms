@@ -23,10 +23,10 @@ shad:
 	python manage.py runserver --settings=lk_yandexdataschool_ru.settings.local 8003
 
 tests:
-	pytest --create-db
-	pytest -c compscicenter_ru/pytest.ini
-	pytest -c compsciclub_ru/pytest.ini
-	pytest -c lk_yandexdataschool_ru/pytest.ini
+	pytest --create-db --ds=compscicenter_ru.settings.test
+	pytest -c compscicenter_ru/pytest.ini --ds=compscicenter_ru.settings.test
+	pytest -c compsciclub_ru/pytest.ini --ds=compsciclub_ru.settings.test
+	pytest -c lk_yandexdataschool_ru/pytest.ini --ds=lk_yandexdataschool_ru.settings.test
 
 migrate:
 	python manage.py migrate $(DJANGO_POSTFIX)
@@ -53,6 +53,7 @@ loaddata:
 
 clean:
 	find . -type f -name "*.py[co]" -print0 -delete
+	find . -type f -name "*.mo" -print0 -delete
 	find . -type d -name "__pycache__" -print0 -delete
 	find . -type f -name "*.DS_Store" -print0 -delete
 	-rm -rf htmlcov
