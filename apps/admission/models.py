@@ -1608,3 +1608,60 @@ class Acceptance(TimestampedModel):
     @property
     def is_expired(self):
         return timezone.now() >= self.deadline_at
+
+
+class ResidenceCity(models.Model):
+    external_id = models.PositiveIntegerField(
+        _("External ID"), null=True, blank=True, editable=False
+    )
+    name = models.TextField(_("Name"))
+    display_name = models.TextField(_("Display Name"))
+    country = models.ForeignKey(
+        "universities.Country",
+        verbose_name=_("Country"),
+        related_name="admission_cities",
+        on_delete=models.PROTECT,
+    )
+    order = models.PositiveIntegerField(_("Order"), default=512)
+
+    class Meta:
+        verbose_name = _("Residence City")
+        verbose_name_plural = _("Residence Cities")
+
+    def __str__(self):
+        return self.name
+
+
+class CampaignCity(models.Model):
+    campaign = models.ForeignKey(
+        Campaign,
+        verbose_name=_("Campaign"),
+        related_name="+",
+        on_delete=models.CASCADE,
+    )
+
+    city = models.ForeignKey(
+        ResidenceCity,
+        verbose_name=_("City"),
+        related_name="+",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = _("Campaign Available in City")
+        verbose_name_plural = _("Campaigns Available in City")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["campaign", "city"], name="unique_campaign_per_city"
+            ),
+            models.UniqueConstraint(
+                name="%(app_label)s_%(class)s_default_campaign_unique",
+                fields=("campaign",),
+                condition=Q(city__isnull=True),
+            ),
+        ]
+
+    def __str__(self):
+        return f"CampaignCity campaign={self.campaign} city={self.city}"
