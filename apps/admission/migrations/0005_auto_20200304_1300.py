@@ -4,30 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0004_auto_20200211_1252'),
+        ("admission", "0004_auto_20200211_1252"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='applicant',
-            old_name='course',
-            new_name='level_of_education',
+            model_name="applicant",
+            old_name="course",
+            new_name="level_of_education",
         ),
         migrations.AlterField(
-            model_name='contest',
-            name='details',
-            field=models.JSONField(blank=True, verbose_name='Details'),
+            model_name="contest",
+            name="details",
+            field=models.JSONField(blank=True, verbose_name="Details"),
         ),
         migrations.AlterField(
-            model_name='exam',
-            name='details',
-            field=models.JSONField(blank=True, null=True, verbose_name='Details'),
+            model_name="exam",
+            name="details",
+            field=models.JSONField(blank=True, null=True, verbose_name="Details"),
         ),
         migrations.AlterField(
-            model_name='test',
-            name='details',
-            field=models.JSONField(blank=True, verbose_name='Details'),
+            model_name="test",
+            name="details",
+            field=models.JSONField(blank=True, verbose_name="Details"),
         ),
     ]

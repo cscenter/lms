@@ -18,14 +18,16 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
 
-        template_name_pattern = options['template_pattern']
+        template_name_pattern = options["template_pattern"]
         self.validate_templates(campaigns, [template_name_pattern])
 
         for campaign in campaigns:
             self.stdout.write(str(campaign))
             testing_passing_score = campaign.online_test_passing_score
             if not testing_passing_score:
-                self.stdout.write(f"Passing score for campaign '{campaign}' must be non zero. Skip")
+                self.stdout.write(
+                    f"Passing score for campaign '{campaign}' must be non zero. Skip"
+                )
                 continue
 
             template_name = self.get_template_name(campaign, template_name_pattern)
@@ -33,30 +35,34 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
 
             email_from = get_email_from(campaign)
 
-            applicants = (Applicant.objects
-                          .filter(campaign_id=campaign.pk,
-                                  status=Applicant.REJECTED_BY_TEST)
-                          .values("pk",
-                                  "online_test__score",
-                                  "online_test__yandex_contest_id",
-                                  "yandex_login",
-                                  "email"))
+            applicants = Applicant.objects.filter(
+                campaign_id=campaign.pk, status=Applicant.REJECTED_BY_TEST
+            ).values(
+                "pk",
+                "online_test__score",
+                "online_test__yandex_contest_id",
+                "yandex_login",
+                "email",
+            )
             total = 0
             generated = 0
             for a in applicants:
                 total += 1
-                score = 0 if a["online_test__score"] is None else int(a["online_test__score"])
+                score = (
+                    0
+                    if a["online_test__score"] is None
+                    else int(a["online_test__score"])
+                )
                 if score >= testing_passing_score:
                     msg = f"\tWARN Applicant {a['pk']} has passing score >= campaign passing score."
                     self.stdout.write(msg)
 
                 recipients = [a["email"]]
-                if not Email.objects.filter(to=recipients,
-                                            template=template).exists():
+                if not Email.objects.filter(to=recipients, template=template).exists():
                     context = {
-                        'YANDEX_LOGIN': a["yandex_login"],
-                        'TEST_SCORE': score,
-                        'TEST_CONTEST_ID': a["online_test__yandex_contest_id"],
+                        "YANDEX_LOGIN": a["yandex_login"],
+                        "TEST_SCORE": score,
+                        "TEST_CONTEST_ID": a["online_test__yandex_contest_id"],
                     }
                     mail.send(
                         recipients,
@@ -67,7 +73,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                         # value of the template id. It makes `exists`
                         # method above works correctly.
                         render_on_delivery=True,
-                        backend='ses',
+                        backend="ses",
                     )
                     generated += 1
             self.stdout.write(f"    total: {total}")

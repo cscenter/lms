@@ -5,16 +5,22 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('post_office', '0011_models_help_text'),
-        ('admission', '0036_auto_20210628_1257'),
+        ("post_office", "0011_models_help_text"),
+        ("admission", "0036_auto_20210628_1257"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='campaign',
-            name='template_interview_feedback',
-            field=models.ForeignKey(blank=True, help_text='Leave blank if there is no need to send a feedback email. Email will be sent at the time of interview status change, but not earlier than 21:00 of the day of the interview', null=True, on_delete=django.db.models.deletion.PROTECT, to='post_office.emailtemplate', verbose_name='Interview Feedback Template'),
+            model_name="campaign",
+            name="template_interview_feedback",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Leave blank if there is no need to send a feedback email. Email will be sent at the time of interview status change, but not earlier than 21:00 of the day of the interview",
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="post_office.emailtemplate",
+                verbose_name="Interview Feedback Template",
+            ),
         ),
     ]

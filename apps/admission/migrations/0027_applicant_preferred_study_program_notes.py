@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0026_remove_applicant_university2'),
+        ("admission", "0026_remove_applicant_university2"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='applicant',
-            name='preferred_study_program_notes',
-            field=models.TextField(blank=True, null=True, verbose_name='Study Program Notes'),
+            model_name="applicant",
+            name="preferred_study_program_notes",
+            field=models.TextField(
+                blank=True, null=True, verbose_name="Study Program Notes"
+            ),
         ),
     ]

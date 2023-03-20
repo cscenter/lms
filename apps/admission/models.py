@@ -1215,7 +1215,6 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
 
 
 class Comment(TimeStampedModel):
-
     interview = models.ForeignKey(
         Interview,
         verbose_name=_("Interview"),

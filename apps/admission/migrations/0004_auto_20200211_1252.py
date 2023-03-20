@@ -6,15 +6,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0003_auto_20190830_0814'),
+        ("admission", "0003_auto_20190830_0814"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='campaign',
-            name='year',
-            field=models.PositiveSmallIntegerField(default=admission.models.current_year, validators=[django.core.validators.MinValueValidator(2000)], verbose_name='Campaign|Year'),
+            model_name="campaign",
+            name="year",
+            field=models.PositiveSmallIntegerField(
+                default=admission.models.current_year,
+                validators=[django.core.validators.MinValueValidator(2000)],
+                verbose_name="Campaign|Year",
+            ),
         ),
     ]

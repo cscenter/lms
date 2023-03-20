@@ -23,54 +23,62 @@ class AdmissionApplicantsReport(ReportFileOutput):
         self.process()
 
     def get_queryset(self):
-        return (Applicant.objects
-                .filter(campaign=self.campaign.pk)
-                .select_related("exam", "online_test")
-                .prefetch_related(
-                    "university_legacy",
-                    Prefetch(
-                        "interviews",
-                        queryset=(Interview.objects
-                                  .prefetch_related(
-                                        Prefetch(
-                                            "comments",
-                                            queryset=(Comment.objects
-                                                       .select_related("interviewer"))))
-                        )))
-                .order_by('pk'))
+        return (
+            Applicant.objects.filter(campaign=self.campaign.pk)
+            .select_related("exam", "online_test")
+            .prefetch_related(
+                "university_legacy",
+                Prefetch(
+                    "interviews",
+                    queryset=(
+                        Interview.objects.prefetch_related(
+                            Prefetch(
+                                "comments",
+                                queryset=(
+                                    Comment.objects.select_related("interviewer")
+                                ),
+                            )
+                        )
+                    ),
+                ),
+            )
+            .order_by("pk")
+        )
 
     def process(self):
         # Collect headers
         exclude_applicant_fields = {
-            'modified',
-            'uuid',
-            'yandex_login_q',
-            'campaign',
-            'user',
-            'meta'
+            "modified",
+            "uuid",
+            "yandex_login_q",
+            "campaign",
+            "user",
+            "meta",
         }
-        applicant_fields = [f for f in Applicant._meta.fields if
-                            f.name not in exclude_applicant_fields]
+        applicant_fields = [
+            f for f in Applicant._meta.fields if f.name not in exclude_applicant_fields
+        ]
         self.headers = [force_str(f.verbose_name) for f in applicant_fields]
-        self.headers.extend([
-            "Результаты теста",
-            "Результаты экзамена",
-        ])
+        self.headers.extend(
+            [
+                "Результаты теста",
+                "Результаты экзамена",
+            ]
+        )
         applicants = self.get_queryset()
         # Collect data
         for applicant in applicants:
             row = []
             for field in applicant_fields:
                 value = getattr(applicant, field.name)
-                if field.name == 'status':
+                if field.name == "status":
                     value = applicant.get_status_display()
-                elif field.name == 'level_of_education':
+                elif field.name == "level_of_education":
                     value = applicant.get_level_of_education_display()
-                elif field.name == 'id':
+                elif field.name == "id":
                     value = reverse("admission:applicants:detail", args=[value])
-                elif field.name == 'created':
-                    value = formats.date_format(applicant.created,
-                                                "SHORT_DATE_FORMAT")
+                elif field.name == "created":
+                    value = formats.date_format(applicant.created, "SHORT_DATE_FORMAT")
                 row.append(value)
             if hasattr(applicant, "online_test"):
                 row.append(applicant.online_test.score)
@@ -90,7 +98,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
         return "admission_{}_{}_report_{}".format(
             self.campaign.branch.code,
             self.campaign.year,
-            formats.date_format(today, "SHORT_DATE_FORMAT")
+            formats.date_format(today, "SHORT_DATE_FORMAT"),
         )
 
 
@@ -108,14 +116,14 @@ class AdmissionExamReport:
             "Статус",
             "Participant ID",
             "Contest ID",
-            "Итого"
+            "Итого",
         ]
         queryset = self.get_queryset()
         tasks_len = 0
         for exam in queryset:
-            if exam.details and 'scores' in exam.details:
-                tasks_len = max(tasks_len, len(exam.details['scores']))
-        headers.extend(f'Задача {i}' for i in range(1, tasks_len + 1))
+            if exam.details and "scores" in exam.details:
+                tasks_len = max(tasks_len, len(exam.details["scores"]))
+        headers.extend(f"Задача {i}" for i in range(1, tasks_len + 1))
         data = []
         for i, exam in enumerate(queryset):
             if exam.contest_participant_id:
@@ -131,36 +139,38 @@ class AdmissionExamReport:
                 exam.status,
                 participant_id,
                 exam.yandex_contest_id,
-                exam.score_display()
+                exam.score_display(),
             ]
             has_any_score = exam.score is not None
-            if has_any_score and exam.details and 'scores' in exam.details:
-                for s in exam.details['scores']:
+            if has_any_score and exam.details and "scores" in exam.details:
+                for s in exam.details["scores"]:
                     row.append(str(s))
             else:
                 for _ in range(tasks_len):
-                    row.append('')
+                    row.append("")
             assert len(row) == len(headers)
             data.append(row)
         return DataFrame.from_records(columns=headers, data=data)
 
     def get_queryset(self):
-        return (Exam.objects
-                .filter(applicant__campaign=self.campaign)
-                .select_related("applicant")
-                .order_by('pk'))
+        return (
+            Exam.objects.filter(applicant__campaign=self.campaign)
+            .select_related("applicant")
+            .order_by("pk")
+        )
 
     def get_filename(self):
         today = datetime.datetime.now()
         return "admission_{}_{}_exam_report_{}".format(
             self.campaign.year,
             self.campaign.branch.code,
-            formats.date_format(today, "SHORT_DATE_FORMAT")
+            formats.date_format(today, "SHORT_DATE_FORMAT"),
         )
 
 
-def generate_admission_interviews_report(*, campaign: Campaign,
-                                         url_builder: Callable[[str], str] = str) -> DataFrame:
+def generate_admission_interviews_report(
+    *, campaign: Campaign, url_builder: Callable[[str], str] = str
+) -> DataFrame:
     headers = [
         "Фамилия",
         "Имя",
@@ -173,14 +183,17 @@ def generate_admission_interviews_report(*, campaign: Campaign,
         headers.append(f"{label} / балл")
         headers.append(f"{label} / комментарии")
         interview_section_indexes[value] = 2 * index
-    interview_comments = Prefetch('interviews__comments',
-                                  queryset=(Comment.objects
-                                            .prefetch_related('interviewer')))
-    applicants = (Applicant.objects
-                  .filter(campaign=campaign,
-                          status__in=ApplicantStatuses.RESULTS_STATUSES)
-                  .order_by('pk')
-                  .prefetch_related('interviews', interview_comments))
+    interview_comments = Prefetch(
+        "interviews__comments",
+        queryset=(Comment.objects.prefetch_related("interviewer")),
+    )
+    applicants = (
+        Applicant.objects.filter(
+            campaign=campaign, status__in=ApplicantStatuses.RESULTS_STATUSES
+        )
+        .order_by("pk")
+        .prefetch_related("interviews", interview_comments)
+    )
     data = []
     for i, applicant in enumerate(applicants):
         row = [
@@ -192,10 +205,10 @@ def generate_admission_interviews_report(*, campaign: Campaign,
         ]
         interview_details = ["" for _ in range(2 * len(InterviewSections.values))]
         for interview in applicant.interviews.all():
-            interview_comments = ''
+            interview_comments = ""
             for c in interview.comments.all():
                 author = c.interviewer.get_full_name()
-                interview_comments += f'{author}: {c.score}\n{c.text}\n\n'
+                interview_comments += f"{author}: {c.score}\n{c.text}\n\n"
             index = interview_section_indexes[interview.section]
             interview_details[index] = interview.get_average_score_display()
             interview_details[index + 1] = interview_comments.rstrip()
@@ -203,4 +216,3 @@ def generate_admission_interviews_report(*, campaign: Campaign,
         assert len(row) == len(headers)
         data.append(row)
     return DataFrame.from_records(columns=headers, data=data)
-

@@ -27,19 +27,18 @@ class JsonFieldWidget(widgets.Widget):
 class ContestDetailsMixin:
     # Other fields will be aggregated to the `details` json field
     known_fields = (
-        'created',
-        'applicant',
-        'yandex_login',
-        'score',
-        'status',
+        "created",
+        "applicant",
+        "yandex_login",
+        "score",
+        "status",
     )
 
     def before_import(self, data, using_transactions, dry_run, **kwargs):
         if "details" in data.headers:
             print("Column `details` will be replaced")
             del data["details"]
-        data.append_col(self.row_collect_details(data.headers),
-                        header="details")
+        data.append_col(self.row_collect_details(data.headers), header="details")
 
     def before_import_row(self, row, **kwargs):
         for k, v in row.items():
@@ -49,6 +48,7 @@ class ContestDetailsMixin:
 
     def row_collect_details(self, headers):
         """Collect data for `details` column"""
+
         def wrapper(row):
             details = OrderedDict()
             for i, h in enumerate(headers):
@@ -69,28 +69,29 @@ class ContestDetailsMixin:
                 if scores:
                     details["scores"] = scores
             return details
+
         return wrapper
 
 
-class OnlineTestRecordResource(ContestDetailsMixin,
-                               resources.ModelResource):
+class OnlineTestRecordResource(ContestDetailsMixin, resources.ModelResource):
     applicant = fields.Field(
-        column_name='applicant',
-        attribute='applicant_id',
-        widget=IntegerWidget())
-    details = fields.Field(column_name='details',
-                           attribute='details',
-                           widget=JsonFieldWidget())
+        column_name="applicant", attribute="applicant_id", widget=IntegerWidget()
+    )
+    details = fields.Field(
+        column_name="details", attribute="details", widget=JsonFieldWidget()
+    )
     # Note: It returns __str__ representation of `applicant` attribute
-    fio = fields.Field(column_name='fio', attribute='applicant')
-    yandex_login = fields.Field(column_name='yandex_login',
-                                attribute='applicant__yandex_login')
-    status = fields.Field(column_name='status', attribute='status',
-                          default=ChallengeStatuses.MANUAL)
+    fio = fields.Field(column_name="fio", attribute="applicant")
+    yandex_login = fields.Field(
+        column_name="yandex_login", attribute="applicant__yandex_login"
+    )
+    status = fields.Field(
+        column_name="status", attribute="status", default=ChallengeStatuses.MANUAL
+    )
 
     class Meta:
         model = Test
-        import_id_fields = ('applicant',)
+        import_id_fields = ("applicant",)
         skip_unchanged = True
 
     def skip_row(self, instance, original):
@@ -101,26 +102,24 @@ class OnlineTestRecordResource(ContestDetailsMixin,
 
 
 # FIXME: RowResult.obj_repr calls Exam.__str__ which makes additional db hits
-class ExamRecordResource(ContestDetailsMixin,
-                         resources.ModelResource):
+class ExamRecordResource(ContestDetailsMixin, resources.ModelResource):
     applicant = fields.Field(
-        column_name='applicant',
-        attribute='applicant_id',
-        widget=IntegerWidget())
+        column_name="applicant", attribute="applicant_id", widget=IntegerWidget()
+    )
 
-    details = fields.Field(column_name='details',
-                           attribute='details',
-                           widget=JsonFieldWidget())
+    details = fields.Field(
+        column_name="details", attribute="details", widget=JsonFieldWidget()
+    )
 
     class Meta:
         model = Exam
-        import_id_fields = ('applicant',)
+        import_id_fields = ("applicant",)
         skip_unchanged = True
-        fields = ('applicant', 'score', 'status', 'details')
+        fields = ("applicant", "score", "status", "details")
         instance_loader_class = CachedInstanceLoader
 
     def before_import_row(self, row, **kwargs):
-        """Double check that score is always a valid type, on DB level we 
-        can have null value, so if we omit django field validation on client, 
+        """Double check that score is always a valid type, on DB level we
+        can have null value, so if we omit django field validation on client,
         it will be very bad"""
         assert int(Decimal(row["score"])) >= 0

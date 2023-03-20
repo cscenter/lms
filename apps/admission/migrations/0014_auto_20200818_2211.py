@@ -8,21 +8,29 @@ import files.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('admission', '0013_remove_campaign_template_interview_reminder'),
+        ("admission", "0013_remove_campaign_template_interview_reminder"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='applicant',
-            name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="applicant",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='contest',
-            name='file',
-            field=files.models.ConfigurableStorageFileField(blank=True, upload_to=admission.models.contest_assignments_upload_to, verbose_name='Assignments in pdf format'),
+            model_name="contest",
+            name="file",
+            field=files.models.ConfigurableStorageFileField(
+                blank=True,
+                upload_to=admission.models.contest_assignments_upload_to,
+                verbose_name="Assignments in pdf format",
+            ),
         ),
     ]

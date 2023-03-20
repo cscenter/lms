@@ -30,9 +30,11 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument(
-            '--fail-only', action='store_true',
+            "--fail-only",
+            action="store_true",
             dest="fail_only",
-            help="Send emails only to those who didn't pass to the next stage")
+            help="Send emails only to those who didn't pass to the next stage",
+        )
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options, confirm=False)
@@ -42,7 +44,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
         if not options["fail_only"]:
             result_statuses.append(ExamResultStatus.SUCCESS)
         for status in result_statuses:
-            pattern = options['template_pattern'] or self.TEMPLATE_PATTERN
+            pattern = options["template_pattern"] or self.TEMPLATE_PATTERN
             pattern = pattern.replace("{status}", status)
             template_name_patterns[status] = pattern
         self.validate_templates(campaigns, template_name_patterns.values())
@@ -54,11 +56,11 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             statuses = [Applicant.REJECTED_BY_EXAM]
             if not options["fail_only"]:
                 statuses.append(Applicant.INTERVIEW_TOBE_SCHEDULED)
-            applicants = (Applicant.objects
-                          .filter(campaign=campaign.pk,
-                                  status__in=statuses)
-                          .select_related("exam")
-                          .only("email", "status"))
+            applicants = (
+                Applicant.objects.filter(campaign=campaign.pk, status__in=statuses)
+                .select_related("exam")
+                .only("email", "status")
+            )
             succeed = 0
             total = 0
             generated = 0
@@ -69,11 +71,10 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                 template_name = self.get_template_name(campaign, pattern)
                 template = get_email_template(template_name)
                 recipients = [a.email]
-                if not Email.objects.filter(to=recipients,
-                                            template=template).exists():
+                if not Email.objects.filter(to=recipients, template=template).exists():
                     context = {
-                        'BRANCH': campaign.branch.name,
-                        'CONTEST_ID': a.exam_id and a.exam.yandex_contest_id,
+                        "BRANCH": campaign.branch.name,
+                        "CONTEST_ID": a.exam_id and a.exam.yandex_contest_id,
                     }
                     mail.send(
                         recipients,
@@ -84,7 +85,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                         # `Email.objects.exists()` work correctly.
                         render_on_delivery=True,
                         context=context,
-                        backend='ses',
+                        backend="ses",
                     )
                     generated += 1
             self.stdout.write("Total: {}".format(total))

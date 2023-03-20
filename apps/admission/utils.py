@@ -26,8 +26,7 @@ def calculate_time(time, timedelta):
     return (datetime.combine(timezone.now(), time) - timedelta).time()
 
 
-def get_next_process(serial_number: int, processes: List[Any],
-                     group_size: int = 5):
+def get_next_process(serial_number: int, processes: List[Any], group_size: int = 5):
     """
     Calculates what process should execute task with *serial_number* (1-based)
 
@@ -36,7 +35,7 @@ def get_next_process(serial_number: int, processes: List[Any],
     next *group_size* to the next one, etc.
     """
     # Combine tasks in groups and calculate a 0-based task group number
-    group_number = ((serial_number - 1) // group_size)
+    group_number = (serial_number - 1) // group_size
     # Then calculates index in a round robin list
     index = group_number % len(processes)
     return processes[index]

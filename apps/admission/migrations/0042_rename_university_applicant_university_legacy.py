@@ -15,18 +15,17 @@ old_field_index_name = get_index_name(Applicant.university_legacy.field)
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0041_auto_20220305_1143'),
+        ("admission", "0041_auto_20220305_1143"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='applicant',
-            old_name='university',
-            new_name='university_legacy',
+            model_name="applicant",
+            old_name="university",
+            new_name="university_legacy",
         ),
         migrations.RunSQL(
-            f'ALTER INDEX {new_field_index_name} rename TO {old_field_index_name}'
-        )
+            f"ALTER INDEX {new_field_index_name} rename TO {old_field_index_name}"
+        ),
     ]

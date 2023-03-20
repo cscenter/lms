@@ -1,16 +1,20 @@
 import datetime
 
 import pytest
-from django.utils.timezone import now
 from post_office.models import STATUS as EMAIL_STATUS
 from post_office.models import Email, EmailTemplate
 
+from django.utils.timezone import now
+
 from admission.constants import INVITATION_EXPIRED_IN_HOURS, InterviewSections
 from admission.models import Interview, InterviewInvitation, InterviewSlot
-from admission.services import create_invitation, EmailQueueService
+from admission.services import EmailQueueService, create_invitation
 from admission.tests.factories import (
-    ApplicantFactory, CommentFactory, InterviewerFactory, InterviewFactory,
-    InterviewStreamFactory
+    ApplicantFactory,
+    CommentFactory,
+    InterviewerFactory,
+    InterviewFactory,
+    InterviewStreamFactory,
 )
 from admission.utils import get_next_process
 from learning.settings import Branches
@@ -41,25 +45,30 @@ def test_get_next_process():
 
 @pytest.mark.django_db
 def test_create_invitation(mocker):
-    mocked_timezone = mocker.patch('admission.services.get_now_utc')
-    now_utc = datetime.datetime(2018, month=3, day=8, hour=13, minute=0,
-                                tzinfo=datetime.timezone.utc)
+    mocked_timezone = mocker.patch("admission.services.get_now_utc")
+    now_utc = datetime.datetime(
+        2018, month=3, day=8, hour=13, minute=0, tzinfo=datetime.timezone.utc
+    )
     mocked_timezone.return_value = now_utc
     tomorrow = datetime.date(2018, month=3, day=9)
     from django.utils import timezone
-    stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
-                                    end_at=datetime.time(16, 0),
-                                    duration=20,
-                                    section=InterviewSections.ALL_IN_ONE,
-                                    date=tomorrow,
-                                    with_assignments=False,
-                                    campaign__current=True)
+
+    stream = InterviewStreamFactory(
+        start_at=datetime.time(14, 0),
+        end_at=datetime.time(16, 0),
+        duration=20,
+        section=InterviewSections.ALL_IN_ONE,
+        date=tomorrow,
+        with_assignments=False,
+        campaign__current=True,
+    )
     applicant = ApplicantFactory(campaign=stream.campaign)
     tz = stream.venue.get_timezone()
-    tomorrow_begin = datetime.datetime.combine(tomorrow,
-                                               datetime.datetime.min.time())
+    tomorrow_begin = datetime.datetime.combine(tomorrow, datetime.datetime.min.time())
     tomorrow_begin_local = tz.localize(tomorrow_begin)
-    expired_at_expected = now_utc + datetime.timedelta(hours=INVITATION_EXPIRED_IN_HOURS)
+    expired_at_expected = now_utc + datetime.timedelta(
+        hours=INVITATION_EXPIRED_IN_HOURS
+    )
     assert expired_at_expected > tomorrow_begin_local
     create_invitation([stream], applicant)
     assert InterviewInvitation.objects.count() == 1
@@ -73,10 +82,12 @@ def test_generate_interview_feedback_email_campaign_no_feedback_template():
     """
     No email is sent if an interview feedback email template is not specified.
     """
-    interview = InterviewFactory(status=Interview.APPROVED,
-                                 section=InterviewSections.ALL_IN_ONE,
-                                 applicant__campaign__branch__code=Branches.SPB,
-                                 applicant__campaign__template_interview_feedback=None)
+    interview = InterviewFactory(
+        status=Interview.APPROVED,
+        section=InterviewSections.ALL_IN_ONE,
+        applicant__campaign__branch__code=Branches.SPB,
+        applicant__campaign__template_interview_feedback=None,
+    )
     assert Email.objects.count() == 0
     interview.status = Interview.COMPLETED
     interview.save()
@@ -85,12 +96,16 @@ def test_generate_interview_feedback_email_campaign_no_feedback_template():
 
 @pytest.mark.django_db
 def test_generate_interview_feedback_email():
-    email_template, _ = EmailTemplate.objects.update_or_create(name='interview-feedback-template')
+    email_template, _ = EmailTemplate.objects.update_or_create(
+        name="interview-feedback-template"
+    )
     email_qs = Email.objects.filter(template=email_template)
-    interview = InterviewFactory(status=Interview.APPROVED,
-                                 section=InterviewSections.ALL_IN_ONE,
-                                 applicant__campaign__branch__code=Branches.SPB,
-                                 applicant__campaign__template_interview_feedback=email_template)
+    interview = InterviewFactory(
+        status=Interview.APPROVED,
+        section=InterviewSections.ALL_IN_ONE,
+        applicant__campaign__branch__code=Branches.SPB,
+        applicant__campaign__template_interview_feedback=email_template,
+    )
     assert Email.objects.count() == 0
     interview.status = Interview.COMPLETED
     interview.save()
@@ -107,8 +122,9 @@ def test_generate_interview_feedback_email():
     interview.date += datetime.timedelta(days=1)
     interview.save()
     interview_date = interview.date_local()
-    new_scheduled_time = interview_date.replace(hour=21, minute=0, second=0,
-                                                microsecond=0)
+    new_scheduled_time = interview_date.replace(
+        hour=21, minute=0, second=0, microsecond=0
+    )
     email.refresh_from_db()
     assert email.scheduled_time == new_scheduled_time
     interviewer1, interviewer2 = InterviewerFactory.create_batch(2)
@@ -132,28 +148,36 @@ def test_generate_interview_feedback_email():
 
 @pytest.mark.django_db
 def test_remove_interview_reminder_email():
-    email_template, _ = EmailTemplate.objects.update_or_create(name='interview-reminder-template')
+    email_template, _ = EmailTemplate.objects.update_or_create(
+        name="interview-reminder-template"
+    )
     date = (now() + datetime.timedelta(days=2)).date()
-    stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
-                                    end_at=datetime.time(15, 0),
-                                    duration=30,
-                                    section=InterviewSections.ALL_IN_ONE,
-                                    date=date,
-                                    with_assignments=False,
-                                    campaign__current=True)
+    stream = InterviewStreamFactory(
+        start_at=datetime.time(14, 0),
+        end_at=datetime.time(15, 0),
+        duration=30,
+        section=InterviewSections.ALL_IN_ONE,
+        date=date,
+        with_assignments=False,
+        campaign__current=True,
+    )
     slot1, slot2 = InterviewSlot.objects.filter(stream=stream)
-    interview1 = InterviewFactory(slot=slot1,
-                                  status=Interview.APPROVED,
-                                  section=InterviewSections.MATH,
-                                  applicant__campaign__branch__code=Branches.SPB,
-                                  applicant__campaign__template_interview_feedback=email_template)
+    interview1 = InterviewFactory(
+        slot=slot1,
+        status=Interview.APPROVED,
+        section=InterviewSections.MATH,
+        applicant__campaign__branch__code=Branches.SPB,
+        applicant__campaign__template_interview_feedback=email_template,
+    )
     applicant = interview1.applicant
-    interview2 = InterviewFactory(slot=slot2,
-                                  applicant=applicant,
-                                  status=Interview.APPROVED,
-                                  section=InterviewSections.PROGRAMMING,
-                                  applicant__campaign__branch__code=Branches.SPB,
-                                  applicant__campaign__template_interview_feedback=email_template)
+    interview2 = InterviewFactory(
+        slot=slot2,
+        applicant=applicant,
+        status=Interview.APPROVED,
+        section=InterviewSections.PROGRAMMING,
+        applicant__campaign__branch__code=Branches.SPB,
+        applicant__campaign__template_interview_feedback=email_template,
+    )
     slot1.save()
     slot2.save()
     EmailQueueService.generate_interview_reminder(interview1, stream)
@@ -163,4 +187,7 @@ def test_remove_interview_reminder_email():
     interview1.delete()
     emails = Email.objects.all()
     assert emails.count() == 1
-    assert emails[0].context['SECTION'] == InterviewSections.get_choice(InterviewSections.PROGRAMMING).label
+    assert (
+        emails[0].context["SECTION"]
+        == InterviewSections.get_choice(InterviewSections.PROGRAMMING).label
+    )

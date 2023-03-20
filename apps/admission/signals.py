@@ -5,11 +5,13 @@ from admission.constants import InterviewSections
 from admission.models import Applicant, Campaign, Comment, Interview, InterviewSlot
 from admission.services import EmailQueueService
 
-APPLICANT_FINAL_STATES = (Applicant.ACCEPT,
-                          Applicant.VOLUNTEER,
-                          Applicant.ACCEPT_IF,
-                          Applicant.REJECTED_BY_INTERVIEW,
-                          Applicant.THEY_REFUSED)
+APPLICANT_FINAL_STATES = (
+    Applicant.ACCEPT,
+    Applicant.VOLUNTEER,
+    Applicant.ACCEPT_IF,
+    Applicant.REJECTED_BY_INTERVIEW,
+    Applicant.THEY_REFUSED,
+)
 
 
 @receiver(post_save, sender=Campaign)
@@ -17,10 +19,11 @@ def post_save_campaign(sender, instance, created, *args, **kwargs):
     """Make sure we have only one active campaign for a branch"""
     campaign = instance
     if campaign.current:
-        (Campaign.objects
-         .filter(branch=campaign.branch)
-         .exclude(pk=campaign.pk)
-         .update(current=False))
+        (
+            Campaign.objects.filter(branch=campaign.branch)
+            .exclude(pk=campaign.pk)
+            .update(current=False)
+        )
 
 
 @receiver(post_save, sender=Interview)
@@ -49,9 +52,11 @@ def __sync_applicant_status(interview):
         raise ValueError("Unknown interview status")
     if interview.applicant.status != new_status:
         interview.applicant.status = new_status
-        (Applicant.objects
-         .filter(pk=interview.applicant.pk)
-         .update(status=interview.applicant.status))
+        (
+            Applicant.objects.filter(pk=interview.applicant.pk).update(
+                status=interview.applicant.status
+            )
+        )
 
 
 # TODO: add tests
@@ -59,9 +64,11 @@ def __sync_applicant_status(interview):
 def pre_delete_interview(sender, instance, *args, **kwargs):
     interview = instance
     applicant = interview.applicant
-    (Applicant.objects
-     .filter(pk=applicant.pk)
-     .update(status=Applicant.INTERVIEW_TOBE_SCHEDULED))
+    (
+        Applicant.objects.filter(pk=applicant.pk).update(
+            status=Applicant.INTERVIEW_TOBE_SCHEDULED
+        )
+    )
     EmailQueueService.remove_interview_reminder(interview)
     EmailQueueService.remove_interview_feedback_emails(interview)
 
@@ -82,17 +89,17 @@ def post_save_interview_comment(sender, instance, created, *args, **kwargs):
     comment_authors = {c.interviewer_id for c in interview.comments.all()}
     if set(i.pk for i in interviewers).issubset(comment_authors):
         interview.status = Interview.COMPLETED
-        interview.save(update_fields=['status'])
+        interview.save(update_fields=["status"])
 
 
 @receiver(post_save, sender=InterviewSlot)
 def post_save_interview_slot(sender, instance, created, *args, **kwargs):
     if created:
-        instance.stream.compute_fields('slots_count')
-    instance.stream.compute_fields('slots_occupied_count')
+        instance.stream.compute_fields("slots_count")
+    instance.stream.compute_fields("slots_occupied_count")
 
 
 @receiver(post_delete, sender=InterviewSlot)
 def post_delete_interview_slot(sender, instance, *args, **kwargs):
-    instance.stream.compute_fields('slots_count')
-    instance.stream.compute_fields('slots_occupied_count')
+    instance.stream.compute_fields("slots_count")
+    instance.stream.compute_fields("slots_occupied_count")

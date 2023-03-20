@@ -4,30 +4,47 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0033_auto_20210531_0953'),
+        ("admission", "0033_auto_20210531_0953"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='interviewstream',
-            name='slots_count',
+            model_name="interviewstream",
+            name="slots_count",
             field=models.PositiveIntegerField(default=0, editable=False),
         ),
         migrations.AddField(
-            model_name='interviewstream',
-            name='slots_occupied_count',
+            model_name="interviewstream",
+            name="slots_occupied_count",
             field=models.PositiveIntegerField(default=0, editable=False),
         ),
         migrations.AlterField(
-            model_name='interview',
-            name='section',
-            field=models.CharField(choices=[('all_in_1', 'Common Section'), ('math', 'Math'), ('code', 'Coding'), ('mv', 'Motivation')], max_length=15, verbose_name='Interview|Section'),
+            model_name="interview",
+            name="section",
+            field=models.CharField(
+                choices=[
+                    ("all_in_1", "Common Section"),
+                    ("math", "Math"),
+                    ("code", "Coding"),
+                    ("mv", "Motivation"),
+                ],
+                max_length=15,
+                verbose_name="Interview|Section",
+            ),
         ),
         migrations.AlterField(
-            model_name='interviewstream',
-            name='section',
-            field=models.CharField(choices=[('all_in_1', 'Common Section'), ('math', 'Math'), ('code', 'Coding'), ('mv', 'Motivation')], max_length=15, verbose_name='Interview|Section'),
+            model_name="interviewstream",
+            name="section",
+            field=models.CharField(
+                choices=[
+                    ("all_in_1", "Common Section"),
+                    ("math", "Math"),
+                    ("code", "Coding"),
+                    ("mv", "Motivation"),
+                ],
+                max_length=15,
+                verbose_name="Interview|Section",
+            ),
         ),
     ]

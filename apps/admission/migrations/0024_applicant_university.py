@@ -5,16 +5,22 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0013_university'),
-        ('admission', '0023_auto_20210225_1353'),
+        ("core", "0013_university"),
+        ("admission", "0023_auto_20210225_1353"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='applicant',
-            name='university',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='+', to='core.university', verbose_name='Applicant|University'),
+            model_name="applicant",
+            name="university",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="+",
+                to="core.university",
+                verbose_name="Applicant|University",
+            ),
         ),
     ]

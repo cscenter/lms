@@ -10,14 +10,22 @@ from django.utils import timezone
 
 from admission.constants import WHERE_DID_YOU_LEARN, InterviewFormats
 from admission.models import (
-    Acceptance, Applicant, Campaign, Comment, Contest, Exam, Interview,
-    InterviewAssignment, InterviewFormat, InterviewInvitation, InterviewSlot,
-    InterviewStream, Test
+    Acceptance,
+    Applicant,
+    Campaign,
+    Comment,
+    Contest,
+    Exam,
+    Interview,
+    InterviewAssignment,
+    InterviewFormat,
+    InterviewInvitation,
+    InterviewSlot,
+    InterviewStream,
+    Test,
 )
 from admission.signals import post_save_interview
-from core.tests.factories import (
-    BranchFactory, EmailTemplateFactory, LocationFactory
-)
+from core.tests.factories import BranchFactory, EmailTemplateFactory, LocationFactory
 from learning.settings import AcademicDegreeLevels
 from universities.tests.factories import UniversityFactory
 from users.constants import Roles
@@ -40,11 +48,12 @@ class CampaignFactory(factory.django.DjangoModelFactory):
     online_test_passing_score = FuzzyInteger(20, 25)
     exam_max_score = FuzzyInteger(30, 40)
     exam_passing_score = FuzzyInteger(20, 25)
-    application_starts_at = factory.Faker('past_datetime',
-                                          start_date="-10d",
-                                          tzinfo=timezone.utc)
-    application_ends_at = factory.Faker('future_datetime', end_date="+30d",
-                                        tzinfo=timezone.utc)
+    application_starts_at = factory.Faker(
+        "past_datetime", start_date="-10d", tzinfo=timezone.utc
+    )
+    application_ends_at = factory.Faker(
+        "future_datetime", end_date="+30d", tzinfo=timezone.utc
+    )
 
 
 class ApplicantFactory(factory.django.DjangoModelFactory):
@@ -56,14 +65,14 @@ class ApplicantFactory(factory.django.DjangoModelFactory):
     patronymic = factory.Sequence(lambda n: "Patronymic %03d" % n)
     last_name = factory.Sequence(lambda n: "Surname %03d" % n)
     email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
-    phone = factory.Sequence(lambda n: '123-555-%04d' % n)
+    phone = factory.Sequence(lambda n: "123-555-%04d" % n)
     university = factory.SubFactory(UniversityFactory)
     yandex_login = factory.Sequence(lambda n: "yandex_login_%03d" % n)
     faculty = factory.Sequence(lambda n: "faculty_%03d" % n)
-    level_of_education = factory.fuzzy.FuzzyChoice([x for x, _ in
-                                                    AcademicDegreeLevels.choices])
-    where_did_you_learn = factory.fuzzy.FuzzyChoice([x for x, _ in
-                                                     WHERE_DID_YOU_LEARN])
+    level_of_education = factory.fuzzy.FuzzyChoice(
+        [x for x, _ in AcademicDegreeLevels.choices]
+    )
+    where_did_you_learn = factory.fuzzy.FuzzyChoice([x for x, _ in WHERE_DID_YOU_LEARN])
 
 
 class ContestFactory(factory.django.DjangoModelFactory):
@@ -112,12 +121,12 @@ class InterviewerFactory(UserFactory):
 class InterviewFormatFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = InterviewFormat
-        django_get_or_create = ('campaign', 'format')
+        django_get_or_create = ("campaign", "format")
 
     format = InterviewFormats.OFFLINE
     campaign = factory.SubFactory(CampaignFactory)
     reminder_template = factory.SubFactory(EmailTemplateFactory)
-    remind_before_start = '1 00:00:00'  # 1 day
+    remind_before_start = "1 00:00:00"  # 1 day
 
 
 class InterviewFactory(factory.django.DjangoModelFactory):
@@ -126,11 +135,10 @@ class InterviewFactory(factory.django.DjangoModelFactory):
 
     applicant = factory.SubFactory(ApplicantFactory)
     # TODO: replace with FuzzyDate
-    date = (datetime.datetime.now().replace(tzinfo=pytz.UTC)
-            + datetime.timedelta(days=3))
+    date = datetime.datetime.now().replace(tzinfo=pytz.UTC) + datetime.timedelta(days=3)
     venue = factory.SubFactory(
-        LocationFactory,
-        city=factory.SelfAttribute('..applicant.campaign.branch.city'))
+        LocationFactory, city=factory.SelfAttribute("..applicant.campaign.branch.city")
+    )
 
     @factory.post_generation
     def interviewers(self, create, extracted, **kwargs):
@@ -169,19 +177,22 @@ class InterviewStreamFactory(factory.django.DjangoModelFactory):
     format = InterviewFormats.OFFLINE
     interview_format = factory.SubFactory(
         InterviewFormatFactory,
-        campaign=factory.SelfAttribute('..campaign'),
-        format=factory.SelfAttribute('..format'))
+        campaign=factory.SelfAttribute("..campaign"),
+        format=factory.SelfAttribute("..format"),
+    )
     venue = factory.SubFactory(
-        LocationFactory,
-        city=factory.SelfAttribute('..campaign.branch.city'))
+        LocationFactory, city=factory.SelfAttribute("..campaign.branch.city")
+    )
 
-    date = factory.Faker('future_date', end_date="+10d")
+    date = factory.Faker("future_date", end_date="+10d")
     # 13:00 - 15:00
-    start_at = FuzzyTime(datetime.datetime(2011, 1, 1, 13, 0, 0),
-                         datetime.datetime(2011, 1, 1, 15, 0, 0))
+    start_at = FuzzyTime(
+        datetime.datetime(2011, 1, 1, 13, 0, 0), datetime.datetime(2011, 1, 1, 15, 0, 0)
+    )
     # 16:00 - 17:00
-    end_at = FuzzyTime(datetime.datetime(2011, 1, 1, 16, 0, 0),
-                       datetime.datetime(2011, 1, 1, 17, 0, 0))
+    end_at = FuzzyTime(
+        datetime.datetime(2011, 1, 1, 16, 0, 0), datetime.datetime(2011, 1, 1, 17, 0, 0)
+    )
     with_assignments = random.choice([True, False])
 
     @factory.post_generation
@@ -206,11 +217,12 @@ class InterviewInvitationFactory(factory.django.DjangoModelFactory):
         model = InterviewInvitation
 
     applicant = factory.SubFactory(ApplicantFactory)
-    interview = factory.SubFactory(InterviewFactory,
-                                   applicant=factory.SelfAttribute('..applicant'))
-    expired_at = factory.Faker('date_time_between',
-                               start_date="now", end_date="+30d",
-                               tzinfo=timezone.utc)
+    interview = factory.SubFactory(
+        InterviewFactory, applicant=factory.SelfAttribute("..applicant")
+    )
+    expired_at = factory.Faker(
+        "date_time_between", start_date="now", end_date="+30d", tzinfo=timezone.utc
+    )
 
     @factory.post_generation
     def streams(self, create, extracted, **kwargs):
@@ -226,4 +238,3 @@ class AcceptanceFactory(factory.django.DjangoModelFactory):
         model = Acceptance
 
     applicant = factory.SubFactory(ApplicantFactory)
-

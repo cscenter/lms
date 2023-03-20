@@ -5,21 +5,41 @@ import multiselectfield.db.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0027_applicant_preferred_study_program_notes'),
+        ("admission", "0027_applicant_preferred_study_program_notes"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='interview',
-            name='section',
-            field=models.CharField(choices=[('all_in_1', 'Common'), ('math', 'Math'), ('code', 'Coding'), ('mv', 'Motivation')], default='all_in_1', max_length=15, verbose_name='Interview|Section'),
+            model_name="interview",
+            name="section",
+            field=models.CharField(
+                choices=[
+                    ("all_in_1", "Common"),
+                    ("math", "Math"),
+                    ("code", "Coding"),
+                    ("mv", "Motivation"),
+                ],
+                default="all_in_1",
+                max_length=15,
+                verbose_name="Interview|Section",
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='applicant',
-            name='preferred_study_programs',
-            field=multiselectfield.db.fields.MultiSelectField(blank=True, choices=[('cs', 'Computer Science (Современная информатика)'), ('ds', 'Data Science (Анализ данных)'), ('se', 'Software Engineering (Разработка ПО)'), ('robotics', 'Robotics (Роботы)')], help_text='Applicant|study_program', max_length=255, verbose_name='Study program'),
+            model_name="applicant",
+            name="preferred_study_programs",
+            field=multiselectfield.db.fields.MultiSelectField(
+                blank=True,
+                choices=[
+                    ("cs", "Computer Science (Современная информатика)"),
+                    ("ds", "Data Science (Анализ данных)"),
+                    ("se", "Software Engineering (Разработка ПО)"),
+                    ("robotics", "Robotics (Роботы)"),
+                ],
+                help_text="Applicant|study_program",
+                max_length=255,
+                verbose_name="Study program",
+            ),
         ),
     ]

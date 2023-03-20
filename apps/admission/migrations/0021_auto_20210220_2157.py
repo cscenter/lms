@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0020_auto_20210220_1528'),
+        ("admission", "0020_auto_20210220_1528"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='contest',
-            name='details',
-            field=models.JSONField(blank=True, default=dict, verbose_name='Details'),
+            model_name="contest",
+            name="details",
+            field=models.JSONField(blank=True, default=dict, verbose_name="Details"),
         ),
     ]

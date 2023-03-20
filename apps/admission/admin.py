@@ -15,6 +15,7 @@ from admission.models import (
     Acceptance,
     Applicant,
     Campaign,
+    CampaignCity,
     Comment,
     Contest,
     Exam,
@@ -24,9 +25,8 @@ from admission.models import (
     InterviewInvitation,
     InterviewSlot,
     InterviewStream,
-    Test,
     ResidenceCity,
-    CampaignCity,
+    Test,
 )
 from admission.roles import Roles
 from admission.services import EmailQueueService

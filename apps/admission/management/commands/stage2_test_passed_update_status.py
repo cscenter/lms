@@ -25,15 +25,17 @@ class Command(CurrentCampaignMixin, BaseCommand):
                 self.stdout.write(f"{e.message} Skip")
                 continue
 
-            applicants = (Applicant.objects
-                          .filter(campaign=campaign,
-                                  online_test__score__gte=campaign.online_test_passing_score)
-                          .values("pk",
-                                  "online_test__score",
-                                  "online_test__yandex_contest_id",
-                                  "exam__yandex_contest_id",
-                                  "yandex_login",
-                                  "status"))
+            applicants = Applicant.objects.filter(
+                campaign=campaign,
+                online_test__score__gte=campaign.online_test_passing_score,
+            ).values(
+                "pk",
+                "online_test__score",
+                "online_test__yandex_contest_id",
+                "exam__yandex_contest_id",
+                "yandex_login",
+                "status",
+            )
             selected = 0
             updated = 0
             for a in applicants:
@@ -42,9 +44,11 @@ class Command(CurrentCampaignMixin, BaseCommand):
                     msg = f"\tApplicant {a['pk']} has status {a['status']}. Skip"
                     self.stdout.write(msg)
                     continue
-                (Applicant.objects
-                 .filter(pk=a["pk"])
-                 .update(status=Applicant.PERMIT_TO_EXAM))
+                (
+                    Applicant.objects.filter(pk=a["pk"]).update(
+                        status=Applicant.PERMIT_TO_EXAM
+                    )
+                )
                 updated += 1
             self.stdout.write(f"    selected: {selected}")
             self.stdout.write(f"    updated: {updated}")

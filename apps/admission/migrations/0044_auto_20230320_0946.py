@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("universities", "0002_city_order"),
         ("admission", "0043_applicant_university"),
