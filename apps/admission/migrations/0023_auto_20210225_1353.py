@@ -4,33 +4,47 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0022_auto_20210220_2205'),
+        ("admission", "0022_auto_20210220_2205"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='test',
-            options={'verbose_name': 'Testing Result', 'verbose_name_plural': 'Testing Results'},
+            name="test",
+            options={
+                "verbose_name": "Testing Result",
+                "verbose_name_plural": "Testing Results",
+            },
         ),
         migrations.RenameField(
-            model_name='applicant',
-            old_name='university',
-            new_name='university2',
+            model_name="applicant",
+            old_name="university",
+            new_name="university2",
         ),
         migrations.AlterField(
-            model_name='applicant',
-            name='university2',
-            field=models.ForeignKey(blank=True, db_index=False, null=True, on_delete=models.deletion.PROTECT,
-                                    related_name='applicants', to='admission.university',
-                                    verbose_name='Applicant|University'),
+            model_name="applicant",
+            name="university2",
+            field=models.ForeignKey(
+                blank=True,
+                db_index=False,
+                null=True,
+                on_delete=models.deletion.PROTECT,
+                related_name="applicants",
+                to="admission.university",
+                verbose_name="Applicant|University",
+            ),
         ),
         migrations.AlterField(
-            model_name='applicant',
-            name='university2',
-            field=models.ForeignKey(blank=True, db_index=True, null=True, on_delete=models.deletion.PROTECT,
-                                    related_name='applicants', to='admission.university',
-                                    verbose_name='Applicant|University'),
+            model_name="applicant",
+            name="university2",
+            field=models.ForeignKey(
+                blank=True,
+                db_index=True,
+                null=True,
+                on_delete=models.deletion.PROTECT,
+                related_name="applicants",
+                to="admission.university",
+                verbose_name="Applicant|University",
+            ),
         ),
     ]

@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0010_auto_20200527_1710'),
+        ("admission", "0010_auto_20200527_1710"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='interviewformat',
-            name='appointment_template',
+            model_name="interviewformat",
+            name="appointment_template",
         ),
     ]

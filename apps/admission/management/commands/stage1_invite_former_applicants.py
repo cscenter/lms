@@ -22,13 +22,16 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument(
-            '--years', type=int, default=2,
-            help='How many years before the current campaign should be taken into account.')
+            "--years",
+            type=int,
+            default=2,
+            help="How many years before the current campaign should be taken into account.",
+        )
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
 
-        template_name_pattern = options['template_pattern']
+        template_name_pattern = options["template_pattern"]
         self.validate_templates(campaigns, [template_name_pattern])
 
         number_of_years = options["years"]
@@ -43,45 +46,46 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
 
     def _generate_notifications(self, current_campaign, in_range, template_name):
         email_from = get_email_from(current_campaign)
-        prev_campaigns = list(Campaign.objects
-                              .filter(branch=current_campaign.branch,
-                                      year__range=in_range)
-                              .order_by('-year'))
+        prev_campaigns = list(
+            Campaign.objects.filter(
+                branch=current_campaign.branch, year__range=in_range
+            ).order_by("-year")
+        )
         if not prev_campaigns:
             self.stdout.write(f"No previous campaigns for {current_campaign}")
             return
         else:
             for c in prev_campaigns:
                 self.stdout.write(f"{c}")
-            if input('Continue? [y/n] ') != "y":
+            if input("Continue? [y/n] ") != "y":
                 return
 
-        exclude_statuses = [Applicant.ACCEPT,
-                            Applicant.ACCEPT_IF,
-                            Applicant.VOLUNTEER,
-                            Applicant.THEY_REFUSED,
-                            Applicant.WAITING_FOR_PAYMENT,
-                            Applicant.ACCEPT_PAID,
-                            Applicant.REJECTED_BY_CHEATING]
-        failed_in_prev_campaigns = (Applicant.subscribed
-                                    .filter(campaign__in=prev_campaigns)
-                                    .exclude(status__in=exclude_statuses,
-                                             user__isnull=False)
-                                    .distinct()
-                                    .values_list('email', flat=True))
+        exclude_statuses = [
+            Applicant.ACCEPT,
+            Applicant.ACCEPT_IF,
+            Applicant.VOLUNTEER,
+            Applicant.THEY_REFUSED,
+            Applicant.WAITING_FOR_PAYMENT,
+            Applicant.ACCEPT_PAID,
+            Applicant.REJECTED_BY_CHEATING,
+        ]
+        failed_in_prev_campaigns = (
+            Applicant.subscribed.filter(campaign__in=prev_campaigns)
+            .exclude(status__in=exclude_statuses, user__isnull=False)
+            .distinct()
+            .values_list("email", flat=True)
+        )
         total = 0
         generated = 0
         template = get_email_template(template_name)
         for email in failed_in_prev_campaigns:
             total += 1
-            is_already_applied = (Applicant.objects
-                                  .filter(campaign_id=current_campaign.pk,
-                                          email=email)
-                                  .exists())
+            is_already_applied = Applicant.objects.filter(
+                campaign_id=current_campaign.pk, email=email
+            ).exists()
             if not is_already_applied:
                 recipients = [email]
-                if not Email.objects.filter(to=recipients,
-                                            template=template).exists():
+                if not Email.objects.filter(to=recipients, template=template).exists():
                     mail.send(
                         recipients,
                         sender=email_from,
@@ -91,8 +95,9 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                         # method above works correctly.
                         render_on_delivery=True,
                         context={},
-                        backend='ses',
+                        backend="ses",
                     )
                     generated += 1
-        self.stdout.write(f"Total: {total}\nGenerated {generated}\nAlready applied: {total - generated}")
-
+        self.stdout.write(
+            f"Total: {total}\nGenerated {generated}\nAlready applied: {total - generated}"
+        )

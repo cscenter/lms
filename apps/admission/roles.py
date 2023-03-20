@@ -9,11 +9,15 @@ from .permissions import ViewAdmissionMenu
 
 
 class Roles(DjangoChoices):
-    INTERVIEWER = C(7, _('Interviewer [Admission]'), permissions=(
-        ViewAdmissionMenu,
-    ))
+    INTERVIEWER = C(7, _("Interviewer [Admission]"), permissions=(ViewAdmissionMenu,))
 
 
 for code, name in Roles.choices:
-    role_registry.register(Role(id=code, code=code, description=name,
-                                permissions=Roles.get_choice(code).permissions))
+    role_registry.register(
+        Role(
+            id=code,
+            code=code,
+            description=name,
+            permissions=Roles.get_choice(code).permissions,
+        )
+    )

@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class AdmissionConfig(AppConfig):
-    name = 'admission'
+    name = "admission"
     verbose_name = _("Admission")
 
     def ready(self):

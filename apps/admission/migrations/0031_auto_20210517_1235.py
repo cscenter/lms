@@ -4,14 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0030_auto_20210517_0843'),
+        ("admission", "0030_auto_20210517_0843"),
     ]
 
     operations = [
         migrations.AddConstraint(
-            model_name='interview',
-            constraint=models.UniqueConstraint(fields=('applicant', 'section'), name='unique_interview_section_per_applicant'),
+            model_name="interview",
+            constraint=models.UniqueConstraint(
+                fields=("applicant", "section"),
+                name="unique_interview_section_per_applicant",
+            ),
         ),
     ]

@@ -1,10 +1,10 @@
-from django.conf import settings
 from rest_framework import serializers
 from rest_framework.fields import TimeField
 
+from django.conf import settings
 from django.utils import formats
 
-from admission.models import InterviewSlot, Campaign
+from admission.models import Campaign, InterviewSlot
 
 
 class InterviewSlotBaseSerializer(serializers.ModelSerializer):
@@ -23,6 +23,6 @@ class OpenRegistrationCampaignField(serializers.PrimaryKeyRelatedField):
     def get_queryset(self):
         if self.queryset:
             return self.queryset.all()
-        return (Campaign.with_open_registration()
-                .filter(branch__site_id=settings.SITE_ID))
-
+        return Campaign.with_open_registration().filter(
+            branch__site_id=settings.SITE_ID
+        )

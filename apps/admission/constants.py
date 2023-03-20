@@ -4,34 +4,38 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
 WHERE_DID_YOU_LEARN = (
-    ('uni', 'плакат в университете'),
-    ('social_net', 'пост в социальных сетях'),
-    ('friends', 'от друзей'),
-    ('other', 'другое')
+    ("uni", "плакат в университете"),
+    ("social_net", "пост в социальных сетях"),
+    ("friends", "от друзей"),
+    ("other", "другое"),
 )
 
 INVITATION_EXPIRED_IN_HOURS = 27
-EMAIL_VERIFICATION_CODE_TEMPLATE = 'emails/admission/email_verification_code.txt'
+EMAIL_VERIFICATION_CODE_TEMPLATE = "emails/admission/email_verification_code.txt"
 
 
 class ApplicantStatuses(DjangoChoices):
-    REJECTED_BY_TEST = C('rejected_test', _('Rejected by test'))
-    PERMIT_TO_EXAM = C('permit_to_exam', _('Permitted to the exam'))
-    REJECTED_BY_EXAM = C('rejected_exam', _('Rejected by exam'))
-    REJECTED_BY_CHEATING = C('rejected_cheating', _('Cheating'))
-    PENDING = C('pending', _('Pending'))
+    REJECTED_BY_TEST = C("rejected_test", _("Rejected by test"))
+    PERMIT_TO_EXAM = C("permit_to_exam", _("Permitted to the exam"))
+    REJECTED_BY_EXAM = C("rejected_exam", _("Rejected by exam"))
+    REJECTED_BY_CHEATING = C("rejected_cheating", _("Cheating"))
+    PENDING = C("pending", _("Pending"))
     # TODO: rename interview codes here and in DB.
-    INTERVIEW_TOBE_SCHEDULED = C('interview_phase', _('Can be interviewed'))  # permitted to interview
-    INTERVIEW_SCHEDULED = C('interview_assigned', _('Interview assigned'))
-    INTERVIEW_COMPLETED = C('interview_completed', _('Interview completed'))
-    REJECTED_BY_INTERVIEW = C('rejected_interview', _('Rejected by interview'))
-    REJECTED_BY_INTERVIEW_WITH_BONUS = C('rejected_with_bonus', _('Rejected by interview. Offered a bonus'))
-    ACCEPT_PAID = C('accept_paid', _('Accept on paid'))
-    WAITING_FOR_PAYMENT = C('waiting_for_payment', _('Waiting for Payment'))
-    ACCEPT = C('accept', _('Accept'))
-    ACCEPT_IF = C('accept_if', _('Accept with condition'))
-    VOLUNTEER = C('volunteer', _("Applicant|Volunteer"))
-    THEY_REFUSED = C('they_refused', _("He or she refused"))
+    INTERVIEW_TOBE_SCHEDULED = C(
+        "interview_phase", _("Can be interviewed")
+    )  # permitted to interview
+    INTERVIEW_SCHEDULED = C("interview_assigned", _("Interview assigned"))
+    INTERVIEW_COMPLETED = C("interview_completed", _("Interview completed"))
+    REJECTED_BY_INTERVIEW = C("rejected_interview", _("Rejected by interview"))
+    REJECTED_BY_INTERVIEW_WITH_BONUS = C(
+        "rejected_with_bonus", _("Rejected by interview. Offered a bonus")
+    )
+    ACCEPT_PAID = C("accept_paid", _("Accept on paid"))
+    WAITING_FOR_PAYMENT = C("waiting_for_payment", _("Waiting for Payment"))
+    ACCEPT = C("accept", _("Accept"))
+    ACCEPT_IF = C("accept_if", _("Accept with condition"))
+    VOLUNTEER = C("volunteer", _("Applicant|Volunteer"))
+    THEY_REFUSED = C("they_refused", _("He or she refused"))
 
     # Participants who have reached the interview stage
     RESULTS_STATUSES = {
@@ -45,7 +49,7 @@ class ApplicantStatuses(DjangoChoices):
         ACCEPT.value,
         ACCEPT_IF.value,
         VOLUNTEER.value,
-        THEY_REFUSED.value
+        THEY_REFUSED.value,
     }
 
 
@@ -55,33 +59,33 @@ class ContestTypes(DjangoChoices):
 
 
 class ChallengeStatuses(DjangoChoices):
-    NEW = ChoiceItem('new', _("Not registered in the contest"))
+    NEW = ChoiceItem("new", _("Not registered in the contest"))
     # Results could be imported from a contest
-    REGISTERED = ChoiceItem('registered', _("Syncing with a contest"))
-    MANUAL = ChoiceItem('manual', _("Manual score input"))
+    REGISTERED = ChoiceItem("registered", _("Syncing with a contest"))
+    MANUAL = ChoiceItem("manual", _("Manual score input"))
 
 
 class InterviewFormats(DjangoChoices):
-    OFFLINE = ChoiceItem('offline', _("Offline"))
-    ONLINE = ChoiceItem('online', _("Online"))
+    OFFLINE = ChoiceItem("offline", _("Offline"))
+    ONLINE = ChoiceItem("online", _("Online"))
 
 
 class InterviewSections(DjangoChoices):
-    ALL_IN_ONE = C('all_in_1', pgettext_lazy("section", "Common Section"))
-    MATH = C('math', pgettext_lazy("section", "Math"))
-    PROGRAMMING = C('code', pgettext_lazy("section", "Code"))
-    MOTIVATION = C('mv', pgettext_lazy("section", "Motivation"))
+    ALL_IN_ONE = C("all_in_1", pgettext_lazy("section", "Common Section"))
+    MATH = C("math", pgettext_lazy("section", "Math"))
+    PROGRAMMING = C("code", pgettext_lazy("section", "Code"))
+    MOTIVATION = C("mv", pgettext_lazy("section", "Motivation"))
 
 
 class InterviewInvitationStatuses(DjangoChoices):
     # This status means applicant did not perform any action on this invitation
-    NO_RESPONSE = C('created', _("No Response"))
-    DECLINED = C('declined', _("Declined"))
+    NO_RESPONSE = C("created", _("No Response"))
+    DECLINED = C("declined", _("Declined"))
     # TODO: auto-update status for expired invitation: rq task or in a lazy manner (but where?)
     # Note: explicit status for expired invitation is out of
     # sync with actual checking for expiration time
-    EXPIRED = C('expired', _("Expired"))
-    ACCEPTED = C('accepted', _("Accepted"))
+    EXPIRED = C("expired", _("Expired"))
+    ACCEPTED = C("accepted", _("Accepted"))
 
     @classmethod
     def get_code(cls, value):
@@ -111,4 +115,4 @@ class YandexDataSchoolInterviewRatingSystem(DjangoChoices):
     FIVE = ChoiceItem(5, "точно нужно взять (5)")
 
 
-SESSION_CONFIRMATION_CODE_KEY = 'admission_confirmation_code'
+SESSION_CONFIRMATION_CODE_KEY = "admission_confirmation_code"

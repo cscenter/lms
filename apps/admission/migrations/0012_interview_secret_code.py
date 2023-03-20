@@ -5,15 +5,16 @@ import uuid
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0011_remove_interviewformat_appointment_template'),
+        ("admission", "0011_remove_interviewformat_appointment_template"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='interview',
-            name='secret_code',
-            field=models.UUIDField(default=uuid.uuid4, editable=False, verbose_name='Secret code'),
+            model_name="interview",
+            name="secret_code",
+            field=models.UUIDField(
+                default=uuid.uuid4, editable=False, verbose_name="Secret code"
+            ),
         ),
     ]

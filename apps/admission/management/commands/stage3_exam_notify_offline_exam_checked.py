@@ -13,14 +13,14 @@ from ._utils import CurrentCampaignMixin, EmailTemplateMixin
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
-    help = 'Generate mails about check completeness'
+    help = "Generate mails about check completeness"
 
     TEMPLATE_PATTERN = "admission-{year}-{branch_code}-offline-exam-checked"
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
 
-        template_name_pattern = options['template_pattern']
+        template_name_pattern = options["template_pattern"]
         self.validate_templates(campaigns, [template_name_pattern])
 
         generated = 0
@@ -28,16 +28,15 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             email_from = get_email_from(campaign)
             template_name = self.get_template_name(campaign, template_name_pattern)
             template = get_email_template(template_name)
-            exams = (Exam.objects
-                     .filter(applicant__campaign=campaign.pk,
-                             applicant__status=Applicant.PERMIT_TO_EXAM,
-                             status=ChallengeStatuses.MANUAL)
-                     .select_related("applicant"))
+            exams = Exam.objects.filter(
+                applicant__campaign=campaign.pk,
+                applicant__status=Applicant.PERMIT_TO_EXAM,
+                status=ChallengeStatuses.MANUAL,
+            ).select_related("applicant")
             for e in exams.iterator():
                 applicant = e.applicant
                 recipients = [applicant.email]
-                if not Email.objects.filter(to=recipients,
-                                            template=template).exists():
+                if not Email.objects.filter(to=recipients, template=template).exists():
                     details = {}
                     for k, value in e.details.items():
                         # Pluralize scores
@@ -49,10 +48,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                                 plural_part = "а"
                             value = f"{value} балл{plural_part}"
                         details[k] = value
-                    context = {
-                        "total": str(e.score),
-                        "details": details
-                    }
+                    context = {"total": str(e.score), "details": details}
                     mail.send(
                         recipients,
                         sender=email_from,
@@ -62,7 +58,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                         # value of the template id. It makes
                         # `Email.objects.exists()` work correctly.
                         render_on_delivery=True,
-                        backend='ses',
+                        backend="ses",
                     )
                     generated += 1
         self.stdout.write("Generated emails: {}".format(generated))

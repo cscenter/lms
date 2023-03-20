@@ -20,12 +20,13 @@ class Command(CurrentCampaignMixin, BaseCommand):
                 self.stdout.write("Zero passing score. Skip campaign")
                 continue
 
-            applicants = (Applicant.objects
-                          .filter(campaign_id=campaign.pk,
-                                  online_test__score__gte=passing_score)
-                          .values("id", "yandex_login",
-                                  "exam__yandex_contest_id")
-                          .order_by("exam__yandex_contest_id"))
+            applicants = (
+                Applicant.objects.filter(
+                    campaign_id=campaign.pk, online_test__score__gte=passing_score
+                )
+                .values("id", "yandex_login", "exam__yandex_contest_id")
+                .order_by("exam__yandex_contest_id")
+            )
             contest_id = object()
             for a in applicants:
                 if not a["exam__yandex_contest_id"]:

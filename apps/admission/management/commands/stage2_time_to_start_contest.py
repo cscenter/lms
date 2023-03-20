@@ -17,26 +17,22 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
 
-        template_name_pattern = options['template_pattern']
+        template_name_pattern = options["template_pattern"]
         self.validate_templates(campaigns, [template_name_pattern])
 
         for campaign in campaigns:
             self.stdout.write(str(campaign))
             template_name = self.get_template_name(campaign, template_name_pattern)
             template = get_email_template(template_name)
-            queryset = (Exam.objects
-                        .filter(applicant__campaign_id=campaign.pk,
-                                applicant__is_unsubscribed=False,
-                                score__isnull=True,
-                                status=ChallengeStatuses.REGISTERED)
-                        .values("applicant__email",
-                                "applicant__yandex_login",
-                                "yandex_contest_id"))
+            queryset = Exam.objects.filter(
+                applicant__campaign_id=campaign.pk,
+                applicant__is_unsubscribed=False,
+                score__isnull=True,
+                status=ChallengeStatuses.REGISTERED,
+            ).values("applicant__email", "applicant__yandex_login", "yandex_contest_id")
 
             generated = EmailQueueService.time_to_start_yandex_contest(
-                campaign=campaign,
-                template=template,
-                participants=queryset.iterator()
+                campaign=campaign, template=template, participants=queryset.iterator()
             )
 
             self.stdout.write("total: {}".format(queryset.count()))

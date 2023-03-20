@@ -18,7 +18,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
 
-        template_name_pattern = options['template_pattern']
+        template_name_pattern = options["template_pattern"]
         self.validate_templates(campaigns, [template_name_pattern])
 
         for campaign in campaigns:
@@ -33,8 +33,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
         sent = 0
         for applicant in applicants:
             recipients = [applicant.email]
-            if not Email.objects.filter(to=recipients,
-                                        template=template).exists():
+            if not Email.objects.filter(to=recipients, template=template).exists():
                 mail.send(
                     recipients,
                     sender=email_from,
@@ -44,7 +43,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                     # value of the template id. It makes `exists`
                     # method above works correctly.
                     render_on_delivery=True,
-                    backend='ses',
+                    backend="ses",
                 )
                 sent += 1
         self.stdout.write(f"Emails generated {sent}.")

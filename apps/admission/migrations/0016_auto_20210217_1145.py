@@ -4,24 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0015_auto_20200902_0819'),
+        ("admission", "0015_auto_20200902_0819"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='applicant',
-            name='university2',
+            model_name="applicant",
+            name="university2",
         ),
         migrations.AlterField(
-            model_name='applicant',
-            name='university_other',
-            field=models.CharField(blank=True, max_length=255, null=True, verbose_name='University (Other)'),
+            model_name="applicant",
+            name="university_other",
+            field=models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="University (Other)"
+            ),
         ),
         migrations.AlterField(
-            model_name='campaign',
-            name='current',
-            field=models.BooleanField(default=False, help_text='You can mark campaign as current only after adding contests for testing', verbose_name='Current Admission'),
+            model_name="campaign",
+            name="current",
+            field=models.BooleanField(
+                default=False,
+                help_text="You can mark campaign as current only after adding contests for testing",
+                verbose_name="Current Admission",
+            ),
         ),
     ]

@@ -15,21 +15,25 @@ class EmailVerificationCodeGenerator:
     Strategy object used to generate and check tokens for the password
     reset mechanism.
     """
+
     key_salt = "admission.tokens.EmailVerificationCodeGenerator"
     secret = settings.SECRET_KEY
 
     def __init__(self, algorithm: Optional[str] = None):
-        self.algorithm = algorithm or 'sha256'
+        self.algorithm = algorithm or "sha256"
 
     def make_token(self, email: str, applicant: Applicant) -> str:
         """
         Return a token that can be used once to verify email
         for the given participant.
         """
-        return self._make_token_with_timestamp(email, applicant, self.num_seconds(self._now()))
+        return self._make_token_with_timestamp(
+            email, applicant, self.num_seconds(self._now())
+        )
 
-    def _make_token_with_timestamp(self, email: str, applicant: Applicant,
-                                   timestamp: int) -> str:
+    def _make_token_with_timestamp(
+        self, email: str, applicant: Applicant, timestamp: int
+    ) -> str:
         # timestamp is number of seconds since 2001-1-1. Converted to base 36,
         # this gives us a 6 digit string until about 2069.
         ts_b36 = int_to_base36(timestamp)
@@ -38,7 +42,9 @@ class EmailVerificationCodeGenerator:
             self._make_hash_value(email, applicant, timestamp),
             secret=self.secret,
             algorithm=self.algorithm,
-        ).hexdigest()[::2]  # Limit to 20 characters to shorten the code.
+        ).hexdigest()[
+            ::2
+        ]  # Limit to 20 characters to shorten the code.
         return "%s-%s" % (ts_b36, hash_string)
 
     def _make_hash_value(self, email: str, applicant: Applicant, timestamp: int) -> str:
@@ -72,8 +78,9 @@ class EmailVerificationCodeGenerator:
             return False
 
         # Check that the timestamp/uid has not been tampered with
-        if not constant_time_compare(self._make_token_with_timestamp(email, applicant, timestamp),
-                                     token):
+        if not constant_time_compare(
+            self._make_token_with_timestamp(email, applicant, timestamp), token
+        ):
             return False
 
         # Check the timestamp is within limit

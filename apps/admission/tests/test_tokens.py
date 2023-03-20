@@ -20,12 +20,12 @@ class MockedEmailVerificationCodeGenerator(EmailVerificationCodeGenerator):
 def test_make_token():
     applicant = ApplicantFactory()
     g = EmailVerificationCodeGenerator()
-    token1 = g.make_token('test1@example.com', applicant)
-    token2 = g.make_token('test1@example.com', applicant)
-    token3 = g.make_token('test2@example.com', applicant)
+    token1 = g.make_token("test1@example.com", applicant)
+    token2 = g.make_token("test1@example.com", applicant)
+    token3 = g.make_token("test2@example.com", applicant)
     assert token1 == token2
     assert token1 != token3
-    assert g.check_token('test1@example.com', applicant, token1)
+    assert g.check_token("test1@example.com", applicant, token1)
 
 
 @pytest.mark.django_db
@@ -33,19 +33,19 @@ def test_token_updated_applicant():
     """Applicant model update invalidates the token"""
     applicant = ApplicantFactory()
     g = EmailVerificationCodeGenerator()
-    token1 = g.make_token('test1@example.com', applicant)
+    token1 = g.make_token("test1@example.com", applicant)
     applicant.status = ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED
-    applicant.save(update_fields=['status'])
+    applicant.save(update_fields=["status"])
     applicant.refresh_from_db()
-    token2 = g.make_token('test1@example.com', applicant)
+    token2 = g.make_token("test1@example.com", applicant)
     assert token1 != token2
 
 
 @pytest.mark.django_db
 def test_token_timeout(mocker):
     timeout = 60
-    email = 'test1@example.com'
-    mocked_timeout = mocker.patch('admission.tokens.VERIFICATION_CODE_TIMEOUT', timeout)
+    email = "test1@example.com"
+    mocked_timeout = mocker.patch("admission.tokens.VERIFICATION_CODE_TIMEOUT", timeout)
     applicant = ApplicantFactory()
     now = datetime.now()
     token = MockedEmailVerificationCodeGenerator(now).make_token(email, applicant)
@@ -57,7 +57,7 @@ def test_token_timeout(mocker):
 
 @pytest.mark.django_db
 def test_check_token_with_nonexistent_token_and_applicant():
-    email = 'test1@example.com'
+    email = "test1@example.com"
     applicant = ApplicantFactory()
     g = EmailVerificationCodeGenerator()
     token = g.make_token(email, applicant)

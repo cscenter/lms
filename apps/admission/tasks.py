@@ -8,7 +8,10 @@ from admission.constants import ContestTypes
 from admission.models import Applicant, Campaign, Contest, Exam, Test
 from admission.services import EmailQueueService
 from grading.api.yandex_contest import (
-    ContestAPIError, RegisterStatus, ResponseStatus, YandexContestAPI
+    ContestAPIError,
+    RegisterStatus,
+    ResponseStatus,
+    YandexContestAPI,
 )
 from tasks.models import Task
 
@@ -20,14 +23,15 @@ def notify_admin_bad_token(campaign_id):
     pass
 
 
-@job('high')
+@job("high")
 def register_in_yandex_contest(applicant_id, language_code):
     """Register user in Yandex.Contest, then send email with summary"""
     translation.activate(language_code)
-    applicant = (Applicant.objects
-                 .filter(pk=applicant_id)
-                 .select_related("campaign", "campaign__branch", "online_test")
-                 .first())
+    applicant = (
+        Applicant.objects.filter(pk=applicant_id)
+        .select_related("campaign", "campaign__branch", "online_test")
+        .first()
+    )
     if not applicant.yandex_login:
         logger.error(f"Empty yandex login for applicant id = {applicant_id}")
         raise AttributeError("Empty yandex id")
@@ -36,8 +40,9 @@ def register_in_yandex_contest(applicant_id, language_code):
         logger.error(f"No contest assigned to applicant id = {applicant_id}")
         raise AttributeError("Empty contest id")
     campaign = applicant.campaign
-    api = YandexContestAPI(access_token=campaign.access_token,
-                           refresh_token=campaign.refresh_token)
+    api = YandexContestAPI(
+        access_token=campaign.access_token, refresh_token=campaign.refresh_token
+    )
     try:
         online_test.register_in_contest(api)
     except ContestAPIError as e:
@@ -51,7 +56,7 @@ def register_in_yandex_contest(applicant_id, language_code):
 # FIXME: надо отлавливать все timeout'ы при запросе, т.к. в этом случае поле processed_at не будет обновлено и будет попадать в очередь задач на исполнение
 # TODO: What if rq.timeouts.JobTimeoutException?
 # FIXME: potential deadlock if using task id instead of (task_name, task_params). Provide natural key for task instead of PK
-@job('default')
+@job("default")
 def import_campaign_contest_results(*, task_id) -> None:
     try:
         task = Task.objects.unlocked(timezone.now()).get(pk=task_id)
@@ -60,7 +65,7 @@ def import_campaign_contest_results(*, task_id) -> None:
         return None
 
     task_kwargs = task.task_params
-    contest_type = task_kwargs.get('contest_type')
+    contest_type = task_kwargs.get("contest_type")
     if not contest_type or contest_type not in ContestTypes.values:
         task.error = "Unknown contest type"
         task.complete()
@@ -68,8 +73,7 @@ def import_campaign_contest_results(*, task_id) -> None:
 
     task.lock(locked_by="rqworker")
 
-    campaigns_queryset = (Campaign.objects
-                          .filter(pk=task_kwargs["campaign_id"]))
+    campaigns_queryset = Campaign.objects.filter(pk=task_kwargs["campaign_id"])
     for campaign in campaigns_queryset:
         logger.info(f"Campaign id = {campaign.pk}")
         api = YandexContestAPI(access_token=campaign.access_token)
@@ -83,7 +87,9 @@ def import_campaign_contest_results(*, task_id) -> None:
             else:
                 raise ValueError(f"contest type {contest_type} is not supported")
             try:
-                on_scoreboard, updated = model_class.import_scores(api=api, contest=contest)
+                on_scoreboard, updated = model_class.import_scores(
+                    api=api, contest=contest
+                )
             except ContestAPIError as e:
                 if e.code == ResponseStatus.BAD_TOKEN:
                     notify_admin_bad_token(campaign.pk)

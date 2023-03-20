@@ -9,7 +9,9 @@ from admission.models import Applicant
 from admission.services import get_email_from
 
 from ._utils import (
-    CurrentCampaignMixin, EmailTemplateMixin, validate_campaign_passing_score
+    CurrentCampaignMixin,
+    EmailTemplateMixin,
+    validate_campaign_passing_score,
 )
 
 
@@ -26,16 +28,18 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument(
-            '--skip-exam-invitation', action="store_true",
-            help='Omits exam record validation')
+            "--skip-exam-invitation",
+            action="store_true",
+            help="Omits exam record validation",
+        )
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
 
-        template_name_pattern = options['template_pattern']
+        template_name_pattern = options["template_pattern"]
         self.validate_templates(campaigns, [template_name_pattern])
 
-        skip_exam_invitation = options['skip_exam_invitation']
+        skip_exam_invitation = options["skip_exam_invitation"]
 
         for campaign in campaigns:
             self.stdout.write(str(campaign))
@@ -50,16 +54,17 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
 
             email_from = get_email_from(campaign)
 
-            applicants = (Applicant.objects
-                          .filter(campaign=campaign,
-                                  status=Applicant.PERMIT_TO_EXAM)
-                          .values("pk",
-                                  "online_test__score",
-                                  "online_test__yandex_contest_id",
-                                  "exam__yandex_contest_id",
-                                  "yandex_login",
-                                  "email",
-                                  "status"))
+            applicants = Applicant.objects.filter(
+                campaign=campaign, status=Applicant.PERMIT_TO_EXAM
+            ).values(
+                "pk",
+                "online_test__score",
+                "online_test__yandex_contest_id",
+                "exam__yandex_contest_id",
+                "yandex_login",
+                "email",
+                "status",
+            )
             total = 0
             generated = 0
             for a in applicants:
@@ -68,16 +73,17 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                     msg = f"\tWARN Applicant {a['pk']} has passing score lower than in campaign requirements."
                     self.stdout.write(msg)
                 if not skip_exam_invitation and a["exam__yandex_contest_id"] is None:
-                    self.stdout.write(f"No exam contest id were provided for applicant {a['pk']}. Skip")
+                    self.stdout.write(
+                        f"No exam contest id were provided for applicant {a['pk']}. Skip"
+                    )
                     continue
                 recipients = [a["email"]]
-                if not Email.objects.filter(to=recipients,
-                                            template=template).exists():
+                if not Email.objects.filter(to=recipients, template=template).exists():
                     context = {
-                        'YANDEX_LOGIN': a["yandex_login"],
-                        'TEST_SCORE': int(a["online_test__score"]),
-                        'TEST_CONTEST_ID': a["online_test__yandex_contest_id"],
-                        'EXAM_CONTEST_ID': a["exam__yandex_contest_id"],
+                        "YANDEX_LOGIN": a["yandex_login"],
+                        "TEST_SCORE": int(a["online_test__score"]),
+                        "TEST_CONTEST_ID": a["online_test__yandex_contest_id"],
+                        "EXAM_CONTEST_ID": a["exam__yandex_contest_id"],
                     }
                     mail.send(
                         recipients,
@@ -88,7 +94,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                         # value of the template id. It makes `exists`
                         # method above works correctly.
                         render_on_delivery=True,
-                        backend='ses',
+                        backend="ses",
                     )
                     generated += 1
             self.stdout.write(f"    total: {total}")

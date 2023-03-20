@@ -4,20 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('admission', '0031_auto_20210517_1235'),
+        ("admission", "0031_auto_20210517_1235"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='interviewinvitation',
-            name='status',
-            field=models.CharField(choices=[('created', 'No Response'), ('declined', 'Declined'), ('expired', 'Expired'), ('accepted', 'Accepted')], default='created', max_length=10, verbose_name='Status'),
+            model_name="interviewinvitation",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("created", "No Response"),
+                    ("declined", "Declined"),
+                    ("expired", "Expired"),
+                    ("accepted", "Accepted"),
+                ],
+                default="created",
+                max_length=10,
+                verbose_name="Status",
+            ),
         ),
         migrations.AlterField(
-            model_name='interviewinvitation',
-            name='expired_at',
-            field=models.DateTimeField(verbose_name='Expired at'),
+            model_name="interviewinvitation",
+            name="expired_at",
+            field=models.DateTimeField(verbose_name="Expired at"),
         ),
     ]
