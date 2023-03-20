@@ -23,9 +23,14 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from admission.constants import (
-    ApplicantStatuses, ChallengeStatuses, ContestTypes, DefaultInterviewRatingSystem,
-    InterviewFormats, InterviewInvitationStatuses, InterviewSections,
-    YandexDataSchoolInterviewRatingSystem
+    ApplicantStatuses,
+    ChallengeStatuses,
+    ContestTypes,
+    DefaultInterviewRatingSystem,
+    InterviewFormats,
+    InterviewInvitationStatuses,
+    InterviewSections,
+    YandexDataSchoolInterviewRatingSystem,
 )
 from admission.utils import get_next_process, slot_range
 from api.services import generate_hash, generate_random_string
@@ -55,81 +60,97 @@ def validate_email_template_name(value):
     if value and not EmailTemplate.objects.filter(name=value).exists():
         raise ValidationError(
             _("Email template with name `%(template_name)s` doesn't exist"),
-            params={'template_name': value},
+            params={"template_name": value},
         )
 
 
 class Campaign(TimezoneAwareMixin, models.Model):
-    TIMEZONE_AWARE_FIELD_NAME = 'branch'
+    TIMEZONE_AWARE_FIELD_NAME = "branch"
 
     year = models.PositiveSmallIntegerField(
-        _("Campaign|Year"),
-        validators=[MinValueValidator(2000)],
-        default=current_year)
-    branch = models.ForeignKey(Branch,
-                               verbose_name=_("Branch"),
-                               related_name="campaigns",
-                               on_delete=models.PROTECT)
+        _("Campaign|Year"), validators=[MinValueValidator(2000)], default=current_year
+    )
+    branch = models.ForeignKey(
+        Branch,
+        verbose_name=_("Branch"),
+        related_name="campaigns",
+        on_delete=models.PROTECT,
+    )
     current = models.BooleanField(
         _("Current Admission"),
-        help_text=_("You can mark campaign as current only after adding contests for testing"),
-        default=False)
-    online_test_max_score = models.SmallIntegerField(
-        _("Campaign|Test_max_score"))
+        help_text=_(
+            "You can mark campaign as current only after adding contests for testing"
+        ),
+        default=False,
+    )
+    online_test_max_score = models.SmallIntegerField(_("Campaign|Test_max_score"))
     online_test_passing_score = models.SmallIntegerField(
         _("Campaign|Test_passing_score"),
-        help_text=_("Campaign|Test_passing_score-help"))
+        help_text=_("Campaign|Test_passing_score-help"),
+    )
     exam_max_score = models.SmallIntegerField(
-        _("Campaign|Exam_max_score"),
-        null=True, blank=True)
+        _("Campaign|Exam_max_score"), null=True, blank=True
+    )
     exam_passing_score = models.SmallIntegerField(
         _("Campaign|Exam_passing_score"),
         help_text=_("Campaign|Exam_passing_score-help"),
-        null=True, blank=True)
+        null=True,
+        blank=True,
+    )
     application_starts_at = TimezoneAwareDateTimeField(_("Application Starts on"))
     application_ends_at = TimezoneAwareDateTimeField(
-        _("Application Ends on"),
-        help_text=_("Last day for submitting application"))
+        _("Application Ends on"), help_text=_("Last day for submitting application")
+    )
     confirmation_ends_at = TimezoneAwareDateTimeField(
         _("Confirmation Ends on"),
         help_text=_("Deadline for accepting invitation to create student profile"),
-        blank=True, null=True)
+        blank=True,
+        null=True,
+    )
     access_token = models.CharField(
         _("Access Token"),
         help_text=_("Yandex.Contest Access Token"),
         max_length=255,
-        blank=True)
+        blank=True,
+    )
     refresh_token = models.CharField(
         _("Refresh Token"),
         help_text=_("Yandex.Contest Refresh Token"),
         max_length=255,
-        blank=True)
+        blank=True,
+    )
     # FIXME: factory boy allows to save blank values for template names :<
     template_registration = models.CharField(
         _("Registration Template"),
         help_text=_("Template name for contest registration email"),
         validators=[validate_email_template_name],
-        max_length=255)
+        max_length=255,
+    )
     template_exam_invitation = models.CharField(
         _("Exam Invitation Email Template"),
         help_text=_("Template name for the exam registration email"),
         validators=[validate_email_template_name],
         blank=True,
-        max_length=255)
+        max_length=255,
+    )
     template_appointment = models.CharField(
         _("Invitation Template"),
         help_text=_("Template name for interview invitation email"),
         validators=[validate_email_template_name],
-        max_length=255)
+        max_length=255,
+    )
     template_interview_feedback = models.ForeignKey(
         EmailTemplate,
         verbose_name=_("Interview Feedback Template"),
-        help_text=_("Leave blank if there is no need to send a feedback email. "
-                    "Email will be sent at the time of interview status change, "
-                    "but not earlier than 21:00 of the day of the interview"),
+        help_text=_(
+            "Leave blank if there is no need to send a feedback email. "
+            "Email will be sent at the time of interview status change, "
+            "but not earlier than 21:00 of the day of the interview"
+        ),
         on_delete=models.PROTECT,
         blank=True,
-        null=True)
+        null=True,
+    )
 
     class Meta:
         verbose_name = _("Campaign")
@@ -154,11 +175,13 @@ class Campaign(TimezoneAwareMixin, models.Model):
             raise ValidationError(msg)
         errors = {}
         if self.current:
-            contests = Contest.objects.filter(campaign_id=self.pk,
-                                              type=Contest.TYPE_TEST).count()
+            contests = Contest.objects.filter(
+                campaign_id=self.pk, type=Contest.TYPE_TEST
+            ).count()
             if not contests:
-                msg = _("Before mark campaign as `current` - add contests "
-                        "for testing")
+                msg = _(
+                    "Before mark campaign as `current` - add contests " "for testing"
+                )
                 errors["__all__"] = msg
             if not self.access_token:
                 errors["access_token"] = _("Empty access token")
@@ -169,11 +192,11 @@ class Campaign(TimezoneAwareMixin, models.Model):
     def with_open_registration(cls):
         """Returns campaigns marked as `current` with open registration form"""
         today = timezone.now()
-        return (cls.objects
-                .filter(current=True,
-                        application_starts_at__lte=today,
-                        application_ends_at__gt=today)
-                .select_related('branch'))
+        return cls.objects.filter(
+            current=True,
+            application_starts_at__lte=today,
+            application_ends_at__gt=today,
+        ).select_related("branch")
 
     @property
     def is_active(self):
@@ -189,18 +212,22 @@ class University(models.Model):
     many more things which could prevent accurately aggregate data, store
     target universities for each branch in this model.
     """
-    name = models.CharField(_("University"),
-                            max_length=255,
-                            help_text=_("Perhaps also the faculty."))
-    abbr = models.CharField(_("University abbreviation"), max_length=100,
-                            blank=True, null=True)
+
+    name = models.CharField(
+        _("University"), max_length=255, help_text=_("Perhaps also the faculty.")
+    )
+    abbr = models.CharField(
+        _("University abbreviation"), max_length=100, blank=True, null=True
+    )
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
-    branch = models.ForeignKey(Branch,
-                               verbose_name=_("Branch"),
-                               related_name="+",
-                               null=True,
-                               blank=True,
-                               on_delete=models.PROTECT)
+    branch = models.ForeignKey(
+        Branch,
+        verbose_name=_("Branch"),
+        related_name="+",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+    )
 
     class Meta:
         verbose_name = _("University")
@@ -220,11 +247,12 @@ class _ApplicantSubscribedManager(models.Manager):
 
 
 ApplicantSubscribedManager = _ApplicantSubscribedManager.from_queryset(
-    ApplicantQuerySet)
+    ApplicantQuerySet
+)
 
 
 class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
-    TIMEZONE_AWARE_FIELD_NAME = 'campaign'
+    TIMEZONE_AWARE_FIELD_NAME = "campaign"
 
     # TODO: access applicant statuses with .STATUS.<code> instead
     REJECTED_BY_TEST = ApplicantStatuses.REJECTED_BY_TEST
@@ -232,7 +260,9 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     REJECTED_BY_EXAM = ApplicantStatuses.REJECTED_BY_EXAM
     REJECTED_BY_CHEATING = ApplicantStatuses.REJECTED_BY_CHEATING
     # TODO: rename interview codes here and in DB. Replace values type?
-    INTERVIEW_TOBE_SCHEDULED = ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED  # permitted to interview
+    INTERVIEW_TOBE_SCHEDULED = (
+        ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED
+    )  # permitted to interview
     # FIXME: remove
     INTERVIEW_SCHEDULED = ApplicantStatuses.INTERVIEW_SCHEDULED
     INTERVIEW_COMPLETED = ApplicantStatuses.INTERVIEW_COMPLETED
@@ -254,7 +284,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         REJECTED_BY_INTERVIEW,
         ApplicantStatuses.REJECTED_BY_INTERVIEW_WITH_BONUS,
         VOLUNTEER,
-        WAITING_FOR_PAYMENT
+        WAITING_FOR_PAYMENT,
     }
     # Successful final statuses after interview stage
     ACCEPT_STATUSES = {
@@ -272,30 +302,32 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         (STUDY_PROGRAM_CS, "Computer Science (Современная информатика)"),
         (STUDY_PROGRAM_DS, "Data Science (Анализ данных)"),
         (STUDY_PROGRAM_SE, "Software Engineering (Разработка ПО)"),
-        (STUDY_PROGRAM_ROBOTICS, "Robotics (Роботы)")
+        (STUDY_PROGRAM_ROBOTICS, "Robotics (Роботы)"),
     )
     INFO_SOURCES = (
-        ('uni', 'плакат/листовка в университете'),
-        ('social_net', 'пост в соц. сетях'),
-        ('friends', 'от друзей'),
-        ('other', 'другое'),
+        ("uni", "плакат/листовка в университете"),
+        ("social_net", "пост в соц. сетях"),
+        ("friends", "от друзей"),
+        ("other", "другое"),
         # Legacy options
-        ('habr', 'Прочитал в статье на habr.ru'),
-        ('club', 'Из CS клуба'),
-        ('tandp', 'Теории и практики')
+        ("habr", "Прочитал в статье на habr.ru"),
+        ("club", "Из CS клуба"),
+        ("tandp", "Теории и практики"),
     )
 
     campaign = models.ForeignKey(
         Campaign,
         verbose_name=_("Applicant|Campaign"),
         on_delete=models.PROTECT,
-        related_name="applicants")
+        related_name="applicants",
+    )
     status = models.CharField(
         choices=STATUS,
         verbose_name=_("Applicant|Status"),
         blank=True,
         null=True,
-        max_length=20)
+        max_length=20,
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Account"),
@@ -306,25 +338,22 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     # Personal
     first_name = models.CharField(_("First name"), max_length=255)
     last_name = models.CharField(_("Surname"), max_length=255)
-    patronymic = models.CharField(_("Patronymic"), max_length=255,
-                                  blank=True, null=True)
-    email = models.EmailField(
-        _("Email"),
-        help_text=_("Applicant|email"))
+    patronymic = models.CharField(
+        _("Patronymic"), max_length=255, blank=True, null=True
+    )
+    email = models.EmailField(_("Email"), help_text=_("Applicant|email"))
     is_unsubscribed = models.BooleanField(
         _("Unsubscribed"),
         default=False,
         db_index=True,
-        help_text=_("Unsubscribe from future notifications"))
+        help_text=_("Unsubscribe from future notifications"),
+    )
     phone = models.CharField(
-        _("Contact phone"),
-        max_length=42,
-        help_text=_("Applicant|phone"))
+        _("Contact phone"), max_length=42, help_text=_("Applicant|phone")
+    )
     living_place = models.CharField(
-        _("Living Place"),
-        max_length=255,
-        null=True,
-        blank=True)
+        _("Living Place"), max_length=255, null=True, blank=True
+    )
     birth_date = models.DateField(_("Date of Birth"), blank=True, null=True)
     # Social Networks
     stepic_id = models.CharField(
@@ -332,169 +361,173 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         help_text=_("Applicant|stepic_id"),
         max_length=255,
         blank=True,
-        null=True)
+        null=True,
+    )
     yandex_login = models.CharField(
         _("Yandex Login"),
         max_length=80,
         help_text=_("Applicant|yandex_login"),
         null=True,
-        blank=True)
+        blank=True,
+    )
     yandex_login_q = models.CharField(
         _("Yandex Login (normalized)"),
         max_length=80,
         help_text=_("Applicant|yandex_id_normalization"),
         editable=False,
         null=True,
-        blank=True)
+        blank=True,
+    )
     github_login = models.CharField(
         _("Github Login"),
         max_length=255,
         help_text=_("Applicant|github_login"),
         null=True,
-        blank=True)
+        blank=True,
+    )
     # Education
     is_studying = models.BooleanField(_("Are you studying?"), null=True)
     university = models.ForeignKey(
-        'universities.University',
+        "universities.University",
         verbose_name=_("Universities|University"),
         on_delete=models.PROTECT,
-        blank=True, null=True
+        blank=True,
+        null=True,
     )
     university_legacy = models.ForeignKey(
-        'core.University',
+        "core.University",
         verbose_name=_("Applicant|University"),
         on_delete=models.PROTECT,
         related_name="+",
-        blank=True, null=True)
-    university_other = models.CharField(
-        _("University (Other)"),
-        max_length=255,
+        blank=True,
         null=True,
-        blank=True)
+    )
+    university_other = models.CharField(
+        _("University (Other)"), max_length=255, null=True, blank=True
+    )
     faculty = models.TextField(
-        _("Faculty"),
-        help_text=_("Applicant|faculty"),
-        blank=True, null=True)
+        _("Faculty"), help_text=_("Applicant|faculty"), blank=True, null=True
+    )
     level_of_education = models.CharField(
         _("Course"),
         choices=AcademicDegreeLevels.choices,
         help_text=_("Applicant|course"),
         max_length=12,
-        blank=True, null=True)
+        blank=True,
+        null=True,
+    )
     year_of_graduation = models.PositiveSmallIntegerField(
-        verbose_name=_("Graduation Year"),
-        blank=True, null=True)
+        verbose_name=_("Graduation Year"), blank=True, null=True
+    )
     graduate_work = models.TextField(
         _("Graduate work"),
         help_text=_("Applicant|graduate_work_or_dissertation"),
         null=True,
-        blank=True)
+        blank=True,
+    )
     online_education_experience = models.TextField(
         _("Online Education Exp"),
         help_text=_("Applicant|online_education_experience"),
         null=True,
-        blank=True)
+        blank=True,
+    )
     # Work related questions
     experience = models.TextField(
         _("Experience"),
         help_text=_("Applicant|work_or_study_experience"),
         null=True,
-        blank=True)
+        blank=True,
+    )
     has_job = models.BooleanField(
-        _("Do you work?"),
-        help_text=_("Applicant|has_job"),
-        null=True)
+        _("Do you work?"), help_text=_("Applicant|has_job"), null=True
+    )
     workplace = models.CharField(
         _("Workplace"),
         help_text=_("Applicant|workplace"),
         max_length=255,
         null=True,
-        blank=True)
+        blank=True,
+    )
     position = models.CharField(
         _("Position"),
         help_text=_("Applicant|position"),
         max_length=255,
         null=True,
-        blank=True)
+        blank=True,
+    )
 
     motivation = models.TextField(
         _("Your motivation"),
         help_text=_("Applicant|motivation_why"),
         blank=True,
-        null=True)
-    probability = models.TextField(
-        _("Probability"),
-        help_text=_("Applicant|probability"),
         null=True,
-        blank=True)
+    )
+    probability = models.TextField(
+        _("Probability"), help_text=_("Applicant|probability"), null=True, blank=True
+    )
     preferred_study_programs = MultiSelectField(
         _("Study program"),
         help_text=_("Applicant|study_program"),
         choices=STUDY_PROGRAMS,
         max_length=255,
-        blank=True)
+        blank=True,
+    )
     # TODO: Store all study program notes in this field in label + value format instead
     #  of separated preferred_study_programs_*_note fields
     preferred_study_program_notes = models.TextField(
-        _("Study Program Notes"),
-        null=True, blank=True)
+        _("Study Program Notes"), null=True, blank=True
+    )
     preferred_study_programs_dm_note = models.TextField(
         _("Study program (DM note)"),
         help_text=_("Applicant|study_program_dm"),
         null=True,
-        blank=True)
+        blank=True,
+    )
     preferred_study_programs_se_note = models.TextField(
         _("Study program (SE note)"),
         help_text=_("Applicant|study_program_se"),
         null=True,
-        blank=True)
+        blank=True,
+    )
     preferred_study_programs_cs_note = models.TextField(
         _("Study program (CS note)"),
         help_text=_("Applicant|study_program_cs"),
         null=True,
-        blank=True)
+        blank=True,
+    )
     # Note: replace with m2m relation first if you need some statistics
     # based on field below
     where_did_you_learn = MultiSelectField(
-        _("Where did you learn about admission?"),
-        choices=INFO_SOURCES,
-        blank=True)
+        _("Where did you learn about admission?"), choices=INFO_SOURCES, blank=True
+    )
     where_did_you_learn_other = models.CharField(
         _("Where did you learn about admission? (other)"),
         max_length=255,
         null=True,
-        blank=True)
-    your_future_plans = models.TextField(
-        _("Future plans"),
-        help_text=_("Applicant|future_plans"),
         blank=True,
-        null=True)
+    )
+    your_future_plans = models.TextField(
+        _("Future plans"), help_text=_("Applicant|future_plans"), blank=True, null=True
+    )
     additional_info = models.TextField(
         _("Additional Info"),
         help_text=_("Applicant|additional_info"),
         blank=True,
-        null=True)
+        null=True,
+    )
     admin_note = models.TextField(
-        _("Admin note"),
-        help_text=_("Applicant|admin_note"),
-        blank=True,
-        null=True)
+        _("Admin note"), help_text=_("Applicant|admin_note"), blank=True, null=True
+    )
     # Key-value store for fields specific to admission campaigns
-    data = models.JSONField(
-        _("Data"),
-        blank=True,
-        null=True)
+    data = models.JSONField(_("Data"), blank=True, null=True)
     # Any useful data like application form integration log
     # FIXME: merge into data json field, then remove
-    meta = models.JSONField(
-        blank=True,
-        null=True,
-        editable=False)
+    meta = models.JSONField(blank=True, null=True, editable=False)
 
     class Meta:
         verbose_name = _("Applicant")
         verbose_name_plural = _("Applicants")
-        unique_together = [('email', 'campaign')]
+        unique_together = [("email", "campaign")]
 
     objects = models.Manager()
     subscribed = ApplicantSubscribedManager()
@@ -510,10 +543,11 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         if self.is_unsubscribed:
             # Looking for other applicants with the same email and
             # unsubscribe them too.
-            (Applicant.objects
-             .filter(email=self.email)
-             .exclude(pk=self.pk)
-             .update(is_unsubscribed=True))
+            (
+                Applicant.objects.filter(email=self.email)
+                .exclude(pk=self.pk)
+                .update(is_unsubscribed=True)
+            )
 
     def _assign_testing(self):
         testing = Test(applicant=self, status=ChallengeStatuses.NEW)
@@ -531,7 +565,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
 
     def clean(self):
         if self.yandex_login:
-            self.yandex_login_q = self.yandex_login.lower().replace('-', '.')
+            self.yandex_login_q = self.yandex_login.lower().replace("-", ".")
 
     def get_living_place_display(self):
         if not self.living_place and self.campaign.branch.city_id:
@@ -546,12 +580,11 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         return ""
 
     def get_absolute_url(self):
-        return reverse('admission:applicants:detail', args=[self.pk])
+        return reverse("admission:applicants:detail", args=[self.pk])
 
     def __str__(self):
         if self.campaign_id:
-            return smart_str(
-                "{} [{}]".format(self.full_name, self.campaign))
+            return smart_str("{} [{}]".format(self.full_name, self.campaign))
         else:
             return smart_str(self.full_name)
 
@@ -581,9 +614,9 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         conditions = [
             Q(email=self.email),
             (
-                Q(first_name__iexact=self.first_name) &
-                Q(last_name__iexact=self.last_name) &
-                Q(patronymic__iexact=self.patronymic)
+                Q(first_name__iexact=self.first_name)
+                & Q(last_name__iexact=self.last_name)
+                & Q(patronymic__iexact=self.patronymic)
             ),
         ]
         if self.phone:
@@ -601,8 +634,8 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
 def contest_assignments_upload_to(instance, filename):
     # TODO: Can be visible for unauthenticated. Is it ok?
     return instance.FILE_PATH_TEMPLATE.format(
-        contest_id=instance.contest_id,
-        filename=filename)
+        contest_id=instance.contest_id, filename=filename
+    )
 
 
 def validate_json_container(value):
@@ -610,9 +643,7 @@ def validate_json_container(value):
     Doesn't call if value is empty. This behavior checked in model clean method
     """
     if not isinstance(value, dict):
-        raise ValidationError(
-            "Serialized JSON should have dict as a container."
-        )
+        raise ValidationError("Serialized JSON should have dict as a container.")
 
 
 # TODO: add Contest provider (yandex/stepic), then change YandexContestIntegration.yandex_contest_id to FK
@@ -626,16 +657,16 @@ class Contest(models.Model):
         Campaign,
         verbose_name=_("Contest|Campaign"),
         on_delete=models.PROTECT,
-        related_name="contests")
-    type = models.IntegerField(
-        _("Type"),
-        choices=ContestTypes.choices)
+        related_name="contests",
+    )
+    type = models.IntegerField(_("Type"), choices=ContestTypes.choices)
     contest_id = models.CharField(
         _("Contest #ID"),
         help_text=_("Applicant|yandex_contest_id"),
         max_length=42,
         blank=True,
-        null=True)
+        null=True,
+    )
     details = models.JSONField(
         verbose_name=_("Details"),
         blank=True,
@@ -646,7 +677,8 @@ class Contest(models.Model):
         blank=True,
         upload_to=contest_assignments_upload_to,
         max_length=200,
-        storage=private_storage)
+        storage=private_storage,
+    )
 
     class Meta:
         verbose_name = _("Contest")
@@ -673,23 +705,27 @@ class YandexContestIntegration(models.Model):
         help_text=_("Applicant|yandex_contest_id"),
         max_length=42,
         blank=True,
-        null=True)
+        null=True,
+    )
     contest_participant_id = models.IntegerField(
         _("Participant ID"),
         help_text=_("participant_id in Yandex.Contest"),
         null=True,
-        blank=True)
+        blank=True,
+    )
     contest_status_code = models.IntegerField(
-        "Yandex API Response",
-        null=True,
-        blank=True)
+        "Yandex API Response", null=True, blank=True
+    )
     status = models.CharField(
         choices=ChallengeStatuses.choices,
         default=ChallengeStatuses.NEW,
         verbose_name=_("Status"),
-        help_text=_("Choose `manual score input` to avoid synchronization with "
-                    "contest results"),
-        max_length=15)
+        help_text=_(
+            "Choose `manual score input` to avoid synchronization with "
+            "contest results"
+        ),
+        max_length=15,
+    )
 
     class Meta:
         abstract = True
@@ -707,22 +743,24 @@ class YandexContestIntegration(models.Model):
         if not hasattr(cls, "CONTEST_TYPE"):
             errors.append(
                 checks.Error(
-                    f'`{cls} is a subclass of YandexContestIntegration but no '
-                    f'contest type information was provided',
-                    hint=f'define {cls.__name__}.CONTEST_TYPE attribute value',
+                    f"`{cls} is a subclass of YandexContestIntegration but no "
+                    f"contest type information was provided",
+                    hint=f"define {cls.__name__}.CONTEST_TYPE attribute value",
                     obj=cls,
-                    id='admission.E003',
-                ))
+                    id="admission.E003",
+                )
+            )
         else:
-            types = (k for k, v in Contest._meta.get_field('type').choices)
+            types = (k for k, v in Contest._meta.get_field("type").choices)
             if cls.CONTEST_TYPE not in types:
                 errors.append(
                     checks.Error(
-                        f'`{cls.__name__}.CONTEST_TYPE value must be defined '
-                        f'in Contest.type field choices',
+                        f"`{cls.__name__}.CONTEST_TYPE value must be defined "
+                        f"in Contest.type field choices",
                         obj=cls,
-                        id='admission.E004',
-                    ))
+                        id="admission.E004",
+                    )
+                )
         return errors
 
     @classmethod
@@ -730,24 +768,27 @@ class YandexContestIntegration(models.Model):
         errors = []
         try:
             applicant = cls._meta.get_field("applicant")
-            if (not applicant.is_relation or
-                    not issubclass(applicant.remote_field.model, Applicant)):
+            if not applicant.is_relation or not issubclass(
+                applicant.remote_field.model, Applicant
+            ):
                 errors.append(
                     checks.Error(
-                        f'`{cls}.applicant` is not a FK to Applicant model',
-                        hint='define applicant = OneToOneField(Applicant, ...)',
+                        f"`{cls}.applicant` is not a FK to Applicant model",
+                        hint="define applicant = OneToOneField(Applicant, ...)",
                         obj=cls,
-                        id='admission.E002',
-                    ))
+                        id="admission.E002",
+                    )
+                )
         except FieldDoesNotExist:
             errors.append(
                 checks.Error(
-                    f'`{cls.__name__}` is a subclass of YandexContestIntegration'
-                    f' and must define `applicant` field',
-                    hint='define applicant = OneToOneField(Applicant, ...)',
+                    f"`{cls.__name__}` is a subclass of YandexContestIntegration"
+                    f" and must define `applicant` field",
+                    hint="define applicant = OneToOneField(Applicant, ...)",
                     obj=cls,
-                    id='admission.E001',
-                ))
+                    id="admission.E001",
+                )
+            )
         return errors
 
     def register_in_contest(self, api):
@@ -757,8 +798,9 @@ class YandexContestIntegration(models.Model):
         """
         applicant = self.applicant
         try:
-            status_code, data = api.register_in_contest(applicant.yandex_login,
-                                                        self.yandex_contest_id)
+            status_code, data = api.register_in_contest(
+                applicant.yandex_login, self.yandex_contest_id
+            )
         except YandexContestError:
             raise
         update_fields = {
@@ -769,14 +811,17 @@ class YandexContestIntegration(models.Model):
             participant_id = data
             update_fields["contest_participant_id"] = participant_id
         else:  # 409 - already registered for this contest
-            registered = (self.__class__.objects
-                          .filter(yandex_contest_id=self.yandex_contest_id,
-                                  contest_status_code=RegisterStatus.CREATED,
-                                  applicant__campaign_id=applicant.campaign_id,
-                                  applicant__yandex_login=applicant.yandex_login)
-                          .exclude(contest_participant_id__isnull=True)
-                          .only("contest_participant_id")
-                          .first())
+            registered = (
+                self.__class__.objects.filter(
+                    yandex_contest_id=self.yandex_contest_id,
+                    contest_status_code=RegisterStatus.CREATED,
+                    applicant__campaign_id=applicant.campaign_id,
+                    applicant__yandex_login=applicant.yandex_login,
+                )
+                .exclude(contest_participant_id__isnull=True)
+                .only("contest_participant_id")
+                .first()
+            )
             # 1. Admins/judges could be registered directly through contest
             # admin, so we haven't info about there participant id and
             # can't easily get there results later, but still allow them
@@ -788,9 +833,9 @@ class YandexContestIntegration(models.Model):
             if registered:
                 participant_id = registered.contest_participant_id
                 update_fields["contest_participant_id"] = participant_id
-        updated = (self.__class__.objects
-                   .filter(applicant=applicant)
-                   .update(**update_fields))
+        updated = self.__class__.objects.filter(applicant=applicant).update(
+            **update_fields
+        )
         if updated:
             for k, v in update_fields.items():
                 setattr(self, k, v)
@@ -804,10 +849,7 @@ class YandexContestIntegration(models.Model):
         results during the importing if someone has improved his position
         and moved to a scoreboard `page` that has already been processed.
         """
-        paging = {
-            "page_size": 50,
-            "page": 1
-        }
+        paging = {"page_size": 50, "page": 1}
         scoreboard_total = 0
         updated_total = 0
         if not contest.details:
@@ -820,33 +862,34 @@ class YandexContestIntegration(models.Model):
                 contest.details["titles"] = [t["name"] for t in json_data["titles"]]
                 contest.save(update_fields=("details",))
                 page_total = 0
-                for row in json_data['rows']:
+                for row in json_data["rows"]:
                     scoreboard_total += 1
                     page_total += 1
-                    total_score_str: str = row['score'].replace(',', '.')
+                    total_score_str: str = row["score"].replace(",", ".")
                     total_score = int(round(float(total_score_str)))
                     score_details = [a["score"] for a in row["problemResults"]]
                     update_fields = {
                         "score": total_score,
-                        "details": {"scores": score_details}
+                        "details": {"scores": score_details},
                     }
-                    yandex_login = row['participantInfo']['login']
-                    participant_id = row['participantInfo']['id']
-                    updated = (cls.objects
-                               .filter(Q(applicant__yandex_login=yandex_login) |
-                                       Q(contest_participant_id=participant_id),
-                                       applicant__campaign_id=contest.campaign_id,
-                                       yandex_contest_id=contest.contest_id,
-                                       status=ChallengeStatuses.REGISTERED)
-                               .update(**update_fields))
+                    yandex_login = row["participantInfo"]["login"]
+                    participant_id = row["participantInfo"]["id"]
+                    updated = cls.objects.filter(
+                        Q(applicant__yandex_login=yandex_login)
+                        | Q(contest_participant_id=participant_id),
+                        applicant__campaign_id=contest.campaign_id,
+                        yandex_contest_id=contest.contest_id,
+                        status=ChallengeStatuses.REGISTERED,
+                    ).update(**update_fields)
                     updated_total += updated
                 if page_total < paging["page_size"]:
                     break
                 paging["page"] += 1
             except YandexContestError as e:
                 raise
-        return YandexContestImportResults(on_scoreboard=scoreboard_total,
-                                          updated=updated_total)
+        return YandexContestImportResults(
+            on_scoreboard=scoreboard_total, updated=updated_total
+        )
 
 
 class ApplicantRandomizeContestMixin:
@@ -856,10 +899,11 @@ class ApplicantRandomizeContestMixin:
     def compute_contest_id(self, contest_type, group_size=1) -> Optional[int]:
         """Selects contest id in a round-robin manner."""
         campaign_id = self.applicant.campaign_id
-        contests = list(Contest.objects
-                        .filter(campaign_id=campaign_id, type=contest_type)
-                        .values_list("contest_id", flat=True)
-                        .order_by("contest_id"))
+        contests = list(
+            Contest.objects.filter(campaign_id=campaign_id, type=contest_type)
+            .values_list("contest_id", flat=True)
+            .order_by("contest_id")
+        )
         if not contests:
             return None
         if contest_type == Contest.TYPE_EXAM:
@@ -877,17 +921,18 @@ class ApplicantRandomizeContestMixin:
         return get_next_process(serial_number, contests, group_size)
 
 
-class Test(TimeStampedModel, YandexContestIntegration,
-           ApplicantRandomizeContestMixin):
+class Test(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContestMixin):
     CONTEST_TYPE = Contest.TYPE_TEST
 
     applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
-        related_name="online_test")
+        related_name="online_test",
+    )
     score = models.PositiveSmallIntegerField(
-        verbose_name=_("Score"), null=True, blank=True)
+        verbose_name=_("Score"), null=True, blank=True
+    )
     details = models.JSONField(
         verbose_name=_("Details"),
         blank=True,
@@ -899,7 +944,7 @@ class Test(TimeStampedModel, YandexContestIntegration,
         verbose_name_plural = _("Testing Results")
 
     def __str__(self):
-        """ Import/export get repr before instance created in db."""
+        """Import/export get repr before instance created in db."""
         if self.applicant_id:
             return self.applicant.full_name
         else:
@@ -910,34 +955,34 @@ class Test(TimeStampedModel, YandexContestIntegration,
 
     def save(self, **kwargs):
         created = self.pk is None
-        if (created and self.status == ChallengeStatuses.NEW and
-                not self.yandex_contest_id):
+        if (
+            created
+            and self.status == ChallengeStatuses.NEW
+            and not self.yandex_contest_id
+        ):
             contest_id = self.compute_contest_id(Contest.TYPE_TEST)
             if contest_id:
                 self.yandex_contest_id = contest_id
         super().save(**kwargs)
 
 
-class Exam(TimeStampedModel, YandexContestIntegration,
-           ApplicantRandomizeContestMixin):
+class Exam(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContestMixin):
     CONTEST_TYPE = Contest.TYPE_EXAM
 
     applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
-        related_name="exam")
+        related_name="exam",
+    )
     score = ScoreField(
         verbose_name=_("Score"),
         decimal_places=3,
         # Avoid loading empty values with admin interface
         null=True,
-        blank=True)
-    details = models.JSONField(
-        verbose_name=_("Details"),
         blank=True,
-        null=True
     )
+    details = models.JSONField(verbose_name=_("Details"), blank=True, null=True)
 
     class Meta:
         verbose_name = _("Exam")
@@ -945,15 +990,18 @@ class Exam(TimeStampedModel, YandexContestIntegration,
 
     def save(self, **kwargs):
         created = self.pk is None
-        if (created and self.status == ChallengeStatuses.NEW and
-                not self.yandex_contest_id):
+        if (
+            created
+            and self.status == ChallengeStatuses.NEW
+            and not self.yandex_contest_id
+        ):
             contest_id = self.compute_contest_id(Contest.TYPE_EXAM)
             if contest_id:
                 self.yandex_contest_id = contest_id
         super().save(**kwargs)
 
     def __str__(self):
-        """ Import/export get repr before instance created in db."""
+        """Import/export get repr before instance created in db."""
         if self.applicant_id:
             return self.applicant.full_name
         else:
@@ -968,16 +1016,15 @@ class InterviewAssignment(models.Model):
         Campaign,
         verbose_name=_("InterviewAssignments|Campaign"),
         on_delete=models.PROTECT,
-        related_name="interview_assignments")
+        related_name="interview_assignments",
+    )
     name = models.CharField(_("InterviewAssignments|name"), max_length=255)
     description = models.TextField(
-        _("Assignment description"),
-        help_text=_("TeX support"))
+        _("Assignment description"), help_text=_("TeX support")
+    )
     solution = models.TextField(
-        _("Assignment solution"),
-        help_text=_("TeX support"),
-        null=True,
-        blank=True)
+        _("Assignment solution"), help_text=_("TeX support"), null=True, blank=True
+    )
 
     class Meta:
         verbose_name = _("Interview assignment")
@@ -992,42 +1039,52 @@ class InterviewFormat(models.Model):
         Campaign,
         verbose_name=_("Campaign"),
         on_delete=models.CASCADE,
-        related_name="interview_formats")
+        related_name="interview_formats",
+    )
     format = models.CharField(
-        verbose_name=_("Format Name"),
-        choices=InterviewFormats.choices,
-        max_length=255)
+        verbose_name=_("Format Name"), choices=InterviewFormats.choices, max_length=255
+    )
     confirmation_template = models.ForeignKey(
         EmailTemplate,
         verbose_name=_("Confirmation Template"),
         related_name="+",
-        help_text=_("Template for confirmation email that the interview was "
-                    "scheduled. Leave blank if there is no need to send "
-                    "confirmation email"),
-        blank=True, null=True,
-        on_delete=models.PROTECT)
+        help_text=_(
+            "Template for confirmation email that the interview was "
+            "scheduled. Leave blank if there is no need to send "
+            "confirmation email"
+        ),
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+    )
     reminder_template = models.ForeignKey(
         EmailTemplate,
         verbose_name=_("Reminder Template"),
         related_name="+",
-        help_text=_("Template for interview reminder email. Notification will "
-                    "be generated only on interview creation through slots "
-                    "mechanism."),
-        on_delete=models.PROTECT)
+        help_text=_(
+            "Template for interview reminder email. Notification will "
+            "be generated only on interview creation through slots "
+            "mechanism."
+        ),
+        on_delete=models.PROTECT,
+    )
     remind_before_start = models.DurationField(
         verbose_name=_("Remind Before Start"),
-        help_text=_("Helps to calculate schedule time of the reminder. "
-                    "Specify timedelta that will be subtracted from the "
-                    "interview start time."),
-        default='23:59:59'
+        help_text=_(
+            "Helps to calculate schedule time of the reminder. "
+            "Specify timedelta that will be subtracted from the "
+            "interview start time."
+        ),
+        default="23:59:59",
     )
 
     class Meta:
         verbose_name = _("Interview Format")
         verbose_name_plural = _("Interview Formats")
         constraints = [
-            models.UniqueConstraint(fields=('campaign', 'format'),
-                                    name='unique_format_per_campaign'),
+            models.UniqueConstraint(
+                fields=("campaign", "format"), name="unique_format_per_campaign"
+            ),
         ]
 
     def __str__(self):
@@ -1035,19 +1092,19 @@ class InterviewFormat(models.Model):
 
 
 class Interview(TimezoneAwareMixin, TimeStampedModel):
-    TIMEZONE_AWARE_FIELD_NAME = 'venue'
+    TIMEZONE_AWARE_FIELD_NAME = "venue"
 
-    APPROVAL = 'approval'
-    APPROVED = 'waiting'
-    DEFERRED = 'deferred'
-    CANCELED = 'canceled'
-    COMPLETED = 'completed'
+    APPROVAL = "approval"
+    APPROVED = "waiting"
+    DEFERRED = "deferred"
+    CANCELED = "canceled"
+    COMPLETED = "completed"
     STATUSES = (
-        (APPROVAL, _('Approval')),
-        (DEFERRED, _('Deferred')),
-        (CANCELED, _('Canceled')),
-        (APPROVED, _('Approved')),
-        (COMPLETED, _('Completed')),
+        (APPROVAL, _("Approval")),
+        (DEFERRED, _("Deferred")),
+        (CANCELED, _("Canceled")),
+        (APPROVED, _("Approved")),
+        (COMPLETED, _("Completed")),
     )
     TRANSITION_STATUSES = [DEFERRED, CANCELED, APPROVAL]
 
@@ -1055,47 +1112,49 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
-        related_name="interviews")
+        related_name="interviews",
+    )
     section = models.CharField(
         choices=InterviewSections.choices,
         verbose_name=_("Interview|Section"),
-        max_length=15)
+        max_length=15,
+    )
     date = TimezoneAwareDateTimeField(_("When"))
     status = models.CharField(
         choices=STATUSES,
         default=APPROVAL,
         verbose_name=_("Interview|Status"),
-        max_length=15)
+        max_length=15,
+    )
     venue = models.ForeignKey(
         Location,
         verbose_name=_("Venue"),
         on_delete=models.PROTECT,
         related_name="+",
         blank=False,
-        null=True)
+        null=True,
+    )
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
-        limit_choices_to={'group__role': Roles.INTERVIEWER})
+        limit_choices_to={"group__role": Roles.INTERVIEWER},
+    )
     assignments = models.ManyToManyField(
-        'InterviewAssignment',
-        verbose_name=_("Interview|Assignments"),
-        blank=True)
+        "InterviewAssignment", verbose_name=_("Interview|Assignments"), blank=True
+    )
     secret_code = models.UUIDField(
-        verbose_name=_("Secret code"),
-        editable=False,
-        default=uuid.uuid4)
-    note = models.TextField(
-        _("Note"),
-        blank=True,
-        null=True)
+        verbose_name=_("Secret code"), editable=False, default=uuid.uuid4
+    )
+    note = models.TextField(_("Note"), blank=True, null=True)
 
     class Meta:
         verbose_name = _("Interview")
         verbose_name_plural = _("Interviews")
         constraints = [
-            models.UniqueConstraint(fields=('applicant', 'section'),
-                                    name='unique_interview_section_per_applicant'),
+            models.UniqueConstraint(
+                fields=("applicant", "section"),
+                name="unique_interview_section_per_applicant",
+            ),
         ]
 
     def __str__(self):
@@ -1116,15 +1175,16 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
             raise ValidationError("You can't change status without date set up")
 
     def get_absolute_url(self):
-        return reverse('admission:interviews:detail', args=[self.pk])
+        return reverse("admission:interviews:detail", args=[self.pk])
 
     def get_public_assignments_url(self):
         return reverse(
-            'appointment:interview_assignments',
+            "appointment:interview_assignments",
             kwargs={
-                'year': self.applicant.campaign.year,
-                'secret_code': str(self.secret_code).replace("-", "")
-            })
+                "year": self.applicant.campaign.year,
+                "secret_code": str(self.secret_code).replace("-", ""),
+            },
+        )
 
     def in_transition_state(self):
         return self.status in self.TRANSITION_STATUSES
@@ -1149,7 +1209,7 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
     @property
     def rating_system(self) -> Type[DjangoChoices]:
         # TODO: consider to move rating systems to DB
-        if self.applicant.campaign.branch.site.name == 'Yandex School of Data Analysis':
+        if self.applicant.campaign.branch.site.name == "Yandex School of Data Analysis":
             return YandexDataSchoolInterviewRatingSystem
         return DefaultInterviewRatingSystem
 
@@ -1160,18 +1220,16 @@ class Comment(TimeStampedModel):
         Interview,
         verbose_name=_("Interview"),
         on_delete=models.PROTECT,
-        related_name="comments")
+        related_name="comments",
+    )
     interviewer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interviewer"),
         on_delete=models.PROTECT,
-        related_name="interview_comments")
-    text = models.TextField(
-        _("Text"),
-        blank=True,
-        null=True)
-    score = models.SmallIntegerField(
-        verbose_name=_("Score"))
+        related_name="interview_comments",
+    )
+    text = models.TextField(_("Text"), blank=True, null=True)
+    score = models.SmallIntegerField(verbose_name=_("Score"))
 
     class Meta:
         verbose_name = _("Comment")
@@ -1179,61 +1237,68 @@ class Comment(TimeStampedModel):
         unique_together = ("interview", "interviewer")
 
     def __str__(self):
-        return smart_str("{} [{}]".format(self.interviewer.get_full_name(),
-                                           self.interview.applicant.full_name))
+        return smart_str(
+            "{} [{}]".format(
+                self.interviewer.get_full_name(), self.interview.applicant.full_name
+            )
+        )
 
 
 class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel):
-    TIMEZONE_AWARE_FIELD_NAME = 'venue'
+    TIMEZONE_AWARE_FIELD_NAME = "venue"
     formats = InterviewFormats  # TODO: remove
 
     campaign = models.ForeignKey(
         Campaign,
         verbose_name=_("Campaign"),
         on_delete=models.CASCADE,
-        related_name="interview_streams")
+        related_name="interview_streams",
+    )
     section = models.CharField(
         choices=InterviewSections.choices,
         verbose_name=_("Interview|Section"),
-        max_length=15)
+        max_length=15,
+    )
     format = models.CharField(
         verbose_name=_("Interview Format"),
         choices=InterviewFormats.choices,
-        max_length=42)
+        max_length=42,
+    )
     interview_format = models.ForeignKey(
         InterviewFormat,
         verbose_name=_("Interview Format"),
         on_delete=models.CASCADE,
         editable=False,
-        related_name="+")
+        related_name="+",
+    )
     date = models.DateField(_("Interview day"))
     start_at = models.TimeField(_("Period start"))
     end_at = models.TimeField(_("Period end"))
     duration = models.IntegerField(
-        _("Slot duration"),
-        validators=[MinValueValidator(10)],
-        default=30)
+        _("Slot duration"), validators=[MinValueValidator(10)], default=30
+    )
     # TODO: do not change if some slots already was taken
     venue = models.ForeignKey(
         Location,
         verbose_name=_("Interview venue"),
         on_delete=models.PROTECT,
-        related_name="streams")
+        related_name="streams",
+    )
     with_assignments = models.BooleanField(
         _("Has assignments"),
-        help_text=_("Based on this flag, student should arrive 30 min "
-                    "before or not"))
+        help_text=_(
+            "Based on this flag, student should arrive 30 min " "before or not"
+        ),
+    )
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
-        limit_choices_to={'group__role': Roles.INTERVIEWER})
+        limit_choices_to={"group__role": Roles.INTERVIEWER},
+    )
     slots_count = models.PositiveIntegerField(editable=False, default=0)
     slots_occupied_count = models.PositiveIntegerField(editable=False, default=0)
 
-    derivable_fields = [
-        'slots_count',
-        'slots_occupied_count'
-    ]
+    derivable_fields = ["slots_count", "slots_occupied_count"]
 
     class Meta:
         verbose_name = _("Interview stream")
@@ -1241,74 +1306,91 @@ class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel
 
     def save(self, **kwargs):
         created = self.pk is None
-        self.interview_format = (InterviewFormat.objects
-                                 .get(campaign=self.campaign,
-                                      format=self.format))
+        self.interview_format = InterviewFormat.objects.get(
+            campaign=self.campaign, format=self.format
+        )
         super().save(**kwargs)
         if created:
             # Generate slots
             step = datetime.timedelta(minutes=self.duration)
-            slots = [InterviewSlot(start_at=start_at, end_at=end_at, stream=self)
-                     for start_at, end_at
-                     in slot_range(self.start_at, self.end_at, step)]
+            slots = [
+                InterviewSlot(start_at=start_at, end_at=end_at, stream=self)
+                for start_at, end_at in slot_range(self.start_at, self.end_at, step)
+            ]
             InterviewSlot.objects.bulk_create(slots)
             # It's possible to avoid query below by separating slots bulk
             # creation and objects initialization, but let's store them in
             # one place
             self.slots_count = len(slots)
-            (InterviewStream.objects
-             .filter(pk=self.pk)
-             .update(slots_count=self.slots_count))
+            (
+                InterviewStream.objects.filter(pk=self.pk).update(
+                    slots_count=self.slots_count
+                )
+            )
 
     def __str__(self):
         return "{}, {}-{}".format(
             date_format(self.date, settings.DATE_FORMAT),
             time_format(self.start_at),
-            time_format(self.end_at))
+            time_format(self.end_at),
+        )
 
     def clean(self):
         if self.format and self.campaign:
             if not InterviewFormat.objects.filter(
-                    format=self.format, campaign=self.campaign).exists():
-                error_msg = _("Interview format settings are not found. "
-                              "Create settings <a href='{}'>here</a>.")
-                add_url = reverse('admin:admission_interviewformat_add')
+                format=self.format, campaign=self.campaign
+            ).exists():
+                error_msg = _(
+                    "Interview format settings are not found. "
+                    "Create settings <a href='{}'>here</a>."
+                )
+                add_url = reverse("admin:admission_interviewformat_add")
                 msg = mark_safe(error_msg.format(add_url))
                 raise ValidationError(msg)
         if self.start_at and self.end_at and self.duration:
             self.start_at = self.start_at.replace(second=0, microsecond=0)
             self.end_at = self.end_at.replace(second=0, microsecond=0)
-            start_at = datetime.timedelta(hours=self.start_at.hour,
-                                          minutes=self.start_at.minute)
-            end_at = datetime.timedelta(hours=self.end_at.hour,
-                                        minutes=self.end_at.minute)
+            start_at = datetime.timedelta(
+                hours=self.start_at.hour, minutes=self.start_at.minute
+            )
+            end_at = datetime.timedelta(
+                hours=self.end_at.hour, minutes=self.end_at.minute
+            )
             diff = (end_at - start_at).total_seconds() / 60
             if diff < self.duration:
                 raise ValidationError(
-                    _("Stream duration can't be less than slot duration"))
+                    _("Stream duration can't be less than slot duration")
+                )
 
     def _compute_slots_count(self):
-        total = Subquery(InterviewSlot.objects
-                         .filter(stream_id=OuterRef('id'))
-                         .values('stream')
-                         .annotate(total=Count("*"))
-                         .values("total"))
-        (InterviewStream.objects
-         .filter(pk=self.pk)
-         .update(slots_count=Coalesce(total, Value(0))))
+        total = Subquery(
+            InterviewSlot.objects.filter(stream_id=OuterRef("id"))
+            .values("stream")
+            .annotate(total=Count("*"))
+            .values("total")
+        )
+        (
+            InterviewStream.objects.filter(pk=self.pk).update(
+                slots_count=Coalesce(total, Value(0))
+            )
+        )
         # Avoid triggering .save()
         return False
 
     def _compute_slots_occupied_count(self):
-        total = Subquery(InterviewSlot.objects
-                         .filter(stream_id=OuterRef('id'),
-                                 interview__isnull=False)
-                         .values('stream')
-                         .annotate(total=Count("*"))
-                         .values("total"))
-        (InterviewStream.objects
-         .filter(pk=self.pk)
-         .update(slots_occupied_count=Coalesce(total, Value(0))))
+        total = Subquery(
+            InterviewSlot.objects.filter(
+                stream_id=OuterRef("id"), interview__isnull=False
+            )
+            .values("stream")
+            .annotate(total=Count("*"))
+            .values("total")
+        )
+        (
+            InterviewStream.objects.filter(pk=self.pk).update(
+                slots_occupied_count=Coalesce(total, Value(0))
+            )
+        )
         # Avoid triggering .save()
         return False
 
@@ -1320,9 +1402,9 @@ class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel
 class InterviewSlotQuerySet(query.QuerySet):
     def lock(self, slot, interview):
         """Try to fill interview slot in a CAS manner"""
-        return (self.filter(pk=slot.pk,
-                            interview_id__isnull=True)
-                .update(interview_id=interview.pk))
+        return self.filter(pk=slot.pk, interview_id__isnull=True).update(
+            interview_id=interview.pk
+        )
 
 
 class InterviewSlot(TimeStampedModel):
@@ -1332,17 +1414,19 @@ class InterviewSlot(TimeStampedModel):
         on_delete=models.SET_NULL,
         related_name="slot",
         null=True,
-        blank=True)
+        blank=True,
+    )
     start_at = models.TimeField(_("Interview start"))
     end_at = models.TimeField(_("Interview end"))
     stream = models.ForeignKey(
         InterviewStream,
         verbose_name=_("Interview stream"),
         on_delete=models.PROTECT,
-        related_name="slots")
+        related_name="slots",
+    )
 
     class Meta:
-        ordering = ['start_at']
+        ordering = ["start_at"]
         verbose_name = _("Interview slot")
         verbose_name_plural = _("Interview slots")
 
@@ -1366,11 +1450,12 @@ class InterviewInvitationQuerySet(query.QuerySet):
     def for_applicant(self, applicant):
         """Returns last active invitation for requested user"""
         today = timezone.now()
-        return (self.filter(Q(expired_at__gt=today) |
-                            Q(expired_at__isnull=True))
-                    .filter(applicant=applicant)
-                .order_by("-pk")
-                .first())
+        return (
+            self.filter(Q(expired_at__gt=today) | Q(expired_at__isnull=True))
+            .filter(applicant=applicant)
+            .order_by("-pk")
+            .first()
+        )
 
 
 class InterviewInvitation(TimeStampedModel):
@@ -1378,20 +1463,22 @@ class InterviewInvitation(TimeStampedModel):
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
-        related_name="interview_invitations")
+        related_name="interview_invitations",
+    )
     status = models.CharField(
         choices=InterviewInvitationStatuses.choices,
         default=InterviewInvitationStatuses.NO_RESPONSE,
         verbose_name=_("Status"),
-        max_length=10)
+        max_length=10,
+    )
     streams = models.ManyToManyField(
         InterviewStream,
         verbose_name=_("Interview streams"),
-        related_name="interview_invitations")
+        related_name="interview_invitations",
+    )
     secret_code = models.UUIDField(
-        verbose_name=_("Secret code"),
-        default=uuid.uuid4,
-        unique=True)
+        verbose_name=_("Secret code"), default=uuid.uuid4, unique=True
+    )
     expired_at = models.DateTimeField(_("Expired at"))
     interview = models.ForeignKey(
         Interview,
@@ -1399,7 +1486,8 @@ class InterviewInvitation(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="invitations",
         null=True,
-        blank=True)
+        blank=True,
+    )
 
     objects = InterviewInvitationQuerySet.as_manager()
 
@@ -1414,17 +1502,21 @@ class InterviewInvitation(TimeStampedModel):
             # Update status if we send invitation before
             # summing up the exam results
             if self.applicant.status == Applicant.PERMIT_TO_EXAM:
-                (Applicant.objects
-                 .filter(pk=self.applicant_id)
-                 .update(status=Applicant.INTERVIEW_TOBE_SCHEDULED))
+                (
+                    Applicant.objects.filter(pk=self.applicant_id).update(
+                        status=Applicant.INTERVIEW_TOBE_SCHEDULED
+                    )
+                )
 
     def __str__(self):
         return str(self.applicant)
 
     @property
     def is_expired(self):
-        return (self.status == InterviewInvitationStatuses.EXPIRED or
-                timezone.now() >= self.expired_at)
+        return (
+            self.status == InterviewInvitationStatuses.EXPIRED
+            or timezone.now() >= self.expired_at
+        )
 
     @property
     def is_accepted(self):
@@ -1435,10 +1527,13 @@ class InterviewInvitation(TimeStampedModel):
         return self.status == InterviewInvitationStatuses.DECLINED
 
     def get_absolute_url(self):
-        return reverse("appointment:select_time_slot", kwargs={
-            "year": self.applicant.campaign.year,
-            "secret_code": str(self.secret_code).replace("-", "")
-        })
+        return reverse(
+            "appointment:select_time_slot",
+            kwargs={
+                "year": self.applicant.campaign.year,
+                "secret_code": str(self.secret_code).replace("-", ""),
+            },
+        )
 
     def get_status_display(self):
         status = self.status
@@ -1448,8 +1543,8 @@ class InterviewInvitation(TimeStampedModel):
 
 
 class Acceptance(TimestampedModel):
-    WAITING = 'new'
-    CONFIRMED = 'confirmed'
+    WAITING = "new"
+    CONFIRMED = "confirmed"
     CONFIRMATION_CODE_LENGTH = 16
 
     status = models.CharField(
@@ -1459,20 +1554,20 @@ class Acceptance(TimestampedModel):
             (WAITING, _("Waiting for Confirmation")),
             (CONFIRMED, _("Confirmed")),
         ],
-        default=WAITING)
+        default=WAITING,
+    )
     applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
-        related_name="+")
+        related_name="+",
+    )
     access_key = models.CharField(
-        max_length=DIGEST_MAX_LENGTH,
-        editable=False,
-        db_index=True)
+        max_length=DIGEST_MAX_LENGTH, editable=False, db_index=True
+    )
     confirmation_code = models.CharField(
-        verbose_name=_("Authorization Code"),
-        max_length=24,
-        editable=False)
+        verbose_name=_("Authorization Code"), max_length=24, editable=False
+    )
 
     class Meta:
         verbose_name = _("Acceptance for Studies")
@@ -1484,20 +1579,28 @@ class Acceptance(TimestampedModel):
     def save(self, **kwargs):
         created = self.pk is None
         if created:
-            self.access_key = generate_hash(b'acceptance', force_bytes(self.applicant.email))
-            self.confirmation_code = generate_random_string(self.CONFIRMATION_CODE_LENGTH,
-                                                            alphabet=string.hexdigits)
+            self.access_key = generate_hash(
+                b"acceptance", force_bytes(self.applicant.email)
+            )
+            self.confirmation_code = generate_random_string(
+                self.CONFIRMATION_CODE_LENGTH, alphabet=string.hexdigits
+            )
         super().save(**kwargs)
 
     def get_absolute_url(self):
-        return reverse('admission:acceptance:confirmation_form', kwargs={
-            "year": self.applicant.campaign.year,
-            "access_key": self.access_key,
-        })
+        return reverse(
+            "admission:acceptance:confirmation_form",
+            kwargs={
+                "year": self.applicant.campaign.year,
+                "access_key": self.access_key,
+            },
+        )
 
     @property
     def deadline_at(self) -> datetime.datetime:
-        ends_at: Optional[datetime.datetime] = self.applicant.campaign.confirmation_ends_at
+        ends_at: Optional[
+            datetime.datetime
+        ] = self.applicant.campaign.confirmation_ends_at
         if not ends_at:
             return timezone.now() - datetime.timedelta(hours=2)
         return ends_at
@@ -1505,3 +1608,60 @@ class Acceptance(TimestampedModel):
     @property
     def is_expired(self):
         return timezone.now() >= self.deadline_at
+
+
+class ResidenceCity(models.Model):
+    external_id = models.PositiveIntegerField(
+        _("External ID"), null=True, blank=True, editable=False
+    )
+    name = models.TextField(_("Name"))
+    display_name = models.TextField(_("Display Name"))
+    country = models.ForeignKey(
+        "universities.Country",
+        verbose_name=_("Country"),
+        related_name="admission_cities",
+        on_delete=models.PROTECT,
+    )
+    order = models.PositiveIntegerField(_("Order"), default=512)
+
+    class Meta:
+        verbose_name = _("Residence City")
+        verbose_name_plural = _("Residence Cities")
+
+    def __str__(self):
+        return self.name
+
+
+class CampaignCity(models.Model):
+    campaign = models.ForeignKey(
+        Campaign,
+        verbose_name=_("Campaign"),
+        related_name="+",
+        on_delete=models.CASCADE,
+    )
+
+    city = models.ForeignKey(
+        ResidenceCity,
+        verbose_name=_("City"),
+        related_name="+",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = _("Campaign Available in City")
+        verbose_name_plural = _("Campaigns Available in City")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["campaign", "city"], name="unique_campaign_per_city"
+            ),
+            models.UniqueConstraint(
+                name="%(app_label)s_%(class)s_default_campaign_unique",
+                fields=("campaign",),
+                condition=Q(city__isnull=True),
+            ),
+        ]
+
+    def __str__(self):
+        return f"CampaignCity campaign={self.campaign} city={self.city}"
