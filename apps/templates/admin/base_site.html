@@ -15,6 +15,29 @@
 
 {% block nav-global %}{% endblock %}
 
+{% block extrastyle %}{{ block.super }}
+{% if ENVIRONMENT_NAME and ENVIRONMENT_COLOR and show_notice %}
+<!-- Environment notice -->
+<style type="text/css"{% if request.csp_nonce %} nonce="{{ request.csp_nonce }}"{% endif %}>
+    {{ ENVIRONMENT_ADMIN_SELECTOR }}:before {
+        display: block;
+        line-height: 35px;
+        text-align: center;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: {{ ENVIRONMENT_TEXT_COLOR }};
+        content: "{{ ENVIRONMENT_NAME }}";
+        background-color: {{ ENVIRONMENT_COLOR }};
+        {% if ENVIRONMENT_FLOAT %}
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        {% endif %}
+    }
+</style>
+{% endif %}
+{% endblock %}
+
 
 {% block footer %}
     <div id="footer"></div>
