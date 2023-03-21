@@ -13,6 +13,7 @@ from admission.models import (
     InterviewInvitation,
     InterviewSlot,
     ResidenceCity,
+    CampaignCity,
 )
 from core.timezone import get_now_utc
 
@@ -107,6 +108,32 @@ def residence_cities_queryset(
     *, filters: Optional[Dict[str, Any]] = None
 ) -> QuerySet[ResidenceCity]:
     filter_set = ResidenceCityFilter(filters, ResidenceCity.objects.get_queryset())
+    if filter_set.is_bound and not filter_set.is_valid():
+        raise ValidationError(filter_set.errors)
+    if "ordering" in filters:
+        return filter_set.qs
+    return filter_set.qs.order_by()
+
+
+class CampaignCityFilter(FilterSet):
+    city_id = NumberFilter(lookup_expr="exact", required=False)
+
+    ordering = OrderingFilter(
+        fields=[("campaign__order", "campaign")],
+        field_labels={
+            "campaign": "Campaign Order",
+        },
+    )
+
+    class Meta:
+        model = ResidenceCity
+        fields = ("city_id", "ordering")
+
+
+def residence_city_campaigns_queryset(
+    *, filters: Optional[Dict[str, Any]] = None
+) -> QuerySet[CampaignCity]:
+    filter_set = CampaignCityFilter(filters, CampaignCity.objects.get_queryset())
     if filter_set.is_bound and not filter_set.is_valid():
         raise ValidationError(filter_set.errors)
     if "ordering" in filters:

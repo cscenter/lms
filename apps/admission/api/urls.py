@@ -20,6 +20,11 @@ urlpatterns = [
                         v.ResidenceCityList.as_view(),
                         name="residence_cities",
                     ),
+                    path(
+                        "residence-city-campaigns/",
+                        v.CampaignCityList.as_view(),
+                        name="residence_cities",
+                    ),
                 ],
                 "v2",
             )
