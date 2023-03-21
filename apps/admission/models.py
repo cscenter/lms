@@ -305,10 +305,11 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         (STUDY_PROGRAM_ROBOTICS, "Robotics (Роботы)"),
     )
     INFO_SOURCES = (
-        ("uni", "плакат/листовка в университете"),
-        ("social_net", "пост в соц. сетях"),
-        ("friends", "от друзей"),
-        ("other", "другое"),
+        ('uni', 'плакат/листовка в университете'),
+        ('social_net', 'пост в соц. сетях'),
+        ('ambassador', 'от амбассадора Yandex U-Team'),
+        ('friends', 'от друзей'),
+        ('other', 'другое'),
         # Legacy options
         ("habr", "Прочитал в статье на habr.ru"),
         ("club", "Из CS клуба"),
@@ -338,10 +339,13 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     # Personal
     first_name = models.CharField(_("First name"), max_length=255)
     last_name = models.CharField(_("Surname"), max_length=255)
-    patronymic = models.CharField(
-        _("Patronymic"), max_length=255, blank=True, null=True
-    )
-    email = models.EmailField(_("Email"), help_text=_("Applicant|email"))
+    patronymic = models.CharField(_("Patronymic"), max_length=255,
+                                  blank=True, null=True)
+    email = models.EmailField(
+        _("Email"),
+        help_text=_("Applicant|email"))
+    telegram_username = models.CharField(_("Telegram"), max_length=255,
+                                         blank=True, null=True)
     is_unsubscribed = models.BooleanField(
         _("Unsubscribed"),
         default=False,

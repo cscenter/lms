@@ -1,5 +1,8 @@
+from typing import List, Dict
+
 from django.views.generic import TemplateView
 
+from admission.constants import WHERE_DID_YOU_LEARN
 from admission.models import Campaign
 from auth.views import YANDEX_OAUTH_BACKEND_PREFIX
 
@@ -10,7 +13,27 @@ from django.middleware.csrf import get_token
 from learning.settings import AcademicDegreeLevels
 
 from django.conf import settings
+
+from users.models import PartnerTag
+
 SESSION_LOGIN_KEY = f"{YANDEX_OAUTH_BACKEND_PREFIX}_login"
+
+
+def get_partners() -> List[Dict]:
+    partners = [
+        {
+            "id": partner.id,
+            "value": partner.slug,
+            "label": f"Да, {partner.name}"
+        } for partner in PartnerTag.objects.all()
+    ]
+    if partners:
+        partners.append({
+            "id": None,
+            "value": "none",
+            "label": f"Нет"
+        })
+    return partners
 
 
 class ApplicationFormView(TemplateView):
@@ -27,9 +50,11 @@ class ApplicationFormView(TemplateView):
         context["show_form"] = show_form
         utm_params = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]
         utm = {param: self.request.GET.get(param) for param in utm_params}
+        sources = [{"value": k, "label": v} for k, v in WHERE_DID_YOU_LEARN]
         if show_form:
             levels_of_education = [{"value": k, "label": str(v).lower()} for k, v in
                                    AcademicDegreeLevels.values.items()]
+
             yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
             context['app'] = {
                 'props': {
@@ -42,6 +67,8 @@ class ApplicationFormView(TemplateView):
                     'endpointUniversities': reverse('universities:v1:universities'),
                     'campaigns': list(active_campaigns),
                     'educationLevelOptions': levels_of_education,
+                    'sourceOptions': sources,
+                    'partners': get_partners(),
                 },
                 'state': {
                     'isYandexPassportAccessAllowed': bool(yandex_passport_access),

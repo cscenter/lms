@@ -25,12 +25,12 @@ yds_post_data = {
     "ml_experience": "Изучали ли вы раньше машинное обучение/анализ данных?",
     "campaign": None,
     "shad_agreement": True,
-    "rash_agreement": False,
-    "magistracy_and_shad": False,
     "ticket_access": True,
     "email_subscription": True,
     "university": None,
-    "university_city": {"is_exists": False, "city_name": "Петергоф"}
+    "new_track": True,
+    "university_city": {"is_exists": False, "city_name": "Петергоф"},
+    "where_did_you_learn": ["friends"],
 }
 
 
@@ -89,9 +89,7 @@ def test_view_application_form_msk_campaigns(client):
 
     data['university'] = university.pk
     data['campaign'] = msk_campaign.pk
-    data['shad_plus_rash'] = True
     data['new_track'] = True
-    data['rash_agreement'] = True
     url = reverse('applicant_create')
     session = client.session
     session["application_ya_login"] = data['yandex_login']
