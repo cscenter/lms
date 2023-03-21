@@ -15,6 +15,7 @@ from admission.models import InterviewSlot, ResidenceCity
 from admission.selectors import (
     get_ongoing_interview_invitation,
     residence_cities_queryset,
+    residence_city_campaigns_queryset,
 )
 from admission.services import (
     accept_interview_invitation,
@@ -25,7 +26,9 @@ from admission.services import (
 )
 from admission.tasks import import_campaign_contest_results
 from api.permissions import CuratorAccessPermission
+from api.utils import inline_serializer
 from api.views import APIBaseView
+from core.api.serializers import BranchSerializer
 from core.http import APIRequest, HttpRequest
 from core.models import Branch
 
@@ -182,4 +185,38 @@ class ResidenceCityList(APIBaseView):
             filters=filters_serializer.validated_data
         )
         data = self.OutputSerializer(residence_cities, many=True).data
+        return Response(data)
+
+
+class CampaignCityList(APIBaseView):
+    authentication_classes: List[Type[BaseAuthentication]] = []
+    permission_classes = (AllowAny,)
+
+    class FilterSerializer(serializers.Serializer):
+        city_id = serializers.IntegerField(required=True)
+        ordering = serializers.CharField(required=False)
+
+    class OutputSerializer(serializers.ModelSerializer):
+        campaign = inline_serializer(
+            fields={
+                "branch": inline_serializer(
+                    fields={
+                        "code": serializers.CharField(),
+                        "name": serializers.CharField(),
+                    }
+                ),
+            }
+        )
+
+        class Meta:
+            model = ResidenceCity
+            fields = ("id", "campaign")
+
+    def get(self, request: APIRequest, **kwargs: Any):
+        filters_serializer = self.FilterSerializer(data=request.query_params)
+        filters_serializer.is_valid(raise_exception=True)
+        residence_city_campaigns = residence_city_campaigns_queryset(
+            filters=filters_serializer.validated_data
+        )
+        data = self.OutputSerializer(residence_city_campaigns, many=True).data
         return Response(data)
