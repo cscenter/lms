@@ -19,7 +19,9 @@ from django.views import View, generic
 import core.utils
 from admission.models import Campaign, Interview
 from admission.reports import (
-    AdmissionApplicantsReport, AdmissionExamReport, generate_admission_interviews_report
+    AdmissionApplicantsReport,
+    AdmissionExamReport,
+    generate_admission_interviews_report,
 )
 from core.http import HttpRequest
 from core.models import Branch
@@ -31,9 +33,13 @@ from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment, GraduateProfile, Invitation
 from learning.reports import (
-    FutureGraduateDiplomasReport, OfficialDiplomasReport, ProgressReportForInvitation,
-    ProgressReportForSemester, ProgressReportFull, WillGraduateStatsReport,
-    dataframe_to_response
+    FutureGraduateDiplomasReport,
+    OfficialDiplomasReport,
+    ProgressReportForInvitation,
+    ProgressReportForSemester,
+    ProgressReportFull,
+    WillGraduateStatsReport,
+    dataframe_to_response,
 )
 from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
@@ -48,33 +54,40 @@ from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
 from users.models import PartnerTag, StudentProfile, StudentTypes, User
 from users.services import (
-    create_graduate_profiles, get_graduate_profile, get_student_progress
+    create_graduate_profiles,
+    get_graduate_profile,
+    get_student_progress,
 )
 
 
 class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):
-    context_object_name = 'applicants'
+    context_object_name = "applicants"
     model = StudentProfile
     filterset_class = StudentFilter
 
     def get_queryset(self):
-        return (StudentProfile.objects
-                .select_related('user', 'branch', 'graduate_profile'))
+        return StudentProfile.objects.select_related(
+            "user", "branch", "graduate_profile"
+        )
 
     def get(self, request, *args, **kwargs):
         filterset_class = self.get_filterset_class()
         self.filterset = self.get_filterset(filterset_class)
 
-        if not self.filterset.is_bound or self.filterset.is_valid() or not self.get_strict():
+        if (
+            not self.filterset.is_bound
+            or self.filterset.is_valid()
+            or not self.get_strict()
+        ):
             queryset = self.filterset.qs
         else:
             queryset = self.filterset.queryset.none()
         report = ProgressReportFull(grade_getter="grade_honest")
         custom_qs = report.get_queryset(base_queryset=queryset)
         df = report.generate(queryset=custom_qs)
-        today = datetime.datetime.now().strftime('%d.%m.%Y')
+        today = datetime.datetime.now().strftime("%d.%m.%Y")
         file_name = f"sheet_{today}"
-        return dataframe_to_response(df, 'csv', file_name)
+        return dataframe_to_response(df, "csv", file_name)
 
 
 class StudentSearchView(CuratorOnlyMixin, TemplateView):
@@ -83,27 +96,30 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
     def get_context_data(self, **kwargs):
         branches = Branch.objects.for_site(site_id=settings.SITE_ID)
         context = {
-            'json_api_uri': reverse('staff:student_search_json'),
-            'branches': {b.pk: b.name for b in branches},
-            'curriculum_years': (StudentProfile.objects
-                                 .filter(site=self.request.site,
-                                         year_of_curriculum__isnull=False)
-                                 .values_list('year_of_curriculum',
-                                              flat=True)
-                                 .order_by('year_of_curriculum')
-                                 .distinct()),
-            'admission_years': (StudentProfile.objects
-                                .filter(site=self.request.site,
-                                        year_of_admission__isnull=False)
-                                .values_list('year_of_admission', flat=True)
-                                .order_by('year_of_admission')
-                                .distinct()),
+            "json_api_uri": reverse("staff:student_search_json"),
+            "branches": {b.pk: b.name for b in branches},
+            "curriculum_years": (
+                StudentProfile.objects.filter(
+                    site=self.request.site, year_of_curriculum__isnull=False
+                )
+                .values_list("year_of_curriculum", flat=True)
+                .order_by("year_of_curriculum")
+                .distinct()
+            ),
+            "admission_years": (
+                StudentProfile.objects.filter(
+                    site=self.request.site, year_of_admission__isnull=False
+                )
+                .values_list("year_of_admission", flat=True)
+                .order_by("year_of_admission")
+                .distinct()
+            ),
             "types": StudentTypes.choices,
             "academic_disciplines": AcademicDiscipline.objects.all(),
             "partner_tags": PartnerTag.objects.all(),
             "status": StudentStatuses.values,
             "cnt_enrollments": range(StudentFilter.ENROLLMENTS_MAX + 1),
-            "is_paid_basis": [("1", "Да"), ("0", "Нет")]
+            "is_paid_basis": [("1", "Да"), ("0", "Нет")],
         }
         return context
 
@@ -115,22 +131,24 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         current_term = get_current_term_pair()
         prev_term = current_term.get_prev()
         graduation_form = GraduationForm()
-        graduation_form.helper.form_action = reverse('staff:create_alumni_profiles')
-        official_diplomas_dates = (GraduateProfile.objects
-                                   .for_site(self.request.site)
-                                   .with_official_diploma()
-                                   .distinct('diploma_issued_on')
-                                   .order_by('-diploma_issued_on')
-                                   .values_list('diploma_issued_on', flat=True))
+        graduation_form.helper.form_action = reverse("staff:create_alumni_profiles")
+        official_diplomas_dates = (
+            GraduateProfile.objects.for_site(self.request.site)
+            .with_official_diploma()
+            .distinct("diploma_issued_on")
+            .order_by("-diploma_issued_on")
+            .values_list("diploma_issued_on", flat=True)
+        )
         branches = Branch.objects.filter(site_id=settings.SITE_ID)
         context = {
             "alumni_profiles_form": graduation_form,
             "current_term": current_term,
             "prev_term": {"year": prev_term.year, "type": prev_term.type},
-            "campaigns": (Campaign.objects
-                          .filter(branch__in=branches)
-                          .select_related("branch")
-                          .order_by("-year", "branch__name")),
+            "campaigns": (
+                Campaign.objects.filter(branch__in=branches)
+                .select_related("branch")
+                .order_by("-year", "branch__name")
+            ),
             "branches": branches,
             "official_diplomas_dates": official_diplomas_dates,
         }
@@ -140,16 +158,21 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
 class FutureGraduateStatsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas_stats.html"
     BAD_GRADES = GradeTypes.unsatisfactory_grades
-    BAD_PROJECT_GRADES = [ProjectGradeTypes.UNSATISFACTORY, ProjectGradeTypes.NOT_GRADED]
+    BAD_PROJECT_GRADES = [
+        ProjectGradeTypes.UNSATISFACTORY,
+        ProjectGradeTypes.NOT_GRADED,
+    ]
 
     def get_context_data(self, branch_id, **kwargs):
-        student_profiles = (StudentProfile.objects
-                            .filter(type=StudentTypes.REGULAR,
-                                    branch_id=branch_id,
-                                    status=StudentStatuses.WILL_GRADUATE)
-                            .select_related('user')
-                            .order_by('user__last_name', 'user__first_name',
-                                      'user_id'))
+        student_profiles = (
+            StudentProfile.objects.filter(
+                type=StudentTypes.REGULAR,
+                branch_id=branch_id,
+                status=StudentStatuses.WILL_GRADUATE,
+            )
+            .select_related("user")
+            .order_by("user__last_name", "user__first_name", "user_id")
+        )
         progress = get_student_progress(student_profiles)
         unique_teachers = set()
         total_hours = 0
@@ -172,18 +195,23 @@ class FutureGraduateStatsView(CuratorOnlyMixin, generic.TemplateView):
 
         for student_profile in student_profiles:
             s = student_profile.user
-            enrollments = progress[s.id].get('enrollments', [])
-            projects = progress[s.id].get('projects', [])
-            shad = progress[s.id].get('shad', [])
+            enrollments = progress[s.id].get("enrollments", [])
+            projects = progress[s.id].get("projects", [])
+            shad = progress[s.id].get("shad", [])
             graduate_profile = get_graduate_profile(student_profile)
-            if graduate_profile and len(graduate_profile.academic_disciplines.all()) >= 2:
+            if (
+                graduate_profile
+                and len(graduate_profile.academic_disciplines.all()) >= 2
+            ):
                 finished_two_or_more_programs.add(s)
             by_year_of_admission[student_profile.year_of_admission].add(student_profile)
             degree_year = AcademicDegreeLevels.BACHELOR_SPECIALITY_1
             if student_profile.level_of_education_on_admission == degree_year:
                 enrolled_on_first_course.add(s)
             # Count most_courses_students
-            s.passed_courses = sum(1 for e in enrollments if e.grade not in self.BAD_GRADES)
+            s.passed_courses = sum(
+                1 for e in enrollments if e.grade not in self.BAD_GRADES
+            )
             s.passed_courses += sum(1 for c in shad if c.grade not in self.BAD_GRADES)
             if not most_courses_students:
                 most_courses_students = {s}
@@ -193,8 +221,11 @@ class FutureGraduateStatsView(CuratorOnlyMixin, generic.TemplateView):
                     most_courses_students.add(s)
                 elif s.passed_courses > most_courses_student.passed_courses:
                     most_courses_students = {s}
-            s.pass_open_courses = sum(e.course.is_club_course for e in enrollments
-                                      if e.grade not in self.BAD_GRADES)
+            s.pass_open_courses = sum(
+                e.course.is_club_course
+                for e in enrollments
+                if e.grade not in self.BAD_GRADES
+            )
             if not most_open_courses_students:
                 most_open_courses_students.add(s)
             else:
@@ -208,8 +239,8 @@ class FutureGraduateStatsView(CuratorOnlyMixin, generic.TemplateView):
             projects_in_first_two_years_of_learning = 0
             internal_projects_in_first_two_years_of_learning = 0
             enrollment_term_index = get_term_index(
-                student_profile.year_of_admission,
-                SemesterTypes.AUTUMN)
+                student_profile.year_of_admission, SemesterTypes.AUTUMN
+            )
             for ps in projects:
                 if ps.final_grade in self.BAD_PROJECT_GRADES or ps.project.is_canceled:
                     continue
@@ -279,30 +310,37 @@ class FutureGraduateStatsView(CuratorOnlyMixin, generic.TemplateView):
                 most_courses_in_term_students = {s}
             else:
                 most_courses_in_term_student = next(iter(most_courses_in_term_students))
-                if s.max_courses_in_term == most_courses_in_term_student.max_courses_in_term:
+                if (
+                    s.max_courses_in_term
+                    == most_courses_in_term_student.max_courses_in_term
+                ):
                     most_courses_in_term_students.add(s)
-                elif s.max_courses_in_term > most_courses_in_term_student.max_courses_in_term:
+                elif (
+                    s.max_courses_in_term
+                    > most_courses_in_term_student.max_courses_in_term
+                ):
                     most_courses_in_term_students = {s}
         context = {
             "branch": Branch.objects.get(pk=branch_id),
-            'less_failed_courses': less_failed_courses,
-            'most_failed_courses': most_failed_courses,
-            'all_three_practicies_are_internal': all_three_practicies_are_internal,
-            'passed_practicies_in_first_two_years': passed_practicies_in_first_two_years,
-            'passed_internal_practicies_in_first_two_years': passed_internal_practicies_in_first_two_years,
-            'finished_two_or_more_programs': finished_two_or_more_programs,
-            'by_enrollment_year': dict(by_year_of_admission),
-            'enrolled_on_first_course': enrolled_on_first_course,
-            'most_courses_students': most_courses_students,
-            'most_courses_in_term_students': most_courses_in_term_students,
-            'most_open_courses_students': most_open_courses_students,
-            'student_profiles': student_profiles,
+            "less_failed_courses": less_failed_courses,
+            "most_failed_courses": most_failed_courses,
+            "all_three_practicies_are_internal": all_three_practicies_are_internal,
+            "passed_practicies_in_first_two_years": passed_practicies_in_first_two_years,
+            "passed_internal_practicies_in_first_two_years": passed_internal_practicies_in_first_two_years,
+            "finished_two_or_more_programs": finished_two_or_more_programs,
+            "by_enrollment_year": dict(by_year_of_admission),
+            "enrolled_on_first_course": enrolled_on_first_course,
+            "most_courses_students": most_courses_students,
+            "most_courses_in_term_students": most_courses_in_term_students,
+            "most_open_courses_students": most_open_courses_students,
+            "student_profiles": student_profiles,
             "unique_teachers_count": len(unique_teachers),
             "total_hours": int(total_hours),
-            "unique_courses": unique_courses, "good_total": good_total,
+            "unique_courses": unique_courses,
+            "good_total": good_total,
             "excellent_total": excellent_total,
             "total_passed_courses": total_passed_courses,
-            "unique_projects": unique_projects
+            "unique_projects": unique_projects,
         }
         return context
 
@@ -315,17 +353,17 @@ class FutureGraduateDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
         report = FutureGraduateDiplomasReport(branch)
         student_profiles = report.get_queryset()
         students = (sp.user for sp in student_profiles)
-        courses_qs = (report.get_courses_queryset(students)
-                      .annotate(classes_total=Count('courseclass')))
+        courses_qs = report.get_courses_queryset(students).annotate(
+            classes_total=Count("courseclass")
+        )
         courses = {c.pk: c for c in courses_qs}
 
-        diploma_student_profiles = [generate_tex_student_profile_for_diplomas(sp, courses)
-                                    for sp in student_profiles]
+        diploma_student_profiles = [
+            generate_tex_student_profile_for_diplomas(sp, courses)
+            for sp in student_profiles
+        ]
 
-        context = {
-            "branch": branch,
-            "students": diploma_student_profiles
-        }
+        context = {"branch": branch, "students": diploma_student_profiles}
         return context
 
 
@@ -336,13 +374,13 @@ class FutureGraduateDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
         df = report.generate()
         today = datetime.datetime.now()
         file_name = "diplomas_{}".format(today.year)
-        return dataframe_to_response(df, 'csv', file_name)
+        return dataframe_to_response(df, "csv", file_name)
 
 
 class ProgressReportFullView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, output_format, *args, **kwargs):
         report = ProgressReportFull(grade_getter="grade_honest")
-        today = datetime.datetime.now().strftime('%d.%m.%Y')
+        today = datetime.datetime.now().strftime("%d.%m.%Y")
         file_name = f"sheet_{today}"
         return dataframe_to_response(report.generate(), output_format, file_name)
 
@@ -351,10 +389,10 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, output_format, *args, **kwargs):
         # Validate year and term GET params
         try:
-            term_year = int(self.kwargs['term_year'])
+            term_year = int(self.kwargs["term_year"])
             if term_year < settings.ESTABLISHED:
                 raise ValueError("ProgressReportForSemester: Wrong year format")
-            term_type = self.kwargs['term_type']
+            term_type = self.kwargs["term_type"]
             if term_type not in SemesterTypes.values:
                 raise ValueError("ProgressReportForSemester: Wrong term format")
             filters = {"year": term_year, "type": term_type}
@@ -376,7 +414,7 @@ class EnrollmentInvitationListView(CuratorOnlyMixin, TemplateView):
         site_branches = Branch.objects.for_site(site_id=settings.SITE_ID)
         assert len(site_branches) > 0
         serializer = self.InputSerializer(data=request.GET)
-        serializer.fields['branch'].choices = [(b.pk, b.name) for b in site_branches]
+        serializer.fields["branch"].choices = [(b.pk, b.name) for b in site_branches]
         if not serializer.initial_data:
             branch = site_branches[0]
             current_term = get_current_term_pair(branch.get_timezone())
@@ -384,38 +422,37 @@ class EnrollmentInvitationListView(CuratorOnlyMixin, TemplateView):
             return HttpResponseRedirect(url)
         serializer.is_valid(raise_exception=False)
         # Filterset knows how to validate input data too
-        invitations = (Invitation.objects
-                       .select_related('branch', 'semester')
-                       .order_by('-semester__index', 'name'))
-        filter_set = EnrollmentInvitationFilter(site_branches,
-                                                data=self.request.GET,
-                                                queryset=invitations)
+        invitations = Invitation.objects.select_related("branch", "semester").order_by(
+            "-semester__index", "name"
+        )
+        filter_set = EnrollmentInvitationFilter(
+            site_branches, data=self.request.GET, queryset=invitations
+        )
         context = self.get_context_data(filter_set, **kwargs)
         return self.render_to_response(context)
 
     def get_context_data(self, filter_set: FilterSet, **kwargs):
         context = {
-            'filter_form': filter_set.form,
-            'enrollment_invitations': filter_set.qs,
+            "filter_form": filter_set.form,
+            "enrollment_invitations": filter_set.qs,
         }
         return context
 
 
 class InvitationStudentsProgressReportView(CuratorOnlyMixin, View):
     def get(self, request, output_format, invitation_id, *args, **kwargs):
-        invitation = get_object_or_404(Invitation.objects
-                                       .filter(pk=invitation_id))
+        invitation = get_object_or_404(Invitation.objects.filter(pk=invitation_id))
         report = ProgressReportForInvitation(invitation)
         term = invitation.semester
         file_name = f"sheet_invitation_{invitation.pk}_{term.year}_{term.type}"
-        return dataframe_to_response(report.generate(), output_format,
-                                     file_name)
+        return dataframe_to_response(report.generate(), output_format, file_name)
 
 
 class AdmissionApplicantsReportView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, campaign_id, output_format, **kwargs):
-        campaign = get_object_or_404(Campaign.objects
-                                     .filter(pk=campaign_id, branch__site_id=settings.SITE_ID))
+        campaign = get_object_or_404(
+            Campaign.objects.filter(pk=campaign_id, branch__site_id=settings.SITE_ID)
+        )
         report = AdmissionApplicantsReport(campaign=campaign)
         if output_format == "csv":
             return report.output_csv()
@@ -425,23 +462,26 @@ class AdmissionApplicantsReportView(CuratorOnlyMixin, generic.base.View):
 
 class AdmissionInterviewsReportView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, campaign_id, output_format, **kwargs):
-        campaign_queryset = (Campaign.objects
-                             .filter(pk=campaign_id,
-                                     branch__site_id=settings.SITE_ID))
+        campaign_queryset = Campaign.objects.filter(
+            pk=campaign_id, branch__site_id=settings.SITE_ID
+        )
         campaign = get_object_or_404(campaign_queryset)
-        report = generate_admission_interviews_report(campaign=campaign,
-                                                      url_builder=request.build_absolute_uri)
+        report = generate_admission_interviews_report(
+            campaign=campaign, url_builder=request.build_absolute_uri
+        )
         file_name = f"admission_{campaign.year}_{campaign.branch.code}_interviews"
         return dataframe_to_response(report, output_format, file_name)
 
 
 class AdmissionExamReportView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, campaign_id, output_format, **kwargs):
-        campaign = get_object_or_404(Campaign.objects
-                                     .filter(pk=campaign_id, branch__site_id=settings.SITE_ID))
+        campaign = get_object_or_404(
+            Campaign.objects.filter(pk=campaign_id, branch__site_id=settings.SITE_ID)
+        )
         report = AdmissionExamReport(campaign=campaign)
-        return dataframe_to_response(report.generate(), output_format,
-                                     report.get_filename())
+        return dataframe_to_response(
+            report.generate(), output_format, report.get_filename()
+        )
 
 
 class WillGraduateStatsReportView(CuratorOnlyMixin, generic.base.View):
@@ -463,15 +503,17 @@ class HintListView(CuratorOnlyMixin, generic.ListView):
 
 class StudentFacesView(CuratorOnlyMixin, TemplateView):
     """Photo + names to memorize newbies"""
+
     template_name = "lms/staff/student_faces.html"
 
     class InputSerializer(serializers.Serializer):
         branch = serializers.ChoiceField(required=True, choices=())
-        year = serializers.IntegerField(label="Year of Admission",
-                                        required=True,
-                                        min_value=settings.ESTABLISHED)
-        type = serializers.ChoiceField(required=False, allow_blank=True,
-                                       choices=StudentTypes.choices)
+        year = serializers.IntegerField(
+            label="Year of Admission", required=True, min_value=settings.ESTABLISHED
+        )
+        type = serializers.ChoiceField(
+            required=False, allow_blank=True, choices=StudentTypes.choices
+        )
 
     def get_template_names(self):
         if "print" in self.request.GET:
@@ -482,7 +524,7 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
         site_branches = Branch.objects.for_site(site_id=settings.SITE_ID)
         assert len(site_branches) > 0
         serializer = self.InputSerializer(data=request.GET)
-        serializer.fields['branch'].choices = [(b.pk, b.name) for b in site_branches]
+        serializer.fields["branch"].choices = [(b.pk, b.name) for b in site_branches]
         if not serializer.initial_data:
             branch = site_branches[0]
             current_term = get_current_term_pair(branch.get_timezone())
@@ -491,24 +533,24 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
         # Filterset knows how to validate input data but we plan to use this
         # serializer for the future api view
         serializer.is_valid(raise_exception=False)
-        filter_set = StudentProfileFilter(site_branches,
-                                          data=self.request.GET,
-                                          queryset=self.get_queryset())
+        filter_set = StudentProfileFilter(
+            site_branches, data=self.request.GET, queryset=self.get_queryset()
+        )
         context = self.get_context_data(filter_set, **kwargs)
         return self.render_to_response(context)
 
     def get_context_data(self, filter_set: FilterSet, **kwargs):
         context = {
-            'filter_form': filter_set.form,
-            'student_profiles': filter_set.qs,
-            'StudentStatuses': StudentStatuses,
+            "filter_form": filter_set.form,
+            "student_profiles": filter_set.qs,
+            "StudentStatuses": StudentStatuses,
         }
         return context
 
     def get_queryset(self):
-        qs = (StudentProfile.objects
-              .select_related("user")
-              .order_by('user__last_name', 'user__first_name', 'pk'))
+        qs = StudentProfile.objects.select_related("user").order_by(
+            "user__last_name", "user__first_name", "pk"
+        )
         if "print" in self.request.GET:
             qs = qs.exclude(status__in=StudentStatuses.inactive_statuses)
         return qs
@@ -519,14 +561,13 @@ class InterviewerFacesView(CuratorOnlyMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(InterviewerFacesView, self).get_context_data(**kwargs)
-        users = (Interview.interviewers.through
-                 .objects.only("user_id")
-                 .distinct()
-                 .values_list("user_id", flat=True))
-        qs = (User.objects
-              .filter(id__in=users.all())
-              .distinct())
-        context['students'] = qs
+        users = (
+            Interview.interviewers.through.objects.only("user_id")
+            .distinct()
+            .values_list("user_id", flat=True)
+        )
+        qs = User.objects.filter(id__in=users.all()).distinct()
+        context["students"] = qs
         return context
 
 
@@ -535,42 +576,45 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
 
     def get_context_data(self, **kwargs):
         term_pair = get_current_term_pair()
-        all_courses_in_term = (Course.objects
-                               .filter(semester__index=term_pair.index)
-                               .select_related("meta_course"))
+        all_courses_in_term = Course.objects.filter(
+            semester__index=term_pair.index
+        ).select_related("meta_course")
         # Get participants
-        query_courses = self.request.GET.getlist('course_offerings[]', [])
+        query_courses = self.request.GET.getlist("course_offerings[]", [])
         query_courses = [int(t) for t in query_courses if t]
         results = list(
-            Course.objects
-            .filter(pk__in=query_courses)
+            Course.objects.filter(pk__in=query_courses)
             .select_related("meta_course")
             .prefetch_related(
-                Prefetch("enrollment_set",
-                         queryset=(Enrollment.active
-                                   .select_related("student")
-                                   .only("pk",
-                                         "course_id",
-                                         "student_id",
-                                         "student__username",
-                                         "student__first_name",
-                                         "student__last_name",
-                                         "student__patronymic")))
-            ))
+                Prefetch(
+                    "enrollment_set",
+                    queryset=(
+                        Enrollment.active.select_related("student").only(
+                            "pk",
+                            "course_id",
+                            "student_id",
+                            "student__username",
+                            "student__first_name",
+                            "student__last_name",
+                            "student__patronymic",
+                        )
+                    ),
+                )
+            )
+        )
         if len(results) > 1:
             first_course, second_course = (
-                {e.student_id for e in co.enrollment_set.all()} for co in results)
+                {e.student_id for e in co.enrollment_set.all()} for co in results
+            )
             intersection = first_course.intersection(second_course)
         else:
             intersection = set()
         context = {
-            'course_offerings': all_courses_in_term,
-            'intersection': intersection,
-            'current_term': "{} {}".format(_(term_pair.type), term_pair.year),
-            'results': results,
-            'query': {
-                'course_offerings': query_courses
-            }
+            "course_offerings": all_courses_in_term,
+            "intersection": intersection,
+            "current_term": "{} {}".format(_(term_pair.type), term_pair.year),
+            "results": results,
+            "query": {"course_offerings": query_courses},
         }
         return context
 
@@ -579,9 +623,10 @@ def autograde_projects(request):
     if not request.user.is_curator:
         return HttpResponseForbidden()
     try:
-        graded = call_command('autograde_projects')
-        messages.success(request, f"Операция выполнена успешно.<br>"
-                                  f"Выставлено оценок: {graded}")
+        graded = call_command("autograde_projects")
+        messages.success(
+            request, f"Операция выполнена успешно.<br>" f"Выставлено оценок: {graded}"
+        )
     except CommandError as e:
         messages.error(request, str(e))
     return HttpResponseRedirect(reverse("staff:exports"))
@@ -594,12 +639,11 @@ def create_alumni_profiles(request: HttpRequest):
 
     form = GraduationForm(data=request.POST)
     if form.is_valid():
-        graduated_on = form.cleaned_data['graduated_on']
-        create_graduate_profiles(request.site, graduated_on,
-                                 created_by=request.user)
+        graduated_on = form.cleaned_data["graduated_on"]
+        create_graduate_profiles(request.site, graduated_on, created_by=request.user)
         messages.success(request, f"Операция выполнена успешно.")
     else:
-        messages.error(request, str('Неверный формат даты выпуска'))
+        messages.error(request, str("Неверный формат даты выпуска"))
     return HttpResponseRedirect(reverse("staff:exports"))
 
 
@@ -609,12 +653,9 @@ class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, survey_pk, output_format, *args, **kwargs):
         if output_format not in self.FORMATS:
             return HttpResponseBadRequest(f"Supported formats {self.FORMATS}")
-        query = (CourseSurvey.objects
-                 .filter(pk=survey_pk)
-                 .select_related("form",
-                                 "course",
-                                 "course__meta_course",
-                                 "course__semester"))
+        query = CourseSurvey.objects.filter(pk=survey_pk).select_related(
+            "form", "course", "course__meta_course", "course__semester"
+        )
         survey = get_object_or_404(query)
         report = SurveySubmissionsReport(survey)
         return getattr(report, f"output_{output_format}")()
@@ -625,19 +666,16 @@ class SurveySubmissionsStatsView(CuratorOnlyMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         survey_pk = self.kwargs["survey_pk"]
-        query = (CourseSurvey.objects
-                 .filter(pk=survey_pk)
-                 .select_related("form",
-                                 "course",
-                                 "course__meta_course",
-                                 "course__semester"))
+        query = CourseSurvey.objects.filter(pk=survey_pk).select_related(
+            "form", "course", "course__meta_course", "course__semester"
+        )
         survey = get_object_or_404(query)
         report = SurveySubmissionsStats(survey)
         stats = report.calculate()
         return {
             "survey": survey,
             "total_submissions": stats["total_submissions"],
-            "data": stats["fields"]
+            "data": stats["fields"],
         }
 
 
@@ -662,41 +700,42 @@ class GradeBookListView(CuratorOnlyMixin, GradeBookListBaseView):
             for academic_year in semester_list:
                 # Group by main branch name
                 for term in academic_year:
-                    courses = bucketize(term.course_offerings,
-                                        key=lambda c: c.main_branch.name)
+                    courses = bucketize(
+                        term.course_offerings, key=lambda c: c.main_branch.name
+                    )
                     term.course_offerings = courses
-        context = {
-            "semester_list": semester_list
-        }
+        context = {"semester_list": semester_list}
         return context
 
 
 class OfficialDiplomasListView(CuratorOnlyMixin, TemplateView):
-    template_name = 'staff/official_diplomas_list.html'
+    template_name = "staff/official_diplomas_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        year = int(self.kwargs['year'])
-        month = int(self.kwargs['month'])
-        day = int(self.kwargs['day'])
+        year = int(self.kwargs["year"])
+        month = int(self.kwargs["month"])
+        day = int(self.kwargs["day"])
         date = datetime.date(year, month, day)
-        graduate_profiles = get_list_or_404(GraduateProfile.objects
-                                            .for_site(self.request.site)
-                                            .with_official_diploma()
-                                            .filter(diploma_issued_on=date)
-                                            .select_related('student_profile__user')
-                                            .only('student_profile__user')
-                                            .order_by('student_profile__user__last_name',
-                                                      'student_profile__user__first_name',
-                                                      'student_profile__user__patronymic'))
+        graduate_profiles = get_list_or_404(
+            GraduateProfile.objects.for_site(self.request.site)
+            .with_official_diploma()
+            .filter(diploma_issued_on=date)
+            .select_related("student_profile__user")
+            .only("student_profile__user")
+            .order_by(
+                "student_profile__user__last_name",
+                "student_profile__user__first_name",
+                "student_profile__user__patronymic",
+            )
+        )
         graduated_users = [g.student_profile.user for g in graduate_profiles]
-        graduates_data = [(g.get_absolute_url(), g.get_full_name(last_name_first=True))
-                          for g in graduated_users]
-        context.update({
-            'date': date,
-            'graduates_data': graduates_data
-        })
+        graduates_data = [
+            (g.get_absolute_url(), g.get_full_name(last_name_first=True))
+            for g in graduated_users
+        ]
+        context.update({"date": date, "graduates_data": graduates_data})
         return context
 
 
@@ -704,13 +743,15 @@ class OfficialDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, year, month, day, *args, **kwargs):
         diploma_issued_on = datetime.date(int(year), int(month), int(day))
         report = OfficialDiplomasReport(diploma_issued_on)
-        site_aware_queryset = report.get_queryset().filter(branch__site=self.request.site)
+        site_aware_queryset = report.get_queryset().filter(
+            branch__site=self.request.site
+        )
         if not site_aware_queryset.count():
             raise Http404
         df = report.generate(site_aware_queryset)
-        date_issued = diploma_issued_on.isoformat().replace('-', '_')
+        date_issued = diploma_issued_on.isoformat().replace("-", "_")
         file_name = "official_diplomas_{}".format(date_issued)
-        return dataframe_to_response(df, 'csv', file_name)
+        return dataframe_to_response(df, "csv", file_name)
 
 
 class OfficialDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
@@ -721,15 +762,18 @@ class OfficialDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
         report = OfficialDiplomasReport(diploma_issued_on)
         student_profiles = report.get_queryset().filter(branch__site=self.request.site)
         students = (sp.user for sp in student_profiles)
-        courses_qs = (report.get_courses_queryset(students)
-                      .annotate(classes_total=Count('courseclass')))
+        courses_qs = report.get_courses_queryset(students).annotate(
+            classes_total=Count("courseclass")
+        )
         courses = {c.pk: c for c in courses_qs}
 
-        diploma_student_profiles = [generate_tex_student_profile_for_diplomas(sp, courses, is_official=True)
-                                    for sp in student_profiles]
+        diploma_student_profiles = [
+            generate_tex_student_profile_for_diplomas(sp, courses, is_official=True)
+            for sp in student_profiles
+        ]
 
         context = {
             "diploma_issued_on": diploma_issued_on,
-            "students": diploma_student_profiles
+            "students": diploma_student_profiles,
         }
         return context
