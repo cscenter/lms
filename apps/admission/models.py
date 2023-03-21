@@ -339,12 +339,6 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     # Personal
     first_name = models.CharField(_("First name"), max_length=255)
     last_name = models.CharField(_("Surname"), max_length=255)
-<<<<<<< HEAD
-    patronymic = models.CharField(
-        _("Patronymic"), max_length=255, blank=True, null=True
-    )
-    email = models.EmailField(_("Email"), help_text=_("Applicant|email"))
-=======
     patronymic = models.CharField(_("Patronymic"), max_length=255,
                                   blank=True, null=True)
     email = models.EmailField(
@@ -352,7 +346,6 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         help_text=_("Applicant|email"))
     telegram_username = models.CharField(_("Telegram"), max_length=255,
                                          blank=True, null=True)
->>>>>>> 06f65ce25 (ACADEMYDEV-571: form update part 1)
     is_unsubscribed = models.BooleanField(
         _("Unsubscribed"),
         default=False,
