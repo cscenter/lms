@@ -27,12 +27,6 @@ def get_partners() -> List[Dict]:
             "label": f"Да, {partner.name}"
         } for partner in PartnerTag.objects.all()
     ]
-    if partners:
-        partners.append({
-            "id": None,
-            "value": "none",
-            "label": f"Нет"
-        })
     return partners
 
 

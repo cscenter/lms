@@ -391,6 +391,8 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         blank=True,
     )
     # Education
+    partner = models.ForeignKey("users.PartnerTag", verbose_name=_("Partner"),
+                                null=True, blank=True, on_delete=models.SET_NULL)
     is_studying = models.BooleanField(_("Are you studying?"), null=True)
     university = models.ForeignKey(
         "universities.University",
@@ -440,6 +442,23 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     experience = models.TextField(
         _("Experience"),
         help_text=_("Applicant|work_or_study_experience"),
+        null=True,
+        blank=True,
+    )
+    has_internship = models.BooleanField(
+        _("Have you had an internship?"), help_text=_("Applicant|Has internship"), null=True
+    )
+    internship_workplace = models.CharField(
+        _("Internship workplace"),
+        help_text=_("Applicant|Internship workplace"),
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    internship_position = models.CharField(
+        _("Internship position"),
+        help_text=_("Applicant|Internship position"),
+        max_length=255,
         null=True,
         blank=True,
     )
