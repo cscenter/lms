@@ -7,6 +7,7 @@ from django.conf import settings
 from django.utils.timezone import now
 
 from admission.api.serializers import OpenRegistrationCampaignField
+from admission.constants import WHERE_DID_YOU_LEARN
 from admission.models import Applicant, Campaign
 from admission.tasks import register_in_yandex_contest
 from core.models import University as UniversityLegacy
@@ -216,19 +217,9 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'does_not_exist': 'Приемная кампания окончена либо не существует',
             'incorrect_type': 'Некорректное значение идентификатора кампании'
         })
-    shad_plus_rash = AliasedChoiceField(
-        required=False,
-        write_only=True,
-        choices=[
-            (True, True, 'Да'),
-            (False, False, 'Нет'),
-        ],
-        label='Планируете ли вы поступать на совместную программу ШАД и РЭШ?'
-    )
-    rash_agreement = serializers.BooleanField(
-        required=False,
-        write_only=True
-    )
+    where_did_you_learn = serializers.MultipleChoiceField(
+        choices=WHERE_DID_YOU_LEARN,
+        allow_empty=False)
     new_track = AliasedChoiceField(
         required=False,
         write_only=True,
@@ -269,10 +260,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         write_only=True,
         label='Мне был предоставлен билет на прошлом отборе в ШАД'
     )
-    magistracy_and_shad = serializers.BooleanField(
-        write_only=True,
-        label='Планируете ли вы поступать в этом году на одну из совместных с ШАД магистерских программ?'
-    )
     email_subscription = serializers.BooleanField(
         write_only=True,
         label='Я согласен (-на) на получение новостной и рекламной рассылки от АНО ДПО "ШАД" и ООО "ЯНДЕКС'
@@ -293,26 +280,28 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # Personal info
             "last_name", "first_name", "patronymic",
             "email", "phone", "birth_date", "living_place",
+            "additional_info",
 
             # Accounts
             "yandex_login",
+            "telegram_username",
 
             # Education
             "university_city", "university", "university_other",
             "faculty", "is_studying", "level_of_education", "year_of_graduation",
+
+            # Exp and work
+            "has_job",
+            "position",
+            "workplace",
 
             # YDS
             "campaign",
             "motivation",
             "ml_experience",
             "ticket_access",
-            "magistracy_and_shad",
             "email_subscription",
             "shad_agreement",
-
-            # Rash
-            "shad_plus_rash",
-            "rash_agreement",
 
             # New track
             "new_track",
@@ -323,6 +312,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
 
             # Source
             "utm",
+            "where_did_you_learn",
             "where_did_you_learn_other",
 
             # version 0.2, but in the data field it's still 0.1
@@ -339,6 +329,8 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # version 0.4
             # remove field is_for_ozon
 
+            # version 0.5
+            # remove fields magistracy_and_shad, shad_plus_rash, rash_agreement
         )
         extra_kwargs = {
             'university': {
@@ -358,6 +350,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
 
     def __init__(self, instance=None, data=empty, **kwargs):
         super().__init__(instance, data, **kwargs)
+        self.fields["new_track"].required = True
         self.fields["patronymic"].required = True
         self.fields["living_place"].required = True
         if data is not empty and data:
@@ -368,16 +361,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                 self.fields["university"].required = False
             if data.get("is_studying"):
                 self.fields["level_of_education"].required = True
-            if data.get("shad_plus_rash"):
-                self.fields['rash_agreement'].required = True
-            msk_campaign = (Campaign.with_open_registration()
-                            .filter(branch__site_id=settings.SITE_ID,
-                                    branch__code='msk')
-                            .first())
-            if msk_campaign is not None:
-                if data.get('campaign') == msk_campaign.pk:
-                    self.fields["new_track"].required = True
-                    self.fields["shad_plus_rash"].required = True
 
     def create(self, validated_data):
         data = {**validated_data}
@@ -396,13 +379,9 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'new_track_tech_articles': data.get('new_track_tech_articles'),
             'new_track_project_details': data.get('new_track_project_details'),
 
-            'shad_plus_rash': data.get('shad_plus_rash'),
-            'rash_agreement': data.get('rash_agreement'),
-
             'ticket_access': data.get('ticket_access'),
-            'magistracy_and_shad': data.get('magistracy_and_shad'),
             'email_subscription': data.get('email_subscription'),
-            'data_format_version': '0.4'
+            'data_format_version': '0.5'
         }
         data['experience'] = data['ml_experience']
         # Remove fields that are actually not present on Applicant model
@@ -427,6 +406,4 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if not attrs.get('is_studying') and 'level_of_education' in attrs:
             del attrs['level_of_education']
-        if attrs.get('shad_plus_rash') and not attrs.get('rash_agreement'):
-            raise ValidationError("Необходимо согласиться с политикой РЭШ в отношении персональных данных.")
         return attrs

@@ -248,12 +248,13 @@ yds_post_data = {
     "faculty": "Факультет",
     "is_studying": False,
     "year_of_graduation": "2022",
+    "where_did_you_learn": ["friends", "other"],
     "motivation": "Зачем вы поступаете в ШАД?",
     "ml_experience": "Изучали ли вы раньше машинное обучение/анализ данных?",
     "campaign": None,
+    "new_track": True,
     "shad_agreement": True,
     "rash_agreement": False,
-    "magistracy_and_shad": False,
     "ticket_access": True,
     "email_subscription": True,
     "university": None,
@@ -282,9 +283,9 @@ def test_application_YDS_form_serializer(settings, mocker):
         'new_track_tech_articles': 'new_track_tech_articles',
         'shad_plus_rash': True,
         'rash_agreement': True,
-        'magistracy_and_shad': True,
         'is_studying': True,
         'level_of_education': AcademicDegreeLevels.MASTER_1,
+        'where_did_you_learn': ['friends'],
     })
     serializer = ApplicationYDSFormSerializer(data=data)
     assert serializer.is_valid(raise_exception=True)
@@ -304,12 +305,9 @@ def test_application_YDS_form_serializer(settings, mocker):
         "utm": {},
         "shad_agreement": True,
         "ticket_access": True,
-        "magistracy_and_shad": True,
         "email_subscription": True,
         "university_city": data["university_city"],
-        "data_format_version": '0.4',
-        'shad_plus_rash': True,
-        "rash_agreement": True,
+        "data_format_version": '0.5',
         'new_track': True,
         'new_track_project_details': "new_track_project_details",
         'new_track_projects': "new_track_projects",
@@ -350,11 +348,8 @@ def test_application_YDS_form_serializer_min_fields(settings, mocker):
         "ticket_access": True,
         "university_city": data["university_city"],
         "email_subscription": True,
-        "data_format_version": '0.4',
-        "magistracy_and_shad": False,
-        'shad_plus_rash': None,
-        "rash_agreement": False,
-        'new_track': None,
+        "data_format_version": '0.5',
+        'new_track': True,
         'new_track_project_details': None,
         'new_track_projects': None,
         'new_track_scientific_articles': None,
@@ -376,22 +371,6 @@ def test_application_YDS_form_serializer_msk_required_fields(settings, mocker):
     contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
     data['campaign'] = campaign.pk
 
-    serializer = ApplicationYDSFormSerializer(data=data)
-    assert not serializer.is_valid()
-    assert 'shad_plus_rash' in serializer.errors
-    assert 'new_track' in serializer.errors
-
-    data['shad_plus_rash'] = True
-    data['new_track'] = True
-    del data['rash_agreement']
-    serializer = ApplicationYDSFormSerializer(data=data)
-    assert not serializer.is_valid()
-
-    data['rash_agreement'] = False
-    serializer = ApplicationYDSFormSerializer(data=data)
-    assert not serializer.is_valid()
-
-    data['rash_agreement'] = True
     serializer = ApplicationYDSFormSerializer(data=data)
     assert serializer.is_valid()
 
