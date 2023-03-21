@@ -577,6 +577,12 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
             return self.campaign.branch.name
         return self.living_place
 
+    @property
+    def is_alternative_track(self) -> bool:
+        if not isinstance(self.data, dict):
+            return False
+        return self.data.get("new_track") is True
+
     @classmethod
     def get_name_by_status_code(cls, code):
         for status_code, status_name in cls.STATUS:
