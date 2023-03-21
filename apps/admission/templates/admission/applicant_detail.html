@@ -26,8 +26,11 @@
       {% endif %}</h2>
 
     </div>
-    <div class="additional-info">Набор: {{ applicant.campaign }}<br>Статус анкеты:
-      {{ applicant.get_status_display|default_if_none:"<не указан>" }}</div>
+    <div class="additional-info">
+      Набор: {{ applicant.campaign }}<br>
+      Статус анкеты: {{ applicant.get_status_display|default_if_none:"<не указан>" }}<br>
+      {% if applicant.is_alternative_track %}Альтернативный трек{% endif %}
+    </div>
     <div class="nav-tabs-horizontal nav-tabs-inverse">
       <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
         <li role="presentation" class="active">
