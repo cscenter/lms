@@ -39,7 +39,8 @@ class ApplicationFormView(TemplateView):
                             .filter(branch__site_id=settings.SITE_ID)
                             .annotate(value=F('branch__code'),
                                       label=F('branch__name'))
-                            .values('value', 'label', 'id'))
+                            .values('value', 'label', 'id')
+                            .order_by('order'))
         show_form = len(active_campaigns) > 0
         context["show_form"] = show_form
         utm_params = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]
