@@ -28,6 +28,7 @@ yds_post_data = {
     "ticket_access": True,
     "email_subscription": True,
     "university": None,
+    "partner": None,
     "new_track": True,
     "university_city": {"is_exists": False, "city_name": "Петергоф"},
     "where_did_you_learn": ["friends"],

@@ -13,6 +13,7 @@ from admission.tasks import register_in_yandex_contest
 from core.models import University as UniversityLegacy
 from learning.settings import AcademicDegreeLevels
 from universities.models import University
+from users.models import PartnerTag
 
 from .fields import AliasedChoiceField
 
@@ -268,7 +269,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         required=True,
         write_only=True
     )
-
+    partner = serializers.PrimaryKeyRelatedField(queryset=PartnerTag.objects.all(), allow_null=True)
     university = serializers.PrimaryKeyRelatedField(queryset=University.objects.all())
     university_city = UniversityCitySerializer(required=True, write_only=True)
     # FIXME: Replace with hidden field since real value stores in session
@@ -289,11 +290,15 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # Education
             "university_city", "university", "university_other",
             "faculty", "is_studying", "level_of_education", "year_of_graduation",
+            "partner",
 
             # Exp and work
             "has_job",
             "position",
             "workplace",
+            "has_internship",
+            "internship_workplace",
+            "internship_position",
 
             # YDS
             "campaign",

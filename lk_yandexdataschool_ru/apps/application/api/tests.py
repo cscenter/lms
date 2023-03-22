@@ -258,6 +258,7 @@ yds_post_data = {
     "ticket_access": True,
     "email_subscription": True,
     "university": None,
+    "partner": None,
     "university_city": {"is_exists": False, "city_name": "Петергоф"}
 }
 
