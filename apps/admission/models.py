@@ -356,6 +356,9 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     phone = models.CharField(
         _("Contact phone"), max_length=42, help_text=_("Applicant|phone")
     )
+    residence_city = models.ForeignKey(to="admission.ResidenceCity", verbose_name=_("Residence city"),
+                                       blank=True, null=True, on_delete=models.SET_NULL)
+    # Since the 2023 campaign, we have been using it as storage for cities not listed in ResidenceCity.
     living_place = models.CharField(
         _("Living Place"), max_length=255, null=True, blank=True
     )

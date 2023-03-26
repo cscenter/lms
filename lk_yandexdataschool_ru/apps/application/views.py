@@ -3,7 +3,7 @@ from typing import List, Dict
 from django.views.generic import TemplateView
 
 from admission.constants import WHERE_DID_YOU_LEARN
-from admission.models import Campaign
+from admission.models import Campaign, CampaignCity
 from auth.views import YANDEX_OAUTH_BACKEND_PREFIX
 
 from core.urls import reverse
@@ -58,8 +58,9 @@ class ApplicationFormView(TemplateView):
                     'csrfToken': get_token(self.request),
                     'authCompleteUrl': reverse('auth:application:complete'),
                     'authBeginUrl': reverse('auth:application:begin'),
-                    'endpointCities': reverse('universities:v1:cities'),
+                    'endpointUniversitiesCities': reverse('universities:v1:cities'),
                     'endpointUniversities': reverse('universities:v1:universities'),
+                    'endpointResidenceCities': reverse('admission-api:v2:residence_cities'),
                     'campaigns': list(active_campaigns),
                     'educationLevelOptions': levels_of_education,
                     'sourceOptions': sources,

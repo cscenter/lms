@@ -269,7 +269,8 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         required=True,
         write_only=True
     )
-    partner = serializers.PrimaryKeyRelatedField(queryset=PartnerTag.objects.all(), allow_null=True)
+    partner = serializers.PrimaryKeyRelatedField(queryset=PartnerTag.objects.all(),
+                                                 allow_null=True, required=False)
     university = serializers.PrimaryKeyRelatedField(queryset=University.objects.all())
     university_city = UniversityCitySerializer(required=True, write_only=True)
     # FIXME: Replace with hidden field since real value stores in session
@@ -279,9 +280,9 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         model = Applicant
         fields = (
             # Personal info
-            "last_name", "first_name", "patronymic",
-            "email", "phone", "birth_date", "living_place",
-            "additional_info",
+            "last_name", "first_name", "patronymic", "birth_date",
+            "living_place", "residence_city",
+            "email", "phone", "additional_info",
 
             # Accounts
             "yandex_login",
@@ -357,7 +358,15 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         super().__init__(instance, data, **kwargs)
         self.fields["new_track"].required = True
         self.fields["patronymic"].required = True
-        self.fields["living_place"].required = True
+        msk_campaign = (Campaign.with_open_registration()
+                        .filter(branch__site_id=settings.SITE_ID,
+                                branch__code='msk')
+                        .first())
+        if msk_campaign is not None:
+            if data.get('campaign') == msk_campaign.pk:
+                self.fields["partner"].required = True
+        if not data.get('residence_city'):
+            self.fields["living_place"].required = True
         if data is not empty and data:
             if "university_other" in data:
                 # Make university optional cause its value should be empty in

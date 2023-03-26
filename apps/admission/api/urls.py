@@ -23,7 +23,7 @@ urlpatterns = [
                     path(
                         "residence-city-campaigns/",
                         v.CampaignCityList.as_view(),
-                        name="residence_cities",
+                        name="residence_city_campaigns",
                     ),
                 ],
                 "v2",
