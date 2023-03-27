@@ -305,11 +305,12 @@ def test_application_YDS_form_serializer(settings, mocker):
     assert instance.experience == data['ml_experience']
     assert instance.data == {
         "utm": {},
+        'yandex_profile': {},
         "shad_agreement": True,
         "ticket_access": True,
         "email_subscription": True,
         "university_city": data["university_city"],
-        "data_format_version": '0.5',
+        "data_format_version": '0.6',
         'new_track': True,
         'new_track_project_details': "new_track_project_details",
         'new_track_projects': "new_track_projects",
@@ -347,11 +348,12 @@ def test_application_YDS_form_serializer_min_fields(settings, mocker):
     assert instance.experience == data['ml_experience']
     assert instance.data == {
         "utm": {},
+        'yandex_profile': {},
         "shad_agreement": True,
         "ticket_access": True,
         "university_city": data["university_city"],
         "email_subscription": True,
-        "data_format_version": '0.5',
+        "data_format_version": '0.6',
         'new_track': True,
         'new_track_project_details': None,
         'new_track_projects': None,

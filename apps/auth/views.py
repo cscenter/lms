@@ -295,7 +295,7 @@ def yandex_login_access_admission_complete(request, *args, **kwargs):
     # Note: Pipeline is never called since we prevent user authentication
     try:
         auth_data = backend.complete(user=user, *args, **kwargs)
-        for field_name in ["login", "sex"]:
+        for field_name in ["id", "login", "display_name", "real_name", "first_name", "last_name"]:
             key = f"{YANDEX_OAUTH_BACKEND_PREFIX}_{field_name}"
             backend.strategy.session_set(key, auth_data.get(field_name))
         context = {"yandex_login": auth_data.get("login", "")}

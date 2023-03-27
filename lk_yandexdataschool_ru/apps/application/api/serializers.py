@@ -210,6 +210,15 @@ class UTMSerializer(serializers.Serializer):
     utm_content = serializers.CharField(allow_null=True, allow_blank=True)
 
 
+class YandexProfileSerializer(serializers.Serializer):
+    application_ya_id = serializers.CharField(max_length=64, allow_null=True, allow_blank=True)
+    application_ya_login = serializers.CharField(max_length=64, allow_null=True, allow_blank=True)
+    application_ya_display_name = serializers.CharField(max_length=130, allow_null=True, allow_blank=True)
+    application_ya_real_name = serializers.CharField(max_length=130, allow_null=True, allow_blank=True)
+    application_ya_first_name = serializers.CharField(max_length=64, allow_null=True, allow_blank=True)
+    application_ya_last_name = serializers.CharField(max_length=64, allow_null=True, allow_blank=True)
+
+
 class ApplicationYDSFormSerializer(serializers.ModelSerializer):
     utm = UTMSerializer(required=False, write_only=True)
     campaign = OpenRegistrationCampaignField(
@@ -274,7 +283,10 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
     university = serializers.PrimaryKeyRelatedField(queryset=University.objects.all())
     university_city = UniversityCitySerializer(required=True, write_only=True)
     # FIXME: Replace with hidden field since real value stores in session
+    # TODO: replace with yandex_profile
     yandex_login = serializers.CharField(max_length=80)
+
+    yandex_profile = YandexProfileSerializer(required=False, write_only=True)
 
     class Meta:
         model = Applicant
@@ -286,6 +298,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
 
             # Accounts
             "yandex_login",
+            "yandex_profile",
             "telegram_username",
 
             # Education
@@ -337,6 +350,15 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
 
             # version 0.5
             # remove fields magistracy_and_shad, shad_plus_rash, rash_agreement
+
+            # version 0.6
+            # add add yandex_profile field with optional inner str fields:
+            #      application_ya_id
+            #      application_ya_login
+            #      application_ya_display_name
+            #      application_ya_real_name
+            #      application_ya_first_name
+            #      application_ya_last_name
         )
         extra_kwargs = {
             'university': {
@@ -383,8 +405,12 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             utm = {key: value for key, value in utm.items() if value}
         else:
             utm = {}
+        yandex_profile = data.get('yandex_profile', {})
+        if yandex_profile:
+            yandex_profile = {key: value for key, value in yandex_profile.items() if value}
         data['data'] = {
             'utm': utm,
+            'yandex_profile': yandex_profile,
             'university_city': data.get('university_city'),
             'shad_agreement': data.get('shad_agreement'),
             'new_track': data.get('new_track'),
@@ -392,10 +418,9 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'new_track_projects': data.get('new_track_projects'),
             'new_track_tech_articles': data.get('new_track_tech_articles'),
             'new_track_project_details': data.get('new_track_project_details'),
-
             'ticket_access': data.get('ticket_access'),
             'email_subscription': data.get('email_subscription'),
-            'data_format_version': '0.5'
+            'data_format_version': '0.6'
         }
         data['experience'] = data['ml_experience']
         # Remove fields that are actually not present on Applicant model
