@@ -199,6 +199,7 @@ class CampaignCityList(APIBaseView):
     class OutputSerializer(serializers.ModelSerializer):
         campaign = inline_serializer(
             fields={
+                "id": serializers.IntegerField(),
                 "branch": inline_serializer(
                     fields={
                         "code": serializers.CharField(),

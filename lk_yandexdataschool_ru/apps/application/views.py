@@ -1,5 +1,6 @@
 from typing import List, Dict
 
+from django.utils import timezone
 from django.views.generic import TemplateView
 
 from admission.constants import WHERE_DID_YOU_LEARN
@@ -35,13 +36,24 @@ class ApplicationFormView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        active_campaigns = (Campaign.with_open_registration()
-                            .filter(branch__site_id=settings.SITE_ID)
-                            .annotate(value=F('branch__code'),
-                                      label=F('branch__name'))
-                            .values('value', 'label', 'id')
-                            .order_by('order'))
-        show_form = len(active_campaigns) > 0
+        today = timezone.now()
+        always_allow_campaigns = (
+            CampaignCity.objects
+                .filter(city__isnull=True,
+                        campaign__current=True,
+                        campaign__application_starts_at__lte=today,
+                        campaign__application_ends_at__gt=today,
+                        campaign__branch__site_id=settings.SITE_ID
+                        )
+                .annotate(value=F('campaign__branch__code'),
+                          label=F('campaign__branch__name'),
+                )
+                .select_related('campaign', 'campaign__branch')
+                .order_by('campaign__order')
+                .values('value', 'label', 'campaign_id')
+        )
+
+        show_form = len(always_allow_campaigns) > 0
         context["show_form"] = show_form
         utm_params = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]
         utm = {param: self.request.GET.get(param) for param in utm_params}
@@ -61,7 +73,8 @@ class ApplicationFormView(TemplateView):
                     'endpointUniversitiesCities': reverse('universities:v1:cities'),
                     'endpointUniversities': reverse('universities:v1:universities'),
                     'endpointResidenceCities': reverse('admission-api:v2:residence_cities'),
-                    'campaigns': list(active_campaigns),
+                    'endpointResidenceCampaigns': reverse('admission-api:v2:residence_city_campaigns'),
+                    'alwaysAllowCampaigns': list(always_allow_campaigns),
                     'educationLevelOptions': levels_of_education,
                     'sourceOptions': sources,
                     'partners': get_partners(),

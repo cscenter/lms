@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 
 from django.utils.timezone import now
 
-from admission.models import Contest, Applicant
+from admission.models import Contest, Applicant, CampaignCity
 from admission.tests.factories import CampaignFactory, ContestFactory
 from core.models import University
 from core.tests.factories import BranchFactory
@@ -274,6 +274,7 @@ def test_application_YDS_form_serializer(settings, mocker):
     assert not serializer.is_valid(raise_exception=False)
     branch = BranchFactory(code='msk', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    CampaignCity.objects.create(campaign=campaign, city=None)
     contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
     data['campaign'] = campaign.pk
     data.update({
@@ -328,6 +329,7 @@ def test_application_YDS_form_serializer_min_fields(settings, mocker):
     assert not serializer.is_valid(raise_exception=False)
     branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    CampaignCity.objects.create(campaign=campaign, city=None)
     contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
     data['campaign'] = campaign.pk
     serializer = ApplicationYDSFormSerializer(data=data)
@@ -369,6 +371,7 @@ def test_application_YDS_form_serializer_msk_required_fields(settings, mocker):
     assert not serializer.is_valid(raise_exception=False)
     branch = BranchFactory(code='msk', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    CampaignCity.objects.create(campaign=campaign, city=None)
     contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
     data['campaign'] = campaign.pk
 
@@ -387,6 +390,7 @@ def test_application_YDS_form_serializer_university_field(settings, mocker):
     assert not serializer.is_valid(raise_exception=False)
     branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    CampaignCity.objects.create(campaign=campaign, city=None)
     contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
     data['campaign'] = campaign.pk
 
@@ -433,6 +437,7 @@ def test_application_YDS_form_serializer_university_city_field(settings, mocker)
     assert not serializer.is_valid(raise_exception=False)
     branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    CampaignCity.objects.create(campaign=campaign, city=None)
     contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
     data['campaign'] = campaign.pk
 
@@ -460,6 +465,7 @@ def test_application_YDS_form_creates(settings, client):
     data['university'] = university.pk
     branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    CampaignCity.objects.create(campaign=campaign, city=None)
     contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
     data['campaign'] = campaign.pk
     url = reverse('applicant_create')
@@ -483,6 +489,7 @@ def test_application_YDS_form_serializer_test_utm(settings, mocker):
 
     branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    CampaignCity.objects.create(campaign=campaign, city=None)
     contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
     data['campaign'] = campaign.pk
     serializer = ApplicationYDSFormSerializer(data=data)

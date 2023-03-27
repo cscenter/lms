@@ -8,7 +8,7 @@ from django.utils.timezone import now
 
 from admission.api.serializers import OpenRegistrationCampaignField
 from admission.constants import WHERE_DID_YOU_LEARN
-from admission.models import Applicant, Campaign
+from admission.models import Applicant, Campaign, CampaignCity
 from admission.tasks import register_in_yandex_contest
 from core.models import University as UniversityLegacy
 from learning.settings import AcademicDegreeLevels
@@ -420,4 +420,10 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if not attrs.get('is_studying') and 'level_of_education' in attrs:
             del attrs['level_of_education']
+        residence_city = attrs.get('residence_city')
+        campaign = attrs.get('campaign')
+        rule_exists = CampaignCity.objects.filter(city=residence_city, campaign=campaign).exists()
+        strict_rules_exists = CampaignCity.objects.filter(city__isnull=False, campaign=campaign).exists()
+        if not rule_exists or (residence_city is None and strict_rules_exists):
+            raise serializers.ValidationError(f"Campaign {campaign} is not allowed in {residence_city} city.")
         return attrs

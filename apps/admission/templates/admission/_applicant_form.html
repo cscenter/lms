@@ -2,36 +2,59 @@
   {% if field.name == 'where_did_you_learn_other' %}
   {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
   {% elif field.name == 'position' and not applicant_form.has_job.value %}
+  {% elif field.name == 'internship_workplace' and not applicant_form.has_internship.value %}
+  {% elif field.name == 'internship_position' and not applicant_form.has_internship.value %}
   {% else %}
-    <dt>{{ field.label_tag }}</dt>
-    {% if field.name == 'github_login' %}
+   <dt>{{ field.label_tag }}</dt>
+   {% if field.name == 'github_login' %}
       <dd>{% if field.value %}{{ field.value }}
         <a class="text-muted" target="_blank" href="https://github.com/{{ field.value }}">
           <i class="fa fa-github-alt" aria-hidden="true"></i>
         </a>{% else %}
         <не указано>{% endif %}</dd>
-    {% elif field.name == 'level_of_education' %}
+   {% elif field.name == 'level_of_education' %}
       <dd>{{ applicant_form.instance.get_level_of_education_display }}</dd>
-    {% elif field.name == 'living_place' %}
+   {% elif field.name == 'living_place' %}
       <dd>{{ applicant_form.instance.get_living_place_display|default:"<не указано>" }}</dd>
-    {% elif field.name == 'university_legacy' %}
+   {% elif field.name == 'university_legacy' %}
+      <dd>С 2022-го используется для хранения названия университета, незарегистрированного в LMS</dd>
       <dd>{% if applicant_form.instance.university_other %}{{ applicant_form.instance.university_other }}{% else %}
         {{ applicant_form.instance.university_legacy.name }}{% endif %}</dd>
-    {% elif field.name == 'where_did_you_learn' %}
+   {% elif field.name == 'where_did_you_learn' %}
       <dd>{{ field.value }}{% if applicant_form.where_did_you_learn_other.value %}.
         {{ applicant_form.where_did_you_learn_other.value }}{% endif %}</dd>
-    {% elif field.name == 'has_job' %}
+   {% elif field.name == 'partner' %}
+      <dd>{{ applicant_form.instance.partner }}</dd>
+   {% elif field.name == 'residence_city' %}
+      <dd>{{ applicant_form.instance.residence_city }}</dd>
+   {% elif field.name == 'yandex_login' %}
+     <dd>{{ applicant_form.instance.yandex_login }}</dd>
+   {% elif field.name == 'university' %}
+     <dd>{{ applicant_form.instance.university }}</dd>
+   {% elif field.name == 'has_job' %}
       <dd>
         {% if field.value %}
           Да
         {% elif field.value == None %}
-          <не указано>
-            {% else %}
-            Нет
-        {% endif %}</dd>
-    {% else %}
-      <dd>{% if field.value %}{{ field.value|linebreaks }}{% else %}
-        <не указано>{% endif %}</dd>
-    {% endif %}
+          Не указано
+        {% else %}
+          Нет
+        {% endif %}
+      </dd>
+   {% elif field.name == 'has_internship' %}
+      <dd>
+        {% if field.value %}
+          Да
+        {% elif field.value == None %}
+          Не указано
+        {% else %}
+          Нет
+        {% endif %}
+      </dd>
+   {% else %}
+      <dd>{% if field.value %}
+        {{ field.value|linebreaks }}
+      {% endif %}</dd>
+   {% endif %}
   {% endif %}
 {% endspaceless %}{% endfor %}
