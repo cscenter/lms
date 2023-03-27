@@ -12,6 +12,7 @@ from django.http import HttpResponseBadRequest, HttpResponseForbidden, JsonRespo
 
 from application.api.serializers import ApplicationYDSFormSerializer
 from application.views import SESSION_LOGIN_KEY
+from auth.views import YANDEX_OAUTH_BACKEND_PREFIX
 from lk_yandexdataschool_ru.apps.application.tasks import register_new_application_form
 
 
@@ -55,6 +56,11 @@ class ApplicantCreateFromYDSFormAPIView(CreateAPIView):
         # Insert yandex login if session value were found, otherwise remove it
         if data:
             data = data.copy()
+            data['yandex_profile'] = {}
+            for field_name in ["id", "login", "display_name", "real_name", "first_name", "last_name"]:
+                key_name = f"{YANDEX_OAUTH_BACKEND_PREFIX}_{field_name}"
+                value = self.request.session.get(key_name, None)
+                data['yandex_profile'][key_name] = value
             yandex_login = self.request.session.get(SESSION_LOGIN_KEY, None)
             if yandex_login:
                 data["yandex_login"] = yandex_login
