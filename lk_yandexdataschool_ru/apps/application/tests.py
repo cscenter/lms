@@ -3,7 +3,7 @@ from django.utils.timezone import now
 import pytest
 from django.conf import settings
 
-from admission.models import Contest, Applicant
+from admission.models import Contest, Applicant, CampaignCity
 from admission.tests.factories import CampaignFactory, ContestFactory
 from core.tests.factories import BranchFactory
 from core.urls import reverse
@@ -47,6 +47,7 @@ def test_view_application_form_no_campaigns(client):
 def test_view_application_form_no_msk_campaigns(client):
     branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    CampaignCity.objects.create(campaign=campaign)
     contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
     university = UniversityFactory()
     data = {**yds_post_data}
@@ -58,8 +59,8 @@ def test_view_application_form_no_msk_campaigns(client):
     assert response.status_code == 200
     assert response.context_data["show_form"]
     context = response.context_data["app"]["props"]
-    assert len(context["campaigns"]) == 1
-    assert campaign.pk in map(lambda c: c["id"], context["campaigns"])
+    assert len(context["alwaysAllowCampaigns"]) == 1
+    assert campaign.pk in map(lambda c: c["campaign_id"], context["alwaysAllowCampaigns"])
 
     url = reverse('applicant_create')
     session = client.session
@@ -75,6 +76,8 @@ def test_view_application_form_msk_campaigns(client):
     msk_branch = BranchFactory(code='msk', site_id=settings.SITE_ID)
     msk_campaign = CampaignFactory(branch=msk_branch, year=now().year, current=True)
     distance_campaign = CampaignFactory(branch=distance_branch, year=now().year, current=True)
+    CampaignCity.objects.create(campaign=msk_campaign)
+    CampaignCity.objects.create(campaign=distance_campaign)
     contest = ContestFactory(campaign=msk_campaign, type=Contest.TYPE_TEST)
     university = UniversityFactory()
     data = {**yds_post_data}
@@ -84,8 +87,8 @@ def test_view_application_form_msk_campaigns(client):
     assert response.status_code == 200
     assert response.context_data["show_form"]
     context = response.context_data["app"]["props"]
-    assert len(context["campaigns"]) == 2
-    campaigns_pk = map(lambda c: c["id"], context["campaigns"])
+    assert len(context["alwaysAllowCampaigns"]) == 2
+    campaigns_pk = map(lambda c: c["campaign_id"], context["alwaysAllowCampaigns"])
     assert {msk_campaign.pk, distance_campaign.pk} == set(campaigns_pk)
 
     data['university'] = university.pk

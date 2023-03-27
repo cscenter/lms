@@ -93,8 +93,9 @@ class ResidenceCityFilter(FilterSet):
     country_id = NumberFilter(lookup_expr="exact", required=False)
 
     ordering = OrderingFilter(
-        fields=[("display_name", "name")],
+        fields=[("order", "order"), ("display_name", "name")],
         field_labels={
+            "order": "Order",
             "display_name": "Display Name",
         },
     )
