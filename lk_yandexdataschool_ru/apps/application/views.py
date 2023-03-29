@@ -61,8 +61,9 @@ class ApplicationFormView(TemplateView):
         if show_form:
             levels_of_education = [{"value": k, "label": str(v).lower()} for k, v in
                                    AcademicDegreeLevels.values.items()]
-
-            yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
+            self.request.session.pop(SESSION_LOGIN_KEY, None)
+            yandex_passport_access = False
+            # yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
             context['app'] = {
                 'props': {
                     'utm': utm,
