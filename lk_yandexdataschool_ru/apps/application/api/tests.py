@@ -241,6 +241,7 @@ yds_post_data = {
     "first_name": "Иван",
     "patronymic": "Иванович",
     "yandex_login": "ivanov",
+    "telegram_username": "pavel_durov",
     "email": "somemail@mail.com",
     "phone": "89991234567",
     "birth_date": "2000-01-01",

@@ -4,6 +4,7 @@ import uuid
 from decimal import Decimal
 from typing import Any, ClassVar, NamedTuple, Optional, Type, Union
 
+from django.utils.functional import cached_property
 from djchoices import DjangoChoices
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
@@ -47,6 +48,7 @@ from files.storage import private_storage
 from grading.api.yandex_contest import Error as YandexContestError
 from grading.api.yandex_contest import RegisterStatus
 from learning.settings import AcademicDegreeLevels
+from lms.settings.base import YDS_SITE_ID
 from notifications.base_models import EmailAddressSuspension
 from users.constants import Roles
 
@@ -604,6 +606,27 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         if not isinstance(self.data, dict):
             return False
         return self.data.get("new_track") is True
+
+    @property
+    def alternative_track_info(self) -> dict:
+        if not isinstance(self.data, dict):
+            return {}
+        return {
+            "Есть ли у вас научные статьи": self.data.get("new_track_scientific_articles"),
+            "Есть ли у вас открытые проекты вашего авторства": self.data.get("new_track_projects"),
+            "Есть ли у вас посты или статьи о технологиях": self.data.get("new_track_tech_articles"),
+            "Расскажите более подробно о каком-нибудь из своих проектов": self.data.get("new_track_project_details"),
+        }
+
+    @property
+    def has_ticket(self) -> bool:
+        if not isinstance(self.data, dict):
+            return False
+        return self.data.get("ticket_access")
+
+    @cached_property
+    def is_yds_applicant(self):
+        return self.campaign.branch.site.id == YDS_SITE_ID
 
     @classmethod
     def get_name_by_status_code(cls, code):

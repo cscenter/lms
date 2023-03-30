@@ -13,7 +13,7 @@ from admission.tasks import register_in_yandex_contest
 from core.models import University as UniversityLegacy
 from learning.settings import AcademicDegreeLevels
 from universities.models import University
-from users.models import PartnerTag
+from users.models import PartnerTag, TELEGRAM_REGEX
 
 from .fields import AliasedChoiceField
 
@@ -221,6 +221,16 @@ class YandexProfileSerializer(serializers.Serializer):
 
 class ApplicationYDSFormSerializer(serializers.ModelSerializer):
     utm = UTMSerializer(required=False, write_only=True)
+    telegram_username = serializers.RegexField(
+        label="Telegram",
+        max_length=32,
+        regex=TELEGRAM_REGEX,
+        help_text="Telegram username without @",
+        error_messages={
+            "invalid": "Telegram username may only contain 5-32 alphanumeric characters or single underscores."
+                       " Should begin only with letter and end with alphanumeric.",
+        },
+    )
     campaign = OpenRegistrationCampaignField(
         label='Отделение',
         error_messages={

@@ -61,7 +61,8 @@ logger = logging.getLogger(__name__)
 
 # Telegram username may only contain alphanumeric characters or
 # single underscores. Should begin only with letter and end with alphanumeric.
-TELEGRAM_USERNAME_VALIDATOR = RegexValidator(regex="^(?!.*__.*)[a-z A-Z]\w{3,30}[a-zA-Z0-9]$")
+TELEGRAM_REGEX = "^(?!.*__.*)[a-z A-Z]\w{3,30}[a-zA-Z0-9]$"
+TELEGRAM_USERNAME_VALIDATOR = RegexValidator(regex=TELEGRAM_REGEX)
 
 # Github username may only contain alphanumeric characters or
 # single hyphens, and cannot begin or end with a hyphen

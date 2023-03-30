@@ -5,8 +5,29 @@
   {% elif field.name == 'internship_workplace' and not applicant_form.has_internship.value %}
   {% elif field.name == 'internship_position' and not applicant_form.has_internship.value %}
   {% else %}
-   <dt>{{ field.label_tag }}</dt>
-   {% if field.name == 'github_login' %}
+   {% if field.name == "experience" %}
+     {% if applicant_form.instance.is_yds_applicant %}
+      <dt>Изучали ли вы раньше машинное обучение/анализ данных?<br>
+        Каким образом? Какие навыки удалось приобрести, какие проекты сделать?</dt>
+     {% endif %}
+   {% elif not applicant_form.instance.is_yds_applicant or field.name not in yds_hide_fields %}<dt>{{ field.label_tag }}</dt>{% endif %}
+    
+   {% if applicant_form.instance.is_yds_applicant and field.name in yds_hide_fields %}
+   {% elif field.name == 'email' %}
+     <dd>
+      <a href="mailto:{{ applicant_form.instance.email }}">{{ applicant_form.instance.email}}</a>
+     </dd>
+   {% elif field.name == 'phone' %}
+     <dd>
+      <a href="tel:{{ applicant_form.instance.phone }}">{{ applicant_form.instance.phone}}</a>
+     </dd>
+   {% elif field.name == 'telegram_username' %}
+     <dd>
+      <a href="https://t.me/{{ applicant_form.instance.telegram_username }}">
+          @{{ applicant_form.instance.telegram_username}}
+      </a>
+     </dd>
+   {% elif field.name == 'github_login' %}
       <dd>{% if field.value %}{{ field.value }}
         <a class="text-muted" target="_blank" href="https://github.com/{{ field.value }}">
           <i class="fa fa-github-alt" aria-hidden="true"></i>
@@ -17,31 +38,27 @@
    {% elif field.name == 'living_place' %}
       <dd>{{ applicant_form.instance.get_living_place_display|default:"<не указано>" }}</dd>
    {% elif field.name == 'university_legacy' %}
-      <dd>С 2022-го используется для хранения названия университета, незарегистрированного в LMS</dd>
+     {% if applicant_form.instance.is_yds_applicant %}
+      <dd>Используется для хранения названия университета, незарегистрированного в LMS</dd>
+     {% endif %}
       <dd>{% if applicant_form.instance.university_other %}{{ applicant_form.instance.university_other }}{% else %}
         {{ applicant_form.instance.university_legacy.name }}{% endif %}</dd>
    {% elif field.name == 'where_did_you_learn' %}
       <dd>{{ field.value }}{% if applicant_form.where_did_you_learn_other.value %}.
         {{ applicant_form.where_did_you_learn_other.value }}{% endif %}</dd>
    {% elif field.name == 'partner' %}
-      <dd>{{ applicant_form.instance.partner }}</dd>
+      {% if field.value is None %}
+        <dd>Нет</dd>
+      {% else %}
+        <dd>{{ applicant_form.instance.partner }}</dd>
+      {% endif %}
    {% elif field.name == 'residence_city' %}
       <dd>{{ applicant_form.instance.residence_city }}</dd>
    {% elif field.name == 'yandex_login' %}
      <dd>{{ applicant_form.instance.yandex_login }}</dd>
    {% elif field.name == 'university' %}
      <dd>{{ applicant_form.instance.university }}</dd>
-   {% elif field.name == 'has_job' %}
-      <dd>
-        {% if field.value %}
-          Да
-        {% elif field.value == None %}
-          Не указано
-        {% else %}
-          Нет
-        {% endif %}
-      </dd>
-   {% elif field.name == 'has_internship' %}
+   {% elif field.name == 'has_job' or field.name == 'has_internship' or field.name == 'is_studying' %}
       <dd>
         {% if field.value %}
           Да
@@ -52,9 +69,17 @@
         {% endif %}
       </dd>
    {% else %}
-      <dd>{% if field.value %}
-        {{ field.value|linebreaks }}
-      {% endif %}</dd>
+      {% if not applicant_form.instance.is_yds_applicant or field.name not in yds_hide_fields%}
+        <dd>{% if field.value is not None and field.value != "" %}
+          {{ field.value|linebreaks }}
+        {% endif %}</dd>
+      {% endif %}
    {% endif %}
   {% endif %}
 {% endspaceless %}{% endfor %}
+{% if applicant_form.instance.is_yds_applicant and applicant.is_alternative_track %}
+  {% for field_name, field_value in applicant_form.instance.alternative_track_info.items %}
+    <dt>{{ field_name }}:</dt>
+    <dd>{{ field_value }}</dd>
+  {% endfor %}
+{% endif %}
