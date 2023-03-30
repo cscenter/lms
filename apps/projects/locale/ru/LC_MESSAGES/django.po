@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-22 11:48+0000\n"
+"POT-Creation-Date: 2023-03-30 01:19+0000\n"
 "PO-Revision-Date: 2022-02-21 15:24+0000\n"
 "Last-Translator: Сергей Жеревчук <pacabest@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,24 +16,26 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Translated-Using: django-rosetta 0.9.8\n"
 
-#: apps/projects/admin.py:104 apps/projects/filters.py:36
+#: apps/projects/admin.py:107 apps/projects/filters.py:36
 msgid "Student"
 msgstr "Студент"
 
-#: apps/projects/admin.py:108 apps/projects/admin.py:126
-#: apps/projects/models.py:548
+#: apps/projects/admin.py:111 apps/projects/admin.py:129
+#: apps/projects/models.py:562
 msgid "Project"
 msgstr "Проект"
 
-#: apps/projects/admin.py:150 apps/projects/models.py:114
-#: apps/projects/models.py:481
+#: apps/projects/admin.py:153 apps/projects/models.py:116
+#: apps/projects/models.py:493
 msgid "Semester"
 msgstr "Семестр"
 
-#: apps/projects/admin.py:162
+#: apps/projects/admin.py:165
 #, fuzzy
 #| msgid "Report file"
 msgid "Report Reviewer"
@@ -43,31 +45,31 @@ msgstr "Файл отчета"
 msgid "Student Projects"
 msgstr "Студенческие проекты"
 
-#: apps/projects/constants.py:11
+#: apps/projects/constants.py:12
 msgid "StudentProject|Practice"
 msgstr "Практика"
 
-#: apps/projects/constants.py:12
+#: apps/projects/constants.py:13
 msgid "StudentProject|Research"
 msgstr "НИР"
 
-#: apps/projects/constants.py:19
+#: apps/projects/constants.py:20
 msgid "ProjectGradeTypes|Not graded"
 msgstr "Без оценки"
 
-#: apps/projects/constants.py:20
+#: apps/projects/constants.py:21
 msgid "ProjectGradeTypes|Unsatisfactory"
 msgstr "Незачёт"
 
-#: apps/projects/constants.py:21
+#: apps/projects/constants.py:22
 msgid "ProjectGradeTypes|Pass"
 msgstr "Зачёт"
 
-#: apps/projects/constants.py:22
+#: apps/projects/constants.py:23
 msgid "ProjectGradeTypes|Good"
 msgstr "Хорошо"
 
-#: apps/projects/constants.py:23
+#: apps/projects/constants.py:24
 msgid "ProjectGradeTypes|Excellent"
 msgstr "Отлично"
 
@@ -75,7 +77,7 @@ msgstr "Отлично"
 msgid "Any"
 msgstr ""
 
-#: apps/projects/filters.py:30 apps/projects/models.py:492
+#: apps/projects/filters.py:30 apps/projects/models.py:504
 msgid "External project"
 msgstr "Внешний проект"
 
@@ -84,12 +86,12 @@ msgid "Supervisor (Last name)"
 msgstr "Руководитель (фамилия)"
 
 #: apps/projects/filters.py:51 apps/projects/filters.py:244
-#: apps/projects/models.py:346
+#: apps/projects/models.py:350
 msgid "Final grade"
 msgstr "Итоговая оценка"
 
 #: apps/projects/filters.py:54 apps/projects/filters.py:237
-#: apps/projects/models.py:125 apps/projects/models.py:488
+#: apps/projects/models.py:127 apps/projects/models.py:500
 msgid "Branch"
 msgstr "Отделение"
 
@@ -97,15 +99,15 @@ msgstr "Отделение"
 msgid "Filter"
 msgstr "Фильтровать"
 
-#: apps/projects/filters.py:240 apps/projects/models.py:532
+#: apps/projects/filters.py:240 apps/projects/models.py:545
 msgid "Participants presentation"
 msgstr "Презентация участников"
 
-#: apps/projects/filters.py:241 apps/projects/models.py:331
+#: apps/projects/filters.py:241 apps/projects/models.py:335
 msgid "Supervisor grade"
 msgstr "Оценка руководителя"
 
-#: apps/projects/filters.py:243 apps/projects/models.py:340
+#: apps/projects/filters.py:243 apps/projects/models.py:344
 msgid "Presentation grade"
 msgstr "Оценка за презентацию"
 
@@ -117,15 +119,15 @@ msgstr "Тип"
 msgid "Report"
 msgstr "Отчет"
 
-#: apps/projects/forms.py:31
+#: apps/projects/forms.py:33
 msgid "Report content"
 msgstr "Текст отчета"
 
-#: apps/projects/forms.py:96
+#: apps/projects/forms.py:98
 msgid "New comment"
 msgstr "Новый комментарий"
 
-#: apps/projects/forms.py:112
+#: apps/projects/forms.py:114
 msgid "Send"
 msgstr "Отправить"
 
@@ -133,367 +135,376 @@ msgstr "Отправить"
 msgid "Either text or file should be non-empty"
 msgstr "Должен быть указан текст комментария или приложен файл."
 
-#: apps/projects/forms.py:158
+#: apps/projects/forms.py:159
 msgid "Text should be non-empty"
 msgstr "Должен быть указан текст комментария."
 
-#: apps/projects/forms.py:182
+#: apps/projects/forms.py:183
 msgid "Complete assessment"
 msgstr "Завершить проверку"
 
-#: apps/projects/forms.py:183 apps/projects/forms.py:261
+#: apps/projects/forms.py:184 apps/projects/forms.py:262
 msgid "Save draft"
 msgstr "Сохранить как черновик"
 
-#: apps/projects/forms.py:260
+#: apps/projects/forms.py:261
 msgid "Complete"
 msgstr "Завершить"
 
-#: apps/projects/forms.py:306
+#: apps/projects/forms.py:307
 msgid "Save"
 msgstr "Сохранить"
 
-#: apps/projects/models.py:107
+#: apps/projects/models.py:109
 msgid "Label"
 msgstr "Метка"
 
-#: apps/projects/models.py:109
+#: apps/projects/models.py:111
 msgid "Helps to distinguish student reports for the project."
 msgstr "Помогает различать отчеты студента для проекта, если их несколько."
 
-#: apps/projects/models.py:117
+#: apps/projects/models.py:119
 msgid "Start On"
 msgstr "Дата начала"
 
-#: apps/projects/models.py:118
+#: apps/projects/models.py:120
 msgid "First day of the report period."
 msgstr "Первый день, когда можно отправить отчет."
 
-#: apps/projects/models.py:120
+#: apps/projects/models.py:122
 msgid "End On"
 msgstr "Дата окончания"
 
-#: apps/projects/models.py:121
+#: apps/projects/models.py:123
 msgid "The last day of the report period."
 msgstr "Последний день отправки отчета."
 
-#: apps/projects/models.py:132 apps/projects/models.py:484
+#: apps/projects/models.py:134 apps/projects/models.py:496
 msgid "StudentProject|Type"
 msgstr "Тип"
 
-#: apps/projects/models.py:137
+#: apps/projects/models.py:139
 msgid "Min score for EXCELLENT"
 msgstr "Балл на Отлично"
 
-#: apps/projects/models.py:140
+#: apps/projects/models.py:142
 msgid "Projects with final score >= this value will be graded as Excellent"
 msgstr ""
 "Если финальный балл по проекту >= указанного значения, то студент получит "
 "оценку \"Отлично\"."
 
-#: apps/projects/models.py:143
+#: apps/projects/models.py:145
 msgid "Min score for GOOD"
 msgstr "Балл на Хорошо"
 
-#: apps/projects/models.py:146
+#: apps/projects/models.py:148
 msgid "Projects with final score in [GOOD; EXCELLENT) will be graded as Good."
 msgstr ""
 "Если финальный балл по проекту в диапазоне [Хорошо; Отлично), то студент "
 "получит оценку \"Хорошо\"."
 
-#: apps/projects/models.py:149
+#: apps/projects/models.py:151
 msgid "Min score for PASS"
 msgstr "Балл на Зачет"
 
-#: apps/projects/models.py:152
+#: apps/projects/models.py:154
 msgid ""
-"Projects with final score in [PASS; GOOD) will be graded as Pass, with score"
-" < PASS as Unsatisfactory."
+"Projects with final score in [PASS; GOOD) will be graded as Pass, with score "
+"< PASS as Unsatisfactory."
 msgstr ""
 "Если финальный балл по проекту в диапазоне [Зачет; Хорошо), то студент "
 "получит оценку \"Зачет\", если ниже указанного значения, то \"Незачет\"."
 
-#: apps/projects/models.py:156
+#: apps/projects/models.py:158
 msgid "Reporting Period"
 msgstr "Отчетный период"
 
-#: apps/projects/models.py:157
+#: apps/projects/models.py:159
 msgid "Reporting Periods"
 msgstr "Отчетные периоды"
 
-#: apps/projects/models.py:333
+#: apps/projects/models.py:337
 msgid "Integer value from -15 to 15"
 msgstr "Целое число в диапазоне от -15 до 15 включительно"
 
-#: apps/projects/models.py:337
+#: apps/projects/models.py:341
 msgid "Review from supervisor"
 msgstr "Отзыв руководителя"
 
-#: apps/projects/models.py:342
+#: apps/projects/models.py:346
 msgid "Integer value from 0 to 10"
 msgstr "Целое число от 0 до 10 включительно"
 
-#: apps/projects/models.py:352
+#: apps/projects/models.py:356
 msgid "Project student"
 msgstr "Участник проекта"
 
-#: apps/projects/models.py:353
+#: apps/projects/models.py:357
 msgid "Project students"
 msgstr "Участники проекта"
 
-#: apps/projects/models.py:398
-#| msgid "All assignments"
+#: apps/projects/models.py:402
 msgid "Assignment|pass"
 msgstr "Удовлетворительно"
 
-#: apps/projects/models.py:414
-msgid "First Name"
-msgstr "Имя"
+#: apps/projects/models.py:407
+msgctxt "Project"
+msgid "Shifted"
+msgstr ""
 
-#: apps/projects/models.py:416
-msgid "Last Name"
-msgstr "Фамилия"
-
-#: apps/projects/models.py:418
-msgid "Patronymic"
-msgstr "Отчество"
-
-#: apps/projects/models.py:422
-msgid "Workplace"
-msgstr "Место работы"
-
-#: apps/projects/models.py:426
-msgid "Gender"
-msgstr "Пол"
-
-#: apps/projects/models.py:431
-msgid "Supervisor"
-msgstr "Руководитель"
-
-#: apps/projects/models.py:432 apps/projects/models.py:518
-msgid "Supervisors"
-msgstr "Руководители"
-
-#: apps/projects/models.py:467
+#: apps/projects/models.py:409
+#, fuzzy
+#| msgid "Canceled"
+msgctxt "Project"
 msgid "Canceled"
 msgstr "Отменен"
 
-#: apps/projects/models.py:468
+#: apps/projects/models.py:426
+msgid "First Name"
+msgstr "Имя"
+
+#: apps/projects/models.py:428
+msgid "Last Name"
+msgstr "Фамилия"
+
+#: apps/projects/models.py:430
+msgid "Patronymic"
+msgstr "Отчество"
+
+#: apps/projects/models.py:434
+msgid "Workplace"
+msgstr "Место работы"
+
+#: apps/projects/models.py:438
+msgid "Gender"
+msgstr "Пол"
+
+#: apps/projects/models.py:443
+msgid "Supervisor"
+msgstr "Руководитель"
+
+#: apps/projects/models.py:444 apps/projects/models.py:530
+msgid "Supervisors"
+msgstr "Руководители"
+
+#: apps/projects/models.py:479
+msgid "Canceled"
+msgstr "Отменен"
+
+#: apps/projects/models.py:480
 msgid "Continued without intermediate results"
 msgstr "Продолжение без промежуточных итогов"
 
-#: apps/projects/models.py:470
+#: apps/projects/models.py:482
 msgid "StudentProject|Name"
 msgstr "Название"
 
-#: apps/projects/models.py:473
+#: apps/projects/models.py:485
 msgid "Continuation of Work"
 msgstr "Продолжение работы"
 
-#: apps/projects/models.py:474
+#: apps/projects/models.py:486
 msgid "Select a project that is the continuation of the current one."
 msgstr "Укажите проект, продолжением которого является текущий."
 
-#: apps/projects/models.py:496
+#: apps/projects/models.py:508
 msgid "StudentProject|Status"
 msgstr "Статус"
 
-#: apps/projects/models.py:501 apps/projects/models.py:638
+#: apps/projects/models.py:513 apps/projects/models.py:652
 msgid "Description"
 msgstr "Описание"
 
-#: apps/projects/models.py:506
+#: apps/projects/models.py:518
 msgid "Students"
 msgstr "Студенты"
 
-#: apps/projects/models.py:510
+#: apps/projects/models.py:522
 msgid "Reviewers"
 msgstr "Проверяющие"
 
-#: apps/projects/models.py:521
+#: apps/projects/models.py:533
 msgid "Supervisor presentation"
 msgstr "Презентация руководителя"
 
-#: apps/projects/models.py:525
+#: apps/projects/models.py:538
 msgid "Link to supervisor presentation"
 msgstr "URL с презентацией руководителя"
 
-#: apps/projects/models.py:528 apps/projects/models.py:539
+#: apps/projects/models.py:541 apps/projects/models.py:553
 msgid "Supported public link to Yandex.Disk only"
 msgstr ""
 "Поддерживаются только публичные ссылки на Яндекс.Диск. Задача на скачивание "
 "слайдов с диска будет проигнорирована, если слайды уже загружены локально."
 
-#: apps/projects/models.py:530
+#: apps/projects/models.py:543
 msgid "SlideShare URL for supervisor presentation"
 msgstr "Slideshare URL с презентацией руководителя"
 
-#: apps/projects/models.py:536
+#: apps/projects/models.py:550
 msgid "Link to participants presentation"
 msgstr "URL с презентацией участников"
 
-#: apps/projects/models.py:541
+#: apps/projects/models.py:555
 msgid "SlideShare URL for participants presentation"
 msgstr "Slideshare URL с презентацией участников"
 
-#: apps/projects/models.py:549
-#| msgid "Project"
+#: apps/projects/models.py:563
 msgid "Projects"
 msgstr "Проекты"
 
-#: apps/projects/models.py:577
+#: apps/projects/models.py:591
 msgid "Yes"
 msgstr "Да"
 
-#: apps/projects/models.py:577
+#: apps/projects/models.py:591
 msgid "No"
 msgstr "Нет"
 
-#: apps/projects/models.py:607
+#: apps/projects/models.py:621
 msgid "New Report"
 msgstr "Новый"
 
-#: apps/projects/models.py:608 apps/projects/models.py:784
-#: apps/projects/models.py:862
+#: apps/projects/models.py:622 apps/projects/models.py:800
+#: apps/projects/models.py:878
 msgid "Review"
 msgstr "Проверка"
 
-#: apps/projects/models.py:609
+#: apps/projects/models.py:623
 msgid "Waiting for final score"
 msgstr "Подведение итогов куратором"
 
-#: apps/projects/models.py:610 apps/projects/models.py:779
+#: apps/projects/models.py:624 apps/projects/models.py:795
 msgid "Completed"
 msgstr "Завершено"
 
-#: apps/projects/models.py:615
+#: apps/projects/models.py:629
 msgid "Poor commit history"
 msgstr ""
 "0 - у студента нет коммитов в репозитории или 1-2 в начале или прямо перед "
 "отчётом"
 
-#: apps/projects/models.py:616
+#: apps/projects/models.py:630
 msgid "Normal activity"
 msgstr "1 - активная жизнь в репозитории"
 
-#: apps/projects/models.py:619
+#: apps/projects/models.py:633
 msgid "Bad report quality and unrelated comments"
 msgstr "0 - отчёт и комментарии к нему написаны плохо"
 
-#: apps/projects/models.py:620
+#: apps/projects/models.py:634
 msgid "Bad report quality, but sensible comments"
 msgstr "1 - отчёт написан плохо, но комментарии полные и разумные"
 
-#: apps/projects/models.py:621
+#: apps/projects/models.py:635
 msgid "Good report quality and sensible comments"
 msgstr "2 - отчёт и комментарии к нему написаны хорошо"
 
-#: apps/projects/models.py:634
+#: apps/projects/models.py:648
 msgid "Status"
 msgstr "Статус"
 
-#: apps/projects/models.py:642
+#: apps/projects/models.py:656
 msgid "Report file"
 msgstr "Файл отчета"
 
-#: apps/projects/models.py:649
+#: apps/projects/models.py:664
 msgid "Student activity in cvs"
 msgstr "Жизнь в репозитории"
 
-#: apps/projects/models.py:656
+#: apps/projects/models.py:671
 msgid "Note for criterion `score_activity`"
 msgstr "Заметка к критерию \"Жизнь в репозитории\""
 
-#: apps/projects/models.py:659
+#: apps/projects/models.py:674
 msgid "Report's quality"
 msgstr "Качество отчета"
 
-#: apps/projects/models.py:666
+#: apps/projects/models.py:681
 msgid "Note for criterion `score_quality`"
 msgstr "Заметка к критерию \"Качество отчета\""
 
-#: apps/projects/models.py:669
+#: apps/projects/models.py:684
 msgid "Final Score"
 msgstr "Финальный балл"
 
-#: apps/projects/models.py:674
+#: apps/projects/models.py:689
 msgid "Final score note"
 msgstr "Итоговый комментарий к отчету"
 
-#: apps/projects/models.py:681 apps/projects/models.py:682
+#: apps/projects/models.py:696 apps/projects/models.py:697
 msgid "Reports"
 msgstr "Отчеты"
 
-#: apps/projects/models.py:769 apps/projects/roles.py:12
+#: apps/projects/models.py:785 apps/projects/roles.py:16
 msgid "Project reviewer"
 msgstr ""
 
-#: apps/projects/models.py:781
+#: apps/projects/models.py:797
 msgid "Check if you already completed the assessment."
 msgstr "Отметьте, если вы закончили проверку отчёта."
 
-#: apps/projects/models.py:785
+#: apps/projects/models.py:801
 msgid "Reviews"
 msgstr "Проверка отчетов"
 
-#: apps/projects/models.py:822
+#: apps/projects/models.py:838
 msgid "0 - Does not understand the task at all"
 msgstr "0 - совсем не понимает задачу"
 
-#: apps/projects/models.py:823
+#: apps/projects/models.py:839
 msgid "1 - Understands, but very superficial"
 msgstr "1 - понимает, но очень поверхностно"
 
-#: apps/projects/models.py:824
+#: apps/projects/models.py:840
 msgid "2 - Understands everything"
 msgstr "2 - всё понимает"
 
-#: apps/projects/models.py:828
+#: apps/projects/models.py:844
 msgid "0 - Does not understand"
 msgstr "0 - не понимает"
 
-#: apps/projects/models.py:829
+#: apps/projects/models.py:845
 msgid "1 - Writing something about the usefulness"
 msgstr "1 - ни то, ни сё, но что-то про полезность пишет"
 
-#: apps/projects/models.py:830
+#: apps/projects/models.py:846
 msgid "2 - Understands and explains"
 msgstr "2 - понимает и рассказывает"
 
-#: apps/projects/models.py:834
+#: apps/projects/models.py:850
 msgid "0 - Understand only theory, or even less"
 msgstr "0 - разобрана только теория или даже меньше"
 
-#: apps/projects/models.py:835
+#: apps/projects/models.py:851
 msgid "1 - Some progress, but not enough"
 msgstr ""
 "1 - что-то сделано, но кажется, что за это время можно было бы и больше"
 
-#: apps/projects/models.py:836
+#: apps/projects/models.py:852
 msgid "2 - The normal rate of work"
 msgstr "2 - работа идёт в разумном темпе"
 
-#: apps/projects/models.py:840
+#: apps/projects/models.py:856
 msgid "0 - Problems not mentioned in the report"
 msgstr "0 - никакие проблемы и их решения не указаны в отчёте"
 
-#: apps/projects/models.py:841
+#: apps/projects/models.py:857
 msgid "1 - Problems are mentioned without any details"
 msgstr "1- проблемы указаны, но как их решили и решили ли, непонятно"
 
-#: apps/projects/models.py:842
+#: apps/projects/models.py:858
 msgid "2 - Problems are mentioned and explained how they been solved"
 msgstr ""
-"2 - доступно написано про возникшие трудности и про то, как с ними "
-"справились"
+"2 - доступно написано про возникшие трудности и про то, как с ними справились"
 
-#: apps/projects/models.py:846
+#: apps/projects/models.py:862
 msgid "0 - Listed, but not explained why."
 msgstr ""
 "0 - студент не может объяснить, почему выбрал именно эти технологии или как "
 "его код встраивается в готовый"
 
-#: apps/projects/models.py:847
+#: apps/projects/models.py:863
 msgid ""
 "1 - The student does not understand about everything and does not try to "
 "understand, but knows something"
@@ -501,20 +512,19 @@ msgstr ""
 "1 - студент не про всё понимает и не пытается понять, но про что-то знает, "
 "зачем или как"
 
-#: apps/projects/models.py:849
+#: apps/projects/models.py:865
 msgid "2 - Understands why choose one or the other technology"
 msgstr ""
 "2 - студент понимает, почему выбраны такие технологии или как устроена "
 "интеграция его наработок в существующий проект"
 
-#: apps/projects/models.py:853
+#: apps/projects/models.py:869
 msgid ""
 "0 - Much less than what has already been done, or the student does not "
 "understand them"
-msgstr ""
-"0 - сильно меньше, чем то, что уже сделано, или студент их не понимает"
+msgstr "0 - сильно меньше, чем то, что уже сделано, или студент их не понимает"
 
-#: apps/projects/models.py:855
+#: apps/projects/models.py:871
 msgid ""
 "1 - It seems to have plans of normal size, but does not understand what to "
 "do."
@@ -522,136 +532,136 @@ msgstr ""
 "1 - вроде планы есть нормального размера, но не до конца понимает, что "
 "именно нужно сделать"
 
-#: apps/projects/models.py:857
+#: apps/projects/models.py:873
 msgid "2 - All right with them"
 msgstr "2 - всё в порядке с ними"
 
-#: apps/projects/models.py:867
+#: apps/projects/models.py:883
 msgid "The global task for term"
 msgstr "Глобальная задача на семестр"
 
-#: apps/projects/models.py:873
+#: apps/projects/models.py:889
 msgid "Possible uses and scenarios"
 msgstr "Возможные способы и сценарии использования"
 
-#: apps/projects/models.py:879
+#: apps/projects/models.py:895
 msgid "What has been done since the start of the project."
 msgstr "Что было сделано с момента старта работы над проектом"
 
-#: apps/projects/models.py:885
+#: apps/projects/models.py:901
 msgid "What problems have arisen in the process."
 msgstr "Какие проблемы возникли при работе"
 
-#: apps/projects/models.py:891
+#: apps/projects/models.py:907
 msgid ""
 "The choice of technologies or method of integration with the existing "
 "development"
 msgstr "Выбор технологий или способ интеграции с существующей разработкой"
 
-#: apps/projects/models.py:898
+#: apps/projects/models.py:914
 msgid "Future plan"
 msgstr "Планы до конца семестра"
 
-#: apps/projects/models.py:903
+#: apps/projects/models.py:919
 msgid "Note for criterion #1"
 msgstr "Заметка к критерию \"Глобальная задача на семестр\""
 
-#: apps/projects/models.py:907
+#: apps/projects/models.py:923
 msgid "Note for criterion #2"
 msgstr "Заметка к критерию \"Возможные способы и сценарии использования\""
 
-#: apps/projects/models.py:911
+#: apps/projects/models.py:927
 msgid "Note for criterion #3"
 msgstr ""
 "Заметка к критерию \"Что было сделано с момента старта работы над проектом\""
 
-#: apps/projects/models.py:915
+#: apps/projects/models.py:931
 msgid "Note for criterion #4"
 msgstr "Заметка к критерию \"Какие проблемы возникли при работе\""
 
-#: apps/projects/models.py:919
+#: apps/projects/models.py:935
 msgid "Note for criterion #5"
 msgstr ""
 "Заметка к критерию \"Выбор технологий или способ интеграции с существующей "
 "разработкой\""
 
-#: apps/projects/models.py:923
+#: apps/projects/models.py:939
 msgid "Note for criterion #6"
 msgstr "Заметка к критерию \"Планы до конца семестра\""
 
-#: apps/projects/models.py:928 apps/projects/models.py:929
+#: apps/projects/models.py:944 apps/projects/models.py:945
 msgid "Practice Criteria"
 msgstr "Оценка практик"
 
-#: apps/projects/models.py:946
+#: apps/projects/models.py:962
 msgid "ReportComment|text"
 msgstr "Текст комментария"
 
-#: apps/projects/models.py:947
+#: apps/projects/models.py:963
 msgid "LaTeX+Markdown is enabled"
 msgstr "Доступна разметка LaTeX+Markdown"
 
-#: apps/projects/models.py:951
+#: apps/projects/models.py:967
 msgid "Author"
 msgstr "Автор"
 
-#: apps/projects/models.py:960
+#: apps/projects/models.py:977
 msgid "Report comment"
 msgstr "Комментарий к отчету"
 
-#: apps/projects/models.py:961
+#: apps/projects/models.py:978
 msgid "Report comments"
 msgstr "Комментарии к отчету"
 
-#: apps/projects/roles.py:18
+#: apps/projects/roles.py:22
 msgid "Curator of projects"
 msgstr "Куратор [Проекты]"
 
-#: apps/projects/views.py:269
+#: apps/projects/views.py:271
 msgid "Report successfully has been sent"
 msgstr "Отчет успешно отправлен."
 
-#: apps/projects/views.py:319
+#: apps/projects/views.py:321
 msgid "Данные успешно сохранены"
 msgstr "Данные успешно сохранены"
 
-#: apps/projects/views.py:384
+#: apps/projects/views.py:386
 msgid "You successfully enrolled on the project"
 msgstr "Вы успешно подписаны на проект."
 
-#: apps/projects/views.py:446 apps/projects/views.py:657
+#: apps/projects/views.py:448 apps/projects/views.py:659
 msgid "Data not saved. Fix errors."
 msgstr "Данные не сохранены. Исправьте ошибки."
 
-#: apps/projects/views.py:551
+#: apps/projects/views.py:553
 msgid "Comment successfully added."
 msgstr "Комментарий к отчету успешно добавлен."
 
-#: apps/projects/views.py:651
+#: apps/projects/views.py:653
 msgid "The draft successfully saved."
 msgstr "Черновик успешно сохранён."
 
-#: apps/projects/views.py:653
+#: apps/projects/views.py:655
 msgid "The review successfully saved."
 msgstr "Проверка отчёта успешно завершена."
 
-#: apps/projects/views.py:713
+#: apps/projects/views.py:715
 msgid "Report was successfully updated."
 msgstr "Отчет успешно обновлён."
 
-#: apps/projects/views.py:717
+#: apps/projects/views.py:719
 msgid "Data not saved. Check errors."
 msgstr "Данные не сохранены. Проверьте ошибки."
 
-#: apps/projects/views.py:738
+#: apps/projects/views.py:740
 msgid "Status was successfully updated."
 msgstr "Статус отчета успешно обновлён."
 
-#: apps/projects/views.py:811
+#: apps/projects/views.py:813
 msgid "Grades successfully updated."
 msgstr "Баллы успешно обновлены"
 
-#: apps/projects/views.py:819
+#: apps/projects/views.py:821
 msgid "The report results are summed up successfully."
 msgstr "Итоговый комментарий сохранён успешно."
 
@@ -815,8 +825,8 @@ msgstr "Итоговый комментарий сохранён успешно.
 #~ msgstr "Текст"
 
 #~ msgid ""
-#~ "First {n_par} paragraphs or anything before {marker} will serve as excerpt; "
-#~ "LaTeX+Markdown is enabled"
+#~ "First {n_par} paragraphs or anything before {marker} will serve as "
+#~ "excerpt; LaTeX+Markdown is enabled"
 #~ msgstr ""
 #~ "Первые {n_par} параграфов или всё до {marker} будут выдержкой; доступны "
 #~ "LaTeX и Markdown"

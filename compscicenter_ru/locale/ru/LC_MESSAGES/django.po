@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-08 17:45+0000\n"
+"POT-Creation-Date: 2023-03-30 01:19+0000\n"
 "PO-Revision-Date: 2020-02-03 16:52+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,11 +21,11 @@ msgstr ""
 "%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.9.3\n"
 
-#: compscicenter_ru/api/views.py:149
+#: compscicenter_ru/api/views.py:101
 msgid "Saint Petersburg"
 msgstr "Санкт-Петербург"
 
-#: compscicenter_ru/api/views.py:150
+#: compscicenter_ru/api/views.py:102
 msgid "Novosibirsk"
 msgstr "Новосибирск"
 
@@ -326,13 +326,9 @@ msgstr "Преподаватели"
 msgid "Lectures List"
 msgstr "Список лекций"
 
-#: compscicenter_ru/jinja2/compscicenter_ru/layouts/base.html:66
+#: compscicenter_ru/jinja2/compscicenter_ru/layouts/base.html:78
 msgid "Privacy&nbsp;Policy"
 msgstr "Конфиденциальность"
-
-#: compscicenter_ru/jinja2/compscicenter_ru/layouts/base.html:72
-msgid "Computer Science Center on Facebook"
-msgstr ""
 
 #: compscicenter_ru/lms_menu.py:10 compscicenter_ru/menus.py:20
 msgctxt "menu"
@@ -344,7 +340,7 @@ msgctxt "menu"
 msgid "Обучение"
 msgstr ""
 
-#: compscicenter_ru/lms_menu.py:22 compscicenter_ru/lms_menu.py:41
+#: compscicenter_ru/lms_menu.py:22
 msgctxt "menu"
 msgid "Задания"
 msgstr ""
@@ -369,7 +365,7 @@ msgctxt "menu"
 msgid "Библиотека"
 msgstr ""
 
-#: compscicenter_ru/lms_menu.py:27 compscicenter_ru/lms_menu.py:111
+#: compscicenter_ru/lms_menu.py:27 compscicenter_ru/lms_menu.py:113
 msgctxt "menu"
 msgid "Полезное"
 msgstr ""
@@ -387,6 +383,11 @@ msgstr ""
 #: compscicenter_ru/lms_menu.py:36
 msgctxt "menu"
 msgid "Преподавание"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:41
+msgctxt "menu"
+msgid "Очередь проверки"
 msgstr ""
 
 #: compscicenter_ru/lms_menu.py:50
@@ -464,12 +465,12 @@ msgctxt "menu"
 msgid "Файлы"
 msgstr ""
 
-#: compscicenter_ru/lms_menu.py:112
+#: compscicenter_ru/lms_menu.py:114
 msgctxt "menu"
 msgid "Фейсбук"
 msgstr ""
 
-#: compscicenter_ru/lms_menu.py:113
+#: compscicenter_ru/lms_menu.py:115
 msgctxt "menu"
 msgid "Пересечения"
 msgstr ""
@@ -549,39 +550,39 @@ msgctxt "menu"
 msgid "History"
 msgstr "История"
 
-#: compscicenter_ru/views.py:408
+#: compscicenter_ru/views.py:380
 msgid "Course"
 msgstr "Курс"
 
-#: compscicenter_ru/views.py:409
+#: compscicenter_ru/views.py:381
 msgid "Lecture"
 msgstr "Лекция"
 
-#: compscicenter_ru/views.py:617
+#: compscicenter_ru/views.py:590
 msgid "Autumn|adjective"
 msgstr "Осенний"
 
-#: compscicenter_ru/views.py:618
+#: compscicenter_ru/views.py:591
 msgid "Spring|adjective"
 msgstr "Весенний"
 
-#: compscicenter_ru/views.py:675
+#: compscicenter_ru/views.py:648
 msgid "About the Course"
 msgstr "О курсе"
 
-#: compscicenter_ru/views.py:679
+#: compscicenter_ru/views.py:652
 msgid "Syllabus"
 msgstr "Программа"
 
-#: compscicenter_ru/views.py:686
+#: compscicenter_ru/views.py:659
 msgid "Reads lectures"
 msgstr "Читает лекции"
 
-#: compscicenter_ru/views.py:687
+#: compscicenter_ru/views.py:660
 msgid "Checks assignments"
 msgstr "Проверяет задания"
 
-#: compscicenter_ru/views.py:688
+#: compscicenter_ru/views.py:661
 msgid "Leads seminars"
 msgstr "Ведёт семинары"
 

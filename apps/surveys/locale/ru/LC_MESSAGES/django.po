@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-31 16:26+0000\n"
+"POT-Creation-Date: 2023-03-30 01:19+0000\n"
 "PO-Revision-Date: 2019-10-31 16:30+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,18 +16,24 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Translated-Using: django-rosetta 0.9.3\n"
 
-#: apps/surveys/admin.py:58 apps/surveys/models.py:264
+#: apps/surveys/admin.py:66 apps/surveys/models.py:255
 msgid "Expires on"
 msgstr "Истекает"
 
-#: apps/surveys/admin.py:77 apps/surveys/models.py:48
+#: apps/surveys/admin.py:81 apps/surveys/models.py:48
 msgid "Status"
 msgstr "Статус"
 
-#: apps/surveys/admin.py:87
+#: apps/surveys/admin.py:85 apps/surveys/models.py:62
+msgid "Form"
+msgstr "Форма"
+
+#: apps/surveys/admin.py:101
 msgid "Export"
 msgstr ""
 
@@ -35,72 +41,72 @@ msgstr ""
 msgid "Surveys"
 msgstr "Опросы"
 
-#: apps/surveys/constants.py:14
+#: apps/surveys/constants.py:16
 msgid "Draft"
 msgstr "Черновик"
 
-#: apps/surveys/constants.py:15
+#: apps/surveys/constants.py:17
 msgid "Published"
 msgstr "Опубликовано"
 
-#: apps/surveys/constants.py:16
+#: apps/surveys/constants.py:18
 msgid "Template"
 msgstr "Шаблон"
 
-#: apps/surveys/constants.py:45
+#: apps/surveys/constants.py:47
 msgid "Single line text"
 msgstr "Одна строка текста"
 
-#: apps/surveys/constants.py:46
+#: apps/surveys/constants.py:48
 msgid "Multi line text"
 msgstr "Несколько строк текста"
 
-#: apps/surveys/constants.py:47
+#: apps/surveys/constants.py:49
 msgid "Email"
 msgstr "Email"
 
-#: apps/surveys/constants.py:48
+#: apps/surveys/constants.py:50
 msgid "Number"
 msgstr "Число"
 
-#: apps/surveys/constants.py:49
+#: apps/surveys/constants.py:51
 msgid "URL"
 msgstr "URL"
 
-#: apps/surveys/constants.py:50
+#: apps/surveys/constants.py:52
 msgid "Check box"
 msgstr "Чекбокс"
 
-#: apps/surveys/constants.py:51
+#: apps/surveys/constants.py:53
 msgid "Check boxes"
 msgstr "Чекбоксы"
 
-#: apps/surveys/constants.py:52
+#: apps/surveys/constants.py:54
 msgid "Check boxes with textarea"
 msgstr "Чекбоксы с полем комментария"
 
-#: apps/surveys/constants.py:53
+#: apps/surveys/constants.py:55
 msgid "Drop down"
 msgstr "Выпадающий список"
 
-#: apps/surveys/constants.py:54
+#: apps/surveys/constants.py:56
 msgid "Multi select"
 msgstr "Список со множественным выборов"
 
-#: apps/surveys/constants.py:55
+#: apps/surveys/constants.py:57
 msgid "Radio buttons"
 msgstr "Радио-кнопки"
 
-#: apps/surveys/constants.py:56
+#: apps/surveys/constants.py:58
 msgid "Date"
 msgstr "Дата"
 
-#: apps/surveys/constants.py:57
+#: apps/surveys/constants.py:59
 msgid "Date/time"
 msgstr "Дата/Время"
 
 #: apps/surveys/models.py:40 apps/surveys/models.py:88
-#: apps/surveys/models.py:159 apps/surveys/models.py:184
+#: apps/surveys/models.py:163 apps/surveys/models.py:188
 msgid "created"
 msgstr "создано"
 
@@ -124,10 +130,6 @@ msgstr ""
 msgid "Shows this message after submitting form."
 msgstr "Показать это сообщение после успешной отправки формы"
 
-#: apps/surveys/models.py:62
-msgid "Form"
-msgstr "Форма"
-
 #: apps/surveys/models.py:63
 msgid "Forms"
 msgstr "Формы"
@@ -140,7 +142,7 @@ msgstr "Скрытый"
 msgid "Visible"
 msgstr "Видимый"
 
-#: apps/surveys/models.py:91 apps/surveys/models.py:163
+#: apps/surveys/models.py:91 apps/surveys/models.py:167
 msgid "Label"
 msgstr "Заголовок"
 
@@ -152,7 +154,7 @@ msgstr "Показать заголовок"
 msgid "Input Name"
 msgstr ""
 
-#: apps/surveys/models.py:94 apps/surveys/models.py:162
+#: apps/surveys/models.py:94 apps/surveys/models.py:166
 msgid "Order"
 msgstr "Сортировка"
 
@@ -169,119 +171,127 @@ msgid "Placeholder"
 msgstr "Placeholder"
 
 #: apps/surveys/models.py:109
-msgid "CSS classes"
+#, fuzzy
+#| msgid "CSS classes"
+msgid "Field CSS classes"
 msgstr "CSS классы"
 
 #: apps/surveys/models.py:113
+#, fuzzy
+#| msgid "CSS classes"
+msgid "Widget CSS classes"
+msgstr "CSS классы"
+
+#: apps/surveys/models.py:117
 msgid "Visibility"
 msgstr "Видимость"
 
-#: apps/surveys/models.py:117
+#: apps/surveys/models.py:121
 msgid "Help Text"
 msgstr "Подсказка"
 
-#: apps/surveys/models.py:122
+#: apps/surveys/models.py:126
 msgid "Error Message"
 msgstr "Сообщение об ошибке валидации"
 
-#: apps/surveys/models.py:127 apps/surveys/models.py:168
+#: apps/surveys/models.py:131 apps/surveys/models.py:172
 msgid "Free Answer"
 msgstr "Свободный ответ"
 
-#: apps/surveys/models.py:133
+#: apps/surveys/models.py:137
 msgid "Field"
 msgstr "Поле"
 
-#: apps/surveys/models.py:134
+#: apps/surveys/models.py:138
 msgid "Fields"
 msgstr "Поля"
 
-#: apps/surveys/models.py:164
+#: apps/surveys/models.py:168
 msgid "Value"
 msgstr "Значение"
 
-#: apps/surveys/models.py:166
+#: apps/surveys/models.py:170
 msgid "Default"
 msgstr "По-умолчанию"
 
-#: apps/surveys/models.py:169
+#: apps/surveys/models.py:173
 msgid "Shows additional input for free answer if user selected this variant."
 msgstr "Показать дополнительное поле ответа, если выбран этот вариант"
 
-#: apps/surveys/models.py:174
+#: apps/surveys/models.py:178
 msgid "Field Choice"
 msgstr "Вариант ответа"
 
-#: apps/surveys/models.py:175
+#: apps/surveys/models.py:179
 msgid "Field Choices"
 msgstr "Варианты ответа"
 
-#: apps/surveys/models.py:189
+#: apps/surveys/models.py:193
 msgid "Form Submission"
 msgstr "Отзыв"
 
-#: apps/surveys/models.py:190
+#: apps/surveys/models.py:194
 msgid "Form Submissions"
 msgstr "Отзывы"
 
-#: apps/surveys/models.py:198
+#: apps/surveys/models.py:202
 msgid "Is Choice"
 msgstr ""
 
-#: apps/surveys/models.py:199
+#: apps/surveys/models.py:203
 msgid "Meta"
 msgstr ""
 
-#: apps/surveys/models.py:202
+#: apps/surveys/models.py:206
 msgid "Form Submission Entry"
 msgstr "Поле отзыва"
 
-#: apps/surveys/models.py:203
+#: apps/surveys/models.py:207
 msgid "Form Submission Entries"
 msgstr "Поля отзыва"
 
-#: apps/surveys/models.py:248
+#: apps/surveys/models.py:240
 msgid "Middle"
 msgstr "Промежуточный"
 
-#: apps/surveys/models.py:249
+#: apps/surveys/models.py:241
 msgid "Final"
 msgstr "Финальный"
 
-#: apps/surveys/models.py:256
+#: apps/surveys/models.py:248
 msgid "Type"
 msgstr "Тип"
 
-#: apps/surveys/models.py:265
+#: apps/surveys/models.py:256
 msgid ""
 "With published selected, won't be shown after this time. Datetime should be "
 "specified in the timezone of the root course branch. Students will see "
 "deadline in MSK timezone"
 msgstr ""
 "Закрыть возможность заполнения опубликованной формы начиная с указанной "
-"даты. Указывается локальное время для главного отделения курса. Опрашиваемые"
-" увидят дедлайн в часовом поясе UTC+3 (мск)"
+"даты. Указывается локальное время для главного отделения курса. Опрашиваемые "
+"увидят дедлайн в часовом поясе UTC+3 (мск)"
 
-#: apps/surveys/models.py:271
+#: apps/surveys/models.py:262
 msgid ""
 "Students will receive notification based on this template after form "
 "publication"
 msgstr ""
 "Студенты получат уведомления после публикации формы, если указан шаблон"
 
-#: apps/surveys/models.py:277
+#: apps/surveys/models.py:268
 msgid "Course Survey"
 msgstr "Опрос по курсу"
 
-#: apps/surveys/models.py:278
+#: apps/surveys/models.py:269
 msgid "Course Surveys"
 msgstr "Опросы по курсу"
 
-#: apps/surveys/models.py:356
+#: apps/surveys/models.py:347
 msgid "Conditional Logic"
 msgstr ""
 
-#: apps/surveys/models.py:357
+#: apps/surveys/models.py:348
 msgid "Array of dictionaries with logic rules"
 msgstr ""
 
@@ -293,7 +303,8 @@ msgstr ""
 
 #~ msgid "With published selected, won't be shown after this time."
 #~ msgstr ""
-#~ "Закрыть возможность заполнения опубликованной формы начиная с указанной даты"
+#~ "Закрыть возможность заполнения опубликованной формы начиная с указанной "
+#~ "даты"
 
 #~ msgid "City"
 #~ msgstr "Город"
