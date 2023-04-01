@@ -559,7 +559,6 @@ class ApplicantDetailView(InterviewerOnlyMixin, TemplateResponseMixin, BaseCreat
             'preferred_study_programs_se_note',
             'preferred_study_programs_cs_note',
             'your_future_plans',
-            ''
         ]
         if "form" not in kwargs:
             invitation = InterviewInvitation.objects.for_applicant(applicant)
