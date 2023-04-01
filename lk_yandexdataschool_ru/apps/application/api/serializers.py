@@ -458,7 +458,12 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         residence_city = attrs.get('residence_city')
         campaign = attrs.get('campaign')
         rule_exists = CampaignCity.objects.filter(city=residence_city, campaign=campaign).exists()
-        strict_rules_exists = CampaignCity.objects.filter(city__isnull=False, campaign=campaign).exists()
-        if not rule_exists or (residence_city is None and strict_rules_exists):
-            raise serializers.ValidationError(f"Campaign {campaign} is not allowed in {residence_city} city.")
-        return attrs
+        if rule_exists:
+            return attrs
+        if residence_city:
+            common_rule_exist = CampaignCity.objects.filter(city__isnull=True, campaign=campaign).exists()
+            strict_rule_exists = CampaignCity.objects.filter(city=residence_city).exists()
+            if common_rule_exist and not strict_rule_exists:
+                return attrs
+        raise serializers.ValidationError(f"Campaign {campaign} is not allowed in {residence_city} city.")
+
