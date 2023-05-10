@@ -28,7 +28,7 @@ class Command(CurrentCampaignMixin, BaseCommand):
 
         # Collect map "yandex_login -> participant_id" from monitor
         participants = {}
-        campaign = Campaign.objects.filter(id__in=campaigns).get()
+        campaign = Campaign.objects.filter(id__in=[c.id for c in campaigns]).get()
 
         api = YandexContestAPI(access_token=campaign.access_token)
         for contest in campaign.contests.filter(type=Contest.TYPE_TEST).all():

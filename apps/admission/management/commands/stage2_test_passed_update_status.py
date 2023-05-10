@@ -1,9 +1,12 @@
+from decimal import Decimal
+
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 
 from admission.models import Applicant
 
 from ._utils import CurrentCampaignMixin, validate_campaign_passing_score
+from ...constants import ApplicantStatuses
 
 
 class Command(CurrentCampaignMixin, BaseCommand):
@@ -12,22 +15,54 @@ class Command(CurrentCampaignMixin, BaseCommand):
     in the test: score >= passing_score
     """
 
-    def handle(self, *args, **options):
-        campaigns = self.get_current_campaigns(options, branch_is_required=False)
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        parser.add_argument(
+            "--passing_score",
+            type=Decimal,
+            required=True,
+            help="Applicant with score: "
+                 "passing_score <= score < cheater_score will be updated to PERMIT_TO_EXAM status",
+        )
+        parser.add_argument(
+            "--cheater_score",
+            type=int,
+            required=True,
+            dest='cheater_score',
+            help="Users with a score >= cheater_score will have CHEATER status.",
+        )
+        parser.add_argument(
+            "--new_track",
+            action="store_true",
+            default=False,
+            dest="new_track",
+            help="Update statuses for 'new track' applicants."
+        )
 
+    def handle(self, *args, **options):
+        passing_score = options['passing_score']
+        cheater_score = options.get('cheater_score')
+        new_track = options['new_track']
+        campaigns = self.get_current_campaigns(options, branch_is_required=True)
         for campaign in campaigns:
             total_applicants = Applicant.objects.filter(campaign=campaign).count()
             msg = f"{campaign} ({total_applicants} applicants)"
             self.stdout.write(msg)
-            try:
-                validate_campaign_passing_score(campaign)
-            except ValidationError as e:
-                self.stdout.write(f"{e.message} Skip")
-                continue
-
+            filters = {
+                "campaign": campaign,
+                "online_test__score__gte": passing_score,
+                "data__new_track": new_track,
+            }
+            if cheater_score is not None:
+                if cheater_score <= passing_score:
+                    self.stdout.write("Error: passing_score should be less than cheater_score.")
+                    return
+                filters['online_test__score__lt'] = cheater_score
             applicants = Applicant.objects.filter(
-                campaign=campaign,
-                online_test__score__gte=campaign.online_test_passing_score,
+                **filters
+            ).exclude(
+                # bonus from past admission campaign
+                status=ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED
             ).values(
                 "pk",
                 "online_test__score",

@@ -15,30 +15,43 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
 
     TEMPLATE_PATTERN = "admission-{year}-{branch_code}-testing-fail"
 
-    def handle(self, *args, **options):
-        campaigns = self.get_current_campaigns(options)
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        parser.add_argument(
+            "--send_emails",
+            action="store_true",
+            default=False,
+            dest="send_emails",
+            help="Run email sending."
+        )
+        parser.add_argument(
+            "--applicant_id",
+            dest="applicant_id",
+            help="Send email only for applicant.id == applicant_id"
+        )
 
-        template_name_pattern = options["template_pattern"]
-        self.validate_templates(campaigns, [template_name_pattern])
+    def handle(self, *args, **options):
+        send_emails = options.get('send_emails')
+        applicant_id = options.get('applicant_id')
+        campaigns = self.get_current_campaigns(options)
 
         for campaign in campaigns:
             self.stdout.write(str(campaign))
-            testing_passing_score = campaign.online_test_passing_score
-            if not testing_passing_score:
-                self.stdout.write(
-                    f"Passing score for campaign '{campaign}' must be non zero. Skip"
-                )
-                continue
-
-            template_name = self.get_template_name(campaign, template_name_pattern)
-            template = get_email_template(template_name)
 
             email_from = get_email_from(campaign)
 
+            filters = {
+                "campaign": campaign,
+                "status__in": [Applicant.REJECTED_BY_TEST, Applicant.REJECTED_BY_CHEATING],
+            }
+            if applicant_id:
+                filters["id"] = applicant_id
             applicants = Applicant.objects.filter(
-                campaign_id=campaign.pk, status=Applicant.REJECTED_BY_TEST
+                **filters
             ).values(
                 "pk",
+                "first_name",
+                "status",
                 "online_test__score",
                 "online_test__yandex_contest_id",
                 "yandex_login",
@@ -53,29 +66,41 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                     if a["online_test__score"] is None
                     else int(a["online_test__score"])
                 )
-                if score >= testing_passing_score:
-                    msg = f"\tWARN Applicant {a['pk']} has passing score >= campaign passing score."
-                    self.stdout.write(msg)
 
                 recipients = [a["email"]]
+
+                year = campaigns[0].year
+                if a['status'] == Applicant.REJECTED_BY_TEST:
+                    template_name = f"shad-admission-{year}-testing-failed"
+                elif a['status'] == Applicant.REJECTED_BY_CHEATING:
+                    template_name = f"shad-admission-{year}-cheater-testing-failed"
+                else:
+                    raise NotImplementedError(f"Unexpected applicant status: {a.status}")
+                template = get_email_template(template_name)
+
                 if not Email.objects.filter(to=recipients, template=template).exists():
                     context = {
+                        "FIRST_NAME": a["first_name"],
                         "YANDEX_LOGIN": a["yandex_login"],
                         "TEST_SCORE": score,
                         "TEST_CONTEST_ID": a["online_test__yandex_contest_id"],
                     }
-                    mail.send(
-                        recipients,
-                        sender=email_from,
-                        template=template,
-                        context=context,
-                        # If emails rendered on delivery, they will store
-                        # value of the template id. It makes `exists`
-                        # method above works correctly.
-                        render_on_delivery=True,
-                        backend="ses",
-                    )
-                    generated += 1
+                    if send_emails:
+                        mail.send(
+                            recipients,
+                            sender=email_from,
+                            template=template,
+                            context=context,
+                            # If emails rendered on delivery, they will store
+                            # value of the template id. It makes `exists`
+                            # method above works correctly.
+                            render_on_delivery=True,
+                            backend="ses",
+                        )
+                        generated += 1
+                    else:
+                        print(recipients[0], template)
             self.stdout.write(f"    total: {total}")
             self.stdout.write(f"    updated: {generated}")
+            self.stdout.write(f"    is sent: {send_emails}")
         self.stdout.write("Done")
