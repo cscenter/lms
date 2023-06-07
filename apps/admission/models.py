@@ -261,6 +261,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     REJECTED_BY_TEST = ApplicantStatuses.REJECTED_BY_TEST
     PERMIT_TO_EXAM = ApplicantStatuses.PERMIT_TO_EXAM
     REJECTED_BY_EXAM = ApplicantStatuses.REJECTED_BY_EXAM
+    REJECTED_BY_EXAM_CHEATING = ApplicantStatuses.REJECTED_BY_EXAM_CHEATING
     REJECTED_BY_CHEATING = ApplicantStatuses.REJECTED_BY_CHEATING
     # TODO: rename interview codes here and in DB. Replace values type?
     INTERVIEW_TOBE_SCHEDULED = (
