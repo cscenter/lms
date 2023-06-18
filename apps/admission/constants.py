@@ -19,6 +19,7 @@ class ApplicantStatuses(DjangoChoices):
     REJECTED_BY_TEST = C("rejected_test", _("Rejected by test"))
     PERMIT_TO_EXAM = C("permit_to_exam", _("Permitted to the exam"))
     REJECTED_BY_EXAM = C("rejected_exam", _("Rejected by exam"))
+    REJECTED_BY_EXAM_CHEATING = C("reject_exam_cheater", _("Rejected by exam cheating"))
     REJECTED_BY_CHEATING = C("rejected_cheating", _("Cheating"))
     PENDING = C("pending", _("Pending"))
     # TODO: rename interview codes here and in DB.
