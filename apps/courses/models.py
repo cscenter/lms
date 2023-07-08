@@ -476,9 +476,10 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         return reverse(route_name, kwargs=url_kwargs, **options)
 
     def build_absolute_uri(self, site: Optional[Site] = None, is_secure: bool = True):
-        # Use django_reverse because get_absolute_url returns url with scheme and domain on CSC site.
-        url = django_reverse('courses:course_detail', kwargs=self.url_kwargs,
-                             urlconf='lms.urls')
+        # TODO: this is hotfix!!! IDK why it returns absolute url
+        url_absolute = reverse('courses:course_detail', kwargs=self.url_kwargs)
+        relative_start = url_absolute.find('/courses')
+        url = url_absolute[relative_start:]
         scheme = f"http{'s' if is_secure else ''}://"
         if not isinstance(site, Site):
             site = self.main_branch.site
