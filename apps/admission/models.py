@@ -156,6 +156,7 @@ class Campaign(TimezoneAwareMixin, models.Model):
     )
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Campaign")
         verbose_name_plural = _("Campaigns")
 
@@ -233,6 +234,7 @@ class University(models.Model):
     )
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("University")
         verbose_name_plural = _("Universities")
 
@@ -555,6 +557,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     meta = models.JSONField(blank=True, null=True, editable=False)
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Applicant")
         verbose_name_plural = _("Applicants")
         unique_together = [("email", "campaign")]
@@ -738,6 +741,7 @@ class Contest(models.Model):
     )
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Contest")
         verbose_name_plural = _("Contests")
 
@@ -785,6 +789,7 @@ class YandexContestIntegration(models.Model):
     )
 
     class Meta:
+        app_label = "admission"
         abstract = True
 
     @classmethod
@@ -997,6 +1002,7 @@ class Test(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContest
     )
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Testing Result")
         verbose_name_plural = _("Testing Results")
 
@@ -1042,6 +1048,7 @@ class Exam(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContest
     details = models.JSONField(verbose_name=_("Details"), blank=True, null=True)
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Exam")
         verbose_name_plural = _("Exams")
 
@@ -1084,6 +1091,7 @@ class InterviewAssignment(models.Model):
     )
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Interview assignment")
         verbose_name_plural = _("Interview assignments")
 
@@ -1136,6 +1144,7 @@ class InterviewFormat(models.Model):
     )
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Interview Format")
         verbose_name_plural = _("Interview Formats")
         constraints = [
@@ -1205,6 +1214,7 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
     note = models.TextField(_("Note"), blank=True, null=True)
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Interview")
         verbose_name_plural = _("Interviews")
         constraints = [
@@ -1288,6 +1298,7 @@ class Comment(TimeStampedModel):
     score = models.SmallIntegerField(verbose_name=_("Score"))
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Comment")
         verbose_name_plural = _("Comments")
         unique_together = ("interview", "interviewer")
@@ -1357,6 +1368,7 @@ class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel
     derivable_fields = ["slots_count", "slots_occupied_count"]
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Interview stream")
         verbose_name_plural = _("Interview streams")
 
@@ -1482,6 +1494,7 @@ class InterviewSlot(TimeStampedModel):
     )
 
     class Meta:
+        app_label = "admission"
         ordering = ["start_at"]
         verbose_name = _("Interview slot")
         verbose_name_plural = _("Interview slots")
@@ -1548,6 +1561,7 @@ class InterviewInvitation(TimeStampedModel):
     objects = InterviewInvitationQuerySet.as_manager()
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Interview invitation")
         verbose_name_plural = _("Interview invitations")
 
@@ -1626,6 +1640,7 @@ class Acceptance(TimestampedModel):
     )
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Acceptance for Studies")
         verbose_name_plural = _("Acceptances for Studies")
 
@@ -1681,6 +1696,7 @@ class ResidenceCity(models.Model):
     order = models.PositiveIntegerField(_("Order"), default=512)
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Residence City")
         verbose_name_plural = _("Residence Cities")
 
@@ -1706,6 +1722,7 @@ class CampaignCity(models.Model):
     )
 
     class Meta:
+        app_label = "admission"
         verbose_name = _("Campaign Available in City")
         verbose_name_plural = _("Campaigns Available in City")
         constraints = [
