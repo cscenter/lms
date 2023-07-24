@@ -76,15 +76,12 @@ class Command(
 
         manager = self.get_manager(Applicant, options)
         applicants = manager.filter(
-            campaign_id=campaign.pk,
-            status__in=[
-                ApplicantStatuses.ACCEPT,
-                ApplicantStatuses.REJECTED_BY_INTERVIEW,
-                ApplicantStatuses.REJECTED_BY_INTERVIEW_WITH_BONUS,
-            ],
+            campaign_id=campaign.pk
         )
-
+        self.stdout.write(f"Applicants: {len(applicants)}")
         statuses = applicants.values_list("status", flat=True).distinct()
+        for applicant in applicants:
+            print(applicant.email)
         self.stdout.write(f"Participants with final statuses were found:")
         self.stdout.write("\n".join(statuses))
         template_name_patterns = {}
