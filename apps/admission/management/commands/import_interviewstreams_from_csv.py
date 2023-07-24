@@ -19,6 +19,7 @@ MONTH_NUMBER = {
     'августа': 8
 }
 
+
 def get_stream_date(s: str, year: int) -> datetime.date:
     assert prefix in s
     date_start_index = 0
@@ -53,21 +54,33 @@ def get_section(section_name: str) -> InterviewSections:
         "мотивация": InterviewSections.MOTIVATION
     }[section_name]
 
-msk_campaign = Campaign.objects.get(pk=33)
-distant_campaign = Campaign.objects.get(pk=37)
-def get_campaign(campaign_name: str) -> Campaign:
+
+msk_campaign = Campaign.objects.get(pk=42)
+msk_venue = Location.objects.get(pk=87)
+msk_format = InterviewFormat.objects.get(pk=31)
+
+distant_campaign = Campaign.objects.get(pk=48)
+distant_venue = Location.objects.get(pk=105)
+distant_format = InterviewFormat.objects.get(pk=32)
+
+spb_campaign = Campaign.objects.get(pk=43)
+spb_venue = Location.objects.get(pk=106)
+spb_format = InterviewFormat.objects.get(pk=33)
+
+
+def get_filial_info(campaign_name: str) -> Campaign:
     return {
-        "Москва": msk_campaign,
-        "Заочное": distant_campaign
+        "Москва": (msk_campaign, msk_venue, msk_format),
+        "Заочное": (distant_campaign, distant_venue, distant_format),
+        "Санкт-Петербург": (spb_campaign, spb_venue, spb_format),
     }[campaign_name]
 
 
 def main():
-    year = 2022
-    venue = Location.objects.get(pk=87)
+    year = 2023
     format = InterviewFormats.ONLINE
-    interview_format = InterviewFormat.objects.get(pk=26)
     with_assignments = False
+    commit = True
     with open('interviews.csv') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         headers = next(reader)
@@ -108,7 +121,7 @@ def main():
                 print(stream_info[0])
                 interviewer = User.objects.get(email__iexact=stream_info[0])
                 section = get_section(stream_info[1])
-                campaign = get_campaign(stream_info[3])
+                campaign, venue, interview_format = get_filial_info(stream_info[3])
                 stream = InterviewStream(
                     campaign=campaign,
                     venue=venue,
@@ -134,6 +147,8 @@ def main():
                     stream=stream,
                     start_at__in=slots_for_delete
                 ).delete()
+            if not commit:
+                raise Exception("Please set value commit = True")
 
 
 main()
