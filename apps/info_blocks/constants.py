@@ -6,3 +6,5 @@ class CurrentInfoBlockTags:
     USEFUL = "hint"
     HONOR_CODE = "honor-code"
     INTERNSHIP = "internship"
+    PROGRAMS = "programs"
+    LINKS = "links"
