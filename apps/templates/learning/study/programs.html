@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+{% block body_attrs %} class="gray"{% endblock body_attrs %}
+{% block title %}Программы обучения - {{ request.site.name }}{% endblock title %}
+{% block content %}
+    <div class="container">
+        <div class="panel-group" id="questions">
+            {% for qa in faq %}
+                <div class="panel">
+                    <div class="panel-heading _arrowed" id="question-{{ qa.pk }}" aria-expanded="false" href="#answer-{{ qa.pk }}">
+                      <span class="panel-title">{{ qa.title }}</span>
+                    </div>
+                    <div class="panel-collapse collapse" id="answer-{{ qa.pk }}"  aria-expanded="false">
+                        <div class="panel-body _arrowed">{{ qa.content|safe }}</div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="alert alert-info text-center">Здесь пока пусто.</div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock content %}
+

@@ -377,3 +377,14 @@ class HonorCodeView(generic.ListView):
                 .for_site(self.request.site)
                 .with_tag(CurrentInfoBlockTags.HONOR_CODE)
                 .order_by("sort"))
+
+
+class ProgramsView(generic.ListView):
+    context_object_name = "faq"
+    template_name = "learning/study/programs.html"
+
+    def get_queryset(self):
+        return (InfoBlock.objects
+                .for_site(self.request.site)
+                .with_tag(CurrentInfoBlockTags.PROGRAMS)
+                .order_by("sort"))

@@ -2,7 +2,7 @@ from django.conf.urls import include
 from django.urls import path, re_path
 
 from courses.urls import RE_COURSE_URI
-from learning.study.views import HonorCodeView, InternshipListView, UsefulListView
+from learning.study.views import HonorCodeView, InternshipListView, UsefulListView, ProgramsView
 from learning.views import CourseInvitationEnrollView
 
 from .views import (
@@ -28,5 +28,7 @@ urlpatterns = [
     path('learning/useful/', UsefulListView.as_view(), name='learning_useful'),
     path('learning/internships/', InternshipListView.as_view(), name='learning_internships'),
     path('learning/hc/', HonorCodeView.as_view(), name='honor_code'),
+    path('learning/programs/', ProgramsView.as_view(), name='programs'),
     path('learning/library/', include("library.urls")),
+
 ]
