@@ -8,14 +8,14 @@
       <ul>
         {% for enrollment in profile_user.enrollment_set.all() %}
           <li>
-            <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}">
-              {{ enrollment.course }} </a>
             {% if enrollment.student_profile.type == StudentTypes.INVITED %}
                         <i style="font-size:14px" class="fa">&#xf069;</i>
                       {% endif %}
             {% if enrollment.student_profile.type == StudentTypes.PARTNER %}
                         <i style="font-size:14px" class="fa">&#127891;</i>
                       {% endif %}
+            <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}">
+              {{ enrollment.course }} </a>
             /{{ enrollment.grade_honest|lower }}/
           </li>
         {% endfor %}
