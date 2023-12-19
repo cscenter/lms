@@ -36,7 +36,7 @@ from learning.icalendar import get_icalendar_links
 from learning.models import Enrollment, StudentAssignment
 from learning.settings import GradeTypes, StudentStatuses
 from users.compat import get_graduate_profile as get_graduate_profile_compat
-from users.models import SHADCourseRecord, YandexUserData
+from users.models import SHADCourseRecord, YandexUserData, StudentTypes
 from users.thumbnails import CropboxData, get_user_thumbnail, photo_thumbnail_cropbox
 
 from .forms import CertificateOfParticipationCreateForm, UserProfileForm
@@ -105,6 +105,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
         current_semester = Semester.get_current()
         context = {
             "StudentStatuses": StudentStatuses,
+            'StudentTypes': StudentTypes,
             "profile_user": profile_user,
             "time_zone": f"{get_gmt(profile_user.time_zone)} {profile_user.time_zone.zone}",
             "icalendars": icalendars,
