@@ -8,7 +8,6 @@ INSTALLED_APPS += ['django_js_reverse']
 JS_REVERSE_JS_VAR_NAME = 'URLS'
 JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['stats-api', 'admission-api']
 JS_REVERSE_OUTPUT_PATH = str(DJANGO_ASSETS_ROOT / "v1" / "js" / "vendor")
-
 if DEBUG:
     INSTALLED_APPS += ['django_extensions']
     # Translate .po files with UI
