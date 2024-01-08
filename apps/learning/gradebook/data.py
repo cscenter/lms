@@ -98,7 +98,7 @@ class GradeBookData:
         self.show_weight = show_weight
 
     def get_table_width(self):
-        # First 3 columns in gradebook table, see `pages/_gradebook.scss`
+        # First 4 columns in gradebook table, see `pages/_gradebook.scss`
         magic = 150 + 140 + 80 + 66
         return len(self.assignments) * self.ASSIGNMENT_COLUMN_WIDTH + magic
 
