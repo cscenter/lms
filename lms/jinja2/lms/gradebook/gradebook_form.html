@@ -117,6 +117,7 @@
           <div id="gradebook" style="width: {{ gradebook.get_table_width() }}px;">
             <div class="headers">
               <div class="title __student">{% trans %}Students{% endtrans %}</div>
+              <div class="title __study_year">Год программы</div>
               <div class="title __final_grade">{% trans %}Grades{% endtrans %}</div>
               {% if gradebook.assignments %}
                 <div class="title __total_score">{% trans %}Total{% endtrans %}</div>
@@ -142,6 +143,9 @@
                         <i style="font-size:14px" class="fa" title="{{ gradebook_student.invitation }}">&#xf069;</i>
                       {% endif %} {{ student.get_abbreviated_short_name() }}
                     </a>
+                    <div class="cell __study_year {{ loop.cycle('', 'even') }}">
+                      {{ gradebook_student.student_profile.year_of_admission }}
+                    </div>
                     <div class="cell __final_grade {{ loop.cycle('', 'even') }}">
                       {{ form.get_final_widget(gradebook_student.enrollment_id) }}
                     </div>
@@ -169,6 +173,7 @@
             <div class="meta">
               <div class="cell __student gray">{% trans %}Students{% endtrans %}:&nbsp;{{ gradebook.students|length }}</div>
               <div class="cell __final_grade"></div>
+              <div class="cell __study_year"></div>
               {% if gradebook.assignments %}
                 <div class="cell __total_score"></div>
               {% endif %}
