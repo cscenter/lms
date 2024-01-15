@@ -144,7 +144,9 @@
                       {% endif %} {{ student.get_abbreviated_short_name() }}
                     </a>
                     <div class="cell __study_year {{ loop.cycle('', 'even') }}">
-                      {{ gradebook_student.student_profile.year_of_admission }}
+                      {% if gradebook_student.student_profile.year_of_curriculum %}
+                      {{ gradebook_student.student_profile.year_of_curriculum }}
+                      {% endif %}
                     </div>
                     <div class="cell __final_grade {{ loop.cycle('', 'even') }}">
                       {{ form.get_final_widget(gradebook_student.enrollment_id) }}
