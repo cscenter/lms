@@ -8,9 +8,18 @@
       <ul>
         {% for enrollment in profile_user.enrollment_set.all() %}
           <li>
+            {% if can_view_assignments and enrollment.student_profile.type == StudentTypes.INVITED%}
+                        <i style="font-size:14px" class="fa">&#xf069;</i>
+            {% endif %}
+            {% if can_view_assignments and enrollment.student_profile.type == StudentTypes.PARTNER %}
+                        <i style="font-size:14px" class="fa">&#127891;</i>
+            {% endif %}
             <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}">
-              {{ enrollment.course }}
-            </a> /{{ enrollment.grade_honest|lower }}/
+              {{ enrollment.course }} </a>
+            /{{ enrollment.grade_honest|lower }}/
+            {% if not loop.last and loop.nextitem.course.semester != enrollment.course.semester %}
+            <p></p>
+            {% endif %}
           </li>
         {% endfor %}
         {% for shad in profile_user.shadcourserecord_set.all() %}
