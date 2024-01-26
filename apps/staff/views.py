@@ -631,6 +631,18 @@ def autograde_projects(request):
         messages.error(request, str(e))
     return HttpResponseRedirect(reverse("staff:exports"))
 
+def autofail_ungraded(request):
+    if not request.user.is_curator:
+        return HttpResponseForbidden()
+    try:
+        graded = call_command("autofail_ungraded", request.site)
+        messages.success(
+            request, f"Операция выполнена успешно.<br>" f"Выставлено незачетов: {graded}"
+        )
+    except CommandError as e:
+        messages.error(request, str(e))
+    return HttpResponseRedirect(reverse("staff:exports"))
+
 
 # FIXME: replace with staff.api.views.CreateAlumniProfiles (already tested) - needs to write js part
 def create_alumni_profiles(request: HttpRequest):
