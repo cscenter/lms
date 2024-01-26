@@ -66,7 +66,7 @@ def test_autofail_ungraded(settings, prev_sem, current_grade, previous_grade, en
     previous_term = SemesterFactory.create_prev(current_term)
     term_2020_autumn = SemesterFactory(year=2020, type=SemesterTypes.AUTUMN)
     term_2018_autumn = SemesterFactory(year=2018, type=SemesterTypes.AUTUMN)
-    site = SiteFactory(domain="lk.yandexdataschool.ru")
+    site = SiteFactory()
     out = StringIO()
 
     current_enrollment = EnrollmentFactory(course__semester=current_term)
