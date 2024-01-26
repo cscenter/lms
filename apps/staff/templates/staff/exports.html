@@ -72,6 +72,14 @@
             </ul>
           </div>
         </div>
+        <h2>Незачеты</h2>
+        <div class="list-group">
+          <div class="list-group-item">
+            <h4 class="list-group-item-heading">Невыставленные оценки по курсам, {% trans current_term.type %} {{ current_term.year }}</h4>
+            <p><a href="{% url 'staff:autofail_ungraded' %}" class="btn btn-primary btn-wide"
+                  onclick="return confirm('Вы уверены? Это действие нельзя обратить')">Превратить в незачеты </a></p>
+          </div>
+        </div>
         <a name="will-graduate"></a>
         <h2 class="content-title">Будущий выпуск</h2>
         <div class="list-group">
