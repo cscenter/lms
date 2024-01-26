@@ -10,7 +10,7 @@ sys.path.append(str(ROOT_DIR / "apps/"))
 if __name__ == "__main__":
     # On production use --settings to override default behavior
     os.environ.setdefault("DJANGO_SETTINGS_MODULE",
-                          "compscicenter_ru.settings.local")
+                          "lk_yandexdataschool_ru.settings.local")
 
     from django.core.management import execute_from_command_line
 
