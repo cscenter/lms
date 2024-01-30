@@ -65,6 +65,10 @@ top_menu = [
                 pgettext_lazy("menu", "Ведомости"),
                 reverse('teaching:gradebook_list'),
                 weight=50),
+            MenuItem(
+                pgettext_lazy("menu", "Полезное"),
+                reverse('teaching:teaching_useful'),
+                weight=50),
         ],
         permissions=(
             "learning.view_teaching_menu",

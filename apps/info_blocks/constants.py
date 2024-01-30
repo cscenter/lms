@@ -4,6 +4,7 @@ class CurrentInfoBlockTags:
     Need to be kept in sync with actual DB values, will be removed in favor of tabs in the new design.
     """
     USEFUL = "hint"
+    TEACHERS_USEFUL = "teachers-hint"
     HONOR_CODE = "honor-code"
     INTERNSHIP = "internship"
     PROGRAMS = "programs"
