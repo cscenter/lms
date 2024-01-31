@@ -1,9 +1,13 @@
-from django.core.management import BaseCommand, CommandError
+import logging
+
+from django.core.management import BaseCommand
 
 from courses.constants import SemesterTypes
 from courses.models import Semester
 from learning.models import Enrollment
 from learning.settings import GradeTypes
+
+logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = """
@@ -30,5 +34,6 @@ class Command(BaseCommand):
             enrollments = enrollments.filter(grade=GradeTypes.NOT_GRADED,
                                              course__semester=current_term,
                                              student_profile__branch__site__domain=site)
+        logger.info(f"Change grades of {current_term} enrollments from Not Graded to Unsatisfactory")
         graded = enrollments.update(grade=GradeTypes.UNSATISFACTORY)
         return str(graded)
