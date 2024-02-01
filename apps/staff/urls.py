@@ -16,9 +16,10 @@ from staff.views import (
     OfficialDiplomasCSVView, OfficialDiplomasListView, OfficialDiplomasTeXView,
     ProgressReportForSemesterView, ProgressReportFullView, StudentFacesView,
     StudentSearchCSVView, StudentSearchView, SurveySubmissionsReportView,
-    SurveySubmissionsStatsView, WillGraduateStatsReportView, autograde_projects,
-    autofail_ungraded, create_alumni_profiles
+    SurveySubmissionsStatsView, WillGraduateStatsReportView
 )
+
+from staff.views import autograde_projects, autofail_ungraded, create_alumni_profiles
 
 app_name = 'staff'
 
