@@ -19,6 +19,8 @@ from courses.services import get_teacher_branches
 from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
 from courses.views.mixins import CourseURLParamsMixin
+from info_blocks.constants import CurrentInfoBlockTags
+from info_blocks.models import InfoBlock
 from learning.calendar import get_all_calendar_events, get_teacher_calendar_events
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment, StudentAssignment
@@ -159,3 +161,14 @@ class CourseStudentProgressView(CourseURLParamsMixin, PermissionRequiredMixin,
             "student_assignments": student_assignments
         }
         return context
+
+class TeachingUsefulListView(PermissionRequiredMixin, generic.ListView):
+    context_object_name = "faq"
+    template_name = "learning/study/useful.html"
+    permission_required = "teaching.view_faq"
+
+    def get_queryset(self):
+        return (InfoBlock.objects
+                .for_site(self.request.site)
+                .with_tag(CurrentInfoBlockTags.TEACHERS_USEFUL)
+                .order_by("sort"))

@@ -9,7 +9,7 @@ from learning.teaching.api.views import (
 )
 from learning.teaching.views import (
     CalendarFullView, CalendarPersonalView, CourseListView, CourseStudentProgressView,
-    GradeBookListView
+    GradeBookListView, TeachingUsefulListView
 )
 from learning.teaching.views import TimetableView as TeacherTimetable
 from learning.teaching.views.assignments import (
@@ -53,6 +53,7 @@ urlpatterns = [
     path('', RedirectView.as_view(pattern_name='teaching:assignments_check_queue', permanent=False), name='base'),
     path('timetable/', TeacherTimetable.as_view(), name='timetable'),
     path('calendar/', CalendarPersonalView.as_view(), name='calendar'),
+    path('useful/', TeachingUsefulListView.as_view(), name='teaching_useful'),
     path('full-calendar/', CalendarFullView.as_view(), name='calendar_full'),
     path('courses/', include([
         path('', CourseListView.as_view(), name='course_list'),

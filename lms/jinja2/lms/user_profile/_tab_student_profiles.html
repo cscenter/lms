@@ -1,7 +1,15 @@
 <div class="panel-group" role="tablist">
   {% for student_profile in student_profiles %}
     <div class="panel panel-default">
-      <div class="panel-heading" role="tab" id="headingOne">
+      {% if student_profile.status == StudentStatuses.GRADUATE%}
+        {% if student_profile.graduate_profile%}
+          <div class="panel-heading" role="tab" id="headingOne" style="background-color: #40e0d0;">
+        {% else %}
+          <div class="panel-heading" role="tab" id="headingOne" style="background-color: #add8e6;">
+        {% endif %}
+      {% else %}
+        <div class="panel-heading" role="tab" id="headingOne">
+      {% endif %}
         <h4 class="panel-title">
           <a role="button" data-toggle="collapse" href="#student-profile-{{ student_profile.pk }}"
              aria-expanded="{{ "true" if loop.first else "false" }}"
