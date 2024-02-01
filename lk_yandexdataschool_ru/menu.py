@@ -26,7 +26,8 @@ top_menu = [
             MenuItem(pgettext_lazy("menu", "Полезное"), '/learning/useful/', weight=60),
             MenuItem(pgettext_lazy("menu", "Кодекс чести"), '/learning/hc/', weight=70),
             MenuItem(pgettext_lazy("menu", "Программы обучения"), '/learning/programs/', weight=70),
-            MenuItem(pgettext_lazy("menu", "Проекты организаторов"), '/learning/internships/', weight=80),
+            # Commented to return fast in autumn semester
+            # MenuItem(pgettext_lazy("menu", "Проекты организаторов"), '/learning/internships/', weight=80),
         ],
         permissions=(
             "learning.view_study_menu",
