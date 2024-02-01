@@ -12,7 +12,7 @@
             <br><br>
             <ul>
                 {% for qa in faq %}
-                    <li>{{ qa.content }}</li>
+                    <li>{{ qa.content|safe }}</li>
                 {% endfor %}
             </ul>
         {% else %}
