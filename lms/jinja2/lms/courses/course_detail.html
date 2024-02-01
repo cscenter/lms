@@ -19,9 +19,9 @@
             <a href="{{ url('admin:courses_course_change', object_id=course.pk) }}" target="_blank"><i
               class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
           <small>{{ course.main_branch.name }} / {{ course.semester }}, <a href="{{ course.meta_course.get_absolute_url() }}">посмотреть
-            все семестры</a>
+            все семестры</a></small>
           {% if user.is_curator or user in course.teachers.all()%}
-            <br>
+            <br><small>
            <a href="{{request.build_absolute_uri(url('staff:gradebook', **course.url_kwargs))}}">
               Ведомость</a>
           {% endif %}
