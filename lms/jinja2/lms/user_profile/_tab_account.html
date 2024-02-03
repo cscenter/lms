@@ -12,7 +12,7 @@
                         <i style="font-size:14px" class="fa">&#xf069;</i>
             {% endif %}
             {% if can_view_assignments and enrollment.student_profile.type == StudentTypes.PARTNER %}
-                        <i style="font-size:14px" class="fa">&#127891;</i>
+                        <i class="fa fa-graduation-cap" aria-hidden="true"></i>
             {% endif %}
             <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}">
               {{ enrollment.course }} </a>
