@@ -309,6 +309,11 @@ class ViewFAQ(Permission):
 
 
 @add_perm
+class ViewTeachingFAQ(Permission):
+    name = "teaching.view_faq"
+
+
+@add_perm
 class ViewGradebook(Permission):
     name = "teaching.view_gradebook"
 
