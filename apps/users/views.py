@@ -1,4 +1,3 @@
-
 import json
 import os
 from collections import OrderedDict
@@ -88,8 +87,8 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
         u = self.request.user
         profile_user = get_object_or_404(
             self.get_queryset()
-                .filter(pk=kwargs['pk'])
-                .select_related('yandex_data')
+            .filter(pk=kwargs['pk'])
+            .select_related('yandex_data')
         )
         is_library_installed = apps.is_installed("library")
         is_certificates_of_participation_enabled = settings.IS_CERTIFICATES_OF_PARTICIPATION_ENABLED
@@ -118,6 +117,13 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             "yandex_oauth_url": reverse('auth:users:yandex_begin'),
             "is_yds_site": self.request.site.pk == settings.YDS_SITE_ID
         }
+        enrollments = profile_user.enrollment_set.all()
+        for enrollment in enrollments:
+            enrollment.satisfactory = enrollment.grade in GradeTypes.satisfactory_grades or \
+                        (enrollment.grade == GradeTypes.NOT_GRADED and enrollment.course.semester == current_semester)
+            enrollment.view_invited = can_view_assignments and enrollment.student_profile.type == StudentTypes.INVITED
+            enrollment.view_partner = can_view_assignments and enrollment.student_profile.type == StudentTypes.PARTNER
+        context["enrollments"] = enrollments
         if is_certificates_of_participation_enabled:
             certificates = (CertificateOfParticipation.objects
                             .filter(student_profile__user=profile_user)

@@ -2,233 +2,246 @@
 {% set request_user = request.user -%}
 {% with is_secure = request.is_secure() %}
 <ul class="list-unstyled">
-  {% if profile_user.enrollment_set.all() or profile_user.shadcourserecord_set.all() %}
-    <li>
-      <h4>{{ profile_user.first_name }} прослушал{{ suffix }} и сдал{{ suffix }} следующие курсы:</h4>
-      <ul>
-        {% for enrollment in profile_user.enrollment_set.all() %}
-          <li>
-            {% if can_view_assignments and enrollment.student_profile.type == StudentTypes.INVITED%}
-                        <i style="font-size:14px" class="fa">&#xf069;</i>
-            {% endif %}
-            {% if can_view_assignments and enrollment.student_profile.type == StudentTypes.PARTNER %}
-                        <i class="fa fa-graduation-cap" aria-hidden="true"></i>
-            {% endif %}
-            <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}">
-              {{ enrollment.course }} </a>
-            /{{ enrollment.grade_honest|lower }}/
-            {% if not loop.last and loop.nextitem.course.semester != enrollment.course.semester %}
-            <p></p>
-            {% endif %}
-          </li>
-        {% endfor %}
-        {% for shad in profile_user.shadcourserecord_set.all() %}
-          <li>
-            {{ shad.name }} (ШАД), {{ shad.semester }} - {{ shad.teachers }} /{{ shad.grade_display|lower }}/
-          </li>
-        {% endfor %}
-      </ul>
-    </li>
+  {% if enrollments or profile_user.shadcourserecord_set.all() %}
+  <li>
+    <h4>{{ profile_user.first_name }} прослушал{{ suffix }} и сдал{{ suffix }} следующие курсы:</h4>
+    <ul>
+      {% for enrollment in enrollments %}
+      <li>
+        {% if enrollment.satisfactory%}
+          {% if enrollment.view_invited%}
+            <i style="font-size:14px" class="fa">&#xf069;</i>
+          {% endif %}
+          {% if enrollment.view_partner%}
+            <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+          {% endif %}
+          <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}">
+          {{ enrollment.course }} </a>
+          | {{ enrollment.grade_honest|lower }}
+        {% else %}
+          {% if enrollment.view_invited%}
+            <i style="font-size:14px; opacity: 0.5;" class="fa">&#xf069;</i>
+          {% endif %}
+          {% if enrollment.view_partner%}
+            <i style="opacity: 0.5;" class="fa fa-graduation-cap" aria-hidden="true"></i>
+          {% endif %}
+          <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}" style="opacity: 0.5;">
+          {{ enrollment.course }} </a>
+          <i style="opacity: 0.5;"> | {{ enrollment.grade_honest|lower }} </i>
+        {% endif %}
+        {% if not loop.last and loop.nextitem.course.semester != enrollment.course.semester %}
+        <p></p>
+        {% endif %}
+      </li>
+      {% endfor %}
+      {% for shad in profile_user.shadcourserecord_set.all() %}
+      <li>
+        {{ shad.name }} (ШАД), {{ shad.semester }} - {{ shad.teachers }} /{{ shad.grade_display|lower }}/
+      </li>
+      {% endfor %}
+    </ul>
+  </li>
   {% endif %}
 
   {% if student_projects %}
-    <li>
-      <h4>Кроме того, участвовал{{ suffix }} в проектах:</h4>
-      <ul>
-        {% for ps in student_projects %}
-          <li>
-            {% if request_user.is_authenticated %}
-              <a href="{{ ps.project.get_absolute_url() }}">
-            {% endif %}
-            {{ ps.project.name }}, {{ ps.project.semester }}
-            {% if request_user.is_authenticated %}</a>
-            {% endif %} /{{ ps.get_status_display()|lower }}/<br>
-          </li>
-        {% endfor %}
-      </ul>
-    </li>
+  <li>
+    <h4>Кроме того, участвовал{{ suffix }} в проектах:</h4>
+    <ul>
+      {% for ps in student_projects %}
+      <li>
+        {% if request_user.is_authenticated %}
+        <a href="{{ ps.project.get_absolute_url() }}">
+          {% endif %}
+          {{ ps.project.name }}, {{ ps.project.semester }}
+          {% if request_user.is_authenticated %}</a>
+        {% endif %} /{{ ps.get_status_display()|lower }}/<br>
+      </li>
+      {% endfor %}
+    </ul>
+  </li>
   {% elif request_user.is_curator %}
-    <li>Нет студенческих проектов</li>
+  <li>Нет студенческих проектов</li>
   {% endif %}
 
   {% if profile_user.pk == request_user.pk or request_user.is_curator %}
-    {% with recs = profile_user.onlinecourserecord_set.all() %}
-      {% if recs %}
-        <li>
-          <h4>{% trans %}Online courses{% endtrans %}</h4>
-          <ul>
-            {% for rec in recs %}
-              <li>
-                {% if rec.url %}
-                  <a href="{{ rec.url }}">{{ rec.name }}</a>
-                {% else %}
-                  {{ rec.name }}
-                {% endif %}
-              </li>
-            {% endfor %}
-          </ul>
-        </li>
-      {% elif request_user.is_curator %}
-        <li>Нет зачтённых онлайн-курсов</li>
-      {% endif %}
-    {% endwith %}
+  {% with recs = profile_user.onlinecourserecord_set.all() %}
+  {% if recs %}
+  <li>
+    <h4>{% trans %}Online courses{% endtrans %}</h4>
+    <ul>
+      {% for rec in recs %}
+      <li>
+        {% if rec.url %}
+        <a href="{{ rec.url }}">{{ rec.name }}</a>
+        {% else %}
+        {{ rec.name }}
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </li>
+  {% elif request_user.is_curator %}
+  <li>Нет зачтённых онлайн-курсов</li>
+  {% endif %}
+  {% endwith %}
   {% endif %}
 
   {% if profile_user.is_teacher %}
-    <li>
-      {% if profile_user.teaching_set.all() %}
-        <h4>Преподаватель курсов:</h4>
-        <ul class="">
-          {% for course in profile_user.teaching_set.all() %}
-            <li>
-              <a href="{{ course.get_absolute_url() }}">{{ course }}</a>
-            </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    </li>
+  <li>
+    {% if profile_user.teaching_set.all() %}
+    <h4>Преподаватель курсов:</h4>
+    <ul class="">
+      {% for course in profile_user.teaching_set.all() %}
+      <li>
+        <a href="{{ course.get_absolute_url() }}">{{ course }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </li>
   {% endif %}
 </ul>
 {% endwith %}
 {% if request_user.is_authenticated %}
-  <div class="accounts">
-    <table class="table table-condensed table-striped">
-      {% if profile_user.pk == request_user.pk or request_user.is_curator %}
-        {% if invitation and request_user.is_curator %}
-          <tr>
-            <td>Приглашение</td>
-            <td>
-              <a target="_blank" href="{{ url('admin:learning_invitation_change', object_id=invitation.pk) }}">
-              {{ invitation.name }}
-              </a>
-            </td>
-          </tr>
+<div class="accounts">
+  <table class="table table-condensed table-striped">
+    {% if profile_user.pk == request_user.pk or request_user.is_curator %}
+    {% if invitation and request_user.is_curator %}
+    <tr>
+      <td>Приглашение</td>
+      <td>
+        <a target="_blank" href="{{ url('admin:learning_invitation_change', object_id=invitation.pk) }}">
+          {{ invitation.name }}
+        </a>
+      </td>
+    </tr>
+    {% endif %}
+    {% if academic_disciplines %}
+    <tr>
+      <td>Направление обучения</td>
+      <td>{{ academic_disciplines }}</td>
+    </tr>
+    {% endif %}
+    <tr>
+      <td>{% trans %}Email{% endtrans %}:</td>
+      <td>
+        {{ profile_user.email }}
+        {% if profile_user.is_email_suspended %}
+        <div class="text-danger">
+          Отправка email приостановлена (Статус {{ profile_user.email_suspension_details['status'] }}). Обратитесь к кураторам за
+          подробностями.
+        </div>
         {% endif %}
-        {% if academic_disciplines %}
-        <tr>
-          <td>Направление обучения</td>
-          <td>{{ academic_disciplines }}</td>
-        </tr>
-        {% endif %}
-        <tr>
-          <td>{% trans %}Email{% endtrans %}:</td>
-          <td>
-            {{ profile_user.email }}
-            {% if profile_user.is_email_suspended %}
-              <div class="text-danger">
-                Отправка email приостановлена (Статус {{ profile_user.email_suspension_details['status'] }}). Обратитесь к кураторам за подробностями.
-              </div>
-            {% endif %}
-          </td>
-        </tr>
-        <tr>
-          <td>{% trans %}Time Zone{% endtrans %}</td>
-          <td>{{ time_zone }}</td>
-        </tr>
-        <tr>
-          <td>{% trans %}Phone{% endtrans %}:</td>
-          <td>{{ profile_user.phone|default("—", True) }}</td>
-        </tr>
-        <tr>
-          <td>Telegram</td>
-          <td>{% if profile_user.telegram_username %}
-            <a href="https://t.me/{{ profile_user.telegram_username }}" target="_blank">{{ profile_user.telegram_username }}</a>
-          {% else %}
-            —
-          {% endif %}
-          </td>
-        </tr>
-        <tr>
-          <td>{% trans %}Workplace{% endtrans %}:</td>
-          <td>{{ profile_user.workplace|default("—", True) }}</td>
-        </tr>
-        <tr>
-          <td>{% trans %}Date of Birth{% endtrans %}:</td>
-          <td>
-            {% if profile_user.birth_date %}{{ profile_user.birth_date|date("d.m.Y") }}{% else %}—{% endif %}
-          </td>
-        </tr>
-      {% endif %}
-      {% if profile_user.pk == request_user.pk or request_user.is_curator or request_user.is_teacher %}
-        <tr>
-          <td>Yandex</td>
-          <td>
-            {% with verified_yandex=profile_user.yandex_data %}
-              {% if verified_yandex %}
-                {{ profile_user.yandex_data.login|default("—", True) }}
-                {% if request.user.pk == profile_user.pk %}
-                  <a href={{ yandex_oauth_url }}>[Изменить]</a>
-                {% else %}
-                  ({{profile_user.yandex_data.uid}})
-                {% endif %}
-              {% else %}
-                {% if profile_user.yandex_login %}
-                  {{ profile_user.yandex_login }}
-                  {% if request.user.pk == profile_user.pk %}
-                    <a class="text-danger" href={{ yandex_oauth_url }}>[Подтвердить]</a>
-                  {% else %}
-                    <span class="text-danger">[Не подтверждено]</span>
-                  {% endif %}
-                {% else %}
-                  {% if request.user.pk == profile_user.pk %}
-                    <a class="text-danger" href={{ yandex_oauth_url }}>[Войти через Яндекс]</a>
-                  {% else %}
-                    <span class="text-danger">[Аккаунт не подключён]</span>
-                  {% endif %}
-                {% endif %}
-              {% endif %}
-            {% endwith %}
-          </td>
-        </tr>
-      {% endif %}
-      {% if icalendars %}
-        <tr>
-          <td>.iCal-календари</td>
-          <td>
-            {% for icalendar in icalendars %}
-              <a target="_blank" href="{{ icalendar.url }}">{{ icalendar.title }}</a>{% if not loop.last %}&nbsp;&nbsp;{% endif %}
-            {% endfor %}
-          </td>
-        </tr>
-      {% endif %}
-      <tr>
-        <td>Github</td>
-        <td>{% if profile_user.github_login %}
-          <a href="https://github.com/{{ profile_user.github_login }}" target="_blank">{{ profile_user.github_login }}</a>
+      </td>
+    </tr>
+    <tr>
+      <td>{% trans %}Time Zone{% endtrans %}</td>
+      <td>{{ time_zone }}</td>
+    </tr>
+    <tr>
+      <td>{% trans %}Phone{% endtrans %}:</td>
+      <td>{{ profile_user.phone|default("—", True) }}</td>
+    </tr>
+    <tr>
+      <td>Telegram</td>
+      <td>{% if profile_user.telegram_username %}
+        <a href="https://t.me/{{ profile_user.telegram_username }}" target="_blank">{{ profile_user.telegram_username }}</a>
         {% else %}
-          —
+        —
         {% endif %}
-        </td>
-      </tr>
-      <tr>
-        <td>Stepik</td>
-        <td>{% if profile_user.stepic_id %}
-          <a href="https://stepik.org/users/{{ profile_user.stepic_id }}" target="_blank">{{ profile_user.stepic_id }}</a>
+      </td>
+    </tr>
+    <tr>
+      <td>{% trans %}Workplace{% endtrans %}:</td>
+      <td>{{ profile_user.workplace|default("—", True) }}</td>
+    </tr>
+    <tr>
+      <td>{% trans %}Date of Birth{% endtrans %}:</td>
+      <td>
+        {% if profile_user.birth_date %}{{ profile_user.birth_date|date("d.m.Y") }}{% else %}—{% endif %}
+      </td>
+    </tr>
+    {% endif %}
+    {% if profile_user.pk == request_user.pk or request_user.is_curator or request_user.is_teacher %}
+    <tr>
+      <td>Yandex</td>
+      <td>
+        {% with verified_yandex=profile_user.yandex_data %}
+        {% if verified_yandex %}
+        {{ profile_user.yandex_data.login|default("—", True) }}
+        {% if request.user.pk == profile_user.pk %}
+        <a href={{ yandex_oauth_url }}>[Изменить]</a>
         {% else %}
-          —
+        ({{profile_user.yandex_data.uid}})
         {% endif %}
-        </td>
-      </tr>
-      <tr>
-        <td>Codeforces</td>
-        <td>
-          {% if profile_user.codeforces_login %}
-            <a href="https://codeforces.com/profile/{{ profile_user.codeforces_login }}"
-               target="_blank">{{ profile_user.codeforces_login }}</a>
-          {% else %}
-            —
-          {% endif %}
-        </td>
-      </tr>
-    </table>
-  </div>
+        {% else %}
+        {% if profile_user.yandex_login %}
+        {{ profile_user.yandex_login }}
+        {% if request.user.pk == profile_user.pk %}
+        <a class="text-danger" href={{ yandex_oauth_url }}>[Подтвердить]</a>
+        {% else %}
+        <span class="text-danger">[Не подтверждено]</span>
+        {% endif %}
+        {% else %}
+        {% if request.user.pk == profile_user.pk %}
+        <a class="text-danger" href={{ yandex_oauth_url }}>[Войти через Яндекс]</a>
+        {% else %}
+        <span class="text-danger">[Аккаунт не подключён]</span>
+        {% endif %}
+        {% endif %}
+        {% endif %}
+        {% endwith %}
+      </td>
+    </tr>
+    {% endif %}
+    {% if icalendars %}
+    <tr>
+      <td>.iCal-календари</td>
+      <td>
+        {% for icalendar in icalendars %}
+        <a target="_blank" href="{{ icalendar.url }}">{{ icalendar.title }}</a>{% if not loop.last %}&nbsp;&nbsp;{% endif %}
+        {% endfor %}
+      </td>
+    </tr>
+    {% endif %}
+    <tr>
+      <td>Github</td>
+      <td>{% if profile_user.github_login %}
+        <a href="https://github.com/{{ profile_user.github_login }}" target="_blank">{{ profile_user.github_login }}</a>
+        {% else %}
+        —
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td>Stepik</td>
+      <td>{% if profile_user.stepic_id %}
+        <a href="https://stepik.org/users/{{ profile_user.stepic_id }}" target="_blank">{{ profile_user.stepic_id }}</a>
+        {% else %}
+        —
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <td>Codeforces</td>
+      <td>
+        {% if profile_user.codeforces_login %}
+        <a href="https://codeforces.com/profile/{{ profile_user.codeforces_login }}"
+           target="_blank">{{ profile_user.codeforces_login }}</a>
+        {% else %}
+        —
+        {% endif %}
+      </td>
+    </tr>
+  </table>
+</div>
 {% endif %}
 
 {% if request_user.is_authenticated and profile_user.private_contacts.strip() %}
-  <div class="contact-info">
-    <h4>{% trans %}Contact information{% endtrans %}:</h4>
-    <div class="ubertext">
-      {{ profile_user.private_contacts|markdown("user_private_contacts", 3600, profile_user.pk, profile_user.modified) }}
-    </div>
+<div class="contact-info">
+  <h4>{% trans %}Contact information{% endtrans %}:</h4>
+  <div class="ubertext">
+    {{ profile_user.private_contacts|markdown("user_private_contacts", 3600, profile_user.pk, profile_user.modified) }}
   </div>
+</div>
 {% endif %}
