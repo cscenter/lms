@@ -1,3 +1,4 @@
+
 import json
 import os
 from collections import OrderedDict
@@ -87,8 +88,8 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
         u = self.request.user
         profile_user = get_object_or_404(
             self.get_queryset()
-            .filter(pk=kwargs['pk'])
-            .select_related('yandex_data')
+                .filter(pk=kwargs['pk'])
+                .select_related('yandex_data')
         )
         is_library_installed = apps.is_installed("library")
         is_certificates_of_participation_enabled = settings.IS_CERTIFICATES_OF_PARTICIPATION_ENABLED
