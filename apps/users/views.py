@@ -97,6 +97,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
         can_edit_profile = (u == profile_user or u.is_curator)
         can_view_student_profiles = (u == profile_user or u.is_curator)
         can_view_assignments = u.is_curator
+        can_view_course_icons = u.is_curator
         can_view_library = is_library_installed and u.is_curator
         icalendars = []
         if profile_user.pk == u.pk:
@@ -115,9 +116,17 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             "current_semester": current_semester,
             "can_view_student_profiles": can_view_student_profiles,
             "can_view_assignments": can_view_assignments,
+            "can_view_course_icons": can_view_course_icons,
             "yandex_oauth_url": reverse('auth:users:yandex_begin'),
             "is_yds_site": self.request.site.pk == settings.YDS_SITE_ID
         }
+        enrollments = profile_user.enrollment_set.all()
+        for enrollment in enrollments:
+            enrollment.satisfactory = enrollment.grade in GradeTypes.satisfactory_grades or \
+                        (enrollment.grade == GradeTypes.NOT_GRADED and enrollment.course.semester == current_semester)
+            enrollment.view_invited = enrollment.student_profile.type == StudentTypes.INVITED
+            enrollment.view_partner = enrollment.student_profile.type == StudentTypes.PARTNER
+        context["enrollments"] = enrollments
         if is_certificates_of_participation_enabled:
             certificates = (CertificateOfParticipation.objects
                             .filter(student_profile__user=profile_user)

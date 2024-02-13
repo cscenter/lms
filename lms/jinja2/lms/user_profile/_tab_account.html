@@ -2,21 +2,31 @@
 {% set request_user = request.user -%}
 {% with is_secure = request.is_secure() %}
 <ul class="list-unstyled">
-  {% if profile_user.enrollment_set.all() or profile_user.shadcourserecord_set.all() %}
+  {% if enrollments or profile_user.shadcourserecord_set.all() %}
     <li>
       <h4>{{ profile_user.first_name }} прослушал{{ suffix }} и сдал{{ suffix }} следующие курсы:</h4>
       <ul>
-        {% for enrollment in profile_user.enrollment_set.all() %}
+        {% for enrollment in enrollments %}
           <li>
-            {% if can_view_assignments and enrollment.student_profile.type == StudentTypes.INVITED%}
-                        <i style="font-size:14px" class="fa">&#xf069;</i>
+            {% if enrollment.satisfactory%}
+              {% if can_view_course_icons and enrollment.view_invited%}
+                <i style="font-size:14px" class="fa">&#xf069;</i>
+              {% endif %}
+              {% if can_view_course_icons and enrollment.view_partner%}
+                <i class="fa fa-graduation-cap" aria-hidden="true"></i>
+              {% endif %}
+              <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}">
+              {{ enrollment.course }} </a> | {{ enrollment.grade_honest|lower }}
+            {% else %}
+              {% if can_view_course_icons and enrollment.view_invited%}
+                <i style="font-size:14px; opacity: 0.5;" class="fa">&#xf069;</i>
+              {% endif %}
+              {% if can_view_course_icons and enrollment.view_partner%}
+                <i style="opacity: 0.5;" class="fa fa-graduation-cap" aria-hidden="true"></i>
+              {% endif %}
+              <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}" style="opacity: 0.5;">
+              {{ enrollment.course }} </a> <i style="opacity: 0.5;"> | {{ enrollment.grade_honest|lower }} </i>
             {% endif %}
-            {% if can_view_assignments and enrollment.student_profile.type == StudentTypes.PARTNER %}
-                        <i class="fa fa-graduation-cap" aria-hidden="true"></i>
-            {% endif %}
-            <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}">
-              {{ enrollment.course }} </a>
-            /{{ enrollment.grade_honest|lower }}/
             {% if not loop.last and loop.nextitem.course.semester != enrollment.course.semester %}
             <p></p>
             {% endif %}
