@@ -9,19 +9,19 @@
         {% for enrollment in enrollments %}
           <li>
             {% if enrollment.satisfactory%}
-              {% if enrollment.view_invited%}
+              {% if can_view_course_icons and enrollment.view_invited%}
                 <i style="font-size:14px" class="fa">&#xf069;</i>
               {% endif %}
-              {% if enrollment.view_partner%}
+              {% if can_view_course_icons and enrollment.view_partner%}
                 <i class="fa fa-graduation-cap" aria-hidden="true"></i>
               {% endif %}
               <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}">
               {{ enrollment.course }} </a> | {{ enrollment.grade_honest|lower }}
             {% else %}
-              {% if enrollment.view_invited%}
+              {% if can_view_course_icons and enrollment.view_invited%}
                 <i style="font-size:14px; opacity: 0.5;" class="fa">&#xf069;</i>
               {% endif %}
-              {% if enrollment.view_partner%}
+              {% if can_view_course_icons and enrollment.view_partner%}
                 <i style="opacity: 0.5;" class="fa fa-graduation-cap" aria-hidden="true"></i>
               {% endif %}
               <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}" style="opacity: 0.5;">
