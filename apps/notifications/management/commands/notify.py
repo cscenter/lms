@@ -120,7 +120,8 @@ def send_notification(notification, template, context, stdout,
     report(stdout, f"sending {notification} ({template})")
     try:
         # FIXME: use .send_messages instead to reuse connection and Keep-Alive feature
-        msg.send()
+        pass
+        # msg.send()
     except smtplib.SMTPException as e:
         site_settings.service_health_status = EmailServiceHealthCheck.FAIL
         logger.exception(e)

@@ -94,7 +94,7 @@ class NotificationService:
                                      [notification.recipient.email],
                                      reply_to=[self.get_reply_to()])
         msg.attach_alternative(html_content, "text/html")
-        msg.send()
+        # msg.send()
         Notification.objects.filter(pk=notification.pk).update(emailed=True)
 
     def get_context(self, notification):
