@@ -53,7 +53,9 @@ class ApplicationFormView(TemplateView):
                 .values('value', 'label', 'campaign_id')
         )
 
-        show_form = len(always_allow_campaigns) > 0
+        # show_form must be len(always_allow_campaigns) > 0
+        # Temporary made True for curator purposes
+        show_form = True
         context["show_form"] = show_form
         utm_params = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]
         utm = {param: self.request.GET.get(param) for param in utm_params}
