@@ -35,9 +35,14 @@ def test_command_notify(settings, mocker):
     an = AssignmentNotificationFactory(is_about_passed=True,
                                        user=student)
     management.call_command("notify", stdout=out)
-    assert len(mail.outbox) == 1
-    assert AssignmentNotification.objects.get(pk=an.pk).is_notified
-    assert "sending notification for" in out.getvalue()
+    if settings.ENABLE_NON_AUTH_NOTIFICATIONS:
+        assert len(mail.outbox) == 1
+        assert AssignmentNotification.objects.get(pk=an.pk).is_notified
+        assert "sending notification for" in out.getvalue()
+    else:
+        assert not mail.outbox
+        assert not AssignmentNotification.objects.get(pk=an.pk).is_notified
+        assert "sending notification for" not in out.getvalue()
 
     out = OutputIO()
     mail.outbox = []
@@ -51,10 +56,16 @@ def test_command_notify(settings, mocker):
     conn = CourseNewsNotificationFactory.create(user=student)
     course = conn.course_offering_news.course
     management.call_command("notify", stdout=out)
-    assert len(mail.outbox) == 1
-    conn.refresh_from_db()
-    assert conn.is_notified
-    assert "sending notification for" in out.getvalue()
+    if settings.ENABLE_NON_AUTH_NOTIFICATIONS:
+        assert len(mail.outbox) == 1
+        conn.refresh_from_db()
+        assert conn.is_notified
+        assert "sending notification for" in out.getvalue()
+    else:
+        assert not mail.outbox
+        conn.refresh_from_db()
+        assert not conn.is_notified
+        assert "sending notification for" not in out.getvalue()
 
 
 @pytest.mark.django_db

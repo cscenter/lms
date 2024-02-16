@@ -654,3 +654,5 @@ LOGGING = {
 # ------------------------------------------------------------------------------
 ENVIRONMENT_NAME = env.str("ENVIRONMENT_NAME", default="Production Server")
 ENVIRONMENT_COLOR = env.str("ENVIRONMENT_COLOR", default="#FF2222")
+
+ENABLE_NON_AUTH_NOTIFICATIONS = False

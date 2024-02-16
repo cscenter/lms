@@ -90,46 +90,46 @@ def send_notification(notification, template, context, stdout,
                       site_settings: SiteConfiguration):
     """Sends email notification, then updates notification state in DB"""
     # XXX: Note that email is mandatory now
-    if not notification.user.email:
-        report(stdout, f"User {notification.user} has no email")
+    if settings.ENABLE_NON_AUTH_NOTIFICATIONS:
+        if not notification.user.email:
+            report(stdout, f"User {notification.user} has no email")
+            notification.is_notified = True
+            notification.save()
+            return
+
+        service_health_status = getattr(site_settings, 'service_health_status', None)
+        if service_health_status is None:
+            raise EmailServiceError(f'Unknown smtp health status for {site_settings}')
+        elif service_health_status == EmailServiceHealthCheck.FAIL:
+            msg = (f"skip {notification}. SMTP "
+                   f"service {site_settings.default_from_email} is unavailable.")
+            report(stdout, msg)
+            return
+
+        connection = get_email_connection(site_settings)
+        from_email = site_settings.default_from_email
+        subject = "[{}] {}".format(context['course_name'], template['subject'])
+        html_content = linebreaks(render_to_string(template['template_name'],
+                                                   context))
+        text_content = strip_tags(html_content)
+        msg = EmailMultiAlternatives(subject=subject,
+                                     body=text_content,
+                                     from_email=from_email,
+                                     to=[notification.user.email],
+                                     connection=connection)
+        msg.attach_alternative(html_content, "text/html")
+        report(stdout, f"sending {notification} ({template})")
+        try:
+            # FIXME: use .send_messages instead to reuse connection and Keep-Alive feature
+            msg.send()
+        except smtplib.SMTPException as e:
+            site_settings.service_health_status = EmailServiceHealthCheck.FAIL
+            logger.exception(e)
+            report(stdout, f"SMTP service {site_settings.default_from_email} is unhealthy")
+            return
         notification.is_notified = True
         notification.save()
-        return
-
-    service_health_status = getattr(site_settings, 'service_health_status', None)
-    if service_health_status is None:
-        raise EmailServiceError(f'Unknown smtp health status for {site_settings}')
-    elif service_health_status == EmailServiceHealthCheck.FAIL:
-        msg = (f"skip {notification}. SMTP "
-               f"service {site_settings.default_from_email} is unavailable.")
-        report(stdout, msg)
-        return
-
-    connection = get_email_connection(site_settings)
-    from_email = site_settings.default_from_email
-    subject = "[{}] {}".format(context['course_name'], template['subject'])
-    html_content = linebreaks(render_to_string(template['template_name'],
-                                               context))
-    text_content = strip_tags(html_content)
-    msg = EmailMultiAlternatives(subject=subject,
-                                 body=text_content,
-                                 from_email=from_email,
-                                 to=[notification.user.email],
-                                 connection=connection)
-    msg.attach_alternative(html_content, "text/html")
-    report(stdout, f"sending {notification} ({template})")
-    try:
-        # FIXME: use .send_messages instead to reuse connection and Keep-Alive feature
-        pass
-        # msg.send()
-    except smtplib.SMTPException as e:
-        site_settings.service_health_status = EmailServiceHealthCheck.FAIL
-        logger.exception(e)
-        report(stdout, f"SMTP service {site_settings.default_from_email} is unhealthy")
-        return
-    notification.is_notified = True
-    notification.save()
-    time.sleep(settings.EMAIL_SEND_COOLDOWN)
+        time.sleep(settings.EMAIL_SEND_COOLDOWN)
 
 
 def get_assignment_notification_template(notification: AssignmentNotification):

@@ -70,32 +70,33 @@ class NotificationService:
 
     @atomic
     def notify(self, notification):
-        from notifications.models import Notification
-        try:
-            context = self.get_context(notification)
-        except ObjectDoesNotExist:
-            self.logger.exception("Can't get context for {}".format(
-                notification.pk))
-            Notification.objects.filter(pk=notification.pk).update(deleted=True)
-            return
-        if not notification.recipient.email:
-            self.logger.warning("user {0} doesn't have an email. Mark "
-                                "as deleted".format(notification.recipient))
-            Notification.objects.filter(pk=notification.pk).update(deleted=True)
-            return
+        if settings.ENABLE_NON_AUTH_NOTIFICATIONS:
+            from notifications.models import Notification
+            try:
+                context = self.get_context(notification)
+            except ObjectDoesNotExist:
+                self.logger.exception("Can't get context for {}".format(
+                    notification.pk))
+                Notification.objects.filter(pk=notification.pk).update(deleted=True)
+                return
+            if not notification.recipient.email:
+                self.logger.warning("user {0} doesn't have an email. Mark "
+                                    "as deleted".format(notification.recipient))
+                Notification.objects.filter(pk=notification.pk).update(deleted=True)
+                return
 
-        html_content = linebreaks(self._cached_template.render(context))
-        # FIXME: Don't strip links
-        text_content = strip_tags(html_content)
+            html_content = linebreaks(self._cached_template.render(context))
+            # FIXME: Don't strip links
+            text_content = strip_tags(html_content)
 
-        msg = EmailMultiAlternatives(self.get_subject(notification),
-                                     text_content,
-                                     settings.DEFAULT_FROM_EMAIL,
-                                     [notification.recipient.email],
-                                     reply_to=[self.get_reply_to()])
-        msg.attach_alternative(html_content, "text/html")
-        # msg.send()
-        Notification.objects.filter(pk=notification.pk).update(emailed=True)
+            msg = EmailMultiAlternatives(self.get_subject(notification),
+                                         text_content,
+                                         settings.DEFAULT_FROM_EMAIL,
+                                         [notification.recipient.email],
+                                         reply_to=[self.get_reply_to()])
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+            Notification.objects.filter(pk=notification.pk).update(emailed=True)
 
     def get_context(self, notification):
         return {}

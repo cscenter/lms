@@ -323,8 +323,11 @@ def test_new_assignment_notification_context_timezone(settings, mocker):
     out = StringIO()
     mail.outbox = []
     management.call_command("notify", stdout=out)
-    assert len(mail.outbox) == 1
-    assert dt_str in mail.outbox[0].body
+    if settings.ENABLE_NON_AUTH_NOTIFICATIONS:
+        assert len(mail.outbox) == 1
+        assert dt_str in mail.outbox[0].body
+    else:
+        assert not mail.outbox
     # If student is enrolled in the course, show assignments in the
     # timezone of the student.
     student.time_zone = branch_nsk.time_zone
@@ -334,8 +337,11 @@ def test_new_assignment_notification_context_timezone(settings, mocker):
     out = StringIO()
     mail.outbox = []
     management.call_command("notify", stdout=out)
-    assert len(mail.outbox) == 1
-    assert "22:00 04 февраля" in mail.outbox[0].body
+    if settings.ENABLE_NON_AUTH_NOTIFICATIONS:
+        assert len(mail.outbox) == 1
+        assert "22:00 04 февраля" in mail.outbox[0].body
+    else:
+        assert not mail.outbox
 
 
 @pytest.mark.parametrize("site_domain,lms_subdomain",
@@ -438,8 +444,11 @@ def test_changed_assignment_deadline_notifications_timezone(settings, mocker):
     out = StringIO()
     mail.outbox = []
     management.call_command("notify", stdout=out)
-    assert len(mail.outbox) == 1
-    assert "22:00 04 февраля" in mail.outbox[0].body
+    if settings.ENABLE_NON_AUTH_NOTIFICATIONS:
+        assert len(mail.outbox) == 1
+        assert "22:00 04 февраля" in mail.outbox[0].body
+    else:
+        assert not mail.outbox
     # Change student time zone
     student.time_zone = branch_spb.time_zone
     student.save()
@@ -448,8 +457,11 @@ def test_changed_assignment_deadline_notifications_timezone(settings, mocker):
     out = StringIO()
     mail.outbox = []
     management.call_command("notify", stdout=out)
-    assert len(mail.outbox) == 1
-    assert "18:00 04 февраля" in mail.outbox[0].body
+    if settings.ENABLE_NON_AUTH_NOTIFICATIONS:
+        assert len(mail.outbox) == 1
+        assert "18:00 04 февраля" in mail.outbox[0].body
+    else:
+        assert not mail.outbox
 
 
 @pytest.mark.django_db
