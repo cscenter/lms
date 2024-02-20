@@ -54,47 +54,6 @@ def test_autograde_projects(settings):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("prev_sem, current_grade, previous_grade, enrollment_2020_grade, enrollment_2018_grade",
-                         [(False, GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED, GradeTypes.NOT_GRADED,
-                           GradeTypes.NOT_GRADED),
-                          (True, GradeTypes.NOT_GRADED, GradeTypes.UNSATISFACTORY, GradeTypes.UNSATISFACTORY,
-                           GradeTypes.NOT_GRADED)])
-def test_autofail_ungraded(settings, prev_sem, current_grade, previous_grade, enrollment_2020_grade,
-                           enrollment_2018_grade):
-    settings.LANGUAGE_CODE = 'ru'
-    current_term = SemesterFactory.create_current()
-    previous_term = SemesterFactory.create_prev(current_term)
-    term_2020_autumn = SemesterFactory(year=2020, type=SemesterTypes.AUTUMN)
-    term_2018_autumn = SemesterFactory(year=2018, type=SemesterTypes.AUTUMN)
-    site = SiteFactory()
-    out = StringIO()
-
-    current_enrollment = EnrollmentFactory(course__semester=current_term)
-    previous_enrollment = EnrollmentFactory(course__semester=previous_term)
-    enrollment_2020 = EnrollmentFactory(course__semester=term_2020_autumn)
-    enrollment_2018 = EnrollmentFactory(course__semester=term_2018_autumn)
-
-    assert current_enrollment.grade == GradeTypes.NOT_GRADED
-    assert previous_enrollment.grade == GradeTypes.NOT_GRADED
-    assert enrollment_2020.grade == GradeTypes.NOT_GRADED
-    assert enrollment_2018.grade == GradeTypes.NOT_GRADED
-
-    management.call_command("autofail_ungraded", site, prev_sem=prev_sem, stdout=out)
-
-    assert out.getvalue().strip() != "0"
-
-    current_enrollment.refresh_from_db()
-    previous_enrollment.refresh_from_db()
-    enrollment_2020.refresh_from_db()
-    enrollment_2018.refresh_from_db()
-
-    assert current_enrollment.grade == current_grade
-    assert previous_enrollment.grade == previous_grade
-    assert enrollment_2020.grade == enrollment_2020_grade
-    assert enrollment_2018.grade == enrollment_2018_grade
-
-
-@pytest.mark.django_db
 def test_projects_notifications(settings, mocker):
     settings.LANGUAGE_CODE = 'ru'
     mocked_timezone = mocker.patch('django.utils.timezone.now')

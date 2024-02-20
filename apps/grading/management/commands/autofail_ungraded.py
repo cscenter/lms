@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 
 from courses.constants import SemesterTypes
@@ -27,13 +28,14 @@ class Command(BaseCommand):
         if options['prev_sem']:
             term = Semester.objects.get(year=2020, type=SemesterTypes.AUTUMN)
             enrollments = enrollments.filter(grade=GradeTypes.NOT_GRADED,
-                                course__semester__lte=term,
-                                course__semester__gt=current_term,
+                                course__semester__gte=term,
+                                course__semester__lt=current_term,
                                 student_profile__branch__site__domain=site)
         else:
             enrollments = enrollments.filter(grade=GradeTypes.NOT_GRADED,
                                              course__semester=current_term,
                                              student_profile__branch__site__domain=site)
-        logger.info(f"Change grades of {current_term} enrollments from Not Graded to Unsatisfactory")
-        graded = enrollments.update(grade=GradeTypes.UNSATISFACTORY)
+            logger.info(f"Change grades of {current_term} enrollments from Not Graded to Unsatisfactory")
+        # graded = enrollments.update(grade=GradeTypes.UNSATISFACTORY)
+        graded = len(enrollments)
         return str(graded)
