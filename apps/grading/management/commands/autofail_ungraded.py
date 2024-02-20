@@ -1,6 +1,5 @@
 import logging
 
-from django.contrib.sites.models import Site
 from django.core.management import BaseCommand
 
 from courses.constants import SemesterTypes
@@ -36,6 +35,5 @@ class Command(BaseCommand):
                                              course__semester=current_term,
                                              student_profile__branch__site__domain=site)
             logger.info(f"Change grades of {current_term} enrollments from Not Graded to Unsatisfactory")
-        # graded = enrollments.update(grade=GradeTypes.UNSATISFACTORY)
-        graded = len(enrollments)
+        graded = enrollments.update(grade=GradeTypes.UNSATISFACTORY)
         return str(graded)
