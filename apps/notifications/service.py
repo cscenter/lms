@@ -84,6 +84,11 @@ class NotificationService:
                                     "as deleted".format(notification.recipient))
                 Notification.objects.filter(pk=notification.pk).update(deleted=True)
                 return
+            if not notification.recipient.is_notification_allowed:
+                self.logger.warning("user {0} disabled notifications. Mark "
+                                    "as deleted".format(notification.recipient))
+                Notification.objects.filter(pk=notification.pk).update(deleted=True)
+                return
 
             html_content = linebreaks(self._cached_template.render(context))
             # FIXME: Don't strip links

@@ -66,7 +66,7 @@ class UserProfileForm(forms.ModelForm):
         model = User
         fields = ('birth_date', 'phone', 'workplace', 'bio', 'time_zone',
                   'telegram_username', 'yandex_login', 'github_login', 'stepic_id', 'codeforces_login',
-                  'private_contacts')
+                  'private_contacts', 'is_notification_allowed')
         widgets = {
             'bio': UbereditorWidget,
             'private_contacts': UbereditorWidget,
@@ -84,7 +84,8 @@ class UserProfileForm(forms.ModelForm):
             'github_login': "github.com/<b>GITHUB-ID</b>",
             'stepic_id': _("stepik.org/users/<b>USER_ID</b>"),
             'codeforces_login': _("codeforces.com/profile/<b>HANDLE</b>"),
-            'workplace': _("Specify one or more jobs (comma-separated)")
+            'workplace': _("Specify one or more jobs (comma-separated)"),
+            'is_notification_allowed': _("Не касается уведомлений аутентификации")
         }
 
 

@@ -328,6 +328,14 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
             'explicitly assigning them.'
         ),
     )
+
+    is_notification_allowed = models.BooleanField(
+        _('notification permission status'),
+        default=True,
+        help_text=_(
+            'Designates that this user enabled email notifications '
+        ),
+    )
     gender = models.CharField(_("Gender"), max_length=1,
                               choices=GenderTypes.choices)
     phone = models.CharField(
