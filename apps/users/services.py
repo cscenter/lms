@@ -4,6 +4,7 @@ from enum import Enum, auto
 from itertools import islice
 from typing import Any, Dict, List, Optional, Tuple
 
+from django.db.models.functions import Coalesce
 from registration.models import RegistrationProfile
 
 from django.contrib.sites.models import Site
@@ -248,7 +249,7 @@ def get_student_profile(user: User, site, profile_type=None,
     student_profile = (StudentProfile.objects
                        .filter(*filters, user=user, site=site)
                        .select_related('branch')
-                       .order_by('priority', '-year_of_admission', '-pk')
+                       .order_by(Coalesce('year_of_curriculum', 'year_of_admission').desc(), 'priority', '-pk')
                        .first())
     if student_profile is not None:
         # Invalidate cache on user model if the profile has been changed
@@ -265,7 +266,7 @@ def get_student_profiles(*, user: User, site: Site,
     student_profiles = list(StudentProfile.objects
                             .filter(user=user, site=site)
                             .select_related(*select_related)
-                            .order_by('priority', '-year_of_admission', '-pk'))
+                            .order_by(Coalesce('year_of_curriculum', 'year_of_admission').desc(), 'priority', '-pk'))
     syllabus_data = [(sp.year_of_curriculum, sp.branch_id) for sp
                      in student_profiles if sp.year_of_curriculum]
     if syllabus_data:
