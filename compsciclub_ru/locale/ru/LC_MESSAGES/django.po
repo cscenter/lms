@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-27 18:28+0300\n"
+"POT-Creation-Date: 2023-03-30 01:19+0000\n"
 "PO-Revision-Date: 2020-09-09 04:43+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,8 +16,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.9.4\n"
 
 #: compsciclub_ru/apps/international_schools/apps.py:7
@@ -67,35 +67,228 @@ msgstr ""
 msgid "Submit"
 msgstr "Отправить"
 
-#: compsciclub_ru/jinja2/lms/layouts/v1_base.html:82
-#: compsciclub_ru/templates/base.html:86
-msgid "гг."
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:21
+msgid "What"
 msgstr ""
 
-#: compsciclub_ru/templates/_top_menu.html:31
-msgid "Profile"
-msgstr "Профиль"
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:25
+msgid "When"
+msgstr ""
 
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:29
+msgid "Where"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:34
+msgid "Slides"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:41
+msgid "Description"
+msgstr "Описание"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:49
+msgid "Video"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:53
+msgid "Attached files"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:66
+msgid "Other materials"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:24
+msgid ""
+"Enroll in the course to get notifications and to be able to submit home "
+"assignments."
+msgstr ""
+"Запишитесь на курс, чтобы получать уведомления и иметь возможность сдавать "
+"домашние задания. Для записи требуется регистрация на сайте."
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:25
+msgid "Register to enroll now"
+msgstr "Перейти к регистрации"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:25
+#: compsciclub_ru/jinja2/lms/layouts/_top_menu.html:31
 #: compsciclub_ru/templates/_top_menu.html:36
 msgid "Login"
 msgstr "Войти"
 
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:66
+msgid "Date and time"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:67
+msgid "Class|Name"
+msgstr "Занятие"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:68
+msgid "Venue|short"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:69
+msgid "Materials"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:76
+msgid "Lecture"
+msgstr "Лекция"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:76
+msgid "Seminar"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:87
+msgid "No"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_offerings.html:8
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:22
+msgid "Courses"
+msgstr "Курсы"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_offerings.html:38
+msgid "No courses yet"
+msgstr "Курсов пока нет"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:5
+msgid "Author photo"
+msgstr "Автор фото"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:5
+msgid "Andrey Salnikov"
+msgstr "Андрей Сальников"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:10
+msgid ""
+"\n"
+"      The main goal of the Club is to provide undergraduate and graduate "
+"students, as well as professionals, access to high quality education in the "
+"area of Computer Science. Attendance is open to everyone and is free of "
+"charge.\n"
+"    "
+msgstr ""
+"\n"
+"<p>Computer Science клуб — это открытые лекции и курсы. В клубе любой "
+"желающий может познакомиться с классическими результатами, современным "
+"положением дел и открытыми задачами в различных областях Computer Science. "
+"Вход на лекции свободный, регистрация не требуется, посещать курсы можно "
+"начать в любое время.</p>"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:16
+msgid ""
+"\n"
+"      The main goal of the Club is to provide undergraduate and graduate "
+"students, as well as professionals, access to high quality education in the "
+"area of Computer Science. Attendance is open to everyone and is free of "
+"charge.\n"
+"      "
+msgstr ""
+"\n"
+"<p>Computer Science клуб — это открытые лекции и курсы. В клубе любой "
+"желающий может познакомиться с классическими результатами, современным "
+"положением дел и открытыми задачами в различных областях Computer Science. "
+"Вход на лекции свободный, регистрация не требуется, посещать курсы можно "
+"начать в любое время.</p>"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:26
+msgid "Course name"
+msgstr "Название курса"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:27
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_list.html:7
+msgid "Teachers"
+msgstr "Преподаватели"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:28
+msgid "Next lecture"
+msgstr "Следующая лекция"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:29
+#: compsciclub_ru/jinja2/lms/layouts/v1_base.html:61
+#: compsciclub_ru/templates/base.html:65
+msgid "Language"
+msgstr "Язык"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:44
+msgid "The course is completed"
+msgstr "Курс завершён"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:46
+msgid "To be announced"
+msgstr "Дата будет объявлена позже"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:50
+msgid "Russian"
+msgstr "Русский"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/index.html:50
+msgid "English"
+msgstr "Английский"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/meta_course_detail.html:11
+msgid "Edit"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/meta_course_detail.html:22
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:29
+msgid "Course Offerings"
+msgstr "Прочтения курсов"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/meta_course_detail.html:26
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:34
+msgid "Semester"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/meta_course_detail.html:27
+msgid "Branch"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:21
+msgid "Contact information"
+msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:33
+msgid "Course"
+msgstr "Курс"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:47
+msgid "Photos"
+msgstr "Фотографии"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:65
+#: compsciclub_ru/jinja2/lms/layouts/_top_menu.html:26
+#: compsciclub_ru/templates/_top_menu.html:31
+msgid "Profile"
+msgstr "Профиль"
+
+#: compsciclub_ru/jinja2/lms/layouts/_top_menu.html:28
+msgid "Logout"
+msgstr ""
+
+#: compsciclub_ru/jinja2/lms/layouts/_top_menu.html:34
 #: compsciclub_ru/templates/_top_menu.html:39
 #: compsciclub_ru/templates/registration/registration_form.html:10
 msgid "Registration"
 msgstr "Регистрация"
 
+#: compsciclub_ru/jinja2/lms/layouts/v1_base.html:52
 #: compsciclub_ru/templates/base.html:55
 msgid "Admin"
 msgstr "Админка"
 
+#: compsciclub_ru/jinja2/lms/layouts/v1_base.html:58
 #: compsciclub_ru/templates/base.html:62
 msgid "City"
 msgstr "Город"
 
-#: compsciclub_ru/templates/base.html:65
-msgid "Language"
-msgstr "Язык"
+#: compsciclub_ru/jinja2/lms/layouts/v1_base.html:82
+#: compsciclub_ru/templates/base.html:86
+msgid "гг."
+msgstr ""
 
 #: compsciclub_ru/templates/base.html:117
 msgid "close all"
@@ -217,97 +410,6 @@ msgstr "Регистрация аккаунта на"
 #: compsciclub_ru/translation.py:3
 msgid "Can be passed online"
 msgstr "Можно сдать через сайт CS клуба"
-
-#~ msgid "Description"
-#~ msgstr "Описание"
-
-#~ msgid ""
-#~ "Enroll in the course to get notifications and to be able to submit home "
-#~ "assignments."
-#~ msgstr ""
-#~ "Запишитесь на курс, чтобы получать уведомления и иметь возможность "
-#~ "сдавать домашние задания. Для записи требуется регистрация на сайте."
-
-#~ msgid "Register to enroll now"
-#~ msgstr "Перейти к регистрации"
-
-#~ msgid "Class|Name"
-#~ msgstr "Занятие"
-
-#~ msgid "Lecture"
-#~ msgstr "Лекция"
-
-#~ msgid "Courses"
-#~ msgstr "Курсы"
-
-#~ msgid "No courses yet"
-#~ msgstr "Курсов пока нет"
-
-#~ msgid "Author photo"
-#~ msgstr "Автор фото"
-
-#~ msgid "Andrey Salnikov"
-#~ msgstr "Андрей Сальников"
-
-#~ msgid ""
-#~ "\n"
-#~ "      The main goal of the Club is to provide undergraduate and graduate "
-#~ "students, as well as professionals, access to high quality education in "
-#~ "the area of Computer Science. Attendance is open to everyone and is free "
-#~ "of charge.\n"
-#~ "    "
-#~ msgstr ""
-#~ "\n"
-#~ "<p>Computer Science клуб — это открытые лекции и курсы. В клубе любой "
-#~ "желающий может познакомиться с классическими результатами, современным "
-#~ "положением дел и открытыми задачами в различных областях Computer "
-#~ "Science. Вход на лекции свободный, регистрация не требуется, посещать "
-#~ "курсы можно начать в любое время.</p>"
-
-#~ msgid ""
-#~ "\n"
-#~ "      The main goal of the Club is to provide undergraduate and graduate "
-#~ "students, as well as professionals, access to high quality education in "
-#~ "the area of Computer Science. Attendance is open to everyone and is free "
-#~ "of charge.\n"
-#~ "      "
-#~ msgstr ""
-#~ "\n"
-#~ "<p>Computer Science клуб — это открытые лекции и курсы. В клубе любой "
-#~ "желающий может познакомиться с классическими результатами, современным "
-#~ "положением дел и открытыми задачами в различных областях Computer "
-#~ "Science. Вход на лекции свободный, регистрация не требуется, посещать "
-#~ "курсы можно начать в любое время.</p>"
-
-#~ msgid "Course name"
-#~ msgstr "Название курса"
-
-#~ msgid "Teachers"
-#~ msgstr "Преподаватели"
-
-#~ msgid "Next lecture"
-#~ msgstr "Следующая лекция"
-
-#~ msgid "The course is completed"
-#~ msgstr "Курс завершён"
-
-#~ msgid "To be announced"
-#~ msgstr "Дата будет объявлена позже"
-
-#~ msgid "Russian"
-#~ msgstr "Русский"
-
-#~ msgid "English"
-#~ msgstr "Английский"
-
-#~ msgid "Course Offerings"
-#~ msgstr "Прочтения курсов"
-
-#~ msgid "Course"
-#~ msgstr "Курс"
-
-#~ msgid "Photos"
-#~ msgstr "Фотографии"
 
 #~ msgid "teacher"
 #~ msgstr "преподаватель"

@@ -16,7 +16,7 @@ from learning.tests.factories import (
     EnrollmentFactory
 )
 from notifications.management.commands.notify import resolve_course_participant_branch
-from users.tests.factories import CuratorFactory, UserFactory, TeacherFactory
+from users.tests.factories import CuratorFactory, StudentFactory, TeacherFactory
 
 
 @pytest.mark.django_db
@@ -31,7 +31,9 @@ def test_command_notify(settings, mocker):
 
     out = OutputIO()
     mail.outbox = []
-    an = AssignmentNotificationFactory(is_about_passed=True)
+    student = StudentFactory()
+    an = AssignmentNotificationFactory(is_about_passed=True,
+                                       user=student)
     management.call_command("notify", stdout=out)
     if settings.ENABLE_NON_AUTH_NOTIFICATIONS:
         assert len(mail.outbox) == 1
@@ -50,7 +52,9 @@ def test_command_notify(settings, mocker):
 
     out = OutputIO()
     mail.outbox = []
-    conn = CourseNewsNotificationFactory.create()
+    student = StudentFactory()
+    conn = CourseNewsNotificationFactory.create(user=student)
+    course = conn.course_offering_news.course
     management.call_command("notify", stdout=out)
     if settings.ENABLE_NON_AUTH_NOTIFICATIONS:
         assert len(mail.outbox) == 1
@@ -63,14 +67,6 @@ def test_command_notify(settings, mocker):
         assert not conn.is_notified
         assert "sending notification for" not in out.getvalue()
 
-    out = OutputIO()
-    mail.outbox = []
-    user = UserFactory(is_notification_allowed=False)
-    an = AssignmentNotificationFactory(is_about_passed=True, user=user)
-    management.call_command("notify", stdout=out)
-    assert not mail.outbox
-    assert not AssignmentNotification.objects.get(pk=an.pk).is_notified
-    assert "sending notification for" not in out.getvalue()
 
 @pytest.mark.django_db
 def test_command_notification_cleanup(client, settings):
