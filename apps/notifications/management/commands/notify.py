@@ -234,8 +234,7 @@ def send_assignment_notifications(site_configurations: Dict[int, SiteConfigurati
         'student_assignment__student',
     ]
     notifications = (AssignmentNotification.objects
-                     .filter(is_unread=True,
-                             is_notified=False)
+                     .filter(is_unread=True, is_notified=False, user__is_notification_allowed=True)
                      .select_related("user", "user__branch")
                      .prefetch_related(*prefetch))
     for notification in notifications:
@@ -256,7 +255,7 @@ def send_course_news_notifications(site_configurations: Dict[int, SiteConfigurat
         'course_offering_news__course__semester',
     ]
     notifications = (CourseNewsNotification.objects
-                     .filter(is_unread=True, is_notified=False)
+                     .filter(is_unread=True, is_notified=False, user__is_notification_allowed=True)
                      .select_related("user", "course_offering_news")
                      .prefetch_related(*prefetch))
     for notification in notifications:
