@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-27 18:28+0300\n"
+"POT-Creation-Date: 2024-03-02 13:37+0000\n"
 "PO-Revision-Date: 2023-03-30 01:14+0000\n"
 "Last-Translator:   <user.1@compscicenter.ru>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,7 +101,8 @@ msgstr "Пароль"
 msgid "You can also <a href=\"{0}\">restore your password</a>"
 msgstr "Вы также можете <a href=\"{0}\">восстановить ваш пароль</a>"
 
-#: apps/auth/forms.py:64 lms/templates/_top_menu.html:50
+#: apps/auth/forms.py:64 lms/jinja2/lms/layouts/_top_menu.html:47
+#: lms/templates/_top_menu.html:50
 msgid "Login"
 msgstr "Войти"
 
@@ -175,10 +176,14 @@ msgstr "Кем изменено"
 
 #: apps/core/forms.py:7 apps/templates/forms/simple_delete_confirmation.html:22
 #: apps/templates/learning/enrollment/enrollment_leave.html:25
+#: lms/jinja2/lms/courses/course_class_form.html:79
 msgid "Cancel"
 msgstr "Отмена"
 
-#: apps/core/forms.py:10 apps/users/forms.py:97
+#: apps/core/forms.py:10 apps/users/forms.py:98
+#: lms/jinja2/lms/courses/course_class_form.html:80
+#: lms/jinja2/lms/gradebook/gradebook_form.html:33
+#: lms/jinja2/lms/user_profile/_profile_upload_photo.html:40
 msgid "Save"
 msgstr "Сохранить"
 
@@ -257,6 +262,7 @@ msgstr "Сайт"
 #: apps/courses/models.py:70 apps/courses/models.py:280
 #: apps/courses/models.py:825 apps/learning/models.py:1067
 #: apps/templates/learning/event_detail.html:29
+#: lms/jinja2/lms/courses/course_class_detail.html:53
 msgid "Description"
 msgstr "Описание"
 
@@ -271,6 +277,7 @@ msgstr "Общее описание, правила обучения"
 #: apps/library/models.py:66 apps/study_programs/models.py:61
 #: apps/templates/learning/invitation/complete_profile.html:23
 #: apps/users/models.py:176 apps/users/models.py:358 apps/users/models.py:802
+#: lms/jinja2/lms/courses/meta_detail.html:27
 msgid "Branch"
 msgstr "Отделение"
 
@@ -325,6 +332,7 @@ msgstr "Имя"
 
 #: apps/core/models.py:373 apps/universities/models.py:51
 #: apps/universities/models.py:70 apps/users/models.py:818
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:126
 msgid "University"
 msgstr "Университет"
 
@@ -447,11 +455,15 @@ msgstr "лето"
 msgid "autumn"
 msgstr "осень"
 
-#: apps/courses/constants.py:36
+#: apps/courses/constants.py:36 lms/jinja2/lms/courses/course_detail.html:115
+#: lms/jinja2/lms/learning/timetable.html:55
+#: lms/jinja2/lms/teaching/timetable.html:53
 msgid "Lecture"
 msgstr "Лекция"
 
-#: apps/courses/constants.py:37
+#: apps/courses/constants.py:37 lms/jinja2/lms/courses/course_detail.html:115
+#: lms/jinja2/lms/learning/timetable.html:57
+#: lms/jinja2/lms/teaching/timetable.html:55
 msgid "Seminar"
 msgstr "Семинар"
 
@@ -568,6 +580,7 @@ msgstr "Описание"
 #: apps/courses/forms.py:134 apps/courses/forms.py:297
 #: apps/info_blocks/models.py:40 apps/learning/gallery/models.py:34
 #: apps/templates/international_schools/international_schools.html:16
+#: lms/jinja2/lms/courses/course_detail.html:148
 msgid "Title"
 msgstr "Название"
 
@@ -590,10 +603,13 @@ msgid "CourseClass|Name"
 msgstr "Название"
 
 #: apps/courses/forms.py:176 apps/courses/models.py:829
+#: lms/jinja2/lms/courses/course_class_detail.html:46
 msgid "Slides"
 msgstr "Слайды"
 
 #: apps/courses/forms.py:180 apps/courses/forms.py:312
+#: lms/jinja2/lms/courses/course_class_detail.html:66
+#: lms/jinja2/lms/teaching/assignment_detail.html:54
 msgid "Attached files"
 msgstr "Приложенные файлы"
 
@@ -630,7 +646,7 @@ msgstr "Конец"
 
 #: apps/courses/forms.py:203 apps/courses/forms.py:309
 #: apps/courses/models.py:821 apps/courses/models.py:1073
-#: apps/users/models.py:362
+#: apps/users/models.py:362 lms/jinja2/lms/user_profile/_tab_account.html:135
 msgid "Time Zone"
 msgstr "Часовой пояс"
 
@@ -668,11 +684,18 @@ msgid ""
 "for this problem."
 msgstr ""
 
-#: apps/courses/forms.py:304
+#: apps/courses/forms.py:304 lms/jinja2/lms/courses/course_detail.html:147
+#: lms/jinja2/lms/study/assignment_list.html:24
+#: lms/jinja2/lms/study/assignment_list.html:86
+#: lms/jinja2/lms/study/student_assignment_detail.html:141
+#: lms/jinja2/lms/teaching/assignment_detail.html:35
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:232
 msgid "Deadline"
 msgstr "Срок сдачи"
 
 #: apps/courses/forms.py:317 apps/courses/models.py:1085
+#: lms/jinja2/lms/study/student_assignment_detail.html:147
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:240
 msgid "Passing score"
 msgstr "Проходной балл"
 
@@ -681,6 +704,9 @@ msgid "Maximum score"
 msgstr "Максимальный балл"
 
 #: apps/courses/forms.py:323 apps/courses/models.py:1093
+#: lms/jinja2/lms/study/student_assignment_detail.html:150
+#: lms/jinja2/lms/teaching/assignment_detail.html:42
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:245
 msgid "Assignment Weight"
 msgstr "Вес задания"
 
@@ -791,7 +817,10 @@ msgstr "Системное поле. Используется для сорти�
 #: apps/courses/models.py:115 apps/courses/models.py:271
 #: apps/learning/gallery/models.py:83 apps/learning/models.py:284
 #: apps/learning/models.py:515 apps/users/admin.py:181
-#: apps/users/models.py:1022
+#: apps/users/models.py:1022 lms/jinja2/lms/courses/meta_detail.html:26
+#: lms/jinja2/lms/courses/teacher_detail.html:32
+#: lms/jinja2/lms/study/course_list.html:103
+#: lms/jinja2/lms/teaching/course_list.html:11
 msgid "Semester"
 msgstr "Семестр"
 
@@ -823,6 +852,11 @@ msgstr "Обложка"
 #: apps/courses/models.py:597 apps/courses/models.py:725
 #: apps/courses/models.py:808 apps/learning/admin.py:239
 #: apps/learning/study/forms.py:77
+#: lms/jinja2/lms/courses/teacher_detail.html:31
+#: lms/jinja2/lms/learning/timetable.html:34
+#: lms/jinja2/lms/study/assignment_list.html:26
+#: lms/jinja2/lms/study/assignment_list.html:88
+#: lms/jinja2/lms/teaching/timetable.html:36
 msgid "Course"
 msgstr "Курс"
 
@@ -888,7 +922,7 @@ msgstr ""
 "Поле увидят только слушатели курса. Доступны LaTeX для формул, Markdown и "
 "HTML"
 
-#: apps/courses/models.py:289
+#: apps/courses/models.py:289 lms/jinja2/lms/courses/course_detail.html:62
 msgid "Contacts"
 msgstr "Контакты"
 
@@ -986,10 +1020,11 @@ msgstr "Публичные приложения"
 #: apps/courses/models.py:374 apps/courses/models.py:1070
 #: apps/learning/gallery/models.py:49 apps/learning/models.py:67
 #: apps/learning/models.py:358 apps/learning/models.py:472
+#: lms/jinja2/lms/user_profile/_tab_assignments.html:10
 msgid "Course offering"
 msgstr "Прочтение курса"
 
-#: apps/courses/models.py:375
+#: apps/courses/models.py:375 lms/jinja2/lms/courses/teacher_detail.html:27
 msgid "Course offerings"
 msgstr "Прочтения курсов"
 
@@ -1065,6 +1100,7 @@ msgstr "Слайды, приложенные файлы и др."
 
 #: apps/courses/models.py:851 apps/courses/models.py:1114
 #: apps/learning/gradebook/forms.py:120 apps/learning/models.py:221
+#: lms/jinja2/lms/staff/student_search.html:59
 msgid "Groups"
 msgstr "Группы"
 
@@ -1101,6 +1137,12 @@ msgid "Class attachments"
 msgstr "Приложения к занятию"
 
 #: apps/courses/models.py:1076 apps/learning/study/forms.py:62
+#: lms/jinja2/lms/courses/course_detail.html:149
+#: lms/jinja2/lms/study/assignment_list.html:28
+#: lms/jinja2/lms/study/assignment_list.html:90
+#: lms/jinja2/lms/study/student_assignment_detail.html:144
+#: lms/jinja2/lms/teaching/assignment_detail.html:39
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:237
 msgid "Assignment Format"
 msgstr "Формат задания"
 
@@ -1132,10 +1174,12 @@ msgstr "Приоритет ниже, чем у ответственных за �
 #: apps/grading/admin.py:25 apps/learning/admin.py:258
 #: apps/learning/models.py:174 apps/learning/models.py:215
 #: apps/learning/models.py:240
+#: lms/jinja2/lms/user_profile/_tab_assignments.html:11
 msgid "Assignment"
 msgstr "Задание"
 
 #: apps/courses/models.py:1132 apps/learning/icalendar.py:233
+#: lms/jinja2/lms/user_profile/_tab_assignments.html:3
 msgid "Assignments"
 msgstr "Задания"
 
@@ -1218,6 +1262,10 @@ msgstr "Вопросы"
 #: apps/learning/models.py:350 apps/learning/roles.py:92
 #: apps/users/constants.py:36 apps/users/models.py:797 apps/users/models.py:975
 #: apps/users/models.py:999 apps/users/models.py:1016 apps/users/models.py:1048
+#: lms/jinja2/lms/projects/project_report.html:261
+#: lms/jinja2/lms/study/student_assignment_detail.html:138
+#: lms/jinja2/lms/teaching/assignment_detail.html:75
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:191
 msgid "Student"
 msgstr "Студент"
 
@@ -1304,6 +1352,7 @@ msgstr "Посылка к заданию"
 #: apps/grading/models.py:93 apps/learning/forms.py:76
 #: apps/learning/study/forms.py:69 apps/users/models.py:221
 #: apps/users/models.py:807 apps/users/models.py:971
+#: lms/jinja2/lms/staff/student_search.html:69
 msgid "Status"
 msgstr "Статус"
 
@@ -1414,6 +1463,7 @@ msgstr "Обучение"
 
 #: apps/learning/forms.py:61 apps/learning/models.py:825
 #: apps/users/models.py:855
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:145
 msgid "Comment"
 msgstr "Комментарий"
 
@@ -1426,6 +1476,7 @@ msgid "Form is empty."
 msgstr "Недостаточно данных."
 
 #: apps/learning/forms.py:146
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:196
 msgid "Time Spent on Assignment"
 msgstr "Время, затраченное на выполнение задания"
 
@@ -1595,6 +1646,7 @@ msgid "Final grade"
 msgstr "Итоговая оценка"
 
 #: apps/learning/gradebook/views.py:240
+#: lms/jinja2/lms/gradebook/gradebook_form.html:123
 msgid "Total"
 msgstr "Сумма баллов"
 
@@ -1656,6 +1708,7 @@ msgid "A student group with the same name already exists in the course"
 msgstr ""
 
 #: apps/learning/models.py:170 apps/learning/models.py:609
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:206
 msgid "Assignee"
 msgstr "Проверяющий"
 
@@ -1833,7 +1886,10 @@ msgstr "Студент"
 msgid "StudentAssignment|Status"
 msgstr "Статус"
 
-#: apps/learning/models.py:593
+#: apps/learning/models.py:593 lms/jinja2/lms/study/course_list.html:102
+#: lms/jinja2/lms/study/student_assignment_detail.html:122
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:181
+#: lms/jinja2/lms/user_profile/_tab_assignments.html:12
 msgid "Grade"
 msgstr "Оценка"
 
@@ -2299,6 +2355,8 @@ msgstr "Новости"
 #: apps/learning/tests/test_enrollment.py:89
 #: apps/learning/tests/test_enrollment.py:109
 #: apps/learning/tests/test_enrollment.py:117
+#: lms/jinja2/lms/courses/course_detail.html:232
+#: lms/jinja2/lms/courses/course_detail.html:241
 msgid "Places available"
 msgstr "Осталось мест"
 
@@ -2369,7 +2427,7 @@ msgstr "Обложка"
 msgid "book"
 msgstr "Книга"
 
-#: apps/library/models.py:54
+#: apps/library/models.py:54 lms/jinja2/lms/user_profile/_tab_curators.html:55
 msgid "books"
 msgstr "Книги"
 
@@ -2486,6 +2544,8 @@ msgid "Area of study"
 msgstr "Направление обучения"
 
 #: apps/study_programs/models.py:38
+#: lms/jinja2/lms/staff/student_search.html:102
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:135
 msgid "Areas of study"
 msgstr "Направления обучения"
 
@@ -2604,6 +2664,8 @@ msgid "Are you sure you want to delete"
 msgstr "Вы уверены, что хотите удалить"
 
 #: apps/templates/forms/simple_delete_confirmation.html:20
+#: lms/jinja2/lms/courses/course_class_detail.html:20
+#: lms/jinja2/lms/teaching/assignment_detail.html:21
 msgid "Delete"
 msgstr "Удалить"
 
@@ -2661,10 +2723,12 @@ msgid "To leave the course"
 msgstr "Покинуть курс"
 
 #: apps/templates/learning/event_detail.html:19
+#: lms/jinja2/lms/courses/course_class_detail.html:37
 msgid "When"
 msgstr "Когда"
 
 #: apps/templates/learning/event_detail.html:23
+#: lms/jinja2/lms/courses/course_class_detail.html:41
 msgid "Where"
 msgstr "Где"
 
@@ -2707,6 +2771,13 @@ msgstr "Пожалуйста, проверьте свой email для заве�
 
 #: apps/templates/learning/teaching/modal_update_assignment_comment.html:8
 #: apps/templates/projects/modal_update_report_comment.html:9
+#: lms/jinja2/lms/gradebook/_modal_import_csv_enrollments.html:47
+#: lms/jinja2/lms/gradebook/_modal_import_csv_enrollments.html:93
+#: lms/jinja2/lms/gradebook/_modal_import_csv_stepik.html:41
+#: lms/jinja2/lms/gradebook/_modal_import_csv_stepik.html:89
+#: lms/jinja2/lms/gradebook/_modal_import_csv_yandex_login.html:41
+#: lms/jinja2/lms/gradebook/_modal_import_csv_yandex_login.html:88
+#: lms/jinja2/lms/gradebook/_modal_import_yandex_contest_problem.html:34
 msgid "Close"
 msgstr "Закрыть"
 
@@ -2727,10 +2798,12 @@ msgid "Sign in"
 msgstr "Войти"
 
 #: apps/templates/projects/project_detail.html:116
+#: lms/jinja2/lms/admission/admission_results.html:32
 msgid "Please correct the error below."
 msgstr "Пожалуйста, исправьте ошибку."
 
 #: apps/templates/projects/project_detail.html:117
+#: lms/jinja2/lms/admission/admission_results.html:33
 msgid "Please correct the errors below."
 msgstr "Пожалуйста, исправьте ошибки."
 
@@ -2866,6 +2939,7 @@ msgid "Curator's note"
 msgstr "Заметка куратора"
 
 #: apps/users/admin.py:259 apps/users/forms.py:25 apps/users/models.py:345
+#: lms/jinja2/lms/user_profile/_tab_account.html:156
 msgid "Date of Birth"
 msgstr "Дата рождения"
 
@@ -2930,6 +3004,10 @@ msgid "Specify one or more jobs (comma-separated)"
 msgstr ""
 "Укажите одно или несколько мест работы через запятую. Пример: JetBrains, "
 "Яндекс, ПОМИ РАН"
+
+#: apps/users/forms.py:88
+msgid "Не касается уведомлений аутентификации"
+msgstr ""
 
 #: apps/users/models.py:146
 msgid "name"
@@ -3035,7 +3113,7 @@ msgstr ""
 msgid "Gender"
 msgstr "Пол"
 
-#: apps/users/models.py:342
+#: apps/users/models.py:342 lms/jinja2/lms/user_profile/_tab_account.html:139
 msgid "Phone"
 msgstr "Телефон"
 
@@ -3075,11 +3153,12 @@ msgstr "Социальные сети"
 msgid "will be shown to curators only"
 msgstr "будут показаны только кураторам"
 
-#: apps/users/models.py:402
+#: apps/users/models.py:402 lms/jinja2/lms/courses/teacher_detail.html:19
+#: lms/jinja2/lms/user_profile/_tab_account.html:239
 msgid "Contact information"
 msgstr "Контактная информация"
 
-#: apps/users/models.py:408
+#: apps/users/models.py:408 lms/jinja2/lms/user_profile/_tab_account.html:152
 msgid "Workplace"
 msgstr "Место работы"
 
@@ -3115,11 +3194,12 @@ msgstr "Приоритет"
 msgid "Magistracy"
 msgstr "Магистратура"
 
-#: apps/users/models.py:811
+#: apps/users/models.py:811 lms/jinja2/lms/staff/student_search.html:35
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:33
 msgid "Student|admission year"
 msgstr "Год поступления"
 
-#: apps/users/models.py:813
+#: apps/users/models.py:813 lms/jinja2/lms/staff/student_search.html:47
 msgid "CSCUser|Curriculum year"
 msgstr "Год программы обучения"
 
@@ -3168,7 +3248,7 @@ msgstr ""
 msgid "Studying"
 msgstr "Учится"
 
-#: apps/users/models.py:984
+#: apps/users/models.py:984 lms/jinja2/lms/teaching/assignment_detail.html:15
 msgid "Student Status Log"
 msgstr "Лог изменения статуса"
 
@@ -3206,11 +3286,13 @@ msgstr "Справки студента"
 
 #: apps/users/tests/test_certificates_of_participation.py:81
 #: apps/users/tests/test_certificates_of_participation.py:89
+#: lms/jinja2/lms/user_profile/_tab_curators.html:90
 msgid "Create reference"
 msgstr "Выдать справку"
 
 #: apps/users/tests/test_certificates_of_participation.py:104
 #: apps/users/tests/test_certificates_of_participation.py:109
+#: lms/jinja2/lms/user_profile/_tab_curators.html:70
 msgid "Student references"
 msgstr "Справки студента"
 
@@ -3361,6 +3443,196 @@ msgctxt "menu"
 msgid "Результаты"
 msgstr ""
 
+#: lms/jinja2/lms/courses/calendar.html:17
+#: lms/jinja2/lms/learning/timetable.html:16
+#: lms/jinja2/lms/teaching/timetable.html:16
+msgid "List"
+msgstr "Список"
+
+#: lms/jinja2/lms/courses/calendar.html:18
+#: lms/jinja2/lms/learning/timetable.html:17
+#: lms/jinja2/lms/teaching/timetable.html:19
+msgid "Calendar"
+msgstr "Календарь"
+
+#: lms/jinja2/lms/courses/course_class_detail.html:17
+#: lms/jinja2/lms/courses/meta_detail.html:11
+#: lms/jinja2/lms/teaching/assignment_detail.html:18
+#: lms/jinja2/lms/user_profile/connected_social_services.html:45
+#: lms/jinja2/lms/user_profile/user_detail.html:31
+msgid "Edit"
+msgstr "Редактировать"
+
+#: lms/jinja2/lms/courses/course_class_detail.html:33
+msgid "What"
+msgstr "Что"
+
+#: lms/jinja2/lms/courses/course_class_detail.html:62
+msgid "Video"
+msgstr "Видео"
+
+#: lms/jinja2/lms/courses/course_class_detail.html:79
+msgid "Other materials"
+msgstr "Другие материалы"
+
+#: lms/jinja2/lms/courses/course_class_form.html:45
+#: lms/jinja2/lms/courses/course_detail.html:105
+msgid "Materials"
+msgstr "Материалы"
+
+#: lms/jinja2/lms/courses/course_class_form.html:63
+msgid "Visibility Settings"
+msgstr "Настройки отображения"
+
+#: lms/jinja2/lms/courses/course_class_form.html:76
+msgid "Save and add"
+msgstr "Сохранить и добавить ещё"
+
+#: lms/jinja2/lms/courses/course_detail.html:102
+msgid "Date and time"
+msgstr "Дата и время"
+
+#: lms/jinja2/lms/courses/course_detail.html:103
+#: lms/jinja2/lms/learning/timetable.html:33
+#: lms/jinja2/lms/teaching/timetable.html:35
+msgid "Class|Name"
+msgstr "Название"
+
+#: lms/jinja2/lms/courses/course_detail.html:104
+#: lms/jinja2/lms/learning/timetable.html:35
+#: lms/jinja2/lms/teaching/timetable.html:37
+msgid "Venue|short"
+msgstr "Место"
+
+#: lms/jinja2/lms/courses/course_detail.html:129
+msgid "No"
+msgstr "Нет"
+
+#: lms/jinja2/lms/courses/course_detail.html:150
+msgid "Files"
+msgstr "Файлы"
+
+#: lms/jinja2/lms/courses/course_detail.html:207
+msgid "delete"
+msgstr "удалить"
+
+#: lms/jinja2/lms/courses/course_detail.html:208
+msgid "edit"
+msgstr "редактировать"
+
+#: lms/jinja2/lms/courses/course_detail.html:224
+#: lms/jinja2/lms/enrollment/invitation_courses.html:29
+msgid "Unenroll from the course"
+msgstr "Отписаться от курса"
+
+#: lms/jinja2/lms/courses/course_detail.html:230
+#: lms/jinja2/lms/courses/course_detail.html:239
+msgid "Enroll in the course"
+msgstr "Записаться на курс"
+
+#: lms/jinja2/lms/courses/course_detail.html:254
+msgid "Add assignment"
+msgstr "Добавить задание"
+
+#: lms/jinja2/lms/courses/course_detail.html:257
+msgid "Edit description"
+msgstr "Редактировать описание"
+
+#: lms/jinja2/lms/courses/course_detail.html:260
+#: lms/jinja2/lms/teaching/course_list.html:33
+msgid "Add news"
+msgstr "Добавить новость"
+
+#: lms/jinja2/lms/courses/course_detail.html:263
+msgid "Add class"
+msgstr "Добавить занятие"
+
+#: lms/jinja2/lms/courses/course_detail.html:271
+msgid "Start survey"
+msgstr "Оставить отзыв о курсе"
+
+#: lms/jinja2/lms/courses/meta_detail.html:22
+msgid "Course Offerings"
+msgstr "Прочтения курсов"
+
+#: lms/jinja2/lms/gradebook/_modal_import_csv_enrollments.html:11
+msgid "Import scores from CSV"
+msgstr "Импорт оценок из CSV-файла"
+
+#: lms/jinja2/lms/gradebook/_modal_import_csv_enrollments.html:17
+msgid "Choose assignment"
+msgstr "Выберите задание"
+
+#: lms/jinja2/lms/gradebook/_modal_import_csv_enrollments.html:26
+#: lms/jinja2/lms/gradebook/_modal_import_csv_stepik.html:27
+#: lms/jinja2/lms/gradebook/_modal_import_csv_yandex_login.html:27
+msgid "Score will be imported for selected assignment"
+msgstr "Оценки будут импортированы для выбранного задания"
+
+#: lms/jinja2/lms/gradebook/_modal_import_csv_enrollments.html:29
+#: lms/jinja2/lms/gradebook/_modal_import_csv_enrollments.html:71
+msgid "Choose csv file"
+msgstr "Выберите csv-файл"
+
+#: lms/jinja2/lms/gradebook/_modal_import_csv_enrollments.html:48
+#: lms/jinja2/lms/gradebook/_modal_import_csv_enrollments.html:94
+#: lms/jinja2/lms/gradebook/_modal_import_csv_stepik.html:42
+#: lms/jinja2/lms/gradebook/_modal_import_csv_stepik.html:90
+#: lms/jinja2/lms/gradebook/_modal_import_csv_yandex_login.html:42
+#: lms/jinja2/lms/gradebook/_modal_import_csv_yandex_login.html:89
+#: lms/jinja2/lms/gradebook/_modal_import_yandex_contest_problem.html:35
+msgid "Import"
+msgstr "Импортировать"
+
+#: lms/jinja2/lms/gradebook/_modal_import_csv_stepik.html:11
+msgid "Import stepik statements"
+msgstr "Импортировать баллы по stepik.org ID"
+
+#: lms/jinja2/lms/gradebook/_modal_import_csv_stepik.html:17
+#: lms/jinja2/lms/gradebook/_modal_import_csv_yandex_login.html:17
+#: lms/jinja2/lms/gradebook/_modal_import_yandex_contest_problem.html:13
+msgid "Select assignment"
+msgstr "Выбрать задание"
+
+#: lms/jinja2/lms/gradebook/_modal_import_csv_stepik.html:30
+#: lms/jinja2/lms/gradebook/_modal_import_csv_stepik.html:65
+#: lms/jinja2/lms/gradebook/_modal_import_csv_yandex_login.html:30
+#: lms/jinja2/lms/gradebook/_modal_import_csv_yandex_login.html:65
+msgid "Select csv file"
+msgstr "Выбрать csv-файл"
+
+#: lms/jinja2/lms/gradebook/_modal_import_csv_yandex_login.html:11
+msgid "Import yandex statements"
+msgstr "Импортировать баллы по Яндекс-логину"
+
+#: lms/jinja2/lms/gradebook/gradebook_form.html:27
+msgid "Marks sheet"
+msgstr "Ведомость"
+
+#: lms/jinja2/lms/gradebook/gradebook_form.html:119
+#: lms/jinja2/lms/gradebook/gradebook_form.html:176
+msgid "Students"
+msgstr "Студенты"
+
+#: lms/jinja2/lms/gradebook/gradebook_form.html:121
+msgid "Grades"
+msgstr "Итоговая оценка"
+
+#: lms/jinja2/lms/layouts/_top_menu.html:34
+#: lms/jinja2/lms/user_profile/user_detail.html:6
+#: lms/templates/_top_menu.html:37
+msgid "Profile"
+msgstr "Профиль"
+
+#: lms/jinja2/lms/layouts/_top_menu.html:40 lms/templates/_top_menu.html:43
+msgid "Logout"
+msgstr "Выйти"
+
+#: lms/jinja2/lms/layouts/_v2_top_menu.html:36
+#: lms/jinja2/lms/layouts/_v2_top_menu.html:48
+msgid "Members Area"
+msgstr "Личный кабинет"
+
 #: lms/jinja2/lms/layouts/v1_base.html:66 lms/templates/base.html:61
 msgid "гг."
 msgstr ""
@@ -3369,13 +3641,160 @@ msgstr ""
 msgid "Privacy&nbsp;Policy"
 msgstr ""
 
-#: lms/templates/_top_menu.html:37
-msgid "Profile"
-msgstr "Профиль"
+#: lms/jinja2/lms/learning/timetable.html:32
+#: lms/jinja2/lms/teaching/timetable.html:34
+msgid "Time"
+msgstr "Время"
 
-#: lms/templates/_top_menu.html:43
-msgid "Logout"
-msgstr "Выйти"
+#: lms/jinja2/lms/learning/timetable.html:69
+#: lms/jinja2/lms/teaching/timetable.html:67
+msgid "No classes yet"
+msgstr "Список занятий пуст"
+
+#: lms/jinja2/lms/projects/project_report.html:195
+#: lms/jinja2/lms/projects/project_report.html:207
+#, python-format
+msgid "%(counter)s point"
+msgid_plural "%(counter)s points"
+msgstr[0] "%(counter)s балл"
+msgstr[1] "%(counter)s балла"
+msgstr[2] "%(counter)s баллов"
+
+#: lms/jinja2/lms/projects/project_report.html:261
+#: lms/jinja2/lms/teaching/assignment_detail.html:84
+msgid "Volunteer"
+msgstr "Вольный слушатель"
+
+#: lms/jinja2/lms/staff/student_search.html:7
+msgid "Student search"
+msgstr "Поиск студентов"
+
+#: lms/jinja2/lms/staff/student_search.html:18
+msgid "Name, full or partial"
+msgstr "Имя, целиком или часть"
+
+#: lms/jinja2/lms/staff/student_search.html:85
+msgid "Passed courses"
+msgstr "Сданные курсы"
+
+#: lms/jinja2/lms/study/assignment_list.html:12
+msgid "No assignments yet"
+msgstr "Список заданий пуст"
+
+#: lms/jinja2/lms/study/assignment_list.html:21
+msgid "Open assignments"
+msgstr "Открытые задания"
+
+#: lms/jinja2/lms/study/assignment_list.html:27
+#: lms/jinja2/lms/study/assignment_list.html:89
+#: lms/jinja2/lms/teaching/assignment_detail.html:77
+msgid "State"
+msgstr "Статус"
+
+#: lms/jinja2/lms/study/assignment_list.html:83
+msgid "Archive"
+msgstr "Архив"
+
+#: lms/jinja2/lms/study/course_list.html:45
+#: lms/jinja2/lms/study/course_list.html:73
+#: lms/jinja2/lms/study/student_assignment_detail.html:128
+#: lms/jinja2/lms/teaching/course_list.html:12
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:220
+msgid "Professors"
+msgstr "Преподаватели"
+
+#: lms/jinja2/lms/study/course_list.html:54
+msgid "Start survey!"
+msgstr "Оставить отзыв"
+
+#: lms/jinja2/lms/study/course_list.html:60
+msgid "Leave course"
+msgstr "Покинуть курс"
+
+#: lms/jinja2/lms/study/course_list.html:83
+msgid "Enroll"
+msgstr "Записаться"
+
+#: lms/jinja2/lms/study/student_assignment_detail.html:108
+msgid ""
+"Comment doesn't change status.<br>\n"
+"            For the teacher to see an update to the solution, use the «Send "
+"solution» tab."
+msgstr ""
+"Комментарий не меняет статус задания.<br>\n"
+"Чтобы преподаватель увидел обновление к решению, используйте окно «Добавить "
+"решение»."
+
+#: lms/jinja2/lms/study/student_assignment_detail.html:126
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:218
+msgid "Professor"
+msgstr "Преподаватель"
+
+#: lms/jinja2/lms/study/student_assignment_detail.html:148
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:242
+msgid "out of"
+msgstr "из"
+
+#: lms/jinja2/lms/study/student_assignment_detail.html:153
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:248
+msgid "Assignment created"
+msgstr "Задание добавлено"
+
+#: lms/jinja2/lms/teaching/assignment_detail.html:45
+msgid "Estimated Execution Time"
+msgstr "Оценочное время выполнения"
+
+#: lms/jinja2/lms/teaching/assignment_detail.html:48
+msgid "Mean Execution Time"
+msgstr "Среднее время выполнения"
+
+#: lms/jinja2/lms/teaching/assignment_detail.html:51
+msgid "Median Execution Time"
+msgstr "Медианное время выполнения"
+
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:177
+msgid "Next unchecked[assignment]"
+msgstr "Следующее непроверенное"
+
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:199
+msgid "No value is specified"
+msgstr "Не указано"
+
+#: lms/jinja2/lms/user_profile/_profile_upload_photo.html:6
+msgid "Profile photo"
+msgstr "Фото профиля"
+
+#: lms/jinja2/lms/user_profile/_profile_upload_photo.html:25
+msgid "Select a file"
+msgstr "Выбрать изображение"
+
+#: lms/jinja2/lms/user_profile/_profile_upload_photo.html:39
+msgid "Back to upload"
+msgstr "Назад к загрузке фото"
+
+#: lms/jinja2/lms/user_profile/_tab_account.html:68
+msgid "Online courses"
+msgstr "Онлайн-курсы"
+
+#: lms/jinja2/lms/user_profile/_tab_account.html:124
+msgid "Email"
+msgstr "Email"
+
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:86
+msgid "Curriculum year"
+msgstr "Год программы обучения"
+
+#: lms/jinja2/lms/user_profile/user_detail.html:6
+msgid "on site"
+msgstr "на сайте"
+
+#: lms/jinja2/lms/user_profile/user_detail.html:30
+msgid "Change photo"
+msgstr "Изменить фото"
+
+#: lms/jinja2/lms/user_profile/user_detail.html:74
+msgid "Review of the Organization"
+msgstr "Отзыв"
 
 #: lms/templates/base.html:75
 msgid "close all"
@@ -3395,226 +3814,6 @@ msgstr "осенний"
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
-
-#~ msgid "List"
-#~ msgstr "Список"
-
-#~ msgid "Calendar"
-#~ msgstr "Календарь"
-
-#~ msgid "Edit"
-#~ msgstr "Редактировать"
-
-#~ msgid "What"
-#~ msgstr "Что"
-
-#~ msgid "Video"
-#~ msgstr "Видео"
-
-#~ msgid "Other materials"
-#~ msgstr "Другие материалы"
-
-#~ msgid "Materials"
-#~ msgstr "Материалы"
-
-#~ msgid "Visibility Settings"
-#~ msgstr "Настройки отображения"
-
-#~ msgid "Save and add"
-#~ msgstr "Сохранить и добавить ещё"
-
-#~ msgid "Date and time"
-#~ msgstr "Дата и время"
-
-#~ msgid "Class|Name"
-#~ msgstr "Название"
-
-#~ msgid "Venue|short"
-#~ msgstr "Место"
-
-#~ msgid "No"
-#~ msgstr "Нет"
-
-#~ msgid "Files"
-#~ msgstr "Файлы"
-
-#~ msgid "delete"
-#~ msgstr "удалить"
-
-#~ msgid "edit"
-#~ msgstr "редактировать"
-
-#~ msgid "Unenroll from the course"
-#~ msgstr "Отписаться от курса"
-
-#~ msgid "Enroll in the course"
-#~ msgstr "Записаться на курс"
-
-#~ msgid "Add assignment"
-#~ msgstr "Добавить задание"
-
-#~ msgid "Edit description"
-#~ msgstr "Редактировать описание"
-
-#~ msgid "Add news"
-#~ msgstr "Добавить новость"
-
-#~ msgid "Add class"
-#~ msgstr "Добавить занятие"
-
-#~ msgid "Start survey"
-#~ msgstr "Оставить отзыв о курсе"
-
-#~ msgid "Course Offerings"
-#~ msgstr "Прочтения курсов"
-
-#~ msgid "Import scores from CSV"
-#~ msgstr "Импорт оценок из CSV-файла"
-
-#~ msgid "Choose assignment"
-#~ msgstr "Выберите задание"
-
-#~ msgid "Score will be imported for selected assignment"
-#~ msgstr "Оценки будут импортированы для выбранного задания"
-
-#~ msgid "Choose csv file"
-#~ msgstr "Выберите csv-файл"
-
-#~ msgid "Import"
-#~ msgstr "Импортировать"
-
-#~ msgid "Import stepik statements"
-#~ msgstr "Импортировать баллы по stepik.org ID"
-
-#~ msgid "Select assignment"
-#~ msgstr "Выбрать задание"
-
-#~ msgid "Select csv file"
-#~ msgstr "Выбрать csv-файл"
-
-#~ msgid "Import yandex statements"
-#~ msgstr "Импортировать баллы по Яндекс-логину"
-
-#~ msgid "Marks sheet"
-#~ msgstr "Ведомость"
-
-#~ msgid "Students"
-#~ msgstr "Студенты"
-
-#~ msgid "Grades"
-#~ msgstr "Итоговая оценка"
-
-#~ msgid "Members Area"
-#~ msgstr "Личный кабинет"
-
-#~ msgid "Time"
-#~ msgstr "Время"
-
-#~ msgid "No classes yet"
-#~ msgstr "Список занятий пуст"
-
-#, python-format
-#~ msgid "%(counter)s point"
-#~ msgid_plural "%(counter)s points"
-#~ msgstr[0] "%(counter)s балл"
-#~ msgstr[1] "%(counter)s балла"
-#~ msgstr[2] "%(counter)s баллов"
-
-#~ msgid "Volunteer"
-#~ msgstr "Вольный слушатель"
-
-#~ msgid "Student search"
-#~ msgstr "Поиск студентов"
-
-#~ msgid "Name, full or partial"
-#~ msgstr "Имя, целиком или часть"
-
-#~ msgid "Passed courses"
-#~ msgstr "Сданные курсы"
-
-#~ msgid "No assignments yet"
-#~ msgstr "Список заданий пуст"
-
-#~ msgid "Open assignments"
-#~ msgstr "Открытые задания"
-
-#~ msgid "State"
-#~ msgstr "Статус"
-
-#~ msgid "Archive"
-#~ msgstr "Архив"
-
-#~ msgid "Professors"
-#~ msgstr "Преподаватели"
-
-#~ msgid "Start survey!"
-#~ msgstr "Оставить отзыв"
-
-#~ msgid "Leave course"
-#~ msgstr "Покинуть курс"
-
-#~ msgid "Enroll"
-#~ msgstr "Записаться"
-
-#~ msgid ""
-#~ "Comment doesn't change status.<br>\n"
-#~ "            For the teacher to see an update to the solution, use the "
-#~ "«Send solution» tab."
-#~ msgstr ""
-#~ "Комментарий не меняет статус задания.<br>\n"
-#~ "Чтобы преподаватель увидел обновление к решению, используйте окно "
-#~ "«Добавить решение»."
-
-#~ msgid "Professor"
-#~ msgstr "Преподаватель"
-
-#~ msgid "out of"
-#~ msgstr "из"
-
-#~ msgid "Assignment created"
-#~ msgstr "Задание добавлено"
-
-#~ msgid "Estimated Execution Time"
-#~ msgstr "Оценочное время выполнения"
-
-#~ msgid "Mean Execution Time"
-#~ msgstr "Среднее время выполнения"
-
-#~ msgid "Median Execution Time"
-#~ msgstr "Медианное время выполнения"
-
-#~ msgid "Next unchecked[assignment]"
-#~ msgstr "Следующее непроверенное"
-
-#~ msgid "No value is specified"
-#~ msgstr "Не указано"
-
-#~ msgid "Profile photo"
-#~ msgstr "Фото профиля"
-
-#~ msgid "Select a file"
-#~ msgstr "Выбрать изображение"
-
-#~ msgid "Back to upload"
-#~ msgstr "Назад к загрузке фото"
-
-#~ msgid "Online courses"
-#~ msgstr "Онлайн-курсы"
-
-#~ msgid "Email"
-#~ msgstr "Email"
-
-#~ msgid "Curriculum year"
-#~ msgstr "Год программы обучения"
-
-#~ msgid "on site"
-#~ msgstr "на сайте"
-
-#~ msgid "Change photo"
-#~ msgstr "Изменить фото"
-
-#~ msgid "Review of the Organization"
-#~ msgstr "Отзыв"
 
 #~ msgid "<b>YANDEX.ID</b>@yandex.ru"
 #~ msgstr "<b>YANDEX.ID</b>@yandex.ru"
