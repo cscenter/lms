@@ -36,6 +36,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
     branch = None
     time_zone = factory.LazyAttribute(lambda user: user.branch.time_zone if user.branch is not None else settings.DEFAULT_TIMEZONE)
+    is_notification_allowed = True
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
