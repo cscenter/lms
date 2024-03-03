@@ -13,7 +13,7 @@ from courses.models import Course
 from courses.utils import get_current_term_pair, get_term_index
 from users.constants import student_permission_roles
 from users.models import StudentProfile
-from users.services import get_student_profiles
+from users.services import get_student_profiles, get_student_profile
 
 
 class BranchCodeFilter(ChoiceFilter):
@@ -110,7 +110,8 @@ class CoursesFilter(FilterSet):
                 id__in=user_branch_ids,
                 site_id=request.site.pk
             )
-            main_branch_code = profiles[0].branch.code
+            main_branch_code = get_student_profile(user=request.user,
+                                            site=request.site).branch.code
             if not branch_code and main_branch_code:
                 branch_code = [main_branch_code]
         else:
