@@ -12,7 +12,6 @@ from courses.constants import SemesterTypes
 from courses.models import Course
 from courses.utils import get_current_term_pair, get_term_index
 from users.constants import student_permission_roles
-from users.models import StudentProfile
 from users.services import get_student_profiles, get_student_profile
 
 
@@ -88,9 +87,17 @@ class CoursesFilter(FilterSet):
 
     def __init__(self, data=None, queryset=None, request=None, **kwargs):
         """
-        Resolves `branch` value in the next order:
+        If user is student with no other roles, he can reach only branches from his StudentProfiles.
+        Users with any non-student role can reach all branches of site.
+
+        Resolves `branch` value in the next order for user with non-student role:
             * query value
             * valid branch code from user settings
+            * default branch code
+
+        Resolves `branch` value in the next order for "pure" student:
+            * query value
+            * most actual profile branch
             * default branch code
         """
         if data is not None:
@@ -101,9 +108,7 @@ class CoursesFilter(FilterSet):
         branch_code = data.pop("branch", None)
         if request.user.roles.issubset(student_permission_roles):
             profiles = get_student_profiles(user=request.user,
-                                            site=request.site,
-                                            fetch_graduate_profile=True,
-                                            fetch_status_history=True)
+                                            site=request.site)
             user_branch_ids = [profile.branch_id for profile in profiles]
             self.user_branches = Branch.objects.filter(
                 active=True,
