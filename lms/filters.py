@@ -11,6 +11,9 @@ from core.models import Branch
 from courses.constants import SemesterTypes
 from courses.models import Course
 from courses.utils import get_current_term_pair, get_term_index
+from users.constants import student_permission_roles
+from users.models import StudentProfile
+from users.services import get_student_profiles
 
 
 class BranchCodeFilter(ChoiceFilter):
@@ -96,10 +99,26 @@ class CoursesFilter(FilterSet):
             data = QueryDict(mutable=True)
         self.site_branches = self.get_branches(request)
         branch_code = data.pop("branch", None)
-        if not branch_code and hasattr(request.user, "branch_id"):
-            branch = next((b for b in self.site_branches
-                           if b.id == request.user.branch_id), None)
-            branch_code = [branch.code] if branch else None
+        if request.user.roles.issubset(student_permission_roles):
+            profiles = get_student_profiles(user=request.user,
+                                            site=request.site,
+                                            fetch_graduate_profile=True,
+                                            fetch_status_history=True)
+            user_branch_ids = [profile.branch_id for profile in profiles]
+            self.user_branches = Branch.objects.filter(
+                active=True,
+                id__in=user_branch_ids,
+                site_id=request.site.pk
+            )
+            main_branch_code = profiles[0].branch.code
+            if not branch_code and main_branch_code:
+                branch_code = [main_branch_code]
+        else:
+            self.user_branches = self.site_branches
+            if not branch_code and hasattr(request.user, "branch_id"):
+                branch = next((b for b in self.site_branches
+                               if b.id == request.user.branch_id), None)
+                branch_code = [branch.code] if branch else None
         if not branch_code:
             # TODO: Provide default branch for the site
             branch_code = [settings.DEFAULT_BRANCH_CODE]
@@ -107,7 +126,7 @@ class CoursesFilter(FilterSet):
         super().__init__(data=data, queryset=queryset, request=request, **kwargs)
         # Branch code choices depend on current site
         current_term = get_current_term_pair()
-        self.form['branch'].field.choices = [(b.code, b.name) for b in self.site_branches
+        self.form['branch'].field.choices = [(b.code, b.name) for b in self.user_branches
                                              if b.established <= current_term.academic_year]
 
     def get_branches(self, request):
