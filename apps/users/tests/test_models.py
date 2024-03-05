@@ -200,31 +200,25 @@ def test_student_profile_is_invited_active():
     invitation = InvitationFactory()
     student_profile.invitation = invitation
     assert not student_profile.is_invited_active
-    del invitation.is_active
 
     invitation.semester = Semester.get_current()
     assert not student_profile.is_invited_active
-    del invitation.is_active
 
     today = now_local(invitation.branch.get_timezone()).date()
     enrollmentperiod = EnrollmentPeriodFactory()
     assert not student_profile.is_invited_active
-    del invitation.is_active
 
     enrollmentperiod.semester = Semester.get_current()
     enrollmentperiod.save()
     assert not student_profile.is_invited_active
-    del invitation.is_active
 
     enrollmentperiod.site_id = settings.SITE_ID
     enrollmentperiod.save()
     assert not student_profile.is_invited_active
-    del invitation.is_active
 
     enrollmentperiod.starts_on = today
     enrollmentperiod.save()
     assert not student_profile.is_invited_active
-    del invitation.is_active
 
     enrollmentperiod.ends_on = today
     enrollmentperiod.save()
