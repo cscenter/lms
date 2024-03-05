@@ -156,7 +156,7 @@ def test_course_detail_view_inactive_regular_active_invited_profile_permission(c
     course = course_invitation.course
     invitation = course_invitation.invitation
 
-    student = StudentFactory(student_profile__type=StudentTypes.INVITED)
+    student = StudentFactory(student_profile__type=StudentTypes.INVITED, student_profile__invitation=invitation)
     site = SiteFactory(id=settings.SITE_ID)
     complete_student_profile(student, site, invitation)
     regular_profile = StudentProfileFactory(user=student, year_of_admission=previous_term.year - 1)
