@@ -961,6 +961,10 @@ class StudentProfile(TimeStampedModel):
             return self.comment_changed_at.strftime(DATETIME_FORMAT_RU)
         return default
 
+    @property
+    def is_invited_active(self):
+        return self.invitation and self.invitation.is_active
+
 
 class StudentStatusLog(TimestampedModel):
     status_changed_at = models.DateField(
