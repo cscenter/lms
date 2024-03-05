@@ -963,7 +963,12 @@ class StudentProfile(TimeStampedModel):
 
     @property
     def is_invited_active(self):
-        return self.invitation and self.invitation.is_active
+        """
+        Used to check if INVITED StudentProfile has invitation and it is relevant
+        """
+        if self.type != StudentTypes.INVITED:
+            raise ValueError("Works only with invited students. Use is_active for others")
+        return self.invitation is not None and self.invitation.is_active
 
 
 class StudentStatusLog(TimestampedModel):
