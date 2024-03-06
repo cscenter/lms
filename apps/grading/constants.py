@@ -73,7 +73,7 @@ class YandexCompilers(DjangoChoices):
     dotnet5 = C("dotnet5", "(Make) C# (MS .Net Core 5.0)")
     dotnet6 = C("dotnet6", "(Make) C# (MS .Net Core 6.0)")
     gcc_docker2_make = C("gcc_docker2_make", "(make) GCC C++17")
-    gcc_docker2_make = C("gcc_cpp20_make", "(make) GCC C++20")
+    gcc_cpp20_make = C("gcc_cpp20_make", "(make) GCC C++20")
     happyfat = C("happyfat", "happyfat")
     idao = C("idao", "(make) idao")
     idao2020 = C("idao2020", "(make) idao2020")
