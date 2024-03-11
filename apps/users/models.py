@@ -953,7 +953,6 @@ class StudentProfile(TimeStampedModel):
 
     @property
     def is_active(self):
-        # FIXME: make sure profile is not expired for invited student? Should be valid only in the term of invitation
         return not StudentStatuses.is_inactive(self.status)
 
     def get_comment_changed_at_display(self, default=''):
@@ -962,9 +961,9 @@ class StudentProfile(TimeStampedModel):
         return default
 
     @property
-    def is_invited_active(self):
+    def is_invited_student_active(self):
         """
-        Used to check if INVITED StudentProfile has invitation and it is relevant
+        Checks if INVITED StudentProfile has invitation and it is relevant
         """
         if self.type != StudentTypes.INVITED:
             raise ValueError("Works only with invited students. Use is_active for others")
