@@ -215,12 +215,14 @@ def test_view_course_offerings_old_invited(client):
     previous_term = SemesterFactory(year=current_term.year - 1, type=SemesterTypes.SPRING)
 
     site = SiteFactory(id=settings.SITE_ID)
-    course_invitation = CourseInvitationFactory(course__semester=previous_term)
-    student = UserFactory()
+    branch = BranchFactory()
+    course_invitation = CourseInvitationFactory(course__semester=previous_term, course__main_branch=branch,
+                                                invitation__branch=branch)
+    student = UserFactory(branch=branch)
     complete_student_profile(student, site, course_invitation.invitation)
     student_profile = StudentProfile.objects.get(user=student)
     random_course = CourseFactory(semester=current_term)
-    old_course = CourseFactory(semester=previous_term)
+    old_course = CourseFactory(semester=previous_term, main_branch=branch)
     enrollment = EnrollmentFactory(course=old_course,
                                    student=student,
                                    student_profile=student_profile,
@@ -247,7 +249,8 @@ def test_view_course_offerings_old_invited(client):
 
     new_invited_profile = StudentProfileFactory(type=StudentTypes.INVITED,
                                                 user=student,
-                                                year_of_admission=current_term.year)
+                                                year_of_admission=current_term.year,
+                                                branch=branch)
     complete_student_profile(student, site, course_invitation.invitation)
     assert student.get_student_profile() == new_invited_profile
 
@@ -275,8 +278,9 @@ def test_view_course_offerings_regular_in_academic(client):
 
     regular_profile = StudentProfileFactory()
     student = regular_profile.user
+    branch = regular_profile.branch
 
-    course_enrolled, random_course = CourseFactory.create_batch(2)
+    course_enrolled, random_course = CourseFactory.create_batch(2, main_branch=branch)
     enrollment = EnrollmentFactory(course=course_enrolled,
                                    student=student,
                                    student_profile=regular_profile,
@@ -295,10 +299,8 @@ def test_view_course_offerings_regular_in_academic(client):
     assert founded_courses == 2
 
     site = SiteFactory(id=settings.SITE_ID)
-    course_invitation = CourseInvitationFactory(course__semester=current_term)
-    new_invited_profile = StudentProfileFactory(type=StudentTypes.INVITED,
-                                                user=student,
-                                                year_of_admission=current_term.year)
+    course_invitation = CourseInvitationFactory(course__semester=current_term, course__main_branch=branch,
+                                                invitation__branch=branch)
     complete_student_profile(student, site, course_invitation.invitation)
 
     response = client.get(url)
@@ -312,3 +314,78 @@ def test_view_course_offerings_regular_in_academic(client):
     terms_courses = list(response.context_data['courses'].values())
     founded_courses = sum(map(len, terms_courses))
     assert founded_courses == 2
+
+
+@pytest.mark.django_db
+def test_view_only_necessary_branches_to_students(client):
+    url = reverse('course_list', subdomain=settings.LMS_SUBDOMAIN)
+
+    first_branch, second_branch = BranchFactory.create_batch(2)
+    user = UserFactory()
+
+    first_profile = StudentProfileFactory(branch=first_branch, user=user)
+    second_profile = StudentProfileFactory(branch=second_branch, user=user, type=StudentTypes.INVITED)
+
+    first_courses = CourseFactory.create_batch(4, main_branch=first_branch)
+    second_courses = CourseFactory.create_batch(2, main_branch=second_branch)
+    third_courses = CourseFactory.create_batch(6)
+
+    curator = CuratorFactory()
+
+    teacher = TeacherFactory()
+    teacher_profile = StudentProfileFactory(branch=first_branch, user=teacher)
+
+    client.login(user)
+    response = client.get(url)
+    branches = response.context['branches']
+    active_branch = response.context['active_branch']
+    # student profiles are with first_branch and second_branch only
+    assert len(branches) == 2
+
+    terms_courses = list(response.context_data['courses'].values())
+    founded_courses = sum(map(len, terms_courses))
+    # default branch linked with most actual student profile
+    assert founded_courses == 4
+    assert active_branch == first_branch.code
+
+    response = client.get(url, {"branch": second_branch.code})
+    terms_courses = list(response.context_data['courses'].values())
+    founded_courses = sum(map(len, terms_courses))
+    active_branch = response.context['active_branch']
+    # redirect to another available branch
+    assert founded_courses == 2
+    assert active_branch == second_branch.code
+
+    response = client.get(url, {"branch": settings.DEFAULT_BRANCH_CODE})
+    # redirect to unavailable branch redirects to default branch
+    assert response.status_code == 302
+    assert response.url == reverse('course_list')
+
+    for user in (curator, teacher):
+        client.login(user)
+        response = client.get(url)
+
+        branches = response.context['branches']
+        # users with non-student roles can see all branches
+        assert len(branches) == 5
+
+        terms_courses = list(response.context_data['courses'].values())
+        founded_courses = sum(map(len, terms_courses))
+        active_branch = response.context['active_branch']
+        # when user sees all branches default branch is settings.DEFAULT_BRANCH_CODE
+        assert founded_courses == 6
+        assert active_branch == settings.DEFAULT_BRANCH_CODE
+
+        response = client.get(url, {"branch": first_branch.code})
+        terms_courses = list(response.context_data['courses'].values())
+        founded_courses = sum(map(len, terms_courses))
+        active_branch = response.context['active_branch']
+        assert founded_courses == 4
+        assert active_branch == first_branch.code
+
+        response = client.get(url, {"branch": second_branch.code})
+        terms_courses = list(response.context_data['courses'].values())
+        founded_courses = sum(map(len, terms_courses))
+        active_branch = response.context['active_branch']
+        assert founded_courses == 2
+        assert active_branch == second_branch.code
