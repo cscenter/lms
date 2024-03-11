@@ -1,12 +1,16 @@
 import datetime
 
 import pytest
+from django.conf import settings
 
 from django.core.exceptions import ValidationError
 
 from core.tests.factories import BranchFactory, SiteFactory
+from core.timezone import now_local
+from courses.models import Semester
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
+from learning.tests.factories import InvitationFactory, EnrollmentPeriodFactory
 from study_programs.tests.factories import (
     AcademicDisciplineFactory, StudyProgramFactory
 )
@@ -203,8 +207,16 @@ def test_assign_or_revoke_student_role():
 def test_get_student_profile_priority():
     student_profile1 = StudentProfileFactory(type=StudentTypes.REGULAR,
                                              status=StudentStatuses.REINSTATED)
+    current_semester = Semester.get_current()
+    invitation = InvitationFactory(semester=current_semester)
+    today = now_local(invitation.branch.get_timezone()).date()
+    EnrollmentPeriodFactory(semester=current_semester,
+                                               site_id=settings.SITE_ID,
+                                               starts_on=today,
+                                               ends_on=today)
     student_profile2 = StudentProfileFactory(type=StudentTypes.INVITED,
-                                             status=StudentStatuses.REINSTATED)
+                                             status=StudentStatuses.REINSTATED,
+                                             invitation=invitation)
     assert get_student_profile_priority(student_profile1) < get_student_profile_priority(student_profile2)
     student_profile3 = StudentProfileFactory(type=StudentTypes.REGULAR,
                                              status=StudentStatuses.EXPELLED)
@@ -218,6 +230,10 @@ def test_get_student_profile_priority():
     student_profile6 = StudentProfileFactory(type=StudentTypes.VOLUNTEER,
                                              status=StudentStatuses.EXPELLED)
     assert get_student_profile_priority(student_profile5) == get_student_profile_priority(student_profile6)
+    student_profile7 = StudentProfileFactory(type=StudentTypes.INVITED)
+    assert get_student_profile_priority(student_profile3) < get_student_profile_priority(student_profile7)
+    assert get_student_profile_priority(student_profile4) < get_student_profile_priority(student_profile7)
+    assert get_student_profile_priority(student_profile5) < get_student_profile_priority(student_profile7)
 
 
 @pytest.mark.django_db

@@ -1,14 +1,20 @@
+import datetime
+
 import pytest
 
 from django.core.exceptions import ValidationError
+from django.conf import settings
 
 from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN_ID, TEST_DOMAIN_ID
+from core.timezone import now_local
 from core.utils import instance_memoize
+from courses.models import Semester
 from courses.tests.factories import CourseFactory, SemesterFactory
 from learning.settings import GradeTypes
-from learning.tests.factories import EnrollmentFactory
+from learning.tests.factories import EnrollmentFactory, InvitationFactory, EnrollmentPeriodFactory
 from users.constants import Roles
+from users.models import StudentTypes
 from users.tests.factories import (
     CuratorFactory, StudentFactory, StudentProfileFactory, UserFactory, UserGroupFactory
 )
@@ -180,6 +186,43 @@ def test_student_profile_year_of_admission():
         StudentProfileFactory(branch=branch, year_of_admission=2010)
     student_profile = StudentProfileFactory(branch=branch, year_of_admission=2011)
     assert student_profile.pk
+
+
+@pytest.mark.django_db
+def test_student_profile_is_invited_student_active():
+    student_profile = StudentProfileFactory()
+    with pytest.raises(ValueError):
+        student_profile.is_invited_student_active()
+
+    student_profile.type = StudentTypes.INVITED
+    assert not student_profile.is_invited_student_active
+
+    invitation = InvitationFactory()
+    student_profile.invitation = invitation
+    assert not student_profile.is_invited_student_active
+
+    invitation.semester = Semester.get_current()
+    assert not student_profile.is_invited_student_active
+
+    today = now_local(invitation.branch.get_timezone()).date()
+    enrollmentperiod = EnrollmentPeriodFactory()
+    assert not student_profile.is_invited_student_active
+
+    enrollmentperiod.semester = Semester.get_current()
+    enrollmentperiod.save()
+    assert not student_profile.is_invited_student_active
+
+    enrollmentperiod.site_id = settings.SITE_ID
+    enrollmentperiod.save()
+    assert not student_profile.is_invited_student_active
+
+    enrollmentperiod.starts_on = today
+    enrollmentperiod.save()
+    assert not student_profile.is_invited_student_active
+
+    enrollmentperiod.ends_on = today
+    enrollmentperiod.save()
+    assert student_profile.is_invited_student_active
 
 
 def test_get_abbreviated_short_name():

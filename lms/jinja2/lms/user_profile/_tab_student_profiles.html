@@ -7,6 +7,10 @@
         {% else %}
           <div class="panel-heading" role="tab" id="headingOne" style="background-color: #add8e6;">
         {% endif %}
+      {% elif student_profile.status == StudentStatuses.ACADEMIC_LEAVE or student_profile.status == StudentStatuses.ACADEMIC_LEAVE_SECOND%}
+        <div class="panel-heading" role="tab" id="headingOne" style="background-color: #fffeca;">
+      {% elif student_profile.status == StudentStatuses.EXPELLED%}
+        <div class="panel-heading" role="tab" id="headingOne" style="background-color: #ffc3bb;">
       {% else %}
         <div class="panel-heading" role="tab" id="headingOne">
       {% endif %}

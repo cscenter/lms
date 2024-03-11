@@ -555,7 +555,7 @@ class Invitation(TimeStampedModel):
                        kwargs={"token": self.token},
                        subdomain=settings.LMS_SUBDOMAIN)
 
-    @cached_property
+    @property
     def is_active(self):
         today = now_local(self.branch.get_timezone()).date()
         return (EnrollmentPeriod.objects
