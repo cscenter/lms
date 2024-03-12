@@ -100,7 +100,8 @@ class ICalendarEvent(ABC):
 
     def create(self, instance, user: User) -> ICalEvent:
         uid = self.get_calendar_event_id(instance, user)
-        event_component = ICalEvent(uid=vText(uid), dtstamp=timezone.now())
+        event_component = ICalEvent(uid=vText(uid))
+        event_component.add("dtstamp", timezone.now())
         event_properties = self._model_to_dict(instance)
         for k, v in event_properties.items():
             event_component.add(k, v)
