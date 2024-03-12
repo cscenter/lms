@@ -114,6 +114,10 @@
             </td>
           </tr>
         {% endif %}
+        <tr>
+          <td>Отделение</td>
+          <td>{{ profile_user.branch.name|default("—", True) }}</td>
+        </tr>
         {% if academic_disciplines %}
         <tr>
           <td>Направление обучения</td>
@@ -121,7 +125,7 @@
         </tr>
         {% endif %}
         <tr>
-          <td>{% trans %}Email{% endtrans %}:</td>
+          <td>{% trans %}Email{% endtrans %}</td>
           <td>
             {{ profile_user.email }}
             {% if profile_user.is_email_suspended %}
@@ -136,7 +140,7 @@
           <td>{{ time_zone }}</td>
         </tr>
         <tr>
-          <td>{% trans %}Phone{% endtrans %}:</td>
+          <td>{% trans %}Phone{% endtrans %}</td>
           <td>{{ profile_user.phone|default("—", True) }}</td>
         </tr>
         <tr>
@@ -149,13 +153,13 @@
           </td>
         </tr>
         <tr>
-          <td>{% trans %}Workplace{% endtrans %}:</td>
+          <td>{% trans %}Workplace{% endtrans %}</td>
           <td>{{ profile_user.workplace|default("—", True) }}</td>
         </tr>
         <tr>
-          <td>{% trans %}Date of Birth{% endtrans %}:</td>
+          <td>{% trans %}Date of Birth{% endtrans %}</td>
           <td>
-            {% if profile_user.birth_date %}{{ profile_user.birth_date|date("d.m.Y") }}{% else %}—{% endif %}
+            {{ profile_user.birth_date|date("d.m.Y")|default("—", True) }}
           </td>
         </tr>
       {% endif %}

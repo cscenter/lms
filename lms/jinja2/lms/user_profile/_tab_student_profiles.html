@@ -131,6 +131,10 @@
               <td>{{ student_profile.university|default("—", True) }}</td>
             </tr>
             <tr>
+              <td>Магистратура</td>
+              <td>{{ student_profile.partner|default("—", True) }}</td>
+            </tr>
+            <tr>
               <td>Курс при поступлении:</td>
               <td>
                 {{ student_profile.get_level_of_education_on_admission_display()|default("—", True) }}</td>
