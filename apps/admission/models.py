@@ -13,7 +13,7 @@ from post_office.models import EmailTemplate
 from django.conf import settings
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist, ValidationError
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import MinValueValidator, RegexValidator, MaxValueValidator
 from django.db import models, transaction
 from django.db.models import Count, OuterRef, Q, Subquery, Value, query
 from django.db.models.functions import Coalesce
@@ -368,7 +368,8 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     living_place = models.CharField(
         _("Living Place"), max_length=255, null=True, blank=True
     )
-    birth_date = models.DateField(_("Date of Birth"), blank=True, null=True)
+    birth_date = models.DateField(_("Date of Birth"), blank=True, null=True, validators=[MaxValueValidator(
+        datetime.datetime.today().date()), MinValueValidator(datetime.datetime(1900, 1, 1).date())])
     # Social Networks
     stepic_id = models.CharField(
         _("Stepik ID"),
