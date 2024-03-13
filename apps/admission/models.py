@@ -13,7 +13,7 @@ from post_office.models import EmailTemplate
 from django.conf import settings
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist, ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models, transaction
 from django.db.models import Count, OuterRef, Q, Subquery, Value, query
 from django.db.models.functions import Coalesce
@@ -359,7 +359,8 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         help_text=_("Unsubscribe from future notifications"),
     )
     phone = models.CharField(
-        _("Contact phone"), max_length=42, help_text=_("Applicant|phone")
+        _("Contact phone"), max_length=42, help_text=_("Applicant|phone"),
+        validators=[RegexValidator(regex=r"^\+?[1-9][0-9]{7,14}$")]
     )
     residence_city = models.ForeignKey(to="admission.ResidenceCity", verbose_name=_("Residence city"),
                                        blank=True, null=True, on_delete=models.SET_NULL)
