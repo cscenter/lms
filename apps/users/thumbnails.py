@@ -121,6 +121,16 @@ class UserThumbnailMixin(ThumbnailMixin):
                 ))
         return errors
 
+class ApplicantThumbnailMixin(ThumbnailMixin):
+    def get_thumbnail(self, geometry=ThumbnailSizes.BASE, **options):
+        stub_factory = get_stub_factory(self.user.gender if self.user is not None else GenderTypes.MALE)
+        kwargs = {
+            "cropbox": None,
+            "stub_factory": stub_factory,
+            **options
+        }
+        return get_thumbnail(path_to_img=self.photo, geometry=geometry,
+                             **kwargs)
 
 class BaseStubImage(BaseImageFile):
     @property

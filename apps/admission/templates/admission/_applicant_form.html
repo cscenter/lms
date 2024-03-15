@@ -17,6 +17,12 @@
      <dd>
       <a href="mailto:{{ applicant_form.instance.email }}">{{ applicant_form.instance.email}}</a>
      </dd>
+   {% elif field.name == 'photo' %}
+      <div class="thumbnail-img">
+        {% with im=applicant.get_thumbnail %}
+          <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" alt="" />
+        {% endwith -%}
+      </div>
    {% elif field.name == 'phone' %}
      <dd>
       <a href="tel:{{ applicant_form.instance.phone }}">{{ applicant_form.instance.phone}}</a>

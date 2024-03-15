@@ -1,4 +1,5 @@
 import datetime
+import os
 import string
 import uuid
 from decimal import Decimal
@@ -9,6 +10,7 @@ from djchoices import DjangoChoices
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
 from post_office.models import EmailTemplate
+from sorl.thumbnail import ImageField
 
 from django.conf import settings
 from django.core import checks
@@ -51,6 +53,7 @@ from learning.settings import AcademicDegreeLevels
 from lms.settings.base import YDS_SITE_ID
 from notifications.base_models import EmailAddressSuspension
 from users.constants import Roles
+from users.thumbnails import ApplicantThumbnailMixin
 
 
 def current_year():
@@ -255,8 +258,14 @@ ApplicantSubscribedManager = _ApplicantSubscribedManager.from_queryset(
     ApplicantQuerySet
 )
 
+def applicant_photo_upload_to(instance, filename):
+    bucket = instance.campaign.year
+    _, ext = os.path.splitext(filename)
+    file_name = uuid.uuid4().hex
+    return f"applicants/{bucket}/{file_name}{ext}"
 
-class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
+
+class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, ApplicantThumbnailMixin):
     TIMEZONE_AWARE_FIELD_NAME = "campaign"
 
     # TODO: access applicant statuses with .STATUS.<code> instead
@@ -348,6 +357,11 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     patronymic = models.CharField(
         _("Patronymic"), max_length=255, blank=True, null=True
     )
+    photo = ImageField(
+        _("Applicant photo"),
+        upload_to=applicant_photo_upload_to,
+        blank=True,
+        help_text=_("Applicant|photo"))
     email = models.EmailField(_("Email"), help_text=_("Applicant|email"))
     telegram_username = models.CharField(
         _("Telegram"), max_length=255, blank=True, null=True

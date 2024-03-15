@@ -304,7 +304,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # Personal info
             "last_name", "first_name", "patronymic", "birth_date",
             "living_place", "residence_city",
-            "email", "phone", "additional_info",
+            "email", "phone", "additional_info", "photo",
 
             # Accounts
             "yandex_login",

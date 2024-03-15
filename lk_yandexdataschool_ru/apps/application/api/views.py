@@ -52,7 +52,8 @@ class ApplicantCreateFromYDSFormAPIView(CreateAPIView):
     serializer_class = ApplicationYDSFormSerializer
 
     def create(self, request, *args, **kwargs):
-        data = request.data
+        data = json.loads(request.data['payload'].read().decode('utf-8'))
+        data['photo'] = request.data['photo']
         # Insert yandex login if session value were found, otherwise remove it
         if data:
             data = data.copy()
