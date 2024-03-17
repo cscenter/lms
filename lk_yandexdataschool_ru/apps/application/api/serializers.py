@@ -323,6 +323,9 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             "has_internship",
             "internship_workplace",
             "internship_position",
+            "internship_beginning",
+            "internship_end",
+            "internship_not_ended",
 
             # YDS
             "campaign",
@@ -369,6 +372,10 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             #      application_ya_real_name
             #      application_ya_first_name
             #      application_ya_last_name
+
+            # version 0.7
+            # add photo field
+            # add internship_beginning, internship_end, internship_not_ended fields
         )
         extra_kwargs = {
             'university': {
@@ -430,7 +437,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'new_track_project_details': data.get('new_track_project_details'),
             'ticket_access': data.get('ticket_access'),
             'email_subscription': data.get('email_subscription'),
-            'data_format_version': '0.6'
+            'data_format_version': '0.7'
         }
         data['experience'] = data['ml_experience']
         # Remove fields that are actually not present on Applicant model

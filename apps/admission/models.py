@@ -383,7 +383,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         _("Living Place"), max_length=255, null=True, blank=True
     )
     birth_date = models.DateField(_("Date of Birth"), blank=True, null=True, validators=[MaxValueValidator(
-        datetime.datetime.today().date()), MinValueValidator(datetime.datetime(1900, 1, 1).date())])
+        datetime.datetime(2024, 1, 1).date()), MinValueValidator(datetime.datetime(1900, 1, 1).date())])
     # Social Networks
     stepic_id = models.CharField(
         _("Stepik ID"),
@@ -485,6 +485,15 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         max_length=255,
         null=True,
         blank=True,
+    )
+    internship_beginning = models.DateField(_("Date of the internship beginning"), blank=True, null=True, validators=[
+        MaxValueValidator(
+            datetime.datetime(2050, 1, 1).date()), MinValueValidator(datetime.datetime(1900, 1, 1).date())])
+    internship_end = models.DateField(_("Date of the internship end"), blank=True, null=True, validators=[
+        MaxValueValidator(
+            datetime.datetime(2050, 1, 1).date()), MinValueValidator(datetime.datetime(1900, 1, 1).date())])
+    internship_not_ended = models.BooleanField(
+        _("Does your internship still going?"), help_text=_("Applicant|internship_not_ended"), default=False
     )
     has_job = models.BooleanField(
         _("Do you work?"), help_text=_("Applicant|has_job"), null=True
