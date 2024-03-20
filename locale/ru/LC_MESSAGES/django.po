@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-16 19:13+0000\n"
+"POT-Creation-Date: 2024-03-20 15:19+0000\n"
 "PO-Revision-Date: 2023-03-30 01:14+0000\n"
 "Last-Translator:   <user.1@compscicenter.ru>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2177,19 +2177,19 @@ msgstr "Заочное отделение"
 
 #: apps/learning/settings.py:25
 msgid "1 course bachelor, speciality"
-msgstr "1 курс (бакалавриат, специалитет)"
+msgstr "1 курс (бакалавриат, специалитет, СПО)"
 
 #: apps/learning/settings.py:26
 msgid "2 course bachelor, speciality"
-msgstr "2 курс (бакалавриат, специалитет)"
+msgstr "2 курс (бакалавриат, специалитет, СПО)"
 
 #: apps/learning/settings.py:27
 msgid "3 course bachelor, speciality"
-msgstr "3 курс (бакалавриат, специалитет)"
+msgstr "3 курс (бакалавриат, специалитет, СПО))"
 
 #: apps/learning/settings.py:28
 msgid "4 course bachelor, speciality"
-msgstr "4 курс (бакалавриат, специалитет)"
+msgstr "4 курс (бакалавриат, специалитет, СПО))"
 
 #: apps/learning/settings.py:29
 msgid "5 course speciality"
@@ -2209,11 +2209,11 @@ msgstr "2 курс (магистратура)"
 
 #: apps/learning/settings.py:33
 msgid "postgraduate"
-msgstr "аспирант"
+msgstr "Аспирант"
 
 #: apps/learning/settings.py:34
-msgid "graduate"
-msgstr "выпускник"
+msgid "academic_leave"
+msgstr "Нахожусь в академе"
 
 #: apps/learning/settings.py:35
 msgid "Other"
@@ -3814,6 +3814,9 @@ msgstr "осенний"
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
+
+#~ msgid "graduate"
+#~ msgstr "выпускник"
 
 #~ msgid "<b>YANDEX.ID</b>@yandex.ru"
 #~ msgstr "<b>YANDEX.ID</b>@yandex.ru"

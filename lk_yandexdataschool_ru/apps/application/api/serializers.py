@@ -314,12 +314,13 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # Education
             "university_city", "university", "university_other",
             "faculty", "is_studying", "level_of_education", "year_of_graduation",
-            "partner",
+            "partner", "has_diploma", "diploma_degree",
 
             # Exp and work
             "has_job",
             "position",
             "workplace",
+            "working_hours",
             "has_internship",
             "internship_workplace",
             "internship_position",
@@ -412,8 +413,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                 # case when `university_other` value provided. Set value
                 # later in `.validate` method.
                 self.fields["university"].required = False
-            if data.get("is_studying"):
-                self.fields["level_of_education"].required = True
 
     def create(self, validated_data):
         data = {**validated_data}
@@ -437,7 +436,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'new_track_project_details': data.get('new_track_project_details'),
             'ticket_access': data.get('ticket_access'),
             'email_subscription': data.get('email_subscription'),
-            'data_format_version': '0.7'
+            'data_format_version': '0.8'
         }
         data['experience'] = data['ml_experience']
         # Remove fields that are actually not present on Applicant model
@@ -460,8 +459,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, attrs):
-        if not attrs.get('is_studying') and 'level_of_education' in attrs:
-            del attrs['level_of_education']
         residence_city = attrs.get('residence_city')
         campaign = attrs.get('campaign')
         rule_exists = CampaignCity.objects.filter(city=residence_city, campaign=campaign).exists()

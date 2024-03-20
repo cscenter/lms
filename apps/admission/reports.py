@@ -75,6 +75,10 @@ class AdmissionApplicantsReport(ReportFileOutput):
                     value = applicant.get_status_display()
                 elif field.name == "level_of_education":
                     value = applicant.get_level_of_education_display()
+                elif field.name == "has_diploma":
+                    value = applicant.get_has_diploma_display()
+                elif field.name == "diploma_degree":
+                    value = applicant.get_diploma_degree_display()
                 elif field.name == "id":
                     value = reverse("admission:applicants:detail", args=[value])
                 elif field.name == "created":

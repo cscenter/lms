@@ -116,5 +116,16 @@ class YandexDataSchoolInterviewRatingSystem(DjangoChoices):
     FOUR = ChoiceItem(4, "можно взять (4)")
     FIVE = ChoiceItem(5, "точно нужно взять (5)")
 
+class DiplomaDegrees(DjangoChoices):
+    BACHELOR = C("1", _('bachelor'))
+    SPECIALITY = C("2", _('speciality'))
+    MAGISTRACY = C("3", _('magistracy'))
+    POSTGRADUATE = C("4", _('postgraduate'))
+    SECONDARY_PROFESSIONAL = C("5", _('secondary professional'))
+
+class HasDiplomaStatuses(DjangoChoices):
+    YES = C("yes", _('yes'))
+    IN_PROCESS = C("in_process", _('in process of getting degree'))
+    NO = C("no", _('no'))
 
 SESSION_CONFIRMATION_CODE_KEY = "admission_confirmation_code"

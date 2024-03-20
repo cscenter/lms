@@ -282,17 +282,21 @@ class ApplicantReadOnlyForm(ReadOnlyFieldsMixin, forms.ModelForm):
             "contest_id",
             "participant_id",
             "is_unsubscribed",
+            'stepic_id',
+            'github_login',
+            'graduate_work',
+            'online_education_experience',
+            'probability',
+            'preferred_study_programs',
+            'preferred_study_program_notes',
+            'preferred_study_programs_dm_note',
+            'preferred_study_programs_se_note',
+            'preferred_study_programs_cs_note',
+            'your_future_plans'
         )
 
     def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Swap label with help text for next fields
-        to_swap = [
-            "preferred_study_programs_dm_note",
-            "preferred_study_programs_se_note",
-        ]
-        for field in to_swap:
-            self.fields[field].label = self.fields[field].help_text
         if not request.user.is_curator:
             del self.fields["admin_note"]
 

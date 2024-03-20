@@ -33,7 +33,7 @@ from admission.constants import (
     InterviewFormats,
     InterviewInvitationStatuses,
     InterviewSections,
-    YandexDataSchoolInterviewRatingSystem,
+    YandexDataSchoolInterviewRatingSystem, HasDiplomaStatuses, DiplomaDegrees,
 )
 from admission.utils import get_next_process, slot_range
 from api.services import generate_hash, generate_random_string
@@ -418,6 +418,21 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     partner = models.ForeignKey("users.PartnerTag", verbose_name=_("Partner"),
                                 null=True, blank=True, on_delete=models.SET_NULL)
     is_studying = models.BooleanField(_("Are you studying?"), null=True)
+    has_diploma = models.CharField(
+        _("Has diploma"),
+        choices=HasDiplomaStatuses.choices,
+        help_text=_("Applicant|has_diploma"),
+        max_length=30,
+        null=True
+    )
+    diploma_degree = models.CharField(
+        _("Degree of diploma"),
+        choices=DiplomaDegrees.choices,
+        help_text=_("Applicant|diploma_degree"),
+        max_length=30,
+        null=True,
+        blank=True
+    )
     university = models.ForeignKey(
         "universities.University",
         verbose_name=_("Universities|University"),
@@ -512,7 +527,9 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         null=True,
         blank=True,
     )
-
+    working_hours = models.PositiveSmallIntegerField(
+        verbose_name=_("Working hours"), blank=True, null=True
+    )
     motivation = models.TextField(
         _("Your motivation"),
         help_text=_("Applicant|motivation_why"),

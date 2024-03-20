@@ -58,7 +58,11 @@
       <div class="tab-content">
         <div class="tab-pane active" id="applicant" role="tabpanel">
           <dl>
-            {% include "admission/_applicant_form.html" with applicant_form=applicant_form yds_hide_fields=yds_hide_fields %}
+            {% if applicant.data.data_format_version == '0.8' %}
+              {% include "admission/_applicant_form_08.html" with applicant_form=applicant_form yds_hide_fields=yds_hide_fields %}
+            {% else %}
+              {% include "admission/_applicant_form.html" with applicant_form=applicant_form yds_hide_fields=yds_hide_fields %}
+            {% endif %}
           </dl>
         </div>
         <div class="tab-pane" id="test-results" role="tabpanel">
