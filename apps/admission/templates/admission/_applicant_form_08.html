@@ -1,6 +1,7 @@
 {% for field in applicant_form %}{% spaceless %}
   {% if field.name == 'where_did_you_learn_other' %}
   {% elif field.name == 'is_studying' %}
+  {% elif field.name == 'new_track' %}
   {% elif field.name == 'university_legacy' %}
   {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
   {% elif field.name == 'position' and not applicant_form.has_job.value %}
@@ -26,6 +27,7 @@
           <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" alt="" />
         {% endwith %}
       </div>
+      <br/>
    {% elif field.name == 'email' %}
      <dd>
       <a href="mailto:{{ applicant_form.instance.email }}">{{ applicant_form.instance.email}}</a>
@@ -52,6 +54,8 @@
       {% endif %}
    {% elif field.name == 'has_diploma' %}
       <dd>{{ applicant_form.instance.get_has_diploma_display|default:"<не указано>" }}</dd>
+   {% elif field.name == 'gender' %}
+      <dd>{{ applicant_form.instance.get_gender_display|default:"<не указано>" }}</dd>
    {% elif field.name == 'diploma_degree' %}
       <dd>{{ applicant_form.instance.get_diploma_degree_display|default:"<не указано>" }}</dd>
    {% elif field.name == 'living_place' %}
@@ -84,6 +88,7 @@
       </dd>
   {% elif field.name == 'is_studying'%}
   {% elif field.name == 'has_diploma'%}
+  {% elif field.name == 'new_track' %}
   {% elif field.name == 'diploma_degree'%}
   {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
   {% elif field.name == 'position' and not applicant_form.has_job.value %}
@@ -110,9 +115,3 @@
         </dd>
    {% endif %}
 {% endspaceless %}{% endfor %}
-{% if applicant_form.instance.is_yds_applicant and applicant.is_alternative_track %}
-  {% for field_name, field_value in applicant_form.instance.alternative_track_info.items %}
-    <dt>{{ field_name }}:</dt>
-    <dd>{{ field_value }}</dd>
-  {% endfor %}
-{% endif %}

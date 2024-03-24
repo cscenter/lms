@@ -52,7 +52,7 @@ from grading.api.yandex_contest import RegisterStatus
 from learning.settings import AcademicDegreeLevels
 from lms.settings.base import YDS_SITE_ID
 from notifications.base_models import EmailAddressSuspension
-from users.constants import Roles
+from users.constants import Roles, GenderTypes
 from users.thumbnails import ApplicantThumbnailMixin
 
 
@@ -320,15 +320,20 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         (STUDY_PROGRAM_ROBOTICS, "Robotics (Роботы)"),
     )
     INFO_SOURCES = (
-        ("uni", "плакат/листовка в университете"),
-        ("social_net", "пост в соц. сетях"),
-        ("ambassador", "от амбассадора Yandex U-Team"),
-        ("friends", "от друзей"),
-        ("other", "другое"),
+        ('uni', 'плакат в университете'),
+        ('group', 'тг-канал/группа в университете'),
+        ('post', 'пост в вк/тг-канале'),
+        ('mailing', 'рассылка по почте'),
+        ('community', 'от студента/выпускника/преподавателя ШАД'),
+        ('ambassador', 'от амбассадора Yandex U-Team'),
+        ('friends', 'от друзей'),
+        ('bloger', 'от блогера'),
+        ('other', 'другое'),
         # Legacy options
         ("habr", "Прочитал в статье на habr.ru"),
         ("club", "Из CS клуба"),
         ("tandp", "Теории и практики"),
+        ("social_net", "пост в соц. сетях"),
     )
 
     campaign = models.ForeignKey(
@@ -362,6 +367,9 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         upload_to=applicant_photo_upload_to,
         blank=True,
         help_text=_("Applicant|photo"))
+    gender = models.CharField(_("Gender"), max_length=1,
+                              choices=GenderTypes.choices,
+                              default=GenderTypes.OTHER)
     email = models.EmailField(_("Email"), help_text=_("Applicant|email"))
     telegram_username = models.CharField(
         _("Telegram"), max_length=255, blank=True, null=True
@@ -418,6 +426,13 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     partner = models.ForeignKey("users.PartnerTag", verbose_name=_("Partner"),
                                 null=True, blank=True, on_delete=models.SET_NULL)
     is_studying = models.BooleanField(_("Are you studying?"), null=True)
+    new_track = models.BooleanField(_("Are applying for alternative track?"), null=True)
+    new_track_info = models.CharField(
+        _("Alternative track info"),
+        help_text=_("Applicant|alternative_track_info"),
+        max_length = 1000,
+        null=True
+    )
     has_diploma = models.CharField(
         _("Has diploma"),
         choices=HasDiplomaStatuses.choices,
@@ -646,23 +661,6 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         if not self.living_place and self.campaign.branch.city_id:
             return self.campaign.branch.name
         return self.living_place
-
-    @property
-    def is_alternative_track(self) -> bool:
-        if not isinstance(self.data, dict):
-            return False
-        return self.data.get("new_track") is True
-
-    @property
-    def alternative_track_info(self) -> dict:
-        if not isinstance(self.data, dict):
-            return {}
-        return {
-            "Есть ли у вас научные статьи": self.data.get("new_track_scientific_articles"),
-            "Есть ли у вас открытые проекты вашего авторства": self.data.get("new_track_projects"),
-            "Есть ли у вас посты или статьи о технологиях": self.data.get("new_track_tech_articles"),
-            "Расскажите более подробно о каком-нибудь из своих проектов": self.data.get("new_track_project_details"),
-        }
 
     @property
     def has_ticket(self) -> bool:

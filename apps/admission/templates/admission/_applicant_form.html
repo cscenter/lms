@@ -106,9 +106,3 @@
         </dd>
    {% endif %}
 {% endspaceless %}{% endfor %}
-{% if applicant_form.instance.is_yds_applicant and applicant.is_alternative_track %}
-  {% for field_name, field_value in applicant_form.instance.alternative_track_info.items %}
-    <dt>{{ field_name }}:</dt>
-    <dd>{{ field_value }}</dd>
-  {% endfor %}
-{% endif %}

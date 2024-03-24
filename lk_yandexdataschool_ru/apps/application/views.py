@@ -15,6 +15,7 @@ from learning.settings import AcademicDegreeLevels
 
 from django.conf import settings
 
+from users.constants import GenderTypes
 from users.models import PartnerTag
 
 SESSION_LOGIN_KEY = f"{YANDEX_OAUTH_BACKEND_PREFIX}_login"
@@ -63,6 +64,8 @@ class ApplicationFormView(TemplateView):
                                    AcademicDegreeLevels.values.items()]
             diploma_degrees = [{"value": k, "label": str(v)} for k, v in
                                    DiplomaDegrees.values.items()]
+            genders = [{"value": k, "label": str(v)} for k, v in
+                                   GenderTypes.values.items()]
             self.request.session.pop(SESSION_LOGIN_KEY, None)
             yandex_passport_access = False
             # yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
@@ -80,6 +83,7 @@ class ApplicationFormView(TemplateView):
                     'alwaysAllowCampaigns': list(always_allow_campaigns),
                     'educationLevelOptions': levels_of_education,
                     'diplomaDegreeOptions': diploma_degrees,
+                    'genderOptions': genders,
                     'sourceOptions': sources,
                     'partners': get_partners(),
                 },

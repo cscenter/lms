@@ -5,9 +5,13 @@ from django.utils.translation import pgettext_lazy
 
 WHERE_DID_YOU_LEARN = (
     ('uni', 'плакат в университете'),
-    ('social_net', 'пост в социальных сетях'),
+    ('group', 'тг-канал/группа в университете'),
+    ('post', 'пост в вк/тг-канале'),
+    ('mailing', 'рассылка по почте'),
+    ('community', 'от студента/выпускника/преподавателя ШАД'),
     ('ambassador', 'от амбассадора Yandex U-Team'),
     ('friends', 'от друзей'),
+    ('bloger', 'от блогера'),
     ('other', 'другое')
 )
 

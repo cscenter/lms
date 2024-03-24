@@ -29,7 +29,7 @@
     <div class="additional-info">
       Набор: {{ applicant.campaign }}<br>
       Статус анкеты: {{ applicant.get_status_display|default_if_none:"<не указан>" }}<br>
-      {% if applicant.is_alternative_track %}<b class="text-danger">Альтернативный трек</b>{% endif %}<br>
+      {% if applicant.new_track %}<b class="text-danger">Альтернативный трек</b>{% endif %}<br>
       {% if applicant.has_ticket %} <b class="text-danger">Утверждает, что имеет билет</b> {% endif %}<br>
     </div>
     <div class="nav-tabs-horizontal nav-tabs-inverse">

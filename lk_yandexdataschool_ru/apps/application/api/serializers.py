@@ -304,7 +304,8 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # Personal info
             "last_name", "first_name", "patronymic", "birth_date",
             "living_place", "residence_city",
-            "email", "phone", "additional_info", "photo",
+            "email", "phone", "additional_info",
+            "photo", "gender",
 
             # Accounts
             "yandex_login",
@@ -342,6 +343,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             "new_track_projects",
             "new_track_tech_articles",
             "new_track_project_details",
+            "new_track_info",
 
             # Source
             "utm",
@@ -377,6 +379,11 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # version 0.7
             # add photo field
             # add internship_beginning, internship_end, internship_not_ended fields
+
+            # version 0.8
+            # add has_diploma, diploma_degree, working_hours, gender fields
+            # move new_track from data to separate field
+            # add new_track_info
         )
         extra_kwargs = {
             'university': {
@@ -413,6 +420,9 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                 # case when `university_other` value provided. Set value
                 # later in `.validate` method.
                 self.fields["university"].required = False
+            if data.get('has_diploma') == 'no':
+                self.fields["university"].required = False
+                self.fields["university_city"].required = False
 
     def create(self, validated_data):
         data = {**validated_data}
@@ -429,11 +439,6 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'yandex_profile': yandex_profile,
             'university_city': data.get('university_city'),
             'shad_agreement': data.get('shad_agreement'),
-            'new_track': data.get('new_track'),
-            'new_track_scientific_articles': data.get('new_track_scientific_articles'),
-            'new_track_projects': data.get('new_track_projects'),
-            'new_track_tech_articles': data.get('new_track_tech_articles'),
-            'new_track_project_details': data.get('new_track_project_details'),
             'ticket_access': data.get('ticket_access'),
             'email_subscription': data.get('email_subscription'),
             'data_format_version': '0.8'
