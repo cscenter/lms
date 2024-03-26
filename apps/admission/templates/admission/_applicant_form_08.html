@@ -1,11 +1,11 @@
 {% for field in applicant_form %}{% spaceless %}
   {% if field.name == 'where_did_you_learn_other' %}
-  {% elif field.name == 'has_diploma' %}
-  {% elif field.name == 'diploma_degree' %}
+  {% elif field.name == 'is_studying' %}
+  {% elif field.name == 'new_track' %}
   {% elif field.name == 'university_legacy' %}
   {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
   {% elif field.name == 'position' and not applicant_form.has_job.value %}
-  {% elif field.name == 'level_of_education' and not applicant_form.is_studying.value %}
+  {% elif field.name == 'level_of_education' and not applicant_form.has_diploma.value %}
   {% elif field.name == 'internship_workplace' and not applicant_form.has_internship.value %}
   {% elif field.name == 'internship_position' and not applicant_form.has_internship.value %}
   {% elif field.name == 'internship_beginning' and not applicant_form.has_internship.value %}
@@ -27,6 +27,7 @@
           <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" alt="" />
         {% endwith %}
       </div>
+      <br/>
    {% elif field.name == 'email' %}
      <dd>
       <a href="mailto:{{ applicant_form.instance.email }}">{{ applicant_form.instance.email}}</a>
@@ -48,9 +49,15 @@
         </a>{% else %}
         <не указано>{% endif %}</dd>
    {% elif field.name == 'level_of_education' %}
-      {% if applicant_form.is_studying.value %}
+      {% if applicant_form.has_diploma.value %}
       <dd>{{ applicant_form.instance.get_level_of_education_display|default:"<не указано>" }}</dd>
       {% endif %}
+   {% elif field.name == 'has_diploma' %}
+      <dd>{{ applicant_form.instance.get_has_diploma_display|default:"<не указано>" }}</dd>
+   {% elif field.name == 'gender' %}
+      <dd>{{ applicant_form.instance.get_gender_display|default:"<не указано>" }}</dd>
+   {% elif field.name == 'diploma_degree' %}
+      <dd>{{ applicant_form.instance.get_diploma_degree_display|default:"<не указано>" }}</dd>
    {% elif field.name == 'living_place' %}
       <dd>{{ applicant_form.instance.get_living_place_display|default:"<не указано>" }}</dd>
    {% elif field.name == 'university_legacy' %}
@@ -69,7 +76,7 @@
      <dd>{{ applicant_form.instance.yandex_login }}</dd>
    {% elif field.name == 'university' %}
      <dd>{{ applicant_form.instance.university|default:applicant_form.instance.university_other }}</dd>
-   {% elif field.name == 'has_job' or field.name == 'has_internship' or field.name == 'is_studying' %}
+   {% elif field.name == 'has_job' or field.name == 'has_internship'%}
       <dd>
         {% if field.value %}
           Да
@@ -79,7 +86,9 @@
           Нет
         {% endif %}
       </dd>
+  {% elif field.name == 'is_studying'%}
   {% elif field.name == 'has_diploma'%}
+  {% elif field.name == 'new_track' %}
   {% elif field.name == 'diploma_degree'%}
   {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
   {% elif field.name == 'position' and not applicant_form.has_job.value %}

@@ -3,7 +3,7 @@ from typing import List, Dict
 from django.utils import timezone
 from django.views.generic import TemplateView
 
-from admission.constants import WHERE_DID_YOU_LEARN
+from admission.constants import WHERE_DID_YOU_LEARN, DiplomaDegrees
 from admission.models import Campaign, CampaignCity
 from auth.views import YANDEX_OAUTH_BACKEND_PREFIX
 
@@ -15,6 +15,7 @@ from learning.settings import AcademicDegreeLevels
 
 from django.conf import settings
 
+from users.constants import GenderTypes
 from users.models import PartnerTag
 
 SESSION_LOGIN_KEY = f"{YANDEX_OAUTH_BACKEND_PREFIX}_login"
@@ -59,8 +60,12 @@ class ApplicationFormView(TemplateView):
         utm = {param: self.request.GET.get(param) for param in utm_params}
         sources = [{"value": k, "label": v} for k, v in WHERE_DID_YOU_LEARN]
         if show_form:
-            levels_of_education = [{"value": k, "label": str(v).lower()} for k, v in
+            levels_of_education = [{"value": k, "label": str(v)} for k, v in
                                    AcademicDegreeLevels.values.items()]
+            diploma_degrees = [{"value": k, "label": str(v)} for k, v in
+                                   DiplomaDegrees.values.items()]
+            genders = [{"value": k, "label": str(v)} for k, v in
+                                   GenderTypes.values.items()]
             self.request.session.pop(SESSION_LOGIN_KEY, None)
             yandex_passport_access = False
             # yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
@@ -77,6 +82,8 @@ class ApplicationFormView(TemplateView):
                     'endpointResidenceCampaigns': reverse('admission-api:v2:residence_city_campaigns'),
                     'alwaysAllowCampaigns': list(always_allow_campaigns),
                     'educationLevelOptions': levels_of_education,
+                    'diplomaDegreeOptions': diploma_degrees,
+                    'genderOptions': genders,
                     'sourceOptions': sources,
                     'partners': get_partners(),
                 },

@@ -2,7 +2,6 @@
 .DS_Store
 ._*
 
-*.po
 *.sublime-project
 *.pyc
 *.sqlite3

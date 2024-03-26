@@ -1,4 +1,5 @@
 import datetime
+import os
 import string
 import uuid
 from decimal import Decimal
@@ -9,11 +10,12 @@ from djchoices import DjangoChoices
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
 from post_office.models import EmailTemplate
+from sorl.thumbnail import ImageField
 
 from django.conf import settings
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist, ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, RegexValidator, MaxValueValidator
 from django.db import models, transaction
 from django.db.models import Count, OuterRef, Q, Subquery, Value, query
 from django.db.models.functions import Coalesce
@@ -31,7 +33,7 @@ from admission.constants import (
     InterviewFormats,
     InterviewInvitationStatuses,
     InterviewSections,
-    YandexDataSchoolInterviewRatingSystem,
+    YandexDataSchoolInterviewRatingSystem, HasDiplomaStatuses, DiplomaDegrees,
 )
 from admission.utils import get_next_process, slot_range
 from api.services import generate_hash, generate_random_string
@@ -50,7 +52,8 @@ from grading.api.yandex_contest import RegisterStatus
 from learning.settings import AcademicDegreeLevels
 from lms.settings.base import YDS_SITE_ID
 from notifications.base_models import EmailAddressSuspension
-from users.constants import Roles
+from users.constants import Roles, GenderTypes
+from users.thumbnails import ApplicantThumbnailMixin
 
 
 def current_year():
@@ -255,8 +258,14 @@ ApplicantSubscribedManager = _ApplicantSubscribedManager.from_queryset(
     ApplicantQuerySet
 )
 
+def applicant_photo_upload_to(instance, filename):
+    bucket = instance.campaign.year
+    _, ext = os.path.splitext(filename)
+    file_name = uuid.uuid4().hex
+    return f"applicants/{bucket}/{file_name}{ext}"
 
-class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
+
+class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, ApplicantThumbnailMixin):
     TIMEZONE_AWARE_FIELD_NAME = "campaign"
 
     # TODO: access applicant statuses with .STATUS.<code> instead
@@ -311,15 +320,20 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         (STUDY_PROGRAM_ROBOTICS, "Robotics (Роботы)"),
     )
     INFO_SOURCES = (
-        ("uni", "плакат/листовка в университете"),
-        ("social_net", "пост в соц. сетях"),
-        ("ambassador", "от амбассадора Yandex U-Team"),
-        ("friends", "от друзей"),
-        ("other", "другое"),
+        ('uni', 'плакат в университете'),
+        ('group', 'тг-канал/группа в университете'),
+        ('post', 'пост в вк/тг-канале'),
+        ('mailing', 'рассылка по почте'),
+        ('community', 'от студента/выпускника/преподавателя ШАД'),
+        ('ambassador', 'от амбассадора Yandex U-Team'),
+        ('friends', 'от друзей'),
+        ('bloger', 'от блогера'),
+        ('other', 'другое'),
         # Legacy options
         ("habr", "Прочитал в статье на habr.ru"),
         ("club", "Из CS клуба"),
         ("tandp", "Теории и практики"),
+        ("social_net", "пост в соц. сетях"),
     )
 
     campaign = models.ForeignKey(
@@ -348,6 +362,14 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     patronymic = models.CharField(
         _("Patronymic"), max_length=255, blank=True, null=True
     )
+    photo = ImageField(
+        _("Applicant photo"),
+        upload_to=applicant_photo_upload_to,
+        blank=True,
+        help_text=_("Applicant|photo"))
+    gender = models.CharField(_("Gender"), max_length=1,
+                              choices=GenderTypes.choices,
+                              default=GenderTypes.OTHER)
     email = models.EmailField(_("Email"), help_text=_("Applicant|email"))
     telegram_username = models.CharField(
         _("Telegram"), max_length=255, blank=True, null=True
@@ -359,7 +381,8 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         help_text=_("Unsubscribe from future notifications"),
     )
     phone = models.CharField(
-        _("Contact phone"), max_length=42, help_text=_("Applicant|phone")
+        _("Contact phone"), max_length=42, help_text=_("Applicant|phone"),
+        validators=[RegexValidator(regex=r"^\+?[1-9][0-9]{7,14}$")]
     )
     residence_city = models.ForeignKey(to="admission.ResidenceCity", verbose_name=_("Residence city"),
                                        blank=True, null=True, on_delete=models.SET_NULL)
@@ -367,7 +390,8 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     living_place = models.CharField(
         _("Living Place"), max_length=255, null=True, blank=True
     )
-    birth_date = models.DateField(_("Date of Birth"), blank=True, null=True)
+    birth_date = models.DateField(_("Date of Birth"), blank=True, null=True, validators=[MaxValueValidator(
+        datetime.datetime(2024, 1, 1).date()), MinValueValidator(datetime.datetime(1900, 1, 1).date())])
     # Social Networks
     stepic_id = models.CharField(
         _("Stepik ID"),
@@ -402,6 +426,29 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
     partner = models.ForeignKey("users.PartnerTag", verbose_name=_("Partner"),
                                 null=True, blank=True, on_delete=models.SET_NULL)
     is_studying = models.BooleanField(_("Are you studying?"), null=True)
+    new_track = models.BooleanField(_("Are applying for alternative track?"), null=True)
+    new_track_info = models.CharField(
+        _("Alternative track info"),
+        help_text=_("Applicant|alternative_track_info"),
+        max_length = 1000,
+        blank=True,
+        null=True
+    )
+    has_diploma = models.CharField(
+        _("Has diploma"),
+        choices=HasDiplomaStatuses.choices,
+        help_text=_("Applicant|has_diploma"),
+        max_length=30,
+        null=True
+    )
+    diploma_degree = models.CharField(
+        _("Degree of diploma"),
+        choices=DiplomaDegrees.choices,
+        help_text=_("Applicant|diploma_degree"),
+        max_length=30,
+        null=True,
+        blank=True
+    )
     university = models.ForeignKey(
         "universities.University",
         verbose_name=_("Universities|University"),
@@ -470,6 +517,15 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         null=True,
         blank=True,
     )
+    internship_beginning = models.DateField(_("Date of the internship beginning"), blank=True, null=True, validators=[
+        MaxValueValidator(
+            datetime.datetime(2050, 1, 1).date()), MinValueValidator(datetime.datetime(1900, 1, 1).date())])
+    internship_end = models.DateField(_("Date of the internship end"), blank=True, null=True, validators=[
+        MaxValueValidator(
+            datetime.datetime(2050, 1, 1).date()), MinValueValidator(datetime.datetime(1900, 1, 1).date())])
+    internship_not_ended = models.BooleanField(
+        _("Does your internship still going?"), help_text=_("Applicant|internship_not_ended"), default=False
+    )
     has_job = models.BooleanField(
         _("Do you work?"), help_text=_("Applicant|has_job"), null=True
     )
@@ -487,7 +543,9 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         null=True,
         blank=True,
     )
-
+    working_hours = models.PositiveSmallIntegerField(
+        verbose_name=_("Working hours"), blank=True, null=True
+    )
     motivation = models.TextField(
         _("Your motivation"),
         help_text=_("Applicant|motivation_why"),
@@ -604,23 +662,6 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension):
         if not self.living_place and self.campaign.branch.city_id:
             return self.campaign.branch.name
         return self.living_place
-
-    @property
-    def is_alternative_track(self) -> bool:
-        if not isinstance(self.data, dict):
-            return False
-        return self.data.get("new_track") is True
-
-    @property
-    def alternative_track_info(self) -> dict:
-        if not isinstance(self.data, dict):
-            return {}
-        return {
-            "Есть ли у вас научные статьи": self.data.get("new_track_scientific_articles"),
-            "Есть ли у вас открытые проекты вашего авторства": self.data.get("new_track_projects"),
-            "Есть ли у вас посты или статьи о технологиях": self.data.get("new_track_tech_articles"),
-            "Расскажите более подробно о каком-нибудь из своих проектов": self.data.get("new_track_project_details"),
-        }
 
     @property
     def has_ticket(self) -> bool:

@@ -27,11 +27,11 @@ class AcademicDegreeLevels(DjangoChoices):
     BACHELOR_SPECIALITY_3 = C("3", _('3 course bachelor, speciality'))
     BACHELOR_SPECIALITY_4 = C("4", _('4 course bachelor, speciality'))
     SPECIALITY_5 = C("5", _('5 course speciality'))
-    SPECIALITY_6 = C("6_spec", _('6 course speciality'))
-    MASTER_1 = C("6", _('1 course magistracy'))
-    MASTER_2 = C("7", _('2 course magistracy'))
-    POSTGRADUATE = C("8", _('postgraduate'))
-    GRADUATE = C("9", _('graduate'))
+    SPECIALITY_6 = C("6", _('6 course speciality'))
+    MASTER_1 = C("7", _('1 course magistracy'))
+    MASTER_2 = C("8", _('2 course magistracy'))
+    POSTGRADUATE = C("9", _('postgraduate'))
+    ACADEMIC_LEAVE = C("10", _('academic_leave'))
     OTHER = C("other", _('Other'))
 
 

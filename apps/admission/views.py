@@ -546,20 +546,6 @@ class ApplicantDetailView(InterviewerOnlyMixin, TemplateResponseMixin, BaseCreat
         context.update(get_applicant_context(self.request, applicant_id))
         applicant = context["applicant"]
         context["status_form"] = ApplicantForm(instance=applicant)
-        context["yds_hide_fields"] = [
-            'stepic_id',
-            'github_login',
-            'university_legacy',
-            'graduate_work',
-            'online_education_experience',
-            'probability',
-            'preferred_study_programs',
-            'preferred_study_program_notes',
-            'preferred_study_programs_dm_note',
-            'preferred_study_programs_se_note',
-            'preferred_study_programs_cs_note',
-            'your_future_plans',
-        ]
         if "form" not in kwargs:
             invitation = InterviewInvitation.objects.for_applicant(applicant)
             if (

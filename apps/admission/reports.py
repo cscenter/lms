@@ -1,14 +1,11 @@
 import datetime
-from collections import OrderedDict
 from typing import Callable
 
 from pandas import DataFrame
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Prefetch
 from django.utils import formats
 from django.utils.encoding import force_str
-from django.utils.numberformat import format
 
 from admission.constants import ApplicantStatuses, InterviewSections
 from admission.models import Applicant, Campaign, Comment, Exam, Interview
@@ -75,6 +72,12 @@ class AdmissionApplicantsReport(ReportFileOutput):
                     value = applicant.get_status_display()
                 elif field.name == "level_of_education":
                     value = applicant.get_level_of_education_display()
+                elif field.name == "has_diploma":
+                    value = applicant.get_has_diploma_display()
+                elif field.name == "gender":
+                    value = applicant.get_gender_display()
+                elif field.name == "diploma_degree":
+                    value = applicant.get_diploma_degree_display()
                 elif field.name == "id":
                     value = reverse("admission:applicants:detail", args=[value])
                 elif field.name == "created":
