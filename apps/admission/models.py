@@ -431,6 +431,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         _("Alternative track info"),
         help_text=_("Applicant|alternative_track_info"),
         max_length = 1000,
+        blank=True,
         null=True
     )
     has_diploma = models.CharField(

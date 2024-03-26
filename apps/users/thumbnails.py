@@ -123,7 +123,7 @@ class UserThumbnailMixin(ThumbnailMixin):
 
 class ApplicantThumbnailMixin(ThumbnailMixin):
     def get_thumbnail(self, geometry=ThumbnailSizes.BASE, **options):
-        stub_factory = get_stub_factory(self.user.gender if self.user is not None else GenderTypes.MALE)
+        stub_factory = get_stub_factory(self.gender)
         kwargs = {
             "cropbox": None,
             "stub_factory": stub_factory,
