@@ -199,6 +199,8 @@ def test_valid_data_YDS_form(settings, client):
     response = client.post(url, data=make_post_data(data))
     assert response.status_code == 201
     assert Applicant.objects.exists()
+    session["application_ya_login"] = data['yandex_login']
+    session.save()
     data['email'] = 'incorrect@mail@gmail.com'
     data['telegram_username'] = 'https://t.me/username'
     data['birth_date'] = '0900-01-01'
