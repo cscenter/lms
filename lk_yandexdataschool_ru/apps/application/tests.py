@@ -2,7 +2,7 @@ import json
 import tempfile
 
 from PIL import Image
-from django.core.files.uploadedfile import TemporaryUploadedFile, InMemoryUploadedFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils.timezone import now
 
 import pytest
@@ -55,6 +55,7 @@ yds_post_data = {
     'awareness': True,
     'email_subscription': False
 }
+
 
 def make_post_data(payload):
     json_string = json.dumps(payload)
@@ -157,6 +158,7 @@ def test_view_application_form_msk_campaigns(client):
     assert response.status_code == 201
     assert Applicant.objects.exists()
 
+
 @pytest.mark.django_db
 def test_application_YDS_form_creates(settings, client):
     data = {**yds_post_data}
@@ -176,3 +178,40 @@ def test_application_YDS_form_creates(settings, client):
     response = client.post(url, data=make_post_data(data))
     assert response.status_code == 201
     assert Applicant.objects.exists()
+
+
+@pytest.mark.django_db
+def test_valid_data_YDS_form(settings, client):
+    data = {**yds_post_data}
+    university = UniversityFactory()
+    university_city = CityFactory()
+    data['university_city'] = {'is_exists': True, 'pk': university_city.pk}
+    data['university'] = university.pk
+    branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
+    campaign = CampaignFactory(branch=branch, year=now().year, current=True)
+    CampaignCity.objects.create(campaign=campaign, city=None)
+    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    data['campaign'] = campaign.pk
+    url = reverse('applicant_create')
+    session = client.session
+    session["application_ya_login"] = data['yandex_login']
+    session.save()
+    response = client.post(url, data=make_post_data(data))
+    assert response.status_code == 201
+    assert Applicant.objects.exists()
+    data['email'] = 'incorrect@mail@gmail.com'
+    data['telegram_username'] = 'https://t.me/username'
+    data['birth_date'] = '0900-01-01'
+    data['internship_beginning'] = '0900-01-01'
+    data['phone'] = '+12 345-678-90'
+    response = client.post(url, data=make_post_data(data))
+    assert response.status_code == 400
+    assert json.loads(response.content.decode()) == \
+           {
+               "birth_date": ["Ensure this value is greater than or equal to 1900-01-01."],
+               "email": ["Enter a valid email address."],
+               "phone": ["Enter a valid value."],
+               "telegram_username": [
+                   "Telegram username may only contain 5-32 alphanumeric characters or single underscores."
+                   " Should begin only with letter and end with alphanumeric."],
+               "internship_beginning": ["Ensure this value is greater than or equal to 1900-01-01."]}

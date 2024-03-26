@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 
 from django.utils.timezone import now
 
-from admission.models import Contest, Applicant, CampaignCity
+from admission.models import Contest, CampaignCity
 from admission.tests.factories import CampaignFactory, ContestFactory
 from core.models import University
 from core.tests.factories import BranchFactory
