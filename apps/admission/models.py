@@ -478,6 +478,12 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         blank=True,
         null=True,
     )
+    level_of_education_other = models.CharField(
+        _("Course (other)"),
+        max_length=255,
+        null=True,
+        blank=True,
+    )
     year_of_graduation = models.PositiveSmallIntegerField(
         verbose_name=_("Graduation Year"), blank=True, null=True
     )
