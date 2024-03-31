@@ -314,7 +314,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
 
             # Education
             "university_city", "university", "university_other",
-            "faculty", "is_studying", "level_of_education", "year_of_graduation",
+            "faculty", "is_studying", "level_of_education", "level_of_education_other", "year_of_graduation",
             "partner", "has_diploma", "diploma_degree",
 
             # Exp and work
@@ -383,7 +383,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # version 0.8
             # add has_diploma, diploma_degree, working_hours, gender fields
             # move new_track from data to separate field
-            # add new_track_info
+            # add new_track_info, level_of_education_other
         )
         extra_kwargs = {
             'university': {

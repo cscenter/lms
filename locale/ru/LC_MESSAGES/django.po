@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-24 12:39+0000\n"
+"POT-Creation-Date: 2024-03-31 08:08+0000\n"
 "PO-Revision-Date: 2023-03-30 01:14+0000\n"
 "Last-Translator:   <user.1@compscicenter.ru>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2961,7 +2961,7 @@ msgstr "Женский"
 
 #: apps/users/constants.py:12
 msgid "Other/Prefer Not to Say"
-msgstr "Другое/Предпочитаю не сообщать"
+msgstr "Другое / Предпочитаю не сообщать"
 
 #: apps/users/constants.py:41
 msgid "Interviewer [Admission]"
