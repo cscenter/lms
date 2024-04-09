@@ -28,7 +28,7 @@ from core.http import AuthenticatedHttpRequest, HttpRequest
 from core.timezone.utils import get_gmt
 from core.urls import reverse
 from core.views import ProtectedFormMixin
-from courses.models import CourseTeacher, Semester
+from courses.models import CourseTeacher, Semester, CourseDurations
 from courses.selectors import get_site_courses
 from files.handlers import MemoryImageUploadHandler, TemporaryImageUploadHandler
 from learning.forms import TestimonialForm
@@ -107,6 +107,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
         context = {
             "StudentStatuses": StudentStatuses,
             'StudentTypes': StudentTypes,
+            "CourseDurations": CourseDurations,
             "profile_user": profile_user,
             "time_zone": f"{get_gmt(profile_user.time_zone)} {profile_user.time_zone.zone}",
             "icalendars": icalendars,

@@ -34,6 +34,13 @@
                     <a href="{{ course.build_absolute_uri(site=enrollment.student_profile.site, is_secure=is_secure) }}" class="title">
                       {{ course.meta_course.name }}
                     </a>
+                    {{course.duration}}
+                    {% if course.duration == COURSE_DURATIONS.FIRST_HALF %}
+                       <i class="fa fa-adjust fa-rotate-180" aria-hidden="true"></i>
+                    {% endif %}
+                    {% if course.duration == COURSE_DURATIONS.SECOND_HALF %}
+                       <i class="fa fa-adjust" aria-hidden="true"></i>
+                    {% endif %}
                     {%- if request.site.pk != course.main_branch.site_id and course.is_club_course -%}
                       <span>, курс CS клуба</span>{% endif %}
                     &nbsp;&nbsp;
@@ -69,7 +76,13 @@
                   <td>
                     <a class="title" href="{{ course.get_absolute_url() }}">{{ course.meta_course.name }}</a>
                     {%- if request.site.pk != course.main_branch.site_id and course.is_club_course -%}
-                      <span>, курс CS клуба</span>{% endif %}<br>
+                      <span>, курс CS клуба</span>{% endif %}
+                    {% if course.duration == CourseDurations.FIRST_HALF %}
+                       <i class="fa fa-adjust fa-rotate-180" aria-hidden="true"></i>
+                    {% endif %}
+                    {% if course.duration == CourseDurations.SECOND_HALF %}
+                       <i class="fa fa-adjust" aria-hidden="true"></i>
+                    {% endif %}<br>
                     {% trans %}Professors{% endtrans %}:
                     {% for course_teacher in course.course_teachers.all() %}
                       <a href="{{ course_teacher.teacher.teacher_profile_url() }}">{{ course_teacher.teacher.get_abbreviated_name() }}</a>

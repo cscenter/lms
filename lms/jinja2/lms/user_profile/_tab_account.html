@@ -9,24 +9,25 @@
         {% for enrollment in enrollments %}
           <li>
             {% if enrollment.satisfactory%}
-              {% if can_view_course_icons and enrollment.view_invited%}
-                <i style="font-size:14px" class="fa">&#xf069;</i>
-              {% endif %}
-              {% if can_view_course_icons and enrollment.view_partner%}
-                <i class="fa fa-graduation-cap" aria-hidden="true"></i>
-              {% endif %}
-              <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}">
-              {{ enrollment.course }} </a> | {{ enrollment.grade_honest|lower }}
+              {% set opacity = '' %}
             {% else %}
-              {% if can_view_course_icons and enrollment.view_invited%}
-                <i style="font-size:14px; opacity: 0.5;" class="fa">&#xf069;</i>
-              {% endif %}
-              {% if can_view_course_icons and enrollment.view_partner%}
-                <i style="opacity: 0.5;" class="fa fa-graduation-cap" aria-hidden="true"></i>
-              {% endif %}
-              <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}" style="opacity: 0.5;">
-              {{ enrollment.course }} </a> <i style="opacity: 0.5;"> | {{ enrollment.grade_honest|lower }} </i>
+              {% set opacity = 'semi-transparent' %}
             {% endif %}
+            {% if can_view_course_icons and enrollment.view_invited%}
+              <i style="font-size:14px" class="fa {{opacity}}">&#xf069;</i>
+            {% endif %}
+            {% if can_view_course_icons and enrollment.view_partner%}
+              <i class="fa fa-graduation-cap {{opacity}}" aria-hidden="true"></i>
+            {% endif %}
+              <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}" class="{{opacity}}">
+              {{ enrollment.course }} </a>
+            {% if enrollment.course.duration == CourseDurations.FIRST_HALF %}
+              <i class="fa fa-adjust fa-rotate-180 {{opacity}}" aria-hidden="true"></i>
+            {% endif %}
+            {% if enrollment.course.duration == CourseDurations.SECOND_HALF %}
+              <i class="fa fa-adjust {{opacity}}" aria-hidden="true"></i>
+            {% endif %}
+            <i class="{{opacity}}"> | {{ enrollment.grade_honest|lower }} </i>
             {% if not loop.last and loop.nextitem.course.semester != enrollment.course.semester %}
             <p></p>
             {% endif %}

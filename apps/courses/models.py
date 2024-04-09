@@ -245,6 +245,11 @@ class CourseGroupModes(DjangoChoices):
     INVITE_AND_BRANCH = C('invite_and_branch', _('Invitations and Branches'))
 
 
+class CourseDurations(DjangoChoices):
+    FIRST_HALF = C('first', _('In the first half of semester'))
+    SECOND_HALF = C('second', _('In the second half of semester'))
+    FULL = C('full', _('Full semester'))
+
 class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'main_branch'
 
@@ -270,6 +275,12 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         Semester,
         verbose_name=_("Semester"),
         on_delete=models.PROTECT)
+    duration = models.CharField(
+        verbose_name=_("Duration"),
+        max_length=10, db_index=True,
+        help_text=_("Duration of course"),
+        choices=CourseDurations,
+        default=CourseDurations.FULL)
     completed_at = models.DateField(
         _("Date of completion"),
         blank=True,

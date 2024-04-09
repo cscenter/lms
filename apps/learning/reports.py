@@ -12,7 +12,7 @@ from django.http import HttpResponse, FileResponse
 from admission.models import Applicant
 from core.reports import ReportFileOutput
 from courses.constants import SemesterTypes
-from courses.models import Course, MetaCourse, Semester
+from courses.models import Course, MetaCourse, Semester, CourseDurations
 from courses.selectors import course_teachers_prefetch_queryset
 from courses.utils import get_term_index
 from learning.models import AssignmentComment, Enrollment, GraduateProfile
@@ -106,6 +106,11 @@ def is_club_course_map(courses):
             meta_course_is_club[key] = course.is_club_course
     return meta_course_is_club
 
+def duration_course_map(courses):
+    meta_course_duration: Dict[int, bool] = {}
+    for course in courses.values():
+        meta_course_duration[course.meta_course_id] = course.duration
+    return meta_course_duration
 
 class ProgressReport:
     """
@@ -783,12 +788,21 @@ class ProgressReportFull(ProgressReport):
         course_headers = []
         if meta_courses:
             meta_course_is_club = is_club_course_map(courses)
+            meta_course_duration = duration_course_map(courses)
 
             def cs_club_prefix(meta_course_id):
                 return "[CS клуб] " if meta_course_is_club[meta_course_id] else ""
 
+            def durability_prefix(meta_course_id):
+                if meta_course_duration[meta_course_id] == CourseDurations.FIRST_HALF:
+                    return "[В первой половине семестра]"
+                elif meta_course_duration[meta_course_id] == CourseDurations.SECOND_HALF:
+                    return "[Во второй половине семестра]"
+                else:
+                    return ""
+
             course_headers = (
-                f"{cs_club_prefix(course.id)}{course.name}"
+                f"{durability_prefix(course.id)}{cs_club_prefix(course.id)}{course.name}"
                 for course in meta_courses.values()
             )
 
@@ -798,6 +812,7 @@ class ProgressReportFull(ProgressReport):
             "Фамилия",
             "Имя",
             "Отчество",
+            "Тип",
             "Профиль на сайте",
             "Пол",
             "Дата рождения",
@@ -853,6 +868,7 @@ class ProgressReportFull(ProgressReport):
             student_account.last_name,
             student_account.first_name,
             student_account.patronymic,
+            student_profile.get_type_display(),
             student_account.get_absolute_url(),
             student_account.get_gender_display(),
             student_account.birth_date,
