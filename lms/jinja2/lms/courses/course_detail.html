@@ -15,9 +15,17 @@
     <div class="row">
       <div class="col-xs-9">
         <h2 class="course-main-title">
-          {{ course.meta_course.name }}{% if request.user.is_curator %}
+          {{ course.meta_course.name }}
+          {% if course.duration == CourseDurations.FIRST_HALF %}
+             <i class="fa fa-adjust fa-rotate-180" aria-hidden="true"></i>
+          {% endif %}
+          {% if course.duration == CourseDurations.SECOND_HALF %}
+             <i class="fa fa-adjust" aria-hidden="true"></i>
+          {% endif %}
+          {% if request.user.is_curator %}
             <a href="{{ url('admin:courses_course_change', object_id=course.pk) }}" target="_blank"><i
-              class="fa fa-pencil-square-o"></i></a>{% endif %}
+              class="fa fa-pencil-square-o"></i></a>
+          {% endif %}
           {% if user.is_curator or user in course.teachers.all()%}
            <a href="{{request.build_absolute_uri(url('staff:gradebook', **course.url_kwargs))}}" target="_blank">
               <i class="fa fa-list"></i></a>

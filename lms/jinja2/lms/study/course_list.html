@@ -34,7 +34,6 @@
                     <a href="{{ course.build_absolute_uri(site=enrollment.student_profile.site, is_secure=is_secure) }}" class="title">
                       {{ course.meta_course.name }}
                     </a>
-                    {{course.duration}}
                     {% if course.duration == CourseDurations.FIRST_HALF %}
                        <i class="fa fa-adjust fa-rotate-180" aria-hidden="true"></i>
                     {% endif %}

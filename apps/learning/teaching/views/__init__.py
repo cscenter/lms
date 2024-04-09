@@ -13,7 +13,7 @@ from core.exceptions import Redirect
 from core.http import HttpRequest
 from courses.calendar import TimetableEvent
 from courses.constants import TeacherRoles
-from courses.models import Course
+from courses.models import Course, CourseDurations
 from courses.selectors import course_teachers_prefetch_queryset
 from courses.services import get_teacher_branches
 from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
@@ -93,6 +93,7 @@ class CourseListView(PermissionRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context['SpectatorRole'] = TeacherRoles.SPECTATOR
+        context['CourseDurations'] = CourseDurations
         context['get_student_groups_url'] = get_student_groups_url
         context['CreateCourseNews'] = CreateCourseNews.name
         return context
@@ -116,6 +117,7 @@ class GradeBookListView(TeacherOnlyMixin, GradeBookListBaseView):
                     course = semester.course_offerings[0]
                     raise Redirect(to=course.get_gradebook_url())
         context = {
+            'CourseDurations': CourseDurations,
             "semester_list": self.object_list
         }
         return context
