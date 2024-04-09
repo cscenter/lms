@@ -35,10 +35,10 @@
                       {{ course.meta_course.name }}
                     </a>
                     {{course.duration}}
-                    {% if course.duration == COURSE_DURATIONS.FIRST_HALF %}
+                    {% if course.duration == CourseDurations.FIRST_HALF %}
                        <i class="fa fa-adjust fa-rotate-180" aria-hidden="true"></i>
                     {% endif %}
-                    {% if course.duration == COURSE_DURATIONS.SECOND_HALF %}
+                    {% if course.duration == CourseDurations.SECOND_HALF %}
                        <i class="fa fa-adjust" aria-hidden="true"></i>
                     {% endif %}
                     {%- if request.site.pk != course.main_branch.site_id and course.is_club_course -%}
