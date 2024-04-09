@@ -20,7 +20,7 @@ from core.http import HttpRequest
 from core.timezone import get_now_utc
 from core.urls import reverse
 from courses.calendar import CalendarEvent, TimetableEvent
-from courses.models import Course, Semester
+from courses.models import Course, Semester, CourseDurations
 from courses.selectors import course_teachers_prefetch_queryset
 from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
 from courses.views import MonthEventsCalendarView, WeekEventsView
@@ -333,6 +333,7 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
             else:
                 archive.append(course)
         context = {
+            "CourseDurations": CourseDurations,
             "enrollments": student_enrollments,
             "ongoing_rest": ongoing_rest,
             "ongoing_enrolled": ongoing_enrolled,

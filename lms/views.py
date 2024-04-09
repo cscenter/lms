@@ -14,7 +14,7 @@ from django.views import View
 from core.exceptions import Redirect
 from core.urls import reverse
 from courses.constants import SemesterTypes
-from courses.models import Course, CourseTeacher
+from courses.models import Course, CourseTeacher, CourseDurations
 from courses.selectors import course_teachers_prefetch_queryset
 from courses.utils import TermPair, get_current_term_pair
 from learning.models import CourseInvitation, Enrollment
@@ -119,6 +119,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
             courses[term.slug] = OfferingsCourseSerializer(cs, many=True).data
         context = {
             "TERM_TYPES": term_options,
+            "COURSE_DURATIONS": CourseDurations,
             "branches": filterset.form.fields['branch'].choices,
             "terms": terms,
             "courses": courses,
