@@ -28,7 +28,7 @@ from core.models import Branch
 from core.urls import reverse
 from core.utils import bucketize
 from courses.constants import SemesterTypes
-from courses.models import Course, Semester
+from courses.models import Course, Semester, CourseDurations
 from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment, GraduateProfile, Invitation
@@ -716,7 +716,10 @@ class GradeBookListView(CuratorOnlyMixin, GradeBookListBaseView):
                         term.course_offerings, key=lambda c: c.main_branch.name
                     )
                     term.course_offerings = courses
-        context = {"semester_list": semester_list}
+        context = {
+            'CourseDurations': CourseDurations,
+            "semester_list": semester_list
+        }
         return context
 
 

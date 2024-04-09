@@ -18,7 +18,14 @@
             {% for semester in semester_list %}
                 {% for co in semester.course_offerings %}
                   <tr>
-                    <td><a href="{{ co.get_gradebook_url }}">{{ co.meta_course.name }}</a></td>
+                    <td><a href="{{ co.get_gradebook_url }}">{{ co.meta_course.name }}</a>
+                    {% if co.duration == CourseDurations.FIRST_HALF %}
+                       <i class="fa fa-adjust fa-rotate-180" aria-hidden="true"></i>
+                    {% endif %}
+                    {% if co.duration == CourseDurations.SECOND_HALF %}
+                       <i class="fa fa-adjust" aria-hidden="true"></i>
+                    {% endif %}
+                    </td>
                     <td>{{ co.semester }}</td>
                   </tr>
                 {% endfor %}

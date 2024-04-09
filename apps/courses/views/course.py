@@ -11,7 +11,7 @@ from core.http import AuthenticatedHttpRequest
 from core.utils import is_club_site
 from courses.constants import TeacherRoles
 from courses.forms import CourseUpdateForm
-from courses.models import Course, CourseGroupModes, CourseTeacher
+from courses.models import Course, CourseGroupModes, CourseTeacher, CourseDurations
 from courses.permissions import (
     CreateAssignment, CreateCourseClass, EditCourse, ViewCourseContacts,
     ViewCourseInternalDescription, can_view_private_materials, ViewCourse
@@ -88,6 +88,7 @@ class CourseDetailView(PermissionRequiredMixin, CourseURLParamsMixin, DetailView
         can_enroll_by_invitation = user.has_perm(EnrollInCourseByInvitation.name, perm_obj)
         context = {
             'CourseGroupModes': CourseGroupModes,
+            'CourseDurations': CourseDurations,
             'cad_add_news': can_add_news,
             'can_add_assignment': can_add_assignment,
             'can_add_course_classes': can_add_course_classes,
