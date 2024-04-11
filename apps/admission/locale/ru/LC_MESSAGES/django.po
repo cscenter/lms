@@ -8,16 +8,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-10 13:52+0000\n"
-"PO-Revision-Date: 2023-03-30 01:19+0000\n"
-"Last-Translator:   <user.1@compscicenter.ru>\n"
+"POT-Creation-Date: 2024-04-11 19:39+0000\n"
+"PO-Revision-Date: 2024-04-11 19:44+0000\n"
+"Last-Translator: Влад Пимкин <delamelicon@yandex.ru>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.9.8\n"
 
 #: apps/admission/admin.py:46 apps/admission/admin.py:99
@@ -59,7 +58,7 @@ msgstr "Дата"
 msgid "Interview"
 msgstr "Интервью"
 
-#: apps/admission/admin.py:380 apps/admission/constants.py:94
+#: apps/admission/admin.py:380 apps/admission/constants.py:97
 msgid "Accepted"
 msgstr "Принято"
 
@@ -94,156 +93,169 @@ msgid "Permitted to the exam"
 msgstr "Допущен к экзамену"
 
 #: apps/admission/constants.py:25
+msgid "Permitted to the olympiad"
+msgstr "Допущен к олимпиаде"
+
+#: apps/admission/constants.py:26
 msgid "Rejected by exam"
 msgstr "Отказ по результатам экзамена"
 
-#: apps/admission/constants.py:26
-#, fuzzy
+#: apps/admission/constants.py:27
+#| msgid "Rejected by exam"
+msgid "Rejected by form check"
+msgstr "Отказ после проверки анкеты"
+
+#: apps/admission/constants.py:28
+#| msgid "Rejected by interview"
+msgid "Rejected by intensive"
+msgstr "Отказ по результатам интенсива"
+
+#: apps/admission/constants.py:29
 #| msgid "Rejected by exam"
 msgid "Rejected by exam cheating"
-msgstr "Отказ по результатам экзамена"
+msgstr "Отказ из-за читерства на экзамене"
 
-#: apps/admission/constants.py:27
+#: apps/admission/constants.py:30
 msgid "Cheating"
 msgstr "Читер (списывание и т.д.)"
 
-#: apps/admission/constants.py:28
+#: apps/admission/constants.py:31
 msgid "Pending"
 msgstr "Ожидает решения"
 
-#: apps/admission/constants.py:31
+#: apps/admission/constants.py:34
 msgid "Can be interviewed"
 msgstr "Прошёл на собеседование (ещё не назначено)"
 
-#: apps/admission/constants.py:33
+#: apps/admission/constants.py:36
 msgid "Interview assigned"
 msgstr "Назначено собеседование"
 
-#: apps/admission/constants.py:34
+#: apps/admission/constants.py:37
 msgid "Interview completed"
 msgstr "Собеседование завершено"
 
-#: apps/admission/constants.py:35
+#: apps/admission/constants.py:38
 msgid "Rejected by interview"
 msgstr "Отказ по результатам интервью"
 
-#: apps/admission/constants.py:37
+#: apps/admission/constants.py:40
 msgid "Rejected by interview. Offered a bonus"
 msgstr "Отказ по результатам интервью. Предложили бонус"
 
-#: apps/admission/constants.py:39
+#: apps/admission/constants.py:42
 msgid "Accept on paid"
 msgstr "Платное"
 
-#: apps/admission/constants.py:40
+#: apps/admission/constants.py:43
 msgid "Waiting for Payment"
 msgstr "Ожидаем оплаты"
 
-#: apps/admission/constants.py:41
+#: apps/admission/constants.py:44
 msgid "Accept"
 msgstr "Принимаем"
 
-#: apps/admission/constants.py:42
+#: apps/admission/constants.py:45
 msgid "Accept with condition"
 msgstr "Принимаем с условием"
 
-#: apps/admission/constants.py:43
+#: apps/admission/constants.py:46
 msgid "Applicant|Volunteer"
 msgstr "Берем в вольные слушатели"
 
-#: apps/admission/constants.py:44
+#: apps/admission/constants.py:47
 msgid "He or she refused"
 msgstr "Отказался"
 
-#: apps/admission/constants.py:63
+#: apps/admission/constants.py:66
 msgid "Testing"
 msgstr "Тестирование"
 
-#: apps/admission/constants.py:64 apps/admission/models.py:1099
+#: apps/admission/constants.py:67 apps/admission/models.py:1099
 msgid "Exam"
 msgstr "Экзамен"
 
-#: apps/admission/constants.py:68
+#: apps/admission/constants.py:71
 msgid "Not registered in the contest"
 msgstr "Не зарегистрирован в контесте"
 
-#: apps/admission/constants.py:70
+#: apps/admission/constants.py:73
 msgid "Syncing with a contest"
 msgstr "Синхронизация с контестом"
 
-#: apps/admission/constants.py:71
+#: apps/admission/constants.py:74
 msgid "Manual score input"
 msgstr "Ручной ввод баллов"
 
-#: apps/admission/constants.py:75
+#: apps/admission/constants.py:78
 msgid "Offline"
 msgstr "Офлайн"
 
-#: apps/admission/constants.py:76
+#: apps/admission/constants.py:79
 msgid "Online"
 msgstr "Онлайн"
 
-#: apps/admission/constants.py:80
+#: apps/admission/constants.py:83
 msgctxt "section"
 msgid "Common Section"
 msgstr "Общая секция"
 
-#: apps/admission/constants.py:81
+#: apps/admission/constants.py:84
 msgctxt "section"
 msgid "Math"
 msgstr "Математика"
 
-#: apps/admission/constants.py:82
+#: apps/admission/constants.py:85
 msgctxt "section"
 msgid "Code"
 msgstr "Код"
 
-#: apps/admission/constants.py:83
+#: apps/admission/constants.py:86
 msgctxt "section"
 msgid "Motivation"
 msgstr "Мотивация"
 
-#: apps/admission/constants.py:88
+#: apps/admission/constants.py:91
 msgid "No Response"
 msgstr "Нет ответа"
 
-#: apps/admission/constants.py:89
+#: apps/admission/constants.py:92
 msgid "Declined"
 msgstr "Отклонено"
 
-#: apps/admission/constants.py:93
+#: apps/admission/constants.py:96
 msgid "Expired"
 msgstr "Истекло"
 
-#: apps/admission/constants.py:124
+#: apps/admission/constants.py:127
 msgid "bachelor"
 msgstr "Бакалавр"
 
-#: apps/admission/constants.py:125
+#: apps/admission/constants.py:128
 msgid "speciality"
 msgstr "Специалист"
 
-#: apps/admission/constants.py:126
+#: apps/admission/constants.py:129
 msgid "magistracy"
 msgstr "Магистр"
 
-#: apps/admission/constants.py:127
+#: apps/admission/constants.py:130
 msgid "postgraduate"
 msgstr "Аспирант"
 
-#: apps/admission/constants.py:128
+#: apps/admission/constants.py:131
 msgid "secondary professional"
 msgstr "Диплом СПО"
 
-#: apps/admission/constants.py:131
+#: apps/admission/constants.py:134
 msgid "yes"
 msgstr "Да"
 
-#: apps/admission/constants.py:132
+#: apps/admission/constants.py:135
 msgid "in process of getting degree"
 msgstr "В процессе получения диплома"
 
-#: apps/admission/constants.py:133
+#: apps/admission/constants.py:136
 msgid "no"
 msgstr "Нет"
 
@@ -363,7 +375,8 @@ msgid "Current Admission"
 msgstr "Текущий набор"
 
 #: apps/admission/models.py:87
-msgid "You can mark campaign as current only after adding contests for testing"
+msgid ""
+"You can mark campaign as current only after adding contests for testing"
 msgstr ""
 "Возможность сделать набор текущим появится после добавления контестов для "
 "этапа тестирования."
@@ -395,7 +408,8 @@ msgstr "Проходной балл по экзамену"
 #: apps/admission/models.py:102
 msgid "Campaign|Exam_passing_score-help"
 msgstr ""
-"Все результаты >= указанного порога гарантированно пройдут на следующий этап."
+"Все результаты >= указанного порога гарантированно пройдут на следующий "
+"этап."
 
 #: apps/admission/models.py:106
 msgid "Application Starts on"
@@ -467,8 +481,8 @@ msgstr "Шаблон отзыва о собеседовании"
 
 #: apps/admission/models.py:152
 msgid ""
-"Leave blank if there is no need to send a feedback email. Email will be sent "
-"at the time of interview status change, but not earlier than 21:00 of the "
+"Leave blank if there is no need to send a feedback email. Email will be sent"
+" at the time of interview status change, but not earlier than 21:00 of the "
 "day of the interview"
 msgstr ""
 "Оставьте значение пустым, если не нужно отправлять письмо после завершения "
@@ -1001,8 +1015,8 @@ msgid ""
 "Template for confirmation email that the interview was scheduled. Leave "
 "blank if there is no need to send confirmation email"
 msgstr ""
-"Оставьте пустым, если не требуется отправлять письмо с подтверждением  того, "
-"что собеседование было успешно создано."
+"Оставьте пустым, если не требуется отправлять письмо с подтверждением  того,"
+" что собеседование было успешно создано."
 
 #: apps/admission/models.py:1174
 msgid "Reminder Template"
@@ -1132,8 +1146,8 @@ msgstr "С заданиями"
 #: apps/admission/models.py:1404
 msgid "Based on this flag, student should arrive 30 min before or not"
 msgstr ""
-"Если отмечено, то в уведомлении будет указано время собеседования на полчаса "
-"раньше."
+"Если отмечено, то в уведомлении будет указано время собеседования на полчаса"
+" раньше."
 
 #: apps/admission/models.py:1419 apps/admission/models.py:1538
 msgid "Interview stream"
@@ -1141,8 +1155,8 @@ msgstr "Поток собеседований"
 
 #: apps/admission/models.py:1459
 msgid ""
-"Interview format settings are not found. Create settings <a href='{}'>here</"
-"a>."
+"Interview format settings are not found. Create settings <a "
+"href='{}'>here</a>."
 msgstr ""
 "Настройки формата собеседования для указанной кампании не найдены. Создать "
 "настройки можно <a href='{}'>здесь</a>."
@@ -1257,6 +1271,9 @@ msgstr "Активный набор"
 msgid "All campaigns"
 msgstr "Все наборы"
 
+#~ msgid "Rejected by olympiad"
+#~ msgstr "Отказ по результатам интенсива"
+
 #~ msgid "Confirmation code is not valid"
 #~ msgstr "Неправильный код"
 
@@ -1297,15 +1314,15 @@ msgstr "Все наборы"
 #~ msgstr "Имя шаблона письма с напоминанием о предстоящем собеседовании"
 
 #~ msgid ""
-#~ "Make sure file does not include solutions due to it visible with direct "
-#~ "url link"
+#~ "Make sure file does not include solutions due to it visible with direct url "
+#~ "link"
 #~ msgstr ""
 #~ "Файлы не должны включать в себя решения, т.к. доступны по прямой ссылке "
 #~ "любому желающему."
 
 #~ msgid ""
-#~ "Subtract the specified value from the start time of the interview - this "
-#~ "is the schedule time of the reminder."
+#~ "Subtract the specified value from the start time of the interview - this is "
+#~ "the schedule time of the reminder."
 #~ msgstr ""
 #~ "Указывается дельта времени, которая будет вычтена из времени начала "
 #~ "собеседования."

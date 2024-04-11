@@ -22,7 +22,10 @@ EMAIL_VERIFICATION_CODE_TEMPLATE = "emails/admission/email_verification_code.txt
 class ApplicantStatuses(DjangoChoices):
     REJECTED_BY_TEST = C("rejected_test", _("Rejected by test"))
     PERMIT_TO_EXAM = C("permit_to_exam", _("Permitted to the exam"))
+    PERMIT_TO_OlYMPIAD = C("permit_to_olympiad", _("Permitted to the olympiad"))
     REJECTED_BY_EXAM = C("rejected_exam", _("Rejected by exam"))
+    REJECTED_BY_FORM_CHECK = C("rejected_form_check", _("Rejected by form check"))
+    REJECTED_BY_INTENSIVE = C("rejected_intensive", _("Rejected by intensive"))
     REJECTED_BY_EXAM_CHEATING = C("reject_exam_cheater", _("Rejected by exam cheating"))
     REJECTED_BY_CHEATING = C("rejected_cheating", _("Cheating"))
     PENDING = C("pending", _("Pending"))
