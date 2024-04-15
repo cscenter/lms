@@ -127,8 +127,8 @@
             <tr>
               <td>{{ campaign }}</td>
               <td>
-                <a target="_blank" href="{% url 'staff:exports_report_admission_applicants' campaign.pk 'csv' %}">csv</a>,
-                <a target="_blank" href="{% url 'staff:exports_report_admission_applicants' campaign.pk 'xlsx' %}">xlsx</a>
+                <a target="_blank" href="{% url 'staff:exports_report_admission_campaign_applicants' campaign.pk 'csv' %}">csv</a>,
+                <a target="_blank" href="{% url 'staff:exports_report_admission_campaign_applicants' campaign.pk 'xlsx' %}">xlsx</a>
               </td>
               <td>
                 <a target="_blank" href="{% url 'staff:exports_report_admission_exam' campaign.pk 'csv' %}">csv</a>,
@@ -137,6 +137,21 @@
               <td>
                 <a target="_blank" href="{% url 'staff:exports_report_admission_interviews' campaign.pk 'csv' %}">csv</a>,
                 <a target="_blank" href="{% url 'staff:exports_report_admission_interviews' campaign.pk 'xlsx' %}">xlsx</a></td>
+            </tr>
+          {% endfor %}
+
+          <table class="table table-bordered bg-white">
+          <tr>
+            <th>Год набора</th>
+            <th>Анкеты</th>
+          </tr>
+          {% for year in years %}
+            <tr>
+              <td>{{ year }}</td>
+              <td>
+                <a target="_blank" href="{% url 'staff:exports_report_admission_year_applicants' year 'csv' %}">csv</a>,
+                <a target="_blank" href="{% url 'staff:exports_report_admission_year_applicants' year 'xlsx' %}">xlsx</a>
+              </td>
             </tr>
           {% endfor %}
 
