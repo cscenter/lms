@@ -1,6 +1,8 @@
 import datetime
+from abc import abstractmethod
 from typing import Callable
 
+from django.db import models
 from pandas import DataFrame
 
 from django.db.models import Prefetch
@@ -14,47 +16,33 @@ from core.urls import reverse
 
 
 class AdmissionApplicantsReport(ReportFileOutput):
-    def __init__(self, campaign):
+    exclude_applicant_fields = set()
+
+    def __init__(self):
         super().__init__()
-        self.campaign = campaign
         self.process()
 
+    @abstractmethod
     def get_queryset(self):
-        return (
-            Applicant.objects.filter(campaign=self.campaign.pk)
-            .select_related("exam", "online_test")
-            .prefetch_related(
-                "university_legacy",
-                Prefetch(
-                    "interviews",
-                    queryset=(
-                        Interview.objects.prefetch_related(
-                            Prefetch(
-                                "comments",
-                                queryset=(
-                                    Comment.objects.select_related("interviewer")
-                                ),
-                            )
-                        )
-                    ),
-                ),
-            )
-            .order_by("pk")
-        )
+        raise NotImplementedError()
 
     def process(self):
+        applicants = (self.get_queryset()
+        .defer(*self.exclude_applicant_fields)
+        .select_related("exam", "online_test")
+        )
+        self.exclude_applicant_fields.update(("modified", "meta"))
         # Collect headers
-        exclude_applicant_fields = {
-            "modified",
-            "uuid",
-            "yandex_login_q",
-            "campaign",
-            "user",
-            "meta",
-        }
         applicant_fields = [
-            f for f in Applicant._meta.fields if f.name not in exclude_applicant_fields
+            f for f in Applicant._meta.fields if f.name not in self.exclude_applicant_fields
         ]
+
+        to_prefetch = [field.name for field in applicant_fields if isinstance(field, models.ForeignKey)]
+        if "campaign" in to_prefetch:
+            to_prefetch.append("campaign__branch")
+
+        applicants = applicants.prefetch_related(*to_prefetch)
+
         self.headers = [force_str(f.verbose_name) for f in applicant_fields]
         self.headers.extend(
             [
@@ -62,7 +50,6 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 "Результаты экзамена",
             ]
         )
-        applicants = self.get_queryset()
         # Collect data
         for applicant in applicants:
             row = []
@@ -96,6 +83,19 @@ class AdmissionApplicantsReport(ReportFileOutput):
     def export_row(self, row):
         return row
 
+class AdmissionApplicantsCampaignReport(AdmissionApplicantsReport):
+    exclude_applicant_fields = {
+        "yandex_login_q",
+        "campaign",
+        "user",
+    }
+    def __init__(self, campaign):
+        self.campaign = campaign
+        super().__init__()
+
+    def get_queryset(self):
+        return Applicant.objects.filter(campaign=self.campaign.pk).order_by("pk")
+
     def get_filename(self):
         today = datetime.datetime.now()
         return "admission_{}_{}_report_{}".format(
@@ -104,6 +104,42 @@ class AdmissionApplicantsReport(ReportFileOutput):
             formats.date_format(today, "SHORT_DATE_FORMAT"),
         )
 
+
+class AdmissionApplicantsYearReport(AdmissionApplicantsReport):
+    exclude_applicant_fields = {
+        "user",
+        "yandex_login_q",
+        "photo",
+        "telegram_username",
+        "is_unsubscribed",
+        "stepic_id",
+        "github_login",
+        "graduate_work",
+        "online_education_experience",
+        "experience",
+        "internship_beginning",
+        "internship_end",
+        "working_hours",
+        "probability",
+        "preferred_study_programs",
+        "preferred_study_program_notes",
+        "preferred_study_programs_dm_note",
+        "preferred_study_programs_se_note",
+        "preferred_study_programs_cs_note",
+        "your_future_plans",
+        "admin_note",
+    }
+
+    def __init__(self, year):
+        self.year = year
+        super().__init__()
+
+    def get_queryset(self):
+        return Applicant.objects.filter(campaign__year=self.year).exclude(campaign__branch__name='Тест').order_by("pk")
+
+    def get_filename(self):
+        today = datetime.datetime.now()
+        return f"admission_{self.year}_report_{formats.date_format(today, 'SHORT_DATE_FORMAT')}"
 
 class AdmissionExamReport:
     def __init__(self, campaign):

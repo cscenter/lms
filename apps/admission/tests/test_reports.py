@@ -1,7 +1,7 @@
 import pytest
 
 from admission.constants import InterviewSections
-from admission.reports import AdmissionApplicantsReport, AdmissionExamReport
+from admission.reports import AdmissionApplicantsCampaignReport, AdmissionExamReport
 from admission.tests.factories import (
     ApplicantFactory,
     CampaignFactory,
@@ -32,7 +32,7 @@ def test_report_smoke():
         applicant=applicant, section=InterviewSections.ALL_IN_ONE
     )
     CommentFactory(score=1, interview=interview)
-    report = AdmissionApplicantsReport(campaign=campaign)
+    report = AdmissionApplicantsCampaignReport(campaign=campaign)
     assert len(report.data) == 1
 
 

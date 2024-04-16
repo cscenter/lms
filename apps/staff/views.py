@@ -19,12 +19,13 @@ from django.views import View, generic
 import core.utils
 from admission.models import Campaign, Interview
 from admission.reports import (
-    AdmissionApplicantsReport,
+    AdmissionApplicantsCampaignReport,
     AdmissionExamReport,
-    generate_admission_interviews_report,
+    generate_admission_interviews_report, AdmissionApplicantsYearReport,
 )
 from core.http import HttpRequest
 from core.models import Branch
+from core.typings import assert_never
 from core.urls import reverse
 from core.utils import bucketize
 from courses.constants import SemesterTypes
@@ -149,6 +150,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
                 .select_related("branch")
                 .order_by("-year", "branch__name")
             ),
+            "years": range(2020, current_term.year + 1),
             "branches": branches,
             "official_diplomas_dates": official_diplomas_dates,
         }
@@ -448,16 +450,28 @@ class InvitationStudentsProgressReportView(CuratorOnlyMixin, View):
         return dataframe_to_response(report.generate(), output_format, file_name)
 
 
-class AdmissionApplicantsReportView(CuratorOnlyMixin, generic.base.View):
+class AdmissionApplicantsCampaignReportView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, campaign_id, output_format, **kwargs):
         campaign = get_object_or_404(
             Campaign.objects.filter(pk=campaign_id, branch__site_id=settings.SITE_ID)
         )
-        report = AdmissionApplicantsReport(campaign=campaign)
+        report = AdmissionApplicantsCampaignReport(campaign=campaign)
         if output_format == "csv":
             return report.output_csv()
         elif output_format == "xlsx":
             return report.output_xlsx()
+        else:
+            assert_never(output_format)
+
+class AdmissionApplicantsYearReportView(CuratorOnlyMixin, generic.base.View):
+    def get(self, request, output_format, year, **kwargs):
+        report = AdmissionApplicantsYearReport(year=year)
+        if output_format == "csv":
+            return report.output_csv()
+        elif output_format == "xlsx":
+            return report.output_xlsx()
+        else:
+            assert_never(output_format)
 
 
 class AdmissionInterviewsReportView(CuratorOnlyMixin, generic.base.View):
