@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-11 19:39+0000\n"
-"PO-Revision-Date: 2024-04-11 19:47+0000\n"
+"POT-Creation-Date: 2024-04-28 13:26+0000\n"
+"PO-Revision-Date: 2024-04-28 13:26+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -26,7 +26,7 @@ msgid ""
 "here for the last time."
 msgstr ""
 
-#: apps/api/apps.py:7 apps/learning/settings.py:145
+#: apps/api/apps.py:7 apps/learning/settings.py:147
 msgid "REST API"
 msgstr ""
 
@@ -507,7 +507,7 @@ msgid "Online Submission"
 msgstr "Через сайт"
 
 #: apps/courses/constants.py:59 apps/grading/constants.py:162
-#: apps/learning/settings.py:146
+#: apps/learning/settings.py:148
 msgid "Yandex.Contest"
 msgstr "Яндекс.Контест"
 
@@ -2292,50 +2292,55 @@ msgid "Not graded"
 msgstr "Без оценки"
 
 #: apps/learning/settings.py:70
+#| msgid "Not graded"
+msgid "Without Grade"
+msgstr "Курс без оценки"
+
+#: apps/learning/settings.py:72
 msgid "Enrollment|Unsatisfactory"
 msgstr "Незачёт"
 
-#: apps/learning/settings.py:73
+#: apps/learning/settings.py:75
 msgid "Enrollment|Pass"
 msgstr "Зачёт"
 
-#: apps/learning/settings.py:76 apps/users/constants.py:56
+#: apps/learning/settings.py:78 apps/users/constants.py:56
 msgid "Good"
 msgstr "Хорошо"
 
-#: apps/learning/settings.py:77 apps/users/constants.py:57
+#: apps/learning/settings.py:79 apps/users/constants.py:57
 msgid "Excellent"
 msgstr "Отлично"
 
-#: apps/learning/settings.py:80
+#: apps/learning/settings.py:82
 msgid "Enrollment|Re-credit"
 msgstr "Перезачтено"
 
-#: apps/learning/settings.py:137 apps/learning/settings.py:152
+#: apps/learning/settings.py:139 apps/learning/settings.py:154
 msgid "Gradebook"
 msgstr "Ведомость"
 
-#: apps/learning/settings.py:138 apps/learning/settings.py:147
+#: apps/learning/settings.py:140 apps/learning/settings.py:149
 msgid "Imported from CSV by Yandex.Login"
 msgstr "Импорт из CSV-файла по Яндекс.Логину"
 
-#: apps/learning/settings.py:139 apps/learning/settings.py:148
+#: apps/learning/settings.py:141 apps/learning/settings.py:150
 msgid "Imported from CSV by stepik.org ID"
 msgstr "Импорт из CSV-файла по stepik.org ID"
 
-#: apps/learning/settings.py:140 apps/learning/settings.py:149
+#: apps/learning/settings.py:142 apps/learning/settings.py:151
 msgid "Imported from CSV by LMS Student ID"
 msgstr "Импорт из CSV-файла по идентификатору студента"
 
-#: apps/learning/settings.py:141 apps/learning/settings.py:150
+#: apps/learning/settings.py:143 apps/learning/settings.py:152
 msgid "Admin Panel"
 msgstr "Админ-панель"
 
-#: apps/learning/settings.py:151
+#: apps/learning/settings.py:153
 msgid "Form on Assignment Detail Page"
 msgstr "Страница задания студента"
 
-#: apps/learning/settings.py:153
+#: apps/learning/settings.py:155
 msgid "Gerrit Webhook"
 msgstr "Геррит"
 

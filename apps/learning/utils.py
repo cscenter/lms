@@ -12,7 +12,7 @@ def grade_to_mark(grade: str) -> int:
 
     Assume unsatisfactory > not_graded.
     """
-    if grade == GradeTypes.NOT_GRADED:
+    if grade == GradeTypes.NOT_GRADED or grade == GradeTypes.WITHOUT_GRADE:
         return 0
     elif grade == GradeTypes.ONE:
         return 1

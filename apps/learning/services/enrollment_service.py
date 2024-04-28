@@ -159,14 +159,12 @@ def is_course_failed_by_student(course: Course, student: User,
     from learning.models import Enrollment
     if course.is_club_course or not course.is_completed:
         return False
-    bad_grades = (Enrollment.GRADES.UNSATISFACTORY,
-                  Enrollment.GRADES.NOT_GRADED)
     if enrollment:
-        return enrollment.grade in bad_grades
+        return enrollment.grade in enrollment.GRADES.unsatisfactory_grades
     return (Enrollment.active
             .filter(student=student,
                     course=course,
-                    grade__in=bad_grades)
+                    grade__in=enrollment.GRADES.unsatisfactory_grades)
             .exists())
 
 

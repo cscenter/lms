@@ -150,7 +150,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
                 .select_related("branch")
                 .order_by("-year", "branch__name")
             ),
-            "years": range(2020, current_term.year + 1),
+            "years": range(current_term.year, 2019, -1),
             "branches": branches,
             "official_diplomas_dates": official_diplomas_dates,
         }

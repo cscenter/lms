@@ -67,6 +67,8 @@ class GradeTypes(DjangoChoices):
     """
     NOT_GRADED = C('not_graded', _("Not graded"), system='__all__',
                    russian_label="Без оценки", order=0)
+    WITHOUT_GRADE = C('without_grade', _("Without Grade"), system='__all__',
+                   russian_label="Курс без оценки", order=0)
     UNSATISFACTORY = C('unsatisfactory', _("Enrollment|Unsatisfactory"), system=(
         GradingSystems.BASE, GradingSystems.BINARY, GradingSystems.BINARY_PLUS_EXCELLENT
     ), russian_label="Незачет", order=11)
@@ -105,7 +107,7 @@ class GradeTypes(DjangoChoices):
     good_grades = {GOOD.value, SEVEN.value, EIGHT.value}
     satisfactory_grades = {CREDIT.value, RE_CREDIT.value, GOOD.value, EXCELLENT.value,
                            FOUR.value, FIVE.value, SIX.value, SEVEN.value, EIGHT.value, NINE.value, TEN.value}
-    unsatisfactory_grades = {NOT_GRADED.value, UNSATISFACTORY.value,
+    unsatisfactory_grades = {NOT_GRADED.value, UNSATISFACTORY.value, WITHOUT_GRADE.value,
                              ONE.value, TWO.value, THREE.value}
 
     @classmethod
