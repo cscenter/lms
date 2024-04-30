@@ -160,11 +160,11 @@ def is_course_failed_by_student(course: Course, student: User,
     if course.is_club_course or not course.is_completed:
         return False
     if enrollment:
-        return enrollment.grade in enrollment.GRADES.unsatisfactory_grades
+        return enrollment.grade in GradeTypes.unsatisfactory_grades
     return (Enrollment.active
             .filter(student=student,
                     course=course,
-                    grade__in=enrollment.GRADES.unsatisfactory_grades)
+                    grade__in=GradeTypes.unsatisfactory_grades)
             .exists())
 
 
