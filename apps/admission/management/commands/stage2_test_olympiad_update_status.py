@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from django.core.management.base import BaseCommand
 
 from admission.models import Applicant
@@ -10,25 +8,21 @@ from ...constants import ApplicantStatuses
 
 class Command(CurrentCampaignMixin, BaseCommand):
     help = """
-    Updates status to PERMIT_TO_EXAM if applicant succeed 
-    in the test: score >= passing_score
+    Updates status to PERMIT_TO_OlYMPIAD if applicant performed well
+    in the test: left_bound <= score <= right_bound
     """
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument(
-            "--passing_score",
-            type=Decimal,
-            required=True,
-            help="Applicant with score: "
-                 "passing_score <= score < cheater_score will be updated to PERMIT_TO_EXAM status",
-        )
-        parser.add_argument(
-            "--cheater_score",
+            "--left_bound",
             type=int,
             required=True,
-            dest='cheater_score',
-            help="Users with a score >= cheater_score will have CHEATER status.",
+        )
+        parser.add_argument(
+            "--right_bound",
+            type=int,
+            required=True,
         )
         parser.add_argument(
             "--new_track",
@@ -39,24 +33,23 @@ class Command(CurrentCampaignMixin, BaseCommand):
         )
 
     def handle(self, *args, **options):
-        passing_score = options['passing_score']
-        cheater_score = options.get('cheater_score')
+        left_bound = options.get('left_bound')
+        right_bound = options.get('right_bound')
         new_track = options['new_track']
         campaigns = self.get_current_campaigns(options, branch_is_required=True)
         for campaign in campaigns:
             total_applicants = Applicant.objects.filter(campaign=campaign).count()
             msg = f"{campaign} ({total_applicants} applicants)"
             self.stdout.write(msg)
+            if right_bound < left_bound:
+                self.stdout.write("Error: left_bound should be <= right_bound")
+                return
             filters = {
                 "campaign": campaign,
-                "online_test__score__gte": passing_score,
+                "online_test__score__gte": left_bound,
+                "online_test__score__lte": right_bound,
                 "new_track": new_track,
             }
-            if cheater_score is not None:
-                if cheater_score <= passing_score:
-                    self.stdout.write("Error: passing_score should be less than cheater_score.")
-                    return
-                filters['online_test__score__lt'] = cheater_score
             applicants = Applicant.objects.filter(
                 **filters
             ).exclude(
@@ -74,13 +67,13 @@ class Command(CurrentCampaignMixin, BaseCommand):
             updated = 0
             for a in applicants:
                 selected += 1
-                if a["status"] is not None:
+                if a["status"] is not None and a["status"] != ApplicantStatuses.PERMIT_TO_EXAM:
                     msg = f"\tApplicant {a['pk']} has status {a['status']}. Skip"
                     self.stdout.write(msg)
                     continue
                 (
                     Applicant.objects.filter(pk=a["pk"]).update(
-                        status=Applicant.PERMIT_TO_EXAM
+                        status=ApplicantStatuses.PERMIT_TO_OlYMPIAD
                     )
                 )
                 updated += 1

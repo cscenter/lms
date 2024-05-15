@@ -58,7 +58,7 @@ class Command(CurrentCampaignMixin, BaseCommand):
                     status=ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED
                 )
                 .filter(
-                    data__new_track=new_track
+                    new_track=new_track
                 )
                 .filter(
                     default_filters
