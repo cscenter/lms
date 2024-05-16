@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.management import BaseCommand, CommandError
 
-from admission.constants import ChallengeStatuses
+from admission.constants import ChallengeStatuses, ApplicantStatuses
 from admission.models import Applicant, Contest, Exam
 from admission.services import EmailQueueService
 from grading.api.yandex_contest import ContestAPIError, RegisterStatus, YandexContestAPI
@@ -47,10 +47,6 @@ class Command(
         errors = []
         for campaign in campaigns:
             try:
-                validate_campaign_passing_score(campaign)
-            except ValidationError as e:
-                errors.append(e.message)
-            try:
                 validate_campaign_contests(campaign, contest_type=Contest.TYPE_EXAM)
             except ValidationError as e:
                 errors.append(e.message)
@@ -76,9 +72,7 @@ class Command(
             emails_generated = 0
             applicants = manager.filter(
                 campaign_id=campaign.pk,
-                # TODO: Add test instead (compare total records with status)
-                # online_test__score__gte=campaign.online_test_passing_score,
-                status=Applicant.PERMIT_TO_EXAM,
+                status__in=[ApplicantStatuses.PERMIT_TO_EXAM, ApplicantStatuses.PERMIT_TO_OlYMPIAD],
             )
             for a in applicants:
                 exam, created = Exam.objects.get_or_create(
