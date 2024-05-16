@@ -79,7 +79,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
             filters = {
                 "campaign": campaign,
                 "status": Applicant.PERMIT_TO_EXAM,
-                "data__new_track": new_track,
+                "new_track": new_track,
             }
             if applicant_id:
                 filters["id"] = applicant_id
