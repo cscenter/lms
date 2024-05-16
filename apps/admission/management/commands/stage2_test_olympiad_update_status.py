@@ -10,6 +10,7 @@ class Command(CurrentCampaignMixin, BaseCommand):
     help = """
     Updates status to PERMIT_TO_OlYMPIAD if applicant performed well
     in the test: left_bound <= score <= right_bound
+    Use only after stage2_test_passed_update_status usage
     """
 
     def add_arguments(self, parser):
@@ -67,7 +68,7 @@ class Command(CurrentCampaignMixin, BaseCommand):
             updated = 0
             for a in applicants:
                 selected += 1
-                if a["status"] is not None and a["status"] != ApplicantStatuses.PERMIT_TO_EXAM:
+                if a["status"] != ApplicantStatuses.PERMIT_TO_EXAM:
                     msg = f"\tApplicant {a['pk']} has status {a['status']}. Skip"
                     self.stdout.write(msg)
                     continue
