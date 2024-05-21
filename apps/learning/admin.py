@@ -126,15 +126,24 @@ class EnrollmentAdmin(BaseModelAdmin):
     ]
     search_fields = ['course__meta_course__name', 'student__last_name']
     exclude = ['grade_changed']
+    exclude_create = ['grade']
     raw_id_fields = ("student", "course", "invitation", "student_profile",
                      "student_group")
     inlines = [EnrollmentGradeLogAdminInline]
+
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
             return ['course', 'student', 'grade_changed_local', 'modified']
         else:
             return ['grade_changed_local', 'modified']
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            return [field for field in fields if field not in self.exclude_create]
+        else:
+            return fields
 
     def grade_changed_local(self, obj):
         return admin_datetime(obj.grade_changed_local())
