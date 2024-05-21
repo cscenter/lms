@@ -279,8 +279,13 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         verbose_name=_("Duration"),
         max_length=10, db_index=True,
         help_text=_("Duration of course"),
-        choices=CourseDurations,
+        choices=CourseDurations.choices,
         default=CourseDurations.FULL)
+    default_grade = models.CharField(
+        verbose_name=_("Enrollment|default_grade"),
+        max_length=100,
+        choices=GradeTypes.default_grades,
+        default=GradeTypes.NOT_GRADED)
     completed_at = models.DateField(
         _("Date of completion"),
         blank=True,

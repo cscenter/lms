@@ -63,7 +63,7 @@ class GradingSystems(DjangoChoices):
 
 class GradeTypes(DjangoChoices):
     """
-    Used as grade choices for the Enrollment model.
+    Used as grade choices for the Enrollment model and as default_grade choices for Course model.
     """
     NOT_GRADED = C('not_graded', _("Not graded"), system='__all__',
                    russian_label="Без оценки", order=0)
@@ -109,6 +109,10 @@ class GradeTypes(DjangoChoices):
                            FOUR.value, FIVE.value, SIX.value, SEVEN.value, EIGHT.value, NINE.value, TEN.value}
     unsatisfactory_grades = {NOT_GRADED.value, UNSATISFACTORY.value, WITHOUT_GRADE.value,
                              ONE.value, TWO.value, THREE.value}
+    default_grades = {
+        (NOT_GRADED.value, NOT_GRADED.label),
+        (WITHOUT_GRADE.value, WITHOUT_GRADE.label),
+    }
 
     @classmethod
     def is_suitable_for_grading_system(cls, choice, grading_system):
