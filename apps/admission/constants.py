@@ -29,7 +29,10 @@ class ApplicantStatuses(DjangoChoices):
     REJECTED_BY_EXAM_CHEATING = C("reject_exam_cheater", _("Rejected by exam cheating"))
     REJECTED_BY_CHEATING = C("rejected_cheating", _("Cheating"))
     PENDING = C("pending", _("Pending"))
-    # TODO: rename interview codes here and in DB.
+    GOLDEN_TICKET = C("golden_ticket", _("Golden ticket from the previous year"))
+    PASSED_OLYMPIAD = C("passed_olympiad", _("Passed the olympiad"))
+    FAILED_OLYMPIAD = C("failed_olympiad", _("Failed the olympiad, will write the exam"))
+    PASSED_EXAM = C("passed_exam", _("Passed the exam"))
     INTERVIEW_TOBE_SCHEDULED = C(
         "interview_phase", _("Can be interviewed")
     )  # permitted to interview
