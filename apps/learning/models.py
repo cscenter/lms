@@ -402,7 +402,7 @@ class Enrollment(TimezoneAwareMixin, TimeStampedModel):
 
     def save(self, *args, **kwargs):
         created = self.pk is None
-        if created and self.course is not None:
+        if created and self.grade == GradeTypes.NOT_GRADED:
             self.grade = self.course.default_grade
 
         super().save(*args, **kwargs)

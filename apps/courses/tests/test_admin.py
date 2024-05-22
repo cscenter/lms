@@ -13,7 +13,7 @@ from courses.models import (
     Assignment, Course, CourseBranch, CourseGroupModes, CourseTeacher, CourseDurations
 )
 from courses.tests.factories import CourseFactory, MetaCourseFactory, SemesterFactory
-from learning.settings import Branches, GradingSystems
+from learning.settings import Branches, GradingSystems, GradeTypes
 from users.tests.factories import CuratorFactory, TeacherFactory
 
 
@@ -33,6 +33,7 @@ def _get_course_post_data(course=None):
         "group_mode": CourseGroupModes.BRANCH,
         "grading_type": GradingSystems.BASE,
         "duration": CourseDurations.FULL,
+        "default_grade": GradeTypes.NOT_GRADED,
         "capacity": 0,
         "language": "ru",
         "materials_visibility": MaterialVisibilityTypes.PUBLIC,
