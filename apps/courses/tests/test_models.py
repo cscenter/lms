@@ -364,3 +364,34 @@ def test_course_build_absolute_uri(site_domain, lms_subdomain, settings):
 
     url = course.build_absolute_uri(site=another_site)
     assert url.startswith('https://your.random.site/')
+
+@pytest.mark.django_db
+def test_course_validation(mocker, settings):
+    year = 2016
+    term_type = SemesterTypes.AUTUMN
+    # Fix year and term
+    mocked_timezone = mocker.patch('django.utils.timezone.now')
+    now_fixed = datetime.datetime(year, month=9, day=8, tzinfo=pytz.UTC)
+    mocked_timezone.return_value = now_fixed
+    # Default start is the beginning of the term
+    term = SemesterFactory(year=year, type=term_type)
+    term_start_dt = term.starts_at
+    # Validation error: end > start
+    with pytest.raises(ValidationError) as e:
+        end_at = term_start_dt.date() - datetime.timedelta(days=1)
+        ep = Course(semester=term,
+                              starts_on=term_start_dt.date(),
+                              ends_on=end_at)
+        ep.clean()
+    # Start should be inside semester
+    with pytest.raises(ValidationError) as e:
+        before_term_start = term_start_dt - datetime.timedelta(days=2)
+        ep = Course(semester=term,
+                              starts_on=before_term_start.date())
+        ep.clean()
+    # End should be inside semester
+    with pytest.raises(ValidationError) as e:
+        before_term_start = term_start_dt - datetime.timedelta(days=2)
+        ep = Course(semester=term,
+                    ends_on=before_term_start.date())
+        ep.clean()

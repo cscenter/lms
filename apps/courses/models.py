@@ -266,6 +266,16 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         verbose_name=_("CourseOffering|capacity"),
         default=0,
         help_text=_("0 - unlimited"))
+    starts_on = models.DateField(
+        _("Starts on"),
+        blank=True,
+        null=True,
+        help_text=_("If left blank the start date of the semester is used"))
+    ends_on = models.DateField(
+        _("Closing Day"),
+        blank=True,
+        null=True,
+        help_text=_("If left blank the closing date of the semester is used"))
     teachers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Course|teachers"),
@@ -468,6 +478,24 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
             self.completed_at = next_term.starts_at(self.get_timezone()).date()
         super().save(*args, **kwargs)
 
+    def clean(self):
+        term_starts_on = self.semester.starts_at.date()
+        term_ends_on = self.semester.ends_at.date()
+        if self.starts_on:
+            if not (term_starts_on <= self.starts_on <= term_ends_on):
+                msg = _("Start of the enrollment period should be inside "
+                        "term boundaries")
+                raise ValidationError(msg)
+        if self.ends_on:
+            if not (term_starts_on <= self.ends_on <= term_ends_on):
+                msg = _("End of the enrollment period should be inside "
+                        "term boundaries")
+                raise ValidationError(msg)
+        if self.starts_on and self.ends_on and self.ends_on < self.starts_on:
+            msg = _("Deadline should be later than the start of "
+                        "the enrollment period")
+            raise ValidationError(msg)
+
     @property
     def url_kwargs(self) -> dict:
         """
@@ -568,13 +596,25 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
     def enrollment_is_open(self):
         if self.is_completed:
             return False
-        enrollment_periods = [e for e in
-                              self.semester.enrollmentperiod_set.all()
-                              if e.site_id == settings.SITE_ID]
-        if not enrollment_periods:
-            return False
         today = now_local(self.get_timezone()).date()
-        return today in enrollment_periods[0]
+
+        enrollment_periods = self.semester.enrollmentperiod_set.filter(site_id=settings.SITE_ID)
+        if enrollment_periods.exists():
+            enrollment_period = enrollment_periods.first()
+        else:
+            enrollment_period = None
+
+        starts_on = self.starts_on
+        if starts_on is None and enrollment_period is not None:
+            starts_on = enrollment_period.starts_on
+        ends_on = self.ends_on
+        if ends_on is None and enrollment_period is not None:
+            ends_on = enrollment_period.ends_on
+
+        if starts_on is None or ends_on is None:
+            return False
+        else:
+            return starts_on <= today <= ends_on
 
     @property
     def is_capacity_limited(self):

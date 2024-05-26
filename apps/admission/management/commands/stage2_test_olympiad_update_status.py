@@ -8,7 +8,7 @@ from ...constants import ApplicantStatuses
 
 class Command(CurrentCampaignMixin, BaseCommand):
     help = """
-    Updates status to PERMIT_TO_OlYMPIAD if applicant performed well
+    Updates status to PERMIT_TO_OLYMPIAD if applicant performed well
     in the test: left_bound <= score <= right_bound
     Use only after stage2_test_passed_update_status usage
     """
@@ -74,7 +74,7 @@ class Command(CurrentCampaignMixin, BaseCommand):
                     continue
                 (
                     Applicant.objects.filter(pk=a["pk"]).update(
-                        status=ApplicantStatuses.PERMIT_TO_OlYMPIAD
+                        status=ApplicantStatuses.PERMIT_TO_OLYMPIAD
                     )
                 )
                 updated += 1

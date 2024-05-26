@@ -43,7 +43,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
 
             filters = {
                 "campaign": campaign,
-                "status": ApplicantStatuses.PERMIT_TO_OlYMPIAD,
+                "status": ApplicantStatuses.PERMIT_TO_OLYMPIAD,
             }
             if applicant_id:
                 filters["id"] = applicant_id
