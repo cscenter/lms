@@ -72,7 +72,7 @@ class Command(
             emails_generated = 0
             applicants = manager.filter(
                 campaign_id=campaign.pk,
-                status__in=[ApplicantStatuses.PERMIT_TO_EXAM, ApplicantStatuses.PERMIT_TO_OlYMPIAD],
+                status__in=[ApplicantStatuses.PERMIT_TO_EXAM, ApplicantStatuses.PERMIT_TO_OLYMPIAD],
             )
             for a in applicants:
                 exam, created = Exam.objects.get_or_create(

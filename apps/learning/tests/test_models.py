@@ -252,6 +252,17 @@ def test_course_enrollment_is_open(settings, mocker):
     ep.save()
     co_spb.refresh_from_db()
     assert co_spb.enrollment_is_open
+    co_spb.starts_on = now_fixed.date() + datetime.timedelta(days=1)
+    co_spb.save()
+    assert not co_spb.enrollment_is_open
+    ep.ends_on = now_fixed.date() - datetime.timedelta(days=1)
+    co_spb.starts_on = None
+    co_spb.ends_on = now_fixed.date()
+    co_spb.save()
+    assert co_spb.enrollment_is_open
+    co_spb.starts_on = now_fixed.date()
+    co_spb.save()
+    assert co_spb.enrollment_is_open
 
 
 @pytest.mark.django_db
