@@ -396,7 +396,7 @@ class InterviewInvitationListView(
             )
         )
         interview_streams = (
-            interview_stream_filterset.qs.select_related("venue", "interviewers")
+            interview_stream_filterset.qs.select_related("venue")
             .annotate(invitations_total=invitations_waiting_for_response)
             .defer("venue__description", "venue__directions")
             .prefetch_related("interviewers")
