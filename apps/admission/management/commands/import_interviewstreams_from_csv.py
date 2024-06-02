@@ -15,6 +15,7 @@ from django.conf import settings
 
 from django.core.management import BaseCommand
 
+
 class Command(BaseCommand):
     help = """Import interview streams from csv"""
 
@@ -36,7 +37,6 @@ class Command(BaseCommand):
     prefix = "Выбери время, когда ты сможешь провести собеседование."
 
     year = 2024
-    format = InterviewFormats.ONLINE
     with_assignments = False
     commit = True
 
@@ -52,8 +52,15 @@ class Command(BaseCommand):
             "общая секция": InterviewSections.ALL_IN_ONE,
             "математика": InterviewSections.MATH,
             "код": InterviewSections.PROGRAMMING,
+            "математика+код": InterviewSections.MATH_PROGRAMMING,
             "мотивация": InterviewSections.MOTIVATION
         }[section_name]
+
+    def get_format(self, format: str) -> InterviewFormats:
+        return {
+            "очно": InterviewFormats.OFFLINE,
+            "онлайн": InterviewFormats.ONLINE
+        }[format]
 
     def get_stream_date(self, s: str, year: int) -> datetime.date:
         """Returns a date of the slot"""
@@ -81,14 +88,16 @@ class Command(BaseCommand):
         return self.parse_time_pair(time_part)
 
     filial_cache = {}
-    def get_filial_info(self, branch_name: str):
+
+    def get_filial_info(self, branch_name: str, format: InterviewFormats):
         if branch_name in self.filial_cache:
             return self.filial_cache[branch_name]
-        branch = Branch.objects.get(name=branch_name if branch_name!='Заочное' else 'Заочное отделение', site_id=settings.SITE_ID)
+        branch = Branch.objects.get(name=branch_name if branch_name != 'Заочное' else 'Заочное отделение',
+                                    site_id=settings.SITE_ID)
         campaign = Campaign.objects.get(branch=branch, current=True)
         venue_name = f'Онлайн-собеседование в ШАД {branch_name} {self.year}'
         venue = Location.objects.get(name=venue_name)
-        interview_format = InterviewFormat.objects.get(campaign=campaign)
+        interview_format = InterviewFormat.objects.get(campaign=campaign, format=format)
         result = (campaign, venue, interview_format)
         self.filial_cache[branch_name] = result
         return result
@@ -105,7 +114,9 @@ class Command(BaseCommand):
             for row in reader:
                 interviewer_mail = row[1]
                 campaign_name = row[2]
-                interviewer_section = row[3] + row[4] + row[5]
+                format = row[3]
+                interviewer_section = row[4] + row[5] + row[6] + row[7]
+                max_slots = int(row[8])
                 interview_date, interview_start, interview_last_stamp = None, None, None
                 for column in slot_columns:
                     if row[column]:
@@ -117,17 +128,17 @@ class Command(BaseCommand):
                             interview_start = begin
                         elif interview_date != date:
                             # заполняем dict с потоками возможными временами
-                            key = (interviewer_mail, interviewer_section, interview_date, campaign_name)
+                            key = (interviewer_mail, interviewer_section, interview_date, campaign_name, format, max_slots)
                             streams[key].append((interview_start, interview_last_stamp))
                             interview_date = date
                             interview_start = begin
                         interview_last_stamp = end
                     elif interview_start is not None:
-                        key = (interviewer_mail, interviewer_section, interview_date, campaign_name)
+                        key = (interviewer_mail, interviewer_section, interview_date, campaign_name, format, max_slots)
                         streams[key].append((interview_start, interview_last_stamp))
                         interview_date, interview_start, interview_last_stamp = None, None, None
                 if interview_start is not None:
-                    key = (interviewer_mail, interviewer_section, interview_date, campaign_name)
+                    key = (interviewer_mail, interviewer_section, interview_date, campaign_name, format, max_slots)
                     streams[key].append((interview_start, interview_last_stamp))
             begin, end = self.get_stream_begin_end(headers[slot_columns[0]])
             slot_size = (datetime.timedelta(hours=end.hour, minutes=end.minute) -
@@ -136,14 +147,15 @@ class Command(BaseCommand):
                 for stream_info, slots_ranges in streams.items():
                     stream_begin, stream_end = slots_ranges[0][0], slots_ranges[-1][1]
                     assert stream_begin < stream_end
-                    print(stream_info[0])
                     interviewer = User.objects.get(email__iexact=stream_info[0])
                     section = self.get_section(stream_info[1])
-                    campaign, venue, interview_format = self.get_filial_info(stream_info[3])
+                    format = self.get_format(stream_info[4])
+                    campaign, venue, interview_format = self.get_filial_info(stream_info[3], format)
+                    print(f'{stream_info[0]}, {campaign}, {format}, {section}, {stream_info[2]}, {stream_begin}-{stream_end}')
                     stream = InterviewStream(
                         campaign=campaign,
                         venue=venue,
-                        format=self.format,
+                        format=format,
                         interview_format=interview_format,
                         section=section,
                         with_assignments=self.with_assignments,
@@ -159,9 +171,7 @@ class Command(BaseCommand):
                         for period in slots_ranges
                         for start_at, end_at in slot_range(period[0], period[1], slot_size)
                     }
-                    print(slots_that_should_be)
                     all_slots = {start_at for start_at, end_at in slot_range(stream_begin, stream_end, slot_size)}
-                    print(all_slots)
                     slots_for_delete = all_slots.difference(slots_that_should_be)
                     InterviewSlot.objects.filter(
                         stream=stream,
@@ -169,4 +179,3 @@ class Command(BaseCommand):
                     ).delete()
                 if not self.commit:
                     raise Exception("Please set value commit = True")
-

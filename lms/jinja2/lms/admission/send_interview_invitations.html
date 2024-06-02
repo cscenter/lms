@@ -29,8 +29,9 @@
               <tr>
                 <th></th>
                 <th>Поступающий</th>
+                <th style="width: 30px;">Проп.</th>
                 <th>Заметка</th>
-                <th>Направление</th>
+                <th>Формат</th>
                 <th style="width: 60px;">Тест</th>
                 <th style="width: 60px;">Экз.</th>
               </tr>
@@ -50,10 +51,13 @@
                       {% elif applicant.university_legacy.name %}{{ applicant.university_legacy.name }}
                       {% endif %}
                     </td>
+                    <td>
+                      {{ applicant.miss_count }}
+                    </td>
                     <td>{% if applicant.admin_note %}{{ applicant.admin_note }}{% else %}-{% endif %}</td>
                     <td>
-                      {% if applicant.preferred_study_programs %}
-                        {% for p in applicant.preferred_study_programs %}{{ p|upper }}{% if not loop.last %}, {% endif %}{% endfor %}
+                      {% if applicant.interview_format %}
+                        {{ applicant.get_interview_format_display() }}
                       {% else %}
                         -
                       {% endif %}

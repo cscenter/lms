@@ -81,11 +81,17 @@ class InterviewFormats(DjangoChoices):
     OFFLINE = ChoiceItem("offline", _("Offline"))
     ONLINE = ChoiceItem("online", _("Online"))
 
+class ApplicantInterviewFormats(DjangoChoices):
+    OFFLINE = ChoiceItem("offline", _("Offline"))
+    ONLINE = ChoiceItem("online", _("Online"))
+    ANY = ChoiceItem("any", _("Any"))
+
 
 class InterviewSections(DjangoChoices):
     ALL_IN_ONE = C("all_in_1", pgettext_lazy("section", "Common Section"))
     MATH = C("math", pgettext_lazy("section", "Math"))
     PROGRAMMING = C("code", pgettext_lazy("section", "Code"))
+    MATH_PROGRAMMING = C("math_code", pgettext_lazy("section", "Math and code"))
     MOTIVATION = C("mv", pgettext_lazy("section", "Motivation"))
 
 

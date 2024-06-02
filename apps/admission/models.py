@@ -17,7 +17,7 @@ from django.core import checks
 from django.core.exceptions import FieldDoesNotExist, ValidationError
 from django.core.validators import MinValueValidator, RegexValidator, MaxValueValidator
 from django.db import models, transaction
-from django.db.models import Count, OuterRef, Q, Subquery, Value, query
+from django.db.models import Count, OuterRef, Q, F, Subquery, Value, query
 from django.db.models.functions import Coalesce
 from django.utils import numberformat, timezone
 from django.utils.encoding import force_bytes, smart_str
@@ -31,6 +31,7 @@ from admission.constants import (
     ContestTypes,
     DefaultInterviewRatingSystem,
     InterviewFormats,
+    ApplicantInterviewFormats,
     InterviewInvitationStatuses,
     InterviewSections,
     YandexDataSchoolInterviewRatingSystem, HasDiplomaStatuses, DiplomaDegrees,
@@ -258,6 +259,7 @@ ApplicantSubscribedManager = _ApplicantSubscribedManager.from_queryset(
     ApplicantQuerySet
 )
 
+
 def applicant_photo_upload_to(instance, filename):
     bucket = instance.campaign.year
     _, ext = os.path.splitext(filename)
@@ -430,7 +432,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     new_track_info = models.CharField(
         _("Alternative track info"),
         help_text=_("Applicant|alternative_track_info"),
-        max_length = 1000,
+        max_length=1000,
         blank=True,
         null=True
     )
@@ -614,6 +616,19 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     admin_note = models.TextField(
         _("Admin note"), help_text=_("Applicant|admin_note"), blank=True, null=True
     )
+    interview_format = models.CharField(
+        _("Interview Format"),
+        help_text=_("Applicant|interview_format"),
+        choices=ApplicantInterviewFormats,
+        max_length=255,
+        blank=True,
+    )
+    miss_count = models.IntegerField(
+        _("Count of missed interviews"),
+        help_text=_("Applicant|miss_count"),
+        default=0
+    )
+
     # Key-value store for fields specific to admission campaigns
     data = models.JSONField(_("Data"), blank=True, null=True)
     # Any useful data like application form integration log
@@ -1277,6 +1292,11 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
     def save(self, **kwargs):
         created = self.pk is None
         self.full_clean()
+        if not created:
+            previous = Interview.objects.get(pk=self.pk)
+            if previous.status == self.APPROVED and self.status == self.CANCELED:
+                self.applicant.miss_count += F("miss_count") + 1
+                self.applicant.save()
         super().save(**kwargs)
 
     def date_local(self, tz=None):
@@ -1443,11 +1463,17 @@ class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel
                 )
             )
 
+    @cached_property
+    def first_interviewer(self) -> str:
+        return str(self.interviewers.first())
+
     def __str__(self):
-        return "{}, {}-{}".format(
+        return "{} {}, {}-{} {}".format(
+            self.get_format_display(),
             date_format(self.date, settings.DATE_FORMAT),
             time_format(self.start_at),
             time_format(self.end_at),
+            self.first_interviewer
         )
 
     def clean(self):
@@ -1613,6 +1639,7 @@ class InterviewInvitation(TimeStampedModel):
         verbose_name_plural = _("Interview invitations")
 
     def save(self, **kwargs):
+        print(kwargs)
         created = self.pk is None
         super().save(**kwargs)
         if created and not self.interview_id:
@@ -1624,6 +1651,12 @@ class InterviewInvitation(TimeStampedModel):
                         status=Applicant.INTERVIEW_TOBE_SCHEDULED
                     )
                 )
+        if not created:
+            previous = InterviewInvitation.objects.get(pk=self.pk)
+            if previous.status == InterviewInvitationStatuses.NO_RESPONSE and self.status != \
+                InterviewInvitationStatuses.NO_RESPONSE and self.status != InterviewInvitation.ACCEPTED:
+                self.applicant.miss_count += F("miss_count") + 1
+                self.applicant.save()
 
     def __str__(self):
         return str(self.applicant)
@@ -1653,10 +1686,10 @@ class InterviewInvitation(TimeStampedModel):
         )
 
     def get_status_display(self):
-        status = self.status
         if self.status == InterviewInvitationStatuses.NO_RESPONSE and self.is_expired:
-            status = InterviewInvitationStatuses.EXPIRED
-        return InterviewInvitationStatuses.values[status]
+            self.status = InterviewInvitationStatuses.EXPIRED
+            self.save()
+        return InterviewInvitationStatuses.values[self.status]
 
 
 class Acceptance(TimestampedModel):

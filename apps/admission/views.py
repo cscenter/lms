@@ -18,7 +18,7 @@ from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
-from django.db.models import Avg, Case, Count, Prefetch, Q, Value, When
+from django.db.models import Avg, Case, Count, Prefetch, Q, Value, When, Subquery
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import (
@@ -396,7 +396,7 @@ class InterviewInvitationListView(
             )
         )
         interview_streams = (
-            interview_stream_filterset.qs.select_related("venue")
+            interview_stream_filterset.qs.select_related("venue", "interviewers")
             .annotate(invitations_total=invitations_waiting_for_response)
             .defer("venue__description", "venue__directions")
             .prefetch_related("interviewers")

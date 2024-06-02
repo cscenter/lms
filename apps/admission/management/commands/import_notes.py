@@ -5,6 +5,9 @@ from django.core.management import BaseCommand
 from admission.models import Applicant
 
 from ._utils import CurrentCampaignMixin
+from ...constants import ApplicantInterviewFormats
+
+
 class Command(CurrentCampaignMixin, BaseCommand):
     help = """Import applicant notes from csv"""
 
@@ -23,6 +26,13 @@ class Command(CurrentCampaignMixin, BaseCommand):
             help="csv delimiter",
         )
 
+    def get_interview_format(self, format: str) -> ApplicantInterviewFormats:
+        return {
+            "очно": ApplicantInterviewFormats.OFFLINE,
+            "онлайн": ApplicantInterviewFormats.ONLINE,
+            "любой": ApplicantInterviewFormats.ANY
+        }[format]
+
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options, confirm=False)
         delimiter = options["delimiter"]
@@ -32,7 +42,7 @@ class Command(CurrentCampaignMixin, BaseCommand):
             prefix = '/admission/applicants/'
             with transaction.atomic():
                 for row in reader:
-                    note, applicant_url, email = row['Заметки'], row['ID'], row['Email']
+                    note, applicant_url, email, format = row['Заметки'], row['ID'], row['Email'], row['Формат']
                     first_name, last_name, patronymic = row['Имя'], row['Фамилия'], row['Отчество']
                     assert applicant_url.startswith(prefix)
                     assert applicant_url[-1] == '/'
@@ -44,5 +54,6 @@ class Command(CurrentCampaignMixin, BaseCommand):
                     assert(applicant.patronymic == patronymic)
                     assert(applicant.email == email)
                     applicant.admin_note = note
+                    applicant.interview_format = self.get_interview_format(format)
                     applicant.save()
-                    print(f"{last_name} {first_name} {patronymic}, {applicant.campaign}: {note}")
+                    print(f"{last_name} {first_name} {patronymic}, {applicant.campaign}: {note}, {format}")

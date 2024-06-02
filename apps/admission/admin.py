@@ -169,6 +169,7 @@ class ApplicantAdmin(admin.ModelAdmin):
         "campaign",
         "created_local",
     )
+    readonly_fields = ['miss_count']
     list_filter = [CampaignListFilter, "status"]
     search_fields = (
         "yandex_login",
