@@ -1463,17 +1463,11 @@ class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel
                 )
             )
 
-    @cached_property
-    def first_interviewer(self) -> str:
-        return str(self.interviewers.first())
-
     def __str__(self):
-        return "{} {}, {}-{} {}".format(
-            self.get_format_display(),
+        return "{}, {}-{}".format(
             date_format(self.date, settings.DATE_FORMAT),
             time_format(self.start_at),
-            time_format(self.end_at),
-            self.first_interviewer
+            time_format(self.end_at)
         )
 
     def clean(self):

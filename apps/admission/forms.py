@@ -76,7 +76,14 @@ class InterviewForm(forms.ModelForm):
 
 
 class InterviewStreamInvitationForm(forms.Form):
-    streams = forms.ModelMultipleChoiceField(
+    class StreamMultipleChoiceField(forms.ModelMultipleChoiceField):
+        def label_from_instance(self, obj):
+            return "{} {} {}".format(
+                obj.get_format_display(),
+                obj,
+                obj.interviewers.first()
+            )
+    streams = StreamMultipleChoiceField(
         label=_("Interview streams"),
         queryset=InterviewStream.objects.none(),
         widget=SelectMultiple(
