@@ -116,7 +116,7 @@ class Command(BaseCommand):
                 campaign_name = row[2]
                 format = row[3]
                 interviewer_section = row[4] + row[5] + row[6] + row[7]
-                max_slots = int(row[8])
+                interviewers_max = int(row[8])
                 interview_date, interview_start, interview_last_stamp = None, None, None
                 for column in slot_columns:
                     if row[column]:
@@ -128,17 +128,17 @@ class Command(BaseCommand):
                             interview_start = begin
                         elif interview_date != date:
                             # заполняем dict с потоками возможными временами
-                            key = (interviewer_mail, interviewer_section, interview_date, campaign_name, format, max_slots)
+                            key = (interviewer_mail, interviewer_section, interview_date, campaign_name, format, interviewers_max)
                             streams[key].append((interview_start, interview_last_stamp))
                             interview_date = date
                             interview_start = begin
                         interview_last_stamp = end
                     elif interview_start is not None:
-                        key = (interviewer_mail, interviewer_section, interview_date, campaign_name, format, max_slots)
+                        key = (interviewer_mail, interviewer_section, interview_date, campaign_name, format, interviewers_max)
                         streams[key].append((interview_start, interview_last_stamp))
                         interview_date, interview_start, interview_last_stamp = None, None, None
                 if interview_start is not None:
-                    key = (interviewer_mail, interviewer_section, interview_date, campaign_name, format, max_slots)
+                    key = (interviewer_mail, interviewer_section, interview_date, campaign_name, format, interviewers_max)
                     streams[key].append((interview_start, interview_last_stamp))
             begin, end = self.get_stream_begin_end(headers[slot_columns[0]])
             slot_size = (datetime.timedelta(hours=end.hour, minutes=end.minute) -
@@ -150,6 +150,7 @@ class Command(BaseCommand):
                     interviewer = User.objects.get(email__iexact=stream_info[0])
                     section = self.get_section(stream_info[1])
                     format = self.get_format(stream_info[4])
+                    interviewers_max = stream_info[5]
                     campaign, venue, interview_format = self.get_filial_info(stream_info[3], format)
                     print(f'{stream_info[0]}, {campaign}, {format}, {section}, {stream_info[2]}, {stream_begin}-{stream_end}')
                     stream = InterviewStream(
@@ -162,7 +163,8 @@ class Command(BaseCommand):
                         date=stream_info[2],
                         start_at=stream_begin,
                         end_at=stream_end,
-                        duration=slot_size.seconds // 60
+                        duration=slot_size.seconds // 60,
+                        interviewers_max=interviewers_max
                     )
                     stream.save()
                     stream.interviewers.add(interviewer)

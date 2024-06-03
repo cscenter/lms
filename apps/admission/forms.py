@@ -76,14 +76,7 @@ class InterviewForm(forms.ModelForm):
 
 
 class InterviewStreamInvitationForm(forms.Form):
-    class StreamMultipleChoiceField(forms.ModelMultipleChoiceField):
-        def label_from_instance(self, obj):
-            return "{} {} {}".format(
-                obj.get_format_display(),
-                obj,
-                obj.interviewers.first()
-            )
-    streams = StreamMultipleChoiceField(
+    streams = forms.ModelMultipleChoiceField(
         label=_("Interview streams"),
         queryset=InterviewStream.objects.none(),
         widget=SelectMultiple(
@@ -94,7 +87,7 @@ class InterviewStreamInvitationForm(forms.Form):
 
     def __init__(self, streams, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["streams"].queryset = streams
+        self.fields["streams"].queryset = streams.prefetch_related('interviewers')
         self.helper = FormHelper(self)
         self.helper.form_tag = False
         self.helper.layout = Layout(
@@ -377,7 +370,7 @@ class ApplicantFinalStatusForm(ModelForm):
 
 class InterviewStreamChangeForm(ModelForm):
     class Meta:
-        model = InterviewSlot
+        model = InterviewStream
         fields = "__all__"
 
 

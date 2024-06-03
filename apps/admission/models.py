@@ -1262,6 +1262,7 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         blank=False,
         null=True,
     )
+    # TODO replace with ForeignKey
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
@@ -1295,7 +1296,7 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         if not created:
             previous = Interview.objects.get(pk=self.pk)
             if previous.status == self.APPROVED and self.status == self.CANCELED:
-                self.applicant.miss_count += F("miss_count") + 1
+                self.applicant.miss_count = F("miss_count") + 1
                 self.applicant.save()
         super().save(**kwargs)
 
@@ -1424,10 +1425,17 @@ class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel
             "Based on this flag, student should arrive 30 min " "before or not"
         ),
     )
+    # TODO replace with ForeignKey
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
         limit_choices_to={"group__role": Roles.INTERVIEWER},
+    )
+    interviewers_max = models.IntegerField(
+        _("Maximum number of slots preffered by interviewer"),
+        help_text=_("Applicant|interviewers_max"),
+        blank=True,
+        null=True
     )
     slots_count = models.PositiveIntegerField(editable=False, default=0)
     slots_occupied_count = models.PositiveIntegerField(editable=False, default=0)
@@ -1464,10 +1472,12 @@ class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel
             )
 
     def __str__(self):
-        return "{}, {}-{}".format(
+        return "{} {}, {}-{} {}".format(
+            self.get_format_display(),
             date_format(self.date, settings.DATE_FORMAT),
             time_format(self.start_at),
-            time_format(self.end_at)
+            time_format(self.end_at),
+            self.interviewers.all()[0]
         )
 
     def clean(self):
@@ -1607,6 +1617,7 @@ class InterviewInvitation(TimeStampedModel):
         verbose_name=_("Status"),
         max_length=10,
     )
+    # TODO replace with ForeignKey
     streams = models.ManyToManyField(
         InterviewStream,
         verbose_name=_("Interview streams"),
@@ -1635,6 +1646,12 @@ class InterviewInvitation(TimeStampedModel):
     def save(self, **kwargs):
         print(kwargs)
         created = self.pk is None
+        if not created:
+            previous = InterviewInvitation.objects.get(pk=self.pk)
+            if previous.status == InterviewInvitationStatuses.NO_RESPONSE and self.status != \
+                InterviewInvitationStatuses.NO_RESPONSE and self.status != InterviewInvitationStatuses.ACCEPTED:
+                self.applicant.miss_count = F("miss_count") + 1
+                self.applicant.save()
         super().save(**kwargs)
         if created and not self.interview_id:
             # Update status if we send invitation before
@@ -1645,12 +1662,6 @@ class InterviewInvitation(TimeStampedModel):
                         status=Applicant.INTERVIEW_TOBE_SCHEDULED
                     )
                 )
-        if not created:
-            previous = InterviewInvitation.objects.get(pk=self.pk)
-            if previous.status == InterviewInvitationStatuses.NO_RESPONSE and self.status != \
-                InterviewInvitationStatuses.NO_RESPONSE and self.status != InterviewInvitation.ACCEPTED:
-                self.applicant.miss_count += F("miss_count") + 1
-                self.applicant.save()
 
     def __str__(self):
         return str(self.applicant)

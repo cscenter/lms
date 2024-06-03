@@ -31,6 +31,7 @@ from admission.models import (
 from admission.roles import Roles
 from admission.services import EmailQueueService
 from core.admin import meta
+from core.models import Branch
 from core.timezone.fields import TimezoneAwareDateTimeField
 from core.timezone.forms import (
     TimezoneAwareAdminForm,
@@ -59,6 +60,20 @@ class CampaignListFilter(admin.SimpleListFilter):
         else:
             return queryset
 
+class BranchListFilter(admin.SimpleListFilter):
+    title = _('Branch')
+    parameter_name = 'branch'
+
+    def lookups(self, request, model_admin):
+        branches = Branch.objects.select_related("site")
+        return [(b.pk, str(b)) for b in branches]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(**{self.parameter_name: self.value()})
+        else:
+            return queryset
+
 
 class ApplicantCampaignListFilter(CampaignListFilter):
     parameter_name = "applicant__campaign_id__exact"
@@ -67,7 +82,7 @@ class ApplicantCampaignListFilter(CampaignListFilter):
 class CampaignAdmin(admin.ModelAdmin):
     form = TimezoneAwareAdminForm
     list_display = ["year", "branch", "current"]
-    list_filter = ["branch__site", "branch"]
+    list_filter = ["branch__site", BranchListFilter]
     raw_id_fields = ["template_interview_feedback"]
     formfield_overrides = {
         TimezoneAwareDateTimeField: {
@@ -76,11 +91,16 @@ class CampaignAdmin(admin.ModelAdmin):
         },
     }
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "branch":
+            kwargs['queryset'] = Branch.objects.select_related("site")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = OnlineTestRecordResource
     list_display = ["get_applicant", "score", "get_campaign", "yandex_contest_id"]
-    list_filter = ["applicant__campaign"]
+    list_filter = [ApplicantCampaignListFilter]
     search_fields = [
         "applicant__yandex_login",
         "applicant__last_name",
@@ -134,7 +154,7 @@ class ExamAdmin(ImportExportMixin, admin.ModelAdmin):
         "yandex_contest_id",
         "contest_participant_id",
     ]
-    list_filter = ["applicant__campaign"]
+    list_filter = [ApplicantCampaignListFilter]
     formfield_overrides = {models.JSONField: {"widget": PrettyJSONWidget}}
     formats = (CSV,)
 
@@ -218,7 +238,18 @@ class ContestAdmin(admin.ModelAdmin):
 class InterviewFormatAdmin(admin.ModelAdmin):
     raw_id_fields = ("confirmation_template", "reminder_template")
     list_display = ["campaign", "format"]
-    list_filter = ["campaign"]
+    list_filter = [CampaignListFilter]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related(
+            "campaign__branch"
+        )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "campaign":
+            kwargs['queryset'] = Campaign.objects.select_related("branch")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class InterviewAssigneeAdminInline(admin.TabularInline):
@@ -273,11 +304,17 @@ class InterviewAdmin(admin.ModelAdmin):
             for slot in slots:
                 EmailQueueService.generate_interview_reminder(obj, slot.stream)
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related(
+            "venue__city",
+            "applicant__campaign__branch",
+        )
 
 class InterviewCommentAdmin(admin.ModelAdmin):
     list_display = ["get_interview", "get_interviewer", "score"]
     search_fields = ["interview__applicant__last_name"]
-    list_filter = ["interview__applicant__campaign"]
+    list_filter = [ApplicantCampaignListFilter]
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == "interview":
@@ -318,6 +355,11 @@ class InterviewSlotAdmin(admin.ModelAdmin):
     def stream_date(self, obj):
         return obj.stream.date.strftime("%d.%m.%Y")
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "stream":
+            kwargs['queryset'] = InterviewStream.objects.prefetch_related('interviewers')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class InterviewSlotsInline(admin.TabularInline):
     model = InterviewSlot
@@ -331,7 +373,6 @@ class InterviewSlotsInline(admin.TabularInline):
 class InterviewStreamAdmin(admin.ModelAdmin):
     form = InterviewStreamChangeForm
     list_select_related = ("campaign", "campaign__branch")
-    list_display = ["date", "start_at", "end_at", "campaign"]
     ordering = ["-date", "-start_at"]
     list_filter = [CampaignListFilter]
     inlines = [InterviewSlotsInline]
@@ -357,6 +398,17 @@ class InterviewStreamAdmin(admin.ModelAdmin):
             readonly_fields.append("interviewers")
         return readonly_fields
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.prefetch_related(
+            "interviewers"
+        )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "campaign":
+            kwargs['queryset'] = Campaign.objects.select_related("branch")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class InterviewStreamsInline(admin.TabularInline):
     model = InterviewInvitation.streams.through
@@ -375,6 +427,11 @@ class InterviewInvitationAdmin(admin.ModelAdmin):
     list_display = ["get_applicant", "get_campaign_branch", "get_accepted"]
     raw_id_fields = ("applicant", "interview")
     readonly_fields = ("secret_code",)
+    formfield_overrides = {
+        models.ManyToManyField: {
+            "widget": Select2Multiple(attrs={"data-width": "style"})
+        }
+    }
     # Is it possible to restrict streams values by applicant?
     # inlines = [InterviewStreamsInline]
 
@@ -390,10 +447,15 @@ class InterviewInvitationAdmin(admin.ModelAdmin):
     def get_campaign_branch(self, obj):
         return obj.applicant.campaign.branch
 
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == "streams":
+            kwargs['queryset'] = InterviewStream.objects.prefetch_related('interviewers')
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
 
 class AcceptanceAdmin(admin.ModelAdmin):
     list_display = ("applicant_name", "get_campaign", "status", "created_at")
-    list_filter = ["status", "applicant__campaign"]
+    list_filter = ["status", ApplicantCampaignListFilter]
     raw_id_fields = ("applicant",)
     list_select_related = ("applicant__campaign__branch",)
     search_fields = ["applicant__last_name"]

@@ -158,13 +158,14 @@ def get_interview_invitation_sections(invitation: InterviewInvitation):
 class InterviewerSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name="user_detail")
     full_name = serializers.CharField(source="get_full_name")
+    last_name = serializers.CharField()
     photo = PhotoSerializerField(
         User.ThumbnailSize.INTERVIEW_LIST, thumbnail_options={"use_stab": False}
     )
 
     class Meta:
         model = User
-        fields = ("url", "full_name", "photo")
+        fields = ("url", "full_name", "last_name", "photo")
 
 
 class InterviewSerializer(serializers.ModelSerializer):

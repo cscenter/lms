@@ -175,7 +175,7 @@ class InterviewInvitationFilter(django_filters.FilterSet):
 
     def __init__(self, streams, **kwargs):
         super().__init__(**kwargs)
-        self.filters["streams"].queryset = streams
+        self.filters["streams"].queryset = streams.prefetch_related("interviewers")
 
     @property
     def form(self):
