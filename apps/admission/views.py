@@ -284,6 +284,14 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         section = filter_serializer.validated_data["section"]
         applicants = get_applicants_for_invitation(campaign=campaign, section=section)
         applicants = applicants.filter(pk__in=input_serializer.validated_data["ids"])
+        free_slots = sum(stream.slots_free_count for stream in streams)
+        if free_slots < len(applicants):
+            messages.error(self.request, "Суммарное количество слотов выбранных потоков меньше, чем количество "
+                                         "выбранных абитуриентов.")
+            context = self.get_context_data(
+                filter_serializer=filter_serializer, **kwargs
+            )
+            return self.render_to_response(context)
         with transaction.atomic():
             for applicant in applicants:
                 applicant.campaign = campaign
@@ -298,11 +306,27 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
 
     @staticmethod
     def get_interview_stream_filterset(serializer: serializers.Serializer):
+        invitations_waiting_for_response = Count(
+            Case(
+                When(
+                    interview_invitations__expired_at__lte=get_now_utc(),
+                    then=Value(None),
+                ),
+                When(
+                    interview_invitations__status=InterviewInvitationStatuses.NO_RESPONSE,
+                    then=Value(1),
+                ),
+                default=Value(None),
+            )
+        )
         return RequiredSectionInterviewStreamFilter(
             data=serializer.validated_data,
             queryset=(
-                get_ongoing_interview_streams().order_by("-date", "-start_at", "pk").filter(
-                    interviewers_max__gt=F('slots_occupied_count'), slots_count__gt=F('slots_occupied_count'))
+                get_ongoing_interview_streams()
+                .annotate(invitations_total=invitations_waiting_for_response)
+                .filter(interviewers_max__gt=F('slots_occupied_count') + F('invitations_total'),
+                        slots_count__gt=F('slots_occupied_count') + F('invitations_total'))
+                .order_by("-date", "-start_at", "pk")
             ),
         )
 
