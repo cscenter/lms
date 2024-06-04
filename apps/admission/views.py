@@ -18,7 +18,7 @@ from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
-from django.db.models import Avg, Case, Count, Prefetch, Q, Value, When, Subquery
+from django.db.models import Avg, Case, Count, Prefetch, Q, Value, When, Subquery, F
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import (
@@ -301,7 +301,8 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         return RequiredSectionInterviewStreamFilter(
             data=serializer.validated_data,
             queryset=(
-                get_ongoing_interview_streams().order_by("-date", "-start_at", "pk")
+                get_ongoing_interview_streams().order_by("-date", "-start_at", "pk").filter(
+                    interviewers_max__gt=F('slots_occupied_count'), slots_count__gt=F('slots_occupied_count'))
             ),
         )
 

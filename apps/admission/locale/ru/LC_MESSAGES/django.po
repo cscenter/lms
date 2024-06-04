@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-03 15:54+0000\n"
-"PO-Revision-Date: 2024-06-03 15:57+0000\n"
+"POT-Creation-Date: 2024-06-03 18:01+0000\n"
+"PO-Revision-Date: 2024-06-03 18:01+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -19,59 +19,59 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.9.8\n"
 
-#: apps/admission/admin.py:47 apps/admission/admin.py:122
-#: apps/admission/admin.py:443 apps/admission/filters.py:70
+#: apps/admission/admin.py:47 apps/admission/admin.py:119
+#: apps/admission/admin.py:467 apps/admission/filters.py:70
 #: apps/admission/filters.py:109 apps/admission/filters.py:291
 #: apps/admission/models.py:164 apps/admission/models.py:1167
 #: apps/admission/models.py:1388 apps/admission/models.py:1795
 msgid "Campaign"
 msgstr "Набор"
 
-#: apps/admission/admin.py:66 apps/admission/admin.py:421
+#: apps/admission/admin.py:64 apps/admission/admin.py:446
 #: apps/admission/models.py:81 apps/admission/models.py:233
 msgid "Branch"
 msgstr "Отделение"
 
-#: apps/admission/admin.py:126 apps/admission/admin.py:417
-#: apps/admission/admin.py:439 apps/admission/models.py:640
+#: apps/admission/admin.py:123 apps/admission/admin.py:442
+#: apps/admission/admin.py:463 apps/admission/models.py:640
 #: apps/admission/models.py:1053 apps/admission/models.py:1099
 #: apps/admission/models.py:1241 apps/admission/models.py:1610
 #: apps/admission/models.py:1716
 msgid "Applicant"
 msgstr "Поступающий"
 
-#: apps/admission/admin.py:208
+#: apps/admission/admin.py:205
 msgid "Created"
 msgstr "Создано"
 
-#: apps/admission/admin.py:250 apps/admission/admin.py:327
+#: apps/admission/admin.py:258 apps/admission/admin.py:339
 #: apps/admission/models.py:1361
 msgid "Interviewer"
 msgstr "Собеседующий"
 
-#: apps/admission/admin.py:251
+#: apps/admission/admin.py:259
 msgid "Interviewers"
 msgstr "Собеседующие"
 
-#: apps/admission/admin.py:285 apps/admission/admin.py:342
+#: apps/admission/admin.py:293 apps/admission/admin.py:354
 msgid "Date"
 msgstr "Дата"
 
-#: apps/admission/admin.py:323 apps/admission/models.py:1281
+#: apps/admission/admin.py:335 apps/admission/models.py:1281
 #: apps/admission/models.py:1355 apps/admission/models.py:1558
 #: apps/admission/models.py:1632
 msgid "Interview"
 msgstr "Интервью"
 
-#: apps/admission/admin.py:413 apps/admission/constants.py:106
+#: apps/admission/admin.py:438 apps/admission/constants.py:106
 msgid "Accepted"
 msgstr "Принято"
 
-#: apps/admission/admin.py:415
+#: apps/admission/admin.py:440
 msgid "Yes"
 msgstr "Да"
 
-#: apps/admission/admin.py:415
+#: apps/admission/admin.py:440
 msgid "No"
 msgstr "Нет"
 
@@ -336,7 +336,7 @@ msgstr "Потоки собеседований"
 msgid "Пригласить на собеседование"
 msgstr ""
 
-#: apps/admission/forms.py:162 apps/admission/forms.py:389
+#: apps/admission/forms.py:162 apps/admission/forms.py:395
 msgid "Send"
 msgstr "Отправить"
 
@@ -344,42 +344,47 @@ msgstr "Отправить"
 msgid "Update assignments list"
 msgstr "Обновить список заданий"
 
-#: apps/admission/forms.py:215
+#: apps/admission/forms.py:216
 msgid "Укажите оценку перед сохранением."
 msgstr ""
 
-#: apps/admission/forms.py:242
+#: apps/admission/forms.py:230
+#| msgid "Canceled"
+msgid "Is Cancelled"
+msgstr "Не состоялось"
+
+#: apps/admission/forms.py:248
 msgid "Save"
 msgstr "Сохранить"
 
-#: apps/admission/forms.py:255
+#: apps/admission/forms.py:261
 msgid ""
 "Sorry, but you should be in interviewers list to create or update comment."
 msgstr ""
 "Вы не входите в список собеседующих данное интервью и не можете оставить "
 "комментарий."
 
-#: apps/admission/forms.py:313
+#: apps/admission/forms.py:319
 msgid "Update"
 msgstr "Обновить"
 
-#: apps/admission/forms.py:380
+#: apps/admission/forms.py:386
 msgid "Code"
 msgstr "Код"
 
-#: apps/admission/forms.py:396
+#: apps/admission/forms.py:402
 msgid "Authorization code is invalid."
 msgstr "Неправильный код авторизации"
 
-#: apps/admission/forms.py:410
+#: apps/admission/forms.py:416
 msgid "Birthday"
 msgstr "Дата рождения"
 
-#: apps/admission/forms.py:468
+#: apps/admission/forms.py:474
 msgid "Authorization code is not valid"
 msgstr "Неверный код авторизации"
 
-#: apps/admission/forms.py:483
+#: apps/admission/forms.py:489
 msgid "Email verification code is not valid"
 msgstr "Неверный проверочный код"
 
@@ -1190,7 +1195,6 @@ msgid "Maximum number of slots preffered by interviewer"
 msgstr "Максимальное количество собеседований в день"
 
 #: apps/admission/models.py:1436
-#| msgid "Applicant|interview_format"
 msgid "Applicant|interviewers_max"
 msgstr "При достижении поток не предлагается. Пустой игнорируется"
 
