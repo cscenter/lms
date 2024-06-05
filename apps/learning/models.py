@@ -560,13 +560,7 @@ class Invitation(TimeStampedModel):
 
     @property
     def is_active(self):
-        today = now_local(self.branch.get_timezone()).date()
-        return (EnrollmentPeriod.objects
-                .filter(semester=self.semester,
-                        site_id=settings.SITE_ID,
-                        starts_on__lte=today,
-                        ends_on__gte=today)
-                .exists())
+        return all(course.enrollment_is_open for course in self.courses.all())
 
 
 class PersonalAssignmentActivity(models.TextChoices):
