@@ -197,7 +197,9 @@ def test_student_profile_is_invited_student_active():
     student_profile.type = StudentTypes.INVITED
     assert not student_profile.is_invited_student_active
 
+    course = CourseFactory(semester=Semester.get_current())
     invitation = InvitationFactory()
+    invitation.courses.add(course)
     student_profile.invitation = invitation
     assert not student_profile.is_invited_student_active
 
@@ -223,6 +225,10 @@ def test_student_profile_is_invited_student_active():
     enrollmentperiod.ends_on = today
     enrollmentperiod.save()
     assert student_profile.is_invited_student_active
+
+    course.ends_on = today - datetime.timedelta(days=1)
+    course.save()
+    assert not student_profile.is_invited_student_active
 
 
 def test_get_abbreviated_short_name():
