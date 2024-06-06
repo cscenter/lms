@@ -3,6 +3,8 @@
   {% elif field.name == 'is_studying' %}
   {% elif field.name == 'new_track' %}
   {% elif field.name == 'university_legacy' %}
+  {% elif field.name == 'interview_format' %}
+  {% elif field.name == 'miss_count' %}
   {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
   {% elif field.name == 'position' and not applicant_form.has_job.value %}
   {% elif field.name == 'level_of_education' and not applicant_form.has_diploma.value %}
@@ -90,6 +92,8 @@
   {% elif field.name == 'has_diploma'%}
   {% elif field.name == 'new_track' %}
   {% elif field.name == 'diploma_degree'%}
+  {% elif field.name == 'interview_format' %}
+  {% elif field.name == 'miss_count' %}
   {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
   {% elif field.name == 'position' and not applicant_form.has_job.value %}
   {% elif field.name == 'where_did_you_learn_other' and applicant_form.where_did_you_learn.value %}
