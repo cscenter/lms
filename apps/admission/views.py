@@ -319,13 +319,15 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
                 default=Value(None),
             )
         )
+        slots_and_invitations = F('slots_occupied_count') + F('invitations')
+        is_interviewers_max_ok = Q(interviewers_max__gt=slots_and_invitations) | Q(interviewers_max__isnull=True)
+        is_slots_count_ok = Q(slots_count__gt=slots_and_invitations)
         return RequiredSectionInterviewStreamFilter(
             data=serializer.validated_data,
             queryset=(
                 get_ongoing_interview_streams()
-                .annotate(invitations_total=invitations_waiting_for_response)
-                .filter(interviewers_max__gt=F('slots_occupied_count') + F('invitations_total'),
-                        slots_count__gt=F('slots_occupied_count') + F('invitations_total'))
+                .annotate(invitations=invitations_waiting_for_response)
+                .filter(is_interviewers_max_ok, is_slots_count_ok)
                 .order_by("-date", "-start_at", "pk")
             ),
         )

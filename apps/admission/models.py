@@ -1541,11 +1541,15 @@ class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel
 
     @property
     def slots_free_count(self):
-        return min(self.slots_count,self.interviewers_max) - self.slots_occupied_count
+        return self.max_slots - self.slots_occupied_count
 
     @property
     def max_slots(self):
-        return min(self.slots_count,self.interviewers_max)
+        if self.interviewers_max is not None:
+            return min(self.slots_count, self.interviewers_max)
+        else:
+            return self.slots_count
+
 
 
 class InterviewSlotQuerySet(query.QuerySet):
