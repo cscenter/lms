@@ -44,7 +44,7 @@ from admission.filters import (
     InterviewsCuratorFilter,
     InterviewsFilter,
     InterviewStreamFilter,
-    RequiredSectionInterviewStreamFilter,
+    InvitationCreateInterviewStreamFilter,
     ResultsFilter,
 )
 from admission.forms import (
@@ -231,13 +231,13 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
             choices=InterviewFormats.choices, required=False
         )
         track = serializers.ChoiceField(
-            choices=InterviewStreamFilter.ApplicantTrack, required=False
+            choices=InvitationCreateInterviewStreamFilter.ApplicantTrack, required=False
         )
         way_to_interview = serializers.ChoiceField(
-            choices=InterviewStreamFilter.ApplicantWayToInterview, required=False
+            choices=InvitationCreateInterviewStreamFilter.ApplicantWayToInterview, required=False
         )
         number_of_misses = serializers.ChoiceField(
-            choices=InterviewStreamFilter.ApplicantMisses, required=False
+            choices=InvitationCreateInterviewStreamFilter.ApplicantMisses, required=False
         )
 
     class InputSerializer(serializers.Serializer):
@@ -339,7 +339,7 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         slots_and_invitations = F('slots_occupied_count') + F('invitations')
         is_interviewers_max_ok = Q(interviewers_max__gt=slots_and_invitations) | Q(interviewers_max__isnull=True)
         is_slots_count_ok = Q(slots_count__gt=slots_and_invitations)
-        return RequiredSectionInterviewStreamFilter(
+        return InvitationCreateInterviewStreamFilter(
             data=serializer.validated_data,
             queryset=(
                 get_ongoing_interview_streams()

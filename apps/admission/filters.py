@@ -105,6 +105,40 @@ class ApplicantFilter(django_filters.FilterSet):
 
 
 class InterviewStreamFilter(django_filters.FilterSet):
+    campaign = django_filters.ModelChoiceFilter(
+        label=_("Campaign"),
+        queryset=(
+            Campaign.objects.filter(branch__site_id=settings.SITE_ID)
+            .select_related("branch")
+            .order_by("-year", "branch__order")
+            .all()
+        ),
+        empty_label=None,
+    )
+    section = django_filters.ChoiceFilter(
+        label=_("Interview Section"), choices=InterviewSections.choices
+    )
+
+    class Meta:
+        model = InterviewStream
+        fields = ["campaign", "section", "format"]
+
+    @property
+    def form(self):
+        if not hasattr(self, "_form"):
+            self._form = super(InterviewStreamFilter, self).form
+            self._form.helper = FormHelper()
+            self._form.helper.form_method = "GET"
+            self._form.helper.layout = Layout(
+                Row(
+                    Div("campaign", css_class="col-xs-3"), Div("section", css_class="col-xs-3"),
+                       Div(Submit("", _("Filter"), css_class="btn-block -inline-submit"), css_class="col-xs-2"),
+                )
+            )
+        return self._form
+
+
+class InvitationCreateInterviewStreamFilter(InterviewStreamFilter):
     ApplicantTrack = [
         ("regular", _("Regular")),
         ("alternative", _("Alternative"))
@@ -121,18 +155,10 @@ class InterviewStreamFilter(django_filters.FilterSet):
         (3, 3),
         (4, ">3")
     ]
-    campaign = django_filters.ModelChoiceFilter(
-        label=_("Campaign"),
-        queryset=(
-            Campaign.objects.filter(branch__site_id=settings.SITE_ID)
-            .select_related("branch")
-            .order_by("-year", "branch__order")
-            .all()
-        ),
-        empty_label=None,
-    )
     section = django_filters.ChoiceFilter(
-        label=_("Interview Section"), choices=InterviewSections.choices
+        label=_("Interview Section"),
+        choices=InterviewSections.choices,
+        empty_label=None,
     )
     format = django_filters.ChoiceFilter(
         label=_("Interview format"), choices=InterviewFormats.choices
@@ -147,14 +173,10 @@ class InterviewStreamFilter(django_filters.FilterSet):
         label=_("Applicant number of missed interviews"), choices=ApplicantMisses
     )
 
-    class Meta:
-        model = InterviewStream
-        fields = ["campaign", "section", "format"]
-
     @property
     def form(self):
         if not hasattr(self, "_form"):
-            self._form = super(InterviewStreamFilter, self).form
+            self._form = super(InvitationCreateInterviewStreamFilter, self).form
             self._form.helper = FormHelper()
             self._form.helper.form_method = "GET"
             self._form.helper.layout = Layout(
@@ -185,14 +207,6 @@ class InterviewStreamFilter(django_filters.FilterSet):
                 "Expected '%s.%s' to return a QuerySet, but got a %s instead." \
                 % (type(self).__name__, name, type(queryset).__name__)
         return queryset
-
-
-class RequiredSectionInterviewStreamFilter(InterviewStreamFilter):
-    section = django_filters.ChoiceFilter(
-        label=_("Interview Section"),
-        choices=InterviewSections.choices,
-        empty_label=None,
-    )
 
 
 class InterviewInvitationFilter(django_filters.FilterSet):
