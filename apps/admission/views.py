@@ -294,7 +294,12 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         # Create interview invitations
         campaign = filter_serializer.validated_data["campaign"]
         section = filter_serializer.validated_data["section"]
-        applicants = get_applicants_for_invitation(campaign=campaign, section=section)
+        format = filter_serializer.validated_data.get("format")
+        track = filter_serializer.validated_data.get("track")
+        way_to_interview = filter_serializer.validated_data.get("way_to_interview")
+        number_of_misses = filter_serializer.validated_data.get("number_of_misses")
+        applicants = get_applicants_for_invitation(campaign=campaign, section=section, format=format, track=track,
+                                          way_to_interview=way_to_interview, number_of_misses=number_of_misses)
         applicants = applicants.filter(pk__in=input_serializer.validated_data["ids"])
         free_slots = sum(stream.slots_free_count for stream in streams)
         if free_slots < len(applicants):

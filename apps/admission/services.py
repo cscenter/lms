@@ -247,7 +247,10 @@ def get_streams(
         .select_related("stream__interview_format", "stream__venue__city")
         .order_by("stream__date", "start_at")
     )
-    return bucketize(slots, key=lambda s: s.stream)
+    bucket = bucketize(slots, key=lambda s: s.stream)
+
+    return {stream: slots for stream, slots in bucket.items() if stream.slots_free_count != 0}
+
 
 
 # TODO: change exception type
