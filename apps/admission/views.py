@@ -228,16 +228,16 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
             choices=InterviewSections.choices, required=True
         )
         format = serializers.ChoiceField(
-            choices=InterviewFormats.choices
+            choices=InterviewFormats.choices, required=False
         )
         track = serializers.ChoiceField(
-            choices=InterviewStreamFilter.ApplicantTrack
+            choices=InterviewStreamFilter.ApplicantTrack, required=False
         )
         way_to_interview = serializers.ChoiceField(
-            choices=InterviewStreamFilter.ApplicantWayToInterview
+            choices=InterviewStreamFilter.ApplicantWayToInterview, required=False
         )
         number_of_misses = serializers.ChoiceField(
-            choices=InterviewStreamFilter.ApplicantMisses
+            choices=InterviewStreamFilter.ApplicantMisses, required=False
         )
 
     class InputSerializer(serializers.Serializer):
@@ -348,12 +348,17 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         filter_serializer = kwargs["filter_serializer"]
         campaign = filter_serializer.validated_data["campaign"]
         section = filter_serializer.validated_data["section"]
+        format = filter_serializer.validated_data.get("format")
+        track = filter_serializer.validated_data.get("track")
+        way_to_interview = filter_serializer.validated_data.get("way_to_interview")
+        number_of_misses = filter_serializer.validated_data.get("number_of_misses")
         interview_stream_filterset = self.get_interview_stream_filterset(
             filter_serializer
         )
 
         applicants = (
-            get_applicants_for_invitation(campaign=campaign, section=section)
+            get_applicants_for_invitation(campaign=campaign, section=section, format=format, track=track,
+                                          way_to_interview=way_to_interview, number_of_misses=number_of_misses)
             .select_related(
                 "exam",
                 "online_test",

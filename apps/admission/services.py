@@ -25,8 +25,9 @@ from admission.constants import (
     INVITATION_EXPIRED_IN_HOURS,
     ContestTypes,
     InterviewFormats,
-    InterviewInvitationStatuses, ApplicantStatuses,
+    InterviewInvitationStatuses, ApplicantStatuses, ApplicantInterviewFormats,
 )
+# from admission.filters import InterviewStreamFilter
 from admission.models import (
     Acceptance,
     Applicant,
@@ -72,7 +73,7 @@ def get_ongoing_interview_streams() -> models.QuerySet[InterviewStream]:
 
 
 def get_applicants_for_invitation(
-    *, campaign: Campaign, section: str
+    *, campaign: Campaign, section: str, format: InterviewFormats, track, way_to_interview, number_of_misses
 ) -> models.QuerySet[Applicant]:
     """
     Returns all campaign participants available for invitation to the interview
@@ -90,14 +91,48 @@ def get_applicants_for_invitation(
         .distinct()
     )
     # Participants with scheduled interview
-    # FIXME: how to handle DEFERRED/CANCELED/etc statuses?
-    with_interview = Interview.objects.filter(
-        applicant__campaign=campaign, section=section
-    ).values("applicant_id")
+    with_interview = (Interview.objects.filter(
+        applicant__campaign=campaign, section=section)
+                      .exclude(status__in=[Interview.DEFERRED, Interview.CANCELED])
+                      .values("applicant_id"))
+
+    format_filter = Q()
+    if format is not None:
+        format_filter = Q(interview_format=format) | Q(interview_format=ApplicantInterviewFormats.ANY)
+
+    track_filter = Q()
+    if track is not None:
+        track_filter = Q(new_track=(track=="alternative"))
+
+    way_filter = Q()
+    if way_to_interview is not None:
+        if way_to_interview == "exam":
+            way_filter = Q(status=ApplicantStatuses.PASSED_EXAM)
+        elif way_to_interview == "olympiad":
+            way_filter = Q(status=ApplicantStatuses.PASSED_OLYMPIAD)
+        elif way_to_interview == "golden_ticket":
+            way_filter = Q(status=ApplicantStatuses.GOLDEN_TICKET)
+        else:
+            raise ValueError(f"Unsupported value {way_to_interview}")
+
+
+    miss_filter = Q()
+    if number_of_misses is not None:
+        if number_of_misses in range(0, 4):
+            way_filter = Q(miss_count=number_of_misses)
+        elif number_of_misses == 4:
+            way_filter = Q(miss_count__gt=3)
+        else:
+            raise ValueError(f"Unsupported value {number_of_misses}")
 
     queryset = (
         Applicant.objects.filter(
-            campaign=campaign, status__in=ApplicantStatuses.RIGHT_BEFORE_INTERVIEW
+            format_filter,
+            track_filter,
+            way_filter,
+            miss_filter,
+            campaign=campaign,
+            status__in=ApplicantStatuses.RIGHT_BEFORE_INTERVIEW,
         )
         .exclude(pk__in=with_active_invitation)
         .exclude(pk__in=with_interview)
