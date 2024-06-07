@@ -63,9 +63,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
         exclude_statuses = [
             Applicant.ACCEPT,
             Applicant.ACCEPT_IF,
-            Applicant.VOLUNTEER,
             Applicant.THEY_REFUSED,
-            Applicant.WAITING_FOR_PAYMENT,
             Applicant.ACCEPT_PAID,
             Applicant.REJECTED_BY_CHEATING,
         ]

@@ -17,7 +17,7 @@ from admission.constants import (
     ChallengeStatuses,
     InterviewFormats,
     InterviewInvitationStatuses,
-    InterviewSections,
+    InterviewSections, ApplicantStatuses,
 )
 from admission.models import Acceptance, Applicant, Exam, Interview
 from admission.services import (
@@ -289,7 +289,7 @@ def test_get_applicants_for_invitation():
         == 0
     )
     applicant3 = ApplicantFactory(
-        campaign=campaign1, status=Applicant.INTERVIEW_TOBE_SCHEDULED
+        campaign=campaign1, status=ApplicantStatuses.PASSED_EXAM
     )
     assert (
         get_applicants_for_invitation(
@@ -314,7 +314,7 @@ def test_get_applicants_for_invitation():
     )
     # Expired invitation for target section
     applicant4 = ApplicantFactory(
-        campaign=campaign1, status=Applicant.INTERVIEW_TOBE_SCHEDULED
+        campaign=campaign1, status=ApplicantStatuses.PASSED_EXAM
     )
     yesterday_utc = get_now_utc() - datetime.timedelta(days=1)
     next_week_utc = get_now_utc() + datetime.timedelta(weeks=1)

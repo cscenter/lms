@@ -277,39 +277,19 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     REJECTED_BY_EXAM_CHEATING = ApplicantStatuses.REJECTED_BY_EXAM_CHEATING
     REJECTED_BY_CHEATING = ApplicantStatuses.REJECTED_BY_CHEATING
     # TODO: rename interview codes here and in DB. Replace values type?
-    INTERVIEW_TOBE_SCHEDULED = (
-        ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED
-    )  # permitted to interview
-    # FIXME: remove
-    INTERVIEW_SCHEDULED = ApplicantStatuses.INTERVIEW_SCHEDULED
-    INTERVIEW_COMPLETED = ApplicantStatuses.INTERVIEW_COMPLETED
     REJECTED_BY_INTERVIEW = ApplicantStatuses.REJECTED_BY_INTERVIEW
     PENDING = ApplicantStatuses.PENDING
     ACCEPT = ApplicantStatuses.ACCEPT
     ACCEPT_PAID = ApplicantStatuses.ACCEPT_PAID
-    WAITING_FOR_PAYMENT = ApplicantStatuses.WAITING_FOR_PAYMENT
     ACCEPT_IF = ApplicantStatuses.ACCEPT_IF
-    VOLUNTEER = ApplicantStatuses.VOLUNTEER
     THEY_REFUSED = ApplicantStatuses.THEY_REFUSED
 
     STATUS = ApplicantStatuses.choices
-    # One of the statuses below could be set after interviewing
-    INTERVIEW_RESULTS = {
-        ACCEPT,
-        ACCEPT_PAID,
-        ACCEPT_IF,
-        REJECTED_BY_INTERVIEW,
-        ApplicantStatuses.REJECTED_BY_INTERVIEW_WITH_BONUS,
-        VOLUNTEER,
-        WAITING_FOR_PAYMENT,
-    }
     # Successful final statuses after interview stage
     ACCEPT_STATUSES = {
         ACCEPT,
         ACCEPT_PAID,
         ACCEPT_IF,
-        VOLUNTEER,
-        WAITING_FOR_PAYMENT,
     }
     STUDY_PROGRAM_DS = "ds"
     STUDY_PROGRAM_CS = "cs"
@@ -349,7 +329,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         verbose_name=_("Applicant|Status"),
         blank=True,
         null=True,
-        max_length=20,
+        max_length=30,
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -1651,8 +1631,14 @@ class InterviewInvitation(TimeStampedModel):
         verbose_name = _("Interview invitation")
         verbose_name_plural = _("Interview invitations")
 
+    def clean(self):
+        if self.pk is None:
+            if self.applicant.status not in ApplicantStatuses.RIGHT_BEFORE_INTERVIEW:
+                raise ValidationError(f"Для создания преглашения статус абитуриента должен быть один из следующих:"
+                                      f"{ApplicantStatuses.RIGHT_BEFORE_INTERVIEW_DISPLAY}")
+
     def save(self, **kwargs):
-        print(kwargs)
+        self.full_clean()
         created = self.pk is None
         if not created:
             previous = InterviewInvitation.objects.get(pk=self.pk)
@@ -1661,15 +1647,6 @@ class InterviewInvitation(TimeStampedModel):
                 self.applicant.miss_count = F("miss_count") + 1
                 self.applicant.save()
         super().save(**kwargs)
-        if created and not self.interview_id:
-            # Update status if we send invitation before
-            # summing up the exam results
-            if self.applicant.status == Applicant.PERMIT_TO_EXAM:
-                (
-                    Applicant.objects.filter(pk=self.applicant_id).update(
-                        status=Applicant.INTERVIEW_TOBE_SCHEDULED
-                    )
-                )
 
     def __str__(self):
         return str(self.applicant)

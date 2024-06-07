@@ -372,10 +372,8 @@ class ApplicantFinalStatusForm(ModelForm):
     FINAL_CHOICES = (
         ("", filters_settings.EMPTY_CHOICE_LABEL),
         (ApplicantStatuses.ACCEPT, "Берём"),
-        (ApplicantStatuses.VOLUNTEER, "Берём в вольные слушатели"),
         (ApplicantStatuses.ACCEPT_IF, "Берём с условием"),
         (ApplicantStatuses.ACCEPT_PAID, "Платное"),
-        (ApplicantStatuses.WAITING_FOR_PAYMENT, "Ожидаем оплаты"),
         (ApplicantStatuses.REJECTED_BY_INTERVIEW, "Не берём"),
         (
             ApplicantStatuses.REJECTED_BY_INTERVIEW_WITH_BONUS,

@@ -20,49 +20,53 @@ EMAIL_VERIFICATION_CODE_TEMPLATE = "emails/admission/email_verification_code.txt
 
 
 class ApplicantStatuses(DjangoChoices):
-    REJECTED_BY_TEST = C("rejected_test", _("Rejected by test"))
-    PERMIT_TO_EXAM = C("permit_to_exam", _("Permitted to the exam"))
-    PERMIT_TO_OLYMPIAD = C("permit_to_olympiad", _("Permitted to the olympiad"))
-    REJECTED_BY_EXAM = C("rejected_exam", _("Rejected by exam"))
     REJECTED_BY_FORM_CHECK = C("rejected_form_check", _("Rejected by form check"))
-    REJECTED_BY_INTENSIVE = C("rejected_intensive", _("Rejected by intensive"))
-    REJECTED_BY_EXAM_CHEATING = C("reject_exam_cheater", _("Rejected by exam cheating"))
-    REJECTED_BY_CHEATING = C("rejected_cheating", _("Cheating"))
-    PENDING = C("pending", _("Pending"))
     GOLDEN_TICKET = C("golden_ticket", _("Golden ticket from the previous year"))
+    REJECTED_BY_CHEATING = C("rejected_cheating", _("Cheating"))
+    REJECTED_BY_TEST = C("rejected_test", _("Rejected by test"))
+    PERMIT_TO_OLYMPIAD = C("permit_to_olympiad", _("Permitted to the olympiad"))
+    PERMIT_TO_EXAM = C("permit_to_exam", _("Permitted to the exam"))
     PASSED_OLYMPIAD = C("passed_olympiad", _("Passed the olympiad"))
     FAILED_OLYMPIAD = C("failed_olympiad", _("Failed the olympiad, will write the exam"))
+    REJECTED_BY_EXAM_CHEATING = C("reject_exam_cheater", _("Rejected by exam cheating"))
+    REJECTED_BY_EXAM = C("rejected_exam", _("Rejected by exam"))
     PASSED_EXAM = C("passed_exam", _("Passed the exam"))
-    INTERVIEW_TOBE_SCHEDULED = C(
-        "interview_phase", _("Can be interviewed")
-    )  # permitted to interview
-    INTERVIEW_SCHEDULED = C("interview_assigned", _("Interview assigned"))
-    INTERVIEW_COMPLETED = C("interview_completed", _("Interview completed"))
     REJECTED_BY_INTERVIEW = C("rejected_interview", _("Rejected by interview"))
     REJECTED_BY_INTERVIEW_WITH_BONUS = C(
         "rejected_with_bonus", _("Rejected by interview. Offered a bonus")
     )
-    ACCEPT_PAID = C("accept_paid", _("Accept on paid"))
-    WAITING_FOR_PAYMENT = C("waiting_for_payment", _("Waiting for Payment"))
     ACCEPT = C("accept", _("Accept"))
     ACCEPT_IF = C("accept_if", _("Accept with condition"))
-    VOLUNTEER = C("volunteer", _("Applicant|Volunteer"))
     THEY_REFUSED = C("they_refused", _("He or she refused"))
+    PERMIT_TO_INTENSIVE = C("permit_to_intensive", _("Permitted to the intensive"))
+    PENDING = C("pending", _("Pending"))
+    REJECTED_BY_INTENSIVE = C("rejected_intensive", _("Rejected by intensive"))
+    REJECTED_BY_INTENSIVE_WITH_BONUS = C("rejected_intensive_bonus", _("Rejected by intensive. Offered a bonus"))
+    ACCEPT_PAID = C("accept_paid", _("Accept on paid"))
 
-    # Participants who have reached the interview stage
+    # Applicants whose next step is interview.
+    # Modern equivalent of INTERVIEW_TOBE_SCHEDULED
+    RIGHT_BEFORE_INTERVIEW = {
+        PASSED_EXAM.value,
+        GOLDEN_TICKET.value,
+        PASSED_OLYMPIAD.value
+    }
+
+    # Applicants who have reached the interview stage
     RESULTS_STATUSES = {
-        INTERVIEW_TOBE_SCHEDULED.value,
-        INTERVIEW_SCHEDULED.value,
-        INTERVIEW_COMPLETED.value,
+        *RIGHT_BEFORE_INTERVIEW,
         REJECTED_BY_INTERVIEW.value,
         REJECTED_BY_INTERVIEW_WITH_BONUS.value,
         ACCEPT_PAID.value,
-        WAITING_FOR_PAYMENT.value,
         ACCEPT.value,
         ACCEPT_IF.value,
-        VOLUNTEER.value,
         THEY_REFUSED.value,
     }
+
+    @classmethod
+    @property
+    def RIGHT_BEFORE_INTERVIEW_DISPLAY(self):
+        return [self.get_choice(value).label for value in self.RIGHT_BEFORE_INTERVIEW]
 
 
 class ContestTypes(DjangoChoices):

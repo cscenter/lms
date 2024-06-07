@@ -53,10 +53,6 @@ class Command(CurrentCampaignMixin, BaseCommand):
                 default_filters |= Q(online_test__score__gte=cheater_score)
             applicants = (
                 Applicant.objects.filter(campaign_id=campaign.pk)
-                .exclude(
-                    # bonus from past admission campaign
-                    status=ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED
-                )
                 .filter(
                     new_track=new_track
                 )

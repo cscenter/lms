@@ -8,6 +8,7 @@ from admission.models import Applicant
 from admission.services import get_email_from
 
 from ._utils import CurrentCampaignMixin, EmailTemplateMixin
+from ...constants import ApplicantStatuses
 
 
 class ExamResultStatus:
@@ -18,9 +19,9 @@ class ExamResultStatus:
 
 def get_exam_results_template_pattern(status: str, initial_pattern: str, **kwargs):
     status_mapping = {
-        Applicant.INTERVIEW_TOBE_SCHEDULED: ExamResultStatus.SUCCESS,
-        Applicant.REJECTED_BY_EXAM_CHEATING: ExamResultStatus.CHEATER,
-        Applicant.REJECTED_BY_EXAM: ExamResultStatus.FAIL,
+        ApplicantStatuses.PASSED_EXAM: ExamResultStatus.SUCCESS,
+        ApplicantStatuses.REJECTED_BY_EXAM_CHEATING: ExamResultStatus.CHEATER,
+        ApplicantStatuses.REJECTED_BY_EXAM: ExamResultStatus.FAIL,
     }
     status = status_mapping.get(status)
     if status is None:
@@ -59,9 +60,9 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
 
         pattern = options["template_pattern"] or self.TEMPLATE_PATTERN
         statuses = [
-            Applicant.REJECTED_BY_EXAM,
-            Applicant.INTERVIEW_TOBE_SCHEDULED,
-            Applicant.REJECTED_BY_EXAM_CHEATING,
+            ApplicantStatuses.REJECTED_BY_EXAM,
+            ApplicantStatuses.PASSED_EXAM,
+            ApplicantStatuses.REJECTED_BY_EXAM_CHEATING,
         ]
 
         self.stdout.write(f"Templates for campaign: {campaign}")
@@ -93,9 +94,9 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
         generated = 0
         for a in applicants.iterator():
             total += 1
-            succeed += int(a.status == Applicant.INTERVIEW_TOBE_SCHEDULED)
-            cheater += int(a.status == Applicant.REJECTED_BY_EXAM_CHEATING)
-            failed += int(a.status == Applicant.REJECTED_BY_EXAM)
+            succeed += int(a.status == ApplicantStatuses.PASSED_EXAM)
+            cheater += int(a.status == ApplicantStatuses.REJECTED_BY_EXAM_CHEATING)
+            failed += int(a.status == ApplicantStatuses.REJECTED_BY_EXAM)
             template = status_to_pattern[a.status]
             recipients = [a.email]
             if not Email.objects.filter(to=recipients, template=template).exists():

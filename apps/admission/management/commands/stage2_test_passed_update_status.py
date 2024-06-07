@@ -59,9 +59,6 @@ class Command(CurrentCampaignMixin, BaseCommand):
                 filters['online_test__score__lt'] = cheater_score
             applicants = Applicant.objects.filter(
                 **filters
-            ).exclude(
-                # bonus from past admission campaign
-                status=ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED
             ).values(
                 "pk",
                 "online_test__score",

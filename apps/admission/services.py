@@ -25,7 +25,7 @@ from admission.constants import (
     INVITATION_EXPIRED_IN_HOURS,
     ContestTypes,
     InterviewFormats,
-    InterviewInvitationStatuses,
+    InterviewInvitationStatuses, ApplicantStatuses,
 )
 from admission.models import (
     Acceptance,
@@ -97,7 +97,7 @@ def get_applicants_for_invitation(
 
     queryset = (
         Applicant.objects.filter(
-            campaign=campaign, status=Applicant.INTERVIEW_TOBE_SCHEDULED
+            campaign=campaign, status__in=ApplicantStatuses.RIGHT_BEFORE_INTERVIEW
         )
         .exclude(pk__in=with_active_invitation)
         .exclude(pk__in=with_interview)

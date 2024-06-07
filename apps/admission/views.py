@@ -100,7 +100,7 @@ from .constants import (
     ApplicantStatuses,
     ContestTypes,
     InterviewInvitationStatuses,
-    InterviewSections,
+    InterviewSections, InterviewFormats,
 )
 from .selectors import get_interview_invitation, get_occupied_slot
 
@@ -226,6 +226,18 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         )
         section = serializers.ChoiceField(
             choices=InterviewSections.choices, required=True
+        )
+        format = serializers.ChoiceField(
+            choices=InterviewFormats.choices
+        )
+        track = serializers.ChoiceField(
+            choices=InterviewStreamFilter.ApplicantTrack
+        )
+        way_to_interview = serializers.ChoiceField(
+            choices=InterviewStreamFilter.ApplicantWayToInterview
+        )
+        number_of_misses = serializers.ChoiceField(
+            choices=InterviewStreamFilter.ApplicantMisses
         )
 
     class InputSerializer(serializers.Serializer):
@@ -1096,8 +1108,6 @@ class InterviewResultsView(
         final_statuses = {
             Applicant.ACCEPT,
             Applicant.ACCEPT_IF,
-            Applicant.VOLUNTEER,
-            Applicant.WAITING_FOR_PAYMENT,
             Applicant.ACCEPT_PAID,
         }
         received = 0

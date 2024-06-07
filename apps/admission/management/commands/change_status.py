@@ -23,7 +23,7 @@ def main():
         print(f"Success: {success.count()}\n"
               f"Failed: {failed.count()}\n"
               f"Total: {Applicant.objects.filter(campaign__in=campaigns_pk).count()}\n")
-        assert success.update(status=ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED)
+        assert success.update(status=ApplicantStatuses.PASSED_EXAM)
         assert failed.update(status=ApplicantStatuses.REJECTED_BY_EXAM)
 
 

@@ -7,7 +7,6 @@ from admission.services import EmailQueueService
 
 APPLICANT_FINAL_STATES = (
     Applicant.ACCEPT,
-    Applicant.VOLUNTEER,
     Applicant.ACCEPT_IF,
     Applicant.REJECTED_BY_INTERVIEW,
     Applicant.THEY_REFUSED,
@@ -29,8 +28,6 @@ def post_save_campaign(sender, instance, created, *args, **kwargs):
 @receiver(post_save, sender=Interview)
 def post_save_interview(sender, instance, created, *args, **kwargs):
     interview = instance
-    if interview.section == InterviewSections.ALL_IN_ONE:
-        __sync_applicant_status(interview)
     if interview.status in [Interview.CANCELED, Interview.DEFERRED]:
         EmailQueueService.remove_interview_reminder(interview)
         EmailQueueService.remove_interview_feedback_emails(interview)
@@ -38,37 +35,12 @@ def post_save_interview(sender, instance, created, *args, **kwargs):
         EmailQueueService.generate_interview_feedback_email(interview)
 
 
-def __sync_applicant_status(interview):
-    """Keep in sync interview and applicant statuses."""
-    if interview.applicant.status in APPLICANT_FINAL_STATES:
-        return
-    if interview.status in [Interview.APPROVAL, Interview.APPROVED]:
-        new_status = Applicant.INTERVIEW_SCHEDULED
-    elif interview.status in [Interview.CANCELED, Interview.DEFERRED]:
-        new_status = Applicant.INTERVIEW_TOBE_SCHEDULED
-    elif interview.status == Interview.COMPLETED:
-        new_status = Applicant.INTERVIEW_COMPLETED
-    else:
-        raise ValueError("Unknown interview status")
-    if interview.applicant.status != new_status:
-        interview.applicant.status = new_status
-        (
-            Applicant.objects.filter(pk=interview.applicant.pk).update(
-                status=interview.applicant.status
-            )
-        )
 
 
 # TODO: add tests
 @receiver(pre_delete, sender=Interview)
 def pre_delete_interview(sender, instance, *args, **kwargs):
     interview = instance
-    applicant = interview.applicant
-    (
-        Applicant.objects.filter(pk=applicant.pk).update(
-            status=Applicant.INTERVIEW_TOBE_SCHEDULED
-        )
-    )
     EmailQueueService.remove_interview_reminder(interview)
     EmailQueueService.remove_interview_feedback_emails(interview)
 

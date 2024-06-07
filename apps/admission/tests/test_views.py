@@ -13,7 +13,7 @@ from admission.constants import (
     INVITATION_EXPIRED_IN_HOURS,
     SESSION_CONFIRMATION_CODE_KEY,
     InterviewFormats,
-    InterviewSections,
+    InterviewSections, ApplicantStatuses,
 )
 from admission.forms import InterviewFromStreamForm
 from admission.models import Acceptance, Applicant, Interview, InterviewInvitation
@@ -59,7 +59,6 @@ def test_simple_interviews_list(client, curator, settings):
         date=today_local_nsk,
         section=InterviewSections.ALL_IN_ONE,
         status=Interview.COMPLETED,
-        applicant__status=Applicant.INTERVIEW_COMPLETED,
         applicant__campaign=campaign,
     )
     interview2.date = today_local_nsk + datetime.timedelta(days=1)
@@ -126,7 +125,6 @@ def test_view_interview_list_csv_security(
         date=today_local_spb,
         section=InterviewSections.ALL_IN_ONE,
         status=Interview.COMPLETED,
-        applicant__status=Applicant.INTERVIEW_COMPLETED,
         applicant__campaign=campaign,
     )
     client.login(interviewer)
@@ -158,7 +156,6 @@ def test_view_interview_list_csv(client, curator, settings):
         date=today_local_spb,
         section=InterviewSections.ALL_IN_ONE,
         status=Interview.COMPLETED,
-        applicant__status=Applicant.INTERVIEW_COMPLETED,
         applicant__campaign=campaign,
     )
     interview2.date += datetime.timedelta(hours=23, minutes=59, seconds=59)
@@ -202,16 +199,16 @@ def test_interview_invitations_create_view(client, settings):
     base_url = reverse("admission:interviews:invitations:send")
     campaign = CampaignFactory(current=True, branch=BranchFactory(code=Branches.SPB))
     applicant = ApplicantFactory(
-        status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign
+        status=ApplicantStatuses.PASSED_EXAM, campaign=campaign
     )
     applicant_2 = ApplicantFactory(
-        status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign
+        status=ApplicantStatuses.PASSED_EXAM, campaign=campaign
     )
     applicant_3 = ApplicantFactory(
-        status=Applicant.INTERVIEW_SCHEDULED, campaign=campaign
+        status=ApplicantStatuses.PASSED_EXAM, campaign=campaign
     )
     applicant_4 = ApplicantFactory(
-        status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign
+        status=ApplicantStatuses.PASSED_EXAM, campaign=campaign
     )
     stream_all_in_one = InterviewStreamFactory(
         campaign=campaign, section=InterviewSections.ALL_IN_ONE
@@ -250,44 +247,6 @@ def test_interview_invitations_create_view(client, settings):
 
 
 @pytest.mark.django_db
-def test_autoupdate_applicant_status_canceled():
-    applicant = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED)
-    # Default interview status is `APPROVAL`
-    interview = InterviewFactory(
-        applicant=applicant, section=InterviewSections.ALL_IN_ONE
-    )
-    # applicant status must be updated to `scheduled`
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_SCHEDULED
-    interview.status = Interview.CANCELED
-    interview.save()
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_TOBE_SCHEDULED
-    # Autoupdate for applicant status works each time you set approval/approved
-    # and applicant status not in final state
-    interview.status = Interview.APPROVAL
-    interview.save()
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_SCHEDULED
-
-
-@pytest.mark.django_db
-def test_auto_update_applicant_status_deferred():
-    applicant = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED)
-    interview = InterviewFactory(
-        applicant=applicant,
-        status=Interview.APPROVED,
-        section=InterviewSections.ALL_IN_ONE,
-    )
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_SCHEDULED
-    interview.status = Interview.DEFERRED
-    interview.save()
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_TOBE_SCHEDULED
-
-
-@pytest.mark.django_db
 def test_autocomplete_interview():
     """
     If all interviewers have left comments, change interview
@@ -299,7 +258,7 @@ def test_autocomplete_interview():
         section=InterviewSections.ALL_IN_ONE,
         interviewers=[interviewer1, interviewer2],
     )
-    assert interview.applicant.status == Applicant.INTERVIEW_SCHEDULED
+    assert interview.applicant.status == ApplicantStatuses.PASSED_EXAM
     CommentFactory(interview=interview, interviewer=interviewer1)
     interview.refresh_from_db()
     assert interview.status == Interview.APPROVED
@@ -317,59 +276,6 @@ def test_autocomplete_interview():
     CommentFactory(interview=interview2, interviewer=interviewer1)
     interview2.refresh_from_db()
     assert interview2.status == Interview.COMPLETED
-
-
-@pytest.mark.django_db
-def test_update_applicant_status_if_interview_has_been_completed():
-    interview2 = InterviewFactory(
-        status=Interview.APPROVED, section=InterviewSections.ALL_IN_ONE
-    )
-    CommentFactory(interview=interview2)
-    interview2.refresh_from_db()
-    assert interview2.status == Interview.COMPLETED
-    assert interview2.applicant.status == Applicant.INTERVIEW_COMPLETED
-
-
-@pytest.mark.django_db
-def test_autoupdate_applicant_status_completed():
-    """
-    1. If all interviewers leave a comment, change interview status to
-    `complete` status. Also, update applicant status if it's not already in
-    final state.
-    2. If interview took a place and we later remove absent interviewers,
-    try to switch interview and applicant status to `complete` state.
-    """
-    # Default applicant status is nullable, so we can easily set `complete`
-    interview = InterviewFactory(
-        status=Interview.COMPLETED, section=InterviewSections.ALL_IN_ONE
-    )
-    assert interview.applicant.status == Applicant.INTERVIEW_COMPLETED
-    interview.delete()
-    interviewer1, interviewer2 = InterviewerFactory.create_batch(2)
-    interview = InterviewFactory(
-        status=Interview.APPROVED,
-        section=InterviewSections.ALL_IN_ONE,
-        interviewers=[interviewer1, interviewer2],
-    )
-    assert interview.applicant.status == Applicant.INTERVIEW_SCHEDULED
-    CommentFactory.create(interview=interview, interviewer=interviewer1)
-    interview.refresh_from_db()
-    assert interview.status == Interview.APPROVED
-    comment2 = CommentFactory.create(interview=interview, interviewer=interviewer2)
-    interview.refresh_from_db()
-    assert interview.status == Interview.COMPLETED
-    # Now try to remove interviewer and check that status was changed.
-    comment2.delete()
-    interview.status = Interview.APPROVED
-    interview.save()
-    interview.applicant.status = Applicant.INTERVIEW_SCHEDULED
-    interview.applicant.save()
-    interview.interviewers.clear()
-    interview.interviewers.add(interviewer1)
-    assert interview.interviewers.count() == 1
-    interview.refresh_from_db()
-    # FIXME: Removing interviewer won't emit interview post_save signal
-    # assert interview.status == Interview.COMPLETED
 
 
 @pytest.mark.django_db

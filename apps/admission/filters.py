@@ -6,12 +6,12 @@ from crispy_forms.layout import Div, Field, Layout, Row, Submit
 
 from django import forms
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.forms import SelectMultiple
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from admission.constants import InterviewInvitationStatuses, InterviewSections
+from admission.constants import InterviewInvitationStatuses, InterviewSections, InterviewFormats
 from admission.forms import ApplicantFinalStatusForm
 from admission.models import (
     Applicant,
@@ -105,6 +105,22 @@ class ApplicantFilter(django_filters.FilterSet):
 
 
 class InterviewStreamFilter(django_filters.FilterSet):
+    ApplicantTrack = [
+        ("regular", _("Regular")),
+        ("alternative", _("Alternative"))
+    ]
+    ApplicantWayToInterview = [
+        ("exam", _("Exam")),
+        ("olympiad", _("Olympiad")),
+        ("golden_ticket", _("Golden ticket"))
+    ]
+    ApplicantMisses = [
+        (0, 0),
+        (1, 1),
+        (2, 2),
+        (3, 3),
+        (4, ">3")
+    ]
     campaign = django_filters.ModelChoiceFilter(
         label=_("Campaign"),
         queryset=(
@@ -118,10 +134,22 @@ class InterviewStreamFilter(django_filters.FilterSet):
     section = django_filters.ChoiceFilter(
         label=_("Interview Section"), choices=InterviewSections.choices
     )
+    format = django_filters.ChoiceFilter(
+        label=_("Interview format"), choices=InterviewFormats.choices
+    )
+    track = django_filters.ChoiceFilter(
+        label=_("Applicant track"), choices=ApplicantTrack
+    )
+    way_to_interview = django_filters.ChoiceFilter(
+        label=_("Applicant way to interview"), choices=ApplicantWayToInterview
+    )
+    number_of_misses = django_filters.ChoiceFilter(
+        label=_("Applicant number of missed interviews"), choices=ApplicantMisses
+    )
 
     class Meta:
         model = InterviewStream
-        fields = ["campaign", "section"]
+        fields = ["campaign", "section", "format"]
 
     @property
     def form(self):
@@ -131,15 +159,32 @@ class InterviewStreamFilter(django_filters.FilterSet):
             self._form.helper.form_method = "GET"
             self._form.helper.layout = Layout(
                 Row(
-                    Div("campaign", css_class="col-xs-3"),
-                    Div("section", css_class="col-xs-3"),
-                    Div(
-                        Submit("", _("Filter"), css_class="btn-block -inline-submit"),
-                        css_class="col-xs-2",
-                    ),
+                    Div("campaign", css_class="col-xs-3"), Div("section", css_class="col-xs-3"),
+                        Div("format", css_class="col-xs-3")),
+                Row(
+                    Div("track", css_class="col-xs-3"), Div("way_to_interview", css_class="col-xs-3"),
+                        Div("number_of_misses", css_class="col-xs-3"),
+                        Div(Submit("", _("Filter"), css_class="btn-block -inline-submit"), css_class="col-xs-2"),
                 )
             )
         return self._form
+
+    def filter_queryset(self, queryset):
+        """
+        Filter the queryset with the underlying form's `cleaned_data`. You must
+        call `is_valid()` or `errors` before calling this method.
+
+        This method should be overridden if additional filtering needs to be
+        applied to the queryset before it is cached.
+        """
+        for name, value in self.form.cleaned_data.items():
+            if name not in self.Meta.fields:
+                continue
+            queryset = self.filters[name].filter(queryset, value)
+            assert isinstance(queryset, QuerySet), \
+                "Expected '%s.%s' to return a QuerySet, but got a %s instead." \
+                % (type(self).__name__, name, type(queryset).__name__)
+        return queryset
 
 
 class RequiredSectionInterviewStreamFilter(InterviewStreamFilter):

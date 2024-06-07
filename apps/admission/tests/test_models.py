@@ -63,20 +63,18 @@ def test_unique_interview_section_per_applicant():
     with pytest.raises(ValidationError):
         interview.full_clean()
 
-
+# TODO чел с непправильным статусом должен кидать ошибку при создани интервью, остальные чеки убрать
 @pytest.mark.django_db
 def test_interview_invitation_create():
+    assert False
     """Make sure Applicant status auto updated"""
     a = ApplicantFactory(status=Applicant.PERMIT_TO_EXAM)
     invitation = InterviewInvitationFactory(applicant=a, interview=None)
-    a.refresh_from_db()
-    assert a.status == Applicant.INTERVIEW_TOBE_SCHEDULED
     invitation = InterviewInvitationFactory(
         applicant=a, interview__section=InterviewSections.ALL_IN_ONE
     )
     assert invitation.interview_id is not None
     a.refresh_from_db()
-    assert a.status == Applicant.INTERVIEW_SCHEDULED
     a.status = Applicant.PENDING
     a.interviews.all().delete()
     a.save()
