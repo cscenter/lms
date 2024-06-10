@@ -52,14 +52,16 @@
         <не указано>{% endif %}</dd>
    {% elif field.name == 'level_of_education' %}
       {% if applicant_form.has_diploma.value %}
-      <dd>{{ applicant_form.instance.get_level_of_education_display|default:"<не указано>" }}</dd>
+        <dd>{{ applicant_form.instance.get_level_of_education_display|default:"<не указано>" }}</dd>
       {% endif %}
    {% elif field.name == 'has_diploma' %}
       <dd>{{ applicant_form.instance.get_has_diploma_display|default:"<не указано>" }}</dd>
    {% elif field.name == 'gender' %}
       <dd>{{ applicant_form.instance.get_gender_display|default:"<не указано>" }}</dd>
    {% elif field.name == 'diploma_degree' %}
-      <dd>{{ applicant_form.instance.get_diploma_degree_display|default:"<не указано>" }}</dd>
+      {% if applicant_form.has_diploma.value %}
+        <dd>{{ applicant_form.instance.get_diploma_degree_display|default:"<не указано>" }}</dd>
+      {% endif %}
    {% elif field.name == 'living_place' %}
       <dd>{{ applicant_form.instance.get_living_place_display|default:"<не указано>" }}</dd>
    {% elif field.name == 'university_legacy' %}
