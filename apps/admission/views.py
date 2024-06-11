@@ -967,18 +967,14 @@ class InterviewCommentUpsertView(InterviewerOnlyMixin, GenericModelView):
 
     @transaction.atomic
     def form_valid(self, form):
-        if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
-            _ = form.save()
-            return JsonResponse({"success": "true"})
-        return super().form_valid(form)
+        _ = form.save()
+        return JsonResponse({"success": "true"})
 
     def form_invalid(self, form):
-        if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
-            msg = "<br>".join(m for ms in form.errors.values() for m in ms)
-            r = JsonResponse({"errors": msg})
-            r.status_code = 400
-            return r
-        return super().form_invalid(form)
+        msg = "<br>".join(m for ms in form.errors.values() for m in ms)
+        r = JsonResponse({"errors": msg})
+        r.status_code = 400
+        return r
 
     def get_success_url(self):
         messages.success(

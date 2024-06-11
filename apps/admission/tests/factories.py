@@ -8,7 +8,7 @@ from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime
 from django.db.models.signals import post_save
 from django.utils import timezone
 
-from admission.constants import WHERE_DID_YOU_LEARN, InterviewFormats, ApplicantStatuses
+from admission.constants import WHERE_DID_YOU_LEARN, InterviewFormats, ApplicantStatuses, InterviewSections
 from admission.models import (
     Acceptance,
     Applicant,
@@ -133,7 +133,7 @@ class InterviewFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Interview
 
-    applicant = factory.SubFactory(ApplicantFactory(status=ApplicantStatuses.PASSED_EXAM))
+    applicant = factory.SubFactory(ApplicantFactory, status=ApplicantStatuses.PASSED_EXAM)
     # TODO: replace with FuzzyDate
     date = datetime.datetime.now().replace(tzinfo=pytz.UTC) + datetime.timedelta(days=3)
     venue = factory.SubFactory(

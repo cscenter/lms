@@ -1457,7 +1457,7 @@ class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel
             date_format(self.date, settings.DATE_FORMAT),
             time_format(self.start_at),
             time_format(self.end_at),
-            self.interviewers.all()[0]
+            self.interviewers.all()[0] if self.interviewers.exists() else "-"
         )
 
     def clean(self):

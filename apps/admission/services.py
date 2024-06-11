@@ -73,7 +73,8 @@ def get_ongoing_interview_streams() -> models.QuerySet[InterviewStream]:
 
 
 def get_applicants_for_invitation(
-    *, campaign: Campaign, section: str, format: InterviewFormats, track, way_to_interview, number_of_misses
+    *, campaign: Campaign, section: str, format=None, track=None, way_to_interview=None,
+    number_of_misses=None
 ) -> models.QuerySet[Applicant]:
     """
     Returns all campaign participants available for invitation to the interview

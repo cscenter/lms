@@ -4,7 +4,7 @@ import pytest
 
 from django.core.exceptions import ValidationError
 
-from admission.constants import InterviewSections
+from admission.constants import InterviewSections, InterviewInvitationStatuses, ApplicantStatuses
 from admission.models import Applicant, Contest, Interview
 from admission.tests.factories import (
     ApplicantFactory,
@@ -63,24 +63,43 @@ def test_unique_interview_section_per_applicant():
     with pytest.raises(ValidationError):
         interview.full_clean()
 
-# TODO чел с непправильным статусом должен кидать ошибку при создани интервью, остальные чеки убрать
 @pytest.mark.django_db
 def test_interview_invitation_create():
-    assert False
-    """Make sure Applicant status auto updated"""
-    a = ApplicantFactory(status=Applicant.PERMIT_TO_EXAM)
-    invitation = InterviewInvitationFactory(applicant=a, interview=None)
-    invitation = InterviewInvitationFactory(
-        applicant=a, interview__section=InterviewSections.ALL_IN_ONE
-    )
-    assert invitation.interview_id is not None
+    for status in ApplicantStatuses.values:
+        applicant = ApplicantFactory(status=status)
+        interview = InterviewFactory(
+            applicant=applicant, section=InterviewSections.ALL_IN_ONE,
+        )
+        if status in ApplicantStatuses.RIGHT_BEFORE_INTERVIEW:
+            assert InterviewInvitationFactory(applicant=applicant, interview=interview)
+        else:
+            with pytest.raises(ValidationError):
+                InterviewInvitationFactory(applicant=applicant, interview=interview)
+
+
+@pytest.mark.django_db
+def test_applicant_miss_count():
+    """Make sure Applicant miss_count is incremented after status change"""
+    interview = InterviewFactory(status=Interview.APPROVED, section=InterviewSections.ALL_IN_ONE)
+    a = interview.applicant
+    invitation = InterviewInvitationFactory(applicant=a, interview=interview)
+    assert a.miss_count == 0
+    invitation.status = InterviewInvitationStatuses.DECLINED
+    invitation.save()
     a.refresh_from_db()
-    a.status = Applicant.PENDING
-    a.interviews.all().delete()
-    a.save()
-    invitation = InterviewInvitationFactory(applicant=a, interview=None)
+    assert a.miss_count == 1
+    invitation.status = InterviewInvitationStatuses.NO_RESPONSE
+    invitation.save()
     a.refresh_from_db()
-    assert a.status == Applicant.PENDING
+    assert a.miss_count == 1
+    invitation.status = InterviewInvitationStatuses.EXPIRED
+    invitation.save()
+    a.refresh_from_db()
+    assert a.miss_count == 2
+    interview.status = interview.CANCELED
+    interview.save()
+    a.refresh_from_db()
+    assert a.miss_count == 3
 
 
 @pytest.mark.django_db

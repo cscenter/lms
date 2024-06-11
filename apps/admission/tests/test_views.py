@@ -1,9 +1,12 @@
+import ast
 import csv
 import datetime
 import io
 
 import pytest
 from bs4 import BeautifulSoup
+from django.contrib.messages import get_messages, constants
+from django.core.exceptions import ValidationError
 from post_office.models import Email
 
 from django.utils import formats, timezone
@@ -13,10 +16,10 @@ from admission.constants import (
     INVITATION_EXPIRED_IN_HOURS,
     SESSION_CONFIRMATION_CODE_KEY,
     InterviewFormats,
-    InterviewSections, ApplicantStatuses,
+    InterviewSections, ApplicantStatuses, InterviewInvitationStatuses,
 )
 from admission.forms import InterviewFromStreamForm
-from admission.models import Acceptance, Applicant, Interview, InterviewInvitation
+from admission.models import Acceptance, Applicant, Interview, InterviewInvitation, Comment
 from admission.services import get_meeting_time
 from admission.tests.factories import (
     AcceptanceFactory,
@@ -27,7 +30,7 @@ from admission.tests.factories import (
     InterviewFactory,
     InterviewFormatFactory,
     InterviewInvitationFactory,
-    InterviewStreamFactory,
+    InterviewStreamFactory, InterviewSlotFactory,
 )
 from admission.views import InterviewInvitationCreateView
 from core.models import Branch
@@ -193,22 +196,22 @@ def test_view_interview_list_csv(client, curator, settings):
 
 
 @pytest.mark.django_db
-def test_interview_invitations_create_view(client, settings):
+def test_interview_invitations_create_view_get(client, settings):
     curator = CuratorFactory()
     client.login(curator)
     base_url = reverse("admission:interviews:invitations:send")
     campaign = CampaignFactory(current=True, branch=BranchFactory(code=Branches.SPB))
     applicant = ApplicantFactory(
-        status=ApplicantStatuses.PASSED_EXAM, campaign=campaign
+        status=ApplicantStatuses.PASSED_OLYMPIAD, campaign=campaign
     )
     applicant_2 = ApplicantFactory(
         status=ApplicantStatuses.PASSED_EXAM, campaign=campaign
     )
     applicant_3 = ApplicantFactory(
-        status=ApplicantStatuses.PASSED_EXAM, campaign=campaign
+        status=ApplicantStatuses.REJECTED_BY_EXAM, campaign=campaign
     )
     applicant_4 = ApplicantFactory(
-        status=ApplicantStatuses.PASSED_EXAM, campaign=campaign
+        status=ApplicantStatuses.GOLDEN_TICKET, campaign=campaign
     )
     stream_all_in_one = InterviewStreamFactory(
         campaign=campaign, section=InterviewSections.ALL_IN_ONE
@@ -217,7 +220,7 @@ def test_interview_invitations_create_view(client, settings):
         campaign=campaign, section=InterviewSections.MATH
     )
     interview_all_in_one = InterviewFactory(
-        applicant=applicant_2, section=InterviewSections.ALL_IN_ONE
+        applicant=applicant_2, section=InterviewSections.ALL_IN_ONE,
     )
     interview_math = InterviewFactory(
         applicant=applicant_4, section=InterviewSections.MATH
@@ -239,11 +242,120 @@ def test_interview_invitations_create_view(client, settings):
     response = client.get(url_math)
     soup = BeautifulSoup(response.content, "html.parser")
     assert soup.find(text=applicant.full_name) is not None
-    assert soup.find(text=applicant_2.full_name) is None
+    assert soup.find(text=applicant_2.full_name) is not None
     assert soup.find(text=applicant_3.full_name) is None
     assert soup.find(text=applicant_4.full_name) is None
     assert soup.find(text=stream_all_in_one) is None
     assert soup.find(text=stream_math) is not None
+    # Filter streams by format
+    url_math = f"{base_url}?campaign={campaign.id}&section={InterviewSections.MATH}&format=online"
+    response = client.get(url_math)
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert soup.find(text=stream_math) is None
+    # Streams are not shown if unavaliable
+    InterviewSlotFactory(interview=interview_math, stream=stream_math, start_at=stream_math.start_at,
+                         end_at=stream_math.end_at)
+    stream_math.refresh_from_db()
+    stream_math.interviewers_max=1
+    stream_math.save()
+    url_math = f"{base_url}?campaign={campaign.id}&section={InterviewSections.MATH}"
+    response = client.get(url_math)
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert soup.find(text=stream_math) is None
+    inv = InterviewInvitationFactory(applicant=applicant_2, status=InterviewInvitationStatuses.NO_RESPONSE, interview=interview_math)
+    inv.streams.add(stream_all_in_one)
+    inv.save()
+    stream_all_in_one.interviewers_max=1
+    stream_all_in_one.save()
+    url_all_in_one = f"{base_url}?campaign={campaign.id}&section={InterviewSections.ALL_IN_ONE}"
+    response = client.get(url_all_in_one)
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert soup.find(text=stream_all_in_one) is None
+
+@pytest.mark.django_db
+def test_interview_invitations_create_view_post(client, settings):
+    curator = CuratorFactory()
+    client.login(curator)
+    base_url = reverse("admission:interviews:invitations:send")
+    campaign = CampaignFactory(current=True)
+    applicants = [ApplicantFactory(campaign=campaign, status=ApplicantStatuses.PASSED_EXAM) for _ in range(4)]
+
+    stream_1 = InterviewStreamFactory(
+        campaign=campaign, section=InterviewSections.ALL_IN_ONE, interviewers_max=1
+    )
+    stream_2 = InterviewStreamFactory(
+        campaign=campaign, section=InterviewSections.ALL_IN_ONE, interviewers_max=2
+    )
+    url = f"{base_url}?campaign={campaign.id}&section={InterviewSections.ALL_IN_ONE}"
+    data = {
+        "streams": [stream_1.id, stream_2.id],
+        "ids": [applicant.id for applicant in applicants]
+    }
+    response = client.post(url, data)
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert messages[0].level == constants.ERROR
+    assert messages[0].message == "Суммарное количество слотов выбранных потоков меньше, чем количество выбранных абитуриентов."
+
+@pytest.mark.django_db
+def test_interview_comment_post(client, settings):
+    curator = CuratorFactory()
+    client.login(curator)
+    interview = InterviewFactory(section=InterviewSections.ALL_IN_ONE, status=Interview.APPROVED)
+    url = reverse("admission:interviews:comment", args=[interview.id])
+    data = {
+        "is_cancelled": "on",
+        "score": "4",
+        "text": "test",
+        "interview": interview.id,
+        "interviewer": curator.id
+    }
+    client.post(url, data)
+
+    interview.refresh_from_db()
+    assert not Comment.objects.filter(interview=interview).exists()
+    assert interview.status == interview.CANCELED
+
+    data = {
+        "score": "",
+        "text": "",
+        "interview": interview.id,
+        "interviewer": curator.id
+    }
+
+    client.post(url, data)
+
+    interview.refresh_from_db()
+    assert not Comment.objects.filter(interview=interview).exists()
+    assert interview.status == interview.APPROVED
+
+    interview.status=interview.DEFERRED
+    interview.save()
+
+    data = {
+        "is_cancelled": "on",
+        "score": "4",
+        "text": "test",
+        "interview": interview.id,
+        "interviewer": curator.id
+    }
+    response = client.post(url, data)
+    json = response.json()
+    assert "errors" in json
+    assert json["errors"] == 'Интервью не может быть помечено как отмененное, если оно не имеет статус "Согласовано"'
+    assert not Comment.objects.filter(interview=interview).exists()
+    assert interview.status == interview.DEFERRED
+
+    data = {
+        "score": "4",
+        "text": "test",
+        "interview": interview.id,
+        "interviewer": curator.id
+    }
+    client.post(url, data)
+    assert Comment.objects.filter(interview=interview, score=4, text="test").exists()
+    assert interview.status == interview.DEFERRED
+
 
 
 @pytest.mark.django_db
