@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-07 08:34+0000\n"
-"PO-Revision-Date: 2024-06-07 08:35+0000\n"
+"PO-Revision-Date: 2024-06-11 08:03+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -722,7 +722,7 @@ msgstr "Поступает на альтернативный трек"
 
 #: apps/admission/models.py:433
 msgid "Alternative track info"
-msgstr "Информация для алтернативного трека"
+msgstr "Информация для альтернативного трека"
 
 #: apps/admission/models.py:434
 msgid "Applicant|alternative_track_info"
