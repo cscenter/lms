@@ -204,7 +204,7 @@ def test_student_search_by_types(client, curator, search_url, settings):
     # Empty results if no query provided
     response = client.get(search_url)
     assert response.json()["count"] == 0
-    # And without any value it still empty
+    # And without any value it is still empty
     response = client.get("{}?{}".format(search_url, "types="))
     assert response.json()["count"] == 0
     response = client.get("{}?{}".format(search_url, "status=studying&types="))
@@ -218,6 +218,34 @@ def test_student_search_by_types(client, curator, search_url, settings):
     response = client.get(url)
     assert response.json()["count"] == len(students)
 
+
+@pytest.mark.django_db
+def test_student_search_by_graduate_years(client, curator, search_url, settings):
+    client.login(curator)
+    students_none = StudentFactory.create_batch(2)
+    students_2025 = StudentFactory.create_batch(
+        3,
+        student_profile__status=StudentStatuses.GRADUATE,
+        student_profile__graduation_year=2025)
+    students_2024 = VolunteerFactory.create_batch(
+        4,
+        student_profile__status=StudentStatuses.WILL_GRADUATE,
+        student_profile__graduation_year=2024)
+    # Empty results if no query provided
+    response = client.get(search_url)
+    assert response.json()["count"] == 0
+    # And without any value it is still empty
+    response = client.get("{}?{}".format(search_url, "uni_graduation_year="))
+    assert response.json()["count"] == 0
+    response = client.get("{}?{}".format(search_url, "uni_graduation_year=2025"))
+    json_data = response.json()
+    assert json_data["count"] == len(students_2025)
+    response = client.get("{}?{}".format(search_url, "uni_graduation_year=2024,0"))
+    json_data = response.json()
+    assert json_data["count"] == len(students_2024) + len(students_none)
+    response = client.get("{}?{}".format(search_url, "uni_graduation_year=0,2024,2025"))
+    json_data = response.json()
+    assert json_data["count"] == len(students_none) + len(students_2024) + len(students_2025)
 
 @pytest.mark.django_db
 def test_student_search_by_branch(client, curator, search_url):

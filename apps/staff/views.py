@@ -1,6 +1,7 @@
 import datetime
 from collections import defaultdict
 
+from django.utils import timezone
 from django_filters import FilterSet
 from django_filters.views import BaseFilterView
 from rest_framework import serializers
@@ -121,6 +122,14 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
             "status": StudentStatuses.values,
             "cnt_enrollments": range(StudentFilter.ENROLLMENTS_MAX + 1),
             "is_paid_basis": [("1", "Да"), ("0", "Нет")],
+            "uni_graduation_year": (
+                StudentProfile.objects.filter(
+                    site=self.request.site, graduation_year__isnull=False
+                )
+                .values_list("graduation_year", flat=True)
+                .order_by("graduation_year")
+                .distinct()
+            )
         }
         return context
 

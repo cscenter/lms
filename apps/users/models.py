@@ -828,6 +828,12 @@ class StudentProfile(TimeStampedModel):
         help_text=_("Passport, consent for processing personal data, "
                     "diploma (optional)"),
         default=False)
+    graduation_year = models.PositiveSmallIntegerField(
+        _("StudentProfile|graduation_year"),
+        help_text=_("University graduation year for YDS graduates without diploma"),
+        validators=[MinValueValidator(2000)],
+        blank=True,
+        null=True)
     is_paid_basis = models.BooleanField(
         verbose_name=_("Paid Basis"),
         default=False)
@@ -903,10 +909,12 @@ class StudentProfile(TimeStampedModel):
             instance_memoize.delete_cache(self.user)
 
     def clean(self):
-        if self.type == StudentTypes.INVITED:
-            forbidden_statuses = {StudentStatuses.GRADUATE, StudentStatuses.WILL_GRADUATE}
-            if self.status in forbidden_statuses:
-                raise ValidationError(f"Status {self.status} is forbidden for invited students")
+        graduate_statuses = {StudentStatuses.GRADUATE, StudentStatuses.WILL_GRADUATE}
+        if self.type == StudentTypes.INVITED and self.status in graduate_statuses:
+            raise ValidationError(f"Status {self.status} is forbidden for invited students")
+        if self.graduation_year is not None and self.status not in graduate_statuses:
+            raise ValidationError(f'Для выставления года окончания университета статус должен быть один из следующих: '
+                                  f'{[StudentStatuses.get_choice(value).label for value in graduate_statuses]}')
         # TODO: move to the service that creates model object, don't leave non-relational model fields here
         established = self.branch.established
         if self.year_of_admission and self.year_of_admission < established:
