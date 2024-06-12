@@ -64,6 +64,7 @@
                               <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.full_name }}"
                                    alt="{{ interviewer.full_name }}" src="{{ interviewer.photo }}" width="40" />
                             </a>
+                          {{ interviewer.last_name }}
                           {% else %}
                             <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.full_name }}">
                               {{ interviewer.full_name|slice(":1") }}</div>
@@ -86,9 +87,9 @@
             <tr>
               <th>Поток</th>
               <th>Секция</th>
-              <th>Адрес</th>
-              <th>Свободных слотов</th>
-              <th>Актуальных приглашений без&nbsp;ответа</th>
+              <th>Формат</th>
+              <th>Слоты</th>
+              <th>Пригл. без&nbsp;ответа</th>
               <th>Собеседующие</th>
             </tr>
             </thead>
@@ -100,8 +101,8 @@
                     {{ interview_stream.start_at|date("H:i") }}-{{ interview_stream.end_at|date("H:i") }}
                   </td>
                   <td>{{ interview_stream.get_section_display() }}</td>
-                  <td>{{ interview_stream.venue.address|default("-", True) }}</td>
-                  <td>{{ interview_stream.slots_free_count }}/{{ interview_stream.slots_count }}</td>
+                  <td>{{ interview_stream.get_format_display() }}</td>
+                  <td>{{ interview_stream.slots_free_count }}/{{ interview_stream.max_slots }}</td>
                   <td>{{ interview_stream.invitations_total }}</td>
                   <td>
                     <ul class='members'>
@@ -112,10 +113,12 @@
                               <a target="_blank" href="{{ interviewer.get_absolute_url() }}">
                                 <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name() }}"
                                      alt="{{ interviewer.get_full_name() }}" src="{{ im.url }}" width="40" /></a>
+                              {{ interviewer.last_name }}
                             {% else %}
                               <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name() }}">
                                 {{ interviewer.get_full_name()|slice(":1") }}
                               </div>
+                              {{ interviewer.last_name }}
                             {% endif %}
                           {% endwith -%}
                         </li>

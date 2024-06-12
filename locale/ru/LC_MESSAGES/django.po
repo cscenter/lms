@@ -270,12 +270,13 @@ msgstr "Описание"
 msgid "Branch|Description"
 msgstr "Общее описание, правила обучения"
 
-#: apps/core/models.py:291 apps/courses/models.py:61
-#: apps/courses/models.py:235 apps/courses/models.py:649
-#: apps/learning/admin.py:67 apps/learning/gradebook/views.py:231
-#: apps/learning/models.py:77 apps/learning/models.py:522
-#: apps/learning/models.py:1054 apps/library/models.py:66
-#: apps/study_programs/models.py:61
+
+#: apps/core/models.py:291 apps/courses/models.py:61 apps/courses/models.py:235
+#: apps/courses/models.py:649 apps/learning/admin.py:67
+#: apps/learning/gradebook/views.py:231 apps/learning/models.py:77
+#: apps/learning/models.py:522 apps/learning/models.py:1054
+#: apps/library/models.py:66 apps/study_programs/models.py:61
+
 #: apps/templates/learning/invitation/complete_profile.html:23
 #: apps/users/models.py:176 apps/users/models.py:358 apps/users/models.py:802
 #: lms/jinja2/lms/courses/meta_detail.html:27

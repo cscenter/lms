@@ -8,7 +8,7 @@
 {% load floatdot from core_tags %}
 {% load render_bundle from webpack_loader %}
 
-{% block title %}Собеседования - CSC{% endblock title %}
+{% block title %}Собеседования - YDS{% endblock title %}
 
 {% block body_attrs %} class="gray" data-init-sections="datetimepickers,selectpickers,tooltips"{% endblock body_attrs %}
 
@@ -66,6 +66,7 @@
                                 <span style="position: absolute; text-indent: -10000px;">{{ interviewer.get_full_name }}</span>
                               </a>
                             {% enduser_thumbnail %}
+                          {{ interviewer.last_name }}
                           {% else %}
                             <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name }}">
                               {{ interviewer.first_name|slice:":1" }} {{ interviewer.last_name|slice:":1" }}

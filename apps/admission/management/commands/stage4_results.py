@@ -34,7 +34,8 @@ class Command(
     Generates emails with final decision based on applicant status.
 
     Example:
-        ./manage.py stage4_results --branch=nsk --template-pattern="csc-admission-{year}-{branch_code}-results-{status}" -f="status__in=['volunteer']"
+        ./manage.py stage4_results --branch=nsk --template-pattern="csc-admission-{year}-{branch_code}-results-{
+        status}" -f="status__in=['accept']"
     """
 
     def add_arguments(self, parser):
@@ -48,7 +49,7 @@ class Command(
             metavar="STATUS",
             default=INVITE_TO_REGISTRATION,
             help="Invite participants with statuses to create student profile. "
-            "Examples: --invite waiting_for_payment accept. Default: %(default)s)",
+            "Examples: --invite accept_if accept. Default: %(default)s)",
             choices=ApplicantStatuses.values.keys(),
         )
 

@@ -87,7 +87,7 @@ class InterviewStreamInvitationForm(forms.Form):
 
     def __init__(self, streams, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["streams"].queryset = streams
+        self.fields["streams"].queryset = streams.prefetch_related('interviewers')
         self.helper = FormHelper(self)
         self.helper.form_tag = False
         self.helper.layout = Layout(
@@ -98,7 +98,7 @@ class InterviewStreamInvitationForm(forms.Form):
                         "create-invitation",
                         _("Пригласить на собеседование"),
                         css_class="btn btn-primary btn-outline "
-                        "btn-block -inline-submit",
+                                  "btn-block -inline-submit",
                     ),
                     css_class="col-xs-4",
                 ),
@@ -204,6 +204,7 @@ class InterviewCommentForm(forms.ModelForm):
             "interview": forms.HiddenInput(),
             "interviewer": forms.HiddenInput(),
             "score": forms.Select(),
+            "is_cancelled": forms.CheckboxInput(),
             "text": UbereditorWidget(
                 attrs={
                     "data-local-persist": "true",
@@ -225,6 +226,12 @@ class InterviewCommentForm(forms.ModelForm):
             "interviewer": self.interviewer,
         }
         super().__init__(**kwargs)
+        self.fields["is_cancelled"] = forms.BooleanField(
+            required=False,
+            label=_("Is Cancelled"),
+            initial=self.interview.status == interview.CANCELED,
+        )
+        self.fields["score"].required = False
         self.fields["score"].label = "Моя оценка"
         score_choices = (
             ("", filters_settings.EMPTY_CHOICE_LABEL),
@@ -235,7 +242,8 @@ class InterviewCommentForm(forms.ModelForm):
         self.fields["text"].label = "Комментарий"
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
-            Div("score"),
+            Div(Div("score", css_class="col-xs-8"), Div("is_cancelled", css_class="col-xs-4", style="top: 12px;"),
+                css_class="row"),
             Div("text"),
             "interview",
             "interviewer",
@@ -263,6 +271,36 @@ class InterviewCommentForm(forms.ModelForm):
         if interview != self.interview:
             raise ValidationError("Submitted interview id not match GET-value")
         return interview
+
+    def clean(self):
+        cleaned_data = super().clean()
+        is_cancelled = cleaned_data.get('is_cancelled')
+        score = cleaned_data.get('score')
+
+        if is_cancelled and self.interview.status not in (self.interview.CANCELED, self.interview.APPROVED):
+            self.add_error('is_cancelled', _('Интервью не может быть помечено как отмененное, если оно не имеет '
+                                             'статус "Согласовано"'))
+
+        if (is_cancelled and self.interview.status == self.interview.CANCELED) or \
+            (not is_cancelled and self.interview.status != self.interview.CANCELED) \
+            and not score:
+            self.add_error('score', self.fields['score'].error_messages['required'])
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        comment = super().save(commit=False)
+        is_cancelled = self.cleaned_data['is_cancelled']
+        if commit:
+            if is_cancelled and self.interview.status == self.interview.APPROVED:
+                self.interview.status = self.interview.CANCELED
+                self.interview.save()
+            elif not is_cancelled and self.interview.status == self.interview.CANCELED:
+                self.interview.status = self.interview.APPROVED
+                self.interview.save()
+            else:
+                comment.save()
+        return comment
 
 
 class ApplicantReadOnlyForm(ReadOnlyFieldsMixin, forms.ModelForm):
@@ -334,10 +372,8 @@ class ApplicantFinalStatusForm(ModelForm):
     FINAL_CHOICES = (
         ("", filters_settings.EMPTY_CHOICE_LABEL),
         (ApplicantStatuses.ACCEPT, "Берём"),
-        (ApplicantStatuses.VOLUNTEER, "Берём в вольные слушатели"),
         (ApplicantStatuses.ACCEPT_IF, "Берём с условием"),
         (ApplicantStatuses.ACCEPT_PAID, "Платное"),
-        (ApplicantStatuses.WAITING_FOR_PAYMENT, "Ожидаем оплаты"),
         (ApplicantStatuses.REJECTED_BY_INTERVIEW, "Не берём"),
         (
             ApplicantStatuses.REJECTED_BY_INTERVIEW_WITH_BONUS,
@@ -370,7 +406,7 @@ class ApplicantFinalStatusForm(ModelForm):
 
 class InterviewStreamChangeForm(ModelForm):
     class Meta:
-        model = InterviewSlot
+        model = InterviewStream
         fields = "__all__"
 
 
@@ -411,9 +447,10 @@ class ConfirmationForm(forms.ModelForm):
     telegram_username = forms.CharField(
         label="Имя пользователя в Telegram",
         help_text="@&lt;<b>username</b>&gt; в настройках профиля Telegram."
-        "<br>Поставьте прочерк «-», если аккаунт отсутствует.",
+                  "<br>Поставьте прочерк «-», если аккаунт отсутствует.",
         required=True,
     )
+
     # Student Profile data
 
     class Meta:

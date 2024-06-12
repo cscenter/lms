@@ -36,7 +36,7 @@ def main():
                 assert created
             (Applicant.objects
              .filter(pk__in=exam_passed_pk)
-             .update(status=ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED))
+             .update(status=ApplicantStatuses.PASSED_EXAM))
             (Applicant.objects
              .filter(pk__in=exam_failed_pk)
              .update(status=ApplicantStatuses.REJECTED_BY_EXAM))

@@ -7,12 +7,13 @@ from django.db.models import Q
 from admission.models import Applicant
 
 from ._utils import CurrentCampaignMixin
+from ...constants import ApplicantStatuses
 
 
 class Command(CurrentCampaignMixin, BaseCommand):
     help = """
     Updates applicant status based on exam result:
-        INTERVIEW_TOBE_SCHEDULED - exam score >= Campaign.exam_score_pass
+        PASSED_EXAM - exam score >= Campaign.exam_score_pass
         REJECTED_BY_EXAM - exam score <= `reject_value`
         PENDING - exam score in (reject_value, exam_score_pass) range
 
@@ -32,7 +33,7 @@ class Command(CurrentCampaignMixin, BaseCommand):
             "--passing_score",
             type=Decimal,
             help="Applicant with score: "
-                 "passing_score <= score < cheater_score will be updated to INTERVIEW_TOBE_SCHEDULED status",
+                 "passing_score <= score < cheater_score will be updated to PERMIT_TO_EXAM status",
             dest='passing_score',
         )
         parser.add_argument(
@@ -65,7 +66,7 @@ class Command(CurrentCampaignMixin, BaseCommand):
         self.stdout.write("Минимальный шаг оценки - 0.01")
         without_status_total = applicants.filter(status__isnull=True).count()
         self.stdout.write(f"Applicants without status: {without_status_total}")
-        in_pending_state_total = applicants.filter(status=Applicant.PENDING).count()
+        in_pending_state_total = applicants.filter(status=ApplicantStatuses.PENDING).count()
         self.stdout.write(
             f"There are {in_pending_state_total} applicants with PENDING status."
         )
@@ -103,12 +104,12 @@ class Command(CurrentCampaignMixin, BaseCommand):
         self.stdout.write("Total applicants: {}".format(applicants.count()))
 
         cheaters_test = applicants.filter(
-            status=Applicant.REJECTED_BY_CHEATING
+            status=ApplicantStatuses.REJECTED_BY_CHEATING
         ).count()
 
         # Do not include cheaters here
         rejects_by_test_total = applicants.filter(
-            status=Applicant.REJECTED_BY_TEST
+            status=ApplicantStatuses.REJECTED_BY_TEST
         ).count()
 
         with transaction.atomic():
@@ -118,57 +119,47 @@ class Command(CurrentCampaignMixin, BaseCommand):
                 )
                 .filter(
                     status__in=[
-                        Applicant.PENDING,
-                        Applicant.PERMIT_TO_EXAM,
-                        Applicant.REJECTED_BY_EXAM,
+                        ApplicantStatuses.FAILED_OLYMPIAD,
+                        ApplicantStatuses.PERMIT_TO_EXAM
                     ]
-                )
-                .exclude(exam__score__gte=cheater_score)
-                .update(status=Applicant.REJECTED_BY_EXAM)
+                ).exclude(exam__score__gte=cheater_score)
+                .update(status=ApplicantStatuses.REJECTED_BY_EXAM)
             )
 
             applicants.filter(
                 exam__score__gte=exam_score_pass,
                 exam__score__lt=cheater_score,
                 status__in=[
-                    Applicant.PENDING,
-                    Applicant.PERMIT_TO_EXAM,
-                    Applicant.INTERVIEW_TOBE_SCHEDULED,
-                ],
-            ).update(status=Applicant.INTERVIEW_TOBE_SCHEDULED)
+                    ApplicantStatuses.FAILED_OLYMPIAD,
+                    ApplicantStatuses.PERMIT_TO_EXAM,
+                ]
+            ).update(status=ApplicantStatuses.PASSED_EXAM)
             exam_cheaters_total = applicants.filter(
                 exam__score__gte=cheater_score,
                 status__in=[
-                    Applicant.PENDING,
-                    Applicant.PERMIT_TO_EXAM,
-                    Applicant.INTERVIEW_TOBE_SCHEDULED,
-                ],
-            ).update(status=Applicant.REJECTED_BY_EXAM_CHEATING)
+                    ApplicantStatuses.FAILED_OLYMPIAD,
+                    ApplicantStatuses.PERMIT_TO_EXAM,
+                ]
+            ).update(status=ApplicantStatuses.REJECTED_BY_EXAM_CHEATING)
             # Some applicants could have exam score < passing score, but they
             # still pass to the next stage (by manual application form check)
             # Also count those who passed the interview phase and waiting
             # for the final decision
             pass_exam_total = applicants.filter(
-                status__in=[
-                    Applicant.INTERVIEW_TOBE_SCHEDULED,
-                    Applicant.INTERVIEW_SCHEDULED,
-                    Applicant.INTERVIEW_COMPLETED,
-                    Applicant.REJECTED_BY_INTERVIEW,
-                ]
+                status__in=ApplicantStatuses.RIGHT_BEFORE_INTERVIEW
             ).count()
 
-            pending_total = (
-                applicants.filter(
-                    exam__score__gt=reject_value,
-                    exam__score__lt=exam_score_pass,
-                )
-                .filter(status__in=[Applicant.PERMIT_TO_EXAM, Applicant.PENDING])
-                .update(status=Applicant.PENDING)
-            )
+            pending_total = applicants.filter(
+                exam__score__gt=reject_value,
+                exam__score__lt=exam_score_pass,
+            ).filter(status__in=[
+                ApplicantStatuses.FAILED_OLYMPIAD,
+                ApplicantStatuses.PERMIT_TO_EXAM
+            ]).update(status=ApplicantStatuses.PENDING)
 
             # Applicants who skipped the exam could be resolved
             # with THEY_REFUSED or REJECTED_BY_EXAM status
-            refused_total = applicants.filter(status=Applicant.THEY_REFUSED).count()
+            refused_total = applicants.filter(status=ApplicantStatuses.THEY_REFUSED).count()
 
             total = (
                 cheaters_test,

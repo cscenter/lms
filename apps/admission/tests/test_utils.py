@@ -6,7 +6,7 @@ from post_office.models import Email, EmailTemplate
 
 from django.utils.timezone import now
 
-from admission.constants import INVITATION_EXPIRED_IN_HOURS, InterviewSections
+from admission.constants import INVITATION_EXPIRED_IN_HOURS, InterviewSections, ApplicantStatuses
 from admission.models import Interview, InterviewInvitation, InterviewSlot
 from admission.services import EmailQueueService, create_invitation
 from admission.tests.factories import (
@@ -62,7 +62,7 @@ def test_create_invitation(mocker):
         with_assignments=False,
         campaign__current=True,
     )
-    applicant = ApplicantFactory(campaign=stream.campaign)
+    applicant = ApplicantFactory(campaign=stream.campaign, status=ApplicantStatuses.PASSED_EXAM)
     tz = stream.venue.get_timezone()
     tomorrow_begin = datetime.datetime.combine(tomorrow, datetime.datetime.min.time())
     tomorrow_begin_local = tz.localize(tomorrow_begin)

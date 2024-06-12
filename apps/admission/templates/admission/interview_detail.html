@@ -51,7 +51,6 @@
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="comment" role="tabpanel">
-          {{ form.errors }}
           {% crispy comment_form comment_form.helper %}
           <div class="clearfix"></div>
         </div>
@@ -61,7 +60,7 @@
               <dd><a href="{{ applicant_form.instance.get_absolute_url }}" target="_blank">#{{ applicant_form.instance.pk }}</a></dd>
               <dt>Статус анкеты:</dt>
               <dd>{{ applicant_form.instance.get_status_display|default_if_none:"<не указано>" }}</dd>
-            {% include "admission/_applicant_form.html" with applicant_form=applicant_form %}
+            {% include "admission/_applicant_form_interviewer.html" with applicant_form=applicant_form applicant=applicant%}
           </dl>
         </div>
         <div class="tab-pane" id="test-results" role="tabpanel">

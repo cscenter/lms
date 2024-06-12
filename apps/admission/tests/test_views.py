@@ -1,9 +1,12 @@
+import ast
 import csv
 import datetime
 import io
 
 import pytest
 from bs4 import BeautifulSoup
+from django.contrib.messages import get_messages, constants
+from django.core.exceptions import ValidationError
 from post_office.models import Email
 
 from django.utils import formats, timezone
@@ -13,10 +16,10 @@ from admission.constants import (
     INVITATION_EXPIRED_IN_HOURS,
     SESSION_CONFIRMATION_CODE_KEY,
     InterviewFormats,
-    InterviewSections,
+    InterviewSections, ApplicantStatuses, InterviewInvitationStatuses,
 )
 from admission.forms import InterviewFromStreamForm
-from admission.models import Acceptance, Applicant, Interview, InterviewInvitation
+from admission.models import Acceptance, Applicant, Interview, InterviewInvitation, Comment
 from admission.services import get_meeting_time
 from admission.tests.factories import (
     AcceptanceFactory,
@@ -27,7 +30,7 @@ from admission.tests.factories import (
     InterviewFactory,
     InterviewFormatFactory,
     InterviewInvitationFactory,
-    InterviewStreamFactory,
+    InterviewStreamFactory, InterviewSlotFactory,
 )
 from admission.views import InterviewInvitationCreateView
 from core.models import Branch
@@ -59,7 +62,6 @@ def test_simple_interviews_list(client, curator, settings):
         date=today_local_nsk,
         section=InterviewSections.ALL_IN_ONE,
         status=Interview.COMPLETED,
-        applicant__status=Applicant.INTERVIEW_COMPLETED,
         applicant__campaign=campaign,
     )
     interview2.date = today_local_nsk + datetime.timedelta(days=1)
@@ -126,7 +128,6 @@ def test_view_interview_list_csv_security(
         date=today_local_spb,
         section=InterviewSections.ALL_IN_ONE,
         status=Interview.COMPLETED,
-        applicant__status=Applicant.INTERVIEW_COMPLETED,
         applicant__campaign=campaign,
     )
     client.login(interviewer)
@@ -158,7 +159,6 @@ def test_view_interview_list_csv(client, curator, settings):
         date=today_local_spb,
         section=InterviewSections.ALL_IN_ONE,
         status=Interview.COMPLETED,
-        applicant__status=Applicant.INTERVIEW_COMPLETED,
         applicant__campaign=campaign,
     )
     interview2.date += datetime.timedelta(hours=23, minutes=59, seconds=59)
@@ -196,22 +196,22 @@ def test_view_interview_list_csv(client, curator, settings):
 
 
 @pytest.mark.django_db
-def test_interview_invitations_create_view(client, settings):
+def test_interview_invitations_create_view_get(client, settings):
     curator = CuratorFactory()
     client.login(curator)
     base_url = reverse("admission:interviews:invitations:send")
     campaign = CampaignFactory(current=True, branch=BranchFactory(code=Branches.SPB))
     applicant = ApplicantFactory(
-        status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign
+        status=ApplicantStatuses.PASSED_OLYMPIAD, campaign=campaign
     )
     applicant_2 = ApplicantFactory(
-        status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign
+        status=ApplicantStatuses.PASSED_EXAM, campaign=campaign
     )
     applicant_3 = ApplicantFactory(
-        status=Applicant.INTERVIEW_SCHEDULED, campaign=campaign
+        status=ApplicantStatuses.REJECTED_BY_EXAM, campaign=campaign
     )
     applicant_4 = ApplicantFactory(
-        status=Applicant.INTERVIEW_TOBE_SCHEDULED, campaign=campaign
+        status=ApplicantStatuses.GOLDEN_TICKET, campaign=campaign
     )
     stream_all_in_one = InterviewStreamFactory(
         campaign=campaign, section=InterviewSections.ALL_IN_ONE
@@ -220,7 +220,7 @@ def test_interview_invitations_create_view(client, settings):
         campaign=campaign, section=InterviewSections.MATH
     )
     interview_all_in_one = InterviewFactory(
-        applicant=applicant_2, section=InterviewSections.ALL_IN_ONE
+        applicant=applicant_2, section=InterviewSections.ALL_IN_ONE,
     )
     interview_math = InterviewFactory(
         applicant=applicant_4, section=InterviewSections.MATH
@@ -242,49 +242,120 @@ def test_interview_invitations_create_view(client, settings):
     response = client.get(url_math)
     soup = BeautifulSoup(response.content, "html.parser")
     assert soup.find(text=applicant.full_name) is not None
-    assert soup.find(text=applicant_2.full_name) is None
+    assert soup.find(text=applicant_2.full_name) is not None
     assert soup.find(text=applicant_3.full_name) is None
     assert soup.find(text=applicant_4.full_name) is None
     assert soup.find(text=stream_all_in_one) is None
     assert soup.find(text=stream_math) is not None
-
+    # Filter streams by format
+    url_math = f"{base_url}?campaign={campaign.id}&section={InterviewSections.MATH}&format=online"
+    response = client.get(url_math)
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert soup.find(text=stream_math) is None
+    # Streams are not shown if unavaliable
+    InterviewSlotFactory(interview=interview_math, stream=stream_math, start_at=stream_math.start_at,
+                         end_at=stream_math.end_at)
+    stream_math.refresh_from_db()
+    stream_math.interviewers_max=1
+    stream_math.save()
+    url_math = f"{base_url}?campaign={campaign.id}&section={InterviewSections.MATH}"
+    response = client.get(url_math)
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert soup.find(text=stream_math) is None
+    inv = InterviewInvitationFactory(applicant=applicant_2, status=InterviewInvitationStatuses.NO_RESPONSE, interview=interview_math)
+    inv.streams.add(stream_all_in_one)
+    inv.save()
+    stream_all_in_one.interviewers_max=1
+    stream_all_in_one.save()
+    url_all_in_one = f"{base_url}?campaign={campaign.id}&section={InterviewSections.ALL_IN_ONE}"
+    response = client.get(url_all_in_one)
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert soup.find(text=stream_all_in_one) is None
 
 @pytest.mark.django_db
-def test_autoupdate_applicant_status_canceled():
-    applicant = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED)
-    # Default interview status is `APPROVAL`
-    interview = InterviewFactory(
-        applicant=applicant, section=InterviewSections.ALL_IN_ONE
-    )
-    # applicant status must be updated to `scheduled`
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_SCHEDULED
-    interview.status = Interview.CANCELED
-    interview.save()
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_TOBE_SCHEDULED
-    # Autoupdate for applicant status works each time you set approval/approved
-    # and applicant status not in final state
-    interview.status = Interview.APPROVAL
-    interview.save()
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_SCHEDULED
+def test_interview_invitations_create_view_post(client, settings):
+    curator = CuratorFactory()
+    client.login(curator)
+    base_url = reverse("admission:interviews:invitations:send")
+    campaign = CampaignFactory(current=True)
+    applicants = [ApplicantFactory(campaign=campaign, status=ApplicantStatuses.PASSED_EXAM) for _ in range(4)]
 
+    stream_1 = InterviewStreamFactory(
+        campaign=campaign, section=InterviewSections.ALL_IN_ONE, interviewers_max=1
+    )
+    stream_2 = InterviewStreamFactory(
+        campaign=campaign, section=InterviewSections.ALL_IN_ONE, interviewers_max=2
+    )
+    url = f"{base_url}?campaign={campaign.id}&section={InterviewSections.ALL_IN_ONE}"
+    data = {
+        "streams": [stream_1.id, stream_2.id],
+        "ids": [applicant.id for applicant in applicants]
+    }
+    response = client.post(url, data)
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) == 1
+    assert messages[0].level == constants.ERROR
+    assert messages[0].message == "Суммарное количество слотов выбранных потоков меньше, чем количество выбранных абитуриентов."
 
 @pytest.mark.django_db
-def test_auto_update_applicant_status_deferred():
-    applicant = ApplicantFactory(status=Applicant.INTERVIEW_TOBE_SCHEDULED)
-    interview = InterviewFactory(
-        applicant=applicant,
-        status=Interview.APPROVED,
-        section=InterviewSections.ALL_IN_ONE,
-    )
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_SCHEDULED
-    interview.status = Interview.DEFERRED
+def test_interview_comment_post(client, settings):
+    curator = CuratorFactory()
+    client.login(curator)
+    interview = InterviewFactory(section=InterviewSections.ALL_IN_ONE, status=Interview.APPROVED)
+    url = reverse("admission:interviews:comment", args=[interview.id])
+    data = {
+        "is_cancelled": "on",
+        "score": "4",
+        "text": "test",
+        "interview": interview.id,
+        "interviewer": curator.id
+    }
+    client.post(url, data)
+
+    interview.refresh_from_db()
+    assert not Comment.objects.filter(interview=interview).exists()
+    assert interview.status == interview.CANCELED
+
+    data = {
+        "score": "",
+        "text": "",
+        "interview": interview.id,
+        "interviewer": curator.id
+    }
+
+    client.post(url, data)
+
+    interview.refresh_from_db()
+    assert not Comment.objects.filter(interview=interview).exists()
+    assert interview.status == interview.APPROVED
+
+    interview.status=interview.DEFERRED
     interview.save()
-    applicant.refresh_from_db()
-    assert applicant.status == Applicant.INTERVIEW_TOBE_SCHEDULED
+
+    data = {
+        "is_cancelled": "on",
+        "score": "4",
+        "text": "test",
+        "interview": interview.id,
+        "interviewer": curator.id
+    }
+    response = client.post(url, data)
+    json = response.json()
+    assert "errors" in json
+    assert json["errors"] == 'Интервью не может быть помечено как отмененное, если оно не имеет статус "Согласовано"'
+    assert not Comment.objects.filter(interview=interview).exists()
+    assert interview.status == interview.DEFERRED
+
+    data = {
+        "score": "4",
+        "text": "test",
+        "interview": interview.id,
+        "interviewer": curator.id
+    }
+    client.post(url, data)
+    assert Comment.objects.filter(interview=interview, score=4, text="test").exists()
+    assert interview.status == interview.DEFERRED
+
 
 
 @pytest.mark.django_db
@@ -299,7 +370,7 @@ def test_autocomplete_interview():
         section=InterviewSections.ALL_IN_ONE,
         interviewers=[interviewer1, interviewer2],
     )
-    assert interview.applicant.status == Applicant.INTERVIEW_SCHEDULED
+    assert interview.applicant.status == ApplicantStatuses.PASSED_EXAM
     CommentFactory(interview=interview, interviewer=interviewer1)
     interview.refresh_from_db()
     assert interview.status == Interview.APPROVED
@@ -317,59 +388,6 @@ def test_autocomplete_interview():
     CommentFactory(interview=interview2, interviewer=interviewer1)
     interview2.refresh_from_db()
     assert interview2.status == Interview.COMPLETED
-
-
-@pytest.mark.django_db
-def test_update_applicant_status_if_interview_has_been_completed():
-    interview2 = InterviewFactory(
-        status=Interview.APPROVED, section=InterviewSections.ALL_IN_ONE
-    )
-    CommentFactory(interview=interview2)
-    interview2.refresh_from_db()
-    assert interview2.status == Interview.COMPLETED
-    assert interview2.applicant.status == Applicant.INTERVIEW_COMPLETED
-
-
-@pytest.mark.django_db
-def test_autoupdate_applicant_status_completed():
-    """
-    1. If all interviewers leave a comment, change interview status to
-    `complete` status. Also, update applicant status if it's not already in
-    final state.
-    2. If interview took a place and we later remove absent interviewers,
-    try to switch interview and applicant status to `complete` state.
-    """
-    # Default applicant status is nullable, so we can easily set `complete`
-    interview = InterviewFactory(
-        status=Interview.COMPLETED, section=InterviewSections.ALL_IN_ONE
-    )
-    assert interview.applicant.status == Applicant.INTERVIEW_COMPLETED
-    interview.delete()
-    interviewer1, interviewer2 = InterviewerFactory.create_batch(2)
-    interview = InterviewFactory(
-        status=Interview.APPROVED,
-        section=InterviewSections.ALL_IN_ONE,
-        interviewers=[interviewer1, interviewer2],
-    )
-    assert interview.applicant.status == Applicant.INTERVIEW_SCHEDULED
-    CommentFactory.create(interview=interview, interviewer=interviewer1)
-    interview.refresh_from_db()
-    assert interview.status == Interview.APPROVED
-    comment2 = CommentFactory.create(interview=interview, interviewer=interviewer2)
-    interview.refresh_from_db()
-    assert interview.status == Interview.COMPLETED
-    # Now try to remove interviewer and check that status was changed.
-    comment2.delete()
-    interview.status = Interview.APPROVED
-    interview.save()
-    interview.applicant.status = Applicant.INTERVIEW_SCHEDULED
-    interview.applicant.save()
-    interview.interviewers.clear()
-    interview.interviewers.add(interviewer1)
-    assert interview.interviewers.count() == 1
-    interview.refresh_from_db()
-    # FIXME: Removing interviewer won't emit interview post_save signal
-    # assert interview.status == Interview.COMPLETED
 
 
 @pytest.mark.django_db
@@ -450,10 +468,10 @@ def test_interview_comment_create(curator, client, settings):
         "interviewer": curator.pk,
     }
     url = reverse("admission:interviews:comment", args=[interview.pk])
-    response = client.post(url, form, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+    response = client.post(url, form)
     assert response.status_code == 400  # invalid form: empty score
     form["score"] = 2
-    response = client.post(url, form, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+    response = client.post(url, form)
     assert response.status_code == 200
 
 
@@ -462,7 +480,7 @@ def test_create_invitation(curator, client, settings):
     """Create invitation from single stream"""
     settings.LANGUAGE_CODE = "ru"
     campaign = CampaignFactory()
-    applicant = ApplicantFactory(campaign=campaign)
+    applicant = ApplicantFactory(campaign=campaign, status=ApplicantStatuses.PASSED_EXAM)
     tomorrow = now() + datetime.timedelta(days=2)
     InterviewStreamFactory(
         date=tomorrow.date(), with_assignments=True, campaign=campaign

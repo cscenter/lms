@@ -17,7 +17,7 @@ from django.core import checks
 from django.core.exceptions import FieldDoesNotExist, ValidationError
 from django.core.validators import MinValueValidator, RegexValidator, MaxValueValidator
 from django.db import models, transaction
-from django.db.models import Count, OuterRef, Q, Subquery, Value, query
+from django.db.models import Count, OuterRef, Q, F, Subquery, Value, query
 from django.db.models.functions import Coalesce
 from django.utils import numberformat, timezone
 from django.utils.encoding import force_bytes, smart_str
@@ -31,6 +31,7 @@ from admission.constants import (
     ContestTypes,
     DefaultInterviewRatingSystem,
     InterviewFormats,
+    ApplicantInterviewFormats,
     InterviewInvitationStatuses,
     InterviewSections,
     YandexDataSchoolInterviewRatingSystem, HasDiplomaStatuses, DiplomaDegrees,
@@ -258,6 +259,7 @@ ApplicantSubscribedManager = _ApplicantSubscribedManager.from_queryset(
     ApplicantQuerySet
 )
 
+
 def applicant_photo_upload_to(instance, filename):
     bucket = instance.campaign.year
     _, ext = os.path.splitext(filename)
@@ -275,39 +277,19 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     REJECTED_BY_EXAM_CHEATING = ApplicantStatuses.REJECTED_BY_EXAM_CHEATING
     REJECTED_BY_CHEATING = ApplicantStatuses.REJECTED_BY_CHEATING
     # TODO: rename interview codes here and in DB. Replace values type?
-    INTERVIEW_TOBE_SCHEDULED = (
-        ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED
-    )  # permitted to interview
-    # FIXME: remove
-    INTERVIEW_SCHEDULED = ApplicantStatuses.INTERVIEW_SCHEDULED
-    INTERVIEW_COMPLETED = ApplicantStatuses.INTERVIEW_COMPLETED
     REJECTED_BY_INTERVIEW = ApplicantStatuses.REJECTED_BY_INTERVIEW
     PENDING = ApplicantStatuses.PENDING
     ACCEPT = ApplicantStatuses.ACCEPT
     ACCEPT_PAID = ApplicantStatuses.ACCEPT_PAID
-    WAITING_FOR_PAYMENT = ApplicantStatuses.WAITING_FOR_PAYMENT
     ACCEPT_IF = ApplicantStatuses.ACCEPT_IF
-    VOLUNTEER = ApplicantStatuses.VOLUNTEER
     THEY_REFUSED = ApplicantStatuses.THEY_REFUSED
 
     STATUS = ApplicantStatuses.choices
-    # One of the statuses below could be set after interviewing
-    INTERVIEW_RESULTS = {
-        ACCEPT,
-        ACCEPT_PAID,
-        ACCEPT_IF,
-        REJECTED_BY_INTERVIEW,
-        ApplicantStatuses.REJECTED_BY_INTERVIEW_WITH_BONUS,
-        VOLUNTEER,
-        WAITING_FOR_PAYMENT,
-    }
     # Successful final statuses after interview stage
     ACCEPT_STATUSES = {
         ACCEPT,
         ACCEPT_PAID,
         ACCEPT_IF,
-        VOLUNTEER,
-        WAITING_FOR_PAYMENT,
     }
     STUDY_PROGRAM_DS = "ds"
     STUDY_PROGRAM_CS = "cs"
@@ -347,7 +329,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         verbose_name=_("Applicant|Status"),
         blank=True,
         null=True,
-        max_length=20,
+        max_length=30,
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -430,7 +412,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     new_track_info = models.CharField(
         _("Alternative track info"),
         help_text=_("Applicant|alternative_track_info"),
-        max_length = 1000,
+        max_length=1000,
         blank=True,
         null=True
     )
@@ -614,6 +596,19 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     admin_note = models.TextField(
         _("Admin note"), help_text=_("Applicant|admin_note"), blank=True, null=True
     )
+    interview_format = models.CharField(
+        _("Interview Format"),
+        help_text=_("Applicant|interview_format"),
+        choices=ApplicantInterviewFormats,
+        max_length=255,
+        blank=True,
+    )
+    miss_count = models.IntegerField(
+        _("Count of missed interviews"),
+        help_text=_("Applicant|miss_count"),
+        default=0
+    )
+
     # Key-value store for fields specific to admission campaigns
     data = models.JSONField(_("Data"), blank=True, null=True)
     # Any useful data like application form integration log
@@ -1247,6 +1242,7 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         blank=False,
         null=True,
     )
+    # TODO replace with ForeignKey
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
@@ -1277,6 +1273,11 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
     def save(self, **kwargs):
         created = self.pk is None
         self.full_clean()
+        if not created:
+            previous = Interview.objects.get(pk=self.pk)
+            if previous.status == self.APPROVED and self.status == self.CANCELED:
+                self.applicant.miss_count = F("miss_count") + 1
+                self.applicant.save()
         super().save(**kwargs)
 
     def date_local(self, tz=None):
@@ -1404,10 +1405,17 @@ class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel
             "Based on this flag, student should arrive 30 min " "before or not"
         ),
     )
+    # TODO replace with ForeignKey
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
         limit_choices_to={"group__role": Roles.INTERVIEWER},
+    )
+    interviewers_max = models.IntegerField(
+        _("Maximum number of slots preffered by interviewer"),
+        help_text=_("Applicant|interviewers_max"),
+        blank=True,
+        null=True
     )
     slots_count = models.PositiveIntegerField(editable=False, default=0)
     slots_occupied_count = models.PositiveIntegerField(editable=False, default=0)
@@ -1444,10 +1452,12 @@ class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel
             )
 
     def __str__(self):
-        return "{}, {}-{}".format(
+        return "{} {}, {}-{} {}".format(
+            self.get_format_display(),
             date_format(self.date, settings.DATE_FORMAT),
             time_format(self.start_at),
             time_format(self.end_at),
+            self.interviewers.all()[0] if self.interviewers.exists() else "-"
         )
 
     def clean(self):
@@ -1511,7 +1521,15 @@ class InterviewStream(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel
 
     @property
     def slots_free_count(self):
-        return self.slots_count - self.slots_occupied_count
+        return self.max_slots - self.slots_occupied_count
+
+    @property
+    def max_slots(self):
+        if self.interviewers_max is not None:
+            return min(self.slots_count, self.interviewers_max)
+        else:
+            return self.slots_count
+
 
 
 class InterviewSlotQuerySet(query.QuerySet):
@@ -1587,6 +1605,7 @@ class InterviewInvitation(TimeStampedModel):
         verbose_name=_("Status"),
         max_length=10,
     )
+    # TODO replace with ForeignKey
     streams = models.ManyToManyField(
         InterviewStream,
         verbose_name=_("Interview streams"),
@@ -1612,18 +1631,22 @@ class InterviewInvitation(TimeStampedModel):
         verbose_name = _("Interview invitation")
         verbose_name_plural = _("Interview invitations")
 
+    def clean(self):
+        if self.pk is None:
+            if self.applicant.status not in ApplicantStatuses.RIGHT_BEFORE_INTERVIEW:
+                raise ValidationError(f"Для создания преглашения статус абитуриента должен быть один из следующих:"
+                                      f"{ApplicantStatuses.RIGHT_BEFORE_INTERVIEW_DISPLAY}")
+
     def save(self, **kwargs):
+        self.full_clean()
         created = self.pk is None
+        if not created:
+            previous = InterviewInvitation.objects.get(pk=self.pk)
+            if previous.status == InterviewInvitationStatuses.NO_RESPONSE and self.status != \
+                InterviewInvitationStatuses.NO_RESPONSE and self.status != InterviewInvitationStatuses.ACCEPTED:
+                self.applicant.miss_count = F("miss_count") + 1
+                self.applicant.save()
         super().save(**kwargs)
-        if created and not self.interview_id:
-            # Update status if we send invitation before
-            # summing up the exam results
-            if self.applicant.status == Applicant.PERMIT_TO_EXAM:
-                (
-                    Applicant.objects.filter(pk=self.applicant_id).update(
-                        status=Applicant.INTERVIEW_TOBE_SCHEDULED
-                    )
-                )
 
     def __str__(self):
         return str(self.applicant)
@@ -1653,10 +1676,10 @@ class InterviewInvitation(TimeStampedModel):
         )
 
     def get_status_display(self):
-        status = self.status
         if self.status == InterviewInvitationStatuses.NO_RESPONSE and self.is_expired:
-            status = InterviewInvitationStatuses.EXPIRED
-        return InterviewInvitationStatuses.values[status]
+            self.status = InterviewInvitationStatuses.EXPIRED
+            self.save()
+        return InterviewInvitationStatuses.values[self.status]
 
 
 class Acceptance(TimestampedModel):

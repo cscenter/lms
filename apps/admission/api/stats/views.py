@@ -44,7 +44,6 @@ STATUSES = [
     Applicant.ACCEPT,
     Applicant.ACCEPT_IF,
     Applicant.REJECTED_BY_INTERVIEW,
-    Applicant.VOLUNTEER,
     Applicant.THEY_REFUSED,
 ]
 

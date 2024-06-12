@@ -1,0 +1,109 @@
+<dt>{{ applicant_form.photo.label_tag }}</dt>
+<div class="thumbnail-img">
+  {% with im=applicant.get_thumbnail %}
+    <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" alt="" />
+  {% endwith %}
+</div>
+
+<dt>{{ applicant_form.gender.label_tag }}</dt>
+<dd>{{ applicant_form.instance.get_gender_display|default:"<не указано>" }}</dd>
+
+<dt>{{ applicant_form.birth_date.label_tag }}</dt>
+<dd>{{ applicant_form.birth_date.value}}</dd>
+
+<dt>{{ applicant_form.telegram_username.label_tag }}</dt>
+<dd><a href="https://t.me/{{ applicant_form.instance.telegram_username }}"> @{{ applicant_form.instance.telegram_username}}</a></dd>
+
+<hr>
+
+<dt>{{ applicant_form.has_diploma.label_tag }}</dt>
+<dd>{{ applicant_form.instance.get_has_diploma_display|default:"<не указано>" }}</dd>
+
+{% if applicant_form.has_diploma.value == 'yes' %}
+  <dt>{{ applicant_form.diploma_degree.label_tag }}</dt>
+  <dd>{{ applicant_form.instance.get_diploma_degree_display|default:"<не указано>" }}</dd>
+{% endif %}
+
+{% if applicant_form.has_diploma.value == 'in_process' %}
+  <dt>{{ applicant_form.level_of_education.label_tag }}</dt>
+  <dd>{{ applicant_form.instance.get_level_of_education_display|default:applicant_form.level_of_education_other.value|default:"<не указано>" }}</dd>
+{% endif %}
+
+<dt>{{ applicant_form.university.label_tag }}</dt>
+<dd>{{ applicant_form.instance.university|default:applicant_form.instance.university_other|default:"<не указано>" }}</dd>
+
+<dt>{{ applicant_form.faculty.label_tag }}</dt>
+<dd>{{ applicant_form.faculty.value|default:"<не указано>" }}</dd>
+
+<dt>{{ applicant_form.year_of_graduation.label_tag }}</dt>
+<dd>{{ applicant_form.year_of_graduation.value|default:"<не указано>" }}</dd>
+
+<dt>{{ applicant_form.partner.label_tag }}</dt>
+{% if applicant_form.partner.value is None %}
+  <dd>Нет</dd>
+{% else %}
+  <dd>{{ applicant_form.instance.partner }}</dd>
+{% endif %}
+
+<hr>
+
+<dt>Трек поступления:</dt>
+{% if applicant_form.new_track.value == True %}
+  <dd>Альтернативный</dd>
+
+  <dt>{{ applicant_form.new_track_info.label_tag }}</dt>
+  <dd>{{ applicant_form.new_track_info.value|default:"<не указано>" }}</dd>
+{% else %}
+  <dd>Классический</dd>
+{% endif %}
+
+<hr>
+
+<dt>{{ applicant_form.has_internship.label_tag }}</dt>
+{% if applicant_form.has_internship.value == True %}
+  Да
+
+  <dt>{{ applicant_form.internship_workplace.label_tag }}</dt>
+  <dd>{{ applicant_form.internship_workplace.value|default:"<не указано>" }}</dd>
+
+  <dt>{{ applicant_form.internship_position.label_tag }}</dt>
+  <dd>{{ applicant_form.internship_position.value|default:"<не указано>" }}</dd>
+{% elif applicant_form.has_internship.value is None %}
+  <не указано>
+{% else %}
+  Нет
+{% endif %}
+
+<hr>
+
+<dt>{{ applicant_form.has_job.label_tag }}</dt>
+{% if applicant_form.has_job.value == True %}
+  Да
+
+  <dt>{{ applicant_form.workplace.label_tag }}</dt>
+  <dd>{{ applicant_form.workplace.value|default:"<не указано>" }}</dd>
+
+  <dt>{{ applicant_form.position.label_tag }}</dt>
+  <dd>{{ applicant_form.position.value|default:"<не указано>" }}</dd>
+
+  <dt>{{ applicant_form.working_hours.label_tag }}</dt>
+  <dd>{{ applicant_form.working_hours.value|default:"<не указано>" }}</dd>
+{% elif applicant_form.has_job.value is None %}
+  <не указано>
+{% else %}
+  Нет
+{% endif %}
+
+<hr>
+
+<dt>Изучали ли вы раньше машинное обучение/анализ данных?<br>
+  Каким образом? Какие навыки удалось приобрести, какие проекты сделать?</dt>
+<dd>{{ applicant_form.experience.value|default:"<не указано>" }}</dd>
+
+<dt>{{ applicant_form.motivation.label_tag }}</dt>
+<dd>{{ applicant_form.motivation.value|default:"<не указано>" }}</dd>
+
+<hr>
+
+<dt>{{ applicant_form.additional_info.label_tag }}</dt>
+<dd>{{ applicant_form.additional_info.value|default:"<не указано>" }}</dd>

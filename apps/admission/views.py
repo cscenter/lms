@@ -18,7 +18,7 @@ from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
-from django.db.models import Avg, Case, Count, Prefetch, Q, Value, When
+from django.db.models import Avg, Case, Count, Prefetch, Q, Value, When, Subquery, F
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import (
@@ -44,7 +44,7 @@ from admission.filters import (
     InterviewsCuratorFilter,
     InterviewsFilter,
     InterviewStreamFilter,
-    RequiredSectionInterviewStreamFilter,
+    InvitationCreateInterviewStreamFilter,
     ResultsFilter,
 )
 from admission.forms import (
@@ -100,7 +100,7 @@ from .constants import (
     ApplicantStatuses,
     ContestTypes,
     InterviewInvitationStatuses,
-    InterviewSections,
+    InterviewSections, InterviewFormats,
 )
 from .selectors import get_interview_invitation, get_occupied_slot
 
@@ -158,13 +158,14 @@ def get_interview_invitation_sections(invitation: InterviewInvitation):
 class InterviewerSerializer(serializers.ModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name="user_detail")
     full_name = serializers.CharField(source="get_full_name")
+    last_name = serializers.CharField()
     photo = PhotoSerializerField(
         User.ThumbnailSize.INTERVIEW_LIST, thumbnail_options={"use_stab": False}
     )
 
     class Meta:
         model = User
-        fields = ("url", "full_name", "photo")
+        fields = ("url", "full_name", "last_name", "photo")
 
 
 class InterviewSerializer(serializers.ModelSerializer):
@@ -226,6 +227,18 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         section = serializers.ChoiceField(
             choices=InterviewSections.choices, required=True
         )
+        format = serializers.ChoiceField(
+            choices=InterviewFormats.choices, required=False
+        )
+        track = serializers.ChoiceField(
+            choices=InvitationCreateInterviewStreamFilter.ApplicantTrack, required=False
+        )
+        way_to_interview = serializers.ChoiceField(
+            choices=InvitationCreateInterviewStreamFilter.ApplicantWayToInterview, required=False
+        )
+        number_of_misses = serializers.ChoiceField(
+            choices=InvitationCreateInterviewStreamFilter.ApplicantMisses, required=False
+        )
 
     class InputSerializer(serializers.Serializer):
         streams = serializers.ListField(
@@ -281,8 +294,21 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         # Create interview invitations
         campaign = filter_serializer.validated_data["campaign"]
         section = filter_serializer.validated_data["section"]
-        applicants = get_applicants_for_invitation(campaign=campaign, section=section)
+        format = filter_serializer.validated_data.get("format")
+        track = filter_serializer.validated_data.get("track")
+        way_to_interview = filter_serializer.validated_data.get("way_to_interview")
+        number_of_misses = filter_serializer.validated_data.get("number_of_misses")
+        applicants = get_applicants_for_invitation(campaign=campaign, section=section, format=format, track=track,
+                                          way_to_interview=way_to_interview, number_of_misses=number_of_misses)
         applicants = applicants.filter(pk__in=input_serializer.validated_data["ids"])
+        free_slots = sum(stream.slots_free_count for stream in streams)
+        if free_slots < len(applicants):
+            messages.error(self.request, "Суммарное количество слотов выбранных потоков меньше, чем количество "
+                                         "выбранных абитуриентов.")
+            context = self.get_context_data(
+                filter_serializer=filter_serializer, **kwargs
+            )
+            return self.render_to_response(context)
         with transaction.atomic():
             for applicant in applicants:
                 applicant.campaign = campaign
@@ -297,10 +323,29 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
 
     @staticmethod
     def get_interview_stream_filterset(serializer: serializers.Serializer):
-        return RequiredSectionInterviewStreamFilter(
+        invitations_waiting_for_response = Count(
+            Case(
+                When(
+                    interview_invitations__expired_at__lte=get_now_utc(),
+                    then=Value(None),
+                ),
+                When(
+                    interview_invitations__status=InterviewInvitationStatuses.NO_RESPONSE,
+                    then=Value(1),
+                ),
+                default=Value(None),
+            )
+        )
+        slots_and_invitations = F('slots_occupied_count') + F('invitations')
+        is_interviewers_max_ok = Q(interviewers_max__gt=slots_and_invitations) | Q(interviewers_max__isnull=True)
+        is_slots_count_ok = Q(slots_count__gt=slots_and_invitations)
+        return InvitationCreateInterviewStreamFilter(
             data=serializer.validated_data,
             queryset=(
-                get_ongoing_interview_streams().order_by("-date", "-start_at", "pk")
+                get_ongoing_interview_streams()
+                .annotate(invitations=invitations_waiting_for_response)
+                .filter(is_interviewers_max_ok, is_slots_count_ok)
+                .order_by("-date", "-start_at", "pk")
             ),
         )
 
@@ -308,12 +353,17 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         filter_serializer = kwargs["filter_serializer"]
         campaign = filter_serializer.validated_data["campaign"]
         section = filter_serializer.validated_data["section"]
+        format = filter_serializer.validated_data.get("format")
+        track = filter_serializer.validated_data.get("track")
+        way_to_interview = filter_serializer.validated_data.get("way_to_interview")
+        number_of_misses = filter_serializer.validated_data.get("number_of_misses")
         interview_stream_filterset = self.get_interview_stream_filterset(
             filter_serializer
         )
 
         applicants = (
-            get_applicants_for_invitation(campaign=campaign, section=section)
+            get_applicants_for_invitation(campaign=campaign, section=section, format=format, track=track,
+                                          way_to_interview=way_to_interview, number_of_misses=number_of_misses)
             .select_related(
                 "exam",
                 "online_test",
@@ -917,18 +967,14 @@ class InterviewCommentUpsertView(InterviewerOnlyMixin, GenericModelView):
 
     @transaction.atomic
     def form_valid(self, form):
-        if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
-            _ = form.save()
-            return JsonResponse({"success": "true"})
-        return super().form_valid(form)
+        _ = form.save()
+        return JsonResponse({"success": "true"})
 
     def form_invalid(self, form):
-        if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
-            msg = "<br>".join(m for ms in form.errors.values() for m in ms)
-            r = JsonResponse({"errors": msg})
-            r.status_code = 400
-            return r
-        return super().form_invalid(form)
+        msg = "<br>".join(m for ms in form.errors.values() for m in ms)
+        r = JsonResponse({"errors": msg})
+        r.status_code = 400
+        return r
 
     def get_success_url(self):
         messages.success(
@@ -1068,8 +1114,6 @@ class InterviewResultsView(
         final_statuses = {
             Applicant.ACCEPT,
             Applicant.ACCEPT_IF,
-            Applicant.VOLUNTEER,
-            Applicant.WAITING_FOR_PAYMENT,
             Applicant.ACCEPT_PAID,
         }
         received = 0

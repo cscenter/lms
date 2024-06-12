@@ -34,7 +34,7 @@ def test_token_updated_applicant():
     applicant = ApplicantFactory()
     g = EmailVerificationCodeGenerator()
     token1 = g.make_token("test1@example.com", applicant)
-    applicant.status = ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED
+    applicant.status = ApplicantStatuses.GOLDEN_TICKET
     applicant.save(update_fields=["status"])
     applicant.refresh_from_db()
     token2 = g.make_token("test1@example.com", applicant)

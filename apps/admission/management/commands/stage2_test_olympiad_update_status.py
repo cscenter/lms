@@ -53,9 +53,6 @@ class Command(CurrentCampaignMixin, BaseCommand):
             }
             applicants = Applicant.objects.filter(
                 **filters
-            ).exclude(
-                # bonus from past admission campaign
-                status=ApplicantStatuses.INTERVIEW_TOBE_SCHEDULED
             ).values(
                 "pk",
                 "online_test__score",

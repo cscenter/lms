@@ -1,6 +1,7 @@
 import dataclasses
 import datetime
 import io
+import itertools
 from typing import BinaryIO, cast
 
 import pytest
@@ -17,9 +18,9 @@ from admission.constants import (
     ChallengeStatuses,
     InterviewFormats,
     InterviewInvitationStatuses,
-    InterviewSections,
+    InterviewSections, ApplicantStatuses, ApplicantInterviewFormats,
 )
-from admission.models import Acceptance, Applicant, Exam, Interview
+from admission.models import Acceptance, Applicant, Exam, Interview, InterviewSlot
 from admission.services import (
     AccountData,
     EmailQueueService,
@@ -49,10 +50,11 @@ from admission.tests.factories import (
 from core.models import Branch
 from core.tests.factories import BranchFactory, EmailTemplateFactory, SiteFactory
 from core.timezone import get_now_utc
+from core.urls import reverse
 from users.constants import GenderTypes
 from users.models import StudentTypes
 from users.services import get_student_profile
-from users.tests.factories import StudentProfileFactory, UserFactory
+from users.tests.factories import StudentProfileFactory, UserFactory, CuratorFactory
 
 
 @pytest.mark.django_db
@@ -289,7 +291,7 @@ def test_get_applicants_for_invitation():
         == 0
     )
     applicant3 = ApplicantFactory(
-        campaign=campaign1, status=Applicant.INTERVIEW_TOBE_SCHEDULED
+        campaign=campaign1, status=ApplicantStatuses.PASSED_EXAM
     )
     assert (
         get_applicants_for_invitation(
@@ -314,7 +316,7 @@ def test_get_applicants_for_invitation():
     )
     # Expired invitation for target section
     applicant4 = ApplicantFactory(
-        campaign=campaign1, status=Applicant.INTERVIEW_TOBE_SCHEDULED
+        campaign=campaign1, status=ApplicantStatuses.PASSED_EXAM
     )
     yesterday_utc = get_now_utc() - datetime.timedelta(days=1)
     next_week_utc = get_now_utc() + datetime.timedelta(weeks=1)
@@ -368,7 +370,101 @@ def test_get_applicants_for_invitation():
         ).count()
         == 0
     )
+@pytest.mark.django_db
+def test_get_applicants_for_invitation_with_filters(client, settings):
+    campaign = CampaignFactory(current=True)
+    formats = [ApplicantInterviewFormats.ONLINE, ApplicantInterviewFormats.OFFLINE, ApplicantInterviewFormats.ANY]
+    tracks = [False, True]
+    statuses = [ApplicantStatuses.PASSED_EXAM, ApplicantStatuses.PASSED_OLYMPIAD, ApplicantStatuses.GOLDEN_TICKET]
+    miss_counts = range(0, 6)
+    combinations = list(
+        itertools.product(statuses, formats, tracks, miss_counts))
+    applicants = [
+        ApplicantFactory(
+            status=status,
+            campaign=campaign,
+            interview_format=interview_format,
+            new_track=new_track,
+            miss_count=miss_count
+        )
+        for status, interview_format, new_track, miss_count in combinations
+    ]
 
+    for format in ['online', 'offline']:
+        qs = get_applicants_for_invitation(
+            campaign=campaign, section=InterviewSections.ALL_IN_ONE, format=format
+        )
+        for applicant in applicants:
+            if applicant.interview_format == ApplicantInterviewFormats.ONLINE and format == 'online':
+                assert applicant in qs
+            elif applicant.interview_format == ApplicantInterviewFormats.OFFLINE and format == 'offline':
+                assert applicant in qs
+            elif applicant.interview_format == ApplicantInterviewFormats.ANY:
+                assert applicant in qs
+            else:
+                assert applicant not in qs
+
+    for track in ['regular', 'alternative']:
+        qs = get_applicants_for_invitation(
+            campaign=campaign, section=InterviewSections.ALL_IN_ONE, track=track
+        )
+        for applicant in applicants:
+            if applicant.new_track is True and track == 'alternative':
+                assert applicant in qs
+            elif applicant.new_track is False and track == 'regular':
+                assert applicant in qs
+            else:
+                assert applicant not in qs
+
+    for way_to_interview in ['exam', 'olympiad', 'golden_ticket']:
+        qs = get_applicants_for_invitation(
+            campaign=campaign, section=InterviewSections.ALL_IN_ONE, way_to_interview=way_to_interview
+        )
+        for applicant in applicants:
+            if applicant.status == ApplicantStatuses.PASSED_EXAM and way_to_interview == 'exam':
+                assert applicant in qs
+            elif applicant.status == ApplicantStatuses.PASSED_OLYMPIAD and way_to_interview == 'olympiad':
+                assert applicant in qs
+            elif applicant.status == ApplicantStatuses.GOLDEN_TICKET and way_to_interview == 'golden_ticket':
+                assert applicant in qs
+            else:
+                assert applicant not in qs
+
+    for miss_count in range(0,5):
+        qs = get_applicants_for_invitation(
+            campaign=campaign, section=InterviewSections.ALL_IN_ONE, number_of_misses=miss_count
+        )
+        for applicant in applicants:
+            if applicant.miss_count == miss_count and miss_count in range(0,4):
+                assert applicant in qs
+            elif applicant.miss_count > 3 and miss_count == 4:
+                assert applicant in qs
+            else:
+                assert applicant not in qs
+
+@pytest.mark.django_db
+def test_get_streams(client, settings):
+    campaign = CampaignFactory(current=True)
+    stream_1 = InterviewStreamFactory(
+        campaign=campaign, section=InterviewSections.ALL_IN_ONE, interviewers_max=2,
+        start_at=datetime.datetime(2011, 1, 1, 13, 0, 0), end_at=datetime.datetime(2011, 1, 1, 15, 0, 0)
+    )
+    stream_2 = InterviewStreamFactory(
+        campaign=campaign, section=InterviewSections.ALL_IN_ONE,
+        start_at=datetime.datetime(2011, 1, 1, 13, 0, 0), end_at=datetime.datetime(2011, 1, 1, 14, 0, 0)
+    )
+    invitation = InterviewInvitationFactory(streams=[stream_1,stream_2],
+                                            interview__section=InterviewSections.ALL_IN_ONE)
+    assert stream_1 in get_streams(invitation).keys()
+    assert stream_2 in get_streams(invitation).keys()
+    for _ in range(2):
+        slot = InterviewSlot.objects.filter(stream=stream_1, interview__isnull=True).first()
+        interview = InterviewFactory(section=InterviewSections.ALL_IN_ONE)
+        slot.interview = interview
+        slot.save()
+    # stream is not present if no more free slots left or occupied_slots are more than interviewers_max
+    assert stream_1 not in get_streams(invitation).keys()
+    assert stream_2 in get_streams(invitation).keys()
 
 @pytest.mark.django_db
 def test_get_acceptance_ready_to_confirm(settings):

@@ -3,6 +3,8 @@
   {% elif field.name == 'is_studying' %}
   {% elif field.name == 'new_track' %}
   {% elif field.name == 'university_legacy' %}
+  {% elif field.name == 'interview_format' %}
+  {% elif field.name == 'miss_count' %}
   {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
   {% elif field.name == 'position' and not applicant_form.has_job.value %}
   {% elif field.name == 'level_of_education' and not applicant_form.has_diploma.value %}
@@ -50,14 +52,16 @@
         <не указано>{% endif %}</dd>
    {% elif field.name == 'level_of_education' %}
       {% if applicant_form.has_diploma.value %}
-      <dd>{{ applicant_form.instance.get_level_of_education_display|default:"<не указано>" }}</dd>
+        <dd>{{ applicant_form.instance.get_level_of_education_display|default:"<не указано>" }}</dd>
       {% endif %}
    {% elif field.name == 'has_diploma' %}
       <dd>{{ applicant_form.instance.get_has_diploma_display|default:"<не указано>" }}</dd>
    {% elif field.name == 'gender' %}
       <dd>{{ applicant_form.instance.get_gender_display|default:"<не указано>" }}</dd>
    {% elif field.name == 'diploma_degree' %}
-      <dd>{{ applicant_form.instance.get_diploma_degree_display|default:"<не указано>" }}</dd>
+      {% if applicant_form.has_diploma.value %}
+        <dd>{{ applicant_form.instance.get_diploma_degree_display|default:"<не указано>" }}</dd>
+      {% endif %}
    {% elif field.name == 'living_place' %}
       <dd>{{ applicant_form.instance.get_living_place_display|default:"<не указано>" }}</dd>
    {% elif field.name == 'university_legacy' %}
@@ -90,6 +94,8 @@
   {% elif field.name == 'has_diploma'%}
   {% elif field.name == 'new_track' %}
   {% elif field.name == 'diploma_degree'%}
+  {% elif field.name == 'interview_format' %}
+  {% elif field.name == 'miss_count' %}
   {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
   {% elif field.name == 'position' and not applicant_form.has_job.value %}
   {% elif field.name == 'where_did_you_learn_other' and applicant_form.where_did_you_learn.value %}
