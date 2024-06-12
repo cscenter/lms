@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 
-from admission.constants import ContestTypes, InterviewSections
+from admission.constants import ContestTypes, InterviewSections, ApplicantStatuses
 from admission.services import get_latest_contest_results_task
 from admission.tests.factories import (
     CampaignFactory,
@@ -22,7 +22,8 @@ def test_appointment_create_interview(client):
         start_at=datetime.time(14, 0),
         end_at=datetime.time(16, 0),
     )
-    invitation = InterviewInvitationFactory(interview=None, streams=[slot.stream])
+    invitation = InterviewInvitationFactory(interview=None,
+                                            streams=[slot.stream])
     # Use unknown secret code
     url = reverse(
         "appointment:api:interview_appointment_slots",

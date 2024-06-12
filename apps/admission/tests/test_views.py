@@ -468,10 +468,10 @@ def test_interview_comment_create(curator, client, settings):
         "interviewer": curator.pk,
     }
     url = reverse("admission:interviews:comment", args=[interview.pk])
-    response = client.post(url, form, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+    response = client.post(url, form)
     assert response.status_code == 400  # invalid form: empty score
     form["score"] = 2
-    response = client.post(url, form, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+    response = client.post(url, form)
     assert response.status_code == 200
 
 
@@ -480,7 +480,7 @@ def test_create_invitation(curator, client, settings):
     """Create invitation from single stream"""
     settings.LANGUAGE_CODE = "ru"
     campaign = CampaignFactory()
-    applicant = ApplicantFactory(campaign=campaign)
+    applicant = ApplicantFactory(campaign=campaign, status=ApplicantStatuses.PASSED_EXAM)
     tomorrow = now() + datetime.timedelta(days=2)
     InterviewStreamFactory(
         date=tomorrow.date(), with_assignments=True, campaign=campaign

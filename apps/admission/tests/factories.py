@@ -216,7 +216,7 @@ class InterviewInvitationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = InterviewInvitation
 
-    applicant = factory.SubFactory(ApplicantFactory)
+    applicant = factory.SubFactory(ApplicantFactory, status=ApplicantStatuses.PASSED_EXAM)
     interview = factory.SubFactory(
         InterviewFactory, applicant=factory.SelfAttribute("..applicant")
     )

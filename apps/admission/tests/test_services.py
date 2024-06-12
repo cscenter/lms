@@ -453,8 +453,7 @@ def test_get_streams(client, settings):
         campaign=campaign, section=InterviewSections.ALL_IN_ONE,
         start_at=datetime.datetime(2011, 1, 1, 13, 0, 0), end_at=datetime.datetime(2011, 1, 1, 14, 0, 0)
     )
-    invitation = InterviewInvitationFactory(applicant__status=ApplicantStatuses.PASSED_EXAM,
-                                            streams=[stream_1,stream_2],
+    invitation = InterviewInvitationFactory(streams=[stream_1,stream_2],
                                             interview__section=InterviewSections.ALL_IN_ONE)
     assert stream_1 in get_streams(invitation).keys()
     assert stream_2 in get_streams(invitation).keys()

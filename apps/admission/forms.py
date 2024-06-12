@@ -282,7 +282,7 @@ class InterviewCommentForm(forms.ModelForm):
                                              'статус "Согласовано"'))
 
         if (is_cancelled and self.interview.status == self.interview.CANCELED) or \
-            (not is_cancelled and self.interview.status == self.interview.APPROVED) \
+            (not is_cancelled and self.interview.status != self.interview.CANCELED) \
             and not score:
             self.add_error('score', self.fields['score'].error_messages['required'])
 
