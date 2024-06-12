@@ -58,12 +58,14 @@ class StudentFilter(FilterSet):
     academic_disciplines = CharInFilter(field_name='academic_disciplines', distinct=True)
     partners = NumberInFilter(field_name='partner')
     is_paid_basis = NumberInFilter(field_name='is_paid_basis')
+    uni_graduation_year = NumberInFilter(label='University graduation year',
+                                        method='uni_graduation_year_filter')
 
     class Meta:
         model = StudentProfile
         fields = ("name", "branches", "profile_types", "year_of_curriculum",
                   "year_of_admission", "types", "status", "cnt_enrollments",
-                  "academic_disciplines", "partners", "is_paid_basis")
+                  "academic_disciplines", "partners", "is_paid_basis", "uni_graduation_year")
 
     @property
     def qs(self):
@@ -72,6 +74,7 @@ class StudentFilter(FilterSet):
         return super().qs
 
     def courses_filter(self, queryset, name, value):
+        print(value)
         value_list = value.split(u',')
         try:
             value_list = [int(v) for v in value_list if v]
@@ -100,6 +103,12 @@ class StudentFilter(FilterSet):
                                          if v <= self.ENROLLMENTS_MAX])
         if any(value > self.ENROLLMENTS_MAX for value in value_list):
             condition |= Q(courses_total__gt=self.ENROLLMENTS_MAX)
+        return queryset.filter(condition)
+
+    def uni_graduation_year_filter(self, queryset, name, value):
+        condition = Q(graduation_year__isnull=False) & Q(graduation_year__in=[year for year in value if year != 0])
+        if any(year == 0 for year in value):
+            condition |= Q(graduation_year__isnull=True)
         return queryset.filter(condition)
 
     def status_filter(self, queryset, name, value):

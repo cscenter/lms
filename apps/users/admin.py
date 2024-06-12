@@ -219,21 +219,6 @@ class StudentProfileAdmin(BaseModelAdmin):
     raw_id_fields = ('user', 'comment_last_author')
     search_fields = ['user__last_name']
     inlines = [StudentStatusLogAdminInline]
-    fieldsets = [
-        (None, {
-            'fields': ['type', 'is_paid_basis', 'branch', 'user', 'status', 'partner',
-                       'year_of_admission', 'year_of_curriculum',
-                       'university', 'level_of_education_on_admission',
-                       'academic_disciplines']
-        }),
-        (_('Official Student Info'), {
-            'fields': ['is_official_student', 'birth_date',
-                       'diploma_number', 'diploma_issued_on', 'diploma_issued_by']
-        }),
-        (_("Curator's note"), {
-            'fields': ['comment', 'comment_changed_at', 'comment_last_author']
-        }),
-    ]
 
     def get_readonly_fields(self, request, obj=None):
         if obj is not None and obj.pk:
@@ -242,6 +227,29 @@ class StudentProfileAdmin(BaseModelAdmin):
                     'level_of_education_on_admission',
                     'comment_changed_at', 'comment_last_author']
         return ['birth_date']
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = [
+            (None, {
+                'fields': ['type', 'is_paid_basis', 'branch', 'user', 'status', 'partner',
+                           'year_of_admission', 'year_of_curriculum',
+                           'university', 'level_of_education_on_admission',
+                           'academic_disciplines']
+            }),
+            (_('Official Student Info'), {
+                'fields': ['is_official_student', 'birth_date',
+                           'diploma_number', 'diploma_issued_on', 'diploma_issued_by']
+            }),
+            (_("Curator's note"), {
+                'fields': ['comment', 'comment_changed_at', 'comment_last_author']
+            }),
+        ]
+        graduate_statuses = {StudentStatuses.GRADUATE, StudentStatuses.WILL_GRADUATE}
+
+        if obj and obj.status in graduate_statuses:
+            fieldsets[0][1]['fields'].insert(5, 'graduation_year')
+
+        return fieldsets
 
     def save_model(self, request, obj: StudentProfile,
                    form: StudentProfileForm, change: bool) -> None:
