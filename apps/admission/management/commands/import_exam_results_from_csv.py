@@ -1,44 +1,86 @@
 import csv
-
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from admission.models import Applicant, Exam
+from ...constants import ApplicantStatuses
+from ._utils import CurrentCampaignMixin
+from admission.constants import ChallengeStatuses
+from decimal import Decimal
+from collections import defaultdict
 
-from admission.constants import ChallengeStatuses, ApplicantStatuses
-from admission.models import Exam, Applicant
 
+class Command(CurrentCampaignMixin, BaseCommand):
+    help = 'Update exam scores from a CSV file'
 
-def main():
-    with open('results.csv') as csvfile:
-        reader = csv.reader(csvfile, delimiter=';')
-        next(reader, None)  # skip the headers
-        contest_id = None
-        exam_pass_threshold = 3
-        prefix = '/admission/applicants/'
-        exam_failed_pk, exam_passed_pk = [], []
-        with transaction.atomic():
-            for row in reader:
-                score, applicant_url = row[-2:]
-                assert applicant_url.startswith(prefix)
-                assert applicant_url[-1] == '/'
-                applicant_id = int(applicant_url[len(prefix):-1])
-                print(applicant_url[len(prefix):-1])
-                score = float(score.replace(',', '.'))
-                if score >= exam_pass_threshold:
-                    exam_passed_pk.append(applicant_id)
-                else:
-                    exam_failed_pk.append(applicant_id)
-                obj, created = Exam.objects.get_or_create(
-                    applicant_id=applicant_id,
-                    score=score,
-                    yandex_contest_id=contest_id,
-                    status=ChallengeStatuses.MANUAL,
-                    details={}
-                )
-                assert created
-            (Applicant.objects
-             .filter(pk__in=exam_passed_pk)
-             .update(status=ApplicantStatuses.PASSED_EXAM))
-            (Applicant.objects
-             .filter(pk__in=exam_failed_pk)
-             .update(status=ApplicantStatuses.REJECTED_BY_EXAM))
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        parser.add_argument(
+            "--filename",
+            type=str,
+            default='results.csv',
+            help="csv file name",
+        )
+        parser.add_argument(
+            "--delimiter",
+            type=str,
+            default=',',
+            help="csv delimiter",
+        )
+        parser.add_argument(
+            "--commit",
+            action="store_true",
+            default=False,
+            dest="commit",
+            help="Commit changes to database."
+        )
 
-main()
+    def handle(self, *args, **options):
+        delimiter = options["delimiter"]
+        filename = options["filename"]
+        commit = options["commit"]
+        before_exam = [ApplicantStatuses.PERMIT_TO_EXAM,
+                       ApplicantStatuses.FAILED_OLYMPIAD,
+                       ApplicantStatuses.ACCEPT_PAID]
+        campaigns = self.get_current_campaigns(options, confirm=False)
+
+        with open(filename) as csvfile:
+            reader = csv.reader(csvfile, delimiter=delimiter)
+            headers = next(reader)
+            with transaction.atomic():
+                total_by_compaign = defaultdict(int)
+                for row in reader:
+                    yandex_login = row[0]
+                    score = Decimal(row[1])
+
+                    try:
+                        applicant = Applicant.objects.get(yandex_login=yandex_login, campaign__in=campaigns)
+                    except Applicant.DoesNotExist:
+                        self.stdout.write(self.style.ERROR(f'Applicant with login {yandex_login} does not exist'))
+                        continue
+                    except Applicant.MultipleObjectsReturned:
+                        self.stdout.write(self.style.ERROR(f'There are many applicants with login {yandex_login}'))
+                        continue
+                    if applicant.status not in before_exam:
+                        self.stdout.write(self.style.ERROR(f'Invalid status for applicant {yandex_login}: '
+                                                           f'{applicant.status}'))
+                        continue
+                    total_by_compaign[applicant.campaign] += 1
+                    exam, created = Exam.objects.get_or_create(applicant=applicant,
+                                                               defaults={
+                                                                   'score': score,
+                                                                   'status': ChallengeStatuses.MANUAL
+                                                               })
+                    if not created:
+                        exam.score = score
+                        exam.save()
+
+                    if created:
+                        self.stdout.write(
+                            self.style.SUCCESS(f'Created exam for applicant {yandex_login} with score {score}'))
+                for campaign, total in total_by_compaign.items():
+                    print(f'{campaign}: {total}')
+                if input("Продолжить? [y/n] ") != "y":
+                    self.stdout.write("Aborted")
+                    return
+                if not commit:
+                    raise CommandError("Use --commit to apply changes.")
