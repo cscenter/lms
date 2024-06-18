@@ -53,16 +53,13 @@ class Command(CurrentCampaignMixin, BaseCommand):
                     score = Decimal(row[1])
 
                     try:
-                        applicant = Applicant.objects.get(yandex_login=yandex_login, campaign__in=campaigns)
+                        applicant = Applicant.objects.get(yandex_login=yandex_login, campaign__in=campaigns,
+                                                          status__in=before_exam)
                     except Applicant.DoesNotExist:
                         self.stdout.write(self.style.ERROR(f'Applicant with login {yandex_login} does not exist'))
                         continue
                     except Applicant.MultipleObjectsReturned:
                         self.stdout.write(self.style.ERROR(f'There are many applicants with login {yandex_login}'))
-                        continue
-                    if applicant.status not in before_exam:
-                        self.stdout.write(self.style.ERROR(f'Invalid status for applicant {yandex_login}: '
-                                                           f'{applicant.status}'))
                         continue
                     total_by_compaign[applicant.campaign] += 1
                     exam, created = Exam.objects.get_or_create(applicant=applicant,
