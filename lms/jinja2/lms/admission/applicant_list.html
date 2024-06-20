@@ -53,6 +53,7 @@
               <th>Направление</th>
               <th style="width: 60px;">Тест</th>
               <th style="width: 60px;">Экз.</th>
+              <th style="width: 60px;">Cоб.</th>
             </tr>
             </thead>
             <tbody>
@@ -86,6 +87,7 @@
                 </td>
                 <td>{% if applicant.online_test %}{{ applicant.online_test.score_display() }}{% else %}-{% endif %}</td>
                 <td>{% if applicant.exam %}{{ applicant.exam.score_display() }}{% else %}-{% endif %}</td>
+                <td>{{ applicant.get_all_interview_score() }}</td>
               </tr>
               {% else %}
               <tr>
