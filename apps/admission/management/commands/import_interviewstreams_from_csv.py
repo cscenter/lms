@@ -92,7 +92,7 @@ class Command(BaseCommand):
     filial_cache = {}
 
     def get_filial_info(self, branch_name: str, format: InterviewFormats):
-        if branch_name not in self.filial_cache:
+        if (branch_name, format) not in self.filial_cache:
             branch = Branch.objects.get(name=branch_name, site_id=settings.SITE_ID)
             campaign = Campaign.objects.get(branch=branch, current=True)
             venue_name = f'{"Онлайн" if format == InterviewFormats.ONLINE else "Офлайн" }-собеседование в ШАД' \
@@ -100,8 +100,8 @@ class Command(BaseCommand):
             venue = Location.objects.get(name=venue_name)
             interview_format = InterviewFormat.objects.get(campaign=campaign, format=format)
             result = (campaign, venue, interview_format)
-            self.filial_cache[branch_name] = result
-        return self.filial_cache[branch_name]
+            self.filial_cache[(branch_name, format)] = result
+        return self.filial_cache[(branch_name, format)]
 
     def handle(self, *args, **options):
         delimiter = options["delimiter"]
