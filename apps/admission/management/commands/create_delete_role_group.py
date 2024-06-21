@@ -14,7 +14,7 @@ class Command(CurrentCampaignMixin, BaseCommand):
     help = """
     Give or take back interviewer role from Users in csv
     Example of usage: 
-        ./manage.py create_delete_role_group --filename=interviewers.csv --default_branch=msk --role=INTERVIEWER
+        ./manage.py create_delete_role_group --filename=interviewers.csv --branch=msk --role=INTERVIEWER
     """
 
     def add_arguments(self, parser):
@@ -32,9 +32,9 @@ class Command(CurrentCampaignMixin, BaseCommand):
             help="csv delimiter",
         )
         parser.add_argument(
-            "--default_branch",
+            "--branch",
             type=str,
-            help="Default branch set if user doesn't have one",
+            help="Branch used for role",
         )
         parser.add_argument(
             "--take_back",
@@ -54,27 +54,22 @@ class Command(CurrentCampaignMixin, BaseCommand):
         delimiter = options["delimiter"]
         filename = options["filename"]
         take_back = options["take_back"]
-        default_branch = options["default_branch"]
-        role = options["role"]
+        branch = options["branch"]
+        role = getattr(Roles, options["role"])
         available = Branch.objects.filter(
             active=True, site_id=settings.SITE_ID
         )
         cs = [c.code for c in available]
-        if not default_branch or default_branch not in cs:
-            msg = f"Provide the code of the branch with --default_branch. Options: {cs}"
+        if not branch or branch not in cs:
+            msg = f"Provide the code of the branch with --branch. Options: {cs}"
             raise CommandError(msg)
-        default_branch = Branch.objects.get(code=default_branch)
+        branch = Branch.objects.get(code=branch)
         with open(filename) as csvfile:
             reader = csv.reader(csvfile, delimiter=delimiter)
             with transaction.atomic():
                 headers = next(reader)
                 for row in reader:
                     user: User = User.objects.get(email__iexact=row[0])
-                    branch = user.branch
-                    if not branch:
-                        self.stdout.write(self.style.WARNING(f"{user} doesn't have branch. Using default one"))
-                        branch = default_branch
-                    role = getattr(Roles, role)
                     if take_back:
                         user.remove_group(role, branch=branch)
                     else:
