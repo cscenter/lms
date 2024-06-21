@@ -3,6 +3,7 @@ import datetime
 import pytest
 import pytz
 from bs4 import BeautifulSoup
+from django.utils import formats
 
 from admission.constants import InterviewSections
 from admission.tests.factories import (
@@ -191,8 +192,9 @@ def test_interview_list(settings, client, curator):
     msk_interview_date_in_utc = interview.date
     localized = msk_interview_date_in_utc.astimezone(tz_msk)
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
+    today = formats.date_format(msk_interview_date_in_utc, "SHORT_DATE_FORMAT")
     assert time_str == "18:00"  # expected UTC+3
-    url = reverse("admission:interviews:list") + "?campaign="
+    url = reverse("admission:interviews:list") + f"?campaign=&status=&date_from={today}&date_to={today}"
     response = client.get(url)
     assert response.status_code == 200
     html = BeautifulSoup(response.content, "html.parser")
@@ -214,7 +216,7 @@ def test_interview_list(settings, client, curator):
     localized = interview_date_in_utc.astimezone(tz)
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "19:00"  # expected UTC + 7
-    url = reverse("admission:interviews:list") + "?campaign="
+    url = reverse("admission:interviews:list") + f"?campaign=&status=&date_from={today}&date_to={today}"
     response = client.get(url)
     assert response.status_code == 200
     html = BeautifulSoup(response.content, "html.parser")

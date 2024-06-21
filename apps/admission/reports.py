@@ -82,7 +82,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 interview_comments = ""
                 for c in interview.comments.all():
                     author = c.interviewer.get_full_name()
-                    interview_comments += f"{author}: {c.score}\n{c.text}\n\n"
+                    interview_comments += f"{author}:\n{c.text}\n\n"
                 index = interview_section_indexes[interview.section]
                 interview_details[index] = interview.get_average_score_display()
                 interview_details[index + 1] = interview_comments.rstrip()
