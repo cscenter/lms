@@ -11,14 +11,18 @@ from django.conf import settings
 
 
 class Command(CurrentCampaignMixin, BaseCommand):
-    help = """Give or take back interviewer role from Users in csv"""
+    help = """
+    Give or take back interviewer role from Users in csv
+    Example of usage: 
+        ./manage.py create_delete_role_group --filename=interviewers.csv --default_branch=msk --role=INTERVIEWER
+    """
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument(
             "--filename",
             type=str,
-            default='interviewers.csv',
+            default='emails.csv',
             help="csv file name",
         )
         parser.add_argument(
@@ -39,12 +43,19 @@ class Command(CurrentCampaignMixin, BaseCommand):
             dest="take_back",
             help="Take roles back"
         )
+        parser.add_argument(
+            "--role",
+            type=str,
+            required=True,
+            help="Role to give or take back",
+        )
 
     def handle(self, *args, **options):
         delimiter = options["delimiter"]
         filename = options["filename"]
         take_back = options["take_back"]
         default_branch = options["default_branch"]
+        role = options["role"]
         available = Branch.objects.filter(
             active=True, site_id=settings.SITE_ID
         )
@@ -58,14 +69,14 @@ class Command(CurrentCampaignMixin, BaseCommand):
             with transaction.atomic():
                 headers = next(reader)
                 for row in reader:
-                    interviewer: User = User.objects.get(email__iexact=row[0])
-                    branch = interviewer.branch
+                    user: User = User.objects.get(email__iexact=row[0])
+                    branch = user.branch
                     if not branch:
-                        self.stdout.write(self.style.WARNING(f"{interviewer} doesn't have branch. Using default one"))
+                        self.stdout.write(self.style.WARNING(f"{user} doesn't have branch. Using default one"))
                         branch = default_branch
-                    role = Roles.INTERVIEWER
+                    role = getattr(Roles, role)
                     if take_back:
-                        interviewer.remove_group(role, branch=branch)
+                        user.remove_group(role, branch=branch)
                     else:
-                        interviewer.add_group(role, branch=branch)
+                        user.add_group(role, branch=branch)
 

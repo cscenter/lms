@@ -702,6 +702,9 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         except Exam.DoesNotExist:
             return None
 
+    def get_all_interview_score(self) -> int:
+        return sum(Comment.objects.filter(interview__applicant=self).values_list('score', flat=True))
+
     def get_university_display(self) -> Optional[str]:
         if self.university is not None:
             return self.university.name

@@ -56,6 +56,8 @@ def test_simple_interviews_list(client, curator, settings):
     campaign = CampaignFactory(current=True, branch=branch_nsk)
     today_local_nsk = now_local(branch_nsk.get_timezone())
     today_local_nsk_date = formats.date_format(today_local_nsk, "SHORT_DATE_FORMAT")
+    date_to = datetime.datetime(today_local_nsk.year, 8, 1)
+    date_to = formats.date_format(date_to, "SHORT_DATE_FORMAT")
     interview1, interview2, interview3 = InterviewFactory.create_batch(
         3,
         interviewers=[interviewer],
@@ -71,11 +73,11 @@ def test_simple_interviews_list(client, curator, settings):
     response = client.get(reverse("admission:interviews:list"))
     # For curator set default filters and redirect
     assert response.status_code == 302
-    assert f"campaign={campaign.pk}" in response.url
+    assert f"campaign=" in response.url
     assert f"status={Interview.COMPLETED}" in response.url
     assert f"status={Interview.APPROVED}" in response.url
     assert f"date_from={today_local_nsk_date}" in response.url
-    assert f"date_to={today_local_nsk_date}" in response.url
+    assert f"date_to={date_to}" in response.url
 
     def format_url(campaign_id, date_from: str, date_to: str):
         return (

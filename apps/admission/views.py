@@ -586,7 +586,7 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
         return context
 
 
-class ApplicantDetailView(InterviewerOnlyMixin, TemplateResponseMixin, BaseCreateView):
+class ApplicantDetailView(CuratorOnlyMixin, TemplateResponseMixin, BaseCreateView):
     form_class = InterviewForm
     template_name = "admission/applicant_detail.html"
 
@@ -742,26 +742,22 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
 
     def get(self, request, *args, **kwargs):
         """
-        Redirects curator to appropriate campaign if no any provided.
+        Redirects curator to page with appropriate parameters for correct work of 'download_csv'.
         """
         user = self.request.user
-        if user.is_curator and "campaign" not in self.request.GET:
-            # Try to find user preferred current campaign id
-            campaign = get_default_campaign_for_user(user)
-            if not campaign:
-                return HttpResponseRedirect(reverse("admission:applicants:list"))
-            else:
-                today_local = now_local(campaign.branch.get_timezone())
-            date = formats.date_format(today_local, "SHORT_DATE_FORMAT")
-            params = parse.urlencode(
-                {
-                    "campaign": campaign.pk,
+        is_param_lost = any(param not in self.request.GET for param in ["status", "date_from", "date_to"])
+        if is_param_lost:
+            today = formats.date_format(timezone.now(), "SHORT_DATE_FORMAT")
+            date_to = datetime(timezone.now().year, 8, 1)
+            date_to = formats.date_format(date_to, "SHORT_DATE_FORMAT")
+            params = {
                     "status": [Interview.COMPLETED, Interview.APPROVED],
-                    "date_from": date,
-                    "date_to": date,
-                },
-                doseq=True,
-            )
+                    "date_from": today,
+                    "date_to": date_to,
+                }
+            if user.is_curator and "campaign" not in self.request.GET:
+                params.update({"campaign": ""})
+            params = parse.urlencode(params, doseq=True)
             url = "{}?{}".format(reverse("admission:interviews:list"), params)
             return HttpResponseRedirect(redirect_to=url)
         if "download_csv" in request.GET:
@@ -779,18 +775,6 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         if self.request.user.is_curator:
             return InterviewsCuratorFilter
         return InterviewsFilter
-
-    def get_filterset_kwargs(self, filterset_class):
-        kwargs = super().get_filterset_kwargs(filterset_class)
-        kwargs["request"] = self.request
-        if not kwargs["data"]:
-            today = formats.date_format(timezone.now(), "SHORT_DATE_FORMAT")
-            kwargs["data"] = {
-                "status": [Interview.COMPLETED, Interview.APPROVED],
-                "date_from": today,
-                "date_to": today,
-            }
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -841,7 +825,8 @@ class InterviewListCSVView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, *args, **kwargs):
         date_from = datetime.strptime(request.GET.get("date_from"), "%d.%m.%Y")
         date_to = datetime.strptime(request.GET.get("date_to"), "%d.%m.%Y")
-        campaign = int(request.GET.get("campaign"))
+        campaign = request.GET.get("campaign")
+        campaign = int(campaign) if campaign else None
         response = HttpResponse(content_type="text/csv; charset=utf-8")
         filename = f"interviews_{date_from.strftime('%d.%m.%Y')}_{date_to.strftime('%d.%m.%Y')}.csv"
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
@@ -855,12 +840,13 @@ class InterviewListCSVView(CuratorOnlyMixin, generic.base.View):
             "applicant_name",
             "interviewer_name",
         ]
+        campaign_filter = Q(applicant__campaign=campaign) if campaign else Q()
         writer.writerow(headers)
         interviews = (
             Interview.objects.select_related("applicant")
             .prefetch_related("interviewers")
             .filter(
-                applicant__campaign=campaign,
+                campaign_filter,
                 date__date__gte=date_from.strftime("%Y-%m-%d"),
                 date__date__lte=date_to.strftime("%Y-%m-%d"),
             )

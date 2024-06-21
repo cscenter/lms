@@ -36,10 +36,12 @@ class AdmissionApplicantsReport(ReportFileOutput):
         applicant_fields = [
             f for f in Applicant._meta.fields if f.name not in self.exclude_applicant_fields
         ]
-
         to_prefetch = [field.name for field in applicant_fields if isinstance(field, models.ForeignKey)]
         if "campaign" in to_prefetch:
             to_prefetch.append("campaign__branch")
+        to_prefetch.extend(["interviews",
+                            Prefetch("interviews__comments",
+                                     queryset=(Comment.objects.prefetch_related("interviewer")))])
 
         applicants = applicants.prefetch_related(*to_prefetch)
 
@@ -50,21 +52,18 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 "Результаты экзамена",
             ]
         )
+        interview_section_indexes: dict[int,int] = {}
+        for index, (value, label) in enumerate(InterviewSections.choices):
+            self.headers.append(f"{label} / балл")
+            self.headers.append(f"{label} / комментарии")
+            interview_section_indexes[value] = 2 * index
         # Collect data
         for applicant in applicants:
             row = []
             for field in applicant_fields:
                 value = getattr(applicant, field.name)
-                if field.name == "status":
-                    value = applicant.get_status_display()
-                elif field.name == "level_of_education":
-                    value = applicant.get_level_of_education_display()
-                elif field.name == "has_diploma":
-                    value = applicant.get_has_diploma_display()
-                elif field.name == "gender":
-                    value = applicant.get_gender_display()
-                elif field.name == "diploma_degree":
-                    value = applicant.get_diploma_degree_display()
+                if field.name in ("status", "level_of_education", "has_diploma", "gender", "diploma_degree"):
+                    value = getattr(applicant, f"get_{field.name}_display")()
                 elif field.name == "id":
                     value = reverse("admission:applicants:detail", args=[value])
                 elif field.name == "created":
@@ -78,6 +77,17 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 row.append(applicant.exam.score)
             else:
                 row.append("")
+            interview_details = ["" for _ in range(2 * len(InterviewSections.values))]
+            for interview in applicant.interviews.all():
+                interview_comments = ""
+                for c in interview.comments.all():
+                    author = c.interviewer.get_full_name()
+                    interview_comments += f"{author}:\n{c.text}\n\n"
+                index = interview_section_indexes[interview.section]
+                interview_details[index] = interview.get_average_score_display()
+                interview_details[index + 1] = interview_comments.rstrip()
+            row.extend(interview_details)
+            assert len(row) == len(self.headers)
             self.data.append([force_str(x) if x is not None else "" for x in row])
 
     def export_row(self, row):
@@ -128,6 +138,8 @@ class AdmissionApplicantsYearReport(AdmissionApplicantsReport):
         "preferred_study_programs_cs_note",
         "your_future_plans",
         "admin_note",
+        "interview_format",
+        "miss_count"
     }
 
     def __init__(self, year):
