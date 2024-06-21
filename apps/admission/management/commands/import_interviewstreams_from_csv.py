@@ -65,18 +65,19 @@ class Command(BaseCommand):
     def get_stream_date(self, s: str, year: int) -> datetime.date:
         """Returns a date of the slot"""
         assert self.prefix in s
-        date_start_index = 0
+        dash = '/ '
+        date_start_index = s.find(dash) + len(dash)
         date_end_index = date_start_index + 1
         if s[date_end_index] != ' ':
             date_end_index += 1
         day = int(s[date_start_index:date_end_index])
         month_start_index = date_end_index + 1
-        month_end_index = s.find('.')
+        month_end_index = s.find(' ', month_start_index)
         month = self.get_month_number(s[month_start_index:month_end_index])
         return datetime.date(day=day, month=month, year=year)
 
     def parse_time_pair(self, string: str) -> Tuple[datetime.time, datetime.time]:
-        begin, _, end = string.split(' ')
+        begin, end = string.split('-')
         begin = datetime.datetime.strptime(begin, '%H:%M').time()
         end = datetime.datetime.strptime(end, '%H:%M').time()
         return begin, end
@@ -84,7 +85,8 @@ class Command(BaseCommand):
     def get_stream_begin_end(self, s: str) -> Tuple[datetime.time, datetime.time]:
         """Returns a pair: begin and end time of available slot"""
         dash = '/ '
-        time_part = s[s.find(dash) + len(dash):]
+        second_occurrence = s.find(dash, s.find(dash) + len(dash))
+        time_part = s[second_occurrence + len(dash):]
         return self.parse_time_pair(time_part)
 
     filial_cache = {}
