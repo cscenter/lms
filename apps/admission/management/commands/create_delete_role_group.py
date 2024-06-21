@@ -76,16 +76,23 @@ class Command(BaseCommand):
                 for row in reader:
                     user: User = User.objects.get(email__iexact=row[0])
 
-                    if self.get_group_or_none(user, role=role, branch__isnull=True, site_id=settings.SITE_ID):
-                        self.stdout.write(self.style.WARNING(f'{user} already has group with this role and with no branch'))
-                        continue
-
-                    if self.get_group_or_none(user, role=role, branch=branch, site_id=settings.SITE_ID):
-                        self.stdout.write(self.style.WARNING(f'{user} already has group with this role and branch'))
-                        continue
-
                     if take_back:
+                        if self.get_group_or_none(user, role=role, branch=branch, site_id=settings.SITE_ID) is None:
+                            self.stdout.write(
+                                self.style.WARNING(f'{user} does not has group with this role and branch'))
+                            continue
+
                         user.remove_group(role, branch=branch)
                     else:
+                        if self.get_group_or_none(user, role=role, branch__isnull=True, site_id=settings.SITE_ID):
+                            self.stdout.write(
+                                self.style.WARNING(f'{user} already has group with this role and with no branch'))
+                            continue
+
+                        if self.get_group_or_none(user, role=role, branch=branch, site_id=settings.SITE_ID):
+                            self.stdout.write(
+                                self.style.WARNING(f'{user} already has group with this role and branch'))
+                            continue
+
                         user.add_group(role, branch=branch)
 
