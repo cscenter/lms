@@ -586,7 +586,7 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
         return context
 
 
-class ApplicantDetailView(InterviewerOnlyMixin, TemplateResponseMixin, BaseCreateView):
+class ApplicantDetailView(CuratorOnlyMixin, TemplateResponseMixin, BaseCreateView):
     form_class = InterviewForm
     template_name = "admission/applicant_detail.html"
 
