@@ -3,14 +3,13 @@ import csv
 from django.db import transaction
 from django.core.management import BaseCommand, CommandError
 
-from admission.management.commands._utils import CurrentCampaignMixin
 from core.models import Branch
 from users.constants import Roles
-from users.models import User
+from users.models import User, UserGroup
 from django.conf import settings
 
 
-class Command(CurrentCampaignMixin, BaseCommand):
+class Command(BaseCommand):
     help = """
     Give or take back interviewer role from Users in csv
     Example of usage: 
@@ -50,6 +49,12 @@ class Command(CurrentCampaignMixin, BaseCommand):
             help="Role to give or take back",
         )
 
+    def get_group_or_none(self, user, **kwargs):
+        try:
+            return user.groups.get(**kwargs)
+        except UserGroup.DoesNotExist:
+            return None
+
     def handle(self, *args, **options):
         delimiter = options["delimiter"]
         filename = options["filename"]
@@ -70,6 +75,15 @@ class Command(CurrentCampaignMixin, BaseCommand):
                 headers = next(reader)
                 for row in reader:
                     user: User = User.objects.get(email__iexact=row[0])
+
+                    if self.get_group_or_none(user, role=role, branch__isnull=True, site_id=settings.SITE_ID):
+                        self.stdout.write(self.style.WARNING(f'{user} already has group with this role and with no branch'))
+                        continue
+
+                    if self.get_group_or_none(user, role=role, branch=branch, site_id=settings.SITE_ID):
+                        self.stdout.write(self.style.WARNING(f'{user} already has group with this role and branch'))
+                        continue
+
                     if take_back:
                         user.remove_group(role, branch=branch)
                     else:
