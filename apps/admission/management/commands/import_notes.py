@@ -39,21 +39,25 @@ class Command(CurrentCampaignMixin, BaseCommand):
         filename = options["filename"]
         with open(filename) as csvfile:
             reader = csv.DictReader(csvfile, delimiter=delimiter)
-            prefix = '/admission/applicants/'
             with transaction.atomic():
                 for row in reader:
-                    note, applicant_url, email, format = row['Заметки'], row['ID'], row['Email'], row['Формат']
+                    note, email, format = row['Заметки'], row['Email'], row['Формат']
                     first_name, last_name, patronymic = row['Имя'], row['Фамилия'], row['Отчество']
-                    assert applicant_url.startswith(prefix)
-                    assert applicant_url[-1] == '/'
-                    applicant_id = int(applicant_url[len(prefix):-1])
-                    applicant = Applicant.objects.get(pk=applicant_id)
-                    assert(applicant.campaign in campaigns)
-                    assert(applicant.first_name == first_name)
-                    assert(applicant.last_name == last_name)
-                    assert(applicant.patronymic == patronymic)
-                    assert(applicant.email == email)
+                    try:
+                        applicant = Applicant.objects.get(campaign__in=campaigns, email=email)
+                    except Applicant.DoesNotExist:
+                        self.stdout.write(self.style.ERROR(f'Applicant with email {email} does not exist'))
+                        continue
+                    except Applicant.MultipleObjectsReturned:
+                        self.stdout.write(self.style.ERROR(f'There are many applicants with email {email}'))
+                        continue
+
+                    if (applicant.first_name != first_name.replace(' ','') or
+                        applicant.last_name != last_name.replace(' ','') or
+                        applicant.patronymic != patronymic.replace(' ','')):
+                        self.stdout.write(self.style.WARNING(f"{applicant.last_name}:{last_name.replace(' ','')}"))
+                        self.stdout.write(self.style.WARNING(f"{applicant.first_name}:{first_name.replace(' ','')}"))
+                        self.stdout.write(self.style.WARNING(f"{applicant.patronymic}:{patronymic.replace(' ','')}"))
                     applicant.admin_note = note
                     applicant.interview_format = self.get_interview_format(format)
                     applicant.save()
-                    print(f"{last_name} {first_name} {patronymic}, {applicant.campaign}: {note}, {format}")

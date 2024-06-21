@@ -459,14 +459,14 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
 
         super().save(**kwargs)
 
-    def add_group(self, role, site_id: Optional[int] = None) -> None:
+    def add_group(self, role, branch = None, site_id: Optional[int] = None) -> None:
         """Add new role associated with the current site by default"""
         site_id = site_id or settings.SITE_ID
-        self.groups.get_or_create(user=self, role=role, site_id=site_id)
+        self.groups.get_or_create(user=self, role=role, branch=branch, site_id=site_id)
 
-    def remove_group(self, role, site_id: int = None):
+    def remove_group(self, role, branch = None, site_id: int = None):
         sid = site_id or settings.SITE_ID
-        self.groups.filter(user=self, role=role, site_id=sid).delete()
+        self.groups.filter(user=self, role=role, branch=branch, site_id=sid).delete()
 
     @staticmethod
     def generate_random_username(length=30,
