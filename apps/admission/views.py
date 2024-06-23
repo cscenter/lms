@@ -756,7 +756,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         user = self.request.user
         is_param_lost = any(param not in self.request.GET for param in ["status", "date_from", "date_to"])
         if is_param_lost:
-            today = formats.date_format(timezone.now(), "SHORT_DATE_FORMAT")
+            today = formats.date_format(now_local(user.branch.get_timezone()), "SHORT_DATE_FORMAT")
             date_to = datetime(timezone.now().year, 8, 1)
             date_to = formats.date_format(date_to, "SHORT_DATE_FORMAT")
             params = {

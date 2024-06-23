@@ -440,7 +440,7 @@ def test_get_applicants_for_invitation_with_filters(client, settings):
             elif applicant.miss_count > 3 and miss_count == 4:
                 assert applicant in qs
             else:
-                assert applicant not in qs
+                assert applicant not in qs, f'{applicant=}, {applicant.miss_count=}, {miss_count=}'
 
 @pytest.mark.django_db
 def test_get_streams(client, settings):

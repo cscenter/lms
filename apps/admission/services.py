@@ -73,7 +73,7 @@ def get_ongoing_interview_streams() -> models.QuerySet[InterviewStream]:
 
 
 def get_applicants_for_invitation(
-    *, campaign: Campaign, section: str, format=None, last_name=None,  track=None, way_to_interview=None,
+    *, campaign: Campaign, section: str, format=None, last_name=None, track=None, way_to_interview=None,
     number_of_misses=None
 ) -> models.QuerySet[Applicant]:
     """
@@ -107,7 +107,7 @@ def get_applicants_for_invitation(
 
     track_filter = Q()
     if track:
-        track_filter = Q(new_track=(track=="alternative"))
+        track_filter = Q(new_track=(track == "alternative"))
 
     way_filter = Q()
     if way_to_interview:
@@ -120,9 +120,8 @@ def get_applicants_for_invitation(
         else:
             raise ValueError(f"Unsupported value {way_to_interview}")
 
-
     miss_filter = Q()
-    if number_of_misses:
+    if number_of_misses or number_of_misses == 0:
         if number_of_misses in range(0, 4):
             way_filter = Q(miss_count=number_of_misses)
         elif number_of_misses == 4:
@@ -256,7 +255,6 @@ def get_streams(
     bucket = bucketize(slots, key=lambda s: s.stream)
 
     return {stream: slots for stream, slots in bucket.items() if stream.slots_free_count != 0}
-
 
 
 # TODO: change exception type
