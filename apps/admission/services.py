@@ -73,7 +73,7 @@ def get_ongoing_interview_streams() -> models.QuerySet[InterviewStream]:
 
 
 def get_applicants_for_invitation(
-    *, campaign: Campaign, section: str, format=None, track=None, way_to_interview=None,
+    *, campaign: Campaign, section: str, format=None, last_name=None,  track=None, way_to_interview=None,
     number_of_misses=None
 ) -> models.QuerySet[Applicant]:
     """
@@ -98,15 +98,19 @@ def get_applicants_for_invitation(
                       .values("applicant_id"))
 
     format_filter = Q()
-    if format is not None:
+    if format:
         format_filter = Q(interview_format=format) | Q(interview_format=ApplicantInterviewFormats.ANY)
 
+    last_name_filter = Q()
+    if last_name:
+        last_name_filter = Q(last_name__icontains=last_name)
+
     track_filter = Q()
-    if track is not None:
+    if track:
         track_filter = Q(new_track=(track=="alternative"))
 
     way_filter = Q()
-    if way_to_interview is not None:
+    if way_to_interview:
         if way_to_interview == "exam":
             way_filter = Q(status=ApplicantStatuses.PASSED_EXAM)
         elif way_to_interview == "olympiad":
@@ -118,7 +122,7 @@ def get_applicants_for_invitation(
 
 
     miss_filter = Q()
-    if number_of_misses is not None:
+    if number_of_misses:
         if number_of_misses in range(0, 4):
             way_filter = Q(miss_count=number_of_misses)
         elif number_of_misses == 4:
@@ -132,6 +136,7 @@ def get_applicants_for_invitation(
             track_filter,
             way_filter,
             miss_filter,
+            last_name_filter,
             campaign=campaign,
             status__in=ApplicantStatuses.RIGHT_BEFORE_INTERVIEW,
         )

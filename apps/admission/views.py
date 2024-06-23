@@ -239,6 +239,7 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         number_of_misses = serializers.ChoiceField(
             choices=InvitationCreateInterviewStreamFilter.ApplicantMisses, required=False
         )
+        last_name = serializers.CharField(required=False)
 
     class InputSerializer(serializers.Serializer):
         streams = serializers.ListField(
@@ -294,12 +295,14 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         # Create interview invitations
         campaign = filter_serializer.validated_data["campaign"]
         section = filter_serializer.validated_data["section"]
-        format = filter_serializer.validated_data.get("format")
-        track = filter_serializer.validated_data.get("track")
-        way_to_interview = filter_serializer.validated_data.get("way_to_interview")
-        number_of_misses = filter_serializer.validated_data.get("number_of_misses")
-        applicants = get_applicants_for_invitation(campaign=campaign, section=section, format=format, track=track,
-                                          way_to_interview=way_to_interview, number_of_misses=number_of_misses)
+        format = filter_serializer.validated_data.get("format", "")
+        track = filter_serializer.validated_data.get("track", "")
+        way_to_interview = filter_serializer.validated_data.get("way_to_interview", "")
+        number_of_misses = filter_serializer.validated_data.get("number_of_misses", "")
+        last_name = filter_serializer.validated_data.get("last_name", "")
+        applicants = get_applicants_for_invitation(campaign=campaign, section=section, format=format,
+                                                   last_name=last_name, track=track, way_to_interview=way_to_interview,
+                                                   number_of_misses=number_of_misses)
         applicants = applicants.filter(pk__in=input_serializer.validated_data["ids"])
         free_slots = sum(stream.slots_free_count for stream in streams)
         if free_slots < len(applicants):
@@ -318,7 +321,10 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
                 )
         messages.success(request, "Приглашения успешно созданы", extra_tags="timeout")
         url = reverse("admission:interviews:invitations:send")
-        redirect_to = f"{url}?campaign={campaign.id}&section={section}"
+        redirect_to = f"{url}?campaign={campaign.id}&section={section}&format={format}" \
+                        f"&last_name={last_name}&track={track}&way_to_interview={way_to_interview}" \
+                        f"&number_of_misses={number_of_misses}"
+        print(redirect_to)
         return HttpResponseRedirect(redirect_to)
 
     @staticmethod
@@ -353,16 +359,18 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         filter_serializer = kwargs["filter_serializer"]
         campaign = filter_serializer.validated_data["campaign"]
         section = filter_serializer.validated_data["section"]
-        format = filter_serializer.validated_data.get("format")
-        track = filter_serializer.validated_data.get("track")
-        way_to_interview = filter_serializer.validated_data.get("way_to_interview")
-        number_of_misses = filter_serializer.validated_data.get("number_of_misses")
+        format = filter_serializer.validated_data.get("format", "")
+        track = filter_serializer.validated_data.get("track", "")
+        way_to_interview = filter_serializer.validated_data.get("way_to_interview", "")
+        number_of_misses = filter_serializer.validated_data.get("number_of_misses", "")
+        last_name = filter_serializer.validated_data.get("last_name", "")
         interview_stream_filterset = self.get_interview_stream_filterset(
             filter_serializer
         )
 
         applicants = (
-            get_applicants_for_invitation(campaign=campaign, section=section, format=format, track=track,
+            get_applicants_for_invitation(campaign=campaign, section=section, format=format, last_name=last_name,
+                                          track=track,
                                           way_to_interview=way_to_interview, number_of_misses=number_of_misses)
             .select_related(
                 "exam",
@@ -384,8 +392,9 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         page_number = self.request.GET.get("page")
         page = paginator.get_page(page_number)
         paginator_url = reverse("admission:interviews:invitations:send")
-        paginator_url = f"{paginator_url}?campaign={campaign.id}&section={section}"
-
+        paginator_url = f"{paginator_url}?campaign={campaign.id}&section={section}&format={format}" \
+                        f"&last_name={last_name}&track={track}&way_to_interview={way_to_interview} " \
+                        f"&number_of_misses={number_of_misses}"
         context = {
             "stream_filter_form": interview_stream_filterset.form,
             "stream_form": InterviewStreamInvitationForm(
@@ -798,7 +807,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         q = (
             Interview.objects.filter(applicant__campaign__branch__in=branches)
             .select_related("applicant__campaign__branch", "venue__city")
-            .prefetch_related("interviewers")
+            .prefetch_related("interviewers", "slot__stream")
             .annotate(average=Coalesce(Avg("comments__score"), Value(0.0)))
             .order_by("date", "pk")
         )
@@ -886,6 +895,7 @@ class InterviewDetailView(InterviewerOnlyMixin, generic.TemplateView):
             Prefetch(
                 "comments", queryset=(Comment.objects.select_related("interviewer"))
             ),
+            "slot__stream"
         )
         interview = get_object_or_404(qs)
         context = get_applicant_context(self.request, interview.applicant_id)
