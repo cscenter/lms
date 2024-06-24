@@ -64,11 +64,11 @@
                               <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.full_name }}"
                                    alt="{{ interviewer.full_name }}" src="{{ interviewer.photo }}" width="40" />
                             </a>
-                          {{ interviewer.last_name }}
                           {% else %}
                             <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.full_name }}">
                               {{ interviewer.full_name|slice(":1") }}</div>
                           {% endif %}
+                          {{ interviewer.last_name }}
                         </a>
                       </li>
                     {% endfor %}
@@ -85,12 +85,12 @@
           <table class="table">
             <thead>
             <tr>
-              <th>Поток</th>
-              <th>Секция</th>
-              <th>Формат</th>
-              <th>Слоты</th>
-              <th>Пригл. без&nbsp;ответа</th>
-              <th>Собеседующие</th>
+              <th style="width: 15%;">Поток</th>
+              <th style="width: 15%;">Секция</th>
+              <th style="width: 15%;">Формат</th>
+              <th style="width: 12%;">Слоты</th>
+              <th style="width: 20%;">Пригл. без&nbsp;ответа</th>
+              <th style="width: 23%;">Собеседующие</th>
             </tr>
             </thead>
             <tbody>
@@ -113,14 +113,14 @@
                               <a target="_blank" href="{{ interviewer.get_absolute_url() }}">
                                 <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name() }}"
                                      alt="{{ interviewer.get_full_name() }}" src="{{ im.url }}" width="40" /></a>
-                              {{ interviewer.last_name }}
+
                             {% else %}
                               <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name() }}">
                                 {{ interviewer.get_full_name()|slice(":1") }}
                               </div>
-                              {{ interviewer.last_name }}
                             {% endif %}
                           {% endwith -%}
+                          {{ interviewer.last_name }}
                         </li>
                       {% endfor %}
                     </ul>

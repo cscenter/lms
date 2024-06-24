@@ -393,7 +393,7 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         page = paginator.get_page(page_number)
         paginator_url = reverse("admission:interviews:invitations:send")
         paginator_url = f"{paginator_url}?campaign={campaign.id}&section={section}&format={format}" \
-                        f"&last_name={last_name}&track={track}&way_to_interview={way_to_interview} " \
+                        f"&last_name={last_name}&track={track}&way_to_interview={way_to_interview}" \
                         f"&number_of_misses={number_of_misses}"
         context = {
             "stream_filter_form": interview_stream_filterset.form,
