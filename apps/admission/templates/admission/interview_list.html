@@ -37,7 +37,11 @@
                 <th>Собеседующие</th>
                 <th>
                   {% if not filter.form.status.value or filter.form.status.value == "completed" or filter.form.status.value == "agreed" %}
-                    Средний&nbsp;балл{% endif %}</th>
+                    Средний&nbsp;балл
+                  {% else %}
+                    Статус
+                  {% endif %}</th>
+                <th>Формат</th>
               </tr>
               </thead>
               <tbody>
@@ -88,6 +92,9 @@
                     {% elif not filter.form.status.value or filter.form.status.value|length > 1 %}
                       <span>{{ interview.get_status_display }}</span>
                     {% endif %}
+                  </td>
+                  <td>
+                    {{ interview.slot.stream.get_format_display }}
                   </td>
                 </tr>
                 {% empty %}

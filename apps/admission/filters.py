@@ -172,6 +172,7 @@ class InvitationCreateInterviewStreamFilter(InterviewStreamFilter):
     number_of_misses = django_filters.ChoiceFilter(
         label=_("Applicant number of missed interviews"), choices=ApplicantMisses
     )
+    last_name = django_filters.CharFilter(label=_("Last Name"))
 
     @property
     def form(self):
@@ -182,7 +183,7 @@ class InvitationCreateInterviewStreamFilter(InterviewStreamFilter):
             self._form.helper.layout = Layout(
                 Row(
                     Div("campaign", css_class="col-xs-3"), Div("section", css_class="col-xs-3"),
-                        Div("format", css_class="col-xs-3")),
+                        Div("format", css_class="col-xs-3"), Div("last_name", css_class="col-xs-3")),
                 Row(
                     Div("track", css_class="col-xs-3"), Div("way_to_interview", css_class="col-xs-3"),
                         Div("number_of_misses", css_class="col-xs-3"),
