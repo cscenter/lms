@@ -756,8 +756,14 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         user = self.request.user
         is_param_lost = any(param not in self.request.GET for param in ["status", "date_from", "date_to"])
         if is_param_lost:
-            today = formats.date_format(now_local(user.branch.get_timezone()), "SHORT_DATE_FORMAT")
-            date_to = datetime(timezone.now().year, 8, 1)
+            if user.branch:
+                local_timezone = user.branch.get_timezone()
+            else:
+                campaign = get_default_campaign_for_user(user)
+                local_timezone = campaign.branch.get_timezone()
+            local_time = now_local(local_timezone)
+            today = formats.date_format(local_time, "SHORT_DATE_FORMAT")
+            date_to = datetime(local_time.year, 8, 1)
             date_to = formats.date_format(date_to, "SHORT_DATE_FORMAT")
             params = {
                     "status": [Interview.COMPLETED, Interview.APPROVED],
