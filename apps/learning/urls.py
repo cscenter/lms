@@ -26,8 +26,8 @@ urlpatterns = [
 
     path('learning/', include('learning.study.urls')),
     path('learning/useful/', UsefulListView.as_view(), name='learning_useful'),
-    # Commented to return fast in autumn semester
-    # path('learning/internships/', InternshipListView.as_view(), name='learning_internships'),
+    # Comment if not needed to return fast in autumn semester
+    path('learning/internships/', InternshipListView.as_view(), name='learning_internships'),
     path('learning/hc/', HonorCodeView.as_view(), name='honor_code'),
     path('learning/programs/', ProgramsView.as_view(), name='programs'),
     path('learning/library/', include("library.urls")),

@@ -16,9 +16,7 @@
                         </a>
                         <div class="panel-collapse collapse" id="answer-{{ qa.pk }}"  aria-expanded="false">
                             <div class="panel-body _arrowed">
-                            {% markdown 3600 "internships_answers" qa.pk qa.modified %}
-                                {{ qa.content }}
-                            {% endmarkdown %}
+                                {{ qa.content|safe }}
                             </div>
                         </div>
                     </div>
