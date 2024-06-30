@@ -850,15 +850,18 @@ class InterviewListCSVView(CuratorOnlyMixin, generic.base.View):
         if self.request.user.time_zone:
             time_zone = self.request.user.time_zone
         headers = [
-            "date",
-            f"time ({time_zone})",
-            "applicant_name",
-            "interviewer_name",
+            _("Date"),
+            _("Time") + " " + str(time_zone),
+            _("Section"),
+            _("Applicant"),
+            _("Interviewer"),
+            _("Status"),
+            _("Format")
         ]
         campaign_filter = Q(applicant__campaign=campaign) if campaign else Q()
         writer.writerow(headers)
         interviews = (
-            Interview.objects.select_related("applicant")
+            Interview.objects.select_related("applicant", "slot__stream")
             .prefetch_related("interviewers")
             .filter(
                 campaign_filter,
@@ -869,10 +872,15 @@ class InterviewListCSVView(CuratorOnlyMixin, generic.base.View):
         )
         for interview in interviews:
             dt = interview.date.astimezone(time_zone)
+            try:
+                interview_format = interview.slot.stream.get_format_display()
+            except Interview.slot.RelatedObjectDoesNotExist:
+                interview_format = ''
             writer.writerow(
                 [
                     dt.date().strftime("%d.%m.%Y"),
                     dt.time().strftime("%H:%M"),
+                    interview.get_section_display(),
                     interview.applicant.full_name,
                     ", ".join(
                         map(
@@ -880,6 +888,8 @@ class InterviewListCSVView(CuratorOnlyMixin, generic.base.View):
                             interview.interviewers.all(),
                         )
                     ),
+                    interview.get_status_display(),
+                    interview_format
                 ]
             )
         return response
