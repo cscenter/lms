@@ -1581,6 +1581,11 @@ class InterviewSlot(TimeStampedModel):
         date = datetime.datetime.combine(self.stream.date, self.start_at)
         return timezone.make_aware(date, self.stream.get_timezone())
 
+    @property
+    def datetime_end_local(self):
+        date = datetime.datetime.combine(self.stream.date, self.end_at)
+        return timezone.make_aware(date, self.stream.get_timezone())
+
 
 class InterviewInvitationQuerySet(query.QuerySet):
     # FIXME: move to selectors

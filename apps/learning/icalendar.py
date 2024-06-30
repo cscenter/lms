@@ -14,6 +14,8 @@ from django.contrib.sites.models import Site
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from admission.models import Interview
+from admission.roles import Roles
 from core.urls import reverse
 from courses.models import Assignment, CourseClass
 from learning.models import Event, StudentAssignment
@@ -211,6 +213,26 @@ class StudyEventICalendarEvent(ICalendarEvent):
             'categories': vInline('CSC,EVENT')
         }
 
+class InteviewICalendarEvent(ICalendarEvent):
+    def get_calendar_event_id(self, instance: Interview, user):
+        return f"interviews-{user.pk}-{instance.pk}-admission@{self.domain}"
+
+    def _model_to_dict(self, instance: Interview):
+        absolute_url = self.url_builder(instance.get_absolute_url())
+        description = str(instance)
+        summary = f"Собеседование - {instance.get_section_display()} ({instance.slot.stream.get_format_display()})"
+        starts_at = instance.slot.datetime_local
+        ends_at = instance.slot.datetime_end_local
+        return {
+            'url': vUri(absolute_url),
+            'summary': vText(summary),
+            'description': vText(description),
+            'dtstart': starts_at,
+            'dtend': ends_at,
+            'created': instance.created,
+            'last-modified': instance.modified
+        }
+
 
 class ICalendarURL(NamedTuple):
     code: Literal["classes", "assignments", "events"]
@@ -234,4 +256,9 @@ def get_icalendar_links(account: User,
         ICalendarURL(code="assignments", title=str(_("Assignments")), url=url_builder(url_assignments)),
         ICalendarURL(code="events", title=str(_("Events")), url=url_builder(url_events)),
     ]
+    if Roles.INTERVIEWER in account.roles:
+        url_interviews = reverse('user_ical_interviews',
+                              subdomain=settings.LMS_SUBDOMAIN,
+                              args=[account.pk])
+        urls.append(ICalendarURL(code="interviews", title=str(_("Interviews")), url=url_builder(url_interviews)))
     return urls
