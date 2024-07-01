@@ -38,12 +38,12 @@
             <table class="table">
               <thead>
               <tr>
-                <th>#</th>
-                <th>Поступающий</th>
-                <th>Тест</th>
-                <th>Экз.</th>
-                <th>Собеседования</th>
-                <th>Итог</th>
+                <th style="width: 3%;">#</th>
+                <th style="width: 20%;">Поступающий</th>
+                <th style="width: 8%;">Тест</th>
+                <th style="width: 8%;">Экз.</th>
+                <th style="width: 20%;">Собеседования</th>
+                <th style="width: 20%;">Итог</th>
               </tr>
               </thead>
               <tbody>
@@ -53,11 +53,6 @@
                     <td>{{ loop.index }}</td>
                     <td class="applicant">
                       <a href="{{ url("admission:applicants:detail", pk=applicant.pk) }}">{{ applicant.full_name }}</a><br>
-                      {% if applicant.university_other %}
-                        {{ applicant.university_other }}
-                      {% elif applicant.university_legacy %}
-                        {% if applicant.university_legacy.abbr %}{{ applicant.university_legacy.abbr }}{% else %}{{ applicant.university_legacy.name }}{% endif %}
-                      {% endif %}
                     </td>
                     <td>
                       {% if applicant.online_test is defined %}
@@ -75,7 +70,7 @@
                     </td>
                     <td>
                       {% for interview in applicant.interviews.all() %}
-                        <a class="nowrap" href="{{ interview.get_absolute_url() }}">
+                        <a href="{{ interview.get_absolute_url() }}">
                           {{ interview.get_section_display() }}:
                           {% if interview.status == interview.COMPLETED %}
                             {% if interview.average_score != None %}

@@ -49,11 +49,11 @@
             <thead>
             <tr>
               <th>Поступающий</th>
-              <th>Набор</th>
-              <th>Направление</th>
-              <th style="width: 60px;">Тест</th>
-              <th style="width: 60px;">Экз.</th>
-              <th style="width: 60px;">Cоб.</th>
+              <th style="width: 20%;">Набор</th>
+              <th style="width: 25%;">Статус</th>
+              <th style="width: 6%;">Тест</th>
+              <th style="width: 6%;">Экз.</th>
+              <th style="width: 6%;">Cоб.</th>
             </tr>
             </thead>
             <tbody>
@@ -75,15 +75,11 @@
                         </button>
                       </form>
                     {% endif %}
-                  {% endif %}<br>
-                  {% if applicant.university_other %}{{ applicant.university_other }}{% else %}{% if applicant.university_legacy.abbr %}
-                    {{ applicant.university_legacy.abbr }}{% else %}{{ applicant.university_legacy.name }}{% endif %}{% endif %}
+                  {% endif %}
                   {% if applicant.level_of_education %}<br>{{ applicant.get_level_of_education_display() }}{% endif %}
                 </td>
                 <td>{{ applicant.campaign.branch.name }},&nbsp;{{ applicant.campaign.year }}</td>
-                <td>{% if applicant.preferred_study_programs %}
-                  {% for p in applicant.preferred_study_programs %}{{ p|upper }}{% if not loop.last %}, {% endif %}{% endfor %}
-                {% else %}-{% endif %}
+                <td>{{ applicant.get_status_display() }}
                 </td>
                 <td>{% if applicant.online_test %}{{ applicant.online_test.score_display() }}{% else %}-{% endif %}</td>
                 <td>{% if applicant.exam %}{{ applicant.exam.score_display() }}{% else %}-{% endif %}</td>
