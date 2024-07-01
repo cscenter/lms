@@ -138,8 +138,7 @@ class AdmissionApplicantsYearReport(AdmissionApplicantsReport):
         "preferred_study_programs_cs_note",
         "your_future_plans",
         "admin_note",
-        "interview_format",
-        "miss_count"
+        "interview_format"
     }
 
     def __init__(self, year):
