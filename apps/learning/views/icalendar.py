@@ -12,7 +12,7 @@ from admission.selectors import get_ongoing_interviews
 from learning.icalendar import (
     StudentAssignmentICalendarEvent, StudentClassICalendarEvent,
     StudyEventICalendarEvent, TeacherAssignmentICalendarEvent,
-    TeacherClassICalendarEvent, generate_icalendar, InteviewICalendarEvent
+    TeacherClassICalendarEvent, generate_icalendar, InterviewICalendarEvent
 )
 from learning.models import StudentAssignment
 from learning.selectors import (
@@ -141,6 +141,6 @@ class ICalInterviewsView(UserICalendarView):
             file_name="interviews.ics"
         )
     def get_calendar_events(self, user, site, url_builder, tz):
-        event_factory = InteviewICalendarEvent(tz, url_builder, site)
+        event_factory = InterviewICalendarEvent(tz, url_builder, site)
         for interview in get_ongoing_interviews(user):
             yield event_factory.create(interview, user)

@@ -1,11 +1,12 @@
 import datetime
-from pprint import pprint
+from unittest import mock
 
 import factory
 import pytest
 from django.conf import settings
 
 from django.contrib.sites.models import Site
+from django.utils import timezone
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
@@ -172,38 +173,39 @@ def test_view_course_offerings(client):
 def test_view_course_offerings_invited_restriction(client):
     """Invited students should only see courses
     for which they were enrolled or invited"""
-    url = reverse('course_list', subdomain=settings.LMS_SUBDOMAIN)
-    future = now() + datetime.timedelta(days=3)
-    autumn_term = SemesterFactory.create_current(enrollment_period__ends_on=future.date())
-    site = SiteFactory(id=settings.SITE_ID)
-    course_invitation = CourseInvitationFactory(course__semester=autumn_term)
-    student_profile = StudentProfileFactory(type=StudentTypes.INVITED)
-    student = student_profile.user
-    complete_student_profile(student, site, course_invitation.invitation)
+    with mock.patch('django.utils.timezone.now', return_value=timezone.make_aware(datetime.datetime(2022, 10, 31))):
+        url = reverse('course_list', subdomain=settings.LMS_SUBDOMAIN)
+        future = now() + datetime.timedelta(days=3)
+        autumn_term = SemesterFactory.create_current(enrollment_period__ends_on=future.date())
+        site = SiteFactory(id=settings.SITE_ID)
+        course_invitation = CourseInvitationFactory(course__semester=autumn_term)
+        student_profile = StudentProfileFactory(type=StudentTypes.INVITED, created = timezone.now())
+        student = student_profile.user
+        complete_student_profile(student, site, course_invitation.invitation)
 
-    autumn_courses = CourseFactory.create_batch(3, semester=autumn_term)
-    enrolled_curr, unenrolled_curr, can_enroll_curr = autumn_courses
-    EnrollmentFactory(student=student,
-                      student_profile=student_profile,
-                      course=enrolled_curr)
-    EnrollmentFactory(student=student,
-                      student_profile=student_profile,
-                      course=unenrolled_curr,
-                      is_deleted=True)
+        autumn_courses = CourseFactory.create_batch(3, semester=autumn_term)
+        enrolled_curr, unenrolled_curr, can_enroll_curr = autumn_courses
+        EnrollmentFactory(student=student,
+                          student_profile=student_profile,
+                          course=enrolled_curr)
+        EnrollmentFactory(student=student,
+                          student_profile=student_profile,
+                          course=unenrolled_curr,
+                          is_deleted=True)
 
-    client.login(student)
-    response = client.get(url)
-    terms_courses = list(response.context_data['courses'].values())
-    founded_courses = sum(map(len, terms_courses))
-    assert founded_courses == 1
-    assert terms_courses[0][0]['name'] == enrolled_curr.meta_course.name
+        client.login(student)
+        response = client.get(url)
+        terms_courses = list(response.context_data['courses'].values())
+        founded_courses = sum(map(len, terms_courses))
+        assert founded_courses == 1
+        assert terms_courses[0][0]['name'] == enrolled_curr.meta_course.name
 
-    response = client.get(course_invitation.invitation.get_absolute_url())
-    assert response.status_code == 200
-    response = client.get(url)
-    terms_courses = list(response.context_data['courses'].values())
-    founded_courses = sum(map(len, terms_courses))
-    assert founded_courses == 2
+        response = client.get(course_invitation.invitation.get_absolute_url())
+        assert response.status_code == 200
+        response = client.get(url)
+        terms_courses = list(response.context_data['courses'].values())
+        founded_courses = sum(map(len, terms_courses))
+        assert founded_courses == 2
 
 
 @pytest.mark.django_db
@@ -272,48 +274,52 @@ def test_view_course_offerings_old_invited(client):
 
 @pytest.mark.django_db
 def test_view_course_offerings_regular_in_academic(client):
-    url = reverse('course_list', subdomain=settings.LMS_SUBDOMAIN)
-    future = now() + datetime.timedelta(days=3)
-    current_term = SemesterFactory.create_current(enrollment_period__ends_on=future.date())
+    with mock.patch('django.utils.timezone.now', return_value=timezone.make_aware(datetime.datetime(2022, 10, 31))):
+        url = reverse('course_list', subdomain=settings.LMS_SUBDOMAIN)
+        future = now() + datetime.timedelta(days=3)
+        current_term = SemesterFactory.create_current(enrollment_period__ends_on=future.date())
 
-    regular_profile = StudentProfileFactory()
-    student = regular_profile.user
-    branch = regular_profile.branch
+        regular_profile = StudentProfileFactory(created=timezone.now())
+        student = regular_profile.user
+        branch = regular_profile.branch
 
-    course_enrolled, random_course = CourseFactory.create_batch(2, main_branch=branch)
-    enrollment = EnrollmentFactory(course=course_enrolled,
-                                   student=student,
-                                   student_profile=regular_profile,
-                                   grade=GradeTypes.UNSATISFACTORY)
+        course_enrolled, random_course = CourseFactory.create_batch(2, main_branch=branch)
+        enrollment = EnrollmentFactory(course=course_enrolled,
+                                       student=student,
+                                       student_profile=regular_profile,
+                                       grade=GradeTypes.UNSATISFACTORY)
 
-    curator = CuratorFactory()
-    update_student_status(student_profile=regular_profile,
-                          new_status=StudentStatuses.EXPELLED,
-                          editor=curator)
+        curator = CuratorFactory()
+        update_student_status(student_profile=regular_profile,
+                              new_status=StudentStatuses.EXPELLED,
+                              editor=curator)
 
-    client.login(student)
-    response = client.get(url)
-    terms_courses = list(response.context_data['courses'].values())
-    founded_courses = sum(map(len, terms_courses))
-    # Expelled student still have access to courses
-    assert founded_courses == 2
+        client.login(student)
+        response = client.get(url)
+        terms_courses = list(response.context_data['courses'].values())
+        founded_courses = sum(map(len, terms_courses))
+        # Expelled student still have access to courses
+        assert founded_courses == 2
 
-    site = SiteFactory(id=settings.SITE_ID)
-    course_invitation = CourseInvitationFactory(course__semester=current_term, course__main_branch=branch,
-                                                invitation__branch=branch)
-    complete_student_profile(student, site, course_invitation.invitation)
+        site = SiteFactory(id=settings.SITE_ID)
+        course_invitation = CourseInvitationFactory(course__semester=current_term, course__main_branch=branch,
+                                                    invitation__branch=branch)
+        complete_student_profile(student, site, course_invitation.invitation)
+        profile = student.get_student_profile()
+        profile.created = timezone.now()
+        profile.save()
 
-    response = client.get(url)
-    terms_courses = list(response.context_data['courses'].values())
-    founded_courses = sum(map(len, terms_courses))
-    # Show only the course the student was enrolled in
-    assert founded_courses == 1
+        response = client.get(url)
+        terms_courses = list(response.context_data['courses'].values())
+        founded_courses = sum(map(len, terms_courses))
+        # Show only the course the student was enrolled in
+        assert founded_courses == 1
 
-    client.get(course_invitation.invitation.get_absolute_url())
-    response = client.get(url)
-    terms_courses = list(response.context_data['courses'].values())
-    founded_courses = sum(map(len, terms_courses))
-    assert founded_courses == 2
+        client.get(course_invitation.invitation.get_absolute_url())
+        response = client.get(url)
+        terms_courses = list(response.context_data['courses'].values())
+        founded_courses = sum(map(len, terms_courses))
+        assert founded_courses == 2
 
 
 @pytest.mark.django_db

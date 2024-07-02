@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Callable, Iterable, List, Literal, NamedTuple
 
 import pytz
@@ -213,16 +213,21 @@ class StudyEventICalendarEvent(ICalendarEvent):
             'categories': vInline('CSC,EVENT')
         }
 
-class InteviewICalendarEvent(ICalendarEvent):
+class InterviewICalendarEvent(ICalendarEvent):
     def get_calendar_event_id(self, instance: Interview, user):
         return f"interviews-{user.pk}-{instance.pk}-admission@{self.domain}"
 
     def _model_to_dict(self, instance: Interview):
         absolute_url = self.url_builder(instance.get_absolute_url())
         description = str(instance)
-        summary = f"Собеседование - {instance.get_section_display()} ({instance.slot.stream.get_format_display()})"
-        starts_at = instance.slot.datetime_local
-        ends_at = instance.slot.datetime_end_local
+        try:
+            summary = f"Собеседование - {instance.get_section_display()} ({instance.slot.stream.get_format_display()})"
+            starts_at = instance.slot.datetime_local
+            ends_at = instance.slot.datetime_end_local
+        except Interview.slot.RelatedObjectDoesNotExist:
+            summary = f"Собеседование - {instance.get_section_display()} (Неизвестно)"
+            starts_at = instance.date_local()
+            ends_at = starts_at + timedelta(minutes=30)
         return {
             'url': vUri(absolute_url),
             'summary': vText(summary),
