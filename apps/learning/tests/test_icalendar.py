@@ -5,12 +5,14 @@ from icalendar import Calendar, Event
 
 from django.contrib.sites.models import Site
 
+from admission.constants import InterviewSections
+from admission.tests.factories import InterviewFactory
 from core.urls import reverse
 from courses.tests.factories import AssignmentFactory, CourseClassFactory, CourseFactory
 from learning.settings import Branches
 from learning.tests.factories import EnrollmentFactory, EventFactory
 from users.constants import Roles
-from users.tests.factories import StudentFactory
+from users.tests.factories import StudentFactory, UserFactory
 
 # TODO: убедиться, что для заданий/занятий учитывается таймзона пользователя из URL календаря, а не залогиненного
 # TODO: для событий - пока залогиненного
@@ -18,12 +20,17 @@ from users.tests.factories import StudentFactory
 
 @pytest.mark.django_db
 def test_smoke(client, curator, settings):
-    """Any user can view icalendar since these urls are not secret"""
+    """User can view only own icalendar since these urls are secret"""
     student = StudentFactory()
+    other_student = StudentFactory()
+    client.login(student)
     response = client.get(student.get_classes_icalendar_url())
     assert response.status_code == 200
     response = client.get(student.get_assignments_icalendar_url())
     assert response.status_code == 200
+    response = client.get(other_student.get_assignments_icalendar_url())
+    assert response.status_code == 302
+    assert response.url.startswith('/login')
 
 
 @pytest.mark.django_db
@@ -83,7 +90,27 @@ def test_assignments(client, settings, mocker):
     cal = Calendar.from_ical(resp.content)
     assert {f"{a.title} ({a.course.meta_course.name})" for a in
             chain(as_teaching, as_learning)} == {
-        evt['SUMMARY'] for evt in cal.subcomponents if isinstance(evt, Event)}
+               evt['SUMMARY'] for evt in cal.subcomponents if isinstance(evt, Event)}
+
+
+@pytest.mark.django_db
+def test_interviews(client, settings, mocker):
+    user = UserFactory(groups=[Roles.INTERVIEWER])
+    client.login(user)
+    fname = 'interviews.ics'
+    # Empty calendar
+    url = reverse('user_ical_interviews', args=[user.pk],
+                  subdomain=settings.LMS_SUBDOMAIN)
+    resp = client.get(url)
+    assert "text/calendar; charset=UTF-8" == resp['content-type']
+    assert fname in resp['content-disposition']
+    cal = Calendar.from_ical(resp.content)
+    site = Site.objects.get(pk=settings.SITE_ID)
+    assert f"Собеседования {site.name}" == cal['X-WR-CALNAME']
+    InterviewFactory.create_batch(2, interviewers=[user], section=InterviewSections.MATH)
+    resp = client.get(url)
+    cal = Calendar.from_ical(resp.content)
+    assert len([evt for evt in cal.subcomponents if isinstance(evt, Event)]) == 2
 
 
 @pytest.mark.django_db

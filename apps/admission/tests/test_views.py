@@ -176,7 +176,14 @@ def test_view_interview_list_csv(client, curator, settings):
     response = client.get(url)
     status_log_csv = response.content.decode("utf-8")
     data = [s for s in csv.reader(io.StringIO(status_log_csv))]
-    headers = ["date", "time (Europe/Moscow)", "applicant_name", "interviewer_name"]
+    headers = ["Date",
+               "Time Europe/Moscow",
+               "Section",
+                "Applicant",
+                "Interviewer",
+                "Status",
+                "Format"
+               ]
     today = today_local_spb.strftime("%d.%m.%Y")
     tomorrow = (today_local_spb + datetime.timedelta(days=1)).strftime("%d.%m.%Y")
     assert len(data) == 3

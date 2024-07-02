@@ -71,7 +71,7 @@ def course_teachers_prefetch_queryset(*, role_priority: bool = True,
     return (queryset
             .only('id', 'course_id', 'teacher_id', 'roles',
                   'teacher__first_name', 'teacher__last_name', 'teacher__patronymic',
-                  'teacher__gender', 'teacher__photo', 'teacher__cropbox_data')
+                  'teacher__gender', 'teacher__photo', 'teacher__cropbox_data', 'teacher__username' )
             .order_by(*order_by, 'teacher__last_name', 'teacher__first_name'))
 
 
