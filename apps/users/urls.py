@@ -3,7 +3,7 @@ from django.urls import include, path, re_path
 
 from learning.views import EventDetailView
 from learning.views.icalendar import (
-    ICalAssignmentsView, ICalClassesView, ICalEventsView
+    ICalAssignmentsView, ICalClassesView, ICalEventsView, ICalInterviewsView
 )
 from users.views import (
     ConnectedAuthServicesView, ProfileImageUpdate, UserDetailView, UserUpdateView
@@ -25,6 +25,7 @@ urlpatterns = [
     re_path(r'^events.ics', ICalEventsView.as_view(), name='ical_events'),
     path('users/<int:pk>/classes.ics', ICalClassesView.as_view(), name='user_ical_classes'),
     path('users/<int:pk>/assignments.ics', ICalAssignmentsView.as_view(), name='user_ical_assignments'),
+    path('users/<int:pk>/interviews.ics', ICalInterviewsView.as_view(), name='user_ical_interviews'),
 
     path('api/v1/', include(([
         path('', include((user_api_patterns, 'api'))),

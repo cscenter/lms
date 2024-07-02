@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
+from django.utils import timezone
 from django_filters import NumberFilter, OrderingFilter
 from django_filters.rest_framework import FilterSet
 from rest_framework.exceptions import ValidationError
@@ -13,7 +14,7 @@ from admission.models import (
     InterviewInvitation,
     InterviewSlot,
     ResidenceCity,
-    CampaignCity,
+    CampaignCity
 )
 from core.timezone import get_now_utc
 
@@ -140,3 +141,7 @@ def residence_city_campaigns_queryset(
     if "ordering" in filters:
         return filter_set.qs
     return filter_set.qs.order_by()
+
+def get_ongoing_interviews(user):
+    return (interview for interview in user.interview_set.select_related('slot__stream')
+            if interview.slot.datetime_local >= timezone.now())

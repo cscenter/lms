@@ -1,5 +1,6 @@
 from typing import Iterable, NamedTuple
 
+from braces.views import UserPassesTestMixin
 from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponse
@@ -7,16 +8,23 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views import generic
 
+from admission.selectors import get_ongoing_interviews
 from learning.icalendar import (
     StudentAssignmentICalendarEvent, StudentClassICalendarEvent,
     StudyEventICalendarEvent, TeacherAssignmentICalendarEvent,
-    TeacherClassICalendarEvent, generate_icalendar
+    TeacherClassICalendarEvent, generate_icalendar, InteviewICalendarEvent
 )
 from learning.models import StudentAssignment
 from learning.selectors import (
     get_student_classes, get_study_events, get_teacher_assignments, get_teacher_classes
 )
 from users.models import User
+
+class ICalendarOnlyMixin(UserPassesTestMixin):
+    raise_exception = False
+
+    def test_func(self, user):
+        return self.get_user() == user or user.is_curator
 
 
 class ICalendarMeta(NamedTuple):
@@ -26,7 +34,7 @@ class ICalendarMeta(NamedTuple):
 
 
 # TODO: add secret link for each student
-class UserICalendarView(generic.base.View):
+class UserICalendarView(ICalendarOnlyMixin, generic.base.View):
     def get(self, request, *args, **kwargs):
         user = self.get_user()
         site = self.request.site
@@ -123,3 +131,16 @@ class ICalEventsView(UserICalendarView):
             filters.append(Q(branch_id=user.branch_id))
         for e in get_study_events(filters).select_related('venue'):
             yield event_factory.create(e, user)
+
+class ICalInterviewsView(UserICalendarView):
+    @staticmethod
+    def get_calendar_meta(user, site, url_builder, tz) -> ICalendarMeta:
+        return ICalendarMeta(
+            name=f"Собеседования {site.name}",
+            description=f"Календарь собеседований {site.name} ({user.get_full_name()})",
+            file_name="interviews.ics"
+        )
+    def get_calendar_events(self, user, site, url_builder, tz):
+        event_factory = InteviewICalendarEvent(tz, url_builder, site)
+        for interview in get_ongoing_interviews(user):
+            yield event_factory.create(interview, user)
