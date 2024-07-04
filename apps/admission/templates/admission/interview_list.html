@@ -94,7 +94,7 @@
                     {% endif %}
                   </td>
                   <td>
-                    {{ interview.slot.stream.get_format_display }}
+                    {{ interview.get_format_display|default_if_none:"<не указан>" }}
                   </td>
                 </tr>
                 {% empty %}

@@ -144,4 +144,4 @@ def residence_city_campaigns_queryset(
 
 def get_ongoing_interviews(user):
     return (interview for interview in user.interview_set.select_related('slot__stream')
-            if not hasattr(interview, 'slot') or interview.slot.datetime_local >= timezone.now())
+            if interview.date_local() >= timezone.now())

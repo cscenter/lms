@@ -123,9 +123,9 @@ def get_applicants_for_invitation(
     miss_filter = Q()
     if number_of_misses or number_of_misses == 0:
         if number_of_misses in range(0, 4):
-            way_filter = Q(miss_count=number_of_misses)
+            miss_filter = Q(miss_count=number_of_misses)
         elif number_of_misses == 4:
-            way_filter = Q(miss_count__gt=3)
+            miss_filter = Q(miss_count__gt=3)
         else:
             raise ValueError(f"Unsupported value {number_of_misses}")
 
@@ -313,8 +313,10 @@ def accept_interview_invitation(
         applicant=invitation.applicant,
         status=Interview.APPROVED,
         section=slot.stream.section,
+        format=slot.stream.format,
         venue=slot.stream.venue,
         date=slot.datetime_local,
+        duration=slot.stream.duration
     )
     with transaction.atomic():
         sid = transaction.savepoint()

@@ -136,6 +136,7 @@ class InterviewFactory(factory.django.DjangoModelFactory):
     applicant = factory.SubFactory(ApplicantFactory, status=ApplicantStatuses.PASSED_EXAM)
     # TODO: replace with FuzzyDate
     date = datetime.datetime.now().replace(tzinfo=pytz.UTC) + datetime.timedelta(days=3)
+    format = InterviewFormats.OFFLINE
     venue = factory.SubFactory(
         LocationFactory, city=factory.SelfAttribute("..applicant.campaign.branch.city")
     )

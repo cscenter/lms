@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-30 17:39+0000\n"
+"POT-Creation-Date: 2024-07-04 11:00+0000\n"
 "PO-Revision-Date: 2024-06-12 12:43+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1159,7 +1159,7 @@ msgstr "Слайды, приложенные файлы и др."
 msgid "Groups"
 msgstr "Группы"
 
-#: apps/courses/models.py:914 apps/learning/icalendar.py:255
+#: apps/courses/models.py:914 apps/learning/icalendar.py:256
 msgid "Classes"
 msgstr "Занятия"
 
@@ -1233,7 +1233,7 @@ msgstr "Приоритет ниже, чем у ответственных за �
 msgid "Assignment"
 msgstr "Задание"
 
-#: apps/courses/models.py:1188 apps/learning/icalendar.py:256
+#: apps/courses/models.py:1188 apps/learning/icalendar.py:257
 #: lms/jinja2/lms/user_profile/_tab_assignments.html:3
 msgid "Assignments"
 msgstr "Задания"
@@ -1724,11 +1724,11 @@ msgid ""
 "идентификаторами студентов."
 msgstr ""
 
-#: apps/learning/icalendar.py:257
+#: apps/learning/icalendar.py:258
 msgid "Events"
 msgstr "События"
 
-#: apps/learning/icalendar.py:263
+#: apps/learning/icalendar.py:264
 #, fuzzy
 #| msgid "Interview"
 msgid "Interviews"
