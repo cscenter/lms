@@ -26,7 +26,7 @@
     <div class="additional-info">
       Секция: {{ interview.get_section_display }}<br>
       Статус собеседования: {{ interview.get_status_display|default_if_none:"<не указан>" }}<br>
-      Формат собеседования: {{ interview.slot.stream.get_format_display|default_if_none:"<не указан>" }}<br>
+      Формат собеседования: {{ interview.get_format_display|default_if_none:"<не указан>" }}<br>
     </div>
     <div class="nav-tabs-horizontal nav-tabs-inverse">
       <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">

@@ -872,10 +872,7 @@ class InterviewListCSVView(CuratorOnlyMixin, generic.base.View):
         )
         for interview in interviews:
             dt = interview.date.astimezone(time_zone)
-            try:
-                interview_format = interview.slot.stream.get_format_display()
-            except Interview.slot.RelatedObjectDoesNotExist:
-                interview_format = ''
+            interview_format = value if (value := interview.get_format_display()) is not None else '<не указан>'
             writer.writerow(
                 [
                     dt.date().strftime("%d.%m.%Y"),

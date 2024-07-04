@@ -1230,7 +1230,15 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
         verbose_name=_("Interview|Section"),
         max_length=15,
     )
+    format = models.CharField(
+        verbose_name=_("Interview Format"),
+        choices=InterviewFormats.choices,
+        max_length=42,
+    )
     date = TimezoneAwareDateTimeField(_("When"))
+    duration = models.IntegerField(
+        _("Interview|Slot duration"), validators=[MinValueValidator(10)], default=30
+    )
     status = models.CharField(
         choices=STATUSES,
         default=APPROVAL,
