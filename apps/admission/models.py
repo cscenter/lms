@@ -1296,11 +1296,6 @@ class Interview(TimezoneAwareMixin, TimeStampedModel):
             tz = self.get_timezone()
         return timezone.localtime(self.date, timezone=tz)
 
-    def date_end_local(self, tz=None):
-        if not tz:
-            tz = self.get_timezone()
-        return timezone.localtime(self.end_at, timezone=tz)
-
     def clean(self):
         if self.status != self.APPROVAL and not self.date:
             raise ValidationError("You can't change status without date set up")
