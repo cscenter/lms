@@ -99,7 +99,7 @@ class GradeBookData:
 
     def get_table_width(self):
         # First 4 columns in gradebook table, see `pages/_gradebook.scss`
-        magic = 150 + 140 + 80 + 66
+        magic = 150 + 150 + 80 + 66
         return len(self.assignments) * self.ASSIGNMENT_COLUMN_WIDTH + magic
 
     @cached_property
