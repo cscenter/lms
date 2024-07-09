@@ -324,7 +324,6 @@ class InterviewInvitationCreateView(CuratorOnlyMixin, generic.TemplateView):
         redirect_to = f"{url}?campaign={campaign.id}&section={section}&format={format}" \
                         f"&last_name={last_name}&track={track}&way_to_interview={way_to_interview}" \
                         f"&number_of_misses={number_of_misses}"
-        print(redirect_to)
         return HttpResponseRedirect(redirect_to)
 
     @staticmethod
@@ -846,12 +845,9 @@ class InterviewListCSVView(CuratorOnlyMixin, generic.base.View):
         filename = f"interviews_{date_from.strftime('%d.%m.%Y')}_{date_to.strftime('%d.%m.%Y')}.csv"
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         writer = csv.writer(response)
-        time_zone = zoneinfo.ZoneInfo("Europe/Moscow")
-        if self.request.user.time_zone:
-            time_zone = self.request.user.time_zone
         headers = [
             _("Date"),
-            _("Time") + " " + str(time_zone),
+            _("Time"),
             _("Section"),
             _("Applicant"),
             _("Interviewer"),
@@ -871,7 +867,7 @@ class InterviewListCSVView(CuratorOnlyMixin, generic.base.View):
             .order_by("date")
         )
         for interview in interviews:
-            dt = interview.date.astimezone(time_zone)
+            dt = interview.date_local()
             interview_format = value if (value := interview.get_format_display()) is not None else '<не указан>'
             writer.writerow(
                 [
