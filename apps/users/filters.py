@@ -74,7 +74,6 @@ class StudentFilter(FilterSet):
         return super().qs
 
     def courses_filter(self, queryset, name, value):
-        print(value)
         value_list = value.split(u',')
         try:
             value_list = [int(v) for v in value_list if v]
