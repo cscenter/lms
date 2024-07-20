@@ -50,11 +50,11 @@ from admission.tests.factories import (
 from core.models import Branch
 from core.tests.factories import BranchFactory, EmailTemplateFactory, SiteFactory
 from core.timezone import get_now_utc
-from core.urls import reverse
 from users.constants import GenderTypes
 from users.models import StudentTypes
 from users.services import get_student_profile
-from users.tests.factories import StudentProfileFactory, UserFactory, CuratorFactory
+from users.tests.factories import StudentProfileFactory, UserFactory, CuratorFactory, StudentFactory, \
+    InvitedStudentFactory
 
 
 @pytest.mark.django_db
@@ -370,6 +370,8 @@ def test_get_applicants_for_invitation():
         ).count()
         == 0
     )
+
+
 @pytest.mark.django_db
 def test_get_applicants_for_invitation_with_filters(client, settings):
     campaign = CampaignFactory(current=True)
@@ -430,17 +432,18 @@ def test_get_applicants_for_invitation_with_filters(client, settings):
             else:
                 assert applicant not in qs
 
-    for miss_count in range(0,5):
+    for miss_count in range(0, 5):
         qs = get_applicants_for_invitation(
             campaign=campaign, section=InterviewSections.ALL_IN_ONE, number_of_misses=miss_count
         )
         for applicant in applicants:
-            if applicant.miss_count == miss_count and miss_count in range(0,4):
+            if applicant.miss_count == miss_count and miss_count in range(0, 4):
                 assert applicant in qs
             elif applicant.miss_count > 3 and miss_count == 4:
                 assert applicant in qs
             else:
                 assert applicant not in qs, f'{applicant=}, {applicant.miss_count=}, {miss_count=}'
+
 
 @pytest.mark.django_db
 def test_get_streams(client, settings):
@@ -453,7 +456,7 @@ def test_get_streams(client, settings):
         campaign=campaign, section=InterviewSections.ALL_IN_ONE,
         start_at=datetime.datetime(2011, 1, 1, 13, 0, 0), end_at=datetime.datetime(2011, 1, 1, 14, 0, 0)
     )
-    invitation = InterviewInvitationFactory(streams=[stream_1,stream_2],
+    invitation = InterviewInvitationFactory(streams=[stream_1, stream_2],
                                             interview__section=InterviewSections.ALL_IN_ONE)
     assert stream_1 in get_streams(invitation).keys()
     assert stream_2 in get_streams(invitation).keys()
@@ -465,6 +468,7 @@ def test_get_streams(client, settings):
     # stream is not present if no more free slots left or occupied_slots are more than interviewers_max
     assert stream_1 not in get_streams(invitation).keys()
     assert stream_2 in get_streams(invitation).keys()
+
 
 @pytest.mark.django_db
 def test_get_acceptance_ready_to_confirm(settings):
@@ -538,20 +542,28 @@ def test_get_acceptance_ready_to_confirm(settings):
 
 
 ACCOUNT_DATA = AccountData(
+    has_no_patronymic=False,
     email="test@example.com",
-    time_zone=pytz.timezone("Europe/Moscow"),
     gender=GenderTypes.FEMALE,
-    photo=SimpleUploadedFile("test.txt", b"content"),
     telegram_username="username",
     phone="+71234567",
-    workplace="vk",
-    private_contacts="tiktok.com/git_lover",
-    codeforces_login="handle1",
-    stepic_id="42",
-    github_login="git_lover",
+    bio="bio",
+    yandex_login="yandex_login",
     birth_date=datetime.date(2000, 1, 1),
+    living_place="City"
 )
-STUDENT_PROFILE_DATA = StudentProfileData(university="University1")
+
+ACCOUNT_DATA_WITHOUT_PATRONYMIC = AccountData(
+    has_no_patronymic=True,
+    email="test2@example.com",
+    gender=GenderTypes.FEMALE,
+    telegram_username="username2",
+    phone="+712345678",
+    bio="bio2",
+    yandex_login="yandex_login2",
+    birth_date=datetime.date(2001, 1, 1),
+    living_place="City2"
+)
 
 
 @pytest.mark.django_db
@@ -565,19 +577,19 @@ def test_create_student(settings, get_test_image):
     acceptance = AcceptanceFactory(
         status=Acceptance.WAITING,
         applicant__campaign=campaign,
-        applicant__yandex_login="login1",
-        applicant__university_other="University2",
     )
     applicant = acceptance.applicant
-    user = create_student(acceptance, ACCOUNT_DATA, STUDENT_PROFILE_DATA)
+    user = create_student(acceptance, ACCOUNT_DATA)
     assert user.pk
     applicant.refresh_from_db()
+    assert user.username == ACCOUNT_DATA.email.split("@", maxsplit=1)[0]
     assert user.first_name == applicant.first_name
     assert user.last_name == applicant.last_name
     assert user.patronymic == applicant.patronymic
-    assert user.gender == ACCOUNT_DATA.gender
-    assert user.yandex_login == "login1"
-    assert user.birth_date == ACCOUNT_DATA.birth_date
+    assert user.workplace == applicant.workplace
+    assert user.photo == applicant.photo
+    for field in dataclasses.fields(ACCOUNT_DATA):
+        assert getattr(user, field.name) == getattr(ACCOUNT_DATA, field.name)
     assert applicant.user == user
     acceptance.refresh_from_db()
     assert acceptance.status == Acceptance.CONFIRMED
@@ -588,9 +600,75 @@ def test_create_student(settings, get_test_image):
         filters=[Q(year_of_admission=campaign.year)],
     )
     assert student_profile is not None
-    assert student_profile.university == STUDENT_PROFILE_DATA.university
     assert student_profile.year_of_admission == campaign.year
     assert student_profile.type == StudentTypes.REGULAR
+    assert student_profile.level_of_education_on_admission == applicant.level_of_education
+    assert student_profile.level_of_education_on_admission_other == applicant.level_of_education_other
+    assert student_profile.university == applicant.get_university_display()
+    assert student_profile.faculty == applicant.faculty
+    assert student_profile.diploma_degree == applicant.diploma_degree
+    assert student_profile.graduation_year == applicant.year_of_graduation
+    assert student_profile.new_track == applicant.new_track
+
+
+@pytest.mark.django_db
+def test_create_student_with_existing_invited(settings, get_test_image):
+    future_dt = get_now_utc() + datetime.timedelta(days=5)
+    campaign = CampaignFactory(
+        year=2011,
+        branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
+        confirmation_ends_at=future_dt,
+    )
+    acceptance = AcceptanceFactory(
+        status=Acceptance.WAITING,
+        applicant__campaign=campaign,
+        applicant__email=ACCOUNT_DATA_WITHOUT_PATRONYMIC.email,
+        applicant__university=None,
+        applicant__university_other="University2",
+        applicant__level_of_education=None,
+        applicant__level_of_education_other="Bachelor2"
+    )
+    applicant = acceptance.applicant
+    student = InvitedStudentFactory(email=applicant.email,
+                                    first_name=applicant.first_name,
+                                    last_name=applicant.last_name)
+    user = create_student(acceptance, ACCOUNT_DATA_WITHOUT_PATRONYMIC)
+    assert user.pk
+    assert student == user
+    applicant.refresh_from_db()
+    assert user.username != ACCOUNT_DATA_WITHOUT_PATRONYMIC.email.split("@", maxsplit=1)[0]
+    assert user.first_name == applicant.first_name
+    assert user.last_name == applicant.last_name
+    assert user.patronymic == ""
+    assert user.workplace == applicant.workplace
+    assert user.photo == applicant.photo
+    for field in dataclasses.fields(ACCOUNT_DATA_WITHOUT_PATRONYMIC):
+        assert getattr(user, field.name) == getattr(ACCOUNT_DATA_WITHOUT_PATRONYMIC, field.name)
+    assert applicant.user == user
+    acceptance.refresh_from_db()
+    assert acceptance.status == Acceptance.CONFIRMED
+    student_profile = get_student_profile(
+        user=user,
+        site=campaign.branch.site,
+        profile_type=StudentTypes.REGULAR,
+        filters=[Q(year_of_admission=campaign.year)],
+    )
+    invited = get_student_profile(
+        user=user,
+        site=campaign.branch.site,
+        profile_type=StudentTypes.VOLUNTEER
+    )
+    assert invited is not None
+    assert student_profile is not None
+    assert student_profile.year_of_admission == campaign.year
+    assert student_profile.type == StudentTypes.REGULAR
+    assert student_profile.level_of_education_on_admission == applicant.level_of_education
+    assert student_profile.level_of_education_on_admission_other == applicant.level_of_education_other
+    assert student_profile.university == applicant.university_other
+    assert student_profile.faculty == applicant.faculty
+    assert student_profile.diploma_degree == applicant.diploma_degree
+    assert student_profile.graduation_year == applicant.year_of_graduation
+    assert student_profile.new_track == applicant.new_track
 
 
 @pytest.mark.django_db
@@ -635,14 +713,14 @@ def test_create_student_email_case_insensitive(settings, get_test_image):
         branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
         confirmation_ends_at=future_dt,
     )
+    applicant = ApplicantFactory(campaign=campaign)
     acceptance = AcceptanceFactory(
         status=Acceptance.WAITING,
-        applicant__campaign=campaign,
-        applicant__yandex_login="login1",
+        applicant=applicant
     )
-    user1 = UserFactory(email=ACCOUNT_DATA.email)
+    user1 = UserFactory(email=ACCOUNT_DATA.email, first_name=applicant.first_name, last_name=applicant.last_name)
     assert user1.email == "test@example.com"
     # Merging data into existing account since email address must be case insensitive
     account_data1 = dataclasses.replace(ACCOUNT_DATA, email="TEST@example.com")
-    user2 = create_student(acceptance, account_data1, STUDENT_PROFILE_DATA)
+    user2 = create_student(acceptance, account_data1)
     assert user2.pk == user1.pk

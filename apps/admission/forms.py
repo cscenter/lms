@@ -438,6 +438,16 @@ class ConfirmationAuthorizationForm(forms.Form):
 class ConfirmationForm(forms.ModelForm):
     prefix = "confirmation"
 
+    disabled = ["first_name",
+                "last_name",
+                "patronymic",
+                "branch",
+                "track"]
+
+    force_required = ["phone",
+                      "living_place",
+                      "yandex_login"]
+
     authorization_code = forms.CharField(required=True, widget=forms.HiddenInput())
     email_code = forms.CharField(
         label="Email Confirmation Code",
@@ -452,52 +462,61 @@ class ConfirmationForm(forms.ModelForm):
                   "<br>Поставьте прочерк «-», если аккаунт отсутствует.",
         required=True,
     )
-
-    # Student Profile data
+    has_no_patronymic = forms.BooleanField(
+            label=_("Has no patronymic"),
+            required=False
+        )
+    branch = forms.CharField(
+        label=_("Branch"),
+        required=False
+    )
+    track = forms.CharField(
+        label=_("Applicant track"),
+        required=False
+    )
 
     class Meta:
         model = User
         fields = [
+            "first_name",
+            "last_name",
+            "patronymic",
             "email",
             "email_code",
-            "time_zone",
+            "living_place",
             "gender",
             "birth_date",
-            "photo",
             "phone",
             "telegram_username",
-            "workplace",
-            "private_contacts",
-            # Read-only fields (some of them are not a part of User model)
-            "yandex_login",
-            "codeforces_login",
-            "stepic_id",
-            "github_login",
+            "bio",
+            "yandex_login"
         ]
 
     def __init__(self, acceptance: Acceptance, **kwargs):
         self.acceptance = acceptance
-        applicant = acceptance.applicant
+        applicant: Applicant = acceptance.applicant
         initial = {
+            "first_name": applicant.first_name,
+            "last_name": applicant.last_name,
+            "patronymic": applicant.patronymic,
+            "branch": applicant.campaign.branch.name,
+            "track": _("Alternative") if applicant.new_track else _("Regular"),
+            "gender": applicant.gender,
+            "living_place": applicant.residence_city if applicant.residence_city else applicant.living_place,
             "authorization_code": acceptance.confirmation_code,
             "email": applicant.email,
-            "time_zone": applicant.campaign.get_timezone(),
             "phone": applicant.phone,
             "yandex_login": applicant.yandex_login,
-            "stepic_id": applicant.stepic_id,
-            "github_login": applicant.github_login,
-            "workplace": applicant.workplace,
-            "birth_date": applicant.birth_date,
+            "telegram_username": f"@{applicant.telegram_username}",
+            "birth_date": applicant.birth_date
         }
         kwargs["initial"] = initial
         super().__init__(**kwargs)
-        self.fields["photo"].required = True
-        self.fields[
-            "photo"
-        ].help_text = "Изображение в формате JPG или PNG (мин. 250х350px). Размер файла не более 3Mb"
-        self.fields["yandex_login"].disabled = True
-        self.fields["phone"].required = True
-        self.fields["private_contacts"].help_text = ""
+        for field_name in self.disabled:
+            self.fields[field_name].disabled = True
+        for field_name in self.force_required:
+            self.fields[field_name].required = True
+        self.fields["bio"].help_text = ""
         self.helper = FormHelper(self)
         self.helper.form_tag = False
 
@@ -523,9 +542,6 @@ class ConfirmationForm(forms.ModelForm):
 
     def save(self, commit=True) -> User:
         account_data = AccountData.from_dict(self.cleaned_data)
-        student_profile_data = StudentProfileData(
-            university=self.acceptance.applicant.get_university_display()
-        )
         with transaction.atomic():
-            user = create_student(self.acceptance, account_data, student_profile_data)
+            user = create_student(self.acceptance, account_data)
         return user

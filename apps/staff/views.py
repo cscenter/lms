@@ -124,7 +124,9 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
             "is_paid_basis": [("1", "Да"), ("0", "Нет")],
             "uni_graduation_year": (
                 StudentProfile.objects.filter(
-                    site=self.request.site, graduation_year__isnull=False
+                    site=self.request.site,
+                    graduation_year__isnull=False,
+                    graduate_without_diploma=True
                 )
                 .values_list("graduation_year", flat=True)
                 .order_by("graduation_year")

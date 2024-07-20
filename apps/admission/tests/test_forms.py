@@ -24,47 +24,54 @@ def test_confirmation_form_validation(settings, get_test_image):
     )
     form = ConfirmationForm(acceptance=acceptance, data={})
     assert not form.is_valid()
-    # Invalid email verification code
+    # Invalid email verification code and not full data
     form_data = {
         "authorization_code": acceptance.confirmation_code,
         "email": "test@example.com",
         "email_code": "wrong",
-        "time_zone": "Europe/Moscow",
-        "gender": GenderTypes.FEMALE,
-        "birth_date": datetime.date(2011, 1, 1),
-        "phone": "+7",
-        "telegram_username": "-",
+        "birth_date": datetime.date(2000, 1, 1)
     }
-    files = {"photo": get_test_image(name="test.png")}
     form = ConfirmationForm(
-        acceptance=acceptance, data=form_data, prefix=False, files=files
+        acceptance=acceptance, data=form_data, prefix=False
     )
     assert not form.is_valid()
     form_data["email_code"] = email_code_generator.make_token(
         "test2@example.com", acceptance.applicant
     )
     form = ConfirmationForm(
-        acceptance=acceptance, data=form_data, prefix=False, files=files
+        acceptance=acceptance, data=form_data, prefix=False
     )
     assert not form.is_valid()
     form_data["email_code"] = email_code_generator.make_token(
         "test@example.com", acceptance.applicant
     )
+    assert not form.is_valid()
+    missing_fields = ["living_place", "gender", "phone", "telegram_username", "yandex_login"]
+    assert all(field in form.errors for field in missing_fields)
+    form_data["living_place"] = "living_place"
+    form_data["gender"] = GenderTypes.MALE
+    form_data["phone"] = "+71234567"
+    form_data["telegram_username"] = "telegram_username"
+    form_data["yandex_login"] = "yandex_login"
+    form = ConfirmationForm(
+        acceptance=acceptance, data=form_data, prefix=False
+    )
+    assert form.is_valid()
     form_data["telegram_username"] = "ab"  # too short
     form = ConfirmationForm(
-        acceptance=acceptance, data=form_data, prefix=False, files=files
+        acceptance=acceptance, data=form_data, prefix=False
     )
     assert not form.is_valid()
     # if only one symbol then there is no Telegram account.
     form_data["telegram_username"] = "-"
     form = ConfirmationForm(
-        acceptance=acceptance, data=form_data, prefix=False, files=files
+        acceptance=acceptance, data=form_data, prefix=False
     )
     assert form.is_valid()
     assert form.cleaned_data["telegram_username"] == ""
     form_data["telegram_username"] = "abcde"
     form = ConfirmationForm(
-        acceptance=acceptance, data=form_data, prefix=False, files=files
+        acceptance=acceptance, data=form_data, prefix=False
     )
     assert form.is_valid()
     assert form.cleaned_data["telegram_username"] == "abcde"

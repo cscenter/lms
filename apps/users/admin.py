@@ -130,7 +130,7 @@ class UserAdmin(_UserAdmin):
         (_('Personal info'), {
             'fields': ['gender', 'birth_date', 'branch',
                        'last_name', 'first_name', 'patronymic', 'phone',
-                       'workplace', 'photo', 'bio', 'private_contacts',
+                       'workplace', 'living_place', 'photo', 'bio', 'private_contacts',
                        'social_networks', 'time_zone']}),
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        ]}),
@@ -224,16 +224,17 @@ class StudentProfileAdmin(BaseModelAdmin):
         if obj is not None and obj.pk:
             # TODO: add user change url
             return ['type', 'site', 'year_of_admission', 'birth_date',
-                    'level_of_education_on_admission',
                     'comment_changed_at', 'comment_last_author']
         return ['birth_date']
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
             (None, {
-                'fields': ['type', 'is_paid_basis', 'branch', 'user', 'status', 'partner',
+                'fields': ['type', 'is_paid_basis', 'new_track', 'branch', 'user', 'status',
+                           'university', 'partner', 'faculty',
+                           'level_of_education_on_admission', 'level_of_education_on_admission_other',
+                           'diploma_degree', 'graduation_year',
                            'year_of_admission', 'year_of_curriculum',
-                           'university', 'level_of_education_on_admission',
                            'academic_disciplines']
             }),
             (_('Official Student Info'), {
@@ -247,7 +248,8 @@ class StudentProfileAdmin(BaseModelAdmin):
         graduate_statuses = {StudentStatuses.GRADUATE, StudentStatuses.WILL_GRADUATE}
 
         if obj and obj.status in graduate_statuses:
-            fieldsets[0][1]['fields'].insert(5, 'graduation_year')
+            fields: list[str, ...] = fieldsets[0][1]['fields']
+            fields.insert(fields.index('status'), 'graduate_without_diploma')
 
         return fieldsets
 

@@ -222,15 +222,19 @@ def test_student_search_by_types(client, curator, search_url, settings):
 @pytest.mark.django_db
 def test_student_search_by_graduate_years(client, curator, search_url, settings):
     client.login(curator)
-    students_none = StudentFactory.create_batch(2)
+    students_none = StudentFactory.create_batch(
+        2,
+        student_profile__graduate_without_diploma=False)
     students_2025 = StudentFactory.create_batch(
         3,
         student_profile__status=StudentStatuses.GRADUATE,
-        student_profile__graduation_year=2025)
+        student_profile__graduation_year=2025,
+        student_profile__graduate_without_diploma=True)
     students_2024 = VolunteerFactory.create_batch(
         4,
         student_profile__status=StudentStatuses.WILL_GRADUATE,
-        student_profile__graduation_year=2024)
+        student_profile__graduation_year=2024,
+        student_profile__graduate_without_diploma=True)
     # Empty results if no query provided
     response = client.get(search_url)
     assert response.json()["count"] == 0
