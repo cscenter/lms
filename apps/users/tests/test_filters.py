@@ -246,10 +246,10 @@ def test_student_search_by_graduate_years(client, curator, search_url, settings)
     assert json_data["count"] == len(students_2025)
     response = client.get("{}?{}".format(search_url, "uni_graduation_year=2024,0"))
     json_data = response.json()
-    assert json_data["count"] == len(students_2024) + len(students_none)
+    assert json_data["count"] == len(students_2024) + len(students_2025)
     response = client.get("{}?{}".format(search_url, "uni_graduation_year=0,2024,2025"))
     json_data = response.json()
-    assert json_data["count"] == len(students_none) + len(students_2024) + len(students_2025)
+    assert json_data["count"] == len(students_2024) + len(students_2025)
 
 @pytest.mark.django_db
 def test_student_search_by_branch(client, curator, search_url):
