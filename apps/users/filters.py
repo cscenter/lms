@@ -105,9 +105,9 @@ class StudentFilter(FilterSet):
         return queryset.filter(condition)
 
     def uni_graduation_year_filter(self, queryset, name, value):
-        condition = Q(graduation_year__isnull=False) & Q(graduation_year__in=[year for year in value if year != 0])
+        condition = Q(graduate_without_diploma=True) & Q(graduation_year__isnull=False) & Q(graduation_year__in=[year                                                                                                          for year in value if year != 0])
         if any(year == 0 for year in value):
-            condition |= Q(graduation_year__isnull=True)
+            condition |= Q(graduate_without_diploma=True)
         return queryset.filter(condition)
 
     def status_filter(self, queryset, name, value):

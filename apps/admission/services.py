@@ -418,18 +418,15 @@ def validate_verification_code(
 
 @dataclass(frozen=True)
 class AccountData:
+    has_no_patronymic: bool
     email: str
-    time_zone: pytz.BaseTzInfo
     gender: str
-    photo: UploadedFile
-    phone: str
-    telegram_username: str
-    workplace: str
-    private_contacts: str
-    codeforces_login: str
-    stepic_id: str
-    github_login: str
     birth_date: date
+    living_place: str
+    phone: str
+    yandex_login: str
+    telegram_username: str
+    bio: str
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
@@ -473,7 +470,6 @@ def get_or_create_student_profile(
 def create_student(
     acceptance: Acceptance,
     account_data: AccountData,
-    student_profile_data: StudentProfileData,
 ) -> User:
     """
     Creates new user account or merges with the existing one, then creates
@@ -483,9 +479,10 @@ def create_student(
     data for existing account.
     """
     email = account_data.email
-    applicant = acceptance.applicant
+    applicant: Applicant = acceptance.applicant
+    branch = applicant.campaign.branch
     try:
-        user = User.objects.get(email__iexact=email)
+        user = User.objects.get(email__iexact=email, first_name=applicant.first_name, last_name = applicant.last_name)
     except User.DoesNotExist:
         user = create_account(
             username=generate_username_from_email(email),
@@ -493,13 +490,15 @@ def create_student(
             password=User.objects.make_random_password(),
             email=email,
             gender=account_data.gender,
-            time_zone=account_data.time_zone,
+            time_zone=branch.time_zone,
             is_active=True,
+            first_name=applicant.first_name,
+            last_name=applicant.last_name,
+            branch=branch,
         )
-    user.first_name = applicant.first_name
-    user.last_name = applicant.last_name
-    user.patronymic = applicant.patronymic if applicant.patronymic else ""
-    user.yandex_login = applicant.yandex_login or ""
+    user.workplace = applicant.workplace or ""
+    user.patronymic = "" if account_data.has_no_patronymic else applicant.patronymic
+    user.photo = applicant.photo
     # dataclasses.asdict raises `cannot pickle '_io.BufferedRandom' object`
     account_fields = {field.name for field in fields(AccountData)}
     for name in account_fields:
@@ -507,8 +506,12 @@ def create_student(
     user.save()
     student_data = {
         "level_of_education_on_admission": applicant.level_of_education,
-        "university": applicant.get_university_display(),
-        **asdict(student_profile_data),
+        "level_of_education_on_admission_other": applicant.level_of_education_other,
+        "university": applicant.get_university_display() if applicant.university else applicant.university_other,
+        "faculty": applicant.faculty,
+        "diploma_degree": applicant.diploma_degree,
+        "graduation_year": applicant.year_of_graduation,
+        "new_track": applicant.new_track,
     }
     get_or_create_student_profile(applicant.campaign, user, data=student_data)
     applicant.user = user

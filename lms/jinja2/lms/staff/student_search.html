@@ -133,12 +133,12 @@
             </div>
           </div>
           <div class="form-group">
-            <label>{% trans %} University graduation year {% endtrans %}</label><br>
+            <label>{% trans %} University graduation year for graduates without diploma {% endtrans %}</label><br>
             <div class="btn-group btn-group-sm" data-toggle="buttons">
                <label class="btn btn-default">
                 <input type="checkbox" name="uni_graduation_year"
                        value="0"
-                       autocomplete="off"> {% trans %} No {% endtrans %}
+                       autocomplete="off"> {% trans %} Any {% endtrans %}
               </label>
               {% for year in uni_graduation_year %}
                 <label class="btn btn-default">

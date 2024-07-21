@@ -177,7 +177,7 @@ def test_view_interview_list_csv(client, curator, settings):
     status_log_csv = response.content.decode("utf-8")
     data = [s for s in csv.reader(io.StringIO(status_log_csv))]
     headers = ["Date",
-               "Time Europe/Moscow",
+               "Time",
                "Section",
                 "Applicant",
                 "Interviewer",

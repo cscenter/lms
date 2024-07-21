@@ -117,7 +117,7 @@ class Command(BaseCommand):
                 campaign_name = row[2]
                 format = row[3]
                 interviewer_section = row[4] + row[5] + row[6] + row[7]
-                interviewers_max = int(row[8])
+                interviewers_max = int(row[8]) if row[8] != "" else None
                 interview_date, interview_start, interview_last_stamp = None, None, None
                 for column in slot_columns:
                     if row[column]:

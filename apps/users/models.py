@@ -27,6 +27,7 @@ from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
 from django.utils.translation import gettext_lazy as _
 
+from admission.constants import DiplomaDegrees
 from api.services import generate_hash
 from api.settings import DIGEST_MAX_LENGTH
 from auth.permissions import perm_registry
@@ -410,6 +411,10 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         blank=True)
     calendar_key = models.CharField(unique=True, max_length=DIGEST_MAX_LENGTH,
                                     blank=True)
+
+    living_place = models.CharField(
+        _("Living Place"), max_length=255, null=True, blank=True
+    )
 
     objects = CustomUserManager()
 
@@ -818,25 +823,46 @@ class StudentProfile(TimeStampedModel):
         _("University"),
         max_length=255,
         blank=True)
+    faculty = models.TextField(
+        _("Faculty"),
+        blank=True,
+        null=True
+    )
     level_of_education_on_admission = models.CharField(
         _("StudentInfo|University year"),
         choices=AcademicDegreeLevels.choices,
         max_length=12,
         null=True, blank=True)
+    level_of_education_on_admission_other = models.CharField(
+        _("StudentInfo|University year (other)"),
+        max_length=12,
+        null=True, blank=True)
+    diploma_degree = models.CharField(
+        _("Degree of diploma"),
+        choices=DiplomaDegrees.choices,
+        max_length=30,
+        null=True,
+        blank=True
+    )
     is_official_student = models.BooleanField(
         verbose_name=_("Official Student"),
         help_text=_("Passport, consent for processing personal data, "
                     "diploma (optional)"),
         default=False)
+    graduate_without_diploma = models.BooleanField(
+        verbose_name=_("Graduate without diploma"),
+        default=False)
     graduation_year = models.PositiveSmallIntegerField(
         _("StudentProfile|graduation_year"),
-        help_text=_("University graduation year for YDS graduates without diploma"),
-        validators=[MinValueValidator(2000)],
         blank=True,
         null=True)
     is_paid_basis = models.BooleanField(
         verbose_name=_("Paid Basis"),
         default=False)
+    new_track = models.BooleanField(
+        _("Alternative track"),
+        blank=True,
+        null=True)
     # Fields required for the issuance of an official diploma
     diploma_number = models.CharField(
         verbose_name=_("Diploma Number"),
@@ -912,9 +938,12 @@ class StudentProfile(TimeStampedModel):
         graduate_statuses = {StudentStatuses.GRADUATE, StudentStatuses.WILL_GRADUATE}
         if self.type == StudentTypes.INVITED and self.status in graduate_statuses:
             raise ValidationError(f"Status {self.status} is forbidden for invited students")
-        if self.graduation_year is not None and self.status not in graduate_statuses:
-            raise ValidationError(f'Для выставления года окончания университета статус должен быть один из следующих: '
-                                  f'{[StudentStatuses.get_choice(value).label for value in graduate_statuses]}')
+        if self.graduate_without_diploma and self.status not in graduate_statuses:
+            raise ValidationError(f'Для обозначения студента как выпускника без диплома статус должен быть один из '
+                                  f'следующих: {[StudentStatuses.get_choice(value).label for value in graduate_statuses]}')
+        if self.graduate_without_diploma and self.graduation_year is None:
+            raise ValidationError(f'Для обозначения студента как выпускника без диплома нужно выставить год выпуска '
+                                  f'из ВУЗа')
         # TODO: move to the service that creates model object, don't leave non-relational model fields here
         established = self.branch.established
         if self.year_of_admission and self.year_of_admission < established:

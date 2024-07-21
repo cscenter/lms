@@ -101,6 +101,7 @@ class InvitedStudentFactory(UserFactory):
             return
         if self.branch:
             kwargs.setdefault('branch', self.branch)
+            # TODO fix type to StudentTypes.INVITED and wrong permission tests
         StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)
 
 

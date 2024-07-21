@@ -36,14 +36,26 @@
               <div class="mb-20">
                 <p>Поздравляем вас с поступлением и приглашаем создать профиль на сайте <span class="nowrap"><b>{{ request.site.name }}</b></span>. Подтвердите почту,
                 проверьте информацию из анкеты и добавьте ту, которой не хватает.</p>
-                ФИО: {{ applicant.full_name }}<br>
-                Отделение: {{ applicant.campaign.branch.name }}
               </div>
               <form action="" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ forms.field(form['authorization_code']) }}
                 {{ form.non_field_errors() }}
                 <fieldset class="mb-20">
+                  <div class="row">
+                    <div class="col-xs-6">{{ forms.field(form['first_name']) }}</div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xs-6">{{ forms.field(form['last_name']) }}</div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xs-6">{{ forms.field(form['patronymic']) }}</div>
+                    <div class="col-xs-3">{{ forms.field(form['has_no_patronymic']) }}</div>
+                  </div>
+                  <div class="row">
+                    <div class="col-xs-6">{{ forms.field(form['branch']) }}</div>
+                    <div class="col-xs-6">{{ forms.field(form['track']) }}</div>
+                  </div>
                   <div class="row">
                     <div class="col-xs-12">
                       {{ forms.field(form['email'], append_button='<button class="btn btn-primary" id="confirm-email" type="button">Прислать код</button>') }}
@@ -61,13 +73,7 @@
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-xs-12">{{ forms.field(form['photo']) }}</div>
-                    <div class="col-xs-12">{{ forms.field(form['time_zone']) }}</div>
-                    <div class="col-xs-12">
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-xs-12">{{ forms.field(form['workplace']) }}</div>
+                    <div class="col-xs-12">{{ forms.field(form['living_place']) }}</div>
                   </div>
                 </fieldset>
 
@@ -77,19 +83,10 @@
                     В поле "Контактная информация" вставьте ссылки на соц. сети, номер телефона и другие контакты, которыми вы бы хотели
                     поделиться с другими студентами и преподавателями.</p>
                   <div class="row">
-                    <div class="col-xs-12">{{ forms.field(form['phone']) }}</div>
-                    <div class="col-xs-12">{{ forms.field(form['telegram_username']) }}</div>
-                    <div class="col-xs-12">{{ forms.field(form['private_contacts']) }}</div>
-                  </div>
-                </fieldset>
-
-                <fieldset class="mb-20">
-                  <legend>Системы сдачи заданий</legend>
-                  <div class="row">
+                    <div class="col-xs-6">{{ forms.field(form['phone']) }}</div>
                     <div class="col-xs-6">{{ forms.field(form['yandex_login']) }}</div>
-                    <div class="col-xs-6">{{ forms.field(form['codeforces_login']) }}</div>
-                    <div class="col-xs-6">{{ forms.field(form['stepic_id']) }}</div>
-                    <div class="col-xs-6">{{ forms.field(form['github_login']) }}</div>
+                    <div class="col-xs-12">{{ forms.field(form['telegram_username']) }}</div>
+                    <div class="col-xs-12">{{ forms.field(form['bio']) }}</div>
                   </div>
                 </fieldset>
 

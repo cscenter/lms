@@ -408,11 +408,13 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     partner = models.ForeignKey("users.PartnerTag", verbose_name=_("Partner"),
                                 null=True, blank=True, on_delete=models.SET_NULL)
     is_studying = models.BooleanField(_("Are you studying?"), null=True)
-    new_track = models.BooleanField(_("Are applying for alternative track?"), null=True)
-    new_track_info = models.CharField(
+    new_track = models.BooleanField(
+        _("Are applying for alternative track?"),
+        blank=True,
+        null=True)
+    new_track_info = models.TextField(
         _("Alternative track info"),
         help_text=_("Applicant|alternative_track_info"),
-        max_length=1000,
         blank=True,
         null=True
     )
