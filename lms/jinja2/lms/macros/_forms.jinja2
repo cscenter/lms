@@ -3,12 +3,13 @@
 {%- endmacro %}
 
 
-{% macro field(bound_field, hide_label=False, prepend_button="", prepend_text="", append_text="", append_button="", wrapper_classes="", popover_help_text="", label_classes="", input_classes="") -%}
+{% macro field(bound_field, hide_label=False, prepend_button="", prepend_text="", append_text="", append_button="",
+wrapper_classes="", popover_help_text="", label_classes="", input_classes="", is_boolean=False) -%}
     {% if bound_field.is_hidden %}
         {{ bound_field|safe }}
     {% else %}
         <div id="div_{{ bound_field.id_for_label }}" class="form-group{% if bound_field.errors %} has-error{% endif -%}{% if wrapper_classes %} {{ wrapper_classes }}{% endif %}">
-            {% if not hide_label -%}
+            {% if not hide_label and not is_boolean-%}
                 <label for="{{ bound_field.id_for_label }}" class="control-label{% if label_classes %} {{ label_classes }}{%- endif %}">{{ bound_field.label }}{% if bound_field.field.required %}<span class="asteriskField">*</span>{% endif %}</label>
             {%- endif %}
             {% if popover_help_text -%}
@@ -23,6 +24,11 @@
                     {% if append_text %}<span class="input-group-addon">{{ append_text }}</span>{% endif %}
                     {% if append_button %}<span class="input-group-btn">{{ append_button }}</span>{% endif %}
                   </div>
+                {% elif is_boolean %}
+                     <label for="{{ bound_field.id_for_label }}" class="control-label{% if label_classes %} {{ label_classes }}{%- endif %}">
+                    {{ bound_field }}
+                    {{ bound_field.label }}{% if bound_field.field.required %}<span
+                    class="asteriskField">*</span>{% endif %}</label>
                 {% else %}
                   {{ bound_field|with_classes('form-control ' + input_classes) }}
                 {% endif %}

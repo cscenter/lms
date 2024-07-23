@@ -8,16 +8,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-20 17:30+0000\n"
-"PO-Revision-Date: 2024-07-15 15:28+0000\n"
+"POT-Creation-Date: 2024-07-23 17:03+0000\n"
+"PO-Revision-Date: 2024-07-23 17:04+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.9.8\n"
 
 #: apps/admission/admin.py:47 apps/admission/admin.py:119
@@ -298,11 +297,11 @@ msgstr "Фильтровать"
 msgid "Interview Section"
 msgstr "Секция"
 
-#: apps/admission/filters.py:143 apps/admission/forms.py:503
+#: apps/admission/filters.py:143 apps/admission/forms.py:514
 msgid "Regular"
 msgstr "Классический"
 
-#: apps/admission/filters.py:144 apps/admission/forms.py:503
+#: apps/admission/filters.py:144 apps/admission/forms.py:514
 msgid "Alternative"
 msgstr "Альтернативный"
 
@@ -318,7 +317,7 @@ msgstr "Cчастливый билет"
 msgid "Interview format"
 msgstr "Формат собеседования"
 
-#: apps/admission/filters.py:167 apps/admission/forms.py:474
+#: apps/admission/filters.py:167
 msgid "Applicant track"
 msgstr "Трек абитуриента"
 
@@ -413,11 +412,16 @@ msgstr "Дата рождения"
 msgid "Has no patronymic"
 msgstr "Нет отчества"
 
-#: apps/admission/forms.py:526
+#: apps/admission/forms.py:474
+#| msgid "Admission"
+msgid "Admission track"
+msgstr "Трек поступления"
+
+#: apps/admission/forms.py:537
 msgid "Authorization code is not valid"
 msgstr "Неверный код авторизации"
 
-#: apps/admission/forms.py:541
+#: apps/admission/forms.py:552
 msgid "Email verification code is not valid"
 msgstr "Неверный проверочный код"
 
@@ -435,7 +439,8 @@ msgid "Current Admission"
 msgstr "Текущий набор"
 
 #: apps/admission/models.py:88
-msgid "You can mark campaign as current only after adding contests for testing"
+msgid ""
+"You can mark campaign as current only after adding contests for testing"
 msgstr ""
 "Возможность сделать набор текущим появится после добавления контестов для "
 "этапа тестирования."
@@ -467,7 +472,8 @@ msgstr "Проходной балл по экзамену"
 #: apps/admission/models.py:103
 msgid "Campaign|Exam_passing_score-help"
 msgstr ""
-"Все результаты >= указанного порога гарантированно пройдут на следующий этап."
+"Все результаты >= указанного порога гарантированно пройдут на следующий "
+"этап."
 
 #: apps/admission/models.py:107
 msgid "Application Starts on"
@@ -539,8 +545,8 @@ msgstr "Шаблон отзыва о собеседовании"
 
 #: apps/admission/models.py:153
 msgid ""
-"Leave blank if there is no need to send a feedback email. Email will be sent "
-"at the time of interview status change, but not earlier than 21:00 of the "
+"Leave blank if there is no need to send a feedback email. Email will be sent"
+" at the time of interview status change, but not earlier than 21:00 of the "
 "day of the interview"
 msgstr ""
 "Оставьте значение пустым, если не нужно отправлять письмо после завершения "
@@ -1093,8 +1099,8 @@ msgid ""
 "Template for confirmation email that the interview was scheduled. Leave "
 "blank if there is no need to send confirmation email"
 msgstr ""
-"Оставьте пустым, если не требуется отправлять письмо с подтверждением  того, "
-"что собеседование было успешно создано."
+"Оставьте пустым, если не требуется отправлять письмо с подтверждением  того,"
+" что собеседование было успешно создано."
 
 #: apps/admission/models.py:1174
 msgid "Reminder Template"
@@ -1223,8 +1229,8 @@ msgstr "С заданиями"
 #: apps/admission/models.py:1418
 msgid "Based on this flag, student should arrive 30 min before or not"
 msgstr ""
-"Если отмечено, то в уведомлении будет указано время собеседования на полчаса "
-"раньше."
+"Если отмечено, то в уведомлении будет указано время собеседования на полчаса"
+" раньше."
 
 #: apps/admission/models.py:1428
 msgid "Maximum number of slots preffered by interviewer"
@@ -1240,8 +1246,8 @@ msgstr "Поток собеседований"
 
 #: apps/admission/models.py:1482
 msgid ""
-"Interview format settings are not found. Create settings <a href='{}'>here</"
-"a>."
+"Interview format settings are not found. Create settings <a "
+"href='{}'>here</a>."
 msgstr ""
 "Настройки формата собеседования для указанной кампании не найдены. Создать "
 "настройки можно <a href='{}'>здесь</a>."
@@ -1436,15 +1442,15 @@ msgstr "Название формата"
 #~ msgstr "Имя шаблона письма с напоминанием о предстоящем собеседовании"
 
 #~ msgid ""
-#~ "Make sure file does not include solutions due to it visible with direct "
-#~ "url link"
+#~ "Make sure file does not include solutions due to it visible with direct url "
+#~ "link"
 #~ msgstr ""
 #~ "Файлы не должны включать в себя решения, т.к. доступны по прямой ссылке "
 #~ "любому желающему."
 
 #~ msgid ""
-#~ "Subtract the specified value from the start time of the interview - this "
-#~ "is the schedule time of the reminder."
+#~ "Subtract the specified value from the start time of the interview - this is "
+#~ "the schedule time of the reminder."
 #~ msgstr ""
 #~ "Указывается дельта времени, которая будет вычтена из времени начала "
 #~ "собеседования."
