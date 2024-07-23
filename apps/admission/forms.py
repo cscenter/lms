@@ -471,9 +471,21 @@ class ConfirmationForm(forms.ModelForm):
         required=False
     )
     track = forms.CharField(
-        label=_("Applicant track"),
+        label=_("Admission track"),
         required=False
     )
+    comment = forms.CharField(
+        required=False,
+        widget=forms.Textarea
+    )
+    offer_confirmation = forms.BooleanField(
+            label='Я подтверждаю свое ознакомление и согласие с <a '
+                  'href="https://yandex.ru/legal/dataschool_offer/">Офертой на оказание услуг дополнительного '
+                  'профессионального образования для физических лиц </a>'
+                  'и с <a href="https://yandex.ru/legal/dataschool_termsofuse/">'
+                  'Условиями использования сервиса «LMS Школы анализа данных»</a>',
+            required=True
+        )
 
     class Meta:
         model = User
@@ -488,7 +500,6 @@ class ConfirmationForm(forms.ModelForm):
             "birth_date",
             "phone",
             "telegram_username",
-            "bio",
             "yandex_login"
         ]
 
@@ -516,7 +527,7 @@ class ConfirmationForm(forms.ModelForm):
             self.fields[field_name].disabled = True
         for field_name in self.force_required:
             self.fields[field_name].required = True
-        self.fields["bio"].help_text = ""
+        self.fields["email"].help_text = "Если у вас уже была учётная запись на сайте ШАДа, то введите ту электронную почту, которую использовали ранее"
         self.helper = FormHelper(self)
         self.helper.form_tag = False
 
@@ -542,6 +553,7 @@ class ConfirmationForm(forms.ModelForm):
 
     def save(self, commit=True) -> User:
         account_data = AccountData.from_dict(self.cleaned_data)
+        profile_data = StudentProfileData.from_dict(self.cleaned_data)
         with transaction.atomic():
-            user = create_student(self.acceptance, account_data)
+            user = create_student(self.acceptance, account_data, profile_data)
         return user

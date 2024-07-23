@@ -547,10 +547,13 @@ ACCOUNT_DATA = AccountData(
     gender=GenderTypes.FEMALE,
     telegram_username="username",
     phone="+71234567",
-    bio="bio",
     yandex_login="yandex_login",
     birth_date=datetime.date(2000, 1, 1),
     living_place="City"
+)
+
+PROFILE_DATA = StudentProfileData(
+    comment="comment"
 )
 
 ACCOUNT_DATA_WITHOUT_PATRONYMIC = AccountData(
@@ -559,7 +562,6 @@ ACCOUNT_DATA_WITHOUT_PATRONYMIC = AccountData(
     gender=GenderTypes.FEMALE,
     telegram_username="username2",
     phone="+712345678",
-    bio="bio2",
     yandex_login="yandex_login2",
     birth_date=datetime.date(2001, 1, 1),
     living_place="City2"
@@ -567,7 +569,7 @@ ACCOUNT_DATA_WITHOUT_PATRONYMIC = AccountData(
 
 
 @pytest.mark.django_db
-def test_create_student(settings, get_test_image):
+def test_create_student(settings):
     future_dt = get_now_utc() + datetime.timedelta(days=5)
     campaign = CampaignFactory(
         year=2011,
@@ -579,7 +581,7 @@ def test_create_student(settings, get_test_image):
         applicant__campaign=campaign,
     )
     applicant = acceptance.applicant
-    user = create_student(acceptance, ACCOUNT_DATA)
+    user = create_student(acceptance, ACCOUNT_DATA, PROFILE_DATA)
     assert user.pk
     applicant.refresh_from_db()
     assert user.username == ACCOUNT_DATA.email.split("@", maxsplit=1)[0]
@@ -609,10 +611,12 @@ def test_create_student(settings, get_test_image):
     assert student_profile.diploma_degree == applicant.diploma_degree
     assert student_profile.graduation_year == applicant.year_of_graduation
     assert student_profile.new_track == applicant.new_track
+    for field in dataclasses.fields(PROFILE_DATA):
+        assert getattr(student_profile, field.name) == getattr(PROFILE_DATA, field.name)
 
 
 @pytest.mark.django_db
-def test_create_student_with_existing_invited(settings, get_test_image):
+def test_create_student_with_existing_invited(settings):
     future_dt = get_now_utc() + datetime.timedelta(days=5)
     campaign = CampaignFactory(
         year=2011,
@@ -632,7 +636,7 @@ def test_create_student_with_existing_invited(settings, get_test_image):
     student = InvitedStudentFactory(email=applicant.email,
                                     first_name=applicant.first_name,
                                     last_name=applicant.last_name)
-    user = create_student(acceptance, ACCOUNT_DATA_WITHOUT_PATRONYMIC)
+    user = create_student(acceptance, ACCOUNT_DATA_WITHOUT_PATRONYMIC, PROFILE_DATA)
     assert user.pk
     assert student == user
     applicant.refresh_from_db()
@@ -669,6 +673,8 @@ def test_create_student_with_existing_invited(settings, get_test_image):
     assert student_profile.diploma_degree == applicant.diploma_degree
     assert student_profile.graduation_year == applicant.year_of_graduation
     assert student_profile.new_track == applicant.new_track
+    for field in dataclasses.fields(PROFILE_DATA):
+        assert getattr(student_profile, field.name) == getattr(PROFILE_DATA, field.name)
 
 
 @pytest.mark.django_db
@@ -722,5 +728,5 @@ def test_create_student_email_case_insensitive(settings, get_test_image):
     assert user1.email == "test@example.com"
     # Merging data into existing account since email address must be case insensitive
     account_data1 = dataclasses.replace(ACCOUNT_DATA, email="TEST@example.com")
-    user2 = create_student(acceptance, account_data1)
+    user2 = create_student(acceptance, account_data1, PROFILE_DATA)
     assert user2.pk == user1.pk

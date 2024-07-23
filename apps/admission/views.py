@@ -1359,7 +1359,10 @@ class ConfirmationOfAcceptanceForStudiesView(TemplateView):
             context = {"authorization_form": authorization_form}
         else:
             confirmation_form = ConfirmationForm(acceptance=self.acceptance)
-            context = {"confirmation_form": confirmation_form}
+            context = {
+                "confirmation_form": confirmation_form,
+                "contact_email": settings.LMS_CURATOR_EMAIL
+            }
         return self.render_to_response(context)
 
     def post(self, request: HttpRequest, *args, **kwargs):
@@ -1398,3 +1401,9 @@ class ConfirmationOfAcceptanceForStudiesView(TemplateView):
 
 class ConfirmationOfAcceptanceForStudiesDoneView(TemplateView):
     template_name = "lms/admission/confirmation_of_acceptance_done.html"
+
+    def get_context_data(self, **kwargs):
+        context = {
+            "contact_email": settings.LMS_CURATOR_EMAIL
+        }
+        return context

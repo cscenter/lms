@@ -426,7 +426,6 @@ class AccountData:
     phone: str
     yandex_login: str
     telegram_username: str
-    bio: str
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
@@ -437,7 +436,13 @@ class AccountData:
 
 @dataclass(frozen=True)
 class StudentProfileData:
-    university: str
+    comment: str
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]):
+        field_types = {field.name: field.type for field in fields(cls)}
+        valid_data = {k: v for k, v in data.items() if k in field_types}
+        return cls(**valid_data)
 
 
 def get_or_create_student_profile(
@@ -470,6 +475,7 @@ def get_or_create_student_profile(
 def create_student(
     acceptance: Acceptance,
     account_data: AccountData,
+    profile_data: StudentProfileData
 ) -> User:
     """
     Creates new user account or merges with the existing one, then creates
@@ -494,7 +500,7 @@ def create_student(
             is_active=True,
             first_name=applicant.first_name,
             last_name=applicant.last_name,
-            branch=branch,
+            branch=branch
         )
     user.workplace = applicant.workplace or ""
     user.patronymic = "" if account_data.has_no_patronymic else applicant.patronymic
@@ -512,6 +518,7 @@ def create_student(
         "diploma_degree": applicant.diploma_degree,
         "graduation_year": applicant.year_of_graduation,
         "new_track": applicant.new_track,
+        **asdict(profile_data)
     }
     get_or_create_student_profile(applicant.campaign, user, data=student_data)
     applicant.user = user

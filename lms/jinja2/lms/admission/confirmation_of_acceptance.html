@@ -32,10 +32,13 @@
         <div class="col-xs-12 bg-white p-20">
           <div class="row">
             <div class="col-xs-offset-2 col-xs-8">
-              <h3 class="mb-30">Создание профиля</h3>
+              <h3 class="mb-30">Создание профиля студента ШАД</h3>
               <div class="mb-20">
-                <p>Поздравляем вас с поступлением и приглашаем создать профиль на сайте <span class="nowrap"><b>{{ request.site.name }}</b></span>. Подтвердите почту,
-                проверьте информацию из анкеты и добавьте ту, которой не хватает.</p>
+                <p>Поздравляем вас с поступлением в Школу анализа данных и приглашаем создать профиль на сайте <span class="nowrap"><b>{{
+                  request.site.name }}</b></span>.</p>
+                <p>Подтвердите почту, проверьте информацию из анкеты и добавьте ту, которой не хватает. Обратите внимание, что все
+                  данные, которые вы здесь укажете, будут использоваться для зачисления в ШАД и для выдачи справок/диплома.</p>
+                <p>Если какие-то из неизменяемых полей заполнены неверно, то напишите на почту <b>{{ contact_email }}</b></p>
               </div>
               <form action="" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
@@ -50,7 +53,7 @@
                   </div>
                   <div class="row">
                     <div class="col-xs-6">{{ forms.field(form['patronymic']) }}</div>
-                    <div class="col-xs-3">{{ forms.field(form['has_no_patronymic']) }}</div>
+                    <div class="col-xs-3" style="top: 30px;">{{ forms.field(form['has_no_patronymic'], is_boolean=True) }}</div>
                   </div>
                   <div class="row">
                     <div class="col-xs-6">{{ forms.field(form['branch']) }}</div>
@@ -58,7 +61,8 @@
                   </div>
                   <div class="row">
                     <div class="col-xs-12">
-                      {{ forms.field(form['email'], append_button='<button class="btn btn-primary" id="confirm-email" type="button">Прислать код</button>') }}
+                      {{ forms.field(form['email'], prepend_text='<i class="fa fa-envelope-o"></i>', append_button='<button
+                      class="btn btn-primary" id="confirm-email" type="button">Прислать код</button>') }}
                     </div>
                   </div>
                   <div class="row"  id="confirm-email-code">
@@ -73,20 +77,40 @@
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-xs-12">{{ forms.field(form['living_place']) }}</div>
+                    <div class="col-xs-12">{{ forms.field(form['living_place'], prepend_text='<i class="fa fa-home"></i>') }}</div>
                   </div>
                 </fieldset>
 
                 <fieldset class="mb-20">
-                  <legend>Дополнительные контакты</legend>
-                  <p>Номер телефона увидят только кураторы и будут использовать в крайнем случае.<br>
-                    В поле "Контактная информация" вставьте ссылки на соц. сети, номер телефона и другие контакты, которыми вы бы хотели
-                    поделиться с другими студентами и преподавателями.</p>
+                  <legend>Контакты</legend>
+                  <p>Эта данные увидят только кураторы.
+                    <ul>
+                      <li>Телеграм необходим, чтобы добавить вас в чат курса, где будет вся важная информация на протяжении обучения.</li>
+                      <li>Логин на Яндексе будет использоваться, чтобы открывать вам доступ к домашним заданиям.</li>
+                      <li>Телефон будет использоваться кураторами только в крайних случаях.</li>
+                    </ul>
+                  </p>
                   <div class="row">
-                    <div class="col-xs-6">{{ forms.field(form['phone']) }}</div>
-                    <div class="col-xs-6">{{ forms.field(form['yandex_login']) }}</div>
-                    <div class="col-xs-12">{{ forms.field(form['telegram_username']) }}</div>
-                    <div class="col-xs-12">{{ forms.field(form['bio']) }}</div>
+                    <div class="col-xs-6">{{ forms.field(form['phone'], prepend_text='<i class="fa fa-mobile"></i>') }}</div>
+                    <div class="col-xs-6">{{ forms.field(form['yandex_login'], prepend_text='<b>Я</b>')}}</div>
+                    <div class="col-xs-12">{{ forms.field(form['telegram_username'], prepend_text='<i class="fa fa-telegram"></i>')
+                      }}</div>
+                  </div>
+                </fieldset>
+                <fieldset class="mb-20">
+                  <legend>Дополнительная информация</legend>
+                  <p>Здесь вы можете указать любую информацию, которую, по вашему мнению, должен знать о вас куратор.</p>
+                  <div class="row">
+                    <div class="col-xs-12">{{ forms.field(form['comment'], hide_label=True)
+                      }}</div>
+                  </div>
+                </fieldset>
+                <fieldset class="mb-20">
+                  <legend></legend>
+                  <p>Для того, чтобы получить доступ к личному кабинету и платформе, где будет проходить обучение, ознакомьтесь,
+                    пожалуйста, с договором оферты ниже и подтвердите необходимые поля:</p>
+                  <div class="row">
+                    <div class="col-xs-12">{{ forms.field(form['offer_confirmation'], is_boolean=True) }}</div>
                   </div>
                 </fieldset>
 
