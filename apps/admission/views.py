@@ -1395,7 +1395,10 @@ class ConfirmationOfAcceptanceForStudiesView(TemplateView):
                     redirect_to=reverse("admission:acceptance:confirmation_done")
                 )
             else:
-                context = {"confirmation_form": confirmation_form}
+                context = {
+                    "confirmation_form": confirmation_form,
+                    "contact_email": settings.LMS_CURATOR_EMAIL
+                }
                 return self.render_to_response(context)
 
 

@@ -23,19 +23,33 @@ class InvitationLoginForm(LoginForm):
 
 class InvitationRegistrationForm(RegistrationFormUniqueEmail):
     captcha = ReCaptchaField()
-
+    not_required = [
+        "patronymic"
+    ]
     class Meta:
         model = User
-        fields = ("email", "last_name", "first_name", "patronymic", "gender")
+        fields = ("email", "branch", "last_name", "first_name", "patronymic", "gender", "telegram_username", "birth_date")
 
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, *args, invitation, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['last_name'].required = True
-        self.fields['first_name'].required = True
+        for name, value in self.fields.items():
+            if name not in self.not_required:
+                value.required = True
+
+        self.fields['branch'].queryset = invitation.branches
+        self.fields['telegram_username'].help_text = "@&lt;<b>username</b>&gt; в настройках профиля Telegram."\
+                                                     "<br>Поставьте прочерк «-», если аккаунт отсутствует."
+        self.fields['birth_date'].help_text = "Введите дату в формате DD.MM.YYYY"
         self.helper = FormHelper(self)
         self.helper.layout.append(
             FormActions(Submit('submit', _('Submit')))
         )
+
+    def clean_telegram_username(self):
+        telegram_username = self.cleaned_data.get("telegram_username")
+        telegram_username = telegram_username.replace("@", "")
+        return "" if len(telegram_username) == 1 else telegram_username
 
     def clean(self):
         cleaned_data = super().clean()
@@ -50,11 +64,22 @@ class InvitationRegistrationForm(RegistrationFormUniqueEmail):
 
 
 class CompleteAccountForm(forms.ModelForm):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.fields['first_name'].required = True
+    def __init__(self, *args, invitation, **kwargs):
+        instance: User = kwargs["instance"]
+        kwargs["initial"] = {
+            **kwargs.get("initial", {}),
+            "branch": instance.branch,
+        }
+        super().__init__(*args, **kwargs)
         self.fields['last_name'].required = True
+        self.fields['first_name'].required = True
+        self.fields['branch'].required = True
+        self.fields['branch'].queryset = invitation.branches
+        self.helper = FormHelper(self)
+        self.helper.layout.append(
+            FormActions(Submit('continue', _('Continue')))
+        )
 
     class Meta:
         model = User
-        fields = ("first_name", "last_name", "patronymic")
+        fields = ("branch", "first_name", "last_name", "patronymic")

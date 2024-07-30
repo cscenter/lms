@@ -32,7 +32,7 @@ from users.services import (
 )
 
 
-def is_student_profile_valid(user: User, site: Site, invitation: Invitation) -> bool:
+def is_student_profile_valid(user: User, site: Site) -> bool:
     student_profile = user.get_student_profile(site)
     if not student_profile or not student_profile.is_active:
         return False
@@ -83,8 +83,7 @@ class InvitationView(InvitationURLParamsMixin, TemplateView):
                                 kwargs={"token": self.invitation.token},
                                 subdomain=settings.LMS_SUBDOMAIN)
             return HttpResponseRedirect(redirect_to=login_url)
-        if not is_student_profile_valid(request.user, request.site,
-                                        self.invitation):
+        if not is_student_profile_valid(request.user, request.site):
             redirect_to = reverse("invitation:complete_profile",
                                   kwargs={"token": self.invitation.token},
                                   subdomain=settings.LMS_SUBDOMAIN)
@@ -142,6 +141,11 @@ class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
         context = self.get_context_data()
         return self.render_to_response(context)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['invitation'] = self.invitation
+        return kwargs
+
     def register(self, form) -> User:
         site = get_current_site(self.request)
         invitation = self.invitation
@@ -152,14 +156,16 @@ class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
                 password=data['password1'],
                 email=data['email'],
                 gender=data['gender'],
-                time_zone=invitation.branch.time_zone,
+                time_zone=data['branch'].time_zone,
                 is_active=False,
                 first_name=data['first_name'],
                 last_name=data['last_name'],
-                patronymic=data.get('patronymic', ''))
+                patronymic=data.get('patronymic', ''),
+                telegram_username=data["telegram_username"],
+                birth_date=data["birth_date"])
             registration_profile = create_registration_profile(user=new_user)
             create_student_profile(user=new_user,
-                                   branch=invitation.branch,
+                                   branch=data['branch'],
                                    profile_type=StudentTypes.INVITED,
                                    year_of_admission=invitation.semester.academic_year,
                                    invitation=invitation)
@@ -208,9 +214,12 @@ class InvitationCompleteProfileView(InvitationURLParamsMixin,
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        if is_student_profile_valid(request.user, request.site, self.invitation):
+        if is_student_profile_valid(request.user, request.site):
             return HttpResponseRedirect(self.invitation.get_absolute_url())
         return super().dispatch(request, *args, **kwargs)
+
+    def get_form(self, data=None, files=None, **kwargs):
+        return super().get_form(data, files, invitation=self.invitation, **kwargs)
 
     def get_login_url(self):
         return reverse("invitation:login",

@@ -42,7 +42,8 @@ from learning.managers import (
     GraduateProfileDefaultManager, StudentAssignmentManager
 )
 from learning.settings import (
-    ENROLLMENT_DURATION, AssignmentScoreUpdateSource, GradeTypes, GradingSystems, EnrollmentGradeUpdateSource
+    ENROLLMENT_DURATION, AssignmentScoreUpdateSource, GradeTypes, GradingSystems, EnrollmentGradeUpdateSource,
+    InvitationCategories
 )
 from learning.utils import humanize_duration, grade_to_base_system
 from users.constants import ThumbnailSizes
@@ -517,11 +518,23 @@ class Invitation(TimeStampedModel):
         "courses.Semester",
         verbose_name=_("Semester"),
         on_delete=models.CASCADE)
+    #TODO delete
     branch = models.ForeignKey(
         Branch,
         verbose_name=_("Branch"),
         related_name="+",  # Disable backwards relation
         on_delete=models.PROTECT)
+    branches = models.ManyToManyField(
+        Branch,
+        verbose_name=_("Branches"),
+        related_name="+"  # Disable backwards relation
+    )
+    category = models.CharField(
+        verbose_name=_("Category"),
+        choices=InvitationCategories.choices,
+        max_length=15,
+        blank=True,
+        null=True)
     courses = models.ManyToManyField(
         'courses.Course',
         through=CourseInvitation,

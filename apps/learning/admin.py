@@ -1,8 +1,9 @@
+from dal_select2.widgets import Select2Multiple
 from modeltranslation.admin import TranslationAdmin
 
 from django.conf import settings
 from django.contrib import admin
-from django.db import models as db_models
+from django.db import models as db_models, models
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
@@ -329,6 +330,11 @@ class InvitationAdmin(BaseModelAdmin):
     ]
     readonly_fields = ('token',)
     exclude = ('courses', 'enrolled_students')
+    formfield_overrides = {
+        models.ManyToManyField: {
+            "widget": Select2Multiple(attrs={"data-width": "style"})
+        }
+    }
 
     @meta(_("Invitation Link"))
     def get_link(self, obj):
