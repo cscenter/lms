@@ -114,7 +114,7 @@ class UserAdmin(_UserAdmin):
     ordering = ['last_name', 'first_name']
     inlines = [YandexUserDataInlineAdmin, OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
                UserGroupInlineAdmin]
-    readonly_fields = ['last_login', 'date_joined']
+    readonly_fields = ['last_login', 'date_joined', 'gave_permission_at']
     list_display = ['id', 'username', 'email', 'first_name', 'last_name',
                     'is_staff']
     list_filter = ['is_active', 'branch', 'group__site', 'group__role',
@@ -138,7 +138,7 @@ class UserAdmin(_UserAdmin):
                                              'yandex_login', 'stepic_id',
                                              'github_login', 'anytask_url',
                                              'codeforces_login']}),
-        (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
+        (_('Important dates'), {'fields': ['last_login', 'date_joined', 'gave_permission_at']})]
 
     def get_formsets_with_inlines(self, request, obj=None):
         """

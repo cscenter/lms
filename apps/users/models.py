@@ -416,6 +416,13 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         _("Living Place"), max_length=255, null=True, blank=True
     )
 
+    gave_permission_at = models.DateTimeField(
+        _("Permission time"),
+        null=True,
+        blank=True
+    )
+
+
     objects = CustomUserManager()
 
     class Meta:
