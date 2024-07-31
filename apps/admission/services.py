@@ -505,6 +505,7 @@ def create_student(
     user.workplace = applicant.workplace or ""
     user.patronymic = "" if account_data.has_no_patronymic else applicant.patronymic
     user.photo = applicant.photo
+    user.gave_permission_at = user.date_joined
     # dataclasses.asdict raises `cannot pickle '_io.BufferedRandom' object`
     account_fields = {field.name for field in fields(AccountData)}
     for name in account_fields:

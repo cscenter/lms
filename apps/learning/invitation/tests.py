@@ -115,6 +115,7 @@ def test_invitation_register_view(client, assert_redirect, settings, mocker):
     assert not new_user.is_active
     assert new_user.last_name == 'Last Name'
     assert Roles.INVITED in new_user.roles
+    assert new_user.gave_permission_at is None
     student_profile = new_user.get_student_profile(site=invitation.branch.site)
     assert student_profile
     assert student_profile.year_of_admission == invitation.semester.academic_year

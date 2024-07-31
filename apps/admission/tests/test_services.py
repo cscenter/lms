@@ -1,15 +1,12 @@
 import dataclasses
 import datetime
-import io
 import itertools
-from typing import BinaryIO, cast
 
 import pytest
 import pytz
 from rest_framework.exceptions import NotFound
 
 from django.core.exceptions import ValidationError
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
 from django.utils import timezone
 
@@ -590,6 +587,8 @@ def test_create_student(settings):
     assert user.patronymic == applicant.patronymic
     assert user.workplace == applicant.workplace
     assert user.photo == applicant.photo
+    assert user.gave_permission_at is not None
+    assert user.gave_permission_at == user.date_joined
     for field in dataclasses.fields(ACCOUNT_DATA):
         assert getattr(user, field.name) == getattr(ACCOUNT_DATA, field.name)
     assert applicant.user == user
@@ -646,6 +645,8 @@ def test_create_student_with_existing_invited(settings):
     assert user.patronymic == ""
     assert user.workplace == applicant.workplace
     assert user.photo == applicant.photo
+    assert user.gave_permission_at is not None
+    assert user.gave_permission_at == user.date_joined
     for field in dataclasses.fields(ACCOUNT_DATA_WITHOUT_PATRONYMIC):
         assert getattr(user, field.name) == getattr(ACCOUNT_DATA_WITHOUT_PATRONYMIC, field.name)
     assert applicant.user == user
