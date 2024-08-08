@@ -74,11 +74,11 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                                        .select_related("course")
                                        .only('id', 'course_id'))
                 student_enrollments = {e.course_id: e for e in student_enrollments}
-                student_invitations = student_profile.invitations.all()
-                courses_pk = [ci.course_id for ci in (CourseInvitation
-                                                      .objects
-                                                      .filter(invitation__in=student_invitations)
-                                                      .only('course_id'))]
+                invitation = student_profile.invitation
+                if invitation is None:
+                    courses_pk = []
+                else:
+                    courses_pk = invitation.courseinvitation_set.all().values_list("course_id", flat=True)
                 enrolled_in = Q(id__in=list(student_enrollments))
                 has_invitation = Q(id__in=courses_pk)
                 courses = courses.filter(enrolled_in | has_invitation)

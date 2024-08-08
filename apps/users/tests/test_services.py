@@ -209,7 +209,7 @@ def test_get_student_profile_priority():
                                              status=StudentStatuses.REINSTATED)
     current_semester = Semester.get_current()
     invitation = InvitationFactory(semester=current_semester)
-    today = now_local(invitation.branch.get_timezone()).date()
+    today = now_local(student_profile1.branch.get_timezone()).date()
     EnrollmentPeriodFactory(semester=current_semester,
                                                site_id=settings.SITE_ID,
                                                starts_on=today,

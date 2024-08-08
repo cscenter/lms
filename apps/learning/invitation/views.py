@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
 from django.contrib.sites.shortcuts import get_current_site
 from django.db import transaction
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 
@@ -32,7 +32,7 @@ from users.services import (
 )
 
 
-def is_student_profile_valid(user: User, site: Site, invitation: Invitation) -> bool:
+def is_student_profile_valid(user: User, site: Site) -> bool:
     student_profile = user.get_student_profile(site)
     if not student_profile or not student_profile.is_active:
         return False
@@ -45,6 +45,17 @@ def is_student_profile_valid(user: User, site: Site, invitation: Invitation) -> 
     return bool(user.first_name and user.last_name)
 
 
+def has_other_active_invited_profile(user: User, site: Site, invitation: Invitation) -> bool:
+    student_profile = user.get_student_profile(site)
+    if not student_profile:
+        return False
+    if student_profile.type == StudentTypes.INVITED:
+        created_on_term = date_to_term_pair(student_profile.created)
+        return created_on_term == get_current_term_pair() and student_profile.invitation != invitation
+    else:
+        return False
+
+
 def complete_student_profile(user: User, site: Site, invitation: Invitation) -> None:
     update_fields = list(CompleteAccountForm.Meta.fields)
     with transaction.atomic():
@@ -52,9 +63,9 @@ def complete_student_profile(user: User, site: Site, invitation: Invitation) -> 
         invitation_year = invitation.semester.academic_year
         # Account info should be valid at this point but the most recent
         # profile still can be invalid due to inactive state
-        if not is_student_profile_valid(user, site, invitation):
+        if not is_student_profile_valid(user, site):
             create_student_profile(user=user,
-                                   branch=invitation.branch,
+                                   branch=user.branch,
                                    profile_type=StudentTypes.INVITED,
                                    year_of_admission=invitation_year,
                                    invitation=invitation)
@@ -67,7 +78,7 @@ class InvitationURLParamsMixin:
         super().setup(request, **kwargs)
         qs = (Invitation.objects
               .filter(token=kwargs['token'])
-              .select_related("branch"))
+              .prefetch_related("branches"))
         self.invitation = get_object_or_404(qs)
         if not self.invitation.is_active:
             raise Http404
@@ -76,6 +87,13 @@ class InvitationURLParamsMixin:
 class InvitationView(InvitationURLParamsMixin, TemplateView):
     template_name = "lms/enrollment/invitation_courses.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.is_curator:
+            return super().dispatch(request, *args, **kwargs)
+        elif has_other_active_invited_profile(request.user, request.site, self.invitation):
+            return HttpResponseForbidden(_("You already have other active invitation in this semester"))
+        return super().dispatch(request, *args, **kwargs)
+
     # FIXME: What if log in as an expelled student?
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -83,15 +101,11 @@ class InvitationView(InvitationURLParamsMixin, TemplateView):
                                 kwargs={"token": self.invitation.token},
                                 subdomain=settings.LMS_SUBDOMAIN)
             return HttpResponseRedirect(redirect_to=login_url)
-        if not is_student_profile_valid(request.user, request.site,
-                                        self.invitation):
+        if not is_student_profile_valid(request.user, request.site):
             redirect_to = reverse("invitation:complete_profile",
                                   kwargs={"token": self.invitation.token},
                                   subdomain=settings.LMS_SUBDOMAIN)
             return HttpResponseRedirect(redirect_to=redirect_to)
-        # Correct because on this line user already has working profile
-        profile = self.request.user.get_student_profile(request.site)
-        self.invitation.enrolled_students.add(profile)
         context = self.get_context_data()
         return self.render_to_response(context)
 
@@ -99,9 +113,9 @@ class InvitationView(InvitationURLParamsMixin, TemplateView):
         invitation_course_list = (self.invitation.courseinvitation_set
                                   .select_related('course',
                                                   'course__meta_course',
-                                                  'course__semester'))
+                                                  'course__semester')
+                                  .prefetch_related('enrolled_students'))
         return {
-            'invitation': self.invitation,
             'invitation_course_list': invitation_course_list,
             'LeaveCourse': LeaveCourse,
             'InvitationEnrollPermissionObject': InvitationEnrollPermissionObject,
@@ -142,6 +156,11 @@ class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
         context = self.get_context_data()
         return self.render_to_response(context)
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['invitation'] = self.invitation
+        return kwargs
+
     def register(self, form) -> User:
         site = get_current_site(self.request)
         invitation = self.invitation
@@ -152,14 +171,17 @@ class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
                 password=data['password1'],
                 email=data['email'],
                 gender=data['gender'],
-                time_zone=invitation.branch.time_zone,
+                time_zone=data['branch'].time_zone,
                 is_active=False,
                 first_name=data['first_name'],
                 last_name=data['last_name'],
-                patronymic=data.get('patronymic', ''))
+                patronymic=data.get('patronymic', ''),
+                telegram_username=data["telegram_username"],
+                birth_date=data["birth_date"],
+                branch=data["branch"])
             registration_profile = create_registration_profile(user=new_user)
             create_student_profile(user=new_user,
-                                   branch=invitation.branch,
+                                   branch=data['branch'],
                                    profile_type=StudentTypes.INVITED,
                                    year_of_admission=invitation.semester.academic_year,
                                    invitation=invitation)
@@ -208,9 +230,12 @@ class InvitationCompleteProfileView(InvitationURLParamsMixin,
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        if is_student_profile_valid(request.user, request.site, self.invitation):
+        if is_student_profile_valid(request.user, request.site):
             return HttpResponseRedirect(self.invitation.get_absolute_url())
         return super().dispatch(request, *args, **kwargs)
+
+    def get_form(self, data=None, files=None, **kwargs):
+        return super().get_form(data, files, invitation=self.invitation, **kwargs)
 
     def get_login_url(self):
         return reverse("invitation:login",

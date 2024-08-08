@@ -16,7 +16,7 @@ class Command(BaseCommand):
     deleting role, it will be deleted for all branches and with empty branch
     Example of usage: 
         ./manage.py create_delete_role_group --filename=interviewers.csv --branch=msk --role=INTERVIEWER
-        ./manage.py create_delete_role_group --filename=emails.csv --branch=all --role=INTERVIEWER --take_back
+        ./manage.py create_delete_role_group --branch=all --role=INTERVIEWER --take_back
     """
 
     def add_arguments(self, parser):
@@ -74,7 +74,7 @@ class Command(BaseCommand):
 
             if self.get_group_or_none(user, role=role, branch__isnull=True, site_id=settings.SITE_ID):
                 found_role = True
-                user.remove_group(role, branch=branch)
+                user.groups.filter(user=user, role=role, branch__isnull=True, site_id=settings.SITE_ID).delete()
 
             if not found_role:
                 self.stdout.write(

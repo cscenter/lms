@@ -8,7 +8,6 @@ from django.utils.translation import gettext_lazy as _
 
 from core.models import Branch
 from courses.utils import get_current_term_pair
-from learning.models import Invitation
 from users.models import StudentProfile, StudentTypes
 
 

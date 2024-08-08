@@ -34,6 +34,14 @@ class AcademicDegreeLevels(DjangoChoices):
     ACADEMIC_LEAVE = C("10", _('academic_leave'))
     OTHER = C("other", _('Other'))
 
+class InvitationCategories(DjangoChoices):
+    UNIVERSITY = C("university", _("Invitation|University"))
+    STAFF = C("staff", _("Invitation|Staff"))
+    TEACHER = C("teacher", _("Invitation|Teacher"))
+    GUEST = C("guest", _("Invitation|Guest"))
+    ACADEMIC = C("academic", _("Invitation|Aacdemic"))
+    GRADUATE = C("graduate", _("Invitation|Graduate"))
+    APPLICANT = C("applicant", _("Invitation|Applicant"))
 
 class StudentStatuses(DjangoChoices):
     EXPELLED = C('expelled', _("StudentInfo|Expelled"))

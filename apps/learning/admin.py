@@ -1,8 +1,9 @@
+from dal_select2.widgets import Select2Multiple
 from modeltranslation.admin import TranslationAdmin
 
 from django.conf import settings
 from django.contrib import admin
-from django.db import models as db_models
+from django.db import models as db_models, models
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
@@ -315,20 +316,29 @@ class CourseInlineAdmin(admin.TabularInline):
     model = CourseInvitation
     readonly_fields = ('token', )
     raw_id_fields = ('course',)
+    exclude = ('enrolled_students',)
     extra = 0
 
 
 class InvitationAdmin(BaseModelAdmin):
-    list_display = ('name', 'branch', 'semester', 'get_link')
-    list_select_related = ['branch__site', 'semester']
+    list_display = ('name', 'get_branches', 'semester', 'get_link')
+    list_select_related = ['semester']
+    list_prefetch_related = ['branches']
     inlines = (CourseInlineAdmin, )
     list_filter = [
-        'branch__site',
-        'branch',
+        'branches',
         ('semester', AdminRelatedDropdownFilter),
     ]
     readonly_fields = ('token',)
-    exclude = ('courses', 'enrolled_students')
+    exclude = ('courses',)
+    formfield_overrides = {
+        models.ManyToManyField: {
+            "widget": Select2Multiple(attrs={"data-width": "style"})
+        }
+    }
+    @meta(_("Branches"))
+    def get_branches(self, obj):
+        return mark_safe("<br>".join(map(str, obj.branches.all())))
 
     @meta(_("Invitation Link"))
     def get_link(self, obj):

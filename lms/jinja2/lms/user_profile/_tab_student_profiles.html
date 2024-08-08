@@ -18,9 +18,20 @@
           <a role="button" data-toggle="collapse" href="#student-profile-{{ student_profile.pk }}"
              aria-expanded="{{ "true" if loop.first else "false" }}"
              aria-controls="student-profile-{{ student_profile.pk }}">
-            {{ student_profile.get_type_display() }}{% if student_profile.year_of_admission %} {{ student_profile.year_of_admission }} года
-              поступления{% endif %},
-            {{ student_profile.branch.name }}
+            {% if student_profile.type == StudentTypes.INVITED %}
+              {{ student_profile.get_type_display() }}, {{ student_profile.branch.name }},
+              {% if student_profile.invitation %}
+                {{ student_profile.invitation.semester }}
+              {% elif student_profile.year_of_admission %}
+                {{ student_profile.year_of_admission }}
+              {% endif %}
+            {% else %}
+              {{ student_profile.get_type_display() }}
+              {% if student_profile.year_of_admission %}
+                {{ student_profile.year_of_admission }} года поступления,
+              {% endif %}
+              {{ student_profile.branch.name }}
+            {% endif %}
           </a>
         </h4>
       </div>
@@ -149,6 +160,16 @@
                 {% else %}—{% endif %}
               </td>
             </tr>
+            {% if student_profile.invitation %}
+              <tr>
+                <td>Приглашение</td>
+                <td>
+                  <a target="_blank" href="{{ url('admin:learning_invitation_change', object_id=student_profile.invitation.pk) }}">
+                  {{ student_profile.invitation.name }}
+                  </a>
+                </td>
+              </tr>
+            {% endif %}
               <tr>
                 <td>{% trans %}Comment{% endtrans %}:</td>
                 <td>

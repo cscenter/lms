@@ -426,7 +426,7 @@ def create_account(*, username: str, password: str, email: str,
                     is_active=is_active, date_joined=get_now_utc(),
                     is_staff=False, is_superuser=False)
     new_user.set_password(password)
-    valid_fields = {'first_name', 'last_name', 'patronymic', 'branch'}
+    valid_fields = {'first_name', 'last_name', 'patronymic', 'branch', 'telegram_username', 'birth_date'}
     for field_name, field_value in fields.items():
         if field_name in valid_fields:
             setattr(new_user, field_name, field_value)

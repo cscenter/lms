@@ -297,7 +297,8 @@ def test_view_course_detail_enroll_by_invitation(client):
     current_term = SemesterFactory.create_current(
         enrollment_period__ends_on=future.date())
     site = SiteFactory(id=settings.SITE_ID)
-    student = UserFactory()
+    branch = BranchFactory()
+    student = UserFactory(branch=branch)
     course_invitation = CourseInvitationFactory(course__semester=current_term)
     complete_student_profile(student, site, course_invitation.invitation)
 
@@ -317,19 +318,18 @@ def test_view_course_detail_enroll_by_invitation(client):
     assert current_profile != regular_profile
 
     response = client.get(course.get_absolute_url())
-    assert response.status_code == 403
-
-    client.get(course_invitation.invitation.get_absolute_url())
-    response = client.get(course.get_absolute_url())
     assert response.status_code == 200
     html = response.content.decode('utf-8')
     assert 'Записаться по приглашению' in html
     assert 'Enroll in the course' not in html
+    assert course_invitation.enrolled_students.count() == 0
 
     url = course_invitation.get_absolute_url()
     response = client.post(url, follow=True)
     assert response.redirect_chain[-1][0] == course.get_absolute_url()
     assert Enrollment.objects.filter(invitation=course_invitation.invitation).exists()
+    assert course_invitation.enrolled_students.count() == 1
+    assert current_profile == course_invitation.enrolled_students.all().first()
 
     response = client.get(course.get_absolute_url())
     assert response.status_code == 200
@@ -338,3 +338,19 @@ def test_view_course_detail_enroll_by_invitation(client):
     assert 'Enroll in the course' not in html
     assert 'Unenroll from the course' in html
 
+    second_student = UserFactory(branch=branch)
+    complete_student_profile(second_student, site, course_invitation.invitation)
+    client.login(second_student)
+
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 200
+    html = response.content.decode('utf-8')
+    assert 'Записаться по приглашению' in html
+
+    course_invitation.capacity = 1
+    course_invitation.save()
+
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 200
+    html = response.content.decode('utf-8')
+    assert 'Записаться по приглашению' not in html

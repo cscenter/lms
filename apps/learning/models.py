@@ -42,7 +42,8 @@ from learning.managers import (
     GraduateProfileDefaultManager, StudentAssignmentManager
 )
 from learning.settings import (
-    ENROLLMENT_DURATION, AssignmentScoreUpdateSource, GradeTypes, GradingSystems, EnrollmentGradeUpdateSource
+    ENROLLMENT_DURATION, AssignmentScoreUpdateSource, GradeTypes, GradingSystems, EnrollmentGradeUpdateSource,
+    InvitationCategories
 )
 from learning.utils import humanize_duration, grade_to_base_system
 from users.constants import ThumbnailSizes
@@ -475,6 +476,17 @@ class CourseInvitation(models.Model):
         verbose_name=_("Course offering"),
         on_delete=models.CASCADE)
     token = models.CharField(verbose_name=_("Token"), max_length=128)
+    capacity = models.PositiveSmallIntegerField(
+        verbose_name=_("CourseOffering|capacity"),
+        default=0,
+        help_text=_("0 - unlimited"))
+    enrolled_students = models.ManyToManyField(
+        StudentProfile,
+        verbose_name=_("Enrolled students"),
+        related_name='course_invitations',
+        help_text=_("Students who took advantage of the invitation"),
+        blank=True
+    )
 
     class Meta:
         verbose_name = _("Enrollment Invitation")
@@ -509,6 +521,17 @@ class CourseInvitation(models.Model):
     def is_active(self):
         return self.course.enrollment_is_open
 
+    @property
+    def is_capacity_limited(self):
+        return self.capacity > 0
+
+    @property
+    def places_left(self):
+        if self.is_capacity_limited:
+            return max(0, self.capacity - self.enrolled_students.count())
+        else:
+            return float("inf")
+
 
 class Invitation(TimeStampedModel):
     name = models.CharField(_("Name"), max_length=255)
@@ -517,23 +540,22 @@ class Invitation(TimeStampedModel):
         "courses.Semester",
         verbose_name=_("Semester"),
         on_delete=models.CASCADE)
-    branch = models.ForeignKey(
+    branches = models.ManyToManyField(
         Branch,
-        verbose_name=_("Branch"),
-        related_name="+",  # Disable backwards relation
-        on_delete=models.PROTECT)
+        verbose_name=_("Branches"),
+        related_name="+"  # Disable backwards relation
+    )
+    category = models.CharField(
+        verbose_name=_("Category"),
+        choices=InvitationCategories.choices,
+        max_length=15,
+        blank=True,
+        null=True)
     courses = models.ManyToManyField(
         'courses.Course',
         through=CourseInvitation,
         verbose_name=_("Courses"))
 
-    enrolled_students = models.ManyToManyField(
-        StudentProfile,
-        verbose_name=_("Enrolled students"),
-        related_name="invitations",
-        help_text=_("Students who took advantage of the invitation"),
-        blank=True
-    )
 
     class Meta:
         verbose_name = _("Invitation")

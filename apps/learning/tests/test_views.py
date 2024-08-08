@@ -11,12 +11,12 @@ from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
 from auth.permissions import perm_registry
-from core.tests.factories import SiteFactory
+from core.tests.factories import SiteFactory, BranchFactory
 from core.timezone import now_local
 from core.urls import reverse
 from courses.models import CourseTeacher
 from courses.tests.factories import *
-from learning.invitation.views import complete_student_profile
+from learning.invitation.views import complete_student_profile, is_student_profile_valid
 from learning.permissions import ViewEnrollment
 from learning.settings import GradeTypes, StudentStatuses
 from learning.tests.factories import *
@@ -87,13 +87,15 @@ def test_course_detail_view_invited_permission(client):
 
     invitation_1 = CourseInvitationFactory(course__semester=current_term)
     invitation_2 = CourseInvitationFactory(course__semester=current_term)
-    student = StudentFactory(student_profile__type=StudentTypes.INVITED)
+    invitation = invitation_1.invitation
+    branch = BranchFactory()
+    student = UserFactory(branch=branch)
+    assert not is_student_profile_valid(student, branch.site)
+    complete_student_profile(student, branch.site, invitation)
 
     client.login(student)
     response = client.get(invitation_1.course.get_absolute_url())
-    assert response.status_code == 403
-
-    invitation = invitation_1.invitation
+    assert response.status_code == 200
     response = client.get(invitation.get_absolute_url())
     assert response.status_code == 200
     assert 'Записаться' in response.content.decode('utf-8')
@@ -114,15 +116,20 @@ def test_course_detail_view_enrolled_invited_capabilities(client):
         enrollment_period__ends_on=future.date())
     course_invitation = CourseInvitationFactory(course__semester=current_term)
     course = course_invitation.course
+    invitation = course_invitation.invitation
 
-    student = StudentFactory(student_profile__type=StudentTypes.INVITED)
+    site = SiteFactory(id=settings.SITE_ID)
+    branch = BranchFactory(site=site)
+    student = UserFactory(branch=branch)
     client.login(student)
     response = client.get(course.get_absolute_url())
     assert response.status_code == 403
 
+    assert not is_student_profile_valid(student, site)
+    complete_student_profile(student, site, invitation)
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 200
     url = course_invitation.get_absolute_url()
-    site = SiteFactory(id=settings.SITE_ID)
-    complete_student_profile(student, site, course_invitation.invitation)
     response = client.get(course_invitation.invitation.get_absolute_url())
     assert response.status_code == 200
     assert 'Записаться' in response.content.decode('utf-8')
@@ -156,10 +163,10 @@ def test_course_detail_view_inactive_regular_active_invited_profile_permission(c
     course = course_invitation.course
     invitation = course_invitation.invitation
 
-    student = StudentFactory(student_profile__type=StudentTypes.INVITED, student_profile__invitation=invitation)
     site = SiteFactory(id=settings.SITE_ID)
-    complete_student_profile(student, site, invitation)
-    regular_profile = StudentProfileFactory(user=student, year_of_admission=previous_term.year - 1)
+    branch = BranchFactory(site=site)
+    student = StudentFactory(student_profile__year_of_admission=previous_term.year - 1, branch=branch)
+    regular_profile = student.get_student_profile(site=site)
 
     client.login(student)
     response = client.get(course.get_absolute_url())
@@ -175,8 +182,10 @@ def test_course_detail_view_inactive_regular_active_invited_profile_permission(c
                           new_status=StudentStatuses.ACADEMIC_LEAVE,
                           editor=curator)
 
+    assert not is_student_profile_valid(student, site)
+    complete_student_profile(student, site, invitation)
     response = client.get(course.get_absolute_url())
-    assert response.status_code == 403
+    assert response.status_code == 200
     response = client.get(enrollment.course.get_absolute_url())
     assert response.status_code == 200
     enrollment.grade = GradeTypes.UNSATISFACTORY
@@ -188,10 +197,6 @@ def test_course_detail_view_inactive_regular_active_invited_profile_permission(c
     response = client.get(enrollment.course.get_absolute_url())
     assert response.status_code == 403
 
-    client.get(invitation.get_absolute_url())
-    response = client.get(course.get_absolute_url())
-    assert response.status_code == 200
-
 
 @pytest.mark.django_db
 def test_course_detail_view_inactive_invited_profile_permission(client):
@@ -201,16 +206,17 @@ def test_course_detail_view_inactive_invited_profile_permission(client):
     previous_term = SemesterFactory.create_prev(term=current_term)
     site = SiteFactory(id=settings.SITE_ID)
     course_invitation = CourseInvitationFactory(course__semester=previous_term)
-    student = UserFactory()
+    branch = BranchFactory(site=site)
+    student = UserFactory(branch=branch)
+    assert not is_student_profile_valid(student, site)
     complete_student_profile(student, site, course_invitation.invitation)
     student_profile = StudentProfile.objects.get(user=student)
     old_course = CourseFactory(semester=previous_term)
     enrollment = EnrollmentFactory(course=old_course, student=student, student_profile=student_profile)
 
     client.login(student)
-    course_invitation.invitation.enrolled_students.add(student_profile)
     response = client.get(course_invitation.course.get_absolute_url())
-    assert response.status_code == 200
+    assert response.status_code == 403
 
     response = client.get(old_course.get_absolute_url())
     assert response.status_code == 200

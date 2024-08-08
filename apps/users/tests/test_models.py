@@ -206,7 +206,7 @@ def test_student_profile_is_invited_student_active():
     invitation.semester = Semester.get_current()
     assert not student_profile.is_invited_student_active
 
-    today = now_local(invitation.branch.get_timezone()).date()
+    today = now_local(student_profile.branch.get_timezone()).date()
     enrollmentperiod = EnrollmentPeriodFactory()
     assert not student_profile.is_invited_student_active
 
