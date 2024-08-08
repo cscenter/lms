@@ -430,7 +430,7 @@ class EnrollmentInvitationListView(CuratorOnlyMixin, TemplateView):
         serializer.fields["branches"].choices = [(b.pk, b.name) for b in site_branches]
         if not serializer.initial_data:
             branch = site_branches[0]
-            url = f"{request.path}?branch={branch.pk}"
+            url = f"{request.path}?branches={branch.pk}"
             return HttpResponseRedirect(url)
         serializer.is_valid(raise_exception=False)
         # Filterset knows how to validate input data too
