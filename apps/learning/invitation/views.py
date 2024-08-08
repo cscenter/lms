@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
 from django.contrib.sites.shortcuts import get_current_site
 from django.db import transaction
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 
@@ -45,6 +45,17 @@ def is_student_profile_valid(user: User, site: Site) -> bool:
     return bool(user.first_name and user.last_name)
 
 
+def has_other_active_invited_profile(user: User, site: Site, invitation: Invitation) -> bool:
+    student_profile = user.get_student_profile(site)
+    if not student_profile:
+        return False
+    if student_profile.type == StudentTypes.INVITED:
+        created_on_term = date_to_term_pair(student_profile.created)
+        return created_on_term == get_current_term_pair() and student_profile.invitation != invitation
+    else:
+        return False
+
+
 def complete_student_profile(user: User, site: Site, invitation: Invitation) -> None:
     update_fields = list(CompleteAccountForm.Meta.fields)
     with transaction.atomic():
@@ -76,6 +87,13 @@ class InvitationURLParamsMixin:
 class InvitationView(InvitationURLParamsMixin, TemplateView):
     template_name = "lms/enrollment/invitation_courses.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.is_curator:
+            return super().dispatch(request, *args, **kwargs)
+        elif has_other_active_invited_profile(request.user, request.site, self.invitation):
+            return HttpResponseForbidden(_("You already have other active invitation in this semester"))
+        return super().dispatch(request, *args, **kwargs)
+
     # FIXME: What if log in as an expelled student?
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -98,7 +116,6 @@ class InvitationView(InvitationURLParamsMixin, TemplateView):
                                                   'course__semester')
                                   .prefetch_related('enrolled_students'))
         return {
-            'invitation': self.invitation,
             'invitation_course_list': invitation_course_list,
             'LeaveCourse': LeaveCourse,
             'InvitationEnrollPermissionObject': InvitationEnrollPermissionObject,

@@ -47,13 +47,16 @@ def test_invitation_view(client, lms_resolver, assert_redirect, settings):
     complete_student_profile(user, site, invitation)
     response = client.get(url)
     assert response.status_code == 200
-    assert 'invitation' in response.context_data
-    assert response.context_data['invitation'] == invitation
     # Make sure we select courses for target invitation only
-    CourseInvitationFactory()
+    second_course_invitation = CourseInvitationFactory(course__semester=current_term)
     response = client.get(url)
     assert len(response.context_data['invitation_course_list']) == 1
     assert response.context_data['invitation_course_list'][0] == course_invitation
+
+    second_invitation = second_course_invitation.invitation
+    url = second_invitation.get_absolute_url()
+    response = client.get(url)
+    assert response.status_code == 403
 
 
 @pytest.mark.django_db
@@ -91,7 +94,7 @@ def test_invitation_register_form(client, mocker):
     form_data['branch'] = branch
     form_data['gender'] = GenderTypes.MALE
     form = InvitationRegistrationForm(data=form_data, invitation=course_invitation.invitation)
-    assert form.is_valid()@pytest.mark.django_db
+    assert form.is_valid()
 
 @pytest.mark.django_db
 def test_complete_account_form(client, mocker):
@@ -163,9 +166,12 @@ def test_invitation_register_view(client, assert_redirect, settings, mocker):
     new_user = User.objects.get(email=test_email)
     assert not new_user.is_active
     assert new_user.branch == branch
+    assert new_user.check_password('123123')
     assert new_user.telegram_username == "telegram"
     assert new_user.birth_date == datetime.date(2000, 1, 1)
     assert new_user.last_name == 'Last Name'
+    assert new_user.first_name == 'First Name'
+    assert new_user.gender == GenderTypes.MALE
     assert Roles.INVITED in new_user.roles
     assert new_user.gave_permission_at is None
     student_profile = new_user.get_student_profile(site=new_user.branch.site)
