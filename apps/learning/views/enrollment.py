@@ -151,6 +151,7 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
                                      reason_entry='',
                                      invitation=invitation,
                                      student_group=resolved_group)
+            self.course_invitation.enrolled_students.add(student_profile)
             msg = _("You are successfully enrolled in the course")
             messages.success(self.request, msg, extra_tags='timeout')
             redirect_to = self.course.get_absolute_url()

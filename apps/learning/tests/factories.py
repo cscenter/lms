@@ -146,7 +146,6 @@ class InvitationFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "Invitation Name %03d" % n)
     semester = factory.SubFactory(SemesterFactory)
-    branch = factory.SubFactory(BranchFactory)
 
     @factory.post_generation
     def courses(self, create, extracted, **kwargs):
@@ -155,6 +154,14 @@ class InvitationFactory(factory.django.DjangoModelFactory):
         if extracted:
             for course in extracted:
                 self.courses.add(course)
+
+    @factory.post_generation
+    def branches(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for branch in extracted:
+                self.branches.add(branch)
 
 
 class CourseInvitationFactory(factory.django.DjangoModelFactory):

@@ -435,7 +435,7 @@ class EnrollmentInvitationListView(CuratorOnlyMixin, TemplateView):
             return HttpResponseRedirect(url)
         serializer.is_valid(raise_exception=False)
         # Filterset knows how to validate input data too
-        invitations = Invitation.objects.select_related("branch", "semester").order_by(
+        invitations = Invitation.objects.select_related("semester").prefetch_related("branches").order_by(
             "-semester__index", "name"
         )
         filter_set = EnrollmentInvitationFilter(

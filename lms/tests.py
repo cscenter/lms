@@ -179,8 +179,10 @@ def test_view_course_offerings_invited_restriction(client):
         autumn_term = SemesterFactory.create_current(enrollment_period__ends_on=future.date())
         site = SiteFactory(id=settings.SITE_ID)
         course_invitation = CourseInvitationFactory(course__semester=autumn_term)
-        student_profile = StudentProfileFactory(type=StudentTypes.INVITED, created = timezone.now())
+        student_profile = StudentProfileFactory(type=StudentTypes.INVITED)
         student = student_profile.user
+        student.branch = student_profile.branch
+        student.save()
         complete_student_profile(student, site, course_invitation.invitation)
 
         autumn_courses = CourseFactory.create_batch(3, semester=autumn_term)
@@ -194,14 +196,6 @@ def test_view_course_offerings_invited_restriction(client):
                           is_deleted=True)
 
         client.login(student)
-        response = client.get(url)
-        terms_courses = list(response.context_data['courses'].values())
-        founded_courses = sum(map(len, terms_courses))
-        assert founded_courses == 1
-        assert terms_courses[0][0]['name'] == enrolled_curr.meta_course.name
-
-        response = client.get(course_invitation.invitation.get_absolute_url())
-        assert response.status_code == 200
         response = client.get(url)
         terms_courses = list(response.context_data['courses'].values())
         founded_courses = sum(map(len, terms_courses))
@@ -219,7 +213,7 @@ def test_view_course_offerings_old_invited(client):
     site = SiteFactory(id=settings.SITE_ID)
     branch = BranchFactory()
     course_invitation = CourseInvitationFactory(course__semester=previous_term, course__main_branch=branch,
-                                                invitation__branch=branch)
+                                                invitation__branches=[branch])
     student = UserFactory(branch=branch)
     complete_student_profile(student, site, course_invitation.invitation)
     student_profile = StudentProfile.objects.get(user=student)
@@ -234,16 +228,10 @@ def test_view_course_offerings_old_invited(client):
     response = client.get(url)
     terms_courses = list(response.context_data['courses'].values())
     founded_courses = sum(map(len, terms_courses))
-    assert founded_courses == 1
+    assert founded_courses == 2
 
     enrollment.is_deleted = True
     enrollment.save()
-    response = client.get(url)
-    terms_courses = list(response.context_data['courses'].values())
-    founded_courses = sum(map(len, terms_courses))
-    assert founded_courses == 0
-
-    course_invitation.invitation.enrolled_students.add(student_profile)
     response = client.get(url)
     terms_courses = list(response.context_data['courses'].values())
     founded_courses = sum(map(len, terms_courses))
@@ -256,7 +244,6 @@ def test_view_course_offerings_old_invited(client):
     complete_student_profile(student, site, course_invitation.invitation)
     assert student.get_student_profile() == new_invited_profile
 
-    course_invitation.invitation.enrolled_students.add(student_profile)
     response = client.get(url)
     terms_courses = list(response.context_data['courses'].values())
     founded_courses = sum(map(len, terms_courses))
@@ -282,6 +269,8 @@ def test_view_course_offerings_regular_in_academic(client):
         regular_profile = StudentProfileFactory(created=timezone.now())
         student = regular_profile.user
         branch = regular_profile.branch
+        student.branch = branch
+        student.save()
 
         course_enrolled, random_course = CourseFactory.create_batch(2, main_branch=branch)
         enrollment = EnrollmentFactory(course=course_enrolled,
@@ -303,19 +292,12 @@ def test_view_course_offerings_regular_in_academic(client):
 
         site = SiteFactory(id=settings.SITE_ID)
         course_invitation = CourseInvitationFactory(course__semester=current_term, course__main_branch=branch,
-                                                    invitation__branch=branch)
+                                                    invitation__branches=[branch])
         complete_student_profile(student, site, course_invitation.invitation)
         profile = student.get_student_profile()
         profile.created = timezone.now()
         profile.save()
 
-        response = client.get(url)
-        terms_courses = list(response.context_data['courses'].values())
-        founded_courses = sum(map(len, terms_courses))
-        # Show only the course the student was enrolled in
-        assert founded_courses == 1
-
-        client.get(course_invitation.invitation.get_absolute_url())
         response = client.get(url)
         terms_courses = list(response.context_data['courses'].values())
         founded_courses = sum(map(len, terms_courses))

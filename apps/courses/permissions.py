@@ -35,12 +35,11 @@ class ViewCourseAsInvited(Permission):
             return False
         if user.get_enrollment(course.pk):
             return True
-        invitations = student_profile.invitations.all()
-        return (CourseInvitation
-                .objects
-                .filter(course=course,
-                        invitation__in=invitations)
-                .exists())
+        invitation = student_profile.invitation
+        if invitation is None:
+            return False
+        course_invitation = invitation.courseinvitation_set.filter(course=course)
+        return course_invitation.exists() and invitation.is_active
 
 
 @add_perm

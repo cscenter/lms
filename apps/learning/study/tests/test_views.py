@@ -507,7 +507,8 @@ def test_view_student_courses_list_as_invited(client):
     future = now() + datetime.timedelta(days=3)
     current_term = SemesterFactory.create_current(
         enrollment_period__ends_on=future.date())
-    student = UserFactory()
+    branch = BranchFactory(site=site)
+    student = UserFactory(branch=branch)
     regular_profile = StudentProfileFactory(user=student,
                                             type=StudentTypes.REGULAR,
                                             branch__code=Branches.SPB)
@@ -547,12 +548,8 @@ def test_view_student_courses_list_as_invited(client):
     complete_student_profile(student, site, course_invitation.invitation)
     response = client.get(url)
     assert len(response.context_data['ongoing_enrolled']) == 1
-    assert len(response.context_data['ongoing_rest']) == 0
-    assert len(response.context_data['archive']) == 1
-
-    client.get(course_invitation.invitation.get_absolute_url())
-    response = client.get(url)
     assert len(response.context_data['ongoing_rest']) == 1
+    assert len(response.context_data['archive']) == 1
 
     client.post(course_invitation.get_absolute_url(), follow=True)
     response = client.get(url)
@@ -570,7 +567,8 @@ def test_view_student_courses_list_old_invited_profile(client):
     previous_term = SemesterFactory.create_prev(term=current_term)
     site = SiteFactory(id=settings.SITE_ID)
     course_invitation = CourseInvitationFactory(course__semester=previous_term)
-    student = UserFactory()
+    branch =  BranchFactory(site=site)
+    student = UserFactory(branch=branch)
     complete_student_profile(student, site, course_invitation.invitation)
     student_profile = StudentProfile.objects.get(user=student)
 
@@ -581,14 +579,6 @@ def test_view_student_courses_list_old_invited_profile(client):
                       grade=GradeTypes.UNSATISFACTORY)
 
     client.login(student)
-    response = client.get(url)
-    assert len(response.context_data['ongoing_enrolled']) == 0
-    assert len(response.context_data['ongoing_rest']) == 0
-    assert len(response.context_data['archive']) == 1
-
-    course_invitation.invitation.enrolled_students.add(student_profile)
-    # Even if student has invitation(not used) in previous term
-    # the course should not to appear as archive / ongoing_rest
     response = client.get(url)
     assert len(response.context_data['ongoing_enrolled']) == 0
     assert len(response.context_data['ongoing_rest']) == 0

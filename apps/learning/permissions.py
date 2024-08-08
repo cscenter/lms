@@ -48,11 +48,11 @@ def enroll_in_course(user, permission_object: EnrollPermissionObject):
                      "are restricted")
         return False
     if student_profile.type == StudentTypes.INVITED:
-        invitations = student_profile.invitations.all()
-        course_invitation = (CourseInvitation.objects
-                             .filter(invitation__in=invitations,
-                                     course=permission_object.course))
-        return course_invitation.exists() and course_invitation.first().is_active
+        invitation = student_profile.invitation
+        if invitation is None:
+            return False
+        course_invitation = invitation.courseinvitation_set.filter(course=permission_object.course)
+        return course_invitation.exists() and invitation.is_active
     if course.main_branch_id != student_profile.branch_id:  # avoid db hit
         if not any(b.pk == student_profile.branch_id for b in course.branches.all()):
             logger.debug("Student with branch %s could not enroll in the "
@@ -481,6 +481,8 @@ class EnrollInCourseByInvitation(Permission):
     def rule(user, permission_object: InvitationEnrollPermissionObject):
         course_invitation = permission_object.course_invitation
         if not course_invitation or not course_invitation.is_active:
+            return False
+        if course_invitation.is_capacity_limited and not course_invitation.places_left:
             return False
         perm_obj = EnrollPermissionObject(
             course_invitation.course,

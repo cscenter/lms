@@ -81,9 +81,8 @@ class CourseDetailView(PermissionRequiredMixin, CourseURLParamsMixin, DetailView
         can_view_student_groups = user.has_perm(ViewStudentGroup.name, course)
 
         student_profile = user.get_student_profile()
-        invitations = student_profile.invitations.all() if student_profile else []
-        course_invitation = CourseInvitation.objects.filter(course=self.course,
-                                                            invitation__in=invitations).first()
+        course_invitation = student_profile.invitation.courseinvitation_set.filter(course=self.course).first() \
+            if student_profile and student_profile.invitation else None
         perm_obj = InvitationEnrollPermissionObject(course_invitation, student_profile)
         can_enroll_by_invitation = user.has_perm(EnrollInCourseByInvitation.name, perm_obj)
         context = {

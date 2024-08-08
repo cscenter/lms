@@ -488,7 +488,7 @@ def create_student(
     applicant: Applicant = acceptance.applicant
     branch = applicant.campaign.branch
     try:
-        user = User.objects.get(email__iexact=email, first_name=applicant.first_name, last_name = applicant.last_name)
+        user = User.objects.get(email__iexact=email)
     except User.DoesNotExist:
         user = create_account(
             username=generate_username_from_email(email),
@@ -497,12 +497,12 @@ def create_student(
             email=email,
             gender=account_data.gender,
             time_zone=branch.time_zone,
-            is_active=True,
-            first_name=applicant.first_name,
-            last_name=applicant.last_name,
-            branch=branch
+            is_active=True
         )
     user.workplace = applicant.workplace or ""
+    user.branch = branch
+    user.first_name = applicant.first_name
+    user.last_name = applicant.last_name
     user.patronymic = "" if account_data.has_no_patronymic else applicant.patronymic
     user.photo = applicant.photo
     user.gave_permission_at = user.date_joined

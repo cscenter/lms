@@ -46,8 +46,8 @@ def test_confirmation_form_validation(settings, get_test_image):
         "test@example.com", acceptance.applicant
     )
     assert not form.is_valid()
-    missing_fields = ["living_place", "gender", "phone", "telegram_username", "yandex_login", "offer_confirmation", "personal_data_confirmation"]
-    assert all(field in form.errors for field in missing_fields)
+    error_fields = ["email_code", "living_place", "gender", "phone", "telegram_username", "yandex_login", "offer_confirmation", "personal_data_confirmation"]
+    assert set(form.errors) == set(error_fields)
     form_data["living_place"] = "living_place"
     form_data["gender"] = GenderTypes.MALE
     form_data["phone"] = "+71234567"

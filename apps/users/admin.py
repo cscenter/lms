@@ -224,8 +224,8 @@ class StudentProfileAdmin(BaseModelAdmin):
         if obj is not None and obj.pk:
             # TODO: add user change url
             return ['type', 'site', 'year_of_admission', 'birth_date',
-                    'comment_changed_at', 'comment_last_author']
-        return ['birth_date']
+                    'comment_changed_at', 'comment_last_author', 'invitation']
+        return ['birth_date', 'invitation']
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
@@ -235,7 +235,7 @@ class StudentProfileAdmin(BaseModelAdmin):
                            'level_of_education_on_admission', 'level_of_education_on_admission_other',
                            'diploma_degree', 'graduation_year',
                            'year_of_admission', 'year_of_curriculum',
-                           'academic_disciplines']
+                           'academic_disciplines', 'invitation']
             }),
             (_('Official Student Info'), {
                 'fields': ['is_official_student', 'birth_date',

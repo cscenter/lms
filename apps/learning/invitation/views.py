@@ -52,9 +52,9 @@ def complete_student_profile(user: User, site: Site, invitation: Invitation) -> 
         invitation_year = invitation.semester.academic_year
         # Account info should be valid at this point but the most recent
         # profile still can be invalid due to inactive state
-        if not is_student_profile_valid(user, site, invitation):
+        if not is_student_profile_valid(user, site):
             create_student_profile(user=user,
-                                   branch=invitation.branch,
+                                   branch=user.branch,
                                    profile_type=StudentTypes.INVITED,
                                    year_of_admission=invitation_year,
                                    invitation=invitation)
@@ -67,7 +67,7 @@ class InvitationURLParamsMixin:
         super().setup(request, **kwargs)
         qs = (Invitation.objects
               .filter(token=kwargs['token'])
-              .select_related("branch"))
+              .prefetch_related("branches"))
         self.invitation = get_object_or_404(qs)
         if not self.invitation.is_active:
             raise Http404
@@ -88,9 +88,6 @@ class InvitationView(InvitationURLParamsMixin, TemplateView):
                                   kwargs={"token": self.invitation.token},
                                   subdomain=settings.LMS_SUBDOMAIN)
             return HttpResponseRedirect(redirect_to=redirect_to)
-        # Correct because on this line user already has working profile
-        profile = self.request.user.get_student_profile(request.site)
-        self.invitation.enrolled_students.add(profile)
         context = self.get_context_data()
         return self.render_to_response(context)
 
@@ -98,7 +95,8 @@ class InvitationView(InvitationURLParamsMixin, TemplateView):
         invitation_course_list = (self.invitation.courseinvitation_set
                                   .select_related('course',
                                                   'course__meta_course',
-                                                  'course__semester'))
+                                                  'course__semester')
+                                  .prefetch_related('enrolled_students'))
         return {
             'invitation': self.invitation,
             'invitation_course_list': invitation_course_list,
@@ -162,7 +160,8 @@ class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
                 last_name=data['last_name'],
                 patronymic=data.get('patronymic', ''),
                 telegram_username=data["telegram_username"],
-                birth_date=data["birth_date"])
+                birth_date=data["birth_date"],
+                branch=data["branch"])
             registration_profile = create_registration_profile(user=new_user)
             create_student_profile(user=new_user,
                                    branch=data['branch'],

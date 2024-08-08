@@ -303,11 +303,11 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
         enrolled_in = Q(id__in=list(student_enrollments))
         in_current_term = Q(semester__index=current_term_index)
         if student_profile.type == StudentTypes.INVITED:
-            student_invitations = student_profile.invitations.all()
-            courses_pk = [ci.course_id for ci in (CourseInvitation
-                                                  .objects
-                                                  .filter(invitation__in=student_invitations)
-                                                  .only('course_id'))]
+            invitation = student_profile.invitation
+            if invitation is None:
+                courses_pk = []
+            else:
+                courses_pk = invitation.courseinvitation_set.all().values_list("course_id", flat=True)
             has_invitation = Q(id__in=courses_pk)
             qs = Course.objects.filter((has_invitation & in_current_term) | enrolled_in)
         else:
