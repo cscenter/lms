@@ -2,9 +2,11 @@ from datetime import date
 
 import pytest
 from bs4 import BeautifulSoup
+from django.conf import settings
 
 from django.utils.encoding import smart_bytes
 
+from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.tests.settings import ANOTHER_DOMAIN
 from core.urls import reverse
@@ -73,6 +75,18 @@ def test_view_student_progress_report_full_download_csv(client):
     response = client.get(url)
     assert response.status_code == 200
     assert response["Content-Type"] == "text/csv"
+
+@pytest.mark.django_db
+def test_enrollment_invitation_list_view(client, assert_redirect):
+    url = reverse("staff:enrollment_invitations_list")
+    curator = CuratorFactory()
+    client.login(curator)
+    response = client.get(url)
+    assert response.status_code == 302
+    branch = Branch.objects.for_site(site_id=settings.SITE_ID)[0].id
+    url_redirect = f"{url}?branches={branch}"
+    response = client.get(url_redirect)
+    assert response.status_code == 200
 
 
 @pytest.mark.django_db

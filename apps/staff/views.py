@@ -421,17 +421,16 @@ class EnrollmentInvitationListView(CuratorOnlyMixin, TemplateView):
     template_name = "lms/staff/enrollment_invitations.html"
 
     class InputSerializer(serializers.Serializer):
-        branch = serializers.ChoiceField(required=True, choices=())
+        branches = serializers.ChoiceField(required=True, choices=())
 
     def get(self, request, *args, **kwargs):
         site_branches = Branch.objects.for_site(site_id=settings.SITE_ID)
         assert len(site_branches) > 0
         serializer = self.InputSerializer(data=request.GET)
-        serializer.fields["branch"].choices = [(b.pk, b.name) for b in site_branches]
+        serializer.fields["branches"].choices = [(b.pk, b.name) for b in site_branches]
         if not serializer.initial_data:
             branch = site_branches[0]
-            current_term = get_current_term_pair(branch.get_timezone())
-            url = f"{request.path}?branch={branch.pk}&semester={current_term.slug}"
+            url = f"{request.path}?branches={branch.pk}"
             return HttpResponseRedirect(url)
         serializer.is_valid(raise_exception=False)
         # Filterset knows how to validate input data too
