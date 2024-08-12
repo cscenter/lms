@@ -19,7 +19,7 @@ from users.forms import UserChangeForm, UserCreationForm
 from .import_export import UserRecordResource
 from .models import (
     CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
-    StudentStatusLog, StudentTypes, User, UserGroup, YandexUserData
+    StudentStatusLog, StudentTypes, User, UserGroup, YandexUserData, StudentFieldLog, StudentAcademicDisciplineLog
 )
 from .services import assign_role, update_student_status
 
@@ -162,15 +162,11 @@ class UserAdmin(_UserAdmin):
                 obj.save()
         formset.save()
 
-
-
-class StudentStatusLogAdminInline(admin.TabularInline):
+class StudentFieldLogAdminInline(admin.TabularInline):
     list_select_related = ['student_profile', 'entry_author']
-    model = StudentStatusLog
+    model = StudentFieldLog
     extra = 0
-    show_change_link = True
-    readonly_fields = ('get_semester', 'status', 'entry_author')
-    ordering = ['-status_changed_at', '-pk']
+    ordering = ['-changed_at', '-pk']
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -178,12 +174,21 @@ class StudentStatusLogAdminInline(admin.TabularInline):
     def has_delete_permission(self, request, obj=None):
         return False
 
+    def has_change_permission(self, request, obj=None):
+        return False
+
     @meta(_("Semester"))
     def get_semester(self, obj):
         from courses.utils import get_terms_in_range
-        changed_at = obj.status_changed_at
+        changed_at = obj.changed_at
         term = next(get_terms_in_range(changed_at, changed_at), None)
         return term.label if term else '-'
+
+class StudentStatusLogAdminInline(StudentFieldLogAdminInline):
+    model = StudentStatusLog
+
+class StudentAcademicDisciplineLogAdminInline(StudentFieldLogAdminInline):
+    model = StudentAcademicDisciplineLog
 
 
 class StudentProfileForm(forms.ModelForm):
@@ -218,7 +223,7 @@ class StudentProfileAdmin(BaseModelAdmin):
     list_filter = ('type', 'site', 'branch', 'status',)
     raw_id_fields = ('user', 'comment_last_author')
     search_fields = ['user__last_name']
-    inlines = [StudentStatusLogAdminInline]
+    inlines = [StudentStatusLogAdminInline, StudentAcademicDisciplineLogAdminInline]
 
     def get_readonly_fields(self, request, obj=None):
         if obj is not None and obj.pk:

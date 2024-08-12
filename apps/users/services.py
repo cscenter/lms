@@ -158,7 +158,7 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date,
                                            graduated_on=graduated_on)
             if is_update_student_status:
                 update_student_status(student_profile, new_status=StudentStatuses.GRADUATE,
-                                      editor=created_by, status_changed_at=graduated_on)
+                                      editor=created_by, changed_at=graduated_on)
     cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
     cache_key = cache_key_pattern.format(site_id=site.pk)
     cache.delete(cache_key)
@@ -288,15 +288,15 @@ def get_student_profiles(*, user: User, site: Site,
                 sp.__dict__['syllabus'] = syllabus.get(key, None)
     if fetch_status_history:
         queryset = (StudentStatusLog.objects
-                    .order_by('-status_changed_at', '-pk'))
+                    .order_by('-changed_at', '-pk'))
         prefetch_related_objects(student_profiles,
-                                 Prefetch('status_history', queryset=queryset))
+                                 Prefetch('studentstatuslog_related', queryset=queryset))
     return student_profiles
 
 
 def update_student_status(student_profile: StudentProfile, *,
                           new_status: str, editor: User,
-                          status_changed_at: Optional[datetime.date] = None) -> StudentProfile:
+                          changed_at: Optional[datetime.date] = None) -> StudentProfile:
     """
     Updates student profile status value, then adds new log record to
     the student status history and tries to synchronize related account
@@ -327,8 +327,8 @@ def update_student_status(student_profile: StudentProfile, *,
                                  student_profile=student_profile,
                                  entry_author=editor)
 
-    if status_changed_at:
-        log_entry.status_changed_at = status_changed_at
+    if changed_at:
+        log_entry.changed_at = changed_at
 
     log_entry.save()
 
@@ -338,7 +338,7 @@ def update_student_status(student_profile: StudentProfile, *,
 def get_student_status_history(student_profile: StudentProfile) -> List[StudentStatusLog]:
     return (StudentStatusLog.objects
             .filter(student_profile=student_profile)
-            .order_by('-status_changed_at', '-pk'))
+            .order_by('-changed_at', '-pk'))
 
 
 def assign_or_revoke_student_role(*, student_profile: StudentProfile,

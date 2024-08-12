@@ -315,11 +315,11 @@ def test_get_student_profiles(django_assert_num_queries):
         student_profiles = get_student_profiles(user=user, site=site1,
                                                 fetch_status_history=True)
         for sp in student_profiles:
-            assert not sp.status_history.all()
+            assert not sp.studentstatuslog_related.all()
     with django_assert_num_queries(4):
         student_profiles = get_student_profiles(user=user, site=site1)
         for sp in student_profiles:
-            assert not sp.status_history.all()
+            assert not sp.studentstatuslog_related.all()
     with django_assert_num_queries(1):
         assert get_student_profiles(user=user, site=site2) == []
     with django_assert_num_queries(1):

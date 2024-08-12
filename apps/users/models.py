@@ -1013,36 +1013,88 @@ class StudentProfile(TimeStampedModel):
             raise ValueError("Works only with invited students. Use is_active for others")
         return self.invitation is not None and self.invitation.is_active
 
-
-class StudentStatusLog(TimestampedModel):
-    status_changed_at = models.DateField(
+class StudentFieldLog(TimestampedModel):
+    changed_at = models.DateField(
         verbose_name=_("Entry Added"),
         default=timezone.now)
-    status = models.CharField(
-        choices=StudentStatuses.choices,
-        verbose_name=_("Status"),
-        max_length=15)
     student_profile = models.ForeignKey(
         StudentProfile,
         verbose_name=_("Student"),
-        related_name="status_history",
+        related_name="%(class)s_related",
         on_delete=models.CASCADE)
     entry_author = models.ForeignKey(
         User,
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
+    is_processed =  models.BooleanField(
+        _('Is processed'),
+        default=False,
+        help_text=_('Designates whether this Log was processed in document list')
+    )
+    processed_at = models.DateField(
+        verbose_name=_("Processed time"),
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        abstract = True
+        verbose_name_plural = _("Student Log")
+
+    def __str__(self):
+        return str(self.pk)
+
+    def save(self, **kwargs):
+        created = self.pk is None
+        if not created and self.tracker.has_changed('is_processed'):
+            if self.is_processed:
+                self.processed_at = timezone.now()
+            else:
+                self.processed_at = None
+        super().save(**kwargs)
+
+
+class StudentStatusLog(StudentFieldLog):
+    former_status = models.CharField(
+        choices=StudentStatuses.choices,
+        verbose_name=_("Former status"),
+        max_length=15,
+        blank=True)
+    status = models.CharField(
+        choices=StudentStatuses.choices,
+        verbose_name=_("Status"),
+        max_length=15)
+
+    tracker = FieldTracker()  # Must be in child class https://github.com/jazzband/django-model-utils/issues/57
 
     class Meta:
         verbose_name_plural = _("Student Status Log")
 
-    def __str__(self):
-        return str(self.pk)
 
     def get_status_display(self):
         if self.status:
             return StudentStatuses.values[self.status]
         # Empty status means studies in progress
         return _("Studying")
+
+class StudentAcademicDisciplineLog(StudentFieldLog):
+    former_academic_discipline = models.ForeignKey(
+        'study_programs.AcademicDiscipline',
+        verbose_name=_("Former field of study"),
+        on_delete=models.CASCADE,
+        related_name="+",  # Disable backwards relation
+        blank=True)
+    academic_discipline = models.ForeignKey(
+        'study_programs.AcademicDiscipline',
+        verbose_name=_("Field of study"),
+        on_delete=models.CASCADE,
+        related_name="+",  # Disable backwards relation
+        blank=True)
+
+    tracker = FieldTracker()  # Must be in child class https://github.com/jazzband/django-model-utils/issues/57
+
+    class Meta:
+        verbose_name_plural = _("Student Academic Discipline Log")
 
 
 class OnlineCourseRecord(TimeStampedModel):

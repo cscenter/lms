@@ -109,10 +109,10 @@
           <td>Отделение</td>
           <td>{{ profile_user.branch.name|default("—", True) }}</td>
         </tr>
-        {% if academic_disciplines %}
+        {% if academic_discipline %}
         <tr>
           <td>Направление обучения</td>
-          <td>{{ academic_disciplines }}</td>
+          <td>{{ academic_discipline }}</td>
         </tr>
         {% endif %}
         <tr>

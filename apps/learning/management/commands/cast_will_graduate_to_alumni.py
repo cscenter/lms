@@ -40,7 +40,7 @@ class Command(BaseCommand):
                         "graduated_on": graduated_on,
                     })
                 update_student_status(student_profile, new_status=StudentStatuses.GRADUATE,
-                                      editor=admin, status_changed_at=graduated_on)
+                                      editor=admin, changed_at=graduated_on)
         cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
         cache_key = cache_key_pattern.format(site_id=settings.SITE_ID)
         cache.delete(cache_key)
