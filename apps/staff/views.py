@@ -46,7 +46,8 @@ from learning.reports import (
 )
 from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
-from staff.filters import EnrollmentInvitationFilter, StudentProfileFilter, StudentAcademicDisciplineLogFilter
+from staff.filters import EnrollmentInvitationFilter, StudentProfileFilter, StudentAcademicDisciplineLogFilter, \
+    StudentStatusLogFilter
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.tex import generate_tex_student_profile_for_diplomas
@@ -55,7 +56,7 @@ from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
-from users.models import PartnerTag, StudentProfile, StudentTypes, User, StudentAcademicDisciplineLog
+from users.models import PartnerTag, StudentProfile, StudentTypes, User, StudentAcademicDisciplineLog, StudentStatusLog
 from users.services import (
     create_graduate_profiles,
     get_graduate_profile,
@@ -823,10 +824,16 @@ class StudentAcademicDisciplineLogListView(CuratorOnlyMixin, FilterView):
     context_object_name = 'logs'
     filterset_class = StudentAcademicDisciplineLogFilter
     template_name = 'lms/staff/academic_discipline_log.html'
+    paginate_by = 20
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['filter_form'] = context['filter'].form
+        paginator_url = reverse("staff:academic_discipline_log_list")
+        query_params = self.request.GET.copy()
+        if "page" in query_params:
+            query_params.pop("page")
+        context['paginator_url'] = paginator_url + "?" + query_params.urlencode()
         return context
 
     def dispatch(self, request, *args, **kwargs):
@@ -854,7 +861,7 @@ class StudentAcademicDisciplineLogListView(CuratorOnlyMixin, FilterView):
                 request.build_absolute_uri(log.student_profile.get_absolute_url()),
                 log.student_profile.get_full_name(),
                 log.former_academic_discipline,
-                log.academic_discipline.name
+                log.academic_discipline
             ])
 
         return response
@@ -867,3 +874,59 @@ class StudentAcademicDisciplineLogListView(CuratorOnlyMixin, FilterView):
         query_params = request.GET.copy()
         query_params.pop("mark_processed")
         return HttpResponseRedirect(reverse('staff:academic_discipline_log_list') + "?" + query_params.urlencode())
+
+class StudentStatusLogListView(CuratorOnlyMixin, FilterView):
+    model = StudentStatusLog
+    context_object_name = 'logs'
+    filterset_class = StudentStatusLogFilter
+    template_name = 'lms/staff/status_log.html'
+    paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter_form'] = context['filter'].form
+        paginator_url = reverse("staff:status_log_list")
+        query_params = self.request.GET.copy()
+        if "page" in query_params:
+            query_params.pop("page")
+        context['paginator_url'] = paginator_url + "?" + query_params.urlencode()
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.GET.get("download_csv"):
+            return self.download_csv(request)
+        elif request.GET.get("mark_processed"):
+            return self.mark_processed(request)
+        return super().dispatch(request, *args, **kwargs)
+
+    def download_csv(self, request):
+        filterset = self.filterset_class(data=request.GET, queryset=self.get_queryset())
+        filtered_qs = filterset.qs
+
+        today = formats.date_format(datetime.datetime.now(), "SHORT_DATE_FORMAT")
+        filename = f"status_logs_{today}.csv"
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        writer = csv.writer(response)
+        writer.writerow(["Ссылка на ЛК", 'ФИО', _('Former status'), _('Status')])
+
+        for log in filtered_qs:
+            writer.writerow([
+                request.build_absolute_uri(log.student_profile.get_absolute_url()),
+                log.student_profile.get_full_name(),
+                log.get_former_status_display(),
+                log.get_status_display()
+            ])
+
+        return response
+
+    def mark_processed(self, request):
+        filterset = self.filterset_class(data=request.GET, queryset=self.get_queryset())
+        filtered_qs = filterset.qs
+        filtered_qs.update(is_processed=True)
+
+        query_params = request.GET.copy()
+        query_params.pop("mark_processed")
+        return HttpResponseRedirect(reverse('staff:status_log_list') + "?" + query_params.urlencode())

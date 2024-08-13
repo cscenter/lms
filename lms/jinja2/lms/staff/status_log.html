@@ -6,7 +6,7 @@
   <div class="container">
     <div class="row">
       <div class="col-xs-12">
-        <h2 class="mt-0 mb-30">{% trans %}Student Academic Discipline Log{% endtrans %}</h2>
+        <h2 class="mt-0 mb-30">{% trans %}Student Status Log{% endtrans %}</h2>
         {{ crispy(filter.form) }}
 
       <div class="panel">
@@ -16,8 +16,8 @@
                 <thead>
                 <tr>
                   <th>{% trans %}Student Profile{% endtrans %}</th>
-                  <th>{% trans %}Former field of study{% endtrans %}</th>
-                  <th>{% trans %}Field of study{% endtrans %}</th>
+                  <th>{% trans %}Former status{% endtrans %}</th>
+                  <th>{% trans %}Status{% endtrans %}</th>
                   <th>{% trans %}Is processed{% endtrans %}</th>
                 </tr>
                 </thead>
@@ -30,8 +30,8 @@
                         {{ log.student_profile.get_full_name() }}
                       </a>
                     </td>
-                    <td>{{ log.former_academic_discipline|default("-", True) }}</td>
-                    <td>{{ log.academic_discipline|default("-", True) }}</td>
+                    <td>{{ log.get_former_status_display() }}</td>
+                    <td>{{ log.get_status_display() }}</td>
                     <td>{{ log.is_processed|yesno("Да,Нет") }}</td>
                   </tr>
                 {% endfor %}
@@ -43,7 +43,6 @@
         </div>
       </div>
       {{ macros.pagination(paginator, page_obj, paginator_url) }}
-
 
       </div>
     </div>

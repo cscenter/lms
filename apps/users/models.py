@@ -960,8 +960,8 @@ class StudentProfile(TimeStampedModel):
     def __str__(self):
         return f"[StudentProfile] id: {self.pk} name: {self.get_full_name()} site: {self.site.domain}"
 
-    def get_full_name(self):
-        return self.user.get_full_name()
+    def get_full_name(self, last_name_first=False):
+        return self.user.get_full_name(last_name_first)
 
     def get_absolute_url(self, subdomain=None):
         return reverse('user_detail', args=[self.user_id],
@@ -1077,6 +1077,12 @@ class StudentStatusLog(StudentFieldLog):
     def get_status_display(self):
         if self.status:
             return StudentStatuses.values[self.status]
+        # Empty status means studies in progress
+        return _("Studying")
+
+    def get_former_status_display(self):
+        if self.former_status:
+            return StudentStatuses.values[self.former_status]
         # Empty status means studies in progress
         return _("Studying")
 

@@ -10,8 +10,9 @@ from django.utils.translation import gettext_lazy as _
 from core.models import Branch
 from courses.utils import get_current_term_pair
 from learning.models import Invitation
+from learning.settings import StudentStatuses
 from study_programs.models import AcademicDiscipline
-from users.models import StudentProfile, StudentTypes, StudentAcademicDisciplineLog
+from users.models import StudentProfile, StudentTypes, StudentAcademicDisciplineLog, StudentStatusLog
 
 
 class StudentProfileFilter(django_filters.FilterSet):
@@ -141,6 +142,21 @@ class StudentAcademicDisciplineLogFilter(django_filters.FilterSet):
         fields = ['academic_discipline', 'former_academic_discipline', 'is_processed', 'branch', 'type']
 
     @property
+    def qs(self):
+        queryset = super().qs
+        return queryset.select_related(
+            'academic_discipline',
+            'former_academic_discipline',
+            'student_profile__branch',
+            'student_profile__user'
+        ).order_by(
+            'student_profile__user__last_name',
+            'student_profile__user__first_name',
+            'student_profile__user__patronymic'
+        )
+
+
+    @property
     def form(self):
         if not hasattr(self, '_form'):
             self._form = super().form
@@ -151,22 +167,109 @@ class StudentAcademicDisciplineLogFilter(django_filters.FilterSet):
             self._form.helper.form_method = "GET"
             self._form.helper.layout = Layout(
                 Row(
-                Column(
-                    "former_academic_discipline",
-                    "academic_discipline",
-                    css_class="col-xs-5"
-                ),
-                Column(
-                    Column("type", "branch", css_class="col-xs-7"),
-                    Column("is_processed", css_class="col-xs-5"),
-                    css_class="col-xs-5"
-                ),
-                Column(
-                    Submit("", _("Filter"), css_class="btn-block -inline-submit"),
-                    Submit("download_csv", _('Download'), css_class="btn-block -inline-submit"),
-                    Submit("mark_processed", _('Mark processed'), css_class="btn-block -inline-submit"),
-                    css_class="col-xs-2",
+                    Column(
+                        "former_academic_discipline",
+                        "academic_discipline",
+                        css_class="col-xs-5"
+                    ),
+                    Column(
+                        Column("type", "branch", css_class="col-xs-7"),
+                        Column("is_processed", css_class="col-xs-5"),
+                        css_class="col-xs-5"
+                    ),
+                    Column(
+                        Submit("", _("Filter"), css_class="btn-block -inline-submit"),
+                        Submit("download_csv", _('Download'), css_class="btn-block -inline-submit"),
+                        Submit("mark_processed", _('Mark processed'), css_class="btn-block -inline-submit"),
+                        css_class="col-xs-2",
+                    )
                 )
             )
+        return self._form
+
+class StudentStatusLogFilter(django_filters.FilterSet):
+    STATUS_CHOICES = (("empty", _("Studying")),) + StudentStatuses.choices
+    status = django_filters.ChoiceFilter(
+        label=_('Status'),
+        choices=STATUS_CHOICES,
+        required=False,
+        method='filter_by_status'
+    )
+    former_status = django_filters.ChoiceFilter(
+        label=_('Former status'),
+        choices=STATUS_CHOICES,
+        required=False,
+        method='filter_by_former_status'
+    )
+    is_processed = django_filters.BooleanFilter(
+        label=_('Is processed'),
+        required=False
+    )
+    branch = django_filters.ModelChoiceFilter(
+        label=_('Branch'),
+        queryset=Branch.objects.filter(site_id=settings.SITE_ID, active=True),
+        field_name='student_profile__branch'
+    )
+    type = django_filters.ChoiceFilter(
+        label=_("Type"),
+        choices=StudentTypes.choices,
+        field_name='student_profile__type',
+        required=False
+    )
+
+    class Meta:
+        model = StudentStatusLog
+        fields = ['status', 'former_status', 'is_processed', 'branch', 'type']
+
+    def filter_by_status(self, queryset, name, value):
+        if value == "empty":
+            return queryset.filter(status="")
+        return queryset.filter(**{name: value})
+
+    def filter_by_former_status(self, queryset, name, value):
+        if value == "empty":
+            return queryset.filter(former_status="")
+        return queryset.filter(**{name: value})
+
+    @property
+    def qs(self):
+        queryset = super().qs
+        return queryset.select_related(
+            'student_profile__branch',
+            'student_profile__user'
+        ).order_by(
+            'student_profile__user__last_name',
+            'student_profile__user__first_name',
+            'student_profile__user__patronymic'
+        )
+
+    @property
+    def form(self):
+        if not hasattr(self, '_form'):
+            self._form = super().form
+
+            self._form.fields['branch'].label_from_instance=lambda obj: obj.name
+
+            self._form.helper = FormHelper()
+            self._form.helper.form_method = "GET"
+            self._form.helper.layout = Layout(
+                Row(
+                    Column(
+                        "former_status",
+                        "status",
+                        css_class="col-xs-5"
+                    ),
+                    Column(
+                        Column("type", "branch", css_class="col-xs-7"),
+                        Column("is_processed", css_class="col-xs-5"),
+                        css_class="col-xs-5"
+                    ),
+                    Column(
+                        Submit("", _("Filter"), css_class="btn-block -inline-submit"),
+                        Submit("download_csv", _('Download'), css_class="btn-block -inline-submit"),
+                        Submit("mark_processed", _('Mark processed'), css_class="btn-block -inline-submit"),
+                        css_class="col-xs-2",
+                    )
+                )
             )
         return self._form
