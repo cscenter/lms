@@ -914,7 +914,7 @@ class StudentProfile(TimeStampedModel):
         related_name="student_profiles",
         on_delete=models.SET_NULL)
 
-    tracker = FieldTracker(fields=['status'])
+    tracker = FieldTracker(fields=['status', 'academic_disciplines'])
 
     class Meta:
         db_table = 'student_profiles'
@@ -958,7 +958,10 @@ class StudentProfile(TimeStampedModel):
             raise ValidationError({"year_of_admission": msg})
 
     def __str__(self):
-        return f"[StudentProfile] id: {self.pk} name: {self.user.get_full_name()} site: {self.site.domain}"
+        return f"[StudentProfile] id: {self.pk} name: {self.get_full_name()} site: {self.site.domain}"
+
+    def get_full_name(self):
+        return self.user.get_full_name()
 
     def get_absolute_url(self, subdomain=None):
         return reverse('user_detail', args=[self.user_id],
@@ -1083,13 +1086,15 @@ class StudentAcademicDisciplineLog(StudentFieldLog):
         verbose_name=_("Former field of study"),
         on_delete=models.CASCADE,
         related_name="+",  # Disable backwards relation
-        blank=True)
+        blank=True,
+        null=True)
     academic_discipline = models.ForeignKey(
         'study_programs.AcademicDiscipline',
         verbose_name=_("Field of study"),
         on_delete=models.CASCADE,
         related_name="+",  # Disable backwards relation
-        blank=True)
+        blank=True,
+        null=True)
 
     tracker = FieldTracker()  # Must be in child class https://github.com/jazzband/django-model-utils/issues/57
 

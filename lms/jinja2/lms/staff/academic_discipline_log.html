@@ -1,0 +1,50 @@
+{% extends "lms/layouts/v1_base.html" %}
+
+{% block body_attrs %} class="gray"{% endblock body_attrs %}
+
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <h2 class="mt-0 mb-30">{% trans %}Student Academic Discipline Log{% endtrans %}</h2>
+        {{ crispy(filter.form) }}
+
+      <div class="panel">
+        <div class="panel-body">
+            {% if logs %}
+              <table class="table">
+                <thead>
+                <tr>
+                  <th>{% trans %}Student Profile{% endtrans %}</th>
+                  <th>{% trans %}Former field of study{% endtrans %}</th>
+                  <th>{% trans %}Field of study{% endtrans %}</th>
+                  <th>{% trans %}Is processed{% endtrans %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for log in logs %}
+                  <tr>
+                    <td>
+                      <a target="_blank"
+                         href="{{ log.student_profile.get_absolute_url() }}">
+                        {{ log.student_profile.get_full_name() }}
+                      </a>
+                    </td>
+                    <td>{{ log.former_academic_discipline|default("-", True) }}</td>
+                    <td>{{ log.academic_discipline|default("-", True) }}</td>
+                    <td>{{ log.is_processed|yesno("Да,Нет") }}</td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            {% else %}
+              <div class="empty">Логи не найдены. Задайте другие параметры поиска.</div>
+            {% endif %}
+        </div>
+      </div>
+
+
+      </div>
+    </div>
+  </div>
+{% endblock content %}

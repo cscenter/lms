@@ -1,9 +1,10 @@
+import csv
 import datetime
 from collections import defaultdict
 
-from django.utils import timezone
+from django.utils import timezone, formats
 from django_filters import FilterSet
-from django_filters.views import BaseFilterView
+from django_filters.views import BaseFilterView, FilterView
 from rest_framework import serializers
 from vanilla import TemplateView
 
@@ -12,8 +13,8 @@ from django.contrib import messages
 from django.core.management import CommandError, call_command
 from django.db.models import Count, Prefetch
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
-from django.http.response import Http404, HttpResponseForbidden
-from django.shortcuts import get_list_or_404, get_object_or_404
+from django.http.response import Http404, HttpResponseForbidden, HttpResponse
+from django.shortcuts import get_list_or_404, get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
 from django.views import View, generic
 
@@ -45,7 +46,7 @@ from learning.reports import (
 )
 from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
-from staff.filters import EnrollmentInvitationFilter, StudentProfileFilter
+from staff.filters import EnrollmentInvitationFilter, StudentProfileFilter, StudentAcademicDisciplineLogFilter
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.tex import generate_tex_student_profile_for_diplomas
@@ -54,7 +55,7 @@ from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
-from users.models import PartnerTag, StudentProfile, StudentTypes, User
+from users.models import PartnerTag, StudentProfile, StudentTypes, User, StudentAcademicDisciplineLog
 from users.services import (
     create_graduate_profiles,
     get_graduate_profile,
@@ -816,3 +817,53 @@ class OfficialDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
             "students": diploma_student_profiles,
         }
         return context
+
+class StudentAcademicDisciplineLogListView(CuratorOnlyMixin, FilterView):
+    model = StudentAcademicDisciplineLog
+    context_object_name = 'logs'
+    filterset_class = StudentAcademicDisciplineLogFilter
+    template_name = 'lms/staff/academic_discipline_log.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter_form'] = context['filter'].form
+        return context
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.GET.get("download_csv"):
+            return self.download_csv(request)
+        elif request.GET.get("mark_processed"):
+            return self.mark_processed(request)
+        return super().dispatch(request, *args, **kwargs)
+
+    def download_csv(self, request):
+        filterset = self.filterset_class(data=request.GET, queryset=self.get_queryset())
+        filtered_qs = filterset.qs
+
+        today = formats.date_format(datetime.datetime.now(), "SHORT_DATE_FORMAT")
+        filename = f"academic_discipline_logs_{today}.csv"
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        writer = csv.writer(response)
+        writer.writerow(["Ссылка на ЛК", 'ФИО', _('Former field of study'), _('Field of study')])
+
+        for log in filtered_qs:
+            writer.writerow([
+                request.build_absolute_uri(log.student_profile.get_absolute_url()),
+                log.student_profile.get_full_name(),
+                log.former_academic_discipline,
+                log.academic_discipline.name
+            ])
+
+        return response
+
+    def mark_processed(self, request):
+        filterset = self.filterset_class(data=request.GET, queryset=self.get_queryset())
+        filtered_qs = filterset.qs
+        filtered_qs.update(is_processed=True)
+
+        query_params = request.GET.copy()
+        query_params.pop("mark_processed")
+        return HttpResponseRedirect(reverse('staff:academic_discipline_log_list') + "?" + query_params.urlencode())

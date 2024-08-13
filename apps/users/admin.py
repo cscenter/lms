@@ -1,10 +1,11 @@
+from dal_select2.widgets import Select2Multiple
 from import_export.admin import ImportMixin
 
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as _UserAdmin
 from django.core.exceptions import ValidationError
-from django.db import models as db_models
+from django.db import models as db_models, models
 from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -21,7 +22,7 @@ from .models import (
     CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
     StudentStatusLog, StudentTypes, User, UserGroup, YandexUserData, StudentFieldLog, StudentAcademicDisciplineLog
 )
-from .services import assign_role, update_student_status
+from .services import assign_role, update_student_status, update_student_academic_discipline
 
 
 class OnlineCourseRecordAdmin(admin.StackedInline):
@@ -224,6 +225,11 @@ class StudentProfileAdmin(BaseModelAdmin):
     raw_id_fields = ('user', 'comment_last_author')
     search_fields = ['user__last_name']
     inlines = [StudentStatusLogAdminInline, StudentAcademicDisciplineLogAdminInline]
+    formfield_overrides = {
+        models.ManyToManyField: {
+            "widget": Select2Multiple(attrs={"data-width": "style"})
+        }
+    }
 
     def get_readonly_fields(self, request, obj=None):
         if obj is not None and obj.pk:
@@ -265,6 +271,10 @@ class StudentProfileAdmin(BaseModelAdmin):
         if change:
             if "status" in form.changed_data:
                 update_student_status(obj, new_status=form.cleaned_data['status'],
+                                      editor=request.user)
+            if "academic_disciplines" in form.changed_data:
+                update_student_academic_discipline(obj, new_academic_discipline=form.cleaned_data[
+                    'academic_disciplines'].first(),
                                       editor=request.user)
         super().save_model(request, obj, form, change)
         if not change and obj.status not in StudentStatuses.inactive_statuses:

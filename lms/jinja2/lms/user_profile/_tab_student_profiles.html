@@ -110,10 +110,10 @@
                     {% for student_academic_discipline_log_record in student_academic_discipline_history %}
                       <tr>
                         <td style="width:50%;" {% if not loop.first %}class="text-muted"{% endif %}>
-                          {{ student_status_log_record.academic_discipline }}
+                          {{ student_academic_discipline_log_record.academic_discipline }}
                         </td>
                         <td {% if not loop.first %}class="text-muted"{% endif %}>
-                          {{ student_status_log_record.changed_at|date("d.m.Y") }}
+                          {{ student_academic_discipline_log_record.changed_at|date("d.m.Y") }}
                         </td>
                       </tr>
                     {% endfor %}

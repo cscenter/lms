@@ -21,10 +21,10 @@ from core.utils import bucketize
 from courses.models import Semester
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
-from study_programs.models import StudyProgram
+from study_programs.models import StudyProgram, AcademicDiscipline
 from users.constants import GenderTypes, Roles
 from users.models import (
-    OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User, UserGroup
+    OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User, UserGroup, StudentAcademicDisciplineLog
 )
 
 AccountId = int
@@ -324,8 +324,37 @@ def update_student_status(student_profile: StudentProfile, *,
                                   old_status=old_status, new_status=new_status)
 
     log_entry = StudentStatusLog(status=new_status,
+                                 former_status=old_status,
                                  student_profile=student_profile,
                                  entry_author=editor)
+
+    if changed_at:
+        log_entry.changed_at = changed_at
+
+    log_entry.save()
+
+    return student_profile
+
+
+def update_student_academic_discipline(student_profile: StudentProfile, *,
+                                       new_academic_discipline: AcademicDiscipline, editor: User,
+                                       changed_at: Optional[datetime.date] = None) -> StudentProfile:
+    """
+    Updates student profile academic_discipline value, then adds new log record to
+    the student academic_discipline history.
+
+    To correctly resolve academic_discipline transition must be called before calling
+    .save() method on the student profile object.
+    """
+    former_academic_discipline = student_profile.tracker.previous('academic_disciplines').first()
+    student_profile.academic_disciplines.clear()
+    student_profile.academic_disciplines.add(new_academic_discipline)
+    student_profile.save()
+
+    log_entry = StudentAcademicDisciplineLog(academic_discipline=new_academic_discipline,
+                                             former_academic_discipline=former_academic_discipline,
+                                             student_profile=student_profile,
+                                             entry_author=editor)
 
     if changed_at:
         log_entry.changed_at = changed_at

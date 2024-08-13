@@ -16,7 +16,8 @@ from staff.views import (
     OfficialDiplomasCSVView, OfficialDiplomasListView, OfficialDiplomasTeXView,
     ProgressReportForSemesterView, ProgressReportFullView, StudentFacesView,
     StudentSearchCSVView, StudentSearchView, SurveySubmissionsReportView,
-    SurveySubmissionsStatsView, WillGraduateStatsReportView, AdmissionApplicantsYearReportView
+    SurveySubmissionsStatsView, WillGraduateStatsReportView, AdmissionApplicantsYearReportView,
+    StudentAcademicDisciplineLogListView
 )
 
 from staff.views import autograde_projects, autofail_ungraded, create_alumni_profiles
@@ -81,6 +82,9 @@ urlpatterns = [
     path('reports/enrollment-invitations/', include([
         path('', EnrollmentInvitationListView.as_view(), name='enrollment_invitations_list'),
         re_path(r'^(?P<invitation_id>\d+)/(?P<output_format>csv|xlsx)/$', InvitationStudentsProgressReportView.as_view(), name='students_progress_report_for_invitation'),
+    ])),
+    path('reports/academic-discipline_logs/', include([
+        path('', StudentAcademicDisciplineLogListView.as_view(), name='academic_discipline_log_list')
     ])),
     path('reports/students-progress/', include([
         re_path(r'^(?P<output_format>csv|xlsx)/(?P<on_duplicate>max|last)/$', ProgressReportFullView.as_view(), name='students_progress_report'),
