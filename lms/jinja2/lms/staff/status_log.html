@@ -16,6 +16,7 @@
                 <thead>
                 <tr>
                   <th>{% trans %}Student Profile{% endtrans %}</th>
+                  <th>{% trans %}Branch{% endtrans %}</th>
                   <th>{% trans %}Former status{% endtrans %}</th>
                   <th>{% trans %}Status{% endtrans %}</th>
                   <th>{% trans %}Is processed{% endtrans %}</th>
@@ -30,6 +31,7 @@
                         {{ log.student_profile.get_full_name() }}
                       </a>
                     </td>
+                    <td>{{ log.student_profile.branch.name }}</td>
                     <td>{{ log.get_former_status_display() }}</td>
                     <td>{{ log.get_status_display() }}</td>
                     <td>{{ log.is_processed|yesno("Да,Нет") }}</td>

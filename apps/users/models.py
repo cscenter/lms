@@ -1072,6 +1072,7 @@ class StudentStatusLog(StudentFieldLog):
 
     class Meta:
         verbose_name_plural = _("Student Status Log")
+        ordering = ['-changed_at', '-pk']
 
 
     def get_status_display(self):
@@ -1106,6 +1107,7 @@ class StudentAcademicDisciplineLog(StudentFieldLog):
 
     class Meta:
         verbose_name_plural = _("Student Academic Discipline Log")
+        ordering = ['-changed_at', '-pk']
 
 
 class OnlineCourseRecord(TimeStampedModel):

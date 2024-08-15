@@ -167,7 +167,7 @@ class StudentFieldLogAdminInline(admin.TabularInline):
     list_select_related = ['student_profile', 'entry_author']
     model = StudentFieldLog
     extra = 0
-    ordering = ['-changed_at', '-pk']
+    readonly_fields = ('student_profile', 'entry_author', 'is_processed', 'processed_at')
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -175,21 +175,14 @@ class StudentFieldLogAdminInline(admin.TabularInline):
     def has_delete_permission(self, request, obj=None):
         return False
 
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    @meta(_("Semester"))
-    def get_semester(self, obj):
-        from courses.utils import get_terms_in_range
-        changed_at = obj.changed_at
-        term = next(get_terms_in_range(changed_at, changed_at), None)
-        return term.label if term else '-'
 
 class StudentStatusLogAdminInline(StudentFieldLogAdminInline):
     model = StudentStatusLog
+    readonly_fields = StudentFieldLogAdminInline.readonly_fields + ('former_status', 'status')
 
 class StudentAcademicDisciplineLogAdminInline(StudentFieldLogAdminInline):
     model = StudentAcademicDisciplineLog
+    readonly_fields = StudentFieldLogAdminInline.readonly_fields + ('former_academic_discipline', 'academic_discipline')
 
 
 class StudentProfileForm(forms.ModelForm):

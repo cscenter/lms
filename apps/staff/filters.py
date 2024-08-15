@@ -149,10 +149,6 @@ class StudentAcademicDisciplineLogFilter(django_filters.FilterSet):
             'former_academic_discipline',
             'student_profile__branch',
             'student_profile__user'
-        ).order_by(
-            'student_profile__user__last_name',
-            'student_profile__user__first_name',
-            'student_profile__user__patronymic'
         )
 
 
@@ -237,10 +233,6 @@ class StudentStatusLogFilter(django_filters.FilterSet):
         return queryset.select_related(
             'student_profile__branch',
             'student_profile__user'
-        ).order_by(
-            'student_profile__user__last_name',
-            'student_profile__user__first_name',
-            'student_profile__user__patronymic'
         )
 
     @property

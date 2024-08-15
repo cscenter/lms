@@ -854,12 +854,18 @@ class StudentAcademicDisciplineLogListView(CuratorOnlyMixin, FilterView):
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
         writer = csv.writer(response)
-        writer.writerow(["Ссылка на ЛК", 'ФИО', _('Former field of study'), _('Field of study')])
+        writer.writerow(['ФИО', "Ссылка на ЛК", _("Type"), _("Telegram"), _('email address'),
+                         _('Former field of study'), _('Field of study')])
 
         for log in filtered_qs:
+            student_profile = log.student_profile
+            user = student_profile.user
             writer.writerow([
-                request.build_absolute_uri(log.student_profile.get_absolute_url()),
-                log.student_profile.get_full_name(),
+                student_profile.get_full_name(),
+                request.build_absolute_uri(student_profile.get_absolute_url()),
+                student_profile.get_type_display(),
+                user.telegram_username,
+                user.email,
                 log.former_academic_discipline,
                 log.academic_discipline
             ])
@@ -868,8 +874,8 @@ class StudentAcademicDisciplineLogListView(CuratorOnlyMixin, FilterView):
 
     def mark_processed(self, request):
         filterset = self.filterset_class(data=request.GET, queryset=self.get_queryset())
-        filtered_qs = filterset.qs
-        filtered_qs.update(is_processed=True)
+        filtered_qs = filterset.qs.filter(is_processed=False)
+        filtered_qs.update(is_processed=True, processed_at=timezone.now().date())
 
         query_params = request.GET.copy()
         query_params.pop("mark_processed")
@@ -910,12 +916,18 @@ class StudentStatusLogListView(CuratorOnlyMixin, FilterView):
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
         writer = csv.writer(response)
-        writer.writerow(["Ссылка на ЛК", 'ФИО', _('Former status'), _('Status')])
+        writer.writerow(['ФИО', "Ссылка на ЛК", _("Type"), _("Telegram"), _('email address'), _('Former status'),
+                         _('Status')])
 
         for log in filtered_qs:
+            student_profile = log.student_profile
+            user = student_profile.user
             writer.writerow([
-                request.build_absolute_uri(log.student_profile.get_absolute_url()),
-                log.student_profile.get_full_name(),
+                student_profile.get_full_name(),
+                request.build_absolute_uri(student_profile.get_absolute_url()),
+                student_profile.get_type_display(),
+                user.telegram_username,
+                user.email,
                 log.get_former_status_display(),
                 log.get_status_display()
             ])
@@ -924,8 +936,8 @@ class StudentStatusLogListView(CuratorOnlyMixin, FilterView):
 
     def mark_processed(self, request):
         filterset = self.filterset_class(data=request.GET, queryset=self.get_queryset())
-        filtered_qs = filterset.qs
-        filtered_qs.update(is_processed=True)
+        filtered_qs = filterset.qs.filter(is_processed=False)
+        filtered_qs.update(is_processed=True, processed_at=timezone.now().date())
 
         query_params = request.GET.copy()
         query_params.pop("mark_processed")
