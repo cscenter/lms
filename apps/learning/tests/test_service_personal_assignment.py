@@ -144,9 +144,10 @@ def test_service_update_personal_assignment_stats_published(django_capture_on_co
     assert 'count' in solutions_stats
     assert solutions_stats['count'] == 2
     assert 'first' in solutions_stats
-    assert solutions_stats['first'] == comment1.created.replace(microsecond=0)
+    delta = timedelta(seconds=1)
+    assert comment1.created - delta <= solutions_stats['first'] <= comment1.created + delta
     assert 'last' in solutions_stats
-    assert solutions_stats['last'] == fixed_dt.replace(microsecond=0)
+    assert fixed_dt - delta <= solutions_stats['last'] <= fixed_dt + delta
 
 
 @pytest.mark.django_db

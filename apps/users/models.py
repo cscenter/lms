@@ -994,7 +994,7 @@ class StudentProfile(TimeStampedModel):
                     .filter(year=self.year_of_curriculum,
                             branch_id=self.branch_id))
 
-    @cached_property
+    @property
     def academic_discipline(self) -> AcademicDiscipline:
         return self.academic_disciplines.first()
 

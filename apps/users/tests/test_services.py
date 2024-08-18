@@ -4,6 +4,8 @@ import pytest
 from django.conf import settings
 
 from django.core.exceptions import ValidationError
+from django.forms import model_to_dict
+from django.utils import timezone
 
 from core.tests.factories import BranchFactory, SiteFactory
 from core.timezone import now_local
@@ -15,13 +17,14 @@ from study_programs.tests.factories import (
     AcademicDisciplineFactory, StudyProgramFactory
 )
 from users.constants import Roles
-from users.models import StudentProfile, StudentTypes, UserGroup
+from users.models import StudentProfile, StudentTypes, UserGroup, StudentStatusLog
 from users.services import (
     StudentStatusTransition, assign_or_revoke_student_role, assign_role,
     create_graduate_profiles, create_student_profile, get_student_profile_priority,
-    get_student_profiles, maybe_unassign_student_role, unassign_role
+    get_student_profiles, maybe_unassign_student_role, unassign_role, update_student_status,
+    update_student_academic_discipline
 )
-from users.tests.factories import CuratorFactory, StudentProfileFactory, UserFactory
+from users.tests.factories import CuratorFactory, StudentProfileFactory, UserFactory, StudentFactory
 
 
 @pytest.mark.django_db
@@ -367,3 +370,111 @@ def test_get_student_profiles_prefetch_syllabus(django_assert_num_queries):
     assert 'syllabus' in student_profiles[1].__dict__
     assert student_profiles[2].syllabus == student_profile1.syllabus
     assert student_profiles[2].syllabus is None
+
+@pytest.mark.django_db
+def test_update_student_status():
+    student_profile = StudentProfileFactory()
+    curator = CuratorFactory()
+    update_student_status(student_profile,
+                              new_status=StudentStatuses.ACADEMIC_LEAVE,
+                              editor=curator)
+
+    assert student_profile.status == StudentStatuses.ACADEMIC_LEAVE
+    assert Roles.STUDENT not in student_profile.user.roles
+
+    status_logs = student_profile.studentstatuslog_related.all()
+    assert len(status_logs) == 1
+    status_log = status_logs.first()
+    log_dict = model_to_dict(status_log, fields=[field.name for field in status_log._meta.fields if field.name != "id"])
+    assert log_dict == {
+        "status": StudentStatuses.ACADEMIC_LEAVE,
+        "former_status": "",
+        "student_profile": student_profile.id,
+        "entry_author": curator.id,
+        "changed_at": timezone.now().date(),
+        "is_processed": False,
+        "processed_at": None
+    }
+
+    tomorrow = timezone.now().date() + datetime.timedelta(days=1)
+    update_student_status(student_profile,
+                              new_status=StudentStatuses.REINSTATED,
+                              editor=curator,
+                              changed_at=tomorrow)
+    student_profile.refresh_from_db()
+    assert student_profile.status == StudentStatuses.REINSTATED
+    assert Roles.STUDENT in student_profile.user.roles
+
+    status_logs = student_profile.studentstatuslog_related.all()
+    assert len(status_logs) == 2
+    assert status_logs.last() == status_log
+    status_log = status_logs.first()
+    log_dict = model_to_dict(status_log, fields=[field.name for field in status_log._meta.fields if field.name != "id"])
+    assert log_dict == {
+        "status": StudentStatuses.REINSTATED,
+        "former_status": StudentStatuses.ACADEMIC_LEAVE,
+        "student_profile": student_profile.id,
+        "entry_author": curator.id,
+        "changed_at": tomorrow,
+        "is_processed": False,
+        "processed_at": None
+    }
+    with pytest.raises(ValidationError):
+        update_student_status(student_profile,
+                              new_status="unknown_status",
+                              editor=curator)
+
+    student_profile.type = StudentTypes.INVITED
+    with pytest.raises(ValidationError):
+        update_student_status(student_profile,
+                              new_status=StudentStatuses.GRADUATE,
+                              editor=curator)
+
+@pytest.mark.django_db
+def test_update_student_academic_discipline():
+    student_profile = StudentProfileFactory()
+    curator = CuratorFactory()
+    academic_discipline = AcademicDisciplineFactory()
+    update_student_academic_discipline(student_profile,
+                              new_academic_discipline=academic_discipline,
+                              editor=curator)
+
+    assert student_profile.academic_discipline == academic_discipline
+
+    discipline_logs = student_profile.studentacademicdisciplinelog_related.all()
+    assert len(discipline_logs) == 1
+    discipline_log = discipline_logs.first()
+    log_dict = model_to_dict(discipline_log, fields=[field.name for field in discipline_log._meta.fields if field.name != "id"])
+    assert log_dict == {
+        "academic_discipline": academic_discipline.id,
+        "former_academic_discipline": None,
+        "student_profile": student_profile.id,
+        "entry_author": curator.id,
+        "changed_at": timezone.now().date(),
+        "is_processed": False,
+        "processed_at": None
+    }
+
+    tomorrow = timezone.now().date() + datetime.timedelta(days=1)
+    other_academic_discipline = AcademicDisciplineFactory()
+    update_student_academic_discipline(student_profile,
+                              new_academic_discipline=other_academic_discipline,
+                              editor=curator,
+                              changed_at=tomorrow)
+    student_profile.refresh_from_db()
+    assert student_profile.academic_discipline == other_academic_discipline
+
+    discipline_logs = student_profile.studentacademicdisciplinelog_related.all()
+    assert len(discipline_logs) == 2
+    assert discipline_logs.last() == discipline_log
+    discipline_log = discipline_logs.first()
+    log_dict = model_to_dict(discipline_log, fields=[field.name for field in discipline_log._meta.fields if field.name != "id"])
+    assert log_dict == {
+        "academic_discipline": other_academic_discipline.id,
+        "former_academic_discipline": academic_discipline.id,
+        "student_profile": student_profile.id,
+        "entry_author": curator.id,
+        "changed_at": tomorrow,
+        "is_processed": False,
+        "processed_at": None
+    }
