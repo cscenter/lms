@@ -41,7 +41,7 @@
 
           <table class="table mt-20 mb-0">
             <tr>
-              <td>Отделение</td>
+              <td>{% trans %}Branch{% endtrans %}:</td>
               <td>{{ student_profile.branch.name }}</td>
             </tr>
             <tr>
@@ -49,7 +49,7 @@
               <td>{{ student_profile.year_of_admission }}</td>
             </tr>
             <tr>
-              <td>Статус</td>
+              <td>{% trans %}Status{% endtrans %}:</td>
               <td>
                 {% set status_display = student_profile.get_status_display()|default("—", True) %}
                 {% if student_profile.status == StudentStatuses.GRADUATE and student_profile.graduate_profile %}
@@ -66,23 +66,23 @@
             </tr>
             {% if request.user.is_curator %}
             <tr>
-              <td>История статусов</td>
+              <td>{% trans %}Status history{% endtrans %}:</td>
               <td>
-                {% with student_status_history = student_profile.status_history.all() %}
+                {% with student_status_history = student_profile.studentstatuslog_related.all() %}
                   <table class="table table-condensed mb-0">
                     <thead>
                     <tr class="active">
-                      <th>Статус</th>
-                      <th>Дата изменения</th>
+                      <th>{% trans %}Status{% endtrans %}</th>
+                      <th>{% trans %}Entry Added{% endtrans %}</th>
                     </tr>
                     </thead>
-                    {% for student_status_log_record in student_profile.status_history.all() %}
+                    {% for student_status_log_record in student_status_history %}
                       <tr>
                         <td style="width:50%;" {% if not loop.first %}class="text-muted"{% endif %}>
                           {{ student_status_log_record.get_status_display() }}
                         </td>
                         <td {% if not loop.first %}class="text-muted"{% endif %}>
-                          {{ student_status_log_record.status_changed_at|date("d.m.Y") }}
+                          {{ student_status_log_record.changed_at|date("d.m.Y") }}
                         </td>
                       </tr>
                     {% endfor %}
@@ -96,13 +96,44 @@
                 {% endwith %}
               </td>
             </tr>
+            <tr>
+              <td>{% trans %}Areas of study history{% endtrans %}:</td>
+              <td>
+                {% with student_academic_discipline_history = student_profile.studentacademicdisciplinelog_related.all() %}
+                  <table class="table table-condensed mb-0">
+                    <thead>
+                    <tr class="active">
+                      <th>{% trans %}Field of study{% endtrans %}</th>
+                      <th>{% trans %}Entry Added{% endtrans %}</th>
+                    </tr>
+                    </thead>
+                    {% for student_academic_discipline_log_record in student_academic_discipline_history %}
+                      <tr>
+                        <td style="width:50%;" {% if not loop.first %}class="text-muted"{% endif %}>
+                          {{ student_academic_discipline_log_record.academic_discipline }}
+                        </td>
+                        <td {% if not loop.first %}class="text-muted"{% endif %}>
+                          {{ student_academic_discipline_log_record.changed_at|date("d.m.Y") }}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                    {% if student_academic_discipline_history|length == 0 %}
+                    <tr>
+                      <td>-</td>
+                      <td>-</td>
+                    </tr>
+                    {% endif %}
+                  </table>
+                {% endwith %}
+              </td>
+            </tr>
             {% endif %}
             <tr>
               <td>{% trans %}Curriculum year{% endtrans %}:</td>
               <td>{{ student_profile.year_of_curriculum|default('—', True) }}</td>
             </tr>
             <tr>
-              <td>Программа обучения</td>
+              <td>{% trans %}Study Program{% endtrans %}:</td>
               <td>
                 {% if student_profile.syllabus %}
                   {% for program in student_profile.syllabus %}
@@ -142,27 +173,17 @@
               <td>{{ student_profile.university|default("—", True) }}</td>
             </tr>
             <tr>
-              <td>Магистратура</td>
+              <td>{% trans %}Magistracy{% endtrans %}:</td>
               <td>{{ student_profile.partner|default("—", True) }}</td>
             </tr>
             <tr>
-              <td>Курс при поступлении:</td>
+              <td>{% trans %}StudentInfo|University year{% endtrans %}:</td>
               <td>
                 {{ student_profile.get_level_of_education_on_admission_display()|default("—", True) }}</td>
             </tr>
-            <tr>
-              <td>{% trans %}Areas of study{% endtrans %}:</td>
-              <td>
-                {% if student_profile.academic_disciplines.all()|length > 0 %}
-                  {% for academic_discipline in student_profile.academic_disciplines.all() -%}
-                    {{ academic_discipline }}{% if not loop.last %}, {% endif %}
-                  {%- endfor %}
-                {% else %}—{% endif %}
-              </td>
-            </tr>
             {% if student_profile.invitation %}
               <tr>
-                <td>Приглашение</td>
+                <td>{% trans %}Invitation{% endtrans %}:</td>
                 <td>
                   <a target="_blank" href="{{ url('admin:learning_invitation_change', object_id=student_profile.invitation.pk) }}">
                   {{ student_profile.invitation.name }}

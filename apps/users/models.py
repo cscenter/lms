@@ -914,7 +914,7 @@ class StudentProfile(TimeStampedModel):
         related_name="student_profiles",
         on_delete=models.SET_NULL)
 
-    tracker = FieldTracker(fields=['status'])
+    tracker = FieldTracker(fields=['status', 'academic_disciplines'])
 
     class Meta:
         db_table = 'student_profiles'
@@ -958,7 +958,10 @@ class StudentProfile(TimeStampedModel):
             raise ValidationError({"year_of_admission": msg})
 
     def __str__(self):
-        return f"[StudentProfile] id: {self.pk} name: {self.user.get_full_name()} site: {self.site.domain}"
+        return f"[StudentProfile] id: {self.pk} name: {self.get_full_name()} site: {self.site.domain}"
+
+    def get_full_name(self, last_name_first=False):
+        return self.user.get_full_name(last_name_first)
 
     def get_absolute_url(self, subdomain=None):
         return reverse('user_detail', args=[self.user_id],
@@ -991,7 +994,7 @@ class StudentProfile(TimeStampedModel):
                     .filter(year=self.year_of_curriculum,
                             branch_id=self.branch_id))
 
-    @cached_property
+    @property
     def academic_discipline(self) -> AcademicDiscipline:
         return self.academic_disciplines.first()
 
@@ -1013,36 +1016,98 @@ class StudentProfile(TimeStampedModel):
             raise ValueError("Works only with invited students. Use is_active for others")
         return self.invitation is not None and self.invitation.is_active
 
-
-class StudentStatusLog(TimestampedModel):
-    status_changed_at = models.DateField(
+class StudentFieldLog(TimestampedModel):
+    changed_at = models.DateField(
         verbose_name=_("Entry Added"),
         default=timezone.now)
-    status = models.CharField(
-        choices=StudentStatuses.choices,
-        verbose_name=_("Status"),
-        max_length=15)
     student_profile = models.ForeignKey(
         StudentProfile,
         verbose_name=_("Student"),
-        related_name="status_history",
+        related_name="%(class)s_related",
         on_delete=models.CASCADE)
     entry_author = models.ForeignKey(
         User,
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
+    is_processed =  models.BooleanField(
+        _('Is processed'),
+        default=False,
+        help_text=_('Designates whether this Log was processed in document list')
+    )
+    processed_at = models.DateField(
+        verbose_name=_("Processed time"),
+        blank=True,
+        null=True
+    )
 
     class Meta:
-        verbose_name_plural = _("Student Status Log")
+        abstract = True
+        verbose_name_plural = _("Student Log")
 
     def __str__(self):
         return str(self.pk)
+
+    def save(self, **kwargs):
+        created = self.pk is None
+        if not created and self.tracker.has_changed('is_processed'):
+            if self.is_processed:
+                self.processed_at = timezone.now()
+            else:
+                self.processed_at = None
+        super().save(**kwargs)
+
+
+class StudentStatusLog(StudentFieldLog):
+    former_status = models.CharField(
+        choices=StudentStatuses.choices,
+        verbose_name=_("Former status"),
+        max_length=15,
+        blank=True)
+    status = models.CharField(
+        choices=StudentStatuses.choices,
+        verbose_name=_("Status"),
+        max_length=15)
+
+    tracker = FieldTracker()  # Must be in child class https://github.com/jazzband/django-model-utils/issues/57
+
+    class Meta:
+        verbose_name_plural = _("Student Status Log")
+        ordering = ['-changed_at', '-pk']
+
 
     def get_status_display(self):
         if self.status:
             return StudentStatuses.values[self.status]
         # Empty status means studies in progress
         return _("Studying")
+
+    def get_former_status_display(self):
+        if self.former_status:
+            return StudentStatuses.values[self.former_status]
+        # Empty status means studies in progress
+        return _("Studying")
+
+class StudentAcademicDisciplineLog(StudentFieldLog):
+    former_academic_discipline = models.ForeignKey(
+        'study_programs.AcademicDiscipline',
+        verbose_name=_("Former field of study"),
+        on_delete=models.CASCADE,
+        related_name="+",  # Disable backwards relation
+        blank=True,
+        null=True)
+    academic_discipline = models.ForeignKey(
+        'study_programs.AcademicDiscipline',
+        verbose_name=_("Field of study"),
+        on_delete=models.CASCADE,
+        related_name="+",  # Disable backwards relation
+        blank=True,
+        null=True)
+
+    tracker = FieldTracker()  # Must be in child class https://github.com/jazzband/django-model-utils/issues/57
+
+    class Meta:
+        verbose_name_plural = _("Student Academic Discipline Log")
+        ordering = ['-changed_at', '-pk']
 
 
 class OnlineCourseRecord(TimeStampedModel):

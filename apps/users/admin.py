@@ -1,10 +1,11 @@
+from dal_select2.widgets import Select2Multiple
 from import_export.admin import ImportMixin
 
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as _UserAdmin
 from django.core.exceptions import ValidationError
-from django.db import models as db_models
+from django.db import models as db_models, models
 from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -19,9 +20,9 @@ from users.forms import UserChangeForm, UserCreationForm
 from .import_export import UserRecordResource
 from .models import (
     CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
-    StudentStatusLog, StudentTypes, User, UserGroup, YandexUserData
+    StudentStatusLog, StudentTypes, User, UserGroup, YandexUserData, StudentFieldLog, StudentAcademicDisciplineLog
 )
-from .services import assign_role, update_student_status
+from .services import assign_role, update_student_status, update_student_academic_discipline
 
 
 class OnlineCourseRecordAdmin(admin.StackedInline):
@@ -162,15 +163,11 @@ class UserAdmin(_UserAdmin):
                 obj.save()
         formset.save()
 
-
-
-class StudentStatusLogAdminInline(admin.TabularInline):
+class StudentFieldLogAdminInline(admin.TabularInline):
     list_select_related = ['student_profile', 'entry_author']
-    model = StudentStatusLog
+    model = StudentFieldLog
     extra = 0
-    show_change_link = True
-    readonly_fields = ('get_semester', 'status', 'entry_author')
-    ordering = ['-status_changed_at', '-pk']
+    readonly_fields = ('student_profile', 'entry_author', 'is_processed', 'processed_at')
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -178,12 +175,14 @@ class StudentStatusLogAdminInline(admin.TabularInline):
     def has_delete_permission(self, request, obj=None):
         return False
 
-    @meta(_("Semester"))
-    def get_semester(self, obj):
-        from courses.utils import get_terms_in_range
-        changed_at = obj.status_changed_at
-        term = next(get_terms_in_range(changed_at, changed_at), None)
-        return term.label if term else '-'
+
+class StudentStatusLogAdminInline(StudentFieldLogAdminInline):
+    model = StudentStatusLog
+    readonly_fields = StudentFieldLogAdminInline.readonly_fields + ('former_status', 'status')
+
+class StudentAcademicDisciplineLogAdminInline(StudentFieldLogAdminInline):
+    model = StudentAcademicDisciplineLog
+    readonly_fields = StudentFieldLogAdminInline.readonly_fields + ('former_academic_discipline', 'academic_discipline')
 
 
 class StudentProfileForm(forms.ModelForm):
@@ -218,7 +217,12 @@ class StudentProfileAdmin(BaseModelAdmin):
     list_filter = ('type', 'site', 'branch', 'status',)
     raw_id_fields = ('user', 'comment_last_author')
     search_fields = ['user__last_name']
-    inlines = [StudentStatusLogAdminInline]
+    inlines = [StudentStatusLogAdminInline, StudentAcademicDisciplineLogAdminInline]
+    formfield_overrides = {
+        models.ManyToManyField: {
+            "widget": Select2Multiple(attrs={"data-width": "style"})
+        }
+    }
 
     def get_readonly_fields(self, request, obj=None):
         if obj is not None and obj.pk:
@@ -260,6 +264,10 @@ class StudentProfileAdmin(BaseModelAdmin):
         if change:
             if "status" in form.changed_data:
                 update_student_status(obj, new_status=form.cleaned_data['status'],
+                                      editor=request.user)
+            if "academic_disciplines" in form.changed_data:
+                update_student_academic_discipline(obj, new_academic_discipline=form.cleaned_data[
+                    'academic_disciplines'].first(),
                                       editor=request.user)
         super().save_model(request, obj, form, change)
         if not change and obj.status not in StudentStatuses.inactive_statuses:

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-08 14:00+0000\n"
+"POT-Creation-Date: 2024-08-12 14:53+0000\n"
 "PO-Revision-Date: 2020-02-03 16:52+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -365,7 +365,7 @@ msgctxt "menu"
 msgid "Библиотека"
 msgstr ""
 
-#: compscicenter_ru/lms_menu.py:27 compscicenter_ru/lms_menu.py:113
+#: compscicenter_ru/lms_menu.py:27 compscicenter_ru/lms_menu.py:114
 msgctxt "menu"
 msgid "Полезное"
 msgstr ""
@@ -465,12 +465,12 @@ msgctxt "menu"
 msgid "Файлы"
 msgstr ""
 
-#: compscicenter_ru/lms_menu.py:114
+#: compscicenter_ru/lms_menu.py:115
 msgctxt "menu"
 msgid "Фейсбук"
 msgstr ""
 
-#: compscicenter_ru/lms_menu.py:115
+#: compscicenter_ru/lms_menu.py:116
 msgctxt "menu"
 msgid "Пересечения"
 msgstr ""
