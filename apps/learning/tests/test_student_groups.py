@@ -65,11 +65,12 @@ def test_create_student_group_from_main_branch(settings):
 
 
 @pytest.mark.django_db
-def test_upsert_student_group_from_additional_branch(settings):
+@pytest.mark.parametrize("group_mode", [CourseGroupModes.BRANCH, CourseGroupModes.INVITE_AND_BRANCH])
+def test_upsert_student_group_from_additional_branch(settings, group_mode):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     course = CourseFactory(main_branch=branch_spb,
-                           group_mode=StudentGroupTypes.BRANCH)
+                           group_mode=group_mode)
     assert StudentGroup.objects.filter(course=course).count() == 1
     CourseBranch(course=course, branch=branch_nsk).save()
     groups = StudentGroup.objects.filter(course=course)
