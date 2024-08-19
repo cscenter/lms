@@ -266,6 +266,10 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         verbose_name=_("CourseOffering|capacity"),
         default=0,
         help_text=_("0 - unlimited"))
+    hours = models.PositiveSmallIntegerField(
+        verbose_name=_("CourseOffering|hours"),
+        blank=True,
+        null=True)
     starts_on = models.DateField(
         _("Starts on"),
         blank=True,
