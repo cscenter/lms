@@ -854,7 +854,7 @@ class StudentAcademicDisciplineLogListView(CuratorOnlyMixin, FilterView):
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
         writer = csv.writer(response)
-        writer.writerow(['ФИО', "Ссылка на ЛК", _("Type"), _("Telegram"), _('email address'),
+        writer.writerow(['ФИО', "Ссылка на ЛК", _("Branch"), _("Type"), _("Telegram"), _('email address'),
                          _('Former field of study'), _('Field of study')])
 
         for log in filtered_qs:
@@ -863,6 +863,7 @@ class StudentAcademicDisciplineLogListView(CuratorOnlyMixin, FilterView):
             writer.writerow([
                 student_profile.get_full_name(),
                 request.build_absolute_uri(student_profile.get_absolute_url()),
+                student_profile.branch.name,
                 student_profile.get_type_display(),
                 user.telegram_username,
                 user.email,
@@ -916,8 +917,8 @@ class StudentStatusLogListView(CuratorOnlyMixin, FilterView):
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
         writer = csv.writer(response)
-        writer.writerow(['ФИО', "Ссылка на ЛК", _("Type"), _("Telegram"), _('email address'), _('Former status'),
-                         _('Status')])
+        writer.writerow(['ФИО', "Ссылка на ЛК", _("Branch"), _("Type"), _("Telegram"), _('email address'),
+                         _('Former status'), _('Status')])
 
         for log in filtered_qs:
             student_profile = log.student_profile
@@ -925,6 +926,7 @@ class StudentStatusLogListView(CuratorOnlyMixin, FilterView):
             writer.writerow([
                 student_profile.get_full_name(),
                 request.build_absolute_uri(student_profile.get_absolute_url()),
+                student_profile.branch.name,
                 student_profile.get_type_display(),
                 user.telegram_username,
                 user.email,

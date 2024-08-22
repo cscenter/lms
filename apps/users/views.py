@@ -34,7 +34,7 @@ from files.handlers import MemoryImageUploadHandler, TemporaryImageUploadHandler
 from learning.forms import TestimonialForm
 from learning.icalendar import get_icalendar_links
 from learning.models import Enrollment, StudentAssignment
-from learning.settings import GradeTypes, StudentStatuses
+from learning.settings import GradeTypes, StudentStatuses, EnrollmentTypes
 from users.compat import get_graduate_profile as get_graduate_profile_compat
 from users.models import SHADCourseRecord, YandexUserData, StudentTypes
 from users.thumbnails import CropboxData, get_user_thumbnail, photo_thumbnail_cropbox
@@ -127,6 +127,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
                         (enrollment.grade == GradeTypes.NOT_GRADED and enrollment.course.semester == current_semester)
             enrollment.view_invited = enrollment.student_profile.type == StudentTypes.INVITED
             enrollment.view_partner = enrollment.student_profile.type == StudentTypes.PARTNER
+            enrollment.view_lections_only = enrollment.type == EnrollmentTypes.LECTIONS_ONLY
         context["enrollments"] = enrollments
         if is_certificates_of_participation_enabled:
             certificates = (CertificateOfParticipation.objects

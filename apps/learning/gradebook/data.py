@@ -13,7 +13,7 @@ from core.db.utils import normalize_score
 from courses.constants import AssignmentStatus
 from courses.models import Assignment, Course
 from learning.models import Enrollment, StudentAssignment, StudentGroup
-from learning.settings import GradeTypes
+from learning.settings import GradeTypes, EnrollmentTypes
 
 __all__ = ('GradebookStudent', 'GradeBookData', 'gradebook_data',
            'get_student_assignment_state')
@@ -164,7 +164,8 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
     # Collect active enrollments
     enrolled_students = OrderedDict()
     course_enrollments = (Enrollment.active
-                          .filter(course=course))
+                          .filter(course=course)
+                          .exclude(type=EnrollmentTypes.LECTIONS_ONLY))
     if student_group is not None:
         course_enrollments = course_enrollments.filter(student_group=student_group)
     enrollments = (course_enrollments

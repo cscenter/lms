@@ -34,6 +34,15 @@ class AcademicDegreeLevels(DjangoChoices):
     ACADEMIC_LEAVE = C("10", _('academic_leave'))
     OTHER = C("other", _('Other'))
 
+class EnrollmentTypes(DjangoChoices):
+    REGULAR = C("Regular", _("EnrollmentTypes|Regular"))
+    LECTIONS_ONLY = C("lections", _("EnrollmentTypes|Lections"))
+
+class InvitationEnrollmentTypes(DjangoChoices):
+    REGULAR = C("Regular", _("InvitationEnrollmentTypes|Regular"))
+    LECTIONS_ONLY = C("lections", _("InvitationEnrollmentTypes|Lections"))
+    ANY = C("Any", _("InvitationEnrollmentTypes|Any"))
+
 class InvitationCategories(DjangoChoices):
     UNIVERSITY = C("university", _("Invitation|University"))
     STAFF = C("staff", _("Invitation|Staff"))
