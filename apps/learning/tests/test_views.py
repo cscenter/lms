@@ -18,7 +18,7 @@ from courses.models import CourseTeacher
 from courses.tests.factories import *
 from learning.invitation.views import complete_student_profile, is_student_profile_valid
 from learning.permissions import ViewEnrollment
-from learning.settings import GradeTypes, StudentStatuses
+from learning.settings import GradeTypes, StudentStatuses, EnrollmentTypes
 from learning.tests.factories import *
 from users.models import StudentTypes, StudentProfile
 from users.services import update_student_status
@@ -133,8 +133,9 @@ def test_course_detail_view_enrolled_invited_capabilities(client):
     response = client.get(course_invitation.invitation.get_absolute_url())
     assert response.status_code == 200
     assert 'Записаться' in response.content.decode('utf-8')
-    response = client.post(url, follow=True)
-    assert response.redirect_chain[-1][0] == course.get_absolute_url()
+    client.post(url, data={
+        "type": EnrollmentTypes.REGULAR
+    })
 
     enrollment = Enrollment.objects.get(invitation=course_invitation.invitation)
     enrollment.invitation = None

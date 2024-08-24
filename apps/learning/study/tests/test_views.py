@@ -29,7 +29,7 @@ from learning.models import (
     StudentAssignment
 )
 from learning.permissions import ViewCourses, ViewOwnStudentAssignment
-from learning.settings import Branches, StudentStatuses, GradeTypes
+from learning.settings import Branches, StudentStatuses, GradeTypes, EnrollmentTypes
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory, CourseInvitationFactory
 )
@@ -551,7 +551,9 @@ def test_view_student_courses_list_as_invited(client):
     assert len(response.context_data['ongoing_rest']) == 1
     assert len(response.context_data['archive']) == 1
 
-    client.post(course_invitation.get_absolute_url(), follow=True)
+    client.post(course_invitation.get_absolute_url(), data={
+        "type": EnrollmentTypes.REGULAR
+    })
     response = client.get(url)
     assert len(response.context_data['ongoing_enrolled']) == 2
     assert len(response.context_data['ongoing_rest']) == 0

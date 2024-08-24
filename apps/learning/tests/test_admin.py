@@ -10,7 +10,7 @@ from core.admin import get_admin_url
 from core.urls import reverse
 from courses.tests.factories import AssignmentFactory, CourseFactory
 from learning.models import AssignmentScoreAuditLog, AssignmentStatus, StudentAssignment, EnrollmentGradeLog
-from learning.settings import AssignmentScoreUpdateSource, GradeTypes
+from learning.settings import AssignmentScoreUpdateSource, GradeTypes, EnrollmentTypes
 from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import CuratorFactory
 
@@ -87,10 +87,13 @@ def test_admin_enrollment_grade_log(client):
     assert not EnrollmentGradeLog.objects.exists()
 
     enrollment_url = reverse('admin:learning_enrollment_change', args=[enrollment.pk])
-    form_data = {'student_profile': enrollment.student_profile.pk,
-                 'grade': GradeTypes.GOOD,
-                 'grade_history-TOTAL_FORMS': 0,
-                 'grade_history-INITIAL_FORMS': 0}
+    form_data = {
+        'type': EnrollmentTypes.REGULAR,
+        'student_profile': enrollment.student_profile.pk,
+        'grade': GradeTypes.GOOD,
+        'grade_history-TOTAL_FORMS': 0,
+        'grade_history-INITIAL_FORMS': 0
+    }
     client.login(curator)
     response = client.post(enrollment_url, form_data)
     assert response.status_code == 302

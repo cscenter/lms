@@ -297,7 +297,11 @@ class CourseEnrollmentForm(forms.Form):
         required=False)
 
     def __init__(self, **kwargs):
+        ask_enrollment_reason = kwargs.pop('ask_enrollment_reason', None)
         super().__init__(**kwargs)
+        if not ask_enrollment_reason:
+            self.fields.pop('reason')
+
         self.helper = FormHelper(self)
         self.helper.layout.append(Submit('enroll', 'Записаться на курс'))
 
