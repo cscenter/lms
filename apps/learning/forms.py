@@ -24,6 +24,7 @@ from learning.models import (
 )
 
 from .models import AssignmentComment
+from .settings import EnrollmentTypes, InvitationEnrollmentTypes
 
 
 class SubmitLink(BaseInput):
@@ -284,13 +285,41 @@ class TestimonialForm(forms.ModelForm):
 
 
 class CourseEnrollmentForm(forms.Form):
+    type = forms.ChoiceField(
+        label=_("Как вы хотите записаться на курс?"),
+        choices=EnrollmentTypes.choices,
+        initial=EnrollmentTypes.REGULAR,
+        required=True
+    )
     reason = forms.CharField(
         label=_("Почему вы выбрали этот курс?"),
         widget=forms.Textarea(),
         required=False)
 
     def __init__(self, **kwargs):
+        ask_enrollment_reason = kwargs.pop('ask_enrollment_reason', None)
         super().__init__(**kwargs)
+        if not ask_enrollment_reason:
+            self.fields.pop('reason')
+
+        self.helper = FormHelper(self)
+        self.helper.layout.append(Submit('enroll', 'Записаться на курс'))
+
+class CourseInvitationEnrollmentForm(forms.Form):
+    type = forms.ChoiceField(
+        label=_("Как вы хотите записаться на курс?"),
+        choices=EnrollmentTypes.choices,
+        initial=EnrollmentTypes.REGULAR,
+        required=True
+    )
+
+    def __init__(self, **kwargs):
+        enrollment_type = kwargs.pop('enrollment_type', None)
+        super().__init__(**kwargs)
+        if enrollment_type != InvitationEnrollmentTypes.ANY:
+            assert enrollment_type in EnrollmentTypes.values
+            self.fields["type"].initial = enrollment_type
+            self.fields["type"].disabled = True
         self.helper = FormHelper(self)
         self.helper.layout.append(Submit('enroll', 'Записаться на курс'))
 

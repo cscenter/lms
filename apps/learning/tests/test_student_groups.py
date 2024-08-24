@@ -18,7 +18,7 @@ from courses.tests.factories import (
 from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.permissions import DeleteStudentGroup, ViewStudentGroup
 from learning.services import EnrollmentService, StudentGroupService
-from learning.settings import Branches, GradeTypes
+from learning.settings import Branches, GradeTypes, EnrollmentTypes
 from learning.teaching.forms import StudentGroupForm
 from learning.teaching.utils import get_student_groups_url
 from learning.tests.factories import (
@@ -116,9 +116,10 @@ def test_student_group_resolving_on_enrollment(client):
     assert len(student_groups) == 1
     student_group = student_groups[0]
     enroll_url = course.get_enroll_url()
-    form = {'course_pk': course.pk}
     client.login(student_profile1.user)
-    response = client.post(enroll_url, form)
+    response = client.post(enroll_url, data={
+        "type": EnrollmentTypes.REGULAR
+    })
     assert response.status_code == 302
     enrollments = Enrollment.active.filter(student_profile=student_profile1,
                                            course=course).all()
@@ -127,7 +128,9 @@ def test_student_group_resolving_on_enrollment(client):
     assert enrollment.student_group == student_group
     # No permission through public interface
     client.login(student_profile2.user)
-    response = client.post(enroll_url, form)
+    response = client.post(enroll_url, data={
+        "type": EnrollmentTypes.REGULAR
+    })
     assert response.status_code == 403
 
 
@@ -146,6 +149,7 @@ def test_student_group_resolving_on_enrollment_admin(client, settings):
                            semester=current_semester)
     post_data = {
         'course': course.pk,
+        'type': EnrollmentTypes.REGULAR,
         'student': student.pk,
         'student_profile': student.get_student_profile(settings.SITE_ID).pk,
         'grade': GradeTypes.NOT_GRADED,
@@ -183,7 +187,9 @@ def test_student_group_resolving_enrollment_by_invitation(settings, client):
     course_invitation = CourseInvitationFactory(course=course)
     enroll_url = course_invitation.get_absolute_url()
     client.login(invited)
-    response = client.post(enroll_url, {})
+    response = client.post(enroll_url, data={
+        "type": EnrollmentTypes.REGULAR
+    })
     assert response.status_code == 302
     enrollments = Enrollment.active.filter(student=invited, course=course).all()
     assert len(enrollments) == 1

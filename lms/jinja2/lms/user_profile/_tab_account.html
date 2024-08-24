@@ -19,6 +19,9 @@
             {% if can_view_course_icons and enrollment.view_partner%}
               <i class="fa fa-graduation-cap {{opacity}}" aria-hidden="true"></i>
             {% endif %}
+            {% if can_view_course_icons and enrollment.view_lections_only%}
+              <i class="fa fa-headphones {{opacity}}" aria-hidden="true"></i>
+            {% endif %}
               <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}" class="{{opacity}}">
               {{ enrollment.course }} </a>
             {% if enrollment.course.duration == CourseDurations.FIRST_HALF %}

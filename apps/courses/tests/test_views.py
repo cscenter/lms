@@ -25,11 +25,10 @@ from courses.tests.factories import (
 from files.response import XAccelRedirectFileResponse
 from files.views import ProtectedFileDownloadView
 from learning.models import Enrollment
-from learning.settings import Branches, GradeTypes, StudentStatuses
+from learning.settings import Branches, GradeTypes, StudentStatuses, EnrollmentTypes
 from learning.invitation.views import complete_student_profile
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
 from users.constants import Roles
-from users.models import StudentProfile
 from users.services import update_student_status
 from users.tests.factories import (
     CuratorFactory, StudentFactory, StudentProfileFactory, TeacherFactory, UserFactory
@@ -325,8 +324,14 @@ def test_view_course_detail_enroll_by_invitation(client):
     assert course_invitation.enrolled_students.count() == 0
 
     url = course_invitation.get_absolute_url()
-    response = client.post(url, follow=True)
-    assert response.redirect_chain[-1][0] == course.get_absolute_url()
+    response = client.get(url)
+    assert response.status_code == 200
+    html = response.content.decode('utf-8')
+    assert 'Как вы хотите записаться на курс?' in html
+    response = client.post(url, data={
+        "type": EnrollmentTypes.REGULAR
+    })
+    assert response.status_code == 302
     assert Enrollment.objects.filter(invitation=course_invitation.invitation).exists()
     assert course_invitation.enrolled_students.count() == 1
     assert current_profile == course_invitation.enrolled_students.all().first()

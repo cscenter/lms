@@ -43,7 +43,7 @@ from learning.managers import (
 )
 from learning.settings import (
     ENROLLMENT_DURATION, AssignmentScoreUpdateSource, GradeTypes, GradingSystems, EnrollmentGradeUpdateSource,
-    InvitationCategories
+    InvitationCategories, EnrollmentTypes, InvitationEnrollmentTypes
 )
 from learning.utils import humanize_duration, grade_to_base_system
 from users.constants import ThumbnailSizes
@@ -358,6 +358,11 @@ class Enrollment(TimezoneAwareMixin, TimeStampedModel):
         Course,
         verbose_name=_("Course offering"),
         on_delete=models.CASCADE)
+    type = models.CharField(
+        verbose_name=_("Enrollment|type"),
+        max_length=100,
+        choices=EnrollmentTypes.choices,
+        default=EnrollmentTypes.REGULAR)
     grade = models.CharField(
         verbose_name=_("Enrollment|grade"),
         max_length=100,
@@ -480,6 +485,11 @@ class CourseInvitation(models.Model):
         verbose_name=_("CourseOffering|capacity"),
         default=0,
         help_text=_("0 - unlimited"))
+    enrollment_type = models.CharField(
+        verbose_name=_("Enrollment|type"),
+        max_length=100,
+        choices=InvitationEnrollmentTypes.choices,
+        default=InvitationEnrollmentTypes.ANY)
     enrolled_students = models.ManyToManyField(
         StudentProfile,
         verbose_name=_("Enrolled students"),

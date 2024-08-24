@@ -38,7 +38,7 @@ from learning.services.personal_assignment_service import (
     get_personal_assignments_by_stepik_id
 )
 from learning.settings import (
-    AssignmentScoreUpdateSource, Branches, GradeTypes, StudentStatuses, EnrollmentGradeUpdateSource
+    AssignmentScoreUpdateSource, Branches, GradeTypes, StudentStatuses, EnrollmentGradeUpdateSource, EnrollmentTypes
 )
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory,
@@ -219,9 +219,14 @@ def test_save_gradebook(client, assert_redirect):
 @pytest.mark.django_db
 def test_gradebook_data(settings):
     co = CourseFactory()
-    e1, e2, e3, e4, e5 = EnrollmentFactory.create_batch(5, course=co)
+    e1, e2, e3, e4, e5, e6 = EnrollmentFactory.create_batch(6, course=co)
     a1, a2, a3 = AssignmentFactory.create_batch(3, course=co,
                                                 passing_score=1, maximum_score=10)
+    data = gradebook_data(co)
+    assert len(data.assignments) == 3
+    assert len(data.students) == 6
+    e6.type = EnrollmentTypes.LECTIONS_ONLY
+    e6.save()
     data = gradebook_data(co)
     assert len(data.assignments) == 3
     assert len(data.students) == 5

@@ -31,10 +31,7 @@
                                         {% set perm_obj = InvitationEnrollPermissionObject(course_invitation, request.user.get_student_profile()) %}
                                         {% set can_enroll_by_invitation = request.user.has_perm(EnrollInCourseByInvitation.name, perm_obj) %}
                                         {% if can_enroll_by_invitation %}
-                                            <form method="post" action="{{ course_invitation.get_absolute_url() }}">
-                                              {% csrf_token %}
-                                              <button class="btn btn-primary" type="submit">Записаться</button>
-                                            </form>
+                                            <a href="{{ course_invitation.get_absolute_url() }}" class="btn btn-primary">Записаться</a>
                                         {% endif %}
                                     {% endif %}
                                 </td>

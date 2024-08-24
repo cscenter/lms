@@ -16,7 +16,7 @@ from learning.services import AssignmentService
 from learning.services.notification_service import (
     remove_course_notifications_for_student
 )
-from learning.settings import GradeTypes, EnrollmentGradeUpdateSource
+from learning.settings import GradeTypes, EnrollmentGradeUpdateSource, EnrollmentTypes
 from users.models import StudentProfile, User
 
 
@@ -42,7 +42,7 @@ class EnrollmentService:
 
     @classmethod
     def enroll(cls, student_profile: StudentProfile, course: Course,
-               reason_entry: str = '',
+               reason_entry: str = '', type: EnrollmentTypes = EnrollmentTypes.REGULAR,
                student_group: Optional[StudentGroup] = None, **attrs: Any) -> Enrollment:
         if course.group_mode != CourseGroupModes.NO_GROUPS and not student_group:
             raise ValidationError("Provide student group value")
@@ -81,7 +81,8 @@ class EnrollmentService:
                 "is_deleted": False,
                 "student_profile": student_profile,
                 "student_group": student_group,
-                "reason_entry": reason_entry
+                "reason_entry": reason_entry,
+                "type": type
             })
             updated = (Enrollment.objects
                        .filter(*filters)
