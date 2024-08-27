@@ -77,7 +77,7 @@
           {% if "contacts" in course_tabs and course_tabs.contacts.tab_panel %}
             {% with tab=course_tabs.contacts %}
               <div class="tab-pane {% if tab.is_default %}active{% endif %}" role="tabpanel" id="course-{{ tab.type }}">
-                {% if has_organizers %}
+                {% if teachers.organizer %}
                   <h3>Организаторы курса</h3><br>
                 {% endif %}
                 {% for course_teacher in tab.tab_panel.context['items'] %}
@@ -119,20 +119,26 @@
                         class="text-muted">{{ course_class.starts_at_local(tz)|time("H:i") }}–{{ course_class.ends_at_local(tz)|time("H:i") }}</span>
                       </td>
                       <td>
-                        <a href="{{ course_class.get_absolute_url() }}">
-                          {{ course_class.name }}</a><span class="text-muted">, {% if course_class.type == 'lecture' %}{% trans %}Lecture{% endtrans %}{% else %}{% trans %}Seminar{% endtrans %}</span>{% endif %}
+                        <a href="{{ course_class.get_absolute_url() }}"> {{ course_class.name }}, </a>
+                        <span class="text-muted">{{ course_class.get_type_display() }} </span>
                       </td>
                       <td>
-                        <a href="{{ course_class.venue.location.get_absolute_url() }}">{{ course_class.venue.full_name }}</a>
+                          {{ course_class.venue.full_name }}{% if course_class.translation_link %},
+                          <br><a href="{{ course_class.translation_link }}">{% trans %}translation{% endtrans %}</a>
+                        {% endif %}
                       </td>
                       <td>
                         {% if course_class.materials_is_public or has_access_to_private_materials %}
                           {% with available_materials = course_class.get_available_materials() %}
                             {% if available_materials %}
                               {% for m in available_materials %}
-                                <a href="{{ course_class.get_absolute_url() }}#{{ m.type }}">{{ m.name }}</a>{% if not loop.last %},
-                                {{ loop.cycle(' ', '&nbsp;') }}{% if loop.index % 2 == 0 %} {% else %}&nbsp;{% endif %}
-                              {% endif %}{% endfor %}
+                                {% if m.type != "recording_link" %}
+                                  <a href="{{ course_class.get_absolute_url() }}#{{ m.type }}">
+                                {% else %}
+                                  <a target="_blank" href="{{ course_class.recording_link }}">
+                                {% endif %}
+                                  {{ m.name }}</a>{% if not loop.last %},{% endif %}
+                              {% endfor %}
                             {% else %}
                               {% trans %}No{% endtrans %}
                             {% endif %}
@@ -266,9 +272,25 @@
             {% endif %}
           </div>
         {% endif %}
+        {% if teachers.lecturer or teachers.seminar %}
         <div class="o-users-vlist">
+          <h4 class="text-center">{% trans %}Teachers{% endtrans %}</h4>
           <ul class="list-unstyled">
-            {% for course_teacher in teachers.main %}
+            {% for course_teacher in teachers.lecturer %}
+              {% with teacher=course_teacher.teacher %}
+                <li>
+                  <a href="{{ teacher.teacher_profile_url() }}">
+                    {% if teacher.photo %}
+                      {% with im = teacher.get_thumbnail(teacher.ThumbnailSize.BASE, use_stub=True, stub_official=True) -%}
+                        <img alt="{{ teacher.get_full_name() }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" /><br>
+                      {% endwith -%}
+                    {% endif %}
+                    {{ teacher.get_full_name() }}
+                  </a>
+                </li>
+              {% endwith %}
+            {% endfor %}
+            {% for course_teacher in teachers.seminar %}
               {% with teacher=course_teacher.teacher %}
                 <li>
                   <a href="{{ teacher.teacher_profile_url() }}">
@@ -284,14 +306,43 @@
             {% endfor %}
           </ul>
         </div>
-        {% if teachers.others %}
+        {% endif %}
+        {% if teachers.reviewer %}
           <div class="o-users-vlist">
             <h4 class="text-center">{% if course.is_completed %}Помогали{% else %}Помогают{% endif %} с заданиями</h4>
             <ul class="list-unstyled">
-              {% for course_teacher in teachers.others %}
+              {% for course_teacher in teachers.reviewer %}
                 {% with teacher=course_teacher.teacher %}
                   <li>
-                    <a href="{{ teacher.teacher_profile_url() }}">{{ teacher.get_full_name() }}</a>
+                    <a href="{{ teacher.teacher_profile_url() }}">
+                      {% if teacher.photo %}
+                        {% with im = teacher.get_thumbnail(teacher.ThumbnailSize.BASE, use_stub=True, stub_official=True) -%}
+                          <img alt="{{ teacher.get_full_name() }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" /><br>
+                        {% endwith -%}
+                      {% endif %}
+                      {{ teacher.get_full_name() }}
+                    </a>
+                  </li>
+                {% endwith %}
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+        {% if teachers.organizer %}
+          <div class="o-users-vlist">
+            <h4 class="text-center">Кураторы курса</h4>
+            <ul class="list-unstyled">
+              {% for course_teacher in teachers.organizer %}
+                {% with teacher=course_teacher.teacher %}
+                  <li>
+                    <a href="{{ teacher.teacher_profile_url() }}">
+                      {% if teacher.photo %}
+                        {% with im = teacher.get_thumbnail(teacher.ThumbnailSize.BASE, use_stub=True, stub_official=True) -%}
+                          <img alt="{{ teacher.get_full_name() }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" /><br>
+                        {% endwith -%}
+                      {% endif %}
+                      {{ teacher.get_full_name() }}
+                    </a>
                   </li>
                 {% endwith %}
               {% endfor %}

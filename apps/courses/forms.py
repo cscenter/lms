@@ -166,26 +166,18 @@ class CourseClassForm(forms.ModelForm):
         choices=ClassTypes.choices)
     name = forms.CharField(
         label=_("CourseClass|Name"),
+        help_text=_('Do not use words "Lecture", "Lesson", "Seminar". Fill in only name of the theme'),
         widget=forms.TextInput(attrs={'autocomplete': 'off'}))
     description = forms.CharField(
         label=_("Description"),
         required=False,
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
         widget=UbereditorWidget(attrs={'autofocus': 'autofocus'}))
-    slides = forms.FileField(
-        label=_("Slides"),
-        required=False,
-        widget=forms.ClearableFileInput)
     attachments = forms.FileField(
-        label=_("Attached files"),
+        label=_("Materials (presentations, instructions, reminders)"),
         required=False,
         help_text=_("You can select multiple files"),
         widget=forms.ClearableFileInput(attrs={'multiple': 'multiple'}))
-    other_materials = forms.CharField(
-        label=_("CourseClass|Other materials"),
-        required=False,
-        help_text=LATEX_MARKDOWN_HTML_ENABLED,
-        widget=UbereditorWidget)
     date = forms.DateField(
         label=_("Date"),
         help_text=_("Format: dd.mm.yyyy"),
@@ -210,9 +202,8 @@ class CourseClassForm(forms.ModelForm):
 
     class Meta:
         model = CourseClass
-        fields = ['venue', 'type', 'date', 'starts_at', 'ends_at', 'time_zone', 'name',
-                  'description', 'slides', 'attachments', 'video_url',
-                  'other_materials', 'materials_visibility', 'restricted_to']
+        fields = ['venue', 'type', 'translation_link', 'date', 'starts_at', 'ends_at', 'time_zone', 'name',
+                  'description', 'attachments', 'recording_link', 'materials_visibility', 'restricted_to']
 
     def __init__(self, locale='en', **kwargs):
         course = kwargs.pop('course', None)

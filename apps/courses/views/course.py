@@ -61,15 +61,6 @@ class CourseDetailView(PermissionRequiredMixin, CourseURLParamsMixin, DetailView
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         # Teachers
         by_role = group_teachers(course.course_teachers.all())
-        teachers = {'main': [], 'spectators': [], 'others': []}
-        has_organizers = False
-        for role, ts in by_role.items():
-            if role in (TeacherRoles.LECTURER, TeacherRoles.SEMINAR, TeacherRoles.ORGANIZER):
-                if role == TeacherRoles.ORGANIZER:
-                    has_organizers = True
-                teachers['main'].extend(ts)
-            elif role != TeacherRoles.SPECTATOR:
-                teachers['others'].extend(ts)
         user = self.request.user
         role = course_access_role(course=course, user=user)
         can_add_assignment = user.has_perm(CreateAssignment.name, course)
@@ -99,8 +90,7 @@ class CourseDetailView(PermissionRequiredMixin, CourseURLParamsMixin, DetailView
             'get_student_groups_url': get_student_groups_url,
             'course': course,
             'course_tabs': tab_list,
-            'has_organizers': has_organizers,
-            'teachers': teachers,
+            'teachers': by_role,
             'has_access_to_private_materials': can_view_private_materials(role),
             'course_invitation': course_invitation,
             **self._get_additional_context(course)

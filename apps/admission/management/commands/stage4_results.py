@@ -34,8 +34,10 @@ class Command(
     Generates emails with final decision based on applicant status.
 
     Example:
-        ./manage.py stage4_results --branch=nsk --template-pattern="csc-admission-{year}-{branch_code}-results-{
-        status}" -f="status__in=['accept']"
+        ./manage.py stage4_results --branch=mnk
+        --template-pattern=shad-admission-2024-results-accept
+        -f="status='accept'" 
+        --invite accept
     """
 
     def add_arguments(self, parser):
@@ -80,7 +82,7 @@ class Command(
             campaign_id=campaign.pk
         )
         self.stdout.write(f"Applicants: {len(applicants)}")
-        statuses = applicants.values_list("status", flat=True).distinct()
+        statuses = applicants.exclude(status__isnull=True).values_list("status", flat=True).distinct()
         for applicant in applicants:
             print(applicant.email)
         self.stdout.write(f"Participants with final statuses were found:")

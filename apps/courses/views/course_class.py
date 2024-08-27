@@ -122,6 +122,7 @@ class CourseClassCreateView(PermissionRequiredMixin, CourseURLParamsMixin,
         course = kwargs["course"]
         initial = {
             "materials_visibility": course.materials_visibility,
+            "translation_link": course.translation_link,
             "time_zone": course.main_branch.get_timezone() or None
         }
         # TODO: Add tests for initial data after discussion
