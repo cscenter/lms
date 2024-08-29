@@ -794,12 +794,7 @@ class ProgressReportFull(ProgressReport):
                 return "[CS клуб] " if meta_course_is_club[meta_course_id] else ""
 
             def durability_prefix(meta_course_id):
-                if meta_course_duration[meta_course_id] == CourseDurations.FIRST_HALF:
-                    return "[В первой половине семестра]"
-                elif meta_course_duration[meta_course_id] == CourseDurations.SECOND_HALF:
-                    return "[Во второй половине семестра]"
-                else:
-                    return ""
+                return "[Полусеместровый] " if meta_course_duration[meta_course_id] != CourseDurations.FULL else ""
 
             course_headers = (
                 f"{durability_prefix(course.id)}{cs_club_prefix(course.id)}{course.name}"

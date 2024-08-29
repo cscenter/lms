@@ -29,6 +29,7 @@
                     <div class="row">
                         <div class="col-xs-2">{{ forms.field(form['type']) }}</div>
                         <div class="col-xs-3">{{ forms.field(form['venue']) }}</div>
+                        <div class="col-xs-4">{{ forms.field(form['translation_link']) }}</div>
                     </div>
                     <div class="form-group">
                         <div class="form-inline">
@@ -41,10 +42,8 @@
                 </fieldset>
                 {{ forms.field(form['name']) }}
                 {{ forms.field(form['description']) }}
+                {{ forms.field(form['recording_link']) }}
                 <fieldset>
-                    <legend>{% trans %}Materials{% endtrans %}</legend>
-                    {{ forms.field(form['slides']) }}
-                    {{ forms.field(form['video_url']) }}
                     {{ forms.field(form['attachments']) }}
                     {% if form.instance -%}
                         {% with course_class_attachments = form.instance.courseclassattachment_set.all() -%}
@@ -57,7 +56,6 @@
                             {%- endif %}
                         {%- endwith %}
                     {%- endif %}
-                    {{ forms.field(form['other_materials']) }}
                 </fieldset>
                 <fieldset>
                     <legend>{% trans %}Visibility Settings{% endtrans %}</legend>

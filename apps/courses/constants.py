@@ -35,6 +35,8 @@ class SemesterTypes(DjangoChoices):
 class ClassTypes(DjangoChoices):
     LECTURE = C('lecture', _("Lecture"))
     SEMINAR = C('seminar', _("Seminar"))
+    LECTURE_AND_SEMINAR = C('lecture_and_seminar', _("Lecture and seminar"))
+    INVITED_LECTURE = C('invited_lecture', _("Invited lecture"))
 
 
 class TeacherRoles(DjangoChoices):

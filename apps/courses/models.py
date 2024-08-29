@@ -266,6 +266,10 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         verbose_name=_("CourseOffering|capacity"),
         default=0,
         help_text=_("0 - unlimited"))
+    hours = models.PositiveSmallIntegerField(
+        verbose_name=_("CourseOffering|hours"),
+        blank=True,
+        null=True)
     starts_on = models.DateField(
         _("Starts on"),
         blank=True,
@@ -368,6 +372,10 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("Default visibility for class materials."),
         choices=MaterialVisibilityTypes.choices,
         default=MaterialVisibilityTypes.COURSE_PARTICIPANTS)
+    translation_link = models.URLField(
+        verbose_name=_("Translation link"),
+        blank=True
+    )
     # TODO: recalculate on deleting course class
     public_videos_count = models.PositiveIntegerField(default=0, editable=False)
     public_slides_count = models.PositiveIntegerField(
@@ -893,6 +901,14 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
         blank=True,
         help_text=_("Both YouTube and Yandex Video are supported"),
         max_length=512)
+    translation_link = models.URLField(
+        verbose_name=_("Translation link"),
+        blank=True
+    )
+    recording_link = models.URLField(
+        verbose_name=_("Recording link"),
+        blank=True
+    )
     other_materials = models.TextField(
         _("CourseClass|Other materials"),
         blank=True,
@@ -1044,6 +1060,9 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
             materials.append(m)
         if self.other_materials:
             m = ClassMaterial(type='other_materials', name=_("other"))
+            materials.append(m)
+        if self.recording_link:
+            m = ClassMaterial(type='recording_link', name=_("recording"))
             materials.append(m)
         return materials
 

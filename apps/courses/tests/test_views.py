@@ -124,15 +124,13 @@ def test_update_derivable_fields(curator, client, mocker):
     assert not co.public_slides_count
     assert not co.public_attachments_count
     slides_file = SimpleUploadedFile("slides.pdf", b"slides_content")
-    client.login(curator)
-    form = model_to_dict(cc1)
-    form['slides'] = slides_file
-    client.post(cc1.get_update_url(), form)
+    CourseClassFactory(course=co, slides=slides_file,
+                       materials_visibility=MaterialVisibilityTypes.PUBLIC)
     co.refresh_from_db()
     assert not co.public_videos_count
     assert co.public_slides_count == 1
     assert not co.public_attachments_count
-    cc2 = CourseClassFactory(course=co, video_url="youtuuube",
+    CourseClassFactory(course=co, video_url="youtuuube",
                              materials_visibility=MaterialVisibilityTypes.PUBLIC)
     co.refresh_from_db()
     assert co.public_videos_count == 1
@@ -215,26 +213,38 @@ def test_view_course_detail_teacher_contacts_visibility(client):
     lecturer_contacts = "Lecturer contacts"
     organizer_contacts = "Organizer contacts"
     spectator_contacts = "Spectator contacts"
+    seminar_contacts = "Seminar contacts"
+    reviewer_contacts = "Reviewer contacts"
     lecturer = TeacherFactory(private_contacts=lecturer_contacts)
     organizer = TeacherFactory(private_contacts=organizer_contacts)
     spectator = TeacherFactory(private_contacts=spectator_contacts)
+    seminar = TeacherFactory(private_contacts=spectator_contacts)
+    reviewer = TeacherFactory(private_contacts=spectator_contacts)
     course = CourseFactory()
     ct_lec = CourseTeacherFactory(course=course, teacher=lecturer,
                                   roles=CourseTeacher.roles.lecturer)
     ct_org = CourseTeacherFactory(course=course, teacher=organizer,
                                   roles=CourseTeacher.roles.organizer)
-    ct_spe = CourseTeacherFactory(course=course, teacher=spectator,
+    ct_spec = CourseTeacherFactory(course=course, teacher=spectator,
                                   roles=CourseTeacher.roles.spectator)
+    ct_sem_org = CourseTeacherFactory(course=course, teacher=seminar,
+                                  roles=CourseTeacher.roles.seminar | CourseTeacher.roles.organizer)
+    сt_rev = CourseTeacherFactory(course=course, teacher=reviewer,
+                                  roles=CourseTeacher.roles.reviewer)
 
     url = course.get_absolute_url()
     client.login(lecturer)
     response = client.get(url)
 
     context_teachers = response.context_data['teachers']
-    assert set(context_teachers['main']) == {ct_lec, ct_org}
-    assert not context_teachers['others']
+    assert context_teachers['lecturer'] == [ct_lec]
+    assert context_teachers['organizer'] == [ct_org]
+    assert context_teachers['reviewer'] == [сt_rev]
+    assert context_teachers['seminar'] == [ct_sem_org]
     assert smart_bytes(lecturer.get_full_name()) in response.content
     assert smart_bytes(organizer.get_full_name()) in response.content
+    assert smart_bytes(seminar.get_full_name()) in response.content
+    assert smart_bytes(reviewer.get_full_name()) in response.content
     assert smart_bytes(spectator.get_full_name()) not in response.content
 
 
