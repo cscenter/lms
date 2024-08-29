@@ -401,6 +401,7 @@ def test_course_class_form_available(client, curator, settings):
         "date": next_day.strftime(date_format),
         "starts_at": "17:20",
         "ends_at": "18:50",
+        "recording_link": "https://test-site.com",
         "time_zone": course.main_branch.get_timezone(),
         "materials_visibility": MaterialVisibilityTypes.PUBLIC
     }
