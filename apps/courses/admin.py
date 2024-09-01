@@ -153,6 +153,18 @@ class CourseClassAdmin(admin.ModelAdmin):
                                   .select_related("meta_course", "semester"))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        if db_field.name == "teachers":
+            qs = CourseTeacher.objects.select_related("teacher", "course")
+            try:
+                courseclass_id = request.resolver_match.kwargs['object_id']
+                cl = CourseClass.objects.get(pk=courseclass_id)
+                qs = qs.filter(course_id=cl.course_id)
+            except KeyError:
+                pass
+            kwargs["queryset"] = qs.order_by("course_id").distinct()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
 
 class CourseNewsAdmin(admin.ModelAdmin):
     date_hierarchy = 'created'

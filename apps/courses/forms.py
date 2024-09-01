@@ -203,7 +203,8 @@ class CourseClassForm(forms.ModelForm):
     class Meta:
         model = CourseClass
         fields = ['venue', 'type', 'translation_link', 'date', 'starts_at', 'ends_at', 'time_zone', 'name',
-                  'description', 'attachments', 'recording_link', 'materials_visibility', 'restricted_to']
+                  'description', 'attachments', 'recording_link', 'materials_visibility', 'restricted_to',
+                  'teachers', 'is_conducted_by_invited']
 
     def __init__(self, locale='en', **kwargs):
         course = kwargs.pop('course', None)
@@ -217,6 +218,9 @@ class CourseClassForm(forms.ModelForm):
         self.fields['time_zone'].choices = CourseService.get_time_zones(course, locale=locale)
         field_restrict_to = self.fields['restricted_to']
         field_restrict_to.choices = StudentGroupService.get_choices(course)
+        self.fields['teachers'].widget = forms.widgets.CheckboxSelectMultiple()
+        self.fields['teachers'].queryset = get_course_teachers(course=course).select_related('teacher')
+        self.fields['teachers'].label_from_instance = lambda obj: obj.teacher
         self.instance.course = course
 
     def clean_date(self):

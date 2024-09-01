@@ -39,7 +39,9 @@
         </tr>
         <tr>
           <td>{% trans %}Where{% endtrans %}:</td>
-          <td><a href="{{ course_class.venue.location.get_absolute_url() }}">{{ course_class.venue.full_name }}</a></td>
+          <td>{{ course_class.venue.full_name }}{% if course_class.translation_link %}, <a href="{{ course_class.translation_link }}">{%
+            trans %}translation{% endtrans %}</a>{% endif %}
+          </td>
         </tr>
         {% if course_class.slides and can_view_course_class_materials %}
         <tr>

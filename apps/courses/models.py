@@ -923,6 +923,14 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
         verbose_name=_("Groups"),
         related_name='course_classes',
         through='learning.CourseClassGroup')
+    teachers = models.ManyToManyField(
+        CourseTeacher,
+        verbose_name=_("Course class teachers"),
+        related_name='course_classes',
+        blank=True)
+    is_conducted_by_invited = models.BooleanField(
+        verbose_name=_("Is conducted by invited"),
+        default=False)
 
     class Meta:
         ordering = ["-date", "course", "-starts_at"]
