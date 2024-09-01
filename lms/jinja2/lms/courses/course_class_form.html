@@ -41,6 +41,13 @@
                     </div>
                 </fieldset>
                 {{ forms.field(form['name']) }}
+                <label for="{{ form['teachers'].id_for_label }}" class="control-label"> {{ form['teachers'].label }} </label>
+                  {% for checkbox in form['teachers'] %}
+                    <div class="checkbox-item" style="font-weight: normal;">
+                        {{ checkbox }}
+                    </div>
+                  {% endfor %}
+                {{ forms.field(form['is_conducted_by_invited'], is_boolean=True) }}
                 {{ forms.field(form['description']) }}
                 {{ forms.field(form['recording_link']) }}
                 <fieldset>
