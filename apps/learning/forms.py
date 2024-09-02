@@ -293,8 +293,7 @@ class CourseEnrollmentForm(forms.Form):
     )
     reason = forms.CharField(
         label=_("Почему вы выбрали этот курс?"),
-        widget=forms.Textarea(),
-        required=False)
+        widget=forms.Textarea())
 
     def __init__(self, **kwargs):
         ask_enrollment_reason = kwargs.pop('ask_enrollment_reason', None)

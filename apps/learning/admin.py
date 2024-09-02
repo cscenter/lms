@@ -1,7 +1,7 @@
 from dal_select2.widgets import Select2Multiple
+from django.contrib.admin import SimpleListFilter
 from modeltranslation.admin import TranslationAdmin
 
-from django.conf import settings
 from django.contrib import admin
 from django.db import models as db_models, models
 from django.utils.safestring import mark_safe
@@ -24,6 +24,19 @@ from .services.enrollment_service import recreate_assignments_for_student, updat
 from .services.personal_assignment_service import update_personal_assignment_score
 from .settings import AssignmentScoreUpdateSource, EnrollmentGradeUpdateSource
 
+class CourseFilter(SimpleListFilter):
+    title = _('Course')
+    parameter_name = 'course'
+    template = 'admin/dropdown_listfilter.html'
+
+    def lookups(self, request, model_admin):
+        courses = Course.objects.all().order_by('-pk').select_related('meta_course', 'semester')
+        return [(course.pk, str(course)) for course in courses]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(course__pk=self.value())
+        return queryset
 
 class CourseTeacherAdmin(BaseModelAdmin):
     list_display = ('teacher', 'course')
@@ -123,7 +136,8 @@ class EnrollmentAdmin(BaseModelAdmin):
     list_filter = [
         'course__main_branch__site',
         'course__main_branch',
-        ('course__semester', AdminRelatedDropdownFilter)
+        ('course__semester', AdminRelatedDropdownFilter),
+        CourseFilter,
     ]
     search_fields = ['course__meta_course__name', 'student__last_name']
     exclude = ['grade_changed']
