@@ -218,8 +218,13 @@ def test_enrollment_leave_reason(client):
     client.post(co.get_enroll_url(), data={
         "type": EnrollmentTypes.REGULAR
     })
+    assert Enrollment.active.count() == 0
+    client.post(co.get_enroll_url(), data={
+        "type": EnrollmentTypes.REGULAR,
+        "reason": "reason"
+    })
     assert Enrollment.active.count() == 1
-    assert Enrollment.objects.first().reason_entry == ''
+    assert "reason" in Enrollment.objects.first().reason_entry
     client.post(co.get_unenroll_url(), data={
         "type": EnrollmentTypes.REGULAR,
         "reason": "foo"
@@ -230,7 +235,8 @@ def test_enrollment_leave_reason(client):
     assert 'foo' in e.reason_leave
     # Enroll for the second time and leave with another reason
     client.post(co.get_enroll_url(), data={
-        "type": EnrollmentTypes.REGULAR
+        "type": EnrollmentTypes.REGULAR,
+        "reason": "reason"
     })
     assert Enrollment.active.count() == 1
     client.post(co.get_unenroll_url(), data={
