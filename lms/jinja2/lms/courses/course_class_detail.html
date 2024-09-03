@@ -64,6 +64,11 @@
           <h4 class="bigger-margin">{% trans %}Video{% endtrans %}</h4>
           {{ macros.b3_video_iframe(course_class.video_url) }}
         {% endif %}
+        {% if course_class.recording_link %}
+          <a target="_blank" href="{{ course_class.recording_link }}">
+            <h4 class="bigger-margin">{% trans %}Recording link{% endtrans %}</h4>
+          </a>
+        {% endif %}
         {% if attachments %}
             <h4 class="bigger-margin" id="attachments">{% trans %}Attached files{% endtrans %}</h4>
             <ul class="list">

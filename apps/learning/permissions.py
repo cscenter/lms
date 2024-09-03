@@ -40,8 +40,10 @@ def enroll_in_course(user, permission_object: EnrollPermissionObject):
         logger.debug("Enrollment is closed")
         return False
     if course.is_capacity_limited and not course.places_left:
+        logger.debug("No places left")
         return False
     if not student_profile:
+        logger.debug("No student profile")
         return
     if not student_profile.is_active:
         logger.debug("Permissions for student with inactive profile "
@@ -50,6 +52,7 @@ def enroll_in_course(user, permission_object: EnrollPermissionObject):
     if student_profile.type == StudentTypes.INVITED:
         invitation = student_profile.invitation
         if invitation is None:
+            logger.debug("No invitation for invited student")
             return False
         course_invitation = invitation.courseinvitation_set.filter(course=permission_object.course)
         return course_invitation.exists() and invitation.is_active

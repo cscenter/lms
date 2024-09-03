@@ -38,6 +38,7 @@ class EnrollmentTypes(DjangoChoices):
     REGULAR = C("Regular", _("EnrollmentTypes|Regular"))
     LECTIONS_ONLY = C("lections", _("EnrollmentTypes|Lections"))
 
+# TODO rename as it is used not only in invitation (ex. Course model)
 class InvitationEnrollmentTypes(DjangoChoices):
     REGULAR = C("Regular", _("InvitationEnrollmentTypes|Regular"))
     LECTIONS_ONLY = C("lections", _("InvitationEnrollmentTypes|Lections"))
@@ -126,10 +127,10 @@ class GradeTypes(DjangoChoices):
                            FOUR.value, FIVE.value, SIX.value, SEVEN.value, EIGHT.value, NINE.value, TEN.value}
     unsatisfactory_grades = {NOT_GRADED.value, UNSATISFACTORY.value, WITHOUT_GRADE.value,
                              ONE.value, TWO.value, THREE.value}
-    default_grades = {
+    default_grades = (
         (NOT_GRADED.value, NOT_GRADED.label),
         (WITHOUT_GRADE.value, WITHOUT_GRADE.label),
-    }
+    )
 
     @classmethod
     def is_suitable_for_grading_system(cls, choice, grading_system):

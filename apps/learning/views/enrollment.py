@@ -23,7 +23,7 @@ from learning.services.enrollment_service import AlreadyEnrolled, CourseCapacity
 from learning.services.student_group_service import (
     StudentGroupError, StudentGroupService
 )
-from learning.settings import EnrollmentTypes
+from learning.settings import EnrollmentTypes, InvitationEnrollmentTypes
 
 
 class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
@@ -48,18 +48,23 @@ class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['ask_enrollment_reason'] = self.course.ask_enrollment_reason
+        if self.course.enrollment_type == InvitationEnrollmentTypes.ANY:
+            if self.course.is_learners_capacity_limited and not self.course.learners_places_left:
+                kwargs['enrollment_type'] = EnrollmentTypes.LECTIONS_ONLY
+            elif self.course.is_listeners_capacity_limited and not self.course.listeners_places_left:
+                kwargs['enrollment_type'] = EnrollmentTypes.REGULAR
+        else:
+            kwargs['enrollment_type'] = self.course.enrollment_type
         return kwargs
 
-    def form_valid(self, form):
-        reason_entry = form.cleaned_data.get("reason", "").strip()
-        type = form.cleaned_data["type"].strip()
-        user = self.request.user
-        student_profile = user.get_student_profile(self.request.site)
+    def enroll(self, request, reason_entry, type):
+        user = request.user
+        student_profile = user.get_student_profile(request.site)
         try:
             student_group = StudentGroupService.resolve(self.course,
                                                         student_profile=student_profile)
         except StudentGroupError as e:
-            messages.error(self.request, str(e), extra_tags='timeout')
+            messages.error(request, str(e), extra_tags='timeout')
             raise Redirect(to=self.course.get_absolute_url())
         try:
             EnrollmentService.enroll(student_profile, self.course,
@@ -67,19 +72,30 @@ class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
                                      type=type,
                                      student_group=student_group)
             msg = _("You are successfully enrolled in the course")
-            messages.success(self.request, msg, extra_tags='timeout')
+            messages.success(request, msg, extra_tags='timeout')
         except AlreadyEnrolled:
             msg = _("You are already enrolled in the course")
-            messages.warning(self.request, msg, extra_tags='timeout')
+            messages.warning(request, msg, extra_tags='timeout')
         except CourseCapacityFull:
             msg = _("No places available, sorry")
-            messages.error(self.request, msg, extra_tags='timeout')
+            messages.error(request, msg, extra_tags='timeout')
             raise Redirect(to=self.course.get_absolute_url())
-        if self.request.POST.get('back') == 'study:course_list':
+        if request.POST.get('back') == 'study:course_list':
             return_to = reverse('study:course_list')
         else:
             return_to = self.course.get_absolute_url()
         return HttpResponseRedirect(return_to)
+
+    def form_valid(self, form):
+        reason_entry = form.cleaned_data.get("reason", "").strip()
+        type = form.cleaned_data["type"].strip()
+        return self.enroll(self.request, reason_entry, type)
+
+    def get(self, request, *args, **kwargs):
+        if self.course.enrollment_type != InvitationEnrollmentTypes.ANY and not self.course.ask_enrollment_reason:
+            return self.enroll(request, "", self.course.enrollment_type)
+        else:
+            return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -186,7 +202,7 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
         return self.enroll(self.request, type)
 
     def get(self, request, *args, **kwargs):
-        if self.course_invitation.enrollment_type in EnrollmentTypes.values:
+        if self.course_invitation.enrollment_type != InvitationEnrollmentTypes.ANY:
             return self.enroll(request, self.course_invitation.enrollment_type)
         else:
             return super().get(request, *args, **kwargs)

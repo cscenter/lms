@@ -10,7 +10,8 @@ from learning.models import (
     CourseNewsNotification, Enrollment, StudentAssignment, StudentGroup
 )
 from learning.services import StudentGroupService
-from learning.services.enrollment_service import update_course_learners_count
+from learning.services.enrollment_service import update_course_learners_count, update_course_listeners_count
+from learning.settings import EnrollmentTypes
 # FIXME: post_delete нужен? Что лучше - удалять StudentGroup + SET_NULL у Enrollment или делать soft-delete?
 # FIXME: группу лучше удалить, т.к. она будет предлагаться для новых заданий, хотя типа уже удалена.
 from learning.tasks import convert_assignment_submission_ipynb_file_to_html
@@ -44,12 +45,16 @@ def delete_student_group_if_course_branch_deleted(sender, instance: CourseBranch
 
 
 @receiver(post_save, sender=Enrollment)
-def compute_course_learners_count(sender, instance: Enrollment, created,
+def compute_course_student_counts(sender, instance: Enrollment, created,
                                   *args, **kwargs):
-    if created and instance.is_deleted:
+    if created and (instance.is_deleted or instance.invitation is not None):
         return
-    update_course_learners_count(instance.course_id)
-
+    if instance.type == EnrollmentTypes.REGULAR:
+        update_course_learners_count(instance.course_id)
+    elif instance.type == EnrollmentTypes.LECTIONS_ONLY:
+        update_course_listeners_count(instance.course_id)
+    else:
+        assert not "possible"
 
 @receiver(post_save, sender=CourseNews)
 def create_notifications_about_course_news(sender, instance: CourseNews,
