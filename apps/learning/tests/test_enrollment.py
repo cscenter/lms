@@ -59,7 +59,8 @@ def test_enrollment_capacity(settings):
     current_semester = SemesterFactory.create_current()
     course = CourseFactory.create(main_branch=student_profile.branch,
                                   semester=current_semester,
-                                  capacity=1)
+                                  learners_capacity=1,
+                                  enrollment_type=EnrollmentTypes.REGULAR)
     student_group = course.student_groups.first()
     EnrollmentService.enroll(StudentProfileFactory(), course, student_group=student_group)
     course.refresh_from_db()
@@ -82,13 +83,30 @@ def test_enrollment_capacity_view(client):
         enrollment_period__ends_on=future.date()
     )
     course = CourseFactory(main_branch=student_profile.branch,
-                           semester=current_semester,)
+                           semester=current_semester,
+                           enrollment_type=InvitationEnrollmentTypes.REGULAR)
     response = client.get(course.get_absolute_url())
-    assert smart_bytes(_("Places available")) not in response.content
-    course.capacity = 1
+    assert smart_bytes(_("Learner places available")) not in response.content
+    assert smart_bytes(_("Listener places available")) not in response.content
+    course.listeners_capacity = 1
     course.save()
     response = client.get(course.get_absolute_url())
-    assert smart_bytes(_("Places available")) in response.content
+    print(response.content)
+    assert smart_bytes(_("Learner places available")) not in response.content
+    assert (smart_bytes(_("Listener places available")) + b": 1") in response.content
+    course.learners_capacity = 1
+    course.listeners_capacity = 0
+    course.save()
+    response = client.get(course.get_absolute_url())
+    assert (smart_bytes(_("Learner places available")) + b": 1") in response.content
+    assert smart_bytes(_("Listener places available")) not in response.content
+    course.listeners_capacity = 1
+    course.save()
+    response = client.get(course.get_absolute_url())
+    assert (smart_bytes(_("Learner places available")) + b": 1") in response.content
+    assert (smart_bytes(_("Listener places available")) + b": 1") in response.content
+    course.listeners_capacity = 0
+    course.save()
     client.post(course.get_enroll_url(), data={
         "type": EnrollmentTypes.REGULAR
     })
@@ -96,6 +114,7 @@ def test_enrollment_capacity_view(client):
     # Capacity is reached
     course.refresh_from_db()
     assert course.learners_count == 1
+    assert course.listeners_count == 0
     assert course.places_left == 0
     s2 = StudentFactory(branch=course.main_branch)
     client.login(s2)
@@ -107,11 +126,12 @@ def test_enrollment_capacity_view(client):
     })
     assert response.status_code == 302
     # Increase capacity
-    course.capacity += 1
+    course.learners_capacity += 1
     course.save()
     assert course.places_left == 1
     response = client.get(course.get_absolute_url())
-    assert (smart_bytes(_("Places available")) + b": 1") in response.content
+    assert (smart_bytes(_("Learner places available")) + b": 1") in response.content
+    assert smart_bytes(_("Listener places available")) not in response.content
     # Unenroll first student, capacity should increase
     client.login(student)
     client.post(course.get_unenroll_url())
@@ -119,7 +139,8 @@ def test_enrollment_capacity_view(client):
     course.refresh_from_db()
     assert course.learners_count == 0
     response = client.get(course.get_absolute_url())
-    assert (smart_bytes(_("Places available")) + b": 2") in response.content
+    assert (smart_bytes(_("Learner places available")) + b": 2") in response.content
+    assert smart_bytes(_("Listener places available")) not in response.content
 
 
 @pytest.mark.django_db
