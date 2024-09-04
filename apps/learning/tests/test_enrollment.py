@@ -2,6 +2,7 @@ import datetime
 
 import pytest
 from bs4 import BeautifulSoup
+from django.contrib.messages import get_messages
 
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
@@ -59,7 +60,8 @@ def test_enrollment_capacity(settings):
     current_semester = SemesterFactory.create_current()
     course = CourseFactory.create(main_branch=student_profile.branch,
                                   semester=current_semester,
-                                  capacity=1)
+                                  learners_capacity=1,
+                                  enrollment_type=EnrollmentTypes.REGULAR)
     student_group = course.student_groups.first()
     EnrollmentService.enroll(StudentProfileFactory(), course, student_group=student_group)
     course.refresh_from_db()
@@ -82,13 +84,30 @@ def test_enrollment_capacity_view(client):
         enrollment_period__ends_on=future.date()
     )
     course = CourseFactory(main_branch=student_profile.branch,
-                           semester=current_semester,)
+                           semester=current_semester,
+                           enrollment_type=InvitationEnrollmentTypes.REGULAR)
     response = client.get(course.get_absolute_url())
-    assert smart_bytes(_("Places available")) not in response.content
-    course.capacity = 1
+    assert smart_bytes(_("Learner places available")) not in response.content
+    assert smart_bytes(_("Listener places available")) not in response.content
+    course.listeners_capacity = 1
     course.save()
     response = client.get(course.get_absolute_url())
-    assert smart_bytes(_("Places available")) in response.content
+    print(response.content)
+    assert smart_bytes(_("Learner places available")) not in response.content
+    assert (smart_bytes(_("Listener places available")) + b": 1") in response.content
+    course.learners_capacity = 1
+    course.listeners_capacity = 0
+    course.save()
+    response = client.get(course.get_absolute_url())
+    assert (smart_bytes(_("Learner places available")) + b": 1") in response.content
+    assert smart_bytes(_("Listener places available")) not in response.content
+    course.listeners_capacity = 1
+    course.save()
+    response = client.get(course.get_absolute_url())
+    assert (smart_bytes(_("Learner places available")) + b": 1") in response.content
+    assert (smart_bytes(_("Listener places available")) + b": 1") in response.content
+    course.listeners_capacity = 0
+    course.save()
     client.post(course.get_enroll_url(), data={
         "type": EnrollmentTypes.REGULAR
     })
@@ -96,6 +115,7 @@ def test_enrollment_capacity_view(client):
     # Capacity is reached
     course.refresh_from_db()
     assert course.learners_count == 1
+    assert course.listeners_count == 0
     assert course.places_left == 0
     s2 = StudentFactory(branch=course.main_branch)
     client.login(s2)
@@ -107,11 +127,12 @@ def test_enrollment_capacity_view(client):
     })
     assert response.status_code == 302
     # Increase capacity
-    course.capacity += 1
+    course.learners_capacity += 1
     course.save()
     assert course.places_left == 1
     response = client.get(course.get_absolute_url())
-    assert (smart_bytes(_("Places available")) + b": 1") in response.content
+    assert (smart_bytes(_("Learner places available")) + b": 1") in response.content
+    assert smart_bytes(_("Listener places available")) not in response.content
     # Unenroll first student, capacity should increase
     client.login(student)
     client.post(course.get_unenroll_url())
@@ -119,7 +140,8 @@ def test_enrollment_capacity_view(client):
     course.refresh_from_db()
     assert course.learners_count == 0
     response = client.get(course.get_absolute_url())
-    assert (smart_bytes(_("Places available")) + b": 2") in response.content
+    assert (smart_bytes(_("Learner places available")) + b": 2") in response.content
+    assert smart_bytes(_("Listener places available")) not in response.content
 
 
 @pytest.mark.django_db
@@ -472,6 +494,92 @@ def test_course_enrollment_is_open(client, settings):
     response = client.get(co_spb.get_absolute_url())
     assert smart_bytes("Enroll in") not in response.content
 
+@pytest.mark.django_db
+def test_course_enrollment_is_open_enrollment_types(client, settings):
+    co = CourseFactory()
+    assert not co.enrollment_is_open
+    tomorrow = now_local(co.main_branch.get_timezone()) + datetime.timedelta(days=1)
+    term = SemesterFactory.create_current(enrollment_period__ends_on=tomorrow.date())
+    co.completed_at = tomorrow.date()
+    co.semester = term
+    co.save()
+    assert co.enrollment_is_open
+    student = StudentFactory()
+    client.login(student)
+    response = client.get(co.get_absolute_url())
+    assert smart_bytes("Enroll in") in response.content
+    co.enrollment_type = InvitationEnrollmentTypes.REGULAR
+    co.save()
+    response = client.get(co.get_absolute_url())
+    assert smart_bytes("Enroll in") in response.content
+    co.learners_capacity = 1
+    co.save()
+    response = client.get(co.get_absolute_url())
+    assert smart_bytes("Enroll in") in response.content
+    EnrollmentFactory(course=co)
+    co.refresh_from_db()
+    assert co.learners_count == 1
+    response = client.get(co.get_absolute_url())
+    assert smart_bytes("Enroll in") not in response.content
+    co.enrollment_type = InvitationEnrollmentTypes.ANY
+    co.save()
+    response = client.get(co.get_absolute_url())
+    assert smart_bytes("Enroll in") in response.content
+    co.listeners_capacity = 1
+    co.save()
+    response = client.get(co.get_absolute_url())
+    assert smart_bytes("Enroll in") in response.content
+    EnrollmentFactory(course=co, type=EnrollmentTypes.LECTIONS_ONLY)
+    co.refresh_from_db()
+    assert co.listeners_count == 1
+    response = client.get(co.get_absolute_url())
+    assert smart_bytes("Enroll in") not in response.content
+
+@pytest.mark.django_db
+def test_enrollment_form_disable_type(client, settings):
+    branch = BranchFactory()
+    tomorrow = now_local(branch.get_timezone()) + datetime.timedelta(days=1)
+    term = SemesterFactory.create_current(enrollment_period__ends_on=tomorrow.date())
+    co = CourseFactory(main_branch=branch, completed_at=tomorrow.date(),
+                       semester=term, enrollment_type=InvitationEnrollmentTypes.REGULAR)
+    student = StudentFactory(branch=branch)
+    client.login(student)
+    response = client.get(co.get_enroll_url())
+    form = response.context['form']
+    assert form.fields['type'].disabled
+    assert form.fields['type'].initial == EnrollmentTypes.REGULAR
+    co.enrollment_type = InvitationEnrollmentTypes.ANY
+    co.save()
+    response = client.get(co.get_enroll_url())
+    form = response.context['form']
+    assert not form.fields['type'].disabled
+    assert form.fields['type'].initial == EnrollmentTypes.REGULAR
+    co.learners_capacity = 1
+    co.save()
+    response = client.get(co.get_enroll_url())
+    form = response.context['form']
+    assert not form.fields['type'].disabled
+    assert form.fields['type'].initial == EnrollmentTypes.REGULAR
+    EnrollmentFactory(course=co)
+    co.refresh_from_db()
+    response = client.get(co.get_enroll_url())
+    form = response.context['form']
+    assert form.fields['type'].disabled
+    assert form.fields['type'].initial == EnrollmentTypes.LECTIONS_ONLY
+    assert "reason" not in form.fields
+    co.ask_enrollment_reason = True
+    co.save()
+    response = client.get(co.get_enroll_url())
+    form = response.context['form']
+    assert form.fields['type'].disabled
+    assert form.fields['type'].initial == EnrollmentTypes.LECTIONS_ONLY
+    assert "reason" in form.fields
+    response = client.post(co.get_enroll_url(), data={"type": EnrollmentTypes.REGULAR,
+                                           "reason": "reason"
+                                           })
+    enrollments = Enrollment.active.filter(student=student, course=co).all()
+    assert len(enrollments) == 1
+    assert enrollments.first().type == EnrollmentTypes.LECTIONS_ONLY
 
 @pytest.mark.django_db
 def test_enrollment_by_invitation(settings, client):
@@ -505,6 +613,10 @@ def test_enrollment_by_invitation(settings, client):
     course_invitation.enrollment_type = InvitationEnrollmentTypes.LECTIONS_ONLY
     course_invitation.save()
     response = client.get(enroll_url)
+    assert response.status_code == 200
+    response = client.post(enroll_url, data={
+        "type": EnrollmentTypes.REGULAR # post type doesn't matters with LECTIONS_ONLY enrollment_type, it can even be empty
+    })
     assert response.status_code == 302
     enrollments = Enrollment.active.filter(student=invited, course=course).all()
     assert len(enrollments) == 1

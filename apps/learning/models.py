@@ -482,7 +482,7 @@ class CourseInvitation(models.Model):
         on_delete=models.CASCADE)
     token = models.CharField(verbose_name=_("Token"), max_length=128)
     capacity = models.PositiveSmallIntegerField(
-        verbose_name=_("CourseOffering|capacity"),
+        verbose_name=_("CourseInvitation|capacity"),
         default=0,
         help_text=_("0 - unlimited"))
     enrollment_type = models.CharField(

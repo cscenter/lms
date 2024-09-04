@@ -26,7 +26,7 @@ from learning.permissions import (
     ViewStudentAssignment, ViewStudentGroup, ViewStudentGroupAsTeacher
 )
 from learning.services import CourseRole, EnrollmentService, course_access_role
-from learning.settings import Branches, GradeTypes, StudentStatuses
+from learning.settings import Branches, GradeTypes, StudentStatuses, InvitationEnrollmentTypes
 from learning.tests.factories import (
     AssignmentCommentFactory, CourseInvitationFactory, EnrollmentFactory,
     GraduateFactory, StudentAssignmentFactory, StudentGroupFactory
@@ -240,8 +240,7 @@ def test_enroll_in_course(inactive_status, settings):
     branch_nsk = BranchFactory(code=Branches.NSK)
     course = CourseFactory(
         semester=term,
-        completed_at=(today_local + datetime.timedelta(days=10)).date(),
-        capacity=0, main_branch=branch_spb)
+        completed_at=(today_local + datetime.timedelta(days=10)).date(), main_branch=branch_spb)
     assert course.enrollment_is_open
     student_spb = StudentFactory(branch=branch_spb, status="")
     student_spb_profile = student_spb.get_student_profile(settings.SITE_ID)
@@ -264,8 +263,11 @@ def test_enroll_in_course(inactive_status, settings):
     student_spb_profile.save()
     assert student_spb.has_perm(EnrollInCourse.name, perm_obj)
     # Full course capacity
-    course.capacity = 1
+    course.learners_capacity = 1
     course.learners_count = 1
+    assert student_spb.has_perm(EnrollInCourse.name, perm_obj)
+    course.enrollment_type = InvitationEnrollmentTypes.REGULAR
+    course.save()
     assert not student_spb.has_perm(EnrollInCourse.name, perm_obj)
     course.learners_count = 0
     assert student_spb.has_perm(EnrollInCourse.name, perm_obj)
@@ -315,7 +317,7 @@ def test_permission_enroll_in_course_by_invitation(settings):
     term = SemesterFactory.create_current(
         for_branch=branch_spb.code,
         enrollment_period__ends_on=tomorrow.date())
-    course = CourseFactory(main_branch=branch_spb, semester=term, capacity=0)
+    course = CourseFactory(main_branch=branch_spb, semester=term)
     assert course.enrollment_is_open
     student = StudentFactory(branch=course.main_branch)
     student_profile = student.get_student_profile(settings.SITE_ID)

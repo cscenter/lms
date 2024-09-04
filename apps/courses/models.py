@@ -38,7 +38,7 @@ from courses.constants import (
 from courses.utils import TermPair, get_current_term_pair
 from files.models import ConfigurableStorageFileField
 from files.storage import private_storage
-from learning.settings import GradeTypes, GradingSystems
+from learning.settings import GradeTypes, GradingSystems, InvitationEnrollmentTypes
 from learning.utils import humanize_duration
 
 from .constants import ClassTypes, SemesterTypes
@@ -262,10 +262,19 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         verbose_name=_("CourseOffering|grading_type"),
         choices=GradingSystems.choices,
         default=GradingSystems.BASE)
-    capacity = models.PositiveSmallIntegerField(
-        verbose_name=_("CourseOffering|capacity"),
+    learners_capacity = models.PositiveSmallIntegerField(
+        verbose_name=_("CourseOffering|learners_capacity"),
         default=0,
         help_text=_("0 - unlimited"))
+    listeners_capacity = models.PositiveSmallIntegerField(
+        verbose_name=_("CourseOffering|listeners_capacity"),
+        default=0,
+        help_text=_("0 - unlimited"))
+    enrollment_type = models.CharField(
+        verbose_name=_("Enrollment|type"),
+        max_length=100,
+        choices=InvitationEnrollmentTypes.choices,
+        default=InvitationEnrollmentTypes.ANY)
     hours = models.PositiveSmallIntegerField(
         verbose_name=_("CourseOffering|hours"),
         blank=True,
@@ -392,6 +401,7 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         help_text="Helpful for getting thumbnail on /videos/ page",
         blank=True)
     learners_count = models.PositiveIntegerField(editable=False, default=0)
+    listeners_count = models.PositiveIntegerField(editable=False, default=0)
 
     objects = CourseDefaultManager()
 
@@ -399,8 +409,7 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         'public_videos_count',
         'public_slides_count',
         'public_attachments_count',
-        'youtube_video_id',
-        'learners_count',
+        'youtube_video_id'
     ]
 
     class Meta:
@@ -472,11 +481,6 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
 
         return False
 
-    def _compute_learners_count(self):
-        """
-        Calculate this value with external signal on adding new learner.
-        """
-        return False
 
     def save(self, *args, **kwargs):
         # Make sure `self.completed_at` always has value
@@ -502,6 +506,12 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         if self.starts_on and self.ends_on and self.ends_on < self.starts_on:
             msg = _("Deadline should be later than the start of "
                         "the enrollment period")
+            raise ValidationError(msg)
+        if self.enrollment_type == InvitationEnrollmentTypes.REGULAR and self.listeners_capacity != 0:
+            msg = _("You can not set listeners capacity with REGULAR enrollment type")
+            raise ValidationError(msg)
+        if self.enrollment_type == InvitationEnrollmentTypes.LECTIONS_ONLY and self.learners_capacity != 0:
+            msg = _("You can not set learners capacity with LECTIONS_ONLY enrollment type")
             raise ValidationError(msg)
 
     @property
@@ -625,15 +635,47 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
             return starts_on <= today <= ends_on
 
     @property
+    def is_learners_capacity_limited(self):
+        return self.learners_capacity > 0
+
+    @property
+    def is_listeners_capacity_limited(self):
+        return self.listeners_capacity > 0
+    @property
     def is_capacity_limited(self):
-        return self.capacity > 0
+        if self.enrollment_type == InvitationEnrollmentTypes.REGULAR:
+            return self.is_learners_capacity_limited
+        elif self.enrollment_type == InvitationEnrollmentTypes.LECTIONS_ONLY:
+            return self.is_listeners_capacity_limited
+        elif self.enrollment_type == InvitationEnrollmentTypes.ANY:
+            return self.is_learners_capacity_limited and self.is_listeners_capacity_limited
+        else:
+            assert not "reachable"
+
+    @property
+    def learners_places_left(self):
+        if self.is_learners_capacity_limited:
+            return max(0, self.learners_capacity - self.learners_count)
+        else:
+            return float("inf")
+
+    @property
+    def listeners_places_left(self):
+        if self.is_listeners_capacity_limited:
+            return max(0, self.listeners_capacity - self.listeners_count)
+        else:
+            return float("inf")
 
     @property
     def places_left(self):
-        if self.is_capacity_limited:
-            return max(0, self.capacity - self.learners_count)
+        if self.enrollment_type == InvitationEnrollmentTypes.REGULAR:
+            return self.learners_places_left
+        elif self.enrollment_type == InvitationEnrollmentTypes.LECTIONS_ONLY:
+            return self.listeners_places_left
+        elif self.enrollment_type == InvitationEnrollmentTypes.ANY:
+            return self.listeners_places_left + self.learners_places_left
         else:
-            return float("inf")
+            assert not "reachable"
 
     @property
     def grading_system(self):

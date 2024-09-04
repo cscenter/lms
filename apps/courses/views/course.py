@@ -23,6 +23,7 @@ from learning.models import CourseNewsNotification, CourseInvitation
 from learning.permissions import CreateCourseNews, ViewOwnEnrollments, ViewStudentGroup, EnrollInCourseByInvitation, \
     InvitationEnrollPermissionObject
 from learning.services import course_access_role
+from learning.settings import InvitationEnrollmentTypes
 from learning.teaching.utils import get_student_groups_url
 
 __all__ = ('CourseDetailView', 'CourseUpdateView')
@@ -79,6 +80,7 @@ class CourseDetailView(PermissionRequiredMixin, CourseURLParamsMixin, DetailView
         context = {
             'CourseGroupModes': CourseGroupModes,
             'CourseDurations': CourseDurations,
+            'InvitationEnrollmentTypes': InvitationEnrollmentTypes,
             'cad_add_news': can_add_news,
             'can_add_assignment': can_add_assignment,
             'can_add_course_classes': can_add_course_classes,

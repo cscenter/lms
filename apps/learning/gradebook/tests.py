@@ -49,6 +49,7 @@ from users.services import get_student_profile
 from users.tests.factories import (
     CuratorFactory, StudentFactory, TeacherFactory, UserFactory
 )
+from django.utils.translation import gettext as _
 
 
 # TODO: test redirect to gradebook for teachers if only 1 course in current term
@@ -326,6 +327,12 @@ def test_empty_gradebook_view(client):
         field = 'final_grade_{}'.format(enrollment.pk)
         assert field in response.context_data['form'].fields
     assert len(students) == len(response.context_data['form'].fields)
+    assert smart_bytes(_("Students") + f":&nbsp;{len(students)}") in response.content
+    assert smart_bytes(_("Students and listeners") + f":&nbsp;{len(students)}") in response.content
+    EnrollmentFactory.create(course=co1, type=EnrollmentTypes.LECTIONS_ONLY)
+    response = client.get(co1.get_gradebook_url())
+    assert smart_bytes(_("Students") + f":&nbsp;{len(students)}") in response.content
+    assert smart_bytes(_("Students and listeners") + f":&nbsp;{len(students) + 1}") in response.content
     for co in [co1, co2]:
         url = co.get_gradebook_url()
         assert smart_bytes(url) in response.content

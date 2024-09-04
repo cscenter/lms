@@ -255,8 +255,11 @@
               {% if can_enroll %}
                   <a href="{{ course.get_enroll_url() }}" class="btn btn-primary btn-block">
                     {% trans %}Enroll in the course{% endtrans %}
-                    {% if course.is_capacity_limited %}
-                      <br><small>{% trans %}Places available{% endtrans %}: {{ course.places_left }}</small>
+                    {% if course.is_learners_capacity_limited %}
+                      <br><small>{% trans %}Learner places available{% endtrans %}: {{ course.learners_places_left }}</small>
+                    {% endif %}
+                    {% if course.is_listeners_capacity_limited %}
+                      <br><small>{% trans %}Listener places available{% endtrans %}: {{ course.listeners_places_left }}</small>
                     {% endif %}
                   </a>
               {% elif can_enroll_by_invitation %}

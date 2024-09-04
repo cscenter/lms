@@ -76,7 +76,11 @@ class EnrollmentService:
                 learners_count = get_learners_count_subquery(
                     outer_ref=OuterRef('course_id')
                 )
-                filters.append(Q(course__capacity__gt=learners_count))
+                listeners_count = get_listeners_count_subquery(
+                    outer_ref=OuterRef('course_id')
+                )
+                filters.append(Q(course__learners_capacity__gt=learners_count) | Q(course__learners_capacity=0))
+                filters.append(Q(course__listeners_capacity__gt=listeners_count) | Q(course__listeners_capacity=0))
             attrs.update({
                 "is_deleted": False,
                 "student_profile": student_profile,
@@ -125,7 +129,18 @@ def get_learners_count_subquery(outer_ref: OuterRef) -> Func:
     from learning.models import Enrollment
     return Coalesce(Subquery(
         (Enrollment.active
-         .filter(course_id=outer_ref)
+         .filter(course_id=outer_ref, type=EnrollmentTypes.REGULAR, invitation__isnull=True)
+         .order_by()
+         .values('course')  # group by
+         .annotate(total=Count("*"))
+         .values("total"))
+    ), Value(0))
+
+def get_listeners_count_subquery(outer_ref: OuterRef) -> Func:
+    from learning.models import Enrollment
+    return Coalesce(Subquery(
+        (Enrollment.active
+         .filter(course_id=outer_ref, type=EnrollmentTypes.LECTIONS_ONLY, invitation__isnull=True)
          .order_by()
          .values('course')  # group by
          .annotate(total=Count("*"))
@@ -136,6 +151,11 @@ def get_learners_count_subquery(outer_ref: OuterRef) -> Func:
 def update_course_learners_count(course_id: int) -> None:
     Course.objects.filter(id=course_id).update(
         learners_count=get_learners_count_subquery(outer_ref=OuterRef('id'))
+    )
+
+def update_course_listeners_count(course_id: int) -> None:
+    Course.objects.filter(id=course_id).update(
+        listeners_count=get_listeners_count_subquery(outer_ref=OuterRef('id'))
     )
 
 
