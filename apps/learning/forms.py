@@ -297,11 +297,11 @@ class CourseEnrollmentForm(forms.Form):
 
     def __init__(self, **kwargs):
         ask_enrollment_reason = kwargs.pop('ask_enrollment_reason', None)
-        enrollment_type = kwargs.pop('enrollment_type', None)
+        enrollment_type = kwargs.pop('enrollment_type')
         super().__init__(**kwargs)
         if not ask_enrollment_reason:
             self.fields.pop('reason')
-        if enrollment_type is not None and enrollment_type != InvitationEnrollmentTypes.ANY:
+        if enrollment_type != InvitationEnrollmentTypes.ANY:
             assert enrollment_type in EnrollmentTypes.values
             self.fields["type"].initial = enrollment_type
             self.fields["type"].disabled = True
@@ -320,7 +320,7 @@ class CourseInvitationEnrollmentForm(forms.Form):
     def __init__(self, **kwargs):
         enrollment_type = kwargs.pop('enrollment_type', None)
         super().__init__(**kwargs)
-        if enrollment_type is not None and enrollment_type != InvitationEnrollmentTypes.ANY:
+        if enrollment_type != InvitationEnrollmentTypes.ANY:
             assert enrollment_type in EnrollmentTypes.values
             self.fields["type"].initial = enrollment_type
             self.fields["type"].disabled = True

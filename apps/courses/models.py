@@ -507,6 +507,12 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
             msg = _("Deadline should be later than the start of "
                         "the enrollment period")
             raise ValidationError(msg)
+        if self.enrollment_type == InvitationEnrollmentTypes.REGULAR and self.listeners_capacity != 0:
+            msg = _("You can not set listeners capacity with REGULAR enrollment type")
+            raise ValidationError(msg)
+        if self.enrollment_type == InvitationEnrollmentTypes.LECTIONS_ONLY and self.learners_capacity != 0:
+            msg = _("You can not set learners capacity with LECTIONS_ONLY enrollment type")
+            raise ValidationError(msg)
 
     @property
     def url_kwargs(self) -> dict:
@@ -642,7 +648,7 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         elif self.enrollment_type == InvitationEnrollmentTypes.LECTIONS_ONLY:
             return self.is_listeners_capacity_limited
         elif self.enrollment_type == InvitationEnrollmentTypes.ANY:
-            return self.is_learners_capacity_limited or self.is_listeners_capacity_limited
+            return self.is_learners_capacity_limited and self.is_listeners_capacity_limited
         else:
             assert not "reachable"
 

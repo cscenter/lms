@@ -53,18 +53,22 @@ class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
                 kwargs['enrollment_type'] = EnrollmentTypes.LECTIONS_ONLY
             elif self.course.is_listeners_capacity_limited and not self.course.listeners_places_left:
                 kwargs['enrollment_type'] = EnrollmentTypes.REGULAR
+            else:
+                kwargs['enrollment_type'] = InvitationEnrollmentTypes.ANY
         else:
             kwargs['enrollment_type'] = self.course.enrollment_type
         return kwargs
 
-    def enroll(self, request, reason_entry, type):
-        user = request.user
-        student_profile = user.get_student_profile(request.site)
+    def form_valid(self, form):
+        reason_entry = form.cleaned_data.get("reason", "").strip()
+        type = form.cleaned_data["type"].strip()
+        user = self.request.user
+        student_profile = user.get_student_profile(self.request.site)
         try:
             student_group = StudentGroupService.resolve(self.course,
                                                         student_profile=student_profile)
         except StudentGroupError as e:
-            messages.error(request, str(e), extra_tags='timeout')
+            messages.error(self.request, str(e), extra_tags='timeout')
             raise Redirect(to=self.course.get_absolute_url())
         try:
             EnrollmentService.enroll(student_profile, self.course,
@@ -72,30 +76,19 @@ class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
                                      type=type,
                                      student_group=student_group)
             msg = _("You are successfully enrolled in the course")
-            messages.success(request, msg, extra_tags='timeout')
+            messages.success(self.request, msg, extra_tags='timeout')
         except AlreadyEnrolled:
             msg = _("You are already enrolled in the course")
-            messages.warning(request, msg, extra_tags='timeout')
+            messages.warning(self.request, msg, extra_tags='timeout')
         except CourseCapacityFull:
             msg = _("No places available, sorry")
-            messages.error(request, msg, extra_tags='timeout')
+            messages.error(self.request, msg, extra_tags='timeout')
             raise Redirect(to=self.course.get_absolute_url())
-        if request.POST.get('back') == 'study:course_list':
+        if self.request.POST.get('back') == 'study:course_list':
             return_to = reverse('study:course_list')
         else:
             return_to = self.course.get_absolute_url()
         return HttpResponseRedirect(return_to)
-
-    def form_valid(self, form):
-        reason_entry = form.cleaned_data.get("reason", "").strip()
-        type = form.cleaned_data["type"].strip()
-        return self.enroll(self.request, reason_entry, type)
-
-    def get(self, request, *args, **kwargs):
-        if self.course.enrollment_type != InvitationEnrollmentTypes.ANY and not self.course.ask_enrollment_reason:
-            return self.enroll(request, "", self.course.enrollment_type)
-        else:
-            return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -166,16 +159,18 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
             raise Redirect(to=invitation.get_absolute_url())
         return False
 
-    def enroll(self, request, type):
+
+    def form_valid(self, form):
+        type = form.cleaned_data["type"].strip()
         invitation = self.course_invitation.invitation
-        user = request.user
-        student_profile = user.get_student_profile(request.site)
+        user = self.request.user
+        student_profile = user.get_student_profile(self.request.site)
         try:
             resolved_group = StudentGroupService.resolve(self.course,
                                                          student_profile=student_profile,
                                                          invitation=invitation)
         except StudentGroupError as e:
-            messages.error(request, str(e), extra_tags='timeout')
+            messages.error(self.request, str(e), extra_tags='timeout')
             raise Redirect(to=self.course.get_absolute_url())
         try:
             EnrollmentService.enroll(student_profile, self.course,
@@ -185,27 +180,17 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
                                      student_group=resolved_group)
             self.course_invitation.enrolled_students.add(student_profile)
             msg = _("You are successfully enrolled in the course")
-            messages.success(request, msg, extra_tags='timeout')
+            messages.success(self.request, msg, extra_tags='timeout')
             redirect_to = self.course.get_absolute_url()
         except AlreadyEnrolled:
             msg = _("You are already enrolled in the course")
-            messages.warning(request, msg, extra_tags='timeout')
+            messages.warning(self.request, msg, extra_tags='timeout')
             redirect_to = self.course.get_absolute_url()
         except CourseCapacityFull:
             msg = _("No places available, sorry")
-            messages.error(request, msg, extra_tags='timeout')
+            messages.error(self.request, msg, extra_tags='timeout')
             redirect_to = invitation.get_absolute_url()
         return HttpResponseRedirect(redirect_to)
-
-    def form_valid(self, form):
-        type = form.cleaned_data["type"].strip()
-        return self.enroll(self.request, type)
-
-    def get(self, request, *args, **kwargs):
-        if self.course_invitation.enrollment_type != InvitationEnrollmentTypes.ANY:
-            return self.enroll(request, self.course_invitation.enrollment_type)
-        else:
-            return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
