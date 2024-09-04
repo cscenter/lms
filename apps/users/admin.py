@@ -20,7 +20,8 @@ from users.forms import UserChangeForm, UserCreationForm
 from .import_export import UserRecordResource
 from .models import (
     CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
-    StudentStatusLog, StudentTypes, User, UserGroup, YandexUserData, StudentFieldLog, StudentAcademicDisciplineLog
+    StudentStatusLog, StudentTypes, User, UserGroup, YandexUserData, StudentFieldLog, StudentAcademicDisciplineLog,
+    PartnerTag
 )
 from .services import assign_role, update_student_status, update_student_academic_discipline
 
@@ -234,12 +235,10 @@ class StudentProfileAdmin(BaseModelAdmin):
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
             (None, {
-                'fields': ['type', 'is_paid_basis', 'new_track', 'branch', 'user', 'status',
-                           'university', 'partner', 'faculty',
+                'fields': ['type', 'is_paid_basis', 'new_track', 'branch', 'user', 'university', 'partner', 'faculty',
                            'level_of_education_on_admission', 'level_of_education_on_admission_other',
                            'diploma_degree', 'graduation_year',
-                           'year_of_admission', 'year_of_curriculum',
-                           'academic_disciplines', 'invitation']
+                           'year_of_admission', 'year_of_curriculum', 'invitation']
             }),
             (_('Official Student Info'), {
                 'fields': ['is_official_student', 'birth_date',
@@ -251,9 +250,13 @@ class StudentProfileAdmin(BaseModelAdmin):
         ]
         graduate_statuses = {StudentStatuses.GRADUATE, StudentStatuses.WILL_GRADUATE}
 
-        if obj and obj.status in graduate_statuses:
+        if obj:
             fields: list[str, ...] = fieldsets[0][1]['fields']
-            fields.insert(fields.index('status'), 'graduate_without_diploma')
+            # Status and academic discipline logs work correctly only if object exists
+            fields.insert(fields.index('university'), 'status')
+            fields.insert(fields.index('invitation'), 'academic_disciplines')
+            if obj.status in graduate_statuses:
+                fields.insert(fields.index('status'), 'graduate_without_diploma')
 
         return fieldsets
 
@@ -310,8 +313,12 @@ class CertificateOfParticipationAdmin(admin.ModelAdmin):
     list_display = ["student_profile", "created"]
     raw_id_fields = ["student_profile"]
 
+class PartnerTagAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+
 
 admin.site.register(User, UserRecordResourceAdmin)
 admin.site.register(StudentProfile, StudentProfileAdmin)
 admin.site.register(CertificateOfParticipation, CertificateOfParticipationAdmin)
 admin.site.register(SHADCourseRecord, SHADCourseRecordAdmin)
+admin.site.register(PartnerTag, PartnerTagAdmin)
