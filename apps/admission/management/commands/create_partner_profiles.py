@@ -152,10 +152,10 @@ class Command(BaseCommand):
                         if not gave_permission_at:
                             try:
                                 user = User.objects.get(last_name=last_name, first_name=first_name)
-                                print(f"STUDENT {last_name} {first_name} {patronymic} HAS ACCOUNT WITH EMAIL '"
+                                raise CommandError(f"STUDENT {last_name} {first_name} {patronymic} HAS ACCOUNT WITH EMAIL '"
                                       f"{user.email}', but '{email}' was provided")
                             except User.DoesNotExist:
-                                print(f"NO PERMISSION FOR NEW STUDENT: {last_name} {first_name} {patronymic}")
+                                raise CommandError(f"NO PERMISSION FOR NEW STUDENT: {last_name} {first_name} {patronymic}")
                         user = create_account(username=generate_username_from_email(email),
                                               password=User.objects.make_random_password(),
                                               email=email,
