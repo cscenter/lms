@@ -115,7 +115,6 @@ class Command(BaseCommand):
         changed_at = datetime.strptime(options["changed_at"], "%d.%m.%Y")
         with open(filename) as csvfile:
             reader = csv.DictReader(csvfile, delimiter=delimiter)
-            headers = next(reader)
             found_counter = 0
             created_counter = 0
             with transaction.atomic():
