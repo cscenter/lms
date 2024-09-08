@@ -64,6 +64,10 @@
                 {% endif %}
               </td>
             </tr>
+            <tr>
+              <td>{% trans %}Area of study{% endtrans %}:</td>
+              <td>{{ student_profile.academic_discipline|default("—", True) }}</td>
+            </tr>
             {% if request.user.is_curator %}
             <tr>
               <td>{% trans %}Status history{% endtrans %}:</td>
