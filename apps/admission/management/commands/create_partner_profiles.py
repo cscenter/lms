@@ -139,7 +139,7 @@ class Command(BaseCommand):
                                       for field, (current, expected) in mismatched_fields.items()
                                       if current != expected}
                         for field, (current, expected) in mismatches.items():
-                            if trust_csv:
+                            if trust_csv or not current:
                                 print(f"Changed field '{field}' of user '{user}' from '{current}' to '{expected}'")
                                 setattr(user, field, expected)
                                 user.save()
