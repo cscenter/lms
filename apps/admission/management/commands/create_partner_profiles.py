@@ -125,7 +125,8 @@ class Command(BaseCommand):
                         else datetime.strptime(row["Дата подтверждения согласий (дата и время)"], "%d.%m.%Y %H:%M:%S")
                     birth_date = datetime.strptime(row["Дата рождения"], "%d.%m.%Y").date()
                     phone, telegram_username, email = row["Номер телефона"], row["ТГ"].replace("@", ""), row["Почта"]
-                    academic_discipline = AcademicDiscipline.objects.get(name=row["Направление"])
+                    academic_discipline = AcademicDiscipline.objects.get(name=value) if ( value := row[
+                        "Направление"]) else None
                     try:
                         user = User.objects.get(email__iexact=email)
                         mismatched_fields = {
@@ -136,14 +137,14 @@ class Command(BaseCommand):
                         }
                         mismatches = {field: (current, expected)
                                       for field, (current, expected) in mismatched_fields.items()
-                                      if current != expected}
+                                      if expected and current != expected}
                         for field, (current, expected) in mismatches.items():
                             if trust_csv or not current:
                                 print(f"Changed field '{field}' of user '{user}' from '{current}' to '{expected}'")
                                 setattr(user, field, expected)
                                 user.save()
                             elif input(f"Change field '{field}' of user '{user}' from '{current}' to '{expected}'?\n"
-                                     f"y/[n]: ") == "y":
+                                       f"y/[n]: ") == "y":
                                 setattr(user, field, expected)
                                 user.save()
                         found_counter += 1
@@ -152,7 +153,7 @@ class Command(BaseCommand):
                             try:
                                 user = User.objects.get(last_name=last_name, first_name=first_name)
                                 raise CommandError(f"STUDENT {last_name} {first_name} {patronymic} HAS ACCOUNT WITH EMAIL '"
-                                      f"{user.email}', but '{email}' was provided")
+                                    f"{user.email}', but '{email}' was provided")
                             except User.DoesNotExist:
                                 raise CommandError(f"NO PERMISSION FOR NEW STUDENT: {last_name} {first_name} {patronymic}")
                         user = create_account(username=generate_username_from_email(email),
@@ -185,14 +186,15 @@ class Command(BaseCommand):
                         type=StudentTypes.PARTNER,
                         partner=partner).exists()
                     student_profile = create_student_profile(**profile_fields)
-                    student_profile.academic_disciplines.add(academic_discipline)
-                    student_profile.save()
+                    if academic_discipline:
+                        student_profile.academic_disciplines.add(academic_discipline)
+                        student_profile.save()
 
-                    log_entry = StudentAcademicDisciplineLog(academic_discipline=academic_discipline,
-                                                             student_profile=student_profile,
-                                                             entry_author=entry_author,
-                                                             changed_at=changed_at)
-                    log_entry.save()
+                        log_entry = StudentAcademicDisciplineLog(academic_discipline=academic_discipline,
+                                                                 student_profile=student_profile,
+                                                                 entry_author=entry_author,
+                                                                 changed_at=changed_at)
+                        log_entry.save()
 
                 print(f"Found students: {found_counter}")
                 print(f"Created students: {created_counter}")
