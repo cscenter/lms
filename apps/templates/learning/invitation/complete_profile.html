@@ -11,7 +11,8 @@
                 <h3>{% trans "Profile Update" %}</h3>
                 <form action="" method="post">
                     <p>Пожалуйста, указывайте только реальные ФИО.<br>
-                    Если вашего отделениянет в списке, напишите на <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.<br> </p>
+                    Если вашего отделения нет в списке, напишите на <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.<br>
+                    Если вы выпускник или преподаватель ШАД — филиал для записи "Москва".</p>
                     {% csrf_token %}
                     {% for hidden in form.hidden_fields %}
                         {{ hidden }}
