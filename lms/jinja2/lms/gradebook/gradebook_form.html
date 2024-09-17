@@ -88,11 +88,6 @@
                 {% endfor %}
               </ul>
             </div>
-              <br>
-              <h2>
-                <div class="small" style="margin-top: 10px;">{% trans %}Students and listeners{% endtrans %}:&nbsp;{{
-                  gradebook.course.learners_count + gradebook.course.listeners_count }}</div>
-              </h2>
           </div>
           <hr>
         </div>
@@ -150,7 +145,7 @@
                     </a>
                     <div class="cell __study_year {{ loop.cycle('', 'even') }}">
                       {% if gradebook_student.student_profile.year_of_curriculum %}
-                      {{ gradebook_student.student_profile.year_of_curriculum }}
+                      {{ gradebook_student.year_of_curriculum }}
                       {% endif %}
                     </div>
                     <div class="cell __final_grade {{ loop.cycle('', 'even') }}">
@@ -178,7 +173,11 @@
             </div>
 
             <div class="meta">
-              <div class="cell __student gray">{% trans %}Students{% endtrans %}:&nbsp;{{ gradebook.students|length }}</div>
+              <div class="cell __student gray">
+                {% trans %}Learners{% endtrans %}:&nbsp;{{ total_learners }}<br>
+                {% trans %}Listeners{% endtrans %}:&nbsp;{{ total_listeners }}<br>
+                {% trans %}Total students{% endtrans %}:&nbsp;{{ total_listeners + total_learners }}
+              </div>
               <div class="cell __final_grade"></div>
               <div class="cell __study_year"></div>
               {% if gradebook.assignments %}

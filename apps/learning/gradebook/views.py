@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q, Count
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.datastructures import MultiValueDictKeyError
@@ -49,7 +49,7 @@ __all__ = [
     "ImportAssignmentScoresByYandexLoginView"
 ]
 
-from learning.settings import AssignmentScoreUpdateSource, EnrollmentGradeUpdateSource
+from learning.settings import AssignmentScoreUpdateSource, EnrollmentGradeUpdateSource, EnrollmentTypes
 from users.models import StudentTypes, User
 
 
@@ -202,6 +202,12 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
                    .select_related('semester', 'meta_course', 'main_branch'))
         context['course_offering_list'] = courses
         context['user_type'] = self.user_type
+        enrollments_summary = Enrollment.active.filter(course=self.course).aggregate(
+            total_listeners=Count('id', filter=Q(type=EnrollmentTypes.LECTIONS_ONLY)),
+            total_learners=Count('id', filter=Q(type=EnrollmentTypes.REGULAR))
+        )
+        context['total_listeners'] = enrollments_summary['total_listeners']
+        context['total_learners'] = enrollments_summary['total_learners']
 
         return context
 
@@ -224,12 +230,14 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
 
         writer = csv.writer(response)
         headers = [
-            "id",
+            "Профиль на сайте",
             _("Last name"),
             _("First name"),
             _("Patronymic"),
             _("Branch"),
             _("Role"),
+            "Тип записи",
+            _("CSCUser|Curriculum year"),
             _("Group"),
             _("Yandex Login"),
             _("Telegram Username"),
@@ -261,12 +269,14 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
             gitlab_manytask = connected_providers.get('gitlab-manytask')
             writer.writerow(
                 itertools.chain(
-                    [gradebook_student.enrollment_id,
+                    [student.get_absolute_url(),
                      student.last_name,
                      student.first_name,
                      student.patronymic,
                      student_profile.branch.name,
                      student_profile.get_type_display(),
+                     gradebook_student.enrollment_type_display,
+                     gradebook_student.year_of_curriculum,
                      (student_group and student_group.name) or "-",
                      student.yandex_login,
                      student.telegram_username,
