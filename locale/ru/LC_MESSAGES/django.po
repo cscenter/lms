@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-04 09:52+0000\n"
-"PO-Revision-Date: 2024-09-04 09:52+0000\n"
-"Last-Translator: Имя Чернушевич <dmi4er4@gmail.com>\n"
+"POT-Creation-Date: 2024-09-16 15:19+0000\n"
+"PO-Revision-Date: 2024-09-16 15:20+0000\n"
+"Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -272,7 +272,7 @@ msgstr "Общее описание, правила обучения"
 
 #: apps/core/models.py:291 apps/courses/models.py:61
 #: apps/courses/models.py:235 apps/courses/models.py:699
-#: apps/learning/admin.py:81 apps/learning/gradebook/views.py:231
+#: apps/learning/admin.py:81 apps/learning/gradebook/views.py:237
 #: apps/learning/models.py:78 apps/learning/models.py:1086
 #: apps/library/models.py:66 apps/staff/filters.py:130
 #: apps/staff/filters.py:205 apps/staff/views.py:857 apps/staff/views.py:920
@@ -337,7 +337,7 @@ msgstr "Имя"
 
 #: apps/core/models.py:373 apps/universities/models.py:51
 #: apps/universities/models.py:70 apps/users/models.py:830
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:172
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:176
 msgid "University"
 msgstr "Университет"
 
@@ -890,7 +890,7 @@ msgstr "Ручной"
 #: apps/courses/models.py:236 apps/learning/models.py:85
 #: apps/learning/models.py:153 apps/learning/models.py:392
 #: apps/learning/models.py:571 apps/users/models.py:911
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:186
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:190
 msgid "Invitation"
 msgstr "Приглашение"
 
@@ -1486,7 +1486,7 @@ msgstr "Посылка к заданию"
 #: apps/users/models.py:1068 lms/jinja2/lms/staff/status_log.html:21
 #: lms/jinja2/lms/staff/student_search.html:69
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:52
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:75
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:79
 msgid "Status"
 msgstr "Статус"
 
@@ -1597,7 +1597,7 @@ msgstr "Обучение"
 
 #: apps/learning/forms.py:62 apps/learning/models.py:854
 #: apps/users/models.py:894
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:195
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:199
 msgid "Comment"
 msgstr "Комментарий"
 
@@ -1734,15 +1734,18 @@ msgstr "Заголовок '{}' не найден"
 msgid "Invalid score format '{}'"
 msgstr "Неверный формат оценки '{}'"
 
-#: apps/learning/gradebook/tests.py:100 apps/learning/gradebook/views.py:228
+#: apps/learning/gradebook/tests.py:100 apps/learning/gradebook/views.py:234
 msgid "Last name"
 msgstr "Фамилия"
 
-#: apps/learning/gradebook/tests.py:330
-#: lms/jinja2/lms/gradebook/gradebook_form.html:124
-#: lms/jinja2/lms/gradebook/gradebook_form.html:181
+#: apps/learning/gradebook/tests.py:330 apps/learning/gradebook/tests.py:334
+#: lms/jinja2/lms/gradebook/gradebook_form.html:119
 msgid "Students"
 msgstr "Студенты"
+
+#: apps/learning/gradebook/tests.py:331 apps/learning/gradebook/tests.py:335
+msgid "Students and listeners"
+msgstr "Студенты и слушатели"
 
 #: apps/learning/gradebook/views.py:144
 msgid ""
@@ -1759,55 +1762,55 @@ msgstr "Ведомость успешно сохранена."
 msgid "Gradebook hasn't been saved."
 msgstr "Ведомость не была сохранена."
 
-#: apps/learning/gradebook/views.py:229
+#: apps/learning/gradebook/views.py:235
 msgid "First name"
 msgstr "Имя"
 
-#: apps/learning/gradebook/views.py:230
+#: apps/learning/gradebook/views.py:236
 msgid "Patronymic"
 msgstr "Отчество"
 
-#: apps/learning/gradebook/views.py:232 apps/users/models.py:181
+#: apps/learning/gradebook/views.py:238 apps/users/models.py:181
 msgid "Role"
 msgstr "Роль"
 
-#: apps/learning/gradebook/views.py:233 apps/learning/models.py:246
+#: apps/learning/gradebook/views.py:239 apps/learning/models.py:246
 #: apps/learning/models.py:268
 msgid "Group"
 msgstr "Группа"
 
-#: apps/learning/gradebook/views.py:234 apps/users/models.py:260
+#: apps/learning/gradebook/views.py:240 apps/users/models.py:260
 #: apps/users/models.py:369
 msgid "Yandex Login"
 msgstr "Логин на Яндексе"
 
-#: apps/learning/gradebook/views.py:235
+#: apps/learning/gradebook/views.py:241
 msgid "Telegram Username"
 msgstr "Telegram"
 
-#: apps/learning/gradebook/views.py:237 apps/users/models.py:387
+#: apps/learning/gradebook/views.py:243 apps/users/models.py:387
 msgid "Codeforces Handle"
 msgstr ""
 
-#: apps/learning/gradebook/views.py:240
+#: apps/learning/gradebook/views.py:246
 msgid "Final grade"
 msgstr "Итоговая оценка"
 
-#: apps/learning/gradebook/views.py:241
-#: lms/jinja2/lms/gradebook/gradebook_form.html:128
+#: apps/learning/gradebook/views.py:247
+#: lms/jinja2/lms/gradebook/gradebook_form.html:123
 msgid "Total"
 msgstr "Сумма баллов"
 
-#: apps/learning/gradebook/views.py:316
+#: apps/learning/gradebook/views.py:322
 msgid "Imported records for assignment {} - {} out of {}"
 msgstr "Импортировано оценок за задание {} - {} из {} найденных"
 
-#: apps/learning/gradebook/views.py:320
+#: apps/learning/gradebook/views.py:326
 msgid "<b>Not all records were processed. Import stopped by an error:</b><br>"
 msgstr ""
 "<b>Не все записи были обработаны. Импорт прекращён из-за ошибки:</b><br>"
 
-#: apps/learning/gradebook/views.py:394
+#: apps/learning/gradebook/views.py:400
 msgid ""
 "Успешно импортированы записи для курса {} - для {} из {} строк с верными "
 "идентификаторами студентов."
@@ -1985,8 +1988,8 @@ msgid "Satisfactory"
 msgstr "Удовлетворительно"
 
 #: apps/learning/models.py:447 apps/users/models.py:1021
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:76
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:107
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:80
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:111
 msgid "Entry Added"
 msgstr "Дата изменения"
 
@@ -2714,7 +2717,7 @@ msgstr ""
 
 #: apps/staff/filters.py:116 apps/staff/views.py:858 apps/users/models.py:1100
 #: lms/jinja2/lms/staff/academic_discipline_log.html:21
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:106
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:110
 msgid "Field of study"
 msgstr "Направление обучения"
 
@@ -2803,6 +2806,7 @@ msgid "AreaOfStudy|description"
 msgstr "Описание"
 
 #: apps/study_programs/models.py:37
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:68
 msgid "Area of study"
 msgstr "Направление обучения"
 
@@ -2832,7 +2836,7 @@ msgid "StudyProgram|description"
 msgstr "Доп. описание"
 
 #: apps/study_programs/models.py:80 apps/study_programs/models.py:113
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:136
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:140
 msgid "Study Program"
 msgstr "Учебная программа"
 
@@ -3143,61 +3147,61 @@ msgstr "Факультет"
 msgid "Faculties"
 msgstr "Факультеты"
 
-#: apps/users/admin.py:58
+#: apps/users/admin.py:59
 msgid "Create Student Profile before adding student permissions"
 msgstr "Требуется создать профиль студента перед выдачей роли студента."
 
-#: apps/users/admin.py:63
+#: apps/users/admin.py:64
 msgid "Selected branch does not match branch {} from the student profile"
 msgstr ""
 
-#: apps/users/admin.py:69
+#: apps/users/admin.py:70
 msgid "You have to specify branch for user before adding teacher permissions"
 msgstr ""
 "Укажите отделение у пользователя перед тем, как выдать ему права "
 "преподавателя."
 
-#: apps/users/admin.py:73
+#: apps/users/admin.py:74
 msgid "Assign branch relative to the selected site"
 msgstr ""
 
-#: apps/users/admin.py:83 apps/users/admin.py:136
+#: apps/users/admin.py:84 apps/users/admin.py:137
 msgid "Permissions"
 msgstr "Разрешения"
 
-#: apps/users/admin.py:131
+#: apps/users/admin.py:132
 msgid "Personal info"
 msgstr "Персональная информация"
 
-#: apps/users/admin.py:138
+#: apps/users/admin.py:139
 msgid "External services"
 msgstr "Внешние сервисы"
 
-#: apps/users/admin.py:142
+#: apps/users/admin.py:143
 msgid "Important dates"
 msgstr "Важные даты"
 
-#: apps/users/admin.py:208
+#: apps/users/admin.py:209
 msgid ""
 "Regular student profile already exists for this admission campaign year."
 msgstr ""
 "Профиль регулярного студента уже существует для связанной кампании по "
 "набору."
 
-#: apps/users/admin.py:244
+#: apps/users/admin.py:243
 msgid "Official Student Info"
 msgstr "Официальный студент"
 
-#: apps/users/admin.py:248
+#: apps/users/admin.py:247
 msgid "Curator's note"
 msgstr "Заметка куратора"
 
-#: apps/users/admin.py:277 apps/users/forms.py:25 apps/users/models.py:346
+#: apps/users/admin.py:280 apps/users/forms.py:25 apps/users/models.py:346
 #: lms/jinja2/lms/user_profile/_tab_account.html:154
 msgid "Date of Birth"
 msgstr "Дата рождения"
 
-#: apps/users/admin.py:296
+#: apps/users/admin.py:299
 msgid "Anytask"
 msgstr ""
 
@@ -3447,7 +3451,7 @@ msgid "Priority"
 msgstr "Приоритет"
 
 #: apps/users/models.py:803
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:176
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:180
 msgid "Magistracy"
 msgstr "Магистратура"
 
@@ -3461,7 +3465,7 @@ msgid "CSCUser|Curriculum year"
 msgstr "Год программы обучения"
 
 #: apps/users/models.py:839
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:180
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:184
 msgid "StudentInfo|University year"
 msgstr "Курс при поступлении"
 
@@ -3909,14 +3913,22 @@ msgstr "Импортировать баллы по Яндекс-логину"
 msgid "Marks sheet"
 msgstr "Ведомость"
 
-#: lms/jinja2/lms/gradebook/gradebook_form.html:93
-#| msgid "Student|admission year"
-msgid "Students and listeners"
-msgstr "Всего студентов и слушателей"
-
-#: lms/jinja2/lms/gradebook/gradebook_form.html:126
+#: lms/jinja2/lms/gradebook/gradebook_form.html:121
 msgid "Grades"
 msgstr "Итоговая оценка"
+
+#: lms/jinja2/lms/gradebook/gradebook_form.html:177
+#| msgid "Listeners"
+msgid "Learners"
+msgstr "Сдающие"
+
+#: lms/jinja2/lms/gradebook/gradebook_form.html:178
+msgid "Listeners"
+msgstr "Слушатели"
+
+#: lms/jinja2/lms/gradebook/gradebook_form.html:179
+msgid "Total students"
+msgstr "Всего"
 
 #: lms/jinja2/lms/layouts/_top_menu.html:34
 #: lms/jinja2/lms/user_profile/user_detail.html:6
@@ -4086,15 +4098,15 @@ msgstr "Онлайн-курсы"
 msgid "Email"
 msgstr "Email"
 
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:69
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:73
 msgid "Status history"
 msgstr "История статусов"
 
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:100
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:104
 msgid "Areas of study history"
 msgstr "История направлений"
 
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:132
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:136
 msgid "Curriculum year"
 msgstr "Год программы обучения"
 

@@ -36,6 +36,10 @@ class GradebookStudent:
         return self._enrollment.pk
 
     @property
+    def enrollment_type_display(self):
+        return self._enrollment.get_type_display()
+
+    @property
     def final_grade(self):
         return self._enrollment.grade
 
@@ -62,11 +66,14 @@ class GradebookStudent:
         return self.student_profile.type
 
     @property
+    def year_of_curriculum(self) -> int:
+        year_of_curriculum = self.student_profile.year_of_curriculum
+        return year_of_curriculum if year_of_curriculum else None
+
+    @property
     def invitation(self) -> Optional[str]:
         invitation = self.student_profile.invitation
-        if invitation:
-            return invitation.name
-        return None
+        return invitation.name if invitation else None
 
 
 @dataclass
