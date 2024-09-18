@@ -12,12 +12,32 @@
 
     <script type="text/template" id="courses-list-table-row">
         <tr>
-            <td><% if (co.is_club_course) { %><span data-title="{% trans "CS club course" %}" class="__club"></span><% } %><a href="<%-co.url%>" class="__course"><%-co.name%></a></td>
-            <td>
-                <% for (var i = 0; i < co.teachers.length; i++) { %>
-                    <a class="__teacher text-nowrap" href="/teachers/<%=co.teachers[i].id%>/"><%=co.teachers[i].name%></a><% if (i != co.teachers.length - 1) { %>, <% } %>
+          <td>
+            <% if (co.is_club_course) { %><span data-title="{% trans "CS club course" %}" class="__club"></span><% } %>
+            <a href="<%-co.url%>" class="__course"><%-co.name%></a>
+            <% if (co.duration == COURSE_DURATIONS.FIRST_HALF) { %><i class="fa fa-adjust fa-rotate-180" aria-hidden="true"></i><% } %>
+            <% if (co.duration == COURSE_DURATIONS.SECOND_HALF) { %><i class="fa fa-adjust" aria-hidden="true"></i><% } %>
+          </td>
+          <td>
+            <% for (var role in co.grouped_teachers) { %>
+              <% var teachers = co.grouped_teachers[role]; %>
+                <% if (teachers && teachers.length > 0) { %>
+                  <% if (role == "lecturer") { %>
+                    <b>Лекторы:</b>
+                  <% } else if (role == "seminar") { %>
+                    <b>Семинаристы:</b>
+                  <% } else if (role == "reviewer") { %>
+                    <b><% if (co.is_completed) { %>Помогали<% } else { %>Помогают<% } %> с заданиями:</b>
+                  <% } else if (role == "organizer") { %>
+                    <b>Кураторы курса:</b>
+                  <% } %>
+                  <% for (var i = 0; i < teachers.length; i++) { %>
+                    <a class="__teacher text-nowrap" href="<%= teachers[i].url %>"><%= teachers[i].name %></a><% if (i != teachers.length - 1) { %>, <% } %>
+                  <% } %>
+                  <br>
                 <% } %>
-            </td>
+            <% } %>
+          </td>
         </tr>
     </script>
 
