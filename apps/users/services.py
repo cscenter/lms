@@ -260,10 +260,14 @@ def get_student_profile(user: User, site, profile_type=None,
 
 def get_student_profiles(*, user: User, site: Site,
                          fetch_graduate_profile: bool = False,
-                         fetch_status_history: bool = False) -> List[StudentProfile]:
+                         fetch_status_history: bool = False,
+                         fetch_invitation: bool = False,
+                         fetch_academic_disciplines: bool = False) -> List[StudentProfile]:
     select_related = ['branch']
     if fetch_graduate_profile:
         select_related.append('graduate_profile')
+    if fetch_invitation:
+        select_related.append('invitation')
     student_profiles = list(StudentProfile.objects
                             .filter(user=user, site=site)
                             .select_related(*select_related)
@@ -286,11 +290,13 @@ def get_student_profiles(*, user: User, site: Site,
             key = (sp.year_of_curriculum, sp.branch_id)
             if sp.type != StudentTypes.INVITED:
                 sp.__dict__['syllabus'] = syllabus.get(key, None)
-    if fetch_status_history:
-        queryset = (StudentStatusLog.objects
-                    .order_by('-changed_at', '-pk'))
+    if fetch_academic_disciplines:
         prefetch_related_objects(student_profiles,
-                                 Prefetch('studentstatuslog_related', queryset=queryset))
+                                 Prefetch('academic_disciplines'))
+    if fetch_status_history:
+        prefetch_related_objects(student_profiles,
+                                 Prefetch('studentstatuslog_related'),
+                                 Prefetch('studentacademicdisciplinelog_related'))
     return student_profiles
 
 

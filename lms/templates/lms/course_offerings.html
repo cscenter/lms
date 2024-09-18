@@ -84,8 +84,22 @@
                                         {% endif %}
                                   </td>
                                     <td>
-                                        {% for teacher in co.teachers %}
-                                            <a class="__teacher text-nowrap" href="/teachers/{{ teacher.id }}/">{{ teacher.name }}</a>{% if not forloop.last %}, {% endif %}
+                                        {% for role, teachers in co.grouped_teachers.items %}
+                                          {% if teachers %}
+                                            {% if role == "lecturer" %}
+                                              <b>Лекторы:</b>
+                                            {% elif role == "seminar" %}
+                                              <b>Семинаристы:</b>
+                                            {% elif role == "reviewer" %}
+                                              <b>{% if co.is_completed %}Помогали{% else %}Помогают{% endif %} с заданиями:</b>
+                                            {% elif role == "organizer" %}
+                                              <b>Кураторы курса:</b>
+                                            {% endif %}
+                                            {% for teacher in teachers %}
+                                                <a class="__teacher text-nowrap" href="{{ teacher.url }}">{{ teacher.name }}</a>{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                            <br>
+                                          {% endif %}
                                         {% endfor %}
                                     </td>
                                 </tr>

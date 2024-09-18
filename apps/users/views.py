@@ -121,7 +121,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             "yandex_oauth_url": reverse('auth:users:yandex_begin'),
             "is_yds_site": self.request.site.pk == settings.YDS_SITE_ID
         }
-        enrollments = profile_user.enrollment_set.all()
+        enrollments = profile_user.enrollment_set.all().select_related("student_profile")
         for enrollment in enrollments:
             enrollment.satisfactory = enrollment.grade in GradeTypes.satisfactory_grades or \
                         (enrollment.grade == GradeTypes.NOT_GRADED and enrollment.course.semester == current_semester)
@@ -179,7 +179,9 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             student_profiles = get_student_profiles(user=profile_user,
                                                     site=self.request.site,
                                                     fetch_graduate_profile=True,
-                                                    fetch_status_history=True)
+                                                    fetch_status_history=True,
+                                                    fetch_invitation=True,
+                                                    fetch_academic_disciplines=True)
             # Aggregate stats needed for student profiles
             passed_courses = set()
             in_current_term = set()
