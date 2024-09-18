@@ -20,10 +20,14 @@ class SemesterSerializer(serializers.ModelSerializer):
 class CourseTeacherSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="teacher_id")
     name = serializers.CharField(source='teacher.get_abbreviated_name')
+    url = serializers.SerializerMethodField()
+
+    def get_url(self, obj: CourseTeacher):
+        return obj.get_absolute_url()
 
     class Meta:
         model = CourseTeacher
-        fields = ("id", "name",)
+        fields = ("id", "name", "url")
 
 
 class CourseSerializer(serializers.ModelSerializer):

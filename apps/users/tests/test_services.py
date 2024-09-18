@@ -313,8 +313,8 @@ def test_get_student_profiles(django_assert_num_queries):
     assert student_profile2.priority < student_profile1.priority
     assert student_profile1 == student_profiles[1]
     assert student_profile2 == student_profiles[0]  # higher priority
-    with django_assert_num_queries(3):
-        # 1) student profiles 2) empty study programs 3) status history
+    with django_assert_num_queries(4):
+        # 1) student profiles 2) empty study programs 3) status history 4) academic discipline history
         student_profiles = get_student_profiles(user=user, site=site1,
                                                 fetch_status_history=True)
         for sp in student_profiles:
