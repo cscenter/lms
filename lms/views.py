@@ -104,6 +104,10 @@ class CourseOfferingsView(FilterMixin, TemplateView):
             SemesterTypes.AUTUMN: pgettext_lazy("adjective", "autumn"),
             SemesterTypes.SPRING: pgettext_lazy("adjective", "spring"),
         }
+        duration_options = {
+            "FIRST_HALF": CourseDurations.FIRST_HALF,
+            "SECOND_HALF": CourseDurations.SECOND_HALF
+        }
         courses_qs = filterset.qs
         terms = group_terms_by_academic_year(courses_qs)
         active_academic_year, active_type = self.get_term(filterset, courses_qs)
@@ -119,7 +123,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
             courses[term.slug] = OfferingsCourseSerializer(cs, many=True).data
         context = {
             "TERM_TYPES": term_options,
-            "COURSE_DURATIONS": CourseDurations,
+            "COURSE_DURATIONS": duration_options,
             "branches": filterset.form.fields['branch'].choices,
             "terms": terms,
             "courses": courses,
@@ -136,6 +140,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                 },
                 "terms": terms,
                 "termOptions": term_options,
+                "COURSE_DURATIONS": duration_options,
                 "courses": courses
             }).decode('utf-8'),
         }
