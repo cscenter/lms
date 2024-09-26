@@ -83,22 +83,12 @@ class UserQuerySet(query.QuerySet):
             q_ = ~Q(grade__in=exclude_grades)
             enrollment_filters.append(q_)
 
-        shad_filters = []
-        if exclude_grades:
-            shad_filters.append(~Q(grade__in=exclude_grades))
-        if until_term:
-            shad_filters.append(Q(semester__index__lte=until_term.index))
-
         return (self.prefetch_related(
             get_enrollments_progress(
                 lookup='enrollment_set',
                 filters=enrollment_filters
             ),
             get_projects_progress(),
-            get_shad_courses_progress(
-                lookup='shadcourserecord_set',
-                filters=shad_filters
-            ),
             Prefetch('onlinecourserecord_set', to_attr='online_courses')))
 
 

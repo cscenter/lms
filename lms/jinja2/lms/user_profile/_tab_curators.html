@@ -77,7 +77,7 @@
               <a target="_blank" href="{{ reference.get_absolute_url() }}?style=shad_ru_with_courses">C курсами</a>,
               <a target="_blank" href="{{ reference.get_absolute_url() }}?style=shad_ru_without_courses">Без курсов</a>,
               <a target="_blank" href="{{ reference.get_absolute_url() }}?style=shad_en_with_courses">EN с курсами</a>,
-              <a target="_blank" href="{{ reference.get_absolute_url() }}?style=shad_en_graduated">EN закончил</a>
+              <a target="_blank" href="{{ reference.get_absolute_url() }}?style=shad_en_without_courses">EN без курсов</a>
              ]{% else %}
               <a target="_blank" href="{{ reference.get_absolute_url() }}?style=csc">{{ reference.created|date("d.m.Y") }}</a>
              {% endif %}

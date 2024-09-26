@@ -47,7 +47,7 @@ def test_create_reference(client, assert_redirect):
     url_ru_courses = f"{ref.get_absolute_url()}?style=shad_ru_with_courses"
     url_ru_without_courses = f"{ref.get_absolute_url()}?style=shad_ru_without_courses"
     url_en_courses = f"{ref.get_absolute_url()}?style=shad_en_with_courses"
-    url_en_graduated = f"{ref.get_absolute_url()}?style=shad_en_graduated"
+    url_en_graduated = f"{ref.get_absolute_url()}?style=shad_en_without_courses"
 
     html = client.get(url_ru_courses).content.decode('utf-8')
     assert note in html
@@ -131,7 +131,7 @@ def test_reference_detail(client, assert_login_redirect, settings):
         student_profile=student_profile,
         note="TEST",
         signature="SIGNATURE")
-    url = reference.get_absolute_url()
+    url = reference.get_absolute_url() + "?style=shad_en_with_courses"
     client.login(student)
     response = client.get(url)
     assert response.status_code == 403
@@ -142,9 +142,9 @@ def test_reference_detail(client, assert_login_redirect, settings):
     soup = BeautifulSoup(response.content, "html.parser")
     sig_text = soup.find(text=re.compile('SIGNATURE'))
     assert sig_text is not None
-    es = soup.find(id='reference-page-body').findAll('li')
+    es = soup.find(id='reference-yds-page-body').findAll('td')
     expected_enrollments_count = 1
-    assert len(es) == expected_enrollments_count
+    assert len(es) / 3 == expected_enrollments_count
 
 
 @pytest.mark.django_db
@@ -163,7 +163,7 @@ def test_certificate_of_participant_hidden_course(client):
         student_profile=student_profile,
         signature="English Student Name"
     )
-    url = reference.get_absolute_url()
+    url = reference.get_absolute_url() + "?style=shad_ru_with_courses"
     client.login(curator)
 
     response = client.get(url)

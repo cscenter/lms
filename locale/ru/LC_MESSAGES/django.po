@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-16 15:19+0000\n"
-"PO-Revision-Date: 2024-09-16 15:20+0000\n"
+"POT-Creation-Date: 2024-09-22 18:27+0000\n"
+"PO-Revision-Date: 2024-09-22 18:28+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -276,7 +276,7 @@ msgstr "Общее описание, правила обучения"
 #: apps/learning/models.py:78 apps/learning/models.py:1086
 #: apps/library/models.py:66 apps/staff/filters.py:130
 #: apps/staff/filters.py:205 apps/staff/views.py:857 apps/staff/views.py:920
-#: apps/study_programs/models.py:61 apps/users/models.py:177
+#: apps/study_programs/models.py:65 apps/users/models.py:177
 #: apps/users/models.py:359 apps/users/models.py:814
 #: lms/jinja2/lms/courses/meta_detail.html:27
 #: lms/jinja2/lms/staff/academic_discipline_log.html:19
@@ -805,7 +805,7 @@ msgstr "Место проведения"
 msgid "Learning Spaces"
 msgstr "Места проведения занятий"
 
-#: apps/courses/models.py:95 apps/study_programs/models.py:59
+#: apps/courses/models.py:95 apps/study_programs/models.py:63
 msgid "Year"
 msgstr "Год"
 
@@ -1738,14 +1738,20 @@ msgstr "Неверный формат оценки '{}'"
 msgid "Last name"
 msgstr "Фамилия"
 
-#: apps/learning/gradebook/tests.py:330 apps/learning/gradebook/tests.py:334
-#: lms/jinja2/lms/gradebook/gradebook_form.html:119
-msgid "Students"
-msgstr "Студенты"
+#: apps/learning/gradebook/tests.py:330 apps/learning/gradebook/tests.py:335
+#: lms/jinja2/lms/gradebook/gradebook_form.html:177
+msgid "Learners"
+msgstr "Сдающие"
 
-#: apps/learning/gradebook/tests.py:331 apps/learning/gradebook/tests.py:335
-msgid "Students and listeners"
-msgstr "Студенты и слушатели"
+#: apps/learning/gradebook/tests.py:331 apps/learning/gradebook/tests.py:336
+#: lms/jinja2/lms/gradebook/gradebook_form.html:179
+msgid "Total students"
+msgstr "Всего"
+
+#: apps/learning/gradebook/tests.py:332 apps/learning/gradebook/tests.py:337
+#: lms/jinja2/lms/gradebook/gradebook_form.html:178
+msgid "Listeners"
+msgstr "Слушатели"
 
 #: apps/learning/gradebook/views.py:144
 msgid ""
@@ -1774,43 +1780,48 @@ msgstr "Отчество"
 msgid "Role"
 msgstr "Роль"
 
-#: apps/learning/gradebook/views.py:239 apps/learning/models.py:246
+#: apps/learning/gradebook/views.py:240 apps/users/models.py:825
+#: lms/jinja2/lms/staff/student_search.html:47
+msgid "CSCUser|Curriculum year"
+msgstr "Год программы обучения"
+
+#: apps/learning/gradebook/views.py:241 apps/learning/models.py:246
 #: apps/learning/models.py:268
 msgid "Group"
 msgstr "Группа"
 
-#: apps/learning/gradebook/views.py:240 apps/users/models.py:260
+#: apps/learning/gradebook/views.py:242 apps/users/models.py:260
 #: apps/users/models.py:369
 msgid "Yandex Login"
 msgstr "Логин на Яндексе"
 
-#: apps/learning/gradebook/views.py:241
+#: apps/learning/gradebook/views.py:243
 msgid "Telegram Username"
 msgstr "Telegram"
 
-#: apps/learning/gradebook/views.py:243 apps/users/models.py:387
+#: apps/learning/gradebook/views.py:245 apps/users/models.py:387
 msgid "Codeforces Handle"
 msgstr ""
 
-#: apps/learning/gradebook/views.py:246
+#: apps/learning/gradebook/views.py:248
 msgid "Final grade"
 msgstr "Итоговая оценка"
 
-#: apps/learning/gradebook/views.py:247
+#: apps/learning/gradebook/views.py:249
 #: lms/jinja2/lms/gradebook/gradebook_form.html:123
 msgid "Total"
 msgstr "Сумма баллов"
 
-#: apps/learning/gradebook/views.py:322
+#: apps/learning/gradebook/views.py:326
 msgid "Imported records for assignment {} - {} out of {}"
 msgstr "Импортировано оценок за задание {} - {} из {} найденных"
 
-#: apps/learning/gradebook/views.py:326
+#: apps/learning/gradebook/views.py:330
 msgid "<b>Not all records were processed. Import stopped by an error:</b><br>"
 msgstr ""
 "<b>Не все записи были обработаны. Импорт прекращён из-за ошибки:</b><br>"
 
-#: apps/learning/gradebook/views.py:400
+#: apps/learning/gradebook/views.py:404
 msgid ""
 "Успешно импортированы записи для курса {} - для {} из {} строк с верными "
 "идентификаторами студентов."
@@ -2765,7 +2776,7 @@ msgstr "Склад"
 
 #: apps/staff/templates/staff/gradebook_list.html:49
 #: apps/templates/learning/teaching/gradebook_list.html:34
-#: lms/templates/lms/course_offerings.html:96
+#: lms/templates/lms/course_offerings.html:130
 msgid "No courses yet"
 msgstr "Список курсов пуст"
 
@@ -2781,7 +2792,7 @@ msgstr ""
 msgid "Statistics"
 msgstr "Статистика"
 
-#: apps/study_programs/apps.py:7 apps/study_programs/models.py:81
+#: apps/study_programs/apps.py:7 apps/study_programs/models.py:85
 msgid "Study Programs"
 msgstr "Учебные программы"
 
@@ -2794,36 +2805,41 @@ msgid "AreaOfStudy|Name"
 msgstr "Название"
 
 #: apps/study_programs/models.py:25
+#| msgid "AcademicDiscipline|cover"
+msgid "AcademicDiscipline|hours"
+msgstr "Общее кол-во часов"
+
+#: apps/study_programs/models.py:29
 msgid "AcademicDiscipline|cover"
 msgstr "Обложка"
 
-#: apps/study_programs/models.py:29
+#: apps/study_programs/models.py:33
 msgid "AcademicDiscipline|icon"
 msgstr "Иконка"
 
-#: apps/study_programs/models.py:32
+#: apps/study_programs/models.py:36
 msgid "AreaOfStudy|description"
 msgstr "Описание"
 
-#: apps/study_programs/models.py:37
+#: apps/study_programs/models.py:41
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:68
 msgid "Area of study"
 msgstr "Направление обучения"
 
-#: apps/study_programs/models.py:38
+#: apps/study_programs/models.py:42
 #: lms/jinja2/lms/staff/student_search.html:102
 msgid "Areas of study"
 msgstr "Направления обучения"
 
-#: apps/study_programs/models.py:66
+#: apps/study_programs/models.py:70
 msgid "Area of Study"
 msgstr "Направление обучения"
 
-#: apps/study_programs/models.py:70
+#: apps/study_programs/models.py:74
 msgid "Activity"
 msgstr "Активность"
 
-#: apps/study_programs/models.py:71
+#: apps/study_programs/models.py:75
 msgid ""
 "Show on syllabus page. Other activity flags for selected branch and academic"
 " discipline will be deactivated."
@@ -2831,28 +2847,28 @@ msgstr ""
 "Активная программа будет показана на странице программы. Все другие записи "
 "для выбранного отделения и направления обучения будут деактивированы."
 
-#: apps/study_programs/models.py:75
+#: apps/study_programs/models.py:79
 msgid "StudyProgram|description"
 msgstr "Доп. описание"
 
-#: apps/study_programs/models.py:80 apps/study_programs/models.py:113
+#: apps/study_programs/models.py:84 apps/study_programs/models.py:117
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:140
 msgid "Study Program"
 msgstr "Учебная программа"
 
-#: apps/study_programs/models.py:109
+#: apps/study_programs/models.py:113
 msgid "StudyProgramCourseGroup|courses"
 msgstr "Курсы"
 
-#: apps/study_programs/models.py:110
+#: apps/study_programs/models.py:114
 msgid "Courses will be grouped with boolean OR"
 msgstr "Курсы объединяются логическим ИЛИ."
 
-#: apps/study_programs/models.py:119
+#: apps/study_programs/models.py:123
 msgid "Study Program Course"
 msgstr "Курс учебной программы"
 
-#: apps/study_programs/models.py:120
+#: apps/study_programs/models.py:124
 msgid "Study Program Courses"
 msgstr "Обязательные курсы"
 
@@ -3460,10 +3476,6 @@ msgstr "Магистратура"
 msgid "Student|admission year"
 msgstr "Год поступления"
 
-#: apps/users/models.py:825 lms/jinja2/lms/staff/student_search.html:47
-msgid "CSCUser|Curriculum year"
-msgstr "Год программы обучения"
-
 #: apps/users/models.py:839
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:184
 msgid "StudentInfo|University year"
@@ -3913,22 +3925,13 @@ msgstr "Импортировать баллы по Яндекс-логину"
 msgid "Marks sheet"
 msgstr "Ведомость"
 
+#: lms/jinja2/lms/gradebook/gradebook_form.html:119
+msgid "Students"
+msgstr "Студенты"
+
 #: lms/jinja2/lms/gradebook/gradebook_form.html:121
 msgid "Grades"
 msgstr "Итоговая оценка"
-
-#: lms/jinja2/lms/gradebook/gradebook_form.html:177
-#| msgid "Listeners"
-msgid "Learners"
-msgstr "Сдающие"
-
-#: lms/jinja2/lms/gradebook/gradebook_form.html:178
-msgid "Listeners"
-msgstr "Слушатели"
-
-#: lms/jinja2/lms/gradebook/gradebook_form.html:179
-msgid "Total students"
-msgstr "Всего"
 
 #: lms/jinja2/lms/layouts/_top_menu.html:34
 #: lms/jinja2/lms/user_profile/user_detail.html:6
@@ -4126,8 +4129,8 @@ msgstr "Отзыв"
 msgid "close all"
 msgstr "закрыть все"
 
-#: lms/templates/lms/course_offerings.html:15
-#: lms/templates/lms/course_offerings.html:76
+#: lms/templates/lms/course_offerings.html:16
+#: lms/templates/lms/course_offerings.html:96
 msgid "CS club course"
 msgstr "Курс CS клуба"
 
@@ -4140,6 +4143,9 @@ msgstr "осенний"
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
+
+#~ msgid "Students and listeners"
+#~ msgstr "Студенты и слушатели"
 
 #~ msgid "Places available"
 #~ msgstr "Осталось мест"

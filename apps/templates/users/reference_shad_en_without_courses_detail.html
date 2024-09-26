@@ -22,57 +22,15 @@
             Independent Non-profit Organization of Continuing Professional Education "Yandex Educational Technologies",
             license No. L035-01298-77/00185314 dated March 24, 2015, confirms that {{ certificate_of_participation.signature }} is
             a Student of Independent Non-profit Organization of Continuing Professional Education "Yandex Educational Technologies"
-            successfully undergoing training under the program "{{ certificate_of_participation.student_profile.academic_discipline.name_en }}"
-            on the basis of an agreement on the provision of educational services (education agreement) for continuing educational programs
-            (continuing general education programs and continuing professional programs), concluded in electronic form by accepting an offer
-            posted at: <a href="https://yandex.ru/legal/dataschool_offer">https://yandex.ru/legal/dataschool_offer</a> in accordance with
-            the procedure provided for in section 2 of the offer.
+            successfully undergoing training under the program "{{ certificate_of_participation.student_profile.academic_discipline.name_en }}".
           </p><br>
           <div class="text-justify">
             Dates of study: from 01.09.{{ certificate_of_participation.student_profile.year_of_admission }}
             to 10.06.{{certificate_of_participation.student_profile.year_of_curriculum|add:2}}<br>
-            Total number of academic hours of study: {{ certificate_of_participation.total_hours }}<br>
             Attendance mode: mixed attendance using distance learning technology
-          </div><br>
-          <div class="text-justify">
-            The student has completed training under the program
-            "{{ certificate_of_participation.student_profile.academic_discipline.name_en }}" in the following courses:
-          </div><br>
-            <table class="table table-condensed table-bordered p-0">
-              <thead>
-                <tr>
-                  <th>Course name</th>
-                  <th>Number of hours</th>
-                  <th>Grade</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for enrollment in enrollments|slice:":7" %}
-                    <tr>
-                      <td>{{ enrollment.course.str_en }}</td>
-                      <td>{{ enrollment.course.hours }}</td>
-                      <td>{{ enrollment.grade_in_base_system|capfirst }}</td>
-                    </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+          </div>
         </div>
-        <div class="page-number">1/2</div>
-    </page>
-    <page size="A4">
-        <img src="{% static "v1/img/shad_top_reference_en.png" %}" id="reference-page-header">
         <div id="reference-yds-page-body">
-            <table class="table table-condensed table-bordered p-0">
-              <tbody>
-                {% for enrollment in enrollments|slice:"7:" %}
-                    <tr>
-                      <td>{{ enrollment.course.str_en }}</td>
-                      <td>{{ enrollment.course.hours }}</td>
-                      <td>{{ enrollment.grade_in_base_system|capfirst }}</td>
-                    </tr>
-                {% endfor %}
-              </tbody>
-            </table>
             <div id="reference-yds-page-note">
                 {{ certificate_of_participation.note }}
             </div>
@@ -90,7 +48,6 @@
             </div>
             <img id="reference-yds-page-stamp" src="{% static "v1/img/stamp-signature-shad.png" %}">
         </div>
-        <div class="page-number">2/2</div>
     </page>
     {% endwith %}
 {% endblock content %}
