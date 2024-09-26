@@ -12,25 +12,37 @@
       </div>
     </div>
     {% with student=certificate_of_participation.student_profile.user %}
-      <page size="A4" id="reference-yds-page" xmlns="http://www.w3.org/1999/html">
+      <page size="A4">
         <img src="{% static "v1/img/shad_top_reference.png" %}" id="reference-page-header">
         <div id="reference-yds-page-body">
+          <div class="col text-center">
+              СПРАВКА
+          </div><br>
           <p class="text-justify">
-            Настоящим подтверждаем, что
-            {{ student.get_full_name }} проходит обучение в Школе анализа данных
-            по программе профессиональной переподготовки «{{ certificate_of_participation.student_profile.academic_discipline.name_ru }}».
-          </p>
-          <p class="text-justify">
-            Срок обучения: с 1 сентября {{ certificate_of_participation.student_profile.year_of_admission }} года
-              по 31 мая {{ certificate_of_participation.student_profile.year_of_admission|add:2}} года.</p>
-          <p class="text-justify">{{ certificate_of_participation.note }}</p>
+            Автономная Некоммерческая Организация Дополнительного Профессионального Образования «Образовательные технологии Яндекса»
+            (АНО ДПО «Образовательные технологии Яндекса»), лицензия № Л035-01298-77/00185314 от 24 марта 2015 года,
+            подтверждает, что {{ student.get_full_name }} действительно является Слушателем автономной
+            некоммерческой организации
+            дополнительного профессионального образования «Образовательные технологии Яндекса»,
+            успешно проходит обучение по программе «{{ certificate_of_participation.student_profile.academic_discipline.name_ru }}».
+          </p><br>
+          <div class="text-justify">
+            Даты обучения: с 01.09.{{ certificate_of_participation.student_profile.year_of_admission }}
+            по 10.06.{{certificate_of_participation.student_profile.year_of_curriculum|add:2}}<br>
+            Форма обучения: очно-заочная с применением дистанционных технологий
+          </div>
+        </div>
+        <div id="reference-yds-page-body">
+            <div id="reference-yds-page-note">
+                {{ certificate_of_participation.note }}
+            </div>
         </div>
         <div id="reference-yds-page-ru-curator-signature">
-            <div class="date mb-10">{{ certificate_of_participation.created|date:"d E Y" }}</div>
+            <div class="date mb-10">{{ certificate_of_participation.created|date:"d E Y г." }}</div>
             <div class="left">
                 <p>
-                  <b>Руководитель академических программ</b><br>
-                  <span style="float: left;">По доверенности от 4 мая 2023г.</span>
+                  <b>Представитель АНО ДПО «Образовательные технологии Яндекса»</b><br>
+                  <span style="float: left;">По доверенности от 8 августа 2024 г.</span>
                   <span style="float: right;"><b>Бронер В. И.</b></span>
                 </p>
             </div>

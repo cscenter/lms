@@ -12,31 +12,64 @@
       </div>
     </div>
     {% with student=certificate_of_participation.student_profile.user %}
-      <page size="A4" xmlns="http://www.w3.org/1999/html">
+      <page size="A4">
         <img src="{% static "v1/img/shad_top_reference.png" %}" id="reference-page-header">
         <div id="reference-yds-page-body">
+          <div class="col text-center">
+              СПРАВКА
+          </div><br>
           <p class="text-justify">
-            Настоящим подтверждаем, что
-            {{ student.get_full_name }} сдал{% if student.gender == student.GENDER_FEMALE %}а{% endif %} следующие курсы в
-            Школе анализа данных:</p>
+            Автономная Некоммерческая Организация Дополнительного Профессионального Образования «Образовательные технологии Яндекса»
+            (АНО ДПО «Образовательные технологии Яндекса»), лицензия № Л035-01298-77/00185314 от 24 марта 2015 года,
+            подтверждает, что {{ student.get_full_name }} действительно является Слушателем автономной
+            некоммерческой организации
+            дополнительного профессионального образования «Образовательные технологии Яндекса»,
+            успешно проходит обучение по программе «{{ certificate_of_participation.student_profile.academic_discipline.name_ru }}»
+            на основании договора об оказании образовательных услуг (договор об образовании) по дополнительным образовательным программам
+            (дополнительным общеобразовательным программам и дополнительным профессиональным программам),
+            заключенного в электронном виде путем акцепта оферты, размещенной по адресу:
+            <a href="https://yandex.ru/legal/dataschool_offer">https://yandex.ru/legal/dataschool_offer</a> в порядке, предусмотренном разделом 2 оферты.
+          </p><br>
+          <div class="text-justify">
+            Даты обучения: с 01.09.{{ certificate_of_participation.student_profile.year_of_admission }}
+            по 10.06.{{certificate_of_participation.student_profile.year_of_curriculum|add:2}}<br>
+            Общее количество академических часов обучения: {{ certificate_of_participation.total_hours }}<br>
+            Форма обучения: очно-заочная с применением дистанционных технологий
+          </div><br>
+          <div class="text-justify">
+            В рамках программы «{{ certificate_of_participation.student_profile.academic_discipline.name_ru }}» прошел обучение по следующим курсам:
+          </div><br>
+          <table class="table table-condensed table-bordered p-0">
+            <thead>
+              <tr>
+                <th>Название курса</th>
+                <th>Кол-во часов</th>
+                <th>Оценка</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for enrollment in enrollments|slice:":5" %}
+                  <tr>
+                    <td>{{ enrollment.course }}</td>
+                    <td>{{ enrollment.course.hours }}</td>
+                    <td>{{ enrollment.grade_honest }}</td>
+                  </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          </div>
+          <div class="page-number">1/2</div>
+    </page>
+    <page size="A4">
+        <img src="{% static "v1/img/shad_top_reference.png" %}" id="reference-page-header">
+        <div id="reference-yds-page-body">
             <table class="table table-condensed table-bordered p-0">
-              <thead>
-                <tr>
-                  <th>Курс</th>
-                  <th>Оценка</th>
-                </tr>
-              </thead>
               <tbody>
-                {% for course_id, enrollment in user_enrollments.items %}
+                {% for enrollment in enrollments|slice:"5:" %}
                     <tr>
                       <td>{{ enrollment.course }}</td>
+                      <td>{{ enrollment.course.hours }}</td>
                       <td>{{ enrollment.grade_honest }}</td>
-                    </tr>
-                {% endfor %}
-                {% for shad in shads %}
-                    <tr>
-                      <td>{{ shad.name }}</td>
-                      <td>{{ shad.grade_display }}</td>
                     </tr>
                 {% endfor %}
               </tbody>
@@ -46,17 +79,17 @@
             </div>
         </div>
         <div id="reference-yds-page-ru-curator-signature">
-            <div class="date mb-10">{{ certificate_of_participation.created|date:"d E Y" }}</div>
+            <div class="date mb-10">{{ certificate_of_participation.created|date:"d E Y г." }}</div>
             <div class="left">
                 <p>
-                  <b>Руководитель академических программ</b><br>
-                  <span style="float: left;">По доверенности от 8 августа 2024г.</span>
+                  <b>Представитель АНО ДПО «Образовательные технологии Яндекса»</b><br>
+                  <span style="float: left;">По доверенности от 8 августа 2024 г.</span>
                   <span style="float: right;"><b>Бронер В. И.</b></span>
                 </p>
             </div>
             <img id="reference-yds-page-stamp" src="{% static "v1/img/stamp-signature-shad.png" %}">
         </div>
-
+        <div class="page-number">2/2</div>
     </page>
     {% endwith %}
 {% endblock content %}

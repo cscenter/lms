@@ -134,6 +134,10 @@ class Semester(models.Model):
         return "{0} {1}".format(SemesterTypes.values[self.type], self.year)
 
     @property
+    def name_en(self):
+        return "{0} {1}".format(self.type, self.year)
+
+    @property
     def term_pair(self) -> TermPair:
         return TermPair(self.year, self.type)
 
@@ -426,6 +430,10 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
     def __str__(self):
         return "{0}, {1}".format(smart_str(self.meta_course),
                                  smart_str(self.semester))
+
+    def str_en(self):
+        return "{0}, {1}".format(smart_str(self.meta_course.name_en),
+                                 smart_str(self.semester.name_en))
 
     def _compute_youtube_video_id(self):
         youtube_video_id = ''

@@ -4,13 +4,14 @@ import os
 from collections import OrderedDict
 from typing import Any, Optional
 
+from django.utils.datetime_safe import datetime
 from django.utils.timezone import now
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
 from django.apps import apps
 from django.conf import settings
-from django.contrib import auth
+from django.contrib import auth, messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Count, Prefetch, Q
@@ -315,8 +316,18 @@ class CertificateOfParticipationDetailView(PermissionRequiredMixin,
         'shad_ru_with_courses',
         'shad_ru_without_courses',
         'shad_en_with_courses',
-        'shad_en_graduated'
+        'shad_en_without_courses'
     ]
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object.student_profile.year_of_curriculum is None:
+            messages.error(request, "Год программы обучения студента не выставлен",
+                           extra_tags='timeout')
+        if self.object.student_profile.academic_discipline is None:
+            messages.error(request, "Направление обучения студента не выставлено",
+                           extra_tags='timeout')
+        return super().get(request, *args, **kwargs)
 
     def get_template_names(self):
         template_name = self.request.GET.get('style')
@@ -341,16 +352,17 @@ class CertificateOfParticipationDetailView(PermissionRequiredMixin,
             e.course = courses[e.course_id]
         enrollments = OrderedDict()
         # Among enrollments for the same course get the latest one
-        student_info.enrollments_progress.sort(key=lambda e: e.course.meta_course.name)
+        student_info.enrollments_progress.sort(key=lambda e: (e.course.semester, e.course.meta_course.name))
+        enrolments_period_start = datetime(day=1, month=9, year=self.object.student_profile.year_of_admission,
+                                           tzinfo=self.object.student_profile.branch.time_zone)
+        enrolments_period_end = self.object.created
         for e in student_info.enrollments_progress:
-            if e.created > self.object.created:
+            if e.created < enrolments_period_start or e.created > enrolments_period_end:
                 continue
             enrollments[e.course.meta_course_id] = e
         context = {
             'certificate_of_participation': self.object,
-            'user_enrollments': enrollments,
-            'shads': filter(lambda x: x.created < self.object.created,
-                            student_info.shads)
+            'enrollments': list(enrollments.values())
         }
         return context
 

@@ -439,7 +439,10 @@ class Enrollment(TimezoneAwareMixin, TimeStampedModel):
 
     @property
     def grade_in_base_system(self):
-        return grade_to_base_system(self.grade)
+        if self.course.grading_type == GradingSystems.BASE and self.grade == self.GRADES.CREDIT:
+            return "Satisfactory"
+        else:
+            return grade_to_base_system(self.grade)
 
 
 class EnrollmentGradeLog(TimestampedModel):

@@ -1177,3 +1177,22 @@ class CertificateOfParticipation(TimeStampedModel):
         return reverse('student_reference_detail',
                        subdomain=settings.LMS_SUBDOMAIN,
                        args=[self.student_profile.user_id, self.pk])
+
+    @property
+    def total_hours(self) -> int:
+        if self.student_profile.year_of_curriculum is None or self.student_profile.academic_discipline is None:
+            # Error messages are sent in view
+            return -1
+        # Total hours of academic discipline changed in 2024
+        if self.student_profile.year_of_curriculum >= 2022:
+            return self.student_profile.academic_discipline.hours
+        elif self.student_profile.academic_discipline.code in ("ds", "ml", "in", "ad"):
+            return 576
+        elif self.student_profile.academic_discipline.code in ("fast1", "fast2"):
+            return 288
+        elif self.student_profile.academic_discipline.code == "prod_track":
+            return 384
+        elif self.student_profile.academic_discipline.code == "algo-syst":
+            return 288
+        else:
+            return self.student_profile.academic_discipline.hours

@@ -21,6 +21,10 @@ class AcademicDiscipline(models.Model):
         on_delete=models.CASCADE,
         related_name='+')
     name = models.CharField(_("AreaOfStudy|Name"), max_length=255)
+    hours = models.PositiveSmallIntegerField(
+        verbose_name=_("AcademicDiscipline|hours"),
+        blank=True,
+        null=True)
     cover = ImageField(
         _("AcademicDiscipline|cover"),
         upload_to="academic_disciplines/",
