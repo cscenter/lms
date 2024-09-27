@@ -9,10 +9,13 @@
         {{ assignment.title }}<br>
         <small><a href="{{ assignment.course.get_absolute_url() }}">{{ assignment.course }}</a></small>
       </h2>
-      {% if can_edit_assignment or can_delete_assignment %}
+      {% if can_edit_assignment or can_delete_assignment or can_download_status_report or can_download_answers_csv %}
         <div class="btn-toolbar">
           {% if can_download_status_report %}
-            <a href="{{ status_report_href }}" class="btn btn-default" role="button">{% trans %}Student Status Log{% endtrans %}</a>
+            <a href="{{ status_report_href }}" class="btn btn-info" role="button">{% trans %}Student Status Log{% endtrans %}</a>
+          {% endif %}
+          {% if can_download_answers_csv %}
+            <a href="{{ assignment.get_answer_csv_url() }}" class="btn btn-info" role="button">{% trans %}Student answers{% endtrans %}</a>
           {% endif %}
           {% if can_edit_assignment %}
             <a href="{{ assignment.get_update_url() }}" class="btn btn-primary" role="button">{% trans %}Edit{% endtrans %}</a>
