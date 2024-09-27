@@ -5,7 +5,6 @@ import tempfile
 import zipfile
 from typing import Any, Dict, Iterator, List, NamedTuple
 
-from django.conf import settings
 from rest_framework import serializers
 from vanilla import TemplateView
 
@@ -13,7 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import FileField
+from django.db.models import FileField, F
 from django.http import FileResponse, HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect
@@ -242,6 +241,8 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
         context["can_delete_assignment"] = self.request.user.has_perm(DeleteAssignment.name, self.object)
         context["can_download_status_report"] = self.object.submission_type in [AssignmentFormat.ONLINE,
                                                                                 AssignmentFormat.CODE_REVIEW]
+        context["can_download_answers_csv"] = self.object.submission_type in [AssignmentFormat.ONLINE,
+                                                                                AssignmentFormat.CODE_REVIEW]
         context['status_report_href'] = reverse('teaching:assignment_status_log_csv', kwargs={'pk': self.object.pk})
         return context
 
@@ -309,6 +310,44 @@ class AssignmentStatusLogCSVView(PermissionRequiredMixin, generic.DetailView):
                 writer.writerow([student.get_short_name(), student.pk, title,
                                  comment_author.get_short_name(), comment_author.pk,
                                  action_text, created])
+        return response
+
+class AssignmentStudentAnswersCSVView(PermissionRequiredMixin, generic.DetailView):
+    model = Assignment
+    permission_required = ViewAssignment.name
+
+    def get_permission_object(self):
+        return self.get_object().course
+
+    def get(self, request, *args, **kwargs):
+        assignment = self.get_object()
+        if assignment.submission_type not in [AssignmentFormat.ONLINE, AssignmentFormat.CODE_REVIEW]:
+            return HttpResponseBadRequest()
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        filename = f"{datetime.date.today()}-students_answers-{assignment.pk}.csv"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        writer = csv.writer(response)
+        headers = [
+            "Профиль на сайте",
+            "Фамилия",
+            "Имя",
+            "Отчество",
+            "Отделение",
+            "Текстовый ответ"
+        ]
+        writer.writerow(headers)
+        comments = (AssignmentComment.objects
+                    .filter(is_published=True,
+                            student_assignment__assignment=assignment,
+                            author=F('student_assignment__student'))
+                    .select_related('author__branch')
+                    .order_by('student_assignment__student', 'created'))
+        for comment in comments:
+            student = comment.author
+            writer.writerow([student.get_absolute_url(), student.last_name, student.first_name, student.patronymic,
+                             value.name if (value := student.branch) else "Не выставлено",
+                             value if (value := comment.text) else "-",
+                             ])
         return response
 
 

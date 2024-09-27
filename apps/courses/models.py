@@ -1305,6 +1305,11 @@ class Assignment(TimezoneAwareMixin, TimeStampedModel):
             "pk": self.pk
         })
 
+    def get_answer_csv_url(self):
+        return reverse("teaching:assignment_student_answers_csv", kwargs={
+            'pk': self.pk
+        })
+
     def has_unread(self):
         from notifications.middleware import get_unread_notifications_cache
         cache = get_unread_notifications_cache()

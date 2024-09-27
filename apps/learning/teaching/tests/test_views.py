@@ -549,3 +549,83 @@ def test_view_assignment_status_log_csv_online_assignments(client):
     assert len(data) == 2
     assert data[1][:-1] == expected_created_student1_row
 
+
+@pytest.mark.django_db
+def test_view_assignment_student_answers_csv(client):
+    teacher = TeacherFactory()
+    student_one, student_two = StudentFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher])
+    EnrollmentFactory(course=course, student=student_one)
+    EnrollmentFactory(course=course, student=student_two)
+    assignment = AssignmentFactory(course=course, submission_type=AssignmentFormat.CODE_REVIEW)
+    csv_download_url = reverse('teaching:assignment_student_answers_csv', args=[assignment.pk])
+    sa_one = StudentAssignment.objects.get(student=student_one)
+    sa_two = StudentAssignment.objects.get(student=student_two)
+    client.login(teacher)
+
+    headers = [
+        "Профиль на сайте",
+        "Фамилия",
+        "Имя",
+        "Отчество",
+        "Отделение",
+        "Текстовый ответ"
+    ]
+    answers_csv = client.get(csv_download_url).content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(answers_csv)) if s]
+    assert data == [headers]
+
+    AssignmentCommentFactory(student_assignment=sa_one, author=student_one,
+                                           type=AssignmentSubmissionTypes.COMMENT,
+                                           text="comment_one")
+    AssignmentCommentFactory(student_assignment=sa_two, author=student_two,
+                                           type=AssignmentSubmissionTypes.COMMENT,
+                                           text="comment_two")
+
+    student_one_row = [
+        student_one.get_absolute_url(),
+        student_one.last_name,
+        student_one.first_name,
+        student_one.patronymic,
+        "Не выставлено",
+        "comment_one",
+    ]
+    student_two_row = [
+        student_two.get_absolute_url(),
+        student_two.last_name,
+        student_two.first_name,
+        student_two.patronymic,
+        "Не выставлено",
+        "comment_two",
+    ]
+
+    status_log_csv = client.get(csv_download_url).content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
+    assert len(data) == 3
+    assert data[1] == student_one_row
+    assert data[2] == student_two_row
+
+    AssignmentCommentFactory(student_assignment=sa_one, author=student_one,
+                                           type=AssignmentSubmissionTypes.COMMENT,
+                                           text="comment_three")
+    student_one_row_extra = [
+        student_one.get_absolute_url(),
+        student_one.last_name,
+        student_one.first_name,
+        student_one.patronymic,
+        "Не выставлено",
+        "comment_three",
+    ]
+
+    branch = BranchFactory()
+    student_two.branch = branch
+    student_two.save()
+
+    student_two_row[4] = branch.name
+
+    status_log_csv = client.get(csv_download_url).content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
+    assert len(data) == 4
+    assert data[1] == student_one_row
+    assert data[2] == student_one_row_extra
+    assert data[3] == student_two_row
