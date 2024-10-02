@@ -1,13 +1,11 @@
 from admission.constants import InterviewSections
 from admission.management.commands._utils import CurrentCampaignMixin
-from admission.models import Applicant, Campaign, Comment, Interview
+from admission.models import Applicant, Comment, Interview
 import csv
 from core.models import Location
 from datetime import datetime
 from django.core.management import BaseCommand, CommandError
-from django.conf import settings
 from django.db import transaction
-from django.db.models import Q
 from django.utils import timezone
 from users.models import User
 
