@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Q
 
 from admission.management.commands._utils import CurrentCampaignMixin
 import csv
@@ -8,7 +9,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from study_programs.models import AcademicDiscipline
-from users.models import User
+from users.models import User, StudentTypes
 from users.services import get_student_profile, update_student_academic_discipline
 
 
@@ -39,6 +40,12 @@ class Command(CurrentCampaignMixin, BaseCommand):
             help="date of interview in YYYY-MM-DD format",
         )
         parser.add_argument(
+            "--year_of_admission",
+            type=int,
+            default=0,
+            help="Year of admission for student profile filter",
+        )
+        parser.add_argument(
             "--editor_id",
             type=int,
             default=15418,
@@ -50,12 +57,14 @@ class Command(CurrentCampaignMixin, BaseCommand):
         filename = options["filename"]
         date = timezone.now().date() if options["date"] == "today" \
             else datetime.strptime(options["date"], '%Y-%m-%d').date()
+        year_of_admission = timezone.now().date().year if options["year_of_admission"] == 0 else options["year_of_admission"]
         editor = User.objects.get(pk=options["editor_id"])
         with open(filename) as csvfile:
             reader = csv.DictReader(csvfile, delimiter=delimiter)
             headers = next(reader)
+            counter = 0
             with transaction.atomic():
-                for student_number, row in enumerate(reader):
+                for row in reader:
                     id = int(row["Профиль на сайте"].split('/')[2])
                     try:
                         user = User.objects.get(id=id)
@@ -68,12 +77,20 @@ class Command(CurrentCampaignMixin, BaseCommand):
                     except AcademicDiscipline.DoesNotExist:
                         print(f'{academic_discipline_name} does not exists')
                         raise
-                    student_profile = get_student_profile(user, site=settings.SITE_ID)
-                    assert student_profile is not None, user
+                    student_profile = get_student_profile(user, site=settings.SITE_ID,
+                                                          profile_type=StudentTypes.REGULAR,
+                                                          filters=[Q(year_of_admission=year_of_admission)])
+                    if student_profile is None:
+                        print(f'No regular student profile with {year_of_admission = } and {user = }')
+                        continue
+                    if student_profile.academic_discipline is not None:
+                        print(f'Academic discipline is aleady set for {student_profile}')
+                        continue
                     update_student_academic_discipline(student_profile,
                                                        new_academic_discipline=academic_discipline,
                                                        editor=editor,
                                                        changed_at=date)
-                if input(f'\nБудут заменены {student_number} направлений и созданы логи на {date} от лица {editor}\n'
+                    counter += 1
+                if input(f'\nБудут заменены {counter} направлений и созданы логи на {date} от лица {editor}\n'
                          f'Введите "y" для подтверждения: ') != "y":
                     raise CommandError("Error asking for approval. Canceled")
