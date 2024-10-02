@@ -508,3 +508,30 @@ def unassign_role(*, account: User, role: str, site: Site):
     if role not in Roles.values:
         raise ValidationError(f"Role {role} is not registered", code="invalid")
     UserGroup.objects.filter(user=account, site=site, role=role).delete()
+
+def merge_users(*, donor: User, recipient: User):
+    if not isinstance(donor, User) or not isinstance(recipient, User):
+        raise TypeError('Only User instances can be merged')
+
+    with transaction.atomic():
+        related_models = [(o.related_model, o.field.name) for o in donor._meta.related_objects]
+        for (related_model, field_name) in related_models:
+            relType = related_model._meta.get_field(field_name).get_internal_type()
+            if relType in ("ForeignKey", "OneToOneField"):
+                qs = related_model.objects.filter(**{ field_name: donor })
+                for obj in qs:
+                    setattr(obj, field_name, recipient)
+                    obj.save()
+            elif relType == "ManyToManyField":
+                qs = related_model.objects.filter(**{ field_name: donor })
+                for obj in qs:
+                    mtmRel = getattr(obj, field_name)
+                    mtmRel.remove(donor)
+                    mtmRel.add(recipient)
+            else:
+                raise TypeError(f"{relType} is not processed")
+
+
+    # donor.delete()
+
+    return recipient
