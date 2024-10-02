@@ -30,7 +30,7 @@
             {% if enrollment.course.duration == CourseDurations.SECOND_HALF %}
               <i class="fa fa-adjust {{opacity}}" aria-hidden="true"></i>
             {% endif %}
-            <i class="{{opacity}}"> | {{ enrollment.grade_honest|lower }} </i>
+            <i class="{{opacity}}"> | {% if enrollment.is_grade_recredited %}перезачтено,{% endif %} {{ enrollment.grade_honest|lower }} </i>
             {% if not loop.last and loop.nextitem.course.semester != enrollment.course.semester %}
             <p></p>
             {% endif %}

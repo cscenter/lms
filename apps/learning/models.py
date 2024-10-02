@@ -368,6 +368,10 @@ class Enrollment(TimezoneAwareMixin, TimeStampedModel):
         max_length=100,
         choices=GradeTypes.choices,
         default=GradeTypes.NOT_GRADED)
+    is_grade_recredited = models.BooleanField(
+        _("Grade re-credited"),
+        help_text=_("This flag is used to represent that set grade is recredited. Use it with satisfactory grades."),
+        default=False)
     grade_changed = MonitorField(
         verbose_name=_("Enrollment|grade changed"),
         monitor='grade')
@@ -419,6 +423,10 @@ class Enrollment(TimezoneAwareMixin, TimeStampedModel):
         if self.student_group_id and self.student_group.course_id != self.course_id:
             raise ValidationError({"student_group": _("Student group must refer to one of the "
                                                       "student groups of the selected course")})
+        if self.is_grade_recredited and self.grade == GradeTypes.RE_CREDIT:
+            raise ValidationError({"is_grade_recredited": _("Can not be used with re-credit grade")})
+        if self.is_grade_recredited and self.grade not in GradeTypes.satisfactory_grades:
+            raise ValidationError({"is_grade_recredited": _("Can not be used with unsatisfactory grades")})
 
     def grade_changed_local(self, tz=None):
         if not tz:
