@@ -1,16 +1,19 @@
 import datetime
+import logging
+import re
 from collections import defaultdict
 from enum import Enum, auto
+from inspect import getouterframes, currentframe
 from itertools import islice
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, TypeVar
 
 from registration.models import RegistrationProfile
 
 from django.contrib.sites.models import Site
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
-from django.db import transaction
-from django.db.models import Prefetch, Q, prefetch_related_objects
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.db import transaction, IntegrityError
+from django.db.models import Prefetch, Q, prefetch_related_objects, Model
 from django.utils.timezone import now
 
 from auth.registry import role_registry
@@ -19,7 +22,7 @@ from core.timezone import get_now_utc
 from core.timezone.typing import Timezone
 from core.utils import bucketize
 from courses.models import Semester
-from learning.models import GraduateProfile
+from learning.models import GraduateProfile, StudentAssignment
 from learning.settings import StudentStatuses
 from study_programs.models import StudyProgram, AcademicDiscipline
 from users.constants import GenderTypes, Roles
@@ -28,6 +31,8 @@ from users.models import (
 )
 
 AccountId = int
+M = TypeVar('M', bound=Model)
+logger = logging.getLogger(__name__)
 
 
 def get_student_progress(queryset,
@@ -509,29 +514,89 @@ def unassign_role(*, account: User, role: str, site: Site):
         raise ValidationError(f"Role {role} is not registered", code="invalid")
     UserGroup.objects.filter(user=account, site=site, role=role).delete()
 
-def merge_users(*, donor: User, recipient: User):
+
+def get_object_from_integrity_error(related_model: Model, e: str) -> Model:
+    detail_pattern = r'DETAIL:  Key \((.*?)\)=\((.*?)\) already exists.'
+    match = re.search(detail_pattern, e)
+    fields = match.group(1).split(', ')
+    values = match.group(2).split(', ')
+    return related_model.objects.get(**dict(zip(fields, values)))
+
+
+def merge_objects(*, donor: M, recipient: M, related_models=None) -> M:
+    if type(donor) != type(recipient):
+        raise TypeError('Donor and recipient must be objects of the same types')
+    if donor == recipient:
+        raise ValueError('Donor and recipient must not be the same object')
+    offset = '\t' * (len(getouterframes(currentframe())) - 21)
+    logger.debug(f"{offset}Merging {donor} to {recipient}. Type: {type(donor)}")
+    related_models = related_models or [(o.related_model, o.field.name) for o in donor._meta.related_objects]
+    with transaction.atomic():
+        for (related_model, field_name) in related_models:
+            related_model_type = related_model._meta.get_field(field_name).get_internal_type()
+            if related_model_type == "ForeignKey":
+                qs = related_model.objects.filter(**{field_name: donor})
+                for obj in qs:
+                    try:
+                        with transaction.atomic():
+                            setattr(obj, field_name, recipient)
+                            obj.save()
+                    except IntegrityError as e:
+                        if "duplicate key value violates unique constraint" in str(e):
+                            obj.refresh_from_db()
+                            merge_objects(donor=obj, recipient=get_object_from_integrity_error(related_model, str(e)))
+                        else:
+                            raise
+            elif related_model_type == "ManyToManyField":
+                qs = related_model.objects.filter(**{field_name: donor})
+                for obj in qs:
+                    mtm_relation = getattr(obj, field_name)
+                    mtm_relation.remove(donor)
+                    mtm_relation.add(recipient)
+            elif related_model_type == "OneToOneField":
+                try:
+                    obj = related_model.objects.get(**{field_name: donor})
+                    merge_objects(donor=obj, recipient=related_model.objects.get(**{field_name: recipient}))
+                except ObjectDoesNotExist:
+                    pass
+            else:
+                raise TypeError(f"{related_model_type} is not processed: {related_model}")
+        profile_fields = [field.name for field in donor._meta.fields if field.name != "id"]
+        for field in profile_fields:
+            donor_value = getattr(donor, field, None)
+            if donor_value is not None:
+                setattr(recipient, field, donor_value)
+        donor.delete()
+        recipient.save()
+    return recipient
+
+
+def merge_users(*, donor: User, recipient: User) -> User:
     if not isinstance(donor, User) or not isinstance(recipient, User):
-        raise TypeError('Only User instances can be merged')
+        raise TypeError('Use merge_objects for non User instances')
+    if donor == recipient:
+        raise ValueError('Donor and recipient must not be the same object')
 
     with transaction.atomic():
-        related_models = [(o.related_model, o.field.name) for o in donor._meta.related_objects]
-        for (related_model, field_name) in related_models:
-            relType = related_model._meta.get_field(field_name).get_internal_type()
-            if relType in ("ForeignKey", "OneToOneField"):
-                qs = related_model.objects.filter(**{ field_name: donor })
-                for obj in qs:
-                    setattr(obj, field_name, recipient)
+        related_models = [(o.related_model, o.field.name) for o in donor._meta.related_objects if
+                          str(o.related_model) != "StudentProfile"]
+
+        # transfer StudentProfiles first for correct transfer of UserGroups as student_profile is needed in post_save
+        qs = StudentProfile.objects.filter(user=donor)
+        for obj in qs:
+            try:
+                with transaction.atomic():
+                    obj.user = recipient
                     obj.save()
-            elif relType == "ManyToManyField":
-                qs = related_model.objects.filter(**{ field_name: donor })
-                for obj in qs:
-                    mtmRel = getattr(obj, field_name)
-                    mtmRel.remove(donor)
-                    mtmRel.add(recipient)
-            else:
-                raise TypeError(f"{relType} is not processed")
+            except IntegrityError as e:
+                if "duplicate key value violates unique constraint" in str(e):
+                    obj.refresh_from_db()
+                    merge_objects(donor=obj, recipient=StudentProfile.objects.get(user=recipient, branch=obj.branch,
+                                                                                  year_of_admission=obj.year_of_admission,
+                                                                                  type=StudentTypes.REGULAR))
+                else:
+                    raise
 
-
-    # donor.delete()
+        recipient = merge_objects(donor=donor, recipient=recipient, related_models=related_models)
 
     return recipient
