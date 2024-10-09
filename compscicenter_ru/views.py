@@ -68,7 +68,8 @@ def get_random_testimonials(count, cache_key, **filters):
                         .get_only_required_fields()
                         .prefetch_related("academic_disciplines")
                         .order_by('?'))[:count]
-        cache.set(cache_key, testimonials, 3600)
+        # Can't pickle local object 'create_forward_many_to_many_manager..ManyRelatedManager'" when pickling academic_disciplines
+        # cache.set(cache_key, testimonials, 3600)
     return testimonials
 
 
