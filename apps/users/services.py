@@ -5,7 +5,7 @@ from collections import defaultdict
 from enum import Enum, auto
 from inspect import getouterframes, currentframe
 from itertools import islice
-from typing import Any, Dict, List, Optional, Tuple, TypeVar
+from typing import Any, Dict, List, Optional, Tuple, TypeVar, Type
 
 from registration.models import RegistrationProfile
 
@@ -515,7 +515,7 @@ def unassign_role(*, account: User, role: str, site: Site):
     UserGroup.objects.filter(user=account, site=site, role=role).delete()
 
 
-def get_object_from_integrity_error(related_model: Model, e: str) -> Model:
+def get_object_from_integrity_error(related_model: Model | Type, e: str) -> Model:
     detail_pattern = r'DETAIL:  Key \((.*?)\)=\((.*?)\) already exists.'
     match = re.search(detail_pattern, e)
     fields = match.group(1).split(', ')
@@ -523,80 +523,90 @@ def get_object_from_integrity_error(related_model: Model, e: str) -> Model:
     return related_model.objects.get(**dict(zip(fields, values)))
 
 
-def merge_objects(*, donor: M, recipient: M, related_models=None) -> M:
-    if type(donor) != type(recipient):
-        raise TypeError('Donor and recipient must be objects of the same types')
-    if donor == recipient:
-        raise ValueError('Donor and recipient must not be the same object')
+def merge_objects(*, major: M, minor: M, related_models=None) -> M:
+    if type(major) != type(minor):
+        raise TypeError('Major and minor must be objects of the same types')
+    if major == minor:
+        raise ValueError(f'Major and minor must not be the same object: {major} with type {type(major)}')
     offset = '\t' * (len(getouterframes(currentframe())) - 21)
-    logger.debug(f"{offset}Merging {donor} to {recipient}. Type: {type(donor)}")
-    related_models = related_models or [(o.related_model, o.field.name) for o in donor._meta.related_objects]
+    logger.debug(f"{offset}Merging {minor} to {major}. Type: {type(major)}")
+    related_models = related_models or [(o.related_model, o.field.name) for o in minor._meta.related_objects]
     with transaction.atomic():
         for (related_model, field_name) in related_models:
             related_model_type = related_model._meta.get_field(field_name).get_internal_type()
             if related_model_type == "ForeignKey":
-                qs = related_model.objects.filter(**{field_name: donor})
+                qs = related_model.objects.filter(**{field_name: minor})
                 for obj in qs:
                     try:
                         with transaction.atomic():
-                            setattr(obj, field_name, recipient)
+                            setattr(obj, field_name, major)
                             obj.save()
                     except IntegrityError as e:
                         if "duplicate key value violates unique constraint" in str(e):
                             obj.refresh_from_db()
-                            merge_objects(donor=obj, recipient=get_object_from_integrity_error(related_model, str(e)))
+                            merge_objects(major=get_object_from_integrity_error(related_model, str(e)), minor=obj)
                         else:
                             raise
             elif related_model_type == "ManyToManyField":
-                qs = related_model.objects.filter(**{field_name: donor})
+                qs = related_model.objects.filter(**{field_name: minor})
                 for obj in qs:
                     mtm_relation = getattr(obj, field_name)
-                    mtm_relation.remove(donor)
-                    mtm_relation.add(recipient)
+                    mtm_relation.remove(minor)
+                    mtm_relation.add(major)
             elif related_model_type == "OneToOneField":
                 try:
-                    obj = related_model.objects.get(**{field_name: donor})
-                    merge_objects(donor=obj, recipient=related_model.objects.get(**{field_name: recipient}))
+                    minor_obj = related_model.objects.get(**{field_name: minor})
                 except ObjectDoesNotExist:
-                    pass
+                    # Means OneToOneField presents but no objects are linked
+                    continue
+                try:
+                    major_obj = related_model.objects.get(**{field_name: major})
+                except ObjectDoesNotExist:
+                    setattr(minor_obj, field_name, major)
+                    minor_obj.save()
+                else:
+                    merge_objects(major=major_obj, minor=minor_obj)
             else:
                 raise TypeError(f"{related_model_type} is not processed: {related_model}")
-        profile_fields = [field.name for field in donor._meta.fields if field.name != "id"]
+        profile_fields = [field.name for field in minor._meta.fields if field.name != "id"]
         for field in profile_fields:
-            donor_value = getattr(donor, field, None)
-            if donor_value is not None:
-                setattr(recipient, field, donor_value)
-        donor.delete()
-        recipient.save()
-    return recipient
+            major_value = getattr(major, field, None)
+            minor_value = getattr(minor, field, None)
+            if major_value is None and minor_value is not None:
+                setattr(major, field, minor_value)
+        minor.delete()
+        major.save()
+    return major
 
 
-def merge_users(*, donor: User, recipient: User) -> User:
-    if not isinstance(donor, User) or not isinstance(recipient, User):
+def merge_users(*, major: User, minor: User) -> User:
+    if not isinstance(major, User) or not isinstance(minor, User):
         raise TypeError('Use merge_objects for non User instances')
-    if donor == recipient:
-        raise ValueError('Donor and recipient must not be the same object')
+    if major == minor:
+        raise ValueError(f'Major and minor must not be the same object: {major} with type {type(major)}')
 
     with transaction.atomic():
-        related_models = [(o.related_model, o.field.name) for o in donor._meta.related_objects if
+        related_models = [(o.related_model, o.field.name) for o in minor._meta.related_objects if
                           str(o.related_model) != "StudentProfile"]
 
         # transfer StudentProfiles first for correct transfer of UserGroups as student_profile is needed in post_save
-        qs = StudentProfile.objects.filter(user=donor)
+        qs = StudentProfile.objects.filter(user=minor)
         for obj in qs:
             try:
                 with transaction.atomic():
-                    obj.user = recipient
+                    obj.user = major
                     obj.save()
             except IntegrityError as e:
                 if "duplicate key value violates unique constraint" in str(e):
                     obj.refresh_from_db()
-                    merge_objects(donor=obj, recipient=StudentProfile.objects.get(user=recipient, branch=obj.branch,
-                                                                                  year_of_admission=obj.year_of_admission,
-                                                                                  type=StudentTypes.REGULAR))
+                    major_obj = StudentProfile.objects.get(user=major,
+                                                           branch=obj.branch,
+                                                           year_of_admission=obj.year_of_admission,
+                                                           type=StudentTypes.REGULAR)
+                    merge_objects(major=major_obj, minor=obj)
                 else:
                     raise
 
-        recipient = merge_objects(donor=donor, recipient=recipient, related_models=related_models)
+        major = merge_objects(major=major, minor=minor, related_models=related_models)
 
-    return recipient
+    return major
