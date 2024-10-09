@@ -15,6 +15,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import transaction, IntegrityError
 from django.db.models import Prefetch, Q, prefetch_related_objects, Model
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 
 from auth.registry import role_registry
 from core.models import Branch
@@ -22,7 +23,7 @@ from core.timezone import get_now_utc
 from core.timezone.typing import Timezone
 from core.utils import bucketize
 from courses.models import Semester
-from learning.models import GraduateProfile, StudentAssignment
+from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
 from study_programs.models import StudyProgram, AcademicDiscipline
 from users.constants import GenderTypes, Roles
@@ -525,9 +526,9 @@ def get_object_from_integrity_error(related_model: Model | Type, e: str) -> Mode
 
 def merge_objects(*, major: M, minor: M, related_models=None) -> M:
     if type(major) != type(minor):
-        raise TypeError('Major and minor must be objects of the same types')
+        raise TypeError(_('Major and minor must be objects of the same types'))
     if major == minor:
-        raise ValueError(f'Major and minor must not be the same object: {major} with type {type(major)}')
+        raise ValueError(_(f'Major and minor must not be the same object: {major} with type {type(major)}'))
     offset = '\t' * (len(getouterframes(currentframe())) - 21)
     logger.debug(f"{offset}Merging {minor} to {major}. Type: {type(major)}")
     related_models = related_models or [(o.related_model, o.field.name) for o in minor._meta.related_objects]
@@ -581,9 +582,9 @@ def merge_objects(*, major: M, minor: M, related_models=None) -> M:
 
 def merge_users(*, major: User, minor: User) -> User:
     if not isinstance(major, User) or not isinstance(minor, User):
-        raise TypeError('Use merge_objects for non User instances')
+        raise TypeError(_('Use merge_objects for non User instances'))
     if major == minor:
-        raise ValueError(f'Major and minor must not be the same object: {major} with type {type(major)}')
+        raise ValueError(_(f'Major and minor must not be the same object: {major} with type {type(major)}'))
 
     with transaction.atomic():
         related_models = [(o.related_model, o.field.name) for o in minor._meta.related_objects if

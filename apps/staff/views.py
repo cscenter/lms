@@ -3,6 +3,7 @@ import datetime
 from collections import defaultdict
 
 from django.utils import timezone, formats
+from django.utils.safestring import mark_safe
 from django_filters import FilterSet
 from django_filters.views import BaseFilterView, FilterView
 from rest_framework import serializers
@@ -14,7 +15,7 @@ from django.core.management import CommandError, call_command
 from django.db.models import Count, Prefetch
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.http.response import Http404, HttpResponseForbidden, HttpResponse
-from django.shortcuts import get_list_or_404, get_object_or_404, redirect
+from django.shortcuts import get_list_or_404, get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views import View, generic
 
@@ -48,7 +49,7 @@ from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
 from staff.filters import EnrollmentInvitationFilter, StudentProfileFilter, StudentAcademicDisciplineLogFilter, \
     StudentStatusLogFilter
-from staff.forms import GraduationForm
+from staff.forms import GraduationForm, MergeUsersForm
 from staff.models import Hint
 from staff.tex import generate_tex_student_profile_for_diplomas
 from study_programs.models import AcademicDiscipline
@@ -60,7 +61,7 @@ from users.models import PartnerTag, StudentProfile, StudentTypes, User, Student
 from users.services import (
     create_graduate_profiles,
     get_graduate_profile,
-    get_student_progress,
+    get_student_progress, merge_users,
 )
 
 
@@ -146,6 +147,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         prev_term = current_term.get_prev()
         graduation_form = GraduationForm()
         graduation_form.helper.form_action = reverse("staff:create_alumni_profiles")
+        merge_users_form = MergeUsersForm()
         official_diplomas_dates = (
             GraduateProfile.objects.for_site(self.request.site)
             .with_official_diploma()
@@ -156,6 +158,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         branches = Branch.objects.filter(site_id=settings.SITE_ID)
         context = {
             "alumni_profiles_form": graduation_form,
+            "merge_users_form": merge_users_form,
             "current_term": current_term,
             "prev_term": {"year": prev_term.year, "type": prev_term.type},
             "campaigns": (
@@ -679,9 +682,30 @@ def create_alumni_profiles(request: HttpRequest):
     if form.is_valid():
         graduated_on = form.cleaned_data["graduated_on"]
         create_graduate_profiles(request.site, graduated_on, created_by=request.user)
-        messages.success(request, f"Операция выполнена успешно.")
+        messages.success(request, "Операция выполнена успешно")
     else:
-        messages.error(request, str("Неверный формат даты выпуска"))
+        messages.error(request, "Неверный формат даты выпуска")
+    return HttpResponseRedirect(reverse("staff:exports"))
+
+def merge_users_view(request: HttpRequest):
+    if not request.user.is_curator:
+        return HttpResponseForbidden()
+    form = MergeUsersForm(data=request.POST)
+    if form.is_valid():
+        major_user = User.objects.get(email__iexact=form.cleaned_data['major_email'])
+        minor_user = User.objects.get(email__iexact=form.cleaned_data['major_email'])
+        try:
+            main_user = merge_users(major=major_user, minor=minor_user)
+        except Exception as e:
+            messages.error(request, str(e))
+        else:
+            messages.success(request, mark_safe(f"Пользователи успешно объединены. "
+                                            f"<a href={main_user.get_absolute_url()}>Ссылка на объединенный профиль</a>"))
+    else:
+        for field, error_as_list in form.errors.items():
+            label = form.fields[field].label if field in form.fields else field
+            errors = "<br>".join(str(error) for error in error_as_list)
+            messages.error(request, mark_safe(f"{label}:<br>{errors}"))
     return HttpResponseRedirect(reverse("staff:exports"))
 
 

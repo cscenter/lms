@@ -17,7 +17,7 @@ from staff.views import (
     ProgressReportForSemesterView, ProgressReportFullView, StudentFacesView,
     StudentSearchCSVView, StudentSearchView, SurveySubmissionsReportView,
     SurveySubmissionsStatsView, WillGraduateStatsReportView, AdmissionApplicantsYearReportView,
-    StudentAcademicDisciplineLogListView, StudentStatusLogListView
+    StudentAcademicDisciplineLogListView, StudentStatusLogListView, merge_users_view
 )
 
 from staff.views import autograde_projects, autofail_ungraded, create_alumni_profiles
@@ -67,6 +67,7 @@ urlpatterns = [
     path('commands/create-alumni-profiles/', create_alumni_profiles, name='create_alumni_profiles'),  # deprecated
     path('commands/autograde-projects/', autograde_projects, name='autograde_projects'),
     path('commands/autofail_ungraded/', autofail_ungraded, name='autofail_ungraded'),
+    path('commands/merge_users/', merge_users_view, name='merge_users'),
 
     path('course-participants/', CourseParticipantsIntersectionView.as_view(), name='course_participants_intersection'),
 
