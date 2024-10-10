@@ -12,16 +12,14 @@ from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import FileField, F, Prefetch
+from django.db.models import FileField, F, OuterRef, Subquery
 from django.http import FileResponse, HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
 
 from auth.mixins import PermissionRequiredMixin
-from code_reviews.gerrit.constants import GerritRobotMessages
 from core import comment_persistence
 from core.api.fields import CharSeparatedField
 from core.exceptions import Redirect
@@ -204,42 +202,29 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
     permission_required = ViewAssignment.name
 
     def get_student_assignments(self):
+        enrollment_subquery = Enrollment.objects.filter(
+            student=OuterRef('student'),
+            course=OuterRef('assignment__course')
+        ).values('type')[:1]
+
         student_assignments = (
             StudentAssignment.objects
+            .annotate(enrollment_type=Subquery(enrollment_subquery))
+            .filter(enrollment_type=EnrollmentTypes.REGULAR)
             .filter(assignment__pk=self.object.pk)
-            .select_related('assignment',
-                            'assignment__course',
-                            'assignment__course__meta_course',
-                            'assignment__course__semester',
-                            'student')
-            .prefetch_related('student__groups', 'student__student_profiles')
-            .order_by('student__last_name', 'student__first_name'))
-        student_ids = student_assignments.values_list('student_id', flat=True)
-        course = student_assignments.first().assignment.course
-        enrollments = Enrollment.objects.filter(student_idin=student_ids, course=course)
-        enrollments_prefetch = Prefetch(
-            'student__enrollment_set',
-            queryset=enrollments,
-            to_attr='prefetched_enrollments'
-        )
-        student_assignments = (
-            student_assignments.prefetch_related(
-                enrollments_prefetch,
-                'student__groups',
-                'student__student_profiles'
+            .select_related(
+                'assignment',
+                'assignment__course',
+                'assignment__course__meta_course',
+                'assignment__course__semester',
+                'student'
             )
+            .prefetch_related('student__groups', 'student__student_profiles')
+            .order_by('student__last_name', 'student__first_name')
         )
+        return student_assignments
 
-        a_s_list = []
-        for student_assignment in student_assignments:
-            enrollment = (Enrollment.objects
-                          .filter(student=student_assignment.student, course_id=student_assignment.assignment.course)
-                          .first())
-            if enrollment.type == EnrollmentTypes.REGULAR:
-                a_s_list.append(student_assignment)
-
-
-def get_permission_object(self):
+    def get_permission_object(self):
         self.object = self.get_object()
         return self.object.course
 
