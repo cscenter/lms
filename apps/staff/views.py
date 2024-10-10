@@ -693,7 +693,7 @@ def merge_users_view(request: HttpRequest):
     form = MergeUsersForm(data=request.POST)
     if form.is_valid():
         major_user = User.objects.get(email__iexact=form.cleaned_data['major_email'])
-        minor_user = User.objects.get(email__iexact=form.cleaned_data['major_email'])
+        minor_user = User.objects.get(email__iexact=form.cleaned_data['minor_email'])
         try:
             main_user = merge_users(major=major_user, minor=minor_user)
         except Exception as e:
@@ -704,6 +704,7 @@ def merge_users_view(request: HttpRequest):
     else:
         for field, error_as_list in form.errors.items():
             label = form.fields[field].label if field in form.fields else field
+            label = "Общее" if label == "__all__" else label
             errors = "<br>".join(str(error) for error in error_as_list)
             messages.error(request, mark_safe(f"{label}:<br>{errors}"))
     return HttpResponseRedirect(reverse("staff:exports"))

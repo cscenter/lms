@@ -45,7 +45,7 @@ class MergeUsersForm(forms.Form):
                 Div('minor_email', css_class="col-xs-4"),
             ),
             FormActions(Submit('submit', _('Merge Users'),
-                               onclick="return confirm('Вы уверены, что хотите объединить пользователей?');"))
+                               onclick="return confirm('Вы уверены? Это действие нельзя обратить');"))
         )
 
     def clean_major_email(self):
@@ -59,3 +59,9 @@ class MergeUsersForm(forms.Form):
         if not User.objects.filter(email__iexact=minor_email).exists():
             raise ValidationError(_("There is no User with this email"))
         return minor_email
+
+    def clean(self):
+        major_email = self.cleaned_data.get('major_email')
+        minor_email = self.cleaned_data.get('minor_email')
+        if major_email == minor_email:
+            raise ValidationError(_("Emails must not be the same"))

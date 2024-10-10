@@ -528,9 +528,7 @@ def merge_objects(*, major: M, minor: M, related_models=None) -> M:
     if type(major) != type(minor):
         raise TypeError(_('Major and minor must be objects of the same types'))
     if major == minor:
-        raise ValueError(_(f'Major and minor must not be the same object: {major} with type {type(major)}'))
-    offset = '\t' * (len(getouterframes(currentframe())) - 21)
-    logger.debug(f"{offset}Merging {minor} to {major}. Type: {type(major)}")
+        raise ValueError(_(f'Major and minor objects must not be the same: {major} with type {type(major)}'))
     related_models = related_models or [(o.related_model, o.field.name) for o in minor._meta.related_objects]
     with transaction.atomic():
         for (related_model, field_name) in related_models:
@@ -584,7 +582,7 @@ def merge_users(*, major: User, minor: User) -> User:
     if not isinstance(major, User) or not isinstance(minor, User):
         raise TypeError(_('Use merge_objects for non User instances'))
     if major == minor:
-        raise ValueError(_(f'Major and minor must not be the same object: {major} with type {type(major)}'))
+        raise ValueError(_(f'Major and minor Users must not be the same object: {major}'))
 
     with transaction.atomic():
         related_models = [(o.related_model, o.field.name) for o in minor._meta.related_objects if
