@@ -106,7 +106,7 @@ class CoursesFilter(FilterSet):
             data = QueryDict(mutable=True)
         self.site_branches = self.get_branches(request)
         branch_code = data.pop("branch", None)
-        if request.user.roles.issubset(student_permission_roles):
+        if request.user.is_authenticated and request.user.roles.issubset(student_permission_roles):
             profiles = get_student_profiles(user=request.user,
                                             site=request.site)
             user_branch_ids = [profile.branch_id for profile in profiles]
