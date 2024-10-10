@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import FileField, F
+from django.db.models import FileField, F, Prefetch
 from django.http import FileResponse, HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect
@@ -51,7 +51,7 @@ from learning.services.personal_assignment_service import (
     create_personal_assignment_review, get_assignment_update_history_message,
     get_draft_comment
 )
-from learning.settings import AssignmentScoreUpdateSource
+from learning.settings import AssignmentScoreUpdateSource, EnrollmentTypes
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
 
@@ -203,7 +203,43 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
     context_object_name = 'assignment'
     permission_required = ViewAssignment.name
 
-    def get_permission_object(self):
+    def get_student_assignments(self):
+        student_assignments = (
+            StudentAssignment.objects
+            .filter(assignment__pk=self.object.pk)
+            .select_related('assignment',
+                            'assignment__course',
+                            'assignment__course__meta_course',
+                            'assignment__course__semester',
+                            'student')
+            .prefetch_related('student__groups', 'student__student_profiles')
+            .order_by('student__last_name', 'student__first_name'))
+        student_ids = student_assignments.values_list('student_id', flat=True)
+        course = student_assignments.first().assignment.course
+        enrollments = Enrollment.objects.filter(student_idin=student_ids, course=course)
+        enrollments_prefetch = Prefetch(
+            'student__enrollment_set',
+            queryset=enrollments,
+            to_attr='prefetched_enrollments'
+        )
+        student_assignments = (
+            student_assignments.prefetch_related(
+                enrollments_prefetch,
+                'student__groups',
+                'student__student_profiles'
+            )
+        )
+
+        a_s_list = []
+        for student_assignment in student_assignments:
+            enrollment = (Enrollment.objects
+                          .filter(student=student_assignment.student, course_id=student_assignment.assignment.course)
+                          .first())
+            if enrollment.type == EnrollmentTypes.REGULAR:
+                a_s_list.append(student_assignment)
+
+
+def get_permission_object(self):
         self.object = self.get_object()
         return self.object.course
 
@@ -221,16 +257,7 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['a_s_list'] = (
-            StudentAssignment.objects
-                .filter(assignment__pk=self.object.pk)
-                .select_related('assignment',
-                                'assignment__course',
-                                'assignment__course__meta_course',
-                                'assignment__course__semester',
-                                'student')
-                .prefetch_related('student__groups')
-                .order_by('student__last_name', 'student__first_name'))
+        context['a_s_list'] = self.get_student_assignments()
         # Note: it's possible to return values instead and
         # making 1 db hit instead of 3
         exec_mean = AssignmentService.get_mean_execution_time(self.object)
