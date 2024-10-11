@@ -12,16 +12,14 @@ from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import FileField, F
+from django.db.models import FileField, F, OuterRef, Subquery
 from django.http import FileResponse, HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect
-from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
 
 from auth.mixins import PermissionRequiredMixin
-from code_reviews.gerrit.constants import GerritRobotMessages
 from core import comment_persistence
 from core.api.fields import CharSeparatedField
 from core.exceptions import Redirect
@@ -51,7 +49,7 @@ from learning.services.personal_assignment_service import (
     create_personal_assignment_review, get_assignment_update_history_message,
     get_draft_comment
 )
-from learning.settings import AssignmentScoreUpdateSource
+from learning.settings import AssignmentScoreUpdateSource, EnrollmentTypes
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
 
@@ -203,6 +201,29 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
     context_object_name = 'assignment'
     permission_required = ViewAssignment.name
 
+    def get_student_assignments(self):
+        enrollment_subquery = Enrollment.objects.filter(
+            student=OuterRef('student'),
+            course=OuterRef('assignment__course')
+        ).values('type')[:1]
+
+        student_assignments = (
+            StudentAssignment.objects
+            .annotate(enrollment_type=Subquery(enrollment_subquery))
+            .filter(enrollment_type=EnrollmentTypes.REGULAR)
+            .filter(assignment__pk=self.object.pk)
+            .select_related(
+                'assignment',
+                'assignment__course',
+                'assignment__course__meta_course',
+                'assignment__course__semester',
+                'student'
+            )
+            .prefetch_related('student__groups', 'student__student_profiles')
+            .order_by('student__last_name', 'student__first_name')
+        )
+        return student_assignments
+
     def get_permission_object(self):
         self.object = self.get_object()
         return self.object.course
@@ -221,16 +242,7 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['a_s_list'] = (
-            StudentAssignment.objects
-                .filter(assignment__pk=self.object.pk)
-                .select_related('assignment',
-                                'assignment__course',
-                                'assignment__course__meta_course',
-                                'assignment__course__semester',
-                                'student')
-                .prefetch_related('student__groups')
-                .order_by('student__last_name', 'student__first_name'))
+        context['a_s_list'] = self.get_student_assignments()
         # Note: it's possible to return values instead and
         # making 1 db hit instead of 3
         exec_mean = AssignmentService.get_mean_execution_time(self.object)

@@ -25,7 +25,7 @@ from grading.tests.factories import SubmissionFactory
 from learning.models import StudentAssignment, AssignmentSubmissionTypes
 from learning.permissions import ViewStudentAssignment, ViewStudentAssignmentList
 from learning.services.personal_assignment_service import create_assignment_solution, create_personal_assignment_review
-from learning.settings import Branches, AssignmentScoreUpdateSource
+from learning.settings import Branches, AssignmentScoreUpdateSource, EnrollmentTypes
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
 )
@@ -173,6 +173,7 @@ def test_view_student_assignment_detail_permissions(client, lms_resolver,
 def test_assignment_detail_view_details(client):
     teacher = TeacherFactory()
     student = StudentFactory()
+    student2 = StudentFactory()
     s = SemesterFactory.create_current(for_branch=Branches.SPB)
     co = CourseFactory.create(semester=s, teachers=[teacher])
     a = AssignmentFactory.create(course=co)
@@ -182,6 +183,19 @@ def test_assignment_detail_view_details(client):
     assert response.context_data['assignment'] == a
     assert len(response.context_data['a_s_list']) == 0
     EnrollmentFactory.create(student=student, course=co)
+    a_s = StudentAssignment.objects.get(student=student, assignment=a)
+    response = client.get(url)
+    assert response.context_data['assignment'] == a
+    assert {a_s} == set(response.context_data['a_s_list'])
+    assert len(response.context_data['a_s_list']) == 1
+    enrollment2 = EnrollmentFactory.create(student=student2, course=co)
+    a_s2 = StudentAssignment.objects.get(student=student2, assignment=a)
+    response = client.get(url)
+    assert response.context_data['assignment'] == a
+    assert {a_s, a_s2} == set(response.context_data['a_s_list'])
+    assert len(response.context_data['a_s_list']) == 2
+    enrollment2.type = EnrollmentTypes.LECTIONS_ONLY
+    enrollment2.save()
     a_s = StudentAssignment.objects.get(student=student, assignment=a)
     response = client.get(url)
     assert response.context_data['assignment'] == a
