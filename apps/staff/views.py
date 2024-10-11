@@ -699,8 +699,11 @@ def merge_users_view(request: HttpRequest):
         except Exception as e:
             messages.error(request, str(e))
         else:
-            messages.success(request, mark_safe(f"Пользователи успешно объединены. "
-                                            f"<a href={main_user.get_absolute_url()}>Ссылка на объединенный профиль</a>"))
+            messages.success(request,
+                             mark_safe(f"Пользователи успешно объединены. <a "
+                                       f"href={main_user.get_absolute_url()} "
+                                       f"target='_blank'>"
+                                       f"Ссылка на объединенный профиль</a>"))
     else:
         for field, error_as_list in form.errors.items():
             label = form.fields[field].label if field in form.fields else field

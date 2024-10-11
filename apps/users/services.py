@@ -530,82 +530,83 @@ def merge_objects(*, major: M, minor: M, related_models=None) -> M:
     if major == minor:
         raise ValueError(_(f'Major and minor objects must not be the same: {major} with type {type(major)}'))
     related_models = related_models or [(o.related_model, o.field.name) for o in minor._meta.related_objects]
-    with transaction.atomic():
-        for (related_model, field_name) in related_models:
-            related_model_type = related_model._meta.get_field(field_name).get_internal_type()
-            if related_model_type == "ForeignKey":
-                qs = related_model.objects.filter(**{field_name: minor})
-                for obj in qs:
-                    try:
-                        with transaction.atomic():
-                            setattr(obj, field_name, major)
-                            obj.save()
-                    except IntegrityError as e:
-                        if "duplicate key value violates unique constraint" in str(e):
-                            obj.refresh_from_db()
-                            merge_objects(major=get_object_from_integrity_error(related_model, str(e)), minor=obj)
-                        else:
-                            raise
-            elif related_model_type == "ManyToManyField":
-                qs = related_model.objects.filter(**{field_name: minor})
-                for obj in qs:
-                    mtm_relation = getattr(obj, field_name)
-                    mtm_relation.remove(minor)
-                    mtm_relation.add(major)
-            elif related_model_type == "OneToOneField":
+    for (related_model, field_name) in related_models:
+        related_model_type = related_model._meta.get_field(field_name).get_internal_type()
+        if related_model_type == "ForeignKey":
+            qs = related_model.objects.filter(**{field_name: minor})
+            for obj in qs:
                 try:
-                    minor_obj = related_model.objects.get(**{field_name: minor})
-                except ObjectDoesNotExist:
-                    # Means OneToOneField presents but no objects are linked
-                    continue
-                try:
-                    major_obj = related_model.objects.get(**{field_name: major})
-                except ObjectDoesNotExist:
-                    setattr(minor_obj, field_name, major)
-                    minor_obj.save()
-                else:
-                    merge_objects(major=major_obj, minor=minor_obj)
+                    # Trying to transfer models completely
+                    setattr(obj, field_name, major)
+                    with transaction.atomic():
+                        obj.save()
+                except IntegrityError as e:
+                    if "duplicate key value violates unique constraint" in str(e):
+                        setattr(obj, field_name, minor)
+                        # If constraint denies complete transfer, transfer partly using this function recursively
+                        merge_objects(major=get_object_from_integrity_error(related_model, str(e)), minor=obj)
+                    else:
+                        raise
+        elif related_model_type == "ManyToManyField":
+            qs = related_model.objects.filter(**{field_name: minor})
+            for obj in qs:
+                mtm_relation = getattr(obj, field_name)
+                mtm_relation.remove(minor)
+                mtm_relation.add(major)
+        elif related_model_type == "OneToOneField":
+            try:
+                minor_obj = related_model.objects.get(**{field_name: minor})
+            except ObjectDoesNotExist:
+                # Means OneToOneField presents but no objects are linked
+                continue
+            try:
+                major_obj = related_model.objects.get(**{field_name: major})
+            except ObjectDoesNotExist:
+                setattr(minor_obj, field_name, major)
+                minor_obj.save()
             else:
-                raise TypeError(f"{related_model_type} is not processed: {related_model}")
-        profile_fields = [field.name for field in minor._meta.fields if field.name != "id"]
-        for field in profile_fields:
-            major_value = getattr(major, field, None)
-            minor_value = getattr(minor, field, None)
-            if major_value is None and minor_value is not None:
-                setattr(major, field, minor_value)
-        minor.delete()
-        major.save()
+                merge_objects(major=major_obj, minor=minor_obj)
+        else:
+            raise TypeError(f"{related_model_type} is not processed: {related_model}")
+    profile_fields = [field.name for field in minor._meta.fields if field.name != "id"]
+    for field in profile_fields:
+        major_value = getattr(major, field, None)
+        minor_value = getattr(minor, field, None)
+        if major_value is None and minor_value is not None:
+            setattr(major, field, minor_value)
+    minor.delete()
+    major.save()
+
     return major
 
-
+@transaction.atomic
 def merge_users(*, major: User, minor: User) -> User:
     if not isinstance(major, User) or not isinstance(minor, User):
         raise TypeError(_('Use merge_objects for non User instances'))
     if major == minor:
         raise ValueError(_(f'Major and minor Users must not be the same object: {major}'))
 
-    with transaction.atomic():
-        related_models = [(o.related_model, o.field.name) for o in minor._meta.related_objects if
-                          str(o.related_model) != "StudentProfile"]
+    excluded_models = ("StudentProfile", "YandexUserData")
+    related_models = [(o.related_model, o.field.name) for o in minor._meta.related_objects if
+                      all(value not in str(o.related_model) for value in excluded_models)]
+    # transfer StudentProfiles first for correct transfer of UserGroups as student_profile is needed in post_save
+    qs = StudentProfile.objects.filter(user=minor)
+    for obj in qs:
+        try:
+            obj.user = major
+            with transaction.atomic():
+                obj.save()
+        except IntegrityError as e:
+            if "duplicate key value violates unique constraint" in str(e):
+                obj.user = minor
+                major_obj = StudentProfile.objects.get(user=major,
+                                                       branch=obj.branch,
+                                                       year_of_admission=obj.year_of_admission,
+                                                       type=StudentTypes.REGULAR)
+                merge_objects(major=major_obj, minor=obj)
+            else:
+                raise
 
-        # transfer StudentProfiles first for correct transfer of UserGroups as student_profile is needed in post_save
-        qs = StudentProfile.objects.filter(user=minor)
-        for obj in qs:
-            try:
-                with transaction.atomic():
-                    obj.user = major
-                    obj.save()
-            except IntegrityError as e:
-                if "duplicate key value violates unique constraint" in str(e):
-                    obj.refresh_from_db()
-                    major_obj = StudentProfile.objects.get(user=major,
-                                                           branch=obj.branch,
-                                                           year_of_admission=obj.year_of_admission,
-                                                           type=StudentTypes.REGULAR)
-                    merge_objects(major=major_obj, minor=obj)
-                else:
-                    raise
-
-        major = merge_objects(major=major, minor=minor, related_models=related_models)
+    major = merge_objects(major=major, minor=minor, related_models=related_models)
 
     return major
