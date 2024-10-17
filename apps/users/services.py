@@ -1,17 +1,20 @@
 import datetime
+import logging
+import re
 from collections import defaultdict
 from enum import Enum, auto
 from itertools import islice
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, TypeVar, Type
 
 from registration.models import RegistrationProfile
 
 from django.contrib.sites.models import Site
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
-from django.db import transaction
-from django.db.models import Prefetch, Q, prefetch_related_objects
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.db import transaction, IntegrityError
+from django.db.models import Prefetch, Q, prefetch_related_objects, Model
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 
 from auth.registry import role_registry
 from core.models import Branch
@@ -28,6 +31,8 @@ from users.models import (
 )
 
 AccountId = int
+M = TypeVar('M', bound=Model)
+logger = logging.getLogger(__name__)
 
 
 def get_student_progress(queryset,
@@ -508,3 +513,104 @@ def unassign_role(*, account: User, role: str, site: Site):
     if role not in Roles.values:
         raise ValidationError(f"Role {role} is not registered", code="invalid")
     UserGroup.objects.filter(user=account, site=site, role=role).delete()
+
+
+def get_object_from_integrity_error(related_model: Model | Type, e: str) -> Model:
+    detail_pattern = r'DETAIL:  Key \((.*?)\)=\((.*?)\) already exists.'
+    match = re.search(detail_pattern, e)
+    fields = match.group(1).split(', ')
+    values = match.group(2).split(', ')
+    return related_model.objects.get(**dict(zip(fields, values)))
+
+
+def merge_objects(*, major: M, minor: M, related_models=None) -> M:
+    if type(major) != type(minor):
+        raise TypeError(_('Major and minor must be objects of the same types'))
+    if major == minor:
+        raise ValueError(_(f'Major and minor objects must not be the same: {major} with type {type(major)}'))
+    related_models = related_models or [(o.related_model, o.field.name) for o in minor._meta.related_objects]
+    for (related_model, field_name) in related_models:
+        related_model_type = related_model._meta.get_field(field_name).get_internal_type()
+        if related_model_type == "ForeignKey":
+            qs = related_model.objects.filter(**{field_name: minor})
+            for obj in qs:
+                try:
+                    # Trying to transfer objects completely
+                    setattr(obj, field_name, major)
+                    with transaction.atomic():
+                        obj.save()
+                except IntegrityError as e:
+                    if "duplicate key value violates unique constraint" in str(e):
+                        setattr(obj, field_name, minor)
+                        # If constraint denies complete transfer, transfer partly using this function recursively
+                        merge_objects(major=get_object_from_integrity_error(related_model, str(e)), minor=obj)
+                    else:
+                        raise
+        elif related_model_type == "ManyToManyField":
+            qs = related_model.objects.filter(**{field_name: minor})
+            for obj in qs:
+                # M2M can always be transferred completely
+                mtm_relation = getattr(obj, field_name)
+                mtm_relation.remove(minor)
+                mtm_relation.add(major)
+        elif related_model_type == "OneToOneField":
+            try:
+                minor_obj = related_model.objects.get(**{field_name: minor})
+            except ObjectDoesNotExist:
+                # Means OneToOneField presents but no minor objects are linked, skip this case
+                continue
+            try:
+                major_obj = related_model.objects.get(**{field_name: major})
+            except ObjectDoesNotExist:
+                # Means there is minor object, but major object is nnot linked, transfer minor completely
+                setattr(minor_obj, field_name, major)
+                minor_obj.save()
+            else:
+                # Means there are both minor and major objects, merge them
+                merge_objects(major=major_obj, minor=minor_obj)
+        else:
+            raise TypeError(f"{related_model_type} is not processed: {related_model}")
+    profile_fields = [field.name for field in minor._meta.fields if field.name != "id"]
+    for field in profile_fields:
+        major_value = getattr(major, field, None)
+        minor_value = getattr(minor, field, None)
+        # Can't cast to bool as set boolean fields must stay the same in major object
+        if (major_value is None or major_value == "") and (minor_value is not None and minor_value != ""):
+            setattr(major, field, minor_value)
+    minor.delete()
+    major.save()
+
+    return major
+
+@transaction.atomic
+def merge_users(*, major: User, minor: User) -> User:
+    if not isinstance(major, User) or not isinstance(minor, User):
+        raise TypeError(_('Use merge_objects for non User instances'))
+    if major == minor:
+        raise ValueError(_(f'Major and minor Users must not be the same object: {major}'))
+
+    excluded_models = ("StudentProfile", "YandexUserData")
+    related_models = [(o.related_model, o.field.name) for o in minor._meta.related_objects if
+                      all(value not in str(o.related_model) for value in excluded_models)]
+    # transfer StudentProfiles before other models for correct transfer of UserGroups as it is needed in post_save
+    # don't transfer YandexUserData to let User auth in correct Yandex account
+    qs = StudentProfile.objects.filter(user=minor)
+    for obj in qs:
+        try:
+            obj.user = major
+            with transaction.atomic():
+                obj.save()
+        except IntegrityError as e:
+            if "duplicate key value violates unique constraint" in str(e):
+                obj.user = minor
+                major_obj = StudentProfile.objects.get(user=major,
+                                                       branch=obj.branch,
+                                                       year_of_admission=obj.year_of_admission,
+                                                       type=StudentTypes.REGULAR)
+                merge_objects(major=major_obj, minor=obj)
+            else:
+                raise
+
+    major = merge_objects(major=major, minor=minor, related_models=related_models)
+
+    return major

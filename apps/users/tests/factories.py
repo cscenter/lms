@@ -7,7 +7,7 @@ from learning.settings import GradeTypes
 from users.constants import GenderTypes, Roles
 from users.models import (
     CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
-    StudentTypes, User, UserGroup
+    StudentTypes, User, UserGroup, YandexUserData
 )
 
 __all__ = ('User', 'SHADCourseRecord', 'CertificateOfParticipation',
@@ -180,3 +180,15 @@ class CertificateOfParticipationFactory(factory.django.DjangoModelFactory):
     signature = "FIO"
     note = ""
     student_profile = factory.SubFactory(StudentProfileFactory)
+
+class YandexUserDataFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = YandexUserData
+
+    user = factory.SubFactory(UserFactory)
+    login = factory.Sequence(lambda n: "Yandex login %03d" % n)
+    uid = factory.Sequence(lambda n: "Uid %03d" % n)
+    first_name = factory.Sequence(lambda n: "First name %03d" % n)
+    last_name = factory.Sequence(lambda n: "Last name %03d" % n)
+    display_name = factory.Sequence(lambda n: "Display name %03d" % n)
+    real_name = factory.Sequence(lambda n: "Real name %03d" % n)

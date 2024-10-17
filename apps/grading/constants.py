@@ -68,7 +68,7 @@ class YandexCompilers(DjangoChoices):
     lua_5_4 = C("lua_5_4", "Lua 5.4")
     cpp_make2 = C("cpp-make2", "(make) C++")
     cpp20_make = C("cpp20-make", "(Make) Clang11 C++20")
-    cpp20_make_clang14 = C("cpp20-make-clang14", "(Make) Clang 15.0.7 C++20")
+    cpp20_make_clang14 = C("cpp20-make-clang14", "(Make) Clang 17.0.1 C++20")
     dotnet = C("dotnet", "(Make) C# (MS .Net Core 3.1)")
     dotnet5 = C("dotnet5", "(Make) C# (MS .Net Core 5.0)")
     dotnet6 = C("dotnet6", "(Make) C# (MS .Net Core 6.0)")

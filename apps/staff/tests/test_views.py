@@ -1,14 +1,13 @@
 import pytest
 from django.conf import settings
+from django.contrib.messages import get_messages
 
 from core.models import Branch
-from core.tests.factories import BranchFactory
 from core.urls import reverse
 from learning.settings import StudentStatuses
 from staff.tests.factories import StudentStatusLogFactory, StudentAcademicDisciplineLogFactory
 from study_programs.tests.factories import AcademicDisciplineFactory
-from users.models import StudentTypes
-from users.tests.factories import CuratorFactory
+from users.tests.factories import CuratorFactory, UserFactory
 
 
 @pytest.mark.django_db
@@ -184,3 +183,46 @@ def test_studentacademicdisciplinelog_list_view_download_csv(client):
     assert response['Content-Type'] == 'text/csv'
     rows = [row for row in response.content.decode('utf-8').split('\n') if row != '']
     assert len(rows) == 4
+
+
+@pytest.mark.django_db
+def test_merge_users_view(client):
+    url = reverse("staff:merge_users")
+    user1 = UserFactory()
+    user2 = UserFactory()
+    response = client.post(url)
+    assert response.status_code == 403
+    curator = CuratorFactory()
+    client.login(curator)
+    response = client.post(url)
+    assert response.status_code == 302
+    form = {
+        "minor_email": "wrong_email",
+        "major_email": "other_wrong_email"
+    }
+    response = client.post(url, form)
+    messages = [msg.message for msg in get_messages(response.wsgi_request)]
+    expected_messages = ['Major User email:<br>Enter a valid email address.',
+                         'Minor User email:<br>Enter a valid email address.']
+    assert all(message in messages for message in expected_messages)
+    form = {
+        "minor_email": "non_existing@email.com",
+        "major_email": "non_existing@email.com"
+    }
+    response = client.post(url, form)
+    messages = [msg.message for msg in get_messages(response.wsgi_request)]
+    expected_messages = ['Major User email:<br>There is no User with this email',
+                         'Minor User email:<br>There is no User with this email',
+                         'Общее:<br>Emails must not be the same']
+    assert all(message in messages for message in expected_messages)
+    form = {
+        "minor_email": user1.email,
+        "major_email": user2.email
+    }
+    response = client.post(url, form)
+    messages = [msg.message for msg in get_messages(response.wsgi_request)]
+    expected_messages = [f"Пользователи успешно объединены. <a "
+                         f"href={user2.get_absolute_url()} "
+                         f"target='_blank'>"
+                         f"Ссылка на объединенный профиль</a>"]
+    assert all(message in messages for message in expected_messages)

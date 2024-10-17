@@ -2,7 +2,6 @@ import datetime
 
 import pytest
 from bs4 import BeautifulSoup
-from django.contrib.messages import get_messages
 
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
