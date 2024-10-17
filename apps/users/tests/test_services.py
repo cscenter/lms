@@ -10,21 +10,23 @@ from django.utils import timezone
 from core.tests.factories import BranchFactory, SiteFactory
 from core.timezone import now_local
 from courses.models import Semester
-from learning.models import GraduateProfile
+from courses.tests.factories import CourseFactory, AssignmentFactory
+from learning.models import GraduateProfile, Enrollment, StudentAssignment
 from learning.settings import StudentStatuses
-from learning.tests.factories import InvitationFactory, EnrollmentPeriodFactory
+from learning.tests.factories import InvitationFactory, EnrollmentPeriodFactory, EnrollmentFactory, AssignmentCommentFactory
 from study_programs.tests.factories import (
     AcademicDisciplineFactory, StudyProgramFactory
 )
 from users.constants import Roles
-from users.models import StudentProfile, StudentTypes, UserGroup, StudentStatusLog
+from users.models import StudentProfile, StudentTypes, UserGroup, User, YandexUserData
 from users.services import (
     StudentStatusTransition, assign_or_revoke_student_role, assign_role,
     create_graduate_profiles, create_student_profile, get_student_profile_priority,
     get_student_profiles, maybe_unassign_student_role, unassign_role, update_student_status,
-    update_student_academic_discipline
+    update_student_academic_discipline, merge_users
 )
-from users.tests.factories import CuratorFactory, StudentProfileFactory, UserFactory, StudentFactory
+from users.tests.factories import CuratorFactory, StudentProfileFactory, UserFactory, StudentFactory, \
+    YandexUserDataFactory
 
 
 @pytest.mark.django_db
@@ -93,16 +95,24 @@ def test_resolve_student_status_transition():
     assert StudentStatusTransition.resolve('', '') == StudentStatusTransition.NEUTRAL
     assert StudentStatusTransition.resolve('', StudentStatuses.WILL_GRADUATE) == StudentStatusTransition.NEUTRAL
     assert StudentStatusTransition.resolve('', StudentStatuses.GRADUATE) == StudentStatusTransition.GRADUATION
-    assert StudentStatusTransition.resolve(StudentStatuses.ACADEMIC_LEAVE, StudentStatuses.GRADUATE) == StudentStatusTransition.GRADUATION
+    assert StudentStatusTransition.resolve(StudentStatuses.ACADEMIC_LEAVE,
+                                           StudentStatuses.GRADUATE) == StudentStatusTransition.GRADUATION
     assert StudentStatusTransition.resolve('', StudentStatuses.EXPELLED) == StudentStatusTransition.DEACTIVATION
     assert StudentStatusTransition.resolve('', StudentStatuses.ACADEMIC_LEAVE) == StudentStatusTransition.DEACTIVATION
-    assert StudentStatusTransition.resolve('', StudentStatuses.ACADEMIC_LEAVE_SECOND) == StudentStatusTransition.DEACTIVATION
-    assert StudentStatusTransition.resolve(StudentStatuses.ACADEMIC_LEAVE, StudentStatuses.EXPELLED) == StudentStatusTransition.NEUTRAL
-    assert StudentStatusTransition.resolve(StudentStatuses.ACADEMIC_LEAVE_SECOND, StudentStatuses.REINSTATED) == StudentStatusTransition.ACTIVATION
-    assert StudentStatusTransition.resolve(StudentStatuses.ACADEMIC_LEAVE, StudentStatuses.REINSTATED) == StudentStatusTransition.ACTIVATION
-    assert StudentStatusTransition.resolve(StudentStatuses.EXPELLED, StudentStatuses.REINSTATED) == StudentStatusTransition.ACTIVATION
-    assert StudentStatusTransition.resolve(StudentStatuses.GRADUATE, StudentStatuses.WILL_GRADUATE) == StudentStatusTransition.ACTIVATION
-    assert StudentStatusTransition.resolve(StudentStatuses.GRADUATE, StudentStatuses.EXPELLED) == StudentStatusTransition.DEACTIVATION
+    assert StudentStatusTransition.resolve('',
+                                           StudentStatuses.ACADEMIC_LEAVE_SECOND) == StudentStatusTransition.DEACTIVATION
+    assert StudentStatusTransition.resolve(StudentStatuses.ACADEMIC_LEAVE,
+                                           StudentStatuses.EXPELLED) == StudentStatusTransition.NEUTRAL
+    assert StudentStatusTransition.resolve(StudentStatuses.ACADEMIC_LEAVE_SECOND,
+                                           StudentStatuses.REINSTATED) == StudentStatusTransition.ACTIVATION
+    assert StudentStatusTransition.resolve(StudentStatuses.ACADEMIC_LEAVE,
+                                           StudentStatuses.REINSTATED) == StudentStatusTransition.ACTIVATION
+    assert StudentStatusTransition.resolve(StudentStatuses.EXPELLED,
+                                           StudentStatuses.REINSTATED) == StudentStatusTransition.ACTIVATION
+    assert StudentStatusTransition.resolve(StudentStatuses.GRADUATE,
+                                           StudentStatuses.WILL_GRADUATE) == StudentStatusTransition.ACTIVATION
+    assert StudentStatusTransition.resolve(StudentStatuses.GRADUATE,
+                                           StudentStatuses.EXPELLED) == StudentStatusTransition.DEACTIVATION
 
 
 @pytest.mark.django_db
@@ -214,9 +224,9 @@ def test_get_student_profile_priority():
     invitation = InvitationFactory(semester=current_semester)
     today = now_local(student_profile1.branch.get_timezone()).date()
     EnrollmentPeriodFactory(semester=current_semester,
-                                               site_id=settings.SITE_ID,
-                                               starts_on=today,
-                                               ends_on=today)
+                            site_id=settings.SITE_ID,
+                            starts_on=today,
+                            ends_on=today)
     student_profile2 = StudentProfileFactory(type=StudentTypes.INVITED,
                                              status=StudentStatuses.REINSTATED,
                                              invitation=invitation)
@@ -371,13 +381,14 @@ def test_get_student_profiles_prefetch_syllabus(django_assert_num_queries):
     assert student_profiles[2].syllabus == student_profile1.syllabus
     assert student_profiles[2].syllabus is None
 
+
 @pytest.mark.django_db
 def test_update_student_status():
     student_profile = StudentProfileFactory()
     curator = CuratorFactory()
     update_student_status(student_profile,
-                              new_status=StudentStatuses.ACADEMIC_LEAVE,
-                              editor=curator)
+                          new_status=StudentStatuses.ACADEMIC_LEAVE,
+                          editor=curator)
 
     assert student_profile.status == StudentStatuses.ACADEMIC_LEAVE
     assert Roles.STUDENT not in student_profile.user.roles
@@ -385,7 +396,8 @@ def test_update_student_status():
     status_logs = student_profile.studentstatuslog_related.all()
     assert len(status_logs) == 1
     status_log = status_logs.first()
-    log_dict = model_to_dict(status_log, fields=[field.name for field in status_log._meta.fields if field.name != "id"])
+    log_dict = model_to_dict(status_log,
+                             fields=[field.name for field in status_log._meta.fields if field.name != "id"])
     assert log_dict == {
         "status": StudentStatuses.ACADEMIC_LEAVE,
         "former_status": "",
@@ -398,9 +410,9 @@ def test_update_student_status():
 
     tomorrow = timezone.now().date() + datetime.timedelta(days=1)
     update_student_status(student_profile,
-                              new_status=StudentStatuses.REINSTATED,
-                              editor=curator,
-                              changed_at=tomorrow)
+                          new_status=StudentStatuses.REINSTATED,
+                          editor=curator,
+                          changed_at=tomorrow)
     student_profile.refresh_from_db()
     assert student_profile.status == StudentStatuses.REINSTATED
     assert Roles.STUDENT in student_profile.user.roles
@@ -409,7 +421,8 @@ def test_update_student_status():
     assert len(status_logs) == 2
     assert status_logs.last() == status_log
     status_log = status_logs.first()
-    log_dict = model_to_dict(status_log, fields=[field.name for field in status_log._meta.fields if field.name != "id"])
+    log_dict = model_to_dict(status_log,
+                             fields=[field.name for field in status_log._meta.fields if field.name != "id"])
     assert log_dict == {
         "status": StudentStatuses.REINSTATED,
         "former_status": StudentStatuses.ACADEMIC_LEAVE,
@@ -430,21 +443,23 @@ def test_update_student_status():
                               new_status=StudentStatuses.GRADUATE,
                               editor=curator)
 
+
 @pytest.mark.django_db
 def test_update_student_academic_discipline():
     student_profile = StudentProfileFactory()
     curator = CuratorFactory()
     academic_discipline = AcademicDisciplineFactory()
     update_student_academic_discipline(student_profile,
-                              new_academic_discipline=academic_discipline,
-                              editor=curator)
+                                       new_academic_discipline=academic_discipline,
+                                       editor=curator)
 
     assert student_profile.academic_discipline == academic_discipline
 
     discipline_logs = student_profile.studentacademicdisciplinelog_related.all()
     assert len(discipline_logs) == 1
     discipline_log = discipline_logs.first()
-    log_dict = model_to_dict(discipline_log, fields=[field.name for field in discipline_log._meta.fields if field.name != "id"])
+    log_dict = model_to_dict(discipline_log,
+                             fields=[field.name for field in discipline_log._meta.fields if field.name != "id"])
     assert log_dict == {
         "academic_discipline": academic_discipline.id,
         "former_academic_discipline": None,
@@ -458,9 +473,9 @@ def test_update_student_academic_discipline():
     tomorrow = timezone.now().date() + datetime.timedelta(days=1)
     other_academic_discipline = AcademicDisciplineFactory()
     update_student_academic_discipline(student_profile,
-                              new_academic_discipline=other_academic_discipline,
-                              editor=curator,
-                              changed_at=tomorrow)
+                                       new_academic_discipline=other_academic_discipline,
+                                       editor=curator,
+                                       changed_at=tomorrow)
     student_profile.refresh_from_db()
     assert student_profile.academic_discipline == other_academic_discipline
 
@@ -468,7 +483,8 @@ def test_update_student_academic_discipline():
     assert len(discipline_logs) == 2
     assert discipline_logs.last() == discipline_log
     discipline_log = discipline_logs.first()
-    log_dict = model_to_dict(discipline_log, fields=[field.name for field in discipline_log._meta.fields if field.name != "id"])
+    log_dict = model_to_dict(discipline_log,
+                             fields=[field.name for field in discipline_log._meta.fields if field.name != "id"])
     assert log_dict == {
         "academic_discipline": other_academic_discipline.id,
         "former_academic_discipline": academic_discipline.id,
@@ -478,3 +494,83 @@ def test_update_student_academic_discipline():
         "is_processed": False,
         "processed_at": None
     }
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("minor_user", [111, "str", None])
+def test_merge_users_failed(minor_user):
+    major_user = UserFactory()
+    with pytest.raises(TypeError):
+        merge_users(major=major_user, minor=minor_user)
+    with pytest.raises(ValueError):
+        merge_users(major=major_user, minor=major_user)
+
+
+@pytest.mark.django_db
+def test_merge_users_completed():
+    '''
+    _merge means this object will merge with major object using recursive call of merge_objects
+    _transfer means this object will be automatically rearranged to parent major object using setattr
+    _autotransfer means this object will be automatically rearranged to major by parent object transfer
+    '''
+    common_branch = BranchFactory()
+    major_user = UserFactory(first_name="")
+    minor_user = UserFactory(branch=common_branch)
+    minor_yandex_data = YandexUserDataFactory(user=minor_user)
+    common_course = CourseFactory()
+    major_profile = StudentProfileFactory(user=major_user, branch=common_branch)
+    minor_profile_merge = StudentProfileFactory(user=minor_user, branch=common_branch,
+                                                year_of_curriculum=2024, is_official_student=True)
+    minor_profile_transfer = StudentProfileFactory(user=minor_user)
+    major_enrollment = EnrollmentFactory(student=major_user,
+                                         student_profile=major_profile,
+                                         course=common_course)
+    minor_enrollment_merge = EnrollmentFactory(student=minor_user,
+                                         student_profile=minor_profile_merge,
+                                         course=common_course,
+                                         reason_entry="significant_reason")
+    minor_enrollment_transfer = EnrollmentFactory(student=minor_user,
+                                                student_profile=minor_profile_merge)
+    minor_enrollment_autotransfer = EnrollmentFactory(student=minor_user,
+                                                  student_profile=minor_profile_transfer)
+    common_assignment = AssignmentFactory(course=common_course)
+    major_assignment = StudentAssignment.objects.get(assignment=common_assignment, student=major_user)
+    minor_assignment_merge = StudentAssignment.objects.get(assignment=common_assignment, student=minor_user)
+    minor_assignment_merge.score = 5
+    minor_assignment_merge.save()
+    uncommon_assignment = AssignmentFactory(course=minor_enrollment_autotransfer.course)
+    minor_assignment_autotransfer = StudentAssignment.objects.get(assignment=uncommon_assignment, student=minor_user)
+    major_comment = AssignmentCommentFactory(student_assignment=major_assignment, author=major_user)
+    minor_comment_autotransfer = AssignmentCommentFactory(student_assignment=minor_assignment_merge, author=minor_user)
+
+    major_user = merge_users(major=major_user, minor=minor_user)
+
+    assert set(major_user.student_profiles.all()) == {major_profile, minor_profile_transfer}
+    assert set(minor_profile_transfer.enrollment_set.all()) == {minor_enrollment_autotransfer}
+    assert set(major_profile.enrollment_set.all()) == {major_enrollment, minor_enrollment_transfer}
+    assert set(major_user.studentassignment_set.all()) == {major_assignment, minor_assignment_autotransfer}
+    assert set(major_user.assignmentcomment_set.all()) == {major_comment, minor_comment_autotransfer}
+    assert set(major_assignment.assignmentcomment_set.all()) == {major_comment, minor_comment_autotransfer}
+    assert major_user.first_name == minor_user.first_name
+    assert major_user.branch == common_branch
+
+    assert major_profile.year_of_curriculum is None
+    assert not major_profile.is_official_student
+    major_profile.refresh_from_db()
+    assert major_profile.year_of_curriculum == 2024
+    assert not major_profile.is_official_student
+
+    assert major_enrollment.reason_entry == ""
+    major_enrollment.refresh_from_db()
+    assert major_enrollment.reason_entry == "significant_reason"
+
+    assert major_assignment.score is None
+    major_assignment.refresh_from_db()
+    assert major_assignment.score == 5
+
+    assert not User.objects.filter(id=minor_user.id).exists()
+    assert not StudentProfile.objects.filter(id=minor_profile_merge.id).exists()
+    assert not Enrollment.objects.filter(id=minor_enrollment_merge.id).exists()
+    assert not StudentAssignment.objects.filter(id=minor_assignment_merge.id).exists()
+    assert not YandexUserData.objects.filter(user=major_user).exists()
+    assert not YandexUserData.objects.filter(id=minor_yandex_data.id).exists()

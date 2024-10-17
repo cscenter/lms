@@ -478,6 +478,7 @@ class AdmissionApplicantsCampaignReportView(CuratorOnlyMixin, generic.base.View)
         else:
             assert_never(output_format)
 
+
 class AdmissionApplicantsYearReportView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, output_format, year, **kwargs):
         report = AdmissionApplicantsYearReport(year=year)
@@ -660,6 +661,7 @@ def autograde_projects(request):
         messages.error(request, str(e))
     return HttpResponseRedirect(reverse("staff:exports"))
 
+
 def autofail_ungraded(request):
     if not request.user.is_curator:
         return HttpResponseForbidden()
@@ -686,6 +688,7 @@ def create_alumni_profiles(request: HttpRequest):
     else:
         messages.error(request, "Неверный формат даты выпуска")
     return HttpResponseRedirect(reverse("staff:exports"))
+
 
 def merge_users_view(request: HttpRequest):
     if not request.user.is_curator:
@@ -847,6 +850,7 @@ class OfficialDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
         }
         return context
 
+
 class StudentAcademicDisciplineLogListView(CuratorOnlyMixin, FilterView):
     model = StudentAcademicDisciplineLog
     context_object_name = 'logs'
@@ -909,6 +913,7 @@ class StudentAcademicDisciplineLogListView(CuratorOnlyMixin, FilterView):
         query_params = request.GET.copy()
         query_params.pop("mark_processed")
         return HttpResponseRedirect(reverse('staff:academic_discipline_log_list') + "?" + query_params.urlencode())
+
 
 class StudentStatusLogListView(CuratorOnlyMixin, FilterView):
     model = StudentStatusLog

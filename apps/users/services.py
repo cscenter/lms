@@ -3,7 +3,6 @@ import logging
 import re
 from collections import defaultdict
 from enum import Enum, auto
-from inspect import getouterframes, currentframe
 from itertools import islice
 from typing import Any, Dict, List, Optional, Tuple, TypeVar, Type
 
@@ -536,7 +535,7 @@ def merge_objects(*, major: M, minor: M, related_models=None) -> M:
             qs = related_model.objects.filter(**{field_name: minor})
             for obj in qs:
                 try:
-                    # Trying to transfer models completely
+                    # Trying to transfer objects completely
                     setattr(obj, field_name, major)
                     with transaction.atomic():
                         obj.save()
@@ -550,6 +549,7 @@ def merge_objects(*, major: M, minor: M, related_models=None) -> M:
         elif related_model_type == "ManyToManyField":
             qs = related_model.objects.filter(**{field_name: minor})
             for obj in qs:
+                # M2M can always be transferred completely
                 mtm_relation = getattr(obj, field_name)
                 mtm_relation.remove(minor)
                 mtm_relation.add(major)
@@ -557,14 +557,16 @@ def merge_objects(*, major: M, minor: M, related_models=None) -> M:
             try:
                 minor_obj = related_model.objects.get(**{field_name: minor})
             except ObjectDoesNotExist:
-                # Means OneToOneField presents but no objects are linked
+                # Means OneToOneField presents but no minor objects are linked, skip this case
                 continue
             try:
                 major_obj = related_model.objects.get(**{field_name: major})
             except ObjectDoesNotExist:
+                # Means there is minor object, but major object is nnot linked, transfer minor completely
                 setattr(minor_obj, field_name, major)
                 minor_obj.save()
             else:
+                # Means there are both minor and major objects, merge them
                 merge_objects(major=major_obj, minor=minor_obj)
         else:
             raise TypeError(f"{related_model_type} is not processed: {related_model}")
@@ -572,7 +574,8 @@ def merge_objects(*, major: M, minor: M, related_models=None) -> M:
     for field in profile_fields:
         major_value = getattr(major, field, None)
         minor_value = getattr(minor, field, None)
-        if major_value is None and minor_value is not None:
+        # Can't cast to bool as set boolean fields must stay the same in major object
+        if (major_value is None or major_value == "") and (minor_value is not None and minor_value != ""):
             setattr(major, field, minor_value)
     minor.delete()
     major.save()
@@ -589,7 +592,8 @@ def merge_users(*, major: User, minor: User) -> User:
     excluded_models = ("StudentProfile", "YandexUserData")
     related_models = [(o.related_model, o.field.name) for o in minor._meta.related_objects if
                       all(value not in str(o.related_model) for value in excluded_models)]
-    # transfer StudentProfiles first for correct transfer of UserGroups as student_profile is needed in post_save
+    # transfer StudentProfiles before other models for correct transfer of UserGroups as it is needed in post_save
+    # don't transfer YandexUserData to let User auth in correct Yandex account
     qs = StudentProfile.objects.filter(user=minor)
     for obj in qs:
         try:
