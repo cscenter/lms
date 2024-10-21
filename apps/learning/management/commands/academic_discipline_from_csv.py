@@ -16,7 +16,7 @@ from users.services import get_student_profile, update_student_academic_discipli
 class Command(CurrentCampaignMixin, BaseCommand):
     help = """
     Set academic discipline and create academic discipline log for user with email from csv
-    Example: ./manage.py academic_discipline_from_csv --date=2024-09-15
+    Example: ./manage.py academic_discipline_from_csv --date=2024-09-15 --profile_type=REGULAR
     """
 
     def add_arguments(self, parser):
@@ -51,10 +51,17 @@ class Command(CurrentCampaignMixin, BaseCommand):
             default=15418,
             help="ID of editor",
         )
+        parser.add_argument(
+            "--profile_type",
+            type=str,
+            required=True,
+            help="Student profile type",
+        )
 
     def handle(self, *args, **options):
         delimiter = options["delimiter"]
         filename = options["filename"]
+        profile_type = getattr(StudentTypes, options["profile_type"])
         date = timezone.now().date() if options["date"] == "today" \
             else datetime.strptime(options["date"], '%Y-%m-%d').date()
         year_of_admission = timezone.now().date().year if options["year_of_admission"] == 0 else options["year_of_admission"]
@@ -78,10 +85,10 @@ class Command(CurrentCampaignMixin, BaseCommand):
                         print(f'{academic_discipline_name} does not exists')
                         raise
                     student_profile = get_student_profile(user, site=settings.SITE_ID,
-                                                          profile_type=StudentTypes.REGULAR,
+                                                          profile_type=profile_type,
                                                           filters=[Q(year_of_admission=year_of_admission)])
                     if student_profile is None:
-                        print(f'No regular student profile with {year_of_admission = } and {user = }')
+                        print(f'No student profile with {year_of_admission = }, {profile_type = } and {user = }')
                         continue
                     if student_profile.academic_discipline is not None:
                         print(f'Academic discipline is aleady set for {student_profile}')
