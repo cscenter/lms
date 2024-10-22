@@ -15,7 +15,7 @@ from courses.calendar import TimetableEvent
 from courses.constants import TeacherRoles
 from courses.models import Course, CourseDurations
 from courses.selectors import course_teachers_prefetch_queryset
-from courses.services import get_teacher_branches
+from courses.services import get_teacher_branches, group_teachers
 from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
 from courses.views.mixins import CourseURLParamsMixin
@@ -81,13 +81,15 @@ class CourseListView(PermissionRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         course_teachers = Prefetch('course_teachers',
-                        course_teachers_prefetch_queryset(hidden_roles=())
-        )
+                                   course_teachers_prefetch_queryset(hidden_roles=())
+                                   )
         courses = (Course.objects
-                    .filter(teachers=self.request.user)
-                    .select_related('meta_course', 'semester')
-                    .prefetch_related(course_teachers)
-                    .order_by('-semester__index', 'meta_course__name'))
+                   .filter(teachers=self.request.user)
+                   .select_related('meta_course', 'semester')
+                   .prefetch_related(course_teachers)
+                   .order_by('-semester__index', 'meta_course__name'))
+        for course in courses:
+            course.grouped_teachers = group_teachers(course.course_teachers.all())
         return courses
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:

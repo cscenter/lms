@@ -22,6 +22,7 @@ from core.urls import reverse
 from courses.calendar import CalendarEvent, TimetableEvent
 from courses.models import Course, Semester, CourseDurations
 from courses.selectors import course_teachers_prefetch_queryset
+from courses.services import group_teachers
 from courses.utils import MonthPeriod, extended_month_date_range, get_current_term_pair
 from courses.views import MonthEventsCalendarView, WeekEventsView
 from info_blocks.constants import CurrentInfoBlockTags
@@ -325,6 +326,7 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
         # Group collected courses
         ongoing_enrolled, ongoing_rest, archive = [], [], []
         for course in courses:
+            course.grouped_teachers = group_teachers(course.course_teachers.all())
             if course.semester.index == current_term_index:
                 if course.pk in student_enrollments:
                     ongoing_enrolled.append(course)
