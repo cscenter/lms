@@ -25,14 +25,24 @@
                   <td>{{ course.semester }}</td>
                   <td>
                     <ul class="list-unstyled margin-bottom-0">
-                      {% for ct in course.course_teachers.all() %}
-                        <li>
-                         <a href="{{ ct.teacher.teacher_profile_url() }}">{{ ct.teacher.get_full_name() }}</a>
-                          {% if SpectatorRole in ct.roles %}
-                             <i class="fa fa-eye" title="Наблюдатель"></i>
-                          {% endif %}
-                        </li>
-                      {% endfor %}
+                                          {% for role, teachers in course.grouped_teachers.items() %}
+                      {% if teachers %}
+                        {% if role == "lecturer" %}
+                          <b>Лекторы:</b>
+                        {% elif role == "seminar" %}
+                          <b>Семинаристы:</b>
+                        {% elif role == "reviewer" %}
+                          <b>{% if course.is_completed %}Помогали{% else %}Помогают{% endif %} с заданиями:</b>
+                        {% elif role == "organizer" %}
+                          <b>Кураторы курса:</b>
+                        {% endif %}
+                        {% for teacher in teachers %}
+                            <a class="__teacher text-nowrap" href="{{ teacher.get_absolute_url() }}">{{ teacher.teacher.get_abbreviated_name() }}</a>{% if not loop.last %},
+                    {% endif %}
+                        {% endfor %}
+                        <br>
+                      {% endif %}
+                    {% endfor %}
                     </ul>
                   </td>
                   <td>
