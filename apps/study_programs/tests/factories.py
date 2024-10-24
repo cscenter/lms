@@ -10,7 +10,7 @@ class AcademicDisciplineFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = AcademicDiscipline
 
-    name = factory.Sequence(lambda n: "Study area %03d" % n)
+    name = factory.Sequence(lambda n: "Study area %04d" % n)
     code = factory.Sequence(lambda n: "p%01d" % n)
 
 

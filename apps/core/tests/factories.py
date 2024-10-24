@@ -21,7 +21,7 @@ class SiteFactory(factory.django.DjangoModelFactory):
         django_get_or_create = ('domain',)
 
     domain = TEST_DOMAIN
-    name = factory.Sequence(lambda n: "Site Name %03d" % n)
+    name = factory.Sequence(lambda n: "Site Name %04d" % n)
     # TODO: create default site configuration
 
 
@@ -38,7 +38,7 @@ class SiteConfigurationFactory(factory.django.DjangoModelFactory):
     email_backend = settings.EMAIL_BACKEND
     email_host = settings.EMAIL_HOST
     email_host_password = SiteConfiguration.encrypt('password')
-    email_host_user = factory.Sequence(lambda n: "User_%03d" % n)
+    email_host_user = factory.Sequence(lambda n: "User_%04d" % n)
     email_port = settings.EMAIL_PORT
     email_use_tls = False
     email_use_ssl = False
@@ -49,9 +49,9 @@ class CityFactory(factory.django.DjangoModelFactory):
         model = City
         django_get_or_create = ('code',)
 
-    code = factory.Sequence(lambda n: "%03d" % n)
-    name = factory.Sequence(lambda n: "City name %03d" % n)
-    abbr = factory.Sequence(lambda n: "%03d" % n)
+    code = factory.Sequence(lambda n: "%04d" % n)
+    name = factory.Sequence(lambda n: "City name %04d" % n)
+    abbr = factory.Sequence(lambda n: "%04d" % n)
 
     @factory.lazy_attribute
     def time_zone(self):
@@ -66,12 +66,12 @@ class EmailTemplateFactory(factory.django.DjangoModelFactory):
         model = EmailTemplate
         django_get_or_create = ["name"]
 
-    name = factory.Sequence(lambda n: "email-template-%03d" % n)
+    name = factory.Sequence(lambda n: "email-template-%04d" % n)
 
 
 class BranchFactory(factory.django.DjangoModelFactory):
-    name = factory.Sequence(lambda n: "Branch %03d" % n)
-    code = factory.Sequence(lambda n: "b%03d" % n)
+    name = factory.Sequence(lambda n: "Branch %04d" % n)
+    code = factory.Sequence(lambda n: "b%04d" % n)
     site = factory.SubFactory(SiteFactory,
                               domain=factory.LazyAttribute(lambda o: TEST_DOMAIN))
     city = factory.SubFactory(CityFactory)
@@ -95,13 +95,13 @@ class LocationFactory(factory.django.DjangoModelFactory):
         model = Location
 
     city = factory.SubFactory(CityFactory, code=Branches.SPB)
-    name = factory.Sequence(lambda n: "Location %03d" % n)
-    description = factory.Sequence(lambda n: "location for tests %03d" % n)
+    name = factory.Sequence(lambda n: "Location %04d" % n)
+    description = factory.Sequence(lambda n: "location for tests %04d" % n)
 
 
 class LegacyUniversityFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = University
 
-    name = factory.Sequence(lambda n: "University %03d" % n)
+    name = factory.Sequence(lambda n: "University %04d" % n)
     city = factory.SubFactory(CityFactory)

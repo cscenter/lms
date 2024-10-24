@@ -410,13 +410,6 @@ class Enrollment(TimezoneAwareMixin, TimeStampedModel):
         return "{0} - {1}".format(smart_str(self.course),
                                   smart_str(self.student.get_full_name()))
 
-    def save(self, *args, **kwargs):
-        created = self.pk is None
-        if created and self.grade == GradeTypes.NOT_GRADED:
-            self.grade = self.course.default_grade
-
-        super().save(*args, **kwargs)
-
     def clean(self):
         if self.student_profile_id and self.student_profile.user_id != self.student_id:
             raise ValidationError(_("Student profile does not match selected user"))
@@ -427,6 +420,8 @@ class Enrollment(TimezoneAwareMixin, TimeStampedModel):
             raise ValidationError({"is_grade_recredited": _("Can not be used with re-credit grade")})
         if self.is_grade_recredited and self.grade not in GradeTypes.satisfactory_grades:
             raise ValidationError({"is_grade_recredited": _("Can not be used with unsatisfactory grades")})
+        if self.type == EnrollmentTypes.LECTIONS_ONLY and self.grade != GradeTypes.WITHOUT_GRADE:
+            raise ValidationError({"type": _("LECTIONS ONLY type can be used with WITHOUT GRADE grade only")})
 
     def grade_changed_local(self, tz=None):
         if not tz:

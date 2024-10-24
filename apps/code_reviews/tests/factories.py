@@ -11,4 +11,4 @@ class GerritChangeFactory(factory.django.DjangoModelFactory):
 
     student_assignment = factory.SubFactory(StudentAssignmentFactory)
     site = factory.SubFactory(SiteFactory)
-    change_id = factory.Sequence(lambda n: "change~%03d" % n)
+    change_id = factory.Sequence(lambda n: "change~%04d" % n)

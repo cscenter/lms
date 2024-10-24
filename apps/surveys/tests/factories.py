@@ -16,8 +16,8 @@ class FormFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Form
 
-    title = factory.Sequence(lambda n: "Form Title %03d" % n)
-    slug = factory.Sequence(lambda n: "form-slug-%03d" % n)
+    title = factory.Sequence(lambda n: "Form Title %04d" % n)
+    slug = factory.Sequence(lambda n: "form-slug-%04d" % n)
 
 
 class FieldFactory(factory.django.DjangoModelFactory):
@@ -25,7 +25,7 @@ class FieldFactory(factory.django.DjangoModelFactory):
         model = Field
 
     form = factory.SubFactory(FormFactory)
-    label = factory.Sequence(lambda n: "Label %03d" % n)
+    label = factory.Sequence(lambda n: "Label %04d" % n)
     field_type = factory.Iterator([FieldType.TEXT, FieldType.TEXTAREA,
                                    FieldType.CHECKBOX_MULTIPLE,
                                    FieldType.RADIO_MULTIPLE])
@@ -49,7 +49,7 @@ class FieldChoiceFactory(factory.django.DjangoModelFactory):
 
     field = factory.SubFactory(FieldFactory)
     value = factory.Sequence(lambda n: str(n + 1))
-    label = factory.Sequence(lambda n: "Choice %03d" % n)
+    label = factory.Sequence(lambda n: "Choice %04d" % n)
 
 
 class CourseSurveyFactory(factory.django.DjangoModelFactory):

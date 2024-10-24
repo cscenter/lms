@@ -8,8 +8,8 @@ class ProjectPublicationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ProjectPublication
 
-    title = factory.Sequence(lambda n: "Project Publication %03d" % n)
-    slug = factory.Sequence(lambda n: "slug-%03d" % n)
+    title = factory.Sequence(lambda n: "Project Publication %04d" % n)
+    slug = factory.Sequence(lambda n: "slug-%04d" % n)
     type = ProjectTypes.practice
 
     @factory.post_generation

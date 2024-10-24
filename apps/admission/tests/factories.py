@@ -62,14 +62,14 @@ class ApplicantFactory(factory.django.DjangoModelFactory):
         model = Applicant
 
     campaign = factory.SubFactory(CampaignFactory)
-    first_name = factory.Sequence(lambda n: "Name %03d" % n)
-    patronymic = factory.Sequence(lambda n: "Patronymic %03d" % n)
-    last_name = factory.Sequence(lambda n: "Surname %03d" % n)
-    email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
+    first_name = factory.Sequence(lambda n: "Name %04d" % n)
+    patronymic = factory.Sequence(lambda n: "Patronymic %04d" % n)
+    last_name = factory.Sequence(lambda n: "Surname %04d" % n)
+    email = factory.Sequence(lambda n: "user%04d@foobar.net" % n)
     phone = factory.Sequence(lambda n: "123-555-%04d" % n)
     university = factory.SubFactory(UniversityFactory)
-    yandex_login = factory.Sequence(lambda n: "yandex_login_%03d" % n)
-    faculty = factory.Sequence(lambda n: "faculty_%03d" % n)
+    yandex_login = factory.Sequence(lambda n: "yandex_login_%04d" % n)
+    faculty = factory.Sequence(lambda n: "faculty_%04d" % n)
     level_of_education = factory.fuzzy.FuzzyChoice(
         [x for x, _ in AcademicDegreeLevels.choices]
     )
@@ -78,7 +78,7 @@ class ApplicantFactory(factory.django.DjangoModelFactory):
     )
     year_of_graduation = factory.fuzzy.FuzzyInteger(1950, 2024)
     where_did_you_learn = factory.fuzzy.FuzzyChoice([x for x, _ in WHERE_DID_YOU_LEARN])
-    workplace = factory.Sequence(lambda n: "Workplace %03d" % n)
+    workplace = factory.Sequence(lambda n: "Workplace %04d" % n)
     new_track = False
 
 
@@ -112,8 +112,8 @@ class InterviewAssignmentFactory(factory.django.DjangoModelFactory):
         model = InterviewAssignment
 
     campaign = factory.SubFactory(CampaignFactory)
-    name = factory.Sequence(lambda n: "Assignment Name %03d" % n)
-    description = factory.Sequence(lambda n: "Assignment Name %03d" % n)
+    name = factory.Sequence(lambda n: "Assignment Name %04d" % n)
+    description = factory.Sequence(lambda n: "Assignment Name %04d" % n)
 
 
 class InterviewerFactory(UserFactory):
