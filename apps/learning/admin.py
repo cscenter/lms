@@ -22,7 +22,8 @@ from .models import AssignmentComment, Enrollment, Event
 from .services import StudentGroupService
 from .services.enrollment_service import recreate_assignments_for_student, update_enrollment_grade
 from .services.personal_assignment_service import update_personal_assignment_score
-from .settings import AssignmentScoreUpdateSource, EnrollmentGradeUpdateSource
+from .settings import AssignmentScoreUpdateSource, EnrollmentGradeUpdateSource, EnrollmentTypes, GradeTypes
+
 
 class CourseFilter(SimpleListFilter):
     title = _('Course')
@@ -37,6 +38,7 @@ class CourseFilter(SimpleListFilter):
         if self.value():
             return queryset.filter(course__pk=self.value())
         return queryset
+
 
 class CourseTeacherAdmin(BaseModelAdmin):
     list_display = ('teacher', 'course')
@@ -103,10 +105,12 @@ class AssignmentCommentAdmin(BaseModelAdmin):
 
     def get_student(self, obj: AssignmentComment):
         return obj.student_assignment.student
+
     get_student.short_description = _("Assignment|assigned_to")
 
     def get_assignment_name(self, obj: AssignmentComment):
         return obj.student_assignment.assignment.title
+
     get_assignment_name.admin_order_field = 'student_assignment__assignment__title'
     get_assignment_name.short_description = _("Asssignment|name")
 
@@ -145,16 +149,29 @@ class EnrollmentAdmin(BaseModelAdmin):
                      "student_group")
     inlines = [EnrollmentGradeLogAdminInline]
 
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        return self.arrange_fields(fields, 'grade', 'type')
 
     def get_readonly_fields(self, request, obj=None):
+        readonly_fields = ['grade_changed_local', 'modified']
         if obj:
-            return ['course', 'student', 'grade_changed_local', 'modified']
-        else:
-            return ['grade_changed_local', 'modified']
+            readonly_fields += ['course', 'student']
+            if obj.type == EnrollmentTypes.LECTIONS_ONLY and obj.grade == GradeTypes.WITHOUT_GRADE:
+                readonly_fields.append("grade")
+        return readonly_fields
 
+    def arrange_fields(self, fields, target_field, before_field):
+        if target_field in fields:
+            fields.remove(target_field)
+        before_index = fields.index(before_field)
+        target_index = before_index + 1
+        fields.insert(target_index, target_field)
+        return fields
 
     def grade_changed_local(self, obj):
         return admin_datetime(obj.grade_changed_local())
+
     grade_changed_local.admin_order_field = 'grade_changed'
     grade_changed_local.short_description = _("Enrollment|grade changed")
 
@@ -292,7 +309,6 @@ class StudentGroupTeacherBucketAssignmentFilter(admin.SimpleListFilter):
 
 @admin.register(StudentGroupTeacherBucket)
 class StudentGroupTeacherBucketAdmin(BaseModelAdmin):
-
     form = StudentGroupTeacherBucketAdminForm
     fields = (('groups', 'teachers', 'assignment'),)
     readonly_fields = ['assignment']
@@ -328,7 +344,7 @@ class GraduateProfileAdmin(BaseModelAdmin):
 
 class CourseInlineAdmin(admin.TabularInline):
     model = CourseInvitation
-    readonly_fields = ('token', )
+    readonly_fields = ('token',)
     raw_id_fields = ('course',)
     exclude = ('enrolled_students',)
     extra = 0
@@ -338,7 +354,7 @@ class InvitationAdmin(BaseModelAdmin):
     list_display = ('name', 'get_branches', 'semester', 'get_link')
     list_select_related = ['semester']
     list_prefetch_related = ['branches']
-    inlines = (CourseInlineAdmin, )
+    inlines = (CourseInlineAdmin,)
     list_filter = [
         'branches',
         ('semester', AdminRelatedDropdownFilter),
@@ -350,6 +366,7 @@ class InvitationAdmin(BaseModelAdmin):
             "widget": Select2Multiple(attrs={"data-width": "style"})
         }
     }
+
     @meta(_("Branches"))
     def get_branches(self, obj):
         return mark_safe("<br>".join(map(str, obj.branches.all())))

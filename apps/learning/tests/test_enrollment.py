@@ -20,7 +20,7 @@ from learning.models import (
 )
 from learning.services import EnrollmentService, StudentGroupService
 from learning.services.enrollment_service import CourseCapacityFull
-from learning.settings import Branches, StudentStatuses, EnrollmentTypes, InvitationEnrollmentTypes
+from learning.settings import Branches, StudentStatuses, EnrollmentTypes, InvitationEnrollmentTypes, GradeTypes
 from learning.tests.factories import (
     CourseInvitationFactory, EnrollmentFactory, StudentGroupFactory
 )
@@ -51,6 +51,35 @@ def test_service_enroll(settings):
                                           student_group=student_group)
     assert enrollment.student_group == student_group
     assert enrollment.type == EnrollmentTypes.REGULAR
+
+
+@pytest.mark.django_db
+def test_enroll_grade():
+    student_profile = StudentProfileFactory()
+    current_semester = SemesterFactory.create_current()
+    course = CourseFactory(main_branch=student_profile.branch,
+                           semester=current_semester,
+                           group_mode=CourseGroupModes.MANUAL,
+                           default_grade=GradeTypes.WITHOUT_GRADE)
+    student_group = StudentGroupFactory(course=course)
+
+    enrollment = EnrollmentService.enroll(student_profile, course, type=EnrollmentTypes.REGULAR,
+                                          student_group=student_group, reason_entry='test enrollment')
+    assert enrollment.grade == GradeTypes.WITHOUT_GRADE
+    enrollment.is_deleted = True
+    enrollment.save()
+
+    course.default_grade = GradeTypes.NOT_GRADED
+    course.save()
+    enrollment = EnrollmentService.enroll(student_profile, course, type=EnrollmentTypes.REGULAR,
+                                          student_group=student_group, reason_entry='test enrollment')
+    assert enrollment.grade == GradeTypes.NOT_GRADED
+    enrollment.is_deleted = True
+    enrollment.save()
+
+    enrollment = EnrollmentService.enroll(student_profile, course, type=EnrollmentTypes.LECTIONS_ONLY,
+                                          student_group=student_group, reason_entry='test enrollment')
+    assert enrollment.grade == GradeTypes.WITHOUT_GRADE
 
 
 @pytest.mark.django_db
@@ -180,8 +209,8 @@ def test_enrollment(client):
     assert course.enrollment_set.count() == 1
     as_ = AssignmentFactory.create_batch(3, course=course)
     assert set((student1.pk, a.pk) for a in as_) == set(StudentAssignment.objects
-                          .filter(student=student1)
-                          .values_list('student', 'assignment'))
+                                                        .filter(student=student1)
+                                                        .values_list('student', 'assignment'))
     co_other = CourseFactory(semester=current_semester)
     url = co_other.get_enroll_url()
     response = client.post(url, data={
@@ -337,8 +366,8 @@ def test_unenrollment(client, settings, assert_redirect):
     })
     assert_redirect(response, reverse('study:course_list'))
     assert set(a_ss) == set(StudentAssignment.objects
-                                  .filter(student=student,
-                                          assignment__course=course))
+                            .filter(student=student,
+                                    assignment__course=course))
     # Check courses on student courses page are empty
     response = client.get(reverse("study:course_list"))
     assert len(response.context_data['ongoing_rest']) == 1
@@ -397,7 +426,7 @@ def test_enrollment_in_other_branch(client):
     assert response.status_code == 302
     assert Enrollment.objects.count() == 1
     client.login(student_profile_nsk.user)
-    response = client.post(course_spb.get_enroll_url(),  data={
+    response = client.post(course_spb.get_enroll_url(), data={
         "type": EnrollmentTypes.REGULAR
     })
     assert response.status_code == 403
@@ -493,6 +522,7 @@ def test_course_enrollment_is_open(client, settings):
     response = client.get(co_spb.get_absolute_url())
     assert smart_bytes("Enroll in") not in response.content
 
+
 @pytest.mark.django_db
 def test_course_enrollment_is_open_enrollment_types(client, settings):
     co = CourseFactory()
@@ -534,6 +564,7 @@ def test_course_enrollment_is_open_enrollment_types(client, settings):
     response = client.get(co.get_absolute_url())
     assert smart_bytes("Enroll in") not in response.content
 
+
 @pytest.mark.django_db
 def test_enrollment_form_disable_type(client, settings):
     branch = BranchFactory()
@@ -574,11 +605,12 @@ def test_enrollment_form_disable_type(client, settings):
     assert form.fields['type'].initial == EnrollmentTypes.LECTIONS_ONLY
     assert "reason" in form.fields
     response = client.post(co.get_enroll_url(), data={"type": EnrollmentTypes.REGULAR,
-                                           "reason": "reason"
-                                           })
+                                                      "reason": "reason"
+                                                      })
     enrollments = Enrollment.active.filter(student=student, course=co).all()
     assert len(enrollments) == 1
     assert enrollments.first().type == EnrollmentTypes.LECTIONS_ONLY
+
 
 @pytest.mark.django_db
 def test_enrollment_by_invitation(settings, client):
@@ -614,7 +646,8 @@ def test_enrollment_by_invitation(settings, client):
     response = client.get(enroll_url)
     assert response.status_code == 200
     response = client.post(enroll_url, data={
-        "type": EnrollmentTypes.REGULAR # post type doesn't matters with LECTIONS_ONLY enrollment_type, it can even be empty
+        "type": EnrollmentTypes.REGULAR
+        # post type doesn't matters with LECTIONS_ONLY enrollment_type, it can even be empty
     })
     assert response.status_code == 302
     enrollments = Enrollment.active.filter(student=invited, course=course).all()
@@ -691,6 +724,3 @@ def test_enrollment_add_teacher_to_project(mocker, django_capture_on_commit_call
                       submission_type=AssignmentFormat.CODE_REVIEW)
     CourseTeacher(course=course, teacher=t2).save()
     mocked.assert_called_once()
-
-
-

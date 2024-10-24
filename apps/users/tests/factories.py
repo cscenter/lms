@@ -28,12 +28,12 @@ class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User
 
-    username = factory.Sequence(lambda n: "testuser%03d" % n)
+    username = factory.Sequence(lambda n: "testuser%04d" % n)
     gender = factory.Iterator([GenderTypes.MALE, GenderTypes.FEMALE])
     password = "test123foobar@!"
-    email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
-    first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
-    last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
+    email = factory.Sequence(lambda n: "user%04d@foobar.net" % n)
+    first_name = factory.Sequence(lambda n: "Ivan%04d" % n)
+    last_name = factory.Sequence(lambda n: "Petrov%04d" % n)
     branch = None
     time_zone = factory.LazyAttribute(lambda user: user.branch.time_zone if user.branch is not None else settings.DEFAULT_TIMEZONE)
     is_notification_allowed = True
@@ -82,8 +82,8 @@ class StudentFactory(UserFactory):
     """
     Student access role will be created by student profile post save signal
     """
-    username = factory.Sequence(lambda n: "student%03d" % n)
-    email = factory.Sequence(lambda n: "student%03d@test.email" % n)
+    username = factory.Sequence(lambda n: "student%04d" % n)
+    email = factory.Sequence(lambda n: "student%04d@test.email" % n)
 
     @factory.post_generation
     def student_profile(self, create, extracted, **kwargs):
@@ -158,7 +158,7 @@ class OnlineCourseRecordFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = OnlineCourseRecord
 
-    name = factory.Sequence(lambda n: "Online course %03d" % n)
+    name = factory.Sequence(lambda n: "Online course %04d" % n)
     student = factory.SubFactory(StudentFactory)
 
 
@@ -166,8 +166,8 @@ class SHADCourseRecordFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = SHADCourseRecord
 
-    name = factory.Sequence(lambda n: "SHAD course name %03d" % n)
-    teachers = factory.Sequence(lambda n: "SHAD course teachers %03d" % n)
+    name = factory.Sequence(lambda n: "SHAD course name %04d" % n)
+    teachers = factory.Sequence(lambda n: "SHAD course teachers %04d" % n)
     student = factory.SubFactory(StudentFactory)
     grade = factory.Iterator(list(GradeTypes.values))
     semester = factory.SubFactory('learning.tests.factories.SemesterFactory')
@@ -186,9 +186,9 @@ class YandexUserDataFactory(factory.django.DjangoModelFactory):
         model = YandexUserData
 
     user = factory.SubFactory(UserFactory)
-    login = factory.Sequence(lambda n: "Yandex login %03d" % n)
-    uid = factory.Sequence(lambda n: "Uid %03d" % n)
-    first_name = factory.Sequence(lambda n: "First name %03d" % n)
-    last_name = factory.Sequence(lambda n: "Last name %03d" % n)
-    display_name = factory.Sequence(lambda n: "Display name %03d" % n)
-    real_name = factory.Sequence(lambda n: "Real name %03d" % n)
+    login = factory.Sequence(lambda n: "Yandex login %04d" % n)
+    uid = factory.Sequence(lambda n: "Uid %04d" % n)
+    first_name = factory.Sequence(lambda n: "First name %04d" % n)
+    last_name = factory.Sequence(lambda n: "Last name %04d" % n)
+    display_name = factory.Sequence(lambda n: "Display name %04d" % n)
+    real_name = factory.Sequence(lambda n: "Real name %04d" % n)

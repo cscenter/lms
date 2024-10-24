@@ -81,12 +81,18 @@ class EnrollmentService:
                 )
                 filters.append(Q(course__learners_capacity__gt=learners_count) | Q(course__learners_capacity=0))
                 filters.append(Q(course__listeners_capacity__gt=listeners_count) | Q(course__listeners_capacity=0))
+
+            # Enrollment and unenrollment is only available before midterm
+            # Only grades for deleted enrollment are WITHOUT_GRADE and NOT_GRADED
+            # Therefore, no grade data is lost when reenrolling the course
+            grade = GradeTypes.WITHOUT_GRADE if type == EnrollmentTypes.LECTIONS_ONLY else course.default_grade
             attrs.update({
                 "is_deleted": False,
                 "student_profile": student_profile,
                 "student_group": student_group,
                 "reason_entry": reason_entry,
-                "type": type
+                "type": type,
+                "grade": grade
             })
             updated = (Enrollment.objects
                        .filter(*filters)

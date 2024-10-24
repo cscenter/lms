@@ -30,8 +30,8 @@ class MetaCourseFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = MetaCourse
 
-    name = factory.Sequence(lambda n: "Test course %03d" % n)
-    slug = factory.Sequence(lambda n: "test-course-%03d" % n)
+    name = factory.Sequence(lambda n: "Test course %04d" % n)
+    slug = factory.Sequence(lambda n: "test-course-%04d" % n)
     description = "This a course for testing purposes"
 
 
@@ -126,7 +126,7 @@ class CourseReviewFactory(factory.django.DjangoModelFactory):
         model = CourseReview
 
     course = factory.SubFactory(CourseFactory)
-    text = factory.Sequence(lambda n: ("Course Review %03d" % n))
+    text = factory.Sequence(lambda n: ("Course Review %04d" % n))
 
 
 class CourseNewsFactory(factory.django.DjangoModelFactory):
@@ -134,10 +134,10 @@ class CourseNewsFactory(factory.django.DjangoModelFactory):
         model = CourseNews
 
     course = factory.SubFactory(CourseFactory)
-    title = factory.Sequence(lambda n: "Important news about testing %03d" % n)
+    title = factory.Sequence(lambda n: "Important news about testing %04d" % n)
     author = factory.SubFactory(TeacherFactory)
     text = factory.Sequence(lambda n: ("Suddenly it turned out that testing "
-                                       "(%03d) can be useful!" % n))
+                                       "(%04d) can be useful!" % n))
 
 
 class LearningSpaceFactory(factory.django.DjangoModelFactory):
@@ -157,9 +157,9 @@ class CourseClassFactory(factory.django.DjangoModelFactory):
         LearningSpaceFactory,
         branch=factory.SelfAttribute('..course.main_branch'))
     type = 'lecture'
-    name = factory.Sequence(lambda n: "Test class %03d" % n)
+    name = factory.Sequence(lambda n: "Test class %04d" % n)
     description = factory.Sequence(
-        lambda n: "In this class %03d we will test" % n)
+        lambda n: "In this class %04d we will test" % n)
     date = (datetime.datetime.now().replace(tzinfo=timezone.utc)
             + datetime.timedelta(days=3)).date()
     starts_at = datetime.time(hour=13, minute=0)
@@ -190,7 +190,7 @@ class AssignmentFactory(factory.django.DjangoModelFactory):
     deadline_at = factory.Faker('date_time_between', start_date="+1d",
                                 end_date="+10d", tzinfo=pytz.UTC)
     submission_type = AssignmentFormat.ONLINE
-    title = factory.Sequence(lambda n: "Test assignment %03d" % n)
+    title = factory.Sequence(lambda n: "Test assignment %04d" % n)
     text = "This is a text for a test assignment"
     time_zone = factory.LazyAttribute(lambda o: o.course.main_branch.get_timezone())
     passing_score = 10

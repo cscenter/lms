@@ -26,7 +26,7 @@ class ReportingPeriodFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ReportingPeriod
 
-    label = factory.Sequence(lambda n: "Period label %03d" % n)
+    label = factory.Sequence(lambda n: "Period label %04d" % n)
     term = factory.SubFactory(SemesterFactory)
     start_on = factory.Faker('past_date', start_date="-10d", tzinfo=None)
     end_on = factory.Faker('future_date', end_date="+10d", tzinfo=None)
@@ -36,10 +36,10 @@ class SupervisorFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Supervisor
 
-    first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
-    last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
-    patronymic = factory.Sequence(lambda n: "Sergeevich%03d" % n)
-    occupation = factory.Sequence(lambda n: "Occupation%03d" % n)
+    first_name = factory.Sequence(lambda n: "Ivan%04d" % n)
+    last_name = factory.Sequence(lambda n: "Petrov%04d" % n)
+    patronymic = factory.Sequence(lambda n: "Sergeevich%04d" % n)
+    occupation = factory.Sequence(lambda n: "Occupation%04d" % n)
     gender = factory.Iterator([GenderTypes.MALE, GenderTypes.FEMALE])
 
 
@@ -47,9 +47,9 @@ class ProjectFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Project
 
-    name = factory.Sequence(lambda n: "Test student project %03d" % n)
+    name = factory.Sequence(lambda n: "Test student project %04d" % n)
     description = factory.Sequence(lambda n: ("Test student project "
-                                              "description %03d" % n))
+                                              "description %04d" % n))
     project_type = ProjectTypes.practice
     semester = factory.SubFactory(SemesterFactory)
     branch = factory.SubFactory(BranchFactory)
@@ -97,7 +97,7 @@ class ReportCommentFactory(factory.django.DjangoModelFactory):
 
     report = factory.SubFactory(ReportFactory)
     author = factory.SubFactory(UserFactory)
-    text = factory.Sequence(lambda n: "Comment %03d" % n)
+    text = factory.Sequence(lambda n: "Comment %04d" % n)
 
 
 class ReviewFactory(factory.django.DjangoModelFactory):

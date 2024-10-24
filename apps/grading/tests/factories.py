@@ -8,7 +8,7 @@ from learning.tests.factories import AssignmentCommentFactory
 
 
 class CheckingSystemFactory(factory.django.DjangoModelFactory):
-    name = factory.Sequence(lambda n: "Checking System %03d" % n)
+    name = factory.Sequence(lambda n: "Checking System %04d" % n)
     settings = factory.Dict({
         'access_token': FuzzyText(length=30)
     })

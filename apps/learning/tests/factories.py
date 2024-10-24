@@ -37,7 +37,7 @@ class StudentGroupFactory(factory.django.DjangoModelFactory):
         model = StudentGroup
 
     type = StudentGroupTypes.MANUAL
-    name = factory.Sequence(lambda n: "Group Name %03d" % n)
+    name = factory.Sequence(lambda n: "Group Name %04d" % n)
     course = factory.SubFactory(CourseFactory)
 
 
@@ -73,7 +73,7 @@ class AssignmentCommentFactory(factory.django.DjangoModelFactory):
         model = AssignmentComment
 
     student_assignment = factory.SubFactory(StudentAssignmentFactory)
-    text = factory.Sequence(lambda n: "Test comment %03d" % n)
+    text = factory.Sequence(lambda n: "Test comment %04d" % n)
     author = factory.SubFactory(UserFactory)
     type = AssignmentSubmissionTypes.COMMENT
     attached_file = factory.django.FileField()
@@ -144,7 +144,7 @@ class InvitationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Invitation
 
-    name = factory.Sequence(lambda n: "Invitation Name %03d" % n)
+    name = factory.Sequence(lambda n: "Invitation Name %04d" % n)
     semester = factory.SubFactory(SemesterFactory)
 
     @factory.post_generation
@@ -197,8 +197,8 @@ class EventFactory(factory.django.DjangoModelFactory):
     venue = factory.SubFactory(LocationFactory)
     branch = factory.SubFactory('core.tests.factories.BranchFactory',
                                 code=settings.DEFAULT_BRANCH_CODE)
-    name = factory.Sequence(lambda n: "Test event %03d" % n)
-    description = factory.Sequence(lambda n: "Test event description %03d" % n)
+    name = factory.Sequence(lambda n: "Test event %04d" % n)
+    description = factory.Sequence(lambda n: "Test event description %04d" % n)
     date = (datetime.datetime.now().replace(tzinfo=timezone.utc)
             + datetime.timedelta(days=3)).date()
     starts_at = datetime.time(hour=13, minute=0)

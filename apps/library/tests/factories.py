@@ -12,8 +12,8 @@ class BookFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Book
 
-    author = factory.Sequence(lambda n: "Author%03d" % n)
-    title = factory.Sequence(lambda n: "Book%03d" % n)
+    author = factory.Sequence(lambda n: "Author%04d" % n)
+    title = factory.Sequence(lambda n: "Book%04d" % n)
 
 
 class StockFactory(factory.django.DjangoModelFactory):

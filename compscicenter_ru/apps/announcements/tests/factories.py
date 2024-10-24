@@ -8,17 +8,17 @@ __all__ = ('AnnouncementTagFactory', 'AnnouncementFactory',
 
 
 class AnnouncementTagFactory(factory.django.DjangoModelFactory):
-    name = factory.Sequence(lambda n: "Tag %03d" % n)
-    slug = factory.Sequence(lambda n: "slug-%03d" % n)
+    name = factory.Sequence(lambda n: "Tag %04d" % n)
+    slug = factory.Sequence(lambda n: "slug-%04d" % n)
 
     class Meta:
         model = AnnouncementTag
 
 
 class AnnouncementFactory(factory.django.DjangoModelFactory):
-    name = factory.Sequence(lambda n: "Announcement %03d" % n)
-    slug = factory.Sequence(lambda n: "slug-%03d" % n)
-    short_description = factory.Sequence(lambda n: "Short description %03d" % n)
+    name = factory.Sequence(lambda n: "Announcement %04d" % n)
+    slug = factory.Sequence(lambda n: "slug-%04d" % n)
+    short_description = factory.Sequence(lambda n: "Short description %04d" % n)
     publish_end_at = factory.Faker('future_datetime', end_date="+30d",
                                    tzinfo=pytz.UTC)
 

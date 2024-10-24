@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-10 11:59+0000\n"
+"POT-Creation-Date: 2024-10-22 15:39+0000\n"
 "PO-Revision-Date: 2020-02-03 16:52+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -550,39 +550,39 @@ msgctxt "menu"
 msgid "History"
 msgstr "История"
 
-#: compscicenter_ru/views.py:380
+#: compscicenter_ru/views.py:381
 msgid "Course"
 msgstr "Курс"
 
-#: compscicenter_ru/views.py:381
+#: compscicenter_ru/views.py:382
 msgid "Lecture"
 msgstr "Лекция"
 
-#: compscicenter_ru/views.py:590
+#: compscicenter_ru/views.py:591
 msgid "Autumn|adjective"
 msgstr "Осенний"
 
-#: compscicenter_ru/views.py:591
+#: compscicenter_ru/views.py:592
 msgid "Spring|adjective"
 msgstr "Весенний"
 
-#: compscicenter_ru/views.py:648
+#: compscicenter_ru/views.py:649
 msgid "About the Course"
 msgstr "О курсе"
 
-#: compscicenter_ru/views.py:652
+#: compscicenter_ru/views.py:653
 msgid "Syllabus"
 msgstr "Программа"
 
-#: compscicenter_ru/views.py:659
+#: compscicenter_ru/views.py:660
 msgid "Reads lectures"
 msgstr "Читает лекции"
 
-#: compscicenter_ru/views.py:660
+#: compscicenter_ru/views.py:661
 msgid "Checks assignments"
 msgstr "Проверяет задания"
 
-#: compscicenter_ru/views.py:661
+#: compscicenter_ru/views.py:662
 msgid "Leads seminars"
 msgstr "Ведёт семинары"
 
