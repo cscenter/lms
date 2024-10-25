@@ -72,10 +72,10 @@ class Command(BaseCommand):
     def get_branch(self, options) -> Branch:
         branch_code = options["branch"]
         if not branch_code:
-            available = Branch.objects.filter(branch__site_id=settings.SITE_ID).values_list("code", flat=True)
+            available = Branch.objects.filter(site_id=settings.SITE_ID).values_list("code", flat=True)
             msg = f"Provide the code of the branch. Options: {available}"
             raise CommandError(msg)
-        branch = Branch.objects.get(code=branch_code)
+        branch = Branch.objects.get(code=branch_code, site_id=settings.SITE_ID)
         if input(f"Selected branch: {branch}. Is it right?\n"
                  f"y/[n]: ") != "y":
             raise CommandError("Error asking for approval. Canceled")
