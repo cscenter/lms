@@ -57,6 +57,12 @@ class Command(BaseCommand):
             help="Date when StudentAcademicDisciplineLog changed_at",
         )
         parser.add_argument(
+            "--year_of_admission",
+            type=int,
+            default=0,
+            help="Year of admission and curriculum for student profile",
+        )
+        parser.add_argument(
             "--trust_csv",
             action="store_true",
             default=False,
@@ -113,6 +119,7 @@ class Command(BaseCommand):
         filename = options["filename"]
         trust_csv = options["trust_csv"]
         changed_at = datetime.strptime(options["changed_at"], "%d.%m.%Y")
+        year_of_admission = timezone.now().year if options["year_of_admission"] == 0 else options["year_of_admission"]
         with open(filename) as csvfile:
             reader = csv.DictReader(csvfile, delimiter=delimiter)
             found_counter = 0
@@ -174,10 +181,10 @@ class Command(BaseCommand):
 
                     profile_fields = {
                         "profile_type": StudentTypes.PARTNER,
-                        "year_of_curriculum": timezone.now().year,
+                        "year_of_curriculum": year_of_admission,
                         "user": user,
                         "branch": branch,
-                        "year_of_admission": timezone.now().year,
+                        "year_of_admission": year_of_admission,
                         "partner": partner
                     }
                     assert not StudentProfile.objects.filter(
