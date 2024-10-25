@@ -64,7 +64,7 @@ class Command(CurrentCampaignMixin, BaseCommand):
         profile_type = getattr(StudentTypes, options["profile_type"])
         date = timezone.now().date() if options["date"] == "today" \
             else datetime.strptime(options["date"], '%Y-%m-%d').date()
-        year_of_admission = timezone.now().date().year if options["year_of_admission"] == 0 else options["year_of_admission"]
+        year_of_admission = timezone.now().year if options["year_of_admission"] == 0 else options["year_of_admission"]
         editor = User.objects.get(pk=options["editor_id"])
         with open(filename) as csvfile:
             reader = csv.DictReader(csvfile, delimiter=delimiter)
