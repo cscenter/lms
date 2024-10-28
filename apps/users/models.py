@@ -886,6 +886,12 @@ class StudentProfile(TimeStampedModel):
         max_length=255,
         blank=True,
     )
+    snils = models.CharField(
+        verbose_name=_("Student SNILS"),
+        max_length=64,
+        help_text=_("Individual insurance account number"),
+        blank=True
+    )
     academic_disciplines = models.ManyToManyField(
         'study_programs.AcademicDiscipline',
         verbose_name=_("Fields of study"),
