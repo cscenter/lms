@@ -242,7 +242,7 @@ class StudentProfileAdmin(BaseModelAdmin):
             }),
             (_('Official Student Info'), {
                 'fields': ['is_official_student', 'birth_date',
-                           'diploma_number', 'diploma_issued_on', 'diploma_issued_by', 'snils_number']
+                           'diploma_number', 'diploma_issued_on', 'diploma_issued_by', 'snils']
             }),
             (_("Curator's note"), {
                 'fields': ['comment', 'comment_changed_at', 'comment_last_author']
