@@ -68,7 +68,6 @@ class Command(CurrentCampaignMixin, BaseCommand):
         editor = User.objects.get(pk=options["editor_id"])
         with open(filename) as csvfile:
             reader = csv.DictReader(csvfile, delimiter=delimiter)
-            headers = next(reader)
             counter = 0
             with transaction.atomic():
                 for row in reader:
