@@ -230,7 +230,7 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
 
         writer = csv.writer(response)
         headers = [
-            "Профиль на сайте",
+            "id",
             _("Last name"),
             _("First name"),
             _("Patronymic"),
@@ -269,7 +269,7 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
             gitlab_manytask = connected_providers.get('gitlab-manytask')
             writer.writerow(
                 itertools.chain(
-                    [student.get_absolute_url(),
+                    [gradebook_student.enrollment_id,
                      student.last_name,
                      student.first_name,
                      student.patronymic,
