@@ -695,8 +695,8 @@ def merge_users_view(request: HttpRequest):
         return HttpResponseForbidden()
     form = MergeUsersForm(data=request.POST)
     if form.is_valid():
-        major_user = User.objects.get(email__iexact=form.cleaned_data['major_email'])
-        minor_user = User.objects.get(email__iexact=form.cleaned_data['minor_email'])
+        major_user = User.objects.get(email=form.cleaned_data['major_email'])
+        minor_user = User.objects.get(email=form.cleaned_data['minor_email'])
         try:
             main_user = merge_users(major=major_user, minor=minor_user)
         except Exception as e:

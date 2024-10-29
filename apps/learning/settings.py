@@ -34,15 +34,18 @@ class AcademicDegreeLevels(DjangoChoices):
     ACADEMIC_LEAVE = C("10", _('academic_leave'))
     OTHER = C("other", _('Other'))
 
+
 class EnrollmentTypes(DjangoChoices):
     REGULAR = C("Regular", _("EnrollmentTypes|Regular"))
     LECTIONS_ONLY = C("lections", _("EnrollmentTypes|Lections"))
+
 
 # TODO rename as it is used not only in invitation (ex. Course model)
 class InvitationEnrollmentTypes(DjangoChoices):
     REGULAR = C("Regular", _("InvitationEnrollmentTypes|Regular"))
     LECTIONS_ONLY = C("lections", _("InvitationEnrollmentTypes|Lections"))
     ANY = C("Any", _("InvitationEnrollmentTypes|Any"))
+
 
 class InvitationCategories(DjangoChoices):
     UNIVERSITY = C("university", _("Invitation|University"))
@@ -52,6 +55,7 @@ class InvitationCategories(DjangoChoices):
     ACADEMIC = C("academic", _("Invitation|Aacdemic"))
     GRADUATE = C("graduate", _("Invitation|Graduate"))
     APPLICANT = C("applicant", _("Invitation|Applicant"))
+
 
 class StudentStatuses(DjangoChoices):
     EXPELLED = C('expelled', _("StudentInfo|Expelled"))
@@ -86,7 +90,7 @@ class GradeTypes(DjangoChoices):
     NOT_GRADED = C('not_graded', _("Not graded"), system='__all__',
                    russian_label="Без оценки", order=0)
     WITHOUT_GRADE = C('without_grade', _("Without Grade"), system='__all__',
-                   russian_label="Курс без оценки", order=0)
+                      russian_label="Не оценивается", order=0)
     UNSATISFACTORY = C('unsatisfactory', _("Enrollment|Unsatisfactory"), system=(
         GradingSystems.BASE, GradingSystems.BINARY, GradingSystems.BINARY_PLUS_EXCELLENT
     ), russian_label="Незачет", order=11)
