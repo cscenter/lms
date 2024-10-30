@@ -621,6 +621,9 @@ def test_enrollment_by_invitation(settings, client):
     course = course_invitation.course
     enroll_url = course_invitation.get_absolute_url()
     invited = InvitedStudentFactory(branch=course.main_branch)
+    student_profile = invited.get_student_profile(settings.SITE_ID)
+    student_profile.invitation = course_invitation.invitation
+    student_profile.save()
     client.login(invited)
     wrong_url = reverse(
         "course_enroll_by_invitation",

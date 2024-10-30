@@ -16,7 +16,7 @@ from courses.tests.factories import (
 from learning.permissions import CreateCourseNews, DeleteCourseNews, EditCourseNews
 from learning.settings import GradeTypes, StudentStatuses
 from learning.tests.factories import EnrollmentFactory
-from users.models import User
+from users.models import User, StudentTypes
 from users.tests.factories import (
     CuratorFactory, InvitedStudentFactory, StudentFactory, TeacherFactory, UserFactory,
     VolunteerFactory
@@ -265,10 +265,14 @@ def test_course_class_materials_visibility_students(participant_factory,
         course=course,
         materials_visibility=MaterialVisibilityTypes.PUBLIC)
     participant: User = participant_factory()
+    student_profile = participant.get_student_profile()
     assert participant.has_perm(ViewCourseClassMaterials.name, course_class)
     course_class.materials_visibility = MaterialVisibilityTypes.PARTICIPANTS
     instance_memoize.delete_cache(participant)
-    assert participant.has_perm(ViewCourseClassMaterials.name, course_class)
+    if student_profile.type == StudentTypes.INVITED:
+        assert not participant.has_perm(ViewCourseClassMaterials.name, course_class)
+    else:
+        assert participant.has_perm(ViewCourseClassMaterials.name, course_class)
     course_class.materials_visibility = MaterialVisibilityTypes.COURSE_PARTICIPANTS
     instance_memoize.delete_cache(participant)
     assert not participant.has_perm(ViewCourseClassMaterials.name, course_class)
