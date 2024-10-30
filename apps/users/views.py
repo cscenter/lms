@@ -16,7 +16,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Count, Prefetch, Q
 from django.http import HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
@@ -296,7 +296,10 @@ class CertificateOfParticipationCreateView(PermissionRequiredMixin,
 
     def form_valid(self, form):
         user = get_object_or_404(User.objects.filter(pk=self.kwargs['user_id']))
-        student_profile = get_student_profile(user=user, site=self.request.site)
+        student_profile = get_student_profile(user=user, site=self.request.site, profile_type=StudentTypes.REGULAR)
+        if student_profile is None:
+            messages.error(self.request, "Профиль обычного студента не найден.")
+            return redirect(self.get_success_url())
         form.instance.student_profile_id = student_profile.pk
         return super().form_valid(form)
 
@@ -322,11 +325,9 @@ class CertificateOfParticipationDetailView(PermissionRequiredMixin,
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         if self.object.student_profile.year_of_curriculum is None:
-            messages.error(request, "Год программы обучения студента не выставлен",
-                           extra_tags='timeout')
+            messages.error(request, "Год программы обучения студента не выставлен")
         if self.object.student_profile.academic_discipline is None:
-            messages.error(request, "Направление обучения студента не выставлено",
-                           extra_tags='timeout')
+            messages.error(request, "Направление обучения студента не выставлено")
         return super().get(request, *args, **kwargs)
 
     def get_template_names(self):
@@ -355,8 +356,10 @@ class CertificateOfParticipationDetailView(PermissionRequiredMixin,
         student_info.enrollments_progress.sort(key=lambda e: (e.course.semester, e.course.meta_course.name))
         enrolments_period_start = datetime(day=1, month=9, year=self.object.student_profile.year_of_admission,
                                            tzinfo=self.object.student_profile.branch.time_zone)
-        enrolments_period_end = self.object.created
+        enrolments_period_end = min(datetime(day=10, month=6, year=self.object.student_profile.year_of_curriculum + 2,
+                                             tzinfo=self.object.student_profile.branch.time_zone), self.object.created)
         for e in student_info.enrollments_progress:
+            # Only courses within study period of regular student profile must be included
             if e.created < enrolments_period_start or e.created > enrolments_period_end:
                 continue
             enrollments[e.course.meta_course_id] = e
