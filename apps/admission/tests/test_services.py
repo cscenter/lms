@@ -661,7 +661,7 @@ def test_create_student_with_existing_invited(settings):
     invited = get_student_profile(
         user=user,
         site=campaign.branch.site,
-        profile_type=StudentTypes.VOLUNTEER
+        profile_type=StudentTypes.INVITED
     )
     assert invited is not None
     assert student_profile is not None

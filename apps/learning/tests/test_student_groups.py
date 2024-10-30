@@ -185,6 +185,9 @@ def test_student_group_resolving_enrollment_by_invitation(settings, client):
     assert len(student_groups) == 1
     student_group = student_groups[0]
     course_invitation = CourseInvitationFactory(course=course)
+    student_profile = invited.get_student_profile(settings.SITE_ID)
+    student_profile.invitation = course_invitation.invitation
+    student_profile.save()
     enroll_url = course_invitation.get_absolute_url()
     client.login(invited)
     response = client.post(enroll_url, data={
