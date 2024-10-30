@@ -57,7 +57,6 @@ from .managers import CustomUserManager
 YANDEX_DOMAINS = ["yandex.ru", "narod.ru", "yandex.ua",
                   "yandex.by", "yandex.kz", "ya.ru", "yandex.com"]
 
-
 logger = logging.getLogger(__name__)
 
 # Telegram username may only contain alphanumeric characters or
@@ -422,7 +421,6 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         blank=True
     )
 
-
     objects = CustomUserManager()
 
     class Meta:
@@ -471,12 +469,12 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
 
         super().save(**kwargs)
 
-    def add_group(self, role, branch = None, site_id: Optional[int] = None) -> None:
+    def add_group(self, role, branch=None, site_id: Optional[int] = None) -> None:
         """Add new role associated with the current site by default"""
         site_id = site_id or settings.SITE_ID
         self.groups.get_or_create(user=self, role=role, branch=branch, site_id=site_id)
 
-    def remove_group(self, role, branch = None, site_id: int = None):
+    def remove_group(self, role, branch=None, site_id: int = None):
         sid = site_id or settings.SITE_ID
         self.groups.filter(user=self, role=role, branch=branch, site_id=sid).delete()
 
@@ -808,12 +806,12 @@ class StudentProfile(TimeStampedModel):
         User,
         verbose_name=_("Student"),
         related_name="student_profiles",
-        on_delete=models.PROTECT,)
+        on_delete=models.PROTECT)
     branch = models.ForeignKey(
         "core.Branch",
         verbose_name=_("Branch"),
         related_name="+",  # Disable backwards relation
-        on_delete=models.PROTECT,)
+        on_delete=models.PROTECT)
     status = models.CharField(
         choices=StudentStatuses.choices,
         verbose_name=_("Status"),
@@ -1022,6 +1020,7 @@ class StudentProfile(TimeStampedModel):
             raise ValueError("Works only with invited students. Use is_active for others")
         return self.invitation is not None and self.invitation.is_active
 
+
 class StudentFieldLog(TimestampedModel):
     changed_at = models.DateField(
         verbose_name=_("Entry Added"),
@@ -1035,7 +1034,7 @@ class StudentFieldLog(TimestampedModel):
         User,
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
-    is_processed =  models.BooleanField(
+    is_processed = models.BooleanField(
         _('Is processed'),
         default=False,
         help_text=_('Designates whether this Log was processed in document list')
@@ -1080,7 +1079,6 @@ class StudentStatusLog(StudentFieldLog):
         verbose_name_plural = _("Student Status Log")
         ordering = ['-changed_at', '-pk']
 
-
     def get_status_display(self):
         if self.status:
             return StudentStatuses.values[self.status]
@@ -1092,6 +1090,7 @@ class StudentStatusLog(StudentFieldLog):
             return StudentStatuses.values[self.former_status]
         # Empty status means studies in progress
         return _("Studying")
+
 
 class StudentAcademicDisciplineLog(StudentFieldLog):
     former_academic_discipline = models.ForeignKey(
@@ -1202,3 +1201,12 @@ class CertificateOfParticipation(TimeStampedModel):
             return 288
         else:
             return self.student_profile.academic_discipline.hours
+
+    @property
+    def is_student_male(self) -> bool:
+        if not self.student_profile.user.gender:
+            return True
+        return self.student_profile.user.gender == self.student_profile.user.GENDER_MALE
+
+    def is_learning_completed(self) -> bool:
+        return self.student_profile.status in (StudentStatuses.GRADUATE, StudentStatuses.EXPELLED)

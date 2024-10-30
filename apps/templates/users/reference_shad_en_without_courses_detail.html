@@ -20,13 +20,26 @@
           </div><br>
           <p class="text-justify">
             Independent Non-profit Organization of Continuing Professional Education "Yandex Educational Technologies",
-            license No. L035-01298-77/00185314 dated March 24, 2015, confirms that {{ certificate_of_participation.signature }} is
-            a Student of Independent Non-profit Organization of Continuing Professional Education "Yandex Educational Technologies"
-            successfully undergoing training under the program "{{ certificate_of_participation.student_profile.academic_discipline.name_en }}".
+            license No. L035-01298-77/00185314 dated March 24, 2015, confirms that <b>{{ certificate_of_participation.signature }}</b>
+            {% if certificate_of_participation.is_learning_completed %}
+              was
+            {% else %}
+              is
+            {% endif %} a Student of Independent Non-profit Organization of Continuing Professional Education "Yandex Educational
+            Technologies" successfully
+            {% if certificate_of_participation.is_learning_completed %}
+              underwent
+            {% else %}
+              undergoing
+            {% endif %} training under the program "{{ certificate_of_participation.student_profile.academic_discipline.name_en }}"
+            on the basis of an agreement on the provision of educational services (education agreement) for continuing educational programs
+            (continuing general education programs and continuing professional programs), concluded in electronic form by accepting an offer
+            posted at: <a href="https://yandex.ru/legal/dataschool_offer">https://yandex.ru/legal/dataschool_offer</a> in accordance with
+            the procedure provided for in section 2 of the offer.
           </p><br>
           <div class="text-justify">
             Dates of study: from 01.09.{{ certificate_of_participation.student_profile.year_of_admission }}
-            to 10.06.{{certificate_of_participation.student_profile.year_of_curriculum|add:2}}<br>
+            to 30.05.{{certificate_of_participation.student_profile.year_of_curriculum|add:2}}<br>
             Attendance mode: mixed attendance using distance learning technology
           </div>
         </div>
