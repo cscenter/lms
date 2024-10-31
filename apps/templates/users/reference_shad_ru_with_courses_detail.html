@@ -21,10 +21,25 @@
           <p class="text-justify">
             Автономная Некоммерческая Организация Дополнительного Профессионального Образования «Образовательные технологии Яндекса»
             (АНО ДПО «Образовательные технологии Яндекса»), лицензия № Л035-01298-77/00185314 от 24 марта 2015 года,
-            подтверждает, что {{ student.get_full_name }} действительно является Слушателем автономной
-            некоммерческой организации
-            дополнительного профессионального образования «Образовательные технологии Яндекса»,
-            успешно проходит обучение по программе «{{ certificate_of_participation.student_profile.academic_discipline.name_ru }}»
+            подтверждает, что <b>{{ student.get_full_name }}</b> действительно
+            {% if certificate_of_participation.is_learning_completed %}
+              {% if certificate_of_participation.is_student_male %}
+                являлся
+              {% else %}
+                являлась
+              {% endif %}
+            {% else %}
+              является
+            {% endif %} Слушателем АНО ДПО «Образовательные технологии Яндекса», успешно
+            {% if certificate_of_participation.is_learning_completed %}
+              {% if certificate_of_participation.is_student_male %}
+                проходил
+              {% else %}
+                проходила
+              {% endif %}
+            {% else %}
+              проходит
+            {% endif %} обучение по программе «{{ certificate_of_participation.student_profile.academic_discipline.name_ru }}»
             на основании договора об оказании образовательных услуг (договор об образовании) по дополнительным образовательным программам
             (дополнительным общеобразовательным программам и дополнительным профессиональным программам),
             заключенного в электронном виде путем акцепта оферты, размещенной по адресу:
@@ -32,12 +47,17 @@
           </p><br>
           <div class="text-justify">
             Даты обучения: с 01.09.{{ certificate_of_participation.student_profile.year_of_admission }}
-            по 10.06.{{certificate_of_participation.student_profile.year_of_curriculum|add:2}}<br>
+            по 30.05.{{certificate_of_participation.student_profile.year_of_curriculum|add:2}}<br>
             Общее количество академических часов обучения: {{ certificate_of_participation.total_hours }}<br>
             Форма обучения: очно-заочная с применением дистанционных технологий
           </div><br>
           <div class="text-justify">
-            В рамках программы «{{ certificate_of_participation.student_profile.academic_discipline.name_ru }}» прошел обучение по следующим курсам:
+            В рамках программы «{{ certificate_of_participation.student_profile.academic_discipline.name_ru }}»
+            {% if certificate_of_participation.is_student_male %}
+                прошел
+              {% else %}
+                прошла
+              {% endif %} обучение по следующим курсам:
           </div><br>
           <table class="table table-condensed table-bordered p-0">
             <thead>
@@ -48,11 +68,11 @@
               </tr>
             </thead>
             <tbody>
-              {% for enrollment in enrollments|slice:":5" %}
+              {% for enrollment in enrollments|slice:":6" %}
                   <tr>
                     <td>{{ enrollment.course }}</td>
                     <td>{{ enrollment.course.hours }}</td>
-                    <td>{{ enrollment.grade_honest }}</td>
+                    <td>{{ enrollment.grade_display }}</td>
                   </tr>
               {% endfor %}
             </tbody>
@@ -65,7 +85,7 @@
         <div id="reference-yds-page-body">
             <table class="table table-condensed table-bordered p-0">
               <tbody>
-                {% for enrollment in enrollments|slice:"5:" %}
+                {% for enrollment in enrollments|slice:"6:" %}
                     <tr>
                       <td>{{ enrollment.course }}</td>
                       <td>{{ enrollment.course.hours }}</td>
