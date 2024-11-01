@@ -356,8 +356,10 @@ class CertificateOfParticipationDetailView(PermissionRequiredMixin,
         student_info.enrollments_progress.sort(key=lambda e: (e.course.semester, e.course.meta_course.name))
         enrolments_period_start = datetime(day=1, month=9, year=self.object.student_profile.year_of_admission,
                                            tzinfo=self.object.student_profile.branch.time_zone)
-        enrolments_period_end = min(datetime(day=30, month=5, year=self.object.student_profile.year_of_curriculum + 2,
-                                             tzinfo=self.object.student_profile.branch.time_zone), self.object.created)
+        enrolments_period_end = self.object.created
+        if self.object.student_profile.year_of_curriculum is not None:
+            enrolments_period_end = min(datetime(day=30, month=5, year=self.object.student_profile.year_of_curriculum + 2,
+                         tzinfo=self.object.student_profile.branch.time_zone), enrolments_period_end)
         for e in student_info.enrollments_progress:
             # Only courses within study period of regular student profile must be included
             if e.created < enrolments_period_start or e.created > enrolments_period_end:
