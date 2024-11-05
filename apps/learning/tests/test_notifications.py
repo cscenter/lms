@@ -6,7 +6,6 @@ from urllib.parse import urlparse
 
 import pytest
 import pytz
-from subdomains.utils import get_domain
 
 from django.contrib.sites.models import Site
 from django.core import mail, management
