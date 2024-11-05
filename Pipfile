@@ -129,7 +129,6 @@ XlsxWriter = "==3.0.3"
 # FIXME: it's nbconvert dependency remove?
 jupyter_client = "==7.1.2"
 isoweek = "*"
-django-subdomains = {git = "https://github.com/pacahon/django-subdomains.git",ref = "4096c2dc82f9f5e511e8c8f78d31e804ac028b5d"}
 django-simple-menu = "*"
 # XXX: UI problems with ckeditor widget in 6.0.0 release
 django-ckeditor = "==5.9.0"
