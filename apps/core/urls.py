@@ -1,7 +1,7 @@
 import re
 from urllib.parse import urlparse
 
-from subdomains.utils import reverse as subdomain_reverse
+from core.utils import reverse as subdomain_reverse
 
 from django.conf import settings
 from django.urls import reverse as django_reverse

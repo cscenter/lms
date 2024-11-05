@@ -604,10 +604,6 @@
             "index": "pypi",
             "version": "==1.12.3"
         },
-        "django-subdomains": {
-            "git": "https://github.com/pacahon/django-subdomains.git",
-            "ref": "4096c2dc82f9f5e511e8c8f78d31e804ac028b5d"
-        },
         "django-taggit": {
             "hashes": [
                 "sha256:61547a23fc99967c9304107414a09e662b459f4163dbbae32e60b8ba40c34d05",
