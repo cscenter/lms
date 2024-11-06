@@ -149,7 +149,6 @@ MIDDLEWARE = [
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
     # EN language is not supported at this moment anyway
     "core.middleware.HardCodedLocaleMiddleware",
-    "subdomains.middleware.SubdomainURLRoutingMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
