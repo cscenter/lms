@@ -110,9 +110,7 @@ MARKDOWN_EXTENSIONS = (h.EXT_FENCED_CODE |
                        h.EXT_TABLES |
                        h.EXT_QUOTE |
                        h.EXT_NO_INTRA_EMPHASIS |
-                       h.EXT_SPACE_HEADERS |
-                       h.EXT_MATH |
-                       h.EXT_MATH_EXPLICIT)
+                       h.EXT_SPACE_HEADERS)
 MARKDOWN_RENDER_FLAGS = 0
 markdown = h.Hoep(MARKDOWN_EXTENSIONS, MARKDOWN_RENDER_FLAGS)
 
