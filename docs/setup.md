@@ -11,7 +11,8 @@ PYCURL_SSL_LIBRARY=openssl LDFLAGS="-L/opt/homebrew/opt/openssl@3/include/lib -L
 env LDFLAGS="-L$(brew --prefix openssl)/lib" \
 CFLAGS="-I$(brew --prefix openssl)/include" \
 SWIG_FEATURES="-cpperraswarn -includeall -I$(brew --prefix openssl)/include" \
-pip install M2Crypto==0.38.0# for fish shell
+pip install M2Crypto==0.38.0
+# for fish shell
 env PYCURL_SSL_LIBRARY=openssl LDFLAGS="-L"(brew --prefix openssl)"/lib -L/usr/local/opt/curl/lib" CPPFLAGS="-I"(brew --prefix openssl)"/include -I/usr/local/opt/curl/include" pip install --compile --no-cache-dir pycurl
 env LDFLAGS="-L"(brew --prefix openssl)"/lib" CFLAGS="-I"(brew --prefix openssl)"/include" SWIG_FEATURES="-cpperraswarn -includeall -I"(brew --prefix openssl)"/include" pip install m2crypto
 

@@ -66,12 +66,12 @@ babel = "*"
 boto3 = "*"
 boto = "*"
 # Event messages verification for AWS SNS
-M2Crypto = "*"
+M2Crypto = "==0.38.0"
 # Mailing
 django-ses = "==2.6.1"
 django-post_office = "==3.6.0"
 # Markdown
-hoep = {editable = true,git = "https://github.com/pacahon/Hoep.git",ref = "0d4c0507dcb34d1b63a099c8b08656b66394bc37"}
+hoep = "*"
 # Monitoring
 sentry-sdk = "*"
 # Oauth2
@@ -140,6 +140,6 @@ djangorestframework-camel-case = "*"
 # FIXME: pylint 2.12.2 possibly conflicting dependencies found: astroid==2.9.3, wrapt [required: >=1.11,<1.14, installed: 1.14.0]
 #  remove after new pyling version release
 wrapt = "==1.13.3"
-
+lxml_html_clean = "==0.3.1"
 [requires]
 python_version = "3.10"
