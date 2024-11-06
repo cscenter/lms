@@ -19,7 +19,7 @@ djangorestframework-stubs = "*"
 types-pytz = "*"
 types-bleach = "*"
 types-python-dateutil = "*"
-types-requests = "*"
+types-requests = "2.28.11.16"
 # Coverage
 coverage = "*"
 django-coverage = "==1.2.4"
