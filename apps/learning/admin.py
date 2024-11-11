@@ -351,6 +351,7 @@ class CourseInlineAdmin(admin.TabularInline):
 
 
 class InvitationAdmin(BaseModelAdmin):
+    search_fields = ['name']
     list_display = ('name', 'get_branches', 'semester', 'get_link')
     list_select_related = ['semester']
     list_prefetch_related = ['branches']

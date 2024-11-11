@@ -913,7 +913,6 @@ class StudentProfile(TimeStampedModel):
     invitation = models.ForeignKey(
         "learning.Invitation",
         verbose_name=_("Invitation"),
-        editable=False,
         blank=True, null=True,
         related_name="student_profiles",
         on_delete=models.SET_NULL)

@@ -194,6 +194,7 @@ class StudentProfileForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         profile_type = cleaned_data.get('type')
+        invitation = cleaned_data.get('invitation')
         user = cleaned_data.get('user')
         branch = cleaned_data.get('branch')
         year_of_admission = cleaned_data.get('year_of_admission')
@@ -209,6 +210,9 @@ class StudentProfileForm(forms.ModelForm):
                     msg = _('Regular student profile already exists for this '
                             'admission campaign year.')
                     self.add_error('year_of_admission', ValidationError(msg))
+        if profile_type == StudentTypes.INVITED and invitation is None:
+            msg = _('Student profile with type INVITED must have invitation')
+            self.add_error('invitation', ValidationError(msg))
 
 
 class StudentProfileAdmin(BaseModelAdmin):
@@ -218,6 +222,7 @@ class StudentProfileAdmin(BaseModelAdmin):
     list_filter = ('type', 'site', 'branch', 'status',)
     raw_id_fields = ('user', 'comment_last_author')
     search_fields = ['user__last_name']
+    raw_id_fields = ['invitation']
     inlines = [StudentStatusLogAdminInline, StudentAcademicDisciplineLogAdminInline]
     formfield_overrides = {
         models.ManyToManyField: {
@@ -230,7 +235,7 @@ class StudentProfileAdmin(BaseModelAdmin):
             # TODO: add user change url
             return ['type', 'site', 'year_of_admission', 'birth_date',
                     'comment_changed_at', 'comment_last_author', 'invitation']
-        return ['birth_date', 'invitation']
+        return ['birth_date']
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = [
