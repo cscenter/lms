@@ -220,9 +220,8 @@ class StudentProfileAdmin(BaseModelAdmin):
     list_select_related = ['user', 'branch', 'branch__site']
     list_display = ('user', 'branch', 'type', 'year_of_admission', 'status', 'priority')
     list_filter = ('type', 'site', 'branch', 'status',)
-    raw_id_fields = ('user', 'comment_last_author')
+    raw_id_fields = ('user', 'comment_last_author', 'invitation')
     search_fields = ['user__last_name']
-    raw_id_fields = ['invitation']
     inlines = [StudentStatusLogAdminInline, StudentAcademicDisciplineLogAdminInline]
     formfield_overrides = {
         models.ManyToManyField: {
