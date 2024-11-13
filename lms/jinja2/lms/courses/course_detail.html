@@ -248,23 +248,21 @@
         {% if user.is_authenticated %}
           <div class="o-buttons-vertical">
             {% set can_leave_course = request.user.has_perm("learning.leave_course", course) %}
+            {% set can_enroll = can_enroll_in_course(request.user, course, request.user.get_student_profile()) %}
             {% if can_leave_course %}
               <a href="{{ course.get_unenroll_url() }}" class="btn btn-danger btn-block">{% trans %}Unenroll from the course{% endtrans %}</a>
-            {% else %}
-              {% set can_enroll = can_enroll_in_course(request.user, course, request.user.get_student_profile()) %}
-              {% if can_enroll %}
-                  <a href="{{ course.get_enroll_url() }}" class="btn btn-primary btn-block">
-                    {% trans %}Enroll in the course{% endtrans %}
-                    {% if course.is_learners_capacity_limited %}
-                      <br><small>{% trans %}Learner places available{% endtrans %}: {{ course.learners_places_left }}</small>
-                    {% endif %}
-                    {% if course.is_listeners_capacity_limited %}
-                      <br><small>{% trans %}Listener places available{% endtrans %}: {{ course.listeners_places_left }}</small>
-                    {% endif %}
-                  </a>
-              {% elif can_enroll_by_invitation %}
-                <a href="{{ course_invitation.get_absolute_url() }}" class="btn btn-primary">Записаться по приглашению</a>
-              {% endif %}
+            {% elif can_enroll_by_invitation %}
+              <a href="{{ course_invitation.get_absolute_url() }}" class="btn btn-primary">Записаться по приглашению</a>
+            {% elif can_enroll%}
+              <a href="{{ course.get_enroll_url() }}" class="btn btn-primary btn-block">
+                {% trans %}Enroll in the course{% endtrans %}
+                {% if course.is_learners_capacity_limited %}
+                  <br><small>{% trans %}Learner places available{% endtrans %}: {{ course.learners_places_left }}</small>
+                {% endif %}
+                {% if course.is_listeners_capacity_limited %}
+                  <br><small>{% trans %}Listener places available{% endtrans %}: {{ course.listeners_places_left }}</small>
+                {% endif %}
+              </a>
             {% endif %}
             {% if can_add_assignment %}
               <a href="{{ course.get_create_assignment_url() }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans %}Add assignment{% endtrans %}</a>
