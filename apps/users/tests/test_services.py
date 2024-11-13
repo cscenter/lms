@@ -13,7 +13,7 @@ from courses.models import Semester
 from courses.tests.factories import CourseFactory, AssignmentFactory
 from learning.models import GraduateProfile, Enrollment, StudentAssignment
 from learning.settings import StudentStatuses
-from learning.tests.factories import InvitationFactory, EnrollmentPeriodFactory, EnrollmentFactory, AssignmentCommentFactory
+from learning.tests.factories import CourseInvitationFactory, InvitationFactory, EnrollmentPeriodFactory, EnrollmentFactory, AssignmentCommentFactory
 from study_programs.tests.factories import (
     AcademicDisciplineFactory, StudyProgramFactory
 )
@@ -222,6 +222,7 @@ def test_get_student_profile_priority():
                                              status=StudentStatuses.REINSTATED)
     current_semester = Semester.get_current()
     invitation = InvitationFactory(semester=current_semester)
+    CourseInvitationFactory(invitation=invitation, course__semester=current_semester)
     today = now_local(student_profile1.branch.get_timezone()).date()
     EnrollmentPeriodFactory(semester=current_semester,
                             site_id=settings.SITE_ID,

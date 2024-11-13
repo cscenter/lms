@@ -25,14 +25,14 @@
                                 </td>
                                 <td align="right">
                                     {% set can_leave_the_course = request.user.has_perm(LeaveCourse.name, course) %}
+                                    {% set perm_obj = InvitationEnrollPermissionObject(course_invitation, request.user.get_student_profile()) %}
+                                    {% set can_enroll_by_invitation = request.user.has_perm(EnrollInCourseByInvitation.name, perm_obj) %}
                                     {% if can_leave_the_course %}
                                         <a href="{{ course.get_unenroll_url() }}" class="btn btn-danger btn-block">{% trans %}Unenroll from the course{% endtrans %}</a>
+                                    {% elif can_enroll_by_invitation%}
+                                        <a href="{{ course_invitation.get_absolute_url() }}" class="btn btn-primary">Записаться</a>
                                     {% else %}
-                                        {% set perm_obj = InvitationEnrollPermissionObject(course_invitation, request.user.get_student_profile()) %}
-                                        {% set can_enroll_by_invitation = request.user.has_perm(EnrollInCourseByInvitation.name, perm_obj) %}
-                                        {% if can_enroll_by_invitation %}
-                                            <a href="{{ course_invitation.get_absolute_url() }}" class="btn btn-primary">Записаться</a>
-                                        {% endif %}
+                                        <div class="btn btn-primary disabled">Записаться</div>
                                     {% endif %}
                                 </td>
                             </tr>

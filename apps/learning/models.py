@@ -598,7 +598,7 @@ class Invitation(TimeStampedModel):
 
     @property
     def is_active(self):
-        return all(course.enrollment_is_open for course in self.courses.all())
+        return any(course.enrollment_is_open for course in self.courses.all())
 
 
 class PersonalAssignmentActivity(models.TextChoices):
