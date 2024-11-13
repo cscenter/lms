@@ -108,6 +108,37 @@ def test_course_detail_view_invited_permission(client):
     response = client.get(invitation_1.course.get_absolute_url())
     assert response.status_code == 403
 
+@pytest.mark.django_db
+def test_invitation_view_is_active(client):
+    future = now() + datetime.timedelta(days=3)
+    current_term = SemesterFactory.create_current(
+        enrollment_period__ends_on=future.date())
+
+    course_invitation_1 = CourseInvitationFactory(course__semester=current_term)
+    invitation = course_invitation_1.invitation
+    course_invitation_2 = CourseInvitationFactory(course__semester=current_term, invitation=invitation)
+    branch = BranchFactory()
+    student = UserFactory(branch=branch)
+    complete_student_profile(student, branch.site, invitation)
+
+    client.login(student)
+    response = client.get(invitation.get_absolute_url())
+    assert response.status_code == 200
+    assert 'class="btn btn-primary">Записаться</a>' in response.content.decode('utf-8')
+    assert '<div class="btn btn-primary disabled">Записаться</div>' not in response.content.decode('utf-8')
+    course_invitation_2.course.completed_at = now().date()
+    course_invitation_2.course.save()
+    
+    response = client.get(invitation.get_absolute_url())
+    assert response.status_code == 200
+    assert 'class="btn btn-primary">Записаться</a>' in response.content.decode('utf-8')
+    assert '<div class="btn btn-primary disabled">Записаться</div>' in response.content.decode('utf-8')
+    course_invitation_1.course.completed_at = now().date()
+    course_invitation_1.course.save()
+    
+    response = client.get(invitation.get_absolute_url())
+    assert response.status_code == 404
+
 
 @pytest.mark.django_db
 def test_course_detail_view_enrolled_invited_capabilities(client):
