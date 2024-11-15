@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 from django.conf import settings
 from django.utils.translation import gettext as _
+from django.utils import timezone
 
 from core.urls import reverse
 from courses.tests.factories import CourseFactory, MetaCourseFactory, SemesterFactory
@@ -29,6 +30,7 @@ def test_create_reference(client, assert_redirect):
     client.login(curator)
 
     student_profile = StudentProfileFactory()
+    SemesterFactory.create_batch(2, year=timezone.now().year)
     form_url = reverse('student_reference_add',
                        subdomain=settings.LMS_SUBDOMAIN,
                        kwargs={"user_id": student_profile.user_id})
@@ -116,7 +118,7 @@ def test_reference_detail(client, assert_login_redirect, settings):
     student = StudentFactory()
     # add 2 enrollments from 1 course reading exactly
     meta_course = MetaCourseFactory.create()
-    semesters = SemesterFactory.create_batch(2, year=2014)
+    semesters = SemesterFactory.create_batch(2, year=timezone.now().year)
     enrollments = []
     student_profile = student.get_student_profile(settings.SITE_ID)
     for s in semesters:
@@ -151,7 +153,8 @@ def test_reference_detail(client, assert_login_redirect, settings):
 def test_certificate_of_participant_hidden_course(client):
     student = StudentFactory()
     curator = CuratorFactory()
-    course = CourseFactory()
+    semesters = SemesterFactory.create_batch(2, year=timezone.now().year)
+    course = CourseFactory(semester=semesters[1])
     student_profile = student.get_student_profile(settings.SITE_ID)
     EnrollmentFactory(
         course=course,
