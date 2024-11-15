@@ -125,6 +125,9 @@ class Semester(models.Model):
     def __lt__(self, other):
         return self.__cmp__(other) < 0
 
+    def __le__(self, other):
+        return self.__cmp__(other) <= 0
+
     @property
     def slug(self):
         return "{0}-{1}".format(self.year, self.type)
