@@ -204,7 +204,7 @@ def get_student_profile_priority(student_profile: StudentProfile) -> int:
         priority = min_priority + 100
     elif student_profile.status in StudentStatuses.inactive_statuses:
         priority = min_priority + 200
-    if student_profile.type == StudentTypes.INVITED and not student_profile.is_invited_student_active:
+    if student_profile.invitation is not None and not student_profile.invitation.semester.is_current:
         priority = min_priority + 300
     return priority
 

@@ -178,8 +178,8 @@ def test_view_course_offerings_invited_restriction(client):
         future = now() + datetime.timedelta(days=3)
         autumn_term = SemesterFactory.create_current(enrollment_period__ends_on=future.date())
         site = SiteFactory(id=settings.SITE_ID)
-        course_invitation = CourseInvitationFactory(course__semester=autumn_term)
-        student_profile = StudentProfileFactory(type=StudentTypes.INVITED)
+        course_invitation = CourseInvitationFactory(course__semester=autumn_term, invitation__semester=autumn_term)
+        student_profile = StudentProfileFactory(type=StudentTypes.INVITED, invitation=course_invitation.invitation)
         student = student_profile.user
         student.branch = student_profile.branch
         student.save()

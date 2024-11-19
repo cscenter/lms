@@ -41,7 +41,7 @@ spec:
             - mountPath: /etc/ldap/certs/
               name: ldap-certs
           command: ["/bin/sh"]
-          args: ["-c", "python manage.py rqworker high default"]
+          args: ["-c", "python manage.py rqworker high default --with-scheduler"]
           resources:
             requests:
               cpu: 100m

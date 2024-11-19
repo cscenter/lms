@@ -1010,15 +1010,6 @@ class StudentProfile(TimeStampedModel):
             return self.comment_changed_at.strftime(DATETIME_FORMAT_RU)
         return default
 
-    @property
-    def is_invited_student_active(self):
-        """
-        Checks if INVITED StudentProfile has invitation and it is relevant
-        """
-        if self.type != StudentTypes.INVITED:
-            raise ValueError("Works only with invited students. Use is_active for others")
-        return self.invitation is not None and self.invitation.is_active
-
 
 class StudentFieldLog(TimestampedModel):
     changed_at = models.DateField(

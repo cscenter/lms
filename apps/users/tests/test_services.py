@@ -221,13 +221,9 @@ def test_get_student_profile_priority():
     student_profile1 = StudentProfileFactory(type=StudentTypes.REGULAR,
                                              status=StudentStatuses.REINSTATED)
     current_semester = Semester.get_current()
+    previos_semester = current_semester.get_prev()
     invitation = InvitationFactory(semester=current_semester)
-    CourseInvitationFactory(invitation=invitation, course__semester=current_semester)
-    today = now_local(student_profile1.branch.get_timezone()).date()
-    EnrollmentPeriodFactory(semester=current_semester,
-                            site_id=settings.SITE_ID,
-                            starts_on=today,
-                            ends_on=today)
+    invitation2 = InvitationFactory(semester=previos_semester)
     student_profile2 = StudentProfileFactory(type=StudentTypes.INVITED,
                                              status=StudentStatuses.REINSTATED,
                                              invitation=invitation)
@@ -244,7 +240,8 @@ def test_get_student_profile_priority():
     student_profile6 = StudentProfileFactory(type=StudentTypes.VOLUNTEER,
                                              status=StudentStatuses.EXPELLED)
     assert get_student_profile_priority(student_profile5) == get_student_profile_priority(student_profile6)
-    student_profile7 = StudentProfileFactory(type=StudentTypes.INVITED)
+    student_profile7 = StudentProfileFactory(type=StudentTypes.INVITED,
+                                             invitation=invitation2)
     assert get_student_profile_priority(student_profile3) < get_student_profile_priority(student_profile7)
     assert get_student_profile_priority(student_profile4) < get_student_profile_priority(student_profile7)
     assert get_student_profile_priority(student_profile5) < get_student_profile_priority(student_profile7)

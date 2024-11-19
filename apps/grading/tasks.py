@@ -11,6 +11,7 @@ from grading.api.yandex_contest import (
     ContestAPIError, SubmissionVerdict, Unavailable, YandexContestAPI
 )
 from grading.constants import CheckingSystemTypes
+from grading.models import Submission
 from grading.utils import YandexContestScoreSource
 
 logger = logging.getLogger(__name__)

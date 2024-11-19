@@ -191,44 +191,22 @@ def test_student_profile_year_of_admission():
 @pytest.mark.django_db
 def test_student_profile_is_invited_student_active():
     student_profile = StudentProfileFactory()
-    with pytest.raises(ValueError):
-        student_profile.is_invited_student_active()
+    assert student_profile.priority == 200
 
     student_profile.type = StudentTypes.INVITED
-    assert not student_profile.is_invited_student_active
+    student_profile.save()
+    assert student_profile.priority == 1000
 
     course = CourseFactory(semester=Semester.get_current())
     invitation = InvitationFactory()
     invitation.courses.add(course)
     student_profile.invitation = invitation
-    assert not student_profile.is_invited_student_active
+    student_profile.save()
+    assert student_profile.priority == 1300
 
     invitation.semester = Semester.get_current()
-    assert not student_profile.is_invited_student_active
-
-    today = now_local(student_profile.branch.get_timezone()).date()
-    enrollmentperiod = EnrollmentPeriodFactory()
-    assert not student_profile.is_invited_student_active
-
-    enrollmentperiod.semester = Semester.get_current()
-    enrollmentperiod.save()
-    assert not student_profile.is_invited_student_active
-
-    enrollmentperiod.site_id = settings.SITE_ID
-    enrollmentperiod.save()
-    assert not student_profile.is_invited_student_active
-
-    enrollmentperiod.starts_on = today
-    enrollmentperiod.save()
-    assert not student_profile.is_invited_student_active
-
-    enrollmentperiod.ends_on = today
-    enrollmentperiod.save()
-    assert student_profile.is_invited_student_active
-
-    course.ends_on = today - datetime.timedelta(days=1)
-    course.save()
-    assert not student_profile.is_invited_student_active
+    student_profile.save()
+    assert student_profile.priority == 1000
 
 
 def test_get_abbreviated_short_name():
