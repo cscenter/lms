@@ -6,7 +6,7 @@ from django.db import models
 from pandas import DataFrame
 
 from django.db.models import Prefetch
-from django.utils import formats
+from django.utils import formats, timezone
 from django.utils.encoding import force_str
 
 from admission.constants import ApplicantStatuses, InterviewSections
@@ -107,7 +107,7 @@ class AdmissionApplicantsCampaignReport(AdmissionApplicantsReport):
         return Applicant.objects.filter(campaign=self.campaign.pk).order_by("pk")
 
     def get_filename(self):
-        today = datetime.datetime.now()
+        today = timezone.now()
         return "admission_{}_{}_report_{}".format(
             self.campaign.branch.code,
             self.campaign.year,
@@ -149,7 +149,7 @@ class AdmissionApplicantsYearReport(AdmissionApplicantsReport):
         return Applicant.objects.filter(campaign__year=self.year).exclude(campaign__branch__name='Тест').order_by("pk")
 
     def get_filename(self):
-        today = datetime.datetime.now()
+        today = timezone.now()
         return f"admission_{self.year}_report_{formats.date_format(today, 'SHORT_DATE_FORMAT')}"
 
 class AdmissionExamReport:
@@ -210,7 +210,7 @@ class AdmissionExamReport:
         )
 
     def get_filename(self):
-        today = datetime.datetime.now()
+        today = timezone.now()
         return "admission_{}_{}_exam_report_{}".format(
             self.campaign.year,
             self.campaign.branch.code,
