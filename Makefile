@@ -27,6 +27,7 @@ tests:
 	pytest -c compscicenter_ru/pytest.ini --ds=compscicenter_ru.settings.test
 	pytest -c compsciclub_ru/pytest.ini --ds=compsciclub_ru.settings.test
 	pytest -c lk_yandexdataschool_ru/pytest.ini --ds=lk_yandexdataschool_ru.settings.test
+	python manage.py clear_scheduled_jobs
 
 migrate:
 	python manage.py migrate $(DJANGO_POSTFIX)

@@ -151,6 +151,19 @@ class Semester(models.Model):
                                                  type=term_pair.type)
         return obj
 
+    def get_next(self) -> "Semester":
+        term_pair = self.term_pair.get_next()
+        obj, created = self.__class__.objects.get_or_create(year=term_pair.year,
+                                                 type=term_pair.type)
+        return obj
+    
+    def get_prev(self) -> "Semester":
+        term_pair = self.term_pair.get_prev()
+        obj, created = self.__class__.objects.get_or_create(year=term_pair.year,
+                                                 type=term_pair.type)
+        return obj
+
+    @property
     def is_current(self, tz: Timezone = settings.DEFAULT_TIMEZONE):
         term_pair = get_current_term_pair(tz)
         return term_pair.year == self.year and term_pair.type == self.type
