@@ -722,14 +722,17 @@ def merge_users_view(request: HttpRequest):
 def badge_number_from_csv_view(request: HttpRequest):
     if not request.user.is_curator:
         return HttpResponseForbidden()
-    form = BadgeNumberFromCSVForm(data=request.POST)
+    form = BadgeNumberFromCSVForm(files=request.FILES)
     if form.is_valid():
         csv_file = form.cleaned_data['csv_file']
         try:
             decoded_file = csv_file.read().decode('utf-8').splitlines()
-            number_done = badge_number_from_csv(decoded_file)
         except Exception as e:
             messages.error(request, _(f"File read error: {str(e)}"))
+        try:
+            number_done = badge_number_from_csv(decoded_file)
+        except Exception as e:
+            messages.error(request, str(e))
         else:
             messages.success(request, f"Номера пропусков успешно выставлены. Обработано {number_done} пользователей")
     else:

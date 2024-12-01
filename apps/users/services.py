@@ -623,7 +623,10 @@ def badge_number_from_csv(csv_file) -> int:
     for row in reader:
         email = row.get('Почта')
         badge_number = row.get('Номер пропуска')
-        user = User.objects.get(email__iexact=email)
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            raise ValueError(_('User with email "{}" does not exists').format(email))
         user.badge_number = badge_number
         user.save()
         count_done += 1

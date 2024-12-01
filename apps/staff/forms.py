@@ -86,11 +86,12 @@ class BadgeNumberFromCSVForm(forms.Form):
         try:
             decoded_file = csv_file.read().decode('utf-8').splitlines()
             reader = csv.DictReader(decoded_file)
-            headers = reader.fieldnames
-
-            required_columns = {"Почта", "Номер пропуска"}
-            if not required_columns.issubset(set(headers)):
-                raise ValidationError(_('CSV file must contain "Email" and "Badge number" columns'))
         except Exception as e:
             raise ValidationError(_(f"File read error: {str(e)}"))
+        
+        headers = reader.fieldnames
+        required_columns = {"Почта", "Номер пропуска"}
+        if not required_columns.issubset(set(headers)):
+            raise ValidationError(_('CSV file must contain "Email" and "Badge number" columns'))
+        csv_file.seek(0)
         return csv_file

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-30 10:17+0000\n"
-"PO-Revision-Date: 2024-11-30 10:19+0000\n"
+"POT-Creation-Date: 2024-12-01 13:42+0000\n"
+"PO-Revision-Date: 2024-12-01 13:42+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -275,7 +275,7 @@ msgstr "Общее описание, правила обучения"
 #: apps/learning/admin.py:83 apps/learning/gradebook/views.py:237
 #: apps/learning/models.py:78 apps/learning/models.py:1092
 #: apps/library/models.py:66 apps/staff/filters.py:130
-#: apps/staff/filters.py:205 apps/staff/views.py:906 apps/staff/views.py:970
+#: apps/staff/filters.py:205 apps/staff/views.py:917 apps/staff/views.py:981
 #: apps/study_programs/models.py:65 apps/users/models.py:176
 #: apps/users/models.py:358 apps/users/models.py:815
 #: lms/jinja2/lms/courses/meta_detail.html:27
@@ -607,7 +607,7 @@ msgstr "Место проведения"
 
 #: apps/courses/forms.py:165 apps/courses/models.py:945
 #: apps/notifications/models.py:92 apps/staff/filters.py:135
-#: apps/staff/filters.py:210 apps/staff/views.py:906 apps/staff/views.py:970
+#: apps/staff/filters.py:210 apps/staff/views.py:917 apps/staff/views.py:981
 #: apps/users/models.py:795
 msgid "Type"
 msgstr "Тип"
@@ -1482,7 +1482,7 @@ msgstr "Посылка к заданию"
 
 #: apps/grading/models.py:93 apps/learning/forms.py:77
 #: apps/learning/study/forms.py:69 apps/staff/filters.py:189
-#: apps/staff/views.py:971 apps/users/models.py:221 apps/users/models.py:820
+#: apps/staff/views.py:982 apps/users/models.py:221 apps/users/models.py:820
 #: apps/users/models.py:1066 lms/jinja2/lms/staff/status_log.html:21
 #: lms/jinja2/lms/staff/student_search.html:69
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:52
@@ -2752,13 +2752,13 @@ msgstr "Уведомление"
 msgid "Filter"
 msgstr ""
 
-#: apps/staff/filters.py:116 apps/staff/views.py:907 apps/users/models.py:1098
+#: apps/staff/filters.py:116 apps/staff/views.py:918 apps/users/models.py:1098
 #: lms/jinja2/lms/staff/academic_discipline_log.html:21
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:110
 msgid "Field of study"
 msgstr "Направление обучения"
 
-#: apps/staff/filters.py:121 apps/staff/views.py:907 apps/users/models.py:1091
+#: apps/staff/filters.py:121 apps/staff/views.py:918 apps/users/models.py:1091
 #: lms/jinja2/lms/staff/academic_discipline_log.html:20
 msgid "Former field of study"
 msgstr "Прошлое направление обучения"
@@ -2783,7 +2783,7 @@ msgstr "Обработать"
 msgid "Studying"
 msgstr "Учится"
 
-#: apps/staff/filters.py:195 apps/staff/views.py:971 apps/users/models.py:1061
+#: apps/staff/filters.py:195 apps/staff/views.py:982 apps/users/models.py:1061
 #: lms/jinja2/lms/staff/status_log.html:20
 msgid "Former status"
 msgstr "Прошлый статус"
@@ -2813,20 +2813,21 @@ msgid "Emails must not be the same"
 msgstr "Почты должны различаться"
 
 #: apps/staff/forms.py:71
-#| msgid "files"
 msgid "CSV file"
 msgstr "Файл CSV"
 
 #: apps/staff/forms.py:81
-#| msgid "Badge number"
 msgid "Fill in badge numbers"
 msgstr "Залить номера пропусков"
 
-#: apps/staff/forms.py:93
+#: apps/staff/forms.py:90 apps/staff/views.py:731
+msgid "File read error: {str(e)}"
+msgstr ""
+
+#: apps/staff/forms.py:95
 msgid "CSV file must contain \"Email\" and \"Badge number\" columns"
 msgstr ""
-"Файл CSV должен содержать колонки с заголовками \"Почта\" и \"Номер "
-"пропуска\""
+"Файл CSV должен содержать колонки с заголовками «Почта» и «Номер пропуска»"
 
 #: apps/staff/models.py:16
 msgid "Hint"
@@ -2842,11 +2843,11 @@ msgstr "Склад"
 msgid "No courses yet"
 msgstr "Список курсов пуст"
 
-#: apps/staff/views.py:906 apps/staff/views.py:970 apps/users/models.py:381
+#: apps/staff/views.py:917 apps/staff/views.py:981 apps/users/models.py:381
 msgid "Telegram"
 msgstr ""
 
-#: apps/staff/views.py:906 apps/staff/views.py:970 apps/users/models.py:309
+#: apps/staff/views.py:917 apps/staff/views.py:981 apps/users/models.py:309
 msgid "email address"
 msgstr ""
 
@@ -3669,11 +3670,11 @@ msgstr "Справка студента"
 msgid "Student References"
 msgstr "Справки студента"
 
-#: apps/users/services.py:528
+#: apps/users/services.py:530
 msgid "Major and minor must be objects of the same types"
 msgstr "Основной и дублирующий объекты должны быть объектами одного типа"
 
-#: apps/users/services.py:530
+#: apps/users/services.py:532
 msgid ""
 "Major and minor objects must not be the same: {major} with type "
 "{type(major)}"
@@ -3681,15 +3682,20 @@ msgstr ""
 "Основной и дублирующий объекты не должны быть одним объектом: {major} типа "
 "{type(major)}"
 
-#: apps/users/services.py:588
+#: apps/users/services.py:590
 msgid "Use merge_objects for non User instances"
 msgstr "Для объектов не-Пользователей используйте merge_objects"
 
-#: apps/users/services.py:590
+#: apps/users/services.py:592
 #, python-brace-format
 msgid "Major and minor Users must not be the same object: {major}"
 msgstr ""
 "Основной и дублирующий пользователи не должны быть одним объектом: {major}"
+
+#: apps/users/services.py:630
+#| msgid "User with email «{email}» does not exists"
+msgid "User with email \"{}\" does not exists"
+msgstr "Пользователь с почтой «{}» не существует"
 
 #: apps/users/tests/test_certificates_of_participation.py:83
 #: apps/users/tests/test_certificates_of_participation.py:91
