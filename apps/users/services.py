@@ -620,6 +620,10 @@ def merge_users(*, major: User, minor: User) -> User:
 def badge_number_from_csv(csv_file) -> int:
     reader = csv.DictReader(csv_file)
     count_done = 0
+    headers = reader.fieldnames
+    required_columns = {"Почта", "Номер пропуска"}
+    if not required_columns.issubset(set(headers)):
+        raise ValidationError(_('CSV file must contain "Email" and "Badge number" columns'))
     for row in reader:
         email = row.get('Почта')
         badge_number = row.get('Номер пропуска')

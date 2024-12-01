@@ -1,4 +1,6 @@
+import csv
 import datetime
+import io
 
 import pytest
 from django.conf import settings
@@ -20,7 +22,7 @@ from study_programs.tests.factories import (
 from users.constants import Roles
 from users.models import StudentProfile, StudentTypes, UserGroup, User, YandexUserData
 from users.services import (
-    StudentStatusTransition, assign_or_revoke_student_role, assign_role,
+    StudentStatusTransition, assign_or_revoke_student_role, assign_role, badge_number_from_csv,
     create_graduate_profiles, create_student_profile, get_student_profile_priority,
     get_student_profiles, maybe_unassign_student_role, unassign_role, update_student_status,
     update_student_academic_discipline, merge_users
@@ -572,3 +574,31 @@ def test_merge_users_completed():
     assert not StudentAssignment.objects.filter(id=minor_assignment_merge.id).exists()
     assert not YandexUserData.objects.filter(user=major_user).exists()
     assert not YandexUserData.objects.filter(id=minor_yandex_data.id).exists()
+
+
+@pytest.mark.django_db
+def test_merge_users_failed():
+    user1 = UserFactory()
+    user2 = UserFactory()
+    csv_file = io.StringIO()
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(['Не Почта', 'Не Номер пропуска'])
+    csv_writer.writerow([user1.email, 'test badge 1'])
+    csv_file.seek(0)
+    with pytest.raises(ValidationError):
+        badge_number_from_csv(csv_file)
+    csv_file = io.StringIO()
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(['Почта', 'Номер пропуска'])
+    csv_writer.writerow([user1.email, 'test badge 1'])
+    csv_writer.writerow(['wrong email', 'test badge 2'])
+    csv_file.seek(0)
+    with pytest.raises(ValueError):
+        badge_number_from_csv(csv_file)
+    csv_file = io.StringIO()
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(['Почта', 'Номер пропуска'])
+    csv_writer.writerow([user1.email, 'test badge 1'])
+    csv_writer.writerow([user2.email, 'test badge 2'])
+    csv_file.seek(0)
+    assert badge_number_from_csv(csv_file) == 2

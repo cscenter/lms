@@ -1,3 +1,5 @@
+import csv
+import io
 import pytest
 from django.conf import settings
 from django.contrib.messages import get_messages
@@ -225,4 +227,50 @@ def test_merge_users_view(client):
                          f"href={user2.get_absolute_url()} "
                          f"target='_blank'>"
                          f"Ссылка на объединенный профиль</a>"]
+    assert all(message in messages for message in expected_messages)
+    
+
+@pytest.mark.django_db
+def test_badge_number_from_csv_view(client):
+    url = reverse("staff:badge_number_from_csv")
+    user1 = UserFactory()
+    user2 = UserFactory()
+    response = client.post(url)
+    assert response.status_code == 403
+    
+    curator = CuratorFactory()
+    client.login(curator)
+    response = client.post(url)
+    assert response.status_code == 302
+    messages = [msg.message for msg in get_messages(response.wsgi_request)]
+    expected_messages = ['CSV file:<br>This field is required.']
+    assert all(message in messages for message in expected_messages)
+    
+    csv_file = io.StringIO()
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(['Не Почта', 'Не Номер пропуска'])
+    csv_file.seek(0)
+    response = client.post(url, {'csv_file': csv_file})
+    messages = [msg.message for msg in get_messages(response.wsgi_request)]
+    expected_messages = ['CSV file:<br>CSV file must contain "Email" and "Badge number" columns']
+    assert all(message in messages for message in expected_messages)
+    
+    csv_file.seek(0)
+    csv_writer.writerow(['Почта', 'Номер пропуска'])
+    csv_writer.writerow([user1.email, 'test badge 1'])
+    csv_writer.writerow(['wrong email', 'test badge 2'])
+    csv_file.seek(0)
+    response = client.post(url, {'csv_file': csv_file})
+    messages = [msg.message for msg in get_messages(response.wsgi_request)]
+    expected_messages = ['User with email "wrong email" does not exists']
+    assert all(message in messages for message in expected_messages)
+    
+    csv_file.seek(0)
+    csv_writer.writerow(['Почта', 'Номер пропуска'])
+    csv_writer.writerow([user1.email, 'test badge 1'])
+    csv_writer.writerow([user2.email, 'test badge 2'])
+    csv_file.seek(0)
+    response = client.post(url, {'csv_file': csv_file})
+    messages = [msg.message for msg in get_messages(response.wsgi_request)]
+    expected_messages = ['Номера пропусков успешно выставлены. Обработано 2 пользователей']
     assert all(message in messages for message in expected_messages)
