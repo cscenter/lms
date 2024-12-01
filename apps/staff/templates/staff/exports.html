@@ -111,6 +111,13 @@
             {% crispy merge_users_form %}
           </div>
         </div>
+        <h2 class="content-title">Номера пропусков</h2>
+        <div class="list-group">
+          <div class="list-group-item">
+            <p>Приложенный csv файл дожен иметь две колонки с заголовками "Почта" и "Номер пропуска".</p>
+            {% crispy badge_number_from_csv_form %}
+          </div>
+        </div>
         <h2 class="content-title">Официальные дипломы</h2>
         <div class="list-group">
           <div class="list-group-item list-unstyled">

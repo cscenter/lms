@@ -133,7 +133,7 @@ class UserAdmin(_UserAdmin):
             'fields': ['gender', 'birth_date', 'branch',
                        'last_name', 'first_name', 'patronymic', 'phone',
                        'workplace', 'living_place', 'photo', 'bio', 'private_contacts',
-                       'social_networks', 'time_zone']}),
+                       'social_networks', 'badge_number', 'time_zone']}),
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        ]}),
         (_('External services'), {'fields': ['telegram_username',

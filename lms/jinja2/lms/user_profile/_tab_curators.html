@@ -49,6 +49,12 @@
       {% endif %}
       </td>
     </tr>
+    <tr>
+      <td>{% trans %}Badge number{% endtrans %}</td>
+      <td>
+        {{ profile_user.badge_number|default("—", True) }}
+      </td>
+    </tr>
   </table>
 
   {% if can_view_library %}
