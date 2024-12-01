@@ -420,6 +420,9 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         null=True,
         blank=True
     )
+    badge_number = models.CharField(
+        _("Badge number"), max_length=255, null=True, blank=True
+    )
 
     objects = CustomUserManager()
 

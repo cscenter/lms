@@ -49,7 +49,7 @@ from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
 from staff.filters import EnrollmentInvitationFilter, StudentProfileFilter, StudentAcademicDisciplineLogFilter, \
     StudentStatusLogFilter
-from staff.forms import GraduationForm, MergeUsersForm
+from staff.forms import BadgeNumberFromCSVForm, GraduationForm, MergeUsersForm
 from staff.models import Hint
 from staff.tex import generate_tex_student_profile_for_diplomas
 from study_programs.models import AcademicDiscipline
@@ -59,6 +59,7 @@ from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
 from users.models import PartnerTag, StudentProfile, StudentTypes, User, StudentAcademicDisciplineLog, StudentStatusLog
 from users.services import (
+    badge_number_from_csv,
     create_graduate_profiles,
     get_graduate_profile,
     get_student_progress, merge_users,
@@ -148,6 +149,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         graduation_form = GraduationForm()
         graduation_form.helper.form_action = reverse("staff:create_alumni_profiles")
         merge_users_form = MergeUsersForm()
+        badge_number_from_csv_form = BadgeNumberFromCSVForm()
         official_diplomas_dates = (
             GraduateProfile.objects.for_site(self.request.site)
             .with_official_diploma()
@@ -159,6 +161,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         context = {
             "alumni_profiles_form": graduation_form,
             "merge_users_form": merge_users_form,
+            "badge_number_from_csv_form": badge_number_from_csv_form,
             "current_term": current_term,
             "prev_term": {"year": prev_term.year, "type": prev_term.type},
             "campaigns": (
@@ -707,6 +710,31 @@ def merge_users_view(request: HttpRequest):
                                        f"href={main_user.get_absolute_url()} "
                                        f"target='_blank'>"
                                        f"Ссылка на объединенный профиль</a>"))
+    else:
+        for field, error_as_list in form.errors.items():
+            label = form.fields[field].label if field in form.fields else field
+            label = "Общее" if label == "__all__" else label
+            errors = "<br>".join(str(error) for error in error_as_list)
+            messages.error(request, mark_safe(f"{label}:<br>{errors}"))
+    return HttpResponseRedirect(reverse("staff:exports"))
+
+
+def badge_number_from_csv_view(request: HttpRequest):
+    if not request.user.is_curator:
+        return HttpResponseForbidden()
+    form = BadgeNumberFromCSVForm(files=request.FILES)
+    if form.is_valid():
+        csv_file = form.cleaned_data['csv_file']
+        try:
+            decoded_file = csv_file.read().decode('utf-8').splitlines()
+        except Exception as e:
+            messages.error(request, _(f"File read error: {str(e)}"))
+        try:
+            number_done = badge_number_from_csv(decoded_file)
+        except Exception as e:
+            messages.error(request, str(e))
+        else:
+            messages.success(request, f"Номера пропусков успешно выставлены. Обработано {number_done} пользователей")
     else:
         for field, error_as_list in form.errors.items():
             label = form.fields[field].label if field in form.fields else field
