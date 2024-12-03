@@ -152,7 +152,7 @@ def monitor_submission_status_in_yandex_contest(submission_id,
     try:
         status, json_data = api.submission_details(
             checker.settings['contest_id'],
-            remote_submission_id, full=True, timeout=10)
+            remote_submission_id, timeout=10)
     except Unavailable as e:
         scheduler = django_rq.get_scheduler('default')
         scheduler.enqueue_in(timedelta(minutes=10),
@@ -166,20 +166,21 @@ def monitor_submission_status_in_yandex_contest(submission_id,
     except ContestAPIError as e:
         raise
     # Wait until remote submission check is not finished
-    if json_data['status'] == 'FAILED':
-        logger.error(f"Remote check for local "
-                     f"submission {submission_id} has failed!")
-        raise ContestAPIError(f"runId {remote_submission_id} has failed")
-    elif json_data['status'] != 'FINISHED':
-        scheduler = django_rq.get_scheduler('default')
-        scheduler.enqueue_in(timedelta(minutes=delay_min),
-                             monitor_submission_status_in_yandex_contest,
-                             submission_id,
-                             remote_submission_id,
-                             delay_min=delay_min + 1)
-        logger.info(f"Submission check {remote_submission_id} is not finished. "
-                    f"Rerun in {delay_min} minutes.")
-        return f"ContestAPIError. Requeue job in {delay_min} minutes"
+    if json_data['verdict'] == 'No report':
+        if delay_min > 10:
+            logger.error(f"Remote check for local "
+                        f"submission {submission_id} has failed!")
+            raise ContestAPIError(f"runId {remote_submission_id} has failed")
+        else:
+            scheduler = django_rq.get_scheduler('default')
+            scheduler.enqueue_in(timedelta(minutes=delay_min),
+                                monitor_submission_status_in_yandex_contest,
+                                submission_id,
+                                remote_submission_id,
+                                delay_min=delay_min + 1)
+            logger.info(f"Submission check {remote_submission_id} is not finished. "
+                        f"Rerun in {delay_min} minutes.")
+            return f"ContestAPIError. Requeue job in {delay_min} minutes"
     # TODO: Investigate how to escape html and store it in json
     # TODO: g.e. look at encoders in simplejson
     json_data.pop("source", None)
