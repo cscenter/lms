@@ -365,6 +365,7 @@ def test_course_build_absolute_uri(site_domain, lms_subdomain, settings):
     url = course.build_absolute_uri(site=another_site)
     assert url.startswith('https://your.random.site/')
 
+
 @pytest.mark.django_db
 def test_course_validation(mocker, settings):
     year = 2016
@@ -383,15 +384,13 @@ def test_course_validation(mocker, settings):
                               starts_on=term_start_dt.date(),
                               ends_on=end_at)
         ep.clean()
-    # Start should be inside semester
-    with pytest.raises(ValidationError) as e:
-        before_term_start = term_start_dt - datetime.timedelta(days=2)
-        ep = Course(semester=term,
-                              starts_on=before_term_start.date())
-        ep.clean()
-    # End should be inside semester
-    with pytest.raises(ValidationError) as e:
-        before_term_start = term_start_dt - datetime.timedelta(days=2)
-        ep = Course(semester=term,
-                    ends_on=before_term_start.date())
-        ep.clean()
+    # Start should not be necessary inside semester
+    before_term_start = term_start_dt - datetime.timedelta(days=2)
+    ep = Course(semester=term,
+                            starts_on=before_term_start.date())
+    ep.clean()
+    # End should not be necessary inside semester
+    before_term_start = term_start_dt - datetime.timedelta(days=2)
+    ep = Course(semester=term,
+                ends_on=before_term_start.date())
+    ep.clean()
