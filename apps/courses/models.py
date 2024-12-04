@@ -515,18 +515,6 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         super().save(*args, **kwargs)
 
     def clean(self):
-        term_starts_on = self.semester.starts_at.date()
-        term_ends_on = self.semester.ends_at.date()
-        if self.starts_on:
-            if not (term_starts_on <= self.starts_on <= term_ends_on):
-                msg = _("Start of the enrollment period should be inside "
-                        "term boundaries")
-                raise ValidationError(msg)
-        if self.ends_on:
-            if not (term_starts_on <= self.ends_on <= term_ends_on):
-                msg = _("End of the enrollment period should be inside "
-                        "term boundaries")
-                raise ValidationError(msg)
         if self.starts_on and self.ends_on and self.ends_on < self.starts_on:
             msg = _("Deadline should be later than the start of "
                         "the enrollment period")
