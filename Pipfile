@@ -74,6 +74,7 @@ django-post_office = "==3.6.0"
 hoep = "*"
 # Monitoring
 sentry-sdk = "*"
+drf-yasg = "==1.21.8"
 # Oauth2
 social-auth-core = "==4.2.0"
 social-auth-app-django = "==5.0.0"
