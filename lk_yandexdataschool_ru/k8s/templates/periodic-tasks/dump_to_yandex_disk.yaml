@@ -4,8 +4,8 @@ metadata:
   name: dump_to_yandex_disk
   namespace: "{{ k8s_namespace}}"
 spec:
-  # https://crontab.guru/#0_10_*_*_*
-  schedule: "0 10 * * *"
+  # https://crontab.guru/#0_10_*_*_0
+  schedule: "0 10 * * 0"
   concurrencyPolicy: Replace
   suspend: false
   successfulJobsHistoryLimit: 0
