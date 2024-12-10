@@ -1959,6 +1959,15 @@
             ],
             "version": "==1.3.0"
         },
+        "yadisk": {
+            "hashes": [
+                "sha256:7228fad42007e1ff8becc48ca9bfa357398f68fa50fe597672d4bf92d99e6685",
+                "sha256:cddc3a07f541bb005f135e8fbeff6980797494e54b6703c26830ca64d38e00e1"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+            "version": "==3.1.0"
+        },
         "zopfli": {
             "hashes": [
                 "sha256:08ca761a8be61d3e46807adef8e8dad314ab93c824fc4d882f9e14a67d59fe57",
