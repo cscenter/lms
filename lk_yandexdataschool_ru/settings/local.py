@@ -11,6 +11,8 @@ JS_REVERSE_OUTPUT_PATH = str(DJANGO_ASSETS_ROOT / "v1" / "js" / "vendor")
 
 if DEBUG:
     INSTALLED_APPS += ['django_extensions']
+    # Django swagger api overview
+    INSTALLED_APPS += ['drf_yasg']
     # Translate .po files with UI
     INSTALLED_APPS = INSTALLED_APPS + ['rosetta']
     ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = 'ru'

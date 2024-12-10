@@ -26,7 +26,7 @@ class CourseParticipantsStatsByType(ListRenderersMixin, PandasView):
     """
     permission_classes = [CuratorAccessPermission]
 
-    class OutputSerializer(serializers.ModelSerializer):
+    class TypeOutputSerializer(serializers.ModelSerializer):
         type = serializers.CharField(source="student_type")
 
         class Meta:
@@ -35,7 +35,7 @@ class CourseParticipantsStatsByType(ListRenderersMixin, PandasView):
             fields = ("year_of_admission", "type")
 
     def get_serializer(self, *args, **kwargs):
-        return self.OutputSerializer(*args, **kwargs)
+        return self.TypeOutputSerializer(*args, **kwargs)
 
     def get_queryset(self):
         course_id = self.kwargs['course_id']
@@ -58,14 +58,14 @@ class CourseParticipantsStatsByYear(ListRenderersMixin, PandasView):
     """
     permission_classes = [CuratorAccessPermission]
 
-    class OutputSerializer(serializers.ModelSerializer):
+    class YearOutputSerializer(serializers.ModelSerializer):
         class Meta:
             list_serializer_class = StudentsTotalByYearPandasSerializer
             model = StudentProfile
             fields = ("year_of_admission",)
 
     def get_serializer(self, *args, **kwargs):
-        return self.OutputSerializer(*args, **kwargs)
+        return self.YearOutputSerializer(*args, **kwargs)
 
     def get_queryset(self):
         course_id = self.kwargs['course_id']
@@ -79,7 +79,7 @@ class AssignmentsStats(APIView):
     """Aggregate stats about course assignments progress"""
     permission_classes = [CuratorAccessPermission]
 
-    class OutputSerializer(serializers.Serializer):
+    class AssignmentsOutputSerializer(serializers.Serializer):
         id = serializers.IntegerField(read_only=True)
         is_online = serializers.ReadOnlyField()
         title = serializers.CharField(read_only=True)
@@ -90,7 +90,7 @@ class AssignmentsStats(APIView):
 
     def get(self, request, **kwargs):
         assignments = self.get_queryset()
-        data = self.OutputSerializer(assignments, many=True).data
+        data = self.AssignmentsOutputSerializer(assignments, many=True).data
         return Response(data)
 
     def get_queryset(self):
@@ -138,7 +138,7 @@ class EnrollmentsStats(APIView):
     """
     permission_classes = [CuratorAccessPermission]
 
-    class OutputSerializer(serializers.Serializer):
+    class EnrollmentsOutputSerializer(serializers.Serializer):
         grade = serializers.CharField(read_only=True)
         student_profile = inline_serializer(fields={
             **get_serializer_fields(StudentProfileSerializer, fields=('type', 'status', 'year_of_curriculum')),
@@ -151,5 +151,5 @@ class EnrollmentsStats(APIView):
                        .only("pk", "grade", "student_profile_id")
                        .filter(course_id=course_id)
                        .order_by())
-        serializer = self.OutputSerializer(enrollments, many=True)
+        serializer = self.EnrollmentsOutputSerializer(enrollments, many=True)
         return Response(serializer.data)
