@@ -89,6 +89,7 @@ cryptography = "*"
 # API
 djangorestframework = "==3.13.1"
 rest-pandas = "==1.1.0"
+yadisk = "==3.1.0"
 # Misc
 django-admin-env-notice = "==1.0"  # https://github.com/dizballanze/django-admin-env-notice
 python-json-logger = "*"
@@ -142,7 +143,5 @@ djangorestframework-camel-case = "*"
 #  remove after new pyling version release
 wrapt = "==1.13.3"
 lxml_html_clean = "==0.3.1"
-# API 
-yadisk = "==3.1.0"
 [requires]
 python_version = "3.10"

@@ -34,3 +34,21 @@ class Token(TimeStampedModel):
 
     def __str__(self):
         return '%s : %s' % (self.access_key, self.user)
+
+class ExternalServiceToken(TimeStampedModel):
+    """
+    This model stores plain external service token
+    """
+    service_tag = models.CharField(_("External service tag"), max_length=100)
+    access_key = models.CharField(
+        verbose_name=_("External token"),
+        max_length=100,
+        db_index=True,
+        help_text=_("Plain external service token"))
+    
+    class Meta:
+        verbose_name = _("External token")
+        verbose_name_plural = _("External tokens")
+
+    def __str__(self):
+        return f"External token for {self.service_tag}"
