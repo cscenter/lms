@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-10 13:49+0000\n"
-"PO-Revision-Date: 2024-12-10 13:49+0000\n"
+"POT-Creation-Date: 2024-12-12 14:45+0000\n"
+"PO-Revision-Date: 2024-12-12 14:46+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -51,6 +51,121 @@ msgstr "Пользователь деактивирован или удалён.
 msgid "Token is invalid or expired"
 msgstr ""
 
+#: apps/api/management/commands/dump_to_yandex_disk.py:25
+#| msgid "Student"
+msgid "Student ID"
+msgstr "ID Студента"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:25
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:136
+msgid "Curriculum year"
+msgstr "Год программы обучения"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:25
+#: apps/courses/models.py:115 apps/courses/models.py:319
+#: apps/learning/gallery/models.py:83 apps/learning/models.py:285
+#: apps/learning/models.py:557 apps/users/models.py:1137
+#: lms/jinja2/lms/courses/meta_detail.html:26
+#: lms/jinja2/lms/courses/teacher_detail.html:32
+#: lms/jinja2/lms/study/course_list.html:140
+#: lms/jinja2/lms/teaching/course_list.html:11
+msgid "Semester"
+msgstr "Семестр"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:25
+#: apps/courses/models.py:230 apps/courses/models.py:278
+#: apps/courses/models.py:715 apps/courses/models.py:843
+#: apps/courses/models.py:926 apps/learning/admin.py:29
+#: apps/learning/admin.py:273 apps/learning/study/forms.py:77
+#: lms/jinja2/lms/courses/teacher_detail.html:31
+#: lms/jinja2/lms/learning/timetable.html:34
+#: lms/jinja2/lms/study/assignment_list.html:26
+#: lms/jinja2/lms/study/assignment_list.html:88
+#: lms/jinja2/lms/teaching/timetable.html:36
+msgid "Course"
+msgstr "Курс"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:25
+#: apps/core/models.py:291 apps/courses/models.py:61
+#: apps/courses/models.py:255 apps/courses/models.py:711
+#: apps/learning/admin.py:83 apps/learning/gradebook/views.py:237
+#: apps/learning/models.py:78 apps/learning/models.py:1092
+#: apps/library/models.py:66 apps/staff/filters.py:130
+#: apps/staff/filters.py:205 apps/staff/views.py:917 apps/staff/views.py:981
+#: apps/study_programs/models.py:65 apps/users/models.py:176
+#: apps/users/models.py:358 apps/users/models.py:815
+#: lms/jinja2/lms/courses/meta_detail.html:27
+#: lms/jinja2/lms/staff/academic_discipline_log.html:19
+#: lms/jinja2/lms/staff/status_log.html:19
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:44
+msgid "Branch"
+msgstr "Отделение"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:25
+#, fuzzy
+#| msgid "Student"
+msgid "Student type"
+msgstr "Студент"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:26
+#: apps/learning/models.py:92 apps/learning/models.py:166
+#: apps/learning/models.py:389
+msgid "Student Group"
+msgstr "Студенческая группа"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:26
+#: apps/courses/forms.py:506 apps/learning/roles.py:156
+#: apps/users/constants.py:37
+msgid "Teacher"
+msgstr "Преподаватель"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:26
+#: apps/courses/models.py:1268 apps/courses/models.py:1375
+#: apps/grading/admin.py:25 apps/learning/admin.py:292
+#: apps/learning/models.py:175 apps/learning/models.py:216
+#: apps/learning/models.py:241
+#: lms/jinja2/lms/user_profile/_tab_assignments.html:11
+msgid "Assignment"
+msgstr "Задание"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:26
+#| msgid "AssignmentStatus|New"
+msgid "Assignment status"
+msgstr "Статус задания"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:26
+#| msgid "Assignment created"
+msgid "Assignment Grade"
+msgstr "Оценка по заданию"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:27
+#: apps/courses/forms.py:315 apps/courses/models.py:1226
+msgid "Maximum score"
+msgstr "Максимальный балл"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:27
+#| msgid "Assignment-comment"
+msgid "Assignment count"
+msgstr "Количество заданий"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:27
+#| msgid "Maximum score"
+msgid "Maximum student score"
+msgstr "Максимальный полученный балл"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:27
+#: apps/learning/models.py:628 lms/jinja2/lms/study/course_list.html:139
+#: lms/jinja2/lms/study/student_assignment_detail.html:122
+#: lms/jinja2/lms/teaching/student_assignment_detail.html:181
+#: lms/jinja2/lms/user_profile/_tab_assignments.html:12
+msgid "Grade"
+msgstr "Оценка"
+
+#: apps/api/management/commands/dump_to_yandex_disk.py:27
+#: apps/learning/models.py:372
+msgid "Grade re-credited"
+msgstr "Оценка перезачтена"
+
 #: apps/api/models.py:17
 msgid "Access Key"
 msgstr "Ключ доступа"
@@ -66,7 +181,7 @@ msgstr ""
 msgid "User"
 msgstr "Имя пользователя"
 
-#: apps/api/models.py:27 apps/api/models.py:49
+#: apps/api/models.py:27
 msgid "Expire at"
 msgstr "Истекает"
 
@@ -80,11 +195,10 @@ msgid "Tokens"
 msgstr "Токены"
 
 #: apps/api/models.py:42
-#| msgid "External service name"
 msgid "External service tag"
 msgstr "Тег внешнего сервиса"
 
-#: apps/api/models.py:44 apps/api/models.py:53
+#: apps/api/models.py:44 apps/api/models.py:50
 msgid "External token"
 msgstr "Внешний токен"
 
@@ -94,7 +208,7 @@ msgstr "Внешний токен"
 msgid "Plain external service token"
 msgstr "Внешние сервисы"
 
-#: apps/api/models.py:54
+#: apps/api/models.py:51
 msgid "External tokens"
 msgstr "Внешние токены"
 
@@ -288,21 +402,6 @@ msgstr "Описание"
 #: apps/core/models.py:280
 msgid "Branch|Description"
 msgstr "Общее описание, правила обучения"
-
-#: apps/core/models.py:291 apps/courses/models.py:61
-#: apps/courses/models.py:255 apps/courses/models.py:711
-#: apps/learning/admin.py:83 apps/learning/gradebook/views.py:237
-#: apps/learning/models.py:78 apps/learning/models.py:1092
-#: apps/library/models.py:66 apps/staff/filters.py:130
-#: apps/staff/filters.py:205 apps/staff/views.py:917 apps/staff/views.py:981
-#: apps/study_programs/models.py:65 apps/users/models.py:176
-#: apps/users/models.py:358 apps/users/models.py:815
-#: lms/jinja2/lms/courses/meta_detail.html:27
-#: lms/jinja2/lms/staff/academic_discipline_log.html:19
-#: lms/jinja2/lms/staff/status_log.html:19
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:44
-msgid "Branch"
-msgstr "Отделение"
 
 #: apps/core/models.py:292 apps/courses/models.py:264
 #: apps/learning/admin.py:371 apps/learning/models.py:561
@@ -736,10 +835,6 @@ msgstr "Приложенные файлы"
 msgid "Passing score"
 msgstr "Проходной балл"
 
-#: apps/courses/forms.py:315 apps/courses/models.py:1226
-msgid "Maximum score"
-msgstr "Максимальный балл"
-
 #: apps/courses/forms.py:318 apps/courses/models.py:1230
 #: lms/jinja2/lms/study/student_assignment_detail.html:150
 #: lms/jinja2/lms/teaching/assignment_detail.html:45
@@ -801,11 +896,6 @@ msgstr "Режим назначения"
 msgid "URL is specified but checking system is empty"
 msgstr "Для URL не указана проверяющая система"
 
-#: apps/courses/forms.py:506 apps/learning/roles.py:156
-#: apps/users/constants.py:37
-msgid "Teacher"
-msgstr "Преподаватель"
-
 #: apps/courses/forms.py:551 apps/learning/models.py:226
 #: apps/users/models.py:1134 lms/jinja2/lms/courses/course_detail.html:114
 #: lms/jinja2/lms/courses/course_detail.html:293
@@ -852,16 +942,6 @@ msgstr "Порядковый номер семестра (служебное п�
 msgid "System field. Used for sort order and filter."
 msgstr "Системное поле. Используется для сортировки и фильтрации."
 
-#: apps/courses/models.py:115 apps/courses/models.py:319
-#: apps/learning/gallery/models.py:83 apps/learning/models.py:285
-#: apps/learning/models.py:557 apps/users/models.py:1137
-#: lms/jinja2/lms/courses/meta_detail.html:26
-#: lms/jinja2/lms/courses/teacher_detail.html:32
-#: lms/jinja2/lms/study/course_list.html:140
-#: lms/jinja2/lms/teaching/course_list.html:11
-msgid "Semester"
-msgstr "Семестр"
-
 #: apps/courses/models.py:116
 msgid "Semesters"
 msgstr "Семестры"
@@ -885,18 +965,6 @@ msgstr "Краткое описание"
 #: apps/courses/models.py:223
 msgid "MetaCourse|cover"
 msgstr "Обложка"
-
-#: apps/courses/models.py:230 apps/courses/models.py:278
-#: apps/courses/models.py:715 apps/courses/models.py:843
-#: apps/courses/models.py:926 apps/learning/admin.py:29
-#: apps/learning/admin.py:273 apps/learning/study/forms.py:77
-#: lms/jinja2/lms/courses/teacher_detail.html:31
-#: lms/jinja2/lms/learning/timetable.html:34
-#: lms/jinja2/lms/study/assignment_list.html:26
-#: lms/jinja2/lms/study/assignment_list.html:88
-#: lms/jinja2/lms/teaching/timetable.html:36
-msgid "Course"
-msgstr "Курс"
 
 #: apps/courses/models.py:252
 msgid "System"
@@ -1310,14 +1378,6 @@ msgstr "Ответственные за задание"
 #: apps/courses/models.py:1246
 msgid "Has lower priority than student group assignees"
 msgstr "Приоритет ниже, чем у ответственных за студенческие группы"
-
-#: apps/courses/models.py:1268 apps/courses/models.py:1375
-#: apps/grading/admin.py:25 apps/learning/admin.py:292
-#: apps/learning/models.py:175 apps/learning/models.py:216
-#: apps/learning/models.py:241
-#: lms/jinja2/lms/user_profile/_tab_assignments.html:11
-msgid "Assignment"
-msgstr "Задание"
 
 #: apps/courses/models.py:1269 apps/learning/icalendar.py:257
 #: lms/jinja2/lms/user_profile/_tab_assignments.html:3
@@ -1874,11 +1934,6 @@ msgstr "Тип группы"
 msgid "Enrollment key"
 msgstr "Код записи на курс"
 
-#: apps/learning/models.py:92 apps/learning/models.py:166
-#: apps/learning/models.py:389
-msgid "Student Group"
-msgstr "Студенческая группа"
-
 #: apps/learning/models.py:107
 msgid "Branch is not specified for the `branch` group type"
 msgstr ""
@@ -1979,10 +2034,6 @@ msgstr "Профиль студента"
 #: apps/users/models.py:1141
 msgid "Enrollment|grade"
 msgstr "Оценка"
-
-#: apps/learning/models.py:372
-msgid "Grade re-credited"
-msgstr "Оценка перезачтена"
 
 #: apps/learning/models.py:373
 msgid ""
@@ -2094,13 +2145,6 @@ msgstr "Студент"
 #: apps/learning/models.py:623
 msgid "StudentAssignment|Status"
 msgstr "Статус"
-
-#: apps/learning/models.py:628 lms/jinja2/lms/study/course_list.html:139
-#: lms/jinja2/lms/study/student_assignment_detail.html:122
-#: lms/jinja2/lms/teaching/student_assignment_detail.html:181
-#: lms/jinja2/lms/user_profile/_tab_assignments.html:12
-msgid "Grade"
-msgstr "Оценка"
 
 #: apps/learning/models.py:640
 msgid "Assignment|grade changed"
@@ -4229,10 +4273,6 @@ msgstr "История статусов"
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:104
 msgid "Areas of study history"
 msgstr "История направлений"
-
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:136
-msgid "Curriculum year"
-msgstr "Год программы обучения"
 
 #: lms/jinja2/lms/user_profile/user_detail.html:6
 msgid "on site"
