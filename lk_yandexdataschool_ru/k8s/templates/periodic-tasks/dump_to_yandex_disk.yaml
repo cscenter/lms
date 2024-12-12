@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: dump_to_yandex_disk
+  name: dump-to-yandex-disk
   namespace: "{{ k8s_namespace}}"
 spec:
   # https://crontab.guru/#0_10_*_*_0
@@ -15,10 +15,10 @@ spec:
       template:
         metadata:
           labels:
-            name: dump_to_yandex_disk
+            name: dump-to-yandex-disk
         spec:
           containers:
-            - name: dump_to_yandex_disk
+            - name: dump-to-yandex-disk
               image: "{{ docker_registry }}/{{ backend_django_image_name }}:{{ backend_django_image_tag }}"
               imagePullPolicy: IfNotPresent
               command: [ "/bin/sh" ]
