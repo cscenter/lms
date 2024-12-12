@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from api.services import TokenService
 
-from .models import Token
+from .models import ExternalServiceToken, Token
 
 
 @admin.register(Token)
@@ -24,3 +24,12 @@ class TokenAdmin(admin.ModelAdmin):
             msg = _("New secret token %s has been created. Save it somewhere "
                     "since you see it here for the last time.")
             messages.add_message(request, messages.WARNING, msg % secret_token)
+            
+@admin.register(ExternalServiceToken)
+class ExternalServiceTokenAdmin(admin.ModelAdmin):
+    list_display = ('service_tag', 'created')
+    fields = ('service_tag', 'access_key')
+    ordering = ('-created',)
+    
+    def get_readonly_fields(self, request, obj=None):
+        return ['service_tag'] if obj else []

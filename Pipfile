@@ -89,6 +89,7 @@ cryptography = "*"
 # API
 djangorestframework = "==3.13.1"
 rest-pandas = "==1.1.0"
+yadisk = "==3.1.0"
 # Misc
 django-admin-env-notice = "==1.0"  # https://github.com/dizballanze/django-admin-env-notice
 python-json-logger = "*"
