@@ -63,7 +63,7 @@ django-rosetta = "*"
 django-modeltranslation = "==0.17.5"
 babel = "*"
 # AWS
-boto3 = "*"
+boto3 = "==1.35.77"
 boto = "*"
 # Event messages verification for AWS SNS
 M2Crypto = "==0.38.0"
@@ -92,7 +92,7 @@ rest-pandas = "==1.1.0"
 yadisk = "==3.1.0"
 # Misc
 django-admin-env-notice = "==1.0"  # https://github.com/dizballanze/django-admin-env-notice
-python-json-logger = "*"
+python-json-logger = "2.0.7"
 requests = "==2.27.1"
 django-model-utils = "==4.2.0"
 django-storages = "==1.12.3"
