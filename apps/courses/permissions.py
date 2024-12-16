@@ -5,6 +5,7 @@ from courses.constants import MaterialVisibilityTypes
 from courses.models import Assignment, AssignmentAttachment, Course, CourseClass
 from learning.models import CourseInvitation
 from learning.services import CourseRole, course_access_role
+from users.constants import student_permission_roles
 
 
 def can_view_private_materials(role: CourseRole) -> bool:
@@ -21,7 +22,13 @@ class EditMetaCourse(Permission):
 @add_perm
 class ViewCourse(Permission):
     name = "courses.view_course"
-
+    
+    @staticmethod
+    @predicate
+    def rule(user, course: Course):
+        if user.roles.issubset(student_permission_roles) and course.is_draft:
+            return False
+        return True
 
 @add_perm
 class ViewCourseAsInvited(Permission):
@@ -30,6 +37,8 @@ class ViewCourseAsInvited(Permission):
     @staticmethod
     @predicate
     def rule(user, course: Course):
+        if user.roles.issubset(student_permission_roles) and course.is_draft:
+            return False
         student_profile = user.get_student_profile()
         if student_profile is None:
             return False

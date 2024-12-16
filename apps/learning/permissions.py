@@ -17,6 +17,7 @@ from learning.models import (
 from learning.services import CourseRole, course_access_role
 from learning.services.enrollment_service import is_course_failed_by_student
 from learning.settings import StudentStatuses
+from users.constants import student_permission_roles
 from users.models import StudentProfile, User, StudentTypes
 
 logger = logging.getLogger(__name__)
@@ -36,6 +37,9 @@ class InvitationEnrollPermissionObject(NamedTuple):
 def enroll_in_course(user, permission_object: EnrollPermissionObject):
     course = permission_object.course
     student_profile = permission_object.student_profile
+    if user.roles.issubset(student_permission_roles) and course.is_draft:
+        logger.debug("Course is draft")
+        return False
     if not course.enrollment_is_open:
         logger.debug("Enrollment is closed")
         return False
@@ -116,6 +120,8 @@ class ViewCourseNews(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, course: Course):
+        if user.roles.issubset(student_permission_roles) and course.is_draft:
+            return False
         role = course_access_role(course=course, user=user)
         return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
 
@@ -174,6 +180,8 @@ class ViewCourseReviews(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, course: Course):
+        if user.roles.issubset(student_permission_roles) and course.is_draft:
+            return False
         return course.enrollment_is_open
 
 

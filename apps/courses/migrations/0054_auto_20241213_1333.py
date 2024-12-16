@@ -3,7 +3,7 @@
 from django.db import migrations
 
 def undraft_existing_courses(apps, schema_editor):
-    apps.get_model('courses', 'Course').objects.update(draft=False)
+    apps.get_model('courses', 'Course').objects.update(is_draft=False)
 
 
 class Migration(migrations.Migration):

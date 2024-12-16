@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='course',
-            name='draft',
-            field=models.BooleanField(default=True, verbose_name='Draft'),
+            name='is_draft',
+            field=models.BooleanField(default=True, verbose_name='Is draft'),
         ),
     ]

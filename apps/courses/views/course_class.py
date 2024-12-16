@@ -19,7 +19,7 @@ from core.utils import hashids
 from courses.forms import CourseClassForm
 from courses.models import CourseClass, CourseClassAttachment
 from courses.permissions import (
-    CreateCourseClass, DeleteCourseClass, EditCourseClass, ViewCourseClassMaterials
+    CreateCourseClass, DeleteCourseClass, EditCourseClass, ViewCourse, ViewCourseClassMaterials
 )
 from courses.views.mixins import CourseURLParamsMixin
 from files.views import ProtectedFileDownloadView
@@ -38,10 +38,14 @@ else:
     CourseClassFormMixinBase = object
 
 
-class CourseClassDetailView(LoginRequiredMixin, generic.DetailView):
+class CourseClassDetailView(CourseURLParamsMixin, PermissionRequiredMixin, generic.DetailView):
     model = CourseClass
+    permission_required = ViewCourse.name
     context_object_name = 'course_class'
     template_name = "lms/courses/course_class_detail.html"
+    
+    def get_permission_object(self):
+        return self.course
 
     def get_queryset(self):
         url_params = self.kwargs

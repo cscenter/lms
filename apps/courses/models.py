@@ -354,8 +354,8 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         blank=True,
         help_text=_("Leave empty if you want to fetch survey url from DB"))
     online_course_url = models.URLField(_("Online Course URL"), blank=True)
-    draft = models.BooleanField(
-        _("Draft"),
+    is_draft = models.BooleanField(
+        _("Is draft"),
         default=True)
     ask_enrollment_reason = models.BooleanField(
         _("Ask Enrollment Reason"),
