@@ -72,6 +72,33 @@ def test_manager_for_student(settings):
                        restricted_to=[student_group1, student_group2])
     assert CourseClass.objects.for_student(student).count() == 4
 
+@pytest.mark.django_db
+def test_draft_course(client):
+    student = StudentFactory()
+    course = CourseFactory()
+    teacher = TeacherFactory()
+    curator = CuratorFactory()
+    cc = CourseClassFactory(course=course)
+    client.login(student)
+    response = client.get(cc.get_absolute_url())
+    assert response.status_code == 200
+    client.login(teacher)
+    response = client.get(cc.get_absolute_url())
+    assert response.status_code == 200
+    client.login(curator)
+    response = client.get(cc.get_absolute_url())
+    assert response.status_code == 200
+    course.is_draft = True
+    course.save()
+    client.login(student)
+    response = client.get(cc.get_absolute_url())
+    assert response.status_code == 403
+    client.login(teacher)
+    response = client.get(cc.get_absolute_url())
+    assert response.status_code == 200
+    client.login(curator)
+    response = client.get(cc.get_absolute_url())
+    assert response.status_code == 200
 
 @pytest.mark.django_db
 def test_course_class_detail_security(client, assert_login_redirect):

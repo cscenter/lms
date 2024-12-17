@@ -151,6 +151,15 @@ def test_view_course_offerings(client):
     assert len(terms_courses) == 2  # two terms
     founded_courses = sum(map(len, terms_courses))
     assert founded_courses == len(autumn_courses) + len(spring_courses)
+    autumn_courses[0].is_draft = True
+    autumn_courses[0].save()
+    spring_courses[0].is_draft = True
+    spring_courses[0].save()
+    response = client.get(url)
+    terms_courses = list(response.context_data['courses'].values())
+    assert len(terms_courses) == 2
+    founded_courses = sum(map(len, terms_courses))
+    assert founded_courses == len(autumn_courses) + len(spring_courses) - 2
 
     curator = CuratorFactory()
     client.login(curator)

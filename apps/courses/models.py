@@ -590,7 +590,7 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
                        subdomain=settings.LMS_SUBDOMAIN)
 
     def get_publish_url(self):
-        return reverse('course_publish', kwargs=self.url_kwargs,
+        return reverse('courses:course_publish', kwargs=self.url_kwargs,
                        subdomain=settings.LMS_SUBDOMAIN)
 
     def get_gradebook_url(self, url_name: str = "teaching:gradebook",

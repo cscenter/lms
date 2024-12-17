@@ -22,8 +22,8 @@ from courses.tests.factories import (
     AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, CourseTeacherFactory
 )
 from learning.models import StudentGroup, StudentGroupTeacherBucket
-from learning.tests.factories import StudentGroupFactory
-from users.tests.factories import CuratorFactory, TeacherFactory
+from learning.tests.factories import StudentAssignmentFactory, StudentGroupFactory
+from users.tests.factories import CuratorFactory, StudentFactory, TeacherFactory
 
 
 def prefixed_form(form_data, prefix: str):
@@ -88,6 +88,35 @@ def test_course_assignment_update_view_security(client, assert_login_redirect,
     assert resolver.func.view_class.permission_required in perm_registry
     assert_login_redirect(update_url, method='get')
 
+@pytest.mark.django_db
+def test_draft_course(client):
+    future = datetime.datetime.now() + datetime.timedelta(days=3)
+    student = StudentFactory()
+    teacher = TeacherFactory()
+    curator = CuratorFactory()
+    course = CourseFactory(completed_at=future, teachers=[teacher])
+    ca = StudentAssignmentFactory(assignment__course=course,
+                                  student=student)
+    client.login(student)
+    response = client.get(ca.get_student_url())
+    assert response.status_code == 200
+    client.login(teacher)
+    response = client.get(ca.assignment.get_teacher_url())
+    assert response.status_code == 200
+    client.login(curator)
+    response = client.get(ca.assignment.get_teacher_url())
+    assert response.status_code == 200
+    course.is_draft = True
+    course.save()
+    client.login(student)
+    response = client.get(ca.get_student_url())
+    assert response.status_code == 200
+    client.login(teacher)
+    response = client.get(ca.assignment.get_teacher_url())
+    assert response.status_code == 200
+    client.login(curator)
+    response = client.get(ca.assignment.get_teacher_url())
+    assert response.status_code == 200
 
 @pytest.mark.django_db
 def test_course_assignment_update(client, assert_redirect):

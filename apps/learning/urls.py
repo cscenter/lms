@@ -4,7 +4,6 @@ from django.urls import path, re_path
 from courses.urls import RE_COURSE_URI
 from learning.study.views import HonorCodeView, InternshipListView, UsefulListView, ProgramsView
 from learning.views import CourseInvitationEnrollView
-from learning.views.enrollment import CoursePublishView
 
 from .views import (
     CourseEnrollView, CourseNewsNotificationUpdate, CourseStudentsView,
@@ -16,7 +15,6 @@ urlpatterns = [
         re_path(RE_COURSE_URI, include([
             path("enroll/", CourseEnrollView.as_view(), name="course_enroll"),
             path("unenroll/", CourseUnenrollView.as_view(), name="course_leave"),
-            path("publish/", CoursePublishView.as_view(), name="course_publish"),
             path("enroll/invitation/<str:course_token>/", CourseInvitationEnrollView.as_view(), name="course_enroll_by_invitation"),
             path("students/", CourseStudentsView.as_view(), name="course_students"),
             path("news/notifications/", CourseNewsNotificationUpdate.as_view(), name="course_news_notifications_read"),

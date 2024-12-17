@@ -83,6 +83,8 @@ class CourseFactory(factory.django.DjangoModelFactory):
     description = "This course offering will be very different"
     main_branch = factory.SubFactory(BranchFactory,
                                      code=settings.DEFAULT_BRANCH_CODE)
+    # Too many tests are done assumed is_draft = False as they were done before draft was invented
+    is_draft = False
 
     @factory.post_generation
     def teachers(self, create, extracted, **kwargs):
