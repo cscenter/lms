@@ -250,7 +250,7 @@
       <div class="col-xs-3">
         {% if user.is_authenticated %}
           <div class="o-buttons-vertical">
-            {% if request.user.is_curator and course.is_draft %}
+            {% if (user.is_curator or user in course.teachers.all())  and course.is_draft %}
               <a href="{{ course.get_publish_url() }}" class="btn btn-default btn-block btn-success">{% trans %}Publish course{% endtrans %}</a>
             {% endif %}
             {% set can_leave_course = request.user.has_perm("learning.leave_course", course) %}

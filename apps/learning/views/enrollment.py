@@ -24,7 +24,7 @@ from learning.services.student_group_service import (
     StudentGroupError, StudentGroupService
 )
 from learning.settings import EnrollmentTypes, InvitationEnrollmentTypes
-from users.mixins import CuratorOnlyMixin
+from users.mixins import TeacherOnlyMixin
 
 
 class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
@@ -198,7 +198,7 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
         context["course"] = self.course
         return context
 
-class CoursePublishView(CuratorOnlyMixin, CourseURLParamsMixin,
+class CoursePublishView(TeacherOnlyMixin, CourseURLParamsMixin,
                          generic.View):
 
     def get(self, request, *args, **kwargs):
