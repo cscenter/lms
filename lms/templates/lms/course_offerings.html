@@ -17,6 +17,7 @@
             <a href="<%-co.url%>" class="__course"><%-co.name%></a>
             <% if (co.duration == COURSE_DURATIONS.FIRST_HALF) { %><i class="fa fa-adjust fa-rotate-180" aria-hidden="true"></i><% } %>
             <% if (co.duration == COURSE_DURATIONS.SECOND_HALF) { %><i class="fa fa-adjust" aria-hidden="true"></i><% } %>
+            <% if (co.is_draft) { %><span style="color: red; font-weight: bold;">{% trans "[Draft]" %}</span><% } %>
           </td>
           <td>
             <% for (var role in co.grouped_teachers) { %>
@@ -101,6 +102,9 @@
                                         {% endif %}
                                         {% if co.duration == COURSE_DURATIONS.SECOND_HALF %}
                                             <i class="fa fa-adjust" aria-hidden="true"></i>
+                                        {% endif %}
+                                        {% if co.is_draft %}
+                                            <span style="color: red; font-weight: bold;">{% trans "[Draft]" %}</span>
                                         {% endif %}
                                   </td>
                                     <td>

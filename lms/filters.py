@@ -100,6 +100,8 @@ class CoursesFilter(FilterSet):
             * most actual profile branch
             * default branch code
         """
+        if queryset is not None and request.user.roles.issubset(student_permission_roles):
+            queryset = queryset.filter(is_draft=False)
         if data is not None:
             data = data.copy()  # get a mutable copy of the QueryDict
         else:

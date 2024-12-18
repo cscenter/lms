@@ -3,6 +3,7 @@ from django.urls import path, re_path
 
 from courses import views
 from courses.constants import SemesterTypes
+from courses.views.course import CoursePublishView
 from courses.views.course_class import (
     CourseClassAttachmentDownloadView, CourseClassSlidesDownloadView
 )
@@ -27,6 +28,7 @@ urlpatterns = [
             path("", views.CourseDetailView.as_view(), name="course_detail"),
             re_path(r"^(?P<tab>news|assignments|classes|about|contacts|reviews)/$", views.CourseDetailView.as_view(), name="course_detail_with_active_tab"),
             path("edit", views.CourseUpdateView.as_view(), name="course_update"),
+            path("publish", CoursePublishView.as_view(), name="course_publish"),
             path("news/", include([
                 path("add", views.CourseNewsCreateView.as_view(), name="course_news_create"),
                 path("<int:pk>/edit", views.CourseNewsUpdateView.as_view(), name="course_news_update"),

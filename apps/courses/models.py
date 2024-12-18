@@ -354,6 +354,9 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         blank=True,
         help_text=_("Leave empty if you want to fetch survey url from DB"))
     online_course_url = models.URLField(_("Online Course URL"), blank=True)
+    is_draft = models.BooleanField(
+        _("Is draft"),
+        default=True)
     ask_enrollment_reason = models.BooleanField(
         _("Ask Enrollment Reason"),
         help_text=_("Ask a student why they wants to enroll in the course "
@@ -584,6 +587,10 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
 
     def get_unenroll_url(self):
         return reverse('course_leave', kwargs=self.url_kwargs,
+                       subdomain=settings.LMS_SUBDOMAIN)
+
+    def get_publish_url(self):
+        return reverse('courses:course_publish', kwargs=self.url_kwargs,
                        subdomain=settings.LMS_SUBDOMAIN)
 
     def get_gradebook_url(self, url_name: str = "teaching:gradebook",

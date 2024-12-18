@@ -22,6 +22,9 @@
           {% if course.duration == CourseDurations.SECOND_HALF %}
              <i class="fa fa-adjust" aria-hidden="true"></i>
           {% endif %}
+          {% if course.is_draft %}
+              <span style="color: red; font-weight: bold;">{% trans %}[Draft]{% endtrans %}</span>
+          {% endif %}
           {% if request.user.is_curator %}
             <a href="{{ url('admin:courses_course_change', object_id=course.pk) }}" target="_blank"><i
               class="fa fa-pencil-square-o"></i></a>
@@ -247,6 +250,9 @@
       <div class="col-xs-3">
         {% if user.is_authenticated %}
           <div class="o-buttons-vertical">
+            {% if (user.is_curator or user in course.teachers.all())  and course.is_draft %}
+              <a href="{{ course.get_publish_url() }}" class="btn btn-default btn-block btn-success">{% trans %}Publish course{% endtrans %}</a>
+            {% endif %}
             {% set can_leave_course = request.user.has_perm("learning.leave_course", course) %}
             {% set can_enroll = can_enroll_in_course(request.user, course, request.user.get_student_profile()) %}
             {% if can_leave_course %}

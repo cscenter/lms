@@ -1,8 +1,10 @@
 from vanilla import DetailView
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
+from django.http import HttpResponseRedirect
 from django.db.models import Prefetch
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
@@ -25,6 +27,7 @@ from learning.permissions import CreateCourseNews, ViewOwnEnrollments, ViewStude
 from learning.services import course_access_role
 from learning.settings import InvitationEnrollmentTypes
 from learning.teaching.utils import get_student_groups_url
+from users.mixins import TeacherOnlyMixin
 
 __all__ = ('CourseDetailView', 'CourseUpdateView')
 
@@ -153,3 +156,18 @@ class CourseUpdateView(PermissionRequiredMixin, CourseURLParamsMixin,
             initial["description_en"] = self.object.meta_course.description_en
         return initial
 
+class CoursePublishView(TeacherOnlyMixin, CourseURLParamsMixin,
+                         generic.View):
+
+    def get(self, request, *args, **kwargs):
+        if not self.course.is_draft:
+            messages.error(request, _("Course is already published"))
+        else:
+            try:
+                self.course.is_draft = False
+                self.course.save()
+                messages.success(request, _("Course is succesfully published"))
+            except Exception as e:
+                messages.error(request, str(e))
+        
+        return HttpResponseRedirect(self.course.get_absolute_url())

@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.messages import get_messages, constants
 from django.forms import model_to_dict
 from django.utils import formats
 from django.utils.encoding import smart_bytes
@@ -369,3 +370,62 @@ def test_view_course_detail_enroll_by_invitation(client):
     assert response.status_code == 200
     html = response.content.decode('utf-8')
     assert 'Записаться по приглашению' not in html
+
+@pytest.mark.django_db
+def test_view_draft_course_detail(client):
+    future = now() + datetime.timedelta(days=3)
+    curator = CuratorFactory()
+    student1, student2 = StudentFactory.create_batch(2)
+    teacher = TeacherFactory()
+    course = CourseFactory(starts_on=now(),
+                           ends_on=future,
+                           completed_at=future)
+    EnrollmentFactory(course=course, student=student1)
+    url = course.get_absolute_url()
+
+    def assert_status_code(user, url, status_code):
+        client.login(user)
+        response = client.get(url)
+        assert response.status_code == status_code
+
+    for user in (curator, student1, student2, teacher):
+        assert_status_code(user, url, 200)
+    
+    assert_status_code(student2, course.get_enroll_url(), 200)
+    course.is_draft = True
+    course.save()
+    
+    assert_status_code(curator, url, 200)
+    assert_status_code(teacher, url, 200)
+    assert_status_code(student1, url, 403)
+    assert_status_code(student2, url, 403)
+    assert_status_code(student2, course.get_enroll_url(), 403)
+    
+    
+@pytest.mark.django_db
+def test_publish_draft_course(client):
+    curator = CuratorFactory()
+    student = StudentFactory()
+    teacher = TeacherFactory()
+    course = CourseFactory()
+    url = course.get_publish_url()
+
+    client.login(student)
+    response = client.get(url)
+    assert response.status_code == 302
+    assert response.url != course.get_absolute_url()
+    
+    for user in (curator, teacher):
+        course.is_draft = True
+        course.save()
+        client.login(user)
+        response = client.get(url)
+        assert response.status_code == 302
+        assert response.url == course.get_absolute_url()
+        messages = map(lambda element: (element.level, element.message), list(get_messages(response.wsgi_request)))
+        assert (constants.SUCCESS, "Course is succesfully published") in messages
+        response = client.get(url)
+        assert response.status_code == 302
+        assert response.url == course.get_absolute_url()
+        messages = map(lambda element: (element.level, element.message), list(get_messages(response.wsgi_request)))
+        assert (constants.ERROR, "Course is already published") in messages

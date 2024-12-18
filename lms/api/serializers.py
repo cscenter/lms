@@ -17,4 +17,4 @@ class OfferingsCourseSerializer(CourseSerializer):
         return serialized_grouped
 
     class Meta(CourseSerializer.Meta):
-        fields = ('name', 'url', 'is_club_course', 'is_completed', 'grouped_teachers', 'duration')
+        fields = ('name', 'url', 'is_club_course', 'is_completed', 'grouped_teachers', 'duration', 'is_draft')
