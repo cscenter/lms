@@ -341,6 +341,7 @@ class AssignmentStudentAnswersCSVView(PermissionRequiredMixin, generic.DetailVie
         writer = csv.writer(response)
         headers = [
             "Профиль на сайте",
+            "id", 
             "Фамилия",
             "Имя",
             "Отчество",
@@ -348,15 +349,18 @@ class AssignmentStudentAnswersCSVView(PermissionRequiredMixin, generic.DetailVie
             "Текстовый ответ"
         ]
         writer.writerow(headers)
+        enrollment_subquery = Enrollment.active.filter(student=OuterRef('author'), course=assignment.course).values('id')[:1]
         comments = (AssignmentComment.objects
                     .filter(is_published=True,
                             student_assignment__assignment=assignment,
                             author=F('student_assignment__student'))
                     .select_related('author__branch')
+                    .annotate(enrollment_id=Subquery(enrollment_subquery))
                     .order_by('student_assignment__student', 'created'))
         for comment in comments:
             student = comment.author
-            writer.writerow([student.get_absolute_url(), student.last_name, student.first_name, student.patronymic,
+            writer.writerow([student.get_absolute_url(), comment.enrollment_id,
+                             student.last_name, student.first_name, student.patronymic,
                              value.name if (value := student.branch) else "Не выставлено",
                              value if (value := comment.text) else "-",
                              ])

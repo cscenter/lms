@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-17 12:01+0000\n"
-"PO-Revision-Date: 2024-12-17 12:02+0000\n"
+"POT-Creation-Date: 2024-12-23 11:52+0000\n"
+"PO-Revision-Date: 2024-12-23 11:54+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -893,7 +893,7 @@ msgstr "Для URL не указана проверяющая система"
 
 #: apps/courses/forms.py:551 apps/learning/models.py:226
 #: apps/users/models.py:1134 lms/jinja2/lms/courses/course_detail.html:117
-#: lms/jinja2/lms/courses/course_detail.html:301
+#: lms/jinja2/lms/courses/course_detail.html:299
 msgid "Teachers"
 msgstr "Преподаватели"
 
@@ -1411,6 +1411,14 @@ msgstr "Занятия"
 msgid "CourseTab|Assignments"
 msgstr "Задания"
 
+#: apps/courses/views/course.py:164
+msgid "Course is already published"
+msgstr "Прочтение курса уже опубликовано"
+
+#: apps/courses/views/course.py:169
+msgid "Course is succesfully published"
+msgstr "Прочтение курса успешно опубликовано"
+
 #: apps/courses/views/course_class.py:149
 #, python-format
 msgid "The class '%s' was successfully created."
@@ -1850,48 +1858,53 @@ msgstr "Отчество"
 msgid "Role"
 msgstr "Роль"
 
-#: apps/learning/gradebook/views.py:240 apps/users/models.py:826
+#: apps/learning/gradebook/views.py:239
+#: lms/jinja2/lms/user_profile/_tab_account.html:122
+msgid "Email"
+msgstr "Почта"
+
+#: apps/learning/gradebook/views.py:241 apps/users/models.py:826
 #: lms/jinja2/lms/staff/student_search.html:47
 msgid "CSCUser|Curriculum year"
 msgstr "Год программы обучения"
 
-#: apps/learning/gradebook/views.py:241 apps/learning/models.py:246
+#: apps/learning/gradebook/views.py:242 apps/learning/models.py:246
 #: apps/learning/models.py:268
 msgid "Group"
 msgstr "Группа"
 
-#: apps/learning/gradebook/views.py:242 apps/users/models.py:259
+#: apps/learning/gradebook/views.py:243 apps/users/models.py:259
 #: apps/users/models.py:368
 msgid "Yandex Login"
 msgstr "Логин на Яндексе"
 
-#: apps/learning/gradebook/views.py:243
+#: apps/learning/gradebook/views.py:244
 msgid "Telegram Username"
 msgstr "Telegram"
 
-#: apps/learning/gradebook/views.py:245 apps/users/models.py:386
+#: apps/learning/gradebook/views.py:246 apps/users/models.py:386
 msgid "Codeforces Handle"
 msgstr ""
 
-#: apps/learning/gradebook/views.py:248
+#: apps/learning/gradebook/views.py:249
 msgid "Final grade"
 msgstr "Итоговая оценка"
 
-#: apps/learning/gradebook/views.py:249
+#: apps/learning/gradebook/views.py:250
 #: lms/jinja2/lms/gradebook/gradebook_form.html:123
 msgid "Total"
 msgstr "Сумма баллов"
 
-#: apps/learning/gradebook/views.py:326
+#: apps/learning/gradebook/views.py:328
 msgid "Imported records for assignment {} - {} out of {}"
 msgstr "Импортировано оценок за задание {} - {} из {} найденных"
 
-#: apps/learning/gradebook/views.py:330
+#: apps/learning/gradebook/views.py:332
 msgid "<b>Not all records were processed. Import stopped by an error:</b><br>"
 msgstr ""
 "<b>Не все записи были обработаны. Импорт прекращён из-за ошибки:</b><br>"
 
-#: apps/learning/gradebook/views.py:404
+#: apps/learning/gradebook/views.py:406
 msgid ""
 "Успешно импортированы записи для курса {} - для {} из {} строк с верными "
 "идентификаторами студентов."
@@ -2661,7 +2674,7 @@ msgstr "Новости"
 #: apps/learning/tests/test_enrollment.py:135
 #: apps/learning/tests/test_enrollment.py:162
 #: apps/learning/tests/test_enrollment.py:171
-#: lms/jinja2/lms/courses/course_detail.html:268
+#: lms/jinja2/lms/courses/course_detail.html:266
 msgid "Learner places available"
 msgstr "Осталось мест сдавать"
 
@@ -2671,7 +2684,7 @@ msgstr "Осталось мест сдавать"
 #: apps/learning/tests/test_enrollment.py:136
 #: apps/learning/tests/test_enrollment.py:163
 #: apps/learning/tests/test_enrollment.py:172
-#: lms/jinja2/lms/courses/course_detail.html:271
+#: lms/jinja2/lms/courses/course_detail.html:269
 msgid "Listener places available"
 msgstr "Осталось мест слушать"
 
@@ -2685,26 +2698,18 @@ msgstr "Записаться"
 msgid "{} hrs {:02d} min"
 msgstr "{} ч. {:02d} мин."
 
-#: apps/learning/views/enrollment.py:44 apps/learning/views/enrollment.py:85
-#: apps/learning/views/enrollment.py:157 apps/learning/views/enrollment.py:191
+#: apps/learning/views/enrollment.py:43 apps/learning/views/enrollment.py:84
+#: apps/learning/views/enrollment.py:156 apps/learning/views/enrollment.py:190
 msgid "No places available, sorry"
 msgstr "Извините, свободных мест не осталось."
 
-#: apps/learning/views/enrollment.py:79 apps/learning/views/enrollment.py:183
+#: apps/learning/views/enrollment.py:78 apps/learning/views/enrollment.py:182
 msgid "You are successfully enrolled in the course"
 msgstr "Вы успешно записались на курс"
 
-#: apps/learning/views/enrollment.py:82 apps/learning/views/enrollment.py:187
+#: apps/learning/views/enrollment.py:81 apps/learning/views/enrollment.py:186
 msgid "You are already enrolled in the course"
 msgstr "Вы уже записаны на этот курс"
-
-#: apps/learning/views/enrollment.py:206
-msgid "Course is already published"
-msgstr "Прочтение курса уже опубликовано"
-
-#: apps/learning/views/enrollment.py:211
-msgid "Course is succesfully published"
-msgstr "Прочтение курса успешно опубликовано"
 
 #: apps/library/admin.py:68
 msgid "Copies available"
@@ -4013,38 +4018,37 @@ msgstr "удалить"
 msgid "edit"
 msgstr "редактировать"
 
-#: lms/jinja2/lms/courses/course_detail.html:256
-#| msgid "Published"
+#: lms/jinja2/lms/courses/course_detail.html:254
 msgid "Publish course"
 msgstr "Опубликовать курс"
 
-#: lms/jinja2/lms/courses/course_detail.html:261
+#: lms/jinja2/lms/courses/course_detail.html:259
 #: lms/jinja2/lms/enrollment/invitation_courses.html:31
 msgid "Unenroll from the course"
 msgstr "Отписаться от курса"
 
-#: lms/jinja2/lms/courses/course_detail.html:266
+#: lms/jinja2/lms/courses/course_detail.html:264
 msgid "Enroll in the course"
 msgstr "Записаться на курс"
 
-#: lms/jinja2/lms/courses/course_detail.html:276
+#: lms/jinja2/lms/courses/course_detail.html:274
 msgid "Add assignment"
 msgstr "Добавить задание"
 
-#: lms/jinja2/lms/courses/course_detail.html:279
+#: lms/jinja2/lms/courses/course_detail.html:277
 msgid "Edit description"
 msgstr "Редактировать описание"
 
-#: lms/jinja2/lms/courses/course_detail.html:282
+#: lms/jinja2/lms/courses/course_detail.html:280
 #: lms/jinja2/lms/teaching/course_list.html:50
 msgid "Add news"
 msgstr "Добавить новость"
 
-#: lms/jinja2/lms/courses/course_detail.html:285
+#: lms/jinja2/lms/courses/course_detail.html:283
 msgid "Add class"
 msgstr "Добавить занятие"
 
-#: lms/jinja2/lms/courses/course_detail.html:293
+#: lms/jinja2/lms/courses/course_detail.html:291
 msgid "Start survey"
 msgstr "Оставить отзыв о курсе"
 
@@ -4279,10 +4283,6 @@ msgstr "Назад к загрузке фото"
 #: lms/jinja2/lms/user_profile/_tab_account.html:72
 msgid "Online courses"
 msgstr "Онлайн-курсы"
-
-#: lms/jinja2/lms/user_profile/_tab_account.html:122
-msgid "Email"
-msgstr "Email"
 
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:73
 msgid "Status history"

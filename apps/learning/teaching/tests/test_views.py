@@ -569,8 +569,8 @@ def test_view_assignment_student_answers_csv(client):
     teacher = TeacherFactory()
     student_one, student_two = StudentFactory.create_batch(2)
     course = CourseFactory(teachers=[teacher])
-    EnrollmentFactory(course=course, student=student_one)
-    EnrollmentFactory(course=course, student=student_two)
+    enrollment_one = EnrollmentFactory(course=course, student=student_one)
+    enrollment_two = EnrollmentFactory(course=course, student=student_two)
     assignment = AssignmentFactory(course=course, submission_type=AssignmentFormat.CODE_REVIEW)
     csv_download_url = reverse('teaching:assignment_student_answers_csv', args=[assignment.pk])
     sa_one = StudentAssignment.objects.get(student=student_one)
@@ -579,6 +579,7 @@ def test_view_assignment_student_answers_csv(client):
 
     headers = [
         "Профиль на сайте",
+        "id",
         "Фамилия",
         "Имя",
         "Отчество",
@@ -598,6 +599,7 @@ def test_view_assignment_student_answers_csv(client):
 
     student_one_row = [
         student_one.get_absolute_url(),
+        str(enrollment_one.id),
         student_one.last_name,
         student_one.first_name,
         student_one.patronymic,
@@ -606,6 +608,7 @@ def test_view_assignment_student_answers_csv(client):
     ]
     student_two_row = [
         student_two.get_absolute_url(),
+        str(enrollment_two.id),
         student_two.last_name,
         student_two.first_name,
         student_two.patronymic,
@@ -624,6 +627,7 @@ def test_view_assignment_student_answers_csv(client):
                                            text="comment_three")
     student_one_row_extra = [
         student_one.get_absolute_url(),
+        str(enrollment_one.id),
         student_one.last_name,
         student_one.first_name,
         student_one.patronymic,
@@ -635,7 +639,7 @@ def test_view_assignment_student_answers_csv(client):
     student_two.branch = branch
     student_two.save()
 
-    student_two_row[4] = branch.name
+    student_two_row[5] = branch.name
 
     status_log_csv = client.get(csv_download_url).content.decode('utf-8')
     data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
