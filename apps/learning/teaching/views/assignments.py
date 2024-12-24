@@ -18,6 +18,7 @@ from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
+from django.utils.translation import gettext_lazy as _
 
 from auth.mixins import PermissionRequiredMixin
 from core import comment_persistence
@@ -340,7 +341,7 @@ class AssignmentStudentAnswersCSVView(PermissionRequiredMixin, generic.DetailVie
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         writer = csv.writer(response)
         headers = [
-            "Профиль на сайте",
+            _("User url"),
             "id", 
             "Фамилия",
             "Имя",

@@ -602,6 +602,9 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
         if student_group is not None:
             url += f'?student_group={student_group}'
         return url
+    
+    def get_enrolees_selection_url(self):
+        return reverse("staff:enrolees_selection_csv", kwargs=self.url_kwargs)
 
     def get_course_news_notifications_url(self):
         return reverse('course_news_notifications_read', kwargs=self.url_kwargs,

@@ -7,6 +7,7 @@ from pandas import DataFrame, ExcelWriter
 
 from django.conf import settings
 from django.db.models import Case, Count, F, IntegerField, Prefetch, Q, When
+from django.utils.translation import gettext_lazy as _
 from django.http import HttpResponse, FileResponse
 
 from admission.models import Applicant
@@ -808,7 +809,7 @@ class ProgressReportFull(ProgressReport):
             "Имя",
             "Отчество",
             "Тип",
-            "Профиль на сайте",
+            _("User url"),
             "Пол",
             "Дата рождения",
             "Почта",
@@ -1032,7 +1033,7 @@ class ProgressReportForSemester(ProgressReport):
             "Фамилия",
             "Имя",
             "Отчество",
-            "Профиль на сайте",
+            _("User url"),
             "Почта",
             "Телефон",
             "Работа",
