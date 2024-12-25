@@ -122,6 +122,8 @@ class UserAdmin(_UserAdmin):
     list_filter = ['is_active', 'branch', 'group__site', 'group__role',
                    'is_staff', 'is_superuser']
     filter_horizontal = []
+    search_fields = ('username', 'first_name', 'last_name', 'patronymic', 'email', 'telegram_username',
+                     'yandex_login', 'yandex_login_normalized')
 
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
@@ -163,6 +165,12 @@ class UserAdmin(_UserAdmin):
                 obj.changed_by = request.user
                 obj.save()
         formset.save()
+        
+    def get_search_results(self, request, queryset, search_term):
+        queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+        if search_term.startswith("@"):
+            queryset |= self.model.objects.filter(telegram_username=search_term[1:])
+        return queryset, use_distinct
 
 class StudentFieldLogAdminInline(admin.TabularInline):
     list_select_related = ['student_profile', 'entry_author']
