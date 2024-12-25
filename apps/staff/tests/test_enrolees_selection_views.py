@@ -119,8 +119,8 @@ def test_enrolees_selection_csv_view(client):
     status_log_csv = client.get(csv_download_url).content.decode('utf-8')
     data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
     assert len(data) == 3
-    assert data[1] == student_two_row
-    assert data[2] == student_one_row
+    assert data[1] == student_one_row
+    assert data[2] == student_two_row
     
     enrollment_one.reason_entry = "reason one"
     enrollment_one.save()
@@ -140,5 +140,5 @@ def test_enrolees_selection_csv_view(client):
     status_log_csv = client.get(csv_download_url).content.decode('utf-8')
     data = [s for s in csv.reader(io.StringIO(status_log_csv)) if s]
     assert len(data) == 3
-    assert data[1] == student_two_row
-    assert data[2] == student_one_row
+    assert data[1] == student_one_row
+    assert data[2] == student_two_row

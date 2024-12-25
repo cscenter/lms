@@ -67,7 +67,7 @@ class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
                        generic.base.View):
 
     def get(self, request, *args, **kwargs):
-        enrollments = Enrollment.active.filter(course=self.course).select_related("student", "student_profile__branch")
+        enrollments = Enrollment.active.filter(course=self.course).select_related("student", "student_profile__branch").order_by("student")
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         filename = "{}-{}-{}-enrolees-selection.csv".format(kwargs['course_slug'],
                                          kwargs['semester_year'],
