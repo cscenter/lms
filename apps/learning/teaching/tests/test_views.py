@@ -578,7 +578,7 @@ def test_view_assignment_student_answers_csv(client):
     client.login(teacher)
 
     headers = [
-        "Профиль на сайте",
+        "User url",
         "id",
         "Фамилия",
         "Имя",

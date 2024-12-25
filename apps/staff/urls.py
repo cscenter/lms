@@ -7,7 +7,7 @@ from learning.gradebook.views import (
     ImportCourseGradesByEnrollmentIDView, ImportCourseGradesByYandexLoginView, ImportCourseGradesByStepikIDView
 )
 from staff.api.views import CreateAlumniProfiles, StudentSearchJSONView
-from staff.views import (
+from staff.views.views import (
     AdmissionApplicantsCampaignReportView, AdmissionExamReportView,
     AdmissionInterviewsReportView, CourseParticipantsIntersectionView,
     EnrollmentInvitationListView, ExportsView, FutureGraduateDiplomasCSVView,
@@ -19,8 +19,8 @@ from staff.views import (
     SurveySubmissionsStatsView, WillGraduateStatsReportView, AdmissionApplicantsYearReportView,
     StudentAcademicDisciplineLogListView, StudentStatusLogListView, badge_number_from_csv_view, merge_users_view
 )
-
-from staff.views import autograde_projects, autofail_ungraded, create_alumni_profiles
+from staff.views.views import autograde_projects, autofail_ungraded, create_alumni_profiles
+from staff.views.enrolees_selection import EnroleesSelectionCSVView, EnroleesSelectionListView
 
 app_name = 'staff'
 
@@ -114,7 +114,13 @@ urlpatterns = [
 
     path('api/staff/', include(([
         path('alumni-profiles/', CreateAlumniProfiles.as_view(), name='create_alumni_profiles'),
-    ], 'api')))
+    ], 'api'))),
+    path('enrolees-selection/', include([
+        path('', EnroleesSelectionListView.as_view(), name='enrolees_selection_list'),
+        re_path(RE_COURSE_URI, include([
+            path('csv/', EnroleesSelectionCSVView.as_view(), name='enrolees_selection_csv'),
+        ]))
+    ])),
 ]
 
 

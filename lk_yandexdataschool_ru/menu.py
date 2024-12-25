@@ -101,6 +101,7 @@ top_menu = [
             MenuItem(pgettext_lazy("menu", "Полезное"), reverse('staff:staff_warehouse'), weight=40),
             MenuItem(pgettext_lazy("menu", "Фейсбук"), reverse('staff:student_faces'), weight=50),
             MenuItem(pgettext_lazy("menu", "Пересечения"), reverse('staff:course_participants_intersection'), weight=60),
+            MenuItem(pgettext_lazy("menu", "Отбор"), reverse('staff:enrolees_selection_list'), weight=60),
         ],
         for_staff=True,
         css_classes='for-staff'),
