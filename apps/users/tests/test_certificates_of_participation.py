@@ -153,7 +153,7 @@ def test_reference_detail(client, assert_login_redirect, settings):
 def test_certificate_of_participant_hidden_course(client):
     student = StudentFactory()
     curator = CuratorFactory()
-    semesters = SemesterFactory.create_batch(2, year=timezone.now().year)
+    semesters = sorted(SemesterFactory.create_batch(2, year=timezone.now().year))
     course = CourseFactory(semester=semesters[1])
     student_profile = student.get_student_profile(settings.SITE_ID)
     EnrollmentFactory(
