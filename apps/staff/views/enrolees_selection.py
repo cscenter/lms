@@ -82,7 +82,7 @@ class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
             _("Patronymic"),
             _("Branch"),
             _("Student type"),
-            _('Curriculum year'),
+            _("Curriculum year"),
             _("Enrollment type"),
             _("Entry reason")
         ]
