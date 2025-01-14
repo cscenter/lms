@@ -1,16 +1,22 @@
 import csv
-from django.db.models import Prefetch
+import statistics
+from datetime import datetime
+from django.db.models import Prefetch, Q
 from django.http.response import HttpResponse
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
+from django.utils import timezone
 
 import core.utils
 from core.utils import bucketize
 from courses.constants import SemesterTypes
 from courses.models import Course, Semester, CourseDurations
+from courses.utils import date_to_term_pair
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import Enrollment
+from learning.settings import GradeTypes, StudentStatuses
 from users.mixins import CuratorOnlyMixin
+from users.models import StudentProfile, StudentTypes, User
 
 class EnroleesSelectionListView(CuratorOnlyMixin, generic.ListView):
     template_name = "staff/enrolees_selection_list.html"
@@ -66,8 +72,66 @@ class EnroleesSelectionListView(CuratorOnlyMixin, generic.ListView):
 class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
                        generic.base.View):
 
+    grade_to_numeric = {
+        GradeTypes.RE_CREDIT: 3,
+        GradeTypes.CREDIT: 3,
+        GradeTypes.GOOD: 4,
+        GradeTypes.EXCELLENT: 5
+    }
+    
+    def get_start_end_term_pairs(self, student_profile):
+        start_term_pair = date_to_term_pair(datetime(day=1, month=9, year=student_profile.year_of_admission,
+                                            tzinfo=student_profile.branch.time_zone))
+        enrolments_period_end = timezone.now()
+        if student_profile.year_of_curriculum is not None:
+            enrolments_period_end = min(datetime(day=30, month=5, year=student_profile.year_of_curriculum + 2,
+                        tzinfo=student_profile.branch.time_zone), enrolments_period_end)
+        end_term_pair = date_to_term_pair(enrolments_period_end)
+        return start_term_pair, end_term_pair
+            
+    def get_semester_map(self, students):
+        query = Q()
+        for student in students:
+            if student.official_profiles:
+                for term_pair in self.get_start_end_term_pairs(student.official_profiles[0]):
+                    query |= Q(year=term_pair.year, type=term_pair.type)
+        
+        semesters = Semester.objects.filter(query)
+        return {semester.term_pair: semester for semester in semesters}
+        
+
+    def calculate_average_grades(self, students):
+        semester_map = self.get_semester_map(students)
+        for student in students:
+            if not student.official_profiles:
+                yield student.id, "-"
+                continue
+
+            # Only courses within study period of regular/partner student profile must be included
+            start_semester, end_semester = (semester_map.get(value) for value in self.get_start_end_term_pairs(student.official_profiles[0]))
+            enrollments = [enrollment for enrollment in student.enrollments_progress if start_semester <= enrollment.course.semester <= end_semester]
+ 
+            numeric_satisfactory_grades = [self.grade_to_numeric[enrollment.grade] for enrollment in enrollments if enrollment.grade in self.grade_to_numeric]
+            if not numeric_satisfactory_grades:
+                yield student.id, "-"
+            else:
+                yield student.id, round(statistics.fmean(numeric_satisfactory_grades), 3)
+        
     def get(self, request, *args, **kwargs):
-        enrollments = Enrollment.active.filter(course=self.course).select_related("student", "student_profile__branch").order_by("student")
+        enrollments = Enrollment.active.filter(course=self.course).select_related("student", "student_profile__branch", "student_profile__partner").order_by("student")
+        student_profile_queryset = (StudentProfile.objects
+                       .filter(site=request.site, 
+                               type__in=[StudentTypes.REGULAR, StudentTypes.PARTNER],
+                               status__ne=StudentStatuses.EXPELLED)
+                       .order_by('year_of_admission', '-pk')
+                       .select_related("branch"))
+        users = (User.objects
+            .student_progress(exclude_grades=[*GradeTypes.unsatisfactory_grades, GradeTypes.RE_CREDIT],
+                                exclude_invisible_courses=True)
+            .filter(pk__in=enrollments.values_list("student__id", flat=True))
+            .prefetch_related(Prefetch("student_profiles", queryset=student_profile_queryset, to_attr="official_profiles")))
+            
+        average_grades_map = dict(self.calculate_average_grades(users))
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         filename = "{}-{}-{}-enrolees-selection.csv".format(kwargs['course_slug'],
                                          kwargs['semester_year'],
@@ -82,9 +146,11 @@ class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
             _("Patronymic"),
             _("Branch"),
             _("Student type"),
+            _("Partner"),
             _("Curriculum year"),
             _("Enrollment type"),
-            _("Entry reason")
+            _("Entry reason"),
+            _("Average grade")
         ]
         writer.writerow(headers)
         for enrollment in enrollments:
@@ -92,7 +158,7 @@ class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
             student_profile = enrollment.student_profile
             writer.writerow([
                 student.get_absolute_url(), student.last_name, student.first_name, student.patronymic,
-                student_profile.branch.name, student_profile.get_type_display(), student_profile.year_of_curriculum,
-                enrollment.get_type_display(), enrollment.reason_entry
+                student_profile.branch.name, student_profile.get_type_display(), student_profile.partner, student_profile.year_of_curriculum,
+                enrollment.get_type_display(), enrollment.reason_entry, average_grades_map[student.id]
             ])
         return response
