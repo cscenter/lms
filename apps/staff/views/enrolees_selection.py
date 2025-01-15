@@ -73,47 +73,19 @@ class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
                        generic.base.View):
 
     grade_to_numeric = {
-        GradeTypes.RE_CREDIT: 3,
         GradeTypes.CREDIT: 3,
         GradeTypes.GOOD: 4,
         GradeTypes.EXCELLENT: 5
     }
-    
-    def get_start_end_term_pairs(self, student_profile):
-        start_term_pair = date_to_term_pair(datetime(day=1, month=9, year=student_profile.year_of_admission,
-                                            tzinfo=student_profile.branch.time_zone))
-        enrolments_period_end = timezone.now()
-        if student_profile.year_of_curriculum is not None:
-            enrolments_period_end = min(datetime(day=30, month=5, year=student_profile.year_of_curriculum + 2,
-                        tzinfo=student_profile.branch.time_zone), enrolments_period_end)
-        end_term_pair = date_to_term_pair(enrolments_period_end)
-        return start_term_pair, end_term_pair
-            
-    def get_semester_map(self, students):
-        query = Q()
-        for student in students:
-            if student.official_profiles:
-                for term_pair in self.get_start_end_term_pairs(student.official_profiles[0]):
-                    query |= Q(year=term_pair.year, type=term_pair.type)
-        
-        semesters = Semester.objects.filter(query)
-        return {semester.term_pair: semester for semester in semesters}
         
 
     def calculate_average_grades(self, students):
-        semester_map = self.get_semester_map(students)
         for student in students:
-            if not student.official_profiles:
-                yield student.id, "-"
-                continue
-
-            # Only courses within study period of regular/partner student profile must be included
-            start_semester, end_semester = (semester_map.get(value) for value in self.get_start_end_term_pairs(student.official_profiles[0]))
-            enrollments = [enrollment for enrollment in student.enrollments_progress if start_semester <= enrollment.course.semester <= end_semester]
- 
-            numeric_satisfactory_grades = [self.grade_to_numeric[enrollment.grade] for enrollment in enrollments if enrollment.grade in self.grade_to_numeric]
+            enrollments = [enrollment for profile in student.official_profiles for enrollment in profile.enrollment_set.all()]
+            numeric_satisfactory_grades = [self.grade_to_numeric[enrollment.grade] for enrollment in enrollments 
+                                           if enrollment.grade in self.grade_to_numeric and enrollment.course.is_visible_in_certificates]
             if not numeric_satisfactory_grades:
-                yield student.id, "-"
+                yield student.id, ""
             else:
                 yield student.id, round(statistics.fmean(numeric_satisfactory_grades), 3)
         
@@ -124,10 +96,9 @@ class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
                                type__in=[StudentTypes.REGULAR, StudentTypes.PARTNER],
                                status__ne=StudentStatuses.EXPELLED)
                        .order_by('year_of_admission', '-pk')
-                       .select_related("branch"))
+                       .select_related("branch")
+                       .prefetch_related("enrollment_set__course"))
         users = (User.objects
-            .student_progress(exclude_grades=[*GradeTypes.unsatisfactory_grades, GradeTypes.RE_CREDIT],
-                                exclude_invisible_courses=True)
             .filter(pk__in=enrollments.values_list("student__id", flat=True))
             .prefetch_related(Prefetch("student_profiles", queryset=student_profile_queryset, to_attr="official_profiles")))
             
@@ -136,8 +107,7 @@ class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
         filename = "{}-{}-{}-enrolees-selection.csv".format(kwargs['course_slug'],
                                          kwargs['semester_year'],
                                          kwargs['semester_type'])
-        response['Content-Disposition'] = 'attachment; filename="{}"'.format(
-            filename)
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
         writer = csv.writer(response)
         headers = [
             _("User url"),

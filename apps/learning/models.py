@@ -420,8 +420,6 @@ class Enrollment(TimezoneAwareMixin, TimeStampedModel):
             raise ValidationError({"is_grade_recredited": _("Can not be used with re-credit grade")})
         if self.is_grade_recredited and self.grade not in GradeTypes.satisfactory_grades:
             raise ValidationError({"is_grade_recredited": _("Can not be used with unsatisfactory grades")})
-        if self.type == EnrollmentTypes.LECTIONS_ONLY and self.grade != GradeTypes.WITHOUT_GRADE:
-            raise ValidationError({"type": _("LECTIONS ONLY type can be used with WITHOUT GRADE grade only")})
 
     def grade_changed_local(self, tz=None):
         if not tz:

@@ -6,7 +6,7 @@ from core.tests.factories import BranchFactory
 from learning.settings import GradeTypes
 from users.constants import GenderTypes, Roles
 from users.models import (
-    CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
+    CertificateOfParticipation, OnlineCourseRecord, PartnerTag, SHADCourseRecord, StudentProfile,
     StudentTypes, User, UserGroup, YandexUserData
 )
 
@@ -127,7 +127,7 @@ class TeacherFactory(UserFactory):
 class StudentProfileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = StudentProfile
-        django_get_or_create = ('user', 'branch', 'year_of_admission')
+        django_get_or_create = ('type', 'user', 'branch', 'year_of_admission')
 
     type = StudentTypes.REGULAR
     user = factory.SubFactory(UserFactory,
@@ -191,3 +191,11 @@ class YandexUserDataFactory(factory.django.DjangoModelFactory):
     last_name = factory.Sequence(lambda n: "Last name %04d" % n)
     display_name = factory.Sequence(lambda n: "Display name %04d" % n)
     real_name = factory.Sequence(lambda n: "Real name %04d" % n)
+
+class PartnerTagFactory(factory.django.DjangoModelFactory):
+    
+    class Meta:
+        model = PartnerTag
+        
+    name = factory.Sequence(lambda n: "Partner name %04d" % n)
+    slug = factory.Sequence(lambda n: "Partner slug %04d" % n)

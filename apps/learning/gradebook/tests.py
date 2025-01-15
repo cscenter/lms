@@ -948,9 +948,9 @@ def generate_course(group_one_size: int = 5,
     group_two_students = StudentFactory.create_batch(group_two_size, branch=branch,
                                                      student_profile__type=group_two_type)
     for student in group_one_students:
-        EnrollmentFactory(student=student, course=course, student_group=group_one)
+        EnrollmentFactory(student=student, student_profile__type=group_one_type, course=course, student_group=group_one)
     for student in group_two_students:
-        EnrollmentFactory(student=student, course=course, student_group=group_two)
+        EnrollmentFactory(student=student, student_profile__type=group_two_type, course=course, student_group=group_two)
     return teacher, course, group_one_students, group_two_students, group_one, group_two
 
 
