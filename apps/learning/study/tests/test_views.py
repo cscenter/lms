@@ -542,8 +542,6 @@ def test_view_student_courses_list_as_invited(client):
                           new_status=StudentStatuses.ACADEMIC_LEAVE,
                           editor=curator)
 
-    StudentProfileFactory(user=student,
-                          type=StudentTypes.INVITED)
     course_invitation = CourseInvitationFactory(course__semester=current_term)
     complete_student_profile(student, site, course_invitation.invitation)
     response = client.get(url)

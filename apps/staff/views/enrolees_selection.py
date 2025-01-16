@@ -1,16 +1,22 @@
 import csv
-from django.db.models import Prefetch
+import statistics
+from datetime import datetime
+from django.db.models import Prefetch, Q
 from django.http.response import HttpResponse
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
+from django.utils import timezone
 
 import core.utils
 from core.utils import bucketize
 from courses.constants import SemesterTypes
 from courses.models import Course, Semester, CourseDurations
+from courses.utils import date_to_term_pair
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import Enrollment
+from learning.settings import GradeTypes, StudentStatuses
 from users.mixins import CuratorOnlyMixin
+from users.models import StudentProfile, StudentTypes, User
 
 class EnroleesSelectionListView(CuratorOnlyMixin, generic.ListView):
     template_name = "staff/enrolees_selection_list.html"
@@ -66,14 +72,42 @@ class EnroleesSelectionListView(CuratorOnlyMixin, generic.ListView):
 class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
                        generic.base.View):
 
+    grade_to_numeric = {
+        GradeTypes.CREDIT: 3,
+        GradeTypes.GOOD: 4,
+        GradeTypes.EXCELLENT: 5
+    }
+        
+
+    def calculate_average_grades(self, students):
+        for student in students:
+            enrollments = [enrollment for profile in student.official_profiles for enrollment in profile.enrollment_set.all()]
+            numeric_satisfactory_grades = [self.grade_to_numeric[enrollment.grade] for enrollment in enrollments 
+                                           if enrollment.grade in self.grade_to_numeric and enrollment.course.is_visible_in_certificates]
+            if not numeric_satisfactory_grades:
+                yield student.id, ""
+            else:
+                yield student.id, round(statistics.fmean(numeric_satisfactory_grades), 3)
+        
     def get(self, request, *args, **kwargs):
-        enrollments = Enrollment.active.filter(course=self.course).select_related("student", "student_profile__branch").order_by("student")
+        enrollments = Enrollment.active.filter(course=self.course).select_related("student", "student_profile__branch", "student_profile__partner").order_by("student")
+        student_profile_queryset = (StudentProfile.objects
+                       .filter(site=request.site, 
+                               type__in=[StudentTypes.REGULAR, StudentTypes.PARTNER],
+                               status__ne=StudentStatuses.EXPELLED)
+                       .order_by('year_of_admission', '-pk')
+                       .select_related("branch")
+                       .prefetch_related("enrollment_set__course"))
+        users = (User.objects
+            .filter(pk__in=enrollments.values_list("student__id", flat=True))
+            .prefetch_related(Prefetch("student_profiles", queryset=student_profile_queryset, to_attr="official_profiles")))
+            
+        average_grades_map = dict(self.calculate_average_grades(users))
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         filename = "{}-{}-{}-enrolees-selection.csv".format(kwargs['course_slug'],
                                          kwargs['semester_year'],
                                          kwargs['semester_type'])
-        response['Content-Disposition'] = 'attachment; filename="{}"'.format(
-            filename)
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
         writer = csv.writer(response)
         headers = [
             _("User url"),
@@ -82,9 +116,11 @@ class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
             _("Patronymic"),
             _("Branch"),
             _("Student type"),
+            _("Partner"),
             _("Curriculum year"),
             _("Enrollment type"),
-            _("Entry reason")
+            _("Entry reason"),
+            _("Average grade")
         ]
         writer.writerow(headers)
         for enrollment in enrollments:
@@ -92,7 +128,7 @@ class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
             student_profile = enrollment.student_profile
             writer.writerow([
                 student.get_absolute_url(), student.last_name, student.first_name, student.patronymic,
-                student_profile.branch.name, student_profile.get_type_display(), student_profile.year_of_curriculum,
-                enrollment.get_type_display(), enrollment.reason_entry
+                student_profile.branch.name, student_profile.get_type_display(), student_profile.partner, student_profile.year_of_curriculum,
+                enrollment.get_type_display(), enrollment.reason_entry, average_grades_map[student.id]
             ])
         return response

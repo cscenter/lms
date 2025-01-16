@@ -167,6 +167,7 @@ class EnrollmentGradeUpdateSource(TextChoices):
     CSV_STEPIK = 'csv-stepik', _("Imported from CSV by stepik.org ID")
     CSV_ENROLLMENT = 'csv-enrollment', _("Imported from CSV by LMS Student ID")
     FORM_ADMIN = 'admin', _("Admin Panel")
+    FORM_ADMIN_TYPE_TRIGGER = 'admin-on-type', _("Auto change on type change with admin panel")
 
 
 class AssignmentScoreUpdateSource(TextChoices):

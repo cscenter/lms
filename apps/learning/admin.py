@@ -187,11 +187,28 @@ class EnrollmentAdmin(BaseModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if change:
+            original_obj = Enrollment.objects.get(pk=obj.pk)
+
+            if "type" in form.changed_data:
+                if original_obj.type == EnrollmentTypes.LECTIONS_ONLY and obj.type == EnrollmentTypes.REGULAR:
+                    new_grade = GradeTypes.NOT_GRADED
+                elif original_obj.type == EnrollmentTypes.REGULAR and obj.type == EnrollmentTypes.LECTIONS_ONLY:
+                    new_grade = GradeTypes.WITHOUT_GRADE
+                else:
+                    new_grade = None
+                if new_grade is not None:
+                    obj.grade = new_grade
+                    update_enrollment_grade(obj,
+                                            editor=request.user,
+                                            old_grade=original_obj.grade,
+                                            new_grade=new_grade,
+                                            source=EnrollmentGradeUpdateSource.FORM_ADMIN_TYPE_TRIGGER)
+                
             if "grade" in form.changed_data:
                 # there is no concurrency check
                 update_enrollment_grade(obj,
                                         editor=request.user,
-                                        old_grade=Enrollment.objects.get(pk=obj.pk).grade,
+                                        old_grade=original_obj.grade,
                                         new_grade=form.cleaned_data['grade'],
                                         source=EnrollmentGradeUpdateSource.FORM_ADMIN)
         super().save_model(request, obj, form, change)

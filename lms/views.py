@@ -87,7 +87,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                 .select_related('meta_course', 'semester', 'main_branch')
                 .only("pk", "main_branch_id", "grading_type",
                       "public_videos_count", "public_slides_count",
-                      "public_attachments_count", "duration", "completed_at",
+                      "public_attachments_count", "duration", "is_draft", "completed_at",
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type",
                       "main_branch__code", "main_branch__site_id", "main_branch__time_zone")
