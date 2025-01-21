@@ -16,7 +16,7 @@ from courses.tests.factories import AssignmentFactory, CourseFactory, SemesterFa
 from courses.utils import get_current_term_pair
 from learning.permissions import ViewOwnStudentAssignments
 from learning.services import CourseRole, course_access_role
-from learning.settings import Branches, GradeTypes, StudentStatuses
+from learning.settings import Branches, EnrollmentTypes, GradeTypes, StudentStatuses
 from learning.tests.factories import *
 from learning.tests.factories import EnrollmentFactory, StudentAssignmentFactory
 from projects.constants import ProjectTypes
@@ -281,6 +281,12 @@ def test_view_assignment_list(client):
     assert len(response.context_data['assignment_list_archive']) == 0
     # Enroll in the course
     EnrollmentFactory(student=student, course=course)
+    unactive_kwargs = [
+        {"grade": GradeTypes.RE_CREDIT},
+        {"is_grade_recredited": True},
+        {"type": EnrollmentTypes.LECTIONS_ONLY}
+    ]
+    unactive_enrollments = [EnrollmentFactory(course=course, **kwargs) for kwargs in unactive_kwargs]
     response = client.get(url)
     assert len(response.context_data['assignment_list_open']) == 2
     assert len(response.context_data['assignment_list_archive']) == 0
