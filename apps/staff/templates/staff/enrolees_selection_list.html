@@ -23,7 +23,8 @@
             {% for branch_name, courses in semester.course_offerings.items %}
                 <li style="list-style: none"><b>{{ branch_name }}</b></li>
                 {% for course in courses %}
-                  <li>{{ course.meta_course.name }}
+                  <li>
+                    <a href="{% call_method course 'get_absolute_url' %}">{{ course.meta_course.name }}</a> |
                     {% if course.duration == CourseDurations.FIRST_HALF %}
                        <i class="fa fa-adjust fa-rotate-180" aria-hidden="true"></i>
                     {% endif %}

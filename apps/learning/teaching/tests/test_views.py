@@ -25,7 +25,7 @@ from grading.tests.factories import SubmissionFactory
 from learning.models import StudentAssignment, AssignmentSubmissionTypes
 from learning.permissions import ViewStudentAssignment, ViewStudentAssignmentList
 from learning.services.personal_assignment_service import create_assignment_solution, create_personal_assignment_review
-from learning.settings import Branches, AssignmentScoreUpdateSource, EnrollmentTypes
+from learning.settings import Branches, AssignmentScoreUpdateSource, EnrollmentTypes, GradeTypes
 from learning.tests.factories import (
     AssignmentCommentFactory, EnrollmentFactory, StudentAssignmentFactory
 )
@@ -183,6 +183,12 @@ def test_assignment_detail_view_details(client):
     assert response.context_data['assignment'] == a
     assert len(response.context_data['a_s_list']) == 0
     EnrollmentFactory.create(student=student, course=co)
+    unactive_kwargs = [
+        {"grade": GradeTypes.RE_CREDIT},
+        {"is_grade_recredited": True},
+        {"type": EnrollmentTypes.LECTIONS_ONLY}
+    ]
+    unactive_enrollments = [EnrollmentFactory(course=co, **kwargs) for kwargs in unactive_kwargs]
     a_s = StudentAssignment.objects.get(student=student, assignment=a)
     response = client.get(url)
     assert response.context_data['assignment'] == a

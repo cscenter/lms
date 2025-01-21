@@ -1,10 +1,13 @@
+from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.db.models import query
 from django.utils import timezone
 
 from core.db.models import LiveManager
+from django.db.models import OuterRef, Exists
 from core.utils import is_club_site
+from learning.settings import EnrollmentTypes, GradeTypes
 
 
 class StudentAssignmentQuerySet(query.QuerySet):
@@ -24,6 +27,20 @@ class StudentAssignmentQuerySet(query.QuerySet):
         Returns individual assignments with unexpired deadlines.
         """
         return self.filter(assignment__deadline_at__gt=timezone.now())
+
+    def active(self):
+        # Have to do so to avoid cercular import:
+        # learning.managers (this) -> learning.models(with Enrollment) -> learning.managers (with AssignmentCommentPublishedManager)
+        Enrollment = apps.get_model('learning', 'Enrollment')
+        enrollment_subquery = Enrollment.active.filter(
+                            student=OuterRef('student'),
+                            course=OuterRef('assignment__course'),
+                            grade__ne=GradeTypes.RE_CREDIT,
+                            is_grade_recredited=False,
+                            type__ne=EnrollmentTypes.LECTIONS_ONLY
+                            )
+
+        return self.annotate(active=Exists(enrollment_subquery)).filter(active=True)
 
 
 class _StudentAssignmentDefaultManager(LiveManager):

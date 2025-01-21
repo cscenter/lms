@@ -18,7 +18,7 @@ from learning.services.enrollment_service import update_enrollment_grade
 from learning.services.notification_service import (
     create_notifications_about_new_submission
 )
-from learning.settings import Branches, StudentStatuses, GradeTypes, EnrollmentGradeUpdateSource
+from learning.settings import Branches, EnrollmentTypes, StudentStatuses, GradeTypes, EnrollmentGradeUpdateSource
 from learning.tests.factories import (
     AssignmentCommentFactory, AssignmentNotificationFactory, EnrollmentFactory,
     StudentAssignmentFactory, StudentGroupAssigneeFactory
@@ -48,7 +48,13 @@ def test_assignment_service_bulk_create_personal_assignments(settings):
     e_other = EnrollmentFactory(course=course,
                                 student_profile=student_profile_other,
                                 student=student_profile_other.user)
-    assert Enrollment.active.count() == 3
+    unactive_kwargs = [
+        {"grade": GradeTypes.RE_CREDIT},
+        {"is_grade_recredited": True},
+        {"type": EnrollmentTypes.LECTIONS_ONLY}
+    ]
+    unactive_enrollments = [EnrollmentFactory(course=course, **kwargs) for kwargs in unactive_kwargs]
+    assert Enrollment.active.count() == 6
     assignment = AssignmentFactory(course=course)
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment)
@@ -70,7 +76,7 @@ def test_assignment_service_bulk_create_personal_assignments(settings):
     # Check soft deleted enrollments don't taken into account
     e_nsk.is_deleted = True
     e_nsk.save()
-    assert Enrollment.active.count() == 2
+    assert Enrollment.active.count() == 5
     AssignmentService.bulk_create_student_assignments(assignment)
     assert StudentAssignment.objects.count() == 2
     # Inactive status prevents generating student assignment too
