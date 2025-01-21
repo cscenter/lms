@@ -12,7 +12,7 @@ from learning.models import (
     AssignmentNotification, Enrollment, StudentAssignment, StudentGroup
 )
 from learning.services.notification_service import notify_student_new_assignment
-from learning.settings import StudentStatuses
+from learning.settings import EnrollmentTypes, GradeTypes, StudentStatuses
 
 
 class AssignmentService:
@@ -63,6 +63,8 @@ class AssignmentService:
         By default it creates record for each enrolled student who's not
         expelled or on academic leave and the assignment is available for
         the student group in which the student participates in the course.
+        Also personal assignment is not created if course is recredited 
+        (with or without grade) or if student is enrolled as listener.
 
         You can process students from the specific groups only by setting
         `for_groups`. Special value `for_groups=[..., None]` - includes
@@ -70,7 +72,10 @@ class AssignmentService:
         """
         filters = [
             Q(course_id=assignment.course_id),
-            ~Q(student_profile__status__in=StudentStatuses.inactive_statuses)
+            ~Q(student_profile__status__in=StudentStatuses.inactive_statuses),
+            ~Q(grade=GradeTypes.RE_CREDIT),
+            Q(is_grade_recredited=False),
+            ~Q(type=EnrollmentTypes.LECTIONS_ONLY)     
         ]
         restrict_to = list(sg.pk for sg in assignment.restricted_to.all())
         # Filter out enrollments not in the targeted course groups

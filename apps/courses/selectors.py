@@ -110,8 +110,7 @@ def personal_assignments_list(*, filters: Optional[Dict[str, Any]] = None,
     return filter_set.qs.order_by()
 
 
-def course_personal_assignments(*, course: Course, filters: Optional[Dict[str, Any]] = None,
-                                filter_class: Optional[FilterSet] = None) -> StudentAssignmentQuerySet:
+def course_personal_assignments(*, course: Course, filters: Optional[Dict[str, Any]] = None) -> StudentAssignmentQuerySet:
     filters = filters or {}
     filters.update({'course': course.pk})
     prefetch_assignments = Prefetch('assignment',
@@ -123,3 +122,6 @@ def course_personal_assignments(*, course: Course, filters: Optional[Dict[str, A
             .prefetch_related(prefetch_assignments,
                               'assignee')
             .order_by())
+
+def course_active_personal_assignments(*, course: Course, filters: Optional[Dict[str, Any]] = None) -> StudentAssignmentQuerySet:
+    return course_personal_assignments(course=course, filters=filters).active()

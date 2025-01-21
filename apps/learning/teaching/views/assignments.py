@@ -50,7 +50,7 @@ from learning.services.personal_assignment_service import (
     create_personal_assignment_review, get_assignment_update_history_message,
     get_draft_comment
 )
-from learning.settings import AssignmentScoreUpdateSource, EnrollmentTypes
+from learning.settings import AssignmentScoreUpdateSource
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
 
@@ -203,16 +203,11 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
     permission_required = ViewAssignment.name
 
     def get_student_assignments(self):
-        enrollment_subquery = Enrollment.objects.filter(
-            student=OuterRef('student'),
-            course=OuterRef('assignment__course')
-        ).values('type')[:1]
 
         student_assignments = (
             StudentAssignment.objects
-            .annotate(enrollment_type=Subquery(enrollment_subquery))
-            .filter(enrollment_type=EnrollmentTypes.REGULAR)
-            .filter(assignment__pk=self.object.pk)
+            .active()
+            .filter(assignment=self.object)
             .select_related(
                 'assignment',
                 'assignment__course',
