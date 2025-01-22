@@ -26,9 +26,9 @@ from courses.models import Semester
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
 from study_programs.models import StudyProgram, AcademicDiscipline
-from users.constants import GenderTypes, Roles
+from users.constants import ConsentTypes, GenderTypes, Roles
 from users.models import (
-    OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User, UserGroup, StudentAcademicDisciplineLog
+    OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User, UserConsent, UserGroup, StudentAcademicDisciplineLog
 )
 
 AccountId = int
@@ -635,3 +635,22 @@ def badge_number_from_csv(csv_file) -> int:
         user.save()
         count_done += 1
     return count_done
+
+def give_consent(user: User, consent_type: ConsentTypes) -> bool:
+    """
+        Create UserConsent or refresh existing one.
+        Return True if new UserConsent created, False
+    """
+    if consent_type not in ConsentTypes.values:
+        raise ValueError("Wrong consent type")
+
+    user_consent, created = UserConsent.objects.get_or_create(
+        user=user,
+        type=consent_type
+    )
+
+    if not created:
+        user_consent.created = now()
+        user_consent.save()
+        
+    return created

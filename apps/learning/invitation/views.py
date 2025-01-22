@@ -26,9 +26,10 @@ from learning.permissions import (
     EnrollInCourseByInvitation, InvitationEnrollPermissionObject, LeaveCourse
 )
 from learning.settings import StudentStatuses
+from users.constants import ConsentTypes
 from users.models import StudentTypes, User
 from users.services import (
-    create_account, create_registration_profile, create_student_profile
+    create_account, create_registration_profile, create_student_profile, give_consent
 )
 
 
@@ -179,6 +180,8 @@ class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
                 telegram_username=data["telegram_username"],
                 birth_date=data["birth_date"],
                 branch=data["branch"])
+            for consent in ConsentTypes.regular_student_consents:
+                give_consent(new_user, consent)
             registration_profile = create_registration_profile(user=new_user)
             create_student_profile(user=new_user,
                                    branch=data['branch'],
