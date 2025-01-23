@@ -14,8 +14,8 @@ from learning.invitation.views import (
     InvitationURLParamsMixin, complete_student_profile, is_student_profile_valid
 )
 from learning.tests.factories import CourseInvitationFactory
-from users.constants import GenderTypes, Roles
-from users.models import User, StudentTypes
+from users.constants import ConsentTypes, GenderTypes, Roles
+from users.models import User, StudentTypes, UserConsent
 from users.tests.factories import UserFactory
 
 
@@ -72,7 +72,7 @@ def test_invitation_register_form(client, mocker):
     form = InvitationRegistrationForm(data={}, invitation=course_invitation.invitation)
     assert not form.is_valid()
     missing_fields = ["email", "branch", "last_name", "first_name", "gender", "telegram_username",
-                      "birth_date", "password1", "password2", "captcha"]
+                      "birth_date", "password1", "password2", "offer_confirmation", "captcha"]
     assert set(form.errors) == set(missing_fields)
     form_data = {
         'email': 'test@test.com',
@@ -84,6 +84,7 @@ def test_invitation_register_form(client, mocker):
         'birth_date': '100-03-999',
         'password1': '123123',
         'password2': '123123',
+        'offer_confirmation': 'True',
         'g-recaptcha-response': 'PASSED'
     }
     form = InvitationRegistrationForm(data=form_data, invitation=course_invitation.invitation)
@@ -153,6 +154,7 @@ def test_invitation_register_view(client, assert_redirect, settings, mocker):
         'birth_date': datetime.date(2000, 1, 1),
         'password1': '123123',
         'password2': '123123',
+        'offer_confirmation': True,
         'g-recaptcha-response': 'PASSED'
     }
     form = InvitationRegistrationForm(data=form_data, invitation=invitation)
@@ -173,7 +175,9 @@ def test_invitation_register_view(client, assert_redirect, settings, mocker):
     assert new_user.first_name == 'First Name'
     assert new_user.gender == GenderTypes.MALE
     assert Roles.INVITED in new_user.roles
-    assert new_user.gave_permission_at is None
+    user_consents = UserConsent.objects.filter(user=new_user)
+    assert set(user_consents.values_list("type", flat=True)) == ConsentTypes.invited_student_consents
+    assert all(now() - created <= datetime.timedelta(seconds=5) for created in user_consents.values_list("created", flat=True))
     student_profile = new_user.get_student_profile(site=new_user.branch.site)
     assert student_profile
     assert student_profile.year_of_admission == invitation.semester.academic_year

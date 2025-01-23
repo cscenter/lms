@@ -47,8 +47,8 @@ from admission.tests.factories import (
 from core.models import Branch
 from core.tests.factories import BranchFactory, EmailTemplateFactory, SiteFactory
 from core.timezone import get_now_utc
-from users.constants import GenderTypes
-from users.models import StudentTypes
+from users.constants import ConsentTypes, GenderTypes
+from users.models import StudentTypes, UserConsent
 from users.services import get_student_profile
 from users.tests.factories import StudentProfileFactory, UserFactory, CuratorFactory, StudentFactory, \
     InvitedStudentFactory
@@ -587,8 +587,9 @@ def test_create_student(settings):
     assert user.patronymic == applicant.patronymic
     assert user.workplace == applicant.workplace
     assert user.photo == applicant.photo
-    assert user.gave_permission_at is not None
-    assert user.gave_permission_at == user.date_joined
+    user_consents = UserConsent.objects.filter(user=user)
+    assert set(user_consents.values_list("type", flat=True)) == ConsentTypes.regular_student_consents
+    assert all(timezone.now() - created <= datetime.timedelta(seconds=5) for created in user_consents.values_list("created", flat=True))
     for field in dataclasses.fields(ACCOUNT_DATA):
         assert getattr(user, field.name) == getattr(ACCOUNT_DATA, field.name)
     assert applicant.user == user
@@ -645,8 +646,9 @@ def test_create_student_with_existing_invited(settings):
     assert user.patronymic == ""
     assert user.workplace == applicant.workplace
     assert user.photo == applicant.photo
-    assert user.gave_permission_at is not None
-    assert user.gave_permission_at == user.date_joined
+    user_consents = UserConsent.objects.filter(user=user)
+    assert set(user_consents.values_list("type", flat=True)) == ConsentTypes.regular_student_consents
+    assert all(timezone.now() - created <= datetime.timedelta(seconds=5) for created in user_consents.values_list("created", flat=True))
     for field in dataclasses.fields(ACCOUNT_DATA_WITHOUT_PATRONYMIC):
         assert getattr(user, field.name) == getattr(ACCOUNT_DATA_WITHOUT_PATRONYMIC, field.name)
     assert applicant.user == user

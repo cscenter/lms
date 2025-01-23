@@ -46,13 +46,14 @@ from core.timezone.constants import DATE_FORMAT_RU
 from core.utils import bucketize
 from grading.api.yandex_contest import YandexContestAPI
 from tasks.models import Task
-from users.constants import GenderTypes
+from users.constants import ConsentTypes, GenderTypes
 from users.models import StudentProfile, StudentTypes, User
 from users.services import (
     create_account,
     create_student_profile,
     generate_username_from_email,
     get_student_profile,
+    give_consent,
 )
 
 
@@ -505,7 +506,8 @@ def create_student(
     user.last_name = applicant.last_name
     user.patronymic = "" if account_data.has_no_patronymic else applicant.patronymic
     user.photo = applicant.photo
-    user.gave_permission_at = user.date_joined
+    for consent in ConsentTypes.regular_student_consents:
+        give_consent(user, consent)
     # dataclasses.asdict raises `cannot pickle '_io.BufferedRandom' object`
     account_fields = {field.name for field in fields(AccountData)}
     for name in account_fields:
