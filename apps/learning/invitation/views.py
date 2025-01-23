@@ -180,7 +180,7 @@ class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
                 telegram_username=data["telegram_username"],
                 birth_date=data["birth_date"],
                 branch=data["branch"])
-            for consent in ConsentTypes.regular_student_consents:
+            for consent in ConsentTypes.invited_student_consents:
                 give_consent(new_user, consent)
             registration_profile = create_registration_profile(user=new_user)
             create_student_profile(user=new_user,

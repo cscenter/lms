@@ -374,7 +374,9 @@ def test_student_should_have_profile(client):
         'yandex_data-TOTAL_FORMS': 0,
         'yandex_data-INITIAL_FORMS': 0,
         'yandex_data-MIN_NUM_FORMS': 0,
-        'yandex_data-MAX_NUM_FORMS': 1
+        'yandex_data-MAX_NUM_FORMS': 1,
+        'consents-TOTAL_FORMS': 0,
+        'consents-INITIAL_FORMS': 0
     })
     admin_url = get_admin_url(user)
     response = client.post(admin_url, form_data)

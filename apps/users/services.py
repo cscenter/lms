@@ -14,7 +14,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import transaction, IntegrityError
 from django.db.models import Prefetch, Q, prefetch_related_objects, Model
-from django.utils.timezone import now
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from auth.registry import role_registry
@@ -155,7 +155,7 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date,
                                 branch__site=site)
                         .select_related('user')
                         .prefetch_related('academic_disciplines'))
-    is_update_student_status = now().date() >= graduated_on
+    is_update_student_status = timezone.now().date() >= graduated_on
     if is_update_student_status and not created_by:
         created_by = User.objects.has_role(Roles.CURATOR).order_by('pk').first()
     for student_profile in student_profiles:
@@ -650,7 +650,7 @@ def give_consent(user: User, consent_type: ConsentTypes) -> bool:
     )
 
     if not created:
-        user_consent.created = now()
+        user_consent.created = timezone.now()
         user_consent.save()
         
     return created
