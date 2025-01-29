@@ -151,7 +151,14 @@
                       </td>
                       <td>
                         {% if course_class.is_conducted_by_invited %}
-                          {% trans %}Is conducted by invited{% endtrans %}{% if course_class.teachers.exists() %},<br>{% endif %}
+                          {% if course_class.invited_teacher_last_name or course_class.invited_teacher_first_name %}
+                            {{ course_class.invited_teacher_last_name }} 
+                            {{ course_class.invited_teacher_first_name }} 
+                            ({% trans %}Is conducted by invited{% endtrans %})
+                          {%- else -%}
+                            {% trans %}Is conducted by invited{% endtrans %}
+                          {%- endif -%}   
+                          {%- if course_class.teachers.exists() %},<br>{% endif %}
                         {% endif %}
                         {% for course_teacher in course_class.teachers.all() %}
                           {% with teacher = course_teacher.teacher %}

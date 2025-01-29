@@ -482,3 +482,30 @@ def test_view_course_add_class_btn_visibility(client):
 
     assert has_create_news_btn(teacher)
     assert not has_create_news_btn(spectator)
+
+@pytest.mark.django_db
+def test_course_class_invited_last_first_name(client):
+    teacher = TeacherFactory()
+    client.login(teacher)
+    s = SemesterFactory.create_current()
+    co = CourseFactory(teachers=[teacher], semester=s)
+    cc = CourseClassFactory(course=co, slides=None)
+    form = model_to_dict(cc)
+    del form["slides"]
+    url = cc.get_update_url()
+    client.post(url, form)
+    cc.refresh_from_db()
+    assert not cc.is_conducted_by_invited
+    assert cc.invited_teacher_first_name == cc.invited_teacher_last_name == ""
+    form["invited_teacher_first_name"] = "First name"
+    form["invited_teacher_last_name"] = "Last name"
+    client.post(url, form)
+    cc.refresh_from_db()
+    assert not cc.is_conducted_by_invited
+    assert cc.invited_teacher_first_name == cc.invited_teacher_last_name == ""
+    form["is_conducted_by_invited"] = True
+    client.post(url, form)
+    cc.refresh_from_db()
+    assert cc.is_conducted_by_invited
+    assert cc.invited_teacher_first_name == "First name"
+    assert cc.invited_teacher_last_name == "Last name"
