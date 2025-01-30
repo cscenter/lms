@@ -342,7 +342,7 @@ class AssignmentStudentAnswersCSVView(PermissionRequiredMixin, generic.DetailVie
         writer = csv.writer(response)
         headers = [
             _("User url"),
-            "id", 
+            _("Enrollment ID"),
             "Фамилия",
             "Имя",
             "Отчество",
