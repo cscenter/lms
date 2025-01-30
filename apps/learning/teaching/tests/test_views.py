@@ -585,7 +585,7 @@ def test_view_assignment_student_answers_csv(client):
 
     headers = [
         "User url",
-        "id",
+        "Enrollment ID",
         "Фамилия",
         "Имя",
         "Отчество",
