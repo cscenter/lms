@@ -14,7 +14,7 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import transaction, IntegrityError
 from django.db.models import Prefetch, Q, prefetch_related_objects, Model
-from django.utils.timezone import now
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from auth.registry import role_registry
@@ -26,9 +26,9 @@ from courses.models import Semester
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
 from study_programs.models import StudyProgram, AcademicDiscipline
-from users.constants import GenderTypes, Roles
+from users.constants import ConsentTypes, GenderTypes, Roles
 from users.models import (
-    OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User, UserGroup, StudentAcademicDisciplineLog
+    OnlineCourseRecord, StudentProfile, StudentStatusLog, StudentTypes, User, UserConsent, UserGroup, StudentAcademicDisciplineLog
 )
 
 AccountId = int
@@ -155,7 +155,7 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date,
                                 branch__site=site)
                         .select_related('user')
                         .prefetch_related('academic_disciplines'))
-    is_update_student_status = now().date() >= graduated_on
+    is_update_student_status = timezone.now().date() >= graduated_on
     if is_update_student_status and not created_by:
         created_by = User.objects.has_role(Roles.CURATOR).order_by('pk').first()
     for student_profile in student_profiles:
@@ -635,3 +635,22 @@ def badge_number_from_csv(csv_file) -> int:
         user.save()
         count_done += 1
     return count_done
+
+def give_consent(user: User, consent_type: ConsentTypes) -> bool:
+    """
+        Create UserConsent or refresh existing one.
+        Return True if new UserConsent created, False
+    """
+    if consent_type not in ConsentTypes.values:
+        raise ValueError("Wrong consent type")
+
+    user_consent, created = UserConsent.objects.get_or_create(
+        user=user,
+        type=consent_type
+    )
+
+    if not created:
+        user_consent.created = timezone.now()
+        user_consent.save()
+        
+    return created

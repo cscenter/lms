@@ -48,7 +48,8 @@ def get_all_calendar_events(*, branch_list, start_date, end_date, time_zone):
     Returns events in a given date range for the given branch list.
     """
     period_filter = _to_range_q_filter(start_date, end_date)
-    for c in get_classes(branch_list, period_filter):
+    class_filters = [Q(course__is_draft=False), *period_filter]
+    for c in get_classes(branch_list, class_filters):
         yield CalendarEventFactory.create(c, time_zone=time_zone)
     event_filters = [Q(branch__in=branch_list), *period_filter]
     for e in get_study_events(event_filters):

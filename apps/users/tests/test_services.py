@@ -1,34 +1,32 @@
 import csv
 import datetime
 import io
+from unittest.mock import patch
 
 import pytest
-from django.conf import settings
 
 from django.core.exceptions import ValidationError
 from django.forms import model_to_dict
 from django.utils import timezone
 
 from core.tests.factories import BranchFactory, SiteFactory
-from core.timezone import now_local
 from courses.models import Semester
 from courses.tests.factories import CourseFactory, AssignmentFactory
 from learning.models import GraduateProfile, Enrollment, StudentAssignment
 from learning.settings import StudentStatuses
-from learning.tests.factories import CourseInvitationFactory, InvitationFactory, EnrollmentPeriodFactory, EnrollmentFactory, AssignmentCommentFactory
+from learning.tests.factories import InvitationFactory, EnrollmentFactory, AssignmentCommentFactory
 from study_programs.tests.factories import (
     AcademicDisciplineFactory, StudyProgramFactory
 )
-from users.constants import Roles
-from users.models import StudentProfile, StudentTypes, UserGroup, User, YandexUserData
+from users.constants import ConsentTypes, Roles
+from users.models import StudentProfile, StudentTypes, UserConsent, UserGroup, User, YandexUserData
 from users.services import (
     StudentStatusTransition, assign_or_revoke_student_role, assign_role, badge_number_from_csv,
     create_graduate_profiles, create_student_profile, get_student_profile_priority,
-    get_student_profiles, maybe_unassign_student_role, unassign_role, update_student_status,
+    get_student_profiles, give_consent, maybe_unassign_student_role, unassign_role, update_student_status,
     update_student_academic_discipline, merge_users
 )
-from users.tests.factories import CuratorFactory, StudentProfileFactory, UserFactory, StudentFactory, \
-    YandexUserDataFactory
+from users.tests.factories import CuratorFactory, StudentProfileFactory, UserFactory, YandexUserDataFactory
 
 
 @pytest.mark.django_db
@@ -602,3 +600,25 @@ def test_merge_users_failed():
     csv_writer.writerow([user2.email, 'test badge 2'])
     csv_file.seek(0)
     assert badge_number_from_csv(csv_file) == 2
+
+@pytest.mark.django_db
+def test_give_consent():
+    user = UserFactory()
+    for consent_type in ConsentTypes.regular_student_consents:
+        give_consent(user, consent_type)
+    time = timezone.now()
+    user_consents = UserConsent.objects.filter(user=user)
+    assert set(user_consents.values_list("type", flat=True)) == ConsentTypes.regular_student_consents
+    assert all(time - created <= datetime.timedelta(seconds=5) for created in user_consents.values_list("created", flat=True))
+    with patch('django.utils.timezone.now') as mocked_now:
+        mocked_now.return_value = time + datetime.timedelta(seconds=10)
+        
+        for consent_type in ConsentTypes.invited_student_consents:
+            give_consent(user, consent_type)
+        time = timezone.now()
+        user_consents = UserConsent.objects.filter(user=user)
+        assert set(user_consents.values_list("type", flat=True)) == ConsentTypes.regular_student_consents
+        new_user_consents = user_consents.filter(type__in=ConsentTypes.invited_student_consents)
+        old_user_consents = user_consents.exclude(type__in=ConsentTypes.invited_student_consents)
+        assert all(time - created <= datetime.timedelta(seconds=5) for created in new_user_consents.values_list("created", flat=True))
+        assert all(time - created > datetime.timedelta(seconds=5) for created in old_user_consents.values_list("created", flat=True))

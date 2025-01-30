@@ -824,6 +824,9 @@ class CourseReview(TimeStampedModel):
         Course,
         related_name="reviews",
         on_delete=models.CASCADE)
+    is_visible = models.BooleanField(
+        _("CourseReview|is_visible"),
+        default=True)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author"),
