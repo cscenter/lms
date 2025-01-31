@@ -49,7 +49,7 @@ class MetaCourseAdmin(TranslationAdmin, admin.ModelAdmin):
 
 class CourseReviewAdmin(admin.ModelAdmin):
     search_fields = ('course__meta_course__name',)
-    list_display = ('course', 'author')
+    list_display = ('course', 'is_visible', 'short_text')
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
@@ -58,6 +58,14 @@ class CourseReviewAdmin(admin.ModelAdmin):
         ('course__meta_course', AdminRelatedDropdownFilter),
         ('course__semester', AdminRelatedDropdownFilter)
     ]
+    
+    def short_text(self, obj):
+        text = obj.text
+        if len(text) > 50:
+            return text[:50] + '...'
+        return text
+
+    short_text.short_description = _("CourseReview|text")
 
 
 class CourseTeacherInline(admin.TabularInline):
