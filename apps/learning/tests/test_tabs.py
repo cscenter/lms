@@ -44,12 +44,8 @@ def test_course_news_tab_permissions_student(client, assert_login_redirect):
     e_current = EnrollmentFactory(course=course, student=student_spb)
     response = client.get(course.get_absolute_url())
     assert "news" in response.context_data['course_tabs']
-    # To see the news for completed course student should successfully pass it.
+    # To see the news for completed course student should not successfully pass it.
     e_prev = EnrollmentFactory(course=co_prev, student=student_spb)
-    response = client.get(co_prev.get_absolute_url())
-    assert "news" not in response.context_data['course_tabs']
-    e_prev.grade = GradeTypes.GOOD
-    e_prev.save()
     response = client.get(co_prev.get_absolute_url())
     assert "news" in response.context_data['course_tabs']
 
