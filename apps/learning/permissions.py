@@ -37,7 +37,7 @@ class InvitationEnrollPermissionObject(NamedTuple):
 def enroll_in_course(user, permission_object: EnrollPermissionObject):
     course = permission_object.course
     student_profile = permission_object.student_profile
-    if user.roles.issubset(student_permission_roles) and course.is_draft:
+    if course.is_draft and not user.has_permission_to_drafts:
         logger.debug("Course is draft")
         return False
     if not course.enrollment_is_open:
@@ -120,8 +120,8 @@ class ViewCourseNews(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, course: Course):
-        if user.roles.issubset(student_permission_roles) and course.is_draft:
-            return False
+        if course.is_draft:
+            return user.has_permission_to_drafts
         role = course_access_role(course=course, user=user)
         return role != CourseRole.NO_ROLE
 
@@ -180,8 +180,8 @@ class ViewCourseReviews(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, course: Course):
-        if user.roles.issubset(student_permission_roles) and course.is_draft:
-            return False
+        if course.is_draft:
+            return user.has_permission_to_drafts
         return course.enrollment_is_open
 
 

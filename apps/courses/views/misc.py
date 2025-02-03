@@ -29,10 +29,11 @@ class TeacherDetailView(LoginRequiredMixin, DetailView):
                                 hidden_roles=(CourseTeacher.roles.spectator,)
                            ),
                            semester__year__gte=min_established,
-                           teachers=self.object.pk,
-                           is_draft=False)
+                           teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index'))
+        if not self.request.user.has_permission_to_drafts:
+            courses = courses.filter(is_draft=False)
         context['courses'] = courses
         return context
 

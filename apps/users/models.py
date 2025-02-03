@@ -621,6 +621,10 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
     def roles(self) -> set:
         return {g.role for g in self.site_groups}
 
+    @cached_property
+    def has_permission_to_drafts(self) -> bool:
+        return self.is_teacher or self.is_curator
+
     @instance_memoize
     def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
         """Returns student enrollment if it exists and not soft deleted"""
