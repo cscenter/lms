@@ -123,7 +123,7 @@ class ViewCourseNews(Permission):
         if user.roles.issubset(student_permission_roles) and course.is_draft:
             return False
         role = course_access_role(course=course, user=user)
-        return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
+        return role != CourseRole.NO_ROLE
 
 
 @add_perm
