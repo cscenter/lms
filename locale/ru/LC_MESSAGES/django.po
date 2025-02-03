@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 11:59+0000\n"
-"PO-Revision-Date: 2025-01-27 12:00+0000\n"
-"Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
+"POT-Creation-Date: 2025-01-30 12:28+0000\n"
+"PO-Revision-Date: 2025-01-30 12:29+0000\n"
+"Last-Translator: Админ Админов <admin@admin.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -1854,6 +1854,11 @@ msgstr "Ведомость успешно сохранена."
 msgid "Gradebook hasn't been saved."
 msgstr "Ведомость не была сохранена."
 
+#: apps/learning/gradebook/views.py:233
+#| msgid "Enrollment"
+msgid "Enrollment ID"
+msgstr "ID записи на курс"
+
 #: apps/learning/gradebook/views.py:235
 #: apps/staff/views/enrolees_selection.py:115
 msgid "First name"
@@ -1967,11 +1972,6 @@ msgstr ""
 
 #: apps/learning/models.py:110
 msgid "Invite is not specified for the `invite` group type"
-msgstr ""
-
-#: apps/learning/models.py:118
-#, python-brace-format
-msgid "Fields {mutually_exclusive} are mutually exclusive"
 msgstr ""
 
 #: apps/learning/models.py:128
@@ -2912,10 +2912,6 @@ msgstr "Файл CSV"
 msgid "Fill in badge numbers"
 msgstr "Залить номера пропусков"
 
-#: apps/staff/forms.py:90 apps/staff/views/views.py:731
-msgid "File read error: {str(e)}"
-msgstr ""
-
 #: apps/staff/forms.py:95 apps/users/services.py:626
 msgid "CSV file must contain \"Email\" and \"Badge number\" columns"
 msgstr ""
@@ -3805,23 +3801,9 @@ msgstr "Согласия пользователя"
 msgid "Major and minor must be objects of the same types"
 msgstr "Основной и дублирующий объекты должны быть объектами одного типа"
 
-#: apps/users/services.py:531
-msgid ""
-"Major and minor objects must not be the same: {major} with type "
-"{type(major)}"
-msgstr ""
-"Основной и дублирующий объекты не должны быть одним объектом: {major} типа "
-"{type(major)}"
-
 #: apps/users/services.py:589
 msgid "Use merge_objects for non User instances"
 msgstr "Для объектов не-Пользователей используйте merge_objects"
-
-#: apps/users/services.py:591
-#, python-brace-format
-msgid "Major and minor Users must not be the same object: {major}"
-msgstr ""
-"Основной и дублирующий пользователи не должны быть одним объектом: {major}"
 
 #: apps/users/services.py:633
 msgid "User with email \"{}\" does not exists"
@@ -4388,8 +4370,17 @@ msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
 
-#~ msgid "Permission time"
-#~ msgstr "Время принятия условий"
+#~ msgid ""
+#~ "Major and minor objects must not be the same: {major} with type "
+#~ "{type(major)}"
+#~ msgstr ""
+#~ "Основной и дублирующий объекты не должны быть одним объектом: {major} типа "
+#~ "{type(major)}"
+
+#, python-brace-format
+#~ msgid "Major and minor Users must not be the same object: {major}"
+#~ msgstr ""
+#~ "Основной и дублирующий пользователи не должны быть одним объектом: {major}"
 
 #~ msgid "LECTIONS ONLY type can be used with WITHOUT GRADE grade only"
 #~ msgstr ""
