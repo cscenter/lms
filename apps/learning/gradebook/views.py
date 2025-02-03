@@ -230,7 +230,7 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
 
         writer = csv.writer(response)
         headers = [
-            "id",
+            _("Enrollment ID"),
             _("Last name"),
             _("First name"),
             _("Patronymic"),
