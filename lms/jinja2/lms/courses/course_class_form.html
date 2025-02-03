@@ -2,7 +2,7 @@
 
 {% import "lms/macros/_forms.jinja2" as forms %}
 
-{% block body_attrs %} data-init-sections="datetimepickers,tooltips,selectpickers"{% endblock body_attrs %}
+{% block body_attrs %} data-init-sections="classForm,datetimepickers,tooltips,selectpickers"{% endblock body_attrs %}
 
 {% block javascripts %}
     {{ render_bundle('teaching', config='V1', extension='js') }}
@@ -47,7 +47,13 @@
                         {{ checkbox }}
                     </div>
                   {% endfor %}
-                {{ forms.field(form['is_conducted_by_invited'], is_boolean=True) }}
+                <div class="row">
+                  {{ forms.field(form['is_conducted_by_invited'], is_boolean=True, wrapper_classes="col-xs-4") }}
+                  <div id="invited-teacher-details" class="{% if not form.is_conducted_by_invited.value() %}hidden{% endif %}">
+                    {{ forms.field(form['invited_teacher_last_name'], wrapper_classes="col-xs-4", placeholder="Иванов", hide_label=True) }}
+                    {{ forms.field(form['invited_teacher_first_name'], wrapper_classes="col-xs-4", placeholder="Иван", hide_label=True) }}
+                  </div>
+                </div>
                 {{ forms.field(form['description']) }}
                 {{ forms.field(form['recording_link']) }}
                 <fieldset>

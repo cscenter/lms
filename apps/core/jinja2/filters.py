@@ -22,7 +22,7 @@ def pluralize(number, singular, genitive_singular, genitive_plural):
         return endings[2]
 
 
-def with_classes(bound_field, class_names):
+def with_classes(bound_field, class_names, *, placeholder):
     """Render field with additional classes"""
     css_classes = bound_field.field.widget.attrs.get('class', '')
     if css_classes:
@@ -32,7 +32,8 @@ def with_classes(bound_field, class_names):
     for class_name in class_names.strip().split(' '):
         if class_name not in css_classes:
             css_classes.append(class_name)
-    widget_str = bound_field.as_widget(attrs={'class': ' '.join(css_classes)})
+    widget_str = bound_field.as_widget(attrs={'class': ' '.join(css_classes),
+                                              'placeholder': placeholder})
     if bound_field.field.show_hidden_initial:
         return widget_str + bound_field.as_hidden(only_initial=True)
     return widget_str

@@ -4,7 +4,7 @@
 
 
 {% macro field(bound_field, hide_label=False, prepend_button="", prepend_text="", append_text="", append_button="",
-wrapper_classes="", popover_help_text="", label_classes="", input_classes="", is_boolean=False) -%}
+wrapper_classes="", popover_help_text="", label_classes="", input_classes="", placeholder="", is_boolean=False) -%}
     {% if bound_field.is_hidden %}
         {{ bound_field|safe }}
     {% else %}
@@ -20,7 +20,7 @@ wrapper_classes="", popover_help_text="", label_classes="", input_classes="", is
                   <div class="input-group">
                     {% if prepend_button %}<span class="input-group-btn">{{ prepend_button }}</span>{% endif %}
                     {% if prepend_text %}<span class="input-group-addon">{{ prepend_text }}</span>{% endif %}
-                    {{ bound_field|with_classes('form-control ' + input_classes) }}
+                    {{ bound_field|with_classes('form-control ' + input_classes, placeholder=placeholder) }}
                     {% if append_text %}<span class="input-group-addon">{{ append_text }}</span>{% endif %}
                     {% if append_button %}<span class="input-group-btn">{{ append_button }}</span>{% endif %}
                   </div>
@@ -30,7 +30,7 @@ wrapper_classes="", popover_help_text="", label_classes="", input_classes="", is
                     {{ bound_field.label }}{% if bound_field.field.required %}<span
                     class="asteriskField">*</span>{% endif %}</label>
                 {% else %}
-                  {{ bound_field|with_classes('form-control ' + input_classes) }}
+                  {{ bound_field|with_classes('form-control ' + input_classes, placeholder=placeholder) }}
                 {% endif %}
 
                 {% if not popover_help_text and bound_field.help_text -%}

@@ -114,13 +114,13 @@ msgid "Student Group"
 msgstr "Студенческая группа"
 
 #: apps/api/management/commands/dump_to_yandex_disk.py:26
-#: apps/courses/forms.py:506 apps/learning/roles.py:156
+#: apps/courses/forms.py:512 apps/learning/roles.py:156
 #: apps/users/constants.py:37
 msgid "Teacher"
 msgstr "Преподаватель"
 
 #: apps/api/management/commands/dump_to_yandex_disk.py:26
-#: apps/courses/models.py:1281 apps/courses/models.py:1388
+#: apps/courses/models.py:1291 apps/courses/models.py:1398
 #: apps/grading/admin.py:25 apps/learning/admin.py:309
 #: apps/learning/models.py:175 apps/learning/models.py:216
 #: apps/learning/models.py:241
@@ -137,7 +137,7 @@ msgid "Assignment Grade"
 msgstr "Оценка по заданию"
 
 #: apps/api/management/commands/dump_to_yandex_disk.py:27
-#: apps/courses/forms.py:315 apps/courses/models.py:1239
+#: apps/courses/forms.py:321 apps/courses/models.py:1249
 msgid "Maximum score"
 msgstr "Максимальный балл"
 
@@ -305,12 +305,12 @@ msgstr "Кем изменено"
 #: apps/core/forms.py:7
 #: apps/templates/forms/simple_delete_confirmation.html:22
 #: apps/templates/learning/enrollment/enrollment_leave.html:25
-#: lms/jinja2/lms/courses/course_class_form.html:84
+#: lms/jinja2/lms/courses/course_class_form.html:90
 msgid "Cancel"
 msgstr "Отмена"
 
 #: apps/core/forms.py:10 apps/users/forms.py:98
-#: lms/jinja2/lms/courses/course_class_form.html:85
+#: lms/jinja2/lms/courses/course_class_form.html:91
 #: lms/jinja2/lms/gradebook/gradebook_form.html:33
 #: lms/jinja2/lms/user_profile/_profile_upload_photo.html:40
 msgid "Save"
@@ -424,8 +424,8 @@ msgstr "Как добраться"
 msgid "Flags"
 msgstr "Флаги"
 
-#: apps/core/models.py:343 apps/courses/models.py:1004
-#: apps/courses/models.py:1169
+#: apps/core/models.py:343 apps/courses/models.py:1014
+#: apps/courses/models.py:1179
 msgid "Class"
 msgstr "Занятие"
 
@@ -441,7 +441,7 @@ msgstr "Отметьте, какие мероприятия проходят в 
 msgid "Locations"
 msgstr "Адреса"
 
-#: apps/core/models.py:362 apps/courses/forms.py:503 apps/courses/models.py:65
+#: apps/core/models.py:362 apps/courses/forms.py:509 apps/courses/models.py:65
 #: apps/faq/models.py:9 apps/learning/gallery/models.py:65
 #: apps/learning/models.py:64 apps/learning/models.py:551
 #: apps/universities/models.py:6 apps/universities/models.py:21
@@ -527,7 +527,7 @@ msgstr ""
 "Пожалуйста, перепроверьте список выбранных преподавателей. Кто-то из них не "
 "имеет отношения к выбранному прочтению курса."
 
-#: apps/courses/admin.py:270 apps/courses/models.py:1222
+#: apps/courses/admin.py:270 apps/courses/models.py:1232
 msgid "Assignment|deadline"
 msgstr "Срок сдачи"
 
@@ -704,14 +704,14 @@ msgstr "Название"
 msgid "Course|description"
 msgstr "Описание"
 
-#: apps/courses/forms.py:134 apps/courses/forms.py:292
+#: apps/courses/forms.py:134 apps/courses/forms.py:298
 #: apps/info_blocks/models.py:40 apps/learning/gallery/models.py:34
 #: apps/templates/international_schools/international_schools.html:16
-#: lms/jinja2/lms/courses/course_detail.html:179
+#: lms/jinja2/lms/courses/course_detail.html:185
 msgid "Title"
 msgstr "Название"
 
-#: apps/courses/forms.py:139 apps/courses/forms.py:295
+#: apps/courses/forms.py:139 apps/courses/forms.py:301
 msgid "Text"
 msgstr "Текст"
 
@@ -743,7 +743,7 @@ msgstr ""
 msgid "Materials (presentations, instructions, reminders)"
 msgstr "Материалы (презентации, инструкции, памятки)"
 
-#: apps/courses/forms.py:179 apps/courses/forms.py:309
+#: apps/courses/forms.py:179 apps/courses/forms.py:315
 msgid "You can select multiple files"
 msgstr "Вы можете выбрать несколько файлов"
 
@@ -770,13 +770,13 @@ msgstr "Формат: чч:мм"
 msgid "Ends at"
 msgstr "Конец"
 
-#: apps/courses/forms.py:195 apps/courses/forms.py:304
-#: apps/courses/models.py:952 apps/courses/models.py:1223
+#: apps/courses/forms.py:195 apps/courses/forms.py:310
+#: apps/courses/models.py:952 apps/courses/models.py:1233
 #: apps/users/models.py:362 lms/jinja2/lms/user_profile/_tab_account.html:133
 msgid "Time Zone"
 msgstr "Часовой пояс"
 
-#: apps/courses/forms.py:199 apps/courses/forms.py:542
+#: apps/courses/forms.py:199 apps/courses/forms.py:548
 #: apps/learning/models.py:93
 msgid "Student Groups"
 msgstr "Студенческие группы"
@@ -791,26 +791,26 @@ msgid ""
 "Inconsistent with this course's semester (from %(starts_at)s to %(ends_at)s)"
 msgstr "Не совпадает с семестром курса (с %(starts_at)s по %(ends_at)s)"
 
-#: apps/courses/forms.py:249
+#: apps/courses/forms.py:255
 msgid "Enter the time spent on the assignment."
 msgstr "Введите время, затраченное на выполнение задания."
 
-#: apps/courses/forms.py:250
+#: apps/courses/forms.py:256
 msgid "Enter a valid duration in a HH:MM format"
 msgstr "Введите продолжительность в HH:MM формате."
 
-#: apps/courses/forms.py:251
+#: apps/courses/forms.py:257
 #, python-brace-format
 msgid "The number of days must be less than {max_days}."
 msgstr ""
 
-#: apps/courses/forms.py:282
+#: apps/courses/forms.py:288
 msgid ""
 "There must be an error in the duration specified. Please, contact curators "
 "for this problem."
 msgstr ""
 
-#: apps/courses/forms.py:299 lms/jinja2/lms/courses/course_detail.html:178
+#: apps/courses/forms.py:305 lms/jinja2/lms/courses/course_detail.html:184
 #: lms/jinja2/lms/study/assignment_list.html:24
 #: lms/jinja2/lms/study/assignment_list.html:86
 #: lms/jinja2/lms/study/student_assignment_detail.html:141
@@ -819,64 +819,64 @@ msgstr ""
 msgid "Deadline"
 msgstr "Срок сдачи"
 
-#: apps/courses/forms.py:307
+#: apps/courses/forms.py:313
 #: lms/jinja2/lms/courses/course_class_detail.html:73
 #: lms/jinja2/lms/teaching/assignment_detail.html:57
 msgid "Attached files"
 msgstr "Приложенные файлы"
 
-#: apps/courses/forms.py:312 apps/courses/models.py:1235
+#: apps/courses/forms.py:318 apps/courses/models.py:1245
 #: lms/jinja2/lms/study/student_assignment_detail.html:147
 #: lms/jinja2/lms/teaching/student_assignment_detail.html:240
 msgid "Passing score"
 msgstr "Проходной балл"
 
-#: apps/courses/forms.py:318 apps/courses/models.py:1243
+#: apps/courses/forms.py:324 apps/courses/models.py:1253
 #: lms/jinja2/lms/study/student_assignment_detail.html:150
 #: lms/jinja2/lms/teaching/assignment_detail.html:45
 #: lms/jinja2/lms/teaching/student_assignment_detail.html:245
 msgid "Assignment Weight"
 msgstr "Вес задания"
 
-#: apps/courses/forms.py:321
+#: apps/courses/forms.py:327
 msgid ""
 "Assignment contribution to the course total score. It takes into account in "
 "the gradebook."
 msgstr "Вклад задания в сумму баллов по курсу."
 
-#: apps/courses/forms.py:325 apps/courses/models.py:1248
+#: apps/courses/forms.py:331 apps/courses/models.py:1258
 msgid "Time to Completion"
 msgstr "Время для завершения"
 
-#: apps/courses/forms.py:327 apps/courses/models.py:1250
+#: apps/courses/forms.py:333 apps/courses/models.py:1260
 msgid "Estimated amount of time required for the task to be completed"
 msgstr ""
 "Сколько, по вашему мнению, студенту потребуется времени, чтобы выполнить "
 "задание?"
 
-#: apps/courses/forms.py:331 apps/learning/forms.py:151
+#: apps/courses/forms.py:337 apps/learning/forms.py:151
 msgid "hours:minutes"
 msgstr "часы:минуты"
 
-#: apps/courses/forms.py:333
+#: apps/courses/forms.py:339
 msgid "Available for Groups"
 msgstr "Доступно для групп"
 
-#: apps/courses/forms.py:335
+#: apps/courses/forms.py:341
 msgid "Restrict assignment to selected groups. Available to all by default."
 msgstr ""
 "Задание будет доступно только выбранным группам. По умолчанию доступно всем."
 
-#: apps/courses/forms.py:337 apps/courses/models.py:1270
+#: apps/courses/forms.py:343 apps/courses/models.py:1280
 #: apps/grading/models.py:32 apps/grading/models.py:52
 msgid "Checking System"
 msgstr "Проверяющая система"
 
-#: apps/courses/forms.py:342
+#: apps/courses/forms.py:348
 msgid "Checker URL"
 msgstr "URL проверяющей системы"
 
-#: apps/courses/forms.py:344
+#: apps/courses/forms.py:350
 msgid ""
 "For example, URL of the Yandex.Contest problem: "
 "https://contest.yandex.ru/contest/3/problems/A/"
@@ -884,17 +884,17 @@ msgstr ""
 "Например, URL задачи из Яндекс.Контеста: "
 "https://contest.yandex.ru/contest/3/problems/A/"
 
-#: apps/courses/forms.py:348
+#: apps/courses/forms.py:354
 msgid "Selection Mode"
 msgstr "Режим назначения"
 
-#: apps/courses/forms.py:386
+#: apps/courses/forms.py:392
 msgid "URL is specified but checking system is empty"
 msgstr "Для URL не указана проверяющая система"
 
-#: apps/courses/forms.py:551 apps/learning/models.py:226
+#: apps/courses/forms.py:557 apps/learning/models.py:226
 #: apps/users/models.py:1128 lms/jinja2/lms/courses/course_detail.html:117
-#: lms/jinja2/lms/courses/course_detail.html:299
+#: lms/jinja2/lms/courses/course_detail.html:305
 msgid "Teachers"
 msgstr "Преподаватели"
 
@@ -1184,7 +1184,7 @@ msgstr "Публичные слайды"
 msgid "Public Attachments"
 msgstr "Публичные приложения"
 
-#: apps/courses/models.py:440 apps/courses/models.py:1220
+#: apps/courses/models.py:440 apps/courses/models.py:1230
 #: apps/learning/gallery/models.py:49 apps/learning/models.py:68
 #: apps/learning/models.py:359 apps/learning/models.py:485
 #: lms/jinja2/lms/user_profile/_tab_assignments.html:10
@@ -1228,7 +1228,6 @@ msgid "Course Teachers"
 msgstr "Преподаватели курса"
 
 #: apps/courses/models.py:828
-#| msgid "Course Reviews"
 msgid "CourseReview|is_visible"
 msgstr "Отображается на странице курса"
 
@@ -1300,7 +1299,7 @@ msgstr "Другие материалы"
 msgid "Slides, attachments and other materials"
 msgstr "Слайды, приложенные файлы и др."
 
-#: apps/courses/models.py:990 apps/courses/models.py:1264
+#: apps/courses/models.py:990 apps/courses/models.py:1274
 #: apps/learning/gradebook/forms.py:120 apps/learning/models.py:222
 #: lms/jinja2/lms/staff/student_search.html:59
 msgid "Groups"
@@ -1310,48 +1309,58 @@ msgstr "Группы"
 msgid "Course class teachers"
 msgstr "Преподаватели занятия"
 
-#: apps/courses/models.py:999 lms/jinja2/lms/courses/course_detail.html:154
+#: apps/courses/models.py:999 lms/jinja2/lms/courses/course_detail.html:156
+#: lms/jinja2/lms/courses/course_detail.html:158
 msgid "Is conducted by invited"
 msgstr "Приглашенный спикер"
 
-#: apps/courses/models.py:1005 apps/learning/icalendar.py:256
+#: apps/courses/models.py:1002
+msgid "Invited teacher first name"
+msgstr "Имя приглашенного спикера"
+
+#: apps/courses/models.py:1007
+#| msgid "Invalid course teacher %s"
+msgid "Invited teacher last name"
+msgstr "Фамилия приглашенного спикера"
+
+#: apps/courses/models.py:1015 apps/learning/icalendar.py:256
 msgid "Classes"
 msgstr "Занятия"
 
-#: apps/courses/models.py:1020
+#: apps/courses/models.py:1030
 msgid "Class should end after it started"
 msgstr "Конец занятия должен быть позже начала"
 
-#: apps/courses/models.py:1121
+#: apps/courses/models.py:1131
 msgid "slides"
 msgstr "слайды"
 
-#: apps/courses/models.py:1125
+#: apps/courses/models.py:1135
 msgid "video"
 msgstr "видео"
 
-#: apps/courses/models.py:1133
+#: apps/courses/models.py:1143
 msgid "files"
 msgstr "файлы"
 
-#: apps/courses/models.py:1137
+#: apps/courses/models.py:1147
 msgid "other"
 msgstr "другое"
 
-#: apps/courses/models.py:1140
+#: apps/courses/models.py:1150
 msgid "recording"
 msgstr "запись"
 
-#: apps/courses/models.py:1178
+#: apps/courses/models.py:1188
 msgid "Class attachment"
 msgstr "Приложение к занятию"
 
-#: apps/courses/models.py:1179
+#: apps/courses/models.py:1189
 msgid "Class attachments"
 msgstr "Приложения к занятию"
 
-#: apps/courses/models.py:1226 apps/learning/study/forms.py:62
-#: lms/jinja2/lms/courses/course_detail.html:180
+#: apps/courses/models.py:1236 apps/learning/study/forms.py:62
+#: lms/jinja2/lms/courses/course_detail.html:186
 #: lms/jinja2/lms/study/assignment_list.html:28
 #: lms/jinja2/lms/study/assignment_list.html:90
 #: lms/jinja2/lms/study/student_assignment_detail.html:144
@@ -1360,48 +1369,48 @@ msgstr "Приложения к занятию"
 msgid "Assignment Format"
 msgstr "Формат задания"
 
-#: apps/courses/models.py:1230
+#: apps/courses/models.py:1240
 msgid "Assignment|name"
 msgstr "Название"
 
-#: apps/courses/models.py:1232
+#: apps/courses/models.py:1242
 msgid "Assignment|text"
 msgstr "Текст"
 
-#: apps/courses/models.py:1252
+#: apps/courses/models.py:1262
 msgid "Assignee mode"
 msgstr "Режим назначения"
 
-#: apps/courses/models.py:1253
+#: apps/courses/models.py:1263
 msgid "Automatic assignment mode of a responsible teacher"
 msgstr "Режим автоматического назначения ответственного преподавателя"
 
-#: apps/courses/models.py:1258
+#: apps/courses/models.py:1268
 msgid "Assignment Assignees"
 msgstr "Ответственные за задание"
 
-#: apps/courses/models.py:1259
+#: apps/courses/models.py:1269
 msgid "Has lower priority than student group assignees"
 msgstr "Приоритет ниже, чем у ответственных за студенческие группы"
 
-#: apps/courses/models.py:1282 apps/learning/icalendar.py:257
+#: apps/courses/models.py:1292 apps/learning/icalendar.py:257
 #: lms/jinja2/lms/user_profile/_tab_assignments.html:3
 msgid "Assignments"
 msgstr "Задания"
 
-#: apps/courses/models.py:1291
+#: apps/courses/models.py:1301
 msgid "Course modification is not allowed"
 msgstr "Изменение курса запрещено"
 
-#: apps/courses/models.py:1293
+#: apps/courses/models.py:1303
 msgid "Passing score should be less than (or equal to) maximum one"
 msgstr " Проходной балл должен быть меньше или равен максимальному баллу"
 
-#: apps/courses/models.py:1396
+#: apps/courses/models.py:1406
 msgid "Assignment attachment"
 msgstr "Приложение к заданию"
 
-#: apps/courses/models.py:1397
+#: apps/courses/models.py:1407
 msgid "Assignment attachments"
 msgstr "Приложения к заданиям"
 
@@ -2693,7 +2702,7 @@ msgstr "Новости"
 #: apps/learning/tests/test_enrollment.py:135
 #: apps/learning/tests/test_enrollment.py:162
 #: apps/learning/tests/test_enrollment.py:171
-#: lms/jinja2/lms/courses/course_detail.html:266
+#: lms/jinja2/lms/courses/course_detail.html:272
 msgid "Learner places available"
 msgstr "Осталось мест сдавать"
 
@@ -2703,7 +2712,7 @@ msgstr "Осталось мест сдавать"
 #: apps/learning/tests/test_enrollment.py:136
 #: apps/learning/tests/test_enrollment.py:163
 #: apps/learning/tests/test_enrollment.py:172
-#: lms/jinja2/lms/courses/course_detail.html:269
+#: lms/jinja2/lms/courses/course_detail.html:275
 msgid "Listener places available"
 msgstr "Осталось мест слушать"
 
@@ -4010,11 +4019,11 @@ msgstr "Видео"
 msgid "Other materials"
 msgstr "Другие материалы"
 
-#: lms/jinja2/lms/courses/course_class_form.html:68
+#: lms/jinja2/lms/courses/course_class_form.html:74
 msgid "Visibility Settings"
 msgstr "Настройки отображения"
 
-#: lms/jinja2/lms/courses/course_class_form.html:81
+#: lms/jinja2/lms/courses/course_class_form.html:87
 msgid "Save and add"
 msgstr "Сохранить и добавить ещё"
 
@@ -4049,53 +4058,53 @@ msgid "translation"
 msgstr "трансляция"
 
 #: lms/jinja2/lms/courses/course_detail.html:147
-#: lms/jinja2/lms/courses/course_detail.html:162
+#: lms/jinja2/lms/courses/course_detail.html:168
 msgid "No"
 msgstr "Нет"
 
-#: lms/jinja2/lms/courses/course_detail.html:181
+#: lms/jinja2/lms/courses/course_detail.html:187
 msgid "Files"
 msgstr "Файлы"
 
-#: lms/jinja2/lms/courses/course_detail.html:238
+#: lms/jinja2/lms/courses/course_detail.html:244
 msgid "delete"
 msgstr "удалить"
 
-#: lms/jinja2/lms/courses/course_detail.html:239
+#: lms/jinja2/lms/courses/course_detail.html:245
 msgid "edit"
 msgstr "редактировать"
 
-#: lms/jinja2/lms/courses/course_detail.html:254
+#: lms/jinja2/lms/courses/course_detail.html:260
 msgid "Publish course"
 msgstr "Опубликовать курс"
 
-#: lms/jinja2/lms/courses/course_detail.html:259
+#: lms/jinja2/lms/courses/course_detail.html:265
 #: lms/jinja2/lms/enrollment/invitation_courses.html:31
 msgid "Unenroll from the course"
 msgstr "Отписаться от курса"
 
-#: lms/jinja2/lms/courses/course_detail.html:264
+#: lms/jinja2/lms/courses/course_detail.html:270
 msgid "Enroll in the course"
 msgstr "Записаться на курс"
 
-#: lms/jinja2/lms/courses/course_detail.html:274
+#: lms/jinja2/lms/courses/course_detail.html:280
 msgid "Add assignment"
 msgstr "Добавить задание"
 
-#: lms/jinja2/lms/courses/course_detail.html:277
+#: lms/jinja2/lms/courses/course_detail.html:283
 msgid "Edit description"
 msgstr "Редактировать описание"
 
-#: lms/jinja2/lms/courses/course_detail.html:280
+#: lms/jinja2/lms/courses/course_detail.html:286
 #: lms/jinja2/lms/teaching/course_list.html:50
 msgid "Add news"
 msgstr "Добавить новость"
 
-#: lms/jinja2/lms/courses/course_detail.html:283
+#: lms/jinja2/lms/courses/course_detail.html:289
 msgid "Add class"
 msgstr "Добавить занятие"
 
-#: lms/jinja2/lms/courses/course_detail.html:291
+#: lms/jinja2/lms/courses/course_detail.html:297
 msgid "Start survey"
 msgstr "Оставить отзыв о курсе"
 
