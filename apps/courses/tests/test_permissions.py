@@ -55,7 +55,7 @@ def test_permission_view_course():
     """
     permission_name = ViewCourse.name
     teacher, spectator = TeacherFactory.create_batch(2)
-    course = CourseFactory(teachers=[teacher])
+    course = CourseFactory(teachers=[teacher], is_draft=True)
     curator = CuratorFactory()
     CourseTeacherFactory(course=course, teacher=spectator,
                          roles=CourseTeacher.roles.spectator)
@@ -68,6 +68,7 @@ def test_permission_view_course():
     assert spectator.has_perm(permission_name, course)
     assert not user.has_perm(permission_name, course)
     assert not student.has_perm(permission_name, course)
+    assert student.has_perm(permission_name)
     assert not invited_student.has_perm(permission_name, course)
     assert teacher_other.has_perm(permission_name, course)
 
