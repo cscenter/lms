@@ -279,6 +279,14 @@ def test_enroll_in_course(inactive_status, settings):
     CourseBranch(course=course, branch=branch_spb).save()
     course.refresh_from_db()
     assert student_spb.has_perm(EnrollInCourse.name, perm_obj)
+    course.is_draft = True
+    course.save()
+    assert not student_spb.has_perm(EnrollInCourse.name, perm_obj)
+    student_curator = StudentFactory()
+    student_curator.is_staff = True
+    student_curator.is_superuser = True
+    student_curator.save()
+    assert student_curator.has_perm(EnrollInCourse.name, perm_obj)
 
 
 @pytest.mark.django_db

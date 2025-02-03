@@ -31,7 +31,9 @@ def test_create_reference(client, assert_redirect):
     client.login(curator)
 
     semesters = [SemesterFactory.create_current()]
+    semesters.append(SemesterFactory.create_prev(semesters[0]))
     semesters.append(SemesterFactory.create_next(semesters[0]))
+    semesters.sort()
     student_profile = StudentProfileFactory(user__date_joined=datetime(day=1, month=9, year=semesters[0].year))
     form_url = reverse('student_reference_add',
                        subdomain=settings.LMS_SUBDOMAIN,
@@ -120,7 +122,9 @@ def test_reference_detail(client, assert_login_redirect, settings):
     # add 2 enrollments from 1 course reading exactly
     meta_course = MetaCourseFactory.create()
     semesters = [SemesterFactory.create_current()]
+    semesters.append(SemesterFactory.create_prev(semesters[0]))
     semesters.append(SemesterFactory.create_next(semesters[0]))
+    semesters.sort()
     student = StudentFactory(date_joined=datetime(day=1, month=9, year=semesters[0].year))
     enrollments = []
     student_profile = student.get_student_profile(settings.SITE_ID)
@@ -156,7 +160,9 @@ def test_reference_detail(client, assert_login_redirect, settings):
 def test_certificate_of_participant_hidden_course(client):
     curator = CuratorFactory()
     semesters = [SemesterFactory.create_current()]
+    semesters.append(SemesterFactory.create_prev(semesters[0]))
     semesters.append(SemesterFactory.create_next(semesters[0]))
+    semesters.sort()
     student = StudentFactory(date_joined=datetime(day=1, month=9, year=semesters[0].year))
     course = CourseFactory(semester=semesters[0])
     student_profile = student.get_student_profile(settings.SITE_ID)

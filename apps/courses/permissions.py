@@ -26,8 +26,8 @@ class ViewCourse(Permission):
     @staticmethod
     @predicate
     def rule(user, course: Course):
-        if user.roles.issubset(student_permission_roles) and course.is_draft:
-            return False
+        if course and course.is_draft:
+            return user.has_permission_to_drafts
         return True
 
 @add_perm
@@ -37,8 +37,8 @@ class ViewCourseAsInvited(Permission):
     @staticmethod
     @predicate
     def rule(user, course: Course):
-        if user.roles.issubset(student_permission_roles) and course.is_draft:
-            return False
+        if course.is_draft:
+            return user.has_permission_to_drafts
         student_profile = user.get_student_profile()
         if student_profile is None:
             return False

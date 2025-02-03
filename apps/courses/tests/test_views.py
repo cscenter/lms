@@ -44,7 +44,8 @@ def get_timezone_gmt_offset(tz: pytz.timezone) -> Optional[datetime.timedelta]:
 def test_teacher_detail_view(client, assert_login_redirect):
     user = UserFactory()
     assert_login_redirect(user.teacher_profile_url())
-    client.login(user)
+    student = StudentFactory()
+    client.login(student)
     response = client.get(user.teacher_profile_url())
     assert response.status_code == 404
     user.add_group(Roles.TEACHER)
@@ -52,6 +53,29 @@ def test_teacher_detail_view(client, assert_login_redirect):
     response = client.get(user.teacher_profile_url())
     assert response.status_code == 200
     assert response.context_data['teacher'] == user
+    assert not response.context_data['courses']
+    course = CourseFactory()
+    response = client.get(user.teacher_profile_url())
+    assert response.status_code == 200
+    assert response.context_data['teacher'] == user
+    assert not response.context_data['courses']
+    course = CourseFactory(teachers=[user])
+    response = client.get(user.teacher_profile_url())
+    assert response.status_code == 200
+    assert response.context_data['teacher'] == user
+    assert list(response.context_data['courses']) == [course]
+    course.is_draft = True
+    course.save()
+    response = client.get(user.teacher_profile_url())
+    assert response.status_code == 200
+    assert response.context_data['teacher'] == user
+    assert not response.context_data['courses']
+    curator = CuratorFactory()
+    client.login(curator)
+    response = client.get(user.teacher_profile_url())
+    assert response.status_code == 200
+    assert response.context_data['teacher'] == user
+    assert list(response.context_data['courses']) == [course]
 
 
 @pytest.mark.django_db
