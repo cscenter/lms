@@ -238,6 +238,7 @@ def test_user_detail_view(client, assert_login_redirect):
     assert response.status_code == 200
     assert response.context_data['profile_user'] == student
     assert not response.context_data['can_edit_profile']
+    assert response.context_data['profile_user'].tshirt_size == student.tshirt_size
 
 
 @pytest.mark.django_db
@@ -526,13 +527,15 @@ def test_view_user_update_student_cant_change_yandex_login(client, assert_redire
 
 
 @pytest.mark.django_db
-def test_view_user_update_curator_can_change_yandex_login(client, assert_redirect):
+def test_view_user_update_curator_cant_change_yandex_login(client, assert_redirect):
     curator = CuratorFactory()
     student = StudentFactory()
     url = student.get_update_profile_url()
     client.login(curator)
     response = client.get(url)
-    assert 'Сначала студент должен привязать аккаунт к Яндекс.ID' in response.content.decode('utf-8')
+    form = response.context_data['form']
+    assert 'yandex_login' not in form.rendered_fields
+    assert 'yandex_login' not in form.helper.layout.fields[0].fields
 
     yandex_login = 'YandexLogin'
     form_data = {
@@ -555,15 +558,31 @@ def test_view_user_update_curator_can_change_yandex_login(client, assert_redirec
     student.refresh_from_db()
     assert not student.yandex_login
 
-    yandex_user_data = YandexUserData(
-        user=student,
-        login=yandex_login,
-        uid='1337'
-    )
-    yandex_user_data.save()
+@pytest.mark.django_db
+def test_view_user_update_student_cant_change_birth_date(client, assert_redirect):
+    student = StudentFactory()
+    client.login(student)
+    url = student.get_update_profile_url()
+    response = client.get(url)
+    form = response.context_data['form']
+    assert 'yandex_login' not in form.rendered_fields
+    assert 'yandex_login' not in form.helper.layout.fields[0].fields
+    birth_date = '2025-01-21'
+    form_data = {
+        'birth_date': birth_date,
+        'phone': '',
+        'workplace': '',
+        'bio': '',
+        'time_zone': 'Europe/Moscow',
+        'telegram_username': '',
+        'github_login': 'testing',
+        'stepic_id': '',
+        'codeforces_login': '',
+        'private_contacts': '',
+        'index_redirect': '',
+        'save': 'Сохранить'
+    }
     response = client.post(url, form_data)
     assert_redirect(response, student.get_absolute_url())
     student.refresh_from_db()
-    yandex_user_data.refresh_from_db()
-    assert student.yandex_login == yandex_login
-    assert yandex_user_data.login == yandex_login
+    assert not student.birth_date
