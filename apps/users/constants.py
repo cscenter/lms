@@ -57,3 +57,14 @@ class SHADCourseGradeTypes(DjangoChoices):
     EXCELLENT = C('excellent', _("Excellent"))
 
     satisfactory_grades = {CREDIT.value, GOOD.value, EXCELLENT.value}
+
+
+class TShirtSizeTypes(DjangoChoices):
+    XXS = C('XXS')
+    XS = C('XS')
+    S = C('S')
+    M = C('M')
+    L = C('L')
+    XL = C('XL')
+    XXL = C('XXL')
+    XXXL = C('XXXL')
