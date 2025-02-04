@@ -564,9 +564,33 @@ def test_view_user_update_student_cant_change_birth_date(client, assert_redirect
     client.login(student)
     url = student.get_update_profile_url()
     response = client.get(url)
-    form = response.context_data['form']
-    assert 'yandex_login' not in form.rendered_fields
-    assert 'yandex_login' not in form.helper.layout.fields[0].fields
+    birth_date = '2025-01-21'
+    form_data = {
+        'birth_date': birth_date,
+        'phone': '',
+        'workplace': '',
+        'bio': '',
+        'time_zone': 'Europe/Moscow',
+        'telegram_username': '',
+        'github_login': 'testing',
+        'stepic_id': '',
+        'codeforces_login': '',
+        'private_contacts': '',
+        'index_redirect': '',
+        'save': 'Сохранить'
+    }
+    response = client.post(url, form_data)
+    assert_redirect(response, student.get_absolute_url())
+    student.refresh_from_db()
+    assert not student.birth_date
+
+@pytest.mark.django_db
+def test_view_user_update_curator_cant_change_birth_date(client, assert_redirect):
+    student = StudentFactory()
+    curator = CuratorFactory()
+    client.login(curator)
+    url = student.get_update_profile_url()
+    response = client.get(url)
     birth_date = '2025-01-21'
     form_data = {
         'birth_date': birth_date,
