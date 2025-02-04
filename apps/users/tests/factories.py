@@ -37,7 +37,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     branch = None
     time_zone = factory.LazyAttribute(lambda user: user.branch.time_zone if user.branch is not None else settings.DEFAULT_TIMEZONE)
     is_notification_allowed = True
-    tshirt_size = factory.Iterator([TShirtSizeTypes.XXS, TShirtSizeTypes.XS, TShirtSizeTypes.S, TShirtSizeTypes.M, TShirtSizeTypes.L, TShirtSizeTypes.XL, TShirtSizeTypes.XXL, TShirtSizeTypes.XXXL])
+    tshirt_size = factory.Iterator(TShirtSizeTypes.labels.values())
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
