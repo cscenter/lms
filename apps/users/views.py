@@ -18,6 +18,7 @@ from django.db.models import Count, Prefetch, Q
 from django.http import HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
@@ -200,6 +201,11 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             if student_profiles:
                 main_profile = student_profiles[0]  # because of profile ordering
                 context['academic_disciplines'] = ", ".join(d.name for d in main_profile.academic_disciplines.all())
+                for student_profile in student_profiles:
+                    if not student_profile.type is StudentTypes.INVITED:
+                        context['student_actual_status'] = student_profile.status if student_profile.status else _("Studying")
+                        context['student_actual_academic_discipline'] = student_profile.academic_discipline
+                        break
         return context
 
 
