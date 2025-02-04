@@ -43,8 +43,7 @@ class UserProfileForm(forms.ModelForm):
         self.fields['index_redirect'].choices = [option_empty] + user_options
         self.helper = FormHelper()
         show_fields = list(UserProfileForm.Meta.fields)
-        if not self.editor.is_curator:
-            self.fields['birth_date'].disabled = True
+        self.fields['birth_date'].disabled = True
         if is_club_site():
             show_fields.extend(['first_name', 'last_name', 'patronymic'])
         else:
