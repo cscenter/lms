@@ -184,6 +184,7 @@ class ProgressReport:
                 "meta_course__name",
                 "meta_course__slug",
                 "grading_type",
+                "duration",
                 "main_branch_id",
                 "main_branch__site_id",
             )

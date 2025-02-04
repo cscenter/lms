@@ -22,10 +22,17 @@ class InvitationLoginForm(LoginForm):
 
 
 class InvitationRegistrationForm(RegistrationFormUniqueEmail):
-    captcha = ReCaptchaField()
     not_required = [
         "patronymic"
     ]
+    offer_confirmation = forms.BooleanField(
+            label='Я подтверждаю свое ознакомление и согласие с <a '
+                  'href="https://yandex.ru/legal/dataschool_offer/">Офертой на оказание услуг дополнительного '
+                  'профессионального образования для физических лиц </a>'
+                  'и с <a href="https://yandex.ru/legal/dataschool_termsofuse/">'
+                  'Условиями использования сервиса «LMS Школы анализа данных»</a>',
+        )
+    captcha = ReCaptchaField()
     class Meta:
         model = User
         fields = ("email", "branch", "last_name", "first_name", "patronymic", "gender", "telegram_username", "birth_date")

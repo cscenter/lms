@@ -32,6 +32,8 @@ class TeacherDetailView(LoginRequiredMixin, DetailView):
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index'))
+        if not self.request.user.has_permission_to_drafts:
+            courses = courses.filter(is_draft=False)
         context['courses'] = courses
         return context
 

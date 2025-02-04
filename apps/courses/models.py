@@ -824,6 +824,9 @@ class CourseReview(TimeStampedModel):
         Course,
         related_name="reviews",
         on_delete=models.CASCADE)
+    is_visible = models.BooleanField(
+        _("CourseReview|is_visible"),
+        default=True)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author"),
@@ -995,6 +998,14 @@ class CourseClass(TimezoneAwareMixin, TimeStampedModel):
     is_conducted_by_invited = models.BooleanField(
         verbose_name=_("Is conducted by invited"),
         default=False)
+    invited_teacher_first_name = models.CharField(
+        verbose_name=_("Invited teacher first name"),
+        max_length=100,
+        blank=True)
+    invited_teacher_last_name = models.CharField(
+        verbose_name=_("Invited teacher last name"),
+        max_length=100,
+        blank=True)
 
     class Meta:
         ordering = ["-date", "course", "-starts_at"]

@@ -45,7 +45,7 @@ from learning.utils import is_negative_grade
 from lms.utils import PublicRoute
 from notifications.base_models import EmailAddressSuspension
 from study_programs.models import StudyProgram, AcademicDiscipline
-from users.constants import GenderTypes, TShirtSizeTypes
+from users.constants import ConsentTypes, GenderTypes, TShirtSizeTypes
 from users.constants import Roles
 from users.constants import Roles as UserRoles
 from users.constants import SHADCourseGradeTypes
@@ -414,12 +414,6 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
     living_place = models.CharField(
         _("Living Place"), max_length=255, null=True, blank=True
     )
-
-    gave_permission_at = models.DateTimeField(
-        _("Permission time"),
-        null=True,
-        blank=True
-    )
     badge_number = models.CharField(
         _("Badge number"), max_length=255, null=True, blank=True
     )
@@ -629,6 +623,10 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
     @cached_property
     def roles(self) -> set:
         return {g.role for g in self.site_groups}
+
+    @cached_property
+    def has_permission_to_drafts(self) -> bool:
+        return self.is_teacher or self.is_curator
 
     @instance_memoize
     def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
@@ -1206,3 +1204,17 @@ class CertificateOfParticipation(TimeStampedModel):
 
     def is_learning_completed(self) -> bool:
         return self.student_profile.status in (StudentStatuses.GRADUATE, StudentStatuses.EXPELLED)
+
+class UserConsent(TimeStampedModel):
+    user = models.ForeignKey(User,
+                             verbose_name=_("User"),
+                             on_delete=models.CASCADE,
+                             related_name="consents")
+    type = models.CharField(verbose_name=_("Consent type"),
+                            max_length=100,
+                            choices=ConsentTypes.choices)
+
+    class Meta:
+        verbose_name = _("User Consent")
+        verbose_name_plural = _("User Consents")
+        unique_together = ('user', 'type')

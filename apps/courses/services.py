@@ -66,7 +66,8 @@ class CourseService:
     @staticmethod
     def get_reviews(course):
         reviews = (CourseReview.objects
-                   .filter(course__meta_course_id=course.meta_course_id)
+                   .filter(course__meta_course_id=course.meta_course_id,
+                           is_visible=True)
                    .select_related('course', 'course__semester',
                                    'course__main_branch')
                    .only('pk', 'modified', 'text',

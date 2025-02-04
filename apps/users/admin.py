@@ -20,7 +20,7 @@ from users.forms import UserChangeForm, UserCreationForm
 from .import_export import UserRecordResource
 from .models import (
     CertificateOfParticipation, OnlineCourseRecord, SHADCourseRecord, StudentProfile,
-    StudentStatusLog, StudentTypes, User, UserGroup, YandexUserData, StudentFieldLog, StudentAcademicDisciplineLog,
+    StudentStatusLog, StudentTypes, User, UserConsent, UserGroup, YandexUserData, StudentFieldLog, StudentAcademicDisciplineLog,
     PartnerTag
 )
 from .services import assign_role, update_student_status, update_student_academic_discipline
@@ -101,6 +101,14 @@ class YandexUserDataInlineAdmin(admin.StackedInline):
     def has_add_permission(self, request, obj=None):
         return False
 
+class UserConsentInlineAdmin(admin.TabularInline):
+    model = UserConsent
+    extra = 0
+    readonly_fields = ['type', 'created']
+    can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 class UserAdmin(_UserAdmin):
     add_form = UserCreationForm
@@ -114,9 +122,9 @@ class UserAdmin(_UserAdmin):
     form = UserChangeForm
     change_form_template = 'admin/user_change_form.html'
     ordering = ['last_name', 'first_name']
-    inlines = [YandexUserDataInlineAdmin, OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
+    inlines = [UserConsentInlineAdmin, YandexUserDataInlineAdmin, OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
                UserGroupInlineAdmin]
-    readonly_fields = ['last_login', 'date_joined', 'gave_permission_at']
+    readonly_fields = ['last_login', 'date_joined']
     list_display = ['id', 'username', 'email', 'first_name', 'last_name',
                     'is_staff']
     list_filter = ['is_active', 'branch', 'group__site', 'group__role',
@@ -142,7 +150,7 @@ class UserAdmin(_UserAdmin):
                                              'yandex_login', 'stepic_id',
                                              'github_login', 'anytask_url',
                                              'codeforces_login']}),
-        (_('Important dates'), {'fields': ['last_login', 'date_joined', 'gave_permission_at']})]
+        (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
 
     def get_formsets_with_inlines(self, request, obj=None):
         """

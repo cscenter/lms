@@ -204,7 +204,7 @@ class EnrollmentAdmin(BaseModelAdmin):
                                             new_grade=new_grade,
                                             source=EnrollmentGradeUpdateSource.FORM_ADMIN_TYPE_TRIGGER)
                 
-            if "grade" in form.changed_data:
+            if "grade" in form.changed_data and "type" not in form.changed_data:
                 # there is no concurrency check
                 update_enrollment_grade(obj,
                                         editor=request.user,

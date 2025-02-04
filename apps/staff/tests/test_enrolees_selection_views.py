@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import pytest
 from core.tests.factories import BranchFactory
 from core.urls import reverse
+from courses.constants import SemesterTypes
 from courses.tests.factories import CourseFactory, SemesterFactory
 from learning.settings import GradeTypes, StudentStatuses
 from learning.tests.factories import EnrollmentFactory
@@ -15,7 +16,9 @@ from users.tests.factories import CuratorFactory, PartnerTagFactory, StudentFact
 def test_enrolees_selection_views_security(client):
     student = StudentFactory()
     curator = CuratorFactory()
-    course = CourseFactory(semester=SemesterFactory.create_current())
+    semester = SemesterFactory.create_current()
+    SemesterFactory.create_prev(semester)
+    course = CourseFactory(semester=semester)
     urls = (reverse("staff:enrolees_selection_list"), course.get_enrolees_selection_url())
     client.login(student)
     for url in urls:
@@ -31,28 +34,32 @@ def test_enrolees_selection_views_security(client):
 def test_enrolees_selection_list_view(client):
     curator = CuratorFactory()
     current_semester = SemesterFactory.create_current()
+    SemesterFactory.create_prev(current_semester)
     course = CourseFactory(semester=current_semester)
     url = reverse("staff:enrolees_selection_list")
     client.login(curator)
     response = client.get(url)
     assert response.status_code == 200
     html = BeautifulSoup(response.content, "html.parser")
-    next_semester = SemesterFactory.create_next(current_semester)
+    if current_semester.type == SemesterTypes.AUTUMN:
+        other_semester = SemesterFactory.create_next(current_semester)  
+    else:
+        other_semester = SemesterFactory.create_prev(current_semester)
     assert html.find(text=str(current_semester).capitalize()) is not None
-    assert html.find(text=str(next_semester).capitalize()) is not None
+    assert html.find(text=str(other_semester).capitalize()) is not None
     assert html.find(text=course.main_branch.name) is not None
     # enrolees_selection_list.html does not has jinja templates, so there is no ability to get rid of external spaces after the course name
     # Have to use re to find substring as html.find returns the string that exactly match given string
     assert html.find(text=re.compile(str(course.meta_course))) is not None
-    next_course = CourseFactory(semester=next_semester)
+    other_course = CourseFactory(semester=other_semester)
     response = client.get(url)
     html = BeautifulSoup(response.content, "html.parser")
     assert html.find(text=str(current_semester).capitalize()) is not None
-    assert html.find(text=str(next_semester).capitalize()) is not None
+    assert html.find(text=str(other_semester).capitalize()) is not None
     assert html.find(text=course.main_branch.name) is not None
-    assert html.find(text=next_course.main_branch.name) is not None
+    assert html.find(text=other_course.main_branch.name) is not None
     assert html.find(text=re.compile(str(course.meta_course))) is not None
-    assert html.find(text=re.compile(str(next_course.meta_course))) is not None
+    assert html.find(text=re.compile(str(other_course.meta_course))) is not None
     
 @pytest.mark.django_db
 def test_enrolees_selection_csv_view(client):

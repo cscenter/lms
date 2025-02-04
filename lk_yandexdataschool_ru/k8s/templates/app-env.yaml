@@ -50,7 +50,7 @@
       key: HASHIDS_SALT
       name: "{{ backend_service_name }}-backend"
 - name: RECAPTCHA_PUBLIC_KEY
-  value: "6LdV3MgZAAAAADu2lzWRnKxmXzQLQqt-wauX69yA"
+  value: "6LdWE8EqAAAAANNpP13nWnHIlz5yhqg6LfDjIL7q"
 - name: RECAPTCHA_PRIVATE_KEY
   valueFrom:
     secretKeyRef:

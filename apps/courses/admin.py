@@ -9,6 +9,7 @@ from django.forms import BaseInlineFormSet
 from django.utils.translation import gettext_lazy as _
 
 from core.admin import meta
+from core.filters import AdminRelatedDropdownFilter
 from core.models import Branch
 from core.timezone.fields import TimezoneAwareDateTimeField
 from core.timezone.forms import (
@@ -48,11 +49,23 @@ class MetaCourseAdmin(TranslationAdmin, admin.ModelAdmin):
 
 class CourseReviewAdmin(admin.ModelAdmin):
     search_fields = ('course__meta_course__name',)
-    list_display = ('course', 'author')
+    list_display = ('course', 'is_visible', 'short_text')
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
     raw_id_fields = ('author', 'course')
+    list_filter = [
+        ('course__meta_course', AdminRelatedDropdownFilter),
+        ('course__semester', AdminRelatedDropdownFilter)
+    ]
+    
+    def short_text(self, obj):
+        text = obj.text
+        if len(text) > 50:
+            return text[:50] + '...'
+        return text
+
+    short_text.short_description = _("CourseReview|text")
 
 
 class CourseTeacherInline(admin.TabularInline):

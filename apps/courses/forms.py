@@ -204,7 +204,7 @@ class CourseClassForm(forms.ModelForm):
         model = CourseClass
         fields = ['venue', 'type', 'translation_link', 'date', 'starts_at', 'ends_at', 'time_zone', 'name',
                   'description', 'attachments', 'recording_link', 'materials_visibility', 'restricted_to',
-                  'teachers', 'is_conducted_by_invited']
+                  'teachers', 'is_conducted_by_invited', 'invited_teacher_first_name', 'invited_teacher_last_name']
 
     def __init__(self, locale='en', **kwargs):
         course = kwargs.pop('course', None)
@@ -239,6 +239,12 @@ class CourseClassForm(forms.ModelForm):
                     params={'starts_at': semester_start,
                             'ends_at': semester_end})
         return date
+        
+    def clean(self):
+        if not self.cleaned_data.get('is_conducted_by_invited', False):
+            self.cleaned_data['invited_teacher_first_name'] = ''
+            self.cleaned_data['invited_teacher_last_name'] = ''
+        return self.cleaned_data
 
 
 class AssignmentDurationField(forms.DurationField):

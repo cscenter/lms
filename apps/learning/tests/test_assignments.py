@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+import re
 
 import factory
 import pytest
@@ -17,7 +18,7 @@ from core.urls import reverse
 from courses.constants import AssigneeMode, AssignmentFormat
 from courses.models import Assignment, AssignmentAttachment, CourseTeacher
 from courses.tests.factories import (
-    AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, CourseTeacherFactory,
+    AssignmentAttachmentFactory, AssignmentFactory, CourseFactory, CourseNewsFactory, CourseTeacherFactory,
     SemesterFactory
 )
 from learning.models import StudentAssignment
@@ -53,15 +54,23 @@ def test_security_course_detail(client):
     response = client.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
     assert soup.find(text=_("News")) is None
+    CourseNewsFactory(course=co, author=teacher)
+    response = client.get(url)
+    soup = BeautifulSoup(response.content, "html.parser")
+    assert soup.find(text=re.compile(_("News"))) is not None
     # Change student co mark
     enrollment.grade = GradeTypes.EXCELLENT
     enrollment.save()
-    response = client.get(url)
     assert not is_course_failed_by_student(co, student)
+    enrollment.grade = GradeTypes.WITHOUT_GRADE
+    enrollment.save()
+    assert not is_course_failed_by_student(co, student)
+    enrollment.grade = GradeTypes.UNSATISFACTORY
+    enrollment.save()
+    assert is_course_failed_by_student(co, student)
     # Change course offering state to not completed
     co.completed_at = now().date() + datetime.timedelta(days=1)
     co.save()
-    response = client.get(url)
     assert not is_course_failed_by_student(co, student)
 
 

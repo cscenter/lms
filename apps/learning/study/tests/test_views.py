@@ -469,6 +469,13 @@ def test_view_student_courses_list(client, lms_resolver, assert_login_redirect):
     assert len(response.context_data['ongoing_rest']) == 2
     assert set(response.context_data['ongoing_rest']) == {co_nsk, co_open}
     assert len(response.context_data['archive']) == 0
+    co_open.is_draft = True
+    co_open.save()
+    response = client.get(url)
+    assert len(response.context_data['ongoing_enrolled']) == 0
+    assert len(response.context_data['ongoing_rest']) == 1
+    assert set(response.context_data['ongoing_rest']) == {co_nsk}
+    assert len(response.context_data['archive']) == 0
 
 
 @pytest.mark.django_db

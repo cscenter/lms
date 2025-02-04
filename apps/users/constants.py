@@ -58,6 +58,14 @@ class SHADCourseGradeTypes(DjangoChoices):
 
     satisfactory_grades = {CREDIT.value, GOOD.value, EXCELLENT.value}
 
+class ConsentTypes(DjangoChoices):
+    LMS = C('lms', _("Yandex School of Data Analysis LMS terms of use"))
+    OFFER = C('offer', _("Offer for the provision of additional professional education services"))
+    TICKETS = C('tickets', _("Buying tickets, making reservations, obtaining permits to visit the countries of arrival"))
+    
+    regular_student_consents = {LMS.value, OFFER.value, TICKETS.value}
+    invited_student_consents = {LMS.value, OFFER.value}
+
 
 class TShirtSizeTypes(DjangoChoices):
     XXS = C('XXS')

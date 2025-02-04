@@ -21,7 +21,7 @@ from core.api.fields import CharSeparatedField, ScoreField
 from core.http import AuthenticatedAPIRequest
 from courses.models import Assignment, Course
 from courses.permissions import CreateAssignment
-from courses.selectors import course_personal_assignments, get_course_teachers
+from courses.selectors import course_active_personal_assignments, course_personal_assignments, get_course_teachers
 from learning.api.serializers import (
     BaseEnrollmentSerializer, BaseStudentAssignmentSerializer,
     CourseAssignmentSerializer, CourseNewsNotificationSerializer, MyCourseSerializer,
@@ -118,6 +118,7 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
     permission_classes = [CreateAssignment]
     renderer_classes = (CamelCaseJSONRenderer, CamelCaseBrowsableAPIRenderer)
     course: Course
+    personal_assignments_function = staticmethod(course_personal_assignments)
 
     class FilterSerializer(serializers.Serializer):
         assignments = CharSeparatedField(label='test', allow_blank=True, required=False)
@@ -155,10 +156,13 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
     def get(self, request: AuthenticatedAPIRequest, **kwargs: Any):
         filters_serializer = self.FilterSerializer(data=request.query_params)
         filters_serializer.is_valid(raise_exception=True)
-        personal_assignments = course_personal_assignments(course=self.course,
+        personal_assignments = self.personal_assignments_function(course=self.course,
                                                            filters=filters_serializer.validated_data)
         data = self.OutputSerializer(personal_assignments, many=True).data
         return Response(data)
+
+class ActivePersonalAssignmentList(PersonalAssignmentList):
+    personal_assignments_function = staticmethod(course_active_personal_assignments)
 
 
 class StudentAssignmentUpdate(UpdateAPIView):
