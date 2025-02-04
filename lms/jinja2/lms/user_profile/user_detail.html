@@ -61,7 +61,7 @@
           {% endif %}
         {% endif %}
         {% if student_actual_academic_discipline %}
-          <h5>{% trans %}Направление обучения:{% endtrans %} {{ student_actual_academic_discipline|default_if_none("") }}</h5>
+          <h5>{% trans %}Field of study{% endtrans %}: {{ student_actual_academic_discipline|default_if_none("") }}</h5>
         {% endif %}
       {% endif %}
       
