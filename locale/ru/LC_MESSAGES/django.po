@@ -4377,18 +4377,6 @@ msgstr "весенний"
 #~ msgstr ""
 #~ "Основной и дублирующий пользователи не должны быть одним объектом: {major}"
 
-#~ msgid ""
-#~ "Major and minor objects must not be the same: {major} with type "
-#~ "{type(major)}"
-#~ msgstr ""
-#~ "Основной и дублирующий объекты не должны быть одним объектом: {major} типа "
-#~ "{type(major)}"
-
-#, python-brace-format
-#~ msgid "Major and minor Users must not be the same object: {major}"
-#~ msgstr ""
-#~ "Основной и дублирующий пользователи не должны быть одним объектом: {major}"
-
 #~ msgid "LECTIONS ONLY type can be used with WITHOUT GRADE grade only"
 #~ msgstr ""
 #~ "Тип \"Только слушать\" может быть использован только с оценкой \"Не "
