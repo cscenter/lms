@@ -206,6 +206,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
                 if actual_student_profile:
                     context['student_actual_status'] = actual_student_profile.status if actual_student_profile.status else _("Studying")
                     context['student_actual_academic_discipline'] = actual_student_profile.academic_discipline
+                    context['student_actual_year_of_curriculum'] = actual_student_profile.year_of_curriculum
         return context
 
 

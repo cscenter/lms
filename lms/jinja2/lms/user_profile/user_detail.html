@@ -61,7 +61,10 @@
           {% endif %}
         {% endif %}
         {% if student_actual_academic_discipline %}
-          <h5>{% trans %}Field of study{% endtrans %}: {{ student_actual_academic_discipline|default_if_none("") }}</h5>
+          <h5 style="margin-top: 20px" >{% trans %}Field of study{% endtrans %}: {{ student_actual_academic_discipline }}</h5>
+        {% endif %}
+        {% if student_actual_year_of_curriculum %}
+          <h5>{% trans %}Curriculum year{% endtrans %}: {{ student_actual_year_of_curriculum }}</h5>
         {% endif %}
       {% endif %}
       
