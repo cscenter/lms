@@ -44,6 +44,31 @@
           </form>
         {% endif %}
       </h2>
+      {% if can_view_student_profiles %}
+        {% if student_actual_status %}
+          {% if student_actual_status == StudentStatuses.ACADEMIC_LEAVE or student_actual_status == StudentStatuses.ACADEMIC_LEAVE_SECOND %}
+            <h5><span style="background-color: #fffeca; color: #856400; border-radius: 5px; padding: 5px">{{ StudentStatuses.values[student_actual_status] }}</span></h5>
+          {% elif student_actual_status == StudentStatuses.WILL_GRADUATE %}
+            <h5><span style="background-color: #9fecff; color: #04596f; border-radius: 5px; padding: 5px">{{ StudentStatuses.values[student_actual_status] }}</span></h5>
+          {% elif student_actual_status == StudentStatuses.GRADUATE %}
+            <h5><span style="background-color: #98b6fc; color: #001ea2; border-radius: 5px; padding: 5px">{{ StudentStatuses.values[student_actual_status] }}</span></h5>
+          {% elif student_actual_status == StudentStatuses.EXPELLED %}
+            <h5><span style="background-color: #ffc3bb; color: #941100; border-radius: 5px; padding: 5px">{{ StudentStatuses.values[student_actual_status] }}</span></h5>
+          {% elif student_actual_status in StudentStatuses.values%}
+            <h5><span style="background-color: #8be4b8; color: #005a2d; border-radius: 5px; padding: 5px">{{ StudentStatuses.values[student_actual_status] }}</span></h5>
+          {% else %}
+            <h5><span style="background-color: #8be4b8; color: #005a2d; border-radius: 5px; padding: 5px">{{ student_actual_status }}</span></h5>
+          {% endif %}
+        {% endif %}
+        {% if student_actual_academic_discipline %}
+          <h5 style="margin-top: 20px" >{% trans %}Field of study{% endtrans %}: {{ student_actual_academic_discipline }}</h5>
+        {% endif %}
+        {% if student_actual_year_of_curriculum %}
+          <h5>{% trans %}Curriculum year{% endtrans %}: {{ student_actual_year_of_curriculum }}</h5>
+        {% endif %}
+      {% endif %}
+      
+      
       {% if graduate_profile %}
         <div class="mb-15">
           С сентября {{ graduate_profile.student_profile.year_of_admission }} года по июнь {{ graduate_profile.graduation_year }} года<br>

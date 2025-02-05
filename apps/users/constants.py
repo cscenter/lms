@@ -65,3 +65,14 @@ class ConsentTypes(DjangoChoices):
     
     regular_student_consents = {LMS.value, OFFER.value, TICKETS.value}
     invited_student_consents = {LMS.value, OFFER.value}
+
+
+class TShirtSizeTypes(DjangoChoices):
+    XXS = C('XXS')
+    XS = C('XS')
+    S = C('S')
+    M = C('M')
+    L = C('L')
+    XL = C('XL')
+    XXL = C('XXL')
+    XXXL = C('XXXL')

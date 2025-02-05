@@ -40,7 +40,7 @@ jobs:
           driver-opts: network=host
 
       - name: Docker registry cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-docker
         with:
           path: /tmp/.docker-registry
@@ -61,7 +61,7 @@ jobs:
           echo "::set-output name=PYTHON_IMAGE::$(docker inspect docker.io/library/${{ env.PYTHON_IMAGE }} | jq -r '.[0].RepoDigests[0]' | cut -d'@' -f2)"
 
       - name: Production dependencies cache | header image
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-django-cache
           key: ${{ runner.os }}-django-buildx-${{ hashFiles('**/Pipfile.lock')  }}-${{ steps.digests.outputs.PYTHON_IMAGE }}
@@ -169,7 +169,7 @@ jobs:
 
     steps:
       - name: Restore docker registry cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: cache-docker
         with:
           path: /tmp/.docker-registry

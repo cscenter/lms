@@ -45,7 +45,7 @@ from learning.utils import is_negative_grade
 from lms.utils import PublicRoute
 from notifications.base_models import EmailAddressSuspension
 from study_programs.models import StudyProgram, AcademicDiscipline
-from users.constants import ConsentTypes, GenderTypes
+from users.constants import ConsentTypes, GenderTypes, TShirtSizeTypes
 from users.constants import Roles
 from users.constants import Roles as UserRoles
 from users.constants import SHADCourseGradeTypes
@@ -417,6 +417,9 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
     badge_number = models.CharField(
         _("Badge number"), max_length=255, null=True, blank=True
     )
+
+    tshirt_size = models.CharField(_("T-Shirt size"), max_length=4,
+                              choices=TShirtSizeTypes.choices, null=True, blank=True)
 
     objects = CustomUserManager()
 

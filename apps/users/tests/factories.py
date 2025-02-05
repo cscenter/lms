@@ -4,7 +4,7 @@ from django.conf import settings
 
 from core.tests.factories import BranchFactory
 from learning.settings import GradeTypes
-from users.constants import GenderTypes, Roles
+from users.constants import GenderTypes, Roles, TShirtSizeTypes
 from users.models import (
     CertificateOfParticipation, OnlineCourseRecord, PartnerTag, SHADCourseRecord, StudentProfile,
     StudentTypes, User, UserGroup, YandexUserData
@@ -37,6 +37,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     branch = None
     time_zone = factory.LazyAttribute(lambda user: user.branch.time_zone if user.branch is not None else settings.DEFAULT_TIMEZONE)
     is_notification_allowed = True
+    tshirt_size = factory.Iterator(TShirtSizeTypes.labels.values())
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
