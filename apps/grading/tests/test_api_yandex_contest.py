@@ -60,5 +60,5 @@ def test_request_and_check_http_error_5xx():
     url = "https://example.com"
     with patch("requests.get") as mock_get:
         mock_get.return_value = MockResponse(status_code=500, text="Internal Server Error")
-        with pytest.raises(Unavailable):
+        with pytest.raises(ContestAPIError):
             YandexContestAPI.request_and_check(url, method="get")
