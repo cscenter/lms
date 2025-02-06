@@ -12,7 +12,7 @@ from core.exceptions import Redirect
 from core.http import HttpRequest
 from core.urls import reverse
 from courses.views.mixins import CourseURLParamsMixin
-from learning.forms import CourseEnrollmentForm, CourseInvitationEnrollmentForm
+from learning.forms import CourseEnrollmentForm
 from learning.models import CourseInvitation, Enrollment
 from learning.permissions import (
     EnrollInCourse, EnrollInCourseByInvitation, EnrollPermissionObject,
@@ -125,7 +125,7 @@ class CourseUnenrollView(PermissionRequiredMixin, CourseURLParamsMixin,
 
 class CourseInvitationEnrollView(PermissionRequiredMixin,
                                  CourseURLParamsMixin, FormView):
-    form_class = CourseInvitationEnrollmentForm
+    form_class = CourseEnrollmentForm
     template_name = "learning/enrollment/enrollment_enter.html"
     course_invitation: CourseInvitation
     permission_required = EnrollInCourseByInvitation.name
@@ -136,6 +136,22 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
         return InvitationEnrollPermissionObject(self.course_invitation,
                                                 student_profile)
 
+    def has_permission(self) -> bool:
+        has_perm = super().has_permission()
+        if not has_perm and not self.course_invitation.places_left:
+            msg = _("No places available, sorry")
+            messages.error(self.request, msg, extra_tags='timeout')
+            invitation = self.course_invitation.invitation
+            raise Redirect(to=invitation.get_absolute_url())
+        return has_perm
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['enrollment_type'] = self.course_invitation.enrollment_type
+        kwargs['ask_enrollment_reason'] = self.course.ask_enrollment_reason
+        return kwargs
+
+
     def setup(self, request: HttpRequest, **kwargs: Any) -> None:
         super().setup(request, **kwargs)
         qs = (CourseInvitation.objects
@@ -144,23 +160,9 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
                       course=self.course))
         self.course_invitation = get_object_or_404(qs)
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['enrollment_type'] = self.course_invitation.enrollment_type
-        return kwargs
-
-    def has_permission(self) -> bool:
-        if super().has_permission():
-            return True
-        if self.course.is_capacity_limited and not self.course.places_left:
-            msg = _("No places available, sorry")
-            messages.error(self.request, msg, extra_tags='timeout')
-            invitation = self.course_invitation.invitation
-            raise Redirect(to=invitation.get_absolute_url())
-        return False
-
 
     def form_valid(self, form):
+        reason_entry = form.cleaned_data.get("reason", "").strip()
         type = form.cleaned_data["type"].strip()
         invitation = self.course_invitation.invitation
         user = self.request.user
@@ -174,7 +176,7 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
             raise Redirect(to=self.course.get_absolute_url())
         try:
             EnrollmentService.enroll(student_profile, self.course,
-                                     reason_entry='',
+                                     reason_entry=reason_entry,
                                      type=type,
                                      invitation=invitation,
                                      student_group=resolved_group)
