@@ -135,7 +135,7 @@ def add_new_submission_to_checking_system(submission_id: int, *, retries: int) -
         submission.meta = json_data
     except Unavailable as e:
         submission_status = SubmissionStatus.RETRY
-        submission_verdict = "Requeue check in 10 minutes"
+        submission_verdict = _("Requeue check in 10 minutes")
         if retries:
             scheduler = django_rq.get_scheduler('default')
             scheduler.enqueue_in(timedelta(minutes=10),
@@ -145,19 +145,19 @@ def add_new_submission_to_checking_system(submission_id: int, *, retries: int) -
             logger.info("Remote server is unavailable. Repeat job in 10 minutes.")
         else:
             submission_status = SubmissionStatus.SUBMIT_FAIL
-            submission_verdict = "Checking failed after all retries"
+            submission_verdict = _("Checking failed after all retries")
 
     except ContestAPIError as e:
         submission_status = SubmissionStatus.SUBMIT_FAIL
         submission_verdict = e.message
         if e.code >= 500:
-            submission_verdict = "Yandex.Contest api error"
+            submission_verdict = _("Yandex.Contest api error")
         elif e.code == 400 and "Duplicate submission" in e.message:
-            submission_verdict = "Duplicate submission"
+            submission_verdict = _("Duplicate submission")
         logger.error(f"Yandex.Contest api request error [{submission_id=}] {e.code=} {e.message=}")
 
     if not submission.meta:
-        submission.meta['verdict'] = submission_verdict
+        submission.meta['verdict'] = str(submission_verdict)
 
     submission.status = submission_status
     submission.save(update_fields=['meta', 'status'])

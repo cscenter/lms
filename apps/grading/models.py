@@ -147,5 +147,5 @@ class Submission(models.Model):
                             break
                 return output
             except ValueError:
-                return _(verdict)
+                return verdict
         return self.status_choice.label
