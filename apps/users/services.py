@@ -360,8 +360,9 @@ def update_student_academic_discipline(student_profile: StudentProfile, *,
     """
     former_academic_discipline = student_profile.tracker.previous('academic_disciplines').first()
     student_profile.academic_disciplines.clear()
-    student_profile.academic_disciplines.add(new_academic_discipline)
-    student_profile.save()
+    if new_academic_discipline:
+        student_profile.academic_disciplines.add(new_academic_discipline)
+        student_profile.save()
 
     log_entry = StudentAcademicDisciplineLog(academic_discipline=new_academic_discipline,
                                              former_academic_discipline=former_academic_discipline,

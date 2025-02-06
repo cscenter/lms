@@ -256,6 +256,32 @@ def test_enrollment_reason_entry(client):
     assert Enrollment.active.count() == 1
     assert Enrollment.objects.first().reason_entry == f'{date}\nbar\n\n{date}\nfoo\n\n'
 
+    course_invitation = CourseInvitationFactory()
+    response = client.post(course_invitation.get_absolute_url(), data={
+        "type": EnrollmentTypes.REGULAR,
+        "reason": "foo"
+    })
+    assert response.status_code == 403
+    
+    course_invitation.course.starts_on = today
+    course_invitation.course.ends_on = today + datetime.timedelta(days=1)
+    course_invitation.course.completed_at = today + datetime.timedelta(days=1)
+    course_invitation.course.save()
+    client.post(course_invitation.get_absolute_url(), data={
+        "type": EnrollmentTypes.REGULAR,
+        "reason": "foo"
+    })
+    assert Enrollment.objects.filter(course=course_invitation.course).first().reason_entry == ''
+    
+    course_invitation.course.ask_enrollment_reason=True
+    course_invitation.course.save()
+    client.post(course_invitation.course.get_unenroll_url())
+    client.post(course_invitation.get_absolute_url(), data={
+        "type": EnrollmentTypes.REGULAR,
+        "reason": "invited reason"
+    })
+    assert Enrollment.objects.filter(course=course_invitation.course).first().reason_entry == f'{date}\ninvited reason\n\n'
+
 
 @pytest.mark.django_db
 def test_enrollment_leave_reason(client):
