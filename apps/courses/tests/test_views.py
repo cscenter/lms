@@ -370,6 +370,24 @@ def test_view_course_detail_enroll_by_invitation(client):
     assert Enrollment.objects.filter(invitation=course_invitation.invitation).exists()
     assert course_invitation.enrolled_students.count() == 1
     assert current_profile == course_invitation.enrolled_students.all().first()
+    
+    Enrollment.objects.filter(invitation=course_invitation.invitation).update(is_deleted=True)
+    assert course_invitation.enrolled_students.count() == 1
+    assert course_invitation.places_left == float("inf")
+    
+    course_invitation.capacity = 1
+    course_invitation.save()
+    assert course_invitation.enrolled_students.count() == 1
+    assert course_invitation.places_left == 1
+    
+    Enrollment.objects.filter(invitation=course_invitation.invitation).update(is_deleted=False)
+    assert course_invitation.enrolled_students.count() == 1
+    assert course_invitation.places_left == 0
+    
+    course_invitation.capacity = 0
+    course_invitation.save()
+    assert course_invitation.enrolled_students.count() == 1
+    assert course_invitation.places_left == float("inf")
 
     response = client.get(course.get_absolute_url())
     assert response.status_code == 200
