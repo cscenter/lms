@@ -162,7 +162,7 @@ def add_new_submission_to_checking_system(submission_id: int, *, retries: int) -
     submission.status = submission_status
     submission.save(update_fields=['meta', 'status'])
 
-    if submission_status == SubmissionStatus.SUBMIT_FAIL:
+    if submission_status in [SubmissionStatus.SUBMIT_FAIL, SubmissionStatus.RETRY]:
         return submission.meta['verdict']
 
     scheduler = django_rq.get_scheduler('default')
