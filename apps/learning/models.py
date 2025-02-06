@@ -542,7 +542,8 @@ class CourseInvitation(models.Model):
     @property
     def places_left(self):
         if self.is_capacity_limited:
-            return max(0, self.capacity - self.enrolled_students.count())
+            enrollments = Enrollment.active.filter(student_profile__in=self.enrolled_students.all(), course=self.course)
+            return max(0, self.capacity - enrollments.count())
         else:
             return float("inf")
 
