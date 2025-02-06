@@ -80,31 +80,31 @@ def update_checker_yandex_contest_problem_compilers(checker_id, *, retries):
 @job('default')
 def add_new_submission_to_checking_system(submission_id: int, *, retries: int) -> str | None:
     """
-    Добавляет новое решение в систему проверки (Yandex.Contest) и обновляет статус отправки.
+    Adds a new solution to the verification system (Yandex.Contest) and updates the submission status.
 
-    Функция выполняет следующие действия:
-    1. Получает отправку (submission) по её ID.
-    2. Извлекает настройки системы проверки и токен доступа.
-    3. Создает запрос на добавление решения в Yandex.Contest.
-    4. Если система проверки недоступна, функция планирует повторную попытку через 10 минут.
-    5. В случае ошибки API (например, дублирующая отправка), обновляет статус отправки и логирует ошибку.
-    6. При успешной отправке обновляет метаданные и статус отправки на "CHECKING".
-    7. Планирует задачу для мониторинга статуса проверки через 15 секунд.
+    The function performs the following actions:
+    1. Receives the submission by its ID.
+    2. Extracts the verification system settings and the access token.
+    3. Creates a request to add a solution to Yandex.Contest.
+    4. If the verification system is unavailable, the function schedules a retry after 10 minutes.
+    5. In case of an API error (for example, duplicate sending), updates the sending status and logs the error.
+    6. Upon successful sending, it updates the metadata and the status of sending to "CHECKING".
+    7. Schedules a task to monitor the verification status after 15 seconds.
 
-    Параметры:
+    Parameters:
     ----------
     submission_id : int
-        Идентификатор отправки, которую необходимо добавить в систему проверки.
+        ID of the submission to be added to the verification system.
     retries : int
-        Количество оставшихся попыток для повторной отправки в случае недоступности системы проверки.
+        The number of remaining attempts to resend if the verification system is unavailable.
 
-    Возвращает:
+    Returns:
     -----------
     str or None
-        - "Submission not found", если отправка не найдена.
-        - "Requeue job in 10 minutes", если система проверки недоступна и задача будет повторена.
-        - Сообщение об ошибке, если произошла ошибка API.
-        - None, если отправка успешно добавлена и статус обновлен.
+        - "Submission not found" if the shipment is not found.
+        - "Request job in 10 minutes", if the verification system is unavailable and the task will be repeated.
+        - An error message if an API error has occurred.
+        - None if the sending was successfully added and the status is updated.
     """
     from grading.constants import SubmissionStatus
     submission_status = SubmissionStatus.CHECKING

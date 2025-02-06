@@ -20,7 +20,7 @@ class MockResponse:
 @pytest.mark.parametrize("req_method",
                          ['get', 'post'])
 def test_request_and_check_success(req_method):
-    """Тест успешного запроса."""
+    """Successful request test."""
     url = "https://example.com"
     with patch(f"requests.{req_method}") as mock:
         mock.return_value = MockResponse(status_code=200, text="Success")
@@ -29,7 +29,7 @@ def test_request_and_check_success(req_method):
         assert response.text == "Success"
 
 def test_request_and_check_unsupported_method():
-    """Тест неподдерживаемого метода."""
+    """Unsupported method test."""
     url = "https://example.com"
     with pytest.raises(AssertionError):
         YandexContestAPI.request_and_check(url, method="put")
@@ -38,7 +38,7 @@ def test_request_and_check_unsupported_method():
                          [requests.ConnectionError("Connection failed"),
                           requests.Timeout("Request timed out")])
 def test_request_and_check_connection_error(side_effect):
-    """Тест ошибки соединения."""
+    """Connection Error Test."""
     url = "https://example.com"
     with patch("requests.get") as mock_get:
         mock_get.side_effect = side_effect
@@ -46,7 +46,7 @@ def test_request_and_check_connection_error(side_effect):
             YandexContestAPI.request_and_check(url, method="get")
 
 def test_request_and_check_http_error_4xx():
-    """Тест HTTP ошибки 4xx."""
+    """Test HTTP error 4xx."""
     url = "https://example.com"
     with patch("requests.get") as mock_get:
         mock_get.return_value = MockResponse(status_code=404, text="Not Found")
@@ -56,7 +56,7 @@ def test_request_and_check_http_error_4xx():
         assert "Not Found" in exc_info.value.message
 
 def test_request_and_check_http_error_5xx():
-    """Тест HTTP ошибки 5xx."""
+    """Test HTTP error 5xx."""
     url = "https://example.com"
     with patch("requests.get") as mock_get:
         mock_get.return_value = MockResponse(status_code=500, text="Internal Server Error")
