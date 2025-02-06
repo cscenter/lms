@@ -10,6 +10,8 @@ from django.db import transaction
 from grading.api.yandex_contest import (
     ContestAPIError, SubmissionVerdict, Unavailable, YandexContestAPI
 )
+from django.utils.translation import gettext_lazy as _
+
 from grading.constants import CheckingSystemTypes
 from grading.models import Submission
 from grading.utils import YandexContestScoreSource
@@ -76,15 +78,47 @@ def update_checker_yandex_contest_problem_compilers(checker_id, *, retries):
 
 
 @job('default')
-def add_new_submission_to_checking_system(submission_id, *, retries):
+def add_new_submission_to_checking_system(submission_id: int, *, retries: int) -> str | None:
+    """
+    Добавляет новое решение в систему проверки (Yandex.Contest) и обновляет статус отправки.
+
+    Функция выполняет следующие действия:
+    1. Получает отправку (submission) по её ID.
+    2. Извлекает настройки системы проверки и токен доступа.
+    3. Создает запрос на добавление решения в Yandex.Contest.
+    4. Если система проверки недоступна, функция планирует повторную попытку через 10 минут.
+    5. В случае ошибки API (например, дублирующая отправка), обновляет статус отправки и логирует ошибку.
+    6. При успешной отправке обновляет метаданные и статус отправки на "CHECKING".
+    7. Планирует задачу для мониторинга статуса проверки через 15 секунд.
+
+    Параметры:
+    ----------
+    submission_id : int
+        Идентификатор отправки, которую необходимо добавить в систему проверки.
+    retries : int
+        Количество оставшихся попыток для повторной отправки в случае недоступности системы проверки.
+
+    Возвращает:
+    -----------
+    str or None
+        - "Submission not found", если отправка не найдена.
+        - "Requeue job in 10 minutes", если система проверки недоступна и задача будет повторена.
+        - Сообщение об ошибке, если произошла ошибка API.
+        - None, если отправка успешно добавлена и статус обновлен.
+    """
     from grading.constants import SubmissionStatus
+    submission_status = SubmissionStatus.CHECKING
+    submission_verdict: str = ""
     submission = get_submission(submission_id)
+    
     if not submission:
         return "Submission not found"
+
     assignment_submission = submission.assignment_submission
     checker = assignment_submission.student_assignment.assignment.checker
     checking_system_settings = checker.checking_system.settings
     access_token = checking_system_settings['access_token']
+
     api = YandexContestAPI(
         access_token=access_token,
         refresh_token=access_token)
@@ -96,38 +130,39 @@ def add_new_submission_to_checking_system(submission_id, *, retries):
     submission_content = assignment_submission.attached_file.read()
     files = {'file': ('test.txt', submission_content)}
     try:
-        status, json_data = api.add_submission(checker.settings['contest_id'],
+        json_data = api.add_submission(checker.settings['contest_id'],
                                                files=files, timeout=5, **data)
+        submission.meta = json_data
     except Unavailable as e:
+        submission_status = SubmissionStatus.RETRY
+        submission_verdict = "Requeue check in 10 minutes"
         if retries:
             scheduler = django_rq.get_scheduler('default')
             scheduler.enqueue_in(timedelta(minutes=10),
                                  add_new_submission_to_checking_system,
                                  submission_id,
                                  retries=retries - 1)
-            logger.info("Remote server is unavailable. "
-                        "Repeat job in 10 minutes.")
-            return "Requeue job in 10 minutes"
+            logger.info("Remote server is unavailable. Repeat job in 10 minutes.")
         else:
-            raise
+            submission_status = SubmissionStatus.SUBMIT_FAIL
+            submission_verdict = "Checking failed after all retries"
+
     except ContestAPIError as e:
-        raise_error = True
-        update_fields = ['status']
+        submission_status = SubmissionStatus.SUBMIT_FAIL
+        submission_verdict = e.message
         if e.code == 400 and "Duplicate submission" in e.message:
-            submission.meta = {'verdict': e.message}
-            update_fields.append('meta')
-            raise_error = False
-        submission.status = SubmissionStatus.SUBMIT_FAIL
-        submission.save(update_fields=update_fields)
-        if raise_error:
-            logger.error(f"Yandex.Contest api request error "
-                         f"[submission_id = {submission_id}]")
-            raise
-        else:
-            return e.message
-    submission.meta = json_data
-    submission.status = SubmissionStatus.CHECKING
+            submission_verdict = "Duplicate submission"
+        logger.error(f"Yandex.Contest api request error [{submission_id=}] {e.code=} {e.message=}")
+
+    if not submission.meta:
+        submission.meta['verdict'] = submission_verdict
+
+    submission.status = submission_status
     submission.save(update_fields=['meta', 'status'])
+
+    if submission_status == SubmissionStatus.SUBMIT_FAIL:
+        return submission.meta['verdict']
+
     scheduler = django_rq.get_scheduler('default')
     scheduler.enqueue_in(timedelta(seconds=15),
                          monitor_submission_status_in_yandex_contest,
