@@ -150,7 +150,9 @@ def add_new_submission_to_checking_system(submission_id: int, *, retries: int) -
     except ContestAPIError as e:
         submission_status = SubmissionStatus.SUBMIT_FAIL
         submission_verdict = e.message
-        if e.code == 400 and "Duplicate submission" in e.message:
+        if e.code >= 500:
+            submission_verdict = "Yandex.Contest api error"
+        elif e.code == 400 and "Duplicate submission" in e.message:
             submission_verdict = "Duplicate submission"
         logger.error(f"Yandex.Contest api request error [{submission_id=}] {e.code=} {e.message=}")
 
