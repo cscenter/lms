@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-06 21:18+0000\n"
-"PO-Revision-Date: 2025-02-06 20:59+0000\n"
+"POT-Creation-Date: 2025-02-06 21:33+0000\n"
+"PO-Revision-Date: 2025-02-06 21:33+0000\n"
 "Last-Translator: Админ Админов <admin@admin.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -1620,7 +1620,7 @@ msgstr "Повторная попытка через 10 минут"
 
 #: apps/grading/tasks.py:148
 msgid "Checking failed after all retries"
-msgstr "Проверка неудалась после всех повторных попыток"
+msgstr "Проверка не удалась после всех повторных попыток"
 
 #: apps/grading/tasks.py:154
 msgid "Yandex.Contest api error"
@@ -1767,7 +1767,7 @@ msgstr "Должен быть прикреплен файл"
 msgid "Text should be non-empty"
 msgstr "Требуется текст"
 
-#: apps/learning/forms.py:289 apps/learning/forms.py:314
+#: apps/learning/forms.py:289
 msgid "Как вы хотите записаться на курс?"
 msgstr ""
 
@@ -2745,15 +2745,15 @@ msgid "{} hrs {:02d} min"
 msgstr "{} ч. {:02d} мин."
 
 #: apps/learning/views/enrollment.py:43 apps/learning/views/enrollment.py:84
-#: apps/learning/views/enrollment.py:156 apps/learning/views/enrollment.py:190
+#: apps/learning/views/enrollment.py:142 apps/learning/views/enrollment.py:192
 msgid "No places available, sorry"
 msgstr "Извините, свободных мест не осталось."
 
-#: apps/learning/views/enrollment.py:78 apps/learning/views/enrollment.py:182
+#: apps/learning/views/enrollment.py:78 apps/learning/views/enrollment.py:184
 msgid "You are successfully enrolled in the course"
 msgstr "Вы успешно записались на курс"
 
-#: apps/learning/views/enrollment.py:81 apps/learning/views/enrollment.py:186
+#: apps/learning/views/enrollment.py:81 apps/learning/views/enrollment.py:188
 msgid "You are already enrolled in the course"
 msgstr "Вы уже записаны на этот курс"
 
@@ -2939,7 +2939,7 @@ msgstr "Файл CSV"
 msgid "Fill in badge numbers"
 msgstr "Залить номера пропусков"
 
-#: apps/staff/forms.py:95 apps/users/services.py:626
+#: apps/staff/forms.py:95 apps/users/services.py:627
 msgid "CSV file must contain \"Email\" and \"Badge number\" columns"
 msgstr ""
 "Файл CSV должен содержать колонки с заголовками «Почта» и «Номер пропуска»"
@@ -3829,15 +3829,15 @@ msgstr "Согласие пользователя"
 msgid "User Consents"
 msgstr "Согласия пользователя"
 
-#: apps/users/services.py:529
+#: apps/users/services.py:530
 msgid "Major and minor must be objects of the same types"
 msgstr "Основной и дублирующий объекты должны быть объектами одного типа"
 
-#: apps/users/services.py:589
+#: apps/users/services.py:590
 msgid "Use merge_objects for non User instances"
 msgstr "Для объектов не-Пользователей используйте merge_objects"
 
-#: apps/users/services.py:633
+#: apps/users/services.py:634
 msgid "User with email \"{}\" does not exists"
 msgstr "Пользователь с почтой «{}» не существует"
 
