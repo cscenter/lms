@@ -174,22 +174,26 @@ def add_new_submission_to_checking_system(submission_id: int, *, retries: int) -
 
 
 @job('default')
-def monitor_submission_status_in_yandex_contest(submission_id,
-                                                remote_submission_id,
-                                                delay_min=1):
+def monitor_submission_status_in_yandex_contest(submission_id: int,
+                                                remote_submission_id: int,
+                                                delay_min: int = 1) -> str | None:
     submission = get_submission(submission_id)
     if not submission:
         return "Submission not found"
+    submission_verdict: str = ""
+    submission_status = submission.STATUSES.CHECKING
     checker = submission.assignment_submission.student_assignment.assignment.checker
     checking_system_settings = checker.checking_system.settings
     access_token = checking_system_settings['access_token']
     api = YandexContestAPI(
         access_token=access_token,
         refresh_token=access_token)
+
     try:
-        status, json_data = api.submission_details(
+        json_data = api.submission_details(
             checker.settings['contest_id'],
             remote_submission_id, timeout=10)
+
     except Unavailable as e:
         scheduler = django_rq.get_scheduler('default')
         scheduler.enqueue_in(timedelta(minutes=10),
@@ -199,15 +203,29 @@ def monitor_submission_status_in_yandex_contest(submission_id,
                              delay_min=1)
         logger.info(f"Remote server is unavailable. "
                     f"Repeat job in 10 minutes.")
-        return f"Unavailable. Requeue job in 10 minutes. "
+        submission_status = submission.STATUSES.RETRY
+        submission_verdict = _("Requeue check in 10 minutes")
+        
     except ContestAPIError as e:
-        raise
+        submission_status = submission.STATUSES.FAILED
+        submission_verdict = e.message
+        if e.code >= 500:
+            submission_verdict = _("Yandex.Contest api error")
+        logger.error(f"Yandex.Contest api request error [{submission_id=}] {e.code=} {e.message=}")
+    
+    
+    if submission_status in [submission.STATUSES.FAILED, submission.STATUSES.RETRY]:
+        submission.meta = {"verdict": str(submission_verdict)}
+        submission.status = submission_status
+        submission.save(update_fields=['meta', 'status'])
+        return submission.meta['verdict']
+
     # Wait until remote submission check is not finished
     if json_data['verdict'] == 'No report':
         if delay_min > 10:
-            logger.error(f"Remote check for local "
-                        f"submission {submission_id} has failed!")
-            raise ContestAPIError(f"runId {remote_submission_id} has failed")
+            logger.error(f"Remote runId={remote_submission_id} check for local submission {submission_id} has failed!")
+            submission_status = submission.STATUSES.SUBMIT_FAIL
+            submission_verdict = _("Remote check for local submission has failed!")
         else:
             scheduler = django_rq.get_scheduler('default')
             scheduler.enqueue_in(timedelta(minutes=delay_min),
@@ -215,9 +233,15 @@ def monitor_submission_status_in_yandex_contest(submission_id,
                                 submission_id,
                                 remote_submission_id,
                                 delay_min=delay_min + 1)
-            logger.info(f"Submission check {remote_submission_id} is not finished. "
-                        f"Rerun in {delay_min} minutes.")
-            return f"ContestAPIError. Requeue job in {delay_min} minutes"
+            logger.info(f"Submission check {remote_submission_id} is not finished. Rerun in {delay_min} minutes.")
+            submission_status = submission.STATUSES.RETRY
+            submission_verdict = _("Requeue check")
+
+        submission.status = submission_status
+        submission.meta = {"verdict": str(submission_verdict)}
+        submission.save(update_fields=['meta', 'status'])
+        return submission.meta['verdict']
+
     # TODO: Investigate how to escape html and store it in json
     # TODO: g.e. look at encoders in simplejson
     json_data.pop("source", None)
@@ -228,6 +252,7 @@ def monitor_submission_status_in_yandex_contest(submission_id,
         for row in json_data["checkerLog"]:
             row.pop("input", None)
             row.pop("output", None)
+
     with transaction.atomic():
         submission.meta = json_data
         if json_data['verdict'] == SubmissionVerdict.OK.value:
