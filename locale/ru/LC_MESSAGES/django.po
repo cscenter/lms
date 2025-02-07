@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-06 21:33+0000\n"
-"PO-Revision-Date: 2025-02-06 21:33+0000\n"
+"POT-Creation-Date: 2025-02-07 12:52+0000\n"
+"PO-Revision-Date: 2025-02-07 12:49+0000\n"
 "Last-Translator: Админ Админов <admin@admin.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -1614,7 +1614,7 @@ msgstr "Посылки"
 msgid " [test %d]"
 msgstr ""
 
-#: apps/grading/tasks.py:138
+#: apps/grading/tasks.py:138 apps/grading/tasks.py:209
 msgid "Requeue check in 10 minutes"
 msgstr "Повторная попытка через 10 минут"
 
@@ -1622,13 +1622,21 @@ msgstr "Повторная попытка через 10 минут"
 msgid "Checking failed after all retries"
 msgstr "Проверка не удалась после всех повторных попыток"
 
-#: apps/grading/tasks.py:154
+#: apps/grading/tasks.py:154 apps/grading/tasks.py:215
 msgid "Yandex.Contest api error"
 msgstr "Ошибка Яндекс.Контест API"
 
 #: apps/grading/tasks.py:156
 msgid "Duplicate submission"
 msgstr "Дублирующая отправка"
+
+#: apps/grading/tasks.py:230
+msgid "Remote check for local submission has failed!"
+msgstr "Удаленная проверка отправки не удалась"
+
+#: apps/grading/tasks.py:241
+msgid "Requeue check"
+msgstr "Повторная попытка"
 
 #: apps/grading/utils.py:52
 msgid "Not a Yandex.Contest URL"
