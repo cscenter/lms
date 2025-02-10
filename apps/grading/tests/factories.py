@@ -1,6 +1,7 @@
 import factory
 from factory.fuzzy import FuzzyInteger, FuzzyText
 
+from apps.grading.constants import CheckingSystemTypes
 from grading.models import Checker, CheckingSystem, Submission
 from grading.utils import get_yandex_contest_url
 from learning.models import AssignmentSubmissionTypes
@@ -9,6 +10,7 @@ from learning.tests.factories import AssignmentCommentFactory
 
 class CheckingSystemFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Checking System %04d" % n)
+    type = CheckingSystemTypes.YANDEX_CONTEST
     settings = factory.Dict({
         'access_token': FuzzyText(length=30)
     })
