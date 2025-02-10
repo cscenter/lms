@@ -20,7 +20,7 @@ club:
 	python manage.py runserver --settings=compsciclub_ru.settings.local 8002
 
 shad:
-	python manage.py runserver --settings=lk_yandexdataschool_ru.settings.local 8003
+	sudo python manage.py runserver_plus 127.0.0.1:8080 --settings=lk_yandexdataschool_ru.settings.local
 
 tests:
 	pytest --create-db --ds=compscicenter_ru.settings.test
