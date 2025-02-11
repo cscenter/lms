@@ -1,14 +1,16 @@
 import datetime
 from typing import TYPE_CHECKING, Any, Optional
 
+from django.forms import ValidationError
 from vanilla import CreateView, DeleteView, UpdateView
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
+from django.db import transaction
 from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
@@ -89,17 +91,8 @@ class CourseClassFormMixin(CourseClassFormMixinBase):
     def get_initial(self, **kwargs):
         return None
 
-    # TODO: add atomic
-    def form_valid(self, form):
-        self.object = form.save()
-        attachments = self.request.FILES.getlist('attachments')
-        if attachments:
-            for attachment in attachments:
-                CourseClassAttachment(course_class=self.object,
-                                      material=attachment).save()
-        return redirect(self.get_success_url())
 
-    def get_success_url(self):
+    def get_success_url(self, to_classes_list=False):
         return_url = self.request.GET.get('back')
         if return_url == 'timetable':
             return reverse('teaching:timetable')
@@ -109,6 +102,8 @@ class CourseClassFormMixin(CourseClassFormMixinBase):
             return reverse('teaching:calendar')
         elif "_addanother" in self.request.POST:
             return self.object.course.get_create_class_url()
+        elif to_classes_list:
+            return self.object.course.get_url_for_tab("classes")
         else:
             return super().get_success_url()
 
@@ -144,12 +139,44 @@ class CourseClassCreateView(PermissionRequiredMixin, CourseURLParamsMixin,
                 "date": previous_class.date + datetime.timedelta(weeks=1)
             })
         return initial
+    
+    def form_valid(self, form):
+        try:
+            with transaction.atomic():
+                number_of_repeats = form.cleaned_data.pop('number_of_repeats') or 1
+                is_repeated = form.cleaned_data.pop('is_repeated')
+                if number_of_repeats != 1 and not is_repeated:
+                    raise ValidationError("Form error. is_repeated is False and number_of_repeats is not 1")
+                base_name = form.cleaned_data.get('name')
+                base_date = form.cleaned_data.get('date')
+                
+                instances = []
+                for i in range(number_of_repeats):
+                    self.object = form.save(commit=False)
+                    self.object.name = base_name if i == 0 else f"{base_name} #{i+1}" 
+                    self.object.date = base_date + datetime.timedelta(weeks=i) 
+                    self.object.pk = None # Ensure a new object is created
+                    self.object.save()
+                    instances.append(self.object)
 
-    def get_success_url(self):
-        msg = _("The class '%s' was successfully created.")
-        messages.success(self.request, msg % self.object.name,
-                         extra_tags='timeout')
-        return super().get_success_url()
+                    attachments = self.request.FILES.getlist('attachments')
+                    if attachments:
+                        for attachment in attachments:
+                            CourseClassAttachment.objects.create(course_class=self.object, material=attachment)
+                
+                return redirect(self.get_success_url(instances))
+                
+        except Exception as e:
+            messages.error(self.request, gettext(f"Class creation error: {str(e)}"))
+            return self.form_invalid(form)
+
+    def get_success_url(self, instances):
+        if len(instances) == 1:
+            msg = gettext(f"The class {self.object.name} was successfully created.")
+        else:
+            msg = gettext(f"The classes {instances[0].name} ... {self.object.name} were successfully created.")
+        messages.success(self.request, msg, extra_tags='timeout')
+        return super().get_success_url(to_classes_list=(len(instances) > 1))
 
     def post(self, request, *args, **kwargs):
         """Teacher can't add new class if course already completed"""
@@ -174,6 +201,16 @@ class CourseClassUpdateView(PermissionRequiredMixin, CourseClassURLParamsMixin,
 
     def get_object(self):
         return self.course_class
+    
+    def form_valid(self, form):
+        with transaction.atomic():
+            self.object = form.save()
+            attachments = self.request.FILES.getlist('attachments')
+            if attachments:
+                for attachment in attachments:
+                    CourseClassAttachment(course_class=self.object,
+                                        material=attachment).save()
+            return redirect(self.get_success_url())
 
     def get_success_url(self):
         msg = _("The class '%s' was successfully updated.")

@@ -195,6 +195,17 @@ class CourseClassForm(forms.ModelForm):
         label=_("Time Zone"),
         required=True,
         help_text="&nbsp;")
+    is_repeated = forms.BooleanField(
+        label=_("Repeated classes"), 
+        required=False
+        )
+    number_of_repeats = forms.IntegerField(
+        label=_("Number of repeats"),
+        required=False,
+        min_value=1,
+        max_value=30,
+        widget=forms.NumberInput(attrs={'max': '30', 'min': '1'})
+)
     restricted_to = MultipleStudentGroupField(
         label=_("Student Groups"),
         required=False,
@@ -202,14 +213,24 @@ class CourseClassForm(forms.ModelForm):
 
     class Meta:
         model = CourseClass
-        fields = ['venue', 'type', 'translation_link', 'date', 'starts_at', 'ends_at', 'time_zone', 'name',
-                  'description', 'attachments', 'recording_link', 'materials_visibility', 'restricted_to',
-                  'teachers', 'is_conducted_by_invited', 'invited_teacher_first_name', 'invited_teacher_last_name']
+        fields = ['venue', 'type', 'translation_link', 
+                  'date', 'starts_at', 'ends_at', 'time_zone', 
+                  'is_repeated', 'number_of_repeats', 
+                  'teachers', 'is_conducted_by_invited', 'invited_teacher_first_name', 'invited_teacher_last_name',
+                  'name', 
+                  'description', 
+                  'recording_link',
+                  'attachments', 'materials_visibility', 'restricted_to'
+                  ]
 
     def __init__(self, locale='en', **kwargs):
         course = kwargs.pop('course', None)
         assert course is not None
         super().__init__(**kwargs)
+        if self.instance.pk:
+            # Editing existing class, not creating new
+            self.fields.pop('is_repeated')
+            self.fields.pop('number_of_repeats')
         self.fields['venue'].queryset = (LearningSpace.objects
                                          .select_related('location')
                                          .filter(branch__in=course.branches.all())
@@ -239,6 +260,17 @@ class CourseClassForm(forms.ModelForm):
                     params={'starts_at': semester_start,
                             'ends_at': semester_end})
         return date
+
+    def clean_number_of_repeats(self):
+        if self.cleaned_data['is_repeated']:
+            number_of_repeats = self.cleaned_data['number_of_repeats']
+            course = self.instance.course
+            semester_end = course.semester.ends_at.date()
+            date = self.cleaned_data['date']
+            last_class_date = date + datetime.timedelta(weeks=number_of_repeats - 1)
+            if semester_end < last_class_date:
+                raise ValidationError(_("Number of repeats is too large. Last class date can not be after semester end date"))
+            return number_of_repeats
         
     def clean(self):
         if not self.cleaned_data.get('is_conducted_by_invited', False):

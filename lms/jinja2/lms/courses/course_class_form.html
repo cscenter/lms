@@ -40,6 +40,13 @@
                         </div>
                     </div>
                 </fieldset>
+                {% if not form.instance.pk %}
+                <div class="row">
+                    {{ forms.field(form['is_repeated'], is_boolean=True, wrapper_classes="col-xs-3") }}
+                    {% set hidden_class = "hidden" if not form.is_repeated.value() else "" %}
+                    {{ forms.field(form['number_of_repeats'], wrapper_classes=hidden_class + " col-xs-3", placeholder=form['number_of_repeats'].label, hide_label=True) }}
+                </div>
+                {% endif %}
                 {{ forms.field(form['name']) }}
                 <label for="{{ form['teachers'].id_for_label }}" class="control-label"> {{ form['teachers'].label }} </label>
                   {% for checkbox in form['teachers'] %}
