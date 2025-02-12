@@ -246,23 +246,21 @@ class CourseClassForm(forms.ModelForm):
 
     def clean_date(self):
         date = self.cleaned_data['date']
-        # Validate this since 'course' could be invalid
-        if 'course' in self.cleaned_data:
-            course = self.cleaned_data['course']
-            semester_start = course.semester.starts_at.date()
-            semester_end = course.semester.ends_at.date()
-            assert semester_start <= semester_end
-            if not semester_start <= date <= semester_end:
-                raise ValidationError(
-                    _("Inconsistent with this course's "
-                      "semester (from %(starts_at)s to %(ends_at)s)"),
-                    code='date_out_of_semester',
-                    params={'starts_at': semester_start,
-                            'ends_at': semester_end})
+        course = self.instance.course
+        semester_start = course.semester.starts_at.date()
+        semester_end = course.semester.ends_at.date()
+        assert semester_start <= semester_end
+        if not semester_start <= date <= semester_end:
+            raise ValidationError(
+                _("Inconsistent with this course's "
+                    "semester (from %(starts_at)s to %(ends_at)s)"),
+                code='date_out_of_semester',
+                params={'starts_at': semester_start,
+                        'ends_at': semester_end})
         return date
 
     def clean_number_of_repeats(self):
-        if self.cleaned_data['is_repeated']:
+        if self.cleaned_data['is_repeated'] and 'date' in self.cleaned_data:
             number_of_repeats = self.cleaned_data['number_of_repeats']
             course = self.instance.course
             semester_end = course.semester.ends_at.date()

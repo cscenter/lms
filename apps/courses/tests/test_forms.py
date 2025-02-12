@@ -1,13 +1,14 @@
+import factory
 import pytest
 
-from courses.constants import AssigneeMode
+from courses.constants import AssigneeMode, ClassTypes, MaterialVisibilityTypes
 from courses.forms import (
-    AssignmentResponsibleTeachersForm, AssignmentResponsibleTeachersFormFactory,
+    AssignmentResponsibleTeachersForm, AssignmentResponsibleTeachersFormFactory, CourseClassForm,
     StudentGroupAssigneeForm, StudentGroupAssigneeFormFactory
 )
 from courses.models import CourseGroupModes, CourseTeacher
 from courses.tests.factories import (
-    AssignmentFactory, CourseFactory, CourseTeacherFactory
+    AssignmentFactory, CourseClassFactory, CourseFactory, CourseTeacherFactory, LearningSpaceFactory, SemesterFactory
 )
 from learning.services import StudentGroupService
 from learning.tests.factories import StudentGroupFactory
@@ -195,3 +196,50 @@ def test_student_group_assignee_form_to_internal():
     assert len(output) == 2
     assert output[student_group1.pk] == [course_teacher1.pk]
     assert output[student_group2.pk] == [course_teacher2.pk]
+
+@pytest.mark.django_db
+def test_courseclassform_is_repeated_create_update_mods():
+    course_class = CourseClassFactory(course__semester=SemesterFactory.create_current())
+    data = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
+    data.update({
+        'venue': LearningSpaceFactory(branch=course_class.course.main_branch),
+        'is_repeated': True,
+        'number_of_repeats': 3
+    })
+    
+    create_form = CourseClassForm(course=course_class.course, data=data)
+    update_form = CourseClassForm(instance=course_class, course=course_class.course, data=data)
+    assert 'is_repeated' in create_form.fields
+    assert 'number_of_repeats' in create_form.fields
+    assert create_form.is_valid()
+    assert 'is_repeated' in create_form.data
+    assert 'number_of_repeats' in create_form.data
+    assert 'is_repeated' in create_form.cleaned_data
+    assert 'number_of_repeats' in create_form.cleaned_data
+    
+    assert 'is_repeated' not in update_form.fields
+    assert 'number_of_repeats' not in update_form.fields
+    assert update_form.is_valid()
+    assert 'is_repeated' in update_form.data
+    assert 'number_of_repeats' in update_form.data
+    assert 'is_repeated' not in update_form.cleaned_data
+    assert 'number_of_repeats' not in update_form.cleaned_data
+
+@pytest.mark.django_db
+def test_courseclassform_number_of_repeats_validation():
+    course = CourseFactory(semester=SemesterFactory.create_current())
+    data = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
+    data.update({
+        'venue': LearningSpaceFactory(branch=course.main_branch),
+        'is_repeated': True,
+        'number_of_repeats': 1,
+        'date': course.semester.starts_at
+    })
+    
+    assert CourseClassForm(course=course, data=data).is_valid(), CourseClassForm(course=course, data=data).errors
+    max_days = (course.semester.ends_at.date() - course.semester.starts_at.date()).days
+    max_repeats = max_days // 7 + 1
+    data["number_of_repeats"] = max_repeats
+    assert CourseClassForm(course=course, data=data).is_valid(), CourseClassForm(course=course, data=data).errors
+    data["number_of_repeats"] = max_repeats + 1
+    assert not CourseClassForm(course=course, data=data).is_valid()

@@ -10,7 +10,6 @@ from django.db import transaction
 from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import gettext
 from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
@@ -146,37 +145,38 @@ class CourseClassCreateView(PermissionRequiredMixin, CourseURLParamsMixin,
                 number_of_repeats = form.cleaned_data.pop('number_of_repeats') or 1
                 is_repeated = form.cleaned_data.pop('is_repeated')
                 if number_of_repeats != 1 and not is_repeated:
-                    raise ValidationError("Form error. is_repeated is False and number_of_repeats is not 1")
+                    raise ValidationError(_("Form error. is_repeated is False and number_of_repeats is not 1"))
                 base_name = form.cleaned_data.get('name')
                 base_date = form.cleaned_data.get('date')
                 
-                instances = []
                 for i in range(number_of_repeats):
                     self.object = form.save(commit=False)
                     self.object.name = base_name if i == 0 else f"{base_name} #{i+1}" 
                     self.object.date = base_date + datetime.timedelta(weeks=i) 
                     self.object.pk = None # Ensure a new object is created
                     self.object.save()
-                    instances.append(self.object)
 
                     attachments = self.request.FILES.getlist('attachments')
                     if attachments:
                         for attachment in attachments:
                             CourseClassAttachment.objects.create(course_class=self.object, material=attachment)
                 
-                return redirect(self.get_success_url(instances))
+                return redirect(self.get_success_url(number_of_repeats != 1, base_name, base_date))
                 
         except Exception as e:
-            messages.error(self.request, gettext(f"Class creation error: {str(e)}"))
+            messages.error(self.request, _("Class creation error: {exception}")).format(exception=str(e))
             return self.form_invalid(form)
 
-    def get_success_url(self, instances):
-        if len(instances) == 1:
-            msg = gettext(f"The class {self.object.name} was successfully created.")
+    def get_success_url(self, is_repeated=False, name=None, date=None):
+        if not is_repeated:
+            msg = _('The class "{name}" was successfully created.').format(name=self.object.name)
         else:
-            msg = gettext(f"The classes {instances[0].name} ... {self.object.name} were successfully created.")
+            msg = _('The classes "{name}" from {from_date} to {to_date} were successfully created.').format(
+                name=name,
+                from_date=date,
+                to_date=self.object.date)
         messages.success(self.request, msg, extra_tags='timeout')
-        return super().get_success_url(to_classes_list=(len(instances) > 1))
+        return super().get_success_url(to_classes_list=is_repeated)
 
     def post(self, request, *args, **kwargs):
         """Teacher can't add new class if course already completed"""

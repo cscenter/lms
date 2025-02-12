@@ -4,9 +4,9 @@ import factory
 import pytz
 
 from django.conf import settings
-from django.utils import timezone
 
 from core.tests.factories import BranchFactory, LocationFactory
+from core.timezone.utils import now_local
 from courses.constants import AssigneeMode, AssignmentFormat, MaterialVisibilityTypes
 from courses.models import (
     Assignment, AssignmentAttachment, Course, CourseBranch, CourseClass,
@@ -162,8 +162,7 @@ class CourseClassFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Test class %04d" % n)
     description = factory.Sequence(
         lambda n: "In this class %04d we will test" % n)
-    date = (datetime.datetime.now().replace(tzinfo=timezone.utc)
-            + datetime.timedelta(days=3)).date()
+    date = factory.LazyAttribute(lambda o: now_local(o.course.main_branch.get_timezone()).date())
     starts_at = datetime.time(hour=13, minute=0)
     ends_at = datetime.time(hour=13, minute=45)
     time_zone = factory.LazyAttribute(lambda o: o.course.main_branch.get_timezone())

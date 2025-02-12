@@ -117,7 +117,7 @@ msgid "Student Group"
 msgstr "Студенческая группа"
 
 #: apps/api/management/commands/dump_to_yandex_disk.py:26
-#: apps/courses/forms.py:543 apps/learning/roles.py:156
+#: apps/courses/forms.py:542 apps/learning/roles.py:156
 #: apps/users/constants.py:37
 msgid "Teacher"
 msgstr "Преподаватель"
@@ -141,7 +141,7 @@ msgid "Assignment Grade"
 msgstr "Оценка по заданию"
 
 #: apps/api/management/commands/dump_to_yandex_disk.py:27
-#: apps/courses/forms.py:352 apps/courses/models.py:1247
+#: apps/courses/forms.py:351 apps/courses/models.py:1247
 msgid "Maximum score"
 msgstr "Максимальный балл"
 
@@ -315,12 +315,12 @@ msgstr "Кем изменено"
 #: apps/core/forms.py:7
 #: apps/templates/forms/simple_delete_confirmation.html:22
 #: apps/templates/learning/enrollment/enrollment_leave.html:25
-#: lms/jinja2/lms/courses/course_class_form.html:96
+#: lms/jinja2/lms/courses/course_class_form.html:97
 msgid "Cancel"
 msgstr "Отмена"
 
 #: apps/core/forms.py:10 apps/users/forms.py:93
-#: lms/jinja2/lms/courses/course_class_form.html:97
+#: lms/jinja2/lms/courses/course_class_form.html:98
 #: lms/jinja2/lms/gradebook/gradebook_form.html:33
 #: lms/jinja2/lms/user_profile/_profile_upload_photo.html:40
 msgid "Save"
@@ -456,7 +456,7 @@ msgstr "Отметьте, какие мероприятия проходят в 
 msgid "Locations"
 msgstr "Адреса"
 
-#: apps/core/models.py:362 apps/courses/forms.py:540 apps/courses/models.py:65
+#: apps/core/models.py:362 apps/courses/forms.py:539 apps/courses/models.py:65
 #: apps/faq/models.py:9 apps/learning/gallery/models.py:65
 #: apps/learning/models.py:64 apps/learning/models.py:552
 #: apps/learning/models.py:64 apps/learning/models.py:552
@@ -730,7 +730,7 @@ msgstr "Название"
 msgid "Course|description"
 msgstr "Описание"
 
-#: apps/courses/forms.py:134 apps/courses/forms.py:329
+#: apps/courses/forms.py:134 apps/courses/forms.py:328
 #: apps/info_blocks/models.py:40 apps/learning/gallery/models.py:34
 #: apps/templates/international_schools/international_schools.html:16
 #: lms/jinja2/lms/courses/course_detail.html:186
@@ -738,7 +738,7 @@ msgstr "Описание"
 msgid "Title"
 msgstr "Название"
 
-#: apps/courses/forms.py:139 apps/courses/forms.py:332
+#: apps/courses/forms.py:139 apps/courses/forms.py:331
 msgid "Text"
 msgstr "Текст"
 
@@ -772,7 +772,7 @@ msgstr ""
 msgid "Materials (presentations, instructions, reminders)"
 msgstr "Материалы (презентации, инструкции, памятки)"
 
-#: apps/courses/forms.py:179 apps/courses/forms.py:346
+#: apps/courses/forms.py:179 apps/courses/forms.py:345
 msgid "You can select multiple files"
 msgstr "Вы можете выбрать несколько файлов"
 
@@ -802,7 +802,7 @@ msgstr "Формат: чч:мм"
 msgid "Ends at"
 msgstr "Конец"
 
-#: apps/courses/forms.py:195 apps/courses/forms.py:341
+#: apps/courses/forms.py:195 apps/courses/forms.py:340
 #: apps/courses/models.py:952 apps/courses/models.py:1231
 #: apps/users/models.py:362 lms/jinja2/lms/user_profile/_tab_account.html:133
 msgid "Time Zone"
@@ -816,27 +816,22 @@ msgstr "Повторяющиеся занятия"
 msgid "Number of repeats"
 msgstr "Кол-во повторений"
 
-#: apps/courses/forms.py:206 apps/courses/forms.py:579
+#: apps/courses/forms.py:210 apps/courses/forms.py:578
 #: apps/learning/models.py:93
 msgid "Student Groups"
 msgstr "Студенческие группы"
 
-#: apps/courses/forms.py:208
+#: apps/courses/forms.py:212
 msgid "Restrict course class visibility in the student schedule"
 msgstr "Ограничение видимости занятия в расписании студента"
 
-#: apps/courses/forms.py:252
+#: apps/courses/forms.py:255
 #, python-format
 msgid ""
 "Inconsistent with this course's semester (from %(starts_at)s to %(ends_at)s)"
 msgstr "Не совпадает с семестром курса (с %(starts_at)s по %(ends_at)s)"
 
-#: apps/courses/forms.py:263
-#| msgid "Number of repeats can not be zero"
-msgid "Number of repeats can not be zero or less"
-msgstr "Кол-во повторений должно быть не меньше одного."
-
-#: apps/courses/forms.py:271
+#: apps/courses/forms.py:270
 msgid ""
 "Number of repeats is too large. Last class date can not be after semester "
 "end date"
@@ -844,26 +839,26 @@ msgstr ""
 "Кол-во повторений слишком велико. Дата последнего занятия не должна быть "
 "позднее даты окончания семестра."
 
-#: apps/courses/forms.py:286
+#: apps/courses/forms.py:285
 msgid "Enter the time spent on the assignment."
 msgstr "Введите время, затраченное на выполнение задания."
 
-#: apps/courses/forms.py:287
+#: apps/courses/forms.py:286
 msgid "Enter a valid duration in a HH:MM format"
 msgstr "Введите продолжительность в HH:MM формате."
 
-#: apps/courses/forms.py:288
+#: apps/courses/forms.py:287
 #, python-brace-format
 msgid "The number of days must be less than {max_days}."
 msgstr ""
 
-#: apps/courses/forms.py:319
+#: apps/courses/forms.py:318
 msgid ""
 "There must be an error in the duration specified. Please, contact curators "
 "for this problem."
 msgstr ""
 
-#: apps/courses/forms.py:336 lms/jinja2/lms/courses/course_detail.html:185
+#: apps/courses/forms.py:335 lms/jinja2/lms/courses/course_detail.html:185
 #: lms/jinja2/lms/study/assignment_list.html:24
 #: lms/jinja2/lms/study/assignment_list.html:86
 #: lms/jinja2/lms/study/student_assignment_detail.html:141
@@ -878,58 +873,58 @@ msgstr "Срок сдачи"
 msgid "Attached files"
 msgstr "Приложенные файлы"
 
-#: apps/courses/forms.py:349 apps/courses/models.py:1243
+#: apps/courses/forms.py:348 apps/courses/models.py:1243
 #: lms/jinja2/lms/study/student_assignment_detail.html:147
 #: lms/jinja2/lms/teaching/student_assignment_detail.html:240
 msgid "Passing score"
 msgstr "Проходной балл"
 
-#: apps/courses/forms.py:355 apps/courses/models.py:1251
+#: apps/courses/forms.py:354 apps/courses/models.py:1251
 #: lms/jinja2/lms/study/student_assignment_detail.html:150
 #: lms/jinja2/lms/teaching/assignment_detail.html:45
 #: lms/jinja2/lms/teaching/student_assignment_detail.html:245
 msgid "Assignment Weight"
 msgstr "Вес задания"
 
-#: apps/courses/forms.py:358
+#: apps/courses/forms.py:357
 msgid ""
 "Assignment contribution to the course total score. It takes into account in "
 "the gradebook."
 msgstr "Вклад задания в сумму баллов по курсу."
 
-#: apps/courses/forms.py:362 apps/courses/models.py:1256
+#: apps/courses/forms.py:361 apps/courses/models.py:1256
 msgid "Time to Completion"
 msgstr "Время для завершения"
 
-#: apps/courses/forms.py:364 apps/courses/models.py:1258
+#: apps/courses/forms.py:363 apps/courses/models.py:1258
 msgid "Estimated amount of time required for the task to be completed"
 msgstr ""
 "Сколько, по вашему мнению, студенту потребуется времени, чтобы выполнить "
 "задание?"
 
-#: apps/courses/forms.py:368 apps/learning/forms.py:151
+#: apps/courses/forms.py:367 apps/learning/forms.py:151
 msgid "hours:minutes"
 msgstr "часы:минуты"
 
-#: apps/courses/forms.py:370
+#: apps/courses/forms.py:369
 msgid "Available for Groups"
 msgstr "Доступно для групп"
 
-#: apps/courses/forms.py:372
+#: apps/courses/forms.py:371
 msgid "Restrict assignment to selected groups. Available to all by default."
 msgstr ""
 "Задание будет доступно только выбранным группам. По умолчанию доступно всем."
 
-#: apps/courses/forms.py:374 apps/courses/models.py:1278
+#: apps/courses/forms.py:373 apps/courses/models.py:1278
 #: apps/grading/models.py:32 apps/grading/models.py:52
 msgid "Checking System"
 msgstr "Проверяющая система"
 
-#: apps/courses/forms.py:379
+#: apps/courses/forms.py:378
 msgid "Checker URL"
 msgstr "URL проверяющей системы"
 
-#: apps/courses/forms.py:381
+#: apps/courses/forms.py:380
 msgid ""
 "For example, URL of the Yandex.Contest problem: "
 "https://contest.yandex.ru/contest/3/problems/A/"
@@ -937,15 +932,15 @@ msgstr ""
 "Например, URL задачи из Яндекс.Контеста: "
 "https://contest.yandex.ru/contest/3/problems/A/"
 
-#: apps/courses/forms.py:385
+#: apps/courses/forms.py:384
 msgid "Selection Mode"
 msgstr "Режим назначения"
 
-#: apps/courses/forms.py:423
+#: apps/courses/forms.py:422
 msgid "URL is specified but checking system is empty"
 msgstr "Для URL не указана проверяющая система"
 
-#: apps/courses/forms.py:588 apps/learning/models.py:226
+#: apps/courses/forms.py:587 apps/learning/models.py:226
 #: apps/users/models.py:1135 lms/jinja2/lms/courses/course_detail.html:117
 #: lms/jinja2/lms/courses/course_detail.html:306
 msgid "Teachers"
@@ -1514,12 +1509,31 @@ msgstr "Прочтение курса уже опубликовано"
 msgid "Course is succesfully published"
 msgstr "Прочтение курса успешно опубликовано"
 
-#: apps/courses/views/course_class.py:149
-#, python-format
-msgid "The class '%s' was successfully created."
-msgstr "Занятие '%s' успешно создано."
+#: apps/courses/views/course_class.py:148
+msgid "Form error. is_repeated is False and number_of_repeats is not 1"
+msgstr "Ошибка формы. Флаг не выставлен, но кол-во повторений указано."
 
-#: apps/courses/views/course_class.py:179
+#: apps/courses/views/course_class.py:169
+msgid "Class creation error: {str(e)}"
+msgstr "Ошибка создания занятия: {str(e)}"
+
+#: apps/courses/views/course_class.py:174
+#, python-brace-format
+#| msgid "The class \"{self.object.name}\" was successfully created."
+msgid "The class \"{name}\" was successfully created."
+msgstr "Занятие \"{name}\" было успешно создано."
+
+#: apps/courses/views/course_class.py:176
+#, python-brace-format
+#| msgid ""
+#| "The classes \"{instances[0].name}\" from {instances[0].date} to "
+#| "{self.object.date} were successfully created."
+msgid ""
+"The classes \"{name}\" from {from_date} to {to_date} were successfully "
+"created."
+msgstr "Занятия \"{name}\" от {from_date} до {to_date} были успешно созданы."
+
+#: apps/courses/views/course_class.py:218
 #, python-format
 msgid "The class '%s' was successfully updated."
 msgstr "Занятие '%s' успешно обновлено."
@@ -4329,11 +4343,11 @@ msgstr "Видео"
 msgid "Other materials"
 msgstr "Другие материалы"
 
-#: lms/jinja2/lms/courses/course_class_form.html:80
+#: lms/jinja2/lms/courses/course_class_form.html:81
 msgid "Visibility Settings"
 msgstr "Настройки отображения"
 
-#: lms/jinja2/lms/courses/course_class_form.html:93
+#: lms/jinja2/lms/courses/course_class_form.html:94
 msgid "Save and add"
 msgstr "Сохранить и добавить ещё"
 
