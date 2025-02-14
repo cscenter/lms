@@ -237,9 +237,5 @@ def test_courseclassform_number_of_repeats_validation():
     })
     
     assert CourseClassForm(course=course, data=data).is_valid(), CourseClassForm(course=course, data=data).errors
-    max_days = (course.semester.ends_at.date() - course.semester.starts_at.date()).days
-    max_repeats = max_days // 7 + 1
-    data["number_of_repeats"] = max_repeats
-    assert CourseClassForm(course=course, data=data).is_valid(), CourseClassForm(course=course, data=data).errors
-    data["number_of_repeats"] = max_repeats + 1
+    data["number_of_repeats"] = 40
     assert not CourseClassForm(course=course, data=data).is_valid()

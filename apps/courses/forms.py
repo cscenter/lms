@@ -203,8 +203,7 @@ class CourseClassForm(forms.ModelForm):
         label=_("Number of repeats"),
         required=False,
         min_value=1,
-        max_value=30,
-        widget=forms.NumberInput(attrs={'max': '30', 'min': '1'})
+        max_value=30
 )
     restricted_to = MultipleStudentGroupField(
         label=_("Student Groups"),
@@ -244,37 +243,21 @@ class CourseClassForm(forms.ModelForm):
         self.fields['teachers'].label_from_instance = lambda obj: obj.teacher
         self.instance.course = course
 
-    def clean_date(self):
-        date = self.cleaned_data['date']
-        course = self.instance.course
-        semester_start = course.semester.starts_at.date()
-        semester_end = course.semester.ends_at.date()
-        assert semester_start <= semester_end
-        if not semester_start <= date <= semester_end:
-            raise ValidationError(
-                _("Inconsistent with this course's "
-                    "semester (from %(starts_at)s to %(ends_at)s)"),
-                code='date_out_of_semester',
-                params={'starts_at': semester_start,
-                        'ends_at': semester_end})
-        return date
 
     def clean_number_of_repeats(self):
-        if self.cleaned_data['is_repeated'] and 'date' in self.cleaned_data:
-            number_of_repeats = self.cleaned_data['number_of_repeats']
-            course = self.instance.course
-            semester_end = course.semester.ends_at.date()
-            date = self.cleaned_data['date']
-            last_class_date = date + datetime.timedelta(weeks=number_of_repeats - 1)
-            if semester_end < last_class_date:
-                raise ValidationError(_("Number of repeats is too large. Last class date can not be after semester end date"))
-            return number_of_repeats
+        if self.cleaned_data['is_repeated']:
+            return self.cleaned_data['number_of_repeats']
+        return 1
         
-    def clean(self):
-        if not self.cleaned_data.get('is_conducted_by_invited', False):
-            self.cleaned_data['invited_teacher_first_name'] = ''
-            self.cleaned_data['invited_teacher_last_name'] = ''
-        return self.cleaned_data
+    def clean_invited_teacher_first_name(self):
+        if self.cleaned_data['is_conducted_by_invited']:
+            return self.cleaned_data['invited_teacher_first_name']
+        return ''
+        
+    def clean_invited_teacher_last_name(self):
+        if self.cleaned_data['is_conducted_by_invited']:
+            return self.cleaned_data['invited_teacher_last_name']
+        return ''
 
 
 class AssignmentDurationField(forms.DurationField):

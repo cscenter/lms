@@ -20,7 +20,7 @@ from core.timezone import now_local
 from core.urls import reverse
 from courses.constants import MaterialVisibilityTypes
 from courses.forms import CourseClassForm
-from courses.models import CourseClass, CourseGroupModes, CourseTeacher
+from courses.models import CourseClass, CourseClassAttachment, CourseGroupModes, CourseTeacher
 from courses.permissions import CreateCourseClass
 from courses.tests.factories import (
     CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
@@ -185,12 +185,17 @@ def test_view_course_class_create_repeated(client):
     course = CourseFactory.create(semester=SemesterFactory.create_current())
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
     name = 'one class name'
+    f1 = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
+    f2 = SimpleUploadedFile("attachment2.txt", b"attachment2_content")
     form.update({
         'name': name,
         'venue': LearningSpaceFactory(branch=course.main_branch).pk,
         'is_repeated': True,
         'number_of_repeats': 1,
-        'date': course.semester.starts_at.date()
+        'date': course.semester.starts_at.date(),
+        'teachers': [CourseTeacherFactory(course=course).pk for _ in range(3)],
+        'restricted_to': [StudentGroupFactory(course=course).pk for _ in range(3)],
+        'attachments' : [f1, f2]
     })
     url = course.get_create_class_url()
 
@@ -200,7 +205,14 @@ def test_view_course_class_create_repeated(client):
     assert classes.count() == 1
     assert set(classes.values_list("date", flat=True)) == {course.semester.starts_at.date()}
     assert set(classes.values_list("name", flat=True)) == {name}
+    assert set(classes.values_list("teachers", flat=True)) == set(form["teachers"])
+    assert classes.values_list("teachers", flat=True).count() == 3
+    assert set(classes.values_list("restricted_to", flat=True)) == set(form["restricted_to"])
+    assert classes.values_list("restricted_to", flat=True).count() == 3
+    assert CourseClassAttachment.objects.filter(course_class__in=classes).count() == 2
     
+    f1.seek(0)
+    f2.seek(0)
     name = 'three classes name'
     form.update({
         'name': name,
@@ -212,7 +224,20 @@ def test_view_course_class_create_repeated(client):
     classes = CourseClass.objects.filter(course=course, name__startswith=name)
     assert classes.count() == 3
     assert set(classes.values_list("date", flat=True)) == {course.semester.starts_at.date() + datetime.timedelta(weeks=2+i) for i in range (3)}
-    assert set(classes.values_list("name", flat=True)) == {name if i == 0 else f"{name} #{i+1}" for i in range (3)}
+    assert set(classes.values_list("name", flat=True)) == {name for _ in range (3)}
+    assert classes.values_list("teachers", flat=True).count() == 9
+    assert set(classes.values_list("teachers", flat=True)) == set(form["teachers"])
+    assert classes.values_list("restricted_to", flat=True).count() == 9
+    assert set(classes.values_list("restricted_to", flat=True)) == set(form["restricted_to"])
+    assert CourseClassAttachment.objects.filter(course_class__in=classes).count() == 6
+    base_class_dict = model_to_dict(classes[0])
+    del base_class_dict['id']
+    del base_class_dict['date']
+    for course_class in classes[1:]:
+        course_class_dict = model_to_dict(course_class)
+        del course_class_dict['id']
+        del course_class_dict['date']
+        assert base_class_dict == course_class_dict
 
 @pytest.mark.django_db
 def test_view_course_class_create_redirect_address(client):

@@ -234,9 +234,9 @@ def test_enrollment(client):
 def test_enrollment_reason_entry(client):
     student_profile = StudentProfileFactory()
     client.login(student_profile.user)
-    today = now_local(student_profile.user.time_zone)
+    today = now_local(student_profile.user.time_zone).date()
     current_term = SemesterFactory.create_current(
-        enrollment_period__ends_on=today.date())
+        enrollment_period__ends_on=today)
     course = CourseFactory(main_branch=student_profile.branch, semester=current_term, ask_enrollment_reason=True)
     client.post(course.get_enroll_url(), data={
         "type": EnrollmentTypes.REGULAR,
