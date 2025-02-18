@@ -34,6 +34,8 @@ class CheckerFactory(factory.django.DjangoModelFactory):
 class SubmissionFactory(factory.django.DjangoModelFactory):
     assignment_submission = factory.SubFactory(AssignmentCommentFactory,
                                                type=AssignmentSubmissionTypes.SOLUTION)
-
+    settings = factory.Dict({
+        "compiler": FuzzyInteger(0, 100),
+    })
     class Meta:
         model = Submission
