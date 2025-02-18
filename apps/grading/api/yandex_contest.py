@@ -165,7 +165,7 @@ class YandexContestAPI:
                                      timeout=timeout)
             response.raise_for_status()
         # Network problems
-        except (requests.ConnectionError, requests.Timeout) as e:
+        except (requests.ConnectionError, requests.Timeout, requests.ReadTimeout) as e:
             raise Unavailable() from e
         # Client 4xx or server 5xx HTTP errors
         except requests.exceptions.HTTPError as e:
@@ -177,6 +177,7 @@ class YandexContestAPI:
                 # Unpredictable client or server error
                 logger.exception("Contest API service had internal error.")
                 raise Unavailable() from e
+            
         participant_id = None
         # FIXME: this logic should be encapsulated in the response object
         if response.status_code in (RegisterStatus.CREATED, RegisterStatus.OK):
@@ -238,7 +239,7 @@ class YandexContestAPI:
                                           timeout=timeout)
         data = response.json()
         logger.debug("Meta data: {}".format(data))
-        return response.status_code, data
+        return data
 
     def add_submission(self, contest_id, timeout=3, files=None, **params):
         headers = {
@@ -264,7 +265,7 @@ class YandexContestAPI:
             response.raise_for_status()
             return response
         # Some of the network problems
-        except (requests.ConnectionError, requests.Timeout) as e:
+        except (requests.ConnectionError, requests.Timeout, requests.ReadTimeout) as e:
             raise Unavailable() from e
         # Client 4xx or server 5xx HTTP errors
         except requests.exceptions.HTTPError as e:
