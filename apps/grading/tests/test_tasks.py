@@ -86,6 +86,28 @@ def test_add_new_submission_api_error(mocker):
 
 
 @pytest.mark.django_db
+def test_add_new_submission_any_error(mocker):
+
+    mocker.patch("grading.api.yandex_contest.YandexContestAPI.add_submission", side_effect=Exception("Some"))
+    mocked_django_rq = mocker.patch("django_rq.get_scheduler")
+    mocked_django_rq.return_value = MagicMock()
+    submission = SubmissionFactory(status=SubmissionStatus.PASSED)
+    # Update course completed_at to make it active course
+    course = submission.assignment_submission.student_assignment.assignment.course
+    course.completed_at = now_local(course.get_timezone()).date() + datetime.timedelta(days=2)
+    course.save()
+    
+    # Add checker with for assignment here because of circle import in factory
+    assignment = submission.assignment_submission.student_assignment.assignment
+    assignment.checker = CheckerFactory()
+    assignment.save()
+
+    result = add_new_submission_to_checking_system(submission.pk, retries=3)
+
+    assert result == "Unknown Yandex.Contest api error"
+
+
+@pytest.mark.django_db
 def test_monitor_submission_success(mocker):
     submission = SubmissionFactory(status=SubmissionStatus.PASSED,
                                    meta={'verdict': SubmissionVerdict.OK.value})
@@ -167,6 +189,28 @@ def test_monitor_submission_api_error(mocker):
     result = monitor_submission_status_in_yandex_contest(submission.pk, 456)
 
     assert result == "Yandex.Contest api error"
+
+@pytest.mark.django_db
+def test_monitor_submission_any_error(mocker):
+    mocked_submission_details = mocker.patch("grading.api.yandex_contest.YandexContestAPI.submission_details", side_effect=Exception("Some exc"))
+    mocked_django_rq = mocker.patch("django_rq.get_scheduler")
+    mocked_django_rq.return_value = MagicMock()
+    submission = SubmissionFactory(status=SubmissionStatus.PASSED)
+    # Update course completed_at to make it active course
+    course = submission.assignment_submission.student_assignment.assignment.course
+    course.completed_at = now_local(course.get_timezone()).date() + datetime.timedelta(days=2)
+    course.save()
+    
+    # Add checker with for assignment here because of circle import in factory
+    assignment = submission.assignment_submission.student_assignment.assignment
+    assignment.checker = CheckerFactory()
+    assignment.save()
+    mocked_submission_details.return_value = {"runId": "456",
+                                              "verdict": SubmissionVerdict.OK.value}
+
+    result = monitor_submission_status_in_yandex_contest(submission.pk, 456)
+
+    assert result == "unknown Yandex.Contest api error"
 
 @pytest.mark.django_db
 def test_monitor_submission_no_report_retry(mocker):
