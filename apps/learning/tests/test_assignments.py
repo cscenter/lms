@@ -14,6 +14,7 @@ from django.utils.translation import gettext as _
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
+from core.timezone.utils import now_local
 from core.urls import reverse
 from courses.constants import AssigneeMode, AssignmentFormat
 from courses.models import Assignment, AssignmentAttachment, CourseTeacher
@@ -69,7 +70,7 @@ def test_security_course_detail(client):
     enrollment.save()
     assert is_course_failed_by_student(co, student)
     # Change course offering state to not completed
-    co.completed_at = now().date() + datetime.timedelta(days=1)
+    co.completed_at = now_local(co.main_branch.time_zone).date() + datetime.timedelta(days=1)
     co.save()
     assert not is_course_failed_by_student(co, student)
 

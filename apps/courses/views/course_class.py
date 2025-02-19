@@ -1,11 +1,13 @@
 import datetime
 from typing import TYPE_CHECKING, Any, Optional
-
+from copy import deepcopy
+from django.forms import ValidationError
 from vanilla import CreateView, DeleteView, UpdateView
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
+from django.db import transaction
 from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
@@ -89,17 +91,8 @@ class CourseClassFormMixin(CourseClassFormMixinBase):
     def get_initial(self, **kwargs):
         return None
 
-    # TODO: add atomic
-    def form_valid(self, form):
-        self.object = form.save()
-        attachments = self.request.FILES.getlist('attachments')
-        if attachments:
-            for attachment in attachments:
-                CourseClassAttachment(course_class=self.object,
-                                      material=attachment).save()
-        return redirect(self.get_success_url())
 
-    def get_success_url(self):
+    def get_success_url(self, to_classes_list=False):
         return_url = self.request.GET.get('back')
         if return_url == 'timetable':
             return reverse('teaching:timetable')
@@ -109,6 +102,8 @@ class CourseClassFormMixin(CourseClassFormMixinBase):
             return reverse('teaching:calendar')
         elif "_addanother" in self.request.POST:
             return self.object.course.get_create_class_url()
+        elif to_classes_list:
+            return self.object.course.get_url_for_tab("classes")
         else:
             return super().get_success_url()
 
@@ -144,12 +139,68 @@ class CourseClassCreateView(PermissionRequiredMixin, CourseURLParamsMixin,
                 "date": previous_class.date + datetime.timedelta(weeks=1)
             })
         return initial
+    
+    def form_valid(self, form):
+        try:
+            with transaction.atomic():
+                number_of_repeats = form.cleaned_data.pop('number_of_repeats') or 1
+                is_repeated = form.cleaned_data.pop('is_repeated')
+                if number_of_repeats != 1 and not is_repeated:
+                    raise ValidationError(_("Form error. is_repeated is False and number_of_repeats is not 1"))
+                            
+                objects = []
+                self.object = form.save()
+                objects.append(self.object)
+                
+                for i in range(number_of_repeats - 1):
+                    obj = deepcopy(self.object)
+                    # save m2m objects
+                    m2m_fields = {}
+                    for field in obj._meta.many_to_many:
+                        m2m_fields[field.name] = list(getattr(obj, field.name).all())
+                    obj.id = None
+                    obj.date = self.object.date + datetime.timedelta(weeks=i+1)
+                    obj.save()
+                    # restore m2m objects as they are cleaned after save
+                    for field_name, values in m2m_fields.items():
+                        getattr(obj, field_name).set(values)
+                    objects.append(obj)
+                
+                # Create attachments for all class objects
+                attachments = self.request.FILES.getlist('attachments')
+                if attachments:
+                    # Create file copies as original TemporaryUploadedFile can be used only once
+                    attachment_copies = []
+                    for attachment in attachments:
+                        attachment_copies.append(SimpleUploadedFile(
+                                attachment.name,
+                                attachment.read(),
+                                attachment.content_type
+                            ))
+                    for obj in objects:
+                        for attachment_copy in attachment_copies:
+                            attachment_copy
+                            CourseClassAttachment.objects.create(
+                                course_class=obj,
+                                material=attachment_copy
+                            )
 
-    def get_success_url(self):
-        msg = _("The class '%s' was successfully created.")
-        messages.success(self.request, msg % self.object.name,
-                         extra_tags='timeout')
-        return super().get_success_url()
+                return redirect(self.get_success_url(number_of_repeats))
+                
+        except Exception as e:
+            messages.error(self.request, _("Class creation error: {exception}").format(exception=str(e)), extra_tags='timeout')
+            return self.form_invalid(form)
+
+    def get_success_url(self, number_of_repeats = 1):
+        if number_of_repeats == 1:
+            msg = _('The class "{name}" was successfully created.').format(name=self.object.name)
+        else:
+            msg = _('The classes "{name}" from {from_date} to {to_date} were successfully created.').format(
+                name=self.object.name,
+                from_date=self.object.date,
+                to_date=self.object.date + datetime.timedelta(weeks=number_of_repeats - 1))
+        messages.success(self.request, msg, extra_tags='timeout')
+        return super().get_success_url(to_classes_list=number_of_repeats != 1)
 
     def post(self, request, *args, **kwargs):
         """Teacher can't add new class if course already completed"""
@@ -174,6 +225,16 @@ class CourseClassUpdateView(PermissionRequiredMixin, CourseClassURLParamsMixin,
 
     def get_object(self):
         return self.course_class
+    
+    def form_valid(self, form):
+        with transaction.atomic():
+            self.object = form.save()
+            attachments = self.request.FILES.getlist('attachments')
+            if attachments:
+                for attachment in attachments:
+                    CourseClassAttachment.objects.create(course_class=self.object,
+                                                        material=attachment)
+            return redirect(self.get_success_url())
 
     def get_success_url(self):
         msg = _("The class '%s' was successfully updated.")

@@ -94,6 +94,7 @@ class CourseService:
     def get_classes(course):
         return (course.courseclass_set
                 .select_related("venue", "venue__location")
+                .prefetch_related("teachers")
                 .order_by("date", "starts_at"))
 
     @staticmethod

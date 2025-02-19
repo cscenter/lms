@@ -4,10 +4,11 @@ import re
 
 import factory
 import pytest
+from pytest_django.asserts import assertRedirects
 import pytz
 from bs4 import BeautifulSoup
 
-from django.contrib.messages import get_messages
+from django.contrib.messages import get_messages, constants
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
@@ -19,7 +20,7 @@ from core.timezone import now_local
 from core.urls import reverse
 from courses.constants import MaterialVisibilityTypes
 from courses.forms import CourseClassForm
-from courses.models import CourseClass, CourseGroupModes, CourseTeacher
+from courses.models import CourseClass, CourseClassAttachment, CourseGroupModes, CourseTeacher
 from courses.permissions import CreateCourseClass
 from courses.tests.factories import (
     CourseClassAttachmentFactory, CourseClassFactory, CourseFactory,
@@ -157,6 +158,151 @@ def test_view_course_class_create(client, lms_resolver, assert_login_redirect):
     assert client.post(url, form).status_code == 302
     assert CourseClass.objects.filter(course=course).count() == 3
 
+    form.update({
+        'is_repeated': True,
+        'number_of_repeats': 1
+    })
+    client.login(curator)
+    assert client.post(url, form).status_code == 302
+    assert CourseClass.objects.filter(course=course).count() == 4
+    
+    form.update({
+        'is_repeated': True,
+        'number_of_repeats': 3
+    })
+    client.login(curator)
+    assert client.post(url, form).status_code == 302
+    assert CourseClass.objects.filter(course=course).count() == 7
+    
+    del form['is_repeated']
+    client.login(curator)
+    assert client.post(url, form).status_code == 302
+    assert CourseClass.objects.filter(course=course).count() == 8
+
+@pytest.mark.django_db
+def test_view_course_class_create_repeated(client):
+    curator = CuratorFactory()
+    course = CourseFactory.create(semester=SemesterFactory.create_current())
+    form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
+    name = 'one class name'
+    f1 = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
+    f2 = SimpleUploadedFile("attachment2.txt", b"attachment2_content")
+    form.update({
+        'name': name,
+        'venue': LearningSpaceFactory(branch=course.main_branch).pk,
+        'is_repeated': True,
+        'number_of_repeats': 1,
+        'date': course.semester.starts_at.date(),
+        'teachers': [CourseTeacherFactory(course=course).pk for _ in range(3)],
+        'restricted_to': [StudentGroupFactory(course=course).pk for _ in range(3)],
+        'attachments' : [f1, f2]
+    })
+    url = course.get_create_class_url()
+
+    client.login(curator)
+    assert client.post(url, form).status_code == 302
+    classes = CourseClass.objects.filter(course=course, name__startswith=name)
+    assert classes.count() == 1
+    assert set(classes.values_list("date", flat=True)) == {course.semester.starts_at.date()}
+    assert set(classes.values_list("name", flat=True)) == {name}
+    assert set(classes.values_list("teachers", flat=True)) == set(form["teachers"])
+    assert classes.values_list("teachers", flat=True).count() == 3
+    assert set(classes.values_list("restricted_to", flat=True)) == set(form["restricted_to"])
+    assert classes.values_list("restricted_to", flat=True).count() == 3
+    assert CourseClassAttachment.objects.filter(course_class__in=classes).count() == 2
+    
+    f1.seek(0)
+    f2.seek(0)
+    name = 'three classes name'
+    form.update({
+        'name': name,
+        'number_of_repeats': 3,
+        'date': course.semester.starts_at.date() + datetime.timedelta(weeks=2)
+    })
+    client.login(curator)
+    assert client.post(url, form).status_code == 302
+    classes = CourseClass.objects.filter(course=course, name__startswith=name)
+    assert classes.count() == 3
+    assert set(classes.values_list("date", flat=True)) == {course.semester.starts_at.date() + datetime.timedelta(weeks=2+i) for i in range (3)}
+    assert set(classes.values_list("name", flat=True)) == {name for _ in range (3)}
+    assert classes.values_list("teachers", flat=True).count() == 9
+    assert set(classes.values_list("teachers", flat=True)) == set(form["teachers"])
+    assert classes.values_list("restricted_to", flat=True).count() == 9
+    assert set(classes.values_list("restricted_to", flat=True)) == set(form["restricted_to"])
+    assert CourseClassAttachment.objects.filter(course_class__in=classes).count() == 6
+    base_class_dict = model_to_dict(classes[0])
+    del base_class_dict['id']
+    del base_class_dict['date']
+    for course_class in classes[1:]:
+        course_class_dict = model_to_dict(course_class)
+        del course_class_dict['id']
+        del course_class_dict['date']
+        assert base_class_dict == course_class_dict
+
+@pytest.mark.django_db
+def test_view_course_class_create_redirect_address(client):
+    curator = CuratorFactory()
+    course = CourseFactory.create(semester=SemesterFactory.create_current())
+    form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
+    form['venue'] = LearningSpaceFactory(branch=course.main_branch).pk
+    url = course.get_create_class_url()
+
+    client.login(curator)
+    response = client.post(url, form)
+    assert response.status_code == 302
+    course_class = CourseClass.objects.get(course=course, name=form["name"])
+    assertRedirects(response, course_class.get_absolute_url())
+    
+    name = 'still one class'
+    form.update({
+        'name': name,
+        'is_repeated': True,
+        'number_of_repeats': 1
+    })
+    response = client.post(url, form)
+    assert response.status_code == 302
+    course_class = CourseClass.objects.get(course=course, name=name)
+    assertRedirects(response, course_class.get_absolute_url())
+    
+    form['number_of_repeats'] = 3
+    response = client.post(url, form)
+    assert response.status_code == 302
+    assertRedirects(response, course_class.course.get_url_for_tab("classes"))
+    
+@pytest.mark.django_db
+def test_view_course_class_create_messages(client):
+    curator = CuratorFactory()
+    course = CourseFactory.create(semester=SemesterFactory.create_current())
+    form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
+    form['venue'] = LearningSpaceFactory(branch=course.main_branch).pk
+    url = course.get_create_class_url()
+
+    client.login(curator)
+    response = client.post(url, form)
+    assert response.status_code == 302
+    messages = map(lambda element: (element.level, element.message), list(get_messages(response.wsgi_request)))
+    assert (constants.SUCCESS, f'The class "{form["name"]}" was successfully created.') in messages
+
+    name = 'still one class'
+    form.update({
+        'name': name,
+        'is_repeated': True,
+        'number_of_repeats': 1
+    })
+    response = client.post(url, form)
+    assert response.status_code == 302
+    messages = map(lambda element: (element.level, element.message), list(get_messages(response.wsgi_request)))
+    assert (constants.SUCCESS, f'The class "{name}" was successfully created.') in messages
+    
+    name = 'three classes'
+    form.update({
+        'name': name,
+        'number_of_repeats': 3
+    })
+    response = client.post(url, form)
+    assert response.status_code == 302
+    messages = map(lambda element: (element.level, element.message), list(get_messages(response.wsgi_request)))
+    assert (constants.SUCCESS, f'The classes "{name}" from {form["date"]} to {form["date"] + datetime.timedelta(weeks=2)} were successfully created.') in messages
 
 @pytest.mark.django_db
 def test_course_class_create_and_add(client, assert_redirect):
