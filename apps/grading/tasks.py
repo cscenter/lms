@@ -159,7 +159,7 @@ def add_new_submission_to_checking_system(submission_id: int, *, retries: int) -
 
         except Exception as e:
             logger.exception(f"Failed Yandex.Contest api e={e!r}")
-            submission_status = submission.STATUSES.FAILED
+            submission_status = SubmissionStatus.SUBMIT_FAIL
             submission_verdict = _("Unknown Yandex.Contest api error")
 
         if not submission.meta:
