@@ -3674,27 +3674,14 @@ msgstr "Незачёт"
 msgid "SHADCourseGrade|Pass"
 msgstr "Удовлетворительно"
 
-#: apps/users/constants.py:62
-msgid "Yandex School of Data Analysis LMS terms of use"
-msgstr ""
 
 #: apps/users/constants.py:63
 msgid "Offer for the provision of additional professional education services"
-msgstr ""
-
-#: apps/users/constants.py:64
-msgid ""
-"Buying tickets, making reservations, obtaining permits to visit the "
-"countries of arrival"
 msgstr ""
 
 #: apps/users/forms.py:72
 #: apps/users/constants.py:62
 msgid "Yandex School of Data Analysis LMS terms of use"
-msgstr ""
-
-#: apps/users/constants.py:63
-msgid "Offer for the provision of additional professional education services"
 msgstr ""
 
 #: apps/users/constants.py:64
@@ -4116,23 +4103,10 @@ msgstr "Согласия пользователя"
 msgid "Major and minor must be objects of the same types"
 msgstr "Основной и дублирующий объекты должны быть объектами одного типа"
 
-#: apps/users/services.py:532
-msgid ""
-"Major and minor objects must not be the same: {major} with type "
-"{type(major)}"
-msgstr ""
-"Основной и дублирующий объекты не должны быть одним объектом: {major} типа "
-"{type(major)}"
 
 #: apps/users/services.py:590
 msgid "Use merge_objects for non User instances"
 msgstr "Для объектов не-Пользователей используйте merge_objects"
-
-#: apps/users/services.py:592
-#, python-brace-format
-msgid "Major and minor Users must not be the same object: {major}"
-msgstr ""
-"Основной и дублирующий пользователи не должны быть одним объектом: {major}"
 
 #: apps/users/services.py:634
 msgid "User with email \"{}\" does not exists"
