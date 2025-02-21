@@ -5,6 +5,8 @@ from django.http.response import (
     HttpResponse, HttpResponseRedirect, HttpResponseServerError
 )
 
+from apps.learning.settings import StudentStatuses
+from compscicenter_ru.apps.application.views import SESSION_LOGIN_KEY
 from core.exceptions import Redirect
 from core.models import Branch
 
@@ -103,3 +105,17 @@ class HealthCheckMiddleware:
             logger.exception(e)
             return HttpResponseServerError("db: cannot connect to database.")
         return HttpResponse("OK")
+
+class UserStatusCheckMiddleware:
+    """
+    Middleware that checks the status of the c in the request.
+    If the student profile is in an inactive status, the session is cleared.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        student_profile = request.user.get_student_profile(settings.SITE_ID)
+        if student_profile and student_profile.status in StudentStatuses.inactive_statuses:
+            request.session.pop(SESSION_LOGIN_KEY, None)
+        return self.get_response(request)

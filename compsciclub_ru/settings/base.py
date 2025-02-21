@@ -48,6 +48,7 @@ MIDDLEWARE = [
     'notifications.middleware.UnreadNotificationsCacheMiddleware',
     'core.middleware.SubdomainBranchMiddleware',
     'core.middleware.RedirectMiddleware',
+    'core.middleware.UserStatusCheckMiddleware',
 ]
 
 INSTALLED_APPS += [
