@@ -116,6 +116,6 @@ class UserStatusCheckMiddleware:
 
     def __call__(self, request):
         student_profile = request.user.get_student_profile(settings.SITE_ID)
-        if student_profile and student_profile.status in StudentStatuses.inactive_statuses:
+        if student_profile and StudentStatuses.is_inactive(student_profile.status):
             request.session.pop(SESSION_LOGIN_KEY, None)
         return self.get_response(request)
