@@ -5,7 +5,7 @@ from django.conf import settings
 from django.http.response import (
     HttpResponse, HttpResponseRedirect, HttpResponseServerError
 )
-from django.urls import reverse
+from core.urls import reverse
 from django.contrib import messages
 
 from apps.learning.settings import StudentStatuses
