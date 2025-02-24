@@ -1,14 +1,17 @@
 import logging
+from pyexpat.errors import messages
 
 from django.conf import settings
 from django.http.response import (
     HttpResponse, HttpResponseRedirect, HttpResponseServerError
 )
+from django.urls import reverse
+from django.contrib import messages
 
 from apps.learning.settings import StudentStatuses
-from compscicenter_ru.apps.application.views import SESSION_LOGIN_KEY
 from core.exceptions import Redirect
 from core.models import Branch
+from django.contrib import auth
 
 logger = logging.getLogger(__name__)
 
@@ -117,5 +120,7 @@ class UserStatusCheckMiddleware:
     def __call__(self, request):
         student_profile = request.user.get_student_profile(settings.SITE_ID)
         if student_profile and StudentStatuses.is_inactive(student_profile.status):
-            request.session.pop(SESSION_LOGIN_KEY, None)
+            auth.logout(request)
+            messages.warning(request, "Ваш аккаунт неактивен")
+            return HttpResponseRedirect(redirect_to=reverse('auth:login'))
         return self.get_response(request)
