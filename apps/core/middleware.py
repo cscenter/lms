@@ -1,5 +1,4 @@
 import logging
-from pyexpat.errors import messages
 
 from django.conf import settings
 from django.http.response import (
@@ -111,7 +110,7 @@ class HealthCheckMiddleware:
 
 class UserStatusCheckMiddleware:
     """
-    Middleware that checks the status of the c in the request.
+    Middleware that checks the status of the client in the request.
     If the student profile is in an inactive status, the session is cleared.
     """
     def __init__(self, get_response):
