@@ -11,6 +11,8 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, get_connection
 from django.core.mail.backends import smtp
 from django.core.management.base import BaseCommand
+from django.db.models import Exists, OuterRef
+
 from django.template.loader import render_to_string
 from django.utils import translation
 from django.utils.decorators import method_decorator
@@ -22,7 +24,7 @@ from core.locks import distributed_lock, get_shared_connection
 from core.models import Branch, SiteConfiguration
 from core.urls import replace_hostname
 from courses.models import Course
-from learning.models import AssignmentNotification, CourseNewsNotification
+from learning.models import AssignmentNotification, CourseNewsNotification, StudentAssignment
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -233,8 +235,14 @@ def send_assignment_notifications(site_configurations: Dict[int, SiteConfigurati
         'student_assignment__assignment__course__meta_course',
         'student_assignment__student',
     ]
+    # AssignmentNotification with unactive StudentAssignment should not exist at this point, but just in case
+    active_sa_query = StudentAssignment.objects.active().filter(pk=OuterRef('student_assignment_id'))
     notifications = (AssignmentNotification.objects
-                     .filter(is_unread=True, is_notified=False, user__is_notification_allowed=True)
+                     .filter(
+                        Exists(active_sa_query),
+                        is_unread=True, 
+                        is_notified=False, 
+                        user__is_notification_allowed=True)
                      .select_related("user", "user__branch")
                      .prefetch_related(*prefetch))
     for notification in notifications:

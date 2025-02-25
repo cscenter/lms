@@ -32,12 +32,9 @@ class StudentAssignmentQuerySet(query.QuerySet):
         # Have to do so to avoid cercular import:
         # learning.managers (this) -> learning.models(with Enrollment) -> learning.managers (with AssignmentCommentPublishedManager)
         Enrollment = apps.get_model('learning', 'Enrollment')
-        enrollment_subquery = Enrollment.active.filter(
+        enrollment_subquery = Enrollment.active.can_submit_assignments().filter(
                             student=OuterRef('student'),
-                            course=OuterRef('assignment__course'),
-                            grade__ne=GradeTypes.RE_CREDIT,
-                            is_grade_recredited=False,
-                            type__ne=EnrollmentTypes.LECTIONS_ONLY
+                            course=OuterRef('assignment__course')
                             )
 
         return self.annotate(active=Exists(enrollment_subquery)).filter(active=True)
@@ -79,7 +76,13 @@ class _EnrollmentActiveManager(models.Manager):
 
 
 class EnrollmentQuerySet(models.QuerySet):
-    pass
+    
+    def can_submit_assignments(self):
+        return self.filter(
+                    grade__ne=GradeTypes.RE_CREDIT,
+                    is_grade_recredited=False,
+                    type__ne=EnrollmentTypes.LECTIONS_ONLY
+                    )
 
 
 EnrollmentDefaultManager = _EnrollmentDefaultManager.from_queryset(

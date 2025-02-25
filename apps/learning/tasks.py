@@ -57,6 +57,7 @@ def handle_submission_assignee_and_notifications(assignment_submission_id: int):
 
 @job('high')
 def generate_notifications_about_new_submission(*, assignment_submission_id):
+        # Do not need to make notifications if student_assignment is not active
     try:
         submission = (AssignmentComment.objects
                       .select_related('student_assignment__assignment',
@@ -70,6 +71,9 @@ def generate_notifications_about_new_submission(*, assignment_submission_id):
                       .get(pk=assignment_submission_id))
     except AssignmentComment.DoesNotExist:
         logger.debug(f"Submission with id={assignment_submission_id} not found")
+        return
+    if not StudentAssignment.objects.active().filter(pk=submission.student_assignment.pk).exists():
+        logger.debug(f"Submission with id={assignment_submission_id} is not active")
         return
     count = create_notifications_about_new_submission(submission)
     return f'Generated {count} notifications'

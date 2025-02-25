@@ -922,6 +922,10 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
         if has_been_published:
             handle_submission_assignee_and_notifications.delay(
                 assignment_submission_id=self.pk)
+            
+    def clean(self):
+        if not StudentAssignment.objects.active().filter(pk=self.student_assignment.pk).exists():
+            raise ValidationError(_("Can not add comment to unactive assignment"))
 
     def created_local(self, tz=None):
         if not tz:
