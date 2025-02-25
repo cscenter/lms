@@ -3,7 +3,7 @@ from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
 from courses.forms import MetaCourseForm
-from courses.models import Course, MetaCourse
+from courses.models import Course, CourseDurations, MetaCourse
 from courses.permissions import EditMetaCourse
 
 __all__ = ('MetaCourseDetailView', 'MetaCourseUpdateView')
@@ -23,6 +23,7 @@ class MetaCourseDetailView(LoginRequiredMixin, generic.DetailView):
         context = {
             'meta_course': self.object,
             'courses': courses,
+            'CourseDurations': CourseDurations
         }
         return context
 
