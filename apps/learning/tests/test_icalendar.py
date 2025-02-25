@@ -20,7 +20,7 @@ from users.tests.factories import StudentFactory, UserFactory
 
 @pytest.mark.django_db
 def test_smoke(client, curator, settings):
-    """User can view only own icalendar since these urls are secret"""
+    """User can view only any icalendar without login since these urls are not secret"""
     student = StudentFactory()
     other_student = StudentFactory()
     client.login(student)
@@ -29,8 +29,7 @@ def test_smoke(client, curator, settings):
     response = client.get(student.get_assignments_icalendar_url())
     assert response.status_code == 200
     response = client.get(other_student.get_assignments_icalendar_url())
-    assert response.status_code == 302
-    assert response.url.startswith('/login')
+    assert response.status_code == 200
 
 
 @pytest.mark.django_db

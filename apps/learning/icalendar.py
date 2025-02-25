@@ -11,6 +11,7 @@ from icalendar.prop import vInline
 
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.core import signing
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -245,12 +246,13 @@ def get_icalendar_links(account: User,
                         url_builder: Callable[[str], str] = None) -> List[ICalendarURL]:
     if not url_builder:
         url_builder = str
+    encoded_pk = signing.dumps(account.pk)
     url_classes = reverse('user_ical_classes',
                           subdomain=settings.LMS_SUBDOMAIN,
-                          args=[account.pk])
+                          args=[encoded_pk])
     url_assignments = reverse('user_ical_assignments',
                               subdomain=settings.LMS_SUBDOMAIN,
-                              args=[account.pk])
+                              args=[encoded_pk])
     url_events = reverse('ical_events', subdomain=settings.LMS_SUBDOMAIN)
     urls = [
         ICalendarURL(code="classes", title=str(_("Classes")), url=url_builder(url_classes)),
@@ -260,6 +262,6 @@ def get_icalendar_links(account: User,
     if Roles.INTERVIEWER in account.roles:
         url_interviews = reverse('user_ical_interviews',
                               subdomain=settings.LMS_SUBDOMAIN,
-                              args=[account.pk])
+                              args=[encoded_pk])
         urls.append(ICalendarURL(code="interviews", title=str(_("Interviews")), url=url_builder(url_interviews)))
     return urls

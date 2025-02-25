@@ -2,6 +2,7 @@ from typing import Iterable, NamedTuple
 
 from braces.views import UserPassesTestMixin
 from django.conf import settings
+from django.core import signing
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -27,7 +28,6 @@ class ICalendarMeta(NamedTuple):
     file_name: str
 
 
-# TODO: add secret link for each student
 class UserICalendarView(generic.base.View):
     def get(self, request, *args, **kwargs):
         user = self.get_user()
@@ -49,9 +49,9 @@ class UserICalendarView(generic.base.View):
         return response
 
     def get_user(self):
-        user_id = self.kwargs['pk']
+        encoded_pk = self.kwargs['encoded_pk']
         qs = (User.objects
-              .filter(pk=user_id)
+              .filter(pk=signing.loads(encoded_pk))
               .only("first_name", "last_name", "patronymic", "pk"))
         return get_object_or_404(qs)
 
