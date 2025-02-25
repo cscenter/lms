@@ -20,12 +20,6 @@ from learning.selectors import (
 )
 from users.models import User
 
-class ICalendarOnlyMixin(UserPassesTestMixin):
-    raise_exception = False
-
-    def test_func(self, user):
-        return self.get_user() == user or user.is_curator
-
 
 class ICalendarMeta(NamedTuple):
     name: str
@@ -34,7 +28,7 @@ class ICalendarMeta(NamedTuple):
 
 
 # TODO: add secret link for each student
-class UserICalendarView(ICalendarOnlyMixin, generic.base.View):
+class UserICalendarView(generic.base.View):
     def get(self, request, *args, **kwargs):
         user = self.get_user()
         site = self.request.site
