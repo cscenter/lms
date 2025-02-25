@@ -155,7 +155,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "notifications.middleware.UnreadNotificationsCacheMiddleware",
     "core.middleware.RedirectMiddleware",
-    "core.middleware.UserStatusCheckMiddleware",
 ]
 
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}

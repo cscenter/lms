@@ -4,13 +4,9 @@ from django.conf import settings
 from django.http.response import (
     HttpResponse, HttpResponseRedirect, HttpResponseServerError
 )
-from core.urls import reverse
-from django.contrib import messages
 
-from apps.learning.settings import StudentStatuses
 from core.exceptions import Redirect
 from core.models import Branch
-from django.contrib import auth
 
 logger = logging.getLogger(__name__)
 
@@ -107,19 +103,3 @@ class HealthCheckMiddleware:
             logger.exception(e)
             return HttpResponseServerError("db: cannot connect to database.")
         return HttpResponse("OK")
-
-class UserStatusCheckMiddleware:
-    """
-    Middleware that checks the status of the client in the request.
-    If the student profile is in an inactive status, the session is cleared.
-    """
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        student_profile = request.user.get_student_profile(settings.SITE_ID)
-        if student_profile and StudentStatuses.is_inactive(student_profile.status):
-            auth.logout(request)
-            messages.warning(request, "Ваш аккаунт неактивен")
-            return HttpResponseRedirect(redirect_to=reverse('auth:login'))
-        return self.get_response(request)
