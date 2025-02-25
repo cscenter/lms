@@ -11,12 +11,12 @@ from core.urls import reverse
 from courses.tests.factories import SemesterFactory
 from learning.invitation.forms import InvitationRegistrationForm, CompleteAccountForm
 from learning.invitation.views import (
-    InvitationURLParamsMixin, complete_student_profile, is_student_profile_valid
+    InvitationURLParamsMixin, complete_student_profile, has_other_active_invited_profile, is_student_profile_valid
 )
-from learning.tests.factories import CourseInvitationFactory
+from learning.tests.factories import CourseInvitationFactory, InvitationFactory
 from users.constants import ConsentTypes, GenderTypes, Roles
 from users.models import User, StudentTypes, UserConsent
-from users.tests.factories import UserFactory
+from users.tests.factories import InvitedStudentFactory, StudentFactory, UserFactory
 
 
 @pytest.mark.django_db
@@ -198,3 +198,52 @@ def test_invitation_register_view(client, assert_redirect, settings, mocker):
             site_name=site.name,
             activation_url=abs_url(activation_url),
             language_code=settings.LANGUAGE_CODE)
+
+@pytest.mark.django_db
+def test_has_other_active_invited_profile_no_profile(settings):
+    student = UserFactory()
+    invintation = InvitationFactory()
+
+    assert not has_other_active_invited_profile(student, settings.SITE_ID, invintation)
+
+@pytest.mark.django_db
+def test_has_other_active_invited_profile_not_invited(settings):
+    student = StudentFactory()
+    invintation = InvitationFactory()
+
+    assert not has_other_active_invited_profile(student, settings.SITE_ID, invintation)
+
+@pytest.mark.django_db
+def test_has_other_active_invited_profile_invited_without_inventation(settings):
+    student = InvitedStudentFactory()
+    invintation = InvitationFactory()
+
+    assert not has_other_active_invited_profile(student, settings.SITE_ID, invintation)
+
+@pytest.mark.django_db
+def test_has_other_active_invited_profile_not_actual_semester(settings):
+    invintation = InvitationFactory()
+    invintation.semester = SemesterFactory.create_prev(SemesterFactory.create_current())
+    invintation.save()
+    student = InvitedStudentFactory(student_profile__invitation=invintation)
+    
+    assert not has_other_active_invited_profile(student, settings.SITE_ID, invintation)
+
+@pytest.mark.django_db
+def test_has_other_active_invited_profile_actual_semester(settings):
+    invintation = InvitationFactory()
+    invintation.semester = SemesterFactory.create_current()
+    invintation.save()
+    student = InvitedStudentFactory(student_profile__invitation=invintation)
+
+    assert not has_other_active_invited_profile(student, settings.SITE_ID, invintation)
+
+
+@pytest.mark.django_db
+def test_has_other_active_invited_profile_another_invitation(settings):
+    invintation = InvitationFactory()
+    invintation.semester = SemesterFactory.create_current()
+    invintation.save()
+    student = InvitedStudentFactory(student_profile__invitation=InvitationFactory(semester=SemesterFactory.create_current()))
+
+    assert has_other_active_invited_profile(student, settings.SITE_ID, invintation)
