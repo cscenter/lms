@@ -98,16 +98,14 @@ def test_interviews(client, settings, mocker):
     client.login(user)
     fname = 'interviews.ics'
     # Empty calendar
-    url = reverse('user_ical_interviews', args=[user.pk],
-                  subdomain=settings.LMS_SUBDOMAIN)
-    resp = client.get(url)
+    resp = client.get(user.get_interviews_icalendar_url())
     assert "text/calendar; charset=UTF-8" == resp['content-type']
     assert fname in resp['content-disposition']
     cal = Calendar.from_ical(resp.content)
     site = Site.objects.get(pk=settings.SITE_ID)
     assert f"Собеседования {site.name}" == cal['X-WR-CALNAME']
     InterviewFactory.create_batch(2, interviewers=[user], section=InterviewSections.MATH)
-    resp = client.get(url)
+    resp = client.get(user.get_interviews_icalendar_url())
     cal = Calendar.from_ical(resp.content)
     assert len([evt for evt in cal.subcomponents if isinstance(evt, Event)]) == 2
 

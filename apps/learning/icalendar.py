@@ -9,15 +9,12 @@ from icalendar import Event as ICalEvent
 from icalendar import Timezone, TimezoneStandard, vText, vUri
 from icalendar.prop import vInline
 
-from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core import signing
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from admission.models import Interview
 from admission.roles import Roles
-from core.urls import reverse
 from courses.models import Assignment, CourseClass
 from learning.models import Event, StudentAssignment
 from users.models import User
@@ -242,26 +239,12 @@ class ICalendarURL(NamedTuple):
     url: str
 
 
-def get_icalendar_links(account: User,
-                        url_builder: Callable[[str], str] = None) -> List[ICalendarURL]:
-    if not url_builder:
-        url_builder = str
-    encoded_pk = signing.dumps(account.pk)
-    url_classes = reverse('user_ical_classes',
-                          subdomain=settings.LMS_SUBDOMAIN,
-                          args=[encoded_pk])
-    url_assignments = reverse('user_ical_assignments',
-                              subdomain=settings.LMS_SUBDOMAIN,
-                              args=[encoded_pk])
-    url_events = reverse('ical_events', subdomain=settings.LMS_SUBDOMAIN)
+def get_icalendar_links(account: User) -> List[ICalendarURL]:
     urls = [
-        ICalendarURL(code="classes", title=str(_("Classes")), url=url_builder(url_classes)),
-        ICalendarURL(code="assignments", title=str(_("Assignments")), url=url_builder(url_assignments)),
-        ICalendarURL(code="events", title=str(_("Events")), url=url_builder(url_events)),
+        ICalendarURL(code="classes", title=str(_("Classes")), url=account.get_classes_icalendar_url()),
+        ICalendarURL(code="assignments", title=str(_("Assignments")), url=account.get_assignments_icalendar_url()),
+        ICalendarURL(code="events", title=str(_("Events")), url=account.get_classes_icalendar_url()),
     ]
     if Roles.INTERVIEWER in account.roles:
-        url_interviews = reverse('user_ical_interviews',
-                              subdomain=settings.LMS_SUBDOMAIN,
-                              args=[encoded_pk])
-        urls.append(ICalendarURL(code="interviews", title=str(_("Interviews")), url=url_builder(url_interviews)))
+        urls.append(ICalendarURL(code="interviews", title=str(_("Interviews")), url=account.get_interviews_icalendar_url()))
     return urls

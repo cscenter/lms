@@ -19,6 +19,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, RegexValidator
+from django.core import signing
 from django.db import models
 from django.db.models import Q, prefetch_related_objects
 from django.utils import timezone
@@ -523,11 +524,15 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
 
     def get_classes_icalendar_url(self):
         # Returns relative path
-        return reverse('user_ical_classes', args=[self.pk],
+        return reverse('user_ical_classes', args=[signing.dumps(self.pk)],
                        subdomain=settings.LMS_SUBDOMAIN)
 
     def get_assignments_icalendar_url(self):
-        return reverse('user_ical_assignments', args=[self.pk],
+        return reverse('user_ical_assignments', args=[signing.dumps(self.pk)],
+                       subdomain=settings.LMS_SUBDOMAIN)
+        
+    def get_interviews_icalendar_url(self):
+        return reverse('user_ical_interviews', args=[signing.dumps(self.pk)],
                        subdomain=settings.LMS_SUBDOMAIN)
 
     # FIXME: remove
@@ -974,13 +979,6 @@ class StudentProfile(TimeStampedModel):
         return reverse('user_detail', args=[self.user_id],
                        subdomain=settings.LMS_SUBDOMAIN)
 
-    def get_classes_icalendar_url(self):
-        return reverse('user_ical_classes', args=[self.pk],
-                       subdomain=settings.LMS_SUBDOMAIN)
-
-    def get_assignments_icalendar_url(self):
-        return reverse('user_ical_assignments', args=[self.pk],
-                       subdomain=settings.LMS_SUBDOMAIN)
 
     def get_status_display(self):
         if self.status:
