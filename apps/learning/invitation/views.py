@@ -53,6 +53,7 @@ def has_other_active_invited_profile(user: User, site: Site, invitation: Invitat
     if not student_profile:
         return False
     if student_profile.type == StudentTypes.INVITED and student_profile.invitation is not None:
+        # already have some other invitation for this semester -> True
         return student_profile.invitation.semester == Semester.get_current() and student_profile.invitation != invitation
     else:
         return False
