@@ -13,6 +13,8 @@ from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 
+
+from courses.models import Semester
 from auth.tasks import ActivationEmailContext, send_activation_email
 from auth.views import LoginView
 from core.http import HttpRequest
@@ -50,9 +52,8 @@ def has_other_active_invited_profile(user: User, site: Site, invitation: Invitat
     student_profile = user.get_student_profile(site)
     if not student_profile:
         return False
-    if student_profile.type == StudentTypes.INVITED:
-        created_on_term = date_to_term_pair(student_profile.created)
-        return created_on_term == get_current_term_pair() and student_profile.invitation != invitation
+    if student_profile.type == StudentTypes.INVITED and student_profile.invitation is not None:
+        return student_profile.invitation.semester == Semester.get_current() and student_profile.invitation != invitation
     else:
         return False
 
