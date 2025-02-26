@@ -104,8 +104,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
         can_view_library = is_library_installed and u.is_curator
         icalendars = []
         if profile_user.pk == u.pk:
-            icalendars = get_icalendar_links(profile_user,
-                                             url_builder=self.request.build_absolute_uri)
+            icalendars = get_icalendar_links(profile_user)
         current_semester = Semester.get_current()
         context = {
             "StudentStatuses": StudentStatuses,

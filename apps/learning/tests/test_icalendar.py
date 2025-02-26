@@ -20,7 +20,7 @@ from users.tests.factories import StudentFactory, UserFactory
 
 @pytest.mark.django_db
 def test_smoke(client, curator, settings):
-    """User can view only own icalendar since these urls are secret"""
+    """User can view only any icalendar without login since these urls are not secret"""
     student = StudentFactory()
     other_student = StudentFactory()
     client.login(student)
@@ -29,8 +29,7 @@ def test_smoke(client, curator, settings):
     response = client.get(student.get_assignments_icalendar_url())
     assert response.status_code == 200
     response = client.get(other_student.get_assignments_icalendar_url())
-    assert response.status_code == 302
-    assert response.url.startswith('/login')
+    assert response.status_code == 200
 
 
 @pytest.mark.django_db
@@ -99,16 +98,14 @@ def test_interviews(client, settings, mocker):
     client.login(user)
     fname = 'interviews.ics'
     # Empty calendar
-    url = reverse('user_ical_interviews', args=[user.pk],
-                  subdomain=settings.LMS_SUBDOMAIN)
-    resp = client.get(url)
+    resp = client.get(user.get_interviews_icalendar_url())
     assert "text/calendar; charset=UTF-8" == resp['content-type']
     assert fname in resp['content-disposition']
     cal = Calendar.from_ical(resp.content)
     site = Site.objects.get(pk=settings.SITE_ID)
     assert f"Собеседования {site.name}" == cal['X-WR-CALNAME']
     InterviewFactory.create_batch(2, interviewers=[user], section=InterviewSections.MATH)
-    resp = client.get(url)
+    resp = client.get(user.get_interviews_icalendar_url())
     cal = Calendar.from_ical(resp.content)
     assert len([evt for evt in cal.subcomponents if isinstance(evt, Event)]) == 2
 
