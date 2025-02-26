@@ -72,8 +72,8 @@ def generate_notifications_about_new_submission(*, assignment_submission_id):
     except AssignmentComment.DoesNotExist:
         logger.debug(f"Submission with id={assignment_submission_id} not found")
         return
-    if not StudentAssignment.objects.active().filter(pk=submission.student_assignment.pk).exists():
-        logger.debug(f"Submission with id={assignment_submission_id} is not active")
+    if not submission.student_assignment.can_be_submitted:
+        logger.debug(f"Submission with id={assignment_submission_id} can not be submitted")
         return
     count = create_notifications_about_new_submission(submission)
     return f'Generated {count} notifications'

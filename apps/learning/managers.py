@@ -28,7 +28,7 @@ class StudentAssignmentQuerySet(query.QuerySet):
         """
         return self.filter(assignment__deadline_at__gt=timezone.now())
 
-    def active(self):
+    def can_be_submitted(self):
         # Have to do so to avoid cercular import:
         # learning.managers (this) -> learning.models(with Enrollment) -> learning.managers (with AssignmentCommentPublishedManager)
         Enrollment = apps.get_model('learning', 'Enrollment')

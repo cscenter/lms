@@ -115,7 +115,7 @@ class AssignmentService:
         # TODO: move to the separated method
         # Generate notifications
         to_notify = [sid for sid in students if sid not in already_exist]
-        created = (StudentAssignment.objects.active()
+        created = (StudentAssignment.objects.can_be_submitted()
                    .filter(assignment=assignment, student_id__in=to_notify)
                    .values_list('pk', 'student_id', named=True))
         objs = (notify_student_new_assignment(sa, commit=False) for sa

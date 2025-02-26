@@ -924,7 +924,7 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
                 assignment_submission_id=self.pk)
             
     def clean(self):
-        if not StudentAssignment.objects.active().filter(pk=self.student_assignment.pk).exists():
+        if not self.student_assignment.can_be_submitted:
             raise ValidationError(_("Can not add comment to unactive assignment"))
 
     def created_local(self, tz=None):
@@ -964,6 +964,10 @@ class AssignmentComment(SoftDeletionModel, TimezoneAwareMixin, TimeStampedModel)
             # TODO: pluralize, add i18n
             return f"{td.days} д. {s}"
         return s
+    
+    @property
+    def can_be_submitted(self):
+        self.__class__.objects.can_be_submitted().filter(pk=self.pk).exists()
 
 
 def assignment_submission_attachment_upload_to(self: "SubmissionAttachment",

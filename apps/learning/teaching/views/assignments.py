@@ -206,7 +206,7 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
 
         student_assignments = (
             StudentAssignment.objects
-            .active()
+            .can_be_submitted()
             .filter(assignment=self.object)
             .select_related(
                 'assignment',

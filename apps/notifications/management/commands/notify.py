@@ -236,7 +236,7 @@ def send_assignment_notifications(site_configurations: Dict[int, SiteConfigurati
         'student_assignment__student',
     ]
     # AssignmentNotification with unactive StudentAssignment should not exist at this point, but just in case
-    active_sa_query = StudentAssignment.objects.active().filter(pk=OuterRef('student_assignment_id'))
+    active_sa_query = StudentAssignment.objects.can_be_submitted().filter(pk=OuterRef('student_assignment_id'))
     notifications = (AssignmentNotification.objects
                      .filter(
                         Exists(active_sa_query),

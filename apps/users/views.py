@@ -153,7 +153,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             assignments_qs = (StudentAssignment.objects
                               .for_student(profile_user)
                               .in_term(current_semester)
-                              .active()
+                              .can_be_submitted()
                               .order_by('assignment__course__meta_course__name',
                                         'assignment__deadline_at',
                                         'assignment__title'))

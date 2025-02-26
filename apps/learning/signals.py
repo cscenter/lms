@@ -85,7 +85,7 @@ def create_deadline_change_notification(sender, instance, created,
         active_enrollments = Enrollment.active.filter(course=instance.course)
         for e in active_enrollments:
             try:
-                sa = (StudentAssignment.objects.active()
+                sa = (StudentAssignment.objects.can_be_submitted()
                       .only('pk')
                       .get(student_id=e.student_id,
                            assignment=instance))
@@ -94,7 +94,7 @@ def create_deadline_change_notification(sender, instance, created,
                                         is_about_deadline=True)
                  .save())
             except StudentAssignment.DoesNotExist:
-                # It can occur for student with inactive status
+                # It can occur for student with inactive status or if assignment can not be submitted
                 continue
 
 
