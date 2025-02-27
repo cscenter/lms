@@ -1,12 +1,13 @@
 from django.apps import apps
 from django.conf import settings
 from django.db import models
-from django.db.models import query
+from django.db.models import Q, query
 from django.utils import timezone
 
 from core.db.models import LiveManager
 from django.db.models import OuterRef, Exists
 from core.utils import is_club_site
+from courses.constants import AssignmentStatus
 from learning.settings import EnrollmentTypes, GradeTypes
 
 
@@ -37,7 +38,11 @@ class StudentAssignmentQuerySet(query.QuerySet):
                             course=OuterRef('assignment__course')
                             )
 
-        return self.annotate(active=Exists(enrollment_subquery)).filter(active=True)
+        return (
+            self.annotate(can_submit_assignments=Exists(enrollment_subquery))
+                .filter(Q(can_submit_assignments=True) | 
+                        Q(status__in=[AssignmentStatus.NEED_FIXES, AssignmentStatus.COMPLETED]))
+            )
 
 
 class _StudentAssignmentDefaultManager(LiveManager):
