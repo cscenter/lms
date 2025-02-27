@@ -42,5 +42,6 @@ def convert_ipynb_to_html(file_field: FieldFile,
         except (FileNotFoundError, AttributeError) as e:
             raise ConvertError from e
     name = name or file_field.name + '.html'
-    return ContentFile(nb_node.encode(), name=name)
-    # file_field.storage.save(new_path, ContentFile(nb_node.encode()))
+    file = ContentFile(nb_node.encode(), name=name)
+    file_field.storage.save(name, file)
+    return file
