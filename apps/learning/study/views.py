@@ -32,7 +32,7 @@ from learning import utils
 from learning.calendar import get_all_calendar_events, get_student_calendar_events
 from learning.models import Enrollment, StudentAssignment, CourseInvitation
 from learning.permissions import (
-    CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution,
+    CreateAssignmentComment, CreateAssignmentCommentAsLearner, CreateOwnAssignmentSolution,
     EnrollPermissionObject, ViewCourses, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments
 )
@@ -219,16 +219,17 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         sa = self.student_assignment
-        draft_comment = get_draft_comment(self.request.user, self.student_assignment)
-        comment_form = AssignmentCommentForm(instance=draft_comment)
-        add_comment_url = reverse('study:assignment_comment_create',
-                                  kwargs={'pk': sa.pk})
-        comment_form.helper.form_action = add_comment_url
         # Format datetime in student timezone
-        context['comment_form'] = comment_form
         context['time_zone'] = self.request.user.time_zone
-        context['solution_form'] = get_solution_form(sa)
         context['get_score_status_changing_message'] = get_assignment_update_history_message
+        if self.request.user.has_perm(CreateAssignmentComment.name, sa):
+            draft_comment = get_draft_comment(self.request.user, self.student_assignment)
+            comment_form = AssignmentCommentForm(instance=draft_comment)
+            add_comment_url = reverse('study:assignment_comment_create',
+                                    kwargs={'pk': sa.pk})
+            comment_form.helper.form_action = add_comment_url
+            context['comment_form'] = comment_form
+            context['solution_form'] = get_solution_form(sa)
         return context
 
 

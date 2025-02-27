@@ -390,6 +390,12 @@ class ViewAssignmentAttachmentAsTeacher(Permission):
 @add_perm
 class CreateAssignmentComment(Permission):
     name = "learning.create_assignment_comment"
+    
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_assignment: StudentAssignment):
+        print(student_assignment, student_assignment.can_be_submitted)
+        return student_assignment and student_assignment.can_be_submitted
 
 
 @add_perm
@@ -402,7 +408,7 @@ class CreateAssignmentCommentAsLearner(Permission):
         student_profile = user.get_student_profile()
         if student_profile.status in StudentStatuses.inactive_statuses:
             return False
-        return student_assignment.student_id == user.id
+        return CreateAssignmentComment.rule(user, student_assignment) and student_assignment.student_id == user.id
 
 
 @add_perm
@@ -413,7 +419,7 @@ class CreateAssignmentCommentAsTeacher(Permission):
     @rules.predicate
     def rule(user, student_assignment: StudentAssignment):
         course = student_assignment.assignment.course
-        return course.is_actual_teacher(user.pk)
+        return CreateAssignmentComment.rule(user, student_assignment) and course.is_actual_teacher(user.pk)
 
 
 @add_perm
