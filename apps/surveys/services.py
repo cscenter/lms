@@ -24,7 +24,7 @@ def create_survey_notifications(survey: CourseSurvey):
         "COURSE_NAME": str(course),
         "SURVEY_URL": survey.get_absolute_url()
     }
-    active_enrollments = (Enrollment.active
+    active_enrollments = (Enrollment.active.can_submit_assignments()
                           .filter(course=course.pk)
                           .select_related("student"))
     for e in active_enrollments.iterator():
