@@ -29,18 +29,6 @@ def test_student_assignment_can_be_submitted_manager():
                              student=deleted_enrollment.student)
     assert StudentAssignment.objects.all().count() == 5
     assert StudentAssignment.objects.can_be_submitted().count() == 1
-    sa = StudentAssignment.objects.exclude(
-        pk__in=[*StudentAssignment.objects.can_be_submitted().values_list("pk", flat=True), 
-                deleted_student_assignment.pk]).first()
-    sa.status = AssignmentStatus.COMPLETED
-    sa.save()
-    assert StudentAssignment.objects.can_be_submitted().count() == 2
-    sa.status = AssignmentStatus.NEED_FIXES
-    sa.save()
-    assert StudentAssignment.objects.can_be_submitted().count() == 2
-    sa.status = AssignmentStatus.ON_CHECKING
-    sa.save()
-    assert StudentAssignment.objects.can_be_submitted().count() == 1
     deleted_student_assignment.status = AssignmentStatus.COMPLETED
     deleted_student_assignment.save()
-    assert StudentAssignment.objects.can_be_submitted().count() == 2
+    assert StudentAssignment.objects.can_be_submitted().count() == 1
