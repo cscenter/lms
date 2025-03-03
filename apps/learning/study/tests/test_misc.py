@@ -92,6 +92,27 @@ def test_view_student_assignment_as_regular_student(client):
     client.login(student)
     response = client.get(new_student_assignment.get_student_url())
     assert response.status_code == 200
+    assert "comment_form" in response.context_data
+    assert "solution_form" in response.context_data
+
+@pytest.mark.django_db
+def test_view_student_assignment_can_not_submit(client):
+    teacher = TeacherFactory()
+    current_semester = SemesterFactory.create_current()
+    course = CourseFactory(teachers=[teacher], semester=current_semester)
+    EnrollmentFactory.can_not_submit_assignments(course=course)
+    AssignmentFactory(course=course)
+    for student_assignment in StudentAssignment.objects.all():
+        client.force_login(student_assignment.student)
+        response = client.get(student_assignment.get_student_url())
+        assert response.status_code == 200
+        assert "comment_form" not in response.context_data
+        assert "solution_form" not in response.context_data
+        client.login(teacher)
+        response = client.get(student_assignment.get_teacher_url())
+        assert response.status_code == 200
+        assert "comment_form" not in response.context_data
+        assert "solution_form" not in response.context_data
 
 
 @pytest.mark.django_db
@@ -281,12 +302,7 @@ def test_view_assignment_list(client):
     assert len(response.context_data['assignment_list_archive']) == 0
     # Enroll in the course
     EnrollmentFactory(student=student, course=course)
-    unactive_kwargs = [
-        {"grade": GradeTypes.RE_CREDIT},
-        {"is_grade_recredited": True},
-        {"type": EnrollmentTypes.LECTIONS_ONLY}
-    ]
-    unactive_enrollments = [EnrollmentFactory(course=course, **kwargs) for kwargs in unactive_kwargs]
+    EnrollmentFactory.can_not_submit_assignments(course=course)
     response = client.get(url)
     assert len(response.context_data['assignment_list_open']) == 2
     assert len(response.context_data['assignment_list_archive']) == 0
