@@ -58,11 +58,11 @@ class AdmissionApplicantsReport(ReportFileOutput):
             self.headers.append(f"{label} / комментарии")
             interview_section_indexes[value] = 2 * index
         
-        self.headers.extend(UTMNames.values.keys())
+        utm_keys = UTMNames.values.keys()
+        self.headers.extend(utm_keys)
         # Collect data
         for applicant in applicants:
             row = []
-            utm_values = {key: "" for key in UTMNames.values.keys()}
             applicant_utms = applicant.data.get("utm", {}) if applicant.data is not None else {}
             # COMMON FIELDS
             for field in applicant_fields:
@@ -98,10 +98,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 interview_details[index + 1] = interview_comments.rstrip()
             row.extend(interview_details)
             # UTM
-            for utm_key, utm_value in applicant_utms.items():
-                if utm_key in utm_values:
-                    utm_values[utm_key] = utm_value
-            row.extend(utm_values.values())
+            row.extend([applicant_utms.get(key, "") for key in utm_keys])
 
             assert len(row) == len(self.headers)
             self.data.append([force_str(x) if x is not None else "" for x in row])
