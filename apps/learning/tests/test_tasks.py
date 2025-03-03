@@ -50,6 +50,7 @@ def test_convert_assignment_submission_ipynb_file_to_html_cant_convert(mocker):
     submission_comment = AssignmentCommentFactory()
     mock_get_field = mocker.patch('learning.tasks.SubmissionAttachment._meta.get_field')
     mock_convert = mocker.patch('learning.tasks.convert_ipynb_to_html')
+    origin_name = os.path.splitext(os.path.basename(submission_comment.attached_file.name))[0]
 
     mock_storage = MagicMock()
     mock_storage.exists.return_value = False
@@ -59,7 +60,7 @@ def test_convert_assignment_submission_ipynb_file_to_html_cant_convert(mocker):
 
     convert_assignment_submission_ipynb_file_to_html(assignment_submission_id=submission_comment.pk)
 
-    mock_convert.assert_called_once_with(submission_comment.attached_file, name=submission_comment.attached_file.name.split("/")[-1] + '.html')
+    mock_convert.assert_called_once_with(submission_comment.attached_file, name=origin_name + '.html')
 
     assert len(SubmissionAttachment.objects.all()) == 0
 
