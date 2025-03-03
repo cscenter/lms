@@ -37,12 +37,15 @@ class StudentAssignmentQuerySet(query.QuerySet):
                             student=OuterRef('student'),
                             course=OuterRef('assignment__course')
                             )
+        return self.filter(Exists(enrollment_subquery))
 
-        return (
-            self.annotate(can_submit_assignments=Exists(enrollment_subquery))
-                .filter(Q(can_submit_assignments=True) | 
-                        Q(status__in=[AssignmentStatus.NEED_FIXES, AssignmentStatus.COMPLETED]))
-            )
+    def for_teachers(self):
+        Enrollment = apps.get_model('learning', 'Enrollment')
+        enrollment_subquery = Enrollment.active.can_submit_assignments().filter(
+                            student=OuterRef('student'),
+                            course=OuterRef('assignment__course')
+                            )
+        return self.filter(Q(Exists(enrollment_subquery)) | Q(status__in=[AssignmentStatus.NEED_FIXES, AssignmentStatus.COMPLETED]))
 
 
 class _StudentAssignmentDefaultManager(LiveManager):

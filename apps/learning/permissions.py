@@ -394,7 +394,6 @@ class CreateAssignmentComment(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, student_assignment: StudentAssignment):
-        print(student_assignment, student_assignment.can_be_submitted)
         return student_assignment and student_assignment.can_be_submitted
 
 

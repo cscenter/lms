@@ -123,5 +123,5 @@ def course_personal_assignments(*, course: Course, filters: Optional[Dict[str, A
                               'assignee')
             .order_by())
 
-def course_personal_assignments_can_be_submitted(*, course: Course, filters: Optional[Dict[str, Any]] = None) -> StudentAssignmentQuerySet:
-    return course_personal_assignments(course=course, filters=filters).can_be_submitted()
+def course_personal_assignments_for_teachers(*, course: Course, filters: Optional[Dict[str, Any]] = None) -> StudentAssignmentQuerySet:
+    return course_personal_assignments(course=course, filters=filters).for_teachers()

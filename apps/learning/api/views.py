@@ -21,7 +21,7 @@ from core.api.fields import CharSeparatedField, ScoreField
 from core.http import AuthenticatedAPIRequest
 from courses.models import Assignment, Course
 from courses.permissions import CreateAssignment
-from courses.selectors import course_personal_assignments_can_be_submitted, course_personal_assignments, get_course_teachers
+from courses.selectors import course_personal_assignments_for_teachers, course_personal_assignments, get_course_teachers
 from learning.api.serializers import (
     BaseEnrollmentSerializer, BaseStudentAssignmentSerializer,
     CourseAssignmentSerializer, CourseNewsNotificationSerializer, MyCourseSerializer,
@@ -161,8 +161,9 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
         data = self.OutputSerializer(personal_assignments, many=True).data
         return Response(data)
 
-class ActivePersonalAssignmentList(PersonalAssignmentList):
-    personal_assignments_function = staticmethod(course_personal_assignments_can_be_submitted)
+class TeacherPersonalAssignmentList(PersonalAssignmentList):
+    # Just like regular, but includes also graded assignments of students who have left the course
+    personal_assignments_function = staticmethod(course_personal_assignments_for_teachers)
 
 
 class StudentAssignmentUpdate(UpdateAPIView):
