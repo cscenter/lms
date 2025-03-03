@@ -1,4 +1,5 @@
 import logging
+import os
 
 from django_rq import job
 
@@ -21,7 +22,9 @@ def convert_assignment_submission_ipynb_file_to_html(*, assignment_submission_id
     except AssignmentComment.DoesNotExist:
         logger.debug(f"Submission with id={assignment_submission_id} not found")
         return
-    file_name = submission.attached_file.name + '.html'
+    # Have to take only name of file
+    original_file_name = os.path.splitext(os.path.basename(submission.attached_file.name))[0]
+    file_name = original_file_name + '.html'
     # Actually it could be any file with the same name
     file_field = SubmissionAttachment._meta.get_field('attachment')
     if file_field.storage.exists(file_name):
@@ -31,9 +34,8 @@ def convert_assignment_submission_ipynb_file_to_html(*, assignment_submission_id
     if html_source is None:
         logger.debug("File not converted")
         return
-    submission_attachment = SubmissionAttachment(submission=submission,
-                                                 attachment=html_source)
-    submission_attachment.save()
+    SubmissionAttachment.objects.create(submission=submission,
+                                        attachment=html_source)
 
 
 @job('default')
