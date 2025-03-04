@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-30 12:28+0000\n"
+"POT-Creation-Date: 2025-03-04 12:54+0000\n"
 "PO-Revision-Date: 2020-09-09 04:43+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -98,6 +98,11 @@ msgstr ""
 #: compsciclub_ru/jinja2/compsciclub_ru/course_class_detail.html:66
 msgid "Other materials"
 msgstr ""
+
+#: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:18
+#: compsciclub_ru/jinja2/compsciclub_ru/meta_course_detail.html:11
+msgid "Edit"
+msgstr "Редактировать"
 
 #: compsciclub_ru/jinja2/compsciclub_ru/course_detail.html:24
 msgid ""
@@ -229,10 +234,6 @@ msgstr "Русский"
 msgid "English"
 msgstr "Английский"
 
-#: compsciclub_ru/jinja2/compsciclub_ru/meta_course_detail.html:11
-msgid "Edit"
-msgstr ""
-
 #: compsciclub_ru/jinja2/compsciclub_ru/meta_course_detail.html:22
 #: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:29
 msgid "Course Offerings"
@@ -258,6 +259,10 @@ msgstr "Курс"
 #: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:47
 msgid "Photos"
 msgstr "Фотографии"
+
+#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:65
+msgid "For curator"
+msgstr "Для куратора"
 
 #: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:65
 #: compsciclub_ru/jinja2/lms/layouts/_top_menu.html:26
