@@ -206,7 +206,7 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
 
         student_assignments = (
             StudentAssignment.objects
-            .active()
+            .for_teachers()
             .filter(assignment=self.object)
             .select_related(
                 'assignment',
@@ -405,7 +405,8 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         })
         context['assignee_teachers'] = get_course_teachers(course=course)
         context['max_score'] = str(sa.assignment.maximum_score)
-        context['review_form'] = AssignmentReviewForm(student_assignment=sa,
+        if self.request.user.has_perm(CreateAssignmentComment.name, sa):
+            context['review_form'] = AssignmentReviewForm(student_assignment=sa,
                                                       draft_comment=get_draft_comment(user, sa))
         # Some estimates on showing audit log link or not.
         context['show_score_audit_log'] = (sa.score is not None or
@@ -416,7 +417,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
 
     def post(self, request, *args, **kwargs):
         sa = self.student_assignment
-        if not request.user.has_perm(EditStudentAssignment.name, sa):
+        if not request.user.has_perm(CreateAssignmentComment.name, sa):
             raise PermissionDenied
         form = AssignmentReviewForm(data=request.POST,
                                     files=request.FILES,

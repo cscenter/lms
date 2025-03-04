@@ -1,12 +1,13 @@
 from django.apps import apps
 from django.conf import settings
 from django.db import models
-from django.db.models import query
+from django.db.models import Q, query
 from django.utils import timezone
 
 from core.db.models import LiveManager
 from django.db.models import OuterRef, Exists
 from core.utils import is_club_site
+from courses.constants import AssignmentStatus
 from learning.settings import EnrollmentTypes, GradeTypes
 
 
@@ -28,19 +29,23 @@ class StudentAssignmentQuerySet(query.QuerySet):
         """
         return self.filter(assignment__deadline_at__gt=timezone.now())
 
-    def active(self):
+    def can_be_submitted(self):
         # Have to do so to avoid cercular import:
         # learning.managers (this) -> learning.models(with Enrollment) -> learning.managers (with AssignmentCommentPublishedManager)
         Enrollment = apps.get_model('learning', 'Enrollment')
-        enrollment_subquery = Enrollment.active.filter(
+        enrollment_subquery = Enrollment.active.can_submit_assignments().filter(
                             student=OuterRef('student'),
-                            course=OuterRef('assignment__course'),
-                            grade__ne=GradeTypes.RE_CREDIT,
-                            is_grade_recredited=False,
-                            type__ne=EnrollmentTypes.LECTIONS_ONLY
+                            course=OuterRef('assignment__course')
                             )
+        return self.filter(Exists(enrollment_subquery))
 
-        return self.annotate(active=Exists(enrollment_subquery)).filter(active=True)
+    def for_teachers(self):
+        Enrollment = apps.get_model('learning', 'Enrollment')
+        enrollment_subquery = Enrollment.active.can_submit_assignments().filter(
+                            student=OuterRef('student'),
+                            course=OuterRef('assignment__course')
+                            )
+        return self.filter(Q(Exists(enrollment_subquery)) | Q(status__in=[AssignmentStatus.NEED_FIXES, AssignmentStatus.COMPLETED]))
 
 
 class _StudentAssignmentDefaultManager(LiveManager):
@@ -79,7 +84,13 @@ class _EnrollmentActiveManager(models.Manager):
 
 
 class EnrollmentQuerySet(models.QuerySet):
-    pass
+    
+    def can_submit_assignments(self):
+        return self.filter(
+                    grade__ne=GradeTypes.RE_CREDIT,
+                    is_grade_recredited=False,
+                    type__ne=EnrollmentTypes.LECTIONS_ONLY
+                    )
 
 
 EnrollmentDefaultManager = _EnrollmentDefaultManager.from_queryset(

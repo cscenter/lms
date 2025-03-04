@@ -1450,25 +1450,25 @@ msgstr "Прочтение курса успешно опубликовано"
 msgid "Form error. is_repeated is False and number_of_repeats is not 1"
 msgstr "Ошибка формы. Флаг не выставлен, но кол-во повторений указано."
 
-#: apps/courses/views/course_class.py:191
+#: apps/courses/views/course_class.py:190
 #, fuzzy, python-brace-format
 #| msgid "Class creation error: {str(e)}"
 msgid "Class creation error: {exception}"
 msgstr "Ошибка создания занятия: {str(e)}"
 
-#: apps/courses/views/course_class.py:196
+#: apps/courses/views/course_class.py:195
 #, python-brace-format
 msgid "The class \"{name}\" was successfully created."
 msgstr "Занятие \"{name}\" было успешно создано."
 
-#: apps/courses/views/course_class.py:198
+#: apps/courses/views/course_class.py:197
 #, python-brace-format
 msgid ""
 "The classes \"{name}\" from {from_date} to {to_date} were successfully "
 "created."
 msgstr "Занятия \"{name}\" от {from_date} до {to_date} были успешно созданы."
 
-#: apps/courses/views/course_class.py:240
+#: apps/courses/views/course_class.py:239
 #, python-format
 msgid "The class '%s' was successfully updated."
 msgstr "Занятие '%s' успешно обновлено."
@@ -1604,7 +1604,7 @@ msgstr "Конфигурации проверяющей системы"
 msgid "Please check that the following settings are provided: {}"
 msgstr "Убедитесь, что указаны следующие настройки: {}"
 
-#: apps/grading/models.py:89 apps/learning/models.py:983
+#: apps/grading/models.py:89 apps/learning/models.py:991
 msgid "Assignment Submission"
 msgstr "Посылка к заданию"
 
@@ -1899,7 +1899,7 @@ msgstr "Заголовок '{}' не найден"
 msgid "Invalid score format '{}'"
 msgstr "Неверный формат оценки '{}'"
 
-#: apps/learning/gradebook/tests.py:100 apps/learning/gradebook/views.py:234
+#: apps/learning/gradebook/tests.py:100 apps/learning/gradebook/views.py:237
 #: apps/staff/views/enrolees_selection.py:114
 msgid "Last name"
 msgstr "Фамилия"
@@ -1910,7 +1910,7 @@ msgid "Learners"
 msgstr "Сдающие"
 
 #: apps/learning/gradebook/tests.py:331 apps/learning/gradebook/tests.py:336
-#: lms/jinja2/lms/gradebook/gradebook_form.html:179
+#: lms/jinja2/lms/gradebook/gradebook_form.html:180
 msgid "Total students"
 msgstr "Всего"
 
@@ -1934,17 +1934,17 @@ msgstr "Ведомость успешно сохранена."
 msgid "Gradebook hasn't been saved."
 msgstr "Ведомость не была сохранена."
 
-#: apps/learning/gradebook/views.py:233
+#: apps/learning/gradebook/views.py:236
 #: apps/learning/teaching/views/assignments.py:340
 msgid "Enrollment ID"
 msgstr "ID записи на курс"
 
-#: apps/learning/gradebook/views.py:235
+#: apps/learning/gradebook/views.py:238
 #: apps/staff/views/enrolees_selection.py:115
 msgid "First name"
 msgstr "Имя"
 
-#: apps/learning/gradebook/views.py:236
+#: apps/learning/gradebook/views.py:239
 #: apps/staff/views/enrolees_selection.py:116
 msgid "Patronymic"
 msgstr "Отчество"
@@ -1953,12 +1953,12 @@ msgstr "Отчество"
 msgid "Role"
 msgstr "Роль"
 
-#: apps/learning/gradebook/views.py:239
+#: apps/learning/gradebook/views.py:242
 #: lms/jinja2/lms/user_profile/_tab_account.html:122
 msgid "Email"
 msgstr "Почта"
 
-#: apps/learning/gradebook/views.py:240
+#: apps/learning/gradebook/views.py:243
 #: apps/staff/views/enrolees_selection.py:121
 msgid "Enrollment type"
 msgstr "Тип записи"
@@ -1968,7 +1968,7 @@ msgstr "Тип записи"
 msgid "CSCUser|Curriculum year"
 msgstr "Год программы обучения"
 
-#: apps/learning/gradebook/views.py:242 apps/learning/models.py:246
+#: apps/learning/gradebook/views.py:245 apps/learning/models.py:246
 #: apps/learning/models.py:268
 msgid "Group"
 msgstr "Группа"
@@ -1978,7 +1978,7 @@ msgstr "Группа"
 msgid "Yandex Login"
 msgstr "Логин на Яндексе"
 
-#: apps/learning/gradebook/views.py:244
+#: apps/learning/gradebook/views.py:247
 msgid "Telegram Username"
 msgstr "Telegram"
 
@@ -1986,25 +1986,25 @@ msgstr "Telegram"
 msgid "Codeforces Handle"
 msgstr ""
 
-#: apps/learning/gradebook/views.py:249
+#: apps/learning/gradebook/views.py:252
 msgid "Final grade"
 msgstr "Итоговая оценка"
 
-#: apps/learning/gradebook/views.py:250
+#: apps/learning/gradebook/views.py:253
 #: lms/jinja2/lms/gradebook/gradebook_form.html:123
 msgid "Total"
 msgstr "Сумма баллов"
 
-#: apps/learning/gradebook/views.py:328
+#: apps/learning/gradebook/views.py:331
 msgid "Imported records for assignment {} - {} out of {}"
 msgstr "Импортировано оценок за задание {} - {} из {} найденных"
 
-#: apps/learning/gradebook/views.py:332
+#: apps/learning/gradebook/views.py:335
 msgid "<b>Not all records were processed. Import stopped by an error:</b><br>"
 msgstr ""
 "<b>Не все записи были обработаны. Импорт прекращён из-за ошибки:</b><br>"
 
-#: apps/learning/gradebook/views.py:406
+#: apps/learning/gradebook/views.py:409
 msgid ""
 "Успешно импортированы записи для курса {} - для {} из {} строк с верными "
 "идентификаторами студентов."
@@ -2339,83 +2339,87 @@ msgstr "Комментарий к заданию"
 msgid "Assignment-comments"
 msgstr "Комментарии к заданиям"
 
-#: apps/learning/models.py:992
+#: apps/learning/models.py:928
+msgid "Can not add comment to unactive assignment"
+msgstr ""
+
+#: apps/learning/models.py:1000
 msgid "Assignment Submission Attachment"
 msgstr "Приложенный файл"
 
-#: apps/learning/models.py:993
+#: apps/learning/models.py:1001
 msgid "Assignment Submission Attachments"
 msgstr "Приложенные файлы"
 
-#: apps/learning/models.py:1023
+#: apps/learning/models.py:1031
 msgid "student_assignment"
 msgstr "Выполнение задания"
 
-#: apps/learning/models.py:1025
+#: apps/learning/models.py:1033
 msgid "About passed assignment"
 msgstr "О сданном задании"
 
-#: apps/learning/models.py:1027
+#: apps/learning/models.py:1035
 msgid "About created assignment"
 msgstr "О сданном задании"
 
-#: apps/learning/models.py:1029
+#: apps/learning/models.py:1037
 msgid "About change of deadline"
 msgstr "О смене времени сдачи"
 
-#: apps/learning/models.py:1031 apps/learning/models.py:1069
+#: apps/learning/models.py:1039 apps/learning/models.py:1077
 msgid "Unread"
 msgstr "Не прочтено"
 
-#: apps/learning/models.py:1033 apps/learning/models.py:1071
+#: apps/learning/models.py:1041 apps/learning/models.py:1079
 msgid "User is notified"
 msgstr "Пользователь оповещён"
 
-#: apps/learning/models.py:1041
+#: apps/learning/models.py:1049
 msgid "Assignment notification"
 msgstr "Уведомление о заданиях"
 
-#: apps/learning/models.py:1042
+#: apps/learning/models.py:1050
 msgid "Assignment notifications"
 msgstr "Уведомления о заданиях"
 
-#: apps/learning/models.py:1046
+#: apps/learning/models.py:1054
 msgid "Only teachers can receive notifications of passed assignments"
 msgstr "Только преподаватели могут получать оповещения о сданных заданиях"
 
-#: apps/learning/models.py:1067
+#: apps/learning/models.py:1075
 msgid "Course offering news"
 msgstr "Новости прочтений"
 
-#: apps/learning/models.py:1079
+#: apps/learning/models.py:1087
 msgid "Course offering news notification"
 msgstr "Оповещение о новостях прочтений"
 
-#: apps/learning/models.py:1080
+#: apps/learning/models.py:1088
 msgid "Course offering news notifications"
 msgstr "Оповещения о новостях прочтений"
 
-#: apps/learning/models.py:1112
+#: apps/learning/models.py:1120
 msgid "Non-course event"
 msgstr "Событие"
 
-#: apps/learning/models.py:1113
+#: apps/learning/models.py:1121
 msgid "Non-course events"
 msgstr "События"
 
-#: apps/learning/models.py:1122
+#: apps/learning/models.py:1130
 msgid "Event should end after it's start"
 msgstr "Конец события должен быть позже начала"
 
-#: apps/learning/models.py:1147
+#: apps/learning/models.py:1155
 msgid "Visibility"
 msgstr "Видимость"
 
-#: apps/learning/models.py:1155
+#: apps/learning/models.py:1163
 msgid "Graduated on"
 msgstr "Дата выпуска"
 
-#: apps/learning/models.py:1156
+#: apps/learning/models.py:1164
 msgid "Graduation ceremony date"
 msgstr "Дата выпускного считается датой выпуска студента"
 
@@ -2423,31 +2427,31 @@ msgstr "Дата выпускного считается датой выпуск
 msgid "Fields of study"
 msgstr "Направления обучения"
 
-#: apps/learning/models.py:1160
+#: apps/learning/models.py:1168
 msgid "Academic disciplines that the student graduated from"
 msgstr "Направления, с которых выпустился студент."
 
-#: apps/learning/models.py:1163
+#: apps/learning/models.py:1171
 msgid "Graduation Year"
 msgstr "Год выпуска"
 
-#: apps/learning/models.py:1164
+#: apps/learning/models.py:1172
 msgid "Helps filtering by year"
 msgstr ""
 
-#: apps/learning/models.py:1167
+#: apps/learning/models.py:1175
 msgid "Photo"
 msgstr "Фото"
 
-#: apps/learning/models.py:1172
+#: apps/learning/models.py:1180
 msgid "Testimonial"
 msgstr "Отзыв"
 
-#: apps/learning/models.py:1173
+#: apps/learning/models.py:1181
 msgid "Testimonial about Computer Science Center"
 msgstr "Отзыв о CS центре"
 
-#: apps/learning/models.py:1176
+#: apps/learning/models.py:1184
 msgid "Details"
 msgstr "Детали"
 
@@ -2455,11 +2459,11 @@ msgstr "Детали"
 msgid "Diploma Number"
 msgstr "Номер диплома"
 
-#: apps/learning/models.py:1186
+#: apps/learning/models.py:1194
 msgid "Registration Number"
 msgstr "Регистрационный номер"
 
-#: apps/learning/models.py:1187
+#: apps/learning/models.py:1195
 msgid "Registration number in the registry of education"
 msgstr "Номер в федеральном реестре (ФРДО)"
 
@@ -2467,11 +2471,11 @@ msgstr "Номер в федеральном реестре (ФРДО)"
 msgid "Diploma Issued on"
 msgstr "Дата выдачи диплома"
 
-#: apps/learning/models.py:1200
+#: apps/learning/models.py:1208
 msgid "Graduate Profile"
 msgstr "Профиль выпускника"
 
-#: apps/learning/models.py:1201
+#: apps/learning/models.py:1209
 msgid "Graduate Profiles"
 msgstr "Профили выпускников"
 
@@ -4251,6 +4255,10 @@ msgstr "Студенты"
 #: lms/jinja2/lms/gradebook/gradebook_form.html:121
 msgid "Grades"
 msgstr "Итоговая оценка"
+
+#: lms/jinja2/lms/gradebook/gradebook_form.html:179
+msgid "Recredited"
+msgstr "Перезачеты"
 
 #: lms/jinja2/lms/layouts/_top_menu.html:34
 #: lms/jinja2/lms/user_profile/user_detail.html:6

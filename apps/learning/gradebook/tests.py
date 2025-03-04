@@ -329,12 +329,14 @@ def test_empty_gradebook_view(client):
     assert len(students) == len(response.context_data['form'].fields)
     assert smart_bytes(_("Learners") + f":&nbsp;{len(students)}") in response.content
     assert smart_bytes(_("Total students") + f":&nbsp;{len(students)}") in response.content
+    assert smart_bytes(_("Recredited") + ":&nbsp;0") in response.content
     assert smart_bytes(_("Listeners") + ":&nbsp;0") in response.content
-    EnrollmentFactory.create(course=co1, type=EnrollmentTypes.LECTIONS_ONLY)
+    EnrollmentFactory.can_not_submit_assignments(course=co1)
     response = client.get(co1.get_gradebook_url())
     assert smart_bytes(_("Learners") + f":&nbsp;{len(students)}") in response.content
-    assert smart_bytes(_("Total students") + f":&nbsp;{len(students) + 1}") in response.content
+    assert smart_bytes(_("Total students") + f":&nbsp;{len(students) + 3}") in response.content
     assert smart_bytes(_("Listeners") + ":&nbsp;1") in response.content
+    assert smart_bytes(_("Recredited") + ":&nbsp;2") in response.content
     for co in [co1, co2]:
         url = co.get_gradebook_url()
         assert smart_bytes(url) in response.content

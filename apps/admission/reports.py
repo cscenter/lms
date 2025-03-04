@@ -9,8 +9,8 @@ from django.db.models import Prefetch
 from django.utils import formats, timezone
 from django.utils.encoding import force_str
 
-from admission.constants import ApplicantStatuses, InterviewSections
-from admission.models import Applicant, Campaign, Comment, Exam, Interview
+from admission.constants import UTMNames, ApplicantStatuses, InterviewSections
+from admission.models import Applicant, Campaign, Comment, Exam
 from core.reports import ReportFileOutput
 from core.urls import reverse
 
@@ -57,9 +57,14 @@ class AdmissionApplicantsReport(ReportFileOutput):
             self.headers.append(f"{label} / балл")
             self.headers.append(f"{label} / комментарии")
             interview_section_indexes[value] = 2 * index
+        
+        utm_keys = UTMNames.values.keys()
+        self.headers.extend(utm_keys)
         # Collect data
         for applicant in applicants:
             row = []
+            applicant_utms = applicant.data.get("utm", {}) if applicant.data is not None else {}
+            # COMMON FIELDS
             for field in applicant_fields:
                 value = getattr(applicant, field.name)
                 if field.name in ("status", "level_of_education", "has_diploma", "gender", "diploma_degree"):
@@ -68,15 +73,20 @@ class AdmissionApplicantsReport(ReportFileOutput):
                     value = reverse("admission:applicants:detail", args=[value])
                 elif field.name == "created":
                     value = formats.date_format(applicant.created, "SHORT_DATE_FORMAT")
+                elif field.name == "data" and applicant.data is not None:
+                    value.pop("utm", None)
                 row.append(value)
+            # ONLINE TEST
             if hasattr(applicant, "online_test"):
                 row.append(applicant.online_test.score)
             else:
                 row.append("")
+            # EXAM
             if hasattr(applicant, "exam"):
                 row.append(applicant.exam.score)
             else:
                 row.append("")
+            # INTERVIEWS
             interview_details = ["" for _ in range(2 * len(InterviewSections.values))]
             for interview in applicant.interviews.all():
                 interview_comments = ""
@@ -87,6 +97,9 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 interview_details[index] = interview.get_average_score_display()
                 interview_details[index + 1] = interview_comments.rstrip()
             row.extend(interview_details)
+            # UTM
+            row.extend([applicant_utms.get(key, "") for key in utm_keys])
+
             assert len(row) == len(self.headers)
             self.data.append([force_str(x) if x is not None else "" for x in row])
 
