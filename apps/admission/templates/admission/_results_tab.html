@@ -4,7 +4,7 @@
   <h4>
     Тест: {{ online_test.score_display }} / <span>{{ campaign.online_test_max_score }}</span>{% if request.user.is_curator %}
     <a href="{% url "admin:admission_test_change" online_test.pk %}" target="_blank"><i
-      class="icon fa fa-pencil-square-o"></i></a>{% endif %}
+      class="icon fa fa-pencil-square-o" title="{% trans %}Edit{% endtrans %}"></i></a>{% endif %}
   </h4>
   {% if ContestTypes.TEST in contests %}
     {% with contests|lookup:ContestTypes.TEST as test_contests %}
@@ -53,7 +53,7 @@
   <h4>
     Экзамен: {{ exam.score_display }} / <span>{{ campaign.exam_max_score|default_if_none:'макс. балл не указан' }}</span>
     {% if request.user.is_curator %}
-      <a href="{% url "admin:admission_exam_change" exam.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>{% endif %}
+      <a href="{% url "admin:admission_exam_change" exam.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o" title="{% trans %}Edit{% endtrans %}"></i></a>{% endif %}
   </h4>
   {% if ContestTypes.EXAM in contests %}
     {% with contests|lookup:ContestTypes.EXAM as contests_ %}

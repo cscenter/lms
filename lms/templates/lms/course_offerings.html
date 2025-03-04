@@ -15,8 +15,8 @@
           <td>
             <% if (co.is_club_course) { %><span data-title="{% trans "CS club course" %}" class="__club"></span><% } %>
             <a href="<%-co.url%>" class="__course"><%-co.name%></a>
-            <% if (co.duration == COURSE_DURATIONS.FIRST_HALF) { %><i class="fa fa-adjust fa-rotate-180" aria-hidden="true"></i><% } %>
-            <% if (co.duration == COURSE_DURATIONS.SECOND_HALF) { %><i class="fa fa-adjust" aria-hidden="true"></i><% } %>
+            <% if (co.duration == COURSE_DURATIONS.FIRST_HALF) { %><i class="fa fa-adjust fa-rotate-180" aria-hidden="true" title="{% trans 'First part of semester' %}"></i><% } %>
+            <% if (co.duration == COURSE_DURATIONS.SECOND_HALF) { %><i class="fa fa-adjust" aria-hidden="true" title="{% trans 'Second part of semester' %}"></i><% } %>
             <% if (co.is_draft) { %><span style="color: red; font-weight: bold;">{% trans "[Draft]" %}</span><% } %>
           </td>
           <td>
@@ -98,10 +98,10 @@
                                         {% endif %}
                                         <a href="{{ co.url }}" class="__course">{{ co.name }}</a>
                                         {% if co.duration == COURSE_DURATIONS.FIRST_HALF %}
-                                            <i class="fa fa-adjust fa-rotate-180" aria-hidden="true"></i>
+                                            <i class="fa fa-adjust fa-rotate-180" aria-hidden="true" title="{% trans 'First part of semester' %}"></i>
                                         {% endif %}
                                         {% if co.duration == COURSE_DURATIONS.SECOND_HALF %}
-                                            <i class="fa fa-adjust" aria-hidden="true"></i>
+                                            <i class="fa fa-adjust" aria-hidden="true" title="{% trans 'Second part of semester' %}"></i>
                                         {% endif %}
                                         {% if co.is_draft %}
                                             <span style="color: red; font-weight: bold;">{% trans "[Draft]" %}</span>

@@ -48,9 +48,9 @@
                     <a class="dropdown-item d-lg-none" href="{{ url('index', subdomain=LMS_SUBDOMAIN) }}">{% trans %}Members Area{% endtrans %}</a>
                     <a class="dropdown-item" href="{{ request.user.get_absolute_url() }}"><i class="fa fa-user"> </i>Профиль</a>
                     {% if request.user.is_staff %}
-                        <a class="dropdown-item" href="{{ url('staff:student_search', LMS_SUBDOMAIN) }}"><i class="fa fa-user-secret"></i> Курирование</a>
-                        <a class="dropdown-item" href="{{ url('stats:index', LMS_SUBDOMAIN) }}"><i class="fa fa-bar-chart"></i> Статистика</a>
-                        <a class="dropdown-item" href="{{ url('admin:index') }}"><i class="fa fa-lock"></i> Админ-панель</a>
+                        <a class="dropdown-item" href="{{ url('staff:student_search', LMS_SUBDOMAIN) }}"><i class="fa fa-user-secret" title="{% trans %}For curator{% endtrans %}"></i> Курирование</a>
+                        <a class="dropdown-item" href="{{ url('stats:index', LMS_SUBDOMAIN) }}"><i class="fa fa-bar-chart" title="{% trans %}Statistics{% endtrans %}"></i> Статистика</a>
+                        <a class="dropdown-item" href="{{ url('admin:index') }}"><i class="fa fa-lock" title="{% trans %}Admin panel{% endtrans %}"></i> Админ-панель</a>
                     {% endif %}
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="{{ url('auth:logout') }}"><i class="fa fa-sign-out"></i> Выйти</a>

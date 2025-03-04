@@ -14,21 +14,21 @@
               {% set opacity = 'semi-transparent' %}
             {% endif %}
             {% if can_view_course_icons and enrollment.view_invited%}
-              <i style="font-size:14px" class="fa {{opacity}}">&#xf069;</i>
+              <i style="font-size:14px" class="fa {{opacity}} " title="{{ enrollment.student_profile.invitation.name }}">&#xf069;</i>
             {% endif %}
             {% if can_view_course_icons and enrollment.view_partner%}
-              <i class="fa fa-graduation-cap {{opacity}}" aria-hidden="true"></i>
+              <i class="fa fa-graduation-cap {{opacity}}" aria-hidden="true" title="{% trans %}Masters degree{% endtrans %} {{ enrollment.student_profile.partner.name }} "></i>
             {% endif %}
             {% if enrollment.view_lections_only%}
-              <i class="fa fa-headphones {{opacity}}" aria-hidden="true"></i>
+              <i class="fa fa-headphones {{opacity}}" aria-hidden="true" title="{% trans %}Listener{% endtrans %}"></i>
             {% endif %}
               <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}" class="{{opacity}}">
               {{ enrollment.course }} </a>
             {% if enrollment.course.duration == CourseDurations.FIRST_HALF %}
-              <i class="fa fa-adjust fa-rotate-180 {{opacity}}" aria-hidden="true"></i>
+              <i class="fa fa-adjust fa-rotate-180 {{opacity}}" aria-hidden="true" title="{% trans %}First part of semester{% endtrans %}"></i>
             {% endif %}
             {% if enrollment.course.duration == CourseDurations.SECOND_HALF %}
-              <i class="fa fa-adjust {{opacity}}" aria-hidden="true"></i>
+              <i class="fa fa-adjust {{opacity}}" aria-hidden="true" title="{% trans %}Second part of semester{% endtrans %}"></i>
             {% endif %}
             <i class="{{opacity}}"> | {% if enrollment.is_grade_recredited %}перезачтено,{% endif %} {{ enrollment.grade_honest|lower }} </i>
             {% if not loop.last and loop.nextitem.course.semester != enrollment.course.semester %}
