@@ -149,3 +149,10 @@ class HasDiplomaStatuses(DjangoChoices):
     NO = C("no", _('no'))
 
 SESSION_CONFIRMATION_CODE_KEY = "admission_confirmation_code"
+
+class UTMNames(DjangoChoices):
+    SOURCE = ChoiceItem("utm_source")
+    MEDIUM = ChoiceItem("utm_medium")
+    CAMPAIGN = ChoiceItem("utm_campaign")
+    TERM = ChoiceItem("utm_term")
+    CONTENT = ChoiceItem("utm_content")

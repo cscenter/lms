@@ -179,7 +179,6 @@ class CourseClassCreateView(PermissionRequiredMixin, CourseURLParamsMixin,
                             ))
                     for obj in objects:
                         for attachment_copy in attachment_copies:
-                            attachment_copy
                             CourseClassAttachment.objects.create(
                                 course_class=obj,
                                 material=attachment_copy
