@@ -22,7 +22,7 @@
   <div class="container">
     <div class="page-header">
       <h2 class="page-title">{{ applicant.full_name }}{% if request.user.is_curator %}
-        <a href="{% url "admin:admission_applicant_change" applicant.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o" title="{% trans %}Edit{% endtrans %}"></i></a>
+        <a href="{% url "admin:admission_applicant_change" applicant.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>
       {% endif %}</h2>
 
     </div>

@@ -14,7 +14,7 @@
     <ol class=" breadcrumb projects">
       <li class="active">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект / {{ project.semester }}
         {% if request.user.is_curator %}<a href="{% url "admin:projects_project_change" object_id=project.pk %}" target="_blank"><i
-          class="fa fa-pencil-square-o" title="{% trans %}Edit{% endtrans %}"></i></a>{% endif %}</li>
+          class="fa fa-pencil-square-o" title="{% trans 'Edit' %}"></i></a>{% endif %}</li>
     </ol>
     {% if project.is_active %}
       {% if request.user.is_project_reviewer or request.user.is_curator %}
@@ -93,7 +93,7 @@
           {% endif %}
 
           {% if request.user.is_curator %}
-            <h4>Оценки <i class="fa fa-user-secret" aria-hidden="true" title="{% trans %}For curator{% endtrans %}"></i></h4>
+            <h4>Оценки <i class="fa fa-user-secret" aria-hidden="true" title="{% trans 'For curator' %}"></i></h4>
             <form action="{% url 'projects:project_results_update' pk=project.pk %}" method="post">
               <table class="table table-bordered">
                 <thead>

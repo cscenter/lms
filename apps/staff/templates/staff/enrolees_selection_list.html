@@ -26,10 +26,10 @@
                   <li>
                     <a href="{% call_method course 'get_absolute_url' %}">{{ course.meta_course.name }}</a> |
                     {% if course.duration == CourseDurations.FIRST_HALF %}
-                       <i class="fa fa-adjust fa-rotate-180" aria-hidden="true" title="{% trans %}First part of semester{% endtrans %}"></i>
+                       <i class="fa fa-adjust fa-rotate-180" aria-hidden="true" title="{% trans 'First part of semester' %}"></i>
                     {% endif %}
                     {% if course.duration == CourseDurations.SECOND_HALF %}
-                       <i class="fa fa-adjust" aria-hidden="true" title="{% trans %}Second part of semester{% endtrans %}"></i>
+                       <i class="fa fa-adjust" aria-hidden="true" title="{% trans 'Second part of semester' %}"></i>
                     {% endif %}
                     <a href="{% call_method course 'get_enrolees_selection_url' %}">CSV <i class="fa fa-download"></i></a>
                   </li>
