@@ -213,6 +213,13 @@ class MetaCourse(TimeStampedModel):
                     "for human-readable URLs, as in "
                     "test.com/news/<b>some-news</b>/"),
         unique=True)
+    index = models.SlugField(
+        _("Course|index"),
+        max_length=70,
+        help_text=_("Short unique index of course"),
+        unique=True,
+        blank=True,
+        null=True)
     description = models.TextField(
         _("Course|description"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED)

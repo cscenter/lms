@@ -797,9 +797,13 @@ class ProgressReportFull(ProgressReport):
 
             def durability_prefix(meta_course_id):
                 return "[Полусеместровый] " if meta_course_duration[meta_course_id] != CourseDurations.FULL else ""
+            
+            def get_course_index(course_index):
+                return f" [{course_index}]" if course_index is not None else ""
+            
 
             course_headers = (
-                f"{durability_prefix(course.id)}{cs_club_prefix(course.id)}{course.name}"
+                f"{durability_prefix(course.id)}{cs_club_prefix(course.id)}{course.name}{get_course_index(course.index)}"
                 for course in meta_courses.values()
             )
 
