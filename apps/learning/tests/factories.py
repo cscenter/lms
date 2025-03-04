@@ -18,7 +18,7 @@ from learning.services.enrollment_service import recreate_assignments_for_studen
 from learning.services.personal_assignment_service import (
     create_assignment_comment, create_assignment_solution
 )
-from learning.settings import StudentStatuses
+from learning.settings import EnrollmentTypes, GradeTypes, StudentStatuses
 from users.constants import Roles
 from users.models import UserGroup
 from users.tests.factories import StudentFactory, StudentProfileFactory, UserFactory
@@ -138,6 +138,25 @@ class EnrollmentFactory(factory.django.DjangoModelFactory):
             return
         # Make sure student group is already assigned here
         recreate_assignments_for_student(self)
+        
+    @classmethod
+    def can_not_submit_assignments(cls, **custom_kwargs):
+        can_not_submit_assignments_kwargs = [
+            {"grade": GradeTypes.RE_CREDIT},
+            {"is_grade_recredited": True},
+            {"type": EnrollmentTypes.LECTIONS_ONLY},
+        ]
+
+        enrollments = []
+        for can_not_submit_assignments_kwarg in can_not_submit_assignments_kwargs:
+            combined_kwargs = {
+                **can_not_submit_assignments_kwarg,
+                **custom_kwargs
+            }
+            enrollment = cls.create(**combined_kwargs)
+            enrollments.append(enrollment)
+
+        return enrollments
 
 
 class InvitationFactory(factory.django.DjangoModelFactory):

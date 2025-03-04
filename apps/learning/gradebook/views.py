@@ -49,7 +49,7 @@ __all__ = [
     "ImportAssignmentScoresByYandexLoginView"
 ]
 
-from learning.settings import AssignmentScoreUpdateSource, EnrollmentGradeUpdateSource, EnrollmentTypes
+from learning.settings import AssignmentScoreUpdateSource, EnrollmentGradeUpdateSource, EnrollmentTypes, GradeTypes
 from users.models import StudentTypes, User
 
 
@@ -202,12 +202,15 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
                    .select_related('semester', 'meta_course', 'main_branch'))
         context['course_offering_list'] = courses
         context['user_type'] = self.user_type
-        enrollments_summary = Enrollment.active.filter(course=self.course).aggregate(
-            total_listeners=Count('id', filter=Q(type=EnrollmentTypes.LECTIONS_ONLY)),
-            total_learners=Count('id', filter=Q(type=EnrollmentTypes.REGULAR))
+        
+        is_recredited_filter = Q(grade=GradeTypes.RE_CREDIT) | Q(is_grade_recredited=True)
+        context.update(
+            Enrollment.active.filter(course=self.course).aggregate(
+                total_listeners=Count('id', filter=Q(type=EnrollmentTypes.LECTIONS_ONLY) & ~is_recredited_filter),
+                total_learners=Count('id', filter=Q(type=EnrollmentTypes.REGULAR) & ~is_recredited_filter),
+                total_recredited=Count('id', filter=is_recredited_filter)
+            )
         )
-        context['total_listeners'] = enrollments_summary['total_listeners']
-        context['total_learners'] = enrollments_summary['total_learners']
 
         return context
 

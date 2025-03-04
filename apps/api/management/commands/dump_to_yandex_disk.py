@@ -6,7 +6,8 @@ from django.core.management import BaseCommand
 from django.db.models import Max
 from django.utils.translation import gettext_lazy as _
 
-from courses.models import Assignment
+from courses.constants import SemesterTypes
+from courses.models import Assignment, Semester
 from learning.models import StudentAssignment
 from users.models import StudentProfile, StudentTypes
 from api.models import ExternalServiceToken
@@ -26,9 +27,10 @@ class Command(BaseCommand):
                                  _('Student Group'), _('Teacher'), _('Assignment'), _('Assignment status'), _('Assignment Grade'), 
                                  _('Maximum score'), _('Assignment count'), _('Maximum student score'), _('Grade'), _('Grade re-credited')])
 
-            current_year = datetime.datetime.now().year
+            current_semester = Semester.get_current()
+            current_curriculum_year = current_semester.year if current_semester.type == SemesterTypes.AUTUMN else current_semester.year - 1
             student_profiles = (StudentProfile.objects.filter(type__in=[StudentTypes.REGULAR, StudentTypes.PARTNER],
-                                                             year_of_curriculum__in=[current_year - 1, current_year])
+                                                             year_of_curriculum__in=[current_curriculum_year - 1, current_curriculum_year])
                                                         .select_related('user')
                                                         .prefetch_related('enrollment_set__course__assignment_set__studentassignment_set'))
             max_assignment_grades: dict[Assignment, int] = dict()

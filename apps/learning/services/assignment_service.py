@@ -72,10 +72,7 @@ class AssignmentService:
         """
         filters = [
             Q(course_id=assignment.course_id),
-            ~Q(student_profile__status__in=StudentStatuses.inactive_statuses),
-            ~Q(grade=GradeTypes.RE_CREDIT),
-            Q(is_grade_recredited=False),
-            ~Q(type=EnrollmentTypes.LECTIONS_ONLY)     
+            ~Q(student_profile__status__in=StudentStatuses.inactive_statuses)
         ]
         restrict_to = list(sg.pk for sg in assignment.restricted_to.all())
         # Filter out enrollments not in the targeted course groups
@@ -118,7 +115,7 @@ class AssignmentService:
         # TODO: move to the separated method
         # Generate notifications
         to_notify = [sid for sid in students if sid not in already_exist]
-        created = (StudentAssignment.objects
+        created = (StudentAssignment.objects.can_be_submitted()
                    .filter(assignment=assignment, student_id__in=to_notify)
                    .values_list('pk', 'student_id', named=True))
         objs = (notify_student_new_assignment(sa, commit=False) for sa
