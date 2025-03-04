@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-04 12:54+0000\n"
+"POT-Creation-Date: 2025-03-04 16:04+0000\n"
 "PO-Revision-Date: 2020-09-09 04:43+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -261,10 +261,6 @@ msgid "Photos"
 msgstr "Фотографии"
 
 #: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:65
-msgid "For curator"
-msgstr "Для куратора"
-
-#: compsciclub_ru/jinja2/compsciclub_ru/teacher_detail.html:65
 #: compsciclub_ru/jinja2/lms/layouts/_top_menu.html:26
 #: compsciclub_ru/templates/_top_menu.html:31
 msgid "Profile"
@@ -415,6 +411,9 @@ msgstr "Регистрация аккаунта на"
 #: compsciclub_ru/translation.py:3
 msgid "Can be passed online"
 msgstr "Можно сдать через сайт CS клуба"
+
+#~ msgid "For curator"
+#~ msgstr "Для куратора"
 
 #~ msgid "teacher"
 #~ msgstr "преподаватель"
