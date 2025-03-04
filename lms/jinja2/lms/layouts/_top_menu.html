@@ -33,9 +33,9 @@
                       <li class="dropdown-header">{{ user.get_short_name() }}</li>
                       <li><a href="{{ user.get_absolute_url() }}"><i class="fa fa-user"></i> {% trans %}Profile{% endtrans %}</a></li>
                       {% if user.is_staff %}
-                          <li><a href="{{ url('staff:student_search', subdomain=LMS_SUBDOMAIN) }}"><i class="fa fa-user-secret" title="{% trans %}For curator{% endtrans %}"></i> Курирование</a></li>
-                          <li><a href="{{ url('stats:index', subdomain=LMS_SUBDOMAIN) }}"><i class="fa fa-bar-chart" title="{% trans %}Statistics{% endtrans %}"></i> Статистика</a></li>
-                          <li><a href="{{ url('admin:index') }}" target="_blank"><i class="fa fa-lock" title="{% trans %}Admin panel{% endtrans %}"></i> Админ-панель</a></li>
+                          <li><a href="{{ url('staff:student_search', subdomain=LMS_SUBDOMAIN) }}"><i class="fa fa-user-secret"></i> Курирование</a></li>
+                          <li><a href="{{ url('stats:index', subdomain=LMS_SUBDOMAIN) }}"><i class="fa fa-bar-chart"></i> Статистика</a></li>
+                          <li><a href="{{ url('admin:index') }}" target="_blank"><i class="fa fa-lock"></i> Админ-панель</a></li>
                       {% endif %}
                       <li><a href="{{ url('auth:logout') }}"><i class="fa fa-sign-out"></i> {% trans %}Logout{% endtrans %}</a></li>
                   </ul>
