@@ -11,7 +11,7 @@
                 {% trans "library"|capfirst %}
                 {% if user.is_superuser %}
                     <a href="{% url 'admin:library_stock_changelist' %}" target="_blank" class="btn btn-link">
-                        <i class="fa fa-pencil"></i>
+                        <i class="fa fa-pencil" title="{% trans 'Edit' %}"></i>
                     </a>
                 {% endif %}
             </h2>

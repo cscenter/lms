@@ -18,9 +18,10 @@
 {% block content %}{% localtime off %}
   <div class="container">
     <div class="page-header">
-      <h2 class="page-title">{{ applicant.full_name }}{% if request.user.is_curator %}
-        <a href="{% url "admin:admission_interview_change" interview.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>
-      {% endif %}</h2>
+      <h2 class="page-title">{{ applicant.full_name }}
+        {% if request.user.is_curator %}
+        <a href="{% url "admin:admission_interview_change" interview.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o" title="{% trans 'Edit' %}"></i></a>
+        {% endif %}</h2>
     </div>
     <div class="date">Дата собеседования: {{ interview.date_local|default:"Не назначена" }}</div>
     <div class="additional-info">
@@ -131,4 +132,5 @@
   </div>
 
   {% include "admission/_interview_assignment_modal.html" %}
-{% endlocaltime %}{% endblock content %}
+{% endlocaltime %}
+{% endblock content %}

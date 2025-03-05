@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-30 12:28+0000\n"
+"POT-Creation-Date: 2025-03-04 16:04+0000\n"
 "PO-Revision-Date: 2024-07-23 17:04+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1351,6 +1351,13 @@ msgstr "Слот для собеседования не найден"
 #: apps/admission/services.py:311
 msgid "Interview slot is not associated with the invitation"
 msgstr "Слот для собеседования не связан с указанным приглашением"
+
+#: apps/admission/templates/admission/_results_tab.html:7
+#: apps/admission/templates/admission/_results_tab.html:56
+#: apps/admission/templates/admission/applicant_detail.html:25
+#: apps/admission/templates/admission/interview_detail.html:22
+msgid "Edit"
+msgstr "Редактирование"
 
 #: apps/admission/views.py:797
 msgid "Current campaign"

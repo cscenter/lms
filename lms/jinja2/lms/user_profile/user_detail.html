@@ -37,7 +37,7 @@
         {{ profile_user.first_name }} {{ profile_user.patronymic }}<br>{{ profile_user.last_name }}
         {% if request_user.is_superuser %}
           <a href="{{ url('admin:users_user_change', object_id=profile_user.pk) }}" target="_blank"><i
-            class="fa fa-pencil-square-o"></i></a>
+            class="fa fa-pencil-square-o" title="{% trans %}Edit{% endtrans %}"></i></a>
           <form action="{{ url('admin:loginas-user-login', user_id=profile_user.pk) }}" method="POST" style="display: inline">
             {% csrf_token %}
             <a title="" class="login-helper" href="#"><i class="fa fa-ils" aria-hidden="true"></i></a>

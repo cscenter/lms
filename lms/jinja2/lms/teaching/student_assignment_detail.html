@@ -23,7 +23,7 @@
           {{ a_s.student.get_short_name() }}
           {% if request_user.is_curator %}
             <a href="{{ url('admin:learning_studentassignment_change', object_id=a_s.pk) }}" target="_blank"><i
-              class="fa fa-pencil-square-o"></i></a>
+              class="fa fa-pencil-square-o" title="{% trans %}Edit{% endtrans %}"></i></a>
           {% endif %}
           <br>
           <small>
