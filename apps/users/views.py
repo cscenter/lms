@@ -123,7 +123,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             "yandex_oauth_url": reverse('auth:users:yandex_begin'),
             "is_yds_site": self.request.site.pk == settings.YDS_SITE_ID
         }
-        enrollments = profile_user.enrollment_set.all().select_related("student_profile")
+        enrollments = profile_user.enrollment_set.all().select_related("student_profile").select_related("student_profile__invitation")
         for enrollment in enrollments:
             enrollment.satisfactory = enrollment.grade in GradeTypes.satisfactory_grades or \
                         (enrollment.grade == GradeTypes.NOT_GRADED and enrollment.course.semester == current_semester)

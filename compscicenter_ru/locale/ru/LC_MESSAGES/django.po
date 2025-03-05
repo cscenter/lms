@@ -1,0 +1,837 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-30 12:28+0000\n"
+"PO-Revision-Date: 2020-02-03 16:52+0000\n"
+"Last-Translator: b'  <pacabest@gmail.com>'\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"%100>=20) ? 1 : 2);\n"
+"X-Translated-Using: django-rosetta 0.9.3\n"
+
+#: compscicenter_ru/api/views.py:101
+msgid "Saint Petersburg"
+msgstr "Санкт-Петербург"
+
+#: compscicenter_ru/api/views.py:102
+msgid "Novosibirsk"
+msgstr "Новосибирск"
+
+#: compscicenter_ru/apps/announcements/admin.py:33
+#: compscicenter_ru/apps/announcements/admin.py:34
+#: compscicenter_ru/apps/announcements/models.py:137
+#: compscicenter_ru/apps/announcements/models.py:138
+msgid "Announcement Details"
+msgstr "Детали анонса"
+
+#: compscicenter_ru/apps/announcements/apps.py:7
+msgid "Announcements of events"
+msgstr "Анонсы мероприятий"
+
+#: compscicenter_ru/apps/announcements/models.py:20
+msgid "Modifier"
+msgstr "Модификатор"
+
+#: compscicenter_ru/apps/announcements/models.py:22
+msgid "This class could affect the tag view"
+msgstr "Может влиять на отображение тега"
+
+#: compscicenter_ru/apps/announcements/models.py:26
+msgid "Announcement Tag"
+msgstr "Тег анонса"
+
+#: compscicenter_ru/apps/announcements/models.py:27
+msgid "Announcement Tags"
+msgstr "Теги"
+
+#: compscicenter_ru/apps/announcements/models.py:62
+#: compscicenter_ru/apps/publications/models.py:64
+#: compscicenter_ru/apps/publications/models.py:187
+msgid "Title"
+msgstr "Заголовок"
+
+#: compscicenter_ru/apps/announcements/models.py:64
+#: compscicenter_ru/apps/publications/models.py:66
+#: compscicenter_ru/apps/publications/models.py:188
+msgid "Slug"
+msgstr "Slug"
+
+#: compscicenter_ru/apps/announcements/models.py:65
+msgid ""
+"Write the URL part after `compscicenter.ru/` If this is an open lecture, add "
+"`open-lecture-` prefix"
+msgstr ""
+"Напишите адрес страницы после <code>compscicenter.ru/</code> Если это "
+"открытая лекция, в начало добавьте <code>open-lecture-</code>"
+
+#: compscicenter_ru/apps/announcements/models.py:68
+msgid "Publish Start at"
+msgstr "Опубликовать с"
+
+#: compscicenter_ru/apps/announcements/models.py:70
+msgid "Publish End at"
+msgstr "Опубликовать до"
+
+#: compscicenter_ru/apps/announcements/models.py:72
+#: compscicenter_ru/apps/publications/models.py:26
+msgid "Short Description"
+msgstr "Краткое описание"
+
+#: compscicenter_ru/apps/announcements/models.py:74
+msgid "Detail Description"
+msgstr "Детальное описание"
+
+#: compscicenter_ru/apps/announcements/models.py:75
+msgid "Don't forget to add &lt;h3&gt;Title&lt;/h3&gt; on the first line"
+msgstr "Не забудьте добавить &lt;h3&gt;Заголовок&lt;/h3&gt; в начале описания."
+
+#: compscicenter_ru/apps/announcements/models.py:78
+#: compscicenter_ru/apps/publications/models.py:148
+msgid "Photo"
+msgstr "Фото"
+
+#: compscicenter_ru/apps/announcements/models.py:82
+msgid "Recommended dimensions 600x400"
+msgstr "Рекомендуемые размеры фото 600x400"
+
+#: compscicenter_ru/apps/announcements/models.py:84
+msgid "Actions"
+msgstr "Действия"
+
+#: compscicenter_ru/apps/announcements/models.py:92
+msgid "Announcement"
+msgstr "Анонс"
+
+#: compscicenter_ru/apps/announcements/models.py:93
+msgid "Announcements"
+msgstr "Анонсы"
+
+#: compscicenter_ru/apps/announcements/models.py:110
+msgid "Venue"
+msgstr "Место проведения"
+
+#: compscicenter_ru/apps/announcements/models.py:115
+msgid "Start Date"
+msgstr "Дата начала"
+
+#: compscicenter_ru/apps/announcements/models.py:119
+msgid "Start Time"
+msgstr "Время начала"
+
+#: compscicenter_ru/apps/announcements/models.py:123
+msgid "End Date"
+msgstr "Дата окончания"
+
+#: compscicenter_ru/apps/announcements/models.py:127
+msgid "End Time"
+msgstr "Время окончания"
+
+#: compscicenter_ru/apps/announcements/models.py:132
+#: compscicenter_ru/apps/publications/models.py:158
+#: compscicenter_ru/apps/publications/models.py:197
+msgid "Speakers"
+msgstr "Лекторы"
+
+#: compscicenter_ru/apps/application/apps.py:7
+#, fuzzy
+#| msgid "Publications"
+msgid "Application"
+msgstr "Публикации"
+
+#: compscicenter_ru/apps/online_courses/apps.py:7
+#: compscicenter_ru/apps/online_courses/models.py:47
+msgid "Online courses"
+msgstr "Онлайн-курсы"
+
+#: compscicenter_ru/apps/online_courses/models.py:22
+msgid "Course|name"
+msgstr "Название"
+
+#: compscicenter_ru/apps/online_courses/models.py:24
+msgid "Online Course|teachers"
+msgstr "Преподаватели"
+
+#: compscicenter_ru/apps/online_courses/models.py:27
+msgid "Online Course|description"
+msgstr "Описание"
+
+#: compscicenter_ru/apps/online_courses/models.py:30
+msgid "Online Course|Link"
+msgstr "Ссылка"
+
+#: compscicenter_ru/apps/online_courses/models.py:32
+msgid "Online Course|photo"
+msgstr "Фото"
+
+#: compscicenter_ru/apps/online_courses/models.py:37
+msgid "Collaboration with AY"
+msgstr "Совместно с АУ"
+
+#: compscicenter_ru/apps/online_courses/models.py:40
+msgid "Without deadlines"
+msgstr "Без дедлайнов"
+
+#: compscicenter_ru/apps/online_courses/models.py:46
+msgid "Online course"
+msgstr "Онлайн-курс"
+
+#: compscicenter_ru/apps/publications/admin.py:15
+msgid "Related Project"
+msgstr "Проект"
+
+#: compscicenter_ru/apps/publications/admin.py:16
+#: compscicenter_ru/apps/publications/models.py:77
+msgid "Projects"
+msgstr "Проекты"
+
+#: compscicenter_ru/apps/publications/admin.py:21
+msgid "Author"
+msgstr "Автор"
+
+#: compscicenter_ru/apps/publications/admin.py:22
+#: compscicenter_ru/apps/publications/models.py:72
+msgid "Authors"
+msgstr "Авторы"
+
+#: compscicenter_ru/apps/publications/apps.py:7
+msgid "Publications"
+msgstr "Публикации"
+
+#: compscicenter_ru/apps/publications/models.py:30
+msgid "Project Publication Author"
+msgstr "Автор публикации"
+
+#: compscicenter_ru/apps/publications/models.py:31
+msgid "Project Publication Authors"
+msgstr "Авторы публикации"
+
+#: compscicenter_ru/apps/publications/models.py:60
+msgid "created"
+msgstr "Создано"
+
+#: compscicenter_ru/apps/publications/models.py:68
+msgid "Draft"
+msgstr "Черновик"
+
+#: compscicenter_ru/apps/publications/models.py:85
+msgid "Cover"
+msgstr "Обложка"
+
+#: compscicenter_ru/apps/publications/models.py:87
+msgid "Min height - 180px"
+msgstr "Минимальная высота - 180px"
+
+#: compscicenter_ru/apps/publications/models.py:91
+#: compscicenter_ru/apps/publications/models.py:146
+#: compscicenter_ru/apps/publications/models.py:190
+#: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:36
+msgid "Description"
+msgstr "Описание"
+
+#: compscicenter_ru/apps/publications/models.py:94
+msgid "External Links"
+msgstr "Внешние ссылки"
+
+#: compscicenter_ru/apps/publications/models.py:102
+msgid "Project Publication"
+msgstr "Публикация о проекте"
+
+#: compscicenter_ru/apps/publications/models.py:103
+msgid "Project Publications"
+msgstr "Публикации о проектах"
+
+#: compscicenter_ru/apps/publications/models.py:140
+msgid "First Name"
+msgstr "Имя"
+
+#: compscicenter_ru/apps/publications/models.py:141
+msgid "Surname"
+msgstr "Фамилия"
+
+#: compscicenter_ru/apps/publications/models.py:142
+msgid "Patronymic"
+msgstr "Отчество"
+
+#: compscicenter_ru/apps/publications/models.py:143
+msgid "Gender"
+msgstr "Пол"
+
+#: compscicenter_ru/apps/publications/models.py:152
+msgid "Aspect ratio 5:7. Min size: {}"
+msgstr ""
+
+#: compscicenter_ru/apps/publications/models.py:153
+msgid "Workplace"
+msgstr "Место работы"
+
+#: compscicenter_ru/apps/publications/models.py:157
+msgid "Speaker"
+msgstr "Лектор"
+
+#: compscicenter_ru/apps/publications/models.py:189
+msgid "Event Date"
+msgstr "Дата события"
+
+#: compscicenter_ru/apps/publications/models.py:192
+msgid "Video URL"
+msgstr "URL Видео"
+
+#: compscicenter_ru/apps/publications/models.py:193
+msgid "https://support.google.com/youtube/answer/171780?hl=en"
+msgstr ""
+
+#: compscicenter_ru/apps/publications/models.py:194
+msgid "Slides URL"
+msgstr "Слайды"
+
+#: compscicenter_ru/apps/publications/models.py:201
+msgid "Recorded Event"
+msgstr "Видеозапись мероприятия"
+
+#: compscicenter_ru/apps/publications/models.py:202
+msgid "Recorded Events"
+msgstr "Видеозаписи мероприятий"
+
+#: compscicenter_ru/apps/publications/views.py:73
+msgid "Practices"
+msgstr "Практики"
+
+#: compscicenter_ru/apps/publications/views.py:75
+msgid "Research Works"
+msgstr "Научно-исследовательские работы"
+
+#: compscicenter_ru/jinja2/compscicenter_ru/courses/class_detail.html:85
+#: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:100
+#: compscicenter_ru/jinja2/compscicenter_ru/courses/meta_course_detail.html:85
+msgid "Edit in Admin"
+msgstr "Редактировать в админ. разделе сайта"
+
+#: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:44
+msgid "Teachers"
+msgstr "Преподаватели"
+
+#: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:61
+msgid "Lectures List"
+msgstr "Список лекций"
+
+#: compscicenter_ru/jinja2/compscicenter_ru/layouts/base.html:78
+msgid "Privacy&nbsp;Policy"
+msgstr "Конфиденциальность"
+
+#: compscicenter_ru/lms_menu.py:10 compscicenter_ru/menus.py:20
+msgctxt "menu"
+msgid "Courses"
+msgstr "Курсы"
+
+#: compscicenter_ru/lms_menu.py:18
+msgctxt "menu"
+msgid "Обучение"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:22
+msgctxt "menu"
+msgid "Задания"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:23
+msgctxt "menu"
+msgid "Моё расписание"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:24 compscicenter_ru/lms_menu.py:55
+msgctxt "menu"
+msgid "Календарь"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:25 compscicenter_ru/lms_menu.py:59
+msgctxt "menu"
+msgid "Мои курсы"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:26
+msgctxt "menu"
+msgid "Библиотека"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:27 compscicenter_ru/lms_menu.py:113
+msgctxt "menu"
+msgid "Полезное"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:28
+msgctxt "menu"
+msgid "Кодекс чести"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:29
+msgctxt "menu"
+msgid "Проекты организаторов"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:36
+msgctxt "menu"
+msgid "Преподавание"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:41
+msgctxt "menu"
+msgid "Очередь проверки"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:50
+msgctxt "menu"
+msgid "Расписание"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:64 compscicenter_ru/lms_menu.py:108
+msgctxt "menu"
+msgid "Ведомости"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:73
+msgctxt "menu"
+msgid "Набор"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:77
+msgctxt "menu"
+msgid "Собеседования"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:78
+msgctxt "menu"
+msgid "Анкеты"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:79
+msgctxt "menu"
+msgid "Отправка приглашений"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:81
+msgctxt "menu"
+msgid "Приглашения"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:83
+msgctxt "menu"
+msgid "Результаты"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:90 compscicenter_ru/lms_menu.py:95
+msgctxt "menu"
+msgid "Проекты"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:94
+msgctxt "menu"
+msgid "Отчеты"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:96
+msgctxt "menu"
+msgid "Все проекты"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:97
+msgctxt "menu"
+msgid "Все отчеты"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:104
+msgctxt "menu"
+msgid "Курирование"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:109
+msgctxt "menu"
+msgid "Поиск студентов"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:110
+msgctxt "menu"
+msgid "Файлы"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:114
+msgctxt "menu"
+msgid "Фейсбук"
+msgstr ""
+
+#: compscicenter_ru/lms_menu.py:115
+msgctxt "menu"
+msgid "Пересечения"
+msgstr ""
+
+#: compscicenter_ru/menus.py:25
+msgctxt "menu"
+msgid "Online Education"
+msgstr "Онлайн-образование"
+
+#: compscicenter_ru/menus.py:29
+msgctxt "menu"
+msgid "Online courses"
+msgstr "Онлайн-курсы"
+
+#: compscicenter_ru/menus.py:30
+msgctxt "menu"
+msgid "Online programs"
+msgstr "Онлайн-программы"
+
+#: compscicenter_ru/menus.py:31
+msgctxt "menu"
+msgid "Video Records"
+msgstr "Видеозаписи лекций"
+
+#: compscicenter_ru/menus.py:34
+msgctxt "menu"
+msgid "Admission"
+msgstr "Поступление"
+
+#: compscicenter_ru/menus.py:38
+msgctxt "menu"
+msgid "Apply"
+msgstr "Подать заявку"
+
+#: compscicenter_ru/menus.py:39
+msgctxt "menu"
+msgid "Checklist"
+msgstr "Памятка"
+
+#: compscicenter_ru/menus.py:40
+msgctxt "menu"
+msgid "Program for Admission"
+msgstr "Программа для поступления"
+
+#: compscicenter_ru/menus.py:41
+msgctxt "menu"
+msgid "FAQ"
+msgstr "Вопросы и ответы"
+
+#: compscicenter_ru/menus.py:44
+msgctxt "menu"
+msgid "About"
+msgstr "О центре"
+
+#: compscicenter_ru/menus.py:48
+msgctxt "menu"
+msgid "Teachers"
+msgstr "Преподаватели"
+
+#: compscicenter_ru/menus.py:49
+msgctxt "menu"
+msgid "Alumni"
+msgstr "Выпускники"
+
+#: compscicenter_ru/menus.py:50
+msgctxt "menu"
+msgid "Testimonials"
+msgstr "Отзывы"
+
+#: compscicenter_ru/menus.py:51
+msgctxt "menu"
+msgid "Team"
+msgstr "Команда"
+
+#: compscicenter_ru/menus.py:52
+msgctxt "menu"
+msgid "History"
+msgstr "История"
+
+#: compscicenter_ru/views.py:381
+msgid "Course"
+msgstr "Курс"
+
+#: compscicenter_ru/views.py:382
+msgid "Lecture"
+msgstr "Лекция"
+
+#: compscicenter_ru/views.py:591
+msgid "Autumn|adjective"
+msgstr "Осенний"
+
+#: compscicenter_ru/views.py:592
+msgid "Spring|adjective"
+msgstr "Весенний"
+
+#: compscicenter_ru/views.py:649
+msgid "About the Course"
+msgstr "О курсе"
+
+#: compscicenter_ru/views.py:653
+msgid "Syllabus"
+msgstr "Программа"
+
+#: compscicenter_ru/views.py:660
+msgid "Reads lectures"
+msgstr "Читает лекции"
+
+#: compscicenter_ru/views.py:661
+msgid "Checks assignments"
+msgstr "Проверяет задания"
+
+#: compscicenter_ru/views.py:662
+msgid "Leads seminars"
+msgstr "Ведёт семинары"
+
+#~ msgid "Members Area"
+#~ msgstr "Личный кабинет"
+
+#~ msgctxt "menu"
+#~ msgid "Programs"
+#~ msgstr "Программы"
+
+#~ msgctxt "menu"
+#~ msgid "On Campus"
+#~ msgstr "Очное обучение"
+
+#~ msgctxt "menu"
+#~ msgid "Distance"
+#~ msgstr "Заочное обучение"
+
+#~ msgid "Profile"
+#~ msgstr "Профиль"
+
+#~ msgid "Logout"
+#~ msgstr "Выйти"
+
+#~ msgid "Login"
+#~ msgstr "Войти"
+
+#~| msgid "Review of Computer Science Center"
+#~ msgid "Computer Science Center, 2011–20 гг."
+#~ msgstr "Computer Science Center, 2011–20 гг."
+
+#~ msgid "close all"
+#~ msgstr "закрыть все"
+
+#~ msgctxt "alumni"
+#~ msgid "graduate"
+#~ msgid_plural "graduates"
+#~ msgstr[0] "выпускник"
+#~ msgstr[1] "выпускника"
+#~ msgstr[2] "выпускников"
+
+#~ msgctxt "alumni"
+#~ msgid "teacher"
+#~ msgid_plural "teachers"
+#~ msgstr[0] "преподаватель"
+#~ msgstr[1] "преподавателя"
+#~ msgstr[2] "преподавателей"
+
+#~ msgctxt "alumni"
+#~ msgid "hour"
+#~ msgid_plural "hours"
+#~ msgstr[0] "час"
+#~ msgstr[1] "часа"
+#~ msgstr[2] "часов"
+
+#~ msgctxt "alumni"
+#~ msgid " project and research work"
+#~ msgid_plural "projects and research works"
+#~ msgstr[0] "проект и НИР"
+#~ msgstr[1] "проекта и НИР"
+#~ msgstr[2] "проектов и НИР"
+
+#~ msgctxt "alumni"
+#~ msgid "passed course"
+#~ msgid_plural "passed courses"
+#~ msgstr[0] "пройденный курс"
+#~ msgstr[1] "пройденных курса"
+#~ msgstr[2] "пройденных курсов"
+
+#~ msgid "on site"
+#~ msgstr "на сайте"
+
+#~ msgid "Change photo"
+#~ msgstr "Изменить фото"
+
+#~ msgid "student"
+#~ msgstr "студент"
+
+#~ msgctxt "user_detail"
+#~ msgid "enrolled in"
+#~ msgstr "года поступления"
+
+#~ msgid "teacher"
+#~ msgstr "преподаватель"
+
+#~ msgid "Review of Computer Science Center"
+#~ msgstr "Отзыв о центре"
+
+#~ msgid "Edit"
+#~ msgstr "Редактировать"
+
+#~ msgid "Student references"
+#~ msgstr "Справки студента"
+
+#~ msgid "Create reference"
+#~ msgstr "Выдать справку"
+
+#~ msgid "books"
+#~ msgstr "книги"
+
+#~ msgid "Student info record"
+#~ msgstr "Карточка студента"
+
+#~ msgid "University"
+#~ msgstr "Университет"
+
+#~ msgid "Phone"
+#~ msgstr "Телефон"
+
+#~ msgid "StudentInfo|University year"
+#~ msgstr "Курс"
+
+#~ msgid "Comment"
+#~ msgstr "Комментарий"
+
+#~ msgid "Status"
+#~ msgstr "Статус"
+
+#~ msgid "Non-degree student"
+#~ msgstr "Вольный слушатель"
+
+#~ msgid "Curriculum year"
+#~ msgstr "Год программы обучения"
+
+#~ msgid "StudentInfo|Study program"
+#~ msgstr "Учебная программа"
+
+#~ msgid "Assignments"
+#~ msgstr "Задания"
+
+#~ msgid "Course offering"
+#~ msgstr "Прочтение курса"
+
+#~ msgid "Assignment"
+#~ msgstr "Задание"
+
+#~ msgid "Grade"
+#~ msgstr "Оценка"
+
+#~ msgctxt "Project"
+#~ msgid "Shifted"
+#~ msgstr "Перенесён"
+
+#~ msgctxt "Project"
+#~ msgid "Canceled"
+#~ msgstr "Отменен"
+
+#~ msgid ".iCal calendar"
+#~ msgstr ".iCal-календарь"
+
+#~ msgid "Link"
+#~ msgstr "Ссылка"
+
+#~ msgid "Classes"
+#~ msgstr "Занятия"
+
+#~ msgid "Events"
+#~ msgstr "События"
+
+#~ msgid "Social accounts"
+#~ msgstr "Аккаунты"
+
+#~ msgid "Contact information"
+#~ msgstr "Контактная информация"
+
+#~ msgid "CS club course"
+#~ msgstr "Курс CS клуба"
+
+#~ msgid "Video"
+#~ msgstr "Видео"
+
+#~ msgid "Slides"
+#~ msgstr "Слайды"
+
+#~ msgid "Files"
+#~ msgstr "Файлы"
+
+#~ msgid "No courses yet"
+#~ msgstr "Нет курсов"
+
+#~ msgctxt "adjective"
+#~ msgid "autumn"
+#~ msgstr "осенний"
+
+#~ msgctxt "adjective"
+#~ msgid "spring"
+#~ msgstr "весенний"
+
+#~ msgctxt "menu"
+#~ msgid "Video"
+#~ msgstr "Видеозаписи лекций2"
+
+#, fuzzy
+#~ msgid "Announcement Detail"
+#~ msgstr "Тег анонса"
+
+#~ msgctxt "menu"
+#~ msgid "Lecture Hall"
+#~ msgstr "Лекторий"
+
+#~ msgid "Event Place"
+#~ msgstr "Место события"
+
+#~ msgid "Open Lecture"
+#~ msgstr "Открытая лекция"
+
+#~ msgctxt "menu"
+#~ msgid "Online"
+#~ msgstr "Онлайн"
+
+#~ msgid "Graduates about CS Center"
+#~ msgstr "Выпускники о CS центре"
+
+#~ msgid "Graduation"
+#~ msgstr "Выпуск"
+
+#, fuzzy
+#~ msgid "No professors yet"
+#~ msgstr "Список новостей пуст"
+
+#~ msgid "All online courses"
+#~ msgstr "Все онлайн-курсы"
+
+#~ msgid "Full-time courses on video"
+#~ msgstr "Видео очных курсов"
+
+#~ msgid "All video courses"
+#~ msgstr "Все курсы с видео"
+
+#~ msgid "Semester"
+#~ msgstr "Семестр"
+
+#~ msgid "%(counter)s class"
+#~ msgid_plural "%(counter)s classes"
+#~ msgstr[0] "%(counter)s занятие"
+#~ msgstr[1] "%(counter)s занятия"
+#~ msgstr[2] "%(counter)s занятий"
+
+#~ msgid "Supported by"
+#~ msgstr "При поддержке"
+
+#~ msgid "Yandex School of Data Analysis"
+#~ msgstr "Яндекс ШАД"
+
+#~ msgid "FML #239"
+#~ msgstr "ФМЛ №239"
+
+#~ msgid "Admin page"
+#~ msgstr "Админка"
+
+#~ msgid "logout"
+#~ msgstr "выйти"
