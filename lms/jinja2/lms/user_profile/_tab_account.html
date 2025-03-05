@@ -22,7 +22,10 @@
               <i style="font-size:14px" class="fa {{opacity}} " title="{{ invited_title }}">&#xf069;</i>
             {% endif %}
             {% if can_view_course_icons and enrollment.view_partner%}
-              <i class="fa fa-graduation-cap {{opacity}}" aria-hidden="true" title="{% trans %}Masters degree{% endtrans %} {{ enrollment.student_profile.partner.name }} "></i>
+              {% if enrollment.student_profile.partner %}
+                {% set partner_title = enrollment.student_profile.partner.name %}
+              {% endif %}
+              <i class="fa fa-graduation-cap {{opacity}}" aria-hidden="true" title="{% trans %}Masters degree{% endtrans %} {{ partner_title }} "></i>
             {% endif %}
             {% if enrollment.view_lections_only%}
               <i class="fa fa-headphones {{opacity}}" aria-hidden="true" title="{% trans %}Listener{% endtrans %}"></i>
