@@ -14,7 +14,12 @@
               {% set opacity = 'semi-transparent' %}
             {% endif %}
             {% if can_view_course_icons and enrollment.view_invited%}
-              <i style="font-size:14px" class="fa {{opacity}} " title="{{ enrollment.student_profile.invitation.name }}">&#xf069;</i>
+              {% if enrollment.student_profile.invitation %}
+                {% set invited_title = enrollment.student_profile.invitation.name %}
+              {% else %}
+                {% set invited_title = "{% trans Invited %}" %}
+              {% endif %}
+              <i style="font-size:14px" class="fa {{opacity}} " title="{{ invited_title }}">&#xf069;</i>
             {% endif %}
             {% if can_view_course_icons and enrollment.view_partner%}
               <i class="fa fa-graduation-cap {{opacity}}" aria-hidden="true" title="{% trans %}Masters degree{% endtrans %} {{ enrollment.student_profile.partner.name }} "></i>
