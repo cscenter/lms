@@ -178,7 +178,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
 
 class FutureGraduateStatsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas_stats.html"
-    BAD_GRADES = GradeTypes.unsatisfactory_grades
+    BAD_GRADES = [*GradeTypes.unsatisfactory_grades, *GradeTypes.unset_grades]
     BAD_PROJECT_GRADES = [
         ProjectGradeTypes.UNSATISFACTORY,
         ProjectGradeTypes.NOT_GRADED,

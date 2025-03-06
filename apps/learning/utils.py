@@ -49,7 +49,7 @@ def grade_to_base_system(grade: str):
     elif grade in GradeTypes.unsatisfactory_grades:
         return GradeTypes.UNSATISFACTORY
     elif grade in GradeTypes.unset_grades:
-        return GradeTypes.UNSATISFACTORY
+        return GradeTypes.NOT_GRADED
 
 
 def is_negative_grade(grade) -> bool:
