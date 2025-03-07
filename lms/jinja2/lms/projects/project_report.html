@@ -41,7 +41,7 @@
             <div class="panel-title">
               Текст отчета {% if request.user.is_curator -%}
               <a href="{{ url("admin:projects_report_change", object_id=report.pk) }}" target="_blank">
-                <i class="fa fa-pencil-square-o"></i>
+                <i class="fa fa-pencil-square-o" title="{% trans %}Edit{% endtrans %}"></i>
               </a>
             {%- endif %}
             </div>
