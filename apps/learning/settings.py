@@ -129,8 +129,8 @@ class GradeTypes(DjangoChoices):
     good_grades = {GOOD.value, SEVEN.value, EIGHT.value}
     satisfactory_grades = {CREDIT.value, RE_CREDIT.value, GOOD.value, EXCELLENT.value,
                            FOUR.value, FIVE.value, SIX.value, SEVEN.value, EIGHT.value, NINE.value, TEN.value}
-    unsatisfactory_grades = {NOT_GRADED.value, UNSATISFACTORY.value, WITHOUT_GRADE.value,
-                             ONE.value, TWO.value, THREE.value}
+    unsatisfactory_grades = {UNSATISFACTORY.value, ONE.value, TWO.value, THREE.value}
+    unset_grades = {NOT_GRADED.value, WITHOUT_GRADE.value}
     default_grades = (
         (NOT_GRADED.value, NOT_GRADED.label),
         (WITHOUT_GRADE.value, WITHOUT_GRADE.label),
