@@ -34,6 +34,7 @@ from admission.constants import (
     ApplicantInterviewFormats,
     InterviewInvitationStatuses,
     InterviewSections,
+    MIPTTracks,
     YandexDataSchoolInterviewRatingSystem, HasDiplomaStatuses, DiplomaDegrees,
 )
 from admission.utils import get_next_process, slot_range
@@ -407,6 +408,13 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     # Education
     partner = models.ForeignKey("users.PartnerTag", verbose_name=_("Partner"),
                                 null=True, blank=True, on_delete=models.SET_NULL)
+    mipt_track = models.CharField(
+        _("MIPT track"),
+        choices=MIPTTracks.choices,
+        max_length=30,
+        blank=True,
+        null=True
+    )
     is_studying = models.BooleanField(_("Are you studying?"), null=True)
     new_track = models.BooleanField(
         _("Are applying for alternative track?"),

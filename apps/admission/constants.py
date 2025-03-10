@@ -157,6 +157,10 @@ class HasDiplomaStatuses(DjangoChoices):
     IN_PROCESS = C("in_process", _('in process of getting degree'))
     NO = C("no", _('no'))
 
+class MIPTTracks(DjangoChoices):
+    BASIC = C("basic", _('Basiс track'))
+    ADVANCED = C("advanced", _('Advanced track'))
+
 SESSION_CONFIRMATION_CODE_KEY = "admission_confirmation_code"
 
 class UTMNames(DjangoChoices):

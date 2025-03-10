@@ -315,7 +315,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # Education
             "university_city", "university", "university_other",
             "faculty", "is_studying", "level_of_education", "level_of_education_other", "year_of_graduation",
-            "partner", "has_diploma", "diploma_degree",
+            "partner", "mipt_track", "has_diploma", "diploma_degree",
 
             # Exp and work
             "has_job",
