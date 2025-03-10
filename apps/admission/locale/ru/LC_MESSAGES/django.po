@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-04 16:04+0000\n"
+"POT-Creation-Date: 2025-03-10 12:40+0000\n"
 "PO-Revision-Date: 2024-07-23 17:04+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,7 +66,7 @@ msgstr "Дата"
 msgid "Interview"
 msgstr "Интервью"
 
-#: apps/admission/admin.py:438 apps/admission/constants.py:110
+#: apps/admission/admin.py:438 apps/admission/constants.py:119
 msgid "Accepted"
 msgstr "Принято"
 
@@ -171,105 +171,133 @@ msgstr "Отказ по результатам интенсива. Предло�
 msgid "Accept on paid"
 msgstr "Платное"
 
-#: apps/admission/constants.py:73
+#: apps/admission/constants.py:47
+msgid "Entering the master's program (pre-selection)"
+msgstr "Поступает в магистратуру (предотбор)"
+
+#: apps/admission/constants.py:48
+msgid "Passed the exam (pre-selection)"
+msgstr "Прошел экзамен (предотбор)"
+
+#: apps/admission/constants.py:49
+msgid "Rejected by exam (pre-selection)"
+msgstr "Отказ после экзамена (предотбор)"
+
+#: apps/admission/constants.py:50
+msgid "Recommended for the master's program (pre-selection)"
+msgstr "Рекомендован в магистратуру (предотбор)"
+
+#: apps/admission/constants.py:51
+msgid "Rejected by interview (pre-selection)"
+msgstr "Отказ после собеседования (предотбор)"
+
+#: apps/admission/constants.py:52
+msgid "Accepted for the master's program (pre-selection)"
+msgstr "Поступил в магистратуру (предотбор)"
+
+#: apps/admission/constants.py:53
+msgid "Refused to enroll the master's program (pre-selection)"
+msgstr "Отказ при зачислении (предотбор)"
+
+#: apps/admission/constants.py:82
 msgid "Testing"
 msgstr "Тестирование"
 
-#: apps/admission/constants.py:74 apps/admission/filters.py:147
+#: apps/admission/constants.py:83 apps/admission/filters.py:147
 #: apps/admission/models.py:1099
 msgid "Exam"
 msgstr "Экзамен"
 
-#: apps/admission/constants.py:78
+#: apps/admission/constants.py:87
 msgid "Not registered in the contest"
 msgstr "Не зарегистрирован в контесте"
 
-#: apps/admission/constants.py:80
+#: apps/admission/constants.py:89
 msgid "Syncing with a contest"
 msgstr "Синхронизация с контестом"
 
-#: apps/admission/constants.py:81
+#: apps/admission/constants.py:90
 msgid "Manual score input"
 msgstr "Ручной ввод баллов"
 
-#: apps/admission/constants.py:85 apps/admission/constants.py:89
+#: apps/admission/constants.py:94 apps/admission/constants.py:98
 msgid "Offline"
 msgstr "Очно"
 
-#: apps/admission/constants.py:86 apps/admission/constants.py:90
+#: apps/admission/constants.py:95 apps/admission/constants.py:99
 msgid "Online"
 msgstr "Онлайн"
 
-#: apps/admission/constants.py:91
+#: apps/admission/constants.py:100
 msgid "Any"
 msgstr "Любой"
 
-#: apps/admission/constants.py:95
+#: apps/admission/constants.py:104
 msgctxt "section"
 msgid "Common Section"
 msgstr "Общая секция"
 
-#: apps/admission/constants.py:96
+#: apps/admission/constants.py:105
 msgctxt "section"
 msgid "Math"
 msgstr "Математика"
 
-#: apps/admission/constants.py:97
+#: apps/admission/constants.py:106
 msgctxt "section"
 msgid "Code"
 msgstr "Код"
 
-#: apps/admission/constants.py:98
+#: apps/admission/constants.py:107
 msgctxt "section"
 msgid "Math and code"
 msgstr "Математика+код"
 
-#: apps/admission/constants.py:99
+#: apps/admission/constants.py:108
 msgctxt "section"
 msgid "Motivation"
 msgstr "Мотивация"
 
-#: apps/admission/constants.py:104
+#: apps/admission/constants.py:113
 msgid "No Response"
 msgstr "Нет ответа"
 
-#: apps/admission/constants.py:105
+#: apps/admission/constants.py:114
 msgid "Declined"
 msgstr "Отклонено"
 
-#: apps/admission/constants.py:109
+#: apps/admission/constants.py:118
 msgid "Expired"
 msgstr "Истекло"
 
-#: apps/admission/constants.py:140
+#: apps/admission/constants.py:149
 msgid "bachelor"
 msgstr "Бакалавр"
 
-#: apps/admission/constants.py:141
+#: apps/admission/constants.py:150
 msgid "speciality"
 msgstr "Специалист"
 
-#: apps/admission/constants.py:142
+#: apps/admission/constants.py:151
 msgid "magistracy"
 msgstr "Магистр"
 
-#: apps/admission/constants.py:143
+#: apps/admission/constants.py:152
 msgid "postgraduate"
 msgstr "Аспирант"
 
-#: apps/admission/constants.py:144
+#: apps/admission/constants.py:153
 msgid "secondary professional"
 msgstr "Диплом СПО"
 
-#: apps/admission/constants.py:147
+#: apps/admission/constants.py:156
 msgid "yes"
 msgstr "Да"
 
-#: apps/admission/constants.py:148
+#: apps/admission/constants.py:157
 msgid "in process of getting degree"
 msgstr "В процессе получения диплома"
 
-#: apps/admission/constants.py:149
+#: apps/admission/constants.py:158
 msgid "no"
 msgstr "Нет"
 
@@ -1352,10 +1380,9 @@ msgstr "Слот для собеседования не найден"
 msgid "Interview slot is not associated with the invitation"
 msgstr "Слот для собеседования не связан с указанным приглашением"
 
-#: apps/admission/templates/admission/_results_tab.html:7
-#: apps/admission/templates/admission/_results_tab.html:56
-#: apps/admission/templates/admission/applicant_detail.html:25
-#: apps/admission/templates/admission/interview_detail.html:22
+#: apps/admission/templates/admission/_results_tab.html:8
+#: apps/admission/templates/admission/_results_tab.html:57
+#: apps/admission/templates/admission/interview_detail.html:23
 msgid "Edit"
 msgstr "Редактирование"
 
