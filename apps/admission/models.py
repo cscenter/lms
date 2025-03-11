@@ -267,6 +267,12 @@ def applicant_photo_upload_to(instance, filename):
     file_name = uuid.uuid4().hex
     return f"applicants/{bucket}/{file_name}{ext}"
 
+def applicant_grades_upload_to(instance, filename):
+    bucket = instance.campaign.year
+    _, ext = os.path.splitext(filename)
+    file_name = uuid.uuid4().hex
+    return f"applicants/{bucket}/grades/{file_name}{ext}"
+
 
 class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, ApplicantThumbnailMixin):
     TIMEZONE_AWARE_FIELD_NAME = "campaign"
@@ -412,6 +418,24 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         _("MIPT track"),
         choices=MIPTTracks.choices,
         max_length=30,
+        blank=True,
+        null=True
+    )
+    mipt_gpa = models.DecimalField(
+        _("MIPT GPA"),
+        max_digits=3,
+        decimal_places=1,
+        blank=True,
+        null=True
+    )
+    mipt_expectations = models.TextField(
+        _("MIPT expectations"),
+        blank=True,
+        null=True
+    )
+    mipt_grades_file = ImageField(
+        _("MIPT grades file"),
+        upload_to=applicant_grades_upload_to,
         blank=True,
         null=True
     )

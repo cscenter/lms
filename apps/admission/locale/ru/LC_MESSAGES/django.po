@@ -22,8 +22,8 @@ msgstr ""
 #: apps/admission/admin.py:47 apps/admission/admin.py:119
 #: apps/admission/admin.py:467 apps/admission/filters.py:70
 #: apps/admission/filters.py:109 apps/admission/filters.py:351
-#: apps/admission/models.py:165 apps/admission/models.py:1161
-#: apps/admission/models.py:1390 apps/admission/models.py:1807
+#: apps/admission/models.py:165 apps/admission/models.py:1184
+#: apps/admission/models.py:1413 apps/admission/models.py:1830
 msgid "Campaign"
 msgstr "Набор"
 
@@ -34,10 +34,10 @@ msgid "Branch"
 msgstr "Отделение"
 
 #: apps/admission/admin.py:123 apps/admission/admin.py:442
-#: apps/admission/admin.py:463 apps/admission/models.py:631
-#: apps/admission/models.py:1047 apps/admission/models.py:1093
-#: apps/admission/models.py:1235 apps/admission/models.py:1625
-#: apps/admission/models.py:1728 apps/admission/views.py:852
+#: apps/admission/admin.py:463 apps/admission/models.py:654
+#: apps/admission/models.py:1070 apps/admission/models.py:1116
+#: apps/admission/models.py:1258 apps/admission/models.py:1648
+#: apps/admission/models.py:1751 apps/admission/views.py:852
 msgid "Applicant"
 msgstr "Поступающий"
 
@@ -46,7 +46,7 @@ msgid "Created"
 msgstr "Создано"
 
 #: apps/admission/admin.py:258 apps/admission/admin.py:339
-#: apps/admission/models.py:1363 apps/admission/views.py:853
+#: apps/admission/models.py:1386 apps/admission/views.py:853
 msgid "Interviewer"
 msgstr "Собеседующий"
 
@@ -59,9 +59,9 @@ msgstr "Собеседующие"
 msgid "Date"
 msgstr "Дата"
 
-#: apps/admission/admin.py:335 apps/admission/models.py:1283
-#: apps/admission/models.py:1357 apps/admission/models.py:1568
-#: apps/admission/models.py:1647
+#: apps/admission/admin.py:335 apps/admission/models.py:1306
+#: apps/admission/models.py:1380 apps/admission/models.py:1591
+#: apps/admission/models.py:1670
 msgid "Interview"
 msgstr "Интервью"
 
@@ -305,7 +305,6 @@ msgid "Basiс track"
 msgstr "Базовый трек"
 
 #: apps/admission/constants.py:153
-#| msgid "Applicant track"
 msgid "Advanced track"
 msgstr "Продвинутый трек"
 
@@ -315,12 +314,12 @@ msgstr "Согласованные и завершенные"
 
 #: apps/admission/filters.py:80 apps/admission/filters.py:229
 #: apps/admission/filters.py:330 apps/admission/filters.py:385
-#: apps/admission/models.py:839 apps/admission/models.py:1632
-#: apps/admission/models.py:1718 apps/admission/views.py:854
+#: apps/admission/models.py:862 apps/admission/models.py:1655
+#: apps/admission/models.py:1741 apps/admission/views.py:854
 msgid "Status"
 msgstr "Статус"
 
-#: apps/admission/filters.py:81 apps/admission/models.py:344
+#: apps/admission/filters.py:81 apps/admission/models.py:350
 msgid "Surname"
 msgstr "Фамилия"
 
@@ -388,7 +387,7 @@ msgid "Create interview"
 msgstr "Создать собеседование"
 
 #: apps/admission/forms.py:82 apps/admission/forms.py:115
-#: apps/admission/models.py:1450 apps/admission/models.py:1638
+#: apps/admission/models.py:1473 apps/admission/models.py:1661
 msgid "Interview streams"
 msgstr "Потоки собеседований"
 
@@ -481,7 +480,7 @@ msgstr ""
 "Возможность сделать набор текущим появится после добавления контестов для "
 "этапа тестирования."
 
-#: apps/admission/models.py:93 apps/admission/models.py:1793
+#: apps/admission/models.py:93 apps/admission/models.py:1816
 msgid "Order"
 msgstr "Сортировка"
 
@@ -630,517 +629,523 @@ msgstr "Сортировка"
 msgid "Universities"
 msgstr "Университеты"
 
-#: apps/admission/models.py:324
+#: apps/admission/models.py:330
 msgid "Applicant|Campaign"
 msgstr "Набор"
 
-#: apps/admission/models.py:330
+#: apps/admission/models.py:336
 msgid "Applicant|Status"
 msgstr "Статус"
 
-#: apps/admission/models.py:337
+#: apps/admission/models.py:343
 msgid "Account"
 msgstr "Пользователь"
 
-#: apps/admission/models.py:343
+#: apps/admission/models.py:349
 msgid "First name"
 msgstr "Имя"
 
-#: apps/admission/models.py:346
+#: apps/admission/models.py:352
 msgid "Patronymic"
 msgstr "Отчество"
 
-#: apps/admission/models.py:349
+#: apps/admission/models.py:355
 msgid "Applicant photo"
 msgstr "Фото"
 
-#: apps/admission/models.py:352
+#: apps/admission/models.py:358
 msgid "Applicant|photo"
 msgstr "Фотография поступающего"
 
-#: apps/admission/models.py:353
+#: apps/admission/models.py:359
 msgid "Gender"
 msgstr ""
 
-#: apps/admission/models.py:356
+#: apps/admission/models.py:362
 msgid "Email"
 msgstr "Электронная почта"
 
-#: apps/admission/models.py:356
+#: apps/admission/models.py:362
 msgid "Applicant|email"
 msgstr "Адрес электронной почты"
 
-#: apps/admission/models.py:358
+#: apps/admission/models.py:364
 msgid "Telegram"
 msgstr ""
 
-#: apps/admission/models.py:361
+#: apps/admission/models.py:367
 msgid "Unsubscribed"
 msgstr "Отписан от уведомлений"
 
-#: apps/admission/models.py:364
+#: apps/admission/models.py:370
 msgid "Unsubscribe from future notifications"
 msgstr "Пользователь отказался от рассылок по поводу приёмной кампании"
 
-#: apps/admission/models.py:367
+#: apps/admission/models.py:373
 msgid "Contact phone"
 msgstr "Контактный телефон"
 
-#: apps/admission/models.py:367
+#: apps/admission/models.py:373
 msgid "Applicant|phone"
 msgstr "Телефон для связи"
 
-#: apps/admission/models.py:370
+#: apps/admission/models.py:376
 msgid "Residence city"
 msgstr "Город проживания"
 
-#: apps/admission/models.py:374
+#: apps/admission/models.py:380
 msgid "Living Place"
 msgstr "Место проживания"
 
-#: apps/admission/models.py:376
+#: apps/admission/models.py:382
 msgid "Date of Birth"
 msgstr "Дата рождения"
 
-#: apps/admission/models.py:380
+#: apps/admission/models.py:386
 msgid "Stepik ID"
 msgstr "stepik.org ID"
 
-#: apps/admission/models.py:381
+#: apps/admission/models.py:387
 msgid "Applicant|stepic_id"
 msgstr "ID на stepic.org"
 
-#: apps/admission/models.py:387
+#: apps/admission/models.py:393
 msgid "Yandex Login"
 msgstr "Логин на Яндексе"
 
-#: apps/admission/models.py:389
+#: apps/admission/models.py:395
 msgid "Applicant|yandex_login"
 msgstr ""
 "Многие сервисы Яндекса используют единый аккаунт  https://passport.yandex.ru"
 
-#: apps/admission/models.py:394
+#: apps/admission/models.py:400
 msgid "Yandex Login (normalized)"
 msgstr "Логин на Яндексе (нормализованный)"
 
-#: apps/admission/models.py:396
+#: apps/admission/models.py:402
 msgid "Applicant|yandex_id_normalization"
 msgstr "Нормализация яндекс логина для поиска анкет"
 
-#: apps/admission/models.py:402
+#: apps/admission/models.py:408
 msgid "Github Login"
 msgstr "Логин на github.com"
 
-#: apps/admission/models.py:404
+#: apps/admission/models.py:410
 msgid "Applicant|github_login"
 msgstr "Ссылка на github-аккаунт"
 
-#: apps/admission/models.py:409
+#: apps/admission/models.py:415
 msgid "Partner"
 msgstr "Партнёрская программа"
 
-#: apps/admission/models.py:412
+#: apps/admission/models.py:418
 msgid "MIPT track"
-msgstr "Трек МФТИ"
+msgstr "Трек поступления (МФТИ)"
 
-#: apps/admission/models.py:414
-#, fuzzy
-#| msgid "Applicant track"
-msgid "Applicant|mipt_track"
-msgstr "Трек абитуриента"
+#: apps/admission/models.py:425
+msgid "MIPT GPA"
+msgstr "Средний балл (МФТИ)"
 
-#: apps/admission/models.py:419
+#: apps/admission/models.py:432
+msgid "MIPT expectations"
+msgstr "Ожидания (МФТИ)"
+
+#: apps/admission/models.py:437
+msgid "MIPT grades file"
+msgstr "Оценки (МФТИ)"
+
+#: apps/admission/models.py:442
 msgid "Are you studying?"
 msgstr "Вы учитесь?"
 
-#: apps/admission/models.py:421
+#: apps/admission/models.py:444
 msgid "Are applying for alternative track?"
 msgstr "Поступает на альтернативный трек"
 
-#: apps/admission/models.py:425
+#: apps/admission/models.py:448
 msgid "Alternative track info"
 msgstr "Информация для альтернативного трека"
 
-#: apps/admission/models.py:426
+#: apps/admission/models.py:449
 msgid "Applicant|alternative_track_info"
 msgstr ""
 "Опишите ваш опыт работы в IT-сфере (разработка, аналитика) после получения "
 "диплома в формате:период работы, компания, должность, обязанности"
 
-#: apps/admission/models.py:431
+#: apps/admission/models.py:454
 msgid "Has diploma"
 msgstr "Есть ли диплом"
 
-#: apps/admission/models.py:433
+#: apps/admission/models.py:456
 msgid "Applicant|has_diploma"
 msgstr "Есть ли у вас диплом?"
 
-#: apps/admission/models.py:438
+#: apps/admission/models.py:461
 msgid "Degree of diploma"
 msgstr "Степень диплома"
 
-#: apps/admission/models.py:440
+#: apps/admission/models.py:463
 msgid "Applicant|diploma_degree"
 msgstr "Укажите степень вашего диплома"
 
-#: apps/admission/models.py:447
+#: apps/admission/models.py:470
 msgid "Universities|University"
 msgstr "Университет"
 
-#: apps/admission/models.py:454
+#: apps/admission/models.py:477
 msgid "Applicant|University"
 msgstr "Университет (и иногда факультет)"
 
-#: apps/admission/models.py:461
+#: apps/admission/models.py:484
 msgid "University (Other)"
 msgstr "Университет, другое"
 
-#: apps/admission/models.py:464
+#: apps/admission/models.py:487
 msgid "Faculty"
 msgstr "Факультет"
 
-#: apps/admission/models.py:464
+#: apps/admission/models.py:487
 msgid "Applicant|faculty"
 msgstr ""
 "На каком факультете (кафедре/специализации) Вы учитесь или какой факультет "
 "закончили?"
 
-#: apps/admission/models.py:467
+#: apps/admission/models.py:490
 msgid "Course"
 msgstr "Курс"
 
-#: apps/admission/models.py:469
+#: apps/admission/models.py:492
 msgid "Applicant|course"
 msgstr "На каком курсе Вы сейчас учитесь?"
 
-#: apps/admission/models.py:475
+#: apps/admission/models.py:498
 msgid "Course (other)"
 msgstr "Курс (другое)"
 
-#: apps/admission/models.py:481
+#: apps/admission/models.py:504
 msgid "Graduation Year"
 msgstr "Год выпуска"
 
-#: apps/admission/models.py:484
+#: apps/admission/models.py:507
 msgid "Graduate work"
 msgstr "Выпускная работа"
 
-#: apps/admission/models.py:485
+#: apps/admission/models.py:508
 msgid "Applicant|graduate_work_or_dissertation"
 msgstr ""
 "Название текущей курсовой, дипломной работы или диссертации (если есть), "
 "руководитель"
 
-#: apps/admission/models.py:490
+#: apps/admission/models.py:513
 msgid "Online Education Exp"
 msgstr ""
 "Вы проходили какие-нибудь онлайн-курсы? Какие? Какие удалось закончить?"
 
-#: apps/admission/models.py:491
+#: apps/admission/models.py:514
 msgid "Applicant|online_education_experience"
 msgstr ""
 "Вы проходили какие-нибудь онлайн-курсы? Какие? Какие удалось закончить?"
 
-#: apps/admission/models.py:497
+#: apps/admission/models.py:520
 msgid "Experience"
 msgstr "Опыт программирования или научной работы"
 
-#: apps/admission/models.py:498
+#: apps/admission/models.py:521
 msgid "Applicant|work_or_study_experience"
 msgstr "Опишите Ваш опыт программирования или научной работы"
 
-#: apps/admission/models.py:503
+#: apps/admission/models.py:526
 msgid "Have you had an internship?"
 msgstr "Вы проходили стажировки в компаниях?"
 
-#: apps/admission/models.py:503
+#: apps/admission/models.py:526
 msgid "Applicant|Has internship"
 msgstr "Проходил стажировки"
 
-#: apps/admission/models.py:506
+#: apps/admission/models.py:529
 msgid "Internship workplace"
 msgstr "Компания, где вы стажировались"
 
-#: apps/admission/models.py:507
+#: apps/admission/models.py:530
 msgid "Applicant|Internship workplace"
 msgstr "Место стажировки"
 
-#: apps/admission/models.py:513
+#: apps/admission/models.py:536
 msgid "Internship position"
 msgstr "Должность на стажировке"
 
-#: apps/admission/models.py:514
+#: apps/admission/models.py:537
 msgid "Applicant|Internship position"
 msgstr "Должность на стажировке"
 
-#: apps/admission/models.py:519
+#: apps/admission/models.py:542
 msgid "Date of the internship beginning"
 msgstr "Дата начала стажировки"
 
-#: apps/admission/models.py:522
+#: apps/admission/models.py:545
 msgid "Date of the internship end"
 msgstr "Дата окончания стажировки"
 
-#: apps/admission/models.py:526
+#: apps/admission/models.py:549
 msgid "Does your internship still going?"
 msgstr "На стажировке"
 
-#: apps/admission/models.py:526
+#: apps/admission/models.py:549
 msgid "Applicant|internship_not_ended"
 msgstr "Стажируется ли до сих пор"
 
-#: apps/admission/models.py:529
+#: apps/admission/models.py:552
 msgid "Do you work?"
 msgstr "Работает"
 
-#: apps/admission/models.py:529
+#: apps/admission/models.py:552
 msgid "Applicant|has_job"
 msgstr "Работает ли в данный момент"
 
-#: apps/admission/models.py:532
+#: apps/admission/models.py:555
 msgid "Workplace"
 msgstr "Место работы"
 
-#: apps/admission/models.py:533
+#: apps/admission/models.py:556
 msgid "Applicant|workplace"
 msgstr "Место работы"
 
-#: apps/admission/models.py:539
+#: apps/admission/models.py:562
 msgid "Position"
 msgstr "Должность"
 
-#: apps/admission/models.py:540
+#: apps/admission/models.py:563
 msgid "Applicant|position"
 msgstr "Должность"
 
-#: apps/admission/models.py:546
+#: apps/admission/models.py:569
 msgid "Working hours"
 msgstr "Количество рабочих часов в неделю"
 
-#: apps/admission/models.py:549
+#: apps/admission/models.py:572
 msgid "Your motivation"
 msgstr "Мотивация поступающего"
 
-#: apps/admission/models.py:550
+#: apps/admission/models.py:573
 msgid "Applicant|motivation_why"
 msgstr "Почему Вы хотите обучаться у нас?"
 
-#: apps/admission/models.py:555
+#: apps/admission/models.py:578
 msgid "Probability"
 msgstr ""
 "Что нужно для выпуска из CS центра? Оцените вероятность, что вы сможете это "
 "сделать"
 
-#: apps/admission/models.py:555
+#: apps/admission/models.py:578
 msgid "Applicant|probability"
 msgstr ""
 "Что нужно для выпуска из CS центра? Оцените вероятность, что вы сможете это "
 "сделать"
 
-#: apps/admission/models.py:558
+#: apps/admission/models.py:581
 msgid "Study program"
 msgstr "Предполагаемые направления обучения"
 
-#: apps/admission/models.py:559
+#: apps/admission/models.py:582
 msgid "Applicant|study_program"
 msgstr "Выберите направления обучения, которые Вам интересны в CS центре"
 
-#: apps/admission/models.py:567
+#: apps/admission/models.py:590
 msgid "Study Program Notes"
 msgstr "Комментарии к направлениям обучения"
 
-#: apps/admission/models.py:570
+#: apps/admission/models.py:593
 msgid "Study program (DM note)"
 msgstr "Направление \"Анализ данных\" (подробнее)"
 
-#: apps/admission/models.py:571
+#: apps/admission/models.py:594
 msgid "Applicant|study_program_dm"
 msgstr ""
 "Почему вам интересен анализ данных? Какие повседневные задачи решаются с "
 "помощью анализа данных?"
 
-#: apps/admission/models.py:576
+#: apps/admission/models.py:599
 msgid "Study program (SE note)"
 msgstr "Направление \"Разработка ПО\" (подробнее)"
 
-#: apps/admission/models.py:577
+#: apps/admission/models.py:600
 msgid "Applicant|study_program_se"
 msgstr ""
 "В разработке какого приложения, которым вы пользуетесь каждый день, вы "
 "хотели бы принять участие? Почему? Каких знаний вам для этого не хватает?"
 
-#: apps/admission/models.py:582
+#: apps/admission/models.py:605
 msgid "Study program (CS note)"
 msgstr "Какие области Computer Science вам интересно было бы изучить?"
 
-#: apps/admission/models.py:583
+#: apps/admission/models.py:606
 msgid "Applicant|study_program_cs"
 msgstr ""
 "Вы можете посмотреть список возможных тем и руководителей НИРов у нас на "
 "сайте: https://compscicenter.ru/projects/"
 
-#: apps/admission/models.py:590
+#: apps/admission/models.py:613
 msgid "Where did you learn about admission?"
 msgstr "Откуда вы узнали о наборе?"
 
-#: apps/admission/models.py:593
+#: apps/admission/models.py:616
 msgid "Where did you learn about admission? (other)"
 msgstr "Откуда вы узнали о наборе? (другое)"
 
-#: apps/admission/models.py:599
+#: apps/admission/models.py:622
 msgid "Future plans"
 msgstr "Планы после обучения"
 
-#: apps/admission/models.py:599
+#: apps/admission/models.py:622
 msgid "Applicant|future_plans"
 msgstr "Чем вы планируете заниматься после окончания обучения?"
 
-#: apps/admission/models.py:602
+#: apps/admission/models.py:625
 msgid "Additional Info"
 msgstr "Дополнительная информация"
 
-#: apps/admission/models.py:603
+#: apps/admission/models.py:626
 msgid "Applicant|additional_info"
 msgstr ""
 "Если хотите, напишите любую дополнительную информацию, которая могла бы "
 "помочь Вам поступить"
 
-#: apps/admission/models.py:608
+#: apps/admission/models.py:631
 msgid "Admin note"
 msgstr "Заметка о поступающем"
 
-#: apps/admission/models.py:608
+#: apps/admission/models.py:631
 msgid "Applicant|admin_note"
 msgstr "Например, вопросы по заявке"
 
-#: apps/admission/models.py:611 apps/admission/models.py:1204
-#: apps/admission/models.py:1245 apps/admission/models.py:1400
-#: apps/admission/models.py:1406
+#: apps/admission/models.py:634 apps/admission/models.py:1227
+#: apps/admission/models.py:1268 apps/admission/models.py:1423
+#: apps/admission/models.py:1429
 msgid "Interview Format"
 msgstr "Формат собеседования"
 
-#: apps/admission/models.py:612
+#: apps/admission/models.py:635
 msgid "Applicant|interview_format"
 msgstr "Желаемый формат интервью"
 
-#: apps/admission/models.py:618
+#: apps/admission/models.py:641
 msgid "Count of missed interviews"
 msgstr "Количество пропусков собеседования"
 
-#: apps/admission/models.py:619
+#: apps/admission/models.py:642
 msgid "Applicant|miss_count"
 msgstr ""
 "Увеличивается, когда человек отклоняет приглашение, не отвечает на него или "
 "не приходит на собеседование"
 
-#: apps/admission/models.py:624
+#: apps/admission/models.py:647
 msgid "Data"
 msgstr "Специфичные для кампании набора поля"
 
-#: apps/admission/models.py:632
+#: apps/admission/models.py:655
 msgid "Applicants"
 msgstr "Анкеты"
 
-#: apps/admission/models.py:774
+#: apps/admission/models.py:797
 msgid "Contest|Campaign"
 msgstr "Кампания по набору"
 
-#: apps/admission/models.py:778
+#: apps/admission/models.py:801
 msgid "Type"
 msgstr "Тип"
 
-#: apps/admission/models.py:780 apps/admission/models.py:821
+#: apps/admission/models.py:803 apps/admission/models.py:844
 msgid "Contest #ID"
 msgstr "#ID Контеста"
 
-#: apps/admission/models.py:781 apps/admission/models.py:822
+#: apps/admission/models.py:804 apps/admission/models.py:845
 msgid "Applicant|yandex_contest_id"
 msgstr "ID Яндекс.Контеста"
 
-#: apps/admission/models.py:787 apps/admission/models.py:1055
-#: apps/admission/models.py:1104
+#: apps/admission/models.py:810 apps/admission/models.py:1078
+#: apps/admission/models.py:1127
 msgid "Details"
 msgstr "Детали"
 
-#: apps/admission/models.py:792
+#: apps/admission/models.py:815
 msgid "Assignments in pdf format"
 msgstr "Pdf-файл с заданиями"
 
-#: apps/admission/models.py:801
+#: apps/admission/models.py:824
 msgid "Contest"
 msgstr "Контест"
 
-#: apps/admission/models.py:802
+#: apps/admission/models.py:825
 msgid "Contests"
 msgstr "Контесты"
 
-#: apps/admission/models.py:828
+#: apps/admission/models.py:851
 msgid "Participant ID"
 msgstr "ID участника"
 
-#: apps/admission/models.py:829
+#: apps/admission/models.py:852
 msgid "participant_id in Yandex.Contest"
 msgstr "participant_id в Яндекс.Контесте"
 
-#: apps/admission/models.py:841
+#: apps/admission/models.py:864
 msgid ""
 "Choose `manual score input` to avoid synchronization with contest results"
 msgstr "\"Ручной ввод\" отключает синхронизацию балла с контестом."
 
-#: apps/admission/models.py:1052 apps/admission/models.py:1098
-#: apps/admission/models.py:1368
+#: apps/admission/models.py:1075 apps/admission/models.py:1121
+#: apps/admission/models.py:1391
 msgid "Score"
 msgstr "Оценка"
 
-#: apps/admission/models.py:1062
+#: apps/admission/models.py:1085
 msgid "Testing Result"
 msgstr "Результат тестирования"
 
-#: apps/admission/models.py:1063
+#: apps/admission/models.py:1086
 msgid "Testing Results"
 msgstr "Результаты тестирования"
 
-#: apps/admission/models.py:1109
+#: apps/admission/models.py:1132
 msgid "Exams"
 msgstr "Результаты экзамена"
 
-#: apps/admission/models.py:1137
+#: apps/admission/models.py:1160
 msgid "InterviewAssignments|Campaign"
 msgstr "Кампания по набору"
 
-#: apps/admission/models.py:1141
+#: apps/admission/models.py:1164
 msgid "InterviewAssignments|name"
 msgstr "Название"
 
-#: apps/admission/models.py:1143
+#: apps/admission/models.py:1166
 msgid "Assignment description"
 msgstr "Описание"
 
-#: apps/admission/models.py:1143 apps/admission/models.py:1146
+#: apps/admission/models.py:1166 apps/admission/models.py:1169
 msgid "TeX support"
 msgstr "Поддерживается TeX"
 
-#: apps/admission/models.py:1146
+#: apps/admission/models.py:1169
 msgid "Assignment solution"
 msgstr "Решение"
 
-#: apps/admission/models.py:1151
+#: apps/admission/models.py:1174
 msgid "Interview assignment"
 msgstr "Задание для интервью"
 
-#: apps/admission/models.py:1152
+#: apps/admission/models.py:1175
 msgid "Interview assignments"
 msgstr "Задания для интервью"
 
-#: apps/admission/models.py:1166
+#: apps/admission/models.py:1189
 msgid "Format Name"
 msgstr "Название формата"
 
-#: apps/admission/models.py:1170
+#: apps/admission/models.py:1193
 msgid "Confirmation Template"
 msgstr "Шаблон подтверждения"
 
-#: apps/admission/models.py:1173
+#: apps/admission/models.py:1196
 msgid ""
 "Template for confirmation email that the interview was scheduled. Leave "
 "blank if there is no need to send confirmation email"
@@ -1148,11 +1153,11 @@ msgstr ""
 "Оставьте пустым, если не требуется отправлять письмо с подтверждением  того,"
 " что собеседование было успешно создано."
 
-#: apps/admission/models.py:1183
+#: apps/admission/models.py:1206
 msgid "Reminder Template"
 msgstr "Шаблон напоминания"
 
-#: apps/admission/models.py:1186
+#: apps/admission/models.py:1209
 msgid ""
 "Template for interview reminder email. Notification will be generated only "
 "on interview creation through slots mechanism."
@@ -1160,11 +1165,11 @@ msgstr ""
 "Шаблон письма с напоминанием о предстоящем собеседовании. Напоминание будет "
 "сгенерировано только при создании интервью через механизм потоков/слотов."
 
-#: apps/admission/models.py:1193
+#: apps/admission/models.py:1216
 msgid "Remind Before Start"
 msgstr "Напомнить за"
 
-#: apps/admission/models.py:1195
+#: apps/admission/models.py:1218
 msgid ""
 "Helps to calculate schedule time of the reminder. Specify timedelta that "
 "will be subtracted from the interview start time."
@@ -1172,125 +1177,125 @@ msgstr ""
 "Указанная дельта времени помогает вычислить время отправки напоминания и "
 "будет вычтена из времени начала собеседования."
 
-#: apps/admission/models.py:1205
+#: apps/admission/models.py:1228
 msgid "Interview Formats"
 msgstr "Форматы собеседований"
 
-#: apps/admission/models.py:1225
+#: apps/admission/models.py:1248
 msgid "Approval"
 msgstr "Согласование"
 
-#: apps/admission/models.py:1226
+#: apps/admission/models.py:1249
 msgid "Deferred"
 msgstr "Отложено"
 
-#: apps/admission/models.py:1227
+#: apps/admission/models.py:1250
 msgid "Canceled"
 msgstr "Отменено"
 
-#: apps/admission/models.py:1228
+#: apps/admission/models.py:1251
 msgid "Approved"
 msgstr "Согласовано"
 
-#: apps/admission/models.py:1229
+#: apps/admission/models.py:1252
 msgid "Completed"
 msgstr "Завершено"
 
-#: apps/admission/models.py:1241 apps/admission/models.py:1396
+#: apps/admission/models.py:1264 apps/admission/models.py:1419
 msgid "Interview|Section"
 msgstr "Секция"
 
-#: apps/admission/models.py:1249
+#: apps/admission/models.py:1272
 msgid "When"
 msgstr "Дата интервью"
 
-#: apps/admission/models.py:1251
+#: apps/admission/models.py:1274
 msgid "Interview|Slot duration"
 msgstr "Длительность (мин)"
 
-#: apps/admission/models.py:1256
+#: apps/admission/models.py:1279
 msgid "Interview|Status"
 msgstr "Статус собеседования"
 
-#: apps/admission/models.py:1261
+#: apps/admission/models.py:1284
 msgid "Venue"
 msgstr "Место проведения собеседования"
 
-#: apps/admission/models.py:1270 apps/admission/models.py:1433
+#: apps/admission/models.py:1293 apps/admission/models.py:1456
 msgid "Interview|Interviewers"
 msgstr "Собеседующие"
 
-#: apps/admission/models.py:1274
+#: apps/admission/models.py:1297
 msgid "Interview|Assignments"
 msgstr "Задания для интервью"
 
-#: apps/admission/models.py:1277 apps/admission/models.py:1642
+#: apps/admission/models.py:1300 apps/admission/models.py:1665
 msgid "Secret code"
 msgstr "Секретный код"
 
-#: apps/admission/models.py:1279
+#: apps/admission/models.py:1302
 msgid "Note"
 msgstr "Доп. информация"
 
-#: apps/admission/models.py:1284
+#: apps/admission/models.py:1307
 msgid "Interviews"
 msgstr "Собеседования"
 
-#: apps/admission/models.py:1367
+#: apps/admission/models.py:1390
 msgid "Text"
 msgstr "Комментарий"
 
-#: apps/admission/models.py:1372
+#: apps/admission/models.py:1395
 msgid "Comment"
 msgstr "Комментарий"
 
-#: apps/admission/models.py:1373
+#: apps/admission/models.py:1396
 msgid "Comments"
 msgstr "Комментарии к собеседованию"
 
-#: apps/admission/models.py:1411
+#: apps/admission/models.py:1434
 msgid "Interview day"
 msgstr "День проведения"
 
-#: apps/admission/models.py:1412
+#: apps/admission/models.py:1435
 msgid "Period start"
 msgstr "Начало потока"
 
-#: apps/admission/models.py:1413
+#: apps/admission/models.py:1436
 msgid "Period end"
 msgstr "Конец потока"
 
-#: apps/admission/models.py:1415
+#: apps/admission/models.py:1438
 msgid "Slot duration"
 msgstr "Длительность слота (мин)"
 
-#: apps/admission/models.py:1420
+#: apps/admission/models.py:1443
 msgid "Interview venue"
 msgstr "Место"
 
-#: apps/admission/models.py:1425
+#: apps/admission/models.py:1448
 msgid "Has assignments"
 msgstr "С заданиями"
 
-#: apps/admission/models.py:1427
+#: apps/admission/models.py:1450
 msgid "Based on this flag, student should arrive 30 min before or not"
 msgstr ""
 "Если отмечено, то в уведомлении будет указано время собеседования на полчаса"
 " раньше."
 
-#: apps/admission/models.py:1437
+#: apps/admission/models.py:1460
 msgid "Maximum number of slots preffered by interviewer"
 msgstr "Максимальное количество собеседований в день"
 
-#: apps/admission/models.py:1438
+#: apps/admission/models.py:1461
 msgid "Applicant|interviewers_max"
 msgstr "При достижении поток не предлагается. Пустой игнорируется"
 
-#: apps/admission/models.py:1449 apps/admission/models.py:1578
+#: apps/admission/models.py:1472 apps/admission/models.py:1601
 msgid "Interview stream"
 msgstr "Поток собеседований"
 
-#: apps/admission/models.py:1491
+#: apps/admission/models.py:1514
 msgid ""
 "Interview format settings are not found. Create settings <a "
 "href='{}'>here</a>."
@@ -1298,93 +1303,93 @@ msgstr ""
 "Настройки формата собеседования для указанной кампании не найдены. Создать "
 "настройки можно <a href='{}'>здесь</a>."
 
-#: apps/admission/models.py:1509
+#: apps/admission/models.py:1532
 msgid "Stream duration can't be less than slot duration"
 msgstr ""
 "Длительность потока должна быть больше, чем длительность хотя бы одного "
 "слота."
 
-#: apps/admission/models.py:1574
+#: apps/admission/models.py:1597
 msgid "Interview start"
 msgstr "Начало"
 
-#: apps/admission/models.py:1575
+#: apps/admission/models.py:1598
 msgid "Interview end"
 msgstr "Окончание"
 
-#: apps/admission/models.py:1586
+#: apps/admission/models.py:1609
 msgid "Interview slot"
 msgstr "Слот для собеседования"
 
-#: apps/admission/models.py:1587
+#: apps/admission/models.py:1610
 msgid "Interview slots"
 msgstr "Слоты для собеседований"
 
-#: apps/admission/models.py:1644
+#: apps/admission/models.py:1667
 msgid "Expired at"
 msgstr "Истекает"
 
-#: apps/admission/models.py:1658
+#: apps/admission/models.py:1681
 msgid "Interview invitation"
 msgstr "Приглашение на собеседование"
 
-#: apps/admission/models.py:1659
+#: apps/admission/models.py:1682
 msgid "Interview invitations"
 msgstr "Приглашения на собеседования"
 
-#: apps/admission/models.py:1721
+#: apps/admission/models.py:1744
 msgid "Waiting for Confirmation"
 msgstr "Ожидаем подтверждения"
 
-#: apps/admission/models.py:1722
+#: apps/admission/models.py:1745
 msgid "Confirmed"
 msgstr "Подтверждено"
 
-#: apps/admission/models.py:1736
+#: apps/admission/models.py:1759
 msgid "Authorization Code"
 msgstr "Код авторизации"
 
-#: apps/admission/models.py:1741
+#: apps/admission/models.py:1764
 msgid "Acceptance for Studies"
 msgstr "Запись о поступлении"
 
-#: apps/admission/models.py:1742
+#: apps/admission/models.py:1765
 msgid "Acceptances for Studies"
 msgstr "Записи о поступлении"
 
-#: apps/admission/models.py:1783
+#: apps/admission/models.py:1806
 msgid "External ID"
 msgstr "Внешний ID"
 
-#: apps/admission/models.py:1785
+#: apps/admission/models.py:1808
 msgid "Name"
 msgstr "Название"
 
-#: apps/admission/models.py:1786
+#: apps/admission/models.py:1809
 msgid "Display Name"
 msgstr ""
 
-#: apps/admission/models.py:1789
+#: apps/admission/models.py:1812
 msgid "Country"
 msgstr "Страна"
 
-#: apps/admission/models.py:1797
+#: apps/admission/models.py:1820
 msgid "Residence City"
 msgstr "Город проживания"
 
-#: apps/admission/models.py:1798
+#: apps/admission/models.py:1821
 msgid "Residence Cities"
 msgstr "Города проживания"
 
-#: apps/admission/models.py:1814
+#: apps/admission/models.py:1837
 msgid "City"
 msgstr "Город"
 
-#: apps/admission/models.py:1823
+#: apps/admission/models.py:1846
 msgid "Campaign Available in City"
 msgstr "Отделение в городе"
 
-#: apps/admission/models.py:1824
+#: apps/admission/models.py:1847
 msgid "Campaigns Available in City"
 msgstr "Отделения, доступные в городе"
 
@@ -1427,6 +1432,10 @@ msgstr "Секция"
 #| msgid "Format Name"
 msgid "Format"
 msgstr "Название формата"
+
+#, fuzzy
+#~ msgid "Applicant|mipt_track"
+#~ msgstr "Трек абитуриента"
 
 #, fuzzy
 #~ msgid "Applicant name"
