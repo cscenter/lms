@@ -44,6 +44,15 @@ class ApplicantStatuses(DjangoChoices):
     REJECTED_BY_INTENSIVE_WITH_BONUS = C("rejected_intensive_bonus", _("Rejected by intensive. Offered a bonus"))
     ACCEPT_PAID = C("accept_paid", _("Accept on paid"))
 
+    ENTERING_MASTERS_PRESELECT = C("entering_masters_preselect", _("Entering the master's program (pre-selection)"))
+    PASSED_EXAM_PRESELECT = C("passed_exam_preselect", _("Passed the exam (pre-selection)"))
+    REJECTED_BY_EXAM_PRESELECT =C("rejected_exam_preselect", _("Rejected by exam (pre-selection)"))
+    RECOMMENDED_MASTERS_PRESELECT = C("recommended_masters_preselect", _("Recommended for the master's program (pre-selection)"))
+    REJECTED_BY_INTERVIEW_PRESELECT = C("rejected_interview_preselect", _("Rejected by interview (pre-selection)"))
+    ACCEPTED_MASTERS_PRESELECT = C("accepted_masters_preselect", _("Accepted for the master's program (pre-selection)"))
+    REJECTED_MASTERS_PRESELECT = C("rejected_masters_preselect", _("Refused to enroll the master's program (pre-selection)"))
+
+
     # Applicants whose next step is interview.
     # Modern equivalent of INTERVIEW_TOBE_SCHEDULED
     RIGHT_BEFORE_INTERVIEW = {
