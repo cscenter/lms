@@ -74,6 +74,7 @@ from admission.models import (
 from admission.services import (
     CampaignContestsImportState,
     EmailQueueService,
+    create_applicant_status_log,
     create_invitation,
     create_student_from_applicant,
     get_acceptance_ready_to_confirm,
@@ -82,6 +83,7 @@ from admission.services import (
     get_meeting_time,
     get_ongoing_interview_streams,
     get_streams,
+    manual_status_change
 )
 from core.db.fields import ScoreField
 from core.http import AuthenticatedHttpRequest, HttpRequest
@@ -704,6 +706,19 @@ class ApplicantDetailView(CuratorOnlyMixin, TemplateResponseMixin, BaseCreateVie
 class ApplicantStatusUpdateView(CuratorOnlyMixin, generic.UpdateView):
     form_class = ApplicantForm
     model = Applicant
+
+    def form_valid(self, form):
+        if 'status' in form.changed_data:
+            with manual_status_change():
+                create_applicant_status_log(
+                    applicant=self.object,
+                    new_status=form.cleaned_data['status'],
+                    editor=self.request.user
+                )
+                response = super().form_valid(form)
+                return response
+        else:
+            return super().form_valid(form)
 
     def get_success_url(self):
         messages.success(self.request, "Статус успешно обновлён", extra_tags="timeout")
