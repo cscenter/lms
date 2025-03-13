@@ -770,6 +770,43 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         return Applicant.objects.filter(~Q(id=self.pk) & q)
 
 
+class ApplicantStatusLog(TimestampedModel):
+    changed_at = models.DateField(
+        verbose_name=_("Entry Added"),
+        default=timezone.now)
+    applicant = models.ForeignKey(
+        Applicant,
+        verbose_name=_("Applicant"),
+        related_name="status_logs",
+        on_delete=models.CASCADE)
+    former_status = models.CharField(
+        choices=ApplicantStatuses.choices,
+        verbose_name=_("Former status"),
+        max_length=30,
+        blank=True,
+        null=True)
+    status = models.CharField(
+        choices=ApplicantStatuses.choices,
+        verbose_name=_("Status"),
+        max_length=30,
+        blank=True,
+        null=True)
+    entry_author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Author"),
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True)
+
+    class Meta:
+        app_label = "admission"
+        verbose_name = _("Applicant Status Log")
+        verbose_name_plural = _("Applicant Status Logs")
+        ordering = ['-changed_at', '-pk']
+
+    def __str__(self):
+        return str(self.pk)
+
 def contest_assignments_upload_to(instance, filename):
     # TODO: Can be visible for unauthenticated. Is it ok?
     return instance.FILE_PATH_TEMPLATE.format(
