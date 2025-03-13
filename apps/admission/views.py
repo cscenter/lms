@@ -62,6 +62,7 @@ from admission.forms import (
 from admission.models import (
     Acceptance,
     Applicant,
+    ApplicantStatusLog,
     Campaign,
     Comment,
     Contest,
@@ -111,6 +112,8 @@ def get_applicant_context(request, applicant_id) -> Dict[str, Any]:
     branches = Branch.objects.for_site(site_id=settings.SITE_ID)
     qs = Applicant.objects.select_related(
         "exam", "campaign__branch__site", "online_test", "university_legacy"
+    ).prefetch_related(
+        Prefetch("status_logs", queryset=ApplicantStatusLog.objects.select_related("entry_author"))
     ).filter(campaign__branch__in=branches, pk=applicant_id)
     applicant = get_object_or_404(qs)
     online_test = applicant.get_testing_record()
@@ -134,7 +137,7 @@ def get_applicant_context(request, applicant_id) -> Dict[str, Any]:
         "ContestTypes": ContestTypes,
         "exam": exam,
         "online_test": online_test,
-        "similar_applicants": applicant.get_similar(),
+        "similar_applicants": applicant.get_similar().select_related("campaign__branch__site"),
     }
     return context
 
