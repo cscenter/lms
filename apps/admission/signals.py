@@ -1,9 +1,9 @@
-from django.db.models.signals import post_delete, post_save, pre_delete
+from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
 from admission.constants import InterviewSections
 from admission.models import Applicant, Campaign, Comment, Interview, InterviewSlot
-from admission.services import EmailQueueService
+from admission.services import EmailQueueService, create_applicant_status_log, is_status_change_handled
 
 APPLICANT_FINAL_STATES = (
     Applicant.ACCEPT,
@@ -75,3 +75,28 @@ def post_save_interview_slot(sender, instance, created, *args, **kwargs):
 def post_delete_interview_slot(sender, instance, *args, **kwargs):
     instance.stream.compute_fields("slots_count")
     instance.stream.compute_fields("slots_occupied_count")
+
+
+@receiver(pre_save, sender=Applicant)
+def track_status_changes(sender, instance, **kwargs):
+    """
+    Track status changes for Applicant model.
+    Creates a log entry when status changes.
+    """
+    # Skip if this change is being handled manually
+    if is_status_change_handled():
+        return
+        
+    if not instance.pk:
+        return  # Skip for new instances
+    
+    # Get the old status from the tracker
+    old_status = instance.tracker.previous('status')
+    
+    # Check if status has changed
+    if old_status != instance.status:
+        # Create log entry without a user
+        create_applicant_status_log(
+            applicant=instance,
+            new_status=instance.status
+        )
