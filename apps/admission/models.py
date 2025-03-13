@@ -649,6 +649,9 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     # Any useful data like application form integration log
     # FIXME: merge into data json field, then remove
     meta = models.JSONField(blank=True, null=True, editable=False)
+    
+    # Track changes to the status field
+    tracker = FieldTracker(fields=['status'])
 
     class Meta:
         app_label = "admission"
