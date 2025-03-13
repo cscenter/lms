@@ -8,6 +8,7 @@ from typing import Any, ClassVar, NamedTuple, Optional, Type, Union
 from django.utils.functional import cached_property
 from djchoices import DjangoChoices
 from model_utils.models import TimeStampedModel
+from model_utils import FieldTracker
 from multiselectfield import MultiSelectField
 from post_office.models import EmailTemplate
 from sorl.thumbnail import ImageField
