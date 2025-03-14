@@ -14,6 +14,7 @@ from admission.import_export import ExamRecordResource, OnlineTestRecordResource
 from admission.models import (
     Acceptance,
     Applicant,
+    ApplicantStatusLog,
     Campaign,
     CampaignCity,
     Comment,
@@ -29,7 +30,7 @@ from admission.models import (
     Test,
 )
 from admission.roles import Roles
-from admission.services import EmailQueueService
+from admission.services import EmailQueueService, create_applicant_status_log, manual_status_change
 from core.admin import meta
 from core.models import Branch
 from core.timezone.fields import TimezoneAwareDateTimeField
@@ -180,6 +181,16 @@ class ExamAdmin(ImportExportMixin, admin.ModelAdmin):
         )
 
 
+class ApplicantStatusLogAdminInline(admin.TabularInline):
+    model = ApplicantStatusLog
+    extra = 0
+    fields = ('former_status', 'status', 'entry_author', 'changed_at')
+    readonly_fields = ('former_status', 'status', 'entry_author')
+    
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 class ApplicantAdmin(admin.ModelAdmin):
     list_display = (
         "id",
@@ -201,6 +212,20 @@ class ApplicantAdmin(admin.ModelAdmin):
         "phone",
     )
     raw_id_fields = ("user", "university")
+    inlines = [ApplicantStatusLogAdminInline]
+    
+    def save_model(self, request, obj, form, change):
+        if change and 'status' in form.changed_data:
+            # Use the context manager to prevent signal from firing
+            with manual_status_change():
+                create_applicant_status_log(
+                applicant=obj,
+                new_status=form.cleaned_data['status'],
+                editor=request.user
+                )
+                super().save_model(request, obj, form, change)  
+        else:
+            super().save_model(request, obj, form, change)
 
     @meta(_("Created"), admin_order_field="created")
     def created_local(self, obj):
