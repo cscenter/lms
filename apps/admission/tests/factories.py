@@ -13,6 +13,7 @@ from admission.constants import WHERE_DID_YOU_LEARN, InterviewFormats, Applicant
 from admission.models import (
     Acceptance,
     Applicant,
+    ApplicantStatusLog,
     Campaign,
     Comment,
     Contest,
@@ -239,6 +240,15 @@ class InterviewInvitationFactory(factory.django.DjangoModelFactory):
         if extracted:
             for stream in extracted:
                 self.streams.add(stream)
+
+
+class ApplicantStatusLogFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ApplicantStatusLog
+
+    applicant = factory.SubFactory(ApplicantFactory)
+    status = factory.LazyAttribute(lambda o: o.applicant.status)
+    former_status = factory.fuzzy.FuzzyChoice([x for x, _ in ApplicantStatuses.choices])
 
 
 class AcceptanceFactory(factory.django.DjangoModelFactory):
