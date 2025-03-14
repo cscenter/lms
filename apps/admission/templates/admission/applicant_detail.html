@@ -30,7 +30,7 @@
       Набор: {{ applicant.campaign }}<br>
       Статусы анкеты: 
       {% with status_logs=applicant.status_logs.all %}
-        {% for log in status_logs|dictsortreversed:"changed_at" %}
+        {% for log in status_logs reversed%}
           {{ log.get_status_display|default_if_none:"<не указан>" }}{% if not forloop.last %} - {% endif %}
         {% empty %}
           {{ applicant.get_status_display|default_if_none:"<не указан>" }}
