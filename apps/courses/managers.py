@@ -120,27 +120,12 @@ class CourseQuerySet(models.QuerySet):
         return (self.filter(coursebranch__branch__in=branches)
                 .distinct('semester__index', 'meta_course__name', 'pk')
                 .order_by('-semester__index', 'meta_course__name', 'pk'))
+    
+    def is_published(self):
+        return self.filter(is_draft=False)
 
     def for_teacher(self, user):
         return self.filter(teachers=user)
 
 
 CourseDefaultManager = models.Manager.from_queryset(CourseQuerySet)
-
-class _CoursePublishedManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(is_draft=False)
-
-
-CoursePublishedManager = _CoursePublishedManager.from_queryset(
-    CourseQuerySet
-)
-
-class _CourseDraftsManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().filter(is_draft=True)
-
-
-CourseDraftsManager = _CourseDraftsManager.from_queryset(
-    CourseQuerySet
-)
