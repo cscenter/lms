@@ -43,7 +43,7 @@ from learning.utils import humanize_duration
 
 from .constants import ClassTypes, SemesterTypes
 from .managers import (
-    AssignmentManager, CourseClassManager, CourseDefaultManager, CourseTeacherManager, CoursePublishedManager, CourseDraftsManager
+    AssignmentManager, CourseClassManager, CourseDefaultManager, CourseTeacherManager
 )
 
 
@@ -434,8 +434,6 @@ class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
     listeners_count = models.PositiveIntegerField(editable=False, default=0)
 
     objects = CourseDefaultManager()
-    published = CoursePublishedManager()
-    drafts = CourseDraftsManager()
 
     derivable_fields = [
         'public_videos_count',
