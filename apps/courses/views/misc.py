@@ -22,7 +22,12 @@ class TeacherDetailView(LoginRequiredMixin, DetailView):
         branches = Branch.objects.for_site(site_id=self.request.site.pk)
         min_established = min(b.established for b in branches)
         # FIXME: move to service method and test
-        courses = (Course.objects
+        _courses = Course.objects
+        
+        if not self.request.user.has_permission_to_drafts:
+            _courses = Course.published
+        
+        courses = (_courses
                    .in_branches(branches)
                    .filter(~CourseTeacher.has_any_hidden_role(
                                 lookup='course_teachers__roles',
@@ -32,8 +37,6 @@ class TeacherDetailView(LoginRequiredMixin, DetailView):
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index'))
-        if not self.request.user.has_permission_to_drafts:
-            courses = courses.filter(is_draft=False)
         context['courses'] = courses
         return context
 

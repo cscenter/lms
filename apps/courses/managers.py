@@ -126,3 +126,12 @@ class CourseQuerySet(models.QuerySet):
 
 
 CourseDefaultManager = models.Manager.from_queryset(CourseQuerySet)
+
+class _CoursePublishedManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_draft=False)
+
+
+CoursePublishedManager = _CoursePublishedManager.from_queryset(
+    CourseQuerySet
+)
