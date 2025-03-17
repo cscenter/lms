@@ -312,14 +312,13 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
             else:
                 courses_pk = invitation.courseinvitation_set.all().values_list("course_id", flat=True)
             has_invitation = Q(id__in=courses_pk)
-            qs = Course.objects.filter((has_invitation & in_current_term) | enrolled_in)
+            qs = Course.published.filter((has_invitation & in_current_term) | enrolled_in)
         else:
             in_student_branch = Q(coursebranch__branch=student_profile.branch_id)
-            qs = Course.objects.filter((in_student_branch & in_current_term) | enrolled_in)
+            qs = Course.published.filter((in_student_branch & in_current_term) | enrolled_in)
         prefetch_teachers = Prefetch('course_teachers',
                                      queryset=course_teachers_prefetch_queryset())
         courses = (qs
-                   .filter(is_draft=False)
                    .select_related('meta_course', 'semester', 'main_branch')
                    .distinct()
                    .order_by('-semester__index', 'meta_course__name', 'pk')
