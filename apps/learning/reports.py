@@ -781,7 +781,7 @@ class ProgressReportFull(ProgressReport):
                 shad_courses_prefetch,
                 online_courses_prefetch,
                 projects_prefetch,
-                "graduate_profile__academic_disciplines"
+                "graduate_profile__academic_disciplines",
             )
         )
 
