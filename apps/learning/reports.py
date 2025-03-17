@@ -183,6 +183,7 @@ class ProgressReport:
                 "meta_course_id",
                 "meta_course__name",
                 "meta_course__slug",
+                "meta_course__index",
                 "grading_type",
                 "duration",
                 "main_branch_id",
@@ -780,7 +781,7 @@ class ProgressReportFull(ProgressReport):
                 shad_courses_prefetch,
                 online_courses_prefetch,
                 projects_prefetch,
-                "graduate_profile__academic_disciplines",
+                "graduate_profile__academic_disciplines"
             )
         )
 
