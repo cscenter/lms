@@ -315,7 +315,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # Education
             "university_city", "university", "university_other",
             "faculty", "is_studying", "level_of_education", "level_of_education_other", "year_of_graduation",
-            "partner", "has_diploma", "diploma_degree",
+            "partner", "mipt_track", "mipt_gpa", "mipt_expectations", "mipt_grades_file", "has_diploma", "diploma_degree",
 
             # Exp and work
             "has_job",
@@ -475,4 +475,3 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             if common_rule_exist and not strict_rule_exists:
                 return attrs
         raise serializers.ValidationError(f"Campaign {campaign} is not allowed in {residence_city} city.")
-

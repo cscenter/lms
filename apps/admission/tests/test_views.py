@@ -700,3 +700,116 @@ def test_applicant_list_view_smoke(client, settings):
     soup = BeautifulSoup(response.content, "html.parser")
     assert soup.find(text=applicant1.full_name) is not None
     assert soup.find(text=applicant2.full_name) is not None
+
+
+@pytest.mark.django_db
+def test_applicant_status_update_view(client, settings):
+    """Test that ApplicantStatusUpdateView creates a log entry with the editor."""
+    # Create a curator and login
+    curator = CuratorFactory()
+    client.login(curator)
+    
+    # Create an applicant with a current campaign
+    campaign = CampaignFactory(current=True)
+    applicant = ApplicantFactory(status=ApplicantStatuses.PENDING, campaign=campaign)
+    
+    # Update the status
+    url = reverse("admission:applicants:update_status", args=[applicant.pk])
+    data = {"status": ApplicantStatuses.PASSED_EXAM}
+    response = client.post(url, data, follow=True)
+    
+    # Check that the response is successful
+    assert response.status_code == 200
+    
+    # Check that a success message was shown
+    messages = list(get_messages(response.wsgi_request))
+    assert len(messages) > 0
+    assert "Статус успешно обновлён" in str(messages[0])
+    
+    # Check that the applicant's status was updated
+    applicant.refresh_from_db()
+    assert applicant.status == ApplicantStatuses.PASSED_EXAM
+    
+    # Check that a log entry was created with the curator as the editor
+    assert applicant.status_logs.count() == 1
+    log = applicant.status_logs.first()
+    assert log.former_status == ApplicantStatuses.PENDING
+    assert log.status == ApplicantStatuses.PASSED_EXAM
+    assert log.entry_author == curator
+
+
+@pytest.mark.django_db
+def test_applicant_detail_view_shows_status_logs(client, settings):
+    """Test that the applicant detail view shows status logs."""
+    # Create a curator and login
+    curator = CuratorFactory()
+    client.login(curator)
+    
+    # Create an applicant with a current campaign
+    campaign = CampaignFactory(current=True)
+    applicant = ApplicantFactory(status=ApplicantStatuses.ACCEPT, campaign=campaign)
+    
+    # Create status logs with different timestamps
+    from admission.services import create_applicant_status_log, manual_status_change
+    
+    # First change: PENDING -> PASSED_EXAM
+    with manual_status_change():
+        applicant.status = ApplicantStatuses.PASSED_EXAM
+        create_applicant_status_log(
+            applicant=applicant,
+            new_status=ApplicantStatuses.PASSED_EXAM,
+            editor=curator
+        )
+        applicant.save()
+    
+    # Second change: PASSED_EXAM -> ACCEPT
+    with manual_status_change():
+        applicant.status = ApplicantStatuses.ACCEPT
+        create_applicant_status_log(
+            applicant=applicant,
+            new_status=ApplicantStatuses.ACCEPT,
+            editor=curator
+        )
+        applicant.save()
+    
+    # Get the applicant detail page
+    url = reverse("admission:applicants:detail", args=[applicant.pk])
+    response = client.get(url)
+    
+    # Check that the response is successful
+    assert response.status_code == 200
+    
+    # Check that the status logs are shown in the summary at the top of the page
+    soup = BeautifulSoup(response.content, "html.parser")
+    summary_div = soup.find("div", class_="additional-info")
+    assert summary_div is not None
+    
+    # The summary should show the status logs in chronological order (oldest first)
+    status_text = summary_div.text
+    passed_exam_index = status_text.find(str(ApplicantStatuses.values[ApplicantStatuses.PASSED_EXAM]))
+    accept_index = status_text.find(str(ApplicantStatuses.values[ApplicantStatuses.ACCEPT]))
+    assert passed_exam_index != -1
+    assert accept_index != -1
+    assert passed_exam_index < accept_index, "Status logs should be in chronological order (oldest first)"
+    
+    # Check that the status logs are also shown in the status tab
+    status_tab = soup.find(id="update-status-form")
+    assert status_tab is not None
+    
+    status_logs_table = status_tab.find("table")
+    assert status_logs_table is not None
+    
+    # Check that the log entries are shown in the table
+    rows = status_logs_table.find_all("tr")[1:]  # Skip header row
+    assert len(rows) == 2
+    
+    # In the table, the most recent log should be first
+    # Check the content of the first row (most recent log - ACCEPT)
+    cells = rows[0].find_all("td")
+    assert str(ApplicantStatuses.values[ApplicantStatuses.ACCEPT]) in cells[0].text
+    assert curator.get_full_name() in cells[2].text
+    
+    # Check the content of the second row (older log - PASSED_EXAM)
+    cells = rows[1].find_all("td")
+    assert str(ApplicantStatuses.values[ApplicantStatuses.PASSED_EXAM]) in cells[0].text
+    assert curator.get_full_name() in cells[2].text

@@ -54,6 +54,8 @@ class ApplicantCreateFromYDSFormAPIView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         data = json.loads(request.data['payload'].read().decode('utf-8'))
         data['photo'] = request.data['photo']
+        if 'mipt_grades_file' in request.data:
+            data['mipt_grades_file'] = request.data['mipt_grades_file']
         # Insert yandex login if session value were found, otherwise remove it
         if data:
             data = data.copy()

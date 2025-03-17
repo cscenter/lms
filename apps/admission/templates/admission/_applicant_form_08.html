@@ -5,6 +5,14 @@
   {% elif field.name == 'university_legacy' %}
   {% elif field.name == 'interview_format' %}
   {% elif field.name == 'miss_count' %}
+  {% elif field.name == 'mipt_track' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_track' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_gpa' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_gpa' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_expectations' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_expectations' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_grades_file' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_grades_file' and applicant_form.instance.partner.name != 'МФТИ' %}
   {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
   {% elif field.name == 'position' and not applicant_form.has_job.value %}
   {% elif field.name == 'level_of_education' and not applicant_form.has_diploma.value %}
@@ -115,6 +123,24 @@
      {% endif %}
      </dd>
     {% endif %}
+  {% elif field.name == 'mipt_track' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_track' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_track' %}
+    <dd>
+      {{ applicant_form.instance.get_mipt_track_display|default:"<не указано>" }}
+    </dd>
+  {% elif field.name == 'mipt_gpa' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_gpa' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_expectations' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_expectations' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_grades_file' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_grades_file' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_grades_file' %}
+    <dd>
+      <a href="{{ applicant_form.instance.mipt_grades_file.url }}" target="_blank">
+        Посмотреть файл
+      </a>
+    </dd>
    {% else%}
         <dd>
           {{ field.value|default:"<не указано>" }}
