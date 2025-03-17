@@ -1,6 +1,8 @@
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass, fields
 from datetime import date, datetime, timedelta
 from operator import attrgetter
+import threading
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pytz
@@ -31,6 +33,7 @@ from admission.constants import (
 from admission.models import (
     Acceptance,
     Applicant,
+    ApplicantStatusLog,
     Campaign,
     Exam,
     Interview,
@@ -833,3 +836,67 @@ class EmailQueueService:
                 )
                 generated += 1
         return generated
+
+
+# Flag to track if we're handling a status change manually
+_status_change_handled = threading.local()
+
+def set_status_change_handled(handled=True):
+    """Mark the current status change as handled (or not)."""
+    _status_change_handled.handled = handled
+
+def is_status_change_handled():
+    """Check if the current status change is being handled manually."""
+    return getattr(_status_change_handled, 'handled', False)
+
+
+@contextmanager
+def manual_status_change():
+    """
+    Context manager to mark a status change as being handled manually.
+    This prevents the signal from creating duplicate logs.
+    """
+    set_status_change_handled(True)
+    try:
+        yield
+    finally:
+        set_status_change_handled(False)
+
+
+def create_applicant_status_log(applicant: Applicant, *,
+                                new_status: str, editor: Optional[User] = None,
+                                changed_at: Optional[datetime.date] = None):
+    """
+    Create a log entry for an applicant status change.
+    
+    Args:
+        applicant: The Applicant instance
+        new_status: The new status value
+        editor: The User who made the change (optional)
+        changed_at: Custom timestamp for the change (optional)
+    
+    Returns:
+        The created ApplicantStatusLog instance
+    """
+    if new_status is not None and new_status not in ApplicantStatuses.values:
+        raise ValidationError("Unknown Applicant Status", code="invalid")
+    
+    old_status = applicant.tracker.previous('status')
+    
+    # Only create a log if the status has changed
+    if old_status != new_status:
+        # Create the log entry
+        log_entry = ApplicantStatusLog(
+            applicant=applicant,
+            former_status=old_status,
+            status=new_status,
+            entry_author=editor
+        )
+        
+        if changed_at:
+            log_entry.changed_at = changed_at
+            
+        log_entry.save()
+        return log_entry
+    
+    return None

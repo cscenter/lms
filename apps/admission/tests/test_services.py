@@ -23,6 +23,7 @@ from admission.services import (
     EmailQueueService,
     StudentProfileData,
     accept_interview_invitation,
+    create_applicant_status_log,
     create_student,
     create_student_from_applicant,
     decline_interview_invitation,
@@ -32,6 +33,8 @@ from admission.services import (
     get_ongoing_interview_streams,
     get_or_create_student_profile,
     get_streams,
+    manual_status_change,
+    is_status_change_handled
 )
 from admission.tests.factories import (
     AcceptanceFactory,
@@ -733,3 +736,84 @@ def test_create_student_email_case_insensitive(settings, get_test_image):
     account_data1 = dataclasses.replace(ACCOUNT_DATA, email="TEST@example.com")
     user2 = create_student(acceptance, account_data1, PROFILE_DATA)
     assert user2.pk == user1.pk
+
+
+@pytest.mark.django_db
+def test_create_applicant_status_log():
+    """Test the create_applicant_status_log service function."""
+    # Create an applicant with a status
+    applicant = ApplicantFactory(status=ApplicantStatuses.PENDING)
+    
+    # Create a user to be the editor
+    editor = UserFactory()
+    
+    # Create a log entry
+    log = create_applicant_status_log(
+        applicant=applicant,
+        new_status=ApplicantStatuses.PASSED_EXAM,
+        editor=editor
+    )
+    
+    # Check that the log was created correctly
+    assert log is not None
+    assert log.applicant == applicant
+    assert log.former_status == ApplicantStatuses.PENDING
+    assert log.status == ApplicantStatuses.PASSED_EXAM
+    assert log.entry_author == editor
+    
+    # Check that the log is in the database
+    assert applicant.status_logs.count() == 1
+    assert applicant.status_logs.first() == log
+
+
+@pytest.mark.django_db
+def test_create_applicant_status_log_no_change():
+    """Test that create_applicant_status_log returns None when status doesn't change."""
+    from admission.services import create_applicant_status_log
+    
+    # Create an applicant with a status
+    applicant = ApplicantFactory(status=ApplicantStatuses.PENDING)
+    
+    # Try to create a log entry with the same status
+    log = create_applicant_status_log(
+        applicant=applicant,
+        new_status=ApplicantStatuses.PENDING
+    )
+    
+    # Check that no log was created
+    assert log is None
+    assert applicant.status_logs.count() == 0
+
+
+@pytest.mark.django_db
+def test_create_applicant_status_log_invalid_status():
+    """Test that create_applicant_status_log raises ValidationError for invalid status."""
+    from admission.services import create_applicant_status_log
+    
+    # Create an applicant with a status
+    applicant = ApplicantFactory(status=ApplicantStatuses.PENDING)
+    
+    # Try to create a log entry with an invalid status
+    with pytest.raises(ValidationError) as excinfo:
+        create_applicant_status_log(
+            applicant=applicant,
+            new_status="invalid_status"
+        )
+    
+    assert "Unknown Applicant Status" in str(excinfo.value)
+    assert applicant.status_logs.count() == 0
+
+
+@pytest.mark.django_db
+def test_manual_status_change():
+    """Test the manual_status_change context manager."""
+    
+    # By default, status changes are not being handled manually
+    assert not is_status_change_handled()
+    
+    # Inside the context manager, status changes should be marked as handled
+    with manual_status_change():
+        assert is_status_change_handled()
+    
+    # After exiting the context manager, status changes should not be marked as handled
+    assert not is_status_change_handled()

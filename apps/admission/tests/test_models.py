@@ -140,3 +140,39 @@ def test_interview_stream_slots_occupied():
     stream.refresh_from_db()
     assert stream.slots_count == 3
     assert stream.slots_occupied_count == 0
+
+
+@pytest.mark.django_db
+def test_applicant_status_log_creation():
+    """Test that ApplicantStatusLog is created when applicant status changes."""
+    applicant = ApplicantFactory(status=ApplicantStatuses.PENDING)
+    
+    # Initially there should be no logs, even if status is set on creation
+    assert not applicant.status_logs.count()
+    
+    # Change the status and save
+    applicant.status = ApplicantStatuses.PASSED_EXAM
+    applicant.save()
+    
+    # Check that a log was created
+    assert applicant.status_logs.count() == 1
+    log = applicant.status_logs.first()
+    assert log.former_status == ApplicantStatuses.PENDING
+    assert log.status == ApplicantStatuses.PASSED_EXAM
+    assert log.entry_author is None  # No user specified
+
+
+@pytest.mark.django_db
+def test_applicant_status_log_no_change():
+    """Test that ApplicantStatusLog is not created when status doesn't change."""
+    applicant = ApplicantFactory(status=ApplicantStatuses.PENDING)
+    
+    # Initially there should be no logs
+    assert applicant.status_logs.count() == 0
+    
+    # Change something else but not status
+    applicant.first_name = "New Name"
+    applicant.save()
+    
+    # Check that still no log was created
+    assert applicant.status_logs.count() == 0
