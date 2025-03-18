@@ -183,6 +183,7 @@ class ProgressReport:
                 "meta_course_id",
                 "meta_course__name",
                 "meta_course__slug",
+                "meta_course__index",
                 "grading_type",
                 "duration",
                 "main_branch_id",
