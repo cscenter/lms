@@ -327,7 +327,7 @@ def test_application_YDS_form_serializer(settings, mocker):
         "ticket_access": False,
         "email_subscription": False,
         "university_city": data["university_city"],
-        "data_format_version": '0.8'
+        "data_format_version": '0.9'
     }
 
 
@@ -367,7 +367,7 @@ def test_application_YDS_form_serializer_min_fields(settings, mocker):
         "ticket_access": False,
         "university_city": data["university_city"],
         "email_subscription": False,
-        "data_format_version": '0.8'
+        "data_format_version": '0.9'
     }
 
 
