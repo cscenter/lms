@@ -22,14 +22,19 @@ SESSION_LOGIN_KEY = f"{YANDEX_OAUTH_BACKEND_PREFIX}_login"
 
 
 def get_partners() -> List[Dict]:
-    partners = [
-        {
-            "id": partner.id,
-            "value": partner.slug,
-            "label": f"Да, {partner.name}"
-        } for partner in PartnerTag.objects.all()
-    ]
-    return partners
+    partners_dict = {partner.slug: partner for partner in PartnerTag.objects.all()}
+    
+    result = []
+    for slug in ['mfti', 'hse', 'unn', 'urfu', 'nsu']:
+        if slug in partners_dict:
+            partner = partners_dict[slug]
+            result.append({
+                "id": partner.id,
+                "value": partner.slug,
+                "label": f"Да, {partner.name}"
+            })
+    
+    return result
 
 
 class ApplicationFormView(TemplateView):

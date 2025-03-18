@@ -384,6 +384,9 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # add has_diploma, diploma_degree, working_hours, gender fields
             # move new_track from data to separate field
             # add new_track_info, level_of_education_other
+            
+            # version 0.9
+            # add mipt_track, mipt_gpa, mipt_expectations, mipt_grades_file fields
         )
         extra_kwargs = {
             'university': {
@@ -441,7 +444,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'shad_agreement': data.get('shad_agreement'),
             'ticket_access': data.get('ticket_access'),
             'email_subscription': data.get('email_subscription'),
-            'data_format_version': '0.8'
+            'data_format_version': '0.9'
         }
         data['experience'] = data['ml_experience']
         # Remove fields that are actually not present on Applicant model

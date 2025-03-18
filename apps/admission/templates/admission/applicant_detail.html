@@ -67,6 +67,8 @@
           <dl>
             {% if applicant.data.data_format_version == '0.8' %}
               {% include "admission/_applicant_form_08.html" with applicant_form=applicant_form yds_hide_fields=yds_hide_fields %}
+            {% elif applicant.data.data_format_version == '0.9'%}
+              {% include "admission/_applicant_form_09.html" with applicant_form=applicant_form yds_hide_fields=yds_hide_fields %}
             {% else %}
               {% include "admission/_applicant_form.html" with applicant_form=applicant_form yds_hide_fields=yds_hide_fields %}
             {% endif %}
