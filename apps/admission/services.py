@@ -28,6 +28,7 @@ from admission.constants import (
     ContestTypes,
     InterviewFormats,
     InterviewInvitationStatuses, ApplicantStatuses, ApplicantInterviewFormats,
+    MIPTTracks,
 )
 # from admission.filters import InterviewStreamFilter
 from admission.models import (
@@ -579,10 +580,22 @@ class EmailQueueService:
     @staticmethod
     def new_registration(applicant: Applicant) -> Email:
         campaign = applicant.campaign
+        
+        template_name = campaign.template_registration
+        
+        is_mipt_advanced = (
+            applicant.mipt_track == MIPTTracks.ADVANCED and 
+            applicant.partner and 
+            applicant.partner.slug == "mfti"
+        )
+        
+        if is_mipt_advanced and campaign.template_registration_mipt_advanced:
+            template_name = campaign.template_registration_mipt_advanced
+        
         return mail.send(
             [applicant.email],
             sender=get_email_from(campaign),
-            template=campaign.template_registration,
+            template=template_name,
             context={
                 "FIRST_NAME": applicant.first_name,
                 "SURNAME": applicant.last_name,
@@ -591,7 +604,7 @@ class EmailQueueService:
                 "BRANCH": campaign.branch.name,
                 "PHONE": applicant.phone,
                 "CONTEST_ID": applicant.online_test.yandex_contest_id,
-                "YANDEX_LOGIN": applicant.yandex_login,
+                "YANDEX_LOGIN": applicant.yandex_login
             },
             render_on_delivery=False,
             backend="ses",

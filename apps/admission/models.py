@@ -135,6 +135,13 @@ class Campaign(TimezoneAwareMixin, models.Model):
         validators=[validate_email_template_name],
         max_length=255,
     )
+    template_registration_mipt_advanced = models.CharField(
+        _("MIPT Advanced Registration Template"),
+        help_text=_("Template name for contest registration email for MIPT Advanced track applicants"),
+        validators=[validate_email_template_name],
+        max_length=255,
+        blank=True,
+    )
     template_exam_invitation = models.CharField(
         _("Exam Invitation Email Template"),
         help_text=_("Template name for the exam registration email"),
