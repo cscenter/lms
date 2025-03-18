@@ -319,7 +319,7 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
         prefetch_teachers = Prefetch('course_teachers',
                                      queryset=course_teachers_prefetch_queryset())
         courses = (qs
-                   .filter(is_draft=False)
+                   .is_published()
                    .select_related('meta_course', 'semester', 'main_branch')
                    .distinct()
                    .order_by('-semester__index', 'meta_course__name', 'pk')

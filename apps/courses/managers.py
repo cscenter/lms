@@ -120,6 +120,9 @@ class CourseQuerySet(models.QuerySet):
         return (self.filter(coursebranch__branch__in=branches)
                 .distinct('semester__index', 'meta_course__name', 'pk')
                 .order_by('-semester__index', 'meta_course__name', 'pk'))
+    
+    def is_published(self):
+        return self.filter(is_draft=False)
 
     def for_teacher(self, user):
         return self.filter(teachers=user)
