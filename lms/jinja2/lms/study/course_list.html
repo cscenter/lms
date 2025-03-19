@@ -31,6 +31,9 @@
                 <tr class="{{ "unread" if course.has_unread() else "noop" }}">
                   <td>
                     {% with enrollment = enrollments[course.pk] %}
+                    {% if enrollment.type == EnrollmentTypes.LECTIONS_ONLY %}
+                      <i class="fa fa-headphones" aria-hidden="true" title="{% trans %}Listener{% endtrans %}"></i>
+                    {% endif %}
                     <a href="{{ course.build_absolute_uri(site=enrollment.student_profile.site, is_secure=is_secure) }}" class="title">
                       {{ course.meta_course.name }}
                     </a>
@@ -145,9 +148,18 @@
                 <tr class="{{ "unread" if course.has_unread() else "noop" }}">
                   {% with enrollment = enrollments[course.pk] %}
                   <td>
+                    {% if enrollment.type == EnrollmentTypes.LECTIONS_ONLY %}
+                      <i class="fa fa-headphones" aria-hidden="true" title="{% trans %}Listener{% endtrans %}"></i>
+                    {% endif %}
                     <a href="{{ course.build_absolute_uri(site=enrollment.student_profile.site, is_secure=is_secure) }}">
                       {{ course.meta_course.name }}
                     </a>
+                    {% if course.duration == CourseDurations.FIRST_HALF %}
+                       <i class="fa fa-adjust fa-rotate-180" aria-hidden="true" title="{% trans %}First part of semester{% endtrans %}"></i>
+                    {% endif %}
+                    {% if course.duration == CourseDurations.SECOND_HALF %}
+                       <i class="fa fa-adjust" aria-hidden="true" title="{% trans %}Second part of semester{% endtrans %}"></i>
+                    {% endif %}
                   </td>
                   <td>
                       <span class="badge assignment-status {{ course.grading_system.css_class }} {{ enrollment.grade }}">
