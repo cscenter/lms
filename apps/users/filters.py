@@ -71,9 +71,8 @@ class StudentFilter(FilterSet):
     def qs(self):
         if not self.form.changed_data:
             return self.queryset.none()
-        queryset = super().qs.filter(site__domain=self.request.site)
-        
-        return queryset
+
+        return super().qs.filter(site=self.request.site)
         
     def courses_filter(self, queryset, name, value):
         value_list = value.split(u',')
