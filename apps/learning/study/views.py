@@ -36,6 +36,7 @@ from learning.permissions import (
     EnrollPermissionObject, ViewCourses, ViewOwnStudentAssignment,
     ViewOwnStudentAssignments
 )
+from learning.settings import EnrollmentTypes
 from learning.selectors import get_student_classes
 from learning.services.personal_assignment_service import (
     get_assignment_update_history_message, get_draft_comment
@@ -339,6 +340,7 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
                 archive.append(course)
         context = {
             "CourseDurations": CourseDurations,
+            "EnrollmentTypes": EnrollmentTypes,
             "enrollments": student_enrollments,
             "ongoing_rest": ongoing_rest,
             "ongoing_enrolled": ongoing_enrolled,
