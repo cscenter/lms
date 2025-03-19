@@ -8,7 +8,7 @@ from django.urls import path, re_path
 from django.views.generic import TemplateView
 
 from compsciclub_ru.views import (
-    AsyncEmailRegistrationView, CalendarClubScheduleView, ClubClassesFeed,
+    RegistrationClosedView, CalendarClubScheduleView, ClubClassesFeed,
     CourseClassDetailView, CourseDetailView, CoursesListView, IndexView,
     MetaCourseDetailView, TeacherDetailView, TeachersView
 )
@@ -25,7 +25,7 @@ admin.autodiscover()
 urlpatterns = i18n_patterns(
     path('', IndexView.as_view(), name='index'),
 
-    path('register/', AsyncEmailRegistrationView.as_view(), name='registration_register'),
+    path('register/', RegistrationClosedView.as_view(), name='registration_register'),
     path('', include('registration.backends.default.urls')),
     path('', include('auth.urls')),
 
