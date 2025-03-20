@@ -18,7 +18,7 @@ def get_max_assignment_grade(assignment: Assignment):
 
 
 class Command(BaseCommand):
-    help = "Dump enrollments csv and upload to yandex disk"
+    help = "Weekly dump student enrollments csv and upload to yandex disk"
 
     def handle(self, *args, **options):
         with io.StringIO() as csv_file:
@@ -58,5 +58,8 @@ class Command(BaseCommand):
             with client:
                 if not client.check_token():
                     raise AssertionError("Token seems to ne invalid. Is it expired?")
+                
+                # Используем ISO формат для имени файла
+                today = datetime.datetime.now().date().isoformat()
                 client.upload(io.BytesIO(csv_file.getvalue().encode()), 
-                              f"/ysda_weekly_dump/dump_{datetime.datetime.now().strftime('%d_%m_%Y')}.csv")
+                              f"/ysda/weekly_student_assignments/student_assignments_{today}.csv")
