@@ -71,7 +71,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 if field.name in ("status", "level_of_education", "has_diploma", "gender", "diploma_degree"):
                     value = getattr(applicant, f"get_{field.name}_display")()
                 elif field.name == "id":
-                    value = applicant.get_absolute_url()
+                    value = reverse("admission:applicants:detail", args=[value])
                 elif field.name == "created":
                     value = formats.date_format(applicant.created, "SHORT_DATE_FORMAT")
                 elif field.name == "data" and applicant.data is not None:
@@ -262,7 +262,7 @@ class ApplicantStatusLogsReport(ReportFileOutput):
         # Filter logs by these applicants
         return ApplicantStatusLog.objects.filter(
             applicant__campaign__in=campaigns
-        ).select_related('applicant').order_by('-changed_at', '-created')
+        ).select_related('applicant').order_by('-changed_at', '-created_at')
     
     def process(self):
         """Process data for the report."""
@@ -271,7 +271,7 @@ class ApplicantStatusLogsReport(ReportFileOutput):
         status_logs = self.get_queryset()
         
         for log in status_logs:
-            applicant_id = log.applicant.get_absolute_url()
+            applicant_id = reverse("admission:applicants:detail", args=[log.applicant.pk])
             former_status_display = log.get_former_status_display() if log.former_status else ""
             status_display = log.get_status_display() if log.status else ""
             changed_at = log.changed_at.isoformat()
