@@ -1,9 +1,10 @@
 import csv
-import datetime
+import os
 import io
 import yadisk
 from django.core.management import BaseCommand
 from django.db.models import Max
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from courses.constants import SemesterTypes
@@ -19,6 +20,14 @@ def get_max_assignment_grade(assignment: Assignment):
 
 class Command(BaseCommand):
     help = "Weekly dump student enrollments csv and upload to yandex disk"
+
+    def _create_parent_directories(self, client, path):
+        """Ensure all parent directories exist on Yandex Disk."""
+        parent_path = os.path.dirname(path)
+        if not parent_path or client.exists(parent_path):
+            return
+        self._create_parent_directories(client, parent_path)
+        client.mkdir(parent_path)
 
     def handle(self, *args, **options):
         with io.StringIO() as csv_file:
@@ -54,12 +63,14 @@ class Command(BaseCommand):
                             pass
 
             csv_file.seek(0)
-            client = yadisk.Client(token=ExternalServiceToken.objects.get(service_tag="syrop_yandex_disk").access_key)
+            client = yadisk.Client(token=ExternalServiceToken.objects.get(service_tag="syrop_yandex_disk").access_key,
+                                    default_args={"overwrite" : True})
             with client:
                 if not client.check_token():
                     raise AssertionError("Token seems to ne invalid. Is it expired?")
                 
                 # Используем ISO формат для имени файла
-                today = datetime.datetime.now().date().isoformat()
-                client.upload(io.BytesIO(csv_file.getvalue().encode()), 
-                              f"/ysda/weekly_student_assignments/student_assignments_{today}.csv")
+                today = timezone.now().date().isoformat()
+                target_path = f"/ysda/weekly_student_assignments/student_assignments_{today}.csv"
+                self._create_parent_directories(client, target_path)
+                client.upload(io.BytesIO(csv_file.getvalue().encode()), target_path)
