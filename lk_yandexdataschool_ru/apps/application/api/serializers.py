@@ -466,6 +466,17 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                                              settings.LANGUAGE_CODE)
         return instance
 
+    def validate_mipt_grades_file(self, value):
+        """
+        Validate that the uploaded file is either an image or a PDF.
+        """
+        allowed_mime_types = ["image/jpeg", "image/png", "application/pdf"]
+        if value.content_type not in allowed_mime_types:
+            raise serializers.ValidationError(
+                "The file must be a JPEG, PNG image, or a PDF document."
+            )
+        return value
+
     def validate(self, attrs):
         residence_city = attrs.get('residence_city')
         campaign = attrs.get('campaign')
