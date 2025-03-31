@@ -16,7 +16,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.timezone import get_now_utc
 from core.typings import assert_never
-from core.utils import _empty
+from core.utils import _empty, normalize_yandex_login
 from courses.constants import AssigneeMode, AssignmentStatus
 from courses.models import Assignment, CourseTeacher
 from courses.selectors import personal_assignments_list
@@ -499,7 +499,6 @@ def get_personal_assignments_by_yandex_login(*, assignment: Assignment) -> Dict[
     Returns personal assignments of students that provided yandex login
     in their account.
     """
-    from core.utils import normalize_yandex_login
     filters = {"assignments": [assignment.pk]}
     student_assignments = list(personal_assignments_list(filters=filters)
                                .select_related('student'))
