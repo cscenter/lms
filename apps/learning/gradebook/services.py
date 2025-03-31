@@ -47,11 +47,11 @@ def assignment_import_scores_from_yandex_contest(*, checker: Checker,
     # score is synchronized with the assignment max score.
     enrolled_students = (Enrollment.active
                          .filter(course_id=assignment.course_id)
-                         .exclude(student_profile__user__yandex_login_normalized='')
-                         .select_related('student_profile__user')
-                         .only('student_profile__user'))
-    students = {e.student_profile.user.yandex_login_normalized: e.student_profile.user
-                for e in enrolled_students}
+                         .select_related('student_profile__user'))
+    students = {}
+    for e in enrolled_students:
+        if hasattr(e.student_profile.user, 'yandex_data') and e.student_profile.user.yandex_data.login:
+            students[e.student_profile.user.yandex_data.login] = e.student_profile.user
     student_assignments = StudentAssignment.objects.filter(assignment=assignment).order_by()
     student_assignments = {s.student_id: s for s in student_assignments}
 

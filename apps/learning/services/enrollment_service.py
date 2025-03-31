@@ -237,5 +237,8 @@ def get_enrollments_by_yandex_login(course: Course) -> Dict[str, Enrollment]:
     enrollments = (Enrollment.active
                    .filter(course=course)
                    .select_related("student"))
-    return {e.student.yandex_login_normalized: e
-            for e in enrollments if e.student.yandex_login_normalized}
+    result = {}
+    for e in enrollments:
+        if hasattr(e.student, 'yandex_data') and e.student.yandex_data.login:
+            result[e.student.yandex_data.login] = e
+    return result

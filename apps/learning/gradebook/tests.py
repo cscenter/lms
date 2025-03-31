@@ -47,7 +47,7 @@ from learning.tests.factories import (
 from users.models import StudentTypes
 from users.services import get_student_profile
 from users.tests.factories import (
-    CuratorFactory, StudentFactory, TeacherFactory, UserFactory
+    CuratorFactory, StudentFactory, TeacherFactory, UserFactory, YandexUserDataFactory
 )
 from django.utils.translation import gettext as _
 
@@ -753,9 +753,17 @@ def test_gradebook_import_assignment_score_by_yandex_login(client):
     teacher = TeacherFactory()
     branch = BranchFactory(code=Branches.SPB)
     course = CourseFactory(teachers=[teacher])
-    student1 = StudentFactory(branch=branch, yandex_login='Yandex-login1')
-    student2 = StudentFactory(branch=branch, yandex_login='yandex.login2')
-    student3 = StudentFactory(branch=branch, yandex_login='')
+    
+    # Create students with YandexUserData
+    student1 = StudentFactory(branch=branch)
+    student2 = StudentFactory(branch=branch)
+    student3 = StudentFactory(branch=branch)
+    
+    # Create YandexUserData for students
+    YandexUserDataFactory(user=student1, login='Yandex-login1')
+    YandexUserDataFactory(user=student2, login='yandex.login2')
+    YandexUserDataFactory(user=student3, login='')
+    
     for s in [student1, student2, student3]:
         EnrollmentFactory.create(student=s, course=course)
     assignment = AssignmentFactory(
@@ -786,7 +794,7 @@ header1,header2,score
     #
     csv_data = b"""
 login,header2,score
-yandex-login1,1,10
+Yandex-login1,1,10
 YANDEX-login2,2,20
 ,3,30
     """.strip()
@@ -1453,9 +1461,17 @@ def test_gradebook_import_course_grades_by_yandex_login(client):
     course = CourseFactory.create(teachers=[teacher])
     import_csv_url = reverse('teaching:gradebook_import_course_grades_by_yandex_login',
                              args=[course.pk])
-    student1 = StudentFactory(branch__code=Branches.SPB, yandex_login='Yandex-login1')
-    student2 = StudentFactory(branch__code=Branches.SPB, yandex_login='')
-    student3 = StudentFactory(branch__code=Branches.SPB, yandex_login='Yandex-login3')
+    
+    # Create students with YandexUserData
+    student1 = StudentFactory(branch__code=Branches.SPB)
+    student2 = StudentFactory(branch__code=Branches.SPB)
+    student3 = StudentFactory(branch__code=Branches.SPB)
+    
+    # Create YandexUserData for students
+    yandex_data1 = YandexUserDataFactory(user=student1, login='yandex.login1')
+    yandex_data2 = YandexUserDataFactory(user=student2, login='yandex.login2')  # Changed from empty to valid login
+    yandex_data3 = YandexUserDataFactory(user=student3, login='yandex.login3')
+    
     e1 = EnrollmentFactory(student=student1, course=course)
     e2 = EnrollmentFactory(student=student2, course=course)
     e3 = EnrollmentFactory(student=student3, course=course)
@@ -1466,14 +1482,14 @@ def test_gradebook_import_course_grades_by_yandex_login(client):
     client.login(teacher)
     csv_data = force_bytes(f"""
 Логин на Яндексе,header2,Итоговая оценка
-{student1.yandex_login},1,Отлично
+{yandex_data1.login},1,Отлично
 3,3,1
 ,2,Перезачтено
-{student1.yandex_login},2,cadabra
+{yandex_data1.login},2,cadabra
 incorrect-id,2,Отлично
-{student3.yandex_login},3,Незачет
-{student3.yandex_login},3,зачёт
-{student3.yandex_login},3,1
+{yandex_data3.login},3,Незачет
+{yandex_data3.login},3,зачёт
+{yandex_data3.login},3,1
 """.strip())
     form = {'csv_file': SimpleUploadedFile("data.csv", csv_data)}
     response = client.post(import_csv_url, form, follow=True)
@@ -1489,7 +1505,7 @@ incorrect-id,2,Отлично
         "Строка 4: Оценки 'cadabra' не существует.",
         'Строка 5: студент с идентификатором "incorrect-id" не найден.',
         "Строка 8: оценка '1' не подходит для системы оценивая этого курса, идентификатор студента"
-        f" '{student3.yandex_login}'."
+        f" '{yandex_data3.login}'."
     ])
     e1.refresh_from_db()
     e2.refresh_from_db()
