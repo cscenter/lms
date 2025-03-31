@@ -33,4 +33,4 @@ docker-compose.override.yml
 # Unstable memory-bank 
 memory-bank/activeContext.md
 memory-bank/decisionLog.md
-/Users/dmi4er4/lms/memory-bank/progress.md
+memory-bank/progress.md
