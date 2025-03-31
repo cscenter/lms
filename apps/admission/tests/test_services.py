@@ -593,8 +593,16 @@ def test_create_student(settings):
     user_consents = UserConsent.objects.filter(user=user)
     assert set(user_consents.values_list("type", flat=True)) == ConsentTypes.regular_student_consents
     assert all(timezone.now() - created <= datetime.timedelta(seconds=5) for created in user_consents.values_list("created", flat=True))
+    
+    # Check that yandex_login is stored in YandexUserData
+    assert hasattr(user, 'yandex_data')
+    assert user.yandex_data.login == ACCOUNT_DATA.yandex_login
+    
+    # Check other fields except yandex_login
     for field in dataclasses.fields(ACCOUNT_DATA):
-        assert getattr(user, field.name) == getattr(ACCOUNT_DATA, field.name)
+        if field.name != 'yandex_login':
+            assert getattr(user, field.name) == getattr(ACCOUNT_DATA, field.name)
+    
     assert applicant.user == user
     acceptance.refresh_from_db()
     assert acceptance.status == Acceptance.CONFIRMED
@@ -652,8 +660,14 @@ def test_create_student_with_existing_invited(settings):
     user_consents = UserConsent.objects.filter(user=user)
     assert set(user_consents.values_list("type", flat=True)) == ConsentTypes.regular_student_consents
     assert all(timezone.now() - created <= datetime.timedelta(seconds=5) for created in user_consents.values_list("created", flat=True))
+
+    # Check that yandex_login is stored in YandexUserData
+    assert hasattr(user, 'yandex_data')
+    assert user.yandex_data.login == ACCOUNT_DATA_WITHOUT_PATRONYMIC.yandex_login
+
     for field in dataclasses.fields(ACCOUNT_DATA_WITHOUT_PATRONYMIC):
-        assert getattr(user, field.name) == getattr(ACCOUNT_DATA_WITHOUT_PATRONYMIC, field.name)
+        if field.name != 'yandex_login':
+            assert getattr(user, field.name) == getattr(ACCOUNT_DATA_WITHOUT_PATRONYMIC, field.name)
     assert applicant.user == user
     acceptance.refresh_from_db()
     assert acceptance.status == Acceptance.CONFIRMED
