@@ -56,6 +56,13 @@ class UserFactory(factory.django.DjangoModelFactory):
         self.set_password(raw_password)
         self.save()
         self.raw_password = raw_password
+        
+    @factory.post_generation
+    def yandex_data(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted is True:
+            YandexUserDataFactory(user=self)
 
 
 class UserGroupFactory(factory.django.DjangoModelFactory):
@@ -184,14 +191,15 @@ class CertificateOfParticipationFactory(factory.django.DjangoModelFactory):
 class YandexUserDataFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = YandexUserData
+        django_get_or_create = ('user',)
 
     user = factory.SubFactory(UserFactory)
-    login = factory.Sequence(lambda n: "Yandex login %04d" % n)
-    uid = factory.Sequence(lambda n: "Uid %04d" % n)
-    first_name = factory.Sequence(lambda n: "First name %04d" % n)
-    last_name = factory.Sequence(lambda n: "Last name %04d" % n)
-    display_name = factory.Sequence(lambda n: "Display name %04d" % n)
-    real_name = factory.Sequence(lambda n: "Real name %04d" % n)
+    login = factory.Sequence(lambda n: f"yandex_login_{n}")
+    uid = factory.Sequence(lambda n: f"uid_{n}")  # Required field, must be unique
+    first_name = factory.Sequence(lambda n: f"First name {n}")
+    last_name = factory.Sequence(lambda n: f"Last name {n}")
+    display_name = factory.Sequence(lambda n: f"Display name {n}")
+    real_name = factory.Sequence(lambda n: f"Real name {n}")
 
 class PartnerTagFactory(factory.django.DjangoModelFactory):
     

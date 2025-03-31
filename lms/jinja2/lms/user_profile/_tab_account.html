@@ -178,23 +178,18 @@
                 {{ profile_user.yandex_data.login|default("—", True) }}
                 {% if request.user.pk == profile_user.pk %}
                   <a href={{ yandex_oauth_url }}>[Изменить]</a>
-                {% else %}
-                  ({{profile_user.yandex_data.uid}})
+                {% elif request.user.is_teacher or request.user.is_curator %}
+                  {% if profile_user.yandex_data.uid %}
+                    ({{profile_user.yandex_data.uid}})
+                  {% else %}
+                    [Не подтверждено]
+                  {% endif %}
                 {% endif %}
               {% else %}
-                {% if profile_user.yandex_login %}
-                  {{ profile_user.yandex_login }}
-                  {% if request.user.pk == profile_user.pk %}
-                    <a class="text-danger" href={{ yandex_oauth_url }}>[Подтвердить]</a>
-                  {% else %}
-                    <span class="text-danger">[Не подтверждено]</span>
-                  {% endif %}
+                {% if request.user.pk == profile_user.pk %}
+                  <a class="text-danger" href={{ yandex_oauth_url }}>[Войти через Яндекс]</a>
                 {% else %}
-                  {% if request.user.pk == profile_user.pk %}
-                    <a class="text-danger" href={{ yandex_oauth_url }}>[Войти через Яндекс]</a>
-                  {% else %}
-                    <span class="text-danger">[Аккаунт не подключён]</span>
-                  {% endif %}
+                  <span class="text-danger">[Аккаунт не подключён]</span>
                 {% endif %}
               {% endif %}
             {% endwith %}

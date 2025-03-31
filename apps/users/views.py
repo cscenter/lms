@@ -218,7 +218,7 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
         kwargs = super(UserUpdateView, self).get_form_kwargs()
         kwargs.update({'editor': self.request.user,
                        'student': self.object,
-                       'initial': {'yandex_login': self.object.get_yandex_login()}})
+                       'initial': {'yandex_login': self.object.yandex_data.login if hasattr(self.object, "yandex_data") else None}})
         return kwargs
 
     def is_form_allowed(self, user, obj):
@@ -246,14 +246,6 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
                 testimonial = testimonial_form.cleaned_data['testimonial']
                 graduate_profile.testimonial = testimonial
                 graduate_profile.save()
-        yandex_login = form.cleaned_data['yandex_login']
-        if yandex_login and self.request.user.is_curator:
-            (YandexUserData.objects
-             .filter(user=self.object)
-             .exclude(login=yandex_login)
-             .update(login=yandex_login,
-                     changed_by=self.request.user,
-                     modified_at=now()))
         return super().form_valid(form)
 
 

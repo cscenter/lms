@@ -94,7 +94,7 @@ class YandexUserDataInlineAdmin(admin.StackedInline):
     fk_name = 'user'
     extra = 0
     fields = ['uid', 'login', 'display_name', 'changed_by', 'modified_at']
-    readonly_fields = ['user', 'uid', 'changed_by', 'modified_at']
+    readonly_fields = ['user', 'uid', 'login', 'display_name', 'changed_by', 'modified_at']
     exclude = ['first_name', 'last_name', 'real_name']
     can_delete = True
 
@@ -124,18 +124,18 @@ class UserAdmin(_UserAdmin):
     ordering = ['last_name', 'first_name']
     inlines = [UserConsentInlineAdmin, YandexUserDataInlineAdmin, OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
                UserGroupInlineAdmin]
-    readonly_fields = ['last_login', 'date_joined']
+    readonly_fields = ['last_login', 'date_joined', 'display_yandex_login']
     list_display = ['id', 'username', 'email', 'first_name', 'last_name',
                     'is_staff']
     list_filter = ['is_active', 'branch', 'group__site', 'group__role',
                    'is_staff', 'is_superuser']
     filter_horizontal = []
-    search_fields = ('username', 'first_name', 'last_name', 'patronymic', 'email', 'telegram_username',
-                     'yandex_login', 'yandex_login_normalized')
+    search_fields = ('username', 'first_name', 'last_name', 'patronymic', 'email', 'telegram_username')
 
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
+
 
     fieldsets = [
         (None, {'fields': ('username', 'email', 'password')}),
@@ -147,7 +147,7 @@ class UserAdmin(_UserAdmin):
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        ]}),
         (_('External services'), {'fields': ['telegram_username',
-                                             'yandex_login', 'stepic_id',
+                                             'display_yandex_login', 'stepic_id',
                                              'github_login', 'anytask_url',
                                              'codeforces_login']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
@@ -160,6 +160,14 @@ class UserAdmin(_UserAdmin):
             return None
         for inline in self.get_inline_instances(request, obj):
             yield inline.get_formset(request, obj), inline
+    
+    def display_yandex_login(self, obj):
+        if hasattr(obj, 'yandex_data') and obj.yandex_data:
+            return obj.yandex_data.login
+        return None
+    
+    display_yandex_login.short_description = _('Yandex Login')
+
 
     def save_model(self, request, obj, form, change):
         if "comment" in form.changed_data:

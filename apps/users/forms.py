@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.utils import is_club_site
+from core.urls import reverse_lazy
 from core.widgets import DateInputTextWidget, UbereditorWidget
 
 from .models import CertificateOfParticipation, User
@@ -26,12 +27,6 @@ class UserProfileForm(forms.ModelForm):
         help_text=_("Format: dd.mm.yyyy"),
         required=False,
         widget=DateInputTextWidget(attrs={'class': 'datepicker'})
-    )
-    yandex_login = forms.CharField(
-        max_length=64,
-        label="Логин из Яндекс.Контеста",
-        help_text="<b>YANDEX.ID</b>@yandex.ru обновлено будет только в YandexUserData",
-        required=False
     )
 
     def __init__(self, *args, **kwargs):
@@ -52,10 +47,6 @@ class UserProfileForm(forms.ModelForm):
         self.helper.layout = Layout(Div(*show_fields))
         self.helper.form_tag = False
 
-    def clean_yandex_login(self):
-        if self.editor.is_curator:
-            return self.cleaned_data['yandex_login']
-        return ''
 
     class Meta:
         model = User

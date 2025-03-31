@@ -499,16 +499,16 @@ def get_personal_assignments_by_yandex_login(*, assignment: Assignment) -> Dict[
     Returns personal assignments of students that provided yandex login
     in their account.
     """
+    from core.utils import normalize_yandex_login
     filters = {"assignments": [assignment.pk]}
     student_assignments = list(personal_assignments_list(filters=filters)
-                               .select_related('student')
-                               .only("pk", "score", "student__yandex_login_normalized"))
+                               .select_related('student'))
     with_yandex_login = {}
     for sa in student_assignments:
-        yandex_login = sa.student.yandex_login_normalized
-        if yandex_login:
+        if hasattr(sa.student, 'yandex_data') and sa.student.yandex_data.login:
             sa.assignment = assignment
-            with_yandex_login[str(yandex_login)] = sa
+            normalized_login = normalize_yandex_login(sa.student.yandex_data.login)
+            with_yandex_login[normalized_login] = sa
     return with_yandex_login
 
 
