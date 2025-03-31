@@ -51,7 +51,7 @@ from core.utils import bucketize
 from grading.api.yandex_contest import YandexContestAPI
 from tasks.models import Task
 from users.constants import ConsentTypes, GenderTypes
-from users.models import StudentProfile, StudentTypes, User
+from users.models import StudentProfile, StudentTypes, User, YandexUserData
 from users.services import (
     create_account,
     create_student_profile,
@@ -512,8 +512,25 @@ def create_student(
     user.photo = applicant.photo
     for consent in ConsentTypes.regular_student_consents:
         give_consent(user, consent)
+    
+    # Handle yandex_login separately since it's now in YandexUserData model
+    yandex_login = account_data.yandex_login
+    if yandex_login:
+        try:
+            yandex_data = YandexUserData.objects.get(user=user)
+            yandex_data.login = yandex_login
+            yandex_data.save()
+        except YandexUserData.DoesNotExist:
+            YandexUserData.objects.create(
+                user=user,
+                login=yandex_login,
+                uid=f"pending-{user.pk}"  # Temporary UID until verified
+            )
+    
     # dataclasses.asdict raises `cannot pickle '_io.BufferedRandom' object`
     account_fields = {field.name for field in fields(AccountData)}
+    # Skip yandex_login since we handled it separately
+    account_fields.discard('yandex_login')
     for name in account_fields:
         setattr(user, name, getattr(account_data, name))
     user.save()
@@ -562,7 +579,20 @@ def create_student_from_applicant(applicant: Applicant):
         user.stepic_id = int(applicant.stepic_id)
     except (TypeError, ValueError):
         pass
-    user.yandex_login = applicant.yandex_login if applicant.yandex_login else ""
+    
+    # Create or update YandexUserData
+    if applicant.yandex_login:
+        try:
+            yandex_data = YandexUserData.objects.get(user=user)
+            yandex_data.login = applicant.yandex_login
+            yandex_data.save()
+        except YandexUserData.DoesNotExist:
+            YandexUserData.objects.create(
+                user=user,
+                login=applicant.yandex_login,
+                uid=f"pending-{user.pk}"  # Temporary UID until verified
+            )
+    
     # For github.com store part after github.com/
     if applicant.github_login:
         user.github_login = applicant.github_login.split("github.com/", maxsplit=1)[-1]
