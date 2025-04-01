@@ -490,9 +490,9 @@ def test_view_user_update_student_cant_change_yandex_login(client, assert_redire
     url = student.get_update_profile_url()
     response = client.get(url)
     form = response.context_data['form']
-    # Form should not have yandex_login field
-    assert 'yandex_login' not in form.rendered_fields
-    assert 'yandex_login' not in form.helper.layout.fields[0].fields
+    # Form should have yandex_login field init disabled
+    assert form.fields['yandex_login'].disabled == True
+    assert form.initial['yandex_login'] == student.yandex_data.login
     
     # Get the original login value
     original_login = student.yandex_data.login
@@ -532,8 +532,9 @@ def test_view_user_update_curator_cant_change_yandex_login(client, assert_redire
     client.login(curator)
     response = client.get(url)
     form = response.context_data['form']
-    assert 'yandex_login' not in form.rendered_fields
-    assert 'yandex_login' not in form.helper.layout.fields[0].fields
+    # Form should have yandex_login field init disabled
+    assert form.fields['yandex_login'].disabled == True
+    assert form.initial['yandex_login'] == student.yandex_data.login
 
     # Get the original login value
     original_login = student.yandex_data.login
