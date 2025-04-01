@@ -5,7 +5,6 @@ from django_filters.conf import settings as filters_settings
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.db import transaction
 from django.forms import SelectMultiple
 from django.forms.models import ModelForm
 from django.utils.translation import gettext_lazy as _
@@ -445,8 +444,7 @@ class ConfirmationForm(forms.ModelForm):
                 "track"]
 
     force_required = ["phone",
-                      "living_place",
-                      "yandex_login"]
+                      "living_place"]
 
     authorization_code = forms.CharField(required=True, widget=forms.HiddenInput())
     email_code = forms.CharField(
@@ -458,7 +456,7 @@ class ConfirmationForm(forms.ModelForm):
     birth_date = forms.DateField(label=_("Birthday"), required=True)
     telegram_username = forms.CharField(
         label="Имя пользователя в Telegram",
-        help_text="@&lt;<b>username</b>&gt; в настройках профиля Telegram."
+        help_text="@<<b>username</b>> в настройках профиля Telegram."
                   "<br>Поставьте прочерк «-», если аккаунт отсутствует.",
         required=True,
     )
@@ -512,7 +510,6 @@ class ConfirmationForm(forms.ModelForm):
             "birth_date",
             "phone",
             "telegram_username",
-            "yandex_login"
         ]
 
     def __init__(self, acceptance: Acceptance, **kwargs):
@@ -529,7 +526,6 @@ class ConfirmationForm(forms.ModelForm):
             "authorization_code": acceptance.confirmation_code,
             "email": applicant.email,
             "phone": applicant.phone,
-            "yandex_login": applicant.yandex_login,
             "telegram_username": f"@{applicant.telegram_username}",
             "birth_date": applicant.birth_date
         }
@@ -564,8 +560,9 @@ class ConfirmationForm(forms.ModelForm):
                 self.add_error("email_code", _("Email verification code is not valid"))
 
     def save(self, commit=True) -> User:
-        account_data = AccountData.from_dict(self.cleaned_data)
+        account_data_data = self.cleaned_data.copy()
+        account_data_data["yandex_login"] = self.acceptance.applicant.yandex_login
+        account_data = AccountData.from_dict(account_data_data)
         profile_data = StudentProfileData.from_dict(self.cleaned_data)
-        with transaction.atomic():
-            user = create_student(self.acceptance, account_data, profile_data)
-        return user
+        return create_student(self.acceptance, account_data, profile_data)
+    
