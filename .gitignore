@@ -29,3 +29,8 @@ docker-compose.override.yml
 *.mo
 *.pot
 .python-version
+
+# Unstable memory-bank 
+memory-bank/activeContext.md
+memory-bank/decisionLog.md
+memory-bank/progress.md
