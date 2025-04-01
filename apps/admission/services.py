@@ -517,15 +517,25 @@ def create_student(
     yandex_login = account_data.yandex_login
     if yandex_login:
         try:
+            # Try to get existing YandexUserData for this user
             yandex_data = YandexUserData.objects.get(user=user)
             yandex_data.login = yandex_login
-            yandex_data.save()
+            try:
+                yandex_data.save()
+                logger.info(f"Updated YandexUserData for user {user.pk} with login {yandex_login}")
+            except Exception as e:
+                logger.error(f"Failed to update YandexUserData for user {user.pk}: {str(e)}")
         except YandexUserData.DoesNotExist:
-            YandexUserData.objects.create(
-                user=user,
-                login=yandex_login,
-                uid=f"pending-{user.pk}"  # Temporary UID until verified
-            )
+            # Create new YandexUserData if it doesn't exist
+            try:
+                YandexUserData.objects.create(
+                    user=user,
+                    login=yandex_login,
+                    uid=f"pending-{user.pk}"  # Temporary UID until verified - will be updated when user authenticates with Yandex
+                )
+                logger.info(f"Created new YandexUserData for user {user.pk} with login {yandex_login}")
+            except Exception as e:
+                logger.error(f"Failed to create YandexUserData for user {user.pk}: {str(e)}")
     
     # dataclasses.asdict raises `cannot pickle '_io.BufferedRandom' object`
     account_fields = {field.name for field in fields(AccountData)}
@@ -583,15 +593,25 @@ def create_student_from_applicant(applicant: Applicant):
     # Create or update YandexUserData
     if applicant.yandex_login:
         try:
+            # Try to get existing YandexUserData for this user
             yandex_data = YandexUserData.objects.get(user=user)
             yandex_data.login = applicant.yandex_login
-            yandex_data.save()
+            try:
+                yandex_data.save()
+                logger.info(f"Updated YandexUserData for user {user.pk} with login {applicant.yandex_login}")
+            except Exception as e:
+                logger.error(f"Failed to update YandexUserData for user {user.pk}: {str(e)}")
         except YandexUserData.DoesNotExist:
-            YandexUserData.objects.create(
-                user=user,
-                login=applicant.yandex_login,
-                uid=f"pending-{user.pk}"  # Temporary UID until verified
-            )
+            # Create new YandexUserData if it doesn't exist
+            try:
+                YandexUserData.objects.create(
+                    user=user,
+                    login=applicant.yandex_login,
+                    uid=f"pending-{user.pk}"  # Temporary UID until verified - will be updated when user authenticates with Yandex
+                )
+                logger.info(f"Created new YandexUserData for user {user.pk} with login {applicant.yandex_login}")
+            except Exception as e:
+                logger.error(f"Failed to create YandexUserData for user {user.pk}: {str(e)}")
     
     # For github.com store part after github.com/
     if applicant.github_login:
