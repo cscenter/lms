@@ -492,138 +492,130 @@ def create_student(
     email = account_data.email
     applicant: Applicant = acceptance.applicant
     branch = applicant.campaign.branch
-    try:
-        user = User.objects.get(email__iexact=email)
-    except User.DoesNotExist:
-        user = create_account(
-            username=generate_username_from_email(email),
-            # User can't reset password if it's set to `None`
-            password=User.objects.make_random_password(),
-            email=email,
-            gender=account_data.gender,
-            time_zone=branch.time_zone,
-            is_active=True
+    with transaction.atomic():
+        user, created = User.objects.get_or_create(
+            email__iexact=email,
+            defaults={
+                "username": generate_username_from_email(email),
+                "password": User.objects.make_random_password(),
+                "email": email,
+                "gender": account_data.gender,
+                "time_zone": branch.time_zone,
+                "is_active": True,
+            },
         )
-    user.workplace = applicant.workplace or ""
-    user.branch = branch
-    user.first_name = applicant.first_name
-    user.last_name = applicant.last_name
-    user.patronymic = "" if account_data.has_no_patronymic else applicant.patronymic
-    user.photo = applicant.photo
-    for consent in ConsentTypes.regular_student_consents:
-        give_consent(user, consent)
-    
-    # Handle yandex_login separately since it's now in YandexUserData model
-    yandex_login = account_data.yandex_login
-    if yandex_login:
-        try:
-            # Try to get existing YandexUserData for this user
-            yandex_data = YandexUserData.objects.get(user=user)
-            yandex_data.login = yandex_login
+        user.workplace = applicant.workplace or ""
+        user.branch = branch
+        user.first_name = applicant.first_name
+        user.last_name = applicant.last_name
+        user.patronymic = "" if account_data.has_no_patronymic else applicant.patronymic
+        user.photo = applicant.photo
+        for consent in ConsentTypes.regular_student_consents:
+            give_consent(user, consent)
+        
+        # dataclasses.asdict raises `cannot pickle '_io.BufferedRandom' object`
+        account_fields = {field.name for field in fields(AccountData)}
+        # Skip yandex_login since we handled it separately
+        account_fields.discard('yandex_login')
+        for name in account_fields:
+            setattr(user, name, getattr(account_data, name))
+        user.save()
+        student_data = {
+            "level_of_education_on_admission": applicant.level_of_education,
+            "level_of_education_on_admission_other": applicant.level_of_education_other,
+            "university": applicant.get_university_display() if applicant.university else (applicant.university_other or "Unknown University"),
+            "faculty": applicant.faculty,
+            "diploma_degree": applicant.diploma_degree,
+            "graduation_year": applicant.year_of_graduation,
+            "new_track": applicant.new_track,
+            **asdict(profile_data)
+        }
+        get_or_create_student_profile(applicant.campaign, user, data=student_data)
+        applicant.user = user
+        applicant.save(update_fields=["user"])
+        acceptance.status = Acceptance.CONFIRMED
+        acceptance.save(update_fields=["status"])
+        applicant_data = getattr(applicant, "data", None)
+        
+        if applicant_data:
+            yandex_profile = applicant_data.get("yandex_profile", {})
             try:
-                yandex_data.save()
-                logger.info(f"Updated YandexUserData for user {user.pk} with login {yandex_login}")
-            except Exception as e:
-                logger.error(f"Failed to update YandexUserData for user {user.pk}: {str(e)}")
-        except YandexUserData.DoesNotExist:
-            # Create new YandexUserData if it doesn't exist
-            try:
-                YandexUserData.objects.create(
+                yandex_data = YandexUserData.objects.create(
                     user=user,
-                    login=yandex_login,
-                    uid=f"pending-{user.pk}"  # Temporary UID until verified - will be updated when user authenticates with Yandex
+                    login=yandex_profile.get("application_ya_login", ""),
+                    uid=yandex_profile.get("application_ya_id", ""),
+                    first_name=yandex_profile.get("application_ya_first_name", ""),
+                    last_name=yandex_profile.get("application_ya_last_name", ""),
+                    display_name=yandex_profile.get("application_ya_display_name", ""),
+                    real_name=yandex_profile.get("application_ya_real_name", ""),
                 )
-                logger.info(f"Created new YandexUserData for user {user.pk} with login {yandex_login}")
+                yandex_data.save()
             except Exception as e:
                 logger.error(f"Failed to create YandexUserData for user {user.pk}: {str(e)}")
-    
-    # dataclasses.asdict raises `cannot pickle '_io.BufferedRandom' object`
-    account_fields = {field.name for field in fields(AccountData)}
-    # Skip yandex_login since we handled it separately
-    account_fields.discard('yandex_login')
-    for name in account_fields:
-        setattr(user, name, getattr(account_data, name))
-    user.save()
-    student_data = {
-        "level_of_education_on_admission": applicant.level_of_education,
-        "level_of_education_on_admission_other": applicant.level_of_education_other,
-        "university": applicant.get_university_display() if applicant.university else applicant.university_other,
-        "faculty": applicant.faculty,
-        "diploma_degree": applicant.diploma_degree,
-        "graduation_year": applicant.year_of_graduation,
-        "new_track": applicant.new_track,
-        **asdict(profile_data)
-    }
-    get_or_create_student_profile(applicant.campaign, user, data=student_data)
-    applicant.user = user
-    applicant.save(update_fields=["user"])
-    acceptance.status = Acceptance.CONFIRMED
-    acceptance.save(update_fields=["status"])
-    return user
+            logger.info(f"Created new YandexUserData for user {user.pk} using yandex_profile.")
+
+        return user
 
 
 def create_student_from_applicant(applicant: Applicant):
     """
     Creates new model or override existent with data from application form.
     """
-    branch = applicant.campaign.branch
-    try:
-        user = User.objects.get(email=applicant.email)
-    except User.DoesNotExist:
-        user = create_account(
-            username=generate_username_from_email(applicant.email),
-            # User can't reset password if it's set to `None`
-            password=User.objects.make_random_password(),
-            email=applicant.email,
-            gender=GenderTypes.OTHER,
-            time_zone=branch.time_zone,
-            is_active=True,
-        )
-    user.first_name = applicant.first_name
-    user.last_name = applicant.last_name
-    user.patronymic = applicant.patronymic if applicant.patronymic else ""
-    user.phone = applicant.phone
-    user.workplace = applicant.workplace if applicant.workplace else ""
-    # Social accounts info
-    try:
-        user.stepic_id = int(applicant.stepic_id)
-    except (TypeError, ValueError):
-        pass
-    
-    # Create or update YandexUserData
-    if applicant.yandex_login:
+    with transaction.atomic():
+        branch = applicant.campaign.branch
         try:
-            # Try to get existing YandexUserData for this user
-            yandex_data = YandexUserData.objects.get(user=user)
-            yandex_data.login = applicant.yandex_login
+            user = User.objects.get(email=applicant.email)
+        except User.DoesNotExist:
+            user = create_account(
+                username=generate_username_from_email(applicant.email),
+                # User can't reset password if it's set to `None`
+                password=User.objects.make_random_password(),
+                email=applicant.email,
+                gender=GenderTypes.OTHER,
+                time_zone=branch.time_zone,
+                is_active=True,
+            )
+        user.first_name = applicant.first_name
+        user.last_name = applicant.last_name
+        user.patronymic = applicant.patronymic if applicant.patronymic else ""
+        user.phone = applicant.phone
+        user.workplace = applicant.workplace if applicant.workplace else ""
+        # Social accounts info
+        try:
+            user.stepic_id = int(applicant.stepic_id)
+        except (TypeError, ValueError):
+            pass
+        
+        applicant_data = getattr(applicant, "data", None)
+        if applicant_data:
+            yandex_profile = applicant_data.get("yandex_profile", {})
             try:
-                yandex_data.save()
-                logger.info(f"Updated YandexUserData for user {user.pk} with login {applicant.yandex_login}")
-            except Exception as e:
-                logger.error(f"Failed to update YandexUserData for user {user.pk}: {str(e)}")
-        except YandexUserData.DoesNotExist:
-            # Create new YandexUserData if it doesn't exist
-            try:
-                YandexUserData.objects.create(
+                yandex_data = YandexUserData.objects.create(
                     user=user,
-                    login=applicant.yandex_login,
-                    uid=f"pending-{user.pk}"  # Temporary UID until verified - will be updated when user authenticates with Yandex
+                    login=yandex_profile.get("application_ya_login", ""),
+                    uid=yandex_profile.get("application_ya_id", ""),
+                    first_name=yandex_profile.get("application_ya_first_name", ""),
+                    last_name=yandex_profile.get("application_ya_last_name", ""),
+                    display_name=yandex_profile.get("application_ya_display_name", ""),
+                    real_name=yandex_profile.get("application_ya_real_name", ""),
                 )
-                logger.info(f"Created new YandexUserData for user {user.pk} with login {applicant.yandex_login}")
+                yandex_data.save()
             except Exception as e:
                 logger.error(f"Failed to create YandexUserData for user {user.pk}: {str(e)}")
-    
-    # For github.com store part after github.com/
-    if applicant.github_login:
-        user.github_login = applicant.github_login.split("github.com/", maxsplit=1)[-1]
-    user.save()
-    student_data = {
-        "year_of_curriculum": applicant.campaign.year,
-        "level_of_education_on_admission": applicant.level_of_education,
-        "university": applicant.get_university_display(),
-    }
-    get_or_create_student_profile(applicant.campaign, user, data=student_data)
-    return user
+            logger.info(f"Created new YandexUserData for user {user.pk} using yandex_profile.")
+
+
+        # For github.com store part after github.com/
+        if applicant.github_login:
+            user.github_login = applicant.github_login.split("github.com/", maxsplit=1)[-1]
+        user.save()
+        student_data = {
+            "year_of_curriculum": applicant.campaign.year,
+            "level_of_education_on_admission": applicant.level_of_education,
+            "university": applicant.get_university_display(),
+        }
+        get_or_create_student_profile(applicant.campaign, user, data=student_data)
+        return user
 
 
 class EmailQueueService:
