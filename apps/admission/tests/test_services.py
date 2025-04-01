@@ -576,7 +576,18 @@ def test_create_student(settings):
         branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
         confirmation_ends_at=future_dt,
     )
+    applicant_data = {
+            "yandex_profile": {
+                "application_ya_login": "yandex_login",
+                "application_ya_id": "12345",
+                "application_ya_first_name": "YandexFirstName",
+                "application_ya_last_name": "YandexLastName",
+                "application_ya_display_name": "YandexDisplayName",
+                "application_ya_real_name": "YandexRealName",
+            }
+        }
     acceptance = AcceptanceFactory(
+            applicant__data=applicant_data,
         status=Acceptance.WAITING,
         applicant__campaign=campaign,
     )
@@ -634,7 +645,19 @@ def test_create_student_with_existing_invited(settings):
         branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
         confirmation_ends_at=future_dt,
     )
+    applicant_data = {
+            "yandex_profile": {
+                "application_ya_login": "yandex_login2",
+                "application_ya_id": "12345",
+                "application_ya_first_name": "YandexFirstName",
+                "application_ya_last_name": "YandexLastName",
+                "application_ya_display_name": "YandexDisplayName",
+                "application_ya_real_name": "YandexRealName",
+            }
+        }
+
     acceptance = AcceptanceFactory(
+        applicant__data=applicant_data,
         status=Acceptance.WAITING,
         applicant__campaign=campaign,
         applicant__email=ACCOUNT_DATA_WITHOUT_PATRONYMIC.email,
