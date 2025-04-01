@@ -753,6 +753,68 @@ def test_create_student_email_case_insensitive(settings, get_test_image):
 
 
 @pytest.mark.django_db
+def test_create_student_with_empty_yandex_login(settings):
+    """Test creating a student with an empty yandex_login field."""
+    future_dt = get_now_utc() + datetime.timedelta(days=5)
+    campaign = CampaignFactory(
+        year=2011,
+        branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
+        confirmation_ends_at=future_dt,
+    )
+    acceptance = AcceptanceFactory(
+        status=Acceptance.WAITING,
+        applicant__campaign=campaign,
+    )
+    
+    # Create account data with empty yandex_login
+    account_data_empty_yandex = dataclasses.replace(ACCOUNT_DATA, yandex_login="")
+    
+    # Create student with empty yandex_login
+    user = create_student(acceptance, account_data_empty_yandex, PROFILE_DATA)
+    
+    # Verify that no YandexUserData was created
+    from django.core.exceptions import ObjectDoesNotExist
+    with pytest.raises(ObjectDoesNotExist):
+        user.yandex_data  # This will raise ObjectDoesNotExist if yandex_data doesn't exist
+    
+    # Verify other fields were set correctly
+    for field in dataclasses.fields(account_data_empty_yandex):
+        if field.name != 'yandex_login':
+            assert getattr(user, field.name) == getattr(account_data_empty_yandex, field.name)
+
+
+@pytest.mark.django_db
+def test_create_student_with_null_yandex_login(settings):
+    """Test creating a student with a null yandex_login field."""
+    future_dt = get_now_utc() + datetime.timedelta(days=5)
+    campaign = CampaignFactory(
+        year=2011,
+        branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
+        confirmation_ends_at=future_dt,
+    )
+    acceptance = AcceptanceFactory(
+        status=Acceptance.WAITING,
+        applicant__campaign=campaign,
+    )
+    
+    # Create account data with null yandex_login
+    account_data_null_yandex = dataclasses.replace(ACCOUNT_DATA, yandex_login=None)
+    
+    # Create student with null yandex_login
+    user = create_student(acceptance, account_data_null_yandex, PROFILE_DATA)
+    
+    # Verify that no YandexUserData was created
+    from django.core.exceptions import ObjectDoesNotExist
+    with pytest.raises(ObjectDoesNotExist):
+        user.yandex_data  # This will raise ObjectDoesNotExist if yandex_data doesn't exist
+    
+    # Verify other fields were set correctly
+    for field in dataclasses.fields(account_data_null_yandex):
+        if field.name != 'yandex_login':
+            assert getattr(user, field.name) == getattr(account_data_null_yandex, field.name)
+
+
+@pytest.mark.django_db
 def test_create_applicant_status_log():
     """Test the create_applicant_status_log service function."""
     # Create an applicant with a status
