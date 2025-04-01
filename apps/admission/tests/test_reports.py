@@ -1,9 +1,12 @@
 import pytest
+import re
+from django.utils import timezone
 
-from admission.constants import InterviewSections
-from admission.reports import AdmissionApplicantsCampaignReport, AdmissionExamReport
+from admission.constants import InterviewSections, ApplicantStatuses
+from admission.reports import AdmissionApplicantsCampaignReport, AdmissionExamReport, ApplicantStatusLogsReport, AdmissionApplicantsYearReport
 from admission.tests.factories import (
     ApplicantFactory,
+    ApplicantStatusLogFactory,
     CampaignFactory,
     CommentFactory,
     ExamFactory,
@@ -66,3 +69,44 @@ def test_exam_report():
     # Different `scores` dimensions for exam2 and exam3
     with pytest.raises(AssertionError):
         df = report.generate()
+
+
+@pytest.mark.django_db
+def test_applicant_status_logs_report():
+    """Test for ApplicantStatusLogsReport class."""
+    # Create a current campaign
+    campaign = CampaignFactory(current=True)
+    
+    # Create applicants with status logs
+    applicant1 = ApplicantFactory(campaign=campaign)
+    applicant2 = ApplicantFactory(campaign=campaign)
+    
+    # Create status logs
+    log1 = ApplicantStatusLogFactory(
+        applicant=applicant1,
+        former_status=ApplicantStatuses.PENDING,
+        status=ApplicantStatuses.PERMIT_TO_EXAM
+    )
+    
+    log2 = ApplicantStatusLogFactory(
+        applicant=applicant2,
+        former_status=ApplicantStatuses.PASSED_EXAM,
+        status=ApplicantStatuses.ACCEPT
+    )
+    
+    # Create report
+    report = ApplicantStatusLogsReport()
+    
+    # Check headers
+    assert 'ID' in report.headers
+    assert 'Former status' in report.headers or 'Предыдущий статус' in report.headers
+    assert 'Status' in report.headers or 'Статус' in report.headers
+    assert 'Entry Added' in report.headers or 'Дата изменения' in report.headers
+    
+    # Check data
+    assert len(report.data) == 2  # Should have two logs
+    
+    # Check that dates are in ISO format or similar format
+    date_pattern = r'\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d+)?([+-]\d{2}:\d{2})?)?'
+    assert re.match(date_pattern, report.data[0][3])
+    assert re.match(date_pattern, report.data[1][3])

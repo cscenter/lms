@@ -8,9 +8,10 @@ from pandas import DataFrame
 from django.db.models import Prefetch
 from django.utils import formats, timezone
 from django.utils.encoding import force_str
+from django.utils.translation import gettext_lazy as _
 
 from admission.constants import UTMNames, ApplicantStatuses, InterviewSections
-from admission.models import Applicant, Campaign, Comment, Exam
+from admission.models import Applicant, ApplicantStatusLog, Campaign, Comment, Exam
 from core.reports import ReportFileOutput
 from core.urls import reverse
 
@@ -70,7 +71,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 if field.name in ("status", "level_of_education", "has_diploma", "gender", "diploma_degree"):
                     value = getattr(applicant, f"get_{field.name}_display")()
                 elif field.name == "id":
-                    value = reverse("admission:applicants:detail", args=[value])
+                    value = applicant.get_absolute_url()
                 elif field.name == "created":
                     value = formats.date_format(applicant.created, "SHORT_DATE_FORMAT")
                 elif field.name == "data" and applicant.data is not None:
@@ -229,6 +230,65 @@ class AdmissionExamReport:
             self.campaign.branch.code,
             formats.date_format(today, "SHORT_DATE_FORMAT"),
         )
+
+class ApplicantStatusLogsReport(ReportFileOutput):
+    """
+    Report for applicant status change logs.
+    Format: ID, previous status, current status, change date (ISO).
+    """
+    
+    def __init__(self, year=None):
+        """
+        Initialize the report.
+        
+        Args:
+            year: campaign year (if None, current campaigns are used)
+        """
+        self.year = year
+        super().__init__()
+        self.process()
+    
+    def get_queryset(self):
+        """Get status logs for applicants from current admission campaigns."""
+        if self.year:
+            # If year is specified, filter by it
+            campaigns = Campaign.objects.filter(year=self.year)
+        else:
+            # Otherwise use current campaigns
+            campaigns = Campaign.objects.filter(current=True)
+            
+        campaigns.exclude(branch__name='Тест')
+        
+        # Filter logs by these applicants
+        return ApplicantStatusLog.objects.filter(
+            applicant__campaign__in=campaigns
+        ).select_related('applicant').order_by('-changed_at', '-created_at')
+    
+    def process(self):
+        """Process data for the report."""
+        self.headers = ['ID', _('Former status'), _("Status"), _("Entry Added")]
+        
+        status_logs = self.get_queryset()
+        
+        for log in status_logs:
+            applicant_id = log.applicant.get_absolute_url()
+            former_status_display = log.get_former_status_display() if log.former_status else ""
+            status_display = log.get_status_display() if log.status else ""
+            changed_at = log.changed_at.isoformat()
+            
+            row = [applicant_id, former_status_display, status_display, changed_at]
+            self.data.append(row)
+    
+    def export_row(self, row):
+        """Export a row of the report."""
+        return row
+    
+    def get_filename(self):
+        """Get filename for the report."""
+        today = timezone.now().date().isoformat()
+        year_suffix = f"_{self.year}" if self.year else ""
+        return f"applicant_status_logs{year_suffix}_{today}"
+
 
 
 def generate_admission_interviews_report(

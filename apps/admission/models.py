@@ -441,7 +441,7 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         blank=True,
         null=True
     )
-    mipt_grades_file = ImageField(
+    mipt_grades_file = models.FileField(
         _("MIPT grades file"),
         upload_to=applicant_grades_upload_to,
         blank=True,
@@ -703,6 +703,14 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     def clean(self):
         if self.yandex_login:
             self.yandex_login_q = self.yandex_login.lower().replace("-", ".")
+        if self.mipt_grades_file:
+            _, file_extension = os.path.splitext(str(self.mipt_grades_file))
+            print(file_extension)
+            allowed_types = ['.png', '.jpg', '.jpeg', '.pdf']
+            if file_extension not in allowed_types:
+                raise ValidationError(
+                    {"mipt_grades_file": "The file must be a JPEG, PNG image, or a PDF document."}
+                )
 
     def get_living_place_display(self):
         if not self.living_place and self.campaign.branch.city_id:
