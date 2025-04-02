@@ -357,7 +357,7 @@ class FutureGraduateDiplomasReport(ProgressReport):
             StudentProfile.objects.filter(
                 status=StudentStatuses.WILL_GRADUATE, branch=self.branch
             )
-            .select_related("user")
+            .select_related("user", "user__yandex_data")
             .prefetch_related(
                 "academic_disciplines",
                 "user__applicant_set",
@@ -565,7 +565,7 @@ class OfficialDiplomasReport(ProgressReport):
             "user__onlinecourserecord_set", to_attr="online_courses"
         )
         return (
-            StudentProfile.objects.select_related("user", "graduate_profile")
+            StudentProfile.objects.select_related("user", "user__yandex_data", "graduate_profile")
             .filter(graduate_profile__diploma_issued_on=self.diploma_issued_on)
             .prefetch_related(
                 "academic_disciplines",
@@ -690,7 +690,7 @@ class ProgressReportFull(ProgressReport):
                     type__in=[StudentTypes.REGULAR, StudentTypes.VOLUNTEER],
                     branch__site_id=settings.SITE_ID,
                 )
-                .select_related("user", "branch", "graduate_profile")
+                .select_related("user", "user__yandex_data", "branch", "graduate_profile")
                 .order_by("user__last_name", "user__first_name", "user__pk")
             )
         success_practice = Count(
@@ -955,7 +955,7 @@ class ProgressReportForSemester(ProgressReport):
         return (
             StudentProfile.objects.filter(*self.get_queryset_filters())
             .exclude(status__in=StudentStatuses.inactive_statuses)
-            .select_related("user", "branch")
+            .select_related("user", "user__yandex_data", "branch")
             .prefetch_related(
                 "academic_disciplines",
                 projects_prefetch,
@@ -1309,7 +1309,7 @@ class WillGraduateStatsReport(ReportFileOutput):
         ]
         qs = (
             User.objects.filter(status=StudentStatuses.WILL_GRADUATE)
-            .select_related("branch")
+            .select_related("branch", "yandex_data")
             .prefetch_related(*prefetch_list)
         )
         return qs

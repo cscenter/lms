@@ -47,7 +47,7 @@ def assignment_import_scores_from_yandex_contest(*, checker: Checker,
     # score is synchronized with the assignment max score.
     enrolled_students = (Enrollment.active
                          .filter(course_id=assignment.course_id)
-                         .select_related('student_profile__user'))
+                         .select_related('student_profile__user__yandex_data'))
     students = {}
     for e in enrolled_students:
         if hasattr(e.student_profile.user, 'yandex_data') and e.student_profile.user.yandex_data.login:
