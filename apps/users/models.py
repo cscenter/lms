@@ -462,7 +462,7 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
     
     @property
     def yandex_login(self):
-        return self.yandex_data.login if self.yandex_data else ""
+        return self.yandex_data.login if hasattr(self, "yandex_data") else ""
 
     @staticmethod
     def generate_random_username(length=30,

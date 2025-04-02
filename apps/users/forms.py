@@ -43,15 +43,12 @@ class UserProfileForm(forms.ModelForm):
         self.fields['index_redirect'].choices = [option_empty] + user_options
         self.helper = FormHelper()
         # Create a new list for show_fields
-        show_fields = [
-            'birth_date', 'phone', 'workplace', 'bio', 'time_zone',
-            'telegram_username', 'github_login', 'stepic_id', 'codeforces_login',
-            'private_contacts', 'is_notification_allowed', 'tshirt_size',
-            'yandex_login'
-        ]
+        show_fields = list(UserProfileForm.Meta.fields)
+        show_fields.append('yandex_login')
         
         self.fields['birth_date'].disabled = True
         self.fields['yandex_login'].disabled = True
+        self.fields['yandex_login'].initial = self.initial.get("yandex_login", "")
         # Update yandex_login help_text with the correct URL
         yandex_url = reverse('auth:users:yandex_begin')
         self.fields['yandex_login'].help_text = f'<a href="{yandex_url}">[Изменить]</a>'

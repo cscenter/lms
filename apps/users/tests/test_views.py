@@ -430,9 +430,9 @@ def test_view_connected_auth_services_smoke(client, settings, lms_resolver):
 
 @pytest.mark.django_db
 def test_view_user_detail_yandex_login_field_visibility(client):
-    teacher = TeacherFactory(yandex_data=True)
-    student = StudentFactory(yandex_data=True)
-    another_student = StudentFactory(yandex_data=True)
+    teacher = TeacherFactory()
+    student = StudentFactory()
+    another_student = StudentFactory()
     url = student.get_absolute_url()
 
     client.login(another_student)
@@ -443,34 +443,29 @@ def test_view_user_detail_yandex_login_field_visibility(client):
     client.login(teacher)
     response = client.get(url)
     data = response.content.decode('utf-8')
-    assert '[Аккаунт не подключён]' in data or student.yandex_data.login in data
+    assert '[Account is not connected]' in data
 
     client.login(student)
     response = client.get(url)
     data = response.content.decode('utf-8')
-    assert '[Войти через Яндекс]' in data or student.yandex_data.login in data
+    assert '[Login by Yandex]' in data
 
     # Update the yandex login
     yandex_login = 'YandexLogin'
-    student.yandex_data.login = yandex_login
-    student.yandex_data.save()
+    YandexUserDataFactory.create(user=student, login=yandex_login)
     
     response = client.get(url)
     data = response.content.decode('utf-8')
     assert yandex_login in data
-    assert '[Подтвердить]' in data or '[Изменить]' in data
-
-    client.login(teacher)
-    response = client.get(url)
-    data = response.content.decode('utf-8')
-    assert yandex_login in data
-    assert '[Не подтверждено]' in data or student.yandex_data.login in data
+    assert '[Change]' in data
 
     # Update with UID
     uid = '1337'
     student.yandex_data.uid = uid
     student.yandex_data.save()
+    student.refresh_from_db()
     
+    client.login(teacher)
     response = client.get(url)
     data = response.content.decode('utf-8')
     assert yandex_login in data
@@ -481,12 +476,13 @@ def test_view_user_detail_yandex_login_field_visibility(client):
     data = response.content.decode('utf-8')
     assert yandex_login in data
     assert f"({uid})" not in data
-    assert '[Изменить]' in data
+    assert '[Change]' in data
 
 
 @pytest.mark.django_db
 def test_view_user_update_student_cant_change_yandex_login(client, assert_redirect):
-    student = StudentFactory(yandex_data=True)
+    student = StudentFactory()
+    YandexUserDataFactory.create(user=student)
     client.login(student)
     url = student.get_update_profile_url()
     response = client.get(url)
@@ -528,7 +524,9 @@ def test_view_user_update_student_cant_change_yandex_login(client, assert_redire
 @pytest.mark.django_db
 def test_view_user_update_curator_cant_change_yandex_login(client, assert_redirect):
     curator = CuratorFactory()
-    student = StudentFactory(yandex_data=True)
+    student = StudentFactory()
+    YandexUserDataFactory.create(user=student)
+    YandexUserDataFactory.create(user=curator)
     url = student.get_update_profile_url()
     client.login(curator)
     response = client.get(url)

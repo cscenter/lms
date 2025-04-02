@@ -493,17 +493,18 @@ def create_student(
     applicant: Applicant = acceptance.applicant
     branch = applicant.campaign.branch
     with transaction.atomic():
-        user, created = User.objects.get_or_create(
-            email__iexact=email,
-            defaults={
-                "username": generate_username_from_email(email),
-                "password": User.objects.make_random_password(),
-                "email": email,
-                "gender": account_data.gender,
-                "time_zone": branch.time_zone,
-                "is_active": True,
-            },
-        )
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+                user = create_account(
+                username=generate_username_from_email(email),
+                # User can't reset password if it's set to `None`
+                password=User.objects.make_random_password(),
+                email=email,
+                gender=account_data.gender,
+                time_zone=branch.time_zone,
+                is_active=True
+            )
         user.workplace = applicant.workplace or ""
         user.branch = branch
         user.first_name = applicant.first_name
