@@ -218,7 +218,7 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
         kwargs = super(UserUpdateView, self).get_form_kwargs()
         kwargs.update({'editor': self.request.user,
                        'student': self.object,
-                       'initial': {'yandex_login': self.object.yandex_data.login if hasattr(self.object, "yandex_data") else None}})
+                       'initial': {'yandex_login': self.object.yandex_login}})
         return kwargs
 
     def is_form_allowed(self, user, obj):

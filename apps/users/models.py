@@ -459,6 +459,10 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
     def remove_group(self, role, branch=None, site_id: int = None):
         sid = site_id or settings.SITE_ID
         self.groups.filter(user=self, role=role, branch=branch, site_id=sid).delete()
+    
+    @property
+    def yandex_login(self):
+        return self.yandex_data.login if self.yandex_data else ""
 
     @staticmethod
     def generate_random_username(length=30,

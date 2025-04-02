@@ -607,8 +607,8 @@ def test_create_student(settings):
     assert all(timezone.now() - created <= datetime.timedelta(seconds=5) for created in user_consents.values_list("created", flat=True))
     
     # Check that yandex_login is stored in YandexUserData
-    assert hasattr(user, 'yandex_data')
-    assert user.yandex_data.login == ACCOUNT_DATA.yandex_login
+    assert user.yandex_login
+    assert user.yandex_login == ACCOUNT_DATA.yandex_login
     
     # Check other fields except yandex_login
     for field in dataclasses.fields(ACCOUNT_DATA):
@@ -686,8 +686,8 @@ def test_create_student_with_existing_invited(settings):
     assert all(timezone.now() - created <= datetime.timedelta(seconds=5) for created in user_consents.values_list("created", flat=True))
 
     # Check that yandex_login is stored in YandexUserData
-    assert hasattr(user, 'yandex_data')
-    assert user.yandex_data.login == ACCOUNT_DATA_WITHOUT_PATRONYMIC.yandex_login
+    assert user.yandex_login
+    assert user.yandex_login == ACCOUNT_DATA_WITHOUT_PATRONYMIC.yandex_login
 
     for field in dataclasses.fields(ACCOUNT_DATA_WITHOUT_PATRONYMIC):
         if field.name != 'yandex_login':

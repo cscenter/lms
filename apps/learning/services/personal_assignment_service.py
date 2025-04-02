@@ -504,9 +504,10 @@ def get_personal_assignments_by_yandex_login(*, assignment: Assignment) -> Dict[
                                .select_related('student'))
     with_yandex_login = {}
     for sa in student_assignments:
-        if hasattr(sa.student, 'yandex_data') and sa.student.yandex_data.login:
+        yandex_login = sa.student.yandex_login
+        if yandex_login:
             sa.assignment = assignment
-            normalized_login = normalize_yandex_login(sa.student.yandex_data.login)
+            normalized_login = normalize_yandex_login(yandex_login)
             with_yandex_login[normalized_login] = sa
     return with_yandex_login
 

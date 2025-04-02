@@ -162,9 +162,7 @@ class UserAdmin(_UserAdmin):
             yield inline.get_formset(request, obj), inline
     
     def display_yandex_login(self, obj):
-        if hasattr(obj, 'yandex_data') and obj.yandex_data:
-            return obj.yandex_data.login
-        return None
+        return obj.yandex_login
     
     display_yandex_login.short_description = _('Yandex Login')
 

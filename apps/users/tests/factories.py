@@ -201,6 +201,14 @@ class YandexUserDataFactory(factory.django.DjangoModelFactory):
     display_name = factory.Sequence(lambda n: f"Display name {n}")
     real_name = factory.Sequence(lambda n: f"Real name {n}")
 
+    @classmethod
+    def create_batch(cls, size, **kwargs):
+        # Could not find better way. This is only for creating a batch
+        if 'user__sequence' in kwargs:
+            users = kwargs.pop('user__sequence')
+            return [cls.create(user=user, **kwargs) for user in users]
+        return super().create_batch(size, **kwargs)
+
 class PartnerTagFactory(factory.django.DjangoModelFactory):
     
     class Meta:

@@ -77,6 +77,7 @@ def test_gradebook_csv_view_security(client, lms_resolver):
 def test_gradebook_download_csv(client):
     teacher = TeacherFactory()
     student1, student2 = StudentFactory.create_batch(2)
+    YandexUserDataFactory.create_batch(2, user__sequence=[student1, student2])
     co = CourseFactory.create(teachers=[teacher])
     a1, a2 = AssignmentFactory.create_batch(2, course=co)
     for s in [student1, student2]:
@@ -108,9 +109,11 @@ def test_gradebook_download_csv(client):
 @pytest.mark.django_db
 def test_view_gradebook_csv_gitlab_manytask_columns(client):
     teacher = TeacherFactory()
+    YandexUserDataFactory.create(user=teacher)
     course = CourseFactory(teachers=[teacher])
     gradebook_url = course.get_gradebook_url(format="csv")
     enrollment = EnrollmentFactory(course=course)
+    YandexUserDataFactory.create(user=enrollment.student)
     client.login(teacher)
     response = client.get(gradebook_url)
     assert response.status_code == 200
@@ -1275,8 +1278,10 @@ def test_gradebook_import_course_grades_permissions(teaching_dispatch_name,
 def test_gradebook_import_course_grades_wrong_headers(id_column_name, dispatch_view_name, client):
     teacher = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
+    YandexUserDataFactory.create(user=teacher)
     url = reverse(dispatch_view_name, args=[course.pk])
     e = EnrollmentFactory(course=course)
+    YandexUserDataFactory.create(user=e.student)
     assignment = AssignmentFactory.create(
         course=course,
         submission_type=AssignmentFormat.NO_SUBMIT,

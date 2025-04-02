@@ -24,7 +24,7 @@ from projects.models import Project
 from projects.tests.factories import ProjectFactory, ProjectStudentFactory
 from users.tests.factories import (
     OnlineCourseRecordFactory, SHADCourseRecordFactory, StudentFactory,
-    StudentProfileFactory, TeacherFactory
+    StudentProfileFactory, TeacherFactory, YandexUserDataFactory
 )
 
 
@@ -45,6 +45,7 @@ def test_report_common(settings):
     co1, co2, co3 = CourseFactory.create_batch(3, semester=s,
                                                teachers=[teacher])
     student1, student2, student3 = StudentFactory.create_batch(3)
+    YandexUserDataFactory.create_batch(3, user__sequence=[student1, student2, student3])
     EnrollmentFactory(student=student1, course=co1, grade=GradeTypes.GOOD)
     EnrollmentFactory(student=student2, course=co1, grade=GradeTypes.GOOD)
     EnrollmentFactory(student=student2, course=co2, grade=GradeTypes.NOT_GRADED)
@@ -118,6 +119,7 @@ def test_report_full():
     co1, co2 = CourseFactory.create_batch(2, semester=s,
                                           teachers=[teacher])
     student1, student2, student3 = students
+    YandexUserDataFactory.create_batch(3, user__sequence=[student1, student2, student3])
     student1.status = StudentStatuses.WILL_GRADUATE
     student1.save()
     EnrollmentFactory.create(student=student1, course=co1, grade=GradeTypes.GOOD)
@@ -193,6 +195,7 @@ def test_report_for_target_term():
     co1, co2, co3 = CourseFactory.create_batch(3, semester=prev_term,
                                                teachers=[teacher])
     student1, student2, student3 = StudentFactory.create_batch(3)
+    YandexUserDataFactory.create_batch(3, user__sequence=[student1, student2, student3])
     e_active = EnrollmentFactory.create(student=student1,
                                         course=co_active,
                                         grade=GradeTypes.EXCELLENT)
@@ -302,6 +305,7 @@ def test_semester_report_projects_stats():
     prev_term = SemesterFactory.create_prev(current_term)
     prev2_term = SemesterFactory.create_prev(prev_term)
     student = StudentFactory()
+    YandexUserDataFactory.create(user=student)
     progress_report = ProgressReportForSemester(current_term).generate()
     check_value_for_header(progress_report, get_header_inner(current_term),
                            student.pk, expected_value=0)
@@ -568,6 +572,7 @@ def test_report_official_diplomas_csv(settings):
 def test_export_highest_or_max_grade(settings):
     report = ProgressReportFull(on_course_duplicate='store_max')
     student = StudentFactory()
+    YandexUserDataFactory.create(user=student)
     meta_course = MetaCourseFactory()
     term_current = SemesterFactory.create_current()
     term_prev = SemesterFactory.create_prev(term_current)

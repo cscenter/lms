@@ -24,7 +24,7 @@ from users.models import User, UserGroup, YandexUserData
 from users.permissions import ViewAccountConnectedServiceProvider
 from users.tests.factories import (
     CuratorFactory, OnlineCourseRecordFactory, SHADCourseRecordFactory, StudentFactory,
-    StudentProfileFactory, UserFactory, add_user_groups, TeacherFactory
+    StudentProfileFactory, UserFactory, YandexUserDataFactory, add_user_groups, TeacherFactory
 )
 
 
@@ -232,6 +232,7 @@ def test_user_detail_view(client, assert_login_redirect):
 def test_view_user_can_update_profile(client, assert_redirect):
     test_note = "The best user in the world"
     user = StudentFactory()
+    YandexUserDataFactory.create(user=user)
     client.login(user)
     response = client.get(user.get_absolute_url())
     assert response.status_code == 200
@@ -572,6 +573,7 @@ def test_view_user_update_curator_cant_change_yandex_login(client, assert_redire
 ])
 def test_view_user_update_student_cant_change_birth_date(client, assert_redirect, user_factory):
     user = user_factory()
+    YandexUserDataFactory.create(user=user)
     client.login(user)
     url = user.get_update_profile_url()
     response = client.get(url)
