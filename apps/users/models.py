@@ -257,13 +257,13 @@ class YandexUserData(TimestampedModel):
         verbose_name=_("User"),
         related_name="yandex_data",
         on_delete=models.CASCADE)
-    login = models.CharField(_("Yandex Login"), max_length=64, blank=True)
-    uid = models.CharField(_("Yandex UID"), max_length=64, unique=True, blank=True, null=True)
+    login = models.CharField(_("Yandex Login"), max_length=64)
+    uid = models.CharField(_("Yandex UID"), max_length=64, unique=True)
 
-    first_name = models.CharField(_('first name'), max_length=64, blank=True)
-    last_name = models.CharField(_('last name'), max_length=64, blank=True)
-    display_name = models.CharField(_("Display Name"), max_length=130, blank=True)
-    real_name = models.CharField(_("Real name"), max_length=130, blank=True)
+    first_name = models.CharField(_('first name'), max_length=64)
+    last_name = models.CharField(_('last name'), max_length=64)
+    display_name = models.CharField(_("Display Name"), max_length=130)
+    real_name = models.CharField(_("Real name"), max_length=130)
 
     # It can be helpful to determine students with problems in the login field.
     # The login can be generated automatically on the Yandex side so it can be useless.

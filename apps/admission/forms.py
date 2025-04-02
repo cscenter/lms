@@ -441,7 +441,8 @@ class ConfirmationForm(forms.ModelForm):
                 "last_name",
                 "patronymic",
                 "branch",
-                "track"]
+                "track",
+                "yandex_login"]
 
     force_required = ["phone",
                       "living_place"]
@@ -459,6 +460,10 @@ class ConfirmationForm(forms.ModelForm):
         help_text="@<<b>username</b>> в настройках профиля Telegram."
                   "<br>Поставьте прочерк «-», если аккаунт отсутствует.",
         required=True,
+    )
+    yandex_login = forms.CharField(
+        label=_("Yandex Login"),
+        required=False,
     )
     has_no_patronymic = forms.BooleanField(
             label=_("Has no patronymic"),
@@ -510,6 +515,7 @@ class ConfirmationForm(forms.ModelForm):
             "birth_date",
             "phone",
             "telegram_username",
+            "yandex_login",
         ]
 
     def __init__(self, acceptance: Acceptance, **kwargs):
@@ -526,6 +532,7 @@ class ConfirmationForm(forms.ModelForm):
             "authorization_code": acceptance.confirmation_code,
             "email": applicant.email,
             "phone": applicant.phone,
+            "yandex_login": applicant.yandex_login,
             "telegram_username": f"@{applicant.telegram_username}",
             "birth_date": applicant.birth_date
         }
@@ -565,4 +572,3 @@ class ConfirmationForm(forms.ModelForm):
         account_data = AccountData.from_dict(account_data_data)
         profile_data = StudentProfileData.from_dict(self.cleaned_data)
         return create_student(self.acceptance, account_data, profile_data)
-    

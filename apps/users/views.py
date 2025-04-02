@@ -39,7 +39,7 @@ from learning.icalendar import get_icalendar_links
 from learning.models import Enrollment, StudentAssignment
 from learning.settings import GradeTypes, StudentStatuses, EnrollmentTypes
 from users.compat import get_graduate_profile as get_graduate_profile_compat
-from users.models import SHADCourseRecord, YandexUserData, StudentTypes
+from users.models import SHADCourseRecord, StudentTypes
 from users.thumbnails import CropboxData, get_user_thumbnail, photo_thumbnail_cropbox
 
 from .forms import CertificateOfParticipationCreateForm, UserProfileForm

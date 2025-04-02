@@ -130,7 +130,7 @@ class UserAdmin(_UserAdmin):
     list_filter = ['is_active', 'branch', 'group__site', 'group__role',
                    'is_staff', 'is_superuser']
     filter_horizontal = []
-    search_fields = ('username', 'first_name', 'last_name', 'patronymic', 'email', 'telegram_username')
+    search_fields = ('username', 'first_name', 'last_name', 'patronymic', 'email', 'telegram_username', 'yandex_data__login')
 
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},

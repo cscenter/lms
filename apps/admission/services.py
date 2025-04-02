@@ -603,7 +603,6 @@ def create_student_from_applicant(applicant: Applicant):
                 yandex_data.save()
             except Exception as e:
                 logger.error(f"Failed to create YandexUserData for user {user.pk}: {str(e)}")
-            logger.info(f"Created new YandexUserData for user {user.pk} using yandex_profile.")
 
 
         # For github.com store part after github.com/
