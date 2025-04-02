@@ -8,7 +8,7 @@ from import_export.instance_loaders import CachedInstanceLoader
 from import_export.widgets import IntegerWidget
 
 from admission.constants import ChallengeStatuses
-from admission.models import Exam, Test
+from admission.models import Exam, Olympiad, Test
 
 # XXX: Not tested with django-import-export==1.0.1
 
@@ -123,3 +123,29 @@ class ExamRecordResource(ContestDetailsMixin, resources.ModelResource):
         can have null value, so if we omit django field validation on client,
         it will be very bad"""
         assert int(Decimal(row["score"])) >= 0
+
+
+class OlympiadResource(ContestDetailsMixin, resources.ModelResource):
+    applicant = fields.Field(
+        column_name="applicant", attribute="applicant_id", widget=IntegerWidget()
+    )
+
+    details = fields.Field(
+        column_name="details", attribute="details", widget=JsonFieldWidget()
+    )
+
+    class Meta:
+        model = Olympiad
+        import_id_fields = ("applicant",)
+        skip_unchanged = True
+        fields = ("applicant", "score", "math_score", "status", "details")
+        instance_loader_class = CachedInstanceLoader
+
+    def before_import_row(self, row, **kwargs):
+        """Double check that score is always a valid type, on DB level we
+        can have null value, so if we omit django field validation on client,
+        it will be very bad"""
+        if row.get("score"):
+            assert int(Decimal(row["score"])) >= 0
+        if row.get("math_score"):
+            assert int(Decimal(row["math_score"])) >= 0
