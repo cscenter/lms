@@ -748,11 +748,17 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
             return self.online_test
         except Test.DoesNotExist:
             return None
-
+            
     def get_exam_record(self) -> Optional["Exam"]:
         try:
             return self.exam
         except Exam.DoesNotExist:
+            return None
+        
+    def get_olympiad_record(self) -> Optional["Olympiad"]:
+        try:
+            return self.olympiad
+        except Olympiad.DoesNotExist:
             return None
 
     def get_all_interview_score(self) -> int:
@@ -1208,6 +1214,74 @@ class Exam(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContest
 
     def score_display(self):
         return self.score if self.score is not None else "-"
+
+
+class Olympiad(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContestMixin):
+    CONTEST_TYPE = ContestTypes.OLYMPIAD
+
+    applicant = models.OneToOneField(
+        Applicant,
+        verbose_name=_("Applicant"),
+        on_delete=models.PROTECT,
+        related_name="olympiad",
+    )
+    score = ScoreField(
+        verbose_name=_("Score"),
+        decimal_places=3,
+        null=True,
+        blank=True,
+    )
+    math_score = ScoreField(
+        verbose_name=_("Math Score"),
+        decimal_places=3,
+        null=True,
+        blank=True,
+    )
+    location = models.ForeignKey(
+        "core.Location",
+        verbose_name=_("Location"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    details = models.JSONField(verbose_name=_("Details"), blank=True, null=True)
+
+    class Meta:
+        app_label = "admission"
+        verbose_name = _("Olympiad Result")
+        verbose_name_plural = _("Olympiad Results")
+
+    def save(self, **kwargs):
+        created = self.pk is None
+        if (
+            created
+            and self.status == ChallengeStatuses.NEW
+            and not self.yandex_contest_id
+        ):
+            contest_id = self.compute_contest_id(ContestTypes.OLYMPIAD)
+            if contest_id:
+                self.yandex_contest_id = contest_id
+        super().save(**kwargs)
+
+    def __str__(self):
+        """Import/export get repr before instance created in db."""
+        if self.applicant_id:
+            return self.applicant.full_name
+        else:
+            return smart_str(self.score)
+
+    def score_display(self):
+        return self.score if self.score is not None else "-"
+
+    def total_score(self):
+        """Return total score (programming + math)."""
+        programming_score = self.score or 0
+        math_score = self.math_score or 0
+        return programming_score + math_score
+
+    def total_score_display(self):
+        """Return formatted total score."""
+        return self.total_score() if (self.score is not None or self.math_score is not None) else "-"
 
 
 class InterviewAssignment(models.Model):
