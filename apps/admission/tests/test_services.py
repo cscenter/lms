@@ -57,6 +57,7 @@ from users.tests.factories import StudentProfileFactory, UserFactory, CuratorFac
     InvitedStudentFactory
 
 
+
 @pytest.mark.django_db
 def test_new_exam_invitation_email():
     email_template = EmailTemplateFactory()
