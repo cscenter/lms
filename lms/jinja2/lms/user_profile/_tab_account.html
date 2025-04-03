@@ -17,7 +17,7 @@
               {% if enrollment.student_profile.invitation %}
                 {% set invited_title = enrollment.student_profile.invitation.name %}
               {% else %}
-                {% set invited_title = _('Invited') %}
+                {% set invited_title = "{% trans Invited %}" %}
               {% endif %}
               <i style="font-size:14px" class="fa {{opacity}} " title="{{ invited_title }}">&#xf069;</i>
             {% endif %}
