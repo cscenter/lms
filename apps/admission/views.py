@@ -532,7 +532,7 @@ def get_contest_results_import_info(
     campaign: Campaign,
 ) -> Dict[str, CampaignContestsImportState]:
     data = {}
-    contest_types = [ContestTypes.TEST, ContestTypes.EXAM]
+    contest_types = [ContestTypes.TEST, ContestTypes.EXAM, ContestTypes.OLYMPIAD]
     for contest_type in contest_types:
         task = get_latest_contest_results_task(campaign, contest_type)
         info = CampaignContestsImportState(
