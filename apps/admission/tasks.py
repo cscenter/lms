@@ -5,7 +5,7 @@ from django_rq import job
 from django.utils import timezone, translation
 
 from admission.constants import ContestTypes
-from admission.models import Applicant, Campaign, Contest, Exam, Test
+from admission.models import Applicant, Campaign, Contest, Exam, Olympiad, Test
 from admission.services import EmailQueueService
 from grading.api.yandex_contest import (
     ContestAPIError,
@@ -84,6 +84,8 @@ def import_campaign_contest_results(*, task_id) -> None:
                 model_class = Test
             elif contest_type == Contest.TYPE_EXAM:
                 model_class = Exam
+            elif contest_type == ContestTypes.OLYMPIAD:
+                model_class = Olympiad
             else:
                 raise ValueError(f"contest type {contest_type} is not supported")
             try:
