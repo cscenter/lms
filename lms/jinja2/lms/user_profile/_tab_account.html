@@ -177,7 +177,7 @@
               {% if verified_yandex %}
                 {{ profile_user.yandex_data.login|default("—", True) }}
                 {% if request.user.pk == profile_user.pk %}
-                  <a href="{{ yandex_oauth_url }}">{{ _('[Change]') }}</a>
+                  <a href="{{ yandex_oauth_url }}">{% trans %}[Change]{% endtrans %}</a>
                 {% endif %}
                 {% if request.user.is_teacher or request.user.is_curator %}
                   {% if request.user.pk != profile_user.pk and profile_user.yandex_data %}
@@ -186,9 +186,9 @@
                 {% endif %}
               {% else %}
                 {% if request.user.pk == profile_user.pk %}
-                  <a class="text-danger" href="{{ yandex_oauth_url }}">{{ _('[Login by Yandex]') }}</a>
+                  <a class="text-danger" href="{{ yandex_oauth_url }}">{% trans %}[Login by Yandex]{% endtrans %}</a>
                 {% else %}
-                  <span class="text-danger">{{ _('[Account is not connected]') }}</span>
+                  <span class="text-danger">{% trans %}[Account is not connected]{% endtrans %}</span>
                 {% endif %}
               {% endif %}
           </td>
@@ -196,7 +196,7 @@
       {% endif %}
       {% if icalendars %}
         <tr>
-          <td>{{ _('.iCal-calendar') }}</td>
+          <td>{% trans %}.iCal-calendar{% endtrans %}</td>
           <td>
             {% for icalendar in icalendars %}
               <a target="_blank" href="{{ icalendar.url }}">{{ icalendar.title }}</a>{% if not loop.last %}&nbsp;&nbsp;{% endif %}

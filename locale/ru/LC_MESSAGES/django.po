@@ -4487,11 +4487,11 @@ msgstr "Онлайн-курсы"
 
 #: lms/jinja2/lms/user_profile/_tab_account.html:180
 msgid "[Change]"
-msgstr "Изменить"
+msgstr "[Изменить]"
 
 #: lms/jinja2/lms/user_profile/_tab_account.html:189
 msgid "[Login by Yandex]"
-msgstr "Войти через Яндекс"
+msgstr "[Войти через Яндекс]"
 
 #: lms/jinja2/lms/user_profile/_tab_account.html:191
 msgid "[Account is not connected]"

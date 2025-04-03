@@ -801,8 +801,7 @@ def test_create_student_with_empty_yandex_login(settings):
     
     # Verify other fields were set correctly
     for field in dataclasses.fields(account_data_empty_yandex):
-        if field.name != 'yandex_login':
-            assert getattr(user, field.name) == getattr(account_data_empty_yandex, field.name)
+        assert getattr(user, field.name) == getattr(account_data_empty_yandex, field.name)
 
 
 @pytest.mark.django_db
@@ -832,8 +831,7 @@ def test_create_student_with_null_yandex_login(settings):
     
     # Verify other fields were set correctly
     for field in dataclasses.fields(account_data_null_yandex):
-        if field.name != 'yandex_login':
-            assert getattr(user, field.name) == getattr(account_data_null_yandex, field.name)
+        assert getattr(user, field.name) == getattr(account_data_null_yandex, field.name)
 
 
 @pytest.mark.django_db

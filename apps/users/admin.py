@@ -93,8 +93,8 @@ class YandexUserDataInlineAdmin(admin.StackedInline):
     model = YandexUserData
     fk_name = 'user'
     extra = 0
-    fields = ['uid', 'login', 'display_name', 'changed_by', 'modified_at']
-    readonly_fields = ['user', 'uid', 'login', 'display_name', 'changed_by', 'modified_at']
+    fields = ['uid', 'login', 'display_name', 'created_at']
+    readonly_fields = ['user', 'uid', 'login', 'display_name', 'created_at']
     exclude = ['first_name', 'last_name', 'real_name']
     can_delete = True
 

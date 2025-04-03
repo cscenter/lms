@@ -464,6 +464,7 @@ class ConfirmationForm(forms.ModelForm):
     yandex_login = forms.CharField(
         label=_("Yandex Login"),
         required=False,
+        help_text="Яндекс логин можно будет поменять в личном кабинете во время обучения"
     )
     has_no_patronymic = forms.BooleanField(
             label=_("Has no patronymic"),
