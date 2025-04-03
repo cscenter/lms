@@ -429,7 +429,6 @@ class AccountData:
     birth_date: date
     living_place: str
     phone: str
-    yandex_login: str
     telegram_username: str
 
     @classmethod
@@ -517,7 +516,6 @@ def create_student(
         # dataclasses.asdict raises `cannot pickle '_io.BufferedRandom' object`
         account_fields = {field.name for field in fields(AccountData)}
         # Skip yandex_login since we handled it separately
-        account_fields.discard('yandex_login')
         for name in account_fields:
             setattr(user, name, getattr(account_data, name))
         user.save()
@@ -543,14 +541,13 @@ def create_student(
             try:
                 yandex_data = YandexUserData.objects.create(
                     user=user,
-                    login=yandex_profile.get("application_ya_login", ""),
-                    uid=yandex_profile.get("application_ya_id", ""),
-                    first_name=yandex_profile.get("application_ya_first_name", ""),
-                    last_name=yandex_profile.get("application_ya_last_name", ""),
-                    display_name=yandex_profile.get("application_ya_display_name", ""),
-                    real_name=yandex_profile.get("application_ya_real_name", ""),
+                    login=yandex_profile.get("application_ya_login"),
+                    uid=yandex_profile.get("application_ya_id"),
+                    first_name=yandex_profile.get("application_ya_first_name"),
+                    last_name=yandex_profile.get("application_ya_last_name"),
+                    display_name=yandex_profile.get("application_ya_display_name"),
+                    real_name=yandex_profile.get("application_ya_real_name"),
                 )
-                yandex_data.save()
             except Exception as e:
                 logger.error(f"Failed to create YandexUserData for user {user.pk}: {str(e)}")
             logger.info(f"Created new YandexUserData for user {user.pk} using yandex_profile.")
@@ -593,14 +590,13 @@ def create_student_from_applicant(applicant: Applicant):
             try:
                 yandex_data = YandexUserData.objects.create(
                     user=user,
-                    login=yandex_profile.get("application_ya_login", ""),
-                    uid=yandex_profile.get("application_ya_id", ""),
-                    first_name=yandex_profile.get("application_ya_first_name", ""),
-                    last_name=yandex_profile.get("application_ya_last_name", ""),
-                    display_name=yandex_profile.get("application_ya_display_name", ""),
-                    real_name=yandex_profile.get("application_ya_real_name", ""),
+                    login=yandex_profile.get("application_ya_login"),
+                    uid=yandex_profile.get("application_ya_id"),
+                    first_name=yandex_profile.get("application_ya_first_name"),
+                    last_name=yandex_profile.get("application_ya_last_name"),
+                    display_name=yandex_profile.get("application_ya_display_name"),
+                    real_name=yandex_profile.get("application_ya_real_name"),
                 )
-                yandex_data.save()
             except Exception as e:
                 logger.error(f"Failed to create YandexUserData for user {user.pk}: {str(e)}")
 

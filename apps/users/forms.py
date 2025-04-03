@@ -25,12 +25,14 @@ class UserProfileForm(forms.ModelForm):
         label=_("Date of Birth"),
         help_text=_("Format: dd.mm.yyyy"),
         required=False,
-        widget=DateInputTextWidget(attrs={'class': 'datepicker'})
+        widget=DateInputTextWidget(attrs={'class': 'datepicker'}),
+        disabled=True
     )
     yandex_login = forms.CharField(
         max_length=64,
         label="Логин из Яндекс",
-        required=False
+        required=False,
+        disabled=True
     )
 
     def __init__(self, *args, **kwargs):
@@ -44,8 +46,6 @@ class UserProfileForm(forms.ModelForm):
         # Create a new list for show_fields
         show_fields = list(UserProfileForm.Meta.fields)
         
-        self.fields['birth_date'].disabled = True
-        self.fields['yandex_login'].disabled = True
         self.fields['yandex_login'].initial = self.initial.get("yandex_login", "")
         # Update yandex_login help_text with the correct URL only if the user is viewing their own profile
         if self.editor == self.student:

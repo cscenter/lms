@@ -568,7 +568,6 @@ class ConfirmationForm(forms.ModelForm):
 
     def save(self, commit=True) -> User:
         account_data_data = self.cleaned_data.copy()
-        account_data_data["yandex_login"] = self.acceptance.applicant.yandex_login
         account_data = AccountData.from_dict(account_data_data)
         profile_data = StudentProfileData.from_dict(self.cleaned_data)
         return create_student(self.acceptance, account_data, profile_data)

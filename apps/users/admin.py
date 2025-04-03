@@ -122,6 +122,7 @@ class UserAdmin(_UserAdmin):
     form = UserChangeForm
     change_form_template = 'admin/user_change_form.html'
     ordering = ['last_name', 'first_name']
+    list_select_related = ['yandex_data']
     inlines = [UserConsentInlineAdmin, YandexUserDataInlineAdmin, OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
                UserGroupInlineAdmin]
     readonly_fields = ['last_login', 'date_joined', 'display_yandex_login']
@@ -239,7 +240,7 @@ class StudentProfileForm(forms.ModelForm):
 
 class StudentProfileAdmin(BaseModelAdmin):
     form = StudentProfileForm
-    list_select_related = ['user', 'branch', 'branch__site']
+    list_select_related = ['user', 'branch', 'branch__site', 'user__yandex_data']
     list_display = ('user', 'branch', 'type', 'year_of_admission', 'status', 'priority')
     list_filter = ('type', 'site', 'branch', 'status',)
     raw_id_fields = ('user', 'comment_last_author', 'invitation')

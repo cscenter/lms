@@ -56,13 +56,6 @@ class UserFactory(factory.django.DjangoModelFactory):
         self.set_password(raw_password)
         self.save()
         self.raw_password = raw_password
-        
-    # @factory.post_generation
-    # def yandex_data(self, create, extracted, **kwargs):
-    #     if not create:
-    #         return
-    #     if extracted:
-            # YandexUserDataFactory(user=self)
 
 
 class UserGroupFactory(factory.django.DjangoModelFactory):

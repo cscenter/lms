@@ -50,8 +50,9 @@ def assignment_import_scores_from_yandex_contest(*, checker: Checker,
                          .select_related('student_profile__user__yandex_data'))
     students = {}
     for e in enrolled_students:
-        if hasattr(e.student_profile.user, 'yandex_data') and e.student_profile.user.yandex_data.login:
-            students[e.student_profile.user.yandex_data.login] = e.student_profile.user
+        yandex_login = e.student_profile.user.yandex_login
+        if yandex_login is not None:
+            students[yandex_login] = e.student_profile.user
     student_assignments = StudentAssignment.objects.filter(assignment=assignment).order_by()
     student_assignments = {s.student_id: s for s in student_assignments}
 

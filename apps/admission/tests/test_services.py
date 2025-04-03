@@ -548,7 +548,6 @@ ACCOUNT_DATA = AccountData(
     gender=GenderTypes.FEMALE,
     telegram_username="username",
     phone="+71234567",
-    yandex_login="yandex_login",
     birth_date=datetime.date(2000, 1, 1),
     living_place="City"
 )
@@ -563,7 +562,6 @@ ACCOUNT_DATA_WITHOUT_PATRONYMIC = AccountData(
     gender=GenderTypes.FEMALE,
     telegram_username="username2",
     phone="+712345678",
-    yandex_login="yandex_login2",
     birth_date=datetime.date(2001, 1, 1),
     living_place="City2"
 )
@@ -589,6 +587,7 @@ def test_create_student(settings):
         }
     acceptance = AcceptanceFactory(
             applicant__data=applicant_data,
+            applicant__yandex_login="yandex_login",
         status=Acceptance.WAITING,
         applicant__campaign=campaign,
     )
@@ -608,12 +607,11 @@ def test_create_student(settings):
     
     # Check that yandex_login is stored in YandexUserData
     assert user.yandex_login
-    assert user.yandex_login == ACCOUNT_DATA.yandex_login
+    assert user.yandex_login == applicant.yandex_login
     
     # Check other fields except yandex_login
     for field in dataclasses.fields(ACCOUNT_DATA):
-        if field.name != 'yandex_login':
-            assert getattr(user, field.name) == getattr(ACCOUNT_DATA, field.name)
+        assert getattr(user, field.name) == getattr(ACCOUNT_DATA, field.name)
     
     assert applicant.user == user
     acceptance.refresh_from_db()
@@ -648,7 +646,7 @@ def test_create_student_with_existing_invited(settings):
     )
     applicant_data = {
             "yandex_profile": {
-                "application_ya_login": "yandex_login2",
+                "application_ya_login": "yandex_login",
                 "application_ya_id": "12345",
                 "application_ya_first_name": "YandexFirstName",
                 "application_ya_last_name": "YandexLastName",
@@ -665,7 +663,8 @@ def test_create_student_with_existing_invited(settings):
         applicant__university=None,
         applicant__university_other="University2",
         applicant__level_of_education=None,
-        applicant__level_of_education_other="Bachelor2"
+        applicant__level_of_education_other="Bachelor2",
+        applicant__yandex_login="yandex_login"
     )
     applicant = acceptance.applicant
     student = InvitedStudentFactory(email=applicant.email,
@@ -687,11 +686,10 @@ def test_create_student_with_existing_invited(settings):
 
     # Check that yandex_login is stored in YandexUserData
     assert user.yandex_login
-    assert user.yandex_login == ACCOUNT_DATA_WITHOUT_PATRONYMIC.yandex_login
+    assert user.yandex_login == applicant.yandex_login
 
     for field in dataclasses.fields(ACCOUNT_DATA_WITHOUT_PATRONYMIC):
-        if field.name != 'yandex_login':
-            assert getattr(user, field.name) == getattr(ACCOUNT_DATA_WITHOUT_PATRONYMIC, field.name)
+        assert getattr(user, field.name) == getattr(ACCOUNT_DATA_WITHOUT_PATRONYMIC, field.name)
     assert applicant.user == user
     acceptance.refresh_from_db()
     assert acceptance.status == Acceptance.CONFIRMED
@@ -791,7 +789,7 @@ def test_create_student_with_empty_yandex_login(settings):
     )
     
     # Create account data with empty yandex_login
-    account_data_empty_yandex = dataclasses.replace(ACCOUNT_DATA, yandex_login="")
+    account_data_empty_yandex = ACCOUNT_DATA
     
     # Create student with empty yandex_login
     user = create_student(acceptance, account_data_empty_yandex, PROFILE_DATA)
@@ -822,7 +820,7 @@ def test_create_student_with_null_yandex_login(settings):
     )
     
     # Create account data with null yandex_login
-    account_data_null_yandex = dataclasses.replace(ACCOUNT_DATA, yandex_login=None)
+    account_data_null_yandex = ACCOUNT_DATA
     
     # Create student with null yandex_login
     user = create_student(acceptance, account_data_null_yandex, PROFILE_DATA)
