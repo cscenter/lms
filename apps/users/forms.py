@@ -43,7 +43,6 @@ class UserProfileForm(forms.ModelForm):
         self.helper = FormHelper()
         # Create a new list for show_fields
         show_fields = list(UserProfileForm.Meta.fields)
-        # show_fields.append('yandex_login')
         
         self.fields['birth_date'].disabled = True
         self.fields['yandex_login'].disabled = True
