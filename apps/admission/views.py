@@ -1,4 +1,5 @@
 import csv
+import logging
 import uuid
 import zoneinfo
 from collections import Counter
@@ -71,6 +72,7 @@ from admission.models import (
     InterviewInvitation,
     InterviewSlot,
     InterviewStream,
+    Olympiad,
 )
 from admission.services import (
     CampaignContestsImportState,
@@ -93,6 +95,7 @@ from core.timezone import get_now_utc, now_local
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
+from grading.api.yandex_contest import YandexContestAPI
 from users.api.serializers import PhotoSerializerField
 from users.mixins import CuratorOnlyMixin
 from users.models import User
@@ -101,11 +104,14 @@ from users.services import UniqueUsernameError
 from .constants import (
     SESSION_CONFIRMATION_CODE_KEY,
     ApplicantStatuses,
+    ChallengeStatuses,
     ContestTypes,
     InterviewInvitationStatuses,
     InterviewSections, InterviewFormats,
 )
 from .selectors import get_interview_invitation, get_occupied_slot
+
+logger = logging.getLogger(__name__)
 
 
 def get_applicant_context(request, applicant_id) -> Dict[str, Any]:
@@ -605,7 +611,71 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
         if campaign and campaign.current and self.request.user.is_curator:
             context["import_tasks"] = get_contest_results_import_info(campaign)
             context["ContestTypes"] = ContestTypes
+            context["show_register_for_olympiad"] = True
+            context["campaign"] = campaign
         return context
+
+
+class RegisterApplicantsForOlympiadView(CuratorOnlyMixin, generic.View):
+    """
+    Register applicants with status PERMIT_TO_OLYMPIAD in the olympiad contest.
+    """
+    
+    def get_campaign(self, campaign_id):
+        """Get campaign by ID."""
+        return get_object_or_404(Campaign, pk=campaign_id)
+    
+    def get_applicants(self, campaign):
+        """Get applicants with status PERMIT_TO_OLYMPIAD."""
+        return Applicant.objects.filter(
+            campaign=campaign,
+            status=ApplicantStatuses.PERMIT_TO_OLYMPIAD
+        )
+    
+    def create_olympiad_records(self, applicants):
+        """Create Olympiad records for applicants who don't have one."""
+        created_count = 0
+        with transaction.atomic():
+            for applicant in applicants:
+                try:
+                    Olympiad.objects.get(applicant=applicant)
+                except Olympiad.DoesNotExist:
+                    Olympiad.objects.create(applicant=applicant)
+                    created_count += 1
+        return created_count
+    
+    def register_in_contest(self, api, applicants):
+        """Register applicants in the contest."""
+        registered_count = 0
+        for olympiad in Olympiad.objects.filter(
+            applicant__in=applicants,
+            status=ChallengeStatuses.NEW
+        ):
+            try:
+                olympiad.register_in_contest(api)
+                registered_count += 1
+            except Exception as e:
+                logger.error(f"Error registering applicant {olympiad.applicant_id} in olympiad contest: {e}")
+        return registered_count
+    
+    def get(self, request, campaign_id):
+        campaign = self.get_campaign(campaign_id)
+        
+        # Get applicants and create Olympiad records
+        applicants = self.get_applicants(campaign)
+        created_count = self.create_olympiad_records(applicants)
+        
+        # Register applicants in the contest
+        api = YandexContestAPI(access_token=campaign.access_token, refresh_token=campaign.refresh_token)
+        registered_count = self.register_in_contest(api, applicants)
+        
+        # Add success message
+        messages.success(
+            request,
+            _("Created {} olympiad records and registered {} applicants in the contest.").format(created_count, registered_count)
+        )
+        
+        return redirect("admission:applicants:list")
 
 
 class ApplicantDetailView(CuratorOnlyMixin, TemplateResponseMixin, BaseCreateView):
