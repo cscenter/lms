@@ -9,6 +9,7 @@ from django.db.models.signals import post_save
 
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
+from core.utils import normalize_yandex_login
 from courses.constants import AssignmentFormat
 from courses.models import Course, CourseGroupModes
 from learning.models import Enrollment, StudentGroup, EnrollmentGradeLog
@@ -239,7 +240,7 @@ def get_enrollments_by_yandex_login(course: Course) -> Dict[str, Enrollment]:
                    .select_related("student"))
     result = {}
     for e in enrollments:
-        yandex_login = e.student.yandex_login
+        yandex_login = normalize_yandex_login(e.student.yandex_login)
         if yandex_login:
             result[yandex_login] = e
     return result
