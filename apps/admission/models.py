@@ -1113,6 +1113,8 @@ class ApplicantRandomizeContestMixin:
             manager = Exam.objects
         elif contest_type == Contest.TYPE_TEST:
             manager = Test.objects
+        elif contest_type == ContestTypes.OLYMPIAD:
+            manager = Olympiad.objects
         else:
             raise ValueError("Unknown contest type")
         qs = manager.filter(applicant__campaign_id=campaign_id)
@@ -1281,7 +1283,7 @@ class Olympiad(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeCon
 
     def total_score_display(self):
         """Return formatted total score."""
-        return self.total_score() if (self.score is not None or self.math_score is not None) else "-"
+        return self.total_score() if (self.contest_score is not None or self.math_score is not None) else "-"
 
 
 class InterviewAssignment(models.Model):
