@@ -557,6 +557,7 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
             .select_related(
                 "exam",
                 "online_test",
+                "olympiad",
                 "campaign",
                 "university_legacy",
                 "campaign__branch",
@@ -567,8 +568,12 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
                     "exam__score", Value(-1, output_field=ScoreField())
                 ),
                 test__score_coalesce=Coalesce("online_test__score", Value(-1)),
+                olympiad__total_score_coalesce=Coalesce(
+                    F("olympiad__score") + F("olympiad__math_score"),
+                    Value(-1, output_field=ScoreField())
+                ),
             )
-            .order_by("-exam__score_coalesce", "-test__score_coalesce", "-pk")
+            .order_by("-exam__score_coalesce", "-olympiad__total_score_coalesce", "-test__score_coalesce", "-pk")
         )
 
     def get(self, request: AuthenticatedHttpRequest, *args, **kwargs):
