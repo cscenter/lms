@@ -40,7 +40,7 @@ from admission.models import (
     Interview,
     InterviewInvitation,
     InterviewSlot,
-    InterviewStream,
+    InterviewStream
 )
 from admission.selectors import get_acceptance
 from admission.tokens import email_code_generator
@@ -225,24 +225,6 @@ def get_latest_contest_results_task(
         .order_by("-id")
         .first()
     )
-
-
-def import_campaign_contest_results(*, campaign: Campaign, model_class):
-    api = YandexContestAPI(access_token=campaign.access_token)
-    on_scoreboard_total = 0
-    updated_total = 0
-    for contest in campaign.contests.filter(type=model_class.CONTEST_TYPE):
-        logger.debug(f"Starting processing contest {contest.pk}")
-        on_scoreboard, updated = model_class.import_scores(api=api, contest=contest)
-        on_scoreboard_total += on_scoreboard
-        updated_total += updated
-        logger.debug(f"Scoreboard total = {on_scoreboard}")
-        logger.debug(f"Updated = {updated}")
-    return on_scoreboard_total, updated_total
-
-
-def import_exam_results(*, campaign: Campaign):
-    import_campaign_contest_results(campaign=campaign, model_class=Exam)
 
 
 def get_streams(
