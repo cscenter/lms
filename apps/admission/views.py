@@ -111,19 +111,22 @@ from .selectors import get_interview_invitation, get_occupied_slot
 def get_applicant_context(request, applicant_id) -> Dict[str, Any]:
     branches = Branch.objects.for_site(site_id=settings.SITE_ID)
     qs = Applicant.objects.select_related(
-        "exam", "campaign__branch__site", "online_test", "university_legacy"
+        "exam", "campaign__branch__site", "online_test", "olympiad", "university_legacy"
     ).prefetch_related(
         Prefetch("status_logs", queryset=ApplicantStatusLog.objects.select_related("entry_author"))
     ).filter(campaign__branch__in=branches, pk=applicant_id)
     applicant = get_object_or_404(qs)
     online_test = applicant.get_testing_record()
     exam = applicant.get_exam_record()
+    olympiad = applicant.get_olympiad_record()
     # Fetch contest records
     contest_pks = []
     if online_test and online_test.yandex_contest_id:
         contest_pks.append(online_test.yandex_contest_id)
     if exam and exam.yandex_contest_id:
         contest_pks.append(exam.yandex_contest_id)
+    if olympiad and olympiad.yandex_contest_id:
+        contest_pks.append(olympiad.yandex_contest_id)
     contests = {}
     if contest_pks:
         filters = [Q(contest_id__in=contest_pks), Q(campaign_id=applicant.campaign_id)]
@@ -137,6 +140,7 @@ def get_applicant_context(request, applicant_id) -> Dict[str, Any]:
         "ContestTypes": ContestTypes,
         "exam": exam,
         "online_test": online_test,
+        "olympiad": olympiad,
         "similar_applicants": applicant.get_similar().select_related("campaign__branch__site"),
     }
     return context
