@@ -1227,8 +1227,8 @@ class Olympiad(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeCon
         on_delete=models.PROTECT,
         related_name="olympiad",
     )
-    contest_score = ScoreField(
-        verbose_name=_("Contest Score"),
+    score = ScoreField(
+        verbose_name=_("Score"),
         decimal_places=3,
         null=True,
         blank=True,
@@ -1273,17 +1273,17 @@ class Olympiad(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeCon
             return smart_str(self.score)
 
     def score_display(self):
-        return self.contest_score if self.contest_score is not None else "-"
+        return self.score if self.score is not None else "-"
 
     def total_score(self):
         """Return total score (programming + math)."""
-        contest_score = self.contest_score or 0
+        programming_score = self.score or 0
         math_score = self.math_score or 0
-        return contest_score + math_score
+        return programming_score + math_score
 
     def total_score_display(self):
         """Return formatted total score."""
-        return self.total_score() if (self.contest_score is not None or self.math_score is not None) else "-"
+        return self.total_score() if (self.score is not None or self.math_score is not None) else "-"
 
 
 class InterviewAssignment(models.Model):
