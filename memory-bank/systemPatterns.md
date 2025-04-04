@@ -2,7 +2,7 @@
 
 This file documents recurring patterns and standards used in the project.
 It is optional, but recommended to be updated as the project evolves.
-2025-03-31 16:16:10 - Log of updates made.
+2025-04-04 18:25:00 - Log of updates made.
 
 *
 
@@ -26,6 +26,7 @@ It is optional, but recommended to be updated as the project evolves.
   - Использование permissions для детального контроля доступа
   - Ролевая модель для разграничения прав пользователей
   - Middleware для проверки аутентификации и авторизации
+  - Миксины для ограничения доступа к представлениям (например, CuratorOnlyMixin)
 
 * **Обработка событий**
   - Использование Django signals для слабосвязанной коммуникации между компонентами
@@ -34,6 +35,17 @@ It is optional, but recommended to be updated as the project evolves.
 * **Шаблонизация**
   - Использование Jinja2 для шаблонов
   - Разделение логики и представления
+  - Использование включаемых шаблонов для повторного использования кода (например, _results_tab.html)
+
+* **Паттерн Mixin**
+  - Использование миксинов для добавления функциональности к классам
+  - Примеры: CuratorOnlyMixin, ApplicantRandomizeContestMixin
+  - Позволяет избежать дублирования кода и улучшает его поддерживаемость
+
+* **Паттерн Factory Method**
+  - Использование фабричных методов для создания объектов
+  - Пример: методы get_testing_record(), get_exam_record(), get_olympiad_record() в модели Applicant
+  - Инкапсулирует логику создания объектов и делает код более гибким
 
 ## Architectural Patterns
 
@@ -64,6 +76,16 @@ It is optional, but recommended to be updated as the project evolves.
   - Оркестрация через Kubernetes
   - Горизонтальное масштабирование компонентов
 
+* **Паттерн Context Provider**
+  - Использование функций для подготовки контекста для шаблонов
+  - Пример: get_applicant_context() для подготовки данных для страницы деталей абитуриента
+  - Позволяет повторно использовать логику подготовки данных в разных представлениях
+
+* **Паттерн Service Layer**
+  - Выделение бизнес-логики в отдельные сервисные функции и классы
+  - Пример: YandexContestAPI для взаимодействия с Yandex.Contest
+  - Улучшает тестируемость и поддерживаемость кода
+
 ## Testing Patterns
 
 * **Фреймворк тестирования**
@@ -92,7 +114,7 @@ It is optional, but recommended to be updated as the project evolves.
 * **Наследование моделей**
   - Использование абстрактных базовых классов для общей функциональности
   - Наследование от базовых моделей для специализированных случаев
-  - Пример: `Olympiad` наследуется от `ContestRecord` для расширения функциональности
+  - Пример: `Olympiad` наследуется от `TimeStampedModel` и использует миксины `YandexContestIntegration` и `ApplicantRandomizeContestMixin`
 
 * **Композиция моделей**
   - Связывание моделей через ForeignKey и ManyToMany отношения
@@ -101,4 +123,9 @@ It is optional, but recommended to be updated as the project evolves.
 
 * **Расширение функциональности**
   - Добавление методов в модели для инкапсуляции бизнес-логики
-  - Пример: метод `total_score()` в модели `Olympiad` для расчета суммы баллов
+  - Пример: методы `total_score()` и `total_score_display()` в модели `Olympiad` для расчета и форматирования суммы баллов
+
+* **Паттерн Annotation**
+  - Использование аннотаций Django ORM для оптимизации запросов
+  - Пример: аннотация `olympiad__total_score_coalesce` в методе `get_queryset()` класса `ApplicantListView`
+  - Позволяет выполнять вычисления на уровне базы данных, а не в Python-коде
