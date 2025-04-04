@@ -8,6 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-04-04 14:45+0000\n"
+"PO-Revision-Date: 2025-04-04 15:02+0000\n"
 "POT-Creation-Date: 2025-04-15 17:58+0000\n"
 "PO-Revision-Date: 2025-04-15 18:00+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
@@ -22,17 +24,27 @@ msgstr ""
 #: apps/admission/admin.py:50 apps/admission/admin.py:122
 #: apps/admission/admin.py:535 apps/admission/filters.py:70
 #: apps/admission/filters.py:109 apps/admission/filters.py:351
+#: apps/admission/models.py:173 apps/admission/models.py:1316
+#: apps/admission/models.py:1545 apps/admission/models.py:1962
 #: apps/admission/models.py:173 apps/admission/models.py:1250
 #: apps/admission/models.py:1479 apps/admission/models.py:1896
 msgid "Campaign"
 msgstr "Набор"
 
+#: apps/admission/admin.py:67 apps/admission/admin.py:514
+#: apps/admission/forms.py:470 apps/admission/models.py:83
 #: apps/admission/admin.py:65 apps/admission/admin.py:471
 #: apps/admission/forms.py:474 apps/admission/models.py:83
 #: apps/admission/models.py:242
 msgid "Branch"
 msgstr "Отделение"
 
+#: apps/admission/admin.py:126 apps/admission/admin.py:510
+#: apps/admission/admin.py:531 apps/admission/models.py:665
+#: apps/admission/models.py:804 apps/admission/models.py:1134
+#: apps/admission/models.py:1180 apps/admission/models.py:1226
+#: apps/admission/models.py:1390 apps/admission/models.py:1780
+#: apps/admission/models.py:1883 apps/admission/views.py:949
 #: apps/admission/admin.py:124 apps/admission/admin.py:467
 #: apps/admission/admin.py:488 apps/admission/models.py:665
 #: apps/admission/models.py:808 apps/admission/models.py:1136
@@ -46,6 +58,8 @@ msgstr "Поступающий"
 msgid "Created"
 msgstr "Создано"
 
+#: apps/admission/admin.py:326 apps/admission/admin.py:407
+#: apps/admission/models.py:1518 apps/admission/views.py:950
 #: apps/admission/admin.py:283 apps/admission/admin.py:364
 #: apps/admission/models.py:1452 apps/admission/views.py:871
 msgid "Interviewer"
@@ -60,12 +74,16 @@ msgstr "Собеседующие"
 msgid "Date"
 msgstr "Дата"
 
+#: apps/admission/admin.py:403 apps/admission/models.py:1438
+#: apps/admission/models.py:1512 apps/admission/models.py:1723
+#: apps/admission/models.py:1802
 #: apps/admission/admin.py:360 apps/admission/models.py:1372
 #: apps/admission/models.py:1446 apps/admission/models.py:1657
 #: apps/admission/models.py:1736
 msgid "Interview"
 msgstr "Интервью"
 
+#: apps/admission/admin.py:506 apps/admission/constants.py:120
 #: apps/admission/admin.py:463 apps/admission/constants.py:125
 msgid "Accepted"
 msgstr "Принято"
@@ -1291,7 +1309,7 @@ msgstr "Собеседующие"
 msgid "Interview|Assignments"
 msgstr "Задания для интервью"
 
-#: apps/admission/models.py:1366 apps/admission/models.py:1731
+#: apps/admission/models.py:1348 apps/admission/models.py:1713
 msgid "Secret code"
 msgstr "Секретный код"
 
