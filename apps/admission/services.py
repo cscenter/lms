@@ -51,7 +51,7 @@ from core.utils import bucketize
 from grading.api.yandex_contest import YandexContestAPI
 from tasks.models import Task
 from users.constants import ConsentTypes, GenderTypes
-from users.models import StudentProfile, StudentTypes, User
+from users.models import StudentProfile, StudentTypes, User, YandexUserData
 from users.services import (
     create_account,
     create_student_profile,
@@ -429,7 +429,6 @@ class AccountData:
     birth_date: date
     living_place: str
     phone: str
-    yandex_login: str
     telegram_username: str
 
     @classmethod
@@ -492,88 +491,127 @@ def create_student(
     email = account_data.email
     applicant: Applicant = acceptance.applicant
     branch = applicant.campaign.branch
-    try:
-        user = User.objects.get(email__iexact=email)
-    except User.DoesNotExist:
-        user = create_account(
-            username=generate_username_from_email(email),
-            # User can't reset password if it's set to `None`
-            password=User.objects.make_random_password(),
-            email=email,
-            gender=account_data.gender,
-            time_zone=branch.time_zone,
-            is_active=True
-        )
-    user.workplace = applicant.workplace or ""
-    user.branch = branch
-    user.first_name = applicant.first_name
-    user.last_name = applicant.last_name
-    user.patronymic = "" if account_data.has_no_patronymic else applicant.patronymic
-    user.photo = applicant.photo
-    for consent in ConsentTypes.regular_student_consents:
-        give_consent(user, consent)
-    # dataclasses.asdict raises `cannot pickle '_io.BufferedRandom' object`
-    account_fields = {field.name for field in fields(AccountData)}
-    for name in account_fields:
-        setattr(user, name, getattr(account_data, name))
-    user.save()
-    student_data = {
-        "level_of_education_on_admission": applicant.level_of_education,
-        "level_of_education_on_admission_other": applicant.level_of_education_other,
-        "university": applicant.get_university_display() if applicant.university else applicant.university_other,
-        "faculty": applicant.faculty,
-        "diploma_degree": applicant.diploma_degree,
-        "graduation_year": applicant.year_of_graduation,
-        "new_track": applicant.new_track,
-        **asdict(profile_data)
-    }
-    get_or_create_student_profile(applicant.campaign, user, data=student_data)
-    applicant.user = user
-    applicant.save(update_fields=["user"])
-    acceptance.status = Acceptance.CONFIRMED
-    acceptance.save(update_fields=["status"])
-    return user
+    with transaction.atomic():
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+                user = create_account(
+                username=generate_username_from_email(email),
+                # User can't reset password if it's set to `None`
+                password=User.objects.make_random_password(),
+                email=email,
+                gender=account_data.gender,
+                time_zone=branch.time_zone,
+                is_active=True
+            )
+        user.workplace = applicant.workplace or ""
+        user.branch = branch
+        user.first_name = applicant.first_name
+        user.last_name = applicant.last_name
+        user.patronymic = "" if account_data.has_no_patronymic else applicant.patronymic
+        user.photo = applicant.photo
+        for consent in ConsentTypes.regular_student_consents:
+            give_consent(user, consent)
+        
+        # dataclasses.asdict raises `cannot pickle '_io.BufferedRandom' object`
+        account_fields = {field.name for field in fields(AccountData)}
+        # Skip yandex_login since we handled it separately
+        for name in account_fields:
+            setattr(user, name, getattr(account_data, name))
+        user.save()
+        student_data = {
+            "level_of_education_on_admission": applicant.level_of_education,
+            "level_of_education_on_admission_other": applicant.level_of_education_other,
+            "university": applicant.get_university_display() if applicant.university else (applicant.university_other or "Unknown University"),
+            "faculty": applicant.faculty,
+            "diploma_degree": applicant.diploma_degree,
+            "graduation_year": applicant.year_of_graduation,
+            "new_track": applicant.new_track,
+            **asdict(profile_data)
+        }
+        get_or_create_student_profile(applicant.campaign, user, data=student_data)
+        applicant.user = user
+        applicant.save(update_fields=["user"])
+        acceptance.status = Acceptance.CONFIRMED
+        acceptance.save(update_fields=["status"])
+        applicant_data = getattr(applicant, "data", None)
+        
+        if applicant_data:
+            yandex_profile = applicant_data.get("yandex_profile", {})
+            try:
+                yandex_data = YandexUserData.objects.create(
+                    user=user,
+                    login=yandex_profile.get("application_ya_login"),
+                    uid=yandex_profile.get("application_ya_id"),
+                    first_name=yandex_profile.get("application_ya_first_name"),
+                    last_name=yandex_profile.get("application_ya_last_name"),
+                    display_name=yandex_profile.get("application_ya_display_name"),
+                    real_name=yandex_profile.get("application_ya_real_name"),
+                )
+            except Exception as e:
+                logger.error(f"Failed to create YandexUserData for user {user.pk}: {str(e)}")
+            logger.info(f"Created new YandexUserData for user {user.pk} using yandex_profile.")
+
+        return user
 
 
 def create_student_from_applicant(applicant: Applicant):
     """
     Creates new model or override existent with data from application form.
     """
-    branch = applicant.campaign.branch
-    try:
-        user = User.objects.get(email=applicant.email)
-    except User.DoesNotExist:
-        user = create_account(
-            username=generate_username_from_email(applicant.email),
-            # User can't reset password if it's set to `None`
-            password=User.objects.make_random_password(),
-            email=applicant.email,
-            gender=GenderTypes.OTHER,
-            time_zone=branch.time_zone,
-            is_active=True,
-        )
-    user.first_name = applicant.first_name
-    user.last_name = applicant.last_name
-    user.patronymic = applicant.patronymic if applicant.patronymic else ""
-    user.phone = applicant.phone
-    user.workplace = applicant.workplace if applicant.workplace else ""
-    # Social accounts info
-    try:
-        user.stepic_id = int(applicant.stepic_id)
-    except (TypeError, ValueError):
-        pass
-    user.yandex_login = applicant.yandex_login if applicant.yandex_login else ""
-    # For github.com store part after github.com/
-    if applicant.github_login:
-        user.github_login = applicant.github_login.split("github.com/", maxsplit=1)[-1]
-    user.save()
-    student_data = {
-        "year_of_curriculum": applicant.campaign.year,
-        "level_of_education_on_admission": applicant.level_of_education,
-        "university": applicant.get_university_display(),
-    }
-    get_or_create_student_profile(applicant.campaign, user, data=student_data)
-    return user
+    with transaction.atomic():
+        branch = applicant.campaign.branch
+        try:
+            user = User.objects.get(email=applicant.email)
+        except User.DoesNotExist:
+            user = create_account(
+                username=generate_username_from_email(applicant.email),
+                # User can't reset password if it's set to `None`
+                password=User.objects.make_random_password(),
+                email=applicant.email,
+                gender=GenderTypes.OTHER,
+                time_zone=branch.time_zone,
+                is_active=True,
+            )
+        user.first_name = applicant.first_name
+        user.last_name = applicant.last_name
+        user.patronymic = applicant.patronymic if applicant.patronymic else ""
+        user.phone = applicant.phone
+        user.workplace = applicant.workplace if applicant.workplace else ""
+        # Social accounts info
+        try:
+            user.stepic_id = int(applicant.stepic_id)
+        except (TypeError, ValueError):
+            pass
+        
+        applicant_data = getattr(applicant, "data", None)
+        if applicant_data:
+            yandex_profile = applicant_data.get("yandex_profile", {})
+            try:
+                yandex_data = YandexUserData.objects.create(
+                    user=user,
+                    login=yandex_profile.get("application_ya_login"),
+                    uid=yandex_profile.get("application_ya_id"),
+                    first_name=yandex_profile.get("application_ya_first_name"),
+                    last_name=yandex_profile.get("application_ya_last_name"),
+                    display_name=yandex_profile.get("application_ya_display_name"),
+                    real_name=yandex_profile.get("application_ya_real_name"),
+                )
+            except Exception as e:
+                logger.error(f"Failed to create YandexUserData for user {user.pk}: {str(e)}")
+
+
+        # For github.com store part after github.com/
+        if applicant.github_login:
+            user.github_login = applicant.github_login.split("github.com/", maxsplit=1)[-1]
+        user.save()
+        student_data = {
+            "year_of_curriculum": applicant.campaign.year,
+            "level_of_education_on_admission": applicant.level_of_education,
+            "university": applicant.get_university_display(),
+        }
+        get_or_create_student_profile(applicant.campaign, user, data=student_data)
+        return user
 
 
 class EmailQueueService:

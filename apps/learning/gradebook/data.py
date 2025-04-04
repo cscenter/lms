@@ -177,6 +177,7 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
         course_enrollments = course_enrollments.filter(student_group=student_group)
     enrollments = (course_enrollments
                    .select_related("student",
+                                   "student__yandex_data",
                                    "student_profile__branch",
                                    "student_profile__invitation",
                                    "student_group")

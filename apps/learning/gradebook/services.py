@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.translation import gettext_lazy as _
 
 from core.forms import ScoreField
+from core.utils import normalize_yandex_login
 from courses.constants import AssignmentFormat
 from courses.models import Assignment, Course
 from grading.api.yandex_contest import (
@@ -47,11 +48,12 @@ def assignment_import_scores_from_yandex_contest(*, checker: Checker,
     # score is synchronized with the assignment max score.
     enrolled_students = (Enrollment.active
                          .filter(course_id=assignment.course_id)
-                         .exclude(student_profile__user__yandex_login_normalized='')
-                         .select_related('student_profile__user')
-                         .only('student_profile__user'))
-    students = {e.student_profile.user.yandex_login_normalized: e.student_profile.user
-                for e in enrolled_students}
+                         .select_related('student_profile__user__yandex_data'))
+    students = {}
+    for e in enrolled_students:
+        yandex_login = normalize_yandex_login(e.student_profile.user.yandex_login)
+        if yandex_login is not None:
+            students[yandex_login] = e.student_profile.user
     student_assignments = StudentAssignment.objects.filter(assignment=assignment).order_by()
     student_assignments = {s.student_id: s for s in student_assignments}
 

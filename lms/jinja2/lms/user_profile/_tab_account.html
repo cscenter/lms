@@ -173,37 +173,30 @@
         <tr>
           <td>Yandex</td>
           <td>
-            {% with verified_yandex=profile_user.yandex_data %}
+            {% set verified_yandex=profile_user.yandex_data %}
               {% if verified_yandex %}
                 {{ profile_user.yandex_data.login|default("—", True) }}
                 {% if request.user.pk == profile_user.pk %}
-                  <a href={{ yandex_oauth_url }}>[Изменить]</a>
-                {% else %}
-                  ({{profile_user.yandex_data.uid}})
+                  <a href="{{ yandex_oauth_url }}">{% trans %}[Change]{% endtrans %}</a>
+                {% endif %}
+                {% if request.user.is_teacher or request.user.is_curator %}
+                  {% if request.user.pk != profile_user.pk and profile_user.yandex_data %}
+                    ({{ profile_user.yandex_data.uid }})
+                  {% endif %}
                 {% endif %}
               {% else %}
-                {% if profile_user.yandex_login %}
-                  {{ profile_user.yandex_login }}
-                  {% if request.user.pk == profile_user.pk %}
-                    <a class="text-danger" href={{ yandex_oauth_url }}>[Подтвердить]</a>
-                  {% else %}
-                    <span class="text-danger">[Не подтверждено]</span>
-                  {% endif %}
+                {% if request.user.pk == profile_user.pk %}
+                  <a class="text-danger" href="{{ yandex_oauth_url }}">{% trans %}[Login by Yandex]{% endtrans %}</a>
                 {% else %}
-                  {% if request.user.pk == profile_user.pk %}
-                    <a class="text-danger" href={{ yandex_oauth_url }}>[Войти через Яндекс]</a>
-                  {% else %}
-                    <span class="text-danger">[Аккаунт не подключён]</span>
-                  {% endif %}
+                  <span class="text-danger">{% trans %}[Account is not connected]{% endtrans %}</span>
                 {% endif %}
               {% endif %}
-            {% endwith %}
           </td>
         </tr>
       {% endif %}
       {% if icalendars %}
         <tr>
-          <td>.iCal-календари</td>
+          <td>{% trans %}.iCal-calendar{% endtrans %}</td>
           <td>
             {% for icalendar in icalendars %}
               <a target="_blank" href="{{ icalendar.url }}">{{ icalendar.title }}</a>{% if not loop.last %}&nbsp;&nbsp;{% endif %}

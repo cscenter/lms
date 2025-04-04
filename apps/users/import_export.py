@@ -47,7 +47,7 @@ class UserRecordResource(resources.ModelResource):
         model = User
         fields = (
             'email', 'username', 'last_name', 'first_name', 'patronymic',
-            'gender', 'phone', 'yandex_login', 'stepic_id', 'github_login'
+            'gender', 'phone', 'stepic_id', 'github_login'
         )
         export_order = fields
         # m2m relationships won't be processed if imported fields
@@ -57,7 +57,8 @@ class UserRecordResource(resources.ModelResource):
 
     def before_import(self, dataset: tablib.Dataset, using_transactions,
                       dry_run, **kwargs):
-        if 'groups' not in dataset.headers:
+        headers = dataset.headers if dataset.headers else []
+        if 'groups' not in headers:
             dataset.append_col(lambda row: '', header='groups')
 
     def before_save_instance(self, instance, using_transactions, dry_run):
