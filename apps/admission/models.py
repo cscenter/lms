@@ -1246,7 +1246,11 @@ class Olympiad(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeCon
         null=True,
         blank=True,
     )
-    details = models.JSONField(verbose_name=_("Details"), blank=True, null=True)
+    details = models.JSONField(
+        verbose_name=_("Details"), 
+        blank=True,
+        null=True
+    )
 
     class Meta:
         app_label = "admission"
