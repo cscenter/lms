@@ -116,7 +116,7 @@ class UserAdmin(_UserAdmin):
         (None, {
             'classes': ('wide',),
             'fields': ('username', 'email', 'password1', 'password2',
-                       'gender', 'time_zone', 'branch'),
+                       'gender', 'time_zone', 'branch', 'citizenship'),
         }),
     )
     form = UserChangeForm
@@ -144,7 +144,7 @@ class UserAdmin(_UserAdmin):
             'fields': ['gender', 'birth_date', 'branch',
                        'last_name', 'first_name', 'patronymic', 'phone',
                        'workplace', 'living_place', 'photo', 'bio', 'private_contacts',
-                       'social_networks', 'badge_number', 'time_zone', 'tshirt_size']}),
+                       'social_networks', 'badge_number', 'time_zone', 'tshirt_size', 'citizenship']}),
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        ]}),
         (_('External services'), {'fields': ['telegram_username',

@@ -168,6 +168,10 @@
           <td>{% trans %}T-Shirt size{% endtrans %}</td>
           <td>{{ profile_user.tshirt_size|default("—", True) }}</td>
         </tr>
+        <tr>
+          <td>{% trans %}Citizenship{% endtrans %}</td>
+          <td>{{ profile_user.citizenship|default("—", True) }}</td>
+        </tr>
       {% endif %}
       {% if profile_user.pk == request_user.pk or request_user.is_curator or request_user.is_teacher %}
         <tr>

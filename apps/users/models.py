@@ -413,6 +413,12 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
 
     tshirt_size = models.CharField(_("T-Shirt size"), max_length=4,
                               choices=TShirtSizeTypes.choices, null=True, blank=True)
+    citizenship = models.CharField(
+        verbose_name=_("User citizenship"),
+        max_length=3,
+        help_text=_("Citizenship code in OKSM system"),
+        blank=True
+    )
 
     objects = CustomUserManager()
 
