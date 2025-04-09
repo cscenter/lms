@@ -32,7 +32,7 @@ from core.typings import assert_never
 from core.urls import reverse
 from core.utils import bucketize
 from courses.constants import SemesterTypes
-from courses.models import Course, Semester, CourseDurations
+from courses.models import Course, MetaCourse, Semester, CourseDurations
 from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment, GraduateProfile, Invitation
@@ -49,15 +49,16 @@ from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
 from staff.filters import EnrollmentInvitationFilter, StudentProfileFilter, StudentAcademicDisciplineLogFilter, \
     StudentStatusLogFilter
-from staff.forms import BadgeNumberFromCSVForm, GraduationForm, MergeUsersForm
+from staff.forms import BadgeNumberFromCSVForm, ExportForDiplomas, GraduationForm, MergeUsersForm
 from staff.models import Hint
 from staff.tex import generate_tex_student_profile_for_diplomas
 from study_programs.models import AcademicDiscipline
 from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
+from users.constants import GenderTypes
 from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
-from users.models import PartnerTag, StudentProfile, StudentTypes, User, StudentAcademicDisciplineLog, StudentStatusLog
+from users.models import PartnerTag, StudentProfile, StudentTypes, User, StudentAcademicDisciplineLog, StudentStatusLog, SHADCourseRecord
 from users.services import (
     badge_number_from_csv,
     create_graduate_profiles,
@@ -157,6 +158,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             .order_by("-diploma_issued_on")
             .values_list("diploma_issued_on", flat=True)
         )
+        export_for_electronic_diploma = ExportForDiplomas()
         branches = Branch.objects.filter(site_id=settings.SITE_ID)
         context = {
             "alumni_profiles_form": graduation_form,
@@ -172,6 +174,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             "years": Campaign.objects.filter(branch__in=branches).values_list('year', flat=True).distinct().order_by('-year'),
             "branches": branches,
             "official_diplomas_dates": official_diplomas_dates,
+            "export_for_electronic_diploma_form": export_for_electronic_diploma
         }
         return context
 
@@ -743,6 +746,161 @@ def badge_number_from_csv_view(request: HttpRequest):
             messages.error(request, mark_safe(f"{label}:<br>{errors}"))
     return HttpResponseRedirect(reverse("staff:exports"))
 
+def _get_student_profiles_for_electronic_diplomas(site, graduated_year):
+    """
+    Get student profiles for electronic diplomas export with optimized prefetching.
+    """
+    return StudentProfile.objects.filter(
+        site=site,
+        type=StudentTypes.REGULAR,
+        status__in=[StudentStatuses.REINSTATED, ""],
+        year_of_curriculum=graduated_year-2
+    ).exclude(
+        branch__code='test'
+    ).select_related(
+        'user', 
+        'branch',
+        'user__yandex_data'
+    ).prefetch_related(
+        Prefetch(
+            'user__shadcourserecord_set',
+            queryset=SHADCourseRecord.objects.select_related('semester'),
+        ),
+        'user__onlinecourserecord_set',
+        Prefetch(
+            'user__enrollment_set',
+            queryset=Enrollment.objects.filter(
+                is_deleted=False, 
+                grade__in=GradeTypes.satisfactory_grades
+            ).select_related('course', 'course__meta_course'),
+            to_attr='prefetched_enrollments'
+        ),
+        # Prefetch academic_discipline as it's a many-to-many relationship
+        'academic_disciplines'
+    )
+
+def _get_meta_courses_data(student_profiles):
+    """
+    Get meta courses data and generate headers for CSV export.
+    """
+    meta_course_ids = {
+        enrollment.course.meta_course_id 
+        for profile in student_profiles 
+        for enrollment in getattr(profile.user, 'prefetched_enrollments', [])
+        if any(e.course.is_visible_in_certificates for e in getattr(profile.user, 'prefetched_enrollments', []) 
+               if e.course.meta_course_id == enrollment.course.meta_course_id)
+    }
+    
+    meta_courses = {}
+    courses_headers = []
+    header_to_index = {}
+    
+    for mc in MetaCourse.objects.filter(id__in=meta_course_ids, index__isnull=False):
+        meta_courses[mc.name] = mc.index
+        
+        # Generate header and add to headers list
+        header = f"[{mc.name}]{mc.index}:evaluation"
+        courses_headers.append(header)
+        header_to_index[header] = mc.index
+    
+    return meta_courses, courses_headers, header_to_index
+
+def _prepare_student_data(student_profiles, meta_courses, graduated_year):
+    """
+    Prepare student data for CSV export.
+    """
+    courses_with_grades = set()
+    student_data = []
+    
+    for profile in student_profiles:
+        user = profile.user
+        
+        # Get courses with grades for this student
+        course_results = profile.get_courses_grades(meta_courses)
+        courses_with_grades.update(course_results.keys())
+        
+        base_data = [
+            user.yandex_login,
+            user.last_name,
+            user.first_name,
+            user.patronymic,
+            user.birth_date.strftime('%Y-%m-%d') if user.birth_date else '',
+            profile.snils,
+            user.citizenship,
+            GenderTypes.values[user.gender] if user.gender else "",
+            datetime.datetime(profile.year_of_admission, 9, 1).strftime('%Y-%m-%d'),
+            datetime.datetime(graduated_year, 5, 31).strftime('%Y-%m-%d'),
+            profile.diploma_number,
+            '',
+            profile.academic_discipline.code if profile.academic_discipline else '',
+            profile.get_passed_courses_total(),
+        ]
+        
+        student_data.append({
+            'base_data': base_data,
+            'course_results': course_results
+        })
+    
+    return student_data, courses_with_grades
+
+def _create_csv_response(student_data, courses_headers, header_to_index, graduated_year):
+    """
+    Create CSV response with student data.
+    """
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="export_for_electronic_diplomas_{graduated_year}.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow([
+        'yauid', 'last_name', 'first_name', 'middle_name', 'birth_date', 
+        'snils', 'citizenship', 'sex', 'study_period_from', 'study_period_to', 
+        'number', 'issue_date', 'frdo_qual', 'control_mc_sum', *courses_headers
+    ])
+    
+    # Write data for each student
+    for data in student_data:
+        row_data = data['base_data'].copy()
+        course_results = data['course_results']
+        
+        # Add grades for each course in the headers
+        for header in courses_headers:
+            course_index = header_to_index[header]
+            grade = course_results.get(course_index, "")
+            row_data.append(grade.lower())
+        
+        writer.writerow(row_data)
+    
+    return response
+
+def export_for_electronic_diplomas_view(request: HttpRequest):
+    """
+    Export student data for electronic diplomas in CSV format.
+    
+    This view handles the export of student data for electronic diplomas,
+    including personal information and course grades.
+    """
+    if not request.user.is_curator:
+        return HttpResponseForbidden()
+    
+    form = ExportForDiplomas(data=request.POST)
+    
+    if form.is_valid():
+        graduated_year = int(form.cleaned_data["graduated_year"])
+        
+        student_profiles = _get_student_profiles_for_electronic_diplomas(request.site, graduated_year)
+        
+        meta_courses, courses_headers, header_to_index = _get_meta_courses_data(student_profiles)
+        
+        student_data, _ = _prepare_student_data(student_profiles, meta_courses, graduated_year)
+        
+        return _create_csv_response(student_data, courses_headers, header_to_index, graduated_year)
+    else:
+        for field, error_as_list in form.errors.items():
+            label = form.fields[field].label if field in form.fields else field
+            errors = "<br>".join(str(error) for error in error_as_list)
+            messages.error(request, mark_safe(f"{label}:<br>{errors}"))
+    
+    return HttpResponseRedirect(reverse("staff:exports"))
 
 class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):
     FORMATS = ("csv", "xlsx")

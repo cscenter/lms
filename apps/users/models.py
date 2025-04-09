@@ -5,6 +5,8 @@ from random import choice
 from string import ascii_lowercase, digits
 from typing import List, Optional, Set
 
+from learning.settings import GradeTypes
+
 from djchoices import C, DjangoChoices
 from model_utils import FieldTracker
 from model_utils.fields import AutoLastModifiedField, MonitorField
@@ -998,6 +1000,66 @@ class StudentProfile(TimeStampedModel):
         if self.comment_changed_at:
             return self.comment_changed_at.strftime(DATETIME_FORMAT_RU)
         return default
+        
+    def get_passed_courses_total(self):
+        """
+        Returns the total number of passed SHAD and online courses.
+        """
+        shad = 0
+        shad_records = self.user.shadcourserecord_set.all()
+        if shad_records.exists():
+            for course in shad_records:
+                if course.grade in GradeTypes.satisfactory_grades:
+                    shad += 1
+        
+        online = self.user.onlinecourserecord_set.count()
+        
+        regular = 0
+        if hasattr(self.user, 'prefetched_enrollments'):
+            enrollments = self.user.prefetched_enrollments
+        else:
+            enrollments = self.user.enrollment_set.filter(is_deleted=False)
+            
+        if enrollments:
+            for enrollment in enrollments:
+                if enrollment.grade in GradeTypes.satisfactory_grades:
+                    regular += 1
+        
+        return shad + online + regular
+        
+    def get_courses_grades(self, meta_courses):
+        """
+        Returns a dictionary mapping course indexes to grade displays for all courses
+        where there is at least one grade.
+        """
+        result = {}
+        
+        # Process regular course enrollments
+        if hasattr(self.user, 'prefetched_enrollments'):
+            enrollments = self.user.prefetched_enrollments
+        else:
+            enrollments = self.user.enrollment_set.filter(is_deleted=False)
+            
+        if enrollments:
+            for enrollment in enrollments:
+                if enrollment.grade in GradeTypes.satisfactory_grades:
+                    # Try to find the course index by name
+                    course_name = enrollment.course.meta_course.name if hasattr(enrollment.course, 'meta_course') else enrollment.course.name
+                    if course_name in meta_courses and meta_courses[course_name]:
+                        result[meta_courses[course_name]] = enrollment.grade_display.lower()
+                    else:
+                        result[course_name] = enrollment.grade_display.lower()
+        
+        # Process SHAD courses
+        for course in self.user.shadcourserecord_set.all():
+            if course.grade in GradeTypes.satisfactory_grades:
+                # Try to find the course index by name
+                if course.name in meta_courses and meta_courses[course.name]:
+                    result[meta_courses[course.name]] = course.grade_display.lower()
+                else:
+                    result[course.name] = course.grade_display.lower()
+        
+        return result
 
 
 class StudentFieldLog(TimestampedModel):

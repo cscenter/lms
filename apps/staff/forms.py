@@ -1,4 +1,5 @@
 import csv
+import datetime
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Layout, Row, Submit
@@ -9,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 from core.urls import reverse
 from core.widgets import DateInputTextWidget
-from users.models import User
+from users.models import User, StudentProfile
 
 
 class GraduationForm(forms.Form):
@@ -95,3 +96,45 @@ class BadgeNumberFromCSVForm(forms.Form):
             raise ValidationError(_('CSV file must contain "Email" and "Badge number" columns'))
         csv_file.seek(0)
         return csv_file
+
+
+class ExportForDiplomas(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Get all years where there are graduates
+        self.graduated_years = self.get_graduated_years()
+        year_choices = [(year, str(year)) for year in self.graduated_years]
+        
+        self.fields['graduated_year'] = forms.ChoiceField(
+            label=_("Year of Graduation"),
+            choices=year_choices
+        )
+        
+        self.helper = FormHelper(self)
+        self.helper.form_action = reverse("staff:export_for_electronic_diplomas")
+        self.helper.layout = Layout(
+            Row(
+                Div('graduated_year', css_class="col-xs-4"),
+            ),
+            FormActions(Submit('submit', _('Dowload CSV')))
+        )
+
+    def get_graduated_years(self):
+        """
+        Get all years in which there are graduates.
+        """
+        # Get distinct year_of_curriculum values from StudentProfile
+        # Optimize by only selecting the year_of_curriculum field and filtering by site
+        current_year = datetime.datetime.now().year
+        curriculum_years = StudentProfile.objects.filter(
+            year_of_curriculum__isnull=False, 
+            year_of_curriculum__lte=current_year-2,
+            status=""
+        ).values('year_of_curriculum').distinct().values_list('year_of_curriculum', flat=True)
+        
+        return sorted([year + 2 for year in curriculum_years], reverse=True)
+
+    def clean(self):
+        graduated_year = int(self.cleaned_data.get('graduated_year'))
+        if graduated_year not in self.graduated_years:
+            raise ValidationError(_("Not supported graduation year"))
