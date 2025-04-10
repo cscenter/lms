@@ -138,13 +138,13 @@ class TestElectronicDiplomaExportService:
         
         # Check the courses headers
         assert len(courses_headers) == 2
-        assert f"[{self.meta_course1.name}]{self.meta_course1.index}:evaluation" in courses_headers
-        assert f"[{self.meta_course2.name}]{self.meta_course2.index}:evaluation" in courses_headers
+        assert f"{self.meta_course1.index}:evaluation" in courses_headers
+        assert f"{self.meta_course2.index}:evaluation" in courses_headers
         
         # Check the header to index mapping
         assert len(header_to_index) == 2
-        assert header_to_index[f"[{self.meta_course1.name}]{self.meta_course1.index}:evaluation"] == self.meta_course1.index
-        assert header_to_index[f"[{self.meta_course2.name}]{self.meta_course2.index}:evaluation"] == self.meta_course2.index
+        assert header_to_index[f"{self.meta_course1.index}:evaluation"] == self.meta_course1.index
+        assert header_to_index[f"{self.meta_course2.index}:evaluation"] == self.meta_course2.index
 
     def test_prepare_student_data(self):
         """Test the prepare_student_data method."""
