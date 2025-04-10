@@ -248,8 +248,8 @@ class TestElectronicDiplomaExportService:
             'yauid', 'last_name', 'first_name', 'middle_name', 'birth_date', 
             'snils', 'citizenship', 'sex', 'study_period_from', 'study_period_to', 
             'number', 'issue_date', 'frdo_qual', 'control_mc_sum', 
-            f'[{self.meta_course1.name}]{self.meta_course1.index}:evaluation',
-            f'[{self.meta_course2.name}]{self.meta_course2.index}:evaluation'
+            f'{self.meta_course1.index}:evaluation',
+            f'{self.meta_course2.index}:evaluation'
         ]
         
         # Check the data rows
