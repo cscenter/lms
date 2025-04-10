@@ -75,11 +75,11 @@ class ElectronicDiplomaExportService:
         header_to_index = {}
         
         # Get meta courses and create headers
-        for mc in MetaCourse.objects.filter(id__in=meta_course_ids, index__isnull=False):
+        for mc in MetaCourse.objects.filter(id__in=meta_course_ids):
             meta_courses[mc.name] = mc.index
             
             # Generate header and add to headers list
-            header = f"[{mc.name}]{mc.index}:evaluation"
+            header = f"{mc.index}:evaluation"
             courses_headers.append(header)
             header_to_index[header] = mc.index
         
@@ -115,7 +115,7 @@ class ElectronicDiplomaExportService:
                 datetime.datetime(graduated_year, 5, 31).strftime('%Y-%m-%d'),
                 profile.diploma_number,
                 '',
-                profile.academic_discipline.code if profile.academic_discipline else '',
+                profile.academic_discipline if profile.academic_discipline else '',
                 profile.get_passed_courses_total(),
             ]
             

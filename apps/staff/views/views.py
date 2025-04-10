@@ -763,6 +763,12 @@ def export_for_electronic_diplomas_view(request: HttpRequest):
     if form.is_valid():
         graduated_year = int(form.cleaned_data["graduated_year"])
         return ElectronicDiplomaExportService.generate_export(request.site, graduated_year)
+    else:
+        for field, error_as_list in form.errors.items():
+            label = form.fields[field].label if field in form.fields else field
+            label = "Общее" if label == "__all__" else label
+            errors = "<br>".join(str(error) for error in error_as_list)
+            messages.error(request, mark_safe(f"{label}:<br>{errors}"))
     
     return HttpResponseRedirect(reverse("staff:exports"))
 

@@ -135,6 +135,9 @@ class ExportForDiplomas(forms.Form):
         return sorted([year + 2 for year in curriculum_years], reverse=True)
 
     def clean(self):
-        graduated_year = int(self.cleaned_data.get('graduated_year'))
-        if graduated_year not in self.graduated_years:
-            raise ValidationError(_("Not supported graduation year"))
+        try:
+            graduated_year = int(self.cleaned_data.get('graduated_year'))
+            if graduated_year not in self.graduated_years:
+                raise ValidationError(_("Not supported graduation year"))
+        except (ValueError, TypeError):
+            raise ValidationError(_("Invalid year format"))
