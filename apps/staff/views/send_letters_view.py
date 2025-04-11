@@ -45,13 +45,10 @@ class SendLettersView(CuratorOnlyMixin, View):
         template = get_email_template(template)
         email_from = "Школа анализа данных <noreply@yandexdataschool.ru>"
 
-        # Parse scheduled_time from ISO format if it's a string
         scheduled_time = None
         if data:
             if isinstance(data, str):
-                # Parse the ISO format string to a datetime object
                 scheduled_time = dateutil.parser.parse(data)
-                # Make sure it's timezone aware
                 if timezone.is_naive(scheduled_time):
                     scheduled_time = timezone.make_aware(scheduled_time, timezone.get_current_timezone())
             else:
@@ -78,12 +75,10 @@ class SendLettersView(CuratorOnlyMixin, View):
         """
         Filter student profiles based on criteria and return a list of email addresses.
         """
-        # Build a single query with all filters
         query = Q(site_id=settings.SITE_ID)
         filter_description = []
 
         if branch:
-            # Convert branch IDs to integers if they are strings
             branch_ids = [int(b) for b in branch]
             query &= Q(branch_id__in=branch_ids)
             branch_names = Branch.objects.filter(pk__in=branch_ids).values_list('name', flat=True)
@@ -108,7 +103,6 @@ class SendLettersView(CuratorOnlyMixin, View):
             filter_description.append(_("Status") + f": {', '.join(status_names)}")
         
         if academic_disciplines:
-            # Convert academic_disciplines IDs to integers if they are strings
             academic_discipline_ids = [int(ad) for ad in academic_disciplines]
             query &= Q(academic_disciplines__id__in=academic_discipline_ids)
             discipline_names = AcademicDiscipline.objects.filter(pk__in=academic_discipline_ids).values_list('name', flat=True)
@@ -125,43 +119,34 @@ class SendLettersView(CuratorOnlyMixin, View):
         """
         Override dispatch to handle different actions based on POST parameters.
         """
-        # Log session data for debugging
         logger.debug("Session data at start: %s", dict(request.session))
         
-        # Check if this is a confirmation submission
         if 'confirm_send' in request.POST:
             return self.handle_confirm_send(request)
         
-        # Check if this is a cancel submission
         if 'cancel_send' in request.POST:
             return self.handle_cancel_send(request)
         
-        # If there's confirmation data in the session, show the confirmation page
         if 'emails' in request.session and 'filter_description' in request.session:
             return self.show_confirmation_page(request)
         
-        # Normal form processing
         if request.method == 'POST':
             return self.post(request, *args, **kwargs)
         
-        # Redirect to exports page for GET requests
         return HttpResponseRedirect(reverse("staff:exports"))
     
     def handle_confirm_send(self, request):
         """
         Handle the confirmation of sending emails.
         """
-        # Get the stored data from session
         email_template_id = request.session.get('email_template_id')
         emails = request.session.get('emails', [])
         scheduled_time = request.session.get('scheduled_time')
         
         try:
-            # Send the emails
             email_template = EmailTemplate.objects.get(pk=email_template_id)
             self._send_emails(emails, email_template.name, scheduled_time)
             
-            # Clear the session data
             self.clear_session_data(request)
             
             logger.debug("Session data after confirm: %s", dict(request.session))
@@ -174,21 +159,18 @@ class SendLettersView(CuratorOnlyMixin, View):
             logger.exception("Error sending emails: %s", str(e))
             messages.error(request, f"Ошибка при отправке писем: {str(e)}")
         
-        # Redirect to exports page
         return HttpResponseRedirect(reverse("staff:exports"))
     
     def handle_cancel_send(self, request):
         """
         Handle the cancellation of sending emails.
         """
-        # Clear the session data
         self.clear_session_data(request)
         
         logger.debug("Session data after cancel: %s", dict(request.session))
         
         messages.info(request, "Отправка писем отменена")
         
-        # Redirect to exports page
         return HttpResponseRedirect(reverse("staff:exports"))
     
     def show_confirmation_page(self, request):
@@ -214,7 +196,6 @@ class SendLettersView(CuratorOnlyMixin, View):
         """
         form = SendLettersForm(data=request.POST, request=request)
         
-        # Log form data for debugging
         logger.debug("Form data: %s", request.POST)
         logger.debug("Form is valid: %s", form.is_valid())
         if form.errors:
@@ -229,7 +210,6 @@ class SendLettersView(CuratorOnlyMixin, View):
         """
         Process a valid form submission.
         """
-        # Get form data
         branch = form.cleaned_data.get('branch', [])
         student_type = form.cleaned_data.get('type', [])
         year_of_admission = form.cleaned_data.get('year_of_admission', [])
@@ -248,7 +228,6 @@ class SendLettersView(CuratorOnlyMixin, View):
                 student_type, status, academic_disciplines, scheduled_time, request
             )
         
-        # If no action was specified, redirect to exports page
         return HttpResponseRedirect(reverse("staff:exports"))
     
     def handle_test_email(self, email_template_id, test_email, request):
@@ -256,10 +235,8 @@ class SendLettersView(CuratorOnlyMixin, View):
         Handle sending a test email.
         """
         try:
-            # Get the email template
             email_template = EmailTemplate.objects.get(pk=email_template_id)
             
-            # Send the test email directly
             self._send_emails([test_email], email_template.name)
             
             messages.success(request, f"Тестовая отправка {test_email} шаблона '{email_template.name}'")
@@ -276,19 +253,15 @@ class SendLettersView(CuratorOnlyMixin, View):
         Handle sending emails to selected students.
         """
         try:
-            # Get the emails and filter description
             emails, filter_description = self.send_letters(
                 email_template_id, branch, year_of_admission, year_of_curriculum, 
                 student_type, status, academic_disciplines, scheduled_time
             )
             
-            # Store the data in the session for confirmation
             request.session['email_template_id'] = email_template_id
             request.session['emails'] = emails
             
-            # Store scheduled_time with timezone info
             if scheduled_time:
-                # Make sure scheduled_time is timezone aware
                 if timezone.is_naive(scheduled_time):
                     scheduled_time = timezone.make_aware(scheduled_time, timezone.get_current_timezone())
                 request.session['scheduled_time'] = scheduled_time.isoformat()
@@ -297,7 +270,6 @@ class SendLettersView(CuratorOnlyMixin, View):
                 
             request.session['filter_description'] = filter_description
             
-            # Redirect back to this view to show the confirmation page
             return HttpResponseRedirect(reverse("staff:send_letters"))
         except Exception as e:
             logger.exception("Error when collecting emails: %s", str(e))
@@ -325,12 +297,10 @@ class SendLettersView(CuratorOnlyMixin, View):
         request.session.pop('scheduled_time', None)
         request.session.pop('filter_description', None)
         
-        # Force save the session
         request.session.modified = True
         request.session.save()
 
 
-# Function-based view for backward compatibility
 def send_letters_view(request: HttpRequest):
     """
     Function-based view for sending letters to students.
