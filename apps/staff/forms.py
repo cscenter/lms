@@ -1,15 +1,21 @@
 import csv
+import pytz
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Div, Layout, Row, Submit
-
+from crispy_forms.layout import Div, Layout, Row, Submit, Fieldset, Column
 from django import forms
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from core.models import Branch
 from core.urls import reverse
 from core.widgets import DateInputTextWidget
-from users.models import User
+from learning.settings import StudentStatuses
+from post_office.models import EmailTemplate
+from study_programs.models import AcademicDiscipline
+from users.models import User, StudentProfile, StudentTypes
 
 
 class GraduationForm(forms.Form):
@@ -91,7 +97,164 @@ class BadgeNumberFromCSVForm(forms.Form):
         
         headers = reader.fieldnames
         required_columns = {"Почта", "Номер пропуска"}
-        if not required_columns.issubset(set(headers)):
+        if headers is None or not required_columns.issubset(set(headers)):
             raise ValidationError(_('CSV file must contain "Email" and "Badge number" columns'))
         csv_file.seek(0)
         return csv_file
+    
+
+class SendLettersForm(forms.Form):
+    branch = forms.MultipleChoiceField(
+        label=_("Branch"),
+        widget=forms.CheckboxSelectMultiple,
+        choices=[],
+        required=False
+    )
+    type = forms.MultipleChoiceField(
+        label=_("Student type"),
+        widget=forms.CheckboxSelectMultiple,
+        choices=[],
+        required=False
+    )
+    year_of_admission = forms.MultipleChoiceField(
+        label=_("Admission year"),
+        widget=forms.CheckboxSelectMultiple,
+        choices=[],
+        required=False
+    )
+    year_of_curriculum = forms.MultipleChoiceField(
+        label=_("Curriculum year"),
+        widget=forms.CheckboxSelectMultiple,
+        choices=[],
+        required=False
+    )
+    status = forms.MultipleChoiceField(
+        label=_("Status"),
+        widget=forms.CheckboxSelectMultiple,
+        choices=[],
+        required=False
+    )
+    academic_disciplines = forms.MultipleChoiceField(
+        label=_("Fields of study"),
+        widget=forms.CheckboxSelectMultiple,
+        choices=[],
+        required=False
+    )
+    email_template = forms.ChoiceField(
+        label=_("Email template"),
+        choices=[],
+        required=True
+    )
+    test_email = forms.EmailField(
+        label=_("Test email"),
+        required=False
+    )
+    scheduled_time = forms.DateTimeField(
+        label=_("Schedule sending time (Moscow time)"),
+        required=False,
+        help_text=_("Time is in Moscow timezone (UTC+3)"),
+        # Initial value will be set in __init__
+    )
+    action = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False
+    )
+    
+    def clean_scheduled_time(self):
+        scheduled_time = self.cleaned_data.get('scheduled_time')
+        if scheduled_time:
+            # If the scheduled_time is naive (no timezone info), assume it's in Moscow timezone
+            if timezone.is_naive(scheduled_time):
+                moscow_tz = pytz.timezone('Europe/Moscow')
+                scheduled_time = timezone.make_aware(scheduled_time, moscow_tz)
+            
+            # Check if the scheduled time is in the past
+            if scheduled_time <= timezone.now():
+                scheduled_time = timezone.now()
+        
+        return scheduled_time
+    
+    def __init__(self, *args, **kwargs):
+        # Extract request from kwargs if present
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        
+        # Always use Moscow timezone
+        moscow_tz = pytz.timezone('Europe/Moscow')
+        # Get current time in Moscow timezone
+        moscow_time = timezone.localtime(timezone.now(), moscow_tz) + timezone.timedelta(hours=1)
+        # Make it naive by removing timezone info to prevent Django from converting it
+        naive_moscow_time = moscow_time.replace(tzinfo=None)
+        self.fields['scheduled_time'].initial = naive_moscow_time
+        
+        # Set student types from StudentTypes model
+        self.fields['type'].choices = StudentTypes.choices
+        
+        # Set student statuses from StudentStatuses model
+        self.fields['status'].choices = [(k, v) for k, v in StudentStatuses.values.items()]
+        
+        # Get branches from the database
+        branches = Branch.objects.filter(site_id=settings.SITE_ID)
+        self.fields['branch'].choices = [(str(b.pk), b.name) for b in branches]
+        
+        # Get admission years from student profiles
+        admission_years = StudentProfile.objects.filter(
+            site_id=settings.SITE_ID, 
+            year_of_admission__isnull=False
+        ).values_list('year_of_admission', flat=True).order_by('-year_of_admission').distinct()
+        self.fields['year_of_admission'].choices = [(str(year), str(year)) for year in admission_years]
+        
+        # Get curriculum years from student profiles
+        curriculum_years = StudentProfile.objects.filter(
+            site_id=settings.SITE_ID, 
+            year_of_curriculum__isnull=False
+        ).values_list('year_of_curriculum', flat=True).order_by('-year_of_curriculum').distinct()
+        self.fields['year_of_curriculum'].choices = [(str(year), str(year)) for year in curriculum_years]
+        
+        # Get academic disciplines
+        academic_disciplines = AcademicDiscipline.objects.all().order_by('name')
+        self.fields['academic_disciplines'].choices = [(str(d.pk), d.name) for d in academic_disciplines]
+        
+        # Get email templates
+        email_templates = EmailTemplate.objects.all().order_by('name')
+        self.fields['email_template'].choices = [(str(t.pk), t.name) for t in email_templates]
+        
+        self.helper = FormHelper(self)
+        self.helper.form_action = reverse("staff:send_letters")
+        self.helper.layout = Layout(
+            Fieldset(_('Filters'),
+                Row(
+                    Div('branch', css_class="col-xs-4"),
+                    Div('year_of_admission', css_class="col-xs-4"),
+                    Div('year_of_curriculum', css_class="col-xs-4"),
+                ),
+                Row(
+                    Div('type', css_class="col-xs-4"),
+                    Div('status', css_class="col-xs-4"),
+                    Div('academic_disciplines', css_class="col-xs-4"),
+                ),
+            ),
+            Row(
+                Column(
+                    Fieldset(_('Testing letter'),
+                        Row(
+                            Div('test_email', css_class="col-xs-12"),
+                        ),
+                        FormActions(Submit('submit_test', _('Send for testing')))
+                    ),
+                    css_class="col-md-6"
+                ),
+                Column(
+                    Fieldset(_('Sending letter'),
+                        Row(
+                            Div('email_template', css_class="col-xs-12"),
+                        ),
+                        Row(
+                            Div('scheduled_time', css_class="col-xs-12"),
+                        ),
+                        FormActions(Submit('submit_send', _('Ready to send')))
+                    ),
+                    css_class="col-md-6"
+                )
+            )
+        )

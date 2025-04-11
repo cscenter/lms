@@ -49,7 +49,7 @@ from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
 from staff.filters import EnrollmentInvitationFilter, StudentProfileFilter, StudentAcademicDisciplineLogFilter, \
     StudentStatusLogFilter
-from staff.forms import BadgeNumberFromCSVForm, GraduationForm, MergeUsersForm
+from staff.forms import BadgeNumberFromCSVForm, GraduationForm, MergeUsersForm, SendLettersForm
 from staff.models import Hint
 from staff.tex import generate_tex_student_profile_for_diplomas
 from study_programs.models import AcademicDiscipline
@@ -157,6 +157,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             .order_by("-diploma_issued_on")
             .values_list("diploma_issued_on", flat=True)
         )
+        send_letters_form = SendLettersForm()
         branches = Branch.objects.filter(site_id=settings.SITE_ID)
         context = {
             "alumni_profiles_form": graduation_form,
@@ -172,6 +173,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             "years": Campaign.objects.filter(branch__in=branches).values_list('year', flat=True).distinct().order_by('-year'),
             "branches": branches,
             "official_diplomas_dates": official_diplomas_dates,
+            "send_letters_form": send_letters_form,
         }
         return context
 
@@ -742,6 +744,7 @@ def badge_number_from_csv_view(request: HttpRequest):
             errors = "<br>".join(str(error) for error in error_as_list)
             messages.error(request, mark_safe(f"{label}:<br>{errors}"))
     return HttpResponseRedirect(reverse("staff:exports"))
+
 
 
 class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Confirm Email Sending" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>{% trans "Confirm Email Sending" %}</h1>
+            
+            <div class="alert alert-info">
+                <p>Вы собираетесь отправить электронные письма <strong>{{ email_count }}</strong> получателям.</p>
+                
+                <h4>{% trans "Фильтры" %}:</h4>
+                <ul>
+                    {% for criteria in filter_description %}
+                        <li>{{ criteria }}</li>
+                    {% endfor %}
+                </ul>
+                
+                {% if email_count > 0 %}
+                    <h4>{% trans "Recipients" %}:</h4>
+                    <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 15px;">
+                        <ul>
+                            {% for email in emails %}
+                                <li>{{ email }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="row">
+                <div class="col-md-3">
+                    <form method="post" action="{% url 'staff:send_letters' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="confirm_send" value="1">
+                        <button type="submit" class="btn btn-primary">{% trans "Confirm and Send" %}</button>
+                    </form>
+                </div>
+                <div class="col-md-2">
+                    <form method="post" action="{% url 'staff:send_letters' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="cancel_send" value="1">
+                        <button type="submit" class="btn btn-secondary">{% trans "Cancel" %}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
