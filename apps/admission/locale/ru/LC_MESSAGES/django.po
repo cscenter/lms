@@ -1309,7 +1309,7 @@ msgstr "Собеседующие"
 msgid "Interview|Assignments"
 msgstr "Задания для интервью"
 
-#: apps/admission/models.py:1348 apps/admission/models.py:1713
+#: apps/admission/models.py:1366 apps/admission/models.py:1731
 msgid "Secret code"
 msgstr "Секретный код"
 
