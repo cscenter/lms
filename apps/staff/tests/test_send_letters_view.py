@@ -104,7 +104,7 @@ class TestSendLettersView:
         ("2023-01-01T12:00:00+03:00", 2),  # ISO format string
         (timezone.now(), 2),  # Timezone aware datetime
     ])
-    @patch('staff.views.send_letters_view.mail.send')
+    @patch('post_office.mail.send')
     def test_send_emails(self, mock_send, data, expected_count, email_template):
         """Test the _send_emails method."""
         # Arrange
