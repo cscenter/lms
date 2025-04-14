@@ -3,9 +3,10 @@ import datetime
 import pytest
 
 from django.core.exceptions import ValidationError
+from django.db.models import ProtectedError
 
-from admission.constants import InterviewSections, InterviewInvitationStatuses, ApplicantStatuses
-from admission.models import Applicant, Contest, Interview
+from admission.constants import InterviewSections, InterviewInvitationStatuses, ApplicantStatuses, ChallengeStatuses
+from admission.models import Contest, Interview, Olympiad
 from admission.tests.factories import (
     ApplicantFactory,
     CampaignFactory,
@@ -14,6 +15,8 @@ from admission.tests.factories import (
     InterviewInvitationFactory,
     InterviewSlotFactory,
     InterviewStreamFactory,
+    OlympiadFactory,
+    LocationFactory,
 )
 
 
@@ -176,3 +179,112 @@ def test_applicant_status_log_no_change():
     
     # Check that still no log was created
     assert applicant.status_logs.count() == 0
+
+
+@pytest.mark.django_db
+def test_olympiad_lifecycle():
+    applicant = ApplicantFactory()
+    olympiad = Olympiad.objects.create(applicant=applicant)
+    assert olympiad.pk is not None
+    assert olympiad.score is None
+    assert olympiad.math_score is None
+    
+    location = LocationFactory()
+    olympiad_full = Olympiad.objects.create(
+        applicant=ApplicantFactory(),
+        score=8,
+        math_score=7,
+        location=location,
+        details={"scores": [3, 2, 3]}
+    )
+    assert olympiad_full.total_score() == 15
+    
+    olympiad.score = 5
+    olympiad.math_score = 4
+    olympiad.save()
+    olympiad.refresh_from_db()
+    assert olympiad.score == 5
+    assert olympiad.math_score == 4
+    assert olympiad.total_score() == 9
+    
+    olympiad_id = olympiad.id
+    olympiad.delete()
+    assert not Olympiad.objects.filter(id=olympiad_id).exists()
+
+
+@pytest.mark.django_db
+def test_olympiad_validation():
+    applicant = ApplicantFactory()
+    Olympiad.objects.create(applicant=applicant)
+    
+    with pytest.raises(ValidationError):
+        duplicate = Olympiad(applicant=applicant)
+        duplicate.full_clean()
+    
+    olympiad = Olympiad(
+        applicant=ApplicantFactory(),
+        score=-1
+    )
+    with pytest.raises(ValidationError):
+        olympiad.full_clean()
+    
+    olympiad = Olympiad(
+        applicant=ApplicantFactory(),
+        math_score=-1
+    )
+    with pytest.raises(ValidationError):
+        olympiad.full_clean()
+    
+    olympiad = Olympiad(
+        applicant=ApplicantFactory(),
+        status="invalid_status"
+    )
+    with pytest.raises(ValidationError):
+        olympiad.full_clean()
+
+
+@pytest.mark.django_db
+def test_olympiad_score_methods():
+    olympiad = OlympiadFactory(score=8, math_score=7)
+    assert olympiad.score_display() == 8
+    assert olympiad.total_score() == 15
+    assert olympiad.total_score_display() == 15
+    
+    olympiad = OlympiadFactory(score=5, math_score=None)
+    assert olympiad.score_display() == 5
+    assert olympiad.total_score() == 5
+    assert olympiad.total_score_display() == 5
+    
+    olympiad = OlympiadFactory(score=None, math_score=6)
+    assert olympiad.score_display() == "-"
+    assert olympiad.total_score() == 6
+    assert olympiad.total_score_display() == 6
+    
+    olympiad = OlympiadFactory(score=None, math_score=None)
+    assert olympiad.score_display() == "-"
+    assert olympiad.total_score() == 0
+    assert olympiad.total_score_display() == "-"
+
+
+@pytest.mark.django_db
+def test_olympiad_applicant_integration():
+    applicant = ApplicantFactory(status=ApplicantStatuses.PERMIT_TO_OLYMPIAD)
+    olympiad = OlympiadFactory(
+        applicant=applicant,
+        score=8,
+        math_score=7
+    )
+    
+    assert olympiad.applicant == applicant
+    assert hasattr(applicant, 'olympiad')
+    assert applicant.olympiad == olympiad
+    assert applicant.get_olympiad_record() == olympiad
+    
+    applicant.status = ApplicantStatuses.PASSED_OLYMPIAD
+    applicant.save()
+    applicant.refresh_from_db()
+    
+    assert hasattr(applicant, 'olympiad')
+    assert applicant.olympiad == olympiad
+    with pytest.raises(ProtectedError):
+        applicant.delete()
