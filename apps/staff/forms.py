@@ -171,8 +171,6 @@ class SendLettersForm(forms.Form):
                     scheduled_time.hour, scheduled_time.minute
                 )
                 scheduled_time = self.tz.localize(naive_dt)
-                # scheduled_time = self.tz.localize(scheduled_time)
-                # scheduled_time = scheduled_time.astimezone(self.tz) #timezone.make_aware(scheduled_time, self.tz)
             else:
                 scheduled_time = timezone.make_aware(scheduled_time, self.tz)
         
