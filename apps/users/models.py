@@ -257,13 +257,13 @@ class YandexUserData(TimestampedModel):
         verbose_name=_("User"),
         related_name="yandex_data",
         on_delete=models.CASCADE)
-    login = models.CharField(_("Yandex Login"), max_length=64, blank=True)
+    login = models.CharField(_("Yandex Login"), max_length=64)
     uid = models.CharField(_("Yandex UID"), max_length=64, unique=True)
 
-    first_name = models.CharField(_('first name'), max_length=64, blank=True)
-    last_name = models.CharField(_('last name'), max_length=64, blank=True)
-    display_name = models.CharField(_("Display Name"), max_length=130, blank=True)
-    real_name = models.CharField(_("Real name"), max_length=130, blank=True)
+    first_name = models.CharField(_('first name'), max_length=64)
+    last_name = models.CharField(_('last name'), max_length=64)
+    display_name = models.CharField(_("Display Name"), max_length=130)
+    real_name = models.CharField(_("Real name"), max_length=130)
 
     # It can be helpful to determine students with problems in the login field.
     # The login can be generated automatically on the Yandex side so it can be useless.
@@ -365,14 +365,6 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         _("CSCUser|note"),
         help_text=_("LaTeX+Markdown is enabled"),
         blank=True)
-    yandex_login = models.CharField(
-        _("Yandex Login"),
-        max_length=80,
-        blank=True)
-    yandex_login_normalized = models.CharField(
-        max_length=80,
-        editable=False,
-        blank=True)
     github_login = models.CharField(
         _("Github Login"),
         max_length=80,
@@ -453,20 +445,9 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
     def save(self, **kwargs):
         created = self.pk is None
         self.email = self.__class__.objects.normalize_email(self.email)
-        if self.email and not self.yandex_login:
-            username, domain = self.email.split("@", 1)
-            if domain in YANDEX_DOMAINS:
-                self.yandex_login = username
-        if self.yandex_login:
-            self.yandex_login_normalized = normalize_yandex_login(self.yandex_login)
         if not self.calendar_key:
             self.calendar_key = generate_hash(b'calendar',
                                               force_bytes(self.email))
-        if self.yandex_login:
-            suffixes = tuple(f"@{d}" for d in YANDEX_DOMAINS)
-            if self.yandex_login.endswith(suffixes):
-                username, domain = self.yandex_login.rsplit("@", 1)
-                self.yandex_login = username
 
         super().save(**kwargs)
 
@@ -478,6 +459,10 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
     def remove_group(self, role, branch=None, site_id: int = None):
         sid = site_id or settings.SITE_ID
         self.groups.filter(user=self, role=role, branch=branch, site_id=sid).delete()
+    
+    @property
+    def yandex_login(self):
+        return self.yandex_data.login if hasattr(self, "yandex_data") else ""
 
     @staticmethod
     def generate_random_username(length=30,
@@ -587,10 +572,6 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         # TODO: remove apostrophe
         return ".".join(parts).translate(ru_en_mapping)
 
-    def get_yandex_login(self):
-        if hasattr(self, 'yandex_data') and self.yandex_data is not None:
-            return normalize_yandex_login(self.yandex_data.login)
-        return self.yandex_login_normalized
 
     @property
     def photo_data(self):

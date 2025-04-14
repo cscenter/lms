@@ -154,6 +154,7 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
 
 
 # TODO: move to learning or users app
+# TODO SEEMS LIKE DEPRICATED 
 class AlumniStats(APIView):
     def get(self, request, graduation_year, format=None):
         filters = (Q(status=StudentStatuses.GRADUATE) &

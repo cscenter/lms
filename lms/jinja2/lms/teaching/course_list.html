@@ -16,10 +16,10 @@
                 <tr class="{{ "unread" if course.has_unread() else "noop" }}">
                   <td><a href="{{ course.get_absolute_url() }}">{{ course.name }}</a>
                   {% if course.duration == CourseDurations.FIRST_HALF %}
-                       <i class="fa fa-adjust fa-rotate-180" aria-hidden="true"></i>
+                       <i class="fa fa-adjust fa-rotate-180" aria-hidden="true" title="{% trans %}First part of semester{% endtrans %}"></i>
                     {% endif %}
                     {% if course.duration == CourseDurations.SECOND_HALF %}
-                       <i class="fa fa-adjust" aria-hidden="true"></i>
+                       <i class="fa fa-adjust" aria-hidden="true" title="{% trans %}Second part of semester{% endtrans %}"></i>
                     {% endif %}
                   </td>
                   <td>{{ course.semester }}</td>

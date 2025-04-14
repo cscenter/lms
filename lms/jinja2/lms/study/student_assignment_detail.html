@@ -97,6 +97,8 @@
             {% endfor %}
           </ul>
         {% endif %}
+        {% set can_create_comment = request.user.has_perm("learning.create_assignment_comment", a_s) %}
+        {% if can_create_comment %}
         <div class="mt-30 assignment-actions">
           {% if solution_form %}
             <button id="add-solution" class="btn btn-lg btn-link active">Добавить решение</button>{% endif %}
@@ -116,7 +118,8 @@
             {{ crispy(solution_form) }}
           </div>
         {% endif %}
-      </div>
+        {% endif %}
+        </div>
 
       <div class="col-xs-3">
         <div class="-submission" id="o-sidebar">

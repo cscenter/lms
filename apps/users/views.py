@@ -39,7 +39,7 @@ from learning.icalendar import get_icalendar_links
 from learning.models import Enrollment, StudentAssignment
 from learning.settings import GradeTypes, StudentStatuses, EnrollmentTypes
 from users.compat import get_graduate_profile as get_graduate_profile_compat
-from users.models import SHADCourseRecord, YandexUserData, StudentTypes
+from users.models import SHADCourseRecord, StudentTypes
 from users.thumbnails import CropboxData, get_user_thumbnail, photo_thumbnail_cropbox
 
 from .forms import CertificateOfParticipationCreateForm, UserProfileForm
@@ -123,7 +123,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             "yandex_oauth_url": reverse('auth:users:yandex_begin'),
             "is_yds_site": self.request.site.pk == settings.YDS_SITE_ID
         }
-        enrollments = profile_user.enrollment_set.all().select_related("student_profile")
+        enrollments = profile_user.enrollment_set.all().select_related("student_profile__invitation")
         for enrollment in enrollments:
             enrollment.satisfactory = enrollment.grade in GradeTypes.satisfactory_grades or \
                         (enrollment.grade == GradeTypes.NOT_GRADED and enrollment.course.semester == current_semester)
@@ -153,7 +153,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             assignments_qs = (StudentAssignment.objects
                               .for_student(profile_user)
                               .in_term(current_semester)
-                              .active()
+                              .can_be_submitted()
                               .order_by('assignment__course__meta_course__name',
                                         'assignment__deadline_at',
                                         'assignment__title'))
@@ -218,7 +218,7 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
         kwargs = super(UserUpdateView, self).get_form_kwargs()
         kwargs.update({'editor': self.request.user,
                        'student': self.object,
-                       'initial': {'yandex_login': self.object.get_yandex_login()}})
+                       'initial': {'yandex_login': self.object.yandex_login}})
         return kwargs
 
     def is_form_allowed(self, user, obj):
@@ -246,14 +246,6 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
                 testimonial = testimonial_form.cleaned_data['testimonial']
                 graduate_profile.testimonial = testimonial
                 graduate_profile.save()
-        yandex_login = form.cleaned_data['yandex_login']
-        if yandex_login and self.request.user.is_curator:
-            (YandexUserData.objects
-             .filter(user=self.object)
-             .exclude(login=yandex_login)
-             .update(login=yandex_login,
-                     changed_by=self.request.user,
-                     modified_at=now()))
         return super().form_valid(form)
 
 
@@ -366,7 +358,7 @@ class CertificateOfParticipationDetailView(PermissionRequiredMixin,
     def get_context_data(self, **kwargs):
         from learning.reports import ProgressReport
         student_info = (User.objects
-                        .student_progress(exclude_grades=[*GradeTypes.unsatisfactory_grades, GradeTypes.RE_CREDIT],
+                        .student_progress(exclude_grades=[*GradeTypes.unsatisfactory_grades, *GradeTypes.unset_grades, GradeTypes.RE_CREDIT],
                                           exclude_invisible_courses=True)
                         .get(pk=self.object.student_profile.user_id))
         courses_qs = (ProgressReport().get_courses_queryset((student_info,)))

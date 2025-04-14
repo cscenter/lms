@@ -183,6 +183,7 @@ class ProgressReport:
                 "meta_course_id",
                 "meta_course__name",
                 "meta_course__slug",
+                "meta_course__index",
                 "grading_type",
                 "duration",
                 "main_branch_id",
@@ -340,7 +341,7 @@ class FutureGraduateDiplomasReport(ProgressReport):
         self.branch = branch
 
     def get_queryset(self):
-        exclude_grades = GradeTypes.unsatisfactory_grades
+        exclude_grades = [*GradeTypes.unsatisfactory_grades, *GradeTypes.unset_grades]
         enrollments_prefetch = get_enrollments_progress(
             lookup="user__enrollment_set", filters=[~Q(grade__in=exclude_grades)]
         )
@@ -356,7 +357,7 @@ class FutureGraduateDiplomasReport(ProgressReport):
             StudentProfile.objects.filter(
                 status=StudentStatuses.WILL_GRADUATE, branch=self.branch
             )
-            .select_related("user")
+            .select_related("user__yandex_data")
             .prefetch_related(
                 "academic_disciplines",
                 "user__applicant_set",
@@ -544,7 +545,7 @@ class OfficialDiplomasReport(ProgressReport):
         return DataFrame.from_records(columns=headers, data=data, index="ID")
 
     def get_queryset(self):
-        exclude_grades = GradeTypes.unsatisfactory_grades
+        exclude_grades = [*GradeTypes.unsatisfactory_grades, *GradeTypes.unset_grades]
         exclude_project_grades = [
             ProjectGradeTypes.UNSATISFACTORY,
             ProjectGradeTypes.NOT_GRADED,
@@ -564,7 +565,7 @@ class OfficialDiplomasReport(ProgressReport):
             "user__onlinecourserecord_set", to_attr="online_courses"
         )
         return (
-            StudentProfile.objects.select_related("user", "graduate_profile")
+            StudentProfile.objects.select_related("user__yandex_data", "graduate_profile")
             .filter(graduate_profile__diploma_issued_on=self.diploma_issued_on)
             .prefetch_related(
                 "academic_disciplines",
@@ -689,7 +690,7 @@ class ProgressReportFull(ProgressReport):
                     type__in=[StudentTypes.REGULAR, StudentTypes.VOLUNTEER],
                     branch__site_id=settings.SITE_ID,
                 )
-                .select_related("user", "branch", "graduate_profile")
+                .select_related("user__yandex_data", "branch", "graduate_profile")
                 .order_by("user__last_name", "user__first_name", "user__pk")
             )
         success_practice = Count(
@@ -797,9 +798,13 @@ class ProgressReportFull(ProgressReport):
 
             def durability_prefix(meta_course_id):
                 return "[Полусеместровый] " if meta_course_duration[meta_course_id] != CourseDurations.FULL else ""
+            
+            def get_course_index(course_index):
+                return f" [{course_index}]" if course_index is not None else ""
+            
 
             course_headers = (
-                f"{durability_prefix(course.id)}{cs_club_prefix(course.id)}{course.name}"
+                f"{durability_prefix(course.id)}{cs_club_prefix(course.id)}{course.name}{get_course_index(course.index)}"
                 for course in meta_courses.values()
             )
 
@@ -950,7 +955,7 @@ class ProgressReportForSemester(ProgressReport):
         return (
             StudentProfile.objects.filter(*self.get_queryset_filters())
             .exclude(status__in=StudentStatuses.inactive_statuses)
-            .select_related("user", "branch")
+            .select_related("user__yandex_data", "branch")
             .prefetch_related(
                 "academic_disciplines",
                 projects_prefetch,
@@ -1304,7 +1309,7 @@ class WillGraduateStatsReport(ReportFileOutput):
         ]
         qs = (
             User.objects.filter(status=StudentStatuses.WILL_GRADUATE)
-            .select_related("branch")
+            .select_related("branch", "yandex_data")
             .prefetch_related(*prefetch_list)
         )
         return qs

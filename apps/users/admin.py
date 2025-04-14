@@ -93,8 +93,8 @@ class YandexUserDataInlineAdmin(admin.StackedInline):
     model = YandexUserData
     fk_name = 'user'
     extra = 0
-    fields = ['uid', 'login', 'display_name', 'changed_by', 'modified_at']
-    readonly_fields = ['user', 'uid', 'changed_by', 'modified_at']
+    fields = ['uid', 'login', 'display_name', 'created_at']
+    readonly_fields = ['user', 'uid', 'login', 'display_name', 'created_at']
     exclude = ['first_name', 'last_name', 'real_name']
     can_delete = True
 
@@ -122,20 +122,21 @@ class UserAdmin(_UserAdmin):
     form = UserChangeForm
     change_form_template = 'admin/user_change_form.html'
     ordering = ['last_name', 'first_name']
+    list_select_related = ['yandex_data']
     inlines = [UserConsentInlineAdmin, YandexUserDataInlineAdmin, OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
                UserGroupInlineAdmin]
-    readonly_fields = ['last_login', 'date_joined']
+    readonly_fields = ['last_login', 'date_joined', 'display_yandex_login']
     list_display = ['id', 'username', 'email', 'first_name', 'last_name',
                     'is_staff']
     list_filter = ['is_active', 'branch', 'group__site', 'group__role',
                    'is_staff', 'is_superuser']
     filter_horizontal = []
-    search_fields = ('username', 'first_name', 'last_name', 'patronymic', 'email', 'telegram_username',
-                     'yandex_login', 'yandex_login_normalized')
+    search_fields = ('username', 'first_name', 'last_name', 'patronymic', 'email', 'telegram_username', 'yandex_data__login')
 
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
+
 
     fieldsets = [
         (None, {'fields': ('username', 'email', 'password')}),
@@ -147,7 +148,7 @@ class UserAdmin(_UserAdmin):
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        ]}),
         (_('External services'), {'fields': ['telegram_username',
-                                             'yandex_login', 'stepic_id',
+                                             'display_yandex_login', 'stepic_id',
                                              'github_login', 'anytask_url',
                                              'codeforces_login']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
@@ -160,6 +161,12 @@ class UserAdmin(_UserAdmin):
             return None
         for inline in self.get_inline_instances(request, obj):
             yield inline.get_formset(request, obj), inline
+    
+    def display_yandex_login(self, obj):
+        return obj.yandex_login
+    
+    display_yandex_login.short_description = _('Yandex Login')
+
 
     def save_model(self, request, obj, form, change):
         if "comment" in form.changed_data:
@@ -233,11 +240,11 @@ class StudentProfileForm(forms.ModelForm):
 
 class StudentProfileAdmin(BaseModelAdmin):
     form = StudentProfileForm
-    list_select_related = ['user', 'branch', 'branch__site']
+    list_select_related = ['user', 'branch', 'branch__site', 'user__yandex_data']
     list_display = ('user', 'branch', 'type', 'year_of_admission', 'status', 'priority')
     list_filter = ('type', 'site', 'branch', 'status',)
     raw_id_fields = ('user', 'comment_last_author', 'invitation')
-    search_fields = ['user__last_name']
+    search_fields = ['user__last_name', 'user__yandex_data__login']
     inlines = [StudentStatusLogAdminInline, StudentAcademicDisciplineLogAdminInline]
     formfield_overrides = {
         models.ManyToManyField: {

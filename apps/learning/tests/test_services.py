@@ -48,23 +48,22 @@ def test_assignment_service_bulk_create_personal_assignments(settings):
     e_other = EnrollmentFactory(course=course,
                                 student_profile=student_profile_other,
                                 student=student_profile_other.user)
-    unactive_kwargs = [
-        {"grade": GradeTypes.RE_CREDIT},
-        {"is_grade_recredited": True},
-        {"type": EnrollmentTypes.LECTIONS_ONLY}
-    ]
-    unactive_enrollments = [EnrollmentFactory(course=course, **kwargs) for kwargs in unactive_kwargs]
+    enrollments_can_not_submit_assignments = EnrollmentFactory.can_not_submit_assignments(course=course)
+    assert len(enrollments_can_not_submit_assignments) == 3
     assert Enrollment.active.count() == 6
+    assert Enrollment.active.can_submit_assignments().count() == 3
     assignment = AssignmentFactory(course=course)
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment)
-    assert StudentAssignment.objects.count() == 3
+    assert StudentAssignment.objects.count() == 6
+    assert StudentAssignment.objects.can_be_submitted().count() == 3
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(
         assignment,
         for_groups=[group_spb.pk, group_nsk.pk])
     # Students without student group will be skipped in this case
-    assert StudentAssignment.objects.count() == 2
+    assert StudentAssignment.objects.count() == 5
+    assert StudentAssignment.objects.can_be_submitted().count() == 2
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment, for_groups=[group_nsk.pk])
     ss = StudentAssignment.objects.filter(assignment=assignment)
@@ -77,14 +76,17 @@ def test_assignment_service_bulk_create_personal_assignments(settings):
     e_nsk.is_deleted = True
     e_nsk.save()
     assert Enrollment.active.count() == 5
+    assert Enrollment.active.can_submit_assignments().count() == 2
     AssignmentService.bulk_create_student_assignments(assignment)
-    assert StudentAssignment.objects.count() == 2
+    assert StudentAssignment.objects.count() == 5
+    assert StudentAssignment.objects.can_be_submitted().count() == 2
     # Inactive status prevents generating student assignment too
     student_profile_spb.status = StudentStatuses.ACADEMIC_LEAVE
     student_profile_spb.save()
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment)
-    assert StudentAssignment.objects.count() == 1
+    assert StudentAssignment.objects.count() == 4
+    assert StudentAssignment.objects.can_be_submitted().count() == 1
     # Now test assignment settings
     student_profile_spb.status = ''
     student_profile_spb.save()
@@ -93,14 +95,16 @@ def test_assignment_service_bulk_create_personal_assignments(settings):
     assignment.restricted_to.add(group_spb)
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment)
-    assert StudentAssignment.objects.filter(assignment=assignment).count() == 1
-    assert StudentAssignment.objects.get(assignment=assignment).student_id == student_profile_spb.user_id
+    assert StudentAssignment.objects.filter(assignment=assignment).count() == 4
+    assert StudentAssignment.objects.filter(assignment=assignment).can_be_submitted().count() == 1
+    assert StudentAssignment.objects.can_be_submitted().get(assignment=assignment).student_id == student_profile_spb.user_id
     # Test that only groups from assignment settings get involved
     # if `for_groups` provided
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment, for_groups=[group_spb.pk, group_nsk.pk])
-    assert StudentAssignment.objects.filter(assignment=assignment).count() == 1
-    assert StudentAssignment.objects.get(assignment=assignment).student_id == student_profile_spb.user_id
+    assert StudentAssignment.objects.filter(assignment=assignment).count() == 4
+    assert StudentAssignment.objects.filter(assignment=assignment).can_be_submitted().count() == 1
+    assert StudentAssignment.objects.can_be_submitted().get(assignment=assignment).student_id == student_profile_spb.user_id
 
 
 @pytest.mark.parametrize("inactive_status", [StudentStatuses.ACADEMIC_LEAVE,

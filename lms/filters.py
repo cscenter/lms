@@ -101,7 +101,7 @@ class CoursesFilter(FilterSet):
             * default branch code
         """
         if queryset is not None and not request.user.has_permission_to_drafts:
-            queryset = queryset.filter(is_draft=False)
+            queryset = queryset.is_published()
         if data is not None:
             data = data.copy()  # get a mutable copy of the QueryDict
         else:

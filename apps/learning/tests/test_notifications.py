@@ -52,6 +52,7 @@ def test_view_new_assignment(client):
     course_teacher1, course_teacher2 = CourseTeacher.objects.filter(course=course)
     student = StudentFactory()
     EnrollmentFactory(student=student, course=course, grade=GradeTypes.GOOD)
+    EnrollmentFactory.can_not_submit_assignments(course=course)
     a = AssignmentFactory.build()
     form = {
         'title': a.title,
@@ -168,7 +169,6 @@ def test_assignment_setup_assignees_public_form(client):
     course_teacher1.roles = None
     course_teacher1.save()
     course_teacher2 = CourseTeacher.objects.get(course=course, teacher=t2)
-    EnrollmentFactory.create(student=student, course=course, grade=GradeTypes.GOOD)
     # Create first assignment
     client.login(t1)
     a = AssignmentFactory.build()
@@ -237,6 +237,7 @@ def test_new_assignment_generate_notifications(settings):
     """Generate notifications for students about new assignment"""
     course = CourseFactory()
     enrollments = EnrollmentFactory.create_batch(5, course=course)
+    EnrollmentFactory.can_not_submit_assignments(course=course)
     assignment = AssignmentFactory(course=course)
     assert AssignmentNotification.objects.count() == 5
     # Dont' send notification to the students who left the course
@@ -342,6 +343,15 @@ def test_new_assignment_notification_context_timezone(settings, mocker):
     else:
         assert not mail.outbox
 
+@pytest.mark.django_db
+def test_new_course_news_notification():
+    course = CourseFactory()
+    EnrollmentFactory.can_not_submit_assignments(course=course)
+    enrollment = EnrollmentFactory(course=course)
+    assert not CourseNewsNotification.objects.count()
+    CourseNewsFactory(course=course)
+    assert CourseNewsNotification.objects.count() == 1
+    assert CourseNewsNotification.objects.get().user == enrollment.student
 
 @pytest.mark.parametrize("site_domain,lms_subdomain",
                          [('example.com', 'my'),
@@ -388,6 +398,7 @@ def test_change_assignment_comment(settings):
     teacher = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
     enrollment = EnrollmentFactory(course=course)
+    EnrollmentFactory.can_not_submit_assignments(course=course)
     student = enrollment.student
     student_profile = enrollment.student_profile
     assignment = AssignmentFactory(course=course)

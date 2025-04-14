@@ -28,7 +28,14 @@
     </div>
     <div class="additional-info">
       Набор: {{ applicant.campaign }}<br>
-      Статус анкеты: {{ applicant.get_status_display|default_if_none:"<не указан>" }}<br>
+      Статусы анкеты: 
+      {% with status_logs=applicant.status_logs.all %}
+        {% for log in status_logs reversed%}
+          {{ log.get_status_display|default_if_none:"<не указан>" }}{% if not forloop.last %} - {% endif %}
+        {% empty %}
+          {{ applicant.get_status_display|default_if_none:"<не указан>" }}
+        {% endfor %}
+      {% endwith %}<br>
       {% if applicant.new_track %}<b class="text-danger">Альтернативный трек</b>{% endif %}<br>
       {% if applicant.has_ticket %} <b class="text-danger">Утверждает, что имеет билет</b> {% endif %}<br>
     </div>
@@ -60,6 +67,8 @@
           <dl>
             {% if applicant.data.data_format_version == '0.8' %}
               {% include "admission/_applicant_form_08.html" with applicant_form=applicant_form yds_hide_fields=yds_hide_fields %}
+            {% elif applicant.data.data_format_version == '0.9'%}
+              {% include "admission/_applicant_form_09.html" with applicant_form=applicant_form yds_hide_fields=yds_hide_fields %}
             {% else %}
               {% include "admission/_applicant_form.html" with applicant_form=applicant_form yds_hide_fields=yds_hide_fields %}
             {% endif %}
@@ -106,6 +115,38 @@
           <div class="tab-pane" id="update-status-form" role="tabpanel">
             {% crispy status_form %}
             <div class="clearfix"></div>
+            
+            <h3>История статусов</h3>
+            <div class="table-responsive">
+              <table class="table table-condensed">
+                <thead>
+                  <tr class="active">
+                    <th>Статус</th>
+                    <th>Дата изменения</th>
+                    <th>Автор</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for log in applicant.status_logs.all %}
+                    <tr>
+                      <td style="width:40%;" {% if not forloop.first %}class="text-muted"{% endif %}>
+                        {{ log.get_status_display|default_if_none:"<не указан>" }}
+                      </td>
+                      <td style="width:30%;" {% if not forloop.first %}class="text-muted"{% endif %}>
+                        {{ log.changed_at|date:"d.m.Y" }}
+                      </td>
+                      <td style="width:30%;" {% if not forloop.first %}class="text-muted"{% endif %}>
+                        {{ log.entry_author.get_full_name|default:"Система" }}
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="3">История статусов отсутствует</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
         {% endif %}
       </div>

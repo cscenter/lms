@@ -315,7 +315,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # Education
             "university_city", "university", "university_other",
             "faculty", "is_studying", "level_of_education", "level_of_education_other", "year_of_graduation",
-            "partner", "has_diploma", "diploma_degree",
+            "partner", "mipt_track", "mipt_gpa", "mipt_expectations", "mipt_grades_file", "has_diploma", "diploma_degree",
 
             # Exp and work
             "has_job",
@@ -384,6 +384,9 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             # add has_diploma, diploma_degree, working_hours, gender fields
             # move new_track from data to separate field
             # add new_track_info, level_of_education_other
+            
+            # version 0.9
+            # add mipt_track, mipt_gpa, mipt_expectations, mipt_grades_file fields
         )
         extra_kwargs = {
             'university': {
@@ -441,7 +444,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             'shad_agreement': data.get('shad_agreement'),
             'ticket_access': data.get('ticket_access'),
             'email_subscription': data.get('email_subscription'),
-            'data_format_version': '0.8'
+            'data_format_version': '0.9'
         }
         data['experience'] = data['ml_experience']
         # Remove fields that are actually not present on Applicant model
@@ -463,6 +466,17 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
                                              settings.LANGUAGE_CODE)
         return instance
 
+    def validate_mipt_grades_file(self, value):
+        """
+        Validate that the uploaded file is either an image or a PDF.
+        """
+        allowed_mime_types = ["image/jpeg", "image/png", "application/pdf"]
+        if value.content_type not in allowed_mime_types:
+            raise serializers.ValidationError(
+                "The file must be a JPEG, PNG image, or a PDF document."
+            )
+        return value
+
     def validate(self, attrs):
         residence_city = attrs.get('residence_city')
         campaign = attrs.get('campaign')
@@ -475,4 +489,3 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
             if common_rule_exist and not strict_rule_exists:
                 return attrs
         raise serializers.ValidationError(f"Campaign {campaign} is not allowed in {residence_city} city.")
-

@@ -9,6 +9,7 @@ from django.db.models.signals import post_save
 
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
+from core.utils import normalize_yandex_login
 from courses.constants import AssignmentFormat
 from courses.models import Course, CourseGroupModes
 from learning.models import Enrollment, StudentGroup, EnrollmentGradeLog
@@ -186,7 +187,7 @@ def is_course_failed_by_student(course: Course, student: User,
     from learning.models import Enrollment
     if course.is_club_course or not course.is_completed:
         return False
-    failed_course_grades = [grade for grade in GradeTypes.unsatisfactory_grades if grade != GradeTypes.WITHOUT_GRADE]
+    failed_course_grades = [grade for grade in [*GradeTypes.unsatisfactory_grades, GradeTypes.NOT_GRADED]]
     if enrollment:
         return enrollment.grade in failed_course_grades
     return (Enrollment.active
@@ -237,5 +238,9 @@ def get_enrollments_by_yandex_login(course: Course) -> Dict[str, Enrollment]:
     enrollments = (Enrollment.active
                    .filter(course=course)
                    .select_related("student"))
-    return {e.student.yandex_login_normalized: e
-            for e in enrollments if e.student.yandex_login_normalized}
+    result = {}
+    for e in enrollments:
+        yandex_login = normalize_yandex_login(e.student.yandex_login)
+        if yandex_login:
+            result[yandex_login] = e
+    return result

@@ -3,8 +3,8 @@ from typing import List, Dict
 from django.utils import timezone
 from django.views.generic import TemplateView
 
-from admission.constants import WHERE_DID_YOU_LEARN, DiplomaDegrees
-from admission.models import Campaign, CampaignCity
+from admission.constants import WHERE_DID_YOU_LEARN, DiplomaDegrees, UTMNames
+from admission.models import CampaignCity
 from auth.views import YANDEX_OAUTH_BACKEND_PREFIX
 
 from core.urls import reverse
@@ -22,14 +22,19 @@ SESSION_LOGIN_KEY = f"{YANDEX_OAUTH_BACKEND_PREFIX}_login"
 
 
 def get_partners() -> List[Dict]:
-    partners = [
-        {
-            "id": partner.id,
-            "value": partner.slug,
-            "label": f"Да, {partner.name}"
-        } for partner in PartnerTag.objects.all()
-    ]
-    return partners
+    partners_dict = {partner.slug: partner for partner in PartnerTag.objects.all()}
+    
+    result = []
+    for slug in ['mfti', 'hse', 'unn', 'urfu', 'nsu']:
+        if slug in partners_dict:
+            partner = partners_dict[slug]
+            result.append({
+                "id": partner.id,
+                "value": partner.slug,
+                "label": f"Да, {partner.name}"
+            })
+    
+    return result
 
 
 class ApplicationFormView(TemplateView):
@@ -56,7 +61,7 @@ class ApplicationFormView(TemplateView):
 
         show_form = len(always_allow_campaigns) > 0
         context["show_form"] = show_form
-        utm_params = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]
+        utm_params = UTMNames.values.keys()
         utm = {param: self.request.GET.get(param) for param in utm_params}
         sources = [{"value": k, "label": v} for k, v in WHERE_DID_YOU_LEARN]
         if show_form:

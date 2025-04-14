@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: weekly-dump-to-yandex-disk
+  namespace: "{{ k8s_namespace}}"
+spec:
+  # https://crontab.guru/#0_10_*_*_0
+  schedule: "0 10 * * 0"
+  concurrencyPolicy: Replace
+  suspend: false
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            name: weekly-dump-to-yandex-disk
+        spec:
+          containers:
+            - name: weekly-dump-to-yandex-disk
+              image: "{{ docker_registry }}/{{ backend_django_image_name }}:{{ backend_django_image_tag }}"
+              imagePullPolicy: IfNotPresent
+              command: [ "/bin/sh" ]
+              args: [ "-c", "python manage.py weekly_dump_to_yandex_disk" ]
+              env:
+                {% filter indent(width=16) %}{% include 'app-env.yaml' %}{% endfilter %}
+          restartPolicy: Never

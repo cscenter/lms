@@ -183,12 +183,8 @@ def test_assignment_detail_view_details(client):
     assert response.context_data['assignment'] == a
     assert len(response.context_data['a_s_list']) == 0
     EnrollmentFactory.create(student=student, course=co)
-    unactive_kwargs = [
-        {"grade": GradeTypes.RE_CREDIT},
-        {"is_grade_recredited": True},
-        {"type": EnrollmentTypes.LECTIONS_ONLY}
-    ]
-    unactive_enrollments = [EnrollmentFactory(course=co, **kwargs) for kwargs in unactive_kwargs]
+    EnrollmentFactory.can_not_submit_assignments(course=co)
+    deleted_enrollment = EnrollmentFactory(is_deleted=True, course=co)
     a_s = StudentAssignment.objects.get(student=student, assignment=a)
     response = client.get(url)
     assert response.context_data['assignment'] == a
@@ -207,6 +203,13 @@ def test_assignment_detail_view_details(client):
     assert response.context_data['assignment'] == a
     assert {a_s} == set(response.context_data['a_s_list'])
     assert len(response.context_data['a_s_list']) == 1
+    deleted_student_assignment = StudentAssignment.objects.get(student=deleted_enrollment.student, assignment=a)
+    deleted_student_assignment.status = AssignmentStatus.COMPLETED
+    deleted_student_assignment.save()
+    response = client.get(url)
+    assert response.context_data['assignment'] == a
+    assert {a_s, deleted_student_assignment} == set(response.context_data['a_s_list'])
+    assert len(response.context_data['a_s_list']) == 2
 
 
 @pytest.mark.django_db

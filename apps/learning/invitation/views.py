@@ -93,7 +93,7 @@ class InvitationView(InvitationURLParamsMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated and request.user.is_curator:
             return super().dispatch(request, *args, **kwargs)
-        elif self.invitation != Semester.get_current():
+        elif self.invitation.semester != Semester.get_current():
             return HttpResponseForbidden(_("Invitation is outdated"))
         elif has_other_active_invited_profile(request.user, request.site, self.invitation):
             return HttpResponseForbidden(_("You already have other active invitation in this semester"))

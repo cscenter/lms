@@ -8,6 +8,7 @@ from typing import Any, ClassVar, NamedTuple, Optional, Type, Union
 from django.utils.functional import cached_property
 from djchoices import DjangoChoices
 from model_utils.models import TimeStampedModel
+from model_utils import FieldTracker
 from multiselectfield import MultiSelectField
 from post_office.models import EmailTemplate
 from sorl.thumbnail import ImageField
@@ -34,6 +35,7 @@ from admission.constants import (
     ApplicantInterviewFormats,
     InterviewInvitationStatuses,
     InterviewSections,
+    MIPTTracks,
     YandexDataSchoolInterviewRatingSystem, HasDiplomaStatuses, DiplomaDegrees,
 )
 from admission.utils import get_next_process, slot_range
@@ -132,6 +134,13 @@ class Campaign(TimezoneAwareMixin, models.Model):
         help_text=_("Template name for contest registration email"),
         validators=[validate_email_template_name],
         max_length=255,
+    )
+    template_registration_mipt_advanced = models.CharField(
+        _("MIPT Advanced Registration Template"),
+        help_text=_("Template name for contest registration email for MIPT Advanced track applicants"),
+        validators=[validate_email_template_name],
+        max_length=255,
+        blank=True,
     )
     template_exam_invitation = models.CharField(
         _("Exam Invitation Email Template"),
@@ -265,6 +274,12 @@ def applicant_photo_upload_to(instance, filename):
     _, ext = os.path.splitext(filename)
     file_name = uuid.uuid4().hex
     return f"applicants/{bucket}/{file_name}{ext}"
+
+def applicant_grades_upload_to(instance, filename):
+    bucket = instance.campaign.year
+    _, ext = os.path.splitext(filename)
+    file_name = uuid.uuid4().hex
+    return f"applicants/{bucket}/grades/{file_name}{ext}"
 
 
 class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, ApplicantThumbnailMixin):
@@ -407,6 +422,31 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     # Education
     partner = models.ForeignKey("users.PartnerTag", verbose_name=_("Partner"),
                                 null=True, blank=True, on_delete=models.SET_NULL)
+    mipt_track = models.CharField(
+        _("MIPT track"),
+        choices=MIPTTracks.choices,
+        max_length=30,
+        blank=True,
+        null=True
+    )
+    mipt_gpa = models.DecimalField(
+        _("MIPT GPA"),
+        max_digits=3,
+        decimal_places=1,
+        blank=True,
+        null=True
+    )
+    mipt_expectations = models.TextField(
+        _("MIPT expectations"),
+        blank=True,
+        null=True
+    )
+    mipt_grades_file = models.FileField(
+        _("MIPT grades file"),
+        upload_to=applicant_grades_upload_to,
+        blank=True,
+        null=True
+    )
     is_studying = models.BooleanField(_("Are you studying?"), null=True)
     new_track = models.BooleanField(
         _("Are applying for alternative track?"),
@@ -616,6 +656,9 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     # Any useful data like application form integration log
     # FIXME: merge into data json field, then remove
     meta = models.JSONField(blank=True, null=True, editable=False)
+    
+    # Track changes to the status field
+    tracker = FieldTracker(fields=['status'])
 
     class Meta:
         app_label = "admission"
@@ -660,6 +703,14 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
     def clean(self):
         if self.yandex_login:
             self.yandex_login_q = self.yandex_login.lower().replace("-", ".")
+        if self.mipt_grades_file:
+            _, file_extension = os.path.splitext(str(self.mipt_grades_file))
+            print(file_extension)
+            allowed_types = ['.png', '.jpg', '.jpeg', '.pdf']
+            if file_extension not in allowed_types:
+                raise ValidationError(
+                    {"mipt_grades_file": "The file must be a JPEG, PNG image, or a PDF document."}
+                )
 
     def get_living_place_display(self):
         if not self.living_place and self.campaign.branch.city_id:
@@ -737,6 +788,43 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
             q |= c
         return Applicant.objects.filter(~Q(id=self.pk) & q)
 
+
+class ApplicantStatusLog(TimestampedModel):
+    changed_at = models.DateField(
+        verbose_name=_("Entry Added"),
+        default=timezone.now)
+    applicant = models.ForeignKey(
+        Applicant,
+        verbose_name=_("Applicant"),
+        related_name="status_logs",
+        on_delete=models.CASCADE)
+    former_status = models.CharField(
+        choices=ApplicantStatuses.choices,
+        verbose_name=_("Former status"),
+        max_length=30,
+        blank=True,
+        null=True)
+    status = models.CharField(
+        choices=ApplicantStatuses.choices,
+        verbose_name=_("Status"),
+        max_length=30,
+        blank=True,
+        null=True)
+    entry_author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Author"),
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True)
+
+    class Meta:
+        app_label = "admission"
+        verbose_name = _("Applicant Status Log")
+        verbose_name_plural = _("Applicant Status Logs")
+        ordering = ['-changed_at', '-pk']
+
+    def __str__(self):
+        return str(self.pk)
 
 def contest_assignments_upload_to(instance, filename):
     # TODO: Can be visible for unauthenticated. Is it ok?

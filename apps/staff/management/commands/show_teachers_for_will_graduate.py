@@ -7,7 +7,7 @@ from learning.settings import GradeTypes, StudentStatuses
 from users.constants import Roles
 from users.models import User
 
-
+# TODO TOTALLY DEPRICATED
 class Command(BaseCommand):
     help = """
     Shows list of teachers who participated in learning students with 

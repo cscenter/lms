@@ -172,11 +172,12 @@ def gradebook_data(course: Course, student_group: Optional[int] = None) -> Grade
     enrolled_students = OrderedDict()
     course_enrollments = (Enrollment.active
                           .filter(course=course)
-                          .exclude(type=EnrollmentTypes.LECTIONS_ONLY))
+                          .can_submit_assignments())
     if student_group is not None:
         course_enrollments = course_enrollments.filter(student_group=student_group)
     enrollments = (course_enrollments
                    .select_related("student",
+                                   "student__yandex_data",
                                    "student_profile__branch",
                                    "student_profile__invitation",
                                    "student_group")

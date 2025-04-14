@@ -6,6 +6,7 @@ from django_ical.views import ICalFeed
 from registration import signals
 from registration.backends.default.views import RegistrationView
 from vanilla import DetailView
+from django.views.generic import TemplateView
 
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
@@ -52,6 +53,11 @@ class PublicURLContextMixin:
             'course_class_public_url': partial(course_class_public_url,
                                                default_branch_code=code)
         }
+
+
+class RegistrationClosedView(TemplateView):
+    """View that shows a registration closed message"""
+    template_name = "registration/registration_closed.html"
 
 
 class AsyncEmailRegistrationView(RegistrationView):

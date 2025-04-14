@@ -7,8 +7,9 @@ from nbconvert import HTMLExporter
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models.fields.files import FieldFile
+import logging
 
-from files.tasks import logger
+logger = logging.getLogger(__file__)
 
 
 class ConvertError(Exception):
@@ -41,6 +42,6 @@ def convert_ipynb_to_html(file_field: FieldFile,
             nb_node, _ = html_exporter.from_filename(file_field.path)
         except (FileNotFoundError, AttributeError) as e:
             raise ConvertError from e
+   
     name = name or file_field.name + '.html'
     return ContentFile(nb_node.encode(), name=name)
-    # file_field.storage.save(new_path, ContentFile(nb_node.encode()))

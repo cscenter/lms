@@ -5,6 +5,10 @@
   {% elif field.name == 'university_legacy' %}
   {% elif field.name == 'interview_format' %}
   {% elif field.name == 'miss_count' %}
+  {% elif field.name == 'mipt_track'%}
+  {% elif field.name == 'mipt_gpa'%}
+  {% elif field.name == 'mipt_expectations'%}
+  {% elif field.name == 'mipt_grades_file'%}
   {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
   {% elif field.name == 'position' and not applicant_form.has_job.value %}
   {% elif field.name == 'level_of_education' and not applicant_form.has_diploma.value %}
@@ -115,6 +119,10 @@
      {% endif %}
      </dd>
     {% endif %}
+  {% elif field.name == 'mipt_track'%}
+  {% elif field.name == 'mipt_gpa'%}
+  {% elif field.name == 'mipt_expectations'%}
+  {% elif field.name == 'mipt_grades_file'%}
    {% else%}
         <dd>
           {{ field.value|default:"<не указано>" }}

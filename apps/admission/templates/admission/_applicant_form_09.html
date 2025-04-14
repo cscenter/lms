@@ -1,0 +1,149 @@
+{% for field in applicant_form %}{% spaceless %}
+  {% if field.name == 'where_did_you_learn_other' %}
+  {% elif field.name == 'is_studying' %}
+  {% elif field.name == 'new_track' %}
+  {% elif field.name == 'university_legacy' %}
+  {% elif field.name == 'interview_format' %}
+  {% elif field.name == 'miss_count' %}
+  {% elif field.name == 'mipt_track' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_track' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_gpa' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_gpa' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_expectations' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_expectations' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_grades_file' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_grades_file' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
+  {% elif field.name == 'position' and not applicant_form.has_job.value %}
+  {% elif field.name == 'level_of_education' and not applicant_form.has_diploma.value %}
+  {% elif field.name == 'internship_workplace' and not applicant_form.has_internship.value %}
+  {% elif field.name == 'internship_position' and not applicant_form.has_internship.value %}
+  {% elif field.name == 'internship_beginning' and not applicant_form.has_internship.value %}
+  {% elif field.name == 'internship_end' and not applicant_form.has_internship.value %}
+  {% elif field.name == 'internship_end' and applicant_form.internship_not_ended.value %}
+  {% elif field.name == 'internship_not_ended' and not applicant_form.has_internship.value %}
+  {% elif field.name == "experience" and applicant_form.instance.is_yds_applicant%}
+      <dt>Изучали ли вы раньше машинное обучение/анализ данных?<br>
+        Каким образом? Какие навыки удалось приобрести, какие проекты сделать?</dt>
+  {% else %}
+    <dt>
+      {{ field.label_tag }}
+    </dt>
+  {% endif %}
+
+    {% if field.name == 'photo' %}
+      <div class="thumbnail-img">
+        {% with im=applicant.get_thumbnail %}
+          <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" alt="" />
+        {% endwith %}
+      </div>
+      <br/>
+   {% elif field.name == 'email' %}
+     <dd>
+      <a href="mailto:{{ applicant_form.instance.email }}">{{ applicant_form.instance.email}}</a>
+     </dd>
+   {% elif field.name == 'phone' %}
+     <dd>
+      <a href="tel:{{ applicant_form.instance.phone }}">{{ applicant_form.instance.phone}}</a>
+     </dd>
+   {% elif field.name == 'telegram_username' %}
+     <dd>
+      <a href="https://t.me/{{ applicant_form.instance.telegram_username }}">
+          @{{ applicant_form.instance.telegram_username}}
+      </a>
+     </dd>
+   {% elif field.name == 'github_login' %}
+      <dd>{% if field.value %}{{ field.value }}
+        <a class="text-muted" target="_blank" href="https://github.com/{{ field.value }}">
+          <i class="fa fa-github-alt" aria-hidden="true"></i>
+        </a>{% else %}
+        <не указано>{% endif %}</dd>
+   {% elif field.name == 'level_of_education' %}
+      {% if applicant_form.has_diploma.value %}
+        <dd>{{ applicant_form.instance.get_level_of_education_display|default:"<не указано>" }}</dd>
+      {% endif %}
+   {% elif field.name == 'has_diploma' %}
+      <dd>{{ applicant_form.instance.get_has_diploma_display|default:"<не указано>" }}</dd>
+   {% elif field.name == 'gender' %}
+      <dd>{{ applicant_form.instance.get_gender_display|default:"<не указано>" }}</dd>
+   {% elif field.name == 'diploma_degree' %}
+      {% if applicant_form.has_diploma.value %}
+        <dd>{{ applicant_form.instance.get_diploma_degree_display|default:"<не указано>" }}</dd>
+      {% endif %}
+   {% elif field.name == 'living_place' %}
+      <dd>{{ applicant_form.instance.get_living_place_display|default:"<не указано>" }}</dd>
+   {% elif field.name == 'university_legacy' %}
+   {% elif field.name == 'where_did_you_learn' %}
+      <dd>{{ field.value }}{% if applicant_form.where_did_you_learn_other.value %}.
+        {{ applicant_form.where_did_you_learn_other.value }}{% endif %}</dd>
+   {% elif field.name == 'partner' %}
+      {% if field.value is None %}
+        <dd>Нет</dd>
+      {% else %}
+        <dd>{{ applicant_form.instance.partner }}</dd>
+      {% endif %}
+   {% elif field.name == 'residence_city' %}
+      <dd>{{ applicant_form.instance.residence_city|default:"<не указано>" }}</dd>
+   {% elif field.name == 'yandex_login' %}
+     <dd>{{ applicant_form.instance.yandex_login }}</dd>
+   {% elif field.name == 'university' %}
+     <dd>{{ applicant_form.instance.university|default:applicant_form.instance.university_other }}</dd>
+   {% elif field.name == 'has_job' or field.name == 'has_internship'%}
+      <dd>
+        {% if field.value %}
+          Да
+        {% elif field.value == None %}
+          Не указано
+        {% else %}
+          Нет
+        {% endif %}
+      </dd>
+  {% elif field.name == 'is_studying'%}
+  {% elif field.name == 'has_diploma'%}
+  {% elif field.name == 'new_track' %}
+  {% elif field.name == 'diploma_degree'%}
+  {% elif field.name == 'interview_format' %}
+  {% elif field.name == 'miss_count' %}
+  {% elif field.name == 'workplace' and not applicant_form.has_job.value %}
+  {% elif field.name == 'position' and not applicant_form.has_job.value %}
+  {% elif field.name == 'where_did_you_learn_other' and applicant_form.where_did_you_learn.value %}
+  {% elif field.name == 'internship_beginning' and not applicant_form.has_internship.value %}
+  {% elif field.name == 'internship_workplace' and not applicant_form.has_internship.value %}
+  {% elif field.name == 'internship_position' and not applicant_form.has_internship.value %}
+  {% elif field.name == 'internship_beginning' and not applicant_form.has_internship.value %}
+  {% elif field.name == 'internship_end' and not applicant_form.has_internship.value %}
+  {% elif field.name == 'internship_end' and applicant_form.internship_not_ended.value %}
+  {% elif field.name == 'internship_not_ended' %}
+     {% if applicant_form.has_internship.value and not applicant_form.internship_end.value%}
+      <dd>
+     {% if field.value == True %}
+        Да
+     {% else %}
+        Нет
+     {% endif %}
+     </dd>
+    {% endif %}
+  {% elif field.name == 'mipt_track' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_track' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_track' %}
+    <dd>
+      {{ applicant_form.instance.get_mipt_track_display|default:"<не указано>" }}
+    </dd>
+  {% elif field.name == 'mipt_gpa' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_gpa' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_expectations' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_expectations' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_grades_file' and not applicant_form.instance.partner %}
+  {% elif field.name == 'mipt_grades_file' and applicant_form.instance.partner.name != 'МФТИ' %}
+  {% elif field.name == 'mipt_grades_file' %}
+    <dd>
+      <a href="{{ applicant_form.instance.mipt_grades_file.url }}" target="_blank">
+        Посмотреть файл
+      </a>
+    </dd>
+   {% else%}
+        <dd>
+          {{ field.value|default:"<не указано>" }}
+        </dd>
+   {% endif %}
+{% endspaceless %}{% endfor %}

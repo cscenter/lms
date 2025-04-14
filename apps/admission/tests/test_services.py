@@ -23,6 +23,7 @@ from admission.services import (
     EmailQueueService,
     StudentProfileData,
     accept_interview_invitation,
+    create_applicant_status_log,
     create_student,
     create_student_from_applicant,
     decline_interview_invitation,
@@ -32,6 +33,8 @@ from admission.services import (
     get_ongoing_interview_streams,
     get_or_create_student_profile,
     get_streams,
+    manual_status_change,
+    is_status_change_handled
 )
 from admission.tests.factories import (
     AcceptanceFactory,
@@ -52,6 +55,7 @@ from users.models import StudentTypes, UserConsent
 from users.services import get_student_profile
 from users.tests.factories import StudentProfileFactory, UserFactory, CuratorFactory, StudentFactory, \
     InvitedStudentFactory
+
 
 
 @pytest.mark.django_db
@@ -544,7 +548,6 @@ ACCOUNT_DATA = AccountData(
     gender=GenderTypes.FEMALE,
     telegram_username="username",
     phone="+71234567",
-    yandex_login="yandex_login",
     birth_date=datetime.date(2000, 1, 1),
     living_place="City"
 )
@@ -559,7 +562,6 @@ ACCOUNT_DATA_WITHOUT_PATRONYMIC = AccountData(
     gender=GenderTypes.FEMALE,
     telegram_username="username2",
     phone="+712345678",
-    yandex_login="yandex_login2",
     birth_date=datetime.date(2001, 1, 1),
     living_place="City2"
 )
@@ -573,7 +575,19 @@ def test_create_student(settings):
         branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
         confirmation_ends_at=future_dt,
     )
+    applicant_data = {
+            "yandex_profile": {
+                "application_ya_login": "yandex_login",
+                "application_ya_id": "12345",
+                "application_ya_first_name": "YandexFirstName",
+                "application_ya_last_name": "YandexLastName",
+                "application_ya_display_name": "YandexDisplayName",
+                "application_ya_real_name": "YandexRealName",
+            }
+        }
     acceptance = AcceptanceFactory(
+            applicant__data=applicant_data,
+            applicant__yandex_login="yandex_login",
         status=Acceptance.WAITING,
         applicant__campaign=campaign,
     )
@@ -590,8 +604,15 @@ def test_create_student(settings):
     user_consents = UserConsent.objects.filter(user=user)
     assert set(user_consents.values_list("type", flat=True)) == ConsentTypes.regular_student_consents
     assert all(timezone.now() - created <= datetime.timedelta(seconds=5) for created in user_consents.values_list("created", flat=True))
+    
+    # Check that yandex_login is stored in YandexUserData
+    assert user.yandex_login
+    assert user.yandex_login == applicant.yandex_login
+    
+    # Check other fields except yandex_login
     for field in dataclasses.fields(ACCOUNT_DATA):
         assert getattr(user, field.name) == getattr(ACCOUNT_DATA, field.name)
+    
     assert applicant.user == user
     acceptance.refresh_from_db()
     assert acceptance.status == Acceptance.CONFIRMED
@@ -623,14 +644,27 @@ def test_create_student_with_existing_invited(settings):
         branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
         confirmation_ends_at=future_dt,
     )
+    applicant_data = {
+            "yandex_profile": {
+                "application_ya_login": "yandex_login",
+                "application_ya_id": "12345",
+                "application_ya_first_name": "YandexFirstName",
+                "application_ya_last_name": "YandexLastName",
+                "application_ya_display_name": "YandexDisplayName",
+                "application_ya_real_name": "YandexRealName",
+            }
+        }
+
     acceptance = AcceptanceFactory(
+        applicant__data=applicant_data,
         status=Acceptance.WAITING,
         applicant__campaign=campaign,
         applicant__email=ACCOUNT_DATA_WITHOUT_PATRONYMIC.email,
         applicant__university=None,
         applicant__university_other="University2",
         applicant__level_of_education=None,
-        applicant__level_of_education_other="Bachelor2"
+        applicant__level_of_education_other="Bachelor2",
+        applicant__yandex_login="yandex_login"
     )
     applicant = acceptance.applicant
     student = InvitedStudentFactory(email=applicant.email,
@@ -649,6 +683,11 @@ def test_create_student_with_existing_invited(settings):
     user_consents = UserConsent.objects.filter(user=user)
     assert set(user_consents.values_list("type", flat=True)) == ConsentTypes.regular_student_consents
     assert all(timezone.now() - created <= datetime.timedelta(seconds=5) for created in user_consents.values_list("created", flat=True))
+
+    # Check that yandex_login is stored in YandexUserData
+    assert user.yandex_login
+    assert user.yandex_login == applicant.yandex_login
+
     for field in dataclasses.fields(ACCOUNT_DATA_WITHOUT_PATRONYMIC):
         assert getattr(user, field.name) == getattr(ACCOUNT_DATA_WITHOUT_PATRONYMIC, field.name)
     assert applicant.user == user
@@ -733,3 +772,144 @@ def test_create_student_email_case_insensitive(settings, get_test_image):
     account_data1 = dataclasses.replace(ACCOUNT_DATA, email="TEST@example.com")
     user2 = create_student(acceptance, account_data1, PROFILE_DATA)
     assert user2.pk == user1.pk
+
+
+@pytest.mark.django_db
+def test_create_student_with_empty_yandex_login(settings):
+    """Test creating a student with an empty yandex_login field."""
+    future_dt = get_now_utc() + datetime.timedelta(days=5)
+    campaign = CampaignFactory(
+        year=2011,
+        branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
+        confirmation_ends_at=future_dt,
+    )
+    acceptance = AcceptanceFactory(
+        status=Acceptance.WAITING,
+        applicant__campaign=campaign,
+    )
+    
+    # Create account data with empty yandex_login
+    account_data_empty_yandex = ACCOUNT_DATA
+    
+    # Create student with empty yandex_login
+    user = create_student(acceptance, account_data_empty_yandex, PROFILE_DATA)
+    
+    # Verify that no YandexUserData was created
+    from django.core.exceptions import ObjectDoesNotExist
+    with pytest.raises(ObjectDoesNotExist):
+        user.yandex_data  # This will raise ObjectDoesNotExist if yandex_data doesn't exist
+    
+    # Verify other fields were set correctly
+    for field in dataclasses.fields(account_data_empty_yandex):
+        assert getattr(user, field.name) == getattr(account_data_empty_yandex, field.name)
+
+
+@pytest.mark.django_db
+def test_create_student_with_null_yandex_login(settings):
+    """Test creating a student with a null yandex_login field."""
+    future_dt = get_now_utc() + datetime.timedelta(days=5)
+    campaign = CampaignFactory(
+        year=2011,
+        branch=BranchFactory(site=SiteFactory(pk=settings.SITE_ID)),
+        confirmation_ends_at=future_dt,
+    )
+    acceptance = AcceptanceFactory(
+        status=Acceptance.WAITING,
+        applicant__campaign=campaign,
+    )
+    
+    # Create account data with null yandex_login
+    account_data_null_yandex = ACCOUNT_DATA
+    
+    # Create student with null yandex_login
+    user = create_student(acceptance, account_data_null_yandex, PROFILE_DATA)
+    
+    # Verify that no YandexUserData was created
+    from django.core.exceptions import ObjectDoesNotExist
+    with pytest.raises(ObjectDoesNotExist):
+        user.yandex_data  # This will raise ObjectDoesNotExist if yandex_data doesn't exist
+    
+    # Verify other fields were set correctly
+    for field in dataclasses.fields(account_data_null_yandex):
+        assert getattr(user, field.name) == getattr(account_data_null_yandex, field.name)
+
+
+@pytest.mark.django_db
+def test_create_applicant_status_log():
+    """Test the create_applicant_status_log service function."""
+    # Create an applicant with a status
+    applicant = ApplicantFactory(status=ApplicantStatuses.PENDING)
+    
+    # Create a user to be the editor
+    editor = UserFactory()
+    
+    # Create a log entry
+    log = create_applicant_status_log(
+        applicant=applicant,
+        new_status=ApplicantStatuses.PASSED_EXAM,
+        editor=editor
+    )
+    
+    # Check that the log was created correctly
+    assert log is not None
+    assert log.applicant == applicant
+    assert log.former_status == ApplicantStatuses.PENDING
+    assert log.status == ApplicantStatuses.PASSED_EXAM
+    assert log.entry_author == editor
+    
+    # Check that the log is in the database
+    assert applicant.status_logs.count() == 1
+    assert applicant.status_logs.first() == log
+
+
+@pytest.mark.django_db
+def test_create_applicant_status_log_no_change():
+    """Test that create_applicant_status_log returns None when status doesn't change."""
+    from admission.services import create_applicant_status_log
+    
+    # Create an applicant with a status
+    applicant = ApplicantFactory(status=ApplicantStatuses.PENDING)
+    
+    # Try to create a log entry with the same status
+    log = create_applicant_status_log(
+        applicant=applicant,
+        new_status=ApplicantStatuses.PENDING
+    )
+    
+    # Check that no log was created
+    assert log is None
+    assert applicant.status_logs.count() == 0
+
+
+@pytest.mark.django_db
+def test_create_applicant_status_log_invalid_status():
+    """Test that create_applicant_status_log raises ValidationError for invalid status."""
+    from admission.services import create_applicant_status_log
+    
+    # Create an applicant with a status
+    applicant = ApplicantFactory(status=ApplicantStatuses.PENDING)
+    
+    # Try to create a log entry with an invalid status
+    with pytest.raises(ValidationError) as excinfo:
+        create_applicant_status_log(
+            applicant=applicant,
+            new_status="invalid_status"
+        )
+    
+    assert "Unknown Applicant Status" in str(excinfo.value)
+    assert applicant.status_logs.count() == 0
+
+
+@pytest.mark.django_db
+def test_manual_status_change():
+    """Test the manual_status_change context manager."""
+    
+    # By default, status changes are not being handled manually
+    assert not is_status_change_handled()
+    
+    # Inside the context manager, status changes should be marked as handled
+    with manual_status_change():
+        assert is_status_change_handled()
+    
+    # After exiting the context manager, status changes should not be marked as handled
+    assert not is_status_change_handled()

@@ -24,7 +24,7 @@ from users.models import User, UserGroup, YandexUserData
 from users.permissions import ViewAccountConnectedServiceProvider
 from users.tests.factories import (
     CuratorFactory, OnlineCourseRecordFactory, SHADCourseRecordFactory, StudentFactory,
-    StudentProfileFactory, UserFactory, add_user_groups, TeacherFactory
+    StudentProfileFactory, UserFactory, YandexUserDataFactory, add_user_groups, TeacherFactory
 )
 
 
@@ -119,19 +119,6 @@ def test_logout_redirect_works(client):
     assert response.status_code == 302
     assert response.url == "/abc"
 
-
-@pytest.mark.django_db
-def test_yandex_login_from_email(client, settings):
-    """
-    yandex_login can be extracted from email if email domain is @yandex.ru
-    """
-    branch = BranchFactory()
-    user = User.objects.create_user("testuser1", "foo@bar.net",
-                                    "test123foobar@!", branch=branch)
-    assert not user.yandex_login
-    user = User.objects.create_user("testuser2", "foo@yandex.ru",
-                                    "test123foobar@!", branch=branch)
-    assert user.yandex_login == "foo"
 
 
 @pytest.mark.django_db
@@ -245,6 +232,7 @@ def test_user_detail_view(client, assert_login_redirect):
 def test_view_user_can_update_profile(client, assert_redirect):
     test_note = "The best user in the world"
     user = StudentFactory()
+    YandexUserDataFactory.create(user=user)
     client.login(user)
     response = client.get(user.get_absolute_url())
     assert response.status_code == 200
@@ -443,7 +431,8 @@ def test_view_connected_auth_services_smoke(client, settings, lms_resolver):
 @pytest.mark.django_db
 def test_view_user_detail_yandex_login_field_visibility(client):
     teacher = TeacherFactory()
-    student, another_student = StudentFactory.create_batch(2)
+    student = StudentFactory()
+    another_student = StudentFactory()
     url = student.get_absolute_url()
 
     client.login(another_student)
@@ -454,34 +443,29 @@ def test_view_user_detail_yandex_login_field_visibility(client):
     client.login(teacher)
     response = client.get(url)
     data = response.content.decode('utf-8')
-    assert '[Аккаунт не подключён]' in data
+    assert '[Account is not connected]' in data
 
     client.login(student)
     response = client.get(url)
     data = response.content.decode('utf-8')
-    assert '[Войти через Яндекс]' in data
+    assert '[Login by Yandex]' in data
 
+    # Update the yandex login
     yandex_login = 'YandexLogin'
-    student.yandex_login = yandex_login
-    student.save()
+    YandexUserDataFactory.create(user=student, login=yandex_login)
+    
     response = client.get(url)
     data = response.content.decode('utf-8')
     assert yandex_login in data
-    assert '[Подтвердить]' in data
+    assert '[Change]' in data
 
-    client.login(teacher)
-    response = client.get(url)
-    data = response.content.decode('utf-8')
-    assert yandex_login in data
-    assert '[Не подтверждено]' in data
-
+    # Update with UID
     uid = '1337'
-    data = YandexUserData(
-        user=student,
-        login=yandex_login,
-        uid=uid
-    )
-    data.save()
+    student.yandex_data.uid = uid
+    student.yandex_data.save()
+    student.refresh_from_db()
+    
+    client.login(teacher)
     response = client.get(url)
     data = response.content.decode('utf-8')
     assert yandex_login in data
@@ -492,19 +476,26 @@ def test_view_user_detail_yandex_login_field_visibility(client):
     data = response.content.decode('utf-8')
     assert yandex_login in data
     assert f"({uid})" not in data
-    assert '[Изменить]' in data
+    assert '[Change]' in data
 
 
 @pytest.mark.django_db
 def test_view_user_update_student_cant_change_yandex_login(client, assert_redirect):
     student = StudentFactory()
+    YandexUserDataFactory.create(user=student)
     client.login(student)
     url = student.get_update_profile_url()
     response = client.get(url)
     form = response.context_data['form']
-    assert 'yandex_login' not in form.rendered_fields
-    assert 'yandex_login' not in form.helper.layout.fields[0].fields
-    yandex_login = 'YandexLogin'
+    # Form should have yandex_login field init disabled
+    assert form.fields['yandex_login'].disabled == True
+    assert form.initial['yandex_login'] == student.yandex_data.login
+    
+    # Get the original login value
+    original_login = student.yandex_data.login
+    
+    # Try to update with a new login value
+    new_login = 'NewYandexLogin'
     form_data = {
         'birth_date': '',
         'phone': '',
@@ -513,7 +504,7 @@ def test_view_user_update_student_cant_change_yandex_login(client, assert_redire
         'time_zone': 'Europe/Moscow',
         'telegram_username': '',
         'github_login': 'testing',
-        'yandex_login': yandex_login,
+        'yandex_login': new_login,  # This field should be ignored
         'stepic_id': '',
         'codeforces_login': '',
         'private_contacts': '',
@@ -522,22 +513,33 @@ def test_view_user_update_student_cant_change_yandex_login(client, assert_redire
     }
     response = client.post(url, form_data)
     assert_redirect(response, student.get_absolute_url())
+    
+    # Refresh the user and check that yandex_data.login hasn't changed
     student.refresh_from_db()
-    assert not student.yandex_login
+    student.yandex_data.refresh_from_db()
+    assert student.yandex_data.login == original_login
+    assert student.yandex_data.login != new_login
 
 
 @pytest.mark.django_db
 def test_view_user_update_curator_cant_change_yandex_login(client, assert_redirect):
     curator = CuratorFactory()
     student = StudentFactory()
+    YandexUserDataFactory.create(user=student)
+    YandexUserDataFactory.create(user=curator)
     url = student.get_update_profile_url()
     client.login(curator)
     response = client.get(url)
     form = response.context_data['form']
-    assert 'yandex_login' not in form.rendered_fields
-    assert 'yandex_login' not in form.helper.layout.fields[0].fields
+    # Form should have yandex_login field init disabled
+    assert form.fields['yandex_login'].disabled == True
+    assert form.initial['yandex_login'] == student.yandex_data.login
 
-    yandex_login = 'YandexLogin'
+    # Get the original login value
+    original_login = student.yandex_data.login
+    
+    # Try to update with a new login value
+    new_login = 'NewYandexLogin'
     form_data = {
         'birth_date': '',
         'phone': '',
@@ -546,7 +548,7 @@ def test_view_user_update_curator_cant_change_yandex_login(client, assert_redire
         'time_zone': 'Europe/Moscow',
         'telegram_username': '',
         'github_login': 'testing',
-        'yandex_login': yandex_login,
+        'yandex_login': new_login,  # This field should be ignored
         'stepic_id': '',
         'codeforces_login': '',
         'private_contacts': '',
@@ -555,8 +557,12 @@ def test_view_user_update_curator_cant_change_yandex_login(client, assert_redire
     }
     response = client.post(url, form_data)
     assert_redirect(response, student.get_absolute_url())
+    
+    # Refresh the user and check that yandex_data.login hasn't changed
     student.refresh_from_db()
-    assert not student.yandex_login
+    student.yandex_data.refresh_from_db()
+    assert student.yandex_data.login == original_login
+    assert student.yandex_data.login != new_login
 
 @pytest.mark.django_db
 @pytest.mark.parametrize('user_factory', [
@@ -565,6 +571,7 @@ def test_view_user_update_curator_cant_change_yandex_login(client, assert_redire
 ])
 def test_view_user_update_student_cant_change_birth_date(client, assert_redirect, user_factory):
     user = user_factory()
+    YandexUserDataFactory.create(user=user)
     client.login(user)
     url = user.get_update_profile_url()
     response = client.get(url)
