@@ -157,7 +157,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             .order_by("-diploma_issued_on")
             .values_list("diploma_issued_on", flat=True)
         )
-        send_letters_form = SendLettersForm()
+        send_letters_form = SendLettersForm(request=self.request)
         branches = Branch.objects.filter(site_id=settings.SITE_ID)
         context = {
             "alumni_profiles_form": graduation_form,

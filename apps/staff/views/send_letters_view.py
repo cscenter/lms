@@ -45,14 +45,7 @@ class SendLettersView(CuratorOnlyMixin, View):
         template = get_email_template(template)
         email_from = "Школа анализа данных <noreply@yandexdataschool.ru>"
 
-        scheduled_time = None
-        if data:
-            if isinstance(data, str):
-                scheduled_time = dateutil.parser.parse(data)
-                if timezone.is_naive(scheduled_time):
-                    scheduled_time = timezone.make_aware(scheduled_time, timezone.get_current_timezone())
-            else:
-                scheduled_time = data
+        scheduled_time = data if data else None
 
         sent_count = 0
         for recipient in emails:
@@ -110,7 +103,10 @@ class SendLettersView(CuratorOnlyMixin, View):
         
         emails = list(StudentProfile.objects.filter(query).select_related('user').values_list('user__email', flat=True).distinct())
         
-        schedule_info = f" (запланировано на {scheduled_time.strftime('%d.%m.%Y %H:%M')})"
+        if scheduled_time and  scheduled_time > timezone.now():
+            schedule_info = f" (запланировано на {scheduled_time.strftime('%d.%m.%Y %H:%M %Z')})"
+        else:
+            schedule_info = " (сразу)"
         filter_description.append(f"Отправляем {len(emails)} emails{schedule_info}")
         
         return emails, filter_description
@@ -261,6 +257,12 @@ class SendLettersView(CuratorOnlyMixin, View):
         Handle sending emails to selected students.
         """
         try:
+            if scheduled_time:
+                request.session['scheduled_time'] = scheduled_time.isoformat()
+            else:
+                request.session['scheduled_time'] = None
+
+
             emails, filter_description = self.send_letters(
                 email_template_id, branch, year_of_admission, year_of_curriculum, 
                 student_type, status, academic_disciplines, scheduled_time
@@ -268,14 +270,6 @@ class SendLettersView(CuratorOnlyMixin, View):
             
             request.session['email_template_id'] = email_template_id
             request.session['emails'] = emails
-            
-            if scheduled_time:
-                if timezone.is_naive(scheduled_time):
-                    scheduled_time = timezone.make_aware(scheduled_time, timezone.get_current_timezone())
-                request.session['scheduled_time'] = scheduled_time.isoformat()
-            else:
-                request.session['scheduled_time'] = None
-                
             request.session['filter_description'] = filter_description
             
             return HttpResponseRedirect(reverse("staff:send_letters"))

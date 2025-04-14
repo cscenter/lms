@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-14 09:10+0000\n"
+"POT-Creation-Date: 2025-04-14 10:36+0000\n"
 "PO-Revision-Date: 2025-03-03 15:47+0000\n"
 "Last-Translator: Софья Аноховская <cinnabun@yandex-team.ru>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,7 +57,7 @@ msgid "Student ID"
 msgstr "ID Студента"
 
 #: apps/api/management/commands/weekly_dump_to_yandex_disk.py:48
-#: apps/staff/forms.py:126 apps/staff/views/enrolees_selection.py:120
+#: apps/staff/forms.py:127 apps/staff/views/enrolees_selection.py:120
 #: apps/staff/views/send_letters_view.py:98
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:136
 #: lms/jinja2/lms/user_profile/user_detail.html:67
@@ -93,7 +93,7 @@ msgstr "Курс"
 #: apps/courses/models.py:728 apps/learning/admin.py:83
 #: apps/learning/gradebook/views.py:240 apps/learning/models.py:78
 #: apps/learning/models.py:1100 apps/library/models.py:66
-#: apps/staff/filters.py:130 apps/staff/filters.py:205 apps/staff/forms.py:108
+#: apps/staff/filters.py:130 apps/staff/filters.py:205 apps/staff/forms.py:109
 #: apps/staff/views/enrolees_selection.py:117
 #: apps/staff/views/send_letters_view.py:85 apps/staff/views/views.py:920
 #: apps/staff/views/views.py:984 apps/study_programs/models.py:65
@@ -106,7 +106,7 @@ msgid "Branch"
 msgstr "Отделение"
 
 #: apps/api/management/commands/weekly_dump_to_yandex_disk.py:48
-#: apps/staff/forms.py:114 apps/staff/views/enrolees_selection.py:118
+#: apps/staff/forms.py:115 apps/staff/views/enrolees_selection.py:118
 #: apps/staff/views/send_letters_view.py:90
 msgid "Student type"
 msgstr "Тип студента"
@@ -1607,7 +1607,7 @@ msgstr "Посылка к заданию"
 
 #: apps/grading/models.py:93 apps/learning/forms.py:77
 #: apps/learning/study/forms.py:69 apps/staff/filters.py:189
-#: apps/staff/forms.py:132 apps/staff/views/send_letters_view.py:103
+#: apps/staff/forms.py:133 apps/staff/views/send_letters_view.py:103
 #: apps/staff/views/views.py:985 apps/users/models.py:224
 #: apps/users/models.py:815 apps/users/models.py:1114
 #: lms/jinja2/lms/staff/status_log.html:21
@@ -2426,7 +2426,7 @@ msgstr "Дата выпуска"
 msgid "Graduation ceremony date"
 msgstr "Дата выпускного считается датой выпуска студента"
 
-#: apps/learning/models.py:1168 apps/staff/forms.py:138
+#: apps/learning/models.py:1168 apps/staff/forms.py:139
 #: apps/staff/views/send_letters_view.py:109 apps/users/models.py:893
 msgid "Fields of study"
 msgstr "Направления обучения"
@@ -2988,83 +2988,81 @@ msgstr "Учится"
 msgid "Former status"
 msgstr "Прошлый статус"
 
-#: apps/staff/forms.py:23
+#: apps/staff/forms.py:24
 msgid "Date of Graduation"
 msgstr "Дата выпуска"
 
-#: apps/staff/forms.py:39
+#: apps/staff/forms.py:40
 msgid "Major User email"
 msgstr "Почта основного пользователя"
 
-#: apps/staff/forms.py:42
+#: apps/staff/forms.py:43
 msgid "Minor User email"
 msgstr "Почта дублирующего пользователя"
 
-#: apps/staff/forms.py:54
+#: apps/staff/forms.py:55
 msgid "Merge Users"
 msgstr "Объединить пользователей"
 
-#: apps/staff/forms.py:61 apps/staff/forms.py:67
+#: apps/staff/forms.py:62 apps/staff/forms.py:68
 msgid "There is no User with this email"
 msgstr "Пользователя с такой почтой не существует"
 
-#: apps/staff/forms.py:74
+#: apps/staff/forms.py:75
 msgid "Emails must not be the same"
 msgstr "Почты должны различаться"
 
-#: apps/staff/forms.py:77
+#: apps/staff/forms.py:78
 msgid "CSV file"
 msgstr "Файл CSV"
 
-#: apps/staff/forms.py:87
+#: apps/staff/forms.py:88
 msgid "Fill in badge numbers"
 msgstr "Залить номера пропусков"
 
-#: apps/staff/forms.py:101 apps/users/services.py:627
+#: apps/staff/forms.py:102 apps/users/services.py:627
 msgid "CSV file must contain \"Email\" and \"Badge number\" columns"
 msgstr ""
 "Файл CSV должен содержать колонки с заголовками «Почта» и «Номер пропуска»"
 
-#: apps/staff/forms.py:120 apps/staff/views/send_letters_view.py:94
+#: apps/staff/forms.py:121 apps/staff/views/send_letters_view.py:94
 msgid "Admission year"
 msgstr "Год поступления"
 
-#: apps/staff/forms.py:144
+#: apps/staff/forms.py:145
 msgid "Email template"
 msgstr "Шаблон письма"
 
-#: apps/staff/forms.py:149
+#: apps/staff/forms.py:150
 msgid "Test email"
 msgstr "Почта для теста"
 
-#: apps/staff/forms.py:153
-#, fuzzy
-#| msgid "Schedule sending time"
-msgid "Schedule sending time (Moscow time)"
+#: apps/staff/forms.py:154
+msgid "Schedule sending time"
 msgstr "Запланированное время отправки"
 
-#: apps/staff/forms.py:155
-msgid "Time is in Moscow timezone (UTC+3)"
-msgstr ""
+#: apps/staff/forms.py:188
+msgid "Time is in timezone {}"
+msgstr "Время в временно зоне"
 
-#: apps/staff/forms.py:225
+#: apps/staff/forms.py:218
 #: apps/staff/templates/staff/confirm_send_letters.html:16
 msgid "Filters"
 msgstr "Фильтры"
 
-#: apps/staff/forms.py:239
+#: apps/staff/forms.py:232
 msgid "Testing letter"
 msgstr "Тестовое письмо"
 
-#: apps/staff/forms.py:243
+#: apps/staff/forms.py:236
 msgid "Send for testing"
 msgstr "Отправить тест"
 
-#: apps/staff/forms.py:248
+#: apps/staff/forms.py:241
 msgid "Sending letter"
 msgstr "Отправка писем"
 
-#: apps/staff/forms.py:255
+#: apps/staff/forms.py:248
 msgid "Ready to send"
 msgstr "Готово к отправке"
 

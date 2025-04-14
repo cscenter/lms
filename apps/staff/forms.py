@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 import pytz
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
@@ -150,9 +151,8 @@ class SendLettersForm(forms.Form):
         required=False
     )
     scheduled_time = forms.DateTimeField(
-        label=_("Schedule sending time (Moscow time)"),
+        label=_("Schedule sending time"),
         required=False,
-        help_text=_("Time is in Moscow timezone (UTC+3)"),
         # Initial value will be set in __init__
     )
     action = forms.CharField(
@@ -163,59 +163,52 @@ class SendLettersForm(forms.Form):
     def clean_scheduled_time(self):
         scheduled_time = self.cleaned_data.get('scheduled_time')
         if scheduled_time:
-            # If the scheduled_time is naive (no timezone info), assume it's in Moscow timezone
-            if timezone.is_naive(scheduled_time):
-                moscow_tz = pytz.timezone('Europe/Moscow')
-                scheduled_time = timezone.make_aware(scheduled_time, moscow_tz)
-            
-            # Check if the scheduled time is in the past
             if scheduled_time <= timezone.now():
-                scheduled_time = timezone.now()
+                scheduled_time = None
+            elif not timezone.is_naive(scheduled_time):
+                naive_dt = datetime(
+                    scheduled_time.year, scheduled_time.month, scheduled_time.day,
+                    scheduled_time.hour, scheduled_time.minute
+                )
+                scheduled_time = self.tz.localize(naive_dt)
+                # scheduled_time = self.tz.localize(scheduled_time)
+                # scheduled_time = scheduled_time.astimezone(self.tz) #timezone.make_aware(scheduled_time, self.tz)
+            else:
+                scheduled_time = timezone.make_aware(scheduled_time, self.tz)
         
         return scheduled_time
     
     def __init__(self, *args, **kwargs):
-        # Extract request from kwargs if present
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         
-        # Always use Moscow timezone
-        moscow_tz = pytz.timezone('Europe/Moscow')
-        # Get current time in Moscow timezone
-        moscow_time = timezone.localtime(timezone.now(), moscow_tz) + timezone.timedelta(hours=1)
-        # Make it naive by removing timezone info to prevent Django from converting it
-        naive_moscow_time = moscow_time.replace(tzinfo=None)
-        self.fields['scheduled_time'].initial = naive_moscow_time
+        self.tz = self.request.user.time_zone if self.request.user.time_zone else pytz.timezone('Europe/Moscow')
+        local_time = timezone.localtime(timezone.now(), self.tz)
+        self.fields['scheduled_time'].initial = local_time.strftime('%d.%m.%Y %H:%M')
+        self.fields['scheduled_time'].help_text = f"Временная зона {getattr(self.tz, 'zone', str(self.tz))} {datetime.now(self.tz).strftime('%z')[:3]}"
         
-        # Set student types from StudentTypes model
         self.fields['type'].choices = StudentTypes.choices
         
-        # Set student statuses from StudentStatuses model
         self.fields['status'].choices = [(k, v) for k, v in StudentStatuses.values.items()]
         
-        # Get branches from the database
         branches = Branch.objects.filter(site_id=settings.SITE_ID)
         self.fields['branch'].choices = [(str(b.pk), b.name) for b in branches]
         
-        # Get admission years from student profiles
         admission_years = StudentProfile.objects.filter(
             site_id=settings.SITE_ID, 
             year_of_admission__isnull=False
         ).values_list('year_of_admission', flat=True).order_by('-year_of_admission').distinct()
         self.fields['year_of_admission'].choices = [(str(year), str(year)) for year in admission_years]
         
-        # Get curriculum years from student profiles
         curriculum_years = StudentProfile.objects.filter(
             site_id=settings.SITE_ID, 
             year_of_curriculum__isnull=False
         ).values_list('year_of_curriculum', flat=True).order_by('-year_of_curriculum').distinct()
         self.fields['year_of_curriculum'].choices = [(str(year), str(year)) for year in curriculum_years]
         
-        # Get academic disciplines
         academic_disciplines = AcademicDiscipline.objects.all().order_by('name')
         self.fields['academic_disciplines'].choices = [(str(d.pk), d.name) for d in academic_disciplines]
         
-        # Get email templates
         email_templates = EmailTemplate.objects.all().order_by('name')
         self.fields['email_template'].choices = [(str(t.pk), t.name) for t in email_templates]
         
