@@ -282,7 +282,7 @@ class TestSendLettersView:
         assert response.status_code == 302
         assert response.url == reverse(expected_redirect)
     
-    def test_dispatch_with_session_data(self, client, curator):
+    def test_dispatch_with_session_data(self, client, curator, email_template):
         """Test the dispatch method with session data."""
         # Arrange
         client.login(curator)
@@ -290,6 +290,7 @@ class TestSendLettersView:
         session = client.session
         session['emails'] = ["test@example.com"]
         session['filter_description'] = ["Test filter"]
+        session['email_template_id'] = email_template.id
         session.save()
         
         # Act
@@ -345,7 +346,7 @@ class TestSendLettersView:
         assert len(messages) == 1
         assert "Отправка писем отменена" in str(messages[0])
     
-    def test_show_confirmation_page(self, client, curator):
+    def test_show_confirmation_page(self, client, curator, email_template):
         """Test the show_confirmation_page method."""
         # Arrange
         client.login(curator)
@@ -353,6 +354,7 @@ class TestSendLettersView:
         session = client.session
         session['emails'] = ["test@example.com"]
         session['filter_description'] = ["Test filter"]
+        session['email_template_id'] = email_template.id
         session.save()
         
         # Act
