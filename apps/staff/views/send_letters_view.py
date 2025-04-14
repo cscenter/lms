@@ -127,6 +127,9 @@ class SendLettersView(CuratorOnlyMixin, View):
         if 'cancel_send' in request.POST:
             return self.handle_cancel_send(request)
         
+        if 'confirm_have_been' in request.session:
+            self.clear_session_data(request)
+        
         if 'emails' in request.session and 'filter_description' in request.session:
             return self.show_confirmation_page(request)
         
@@ -177,8 +180,12 @@ class SendLettersView(CuratorOnlyMixin, View):
         """
         Show the confirmation page before sending emails.
         """
+        request.session["confirm_have_been"] = True
         emails = request.session.get('emails', [])
         filter_description = request.session.get('filter_description', [])
+        template_id = request.session.get('email_template_id', [])
+        if template_id:
+            template = EmailTemplate.objects.get(pk=template_id).name
         
         logger.debug("Session data in confirmation block: %s", dict(request.session))
         
@@ -186,6 +193,7 @@ class SendLettersView(CuratorOnlyMixin, View):
             'emails': emails,
             'email_count': len(emails),
             'filter_description': filter_description,
+            'template': template,
         }
         
         return render(request, 'staff/confirm_send_letters.html', context)
@@ -296,6 +304,7 @@ class SendLettersView(CuratorOnlyMixin, View):
         request.session.pop('emails', None)
         request.session.pop('scheduled_time', None)
         request.session.pop('filter_description', None)
+        request.session.pop('confirm_have_been', None)
         
         request.session.modified = True
         request.session.save()

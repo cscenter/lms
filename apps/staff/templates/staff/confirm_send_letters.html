@@ -13,7 +13,7 @@
             <div class="alert alert-info">
                 <p>Вы собираетесь отправить электронные письма <strong>{{ email_count }}</strong> получателям.</p>
                 
-                <h4>{% trans "Фильтры" %}:</h4>
+                <h4>{% trans "Filters" %}:</h4>
                 <ul>
                     {% for criteria in filter_description %}
                         <li>{{ criteria }}</li>
@@ -30,6 +30,10 @@
                         </ul>
                     </div>
                 {% endif %}
+                <h4>{% trans "Template" %}:</h4>
+                <ul>
+                    <li>{{ template }}</li>
+                </ul>
             </div>
             
             <div class="row">
