@@ -2,6 +2,7 @@
 
 from collections import OrderedDict
 from decimal import Decimal
+import json
 
 from import_export import fields, resources, widgets
 from import_export.instance_loaders import CachedInstanceLoader
@@ -140,6 +141,22 @@ class OlympiadResource(ContestDetailsMixin, resources.ModelResource):
         skip_unchanged = True
         fields = ("applicant", "score", "math_score", "status", "details")
         instance_loader_class = CachedInstanceLoader
+        
+    def dehydrate_details(self, obj):
+        return json.dumps(obj.details)
+    
+    def hydrate_details(self, value):
+        if value and isinstance(value, str):
+            try:
+                return json.loads(value)
+            except json.JSONDecodeError:
+                return value
+        return value
+        
+    def before_import(self, data, using_transactions, dry_run, **kwargs):
+        if "details" in data.headers:
+            for element in data["details"]:
+                element = self.hydrate_details(element)
 
     def before_import_row(self, row, **kwargs):
         """Double check that score is always a valid type, on DB level we
