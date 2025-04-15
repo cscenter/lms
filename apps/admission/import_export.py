@@ -14,14 +14,22 @@ from admission.models import Exam, Olympiad, Test
 # XXX: Not tested with django-import-export==1.0.1
 
 
-class JsonFieldWidget(widgets.Widget):
-    # TODO: Maybe should check str type here and parse it to dict
+class JsonFieldWidget(widgets.Widget):    
+
     def clean(self, value, row=None, *args, **kwargs):
-        return super(JsonFieldWidget, self).clean(value)
+        value = super(JsonFieldWidget, self).clean(value)
+        if value and isinstance(value, str):
+            try:
+                return json.loads(value)
+            except json.JSONDecodeError:
+                return value
+        return value
 
     def render(self, value, obj=None):
         if value:
-            return "\n".join("{}: {}".format(k, v) for k, v in value.items())
+            if isinstance(value, dict) or isinstance(value, list):
+                return json.dumps(value)
+            return str(value)
         return ""
 
 
@@ -37,7 +45,6 @@ class ContestDetailsMixin:
 
     def before_import(self, data, using_transactions, dry_run, **kwargs):
         if "details" in data.headers:
-            print("Column `details` will be replaced")
             del data["details"]
         data.append_col(self.row_collect_details(data.headers), header="details")
 
