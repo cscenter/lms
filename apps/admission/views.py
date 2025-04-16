@@ -577,7 +577,7 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
                 exam__score_coalesce=Coalesce(
                     "exam__score", Value(-1, output_field=ScoreField())
                 ),
-                test__score_coalesce=Coalesce("online_test__score", Value(-1)),
+                test__score_coalesce=Coalesce("online_test__score", Value(-1, output_field=ScoreField())),
                 olympiad__total_score_coalesce=Coalesce(
                     F("olympiad__score") + F("olympiad__math_score"),
                     Value(-1, output_field=ScoreField())
