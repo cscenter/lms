@@ -23,12 +23,13 @@ docker-compose.override.yml
 # TODO: replace public/ with submodule, add to ignore here
 *-debug.log
 
-
-
 # Translations
 *.mo
 *.pot
 .python-version
+
+# Roo
+.roomodes
 
 # Unstable memory-bank 
 memory-bank/activeContext.md

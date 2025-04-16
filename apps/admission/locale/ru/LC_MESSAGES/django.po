@@ -19,8 +19,8 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.9.9\n"
 
-#: apps/admission/admin.py:48 apps/admission/admin.py:120
-#: apps/admission/admin.py:492 apps/admission/filters.py:70
+#: apps/admission/admin.py:50 apps/admission/admin.py:122
+#: apps/admission/admin.py:535 apps/admission/filters.py:70
 #: apps/admission/filters.py:109 apps/admission/filters.py:351
 #: apps/admission/models.py:173 apps/admission/models.py:1250
 #: apps/admission/models.py:1479 apps/admission/models.py:1896
@@ -33,6 +33,12 @@ msgstr "Набор"
 msgid "Branch"
 msgstr "Отделение"
 
+#: apps/admission/admin.py:126 apps/admission/admin.py:510
+#: apps/admission/admin.py:531 apps/admission/models.py:665
+#: apps/admission/models.py:804 apps/admission/models.py:1134
+#: apps/admission/models.py:1180 apps/admission/models.py:1226
+#: apps/admission/models.py:1390 apps/admission/models.py:1780
+#: apps/admission/models.py:1883 apps/admission/views.py:949
 #: apps/admission/admin.py:124 apps/admission/admin.py:467
 #: apps/admission/admin.py:488 apps/admission/models.py:665
 #: apps/admission/models.py:808 apps/admission/models.py:1136
@@ -42,21 +48,23 @@ msgstr "Отделение"
 msgid "Applicant"
 msgstr "Поступающий"
 
-#: apps/admission/admin.py:230
+#: apps/admission/admin.py:273
 msgid "Created"
 msgstr "Создано"
 
+#: apps/admission/admin.py:326 apps/admission/admin.py:407
+#: apps/admission/models.py:1518 apps/admission/views.py:950
 #: apps/admission/admin.py:283 apps/admission/admin.py:364
 #: apps/admission/models.py:1452 apps/admission/views.py:871
 msgid "Interviewer"
 msgstr "Собеседующий"
 
-#: apps/admission/admin.py:284
+#: apps/admission/admin.py:327
 msgid "Interviewers"
 msgstr "Собеседующие"
 
-#: apps/admission/admin.py:318 apps/admission/admin.py:379
-#: apps/admission/views.py:867
+#: apps/admission/admin.py:361 apps/admission/admin.py:422
+#: apps/admission/views.py:946
 msgid "Date"
 msgstr "Дата"
 
@@ -70,11 +78,11 @@ msgstr "Интервью"
 msgid "Accepted"
 msgstr "Принято"
 
-#: apps/admission/admin.py:465
+#: apps/admission/admin.py:508
 msgid "Yes"
 msgstr "Да"
 
-#: apps/admission/admin.py:465
+#: apps/admission/admin.py:508
 msgid "No"
 msgstr "Нет"
 
@@ -207,6 +215,10 @@ msgstr "Тестирование"
 #: apps/admission/models.py:1197
 msgid "Exam"
 msgstr "Экзамен"
+
+#: apps/admission/constants.py:84 apps/admission/filters.py:148
+msgid "Olympiad"
+msgstr "Олимпиада"
 
 #: apps/admission/constants.py:93
 msgid "Not registered in the contest"
@@ -342,10 +354,6 @@ msgstr "Классический"
 #: apps/admission/filters.py:144 apps/admission/forms.py:530
 msgid "Alternative"
 msgstr "Альтернативный"
-
-#: apps/admission/filters.py:148
-msgid "Olympiad"
-msgstr "Олимпиада"
 
 #: apps/admission/filters.py:149
 msgid "Golden ticket"
@@ -1150,6 +1158,27 @@ msgstr "Результаты тестирования"
 msgid "Exams"
 msgstr "Результаты экзамена"
 
+#: apps/admission/models.py:1237
+#| msgctxt "section"
+#| msgid "Math and code"
+msgid "Math Score"
+msgstr "Оценка за математику"
+
+#: apps/admission/models.py:1244
+#| msgid "Section"
+msgid "Location"
+msgstr "Площадка"
+
+#: apps/admission/models.py:1253
+#| msgid "Olympiad"
+msgid "Olympiad Result"
+msgstr "Результат олимпиады"
+
+#: apps/admission/models.py:1254
+#| msgid "Olympiad"
+msgid "Olympiad Results"
+msgstr "Результаты олимпиады"
+
 #: apps/admission/models.py:1226
 msgid "InterviewAssignments|Campaign"
 msgstr "Кампания по набору"
@@ -1438,37 +1467,45 @@ msgstr "Отделения, доступные в городе"
 msgid "Interviewer [Admission]"
 msgstr "Собеседующий [Набор]"
 
-#: apps/admission/services.py:312
+#: apps/admission/services.py:294
 msgid "Interview slot not found"
 msgstr "Слот для собеседования не найден"
 
-#: apps/admission/services.py:315
+#: apps/admission/services.py:297
 msgid "Interview slot is not associated with the invitation"
 msgstr "Слот для собеседования не связан с указанным приглашением"
 
 #: apps/admission/templates/admission/_results_tab.html:8
 #: apps/admission/templates/admission/_results_tab.html:57
+#: apps/admission/templates/admission/_results_tab.html:111
 #: apps/admission/templates/admission/interview_detail.html:23
 msgid "Edit"
 msgstr "Редактирование"
 
-#: apps/admission/views.py:815
+#: apps/admission/views.py:675
+msgid ""
+"Created {} olympiad records and registered {} applicants in the contest."
+msgstr ""
+"Создано {} результатов олимпиады и зарегистрировано {} поступающих на "
+"контест."
+
+#: apps/admission/views.py:894
 msgid "Current campaign"
 msgstr "Активный набор"
 
-#: apps/admission/views.py:825
+#: apps/admission/views.py:904
 msgid "All campaigns"
 msgstr "Все наборы"
 
-#: apps/admission/views.py:868
+#: apps/admission/views.py:947
 msgid "Time"
 msgstr ""
 
-#: apps/admission/views.py:869
+#: apps/admission/views.py:948
 msgid "Section"
 msgstr "Секция"
 
-#: apps/admission/views.py:873
+#: apps/admission/views.py:952
 #, fuzzy
 #| msgid "Format Name"
 msgid "Format"

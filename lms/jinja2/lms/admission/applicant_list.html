@@ -38,6 +38,21 @@
       </div>
     {% endif %}
 
+    {% if show_register_for_olympiad %}
+      <a href="#register_for_olympiad" data-toggle="collapse" aria-expanded="false" class="dashed pb-10"
+         style="display: inline-block; text-decoration: dashed!important;">Регистрация на олимпиаду</a><br>
+      <div class="collapse" id="register_for_olympiad">
+        <div class="pb-10">
+          <a class="btn btn-default mr-10"
+            href="{{ url('admission:applicants:register_for_olympiad', campaign_id=campaign.pk) }}">
+            <i class="fa fa-trophy" aria-hidden="true"></i>
+            Зарегистрировать на олимпиаду
+          </a>
+          <span class="text-muted">Только абитуриентов выбранной наборной кампании со статусом "Допущен к олимпиаде"</span>
+        </div>
+      </div>
+    {% endif %}
+
     <div class="page-content">
       <div class="panel">
         <div class="panel-heading">
@@ -51,6 +66,7 @@
               <th>Поступающий</th>
               <th style="width: 20%;">Набор</th>
               <th style="width: 25%;">Статус</th>
+              <th style="width: 8%;">Олимп.</th>
               <th style="width: 6%;">Тест</th>
               <th style="width: 6%;">Экз.</th>
               <th style="width: 6%;">Cоб.</th>
@@ -80,13 +96,14 @@
                 </td>
                 <td>{{ applicant.campaign.branch.name }},&nbsp;{{ applicant.campaign.year }}</td>
                 <td>{% if applicant.status %}{{ applicant.get_status_display() }}{% else %}-{% endif %}</td>
+                <td>{% if applicant.olympiad %}{{ applicant.olympiad.total_score_display() }}{% else %}-{% endif %}</td>
                 <td>{% if applicant.online_test %}{{ applicant.online_test.score_display() }}{% else %}-{% endif %}</td>
                 <td>{% if applicant.exam %}{{ applicant.exam.score_display() }}{% else %}-{% endif %}</td>
                 <td>{{ applicant.get_all_interview_score() }}</td>
               </tr>
               {% else %}
               <tr>
-                <td colspan="6" class="empty-results">Измените параметры поиска.</td>
+                <td colspan="7" class="empty-results">Измените параметры поиска.</td>
               </tr>
             {% endfor %}
             </tbody>

@@ -87,6 +87,7 @@ class ApplicantStatuses(DjangoChoices):
 class ContestTypes(DjangoChoices):
     TEST = C(1, _("Testing"))
     EXAM = C(2, _("Exam"))
+    OLYMPIAD = C(3, _("Olympiad"))
 
 
 class ChallengeStatuses(DjangoChoices):

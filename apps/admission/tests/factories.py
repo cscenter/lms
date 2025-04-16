@@ -9,7 +9,7 @@ from django.db.models.signals import post_save
 from django.utils import timezone
 
 from admission.constants import WHERE_DID_YOU_LEARN, HasDiplomaStatuses, InterviewFormats, ApplicantStatuses, InterviewSections, \
-    DiplomaDegrees
+    DiplomaDegrees, ContestTypes
 from admission.models import (
     Acceptance,
     Applicant,
@@ -25,6 +25,7 @@ from admission.models import (
     InterviewSlot,
     InterviewStream,
     Test,
+    Olympiad,
 )
 from admission.signals import post_save_interview
 from core.tests.factories import BranchFactory, EmailTemplateFactory, LocationFactory
@@ -95,6 +96,7 @@ class ContestFactory(factory.django.DjangoModelFactory):
 
     campaign = factory.SubFactory(CampaignFactory)
     contest_id = factory.Sequence(lambda n: "%04d" % n)
+    type = ContestTypes.TEST
     # file?
 
 
@@ -103,7 +105,7 @@ class TestFactory(factory.django.DjangoModelFactory):
         model = Test
 
     applicant = factory.SubFactory(ApplicantFactory)
-    score = factory.Sequence(lambda n: "%02d" % n)
+    score = FuzzyInteger(0, 10)
 
 
 class ExamFactory(factory.django.DjangoModelFactory):
@@ -111,7 +113,17 @@ class ExamFactory(factory.django.DjangoModelFactory):
         model = Exam
 
     applicant = factory.SubFactory(ApplicantFactory)
-    score = factory.Sequence(lambda n: "%02d" % n)
+    score = FuzzyInteger(0, 10)
+
+
+class OlympiadFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Olympiad
+
+    applicant = factory.SubFactory(ApplicantFactory)
+    score = FuzzyInteger(0, 10)
+    math_score = FuzzyInteger(0, 10)
+    location = factory.SubFactory(LocationFactory)
 
 
 class InterviewAssignmentFactory(factory.django.DjangoModelFactory):
