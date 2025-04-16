@@ -644,7 +644,7 @@ class RegisterApplicantsForOlympiadView(CuratorOnlyMixin, generic.View):
                     created_count += 1
         return created_count
     
-    def register_in_contest(self, api, applicants):
+    def register_in_contest(self, api, applicants, request):
         """Register applicants in the contest."""
         registered_count = 0
         for olympiad in Olympiad.objects.filter(
@@ -656,6 +656,10 @@ class RegisterApplicantsForOlympiadView(CuratorOnlyMixin, generic.View):
                 registered_count += 1
             except Exception as e:
                 logger.error(f"Error registering applicant {olympiad.applicant_id} in olympiad contest: {e}")
+                messages.error(
+                    request,
+                    f"Error registering applicant {olympiad.applicant_id} in olympiad contest: {e}"
+                )
         return registered_count
     
     def get(self, request, campaign_id):
@@ -667,7 +671,7 @@ class RegisterApplicantsForOlympiadView(CuratorOnlyMixin, generic.View):
         
         # Register applicants in the contest
         api = YandexContestAPI(access_token=campaign.access_token, refresh_token=campaign.refresh_token)
-        registered_count = self.register_in_contest(api, applicants)
+        registered_count = self.register_in_contest(api, applicants, request)
         
         # Add success message
         messages.success(
