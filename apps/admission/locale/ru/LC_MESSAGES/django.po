@@ -8,8 +8,6 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-04 14:45+0000\n"
-"PO-Revision-Date: 2025-04-04 15:02+0000\n"
 "POT-Creation-Date: 2025-04-15 17:58+0000\n"
 "PO-Revision-Date: 2025-04-15 18:00+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
@@ -24,15 +22,11 @@ msgstr ""
 #: apps/admission/admin.py:50 apps/admission/admin.py:122
 #: apps/admission/admin.py:535 apps/admission/filters.py:70
 #: apps/admission/filters.py:109 apps/admission/filters.py:351
-#: apps/admission/models.py:173 apps/admission/models.py:1316
-#: apps/admission/models.py:1545 apps/admission/models.py:1962
 #: apps/admission/models.py:173 apps/admission/models.py:1250
 #: apps/admission/models.py:1479 apps/admission/models.py:1896
 msgid "Campaign"
 msgstr "Набор"
 
-#: apps/admission/admin.py:67 apps/admission/admin.py:514
-#: apps/admission/forms.py:470 apps/admission/models.py:83
 #: apps/admission/admin.py:65 apps/admission/admin.py:471
 #: apps/admission/forms.py:474 apps/admission/models.py:83
 #: apps/admission/models.py:242
@@ -74,16 +68,12 @@ msgstr "Собеседующие"
 msgid "Date"
 msgstr "Дата"
 
-#: apps/admission/admin.py:403 apps/admission/models.py:1438
-#: apps/admission/models.py:1512 apps/admission/models.py:1723
-#: apps/admission/models.py:1802
 #: apps/admission/admin.py:360 apps/admission/models.py:1372
 #: apps/admission/models.py:1446 apps/admission/models.py:1657
 #: apps/admission/models.py:1736
 msgid "Interview"
 msgstr "Интервью"
 
-#: apps/admission/admin.py:506 apps/admission/constants.py:120
 #: apps/admission/admin.py:463 apps/admission/constants.py:125
 msgid "Accepted"
 msgstr "Принято"
@@ -230,7 +220,7 @@ msgstr "Экзамен"
 msgid "Olympiad"
 msgstr "Олимпиада"
 
-#: apps/admission/constants.py:88
+#: apps/admission/constants.py:93
 msgid "Not registered in the contest"
 msgstr "Не зарегистрирован в контесте"
 
@@ -1189,7 +1179,7 @@ msgstr "Результат олимпиады"
 msgid "Olympiad Results"
 msgstr "Результаты олимпиады"
 
-#: apps/admission/models.py:1292
+#: apps/admission/models.py:1226
 msgid "InterviewAssignments|Campaign"
 msgstr "Кампания по набору"
 

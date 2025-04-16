@@ -265,7 +265,6 @@ def test_applicant_status_change_from_special_to_non_special_prevented():
         applicant.full_clean()
     assert 'status' in excinfo.value.error_dict
 
-
 @pytest.mark.django_db
 def test_olympiad_lifecycle():
     applicant = ApplicantFactory()
