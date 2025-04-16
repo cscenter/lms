@@ -8,7 +8,7 @@ from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime
 from django.db.models.signals import post_save
 from django.utils import timezone
 
-from admission.constants import WHERE_DID_YOU_LEARN, InterviewFormats, ApplicantStatuses, InterviewSections, \
+from admission.constants import WHERE_DID_YOU_LEARN, HasDiplomaStatuses, InterviewFormats, ApplicantStatuses, InterviewSections, \
     DiplomaDegrees
 from admission.models import (
     Acceptance,
@@ -67,7 +67,7 @@ class ApplicantFactory(factory.django.DjangoModelFactory):
     patronymic = factory.Sequence(lambda n: f"Patronymic {n}")
     last_name = factory.Sequence(lambda n: f"Surname {n}")
     email = factory.Sequence(lambda n: f"user{n}@foobar.net")
-    phone = factory.Sequence(lambda n: f"123-555-{n}")
+    phone = factory.Sequence(lambda n: f"1235556{n%100}")
     university = factory.SubFactory(UniversityFactory)
     yandex_login = factory.Sequence(lambda n: f"yandex_login_{n}")
     faculty = factory.Sequence(lambda n: f"faculty_{n}")
@@ -81,6 +81,12 @@ class ApplicantFactory(factory.django.DjangoModelFactory):
     where_did_you_learn = factory.fuzzy.FuzzyChoice([x for x, _ in WHERE_DID_YOU_LEARN])
     workplace = factory.Sequence(lambda n: f"Workplace {n}")
     new_track = False
+    is_studying = False
+    has_internship = False
+    has_job = False
+    has_diploma = factory.fuzzy.FuzzyChoice(
+        [x for x, _ in HasDiplomaStatuses.choices]
+    )
 
 
 class ContestFactory(factory.django.DjangoModelFactory):
