@@ -1,5 +1,4 @@
 import csv
-import datetime
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Layout, Row, Submit
@@ -7,6 +6,7 @@ from crispy_forms.layout import Div, Layout, Row, Submit
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 from core.urls import reverse
 from core.widgets import DateInputTextWidget
@@ -100,6 +100,7 @@ class BadgeNumberFromCSVForm(forms.Form):
 
 class ExportForDiplomas(forms.Form):
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request')
         super().__init__(*args, **kwargs)
         # Get all years where there are graduates
         self.graduated_years = self.get_graduated_years()
@@ -125,12 +126,13 @@ class ExportForDiplomas(forms.Form):
         """
         # Get distinct year_of_curriculum values from StudentProfile
         # Optimize by only selecting the year_of_curriculum field and filtering by site
-        current_year = datetime.datetime.now().year
+        current_year = timezone.now().year
+            
         curriculum_years = StudentProfile.objects.filter(
-            year_of_curriculum__isnull=False, 
+            site=self.request.site,
             year_of_curriculum__lte=current_year-2,
             status=""
-        ).values('year_of_curriculum').distinct().values_list('year_of_curriculum', flat=True)
+        ).distinct('year_of_curriculum').values_list('year_of_curriculum', flat=True)
         
         return sorted([year + 2 for year in curriculum_years], reverse=True)
 

@@ -419,7 +419,8 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
         verbose_name=_("User citizenship"),
         max_length=3,
         help_text=_("Citizenship code in OKSM system"),
-        blank=True
+        blank=True,
+        null=True
     )
 
     objects = CustomUserManager()

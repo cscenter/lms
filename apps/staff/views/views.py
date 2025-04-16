@@ -159,7 +159,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             .order_by("-diploma_issued_on")
             .values_list("diploma_issued_on", flat=True)
         )
-        export_for_electronic_diploma = ExportForDiplomas()
+        export_for_electronic_diploma = ExportForDiplomas(request=self.request)
         branches = Branch.objects.filter(site_id=settings.SITE_ID)
         context = {
             "alumni_profiles_form": graduation_form,
@@ -758,7 +758,7 @@ def export_for_electronic_diplomas_view(request: HttpRequest):
     if not request.user.is_curator:
         return HttpResponseForbidden()
     
-    form = ExportForDiplomas(data=request.POST)
+    form = ExportForDiplomas(data=request.POST, request=request)
     
     if form.is_valid():
         graduated_year = int(form.cleaned_data["graduated_year"])
