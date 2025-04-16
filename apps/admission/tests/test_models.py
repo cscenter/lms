@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import ProtectedError
 
 from admission.constants import ContestTypes, InterviewSections, InterviewInvitationStatuses, ApplicantStatuses, ChallengeStatuses
-from admission.models import Contest, Interview, Olympiad
+from admission.models import Applicant, Interview, Olympiad
 from admission.tests.factories import (
     ApplicantFactory,
     CampaignFactory,
