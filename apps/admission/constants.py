@@ -53,6 +53,12 @@ class ApplicantStatuses(DjangoChoices):
     REJECTED_MASTERS_PRESELECT = C("rejected_masters_preselect", _("Refused to enroll the master's program (pre-selection)"))
 
 
+    # Special statuses that allow duplicate emails within the same campaign
+    UNUNIQUE_EMAIL_STATUSES = {
+        REJECTED_BY_EXAM_PRESELECT.value,
+        REJECTED_BY_INTERVIEW_PRESELECT.value,
+    }
+
     # Applicants whose next step is interview.
     # Modern equivalent of INTERVIEW_TOBE_SCHEDULED
     RIGHT_BEFORE_INTERVIEW = {
