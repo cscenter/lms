@@ -664,7 +664,6 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         app_label = "admission"
         verbose_name = _("Applicant")
         verbose_name_plural = _("Applicants")
-        unique_together = [("email", "campaign")]
 
     objects = models.Manager()
     subscribed = ApplicantSubscribedManager()
@@ -704,13 +703,25 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         if self.yandex_login:
             self.yandex_login_q = self.yandex_login.lower().replace("-", ".")
         if self.mipt_grades_file:
-            _, file_extension = os.path.splitext(str(self.mipt_grades_file))
-            print(file_extension)
+            __, file_extension = os.path.splitext(str(self.mipt_grades_file))
             allowed_types = ['.png', '.jpg', '.jpeg', '.pdf']
             if file_extension not in allowed_types:
                 raise ValidationError(
                     {"mipt_grades_file": "The file must be a JPEG, PNG image, or a PDF document."}
                 )
+        
+        
+        error_field = 'status' if self.pk and self.tracker.has_changed('status') else 'email'
+        if Applicant.objects.filter(
+            email=self.email,
+            campaign=self.campaign
+        ).exclude(
+            Q(pk=self.pk) | Q(status__in=ApplicantStatuses.UNUNIQUE_EMAIL_STATUSES)
+        ).exists() and self.status not in ApplicantStatuses.UNUNIQUE_EMAIL_STATUSES:
+            raise ValidationError({
+                error_field: _("An active applicant with this email already exists in this campaign.")
+            })
+
 
     def get_living_place_display(self):
         if not self.living_place and self.campaign.branch.city_id:

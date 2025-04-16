@@ -176,3 +176,88 @@ def test_applicant_status_log_no_change():
     
     # Check that still no log was created
     assert applicant.status_logs.count() == 0
+
+
+@pytest.mark.django_db
+def test_applicant_email_uniqueness_with_ununique_email_status():
+    """Test that applicants with the same email can exist when one has a ununique email status."""
+    campaign = CampaignFactory()
+    email = "same_email@example.com"
+    ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.REJECTED_BY_EXAM_PRESELECT
+    ).full_clean()
+    ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.PENDING
+    ).full_clean()
+    assert Applicant.objects.filter(email=email, campaign=campaign).count() == 2
+
+
+@pytest.mark.django_db
+def test_applicant_email_uniqueness_with_active_applicant():
+    """Test that creating an applicant with the same email as an active applicant is prevented."""
+    campaign = CampaignFactory()
+    email = "same_email@example.com"
+    ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.PENDING
+    ).full_clean()
+    
+    applicant2 = ApplicantFactory.build(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.PENDING
+    )
+    
+    with pytest.raises(ValidationError) as excinfo:
+        applicant2.full_clean()
+    assert 'email' in excinfo.value.error_dict
+
+
+@pytest.mark.django_db
+def test_applicant_status_change_from_special_to_non_special_allowed():
+    """Test that changing status from special to non-special is allowed when no active applicant exists."""
+    campaign = CampaignFactory()
+    email = "same_email@example.com"
+    ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.REJECTED_BY_EXAM_PRESELECT
+    )
+    applicant = ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.REJECTED_BY_EXAM_PRESELECT
+    )
+    applicant.status = ApplicantStatuses.PENDING
+    applicant.full_clean()
+    applicant.save()
+    applicant.refresh_from_db()
+    assert applicant.status == ApplicantStatuses.PENDING
+
+
+@pytest.mark.django_db
+def test_applicant_status_change_from_special_to_non_special_prevented():
+    """Test that changing status from special to non-special is prevented when an active applicant exists."""
+    campaign = CampaignFactory()
+    email = "same_email@example.com"
+
+    applicant = ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.REJECTED_BY_EXAM_PRESELECT
+    )
+    ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.PENDING
+    ).full_clean()
+    
+    applicant.status = ApplicantStatuses.PASSED_EXAM
+    with pytest.raises(ValidationError) as excinfo:
+        applicant.full_clean()
+    assert 'status' in excinfo.value.error_dict
