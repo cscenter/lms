@@ -282,7 +282,7 @@ def test_olympiad_lifecycle():
         location=location,
         details={"scores": [3, 2, 3]}
     )
-    assert olympiad_full.total_score() == 15
+    assert olympiad_full.total_score == 15
     
     olympiad.score = 5
     olympiad.math_score = 4
@@ -290,7 +290,7 @@ def test_olympiad_lifecycle():
     olympiad.refresh_from_db()
     assert olympiad.score == 5
     assert olympiad.math_score == 4
-    assert olympiad.total_score() == 9
+    assert olympiad.total_score == 9
     
     olympiad_id = olympiad.id
     olympiad.delete()
@@ -332,22 +332,22 @@ def test_olympiad_validation():
 def test_olympiad_score_methods():
     olympiad = OlympiadFactory(score=8, math_score=7)
     assert olympiad.score_display() == 8
-    assert olympiad.total_score() == 15
+    assert olympiad.total_score == 15
     assert olympiad.total_score_display() == 15
     
     olympiad = OlympiadFactory(score=5, math_score=None)
     assert olympiad.score_display() == 5
-    assert olympiad.total_score() == 5
+    assert olympiad.total_score == 5
     assert olympiad.total_score_display() == 5
     
     olympiad = OlympiadFactory(score=None, math_score=6)
     assert olympiad.score_display() == "-"
-    assert olympiad.total_score() == 6
+    assert olympiad.total_score == 6
     assert olympiad.total_score_display() == 6
     
     olympiad = OlympiadFactory(score=None, math_score=None)
     assert olympiad.score_display() == "-"
-    assert olympiad.total_score() == 0
+    assert olympiad.total_score == 0
     assert olympiad.total_score_display() == "-"
 
 

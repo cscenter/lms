@@ -1288,6 +1288,7 @@ class Olympiad(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeCon
     def score_display(self):
         return self.score if self.score is not None else "-"
 
+    @property
     def total_score(self):
         """Return total score (programming + math)."""
         programming_score = self.score or 0
@@ -1296,7 +1297,7 @@ class Olympiad(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeCon
 
     def total_score_display(self):
         """Return formatted total score."""
-        return self.total_score() if (self.score is not None or self.math_score is not None) else "-"
+        return self.total_score if (self.score is not None or self.math_score is not None) else "-"
 
 
 class InterviewAssignment(models.Model):

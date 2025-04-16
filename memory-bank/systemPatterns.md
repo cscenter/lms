@@ -125,7 +125,7 @@ It is optional, but recommended to be updated as the project evolves.
 
 * **Расширение функциональности**
   - Добавление методов в модели для инкапсуляции бизнес-логики
-  - Пример: методы `total_score()` и `total_score_display()` в модели `Olympiad` для расчета и форматирования суммы баллов
+  - Пример: методы `total_score` и `total_score_display()` в модели `Olympiad` для расчета и форматирования суммы баллов
 
 * **Паттерн Annotation**
   - Использование аннотаций Django ORM для оптимизации запросов
