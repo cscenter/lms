@@ -193,7 +193,7 @@ class Campaign(TimezoneAwareMixin, models.Model):
         errors = {}
         if self.current:
             contests = Contest.objects.filter(
-                campaign_id=self.pk, type=Contest.TYPE_TEST
+                campaign_id=self.pk, type=ContestTypes.TEST
             ).count()
             if not contests:
                 msg = _(
@@ -861,8 +861,6 @@ def validate_json_container(value):
 # TODO: add Contest provider (yandex/stepic), then change YandexContestIntegration.yandex_contest_id to FK
 class Contest(models.Model):
     FILE_PATH_TEMPLATE = "contest/{contest_id}/assignments/{filename}"
-    TYPE_TEST = ContestTypes.TEST
-    TYPE_EXAM = ContestTypes.EXAM
     # TODO: replace with ContestTypes
     TYPES = ContestTypes.choices
     campaign = models.ForeignKey(
@@ -1120,9 +1118,9 @@ class ApplicantRandomizeContestMixin:
         )
         if not contests:
             return None
-        if contest_type == Contest.TYPE_EXAM:
+        if contest_type == ContestTypes.EXAM:
             manager = Exam.objects
-        elif contest_type == Contest.TYPE_TEST:
+        elif contest_type == ContestTypes.TEST:
             manager = Test.objects
         elif contest_type == ContestTypes.OLYMPIAD:
             manager = Olympiad.objects
@@ -1138,7 +1136,7 @@ class ApplicantRandomizeContestMixin:
 
 
 class Test(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContestMixin):
-    CONTEST_TYPE = Contest.TYPE_TEST
+    CONTEST_TYPE = ContestTypes.TEST
 
     applicant = models.OneToOneField(
         Applicant,
@@ -1177,14 +1175,14 @@ class Test(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContest
             and self.status == ChallengeStatuses.NEW
             and not self.yandex_contest_id
         ):
-            contest_id = self.compute_contest_id(Contest.TYPE_TEST)
+            contest_id = self.compute_contest_id(ContestTypes.TEST)
             if contest_id:
                 self.yandex_contest_id = contest_id
         super().save(**kwargs)
 
 
 class Exam(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContestMixin):
-    CONTEST_TYPE = Contest.TYPE_EXAM
+    CONTEST_TYPE = ContestTypes.EXAM
 
     applicant = models.OneToOneField(
         Applicant,
@@ -1213,7 +1211,7 @@ class Exam(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContest
             and self.status == ChallengeStatuses.NEW
             and not self.yandex_contest_id
         ):
-            contest_id = self.compute_contest_id(Contest.TYPE_EXAM)
+            contest_id = self.compute_contest_id(ContestTypes.EXAM)
             if contest_id:
                 self.yandex_contest_id = contest_id
         super().save(**kwargs)

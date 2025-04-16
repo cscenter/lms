@@ -5,7 +5,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.db.models import ProtectedError
 
-from admission.constants import InterviewSections, InterviewInvitationStatuses, ApplicantStatuses, ChallengeStatuses
+from admission.constants import ContestTypes, InterviewSections, InterviewInvitationStatuses, ApplicantStatuses, ChallengeStatuses
 from admission.models import Contest, Interview, Olympiad
 from admission.tests.factories import (
     ApplicantFactory,
@@ -23,36 +23,36 @@ from admission.tests.factories import (
 @pytest.mark.django_db
 def test_compute_contest_id():
     campaign = CampaignFactory.create()
-    ContestFactory(campaign=campaign, type=Contest.TYPE_EXAM)
-    contests = ContestFactory.create_batch(3, campaign=campaign, type=Contest.TYPE_TEST)
+    ContestFactory(campaign=campaign, type=ContestTypes.EXAM)
+    contests = ContestFactory.create_batch(3, campaign=campaign, type=ContestTypes.TEST)
     c1, c2, c3 = sorted(contests, key=lambda x: x.contest_id)
     assert (
         ApplicantFactory(campaign=campaign).online_test.compute_contest_id(
-            Contest.TYPE_TEST, group_size=3
+            ContestTypes.TEST, group_size=3
         )
         == c1.contest_id
     )
     a = ApplicantFactory(campaign=campaign)
     assert (
-        a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=3)
+        a.online_test.compute_contest_id(ContestTypes.TEST, group_size=3)
         == c1.contest_id
     )
     assert (
-        a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=1)
+        a.online_test.compute_contest_id(ContestTypes.TEST, group_size=1)
         == c2.contest_id
     )
     a = ApplicantFactory(campaign=campaign)
     assert (
-        a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=3)
+        a.online_test.compute_contest_id(ContestTypes.TEST, group_size=3)
         == c1.contest_id
     )
     assert (
-        a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=1)
+        a.online_test.compute_contest_id(ContestTypes.TEST, group_size=1)
         == c3.contest_id
     )
     assert (
         ApplicantFactory(campaign=campaign).online_test.compute_contest_id(
-            Contest.TYPE_TEST, group_size=3
+            ContestTypes.TEST, group_size=3
         )
         == c2.contest_id
     )

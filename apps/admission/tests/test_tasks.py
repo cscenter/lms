@@ -21,7 +21,7 @@ def test_register_in_yandex_contest_success(mocker):
     )
     mocked_api.return_value = 200, 1
     campaign = CampaignFactory()
-    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    contest = ContestFactory(campaign=campaign, type=ContestTypes.TEST)
     applicant = ApplicantFactory(campaign=campaign, yandex_login=None)
     with pytest.raises(AttributeError) as exc:
         register_in_yandex_contest(applicant.id, language_code="ru")

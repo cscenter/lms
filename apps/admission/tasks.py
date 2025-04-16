@@ -80,9 +80,9 @@ def import_campaign_contest_results(*, task_id) -> None:
         for contest in campaign.contests.filter(type=contest_type):
             logger.info(f"Starting processing contest {contest.pk}")
             # TODO: rewrite this code without if
-            if contest_type == Contest.TYPE_TEST:
+            if contest_type == ContestTypes.TEST:
                 model_class = Test
-            elif contest_type == Contest.TYPE_EXAM:
+            elif contest_type == ContestTypes.EXAM:
                 model_class = Exam
             elif contest_type == ContestTypes.OLYMPIAD:
                 model_class = Olympiad
