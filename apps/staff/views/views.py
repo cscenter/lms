@@ -150,6 +150,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         graduation_form.helper.form_action = reverse("staff:create_alumni_profiles")
         merge_users_form = MergeUsersForm()
         badge_number_from_csv_form = BadgeNumberFromCSVForm()
+        send_letters_form = SendLettersForm(request=self.request)
         official_diplomas_dates = (
             GraduateProfile.objects.for_site(self.request.site)
             .with_official_diploma()
@@ -157,12 +158,12 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             .order_by("-diploma_issued_on")
             .values_list("diploma_issued_on", flat=True)
         )
-        send_letters_form = SendLettersForm(request=self.request)
         branches = Branch.objects.filter(site_id=settings.SITE_ID)
         context = {
             "alumni_profiles_form": graduation_form,
             "merge_users_form": merge_users_form,
             "badge_number_from_csv_form": badge_number_from_csv_form,
+            "send_letters_form": send_letters_form,
             "current_term": current_term,
             "prev_term": {"year": prev_term.year, "type": prev_term.type},
             "campaigns": (
@@ -173,7 +174,6 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             "years": Campaign.objects.filter(branch__in=branches).values_list('year', flat=True).distinct().order_by('-year'),
             "branches": branches,
             "official_diplomas_dates": official_diplomas_dates,
-            "send_letters_form": send_letters_form,
         }
         return context
 

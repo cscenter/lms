@@ -102,11 +102,11 @@ class SendLettersView(CuratorOnlyMixin, View):
         
         emails = list(StudentProfile.objects.filter(query).select_related('user').values_list('user__email', flat=True).distinct())
         
-        if scheduled_time and  scheduled_time > timezone.now():
-            schedule_info = f" (запланировано на {scheduled_time.strftime('%d.%m.%Y %H:%M %Z')})"
+        if scheduled_time and scheduled_time > timezone.now():
+            schedule_info = _(" (scheduled on {0})").format(scheduled_time.strftime('%d.%m.%Y %H:%M %Z'))
         else:
-            schedule_info = " (сразу)"
-        filter_description.append(f"Отправляем {len(emails)} emails{schedule_info}")
+            schedule_info = _(" (at once)")
+        filter_description.append(_("Sending {0} emails {1}").format(len(emails), schedule_info))
         
         return emails, filter_description
     
@@ -151,7 +151,7 @@ class SendLettersView(CuratorOnlyMixin, View):
             
             messages.success(
                 request, 
-                f"Успешно запланирована откравка {len(emails)} писем шаблона '{email_template.name}'"
+                _("Successfully scheduled sending {0} emails of template '{1}'").format(len(emails), email_template.name)
             )
         except Exception as e:
             logger.exception("Error sending emails: %s", str(e))
@@ -167,7 +167,7 @@ class SendLettersView(CuratorOnlyMixin, View):
         
         logger.debug("Session data after cancel: %s", dict(request.session))
         
-        messages.info(request, "Отправка писем отменена")
+        messages.info(request, _("Email sending canceled"))
         
         return HttpResponseRedirect(reverse("staff:exports"))
     
@@ -242,10 +242,10 @@ class SendLettersView(CuratorOnlyMixin, View):
             
             self._send_emails([test_email], email_template.name)
             
-            messages.success(request, f"Тестовая отправка {test_email} шаблона '{email_template.name}'")
+            messages.success(request, _("Test sending to {0} of template '{1}'").format(test_email, email_template.name))
         except Exception as e:
             logger.exception("Error when sending test email: %s", str(e))
-            messages.error(request, f"Ошибка при тестовой отправке: {str(e)}")
+            messages.error(request, _("Error during test sending: {0}").format(str(e)))
         
         return HttpResponseRedirect(reverse("staff:exports"))
     
@@ -274,7 +274,7 @@ class SendLettersView(CuratorOnlyMixin, View):
             return HttpResponseRedirect(reverse("staff:send_letters"))
         except Exception as e:
             logger.exception("Error when collecting emails: %s", str(e))
-            messages.error(request, f"Ошибка при сборе почт: {str(e)}")
+            messages.error(request, _("Error collecting emails: {0}").format(str(e)))
         
         return HttpResponseRedirect(reverse("staff:exports"))
     
@@ -301,12 +301,3 @@ class SendLettersView(CuratorOnlyMixin, View):
         
         request.session.modified = True
         request.session.save()
-
-
-def send_letters_view(request: HttpRequest):
-    """
-    Function-based view for sending letters to students.
-    This is a wrapper around the class-based view for backward compatibility.
-    """
-    view = SendLettersView.as_view()
-    return view(request)

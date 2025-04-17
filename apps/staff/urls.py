@@ -19,7 +19,7 @@ from staff.views.views import (
     SurveySubmissionsStatsView, WillGraduateStatsReportView, AdmissionApplicantsYearReportView,
     StudentAcademicDisciplineLogListView, StudentStatusLogListView, badge_number_from_csv_view, merge_users_view
 )
-from staff.views.send_letters_view import send_letters_view
+from staff.views.send_letters_view import SendLettersView
 from staff.views.views import autograde_projects, autofail_ungraded, create_alumni_profiles
 from staff.views.enrolees_selection import EnroleesSelectionCSVView, EnroleesSelectionListView
 
@@ -70,7 +70,7 @@ urlpatterns = [
     path('commands/autofail_ungraded/', autofail_ungraded, name='autofail_ungraded'),
     path('commands/merge_users/', merge_users_view, name='merge_users'),
     path('commands/badge_number_from_csv/', badge_number_from_csv_view, name='badge_number_from_csv'),
-    path('commands/send_letters/', send_letters_view, name='send_letters'),
+    path('commands/send_letters/', SendLettersView.as_view(), name='send_letters'),
     
 
     path('course-participants/', CourseParticipantsIntersectionView.as_view(), name='course_participants_intersection'),

@@ -180,7 +180,7 @@ class SendLettersForm(forms.Form):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         
-        self.tz = self.request.user.time_zone if self.request.user.time_zone else pytz.timezone('Europe/Moscow')
+        self.tz = self.request.user.time_zone if self.request.user.time_zone else settings.DEFAULT_TIMEZONE
         local_time = timezone.localtime(timezone.now(), self.tz)
         self.fields['scheduled_time'].initial = local_time.strftime('%d.%m.%Y %H:%M')
         self.fields['scheduled_time'].help_text = f"Временная зона {getattr(self.tz, 'zone', str(self.tz))} {datetime.now(self.tz).strftime('%z')[:3]}"
@@ -207,7 +207,7 @@ class SendLettersForm(forms.Form):
         academic_disciplines = AcademicDiscipline.objects.all().order_by('name')
         self.fields['academic_disciplines'].choices = [(str(d.pk), d.name) for d in academic_disciplines]
         
-        email_templates = EmailTemplate.objects.all().order_by('name')
+        email_templates = EmailTemplate.objects.all().order_by('-created')
         self.fields['email_template'].choices = [(str(t.pk), t.name) for t in email_templates]
         
         self.helper = FormHelper(self)

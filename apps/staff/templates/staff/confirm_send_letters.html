@@ -11,7 +11,7 @@
             <h1>{% trans "Confirm Email Sending" %}</h1>
             
             <div class="alert alert-info">
-                <p>Вы собираетесь отправить электронные письма <strong>{{ email_count }}</strong> получателям.</p>
+                <p>{% blocktrans %}You are about to send emails to <strong>{{ email_count }}</strong> recipients.{% endblocktrans %}</p>
                 
                 <h4>{% trans "Filters" %}:</h4>
                 <ul>
