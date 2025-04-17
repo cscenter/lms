@@ -5,6 +5,8 @@ from random import choice
 from string import ascii_lowercase, digits
 from typing import List, Optional, Set
 
+from learning.settings import GradeTypes
+
 from djchoices import C, DjangoChoices
 from model_utils import FieldTracker
 from model_utils.fields import AutoLastModifiedField, MonitorField
@@ -51,6 +53,7 @@ from users.constants import Roles
 from users.constants import Roles as UserRoles
 from users.constants import SHADCourseGradeTypes
 from users.thumbnails import UserThumbnailMixin
+from users.utils import get_courses_grades, get_passed_courses_total
 
 from .managers import CustomUserManager
 
@@ -413,6 +416,13 @@ class User(TimezoneAwareMixin, LearningPermissionsMixin, StudentProfileAbstract,
 
     tshirt_size = models.CharField(_("T-Shirt size"), max_length=4,
                               choices=TShirtSizeTypes.choices, null=True, blank=True)
+    citizenship = models.CharField(
+        verbose_name=_("User citizenship"),
+        max_length=3,
+        help_text=_("Citizenship code in OKSM system"),
+        blank=True,
+        null=True
+    )
 
     objects = CustomUserManager()
 
@@ -992,6 +1002,20 @@ class StudentProfile(TimeStampedModel):
         if self.comment_changed_at:
             return self.comment_changed_at.strftime(DATETIME_FORMAT_RU)
         return default
+        
+    def get_passed_courses_total(self):
+        """
+        Returns the total number of passed SHAD and online courses.
+        """
+        return get_passed_courses_total(self)
+        
+        
+    def get_courses_grades(self, meta_courses):
+        """
+        Returns a dictionary mapping course indexes to grade displays for all courses
+        where there is at least one grade.
+        """
+        return get_courses_grades(self, meta_courses)
 
 
 class StudentFieldLog(TimestampedModel):
