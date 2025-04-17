@@ -285,7 +285,7 @@ def test_confirm_view_send_letters_with_multiple_filters(student_profiles, email
 def test_confirm_view_handle_test_email(client, curator, email_template):
     """Test the ConfirmView.handle_test_email method."""
     # Arrange
-    client.login(user=curator)
+    client.login(user_model=curator)
     url = reverse("staff:confirm_send_letters")
     form_data = {
         "email_template": email_template.id,
@@ -311,7 +311,7 @@ def test_confirm_view_handle_test_email(client, curator, email_template):
 def test_confirm_view_handle_send_emails(client, curator, email_template, branch, academic_discipline):
     """Test the ConfirmView.handle_send_emails method."""
     # Arrange
-    client.login(user=curator)
+    client.login(user_model=curator)
     url = reverse("staff:confirm_send_letters")
     form_data = {
         "email_template": email_template.id,
@@ -337,7 +337,7 @@ def test_confirm_view_handle_send_emails(client, curator, email_template, branch
 def test_confirm_view_process_valid_form_test_email(client, curator, email_template):
     """Test the ConfirmView.process_valid_form method with test email."""
     # Arrange
-    client.login(user=curator)
+    client.login(user_model=curator)
     url = reverse("staff:confirm_send_letters")
     form_data = {
         "email_template": email_template.id,
@@ -362,7 +362,7 @@ def test_confirm_view_process_valid_form_test_email(client, curator, email_templ
 def test_confirm_view_process_valid_form_send_emails(client, curator, email_template, branch, academic_discipline):
     """Test the ConfirmView.process_valid_form method with send emails."""
     # Arrange
-    client.login(user=curator)
+    client.login(user_model=curator)
     url = reverse("staff:confirm_send_letters")
     form_data = {
         "email_template": email_template.id,
@@ -388,7 +388,7 @@ def test_confirm_view_process_valid_form_send_emails(client, curator, email_temp
 def test_confirm_view_process_invalid_form(client, curator):
     """Test the ConfirmView.process_invalid_form method."""
     # Arrange
-    client.login(user=curator)
+    client.login(user_model=curator)
     url = reverse("staff:confirm_send_letters")
     form_data = {
         "email_template": "",  # Required field
@@ -411,12 +411,12 @@ def test_confirm_view_process_invalid_form(client, curator):
 def test_send_view_post_confirm_send(client, curator, email_template):
     """Test the SendView.post method with confirm_send."""
     # Arrange
-    client.login(user=curator)
+    client.login(user_model=curator)
     url = reverse("staff:send_letters")
     post_data = {
         "confirm_send": "1",
         "email_template_id": email_template.id,
-        "emails": ["test@example.com"]
+        "recipients_display": "test@example.com"
     }
     
     # Act
@@ -436,7 +436,7 @@ def test_send_view_post_confirm_send(client, curator, email_template):
 def test_send_view_post_cancel_send(client, curator):
     """Test the SendView.post method with cancel_send."""
     # Arrange
-    client.login(user=curator)
+    client.login(user_model=curator)
     url = reverse("staff:send_letters")
     post_data = {
         "cancel_send": "1"
@@ -457,7 +457,7 @@ def test_send_view_post_cancel_send(client, curator):
 def test_send_view_post_no_action(client, curator):
     """Test the SendView.post method with no action."""
     # Arrange
-    client.login(user=curator)
+    client.login(user_model=curator)
     url = reverse("staff:send_letters")
     post_data = {}  # No action specified
     
@@ -477,12 +477,12 @@ def test_send_view_post_no_action(client, curator):
 def test_send_view_handle_confirm_send(client, curator, email_template):
     """Test the SendView.handle_confirm_send method."""
     # Arrange
-    client.login(user=curator)
+    client.login(user_model=curator)
     url = reverse("staff:send_letters")
     post_data = {
         "confirm_send": "1",
         "email_template_id": email_template.id,
-        "emails": ["test@example.com"]
+        "recipients_display": "test@example.com"
     }
     
     # Act
@@ -492,7 +492,7 @@ def test_send_view_handle_confirm_send(client, curator, email_template):
     # Assert
     assert response.status_code == 302
     assert response.url == reverse("staff:exports")
-    mock_send_emails.assert_called_once_with(["test@example.com"], email_template.name, None)
+    mock_send_emails.assert_called_once_with(["test@example.com"], email_template.name, '')
     messages = list(get_messages(response.wsgi_request))
     assert len(messages) == 1
     assert "Successfully scheduled" in str(messages[0])
@@ -503,12 +503,12 @@ def test_send_view_handle_confirm_send(client, curator, email_template):
 def test_send_view_handle_confirm_send_error(client, curator):
     """Test error handling in SendView.handle_confirm_send method."""
     # Arrange
-    client.login(user=curator)
+    client.login(user_model=curator)
     url = reverse("staff:send_letters")
     post_data = {
         "confirm_send": "1",
         "email_template_id": 999,  # Non-existent template ID
-        "emails": ["test@example.com"]
+        "recipients_display": "test@example.com"
     }
     
     # Act

@@ -746,7 +746,6 @@ def badge_number_from_csv_view(request: HttpRequest):
     return HttpResponseRedirect(reverse("staff:exports"))
 
 
-
 class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):
     FORMATS = ("csv", "xlsx")
 

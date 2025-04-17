@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-17 07:40+0000\n"
+"POT-Creation-Date: 2025-04-17 16:45+0000\n"
 "PO-Revision-Date: 2025-03-03 15:47+0000\n"
 "Last-Translator: Софья Аноховская <cinnabun@yandex-team.ru>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,8 +57,8 @@ msgid "Student ID"
 msgstr "ID Студента"
 
 #: apps/api/management/commands/weekly_dump_to_yandex_disk.py:48
-#: apps/staff/forms.py:127 apps/staff/views/enrolees_selection.py:120
-#: apps/staff/views/send_letters_view.py:90
+#: apps/staff/forms.py:235 apps/staff/views/enrolees_selection.py:120
+#: apps/staff/views/send_letters_view.py:157
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:136
 #: lms/jinja2/lms/user_profile/user_detail.html:67
 msgid "Curriculum year"
@@ -93,10 +93,10 @@ msgstr "Курс"
 #: apps/courses/models.py:728 apps/learning/admin.py:83
 #: apps/learning/gradebook/views.py:240 apps/learning/models.py:78
 #: apps/learning/models.py:1100 apps/library/models.py:66
-#: apps/staff/filters.py:130 apps/staff/filters.py:205 apps/staff/forms.py:109
+#: apps/staff/filters.py:130 apps/staff/filters.py:205 apps/staff/forms.py:217
 #: apps/staff/views/enrolees_selection.py:117
-#: apps/staff/views/send_letters_view.py:77 apps/staff/views/views.py:920
-#: apps/staff/views/views.py:984 apps/study_programs/models.py:65
+#: apps/staff/views/send_letters_view.py:144 apps/staff/views/views.py:919
+#: apps/staff/views/views.py:983 apps/study_programs/models.py:65
 #: apps/users/models.py:177 apps/users/models.py:359 apps/users/models.py:802
 #: lms/jinja2/lms/courses/meta_detail.html:27
 #: lms/jinja2/lms/staff/academic_discipline_log.html:19
@@ -106,8 +106,8 @@ msgid "Branch"
 msgstr "Отделение"
 
 #: apps/api/management/commands/weekly_dump_to_yandex_disk.py:48
-#: apps/staff/forms.py:115 apps/staff/views/enrolees_selection.py:118
-#: apps/staff/views/send_letters_view.py:82
+#: apps/staff/forms.py:223 apps/staff/views/enrolees_selection.py:118
+#: apps/staff/views/send_letters_view.py:149
 msgid "Student type"
 msgstr "Тип студента"
 
@@ -306,7 +306,8 @@ msgstr ""
 msgid "Changed by"
 msgstr "Кем изменено"
 
-#: apps/core/forms.py:7 apps/staff/templates/staff/confirm_send_letters.html:51
+#: apps/core/forms.py:7 apps/staff/forms.py:197
+#: apps/staff/templates/staff/confirm_send_letters.html:22
 #: apps/templates/forms/simple_delete_confirmation.html:22
 #: apps/templates/learning/enrollment/enrollment_leave.html:25
 #: lms/jinja2/lms/courses/course_class_form.html:97
@@ -727,8 +728,8 @@ msgstr "Место проведения"
 
 #: apps/courses/forms.py:165 apps/courses/models.py:953
 #: apps/notifications/models.py:92 apps/staff/filters.py:135
-#: apps/staff/filters.py:210 apps/staff/views/views.py:920
-#: apps/staff/views/views.py:984 apps/users/models.py:782
+#: apps/staff/filters.py:210 apps/staff/views/views.py:919
+#: apps/staff/views/views.py:983 apps/users/models.py:782
 msgid "Type"
 msgstr "Тип"
 
@@ -1607,8 +1608,8 @@ msgstr "Посылка к заданию"
 
 #: apps/grading/models.py:93 apps/learning/forms.py:77
 #: apps/learning/study/forms.py:69 apps/staff/filters.py:189
-#: apps/staff/forms.py:133 apps/staff/views/send_letters_view.py:95
-#: apps/staff/views/views.py:985 apps/users/models.py:222
+#: apps/staff/forms.py:241 apps/staff/views/send_letters_view.py:162
+#: apps/staff/views/views.py:984 apps/users/models.py:222
 #: apps/users/models.py:807 apps/users/models.py:1046
 #: lms/jinja2/lms/staff/status_log.html:21
 #: lms/jinja2/lms/staff/student_search.html:69
@@ -2426,8 +2427,8 @@ msgstr "Дата выпуска"
 msgid "Graduation ceremony date"
 msgstr "Дата выпускного считается датой выпуска студента"
 
-#: apps/learning/models.py:1168 apps/staff/forms.py:139
-#: apps/staff/views/send_letters_view.py:101 apps/users/models.py:885
+#: apps/learning/models.py:1168 apps/staff/forms.py:247
+#: apps/staff/views/send_letters_view.py:168 apps/users/models.py:885
 msgid "Fields of study"
 msgstr "Направления обучения"
 
@@ -2949,7 +2950,7 @@ msgstr "Уведомление"
 msgid "Filter"
 msgstr ""
 
-#: apps/staff/filters.py:116 apps/staff/views/views.py:921
+#: apps/staff/filters.py:116 apps/staff/views/views.py:920
 #: apps/users/models.py:1078
 #: lms/jinja2/lms/staff/academic_discipline_log.html:21
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:110
@@ -2957,7 +2958,7 @@ msgstr ""
 msgid "Field of study"
 msgstr "Направление обучения"
 
-#: apps/staff/filters.py:121 apps/staff/views/views.py:921
+#: apps/staff/filters.py:121 apps/staff/views/views.py:920
 #: apps/users/models.py:1071
 #: lms/jinja2/lms/staff/academic_discipline_log.html:20
 msgid "Former field of study"
@@ -2983,82 +2984,100 @@ msgstr "Обработать"
 msgid "Studying"
 msgstr "Учится"
 
-#: apps/staff/filters.py:195 apps/staff/views/views.py:985
+#: apps/staff/filters.py:195 apps/staff/views/views.py:984
 #: apps/users/models.py:1041 lms/jinja2/lms/staff/status_log.html:20
 msgid "Former status"
 msgstr "Прошлый статус"
 
-#: apps/staff/forms.py:24
+#: apps/staff/forms.py:21
 msgid "Date of Graduation"
 msgstr "Дата выпуска"
 
-#: apps/staff/forms.py:40
+#: apps/staff/forms.py:37
 msgid "Major User email"
 msgstr "Почта основного пользователя"
 
-#: apps/staff/forms.py:43
+#: apps/staff/forms.py:40
 msgid "Minor User email"
 msgstr "Почта дублирующего пользователя"
 
-#: apps/staff/forms.py:55
+#: apps/staff/forms.py:52
 msgid "Merge Users"
 msgstr "Объединить пользователей"
 
-#: apps/staff/forms.py:62 apps/staff/forms.py:68
+#: apps/staff/forms.py:59 apps/staff/forms.py:65
 msgid "There is no User with this email"
 msgstr "Пользователя с такой почтой не существует"
 
-#: apps/staff/forms.py:75
+#: apps/staff/forms.py:72
 msgid "Emails must not be the same"
 msgstr "Почты должны различаться"
 
-#: apps/staff/forms.py:78
+#: apps/staff/forms.py:75
 msgid "CSV file"
 msgstr "Файл CSV"
 
-#: apps/staff/forms.py:88
+#: apps/staff/forms.py:85
 msgid "Fill in badge numbers"
 msgstr "Залить номера пропусков"
 
-#: apps/staff/forms.py:102 apps/users/services.py:627
+#: apps/staff/forms.py:99 apps/users/services.py:627
 msgid "CSV file must contain \"Email\" and \"Badge number\" columns"
 msgstr ""
 "Файл CSV должен содержать колонки с заголовками «Почта» и «Номер пропуска»"
 
-#: apps/staff/forms.py:121 apps/staff/views/send_letters_view.py:86
-msgid "Admission year"
-msgstr "Год поступления"
-
-#: apps/staff/forms.py:145
-msgid "Email template"
-msgstr "Шаблон письма"
-
-#: apps/staff/forms.py:150
-msgid "Test email"
-msgstr "Почта для теста"
-
-#: apps/staff/forms.py:154
-msgid "Schedule sending time"
-msgstr "Запланированное время отправки"
-
-#: apps/staff/forms.py:216
-#: apps/staff/templates/staff/confirm_send_letters.html:16
+#: apps/staff/forms.py:122 apps/staff/forms.py:299
 msgid "Filters"
 msgstr "Фильтры"
 
-#: apps/staff/forms.py:230
+#: apps/staff/forms.py:128
+msgid "Recipients"
+msgstr "Получатели"
+
+#: apps/staff/forms.py:133
+#| msgid "Email template"
+msgid "Template"
+msgstr "Шаблон письма"
+
+#: apps/staff/forms.py:171
+#| msgid "Contact information"
+msgid "Confirmation"
+msgstr "Подтверждение"
+
+#: apps/staff/forms.py:191
+#: apps/staff/templates/staff/confirm_send_letters.html:19
+msgid "Confirm and Send"
+msgstr "Подтверждаю и отправляем"
+
+#: apps/staff/forms.py:229 apps/staff/views/send_letters_view.py:153
+msgid "Admission year"
+msgstr "Год поступления"
+
+#: apps/staff/forms.py:253
+msgid "Email template"
+msgstr "Шаблон письма"
+
+#: apps/staff/forms.py:258
+msgid "Test email"
+msgstr "Почта для теста"
+
+#: apps/staff/forms.py:262
+msgid "Schedule sending time"
+msgstr "Запланированное время отправки"
+
+#: apps/staff/forms.py:313
 msgid "Testing letter"
 msgstr "Тестовое письмо"
 
-#: apps/staff/forms.py:234
+#: apps/staff/forms.py:317
 msgid "Send for testing"
 msgstr "Отправить тест"
 
-#: apps/staff/forms.py:239
+#: apps/staff/forms.py:322
 msgid "Sending letter"
 msgstr "Отправка писем"
 
-#: apps/staff/forms.py:246
+#: apps/staff/forms.py:329
 msgid "Ready to send"
 msgstr "Готово к отправке"
 
@@ -3074,28 +3093,6 @@ msgstr "Склад"
 #: apps/staff/templates/staff/confirm_send_letters.html:11
 msgid "Confirm Email Sending"
 msgstr "Подтверждаю отправку"
-
-#: apps/staff/templates/staff/confirm_send_letters.html:14
-#, python-format
-msgid ""
-"You are about to send emails to <strong>%(email_count)s</strong> recipients."
-msgstr ""
-"Вы собираетесь отправить электронные письма <strong>%(email_count)s</strong> "
-"получателям."
-
-#: apps/staff/templates/staff/confirm_send_letters.html:24
-msgid "Recipients"
-msgstr "Получатели"
-
-#: apps/staff/templates/staff/confirm_send_letters.html:33
-#, fuzzy
-#| msgid "Email template"
-msgid "Template"
-msgstr "Шаблон письма"
-
-#: apps/staff/templates/staff/confirm_send_letters.html:44
-msgid "Confirm and Send"
-msgstr "Подтверждаю и отправляем"
 
 #: apps/staff/templates/staff/enrolees_selection_list.html:29
 #: apps/staff/templates/staff/gradebook_list.html:29
@@ -3142,50 +3139,64 @@ msgstr "Партнер"
 msgid "Average grade"
 msgstr "Средний балл"
 
-#: apps/staff/views/send_letters_view.py:106
-#, python-brace-format
-msgid " (scheduled on {0})"
-msgstr " (запланировано на {0})"
-
-#: apps/staff/views/send_letters_view.py:108
-msgid " (at once)"
-msgstr " _(сразу)"
-
-#: apps/staff/views/send_letters_view.py:109
-#, python-brace-format
-msgid "Sending {0} emails {1}"
-msgstr "Отправляем {0} писем {1}"
-
-#: apps/staff/views/send_letters_view.py:154
-#, python-brace-format
-msgid "Successfully scheduled sending {0} emails of template '{1}'"
-msgstr "Успешно запланирована отправка {0} писем шаблона '{1}"
-
-#: apps/staff/views/send_letters_view.py:170
-msgid "Email sending canceled"
-msgstr "Отправка писем отменена"
-
-#: apps/staff/views/send_letters_view.py:245
+#: apps/staff/views/send_letters_view.py:96
 #, python-brace-format
 msgid "Test sending to {0} of template '{1}'"
 msgstr "Тестовая отправка {0} шаблона '{1}'"
 
-#: apps/staff/views/send_letters_view.py:248
+#: apps/staff/views/send_letters_view.py:99
 #, python-brace-format
 msgid "Error during test sending: {0}"
 msgstr "Ошибка при тестовой отправке: {0}"
 
-#: apps/staff/views/send_letters_view.py:277
+#: apps/staff/views/send_letters_view.py:116
 #, python-brace-format
 msgid "Error collecting emails: {0}"
 msgstr "Ошибка при сборе почт: {0}"
 
-#: apps/staff/views/views.py:920 apps/staff/views/views.py:984
+#: apps/staff/views/send_letters_view.py:173
+#, python-brace-format
+msgid " (scheduled on {0})"
+msgstr " (запланировано на {0})"
+
+#: apps/staff/views/send_letters_view.py:175
+msgid " (at once)"
+msgstr " (сразу)"
+
+#: apps/staff/views/send_letters_view.py:176
+#, python-brace-format
+msgid "Sending {0} emails {1}"
+msgstr "Отправляем {0} писем {1}"
+
+#: apps/staff/views/send_letters_view.py:193
+msgid "Email sending canceled"
+msgstr "Отправка писем отменена"
+
+#: apps/staff/views/send_letters_view.py:196
+#| msgid "Email sending canceled"
+msgid "No action specified. Email sending canceled."
+msgstr "Отправка писем отменена"
+
+#: apps/staff/views/send_letters_view.py:224
+msgid "Have been send already"
+msgstr "Это письмо уже отправлялось"
+
+#: apps/staff/views/send_letters_view.py:244
+#, python-brace-format
+msgid "Successfully scheduled sending {0} emails of template '{1}'"
+msgstr "Успешно запланирована отправка {0} писем шаблона '{1}"
+
+#: apps/staff/views/send_letters_view.py:250
+#| msgid "Email sending canceled"
+msgid "Invalid form data. Email sending canceled."
+msgstr "Отправка писем отменена"
+
+#: apps/staff/views/views.py:919 apps/staff/views/views.py:983
 #: apps/users/models.py:374
 msgid "Telegram"
 msgstr ""
 
-#: apps/staff/views/views.py:920 apps/staff/views/views.py:984
+#: apps/staff/views/views.py:919 apps/staff/views/views.py:983
 #: apps/users/models.py:310
 msgid "email address"
 msgstr ""
@@ -4641,6 +4652,14 @@ msgstr "осенний"
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
+
+#, python-format
+#~ msgid ""
+#~ "You are about to send emails to <strong>%(email_count)s</strong> "
+#~ "recipients."
+#~ msgstr ""
+#~ "Вы собираетесь отправить электронные письма <strong>%(email_count)s</"
+#~ "strong> получателям."
 
 #~ msgid "Time is in timezone {}"
 #~ msgstr "Время в временно зоне"

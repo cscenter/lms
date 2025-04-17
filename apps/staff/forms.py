@@ -2,7 +2,7 @@ import csv
 from datetime import datetime
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Div, Layout, Row, Submit, Fieldset, Column, HTML
+from crispy_forms.layout import Div, Layout, Row, Submit, Fieldset, Column
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -95,7 +95,7 @@ class BadgeNumberFromCSVForm(forms.Form):
         
         headers = reader.fieldnames
         required_columns = {"Почта", "Номер пропуска"}
-        if headers is None or not required_columns.issubset(set(headers)):
+        if not required_columns.issubset(set(headers)):
             raise ValidationError(_('CSV file must contain "Email" and "Badge number" columns'))
         csv_file.seek(0)
         return csv_file
