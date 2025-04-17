@@ -2,7 +2,7 @@ import csv
 from datetime import datetime
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Div, Layout, Row, Submit, Fieldset, Column
+from crispy_forms.layout import Div, Layout, Row, Submit, Fieldset, Column, HTML
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -101,46 +101,157 @@ class BadgeNumberFromCSVForm(forms.Form):
         return csv_file
     
 
+class ConfirmSendLettersForm(forms.Form):
+    """
+    Form for confirming email sending.
+    This form is used to display the confirmation page and handle the confirmation/cancellation.
+    """
+    email_template_id = forms.CharField(widget=forms.HiddenInput())
+    scheduled_time = forms.CharField(widget=forms.HiddenInput(), required=False)
+    
+    # These fields are just for display, not for actual form submission
+    base_info_display = forms.CharField(
+        label="",
+        required=False,
+        widget=forms.TextInput(attrs={
+            'readonly': 'readonly', 
+            'style': 'border: none; background-color: #f8f9fa; font-weight: bold; font-size: 1.2em; padding: 10px; border-radius: 5px;'
+        })
+    )
+    filter_description_display = forms.CharField(
+        label=_("Filters"),
+        required=False,
+        initial="",
+        widget=forms.Textarea(attrs={'readonly': 'readonly', 'rows': 5, 'style': 'border: none; background-color: #f8f9fa; height: 150px;'})
+    )
+    recipients_display = forms.CharField(
+        label=_("Recipients"),
+        required=False,
+        widget=forms.Textarea(attrs={'readonly': 'readonly', 'rows': 10, 'style': 'border: none; background-color: #f8f9fa;'})
+    )
+    template_display = forms.CharField(
+        label=_("Template"),
+        required=False,
+        widget=forms.TextInput(attrs={'readonly': 'readonly', 'style': 'border: none; background-color: #f8f9fa;'})
+    )
+    
+    def __init__(self, *args, emails=None, filter_description=None, template_name=None, email_template_id=None, scheduled_time=None, **kwargs):
+        initial = kwargs.get('initial', {})
+        
+        # Set initial values for display fields
+        if filter_description:
+            if len(filter_description) > 0:
+                # The last item is usually the scheduled time info, so exclude it
+                initial['filter_description_display'] = '\n'.join(filter_description[:-1])
+                initial['base_info_display'] = filter_description[-1]
+
+        if emails:
+            initial['recipients_display'] = '\n'.join(emails)
+        if template_name:
+            initial['template_display'] = template_name
+        if email_template_id:
+            initial['email_template_id'] = email_template_id
+        if scheduled_time:
+            initial['scheduled_time'] = scheduled_time
+            
+        kwargs['initial'] = initial
+        super().__init__(*args, **kwargs)
+        
+        # Store emails for form submission
+        self.emails = emails or []
+        
+        # Set up form helper
+        self.helper = FormHelper(self)
+        self.helper.form_action = reverse("staff:send_letters")
+            
+        
+        # Create the layout
+        self.helper.layout = Layout(
+            
+            Fieldset(_('Confirmation'),
+                Row(
+                    Div('base_info_display', css_class="col-xs-12"),
+                ),
+                Row(
+                    Div('filter_description_display', css_class="col-xs-12"),
+                ),
+                Row(
+                    Div('recipients_display', css_class="col-xs-12"),
+                ),
+                Row(
+                    Div('template_display', css_class="col-xs-12"),
+                ),
+                # Hidden fields
+                'email_template_id',
+                'scheduled_time',
+            ),
+            Row(
+                Column(
+                    FormActions(
+                        Submit('confirm_send', _('Confirm and Send'), css_class='btn-primary'),
+                    ),
+                    css_class='col-md-3'
+                ),
+                Column(
+                    FormActions(
+                        Submit('cancel_send', _('Cancel'), css_class='btn-secondary'),
+                    ),
+                    css_class='col-md-2'
+                ),
+            )
+        )
+    
+    def get_emails(self):
+        """
+        Get all emails from the form.
+        """
+        if self.cleaned_data.get('recipients_display'):
+            return [email.strip() for email in self.cleaned_data['recipients_display'].split('\n') if email.strip()]
+        
+        # If the form hasn't been submitted or recipients_display is empty, return the original emails
+        return self.emails
+
+
 class SendLettersForm(forms.Form):
     branch = forms.MultipleChoiceField(
         label=_("Branch"),
         widget=forms.CheckboxSelectMultiple,
-        choices=[],
+        choices=get_branche_choices,
         required=False
     )
     type = forms.MultipleChoiceField(
         label=_("Student type"),
         widget=forms.CheckboxSelectMultiple,
-        choices=[],
+        choices=StudentTypes.choices,
         required=False
     )
     year_of_admission = forms.MultipleChoiceField(
         label=_("Admission year"),
         widget=forms.CheckboxSelectMultiple,
-        choices=[],
+        choices=get_admission_year_choices,
         required=False
     )
     year_of_curriculum = forms.MultipleChoiceField(
         label=_("Curriculum year"),
         widget=forms.CheckboxSelectMultiple,
-        choices=[],
+        choices=get_curriculum_year_choices,
         required=False
     )
     status = forms.MultipleChoiceField(
         label=_("Status"),
         widget=forms.CheckboxSelectMultiple,
-        choices=[],
+        choices=[(k, v) for k, v in StudentStatuses.values.items()],
         required=False
     )
     academic_disciplines = forms.MultipleChoiceField(
         label=_("Fields of study"),
         widget=forms.CheckboxSelectMultiple,
-        choices=[],
+        choices=get_academic_discipline_choices,
         required=False
     )
     email_template = forms.ChoiceField(
         label=_("Email template"),
-        choices=[],
+        choices=get_email_template_choices,
         required=True
     )
     test_email = forms.EmailField(
@@ -182,16 +293,8 @@ class SendLettersForm(forms.Form):
         self.fields['scheduled_time'].initial = local_time.strftime('%d.%m.%Y %H:%M')
         self.fields['scheduled_time'].help_text = f"Временная зона {getattr(self.tz, 'zone', str(self.tz))} {datetime.now(self.tz).strftime('%z')[:3]}"
         
-        self.fields['type'].choices = StudentTypes.choices
-        self.fields['status'].choices = [(k, v) for k, v in StudentStatuses.values.items()]
-        self.fields['branch'].choices = get_branche_choices()
-        self.fields['year_of_admission'].choices = get_admission_year_choices()
-        self.fields['year_of_curriculum'].choices = get_curriculum_year_choices()
-        self.fields['academic_disciplines'].choices = get_academic_discipline_choices()
-        self.fields['email_template'].choices = get_email_template_choices()
-        
         self.helper = FormHelper(self)
-        self.helper.form_action = reverse("staff:send_letters")
+        self.helper.form_action = reverse("staff:confirm_send_letters")
         self.helper.layout = Layout(
             Fieldset(_('Filters'),
                 Row(

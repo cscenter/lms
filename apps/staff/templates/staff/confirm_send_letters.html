@@ -10,48 +10,19 @@
         <div class="col-md-12">
             <h1>{% trans "Confirm Email Sending" %}</h1>
             
-            <div class="alert alert-info">
-                <p>{% blocktrans %}You are about to send emails to <strong>{{ email_count }}</strong> recipients.{% endblocktrans %}</p>
+            <form method="post" action="{% url 'staff:send_letters' %}">
+                {% csrf_token %}
+                {{ form|crispy }}
                 
-                <h4>{% trans "Filters" %}:</h4>
-                <ul>
-                    {% for criteria in filter_description %}
-                        <li>{{ criteria }}</li>
-                    {% endfor %}
-                </ul>
-                
-                {% if email_count > 0 %}
-                    <h4>{% trans "Recipients" %}:</h4>
-                    <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 15px;">
-                        <ul>
-                            {% for email in emails %}
-                                <li>{{ email }}</li>
-                            {% endfor %}
-                        </ul>
+                <div class="row">
+                    <div class="col-md-3">
+                        <button type="submit" name="confirm_send" value="1" class="btn btn-primary">{% trans "Confirm and Send" %}</button>
                     </div>
-                {% endif %}
-                <h4>{% trans "Template" %}:</h4>
-                <ul>
-                    <li>{{ template }}</li>
-                </ul>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-3">
-                    <form method="post" action="{% url 'staff:send_letters' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="confirm_send" value="1">
-                        <button type="submit" class="btn btn-primary">{% trans "Confirm and Send" %}</button>
-                    </form>
+                    <div class="col-md-2">
+                        <button type="submit" name="cancel_send" value="1" class="btn btn-secondary">{% trans "Cancel" %}</button>
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <form method="post" action="{% url 'staff:send_letters' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="cancel_send" value="1">
-                        <button type="submit" class="btn btn-secondary">{% trans "Cancel" %}</button>
-                    </form>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>

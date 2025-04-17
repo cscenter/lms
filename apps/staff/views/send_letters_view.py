@@ -9,13 +9,12 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 
-from core.http import HttpRequest
 from core.models import Branch
 from core.urls import reverse
 from post_office.models import EmailTemplate, Email
 from post_office import mail
 from post_office.utils import get_email_template
-from staff.forms import SendLettersForm
+from staff.forms import SendLettersForm, ConfirmSendLettersForm
 from study_programs.models import AcademicDiscipline
 from users.mixins import CuratorOnlyMixin
 from users.models import StudentProfile, StudentTypes
@@ -23,43 +22,111 @@ from learning.settings import StudentStatuses
 
 logger = logging.getLogger(__name__)
 
-
-class SendLettersView(CuratorOnlyMixin, View):
+class ConfirmView(CuratorOnlyMixin, View):
     """
-    Class-based view for sending letters to students.
+    Class-based view for confirming and preparing email sending to students.
     
     This view handles:
-    1. Displaying the form for selecting students to send emails to
-    2. Processing the form submission
-    3. Showing a confirmation page before sending emails
-    4. Sending test emails
-    5. Sending actual emails to selected students
+    1. Processing the form submission with filter criteria
+    2. Filtering students based on the criteria
+    3. Displaying a confirmation page with the list of recipients
+    4. Sending test emails when requested
     """
+    def post(self, request, *args, **kwargs):
+        """
+        Handle POST requests for the form submission.
+        """
+        form = SendLettersForm(data=request.POST, request=request)
+        
+        logger.debug("Form data: %s", request.POST)
+        logger.debug("Form is valid:  %s", form.is_valid())
+        if form.errors:
+            logger.debug("Form errors: %s", form.errors)
+        
+        if form.is_valid():
+            return self.process_valid_form(form, request)
+        else:
+            return self.process_invalid_form(form, request)
     
-    @classmethod
-    def _send_emails(cls, emails, template, data=None):
+    def process_valid_form(self, form, request):
         """
-        Send emails using the post_office library.
+        Process a valid form submission.
         """
-        template = get_email_template(template)
-        email_from = "Школа анализа данных <noreply@yandexdataschool.ru>"
-
-        scheduled_time = data if data else None
-
-        sent_count = 0
-        for recipient in emails:
-            if not Email.objects.filter(to=recipient, template=template).exists():
-                mail.send(
-                    recipient,
-                    sender=email_from,
-                    template=template,
-                    context={},
-                    render_on_delivery=True,
-                    backend='ses',
-                    scheduled_time=scheduled_time,
-                )
-                sent_count += 1
-        return sent_count
+        branch = form.cleaned_data.get('branch', [])
+        student_type = form.cleaned_data.get('type', [])
+        year_of_admission = form.cleaned_data.get('year_of_admission', [])
+        year_of_curriculum = form.cleaned_data.get('year_of_curriculum', [])
+        status = form.cleaned_data.get('status', [])
+        academic_disciplines = form.cleaned_data.get('academic_disciplines', [])
+        email_template_id = form.cleaned_data.get('email_template', "")
+        test_email = form.cleaned_data.get('test_email', "")
+        scheduled_time = form.cleaned_data.get('scheduled_time')
+        
+        if 'submit_test' in request.POST:
+            return self.handle_test_email(email_template_id, test_email, request)
+        elif 'submit_send' in request.POST:
+            return self.handle_send_emails(
+                email_template_id, branch, year_of_admission, year_of_curriculum, 
+                student_type, status, academic_disciplines, scheduled_time, request
+            )
+        
+        return HttpResponseRedirect(reverse("staff:exports"))
+    
+    def process_invalid_form(self, form, request):
+        """
+        Process an invalid form submission.
+        """
+        for field, error_as_list in form.errors.items():
+            label = form.fields[field].label if field in form.fields else field
+            errors = "<br>".join(str(error) for error in error_as_list)
+            messages.error(request, mark_safe(f"{label}:<br>{errors}"))
+        
+        return HttpResponseRedirect(reverse("staff:exports"))
+    
+    def handle_test_email(self, email_template_id, test_email, request):
+        """
+        Handle sending a test email.
+        """
+        try:
+            email_template = EmailTemplate.objects.get(pk=email_template_id)
+            
+            # Pass is_test=True to always send the test email regardless of whether it was sent before
+            SendView._send_emails([test_email], email_template.name, is_test=True)
+            
+            messages.success(request, _("Test sending to {0} of template '{1}'").format(test_email, email_template.name))
+        except Exception as e:
+            logger.exception("Error when sending test email: %s", str(e))
+            messages.error(request, _("Error during test sending: {0}").format(str(e)))
+        
+        return HttpResponseRedirect(reverse("staff:exports"))
+    
+    def handle_send_emails(self, email_template_id, branch, year_of_admission, 
+                          year_of_curriculum, student_type, status, 
+                          academic_disciplines, scheduled_time, request):
+        """
+        Handle sending emails to selected students.
+        """
+        try:
+            emails, filter_description = self.send_letters(
+                email_template_id, branch, year_of_admission, year_of_curriculum, 
+                student_type, status, academic_disciplines, scheduled_time
+            )
+        except Exception as e:
+            logger.exception("Error when collecting emails: %s", str(e))
+            messages.error(request, _("Error collecting emails: {0}").format(str(e)))
+            return HttpResponseRedirect(reverse("staff:exports"))
+        
+        template_obj = EmailTemplate.objects.get(pk=email_template_id)
+        
+        form = ConfirmSendLettersForm(
+            emails=emails,
+            filter_description=filter_description,
+            template_name=template_obj.name,
+            email_template_id=email_template_id,
+            scheduled_time=scheduled_time.isoformat() if scheduled_time else '',
+        )
+        
+        return render(request, 'staff/confirm_send_letters.html', {'form': form})
     
     @classmethod
     def send_letters(cls, email_template_id, branch, year_of_admission, year_of_curriculum, 
@@ -110,194 +177,76 @@ class SendLettersView(CuratorOnlyMixin, View):
         
         return emails, filter_description
     
-    def dispatch(self, request, *args, **kwargs):
+class SendView(CuratorOnlyMixin, View):
+    """
+    Class-based view for sending emails.
+    """
+
+    def post(self, request, *args, **kwargs):
         """
-        Override dispatch to handle different actions based on POST parameters.
+        Handle POST requests for the send letters.
         """
-        logger.debug("Session data at start: %s", dict(request.session))
-        
         if 'confirm_send' in request.POST:
             return self.handle_confirm_send(request)
         
         if 'cancel_send' in request.POST:
-            return self.handle_cancel_send(request)
-        
-        if 'confirm_have_been' in request.session:
-            self.clear_session_data(request)
-        
-        if 'emails' in request.session and 'filter_description' in request.session:
-            return self.show_confirmation_page(request)
-        
-        if request.method == 'POST':
-            return self.post(request, *args, **kwargs)
-        
+            messages.info(request, _("Email sending canceled"))
+            return HttpResponseRedirect(reverse("staff:exports"))
+
+        messages.warning(request, _("No action specified. Email sending canceled."))
         return HttpResponseRedirect(reverse("staff:exports"))
+    
+    @classmethod
+    def _send_emails(cls, emails, template, data=None, is_test=False):
+        """
+        Send emails using the post_office library.
+        """
+        template = get_email_template(template)
+        email_from = "Школа анализа данных <noreply@yandexdataschool.ru>"
+
+        scheduled_time = data if data else None
+
+        sent_count = 0
+        for recipient in emails:
+            # For test emails, always send regardless of whether it was sent before
+            if is_test or not Email.objects.filter(to=recipient, template=template).exists():
+                mail.send(
+                    recipient,
+                    sender=email_from,
+                    template=template,
+                    context={},
+                    render_on_delivery=True,
+                    backend='ses',
+                    scheduled_time=scheduled_time,
+                )
+                sent_count += 1
+            else:
+                logger.warning(_("Have been send already"))
+        return sent_count
     
     def handle_confirm_send(self, request):
         """
         Handle the confirmation of sending emails.
         """
-        email_template_id = request.session.get('email_template_id')
-        emails = request.session.get('emails', [])
-        scheduled_time = request.session.get('scheduled_time')
-        
-        try:
-            email_template = EmailTemplate.objects.get(pk=email_template_id)
-            self._send_emails(emails, email_template.name, scheduled_time)
-            
-            self.clear_session_data(request)
-            
-            logger.debug("Session data after confirm: %s", dict(request.session))
-            
-            messages.success(
-                request, 
-                _("Successfully scheduled sending {0} emails of template '{1}'").format(len(emails), email_template.name)
-            )
-        except Exception as e:
-            logger.exception("Error sending emails: %s", str(e))
-            messages.error(request, f"Ошибка при отправке писем: {str(e)}")
-        
-        return HttpResponseRedirect(reverse("staff:exports"))
-    
-    def handle_cancel_send(self, request):
-        """
-        Handle the cancellation of sending emails.
-        """
-        self.clear_session_data(request)
-        
-        logger.debug("Session data after cancel: %s", dict(request.session))
-        
-        messages.info(request, _("Email sending canceled"))
-        
-        return HttpResponseRedirect(reverse("staff:exports"))
-    
-    def show_confirmation_page(self, request):
-        """
-        Show the confirmation page before sending emails.
-        """
-        request.session["confirm_have_been"] = True
-        emails = request.session.get('emails', [])
-        filter_description = request.session.get('filter_description', [])
-        template_id = request.session.get('email_template_id', [])
-        if template_id:
-            template = EmailTemplate.objects.get(pk=template_id).name
-        
-        logger.debug("Session data in confirmation block: %s", dict(request.session))
-        
-        context = {
-            'emails': emails,
-            'email_count': len(emails),
-            'filter_description': filter_description,
-            'template': template,
-        }
-        
-        return render(request, 'staff/confirm_send_letters.html', context)
-    
-    def post(self, request, *args, **kwargs):
-        """
-        Handle POST requests for the form submission.
-        """
-        form = SendLettersForm(data=request.POST, request=request)
-        
-        logger.debug("Form data: %s", request.POST)
-        logger.debug("Form is valid: %s", form.is_valid())
-        if form.errors:
-            logger.debug("Form errors: %s", form.errors)
+        form = ConfirmSendLettersForm(request.POST)
         
         if form.is_valid():
-            return self.process_valid_form(form, request)
+            email_template_id = form.cleaned_data.get('email_template_id')
+            scheduled_time_str = form.cleaned_data.get('scheduled_time')
+            emails = form.get_emails()
+            
+            try:
+                email_template = EmailTemplate.objects.get(pk=email_template_id)
+                SendView._send_emails(emails, email_template.name, scheduled_time_str)
+                
+                messages.success(
+                    request, 
+                    _("Successfully scheduled sending {0} emails of template '{1}'").format(len(emails), email_template.name)
+                )
+            except Exception as e:
+                logger.exception("Error sending emails: %s", str(e))
+                messages.error(request, f"Ошибка при отправке писем: {str(e)}")
         else:
-            return self.process_invalid_form(form, request)
-    
-    def process_valid_form(self, form, request):
-        """
-        Process a valid form submission.
-        """
-        branch = form.cleaned_data.get('branch', [])
-        student_type = form.cleaned_data.get('type', [])
-        year_of_admission = form.cleaned_data.get('year_of_admission', [])
-        year_of_curriculum = form.cleaned_data.get('year_of_curriculum', [])
-        status = form.cleaned_data.get('status', [])
-        academic_disciplines = form.cleaned_data.get('academic_disciplines', [])
-        email_template_id = form.cleaned_data.get('email_template', "")
-        test_email = form.cleaned_data.get('test_email', "")
-        scheduled_time = form.cleaned_data.get('scheduled_time')
-        
-        if 'submit_test' in request.POST:
-            return self.handle_test_email(email_template_id, test_email, request)
-        elif 'submit_send' in request.POST:
-            return self.handle_send_emails(
-                email_template_id, branch, year_of_admission, year_of_curriculum, 
-                student_type, status, academic_disciplines, scheduled_time, request
-            )
+            messages.error(request, _("Invalid form data. Email sending canceled."))
         
         return HttpResponseRedirect(reverse("staff:exports"))
-    
-    def handle_test_email(self, email_template_id, test_email, request):
-        """
-        Handle sending a test email.
-        """
-        try:
-            email_template = EmailTemplate.objects.get(pk=email_template_id)
-            
-            self._send_emails([test_email], email_template.name)
-            
-            messages.success(request, _("Test sending to {0} of template '{1}'").format(test_email, email_template.name))
-        except Exception as e:
-            logger.exception("Error when sending test email: %s", str(e))
-            messages.error(request, _("Error during test sending: {0}").format(str(e)))
-        
-        return HttpResponseRedirect(reverse("staff:exports"))
-    
-    def handle_send_emails(self, email_template_id, branch, year_of_admission, 
-                          year_of_curriculum, student_type, status, 
-                          academic_disciplines, scheduled_time, request):
-        """
-        Handle sending emails to selected students.
-        """
-        try:
-            if scheduled_time:
-                request.session['scheduled_time'] = scheduled_time.isoformat()
-            else:
-                request.session['scheduled_time'] = None
-
-
-            emails, filter_description = self.send_letters(
-                email_template_id, branch, year_of_admission, year_of_curriculum, 
-                student_type, status, academic_disciplines, scheduled_time
-            )
-            
-            request.session['email_template_id'] = email_template_id
-            request.session['emails'] = emails
-            request.session['filter_description'] = filter_description
-            
-            return HttpResponseRedirect(reverse("staff:send_letters"))
-        except Exception as e:
-            logger.exception("Error when collecting emails: %s", str(e))
-            messages.error(request, _("Error collecting emails: {0}").format(str(e)))
-        
-        return HttpResponseRedirect(reverse("staff:exports"))
-    
-    def process_invalid_form(self, form, request):
-        """
-        Process an invalid form submission.
-        """
-        for field, error_as_list in form.errors.items():
-            label = form.fields[field].label if field in form.fields else field
-            errors = "<br>".join(str(error) for error in error_as_list)
-            messages.error(request, mark_safe(f"{label}:<br>{errors}"))
-        
-        return HttpResponseRedirect(reverse("staff:exports"))
-    
-    def clear_session_data(self, request):
-        """
-        Clear the session data related to sending emails.
-        """
-        request.session.pop('email_template_id', None)
-        request.session.pop('emails', None)
-        request.session.pop('scheduled_time', None)
-        request.session.pop('filter_description', None)
-        request.session.pop('confirm_have_been', None)
-        
-        request.session.modified = True
-        request.session.save()
