@@ -1,6 +1,5 @@
 import csv
 from datetime import datetime
-import pytz
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Layout, Row, Submit, Fieldset, Column
@@ -10,13 +9,11 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.models import Branch
 from core.urls import reverse
 from core.widgets import DateInputTextWidget
 from learning.settings import StudentStatuses
-from post_office.models import EmailTemplate
-from study_programs.models import AcademicDiscipline
-from users.models import User, StudentProfile, StudentTypes
+from staff.utils import get_academic_discipline_choices, get_admission_year_choices, get_branche_choices, get_curriculum_year_choices, get_email_template_choices
+from users.models import User, StudentTypes
 
 
 class GraduationForm(forms.Form):
@@ -186,29 +183,12 @@ class SendLettersForm(forms.Form):
         self.fields['scheduled_time'].help_text = f"Временная зона {getattr(self.tz, 'zone', str(self.tz))} {datetime.now(self.tz).strftime('%z')[:3]}"
         
         self.fields['type'].choices = StudentTypes.choices
-        
         self.fields['status'].choices = [(k, v) for k, v in StudentStatuses.values.items()]
-        
-        branches = Branch.objects.filter(site_id=settings.SITE_ID)
-        self.fields['branch'].choices = [(str(b.pk), b.name) for b in branches]
-        
-        admission_years = StudentProfile.objects.filter(
-            site_id=settings.SITE_ID, 
-            year_of_admission__isnull=False
-        ).values_list('year_of_admission', flat=True).order_by('-year_of_admission').distinct()
-        self.fields['year_of_admission'].choices = [(str(year), str(year)) for year in admission_years]
-        
-        curriculum_years = StudentProfile.objects.filter(
-            site_id=settings.SITE_ID, 
-            year_of_curriculum__isnull=False
-        ).values_list('year_of_curriculum', flat=True).order_by('-year_of_curriculum').distinct()
-        self.fields['year_of_curriculum'].choices = [(str(year), str(year)) for year in curriculum_years]
-        
-        academic_disciplines = AcademicDiscipline.objects.all().order_by('name')
-        self.fields['academic_disciplines'].choices = [(str(d.pk), d.name) for d in academic_disciplines]
-        
-        email_templates = EmailTemplate.objects.all().order_by('-created')
-        self.fields['email_template'].choices = [(str(t.pk), t.name) for t in email_templates]
+        self.fields['branch'].choices = get_branche_choices()
+        self.fields['year_of_admission'].choices = get_admission_year_choices()
+        self.fields['year_of_curriculum'].choices = get_curriculum_year_choices()
+        self.fields['academic_disciplines'].choices = get_academic_discipline_choices()
+        self.fields['email_template'].choices = get_email_template_choices()
         
         self.helper = FormHelper(self)
         self.helper.form_action = reverse("staff:send_letters")
