@@ -2,25 +2,34 @@
 
 from collections import OrderedDict
 from decimal import Decimal
+import json
 
 from import_export import fields, resources, widgets
 from import_export.instance_loaders import CachedInstanceLoader
 from import_export.widgets import IntegerWidget
 
 from admission.constants import ChallengeStatuses
-from admission.models import Exam, Test
+from admission.models import Exam, Olympiad, Test
 
 # XXX: Not tested with django-import-export==1.0.1
 
 
-class JsonFieldWidget(widgets.Widget):
-    # TODO: Maybe should check str type here and parse it to dict
+class JsonFieldWidget(widgets.Widget):    
+
     def clean(self, value, row=None, *args, **kwargs):
-        return super(JsonFieldWidget, self).clean(value)
+        value = super(JsonFieldWidget, self).clean(value)
+        if value and isinstance(value, str):
+            try:
+                return json.loads(value)
+            except json.JSONDecodeError:
+                return value
+        return value
 
     def render(self, value, obj=None):
         if value:
-            return "\n".join("{}: {}".format(k, v) for k, v in value.items())
+            if isinstance(value, dict) or isinstance(value, list):
+                return json.dumps(value)
+            return str(value)
         return ""
 
 
@@ -36,7 +45,6 @@ class ContestDetailsMixin:
 
     def before_import(self, data, using_transactions, dry_run, **kwargs):
         if "details" in data.headers:
-            print("Column `details` will be replaced")
             del data["details"]
         data.append_col(self.row_collect_details(data.headers), header="details")
 
@@ -123,3 +131,45 @@ class ExamRecordResource(ContestDetailsMixin, resources.ModelResource):
         can have null value, so if we omit django field validation on client,
         it will be very bad"""
         assert int(Decimal(row["score"])) >= 0
+
+
+class OlympiadResource(ContestDetailsMixin, resources.ModelResource):
+    applicant = fields.Field(
+        column_name="applicant", attribute="applicant_id", widget=IntegerWidget()
+    )
+
+    details = fields.Field(
+        column_name="details", attribute="details", widget=JsonFieldWidget()
+    )
+
+    class Meta:
+        model = Olympiad
+        import_id_fields = ("applicant",)
+        skip_unchanged = True
+        fields = ("applicant", "score", "math_score", "status", "details")
+        instance_loader_class = CachedInstanceLoader
+        
+    def dehydrate_details(self, obj):
+        return json.dumps(obj.details)
+    
+    def hydrate_details(self, value):
+        if value and isinstance(value, str):
+            try:
+                return json.loads(value)
+            except json.JSONDecodeError:
+                return value
+        return value
+        
+    def before_import(self, data, using_transactions, dry_run, **kwargs):
+        if "details" in data.headers:
+            for element in data["details"]:
+                element = self.hydrate_details(element)
+
+    def before_import_row(self, row, **kwargs):
+        """Double check that score is always a valid type, on DB level we
+        can have null value, so if we omit django field validation on client,
+        it will be very bad"""
+        if row.get("score"):
+            assert int(Decimal(row["score"])) >= 0
+        if row.get("math_score"):
+            assert int(Decimal(row["math_score"])) >= 0

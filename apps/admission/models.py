@@ -193,7 +193,7 @@ class Campaign(TimezoneAwareMixin, models.Model):
         errors = {}
         if self.current:
             contests = Contest.objects.filter(
-                campaign_id=self.pk, type=Contest.TYPE_TEST
+                campaign_id=self.pk, type=ContestTypes.TEST
             ).count()
             if not contests:
                 msg = _(
@@ -664,7 +664,6 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         app_label = "admission"
         verbose_name = _("Applicant")
         verbose_name_plural = _("Applicants")
-        unique_together = [("email", "campaign")]
 
     objects = models.Manager()
     subscribed = ApplicantSubscribedManager()
@@ -704,13 +703,25 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         if self.yandex_login:
             self.yandex_login_q = self.yandex_login.lower().replace("-", ".")
         if self.mipt_grades_file:
-            _, file_extension = os.path.splitext(str(self.mipt_grades_file))
-            print(file_extension)
+            __, file_extension = os.path.splitext(str(self.mipt_grades_file))
             allowed_types = ['.png', '.jpg', '.jpeg', '.pdf']
             if file_extension not in allowed_types:
                 raise ValidationError(
                     {"mipt_grades_file": "The file must be a JPEG, PNG image, or a PDF document."}
                 )
+        
+        
+        error_field = 'status' if self.pk and self.tracker.has_changed('status') else 'email'
+        if Applicant.objects.filter(
+            email=self.email,
+            campaign=self.campaign
+        ).exclude(
+            Q(pk=self.pk) | Q(status__in=ApplicantStatuses.UNUNIQUE_EMAIL_STATUSES)
+        ).exists() and self.status not in ApplicantStatuses.UNUNIQUE_EMAIL_STATUSES:
+            raise ValidationError({
+                error_field: _("An active applicant with this email already exists in this campaign.")
+            })
+
 
     def get_living_place_display(self):
         if not self.living_place and self.campaign.branch.city_id:
@@ -748,11 +759,17 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
             return self.online_test
         except Test.DoesNotExist:
             return None
-
+            
     def get_exam_record(self) -> Optional["Exam"]:
         try:
             return self.exam
         except Exam.DoesNotExist:
+            return None
+        
+    def get_olympiad_record(self) -> Optional["Olympiad"]:
+        try:
+            return self.olympiad
+        except Olympiad.DoesNotExist:
             return None
 
     def get_all_interview_score(self) -> int:
@@ -844,8 +861,6 @@ def validate_json_container(value):
 # TODO: add Contest provider (yandex/stepic), then change YandexContestIntegration.yandex_contest_id to FK
 class Contest(models.Model):
     FILE_PATH_TEMPLATE = "contest/{contest_id}/assignments/{filename}"
-    TYPE_TEST = ContestTypes.TEST
-    TYPE_EXAM = ContestTypes.EXAM
     # TODO: replace with ContestTypes
     TYPES = ContestTypes.choices
     campaign = models.ForeignKey(
@@ -1103,10 +1118,12 @@ class ApplicantRandomizeContestMixin:
         )
         if not contests:
             return None
-        if contest_type == Contest.TYPE_EXAM:
+        if contest_type == ContestTypes.EXAM:
             manager = Exam.objects
-        elif contest_type == Contest.TYPE_TEST:
+        elif contest_type == ContestTypes.TEST:
             manager = Test.objects
+        elif contest_type == ContestTypes.OLYMPIAD:
+            manager = Olympiad.objects
         else:
             raise ValueError("Unknown contest type")
         qs = manager.filter(applicant__campaign_id=campaign_id)
@@ -1119,7 +1136,7 @@ class ApplicantRandomizeContestMixin:
 
 
 class Test(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContestMixin):
-    CONTEST_TYPE = Contest.TYPE_TEST
+    CONTEST_TYPE = ContestTypes.TEST
 
     applicant = models.OneToOneField(
         Applicant,
@@ -1158,14 +1175,14 @@ class Test(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContest
             and self.status == ChallengeStatuses.NEW
             and not self.yandex_contest_id
         ):
-            contest_id = self.compute_contest_id(Contest.TYPE_TEST)
+            contest_id = self.compute_contest_id(ContestTypes.TEST)
             if contest_id:
                 self.yandex_contest_id = contest_id
         super().save(**kwargs)
 
 
 class Exam(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContestMixin):
-    CONTEST_TYPE = Contest.TYPE_EXAM
+    CONTEST_TYPE = ContestTypes.EXAM
 
     applicant = models.OneToOneField(
         Applicant,
@@ -1194,7 +1211,7 @@ class Exam(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContest
             and self.status == ChallengeStatuses.NEW
             and not self.yandex_contest_id
         ):
-            contest_id = self.compute_contest_id(Contest.TYPE_EXAM)
+            contest_id = self.compute_contest_id(ContestTypes.EXAM)
             if contest_id:
                 self.yandex_contest_id = contest_id
         super().save(**kwargs)
@@ -1208,6 +1225,79 @@ class Exam(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContest
 
     def score_display(self):
         return self.score if self.score is not None else "-"
+
+
+class Olympiad(TimeStampedModel, YandexContestIntegration, ApplicantRandomizeContestMixin):
+    CONTEST_TYPE = ContestTypes.OLYMPIAD
+
+    applicant = models.OneToOneField(
+        Applicant,
+        verbose_name=_("Applicant"),
+        on_delete=models.PROTECT,
+        related_name="olympiad",
+    )
+    score = ScoreField(
+        verbose_name=_("Score"),
+        decimal_places=3,
+        null=True,
+        blank=True,
+    )
+    math_score = ScoreField(
+        verbose_name=_("Math Score"),
+        decimal_places=3,
+        null=True,
+        blank=True,
+    )
+    location = models.ForeignKey(
+        "core.Location",
+        verbose_name=_("Location"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    details = models.JSONField(
+        verbose_name=_("Details"), 
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        app_label = "admission"
+        verbose_name = _("Olympiad Result")
+        verbose_name_plural = _("Olympiad Results")
+
+    def save(self, **kwargs):
+        created = self.pk is None
+        if (
+            created
+            and self.status == ChallengeStatuses.NEW
+            and not self.yandex_contest_id
+        ):
+            contest_id = self.compute_contest_id(ContestTypes.OLYMPIAD)
+            if contest_id:
+                self.yandex_contest_id = contest_id
+        super().save(**kwargs)
+
+    def __str__(self):
+        """Import/export get repr before instance created in db."""
+        if self.applicant_id:
+            return self.applicant.full_name
+        else:
+            return smart_str(self.score)
+
+    def score_display(self):
+        return self.score if self.score is not None else "-"
+
+    @property
+    def total_score(self):
+        """Return total score (programming + math)."""
+        programming_score = self.score or 0
+        math_score = self.math_score or 0
+        return programming_score + math_score
+
+    def total_score_display(self):
+        """Return formatted total score."""
+        return self.total_score if (self.score is not None or self.math_score is not None) else "-"
 
 
 class InterviewAssignment(models.Model):

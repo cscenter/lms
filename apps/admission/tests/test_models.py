@@ -3,9 +3,10 @@ import datetime
 import pytest
 
 from django.core.exceptions import ValidationError
+from django.db.models import ProtectedError
 
-from admission.constants import InterviewSections, InterviewInvitationStatuses, ApplicantStatuses
-from admission.models import Applicant, Contest, Interview
+from admission.constants import ContestTypes, InterviewSections, InterviewInvitationStatuses, ApplicantStatuses, ChallengeStatuses
+from admission.models import Applicant, Interview, Olympiad
 from admission.tests.factories import (
     ApplicantFactory,
     CampaignFactory,
@@ -14,42 +15,44 @@ from admission.tests.factories import (
     InterviewInvitationFactory,
     InterviewSlotFactory,
     InterviewStreamFactory,
+    OlympiadFactory,
+    LocationFactory,
 )
 
 
 @pytest.mark.django_db
 def test_compute_contest_id():
     campaign = CampaignFactory.create()
-    ContestFactory(campaign=campaign, type=Contest.TYPE_EXAM)
-    contests = ContestFactory.create_batch(3, campaign=campaign, type=Contest.TYPE_TEST)
+    ContestFactory(campaign=campaign, type=ContestTypes.EXAM)
+    contests = ContestFactory.create_batch(3, campaign=campaign, type=ContestTypes.TEST)
     c1, c2, c3 = sorted(contests, key=lambda x: x.contest_id)
     assert (
         ApplicantFactory(campaign=campaign).online_test.compute_contest_id(
-            Contest.TYPE_TEST, group_size=3
+            ContestTypes.TEST, group_size=3
         )
         == c1.contest_id
     )
     a = ApplicantFactory(campaign=campaign)
     assert (
-        a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=3)
+        a.online_test.compute_contest_id(ContestTypes.TEST, group_size=3)
         == c1.contest_id
     )
     assert (
-        a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=1)
+        a.online_test.compute_contest_id(ContestTypes.TEST, group_size=1)
         == c2.contest_id
     )
     a = ApplicantFactory(campaign=campaign)
     assert (
-        a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=3)
+        a.online_test.compute_contest_id(ContestTypes.TEST, group_size=3)
         == c1.contest_id
     )
     assert (
-        a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=1)
+        a.online_test.compute_contest_id(ContestTypes.TEST, group_size=1)
         == c3.contest_id
     )
     assert (
         ApplicantFactory(campaign=campaign).online_test.compute_contest_id(
-            Contest.TYPE_TEST, group_size=3
+            ContestTypes.TEST, group_size=3
         )
         == c2.contest_id
     )
@@ -176,3 +179,196 @@ def test_applicant_status_log_no_change():
     
     # Check that still no log was created
     assert applicant.status_logs.count() == 0
+
+
+@pytest.mark.django_db
+def test_applicant_email_uniqueness_with_ununique_email_status():
+    """Test that applicants with the same email can exist when one has a ununique email status."""
+    campaign = CampaignFactory()
+    email = "same_email@example.com"
+    ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.REJECTED_BY_EXAM_PRESELECT
+    ).full_clean()
+    ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.PENDING
+    ).full_clean()
+    assert Applicant.objects.filter(email=email, campaign=campaign).count() == 2
+
+
+@pytest.mark.django_db
+def test_applicant_email_uniqueness_with_active_applicant():
+    """Test that creating an applicant with the same email as an active applicant is prevented."""
+    campaign = CampaignFactory()
+    email = "same_email@example.com"
+    ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.PENDING
+    ).full_clean()
+    
+    applicant2 = ApplicantFactory.build(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.PENDING
+    )
+    
+    with pytest.raises(ValidationError) as excinfo:
+        applicant2.full_clean()
+    assert 'email' in excinfo.value.error_dict
+
+
+@pytest.mark.django_db
+def test_applicant_status_change_from_special_to_non_special_allowed():
+    """Test that changing status from special to non-special is allowed when no active applicant exists."""
+    campaign = CampaignFactory()
+    email = "same_email@example.com"
+    ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.REJECTED_BY_EXAM_PRESELECT
+    )
+    applicant = ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.REJECTED_BY_EXAM_PRESELECT
+    )
+    applicant.status = ApplicantStatuses.PENDING
+    applicant.full_clean()
+    applicant.save()
+    applicant.refresh_from_db()
+    assert applicant.status == ApplicantStatuses.PENDING
+
+
+@pytest.mark.django_db
+def test_applicant_status_change_from_special_to_non_special_prevented():
+    """Test that changing status from special to non-special is prevented when an active applicant exists."""
+    campaign = CampaignFactory()
+    email = "same_email@example.com"
+
+    applicant = ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.REJECTED_BY_EXAM_PRESELECT
+    )
+    ApplicantFactory(
+        campaign=campaign,
+        email=email,
+        status=ApplicantStatuses.PENDING
+    ).full_clean()
+    
+    applicant.status = ApplicantStatuses.PASSED_EXAM
+    with pytest.raises(ValidationError) as excinfo:
+        applicant.full_clean()
+    assert 'status' in excinfo.value.error_dict
+
+@pytest.mark.django_db
+def test_olympiad_lifecycle():
+    applicant = ApplicantFactory()
+    olympiad = Olympiad.objects.create(applicant=applicant)
+    assert olympiad.pk is not None
+    assert olympiad.score is None
+    assert olympiad.math_score is None
+    
+    location = LocationFactory()
+    olympiad_full = Olympiad.objects.create(
+        applicant=ApplicantFactory(),
+        score=8,
+        math_score=7,
+        location=location,
+        details={"scores": [3, 2, 3]}
+    )
+    assert olympiad_full.total_score == 15
+    
+    olympiad.score = 5
+    olympiad.math_score = 4
+    olympiad.save()
+    olympiad.refresh_from_db()
+    assert olympiad.score == 5
+    assert olympiad.math_score == 4
+    assert olympiad.total_score == 9
+    
+    olympiad_id = olympiad.id
+    olympiad.delete()
+    assert not Olympiad.objects.filter(id=olympiad_id).exists()
+
+
+@pytest.mark.django_db
+def test_olympiad_validation():
+    applicant = ApplicantFactory()
+    Olympiad.objects.create(applicant=applicant)
+    
+    with pytest.raises(ValidationError):
+        duplicate = Olympiad(applicant=applicant)
+        duplicate.full_clean()
+    
+    olympiad = Olympiad(
+        applicant=ApplicantFactory(),
+        score=-1
+    )
+    with pytest.raises(ValidationError):
+        olympiad.full_clean()
+    
+    olympiad = Olympiad(
+        applicant=ApplicantFactory(),
+        math_score=-1
+    )
+    with pytest.raises(ValidationError):
+        olympiad.full_clean()
+    
+    olympiad = Olympiad(
+        applicant=ApplicantFactory(),
+        status="invalid_status"
+    )
+    with pytest.raises(ValidationError):
+        olympiad.full_clean()
+
+
+@pytest.mark.django_db
+def test_olympiad_score_methods():
+    olympiad = OlympiadFactory(score=8, math_score=7)
+    assert olympiad.score_display() == 8
+    assert olympiad.total_score == 15
+    assert olympiad.total_score_display() == 15
+    
+    olympiad = OlympiadFactory(score=5, math_score=None)
+    assert olympiad.score_display() == 5
+    assert olympiad.total_score == 5
+    assert olympiad.total_score_display() == 5
+    
+    olympiad = OlympiadFactory(score=None, math_score=6)
+    assert olympiad.score_display() == "-"
+    assert olympiad.total_score == 6
+    assert olympiad.total_score_display() == 6
+    
+    olympiad = OlympiadFactory(score=None, math_score=None)
+    assert olympiad.score_display() == "-"
+    assert olympiad.total_score == 0
+    assert olympiad.total_score_display() == "-"
+
+
+@pytest.mark.django_db
+def test_olympiad_applicant_integration():
+    applicant = ApplicantFactory(status=ApplicantStatuses.PERMIT_TO_OLYMPIAD)
+    olympiad = OlympiadFactory(
+        applicant=applicant,
+        score=8,
+        math_score=7
+    )
+    
+    assert olympiad.applicant == applicant
+    assert hasattr(applicant, 'olympiad')
+    assert applicant.olympiad == olympiad
+    assert applicant.get_olympiad_record() == olympiad
+    
+    applicant.status = ApplicantStatuses.PASSED_OLYMPIAD
+    applicant.save()
+    applicant.refresh_from_db()
+    
+    assert hasattr(applicant, 'olympiad')
+    assert applicant.olympiad == olympiad
+    with pytest.raises(ProtectedError):
+        applicant.delete()

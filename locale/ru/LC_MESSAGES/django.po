@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-09 14:17+0000\n"
+"POT-Creation-Date: 2025-04-02 18:36+0000\n"
 "PO-Revision-Date: 2025-03-03 15:47+0000\n"
 "Last-Translator: Софья Аноховская <cinnabun@yandex-team.ru>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,8 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.9.9\n"
 
 #: apps/api/admin.py:24
@@ -87,15 +86,15 @@ msgstr "Семестр"
 msgid "Course"
 msgstr "Курс"
 
-#: apps/api/management/commands/weekly_dump_to_yandex_disk.py:48
-#: apps/core/models.py:291 apps/courses/models.py:61 apps/courses/models.py:268
-#: apps/courses/models.py:734 apps/learning/admin.py:83
+#: apps/api/management/commands/weekly_dump_to_yandex_disk.py:35
+#: apps/core/models.py:291 apps/courses/models.py:61 apps/courses/models.py:262
+#: apps/courses/models.py:728 apps/learning/admin.py:83
 #: apps/learning/gradebook/views.py:240 apps/learning/models.py:78
 #: apps/learning/models.py:1100 apps/library/models.py:66
 #: apps/staff/filters.py:130 apps/staff/filters.py:205
-#: apps/staff/views/enrolees_selection.py:117 apps/staff/views/views.py:1082
-#: apps/staff/views/views.py:1146 apps/study_programs/models.py:65
-#: apps/users/models.py:180 apps/users/models.py:362 apps/users/models.py:811
+#: apps/staff/views/enrolees_selection.py:117 apps/staff/views/views.py:917
+#: apps/staff/views/views.py:981 apps/study_programs/models.py:65
+#: apps/users/models.py:177 apps/users/models.py:359 apps/users/models.py:802
 #: lms/jinja2/lms/courses/meta_detail.html:27
 #: lms/jinja2/lms/staff/academic_discipline_log.html:19
 #: lms/jinja2/lms/staff/status_log.html:19
@@ -253,8 +252,8 @@ msgid ""
 "Solution was submitted for code review. Use this link to track progress: "
 "{link}."
 msgstr ""
-"Решение было отправлено на код-ревью. За ходом проверки Вы можете следить по "
-"ссылке: {link}."
+"Решение было отправлено на код-ревью. За ходом проверки Вы можете следить по"
+" ссылке: {link}."
 
 #: apps/code_reviews/gerrit/tasks.py:157
 msgid "Update in Gerrit"
@@ -303,7 +302,8 @@ msgstr ""
 msgid "Changed by"
 msgstr "Кем изменено"
 
-#: apps/core/forms.py:7 apps/templates/forms/simple_delete_confirmation.html:22
+#: apps/core/forms.py:7
+#: apps/templates/forms/simple_delete_confirmation.html:22
 #: apps/templates/learning/enrollment/enrollment_leave.html:25
 #: lms/jinja2/lms/courses/course_class_form.html:97
 msgid "Cancel"
@@ -330,8 +330,8 @@ msgid ""
 "How to style text read <a href=\"/commenting-the-right-way/\" "
 "target=\"_blank\">here</a>."
 msgstr ""
-"Как правильно оформлять текст, читайте <a href=\"/commenting-the-right-way/"
-"\" target=\"_blank\">по ссылке</a>."
+"Как правильно оформлять текст, читайте <a href=\"/commenting-the-right-"
+"way/\" target=\"_blank\">по ссылке</a>."
 
 #: apps/core/models.py:181 apps/core/models.py:260
 msgid "Code"
@@ -476,8 +476,8 @@ msgstr ""
 #: apps/core/timezone/forms.py:46
 #, python-format
 msgid ""
-"%(datetime)s couldn't be interpreted in time zone %(instance_tz)s; it may be "
-"ambiguous or it may not exist."
+"%(datetime)s couldn't be interpreted in time zone %(instance_tz)s; it may be"
+" ambiguous or it may not exist."
 msgstr ""
 
 #: apps/core/validators.py:35
@@ -495,7 +495,8 @@ msgid ""
 "MIME type '%(mimetype)s' is not valid. Allowed types are: "
 "%(allowed_mimetypes)s."
 msgstr ""
-"Тип MIME '%(mimetype)s' не допустим. Разрешенные типы: %(allowed_mimetypes)s."
+"Тип MIME '%(mimetype)s' не допустим. Разрешенные типы: "
+"%(allowed_mimetypes)s."
 
 #: apps/core/validators.py:37
 #, python-format
@@ -511,7 +512,8 @@ msgid ""
 "The current file %(size)s, which is too large. The maximum file size is "
 "%(allowed_size)s."
 msgstr ""
-"Размер файла %(size)s недопустим. Максимальный размер файла %(allowed_size)s."
+"Размер файла %(size)s недопустим. Максимальный размер файла "
+"%(allowed_size)s."
 
 #: apps/courses/admin.py:68 apps/courses/models.py:849
 msgid "CourseReview|text"
@@ -823,7 +825,8 @@ msgstr ""
 msgid "Deadline"
 msgstr "Срок сдачи"
 
-#: apps/courses/forms.py:326 lms/jinja2/lms/courses/course_class_detail.html:73
+#: apps/courses/forms.py:326
+#: lms/jinja2/lms/courses/course_class_detail.html:73
 #: lms/jinja2/lms/teaching/assignment_detail.html:57
 msgid "Attached files"
 msgstr "Приложенные файлы"
@@ -881,11 +884,11 @@ msgstr "URL проверяющей системы"
 
 #: apps/courses/forms.py:363
 msgid ""
-"For example, URL of the Yandex.Contest problem: https://contest.yandex.ru/"
-"contest/3/problems/A/"
+"For example, URL of the Yandex.Contest problem: "
+"https://contest.yandex.ru/contest/3/problems/A/"
 msgstr ""
-"Например, URL задачи из Яндекс.Контеста: https://contest.yandex.ru/contest/3/"
-"problems/A/"
+"Например, URL задачи из Яндекс.Контеста: "
+"https://contest.yandex.ru/contest/3/problems/A/"
 
 #: apps/courses/forms.py:367
 msgid "Selection Mode"
@@ -951,8 +954,8 @@ msgstr "Имя для URL"
 
 #: apps/courses/models.py:212
 msgid ""
-"Short dash-separated string for human-readable URLs, as in test.com/news/"
-"<b>some-news</b>/"
+"Short dash-separated string for human-readable URLs, as in "
+"test.com/news/<b>some-news</b>/"
 msgstr ""
 "Короткая строка, разделённая тире, для человекочитаемых URL'ов. Пример: "
 "test.com/news/<b>some-news</b>/"
@@ -1049,7 +1052,8 @@ msgstr "Последний день"
 
 #: apps/courses/models.py:324
 msgid "If left blank the closing date of the semester is used"
-msgstr "Если оставить пустым, то будет использована дата конца записи семестра"
+msgstr ""
+"Если оставить пустым, то будет использована дата конца записи семестра"
 
 #: apps/courses/models.py:327
 msgid "Course|teachers"
@@ -1213,13 +1217,13 @@ msgstr ""
 
 #: apps/courses/models.py:539
 msgid "You can not set listeners capacity with REGULAR enrollment type"
-msgstr ""
-"Вы не можете выставить максимальное кол-во слушателей с типом \"Сдавать\""
+msgstr "Вы не можете выставить максимальное кол-во слушателей с типом \"Сдавать\""
 
 #: apps/courses/models.py:542
 msgid "You can not set learners capacity with LECTIONS_ONLY enrollment type"
 msgstr ""
-"Вы не можете выставить максимальное кол-во сдающих с типом \"Только слушать\""
+"Вы не можете выставить максимальное кол-во сдающих с типом \"Только "
+"слушать\""
 
 #: apps/courses/models.py:745
 msgid "Course Branch"
@@ -2551,11 +2555,11 @@ msgstr "2 курс (бакалавриат, специалитет, СПО)"
 
 #: apps/learning/settings.py:27
 msgid "3 course bachelor, speciality"
-msgstr "3 курс (бакалавриат, специалитет, СПО))"
+msgstr "3 курс (бакалавриат, специалитет, СПО)"
 
 #: apps/learning/settings.py:28
 msgid "4 course bachelor, speciality"
-msgstr "4 курс (бакалавриат, специалитет, СПО))"
+msgstr "4 курс (бакалавриат, специалитет, СПО)"
 
 #: apps/learning/settings.py:29
 msgid "5 course speciality"
@@ -2821,7 +2825,8 @@ msgstr "Вы уже записаны на этот курс"
 msgid "Copies available"
 msgstr "Доступно"
 
-#: apps/library/admin.py:82 apps/library/models.py:28 apps/library/models.py:61
+#: apps/library/admin.py:82 apps/library/models.py:28
+#: apps/library/models.py:61
 msgid "Book"
 msgstr "Книга"
 
@@ -2938,8 +2943,8 @@ msgstr "Типы"
 msgid "Notification"
 msgstr "Уведомление"
 
-#: apps/staff/filters.py:60 apps/staff/filters.py:102 apps/staff/filters.py:177
-#: apps/staff/filters.py:260
+#: apps/staff/filters.py:60 apps/staff/filters.py:102
+#: apps/staff/filters.py:177 apps/staff/filters.py:260
 msgid "Filter"
 msgstr ""
 
@@ -2972,8 +2977,8 @@ msgstr "Скачать"
 msgid "Mark processed"
 msgstr "Обработать"
 
-#: apps/staff/filters.py:187 apps/users/models.py:977 apps/users/models.py:1136
-#: apps/users/models.py:1142 apps/users/views.py:206
+#: apps/staff/filters.py:187 apps/users/models.py:968 apps/users/models.py:1059
+#: apps/users/models.py:1065 apps/users/views.py:206
 msgid "Studying"
 msgstr "Учится"
 
@@ -3150,8 +3155,8 @@ msgstr "Активность"
 
 #: apps/study_programs/models.py:75
 msgid ""
-"Show on syllabus page. Other activity flags for selected branch and academic "
-"discipline will be deactivated."
+"Show on syllabus page. Other activity flags for selected branch and academic"
+" discipline will be deactivated."
 msgstr ""
 "Активная программа будет показана на странице программы. Все другие записи "
 "для выбранного отделения и направления обучения будут деактивированы."
@@ -3227,8 +3232,7 @@ msgid ""
 "and your address will be removed from our records.\n"
 msgstr ""
 "\n"
-"Вы (или кто-то выдающий себя за вас) оставили заявку на регистрацию учетной "
-"записи на %(site_name)s. Если это были не вы, то проигнорируйте\n"
+"Вы (или кто-то выдающий себя за вас) оставили заявку на регистрацию учетной записи на %(site_name)s. Если это были не вы, то проигнорируйте\n"
 "это сообщение, и ваш почтовый адрес будет удален из наших записей.\n"
 
 #: apps/templates/emails/activation_email_body.txt:7
@@ -3268,18 +3272,13 @@ msgstr "Международные студенческие Computer Science ш�
 #: apps/templates/international_schools/international_schools.html:7
 msgid ""
 "\n"
-"        If you would like a school to be added to this list email the club "
-"coordinator: Alexander Kulikov, kulikov()logic.pdmi.ras.ru<br>\n"
-"        Subscribe: <a href=\"https://www.facebook.com/"
-"compscischools\">Facebook</a>\n"
+"        If you would like a school to be added to this list email the club coordinator: Alexander Kulikov, kulikov()logic.pdmi.ras.ru<br>\n"
+"        Subscribe: <a href=\"https://www.facebook.com/compscischools\">Facebook</a>\n"
 "    "
 msgstr ""
 "\n"
-"Список школ также поддерживается в <a href=\"https://vk.com/"
-"compscinews\">группе Вконтакте</a> и в группе <a href=\"https://"
-"www.facebook.com/compscischools\">в Фейсбуке</a>.<br>\n"
-"Для добавления анонса школы свяжитесь с координатором клуба: Александр "
-"Куликов, alexander.s.kulikov@gmail.com."
+"Список школ также поддерживается в <a href=\"https://vk.com/compscinews\">группе Вконтакте</a> и в группе <a href=\"https://www.facebook.com/compscischools\">в Фейсбуке</a>.<br>\n"
+"Для добавления анонса школы свяжитесь с координатором клуба: Александр Куликов, alexander.s.kulikov@gmail.com."
 
 #: apps/templates/international_schools/international_schools.html:15
 msgctxt "international Schools"
@@ -3520,7 +3519,8 @@ msgstr "Важные даты"
 msgid ""
 "Regular student profile already exists for this admission campaign year."
 msgstr ""
-"Профиль регулярного студента уже существует для связанной кампании по набору."
+"Профиль регулярного студента уже существует для связанной кампании по "
+"набору."
 
 #: apps/users/admin.py:237
 msgid "Student profile with type INVITED must have invitation"
@@ -4431,12 +4431,10 @@ msgstr "Записаться"
 #: lms/jinja2/lms/study/student_assignment_detail.html:110
 msgid ""
 "Comment doesn't change status.<br>\n"
-"            For the teacher to see an update to the solution, use the «Send "
-"solution» tab."
+"            For the teacher to see an update to the solution, use the «Send solution» tab."
 msgstr ""
 "Комментарий не меняет статус задания.<br>\n"
-"Чтобы преподаватель увидел обновление к решению, используйте окно «Добавить "
-"решение»."
+"Чтобы преподаватель увидел обновление к решению, используйте окно «Добавить решение»."
 
 #: lms/jinja2/lms/study/student_assignment_detail.html:129
 #: lms/jinja2/lms/teaching/student_assignment_detail.html:218
@@ -4571,18 +4569,15 @@ msgstr "весенний"
 #~ msgstr "Не подтверждено"
 
 #, fuzzy
-#~| msgid "Admin Panel"
 #~ msgid "Admin panel"
 #~ msgstr "Админ-панель"
 
-#~| msgid "Photo"
 #~ msgid "Photo edit"
 #~ msgstr "Изменить фото"
 
 #, python-format
 #~ msgid ""
-#~ "Inconsistent with this course's semester (from %(starts_at)s to "
-#~ "%(ends_at)s)"
+#~ "Inconsistent with this course's semester (from %(starts_at)s to %(ends_at)s)"
 #~ msgstr "Не совпадает с семестром курса (с %(starts_at)s по %(ends_at)s)"
 
 #~ msgid ""
@@ -4596,8 +4591,8 @@ msgstr "весенний"
 #~ "Major and minor objects must not be the same: {major} with type "
 #~ "{type(major)}"
 #~ msgstr ""
-#~ "Основной и дублирующий объекты не должны быть одним объектом: {major} "
-#~ "типа {type(major)}"
+#~ "Основной и дублирующий объекты не должны быть одним объектом: {major} типа "
+#~ "{type(major)}"
 
 #, python-brace-format
 #~ msgid "Major and minor Users must not be the same object: {major}"
@@ -4624,9 +4619,9 @@ msgstr "весенний"
 #~ "If the course was recredited without grade use re-credit grade only. The "
 #~ "flag is used to represent that set grade is recredited."
 #~ msgstr ""
-#~ "Если курс был перезачтен без оценки используйте только оценку "
-#~ "\"Перезачтено (без оценки)\". Эта галочка используется для обозначение "
-#~ "того, что выставленная положительная оценка перезачтена."
+#~ "Если курс был перезачтен без оценки используйте только оценку \"Перезачтено "
+#~ "(без оценки)\". Эта галочка используется для обозначение того, что "
+#~ "выставленная положительная оценка перезачтена."
 
 #~ msgid "Students and listeners"
 #~ msgstr "Студенты и слушатели"

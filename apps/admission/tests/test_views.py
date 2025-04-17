@@ -1,4 +1,3 @@
-import ast
 import csv
 import datetime
 import io
@@ -6,21 +5,22 @@ import io
 import pytest
 from bs4 import BeautifulSoup
 from django.contrib.messages import get_messages, constants
-from django.core.exceptions import ValidationError
 from post_office.models import Email
 
-from django.utils import formats, timezone
+from django.utils import formats
 from django.utils.timezone import now
+from django.urls import reverse
 
 from admission.constants import (
-    INVITATION_EXPIRED_IN_HOURS,
     SESSION_CONFIRMATION_CODE_KEY,
-    InterviewFormats,
-    InterviewSections, ApplicantStatuses, InterviewInvitationStatuses,
+    InterviewSections, 
+    ApplicantStatuses, 
+    InterviewInvitationStatuses, 
+    ContestTypes, 
+    ChallengeStatuses
 )
 from admission.forms import InterviewFromStreamForm
-from admission.models import Acceptance, Applicant, Interview, InterviewInvitation, Comment
-from admission.services import get_meeting_time
+from admission.models import Acceptance, Applicant, Interview, InterviewInvitation, Comment, Olympiad
 from admission.tests.factories import (
     AcceptanceFactory,
     ApplicantFactory,
@@ -28,11 +28,13 @@ from admission.tests.factories import (
     CommentFactory,
     InterviewerFactory,
     InterviewFactory,
-    InterviewFormatFactory,
     InterviewInvitationFactory,
-    InterviewStreamFactory, InterviewSlotFactory,
+    InterviewStreamFactory, 
+    InterviewSlotFactory, 
+    ContestFactory, 
+    OlympiadFactory, 
+    LocationFactory
 )
-from admission.views import InterviewInvitationCreateView
 from core.models import Branch
 from core.tests.factories import BranchFactory, SiteFactory
 from core.timezone import get_now_utc, now_local
@@ -40,6 +42,7 @@ from core.urls import reverse
 from learning.settings import Branches
 from users.mixins import CuratorOnlyMixin
 from users.tests.factories import CuratorFactory, UserFactory
+from tasks.models import Task
 
 # TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
 # TODO: Проверить время отправки напоминания, время/дату собеседования
@@ -813,3 +816,103 @@ def test_applicant_detail_view_shows_status_logs(client, settings):
     cells = rows[1].find_all("td")
     assert str(ApplicantStatuses.values[ApplicantStatuses.PASSED_EXAM]) in cells[0].text
     assert curator.get_full_name() in cells[2].text
+
+
+@pytest.mark.django_db
+def test_olympiad_display(client):
+    curator = CuratorFactory()
+    client.login(curator)
+    applicant = ApplicantFactory()
+    OlympiadFactory(
+        applicant=applicant,
+        score=8,
+        math_score=7,
+        location=LocationFactory(name="Москва")
+    )
+    
+    response = client.get(
+        reverse('admission:applicants:detail', args=[applicant.pk])
+    )
+    assert response.status_code == 200
+    soup = BeautifulSoup(response.content, "html.parser")
+    
+    test_results_tab = soup.find("div", id="test-results")
+    assert test_results_tab is not None
+    
+    tab_text = test_results_tab.text
+    assert "Олимпиада: 15" in tab_text
+    assert "Программирование: 8" in tab_text
+    assert "Математика: 7" in tab_text
+    assert "Площадка: Москва" in tab_text
+    
+    response = client.get(reverse('admission:applicants:list'), follow=True)
+    assert response.status_code == 200
+    
+    response = client.get(
+        reverse('admission:applicants:list') + 
+        '?ordering=-olympiad__total_score_coalesce', 
+        follow=True
+    )
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_register_for_olympiad_view(client, mocker):
+    campaign = CampaignFactory(current=True)
+    ContestFactory(
+        campaign=campaign, 
+        type=ContestTypes.OLYMPIAD,
+        contest_id="12345"
+    )
+    ApplicantFactory.create_batch(
+        3,
+        campaign=campaign,
+        status=ApplicantStatuses.PERMIT_TO_OLYMPIAD,
+        yandex_login="test_user_"
+    )
+    
+    mock_register = mocker.patch(
+        "grading.api.yandex_contest.YandexContestAPI.register_in_contest"
+    )
+    mock_register.return_value = (200, 1001)
+    
+    url = reverse('admission:applicants:register_for_olympiad', args=[campaign.pk])
+    response = client.get(url)
+    assert response.status_code == 302
+    assert response.url.startswith("/login/?next=")
+    
+    curator = CuratorFactory()
+    client.login(curator)
+    response = client.get(url)
+    assert response.status_code == 302
+    assert Olympiad.objects.count() == 3
+    for olympiad in Olympiad.objects.all():
+        assert olympiad.status == ChallengeStatuses.REGISTERED
+        assert olympiad.contest_participant_id == 1001
+
+@pytest.mark.django_db
+def test_olympiad_results_import_view(client, mocker):
+    curator = CuratorFactory()
+    client.login(curator)
+    
+    campaign = CampaignFactory(current=True)
+    ContestFactory(
+        campaign=campaign,
+        type=ContestTypes.OLYMPIAD,
+        contest_id="12345"
+    )
+    mock_delay = mocker.patch("admission.tasks.import_campaign_contest_results.delay")
+    
+    assert Task.objects.count() == 0
+    
+    url = reverse('admission:api:import_contest_scores', args=[campaign.pk, ContestTypes.OLYMPIAD])
+    response = client.post(url)
+    assert response.status_code == 201
+    assert Task.objects.count() == 1
+    
+    task = Task.objects.last()
+    assert task.task_name == "admission.tasks.import_campaign_contest_results"
+    assert task.task_params["campaign_id"] == campaign.pk
+    assert task.task_params["contest_type"] == ContestTypes.OLYMPIAD
+    assert task.creator == curator
+    mock_delay.assert_called_once_with(task_id=task.pk)
