@@ -63,7 +63,7 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('birth_date', 'phone', 'workplace', 'bio', 'citizenship', 'time_zone', 'yandex_login',
+        fields = ('birth_date', 'phone', 'workplace', 'bio', 'time_zone', 'yandex_login',
                   'telegram_username', 'github_login', 'stepic_id', 'codeforces_login',
                   'private_contacts', 'is_notification_allowed', 'tshirt_size')
         widgets = {
