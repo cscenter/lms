@@ -49,7 +49,7 @@ from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
 from staff.filters import EnrollmentInvitationFilter, StudentProfileFilter, StudentAcademicDisciplineLogFilter, \
     StudentStatusLogFilter
-from staff.forms import BadgeNumberFromCSVForm, ExportForDiplomas, GraduationForm, MergeUsersForm
+from staff.forms import BadgeNumberFromCSVForm, ExportForDiplomas, GraduationForm, MergeUsersForm, SendLettersForm
 from staff.models import Hint
 from staff.services.diploma_export import ElectronicDiplomaExportService
 from staff.tex import generate_tex_student_profile_for_diplomas
@@ -152,6 +152,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         graduation_form.helper.form_action = reverse("staff:create_alumni_profiles")
         merge_users_form = MergeUsersForm()
         badge_number_from_csv_form = BadgeNumberFromCSVForm()
+        send_letters_form = SendLettersForm(request=self.request)
         official_diplomas_dates = (
             GraduateProfile.objects.for_site(self.request.site)
             .with_official_diploma()
@@ -165,6 +166,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             "alumni_profiles_form": graduation_form,
             "merge_users_form": merge_users_form,
             "badge_number_from_csv_form": badge_number_from_csv_form,
+            "send_letters_form": send_letters_form,
             "current_term": current_term,
             "prev_term": {"year": prev_term.year, "type": prev_term.type},
             "campaigns": (

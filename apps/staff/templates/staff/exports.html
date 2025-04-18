@@ -189,6 +189,14 @@
           {% endfor %}
 
         </table>
+        <h2 class="content-title">Отправка писем</h2>
+        <div class="list-group">
+          <div class="list-group-item list-unstyled">
+            <p>Необходимо выбрать кому отправлять письма и по какому шаблону.<br>
+               По умолчанию берутся все значения из столбца</p>
+            {% crispy send_letters_form %}
+          </div>
+        </div>
       </div>
     </div>
   </div>
