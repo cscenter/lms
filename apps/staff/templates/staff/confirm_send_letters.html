@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Confirm Email Sending" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>{% trans "Confirm Email Sending" %}</h1>
+            
+            <form method="post" action="{% url 'staff:send_letters' %}">
+                {% csrf_token %}
+                {{ form|crispy }}
+                
+                <div class="row">
+                    <div class="col-md-3">
+                        <button type="submit" name="confirm_send" value="1" class="btn btn-primary">{% trans "Confirm and Send" %}</button>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" name="cancel_send" value="1" class="btn btn-secondary">{% trans "Cancel" %}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

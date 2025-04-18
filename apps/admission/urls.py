@@ -21,6 +21,7 @@ from admission.views import (
     InterviewListView,
     InterviewResultsDispatchView,
     InterviewResultsView,
+    RegisterApplicantsForOlympiadView,
 )
 
 app_name = "admission"
@@ -34,6 +35,11 @@ applicant_patterns = [
         name="create_student",
     ),
     path("status/<int:pk>/", ApplicantStatusUpdateView.as_view(), name="update_status"),
+    path(
+        "campaigns/<int:campaign_id>/register-for-olympiad/",
+        RegisterApplicantsForOlympiadView.as_view(),
+        name="register_for_olympiad",
+    ),
 ]
 
 interview_invitation_patterns = [

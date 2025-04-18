@@ -1,7 +1,7 @@
 # Product Context
 
 This file provides a high-level overview of the project and the expected product that will be created. Initially it is based upon projectBrief.md (if provided) and all other available project-related information in the working directory. This file is intended to be updated as the project evolves, and should be used to inform all other modes of the project's goals and context.
-2025-03-31 16:14:09 - Log of updates made will be appended as footnotes to the end of this file.
+2025-04-04 18:26:00 - Log of updates made will be appended as footnotes to the end of this file.
 
 *
 
@@ -13,9 +13,10 @@ This file provides a high-level overview of the project and the expected product
 
 * **Управление приемной кампанией**
   - Регистрация и обработка заявок абитуриентов
-  - Проведение вступительных тестов и интервью
+  - Проведение вступительных тестов, олимпиад и интервью
   - Управление расписанием собеседований
   - Оценка и отбор кандидатов
+  - Хранение и анализ результатов олимпиад
 
 * **Управление курсами и учебными материалами**
   - Создание и редактирование курсов
@@ -39,7 +40,7 @@ This file provides a high-level overview of the project and the expected product
   - Обратная связь между студентами и преподавателями
 
 * **Интеграция с внешними сервисами**
-  - Yandex.Contest (для проверки заданий)
+  - Yandex.Contest (для проверки заданий и проведения олимпиад)
   - Gerrit (для код-ревью)
   - Yandex.Disk (для хранения файлов)
   - Yandex.Passport и LDAP (для аутентификации)
@@ -55,7 +56,7 @@ This file provides a high-level overview of the project and the expected product
   - lms - общий код и компоненты для всех сайтов
 
 * **Основные компоненты:**
-  - **apps/admission** - управление приемной кампанией
+  - **apps/admission** - управление приемной кампанией, включая проведение олимпиад ШАД
   - **apps/courses** - управление курсами и учебными материалами
   - **apps/learning** - управление учебным процессом
   - **apps/tasks** - система заданий
@@ -73,3 +74,52 @@ This file provides a high-level overview of the project and the expected product
   - API: Django REST Framework
   - Frontend: Jinja2, Webpack
   - Инфраструктура: Docker, Kubernetes
+
+## Модуль приемной кампании (apps/admission)
+
+Модуль приемной кампании отвечает за управление процессом приема абитуриентов, включая регистрацию заявок, проведение вступительных испытаний и отбор кандидатов.
+
+### Основные компоненты модуля:
+
+* **Модели данных:**
+  - `Applicant` - информация о поступающем
+  - `Campaign` - приемная кампания
+  - `Test` - результаты онлайн-теста
+  - `Exam` - результаты экзамена
+  - `Olympiad` - результаты олимпиады ШАД (программирование и математика)
+  - `Interview` - собеседование
+  - `InterviewStream` - поток собеседований
+  - `InterviewSlot` - слот для собеседования
+  - `InterviewInvitation` - приглашение на собеседование
+
+* **Представления:**
+  - `ApplicantListView` - список абитуриентов с фильтрацией и сортировкой
+  - `ApplicantDetailView` - детальная информация об абитуриенте
+  - `RegisterApplicantsForOlympiadView` - регистрация абитуриентов в контесте олимпиады
+  - `InterviewInvitationCreateView` - создание приглашений на собеседование
+  - `InterviewDetailView` - детальная информация о собеседовании
+
+* **Шаблоны:**
+  - `applicant_list.html` - список абитуриентов
+  - `applicant_detail.html` - детальная информация об абитуриенте
+  - `_results_tab.html` - вкладка с результатами тестов, олимпиады и экзамена
+
+* **Интеграция с внешними сервисами:**
+  - Yandex.Contest для проведения онлайн-тестов, олимпиад и экзаменов
+  - Email-сервис для отправки приглашений на собеседования
+
+### Процесс приема:
+
+1. Регистрация абитуриентов через веб-форму
+2. Проведение онлайн-теста через Yandex.Contest
+3. Проведение олимпиады ШАД (программирование и математика)
+4. Приглашение на собеседование
+5. Проведение собеседования
+6. Принятие решения о зачислении
+7. Создание учетной записи студента для зачисленных абитуриентов
+
+*
+
+2025-03-31 16:14:09 - Добавлена базовая информация о проекте, его целях, ключевых функциях и архитектуре.
+
+2025-04-04 18:26:00 - Добавлена детальная информация о модуле приемной кампании (apps/admission), включая его основные компоненты, модели данных, представления, шаблоны, интеграцию с внешними сервисами и процесс приема абитуриентов.

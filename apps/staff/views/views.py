@@ -32,7 +32,7 @@ from core.typings import assert_never
 from core.urls import reverse
 from core.utils import bucketize
 from courses.constants import SemesterTypes
-from courses.models import Course, Semester, CourseDurations
+from courses.models import Course, MetaCourse, Semester, CourseDurations
 from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment, GraduateProfile, Invitation
@@ -49,15 +49,17 @@ from learning.settings import AcademicDegreeLevels, GradeTypes, StudentStatuses
 from projects.constants import ProjectGradeTypes
 from staff.filters import EnrollmentInvitationFilter, StudentProfileFilter, StudentAcademicDisciplineLogFilter, \
     StudentStatusLogFilter
-from staff.forms import BadgeNumberFromCSVForm, GraduationForm, MergeUsersForm
+from staff.forms import BadgeNumberFromCSVForm, ExportForDiplomas, GraduationForm, MergeUsersForm, SendLettersForm
 from staff.models import Hint
+from staff.services.diploma_export import ElectronicDiplomaExportService
 from staff.tex import generate_tex_student_profile_for_diplomas
 from study_programs.models import AcademicDiscipline
 from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
+from users.constants import GenderTypes
 from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
-from users.models import PartnerTag, StudentProfile, StudentTypes, User, StudentAcademicDisciplineLog, StudentStatusLog
+from users.models import PartnerTag, StudentProfile, StudentTypes, User, StudentAcademicDisciplineLog, StudentStatusLog, SHADCourseRecord
 from users.services import (
     badge_number_from_csv,
     create_graduate_profiles,
@@ -150,6 +152,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         graduation_form.helper.form_action = reverse("staff:create_alumni_profiles")
         merge_users_form = MergeUsersForm()
         badge_number_from_csv_form = BadgeNumberFromCSVForm()
+        send_letters_form = SendLettersForm(request=self.request)
         official_diplomas_dates = (
             GraduateProfile.objects.for_site(self.request.site)
             .with_official_diploma()
@@ -157,11 +160,13 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             .order_by("-diploma_issued_on")
             .values_list("diploma_issued_on", flat=True)
         )
+        export_for_electronic_diploma = ExportForDiplomas(request=self.request)
         branches = Branch.objects.filter(site_id=settings.SITE_ID)
         context = {
             "alumni_profiles_form": graduation_form,
             "merge_users_form": merge_users_form,
             "badge_number_from_csv_form": badge_number_from_csv_form,
+            "send_letters_form": send_letters_form,
             "current_term": current_term,
             "prev_term": {"year": prev_term.year, "type": prev_term.type},
             "campaigns": (
@@ -172,6 +177,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             "years": Campaign.objects.filter(branch__in=branches).values_list('year', flat=True).distinct().order_by('-year'),
             "branches": branches,
             "official_diplomas_dates": official_diplomas_dates,
+            "export_for_electronic_diploma_form": export_for_electronic_diploma
         }
         return context
 
@@ -743,6 +749,30 @@ def badge_number_from_csv_view(request: HttpRequest):
             messages.error(request, mark_safe(f"{label}:<br>{errors}"))
     return HttpResponseRedirect(reverse("staff:exports"))
 
+
+def export_for_electronic_diplomas_view(request: HttpRequest):
+    """
+    Export student data for electronic diplomas in CSV format.
+    
+    This view handles the export of student data for electronic diplomas,
+    including personal information and course grades.
+    """
+    if not request.user.is_curator:
+        return HttpResponseForbidden()
+    
+    form = ExportForDiplomas(data=request.POST, request=request)
+    
+    if form.is_valid():
+        graduated_year = int(form.cleaned_data["graduated_year"])
+        return ElectronicDiplomaExportService.generate_export(request.site, graduated_year)
+    else:
+        for field, error_as_list in form.errors.items():
+            label = form.fields[field].label if field in form.fields else field
+            label = "Общее" if label == "__all__" else label
+            errors = "<br>".join(str(error) for error in error_as_list)
+            messages.error(request, mark_safe(f"{label}:<br>{errors}"))
+    
+    return HttpResponseRedirect(reverse("staff:exports"))
 
 class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):
     FORMATS = ("csv", "xlsx")
