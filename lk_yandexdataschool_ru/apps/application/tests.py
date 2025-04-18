@@ -8,6 +8,7 @@ from django.utils.timezone import now
 import pytest
 from django.conf import settings
 
+from admission.constants import ContestTypes
 from admission.models import Contest, Applicant, CampaignCity
 from admission.tests.factories import CampaignFactory, ContestFactory
 from core.tests.factories import BranchFactory
@@ -100,7 +101,7 @@ def test_view_application_form_no_msk_campaigns(client):
     branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
     CampaignCity.objects.create(campaign=campaign)
-    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    contest = ContestFactory(campaign=campaign, type=ContestTypes.TEST)
     university = UniversityFactory()
     university_city = CityFactory()
     data = {**yds_post_data}
@@ -132,7 +133,7 @@ def test_view_application_form_msk_campaigns(client):
     distance_campaign = CampaignFactory(branch=distance_branch, year=now().year, current=True)
     CampaignCity.objects.create(campaign=msk_campaign)
     CampaignCity.objects.create(campaign=distance_campaign)
-    contest = ContestFactory(campaign=msk_campaign, type=Contest.TYPE_TEST)
+    contest = ContestFactory(campaign=msk_campaign, type=ContestTypes.TEST)
     university = UniversityFactory()
     university_city = CityFactory()
     data = {**yds_post_data}
@@ -169,7 +170,7 @@ def test_application_YDS_form_creates(settings, client):
     branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
     CampaignCity.objects.create(campaign=campaign, city=None)
-    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    contest = ContestFactory(campaign=campaign, type=ContestTypes.TEST)
     data['campaign'] = campaign.pk
     url = reverse('applicant_create')
     session = client.session
@@ -190,7 +191,7 @@ def test_valid_data_YDS_form(settings, client):
     branch = BranchFactory(code='distance', site_id=settings.SITE_ID)
     campaign = CampaignFactory(branch=branch, year=now().year, current=True)
     CampaignCity.objects.create(campaign=campaign, city=None)
-    contest = ContestFactory(campaign=campaign, type=Contest.TYPE_TEST)
+    contest = ContestFactory(campaign=campaign, type=ContestTypes.TEST)
     data['campaign'] = campaign.pk
     url = reverse('applicant_create')
     session = client.session

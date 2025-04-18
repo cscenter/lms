@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.management import BaseCommand, CommandError
 
-from admission.constants import ChallengeStatuses, ApplicantStatuses
+from admission.constants import ChallengeStatuses, ApplicantStatuses, ContestTypes
 from admission.models import Applicant, Contest, Exam
 from admission.services import EmailQueueService
 from grading.api.yandex_contest import ContestAPIError, RegisterStatus, YandexContestAPI
@@ -47,7 +47,7 @@ class Command(
         errors = []
         for campaign in campaigns:
             try:
-                validate_campaign_contests(campaign, contest_type=Contest.TYPE_EXAM)
+                validate_campaign_contests(campaign, contest_type=ContestTypes.EXAM)
             except ValidationError as e:
                 errors.append(e.message)
             if send_email and not campaign.template_exam_invitation:
