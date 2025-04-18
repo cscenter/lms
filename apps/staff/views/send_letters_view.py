@@ -90,8 +90,7 @@ class ConfirmView(CuratorOnlyMixin, View):
         try:
             email_template = EmailTemplate.objects.get(pk=email_template_id)
             
-            # Pass is_test=True to always send the test email regardless of whether it was sent before
-            SendView._send_emails([test_email], email_template.name, is_test=True)
+            SendView.send_emails([test_email], email_template.name, is_test=True)
             
             messages.success(request, _("Test sending to {0} of template '{1}'").format(test_email, email_template.name))
         except Exception as e:
@@ -107,7 +106,7 @@ class ConfirmView(CuratorOnlyMixin, View):
         Handle sending emails to selected students.
         """
         try:
-            emails, filter_description = self.send_letters(
+            emails, filter_description = self.filter_students_for_emails(
                 email_template_id, branch, year_of_admission, year_of_curriculum, 
                 student_type, status, academic_disciplines, scheduled_time
             )
@@ -118,18 +117,20 @@ class ConfirmView(CuratorOnlyMixin, View):
         
         template_obj = EmailTemplate.objects.get(pk=email_template_id)
         
-        form = ConfirmSendLettersForm(
-            emails=emails,
-            filter_description=filter_description,
-            template_name=template_obj.name,
-            email_template_id=email_template_id,
-            scheduled_time=scheduled_time.isoformat() if scheduled_time else '',
-        )
+        initial = {  
+            'filter_description_display': '\n'.join(filter_description[:-1]),  
+            'base_info_display': filter_description[-1],  
+            'recipients_display': '\n'.join(emails),  
+            'template_display': template_obj.name,  
+            'email_template_id': email_template_id,
+            'scheduled_time': scheduled_time.isoformat() 
+        }
+        
+        form = ConfirmSendLettersForm(initial=initial)
         
         return render(request, 'staff/confirm_send_letters.html', {'form': form})
-    
-    @classmethod
-    def send_letters(cls, email_template_id, branch, year_of_admission, year_of_curriculum, 
+
+    def filter_students_for_emails(self, email_template_id, branch, year_of_admission, year_of_curriculum, 
                     student_type, status, academic_disciplines, scheduled_time):
         """
         Filter student profiles based on criteria and return a list of email addresses.
@@ -186,42 +187,42 @@ class SendView(CuratorOnlyMixin, View):
         """
         Handle POST requests for the send letters.
         """
-        if 'confirm_send' in request.POST:
-            return self.handle_confirm_send(request)
-        
         if 'cancel_send' in request.POST:
             messages.info(request, _("Email sending canceled"))
             return HttpResponseRedirect(reverse("staff:exports"))
+            
+        if 'confirm_send' in request.POST:
+            return self.handle_confirm_send(request)
 
         messages.warning(request, _("No action specified. Email sending canceled."))
         return HttpResponseRedirect(reverse("staff:exports"))
     
     @classmethod
-    def _send_emails(cls, emails, template, data=None, is_test=False):
+    def send_emails(cls, emails, template, data=None, is_test=False):
         """
         Send emails using the post_office library.
         """
         template = get_email_template(template)
-        email_from = "Школа анализа данных <noreply@yandexdataschool.ru>"
+        email_from = settings.DEFAULT_FROM_EMAIL
 
         scheduled_time = data if data else None
 
-        sent_count = 0
-        for recipient in emails:
-            # For test emails, always send regardless of whether it was sent before
-            if is_test or not Email.objects.filter(to=recipient, template=template).exists():
-                mail.send(
-                    recipient,
-                    sender=email_from,
-                    template=template,
-                    context={},
-                    render_on_delivery=True,
-                    backend='ses',
-                    scheduled_time=scheduled_time,
-                )
-                sent_count += 1
-            else:
-                logger.warning(_("Have been send already"))
+        if is_test:
+            emails_to_send = emails
+        else:
+            sent_emails = Email.objects.filter(to__in=emails, template=template).values_list("to", flat=True)  
+            emails_to_send = [email for email in emails if email not in sent_emails]
+            
+        mail.send(  
+            emails_to_send,  
+            sender=email_from,  
+            template=template,  
+            context={},  
+            render_on_delivery=True,  
+            backend='ses',  
+            scheduled_time=scheduled_time  
+        )
+        sent_count = len(emails_to_send)
         return sent_count
     
     def handle_confirm_send(self, request):
@@ -237,15 +238,15 @@ class SendView(CuratorOnlyMixin, View):
             
             try:
                 email_template = EmailTemplate.objects.get(pk=email_template_id)
-                SendView._send_emails(emails, email_template.name, scheduled_time_str)
+                SendView.send_emails(emails, email_template.name, scheduled_time_str)
                 
                 messages.success(
                     request, 
-                    _("Successfully scheduled sending {0} emails of template '{1}'").format(len(emails), email_template.name)
+                    _("Successfully scheduled sending {0} emails of template '{1}'").format(len(emails) if emails else 0, email_template.name)
                 )
             except Exception as e:
                 logger.exception("Error sending emails: %s", str(e))
-                messages.error(request, f"Ошибка при отправке писем: {str(e)}")
+                messages.error(request, _("Error sending emails: {0}").format(str(e)))
         else:
             messages.error(request, _("Invalid form data. Email sending canceled."))
         

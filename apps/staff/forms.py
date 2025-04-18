@@ -194,7 +194,7 @@ class ConfirmSendLettersForm(forms.Form):
                 ),
                 Column(
                     FormActions(
-                        Submit('cancel_send', _('Cancel'), css_class='btn-secondary'),
+                        Submit('cancel_send', _('Cancel'), css_class='btn-secondary', formmethod='post'),
                     ),
                     css_class='col-md-2'
                 ),
@@ -207,9 +207,6 @@ class ConfirmSendLettersForm(forms.Form):
         """
         if self.cleaned_data.get('recipients_display'):
             return [email.strip() for email in self.cleaned_data['recipients_display'].split('\n') if email.strip()]
-        
-        # If the form hasn't been submitted or recipients_display is empty, return the original emails
-        return self.emails
 
 
 class SendLettersForm(forms.Form):
@@ -240,7 +237,7 @@ class SendLettersForm(forms.Form):
     status = forms.MultipleChoiceField(
         label=_("Status"),
         widget=forms.CheckboxSelectMultiple,
-        choices=[(k, v) for k, v in StudentStatuses.values.items()],
+        choices=StudentStatuses.choices,
         required=False
     )
     academic_disciplines = forms.MultipleChoiceField(
