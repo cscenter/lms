@@ -66,30 +66,22 @@ class CourseSurveyFormSuccessView(CourseURLParamsMixin, TemplateView):
         return {"course": self.course}
 
 
-class ReportBase:
+class ReportBase(generic.base.View):
     url: str
     prefix: str
 
-    def process_get(self, request):
-        """Processing request"""
+    def get(self, request, *args, **kwargs):
+        if self.url is None or self.prefix is None:
+             raise NotImplementedError
         # TODO Create log
         # TODO Set params to Form?
         logger.info(f"Got {self.prefix} report from {request.user} id={request.user.pk} on page {request.META['HTTP_REFERER']} sessionid={request.COOKIES['sessionid']} HTTP_USER_AGENT={request.environ['HTTP_USER_AGENT']}")
         return redirect(self.url)
 
-
-class ReportBugView(ReportBase, CuratorOnlyMixin, generic.base.View):
+class ReportBugView(ReportBase):
     url = "https://forms.yandex.ru/surveys/13739605.ea35e390cf310d138e5e32315ecb2c07f1813e89/"
     prefix = "bug"
 
-    def get(self, request, *args, **kwargs):
-        return super().process_get(request)
-    
-
-class ReportIdeaView(ReportBase, CuratorOnlyMixin, generic.base.View):
+class ReportIdeaView(ReportBase):
     url = "https://forms.yandex.ru/surveys/13739606.3c14ec2d9997b34e4b254c8abddf1636af04f78f/"
     prefix = "idea"
-
-    def get(self, request, *args, **kwargs):
-        return super().process_get(request)
-        
