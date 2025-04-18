@@ -6,6 +6,7 @@ from django.utils import timezone
 from core.tests.factories import EmailTemplateFactory, BranchFactory
 from core.urls import reverse
 from staff.forms import ConfirmSendLettersForm
+from staff.utils import send_emails
 from staff.views.send_letters_view import ConfirmView, SendView
 from study_programs.tests.factories import AcademicDisciplineFactory
 from users.tests.factories import CuratorFactory, StudentProfileFactory, StudentFactory
@@ -105,7 +106,7 @@ def student_profiles(branch, academic_discipline):
     (None, True, 2),  # No scheduled time, is a test
 ])
 def test_send_view_send_emails(data, is_test, expected_count, email_template):
-    """Test the SendView.send_emails method."""
+    """Test the send_emails function from staff.utils."""
     # Arrange
     emails = ["test1@example.com", "test2@example.com"]
     
@@ -113,12 +114,12 @@ def test_send_view_send_emails(data, is_test, expected_count, email_template):
     with patch('post_office.mail.send') as mock_send:
         # For is_test=True, we don't need to mock Email.objects.filter
         if is_test:
-            result = SendView.send_emails(emails, email_template.name, data, is_test)
+            result = send_emails(emails, email_template.name, data, is_test)
         else:
             # Mock Email.objects.filter to return an empty list
             with patch('post_office.models.Email.objects.filter') as mock_filter:
                 mock_filter.return_value.values_list.return_value = ["test1@example.com"]
-                result = SendView.send_emails(emails, email_template.name, data, is_test)
+                result = send_emails(emails, email_template.name, data, is_test)
     
     # Assert
     assert result == expected_count
@@ -308,7 +309,7 @@ def test_confirm_view_handle_test_email(client, curator, email_template):
     }
     
     # Act
-    with patch.object(SendView, 'send_emails', return_value=1) as mock_send_emails:
+    with patch('staff.views.send_letters_view.send_emails', return_value=1) as mock_send_emails:
         response = client.post(url, form_data)
     
     # Assert
@@ -360,7 +361,7 @@ def test_confirm_view_process_valid_form_test_email(client, curator, email_templ
     }
     
     # Act
-    with patch.object(SendView, 'send_emails', return_value=1) as mock_send_emails:
+    with patch('staff.views.send_letters_view.send_emails', return_value=1) as mock_send_emails:
         response = client.post(url, form_data)
     
     # Assert
@@ -434,7 +435,7 @@ def test_send_view_post_confirm_send(client, curator, email_template):
     }
     
     # Act
-    with patch.object(SendView, 'send_emails', return_value=1) as mock_send_emails:
+    with patch('staff.views.send_letters_view.send_emails', return_value=1) as mock_send_emails:
         response = client.post(url, post_data)
     
     # Assert
@@ -500,7 +501,7 @@ def test_send_view_handle_confirm_send(client, curator, email_template):
     }
     
     # Act
-    with patch.object(SendView, 'send_emails', return_value=1) as mock_send_emails:
+    with patch('staff.views.send_letters_view.send_emails', return_value=1) as mock_send_emails:
         response = client.post(url, post_data)
     
     # Assert

@@ -11,10 +11,9 @@ from django.views import View
 
 from core.models import Branch
 from core.urls import reverse
-from post_office.models import EmailTemplate, Email
-from post_office import mail
-from post_office.utils import get_email_template
+from post_office.models import EmailTemplate
 from staff.forms import SendLettersForm, ConfirmSendLettersForm
+from staff.utils import send_emails
 from study_programs.models import AcademicDiscipline
 from users.mixins import CuratorOnlyMixin
 from users.models import StudentProfile, StudentTypes
@@ -90,7 +89,7 @@ class ConfirmView(CuratorOnlyMixin, View):
         try:
             email_template = EmailTemplate.objects.get(pk=email_template_id)
             
-            SendView.send_emails([test_email], email_template.name, is_test=True)
+            send_emails([test_email], email_template.name, is_test=True)
             
             messages.success(request, _("Test sending to {0} of template '{1}'").format(test_email, email_template.name))
         except Exception as e:
@@ -196,34 +195,7 @@ class SendView(CuratorOnlyMixin, View):
 
         messages.warning(request, _("No action specified. Email sending canceled."))
         return HttpResponseRedirect(reverse("staff:exports"))
-    
-    @classmethod
-    def send_emails(cls, emails, template, data=None, is_test=False):
-        """
-        Send emails using the post_office library.
-        """
-        template = get_email_template(template)
-        email_from = settings.DEFAULT_FROM_EMAIL
 
-        scheduled_time = data if data else None
-
-        if is_test:
-            emails_to_send = emails
-        else:
-            sent_emails = Email.objects.filter(to__in=emails, template=template).values_list("to", flat=True)  
-            emails_to_send = [email for email in emails if email not in sent_emails]
-            
-        mail.send(  
-            emails_to_send,  
-            sender=email_from,  
-            template=template,  
-            context={},  
-            render_on_delivery=True,  
-            backend='ses',  
-            scheduled_time=scheduled_time  
-        )
-        sent_count = len(emails_to_send)
-        return sent_count
     
     def handle_confirm_send(self, request):
         """
@@ -238,7 +210,7 @@ class SendView(CuratorOnlyMixin, View):
             
             try:
                 email_template = EmailTemplate.objects.get(pk=email_template_id)
-                SendView.send_emails(emails, email_template.name, scheduled_time_str)
+                send_emails(emails, email_template.name, scheduled_time_str)
                 
                 messages.success(
                     request, 

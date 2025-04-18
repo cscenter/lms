@@ -135,37 +135,12 @@ class ConfirmSendLettersForm(forms.Form):
         widget=forms.TextInput(attrs={'readonly': 'readonly', 'style': 'border: none; background-color: #f8f9fa;'})
     )
     
-    def __init__(self, *args, emails=None, filter_description=None, template_name=None, email_template_id=None, scheduled_time=None, **kwargs):
-        initial = kwargs.get('initial', {})
-        
-        # Set initial values for display fields
-        if filter_description:
-            if len(filter_description) > 0:
-                # The last item is usually the scheduled time info, so exclude it
-                initial['filter_description_display'] = '\n'.join(filter_description[:-1])
-                initial['base_info_display'] = filter_description[-1]
-
-        if emails:
-            initial['recipients_display'] = '\n'.join(emails)
-        if template_name:
-            initial['template_display'] = template_name
-        if email_template_id:
-            initial['email_template_id'] = email_template_id
-        if scheduled_time:
-            initial['scheduled_time'] = scheduled_time
-            
-        kwargs['initial'] = initial
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Store emails for form submission
-        self.emails = emails or []
-        
-        # Set up form helper
         self.helper = FormHelper(self)
         self.helper.form_action = reverse("staff:send_letters")
-            
-        
-        # Create the layout
+
         self.helper.layout = Layout(
             
             Fieldset(_('Confirmation'),
