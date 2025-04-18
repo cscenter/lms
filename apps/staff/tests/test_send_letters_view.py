@@ -97,7 +97,7 @@ def student_profiles(branch, academic_discipline):
     return [profile1, profile2, profile3, profile4, profile5]
 
 
-# Tests for SendView.send_emails method
+# Tests for send_emails method
 @pytest.mark.django_db
 @pytest.mark.parametrize("data,is_test,expected_count", [
     (None, False, 1),  # No scheduled time, not a test
