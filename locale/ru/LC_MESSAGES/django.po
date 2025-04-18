@@ -4651,11 +4651,6 @@ msgstr "весенний"
 #~ msgid "Time is in timezone {}"
 #~ msgstr "Время в временно зоне"
 
-#, fuzzy
-#~| msgid "Invited User"
-#~ msgid "Invited"
-#~ msgstr "Приглашенный студент"
-
 #~ msgid "[Not confirmed]"
 #~ msgstr "Не подтверждено"
 
