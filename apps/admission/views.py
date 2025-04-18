@@ -1,4 +1,5 @@
 import csv
+import logging
 import uuid
 import zoneinfo
 from collections import Counter
@@ -71,6 +72,7 @@ from admission.models import (
     InterviewInvitation,
     InterviewSlot,
     InterviewStream,
+    Olympiad,
 )
 from admission.services import (
     CampaignContestsImportState,
@@ -93,6 +95,7 @@ from core.timezone import get_now_utc, now_local
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from core.utils import bucketize, render_markdown
+from grading.api.yandex_contest import YandexContestAPI
 from users.api.serializers import PhotoSerializerField
 from users.mixins import CuratorOnlyMixin
 from users.models import User
@@ -101,29 +104,35 @@ from users.services import UniqueUsernameError
 from .constants import (
     SESSION_CONFIRMATION_CODE_KEY,
     ApplicantStatuses,
+    ChallengeStatuses,
     ContestTypes,
     InterviewInvitationStatuses,
     InterviewSections, InterviewFormats,
 )
 from .selectors import get_interview_invitation, get_occupied_slot
 
+logger = logging.getLogger(__name__)
+
 
 def get_applicant_context(request, applicant_id) -> Dict[str, Any]:
     branches = Branch.objects.for_site(site_id=settings.SITE_ID)
     qs = Applicant.objects.select_related(
-        "exam", "campaign__branch__site", "online_test", "university_legacy"
+        "exam", "campaign__branch__site", "online_test", "olympiad", "university_legacy"
     ).prefetch_related(
         Prefetch("status_logs", queryset=ApplicantStatusLog.objects.select_related("entry_author"))
     ).filter(campaign__branch__in=branches, pk=applicant_id)
     applicant = get_object_or_404(qs)
     online_test = applicant.get_testing_record()
     exam = applicant.get_exam_record()
+    olympiad = applicant.get_olympiad_record()
     # Fetch contest records
     contest_pks = []
     if online_test and online_test.yandex_contest_id:
         contest_pks.append(online_test.yandex_contest_id)
     if exam and exam.yandex_contest_id:
         contest_pks.append(exam.yandex_contest_id)
+    if olympiad and olympiad.yandex_contest_id:
+        contest_pks.append(olympiad.yandex_contest_id)
     contests = {}
     if contest_pks:
         filters = [Q(contest_id__in=contest_pks), Q(campaign_id=applicant.campaign_id)]
@@ -137,6 +146,7 @@ def get_applicant_context(request, applicant_id) -> Dict[str, Any]:
         "ContestTypes": ContestTypes,
         "exam": exam,
         "online_test": online_test,
+        "olympiad": olympiad,
         "similar_applicants": applicant.get_similar().select_related("campaign__branch__site"),
     }
     return context
@@ -532,7 +542,7 @@ def get_contest_results_import_info(
     campaign: Campaign,
 ) -> Dict[str, CampaignContestsImportState]:
     data = {}
-    contest_types = [ContestTypes.TEST, ContestTypes.EXAM]
+    contest_types = [ContestTypes.TEST, ContestTypes.EXAM, ContestTypes.OLYMPIAD]
     for contest_type in contest_types:
         task = get_latest_contest_results_task(campaign, contest_type)
         info = CampaignContestsImportState(
@@ -557,6 +567,7 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
             .select_related(
                 "exam",
                 "online_test",
+                "olympiad",
                 "campaign",
                 "university_legacy",
                 "campaign__branch",
@@ -567,8 +578,12 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
                     "exam__score", Value(-1, output_field=ScoreField())
                 ),
                 test__score_coalesce=Coalesce("online_test__score", Value(-1)),
+                olympiad__total_score_coalesce=Coalesce(
+                    F("olympiad__score") + F("olympiad__math_score"),
+                    Value(-1, output_field=ScoreField())
+                ),
             )
-            .order_by("-exam__score_coalesce", "-test__score_coalesce", "-pk")
+            .order_by("-exam__score_coalesce", "-olympiad__total_score_coalesce", "-test__score_coalesce", "-pk")
         )
 
     def get(self, request: AuthenticatedHttpRequest, *args, **kwargs):
@@ -596,7 +611,75 @@ class ApplicantListView(CuratorOnlyMixin, FilterMixin, generic.ListView):
         if campaign and campaign.current and self.request.user.is_curator:
             context["import_tasks"] = get_contest_results_import_info(campaign)
             context["ContestTypes"] = ContestTypes
+            context["show_register_for_olympiad"] = True
+            context["campaign"] = campaign
         return context
+
+
+class RegisterApplicantsForOlympiadView(CuratorOnlyMixin, generic.View):
+    """
+    Register applicants with status PERMIT_TO_OLYMPIAD in the olympiad contest.
+    """
+    
+    def get_campaign(self, campaign_id):
+        """Get campaign by ID."""
+        return get_object_or_404(Campaign, pk=campaign_id)
+    
+    def get_applicants(self, campaign):
+        """Get applicants with status PERMIT_TO_OLYMPIAD."""
+        return Applicant.objects.filter(
+            campaign=campaign,
+            status=ApplicantStatuses.PERMIT_TO_OLYMPIAD
+        )
+    
+    def create_olympiad_records(self, applicants):
+        """Create Olympiad records for applicants who don't have one."""
+        created_count = 0
+        with transaction.atomic():
+            for applicant in applicants:
+                try:
+                    Olympiad.objects.get(applicant=applicant)
+                except Olympiad.DoesNotExist:
+                    Olympiad.objects.create(applicant=applicant)
+                    created_count += 1
+        return created_count
+    
+    def register_in_contest(self, api, applicants, request):
+        """Register applicants in the contest."""
+        registered_count = 0
+        for olympiad in Olympiad.objects.filter(
+            applicant__in=applicants,
+            status=ChallengeStatuses.NEW
+        ):
+            try:
+                olympiad.register_in_contest(api)
+                registered_count += 1
+            except Exception as e:
+                logger.error(f"Error registering applicant {olympiad.applicant_id} in olympiad contest: {e}")
+                messages.error(
+                    request,
+                    f"Error registering applicant {olympiad.applicant_id} in olympiad contest: {e}"
+                )
+        return registered_count
+    
+    def get(self, request, campaign_id):
+        campaign = self.get_campaign(campaign_id)
+        
+        # Get applicants and create Olympiad records
+        applicants = self.get_applicants(campaign)
+        created_count = self.create_olympiad_records(applicants)
+        
+        # Register applicants in the contest
+        api = YandexContestAPI(access_token=campaign.access_token, refresh_token=campaign.refresh_token)
+        registered_count = self.register_in_contest(api, applicants, request)
+        
+        # Add success message
+        messages.success(
+            request,
+            _("Created {} olympiad records and registered {} applicants in the contest.").format(created_count, registered_count)
+        )
+        
+        return redirect("admission:applicants:list")
 
 
 class ApplicantDetailView(CuratorOnlyMixin, TemplateResponseMixin, BaseCreateView):

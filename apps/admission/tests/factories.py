@@ -8,8 +8,8 @@ from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime
 from django.db.models.signals import post_save
 from django.utils import timezone
 
-from admission.constants import WHERE_DID_YOU_LEARN, InterviewFormats, ApplicantStatuses, InterviewSections, \
-    DiplomaDegrees
+from admission.constants import WHERE_DID_YOU_LEARN, HasDiplomaStatuses, InterviewFormats, ApplicantStatuses, InterviewSections, \
+    DiplomaDegrees, ContestTypes
 from admission.models import (
     Acceptance,
     Applicant,
@@ -25,6 +25,7 @@ from admission.models import (
     InterviewSlot,
     InterviewStream,
     Test,
+    Olympiad,
 )
 from admission.signals import post_save_interview
 from core.tests.factories import BranchFactory, EmailTemplateFactory, LocationFactory
@@ -67,7 +68,7 @@ class ApplicantFactory(factory.django.DjangoModelFactory):
     patronymic = factory.Sequence(lambda n: f"Patronymic {n}")
     last_name = factory.Sequence(lambda n: f"Surname {n}")
     email = factory.Sequence(lambda n: f"user{n}@foobar.net")
-    phone = factory.Sequence(lambda n: f"123-555-{n}")
+    phone = factory.Sequence(lambda n: f"1235556{n%100}")
     university = factory.SubFactory(UniversityFactory)
     yandex_login = factory.Sequence(lambda n: f"yandex_login_{n}")
     faculty = factory.Sequence(lambda n: f"faculty_{n}")
@@ -81,6 +82,12 @@ class ApplicantFactory(factory.django.DjangoModelFactory):
     where_did_you_learn = factory.fuzzy.FuzzyChoice([x for x, _ in WHERE_DID_YOU_LEARN])
     workplace = factory.Sequence(lambda n: f"Workplace {n}")
     new_track = False
+    is_studying = False
+    has_internship = False
+    has_job = False
+    has_diploma = factory.fuzzy.FuzzyChoice(
+        [x for x, _ in HasDiplomaStatuses.choices]
+    )
 
 
 class ContestFactory(factory.django.DjangoModelFactory):
@@ -89,6 +96,7 @@ class ContestFactory(factory.django.DjangoModelFactory):
 
     campaign = factory.SubFactory(CampaignFactory)
     contest_id = factory.Sequence(lambda n: "%04d" % n)
+    type = ContestTypes.TEST
     # file?
 
 
@@ -97,7 +105,7 @@ class TestFactory(factory.django.DjangoModelFactory):
         model = Test
 
     applicant = factory.SubFactory(ApplicantFactory)
-    score = factory.Sequence(lambda n: "%02d" % n)
+    score = FuzzyInteger(0, 10)
 
 
 class ExamFactory(factory.django.DjangoModelFactory):
@@ -105,7 +113,17 @@ class ExamFactory(factory.django.DjangoModelFactory):
         model = Exam
 
     applicant = factory.SubFactory(ApplicantFactory)
-    score = factory.Sequence(lambda n: "%02d" % n)
+    score = FuzzyInteger(0, 10)
+
+
+class OlympiadFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Olympiad
+
+    applicant = factory.SubFactory(ApplicantFactory)
+    score = FuzzyInteger(0, 10)
+    math_score = FuzzyInteger(0, 10)
+    location = factory.SubFactory(LocationFactory)
 
 
 class InterviewAssignmentFactory(factory.django.DjangoModelFactory):

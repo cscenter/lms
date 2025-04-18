@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from admission.forms import InterviewStreamChangeForm
-from admission.import_export import ExamRecordResource, OnlineTestRecordResource
+from admission.import_export import ExamRecordResource, OlympiadResource, OnlineTestRecordResource
 from admission.models import (
     Acceptance,
     Applicant,
@@ -26,6 +26,7 @@ from admission.models import (
     InterviewInvitation,
     InterviewSlot,
     InterviewStream,
+    Olympiad,
     ResidenceCity,
     Test,
 )
@@ -42,6 +43,7 @@ from core.timezone.forms import (
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from users.models import User
+from core.models import Location
 
 
 class CampaignListFilter(admin.SimpleListFilter):
@@ -179,6 +181,47 @@ class ExamAdmin(ImportExportMixin, admin.ModelAdmin):
         return super(ExamAdmin, self).formfield_for_foreignkey(
             db_field, request, **kwargs
         )
+        
+
+class OlympiadAdmin(ImportExportMixin, admin.ModelAdmin):
+    resource_class = OlympiadResource
+    raw_id_fields = ("applicant", "location")
+    list_display = ("__str__", "score", "math_score", "yandex_contest_id", "status")
+    search_fields = [
+        "applicant__yandex_login",
+        "applicant__last_name",
+        "applicant__email",
+        "applicant__first_name",
+        "yandex_contest_id",
+        "contest_participant_id",
+    ]
+    list_filter = [ApplicantCampaignListFilter]
+    formfield_overrides = {models.JSONField: {"widget": PrettyJSONWidget}}
+    formats = (CSV,)
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = ["contest_status_code"]
+        if obj and obj.contest_participant_id:
+            readonly_fields.append("contest_participant_id")
+        return readonly_fields
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related(
+            "applicant", "applicant__campaign", "applicant__campaign__branch", "location"
+        )
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == "applicant":
+            kwargs["queryset"] = Applicant.objects.select_related(
+                "campaign", "campaign__branch"
+            ).order_by("last_name")
+        elif db_field.name == "location":
+            kwargs["queryset"] = Location.objects.select_related("city")
+        return super().formfield_for_foreignkey(
+            db_field, request, **kwargs
+        )
+
 
 
 class ApplicantStatusLogAdminInline(admin.TabularInline):
@@ -522,6 +565,7 @@ admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Applicant, ApplicantAdmin)
 admin.site.register(Test, OnlineTestAdmin)
 admin.site.register(Exam, ExamAdmin)
+admin.site.register(Olympiad, OlympiadAdmin)
 admin.site.register(InterviewFormat, InterviewFormatAdmin)
 admin.site.register(Interview, InterviewAdmin)
 admin.site.register(InterviewAssignment, InterviewAssignmentAdmin)

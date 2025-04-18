@@ -17,7 +17,7 @@ from staff.views.views import (
     ProgressReportForSemesterView, ProgressReportFullView, StudentFacesView,
     StudentSearchCSVView, StudentSearchView, SurveySubmissionsReportView,
     SurveySubmissionsStatsView, WillGraduateStatsReportView, AdmissionApplicantsYearReportView,
-    StudentAcademicDisciplineLogListView, StudentStatusLogListView, badge_number_from_csv_view, merge_users_view
+    StudentAcademicDisciplineLogListView, StudentStatusLogListView, badge_number_from_csv_view, export_for_electronic_diplomas_view, merge_users_view
 )
 from staff.views.send_letters_view import ConfirmView, SendView
 from staff.views.views import autograde_projects, autofail_ungraded, create_alumni_profiles
@@ -70,6 +70,7 @@ urlpatterns = [
     path('commands/autofail_ungraded/', autofail_ungraded, name='autofail_ungraded'),
     path('commands/merge_users/', merge_users_view, name='merge_users'),
     path('commands/badge_number_from_csv/', badge_number_from_csv_view, name='badge_number_from_csv'),
+    path('commands/export_for_electronic_diplomas/', export_for_electronic_diplomas_view, name='export_for_electronic_diplomas'),
     path('commands/confirm_send_letters/', ConfirmView.as_view(), name='confirm_send_letters'),
     path('commands/send_letters/', SendView.as_view(), name='send_letters'),
     
