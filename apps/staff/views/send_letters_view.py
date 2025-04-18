@@ -123,7 +123,7 @@ class ConfirmView(CuratorOnlyMixin, View):
             'recipients_display': '\n'.join(emails),  
             'template_display': template_obj.name,  
             'email_template_id': email_template_id,
-            'scheduled_time': scheduled_time.isoformat() 
+            'scheduled_time': scheduled_time.isoformat() if scheduled_time else ""
         }
         
         form = ConfirmSendLettersForm(initial=initial)
