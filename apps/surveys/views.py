@@ -1,16 +1,23 @@
+import logging
 import pytz
 from vanilla import TemplateView
+
 
 from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.views import generic
 from django.views.generic import FormView
+from django.shortcuts import redirect
 
 from core.exceptions import Redirect
 from core.urls import reverse
 from courses.views.mixins import CourseURLParamsMixin
 from surveys.forms import FormBuilder
 from surveys.models import CourseSurvey
+from users.mixins import CuratorOnlyMixin
+
+logger = logging.getLogger(__name__)
 
 
 class CourseSurveyDetailView(CourseURLParamsMixin, FormView):
@@ -57,3 +64,24 @@ class CourseSurveyFormSuccessView(CourseURLParamsMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         return {"course": self.course}
+
+
+class ReportBase(generic.base.View):
+    url: str
+    prefix: str
+
+    def get(self, request, *args, **kwargs):
+        if self.url is None or self.prefix is None:
+             raise NotImplementedError
+        # TODO Create log
+        # TODO Set params to Form?
+        logger.info(f"Got {self.prefix} report from {request.user} id={request.user.pk} on page {request.META['HTTP_REFERER']} sessionid={request.COOKIES['sessionid']} HTTP_USER_AGENT={request.environ['HTTP_USER_AGENT']}")
+        return redirect(self.url)
+
+class ReportBugView(ReportBase):
+    url = "https://forms.yandex.ru/surveys/13739605.ea35e390cf310d138e5e32315ecb2c07f1813e89/"
+    prefix = "bug"
+
+class ReportIdeaView(ReportBase):
+    url = "https://forms.yandex.ru/surveys/13739606.3c14ec2d9997b34e4b254c8abddf1636af04f78f/"
+    prefix = "idea"
