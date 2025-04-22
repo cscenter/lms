@@ -260,7 +260,7 @@ class SendLettersForm(forms.Form):
     status = forms.MultipleChoiceField(
         label=_("Status"),
         widget=forms.CheckboxSelectMultiple,
-        choices=StudentStatuses.choices,
+        choices=(("studying", _("Studying")),) + StudentStatuses.choices,
         required=False
     )
     academic_disciplines = forms.MultipleChoiceField(
@@ -303,6 +303,11 @@ class SendLettersForm(forms.Form):
                 scheduled_time = timezone.make_aware(scheduled_time, self.tz)
         
         return scheduled_time
+    
+    def clean_status(self):
+        """Convert 'studying' back to empty string."""
+        statuses = self.cleaned_data.get('status', [])
+        return ["" if s == "studying" else s for s in statuses]
     
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)

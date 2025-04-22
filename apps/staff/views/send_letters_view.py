@@ -158,7 +158,7 @@ class ConfirmView(CuratorOnlyMixin, View):
         
         if status:
             query &= Q(status__in=status)
-            status_names = [str(StudentStatuses.values.get(s, s)) for s in status]
+            status_names = [str(StudentStatuses.values.get(s, s)) if s != "" else str(_("Studying")) for s in status]
             filter_description.append(_("Status") + f": {', '.join(status_names)}")
         
         if academic_disciplines:
