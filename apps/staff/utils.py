@@ -55,7 +55,6 @@ def get_email_template_choices():
 def send_emails(emails, template, data=None, is_test=False):
         """
         Send emails using the post_office library.
-        If there are more than 500 emails, they will be split into batches of 499.
         """
         template = get_email_template(template)
         email_from = settings.DEFAULT_FROM_EMAIL
@@ -68,7 +67,7 @@ def send_emails(emails, template, data=None, is_test=False):
             sent_emails = Email.objects.filter(to__in=emails, template=template).values_list("to", flat=True)  
             emails_to_send = [email for email in emails if email not in sent_emails]
         
-        # Check if we need to split emails into batches (if more than 500)
+        # SendRawEmail destinations must have length less than or equal to 500
         sent_count = 0
         for i in range(0, len(emails_to_send), 500):
             batch = emails_to_send[i:i+500]
