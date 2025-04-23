@@ -66,15 +66,20 @@ def send_emails(emails, template, data=None, is_test=False):
         else:
             sent_emails = Email.objects.filter(to__in=emails, template=template).values_list("to", flat=True)  
             emails_to_send = [email for email in emails if email not in sent_emails]
+        
+        # SendRawEmail destinations must have length less than or equal to 500
+        sent_count = 0
+        for i in range(0, len(emails_to_send), 500):
+            batch = emails_to_send[i:i+500]
+            mail.send(  
+                batch,  
+                sender=email_from,  
+                template=template,  
+                context={},  
+                render_on_delivery=True,  
+                backend='ses',  
+                scheduled_time=scheduled_time  
+            )
+            sent_count += len(batch)
             
-        mail.send(  
-            emails_to_send,  
-            sender=email_from,  
-            template=template,  
-            context={},  
-            render_on_delivery=True,  
-            backend='ses',  
-            scheduled_time=scheduled_time  
-        )
-        sent_count = len(emails_to_send)
         return sent_count
