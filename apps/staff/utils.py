@@ -67,7 +67,7 @@ def send_emails(emails, template, data=None, is_test=False):
             sent_emails = Email.objects.filter(to__in=emails, template=template).values_list("to", flat=True)  
             emails_to_send = [email for email in emails if email not in sent_emails]
         
-        # SendRawEmail destinations recipient count exceeds 50.
+        # SendRawEmail destinations recipient count exceeds 50. 
         sent_count = 0
         for i in range(0, len(emails_to_send), 50):
             batch = emails_to_send[i:i+50]
