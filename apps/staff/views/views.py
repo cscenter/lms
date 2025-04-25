@@ -439,6 +439,7 @@ class EnrollmentInvitationListView(CuratorOnlyMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         site_branches = Branch.objects.for_site(site_id=settings.SITE_ID)
+        semesters = Semester.objects.all()
         assert len(site_branches) > 0
         serializer = self.InputSerializer(data=request.GET)
         serializer.fields["branches"].choices = [(b.pk, b.name) for b in site_branches]
@@ -452,7 +453,7 @@ class EnrollmentInvitationListView(CuratorOnlyMixin, TemplateView):
             "-semester__index", "name"
         )
         filter_set = EnrollmentInvitationFilter(
-            site_branches, data=self.request.GET, queryset=invitations
+            site_branches, semesters, data=self.request.GET, queryset=invitations
         )
         context = self.get_context_data(filter_set, **kwargs)
         return self.render_to_response(context)
