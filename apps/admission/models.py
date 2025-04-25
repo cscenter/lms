@@ -664,6 +664,11 @@ class Applicant(TimezoneAwareMixin, TimeStampedModel, EmailAddressSuspension, Ap
         app_label = "admission"
         verbose_name = _("Applicant")
         verbose_name_plural = _("Applicants")
+        constraints = [
+            models.UniqueConstraint(fields=["email", "campaign"], 
+                                    condition=~Q(status__in=ApplicantStatuses.UNUNIQUE_EMAIL_STATUSES), 
+                                    name="unique_emails"),
+        ]
 
     objects = models.Manager()
     subscribed = ApplicantSubscribedManager()
