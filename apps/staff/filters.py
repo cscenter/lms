@@ -72,7 +72,6 @@ class StudentProfileFilter(django_filters.FilterSet):
         return super().qs
 
 
-
 class EnrollmentInvitationFilter(django_filters.FilterSet):
     branches = django_filters.ChoiceFilter(
         label="Отделение",
