@@ -7,7 +7,7 @@ from django.conf import settings
 from django.utils.timezone import now
 
 from admission.api.serializers import OpenRegistrationCampaignField
-from admission.constants import WHERE_DID_YOU_LEARN
+from admission.constants import WHERE_DID_YOU_LEARN, ApplicantStatuses
 from admission.models import Applicant, Campaign, CampaignCity
 from admission.tasks import register_in_yandex_contest
 from core.models import University as UniversityLegacy
@@ -397,7 +397,7 @@ class ApplicationYDSFormSerializer(serializers.ModelSerializer):
         }
         validators = [
             UniqueTogetherValidator(
-                queryset=Applicant.objects.all(),
+                queryset=Applicant.objects.exclude(status__in=ApplicantStatuses.UNUNIQUE_EMAIL_STATUSES),
                 fields=('email', 'campaign'),
                 message="Если вы уже зарегистрировали анкету на "
                         "указанный email и хотите внести изменения, "
