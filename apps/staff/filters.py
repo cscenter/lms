@@ -72,28 +72,6 @@ class StudentProfileFilter(django_filters.FilterSet):
         return super().qs
 
 
-# class InvitationCourseFilter(SimpleListFilter):
-#     title = _('Course')
-#     parameter_name = 'course'
-#     template = 'admin/dropdown_listfilter.html'
-
-#     def lookups(self, request, model_admin):
-#         # Get courses from the invitation
-#         invitation_id = request.GET.get('id')
-#         if invitation_id:
-#             try:
-#                 invitation = Invitation.objects.get(pk=invitation_id)
-#                 courses = invitation.courses.all().order_by('-pk').select_related('meta_course', 'semester')
-#                 return [(course.pk, str(course)) for course in courses]
-#             except Invitation.DoesNotExist:
-#                 pass
-#         return []
-
-#     def queryset(self, request, queryset):
-#         if self.value():
-#             return queryset.filter(courses__pk=self.value())
-#         return queryset
-
 
 class EnrollmentInvitationFilter(django_filters.FilterSet):
     branches = django_filters.ChoiceFilter(
