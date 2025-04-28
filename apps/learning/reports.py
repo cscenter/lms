@@ -958,6 +958,7 @@ class ProgressReportForSemester(ProgressReport):
             .select_related("user__yandex_data", "branch")
             .prefetch_related(
                 "academic_disciplines",
+                "invitation",
                 projects_prefetch,
                 enrollments_prefetch,
                 shad_courses_prefetch,
@@ -1156,8 +1157,9 @@ class ProgressReportForInvitation(ProgressReportForSemester):
         self.course_invitations = list(
             CourseInvitation.objects
             .filter(invitation=self.invitation)
-            .select_related('course')
+            .select_related('course__name')
             .order_by('course_id')
+            .distinct('course_id')
         )
 
         self.course_invitations_by_id = {
@@ -1174,7 +1176,7 @@ class ProgressReportForInvitation(ProgressReportForSemester):
     def _generate_headers(
         self, *, courses, meta_courses, shads_max, online_max, projects_max
     ):
-        course_headers = [f"[{ci.capacity}] {ci.course.name}, оценка" for ci in self.course_invitations]
+        course_headers = [f"[{ci.capacity}, {ci.get_enrollment_type_display()}] {ci.course.name}, оценка" for ci in self.course_invitations]
         return [
             "ID",
             "Отделение",
@@ -1271,8 +1273,8 @@ class ProgressReportForInvitation(ProgressReportForSemester):
             student_profile.get_status_display(),
             student_profile.comment,
             student_profile.get_comment_changed_at_display(),
-            self.invitation.semester,
-            self.invitation.name,
+            student_profile.invitation.semester,
+            student_profile.invitation.name,
             success_total_lt_target_semester,
             success_total_eq_target_semester,
             enrollments_eq_target_semester,

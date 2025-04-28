@@ -98,8 +98,6 @@ class StudentProfileFilter(django_filters.FilterSet):
 class EnrollmentInvitationFilter(django_filters.FilterSet):
     branches = django_filters.ChoiceFilter(
         label="Отделение",
-        required=True,
-        empty_label=None,
         choices=())
     semester = django_filters.ChoiceFilter(
         label="Семестр",
@@ -131,7 +129,7 @@ class EnrollmentInvitationFilter(django_filters.FilterSet):
             invitation_ids = invitations.values_list('id', flat=True)
             courses = Course.objects.filter(
                 courseinvitation__invitation_id__in=invitation_ids
-            ).select_related('meta_course', 'semester').distinct()
+            ).select_related('meta_course', 'semester').distinct().order_by("-created")
             courses_choices = [(course.pk, str(course)) for course in courses]
         self.filters['course'].extra["choices"] = courses_choices
 
@@ -164,9 +162,10 @@ class EnrollmentInvitationFilter(django_filters.FilterSet):
 
     @property
     def qs(self):
-        # Do not return all records by default
-        if not self.is_bound or not self.is_valid():
-            return self.queryset.none()
+        # If all filter parameters are empty we want to see last semester
+        if self.is_bound and self.is_valid() and all(not value for value in self.form.cleaned_data.values()):
+            return self.queryset.filter(semester=Semester.get_current())
+            
         return super().qs
 
 class StudentAcademicDisciplineLogFilter(django_filters.FilterSet):
