@@ -1157,15 +1157,10 @@ class ProgressReportForInvitation(ProgressReportForSemester):
         self.course_invitations = list(
             CourseInvitation.objects
             .filter(invitation=self.invitation)
-            .select_related('course__name')
+            .select_related('course__meta_course')
             .order_by('course_id')
             .distinct('course_id')
         )
-
-        self.course_invitations_by_id = {
-            ci.course_id: ci 
-            for ci in self.course_invitations
-        }
 
     def get_queryset_filters(self):
         student_profiles = Enrollment.objects.filter(invitation=self.invitation).values(
@@ -1176,7 +1171,7 @@ class ProgressReportForInvitation(ProgressReportForSemester):
     def _generate_headers(
         self, *, courses, meta_courses, shads_max, online_max, projects_max
     ):
-        course_headers = [f"[{ci.capacity}, {ci.get_enrollment_type_display()}] {ci.course.name}, оценка" for ci in self.course_invitations]
+        course_headers = [f"[{ci.capacity}, {ci.get_enrollment_type_display()}] {ci.course.meta_course.name}, оценка" for ci in self.course_invitations]
         return [
             "ID",
             "Отделение",
@@ -1287,7 +1282,7 @@ class ProgressReportForInvitation(ProgressReportForSemester):
         ]
 
     def _export_courses(self, student, courses, meta_courses) -> List[str]:
-        course_grades = {course_id: "" for course_id in self.course_invitations_by_id.keys()}
+        course_grades = {course.course_id: "" for course in self.course_invitations}
         
         for enrollment in student.unique_enrollments.values():
             if enrollment.course_id in course_grades:
