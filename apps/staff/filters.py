@@ -78,7 +78,7 @@ class EnrollmentInvitationFilter(django_filters.FilterSet):
         choices=())
     semester = django_filters.ChoiceFilter(
         label="Семестр",
-        choices=())
+        choices=[(s.pk, s.name) for s in Semester.objects.all()])
     category = django_filters.ChoiceFilter(
         label="Категория",
         choices=InvitationCategories.choices)
@@ -86,7 +86,7 @@ class EnrollmentInvitationFilter(django_filters.FilterSet):
         label="Название",
         lookup_expr='icontains')
     course = django_filters.ChoiceFilter(
-        label=_('Course'),
+        label="Курс",
         choices=(),
         method='filter_by_course')
 
@@ -94,18 +94,16 @@ class EnrollmentInvitationFilter(django_filters.FilterSet):
         model = Invitation
         fields = ['branches', 'name', 'semester', 'category', 'course']
 
-    def __init__(self, site_branches: List[Branch], site_semesters: List[Semester], data=None, **kwargs):
+    def __init__(self, site_branches: List[Branch], data=None, **kwargs):
         assert len(site_branches) > 0
         invitations = kwargs.get("queryset")
         super().__init__(data=data, **kwargs)
         self.filters['branches'].extra["choices"] = [(b.pk, b.name) for b in site_branches]
-        self.filters['semester'].extra["choices"] = [(s.pk, s.name) for s in site_semesters]
         
         courses_choices = []
         if invitations:
-            invitation_ids = invitations.values_list('id', flat=True)
             courses = Course.objects.filter(
-                courseinvitation__invitation_id__in=invitation_ids
+                courseinvitation__invitation__in=invitations
             ).select_related('meta_course', 'semester').distinct().order_by("-created")
             courses_choices = [(course.pk, str(course)) for course in courses]
         self.filters['course'].extra["choices"] = courses_choices
@@ -140,7 +138,7 @@ class EnrollmentInvitationFilter(django_filters.FilterSet):
     @property
     def qs(self):
         # If all filter parameters are empty we want to see last semester
-        if self.is_bound and self.is_valid() and all(not value for value in self.form.cleaned_data.values()):
+        if self.is_bound and self.is_valid() and not any(value for value in self.form.cleaned_data.values()):
             return self.queryset.filter(semester=Semester.get_current())
             
         return super().qs

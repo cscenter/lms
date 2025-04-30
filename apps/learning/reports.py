@@ -1178,7 +1178,7 @@ class ProgressReportForInvitation(ProgressReportForSemester):
             "Фамилия",
             "Имя",
             "Отчество",
-            _("User url"),
+            "Профиль на сайте",
             "Почта",
             "Телефон",
             "Работа",
