@@ -57,6 +57,7 @@ class ApplicantStatuses(DjangoChoices):
     UNUNIQUE_EMAIL_STATUSES = {
         REJECTED_BY_EXAM_PRESELECT.value,
         REJECTED_BY_INTERVIEW_PRESELECT.value,
+        REJECTED_BY_FORM_CHECK.value
     }
 
     # Applicants whose next step is interview.
