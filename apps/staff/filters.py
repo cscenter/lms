@@ -4,13 +4,15 @@ import django_filters
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Layout, Row, Submit, Column
 from django.conf import settings
+from django.contrib.admin import SimpleListFilter
 
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Branch
+from courses.models import Semester, Course
 from courses.utils import get_current_term_pair
 from learning.models import Invitation
-from learning.settings import StudentStatuses
+from learning.settings import InvitationCategories, StudentStatuses
 from study_programs.models import AcademicDiscipline
 from users.models import StudentProfile, StudentTypes, StudentAcademicDisciplineLog, StudentStatusLog
 
@@ -73,21 +75,43 @@ class StudentProfileFilter(django_filters.FilterSet):
 class EnrollmentInvitationFilter(django_filters.FilterSet):
     branches = django_filters.ChoiceFilter(
         label="Отделение",
-        required=True,
-        empty_label=None,
         choices=())
+    semester = django_filters.ChoiceFilter(
+        label="Семестр",
+        choices=[(s.pk, s.name) for s in Semester.objects.all()])
+    category = django_filters.ChoiceFilter(
+        label="Категория",
+        choices=InvitationCategories.choices)
     name = django_filters.CharFilter(
         label="Название",
         lookup_expr='icontains')
+    course = django_filters.ChoiceFilter(
+        label="Курс",
+        choices=(),
+        method='filter_by_course')
 
     class Meta:
         model = Invitation
-        fields = ['branches', 'name']
+        fields = ['branches', 'name', 'semester', 'category', 'course']
 
     def __init__(self, site_branches: List[Branch], data=None, **kwargs):
         assert len(site_branches) > 0
+        invitations = kwargs.get("queryset")
         super().__init__(data=data, **kwargs)
         self.filters['branches'].extra["choices"] = [(b.pk, b.name) for b in site_branches]
+        
+        courses_choices = []
+        if invitations:
+            courses = Course.objects.filter(
+                courseinvitation__invitation__in=invitations
+            ).select_related('meta_course', 'semester').distinct().order_by("-created")
+            courses_choices = [(course.pk, str(course)) for course in courses]
+        self.filters['course'].extra["choices"] = courses_choices
+
+    def filter_by_course(self, queryset, name, value):
+        if value:
+            return queryset.filter(courses__pk=value)
+        return queryset
 
     @property
     def form(self):
@@ -101,14 +125,22 @@ class EnrollmentInvitationFilter(django_filters.FilterSet):
                     Div("name", css_class="col-xs-6"),
                     Div(Submit('', _('Filter'), css_class="btn-block -inline-submit"),
                         css_class="col-xs-3"),
+                ),
+                Row(
+                    Div("semester", css_class="col-xs-3"),
+                    Div("course", css_class="col-xs-3"),
+                ),
+                Row(
+                    Div("category", css_class="col-xs-3"),
                 ))
         return self._form
 
     @property
     def qs(self):
-        # Do not return all records by default
-        if not self.is_bound or not self.is_valid():
-            return self.queryset.none()
+        # If all filter parameters are empty we want to see last semester
+        if self.is_bound and self.is_valid() and not any(value for value in self.form.cleaned_data.values()):
+            return self.queryset.filter(semester=Semester.get_current())
+            
         return super().qs
 
 class StudentAcademicDisciplineLogFilter(django_filters.FilterSet):

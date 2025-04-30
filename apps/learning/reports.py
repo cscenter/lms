@@ -16,7 +16,7 @@ from courses.constants import SemesterTypes
 from courses.models import Course, MetaCourse, Semester, CourseDurations
 from courses.selectors import course_teachers_prefetch_queryset
 from courses.utils import get_term_index
-from learning.models import AssignmentComment, Enrollment, GraduateProfile
+from learning.models import AssignmentComment, CourseInvitation, Enrollment, GraduateProfile
 from learning.settings import GradeTypes, StudentStatuses
 from learning.utils import grade_to_mark
 from projects.constants import ProjectGradeTypes, ProjectTypes
@@ -958,6 +958,7 @@ class ProgressReportForSemester(ProgressReport):
             .select_related("user__yandex_data", "branch")
             .prefetch_related(
                 "academic_disciplines",
+                "invitation",
                 projects_prefetch,
                 enrollments_prefetch,
                 shad_courses_prefetch,
@@ -1153,11 +1154,142 @@ class ProgressReportForInvitation(ProgressReportForSemester):
         term = invitation.semester
         super().__init__(term)
 
+        self.course_invitations = list(
+            CourseInvitation.objects
+            .filter(invitation=self.invitation)
+            .select_related('course__meta_course')
+            .order_by('course_id')
+            .distinct('course_id')
+        )
+
     def get_queryset_filters(self):
         student_profiles = Enrollment.objects.filter(invitation=self.invitation).values(
             "student_profile_id"
         )
         return [Q(type=StudentTypes.INVITED), Q(pk__in=student_profiles)]
+    
+    def _generate_headers(
+        self, *, courses, meta_courses, shads_max, online_max, projects_max
+    ):
+        course_headers = [f"[{ci.capacity}, {ci.get_enrollment_type_display()}] {ci.course.meta_course.name}, оценка" for ci in self.course_invitations]
+        return [
+            "ID",
+            "Отделение",
+            "Фамилия",
+            "Имя",
+            "Отчество",
+            "Профиль на сайте",
+            "Почта",
+            "Телефон",
+            "Работа",
+            "Яндекс ID",
+            "Stepik ID",
+            "Github Login",
+            "ВУЗ",
+            "Курс (на момент поступления)",
+            "Год поступления",
+            "Год программы обучения",
+            "Номер семестра обучения",
+            "Официальный студент",
+            "Номер диплома о высшем образовании",
+            "Направления обучения",
+            "Статус",
+            "Комментарий",
+            "Дата последнего изменения комментария",
+            "Семестр приглашения",
+            "Имя приглашения",
+            'Успешно сдано (Центр/Клуб/ШАД/Онлайн) до семестра "%s"'
+            % self.target_semester,
+            'Успешно сдано (Центр/Клуб/ШАД) за семестр "%s"' % self.target_semester,
+            'Записей на курсы (Центр/Клуб/ШАД) за семестр "%s"' % self.target_semester,
+            'Успешных семестров внутренней практики/НИР до семестра "%s"'
+            % self.target_semester,
+            'Успешных семестров внешней практики/НИР до семестра "%s"'
+            % self.target_semester,
+            'Проекты за семестр "%s"' % self.target_semester,
+            *course_headers,
+            *generate_shad_courses_headers(shads_max),
+            *generate_online_courses_headers(online_max),
+        ]
+
+    def _export_row(
+        self,
+        student_profile,
+        *,
+        courses,
+        meta_courses,
+        shads_max,
+        online_max,
+        projects_max,
+    ):
+        student = student_profile.user
+        success_total_lt_target_semester = (
+            student.success_lt_target_semester
+            + student.success_shad_lt_target_semester
+            + len(student.online_courses)
+        )
+        success_total_eq_target_semester = (
+            student.success_eq_target_semester + student.success_shad_eq_target_semester
+        )
+        enrollments_eq_target_semester = (
+            student.enrollments_eq_target_semester + student.shad_eq_target_semester
+        )
+        if student_profile.year_of_curriculum:
+            curriculum_term_index = get_term_index(
+                student_profile.year_of_curriculum, SemesterTypes.AUTUMN
+            )
+            term_order = self.target_semester.index - curriculum_term_index + 1
+        else:
+            term_order = "-"
+
+        return [
+            student.pk,
+            student_profile.branch.name,
+            student.last_name,
+            student.first_name,
+            student.patronymic,
+            student.get_absolute_url(),
+            student.email,
+            student.phone,
+            student.workplace,
+            student.yandex_login,
+            student.stepic_id if student.stepic_id else "",
+            student.github_login if student.github_login else "",
+            student_profile.university,
+            student_profile.get_level_of_education_on_admission_display(),
+            student_profile.year_of_admission,
+            student_profile.year_of_curriculum
+            if student_profile.year_of_curriculum
+            else "",
+            term_order,
+            "да" if student_profile.is_official_student else "нет",
+            student_profile.diploma_number if student_profile.diploma_number else "",
+            " и ".join(s.name for s in student_profile.academic_disciplines.all()),
+            student_profile.get_status_display(),
+            student_profile.comment,
+            student_profile.get_comment_changed_at_display(),
+            student_profile.invitation.semester,
+            student_profile.invitation.name,
+            success_total_lt_target_semester,
+            success_total_eq_target_semester,
+            enrollments_eq_target_semester,
+            student.success_inner_projects_lt_target_semester,
+            student.success_external_projects_lt_target_semester,
+            "\r\n".join(student.projects_eq_target_semester),
+            *self._export_courses(student, courses, meta_courses),
+            *self._export_shad_courses(student, shads_max),
+            *self._export_online_courses(student, online_max),
+        ]
+
+    def _export_courses(self, student, courses, meta_courses) -> List[str]:
+        course_grades = {course.course_id: "" for course in self.course_invitations}
+        
+        for enrollment in student.unique_enrollments.values():
+            if enrollment.course_id in course_grades:
+                course_grades[enrollment.course_id] = self.grade_getter(enrollment).lower()
+        
+        values = [course_grades[ci.course_id] for ci in self.course_invitations]
+        return values
 
 
 class WillGraduateStatsReport(ReportFileOutput):

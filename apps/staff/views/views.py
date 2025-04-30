@@ -439,12 +439,12 @@ class EnrollmentInvitationListView(CuratorOnlyMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         site_branches = Branch.objects.for_site(site_id=settings.SITE_ID)
+        semesters = Semester.objects.all()
         assert len(site_branches) > 0
         serializer = self.InputSerializer(data=request.GET)
         serializer.fields["branches"].choices = [(b.pk, b.name) for b in site_branches]
         if not serializer.initial_data:
-            branch = site_branches[0]
-            url = f"{request.path}?branches={branch.pk}"
+            url = f"{request.path}"
             return HttpResponseRedirect(url)
         serializer.is_valid(raise_exception=False)
         # Filterset knows how to validate input data too
