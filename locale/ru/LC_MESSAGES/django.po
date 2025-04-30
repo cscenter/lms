@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-22 13:23+0000\n"
-"PO-Revision-Date: 2025-03-03 15:47+0000\n"
-"Last-Translator: Софья Аноховская <cinnabun@yandex-team.ru>\n"
+"POT-Creation-Date: 2025-04-28 13:46+0000\n"
+"PO-Revision-Date: 2025-04-28 13:42+0000\n"
+"Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -51,6 +51,47 @@ msgstr "Пользователь деактивирован или удалён.
 #: apps/api/errors.py:17
 msgid "Token is invalid or expired"
 msgstr ""
+
+#: apps/api/management/commands/monthly_student_status_dump.py:28
+msgid "User ID"
+msgstr "ID пользователя"
+
+#: apps/api/management/commands/monthly_student_status_dump.py:29
+msgid "Student Profile ID"
+msgstr "ID профиля студента"
+
+#: apps/api/management/commands/monthly_student_status_dump.py:30
+#: apps/api/management/commands/weekly_dump_to_yandex_disk.py:48
+#: apps/staff/forms.py:243 apps/staff/views/enrolees_selection.py:118
+#: apps/staff/views/send_letters_view.py:149
+msgid "Student type"
+msgstr "Тип студента"
+
+#: apps/api/management/commands/monthly_student_status_dump.py:31
+#: apps/learning/models.py:451 apps/users/models.py:1023
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:80
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:111
+msgid "Entry Added"
+msgstr "Дата изменения"
+
+#: apps/api/management/commands/monthly_student_status_dump.py:32
+#: apps/grading/models.py:93 apps/learning/forms.py:77
+#: apps/learning/study/forms.py:69 apps/staff/filters.py:189
+#: apps/staff/forms.py:261 apps/staff/views/send_letters_view.py:162
+#: apps/staff/views/views.py:1012 apps/users/models.py:225
+#: apps/users/models.py:817 apps/users/models.py:1070
+#: lms/jinja2/lms/staff/status_log.html:21
+#: lms/jinja2/lms/staff/student_search.html:69
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:52
+#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:79
+msgid "Status"
+msgstr "Статус"
+
+#: apps/api/management/commands/monthly_student_status_dump.py:33
+#: apps/staff/filters.py:195 apps/staff/views/views.py:1012
+#: apps/users/models.py:1065 lms/jinja2/lms/staff/status_log.html:20
+msgid "Former status"
+msgstr "Прошлый статус"
 
 #: apps/api/management/commands/weekly_dump_to_yandex_disk.py:48
 msgid "Student ID"
@@ -104,12 +145,6 @@ msgstr "Курс"
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:44
 msgid "Branch"
 msgstr "Отделение"
-
-#: apps/api/management/commands/weekly_dump_to_yandex_disk.py:48
-#: apps/staff/forms.py:243 apps/staff/views/enrolees_selection.py:118
-#: apps/staff/views/send_letters_view.py:149
-msgid "Student type"
-msgstr "Тип студента"
 
 #: apps/api/management/commands/weekly_dump_to_yandex_disk.py:49
 #: apps/learning/models.py:92 apps/learning/models.py:166
@@ -1606,18 +1641,6 @@ msgstr "Убедитесь, что указаны следующие настр�
 msgid "Assignment Submission"
 msgstr "Посылка к заданию"
 
-#: apps/grading/models.py:93 apps/learning/forms.py:77
-#: apps/learning/study/forms.py:69 apps/staff/filters.py:189
-#: apps/staff/forms.py:261 apps/staff/views/send_letters_view.py:162
-#: apps/staff/views/views.py:1012 apps/users/models.py:225
-#: apps/users/models.py:817 apps/users/models.py:1070
-#: lms/jinja2/lms/staff/status_log.html:21
-#: lms/jinja2/lms/staff/student_search.html:69
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:52
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:79
-msgid "Status"
-msgstr "Статус"
-
 #: apps/grading/models.py:97
 msgid "Settings"
 msgstr "Настройки"
@@ -2198,12 +2221,6 @@ msgstr "Используйте зачетную оценку"
 #: apps/learning/models.py:438
 msgid "Satisfactory"
 msgstr "Удовлетворительно"
-
-#: apps/learning/models.py:451 apps/users/models.py:1023
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:80
-#: lms/jinja2/lms/user_profile/_tab_student_profiles.html:111
-msgid "Entry Added"
-msgstr "Дата изменения"
 
 #: apps/learning/models.py:467 apps/learning/models.py:843
 msgid "Source"
@@ -2984,11 +3001,6 @@ msgstr "Обработать"
 #: apps/users/models.py:1083 apps/users/models.py:1089 apps/users/views.py:206
 msgid "Studying"
 msgstr "Учится"
-
-#: apps/staff/filters.py:195 apps/staff/views/views.py:1012
-#: apps/users/models.py:1065 lms/jinja2/lms/staff/status_log.html:20
-msgid "Former status"
-msgstr "Прошлый статус"
 
 #: apps/staff/forms.py:22
 msgid "Date of Graduation"
@@ -4679,11 +4691,25 @@ msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
 
+#, fuzzy
+#~| msgid "Student type"
+#~ msgid "Student Type"
+#~ msgstr "Тип студента"
+
+#, fuzzy
+#~| msgid "Status"
+#~ msgid "New Status"
+#~ msgstr "Статус"
+
+#, fuzzy
+#~| msgid "Former status"
+#~ msgid "Former Status"
+#~ msgstr "Прошлый статус"
+
 #~ msgid "Citizenship"
 #~ msgstr "Гражданство"
 
 #, fuzzy
-#~| msgid "Invited User"
 #~ msgid "Invited"
 #~ msgstr "Приглашенный студент"
 
