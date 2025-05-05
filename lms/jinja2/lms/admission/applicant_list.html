@@ -96,8 +96,8 @@
                 </td>
                 <td>{{ applicant.campaign.branch.name }},&nbsp;{{ applicant.campaign.year }}</td>
                 <td>{% if applicant.status %}{{ applicant.get_status_display() }}{% else %}-{% endif %}</td>
-                <td>{% if applicant.olympiad %}{{ applicant.olympiad.total_score_display() }}{% else %}-{% endif %}</td>
                 <td>{% if applicant.online_test %}{{ applicant.online_test.score_display() }}{% else %}-{% endif %}</td>
+                <td>{% if applicant.olympiad %}{{ applicant.olympiad.total_score_display() }}{% else %}-{% endif %}</td>
                 <td>{% if applicant.exam %}{{ applicant.exam.score_display() }}{% else %}-{% endif %}</td>
                 <td>{{ applicant.get_all_interview_score() }}</td>
               </tr>
