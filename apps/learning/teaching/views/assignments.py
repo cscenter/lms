@@ -102,11 +102,11 @@ def _check_queue_filters(course: Course, query_params):
                        .select_related('user', 'branch')
                        .order_by('priority', '-year_of_admission', '-pk'))
 
-    profiles_by_user = {}
+    profiles_by_user = []
     program_years = set()
     for profile in student_profiles:
         if profile.user_id not in profiles_by_user:
-            profiles_by_user[profile.user_id] = profile
+            profiles_by_user.append(profile.user_id)
             if profile.year_of_curriculum:
                 program_years.add(str(profile.year_of_curriculum))
 
