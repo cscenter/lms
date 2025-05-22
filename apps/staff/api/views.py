@@ -10,6 +10,7 @@ from api.permissions import CuratorAccessPermission
 from api.views import APIBaseView
 from core.http import HttpRequest
 from learning.api.serializers import StudentProfileSerializer
+from learning.models import GraduateProfile
 from users.filters import StudentFilter
 from users.models import StudentProfile
 from users.services import create_graduate_profiles
@@ -26,8 +27,15 @@ class StudentSearchJSONView(ListAPIView):
     filterset_class = StudentFilter
 
     class OutputSerializer(StudentProfileSerializer):
+        graduation_year = serializers.SerializerMethodField()
+
         class Meta(StudentProfileSerializer.Meta):
-            fields = ('pk', 'short_name', 'user_id')
+            fields = ('pk', 'short_name', 'user_id', 'graduation_year')
+
+        def get_graduation_year(self, obj):
+            if hasattr(obj, 'graduate_profile'):
+                return obj.graduate_profile.graduation_year
+            return None
 
     def get_serializer_class(self):
         return self.OutputSerializer
@@ -35,7 +43,7 @@ class StudentSearchJSONView(ListAPIView):
     def get_queryset(self):
         return (StudentProfile.objects
                 .filter(site=self.request.site)
-                .select_related('user')
+                .select_related('user', 'graduate_profile')
                 .only('user__username', 'user__first_name',
                       'user__last_name', 'user_id')
                 .order_by('user__last_name',
