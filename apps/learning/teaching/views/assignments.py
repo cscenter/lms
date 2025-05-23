@@ -8,11 +8,12 @@ from typing import Any, Dict, Iterator, List, NamedTuple
 from rest_framework import serializers
 from vanilla import TemplateView
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import FileField, F, OuterRef, Subquery
+from django.db.models import FileField, F, OuterRef, Subquery, Prefetch
 from django.http import FileResponse, HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, redirect
@@ -53,6 +54,7 @@ from learning.services.personal_assignment_service import (
 from learning.settings import AssignmentScoreUpdateSource
 from learning.utils import humanize_duration
 from learning.views import AssignmentCommentUpsertView, AssignmentSubmissionBaseView
+from users.models import StudentProfile, User
 
 
 def _check_queue_filters(course: Course, query_params):
@@ -87,10 +89,33 @@ def _check_queue_filters(course: Course, query_params):
     for g in student_groups_:
         label = g.get_name(branch_details=sites_total > 1)
         student_groups.append({"value": g.pk, "label": label, "selected": False})
+
+    student_ids = (Enrollment.active
+                  .filter(course=course)
+                  .select_related('student')
+                  .values_list('student_id', flat=True)
+                  .distinct())
+
+    student_profiles = (StudentProfile.objects
+                       .filter(user_id__in=student_ids, site_id=settings.SITE_ID)
+                       .select_related('user', 'branch')
+                       .order_by('priority', '-year_of_admission', '-pk'))
+
+    profiles_by_user = set()
+    program_years = set()
+    for profile in student_profiles:
+        if profile.user_id not in profiles_by_user:
+            profiles_by_user.add(profile.user_id)
+            if profile.year_of_curriculum:
+                program_years.add(profile.year_of_curriculum)
+
+    program_year = [{"value": str(year), "label": year} for year in sorted(program_years)]
+
     return {
         "assignments": assignments,
         "courseTeachers": course_teachers,
-        "courseGroups": student_groups
+        "courseGroups": student_groups,
+        "programYear": program_year
     }
 
 
@@ -145,6 +170,7 @@ class AssignmentCheckQueueView(PermissionRequiredMixin, TemplateView):
                     "courseOptions": course_options,
                     "courseTeachers": filters["courseTeachers"],
                     "courseGroups": filters["courseGroups"],
+                    "programYear": filters["programYear"],
                     "statusOptions": [{'value': v, 'label': str(l)} for v, l in AssignmentStatus.choices
                                       if v != AssignmentStatus.NEW]
                 },
@@ -203,7 +229,6 @@ class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
     permission_required = ViewAssignment.name
 
     def get_student_assignments(self):
-
         student_assignments = (
             StudentAssignment.objects
             .for_teachers()
@@ -319,6 +344,7 @@ class AssignmentStatusLogCSVView(PermissionRequiredMixin, generic.DetailView):
                                  comment_author.get_short_name(), comment_author.pk,
                                  action_text, created])
         return response
+
 
 class AssignmentStudentAnswersCSVView(PermissionRequiredMixin, generic.DetailView):
     model = Assignment
