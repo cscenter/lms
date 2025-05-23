@@ -139,8 +139,8 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
                 .distinct()
             ),
             "graduation_years": (
-                GraduateProfile.objects.all().filter(
-                    student_profile__site=self.request.site).values_list("graduation_year", flat=True).order_by("graduation_year").distinct()
+                GraduateProfile.objects.filter(
+                    student_profile__site=settings.SITE_ID).values_list("graduation_year", flat=True).order_by("graduation_year").distinct()
             )
         }
         return context

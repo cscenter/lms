@@ -142,8 +142,6 @@
           <div class="form-group">
             <label>Платное обучение</label><br>
             <div class="btn-group btn-group-sm" data-toggle="buttons">
-              class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):
-                  context_object_name = "applicants"
               {% for value, label in is_paid_basis %}
                 <label class="btn btn-default">
                   <input type="checkbox" name="is_paid_basis" value="{{ value }}" autocomplete="off">{{ label }}

@@ -4514,7 +4514,6 @@ msgid "Name, full or partial"
 msgstr "Имя, целиком или часть"
 
 #: lms/jinja2/lms/staff/student_search.html:85
-#, fuzzy
 #| msgid "Graduation Year"
 msgid "Graduation year"
 msgstr "Год выпуска"
