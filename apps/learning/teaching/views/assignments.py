@@ -93,7 +93,6 @@ def _check_queue_filters(course: Course, query_params):
     student_ids = (Enrollment.active
                   .filter(course=course)
                   .select_related('student')
-                  .prefetch_related('student__student_profiles')
                   .values_list('student_id', flat=True)
                   .distinct())
 
@@ -108,9 +107,9 @@ def _check_queue_filters(course: Course, query_params):
         if profile.user_id not in profiles_by_user:
             profiles_by_user.append(profile.user_id)
             if profile.year_of_curriculum:
-                program_years.add(str(profile.year_of_curriculum))
+                program_years.add(profile.year_of_curriculum)
 
-    program_year = [{"value": year, "label": year, "selected": False} for year in sorted(program_years)]
+    program_year = [{"value": str(year), "label": year} for year in sorted(program_years)]
 
     return {
         "assignments": assignments,
