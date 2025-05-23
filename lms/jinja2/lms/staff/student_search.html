@@ -82,6 +82,23 @@
             </div>
           </div>
           <div class="form-group">
+            <label>{% trans %}Graduation year{% endtrans %}</label><br>
+            <div class="btn-group btn-group-sm" data-toggle="buttons">
+              <label class="btn btn-default">
+               <input type="checkbox" name="graduation_years"
+                      value="0"
+                      autocomplete="off"> {% trans %} Any {% endtrans %}
+              </label>
+              {% for year in graduation_years %}
+                <label class="btn btn-default">
+                  <input type="checkbox" name="graduation_years"
+                         value="{{ year }}"
+                         autocomplete="off">{{ year }}
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="form-group">
             <label>{% trans %}Passed courses{% endtrans %}</label><br>
             <div class="btn-group btn-group-sm" data-toggle="buttons">
               {% for cnt in cnt_enrollments %}

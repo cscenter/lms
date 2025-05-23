@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-28 13:46+0000\n"
+"POT-Creation-Date: 2025-05-22 19:06+0000\n"
 "PO-Revision-Date: 2025-04-28 13:42+0000\n"
 "Last-Translator: Дмитрий Чернушевич <dmi4er4@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -52,33 +52,33 @@ msgstr "Пользователь деактивирован или удалён.
 msgid "Token is invalid or expired"
 msgstr ""
 
-#: apps/api/management/commands/monthly_student_status_dump.py:28
+#: apps/api/management/commands/monthly_dump_to_yandex_disk.py:28
 msgid "User ID"
 msgstr "ID пользователя"
 
-#: apps/api/management/commands/monthly_student_status_dump.py:29
+#: apps/api/management/commands/monthly_dump_to_yandex_disk.py:29
 msgid "Student Profile ID"
 msgstr "ID профиля студента"
 
-#: apps/api/management/commands/monthly_student_status_dump.py:30
+#: apps/api/management/commands/monthly_dump_to_yandex_disk.py:30
 #: apps/api/management/commands/weekly_dump_to_yandex_disk.py:48
 #: apps/staff/forms.py:243 apps/staff/views/enrolees_selection.py:118
 #: apps/staff/views/send_letters_view.py:149
 msgid "Student type"
 msgstr "Тип студента"
 
-#: apps/api/management/commands/monthly_student_status_dump.py:31
+#: apps/api/management/commands/monthly_dump_to_yandex_disk.py:31
 #: apps/learning/models.py:451 apps/users/models.py:1023
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:80
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:111
 msgid "Entry Added"
 msgstr "Дата изменения"
 
-#: apps/api/management/commands/monthly_student_status_dump.py:32
+#: apps/api/management/commands/monthly_dump_to_yandex_disk.py:32
 #: apps/grading/models.py:93 apps/learning/forms.py:77
-#: apps/learning/study/forms.py:69 apps/staff/filters.py:189
+#: apps/learning/study/forms.py:69 apps/staff/filters.py:221
 #: apps/staff/forms.py:261 apps/staff/views/send_letters_view.py:162
-#: apps/staff/views/views.py:1012 apps/users/models.py:225
+#: apps/staff/views/views.py:1016 apps/users/models.py:225
 #: apps/users/models.py:817 apps/users/models.py:1070
 #: lms/jinja2/lms/staff/status_log.html:21
 #: lms/jinja2/lms/staff/student_search.html:69
@@ -87,8 +87,8 @@ msgstr "Дата изменения"
 msgid "Status"
 msgstr "Статус"
 
-#: apps/api/management/commands/monthly_student_status_dump.py:33
-#: apps/staff/filters.py:195 apps/staff/views/views.py:1012
+#: apps/api/management/commands/monthly_dump_to_yandex_disk.py:33
+#: apps/staff/filters.py:227 apps/staff/views/views.py:1016
 #: apps/users/models.py:1065 lms/jinja2/lms/staff/status_log.html:20
 msgid "Former status"
 msgstr "Прошлый статус"
@@ -134,10 +134,10 @@ msgstr "Курс"
 #: apps/courses/models.py:728 apps/learning/admin.py:83
 #: apps/learning/gradebook/views.py:240 apps/learning/models.py:78
 #: apps/learning/models.py:1100 apps/library/models.py:66
-#: apps/staff/filters.py:130 apps/staff/filters.py:205 apps/staff/forms.py:237
+#: apps/staff/filters.py:162 apps/staff/filters.py:237 apps/staff/forms.py:237
 #: apps/staff/views/enrolees_selection.py:117
-#: apps/staff/views/send_letters_view.py:144 apps/staff/views/views.py:947
-#: apps/staff/views/views.py:1011 apps/study_programs/models.py:65
+#: apps/staff/views/send_letters_view.py:144 apps/staff/views/views.py:951
+#: apps/staff/views/views.py:1015 apps/study_programs/models.py:65
 #: apps/users/models.py:180 apps/users/models.py:362 apps/users/models.py:812
 #: lms/jinja2/lms/courses/meta_detail.html:27
 #: lms/jinja2/lms/staff/academic_discipline_log.html:19
@@ -762,9 +762,9 @@ msgid "Venue"
 msgstr "Место проведения"
 
 #: apps/courses/forms.py:165 apps/courses/models.py:953
-#: apps/notifications/models.py:92 apps/staff/filters.py:135
-#: apps/staff/filters.py:210 apps/staff/views/views.py:947
-#: apps/staff/views/views.py:1011 apps/users/models.py:792
+#: apps/notifications/models.py:92 apps/staff/filters.py:167
+#: apps/staff/filters.py:242 apps/staff/views/views.py:951
+#: apps/staff/views/views.py:1015 apps/users/models.py:792
 msgid "Type"
 msgstr "Тип"
 
@@ -2501,7 +2501,7 @@ msgstr "Профиль выпускника"
 msgid "Graduate Profiles"
 msgstr "Профили выпускников"
 
-#: apps/learning/reports.py:818 apps/learning/reports.py:1042
+#: apps/learning/reports.py:818 apps/learning/reports.py:1043
 #: apps/learning/teaching/views/assignments.py:339
 #: apps/staff/views/enrolees_selection.py:113
 msgid "User url"
@@ -2962,12 +2962,12 @@ msgstr "Типы"
 msgid "Notification"
 msgstr "Уведомление"
 
-#: apps/staff/filters.py:60 apps/staff/filters.py:102 apps/staff/filters.py:177
-#: apps/staff/filters.py:260
+#: apps/staff/filters.py:62 apps/staff/filters.py:126 apps/staff/filters.py:209
+#: apps/staff/filters.py:292
 msgid "Filter"
 msgstr ""
 
-#: apps/staff/filters.py:116 apps/staff/views/views.py:948
+#: apps/staff/filters.py:148 apps/staff/views/views.py:952
 #: apps/users/models.py:1102
 #: lms/jinja2/lms/staff/academic_discipline_log.html:21
 #: lms/jinja2/lms/user_profile/_tab_student_profiles.html:110
@@ -2975,28 +2975,28 @@ msgstr ""
 msgid "Field of study"
 msgstr "Направление обучения"
 
-#: apps/staff/filters.py:121 apps/staff/views/views.py:948
+#: apps/staff/filters.py:153 apps/staff/views/views.py:952
 #: apps/users/models.py:1095
 #: lms/jinja2/lms/staff/academic_discipline_log.html:20
 msgid "Former field of study"
 msgstr "Прошлое направление обучения"
 
-#: apps/staff/filters.py:126 apps/staff/filters.py:201
+#: apps/staff/filters.py:158 apps/staff/filters.py:233
 #: apps/users/models.py:1035
 #: lms/jinja2/lms/staff/academic_discipline_log.html:22
 #: lms/jinja2/lms/staff/status_log.html:22
 msgid "Is processed"
 msgstr "Обработан ли"
 
-#: apps/staff/filters.py:178 apps/staff/filters.py:261
+#: apps/staff/filters.py:210 apps/staff/filters.py:293
 msgid "Download"
 msgstr "Скачать"
 
-#: apps/staff/filters.py:179 apps/staff/filters.py:262
+#: apps/staff/filters.py:211 apps/staff/filters.py:294
 msgid "Mark processed"
 msgstr "Обработать"
 
-#: apps/staff/filters.py:187 apps/staff/forms.py:263
+#: apps/staff/filters.py:219 apps/staff/forms.py:263
 #: apps/staff/views/send_letters_view.py:161 apps/users/models.py:978
 #: apps/users/models.py:1083 apps/users/models.py:1089 apps/users/views.py:206
 msgid "Studying"
@@ -3221,12 +3221,12 @@ msgstr "Ошибка при отправке электронных писем: 
 msgid "Invalid form data. Email sending canceled."
 msgstr "Неверные данные в форме. Отправка электронного письма отменена."
 
-#: apps/staff/views/views.py:947 apps/staff/views/views.py:1011
+#: apps/staff/views/views.py:951 apps/staff/views/views.py:1015
 #: apps/users/models.py:377
 msgid "Telegram"
 msgstr ""
 
-#: apps/staff/views/views.py:947 apps/staff/views/views.py:1011
+#: apps/staff/views/views.py:951 apps/staff/views/views.py:1015
 #: apps/users/models.py:313
 msgid "email address"
 msgstr ""
@@ -3269,7 +3269,7 @@ msgid "Area of study"
 msgstr "Направление обучения"
 
 #: apps/study_programs/models.py:42
-#: lms/jinja2/lms/staff/student_search.html:102
+#: lms/jinja2/lms/staff/student_search.html:119
 msgid "Areas of study"
 msgstr "Направления обучения"
 
@@ -4473,11 +4473,11 @@ msgstr "Выйти"
 msgid "Members Area"
 msgstr "Личный кабинет"
 
-#: lms/jinja2/lms/layouts/v1_base.html:66 lms/templates/base.html:61
+#: lms/jinja2/lms/layouts/v1_base.html:65 lms/templates/base.html:60
 msgid "гг."
 msgstr ""
 
-#: lms/jinja2/lms/layouts/v2_base.html:46
+#: lms/jinja2/lms/layouts/v2_base.html:45
 msgid "Privacy&nbsp;Policy"
 msgstr ""
 
@@ -4514,16 +4514,22 @@ msgid "Name, full or partial"
 msgstr "Имя, целиком или часть"
 
 #: lms/jinja2/lms/staff/student_search.html:85
+#| msgid "Graduation Year"
+msgid "Graduation year"
+msgstr "Год выпуска"
+
+#: lms/jinja2/lms/staff/student_search.html:90
+#: lms/jinja2/lms/staff/student_search.html:160
+msgid " Any "
+msgstr "Любой"
+
+#: lms/jinja2/lms/staff/student_search.html:102
 msgid "Passed courses"
 msgstr "Сданные курсы"
 
-#: lms/jinja2/lms/staff/student_search.html:136
+#: lms/jinja2/lms/staff/student_search.html:155
 msgid " University graduation year for graduates without diploma "
 msgstr "Год выпуска из ВУЗа выпускников без диплома"
-
-#: lms/jinja2/lms/staff/student_search.html:141
-msgid " Any "
-msgstr "Любой"
 
 #: lms/jinja2/lms/study/assignment_list.html:12
 msgid "No assignments yet"
@@ -4672,7 +4678,7 @@ msgstr "Изменить фото"
 msgid "Review of the Organization"
 msgstr "Отзыв"
 
-#: lms/templates/base.html:75
+#: lms/templates/base.html:74
 msgid "close all"
 msgstr "закрыть все"
 
