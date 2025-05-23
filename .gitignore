@@ -35,3 +35,7 @@ docker-compose.override.yml
 memory-bank/activeContext.md
 memory-bank/decisionLog.md
 memory-bank/progress.md
+
+
+.arcignore
+.dockerignore

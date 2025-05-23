@@ -1,60 +1,103 @@
 {% set suffix = 'а' if profile_user.gender == 'F' else '' -%}
 {% set request_user = request.user -%}
 {% with is_secure = request.is_secure() %}
-<ul class="list-unstyled">
+<ul class="list-unstyled" >
+  {# Общий макрос для отображения элемента курса #}
+  {% macro render_course_item(enrollment) -%}
+    <li style="list-style-type: disc;">
+      {# Определение прозрачности #}
+      {% set opacity = '' if enrollment.satisfactory else 'semi-transparent' %}
+
+      {# Иконки приглашений и партнеров #}
+      {% if can_view_course_icons %}
+        {% if enrollment.view_invited %}
+          {% if enrollment.student_profile.invitation %}
+            {% set invited_title = enrollment.student_profile.invitation.name %}
+          {% else %}
+            {% set invited_title = "{% trans Invited %}" %}
+          {% endif %}
+          <i style="font-size:14px" class="fa {{opacity}} " title="{{ invited_title }}">&#xf069;</i>
+        {% endif %}
+
+        {% if enrollment.view_partner and enrollment.student_profile.partner %}
+          {% set partner_title = enrollment.student_profile.partner.name %}
+          <i class="fa fa-graduation-cap {{opacity}}" aria-hidden="true" title="{% trans %}Masters degree{% endtrans %} {{ partner_title }} "></i>
+        {% endif %}
+      {% endif %}
+
+      {% if enrollment.view_lections_only %}
+        <i class="fa fa-headphones {{opacity}}" aria-hidden="true" title="{% trans %}Listener{% endtrans %}"></i>
+      {% endif %}
+
+      {# Ссылка на курс #}
+      <a href class="{{ opacity }}">{{ enrollment.course }}</a>
+
+      {# Иконки длительности курса #}
+      {% if enrollment.course.duration == CourseDurations.FIRST_HALF %}
+      <i class="fa fa-adjust fa-rotate-180 {{opacity}}" aria-hidden="true" title="{% trans %}First part of semester{% endtrans %}"></i>
+      {% elif enrollment.course.duration == CourseDurations.SECOND_HALF %}
+      <i class="fa fa-adjust {{opacity}}" aria-hidden="true" title="{% trans %}Second part of semester{% endtrans %}"></i>
+      {% endif %}
+
+      {# Информация об оценке #}
+      <i class="grade-info">
+        {% if enrollment.is_grade_recredited %}перезачтено,{% endif %}
+        {{ enrollment.grade_honest|lower }}
+      </i>
+    </li>
+  {%- endmacro %}
+
+{# Основная структура шаблона #}
+{% set suffix = 'а' if profile_user.gender == 'F' else '' %}
+{% set request_user = request.user %}
+
+<ul>
   {% if enrollments or profile_user.shadcourserecord_set.all() %}
-    <li>
-      <h4>{{ profile_user.first_name }} прослушал{{ suffix }} и сдал{{ suffix }} следующие курсы:</h4>
+
+    {# Секция сданных курсов #}
+    {% if (enrollments | selectattr("view_lections_only", "==", false) | list | length) > 0 %}
+      <h4>{{ profile_user.first_name }} сдал{{ suffix }} следующие курсы:</h4>
       <ul>
-        {% for enrollment in enrollments %}
-          <li>
-            {% if enrollment.satisfactory%}
-              {% set opacity = '' %}
-            {% else %}
-              {% set opacity = 'semi-transparent' %}
-            {% endif %}
-            {% if can_view_course_icons and enrollment.view_invited%}
-              {% if enrollment.student_profile.invitation %}
-                {% set invited_title = enrollment.student_profile.invitation.name %}
-              {% else %}
-                {% set invited_title = "{% trans Invited %}" %}
-              {% endif %}
-              <i style="font-size:14px" class="fa {{opacity}} " title="{{ invited_title }}">&#xf069;</i>
-            {% endif %}
-            {% if can_view_course_icons and enrollment.view_partner%}
-              {% if enrollment.student_profile.partner %}
-                {% set partner_title = enrollment.student_profile.partner.name %}
-              {% endif %}
-              <i class="fa fa-graduation-cap {{opacity}}" aria-hidden="true" title="{% trans %}Masters degree{% endtrans %} {{ partner_title }} "></i>
-            {% endif %}
-            {% if enrollment.view_lections_only%}
-              <i class="fa fa-headphones {{opacity}}" aria-hidden="true" title="{% trans %}Listener{% endtrans %}"></i>
-            {% endif %}
-              <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}" class="{{opacity}}">
-              {{ enrollment.course }} </a>
-            {% if enrollment.course.duration == CourseDurations.FIRST_HALF %}
-              <i class="fa fa-adjust fa-rotate-180 {{opacity}}" aria-hidden="true" title="{% trans %}First part of semester{% endtrans %}"></i>
-            {% endif %}
-            {% if enrollment.course.duration == CourseDurations.SECOND_HALF %}
-              <i class="fa fa-adjust {{opacity}}" aria-hidden="true" title="{% trans %}Second part of semester{% endtrans %}"></i>
-            {% endif %}
-            <i class="{{opacity}}"> | {% if enrollment.is_grade_recredited %}перезачтено,{% endif %} {{ enrollment.grade_honest|lower }} </i>
-            {% if not loop.last and loop.nextitem.course.semester != enrollment.course.semester %}
+        {% for enrollment in enrollments if not enrollment.view_lections_only %}
+          {{ render_course_item(enrollment) }}
+          {% if not loop.last and loop.nextitem.course.semester != enrollment.course.semester %}
             <p></p>
-            {% endif %}
-          </li>
+          {% endif %}
         {% endfor %}
+      </ul>
+    {% endif %}
+
+    {# Секция прослушанных курсов #}
+    {% if (enrollments | selectattr("view_lections_only", "==", true) | list | length) > 0 %}
+      <h4>{{ profile_user.first_name }} прослушал{{ suffix }} следующие курсы:</h4>
+      <ul>
+        {% for enrollment in enrollments if enrollment.view_lections_only %}
+          {{ render_course_item(enrollment) }}
+          {% if not loop.last and loop.nextitem.course.semester != enrollment.course.semester %}
+            <p></p>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {# Курсы ШАД #}
+    {% if profile_user.shadcourserecord_set.all()|length > 0 %}
+      <h4>Курсы ШАД:</h4>
+      <ul>
         {% for shad in profile_user.shadcourserecord_set.all() %}
           <li>
             {{ shad.name }} (ШАД), {{ shad.semester }} - {{ shad.teachers }} /{{ shad.grade_display|lower }}/
           </li>
         {% endfor %}
       </ul>
-    </li>
+    {% endif %}
+</ul>
+
+
   {% endif %}
 
   {% if student_projects %}
-    <li>
+    <li style="list-style-type: disc;">
       <h4>Кроме того, участвовал{{ suffix }} в проектах:</h4>
       <ul>
         {% for ps in student_projects %}
@@ -70,7 +113,7 @@
       </ul>
     </li>
   {% elif request_user.is_curator %}
-    <li>Нет студенческих проектов</li>
+  <p>Нет студенческих проектов</p>
   {% endif %}
 
   {% if profile_user.pk == request_user.pk or request_user.is_curator %}
@@ -91,16 +134,15 @@
           </ul>
         </li>
       {% elif request_user.is_curator %}
-        <li>Нет зачтённых онлайн-курсов</li>
+      <p>Нет зачтённых онлайн-курсов</p>
       {% endif %}
     {% endwith %}
   {% endif %}
 
   {% if profile_user.is_teacher %}
-    <li>
       {% if profile_user.teaching_set.all() %}
         <h4>Преподаватель курсов:</h4>
-        <ul class="">
+        <ul class="" style="list-style-type: disc;">
           {% for course in profile_user.teaching_set.all() %}
             <li>
               <a href="{{ course.get_absolute_url() }}">{{ course }}</a>
@@ -108,7 +150,6 @@
           {% endfor %}
         </ul>
       {% endif %}
-    </li>
   {% endif %}
 </ul>
 {% endwith %}
