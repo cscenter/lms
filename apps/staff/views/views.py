@@ -137,6 +137,10 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
                 .values_list("graduation_year", flat=True)
                 .order_by("graduation_year")
                 .distinct()
+            ),
+            "graduation_years": (
+                GraduateProfile.objects.filter(
+                    student_profile__site=settings.SITE_ID).values_list("graduation_year", flat=True).order_by("graduation_year").distinct()
             )
         }
         return context
@@ -753,15 +757,15 @@ def badge_number_from_csv_view(request: HttpRequest):
 def export_for_electronic_diplomas_view(request: HttpRequest):
     """
     Export student data for electronic diplomas in CSV format.
-    
+
     This view handles the export of student data for electronic diplomas,
     including personal information and course grades.
     """
     if not request.user.is_curator:
         return HttpResponseForbidden()
-    
+
     form = ExportForDiplomas(data=request.POST, request=request)
-    
+
     if form.is_valid():
         graduated_year = int(form.cleaned_data["graduated_year"])
         return ElectronicDiplomaExportService.generate_export(request.site, graduated_year)
@@ -771,7 +775,7 @@ def export_for_electronic_diplomas_view(request: HttpRequest):
             label = "Общее" if label == "__all__" else label
             errors = "<br>".join(str(error) for error in error_as_list)
             messages.error(request, mark_safe(f"{label}:<br>{errors}"))
-    
+
     return HttpResponseRedirect(reverse("staff:exports"))
 
 class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):
