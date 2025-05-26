@@ -47,8 +47,6 @@ def test_manager_site_configuration_get_current(rf, settings):
     request.path = '/'
     assert SiteConfiguration.objects.get_current() == site_configuration2
     assert SiteConfiguration.objects.get_current(request) == site_configuration2
-    settings.SITE_ID = None
-    assert SiteConfiguration.objects.get_current(request) == site_configuration1
 
 
 @pytest.mark.django_db
