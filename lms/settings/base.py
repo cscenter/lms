@@ -1,5 +1,4 @@
 import logging
-import os
 import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -9,14 +8,13 @@ import pytz
 
 import django
 
-import ssl
-
 env = environ.Env()
 # Try to read .env file, if it's not present, assume that application
 # is deployed to production and skip reading the file
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     environ.Env.read_env(env_file=env.str("ENV_FILE", default=None))
+
 
 ROOT_DIR = Path(__file__).parents[2]
 SHARED_APPS_DIR = ROOT_DIR / "apps"
@@ -139,16 +137,8 @@ WEBPACK_LOADER = {
 }
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
-DATABASES = {
-    "default": {
-        "ENGINE": env.str("DATABASE_ENGINE"),
-        "NAME": env.str("DATABASE_NAME"),
-        "USER": env.str("DATABASE_USER"),
-        "PASSWORD": env.str("DATABASE_PASSWORD"),
-        "HOST": env.str("DATABASE_HOST"),
-        "PORT": env.str("DATABASE_PORT"),
-    }
-}
+DATABASES = {"default": env.db_url(var="DATABASE_URL")}
+
 
 MIDDLEWARE = [
     # TODO: Return SecurityMiddleware or configure security with nginx-ingress
@@ -169,13 +159,11 @@ MIDDLEWARE = [
 
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
-# SOURCE_SSL_CA_CERT = "/var/www/.redis/YandexInternalRootCA.crt"
-
 REDIS_PASSWORD = env.str("REDIS_PASSWORD", default=None)
 REDIS_HOST = env.str("REDIS_HOST", default="127.0.0.1")
-REDIS_PORT = 6379 # env.int("REDIS_PORT", default=6379)
-REDIS_DB_INDEX = 3 # env.int("REDIS_DB_INDEX", default=SITE_ID)
-REDIS_SSL = False #env.bool("REDIS_SSL", default=True)
+REDIS_PORT = env.int("REDIS_PORT", default=6379)
+REDIS_DB_INDEX = env.int("REDIS_DB_INDEX", default=SITE_ID)
+REDIS_SSL = env.bool("REDIS_SSL", default=True)
 RQ_QUEUES = {
     "default": {
         "HOST": REDIS_HOST,
@@ -183,11 +171,6 @@ RQ_QUEUES = {
         "DB": REDIS_DB_INDEX,
         "PASSWORD": REDIS_PASSWORD,
         "SSL": REDIS_SSL,
-        # 'REDIS_CLIENT_KWARGS': {
-        #     'ssl_ca_certs': SOURCE_SSL_CA_CERT,
-        #     # 'ssl_cert_reqs': None,
-        #     'ssl_min_version': ssl.TLSVersion.TLSv1_3,
-        # },
     },
     "high": {
         "HOST": REDIS_HOST,
@@ -195,11 +178,6 @@ RQ_QUEUES = {
         "DB": REDIS_DB_INDEX,
         "PASSWORD": REDIS_PASSWORD,
         "SSL": REDIS_SSL,
-        # 'REDIS_CLIENT_KWARGS': {
-        #     'ssl_ca_certs': SOURCE_SSL_CA_CERT,
-        #     # 'ssl_cert_reqs': None,
-        #     'ssl_min_version': ssl.TLSVersion.TLSv1_3,
-        # },
     },
 }
 
