@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Type
+from typing import Any, Optional, Type
 
 from djangorestframework_camel_case.render import (
     CamelCaseBrowsableAPIRenderer, CamelCaseJSONRenderer
@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from api.authentication import TokenAuthentication
 from api.mixins import ApiErrorsMixin
 from api.permissions import CuratorAccessPermission
-from api.utils import inline_serializer
+from api.utils import DynamicFieldsModelSerializer, inline_serializer
 from api.views import APIBaseView
 from auth.mixins import RolePermissionRequiredMixin
 from core.api.fields import CharSeparatedField, ScoreField
@@ -24,7 +24,7 @@ from courses.permissions import CreateAssignment
 from courses.selectors import course_personal_assignments_for_teachers, course_personal_assignments, get_course_teachers
 from learning.api.serializers import (
     BaseEnrollmentSerializer, BaseStudentAssignmentSerializer,
-    CourseAssignmentSerializer, CourseNewsNotificationSerializer, MyCourseSerializer, StudentProfileSerializer,
+    CourseAssignmentSerializer, CourseNewsNotificationSerializer, MyCourseSerializer,
     UserSerializer
 )
 from learning.models import (
@@ -113,7 +113,7 @@ class CourseStudentsList(RolePermissionRequiredMixin, APIBaseView):
         data = self.OutputSerializer(queryset, many=True).data
         return Response(data)
 
-class StudentWithProfileSerializer(UserSerializer):
+class StudentWithProfileSerializer(DynamicFieldsModelSerializer):
     year_of_curriculum = serializers.SerializerMethodField()
 
     class Meta:
