@@ -44,8 +44,8 @@ class StudentSearchJSONView(ListAPIView):
 
     def get_queryset(self):
         return (StudentProfile.objects
-                .select_related('user', 'graduate_profile')
                 .filter(site=Site.objects.get(id=settings.SITE_ID))
+                .select_related('user', 'graduate_profile')
                 .only('user__username', 'user__first_name',
                       'user__last_name', 'user_id')
                 .order_by('user__last_name',
