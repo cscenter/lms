@@ -60,6 +60,8 @@ class AdmissionApplicantsReport(ReportFileOutput):
             interview_section_indexes[value] = 2 * index
         
         utm_keys = UTMNames.values.keys()
+        # Добавляем заголовок для UID
+        self.headers.append("UID")
         self.headers.extend(utm_keys)
         # Collect data
         for applicant in applicants:
@@ -98,6 +100,14 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 interview_details[index] = interview.get_average_score_display()
                 interview_details[index + 1] = interview_comments.rstrip()
             row.extend(interview_details)
+            
+            # UID
+            if applicant.data and "yandex_profile" in applicant.data and "application_ya_id" in applicant.data["yandex_profile"]:
+                uid = applicant.data["yandex_profile"]["application_ya_id"]
+            else:
+                uid = ""
+            row.append(uid)
+            
             # UTM
             row.extend([applicant_utms.get(key, "") for key in utm_keys])
 
