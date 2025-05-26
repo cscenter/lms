@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Type
+from typing import Any, Optional, Type
 
 from djangorestframework_camel_case.render import (
     CamelCaseBrowsableAPIRenderer, CamelCaseJSONRenderer
@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from api.authentication import TokenAuthentication
 from api.mixins import ApiErrorsMixin
 from api.permissions import CuratorAccessPermission
-from api.utils import inline_serializer
+from api.utils import DynamicFieldsModelSerializer, inline_serializer
 from api.views import APIBaseView
 from auth.mixins import RolePermissionRequiredMixin
 from core.api.fields import CharSeparatedField, ScoreField
@@ -28,9 +28,10 @@ from learning.api.serializers import (
     UserSerializer
 )
 from learning.models import (
-    CourseNewsNotification, Enrollment, PersonalAssignmentActivity, StudentAssignment
+    CourseNewsNotification, Enrollment, StudentAssignment
 )
 from learning.permissions import EditStudentAssignment, ViewEnrollments
+from users.models import User
 
 
 class CourseNewsUnreadNotificationsView(ListAPIView):
@@ -112,6 +113,18 @@ class CourseStudentsList(RolePermissionRequiredMixin, APIBaseView):
         data = self.OutputSerializer(queryset, many=True).data
         return Response(data)
 
+class StudentWithProfileSerializer(DynamicFieldsModelSerializer):
+    year_of_curriculum = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('id', 'first_name', 'last_name', 'patronymic', 'username', 'year_of_curriculum')
+
+    def get_year_of_curriculum(self, obj):
+        profile = obj.get_student_profile()
+        if profile:
+            return profile.year_of_curriculum
+        return None
 
 class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
@@ -125,7 +138,7 @@ class PersonalAssignmentList(RolePermissionRequiredMixin, APIBaseView):
 
     class OutputSerializer(serializers.ModelSerializer):
         score = ScoreField(coerce_to_string=True)
-        student = UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic', 'username'))
+        student = StudentWithProfileSerializer()
         assignee = inline_serializer(fields={
             "id": serializers.IntegerField(),
             "teacher": UserSerializer(fields=('id', 'first_name', 'last_name', 'patronymic'))
