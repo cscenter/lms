@@ -30,7 +30,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
     def process(self):
         applicants = (self.get_queryset()
         .defer(*self.exclude_applicant_fields)
-        .select_related("exam", "online_test")
+        .select_related("exam", "online_test", "olympiad")
         )
         self.exclude_applicant_fields.update(("modified", "meta"))
         # Collect headers
