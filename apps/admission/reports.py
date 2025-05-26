@@ -30,7 +30,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
     def process(self):
         applicants = (self.get_queryset()
         .defer(*self.exclude_applicant_fields)
-        .select_related("exam", "online_test")
+        .select_related("exam", "online_test", "olympiad")
         )
         self.exclude_applicant_fields.update(("modified", "meta"))
         # Collect headers
@@ -50,6 +50,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
         self.headers.extend(
             [
                 "Результаты теста",
+                "Результаты олимпиады",
                 "Результаты экзамена",
             ]
         )
@@ -58,8 +59,10 @@ class AdmissionApplicantsReport(ReportFileOutput):
             self.headers.append(f"{label} / балл")
             self.headers.append(f"{label} / комментарии")
             interview_section_indexes[value] = 2 * index
-        
+
         utm_keys = UTMNames.values.keys()
+        # Добавляем заголовок для UID
+        self.headers.append("UID")
         self.headers.extend(utm_keys)
         # Collect data
         for applicant in applicants:
@@ -82,6 +85,11 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 row.append(applicant.online_test.score)
             else:
                 row.append("")
+            # OLYMP
+            if hasattr(applicant, "olympiad"):
+                row.append(applicant.olympiad.score + applicant.olympiad.math_score)
+            else:
+                row.append("")
             # EXAM
             if hasattr(applicant, "exam"):
                 row.append(applicant.exam.score)
@@ -98,6 +106,14 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 interview_details[index] = interview.get_average_score_display()
                 interview_details[index + 1] = interview_comments.rstrip()
             row.extend(interview_details)
+
+            # UID
+            if applicant.data and "yandex_profile" in applicant.data and "application_ya_id" in applicant.data["yandex_profile"]:
+                uid = applicant.data["yandex_profile"]["application_ya_id"]
+            else:
+                uid = ""
+            row.append(uid)
+
             # UTM
             row.extend([applicant_utms.get(key, "") for key in utm_keys])
 
@@ -236,18 +252,18 @@ class ApplicantStatusLogsReport(ReportFileOutput):
     Report for applicant status change logs.
     Format: ID, previous status, current status, change date (ISO).
     """
-    
+
     def __init__(self, year=None):
         """
         Initialize the report.
-        
+
         Args:
             year: campaign year (if None, current campaigns are used)
         """
         self.year = year
         super().__init__()
         self.process()
-    
+
     def get_queryset(self):
         """Get status logs for applicants from current admission campaigns."""
         if self.year:
@@ -256,33 +272,33 @@ class ApplicantStatusLogsReport(ReportFileOutput):
         else:
             # Otherwise use current campaigns
             campaigns = Campaign.objects.filter(current=True)
-            
+
         campaigns.exclude(branch__name='Тест')
-        
+
         # Filter logs by these applicants
         return ApplicantStatusLog.objects.filter(
             applicant__campaign__in=campaigns
         ).select_related('applicant').order_by('-changed_at', '-created_at')
-    
+
     def process(self):
         """Process data for the report."""
         self.headers = ['ID', _('Former status'), _("Status"), _("Entry Added")]
-        
+
         status_logs = self.get_queryset()
-        
+
         for log in status_logs:
             applicant_id = log.applicant.get_absolute_url()
             former_status_display = log.get_former_status_display() if log.former_status else ""
             status_display = log.get_status_display() if log.status else ""
             changed_at = log.changed_at.isoformat()
-            
+
             row = [applicant_id, former_status_display, status_display, changed_at]
             self.data.append(row)
-    
+
     def export_row(self, row):
         """Export a row of the report."""
         return row
-    
+
     def get_filename(self):
         """Get filename for the report."""
         today = timezone.now().date().isoformat()
