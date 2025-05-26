@@ -5,12 +5,13 @@ from rest_framework import serializers, status
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
+from django.conf import settings
+from django.contrib.sites.models import Site
 
 from api.permissions import CuratorAccessPermission
 from api.views import APIBaseView
 from core.http import HttpRequest
 from learning.api.serializers import StudentProfileSerializer
-from learning.models import GraduateProfile
 from users.filters import StudentFilter
 from users.models import StudentProfile
 from users.services import create_graduate_profiles
@@ -27,23 +28,16 @@ class StudentSearchJSONView(ListAPIView):
     filterset_class = StudentFilter
 
     class OutputSerializer(StudentProfileSerializer):
-        graduation_year = serializers.SerializerMethodField()
-
         class Meta(StudentProfileSerializer.Meta):
-            fields = ('pk', 'short_name', 'user_id', 'graduation_year')
-
-        def get_graduation_year(self, obj):
-            if hasattr(obj, 'graduate_profile'):
-                return obj.graduate_profile.graduation_year
-            return None
+            fields = ('pk', 'short_name', 'user_id')
 
     def get_serializer_class(self):
         return self.OutputSerializer
 
     def get_queryset(self):
         return (StudentProfile.objects
-                .filter(site=self.request.site)
-                .select_related('user', 'graduate_profile')
+                .filter(site=Site.objects.get(id=settings.SITE_ID))
+                .select_related('user')
                 .only('user__username', 'user__first_name',
                       'user__last_name', 'user_id')
                 .order_by('user__last_name',
@@ -62,6 +56,6 @@ class CreateAlumniProfiles(APIBaseView):
         serializer.is_valid(raise_exception=True)
 
         graduated_on = serializer.validated_data['graduated_on']
-        create_graduate_profiles(request.site, graduated_on, created_by=request.user)
+        create_graduate_profiles(Site.objects.get(id=settings.SITE_ID), graduated_on, created_by=request.user)
 
         return Response(status=status.HTTP_201_CREATED)

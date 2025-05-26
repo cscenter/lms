@@ -12,6 +12,7 @@ from django.db import transaction
 from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
+from django.contrib.sites.models import Site
 
 
 from courses.models import Semester
@@ -95,7 +96,7 @@ class InvitationView(InvitationURLParamsMixin, TemplateView):
             return super().dispatch(request, *args, **kwargs)
         elif self.invitation.semester != Semester.get_current():
             return HttpResponseForbidden(_("Invitation is outdated"))
-        elif has_other_active_invited_profile(request.user, request.site, self.invitation):
+        elif has_other_active_invited_profile(request.user, Site.objects.get(pk=settings.SITE_ID), self.invitation):
             return HttpResponseForbidden(_("You already have other active invitation in this semester"))
         return super().dispatch(request, *args, **kwargs)
 
@@ -106,7 +107,7 @@ class InvitationView(InvitationURLParamsMixin, TemplateView):
                                 kwargs={"token": self.invitation.token},
                                 subdomain=settings.LMS_SUBDOMAIN)
             return HttpResponseRedirect(redirect_to=login_url)
-        if not is_student_profile_valid(request.user, request.site):
+        if not is_student_profile_valid(request.user, Site.objects.get(pk=settings.SITE_ID)):
             redirect_to = reverse("invitation:complete_profile",
                                   kwargs={"token": self.invitation.token},
                                   subdomain=settings.LMS_SUBDOMAIN)
@@ -237,7 +238,7 @@ class InvitationCompleteProfileView(InvitationURLParamsMixin,
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        if is_student_profile_valid(request.user, request.site):
+        if is_student_profile_valid(request.user, Site.objects.get(pk=settings.SITE_ID)):
             return HttpResponseRedirect(self.invitation.get_absolute_url())
         return super().dispatch(request, *args, **kwargs)
 
@@ -254,7 +255,7 @@ class InvitationCompleteProfileView(InvitationURLParamsMixin,
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        complete_student_profile(self.object, self.request.site, self.invitation)
+        complete_student_profile(self.object, Site.objects.get(pk=settings.SITE_ID), self.invitation)
         return HttpResponseRedirect(self.invitation.get_absolute_url())
 
     def get_context_data(self, **kwargs):

@@ -10,6 +10,8 @@ from django.db.models import Prefetch, Q
 from django.http import HttpResponseRedirect
 from django.utils.translation import pgettext_lazy
 from django.views import View
+from django.conf import settings
+from django.contrib.sites.models import Site
 
 from core.exceptions import Redirect
 from core.urls import reverse
@@ -64,7 +66,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                                    ))
 
         courses = Course.objects
-        student_profile = user.get_student_profile(site=self.request.site)
+        student_profile = user.get_student_profile(site=Site.objects.get(pk=settings.SITE_ID))
         if not user.is_curator and not user.is_teacher:
             if student_profile is None:
                 courses = courses.none()

@@ -6,6 +6,8 @@ from django.http.response import HttpResponse
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.utils import timezone
+from django.conf import settings
+from django.contrib.sites.models import Site
 
 import core.utils
 from core.utils import bucketize
@@ -24,7 +26,7 @@ class EnroleesSelectionListView(CuratorOnlyMixin, generic.ListView):
 
     def get_course_queryset(self):
         return (Course.objects
-                .available_on_site(self.request.site)
+                .available_on_site(Site.objects.get(pk=settings.SITE_ID))
                 # TODO add selection_avaliable filter
                 .select_related("meta_course", "main_branch")
                 .order_by("meta_course__name"))
@@ -32,7 +34,7 @@ class EnroleesSelectionListView(CuratorOnlyMixin, generic.ListView):
     def get_term_threshold(self):
         latest_term = Semester.objects.order_by("-index").first()
         return latest_term.index
-    
+
     def get_queryset(self):
         return (Semester.objects
             .filter(index__lte=self.get_term_threshold())
@@ -68,7 +70,7 @@ class EnroleesSelectionListView(CuratorOnlyMixin, generic.ListView):
             "semester_list": semester_list
         }
         return context
-    
+
 class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
                        generic.base.View):
 
@@ -77,22 +79,22 @@ class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
         GradeTypes.GOOD: 4,
         GradeTypes.EXCELLENT: 5
     }
-        
+
 
     def calculate_average_grades(self, students):
         for student in students:
             enrollments = [enrollment for profile in student.official_profiles for enrollment in profile.enrollment_set.all()]
-            numeric_satisfactory_grades = [self.grade_to_numeric[enrollment.grade] for enrollment in enrollments 
+            numeric_satisfactory_grades = [self.grade_to_numeric[enrollment.grade] for enrollment in enrollments
                                            if enrollment.grade in self.grade_to_numeric and enrollment.course.is_visible_in_certificates]
             if not numeric_satisfactory_grades:
                 yield student.id, ""
             else:
                 yield student.id, round(statistics.fmean(numeric_satisfactory_grades), 3)
-        
+
     def get(self, request, *args, **kwargs):
         enrollments = Enrollment.active.filter(course=self.course).select_related("student", "student_profile__branch", "student_profile__partner").order_by("student")
         student_profile_queryset = (StudentProfile.objects
-                       .filter(site=request.site, 
+                       .filter(site=Site.objects.get(pk=settings.SITE_ID),
                                type__in=[StudentTypes.REGULAR, StudentTypes.PARTNER],
                                status__ne=StudentStatuses.EXPELLED)
                        .order_by('year_of_admission', '-pk')
@@ -101,7 +103,7 @@ class EnroleesSelectionCSVView(CuratorOnlyMixin, CourseURLParamsMixin,
         users = (User.objects
             .filter(pk__in=enrollments.values_list("student__id", flat=True))
             .prefetch_related(Prefetch("student_profiles", queryset=student_profile_queryset, to_attr="official_profiles")))
-            
+
         average_grades_map = dict(self.calculate_average_grades(users))
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         filename = "{}-{}-{}-enrolees-selection.csv".format(kwargs['course_slug'],

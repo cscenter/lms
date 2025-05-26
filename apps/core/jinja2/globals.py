@@ -1,6 +1,8 @@
 from crispy_forms.utils import render_crispy_form
 
+from django.conf import settings
 from django.contrib.messages import DEFAULT_LEVELS, get_messages
+from django.contrib.sites.models import Site
 
 from core.menu import Menu
 from jinja2 import pass_context
@@ -40,3 +42,8 @@ def generate_menu(menu_name, request, root_id=None):
 @pass_context
 def crispy(context, form):
     return render_crispy_form(form, context=context)
+
+
+def site_context():
+    """Returns the site object based on settings.SITE_ID."""
+    return Site.objects.get(pk=settings.SITE_ID)

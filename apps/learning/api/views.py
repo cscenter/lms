@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
+from django.contrib.sites.models import Site
 
 from api.authentication import TokenAuthentication
 from api.mixins import ApiErrorsMixin
@@ -109,7 +111,7 @@ class CourseStudentsList(RolePermissionRequiredMixin, APIBaseView):
         queryset = (Enrollment.active
                     .select_related('student')
                     .filter(course=self.course,
-                            course__main_branch__site=request.site))
+                            course__main_branch__site=Site.objects.get(pk=settings.SITE_ID)))
         data = self.OutputSerializer(queryset, many=True).data
         return Response(data)
 

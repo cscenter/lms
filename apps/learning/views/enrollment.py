@@ -6,6 +6,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.generic import FormView
+from django.conf import settings
+from django.contrib.sites.models import Site
 
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
@@ -32,7 +34,7 @@ class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
     permission_required = EnrollInCourse.name
 
     def get_permission_object(self):
-        site = self.request.site
+        site = Site.objects.get(pk=settings.SITE_ID)
         student_profile = self.request.user.get_student_profile(site)
         return EnrollPermissionObject(self.course, student_profile)
 
@@ -63,7 +65,7 @@ class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
         reason_entry = form.cleaned_data.get("reason", "").strip()
         type = form.cleaned_data["type"].strip()
         user = self.request.user
-        student_profile = user.get_student_profile(self.request.site)
+        student_profile = user.get_student_profile(Site.objects.get(pk=settings.SITE_ID))
         try:
             student_group = StudentGroupService.resolve(self.course,
                                                         student_profile=student_profile)
@@ -131,7 +133,7 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
     permission_required = EnrollInCourseByInvitation.name
 
     def get_permission_object(self):
-        site = self.request.site
+        site = Site.objects.get(pk=settings.SITE_ID)
         student_profile = self.request.user.get_student_profile(site)
         return InvitationEnrollPermissionObject(self.course_invitation,
                                                 student_profile)
@@ -144,7 +146,7 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
             invitation = self.course_invitation.invitation
             raise Redirect(to=invitation.get_absolute_url())
         return has_perm
-    
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['enrollment_type'] = self.course_invitation.enrollment_type
@@ -166,7 +168,7 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
         type = form.cleaned_data["type"].strip()
         invitation = self.course_invitation.invitation
         user = self.request.user
-        student_profile = user.get_student_profile(self.request.site)
+        student_profile = user.get_student_profile(Site.objects.get(pk=settings.SITE_ID))
         try:
             resolved_group = StudentGroupService.resolve(self.course,
                                                          student_profile=student_profile,

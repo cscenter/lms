@@ -1,9 +1,11 @@
 from dal import autocomplete
 from vanilla import DetailView, ListView
+from django.conf import settings
 
 from auth.mixins import PermissionRequiredMixin
 from learning.permissions import ViewLibrary
 from users.mixins import CuratorOnlyMixin
+from django.contrib.sites.models import Site
 
 from .models import BookTag, Borrow, Stock
 
@@ -27,13 +29,13 @@ class BookListView(PermissionRequiredMixin, ListView):
     def get_queryset(self):
         qs = (Stock.objects
               .select_related("branch", "book")
-              .filter(branch__site=self.request.site,
+              .filter(branch__site=Site.objects.get(pk=settings.SITE_ID),
                       branch__active=True)
               .prefetch_related("borrows", "borrows__student"))
         # Students can see books from there branch only
         user = self.request.user
         if not user.is_curator:
-            student_profile = user.get_student_profile(self.request.site)
+            student_profile = user.get_student_profile(Site.objects.get(pk=settings.SITE_ID))
             qs = qs.filter(branch_id=student_profile.branch_id)
         return qs
 
@@ -53,14 +55,14 @@ class BookDetailView(PermissionRequiredMixin, DetailView):
 
     def get_queryset(self):
         qs = (Stock.objects
-              .filter(branch__site=self.request.site,
+              .filter(branch__site=Site.objects.get(pk=settings.SITE_ID),
                       branch__active=True)
               .select_related("book")
               .prefetch_related("borrows"))
         # Students can see books from there branch only
         user = self.request.user
         if not user.is_curator:
-            student_profile = user.get_student_profile(self.request.site)
+            student_profile = user.get_student_profile(Site.objects.get(pk=settings.SITE_ID))
             assert student_profile
             qs = qs.filter(branch_id=student_profile.branch_id)
         return qs

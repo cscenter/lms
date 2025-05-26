@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.db.models import Q
 from django.http import Http404
 
@@ -133,7 +134,7 @@ class ConfirmationSendEmailVerificationCodeApi(APIBaseView):
 
         send_email_verification_code(
             email_to=serializer.validated_data["email"],
-            site=request.site,
+            site=Site.objects.get(pk=settings.SITE_ID),
             applicant=acceptance.applicant,
         )
 

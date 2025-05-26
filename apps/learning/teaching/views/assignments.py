@@ -20,6 +20,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
 from django.utils.translation import gettext_lazy as _
+from django.contrib.sites.models import Site
 
 from auth.mixins import PermissionRequiredMixin
 from core import comment_persistence
@@ -137,7 +138,7 @@ class AssignmentCheckQueueView(PermissionRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         teacher = self.request.user
         courses = list(get_teacher_not_spectator_courses(teacher)
-                       .filter(main_branch__site=self.request.site)
+                       .filter(main_branch__site=Site.objects.get(pk=settings.SITE_ID))
                        .order_by("-semester__index", "meta_course__name"))
         if not courses:
             return {}

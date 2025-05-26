@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.forms import SlugField, forms
 from django.http import QueryDict
+from django.contrib.sites.models import Site
 
 from core.models import Branch
 from courses.constants import SemesterTypes
@@ -110,15 +111,15 @@ class CoursesFilter(FilterSet):
         branch_code = data.pop("branch", None)
         if request.user.is_authenticated and request.user.roles.issubset(student_permission_roles):
             profiles = get_student_profiles(user=request.user,
-                                            site=request.site)
+                                            site=Site.objects.get(pk=settings.SITE_ID))
             user_branch_ids = [profile.branch_id for profile in profiles]
             self.user_branches = Branch.objects.filter(
                 active=True,
                 id__in=user_branch_ids,
-                site_id=request.site.pk
+                site_id=settings.SITE_ID
             )
             main_branch_code = get_student_profile(user=request.user,
-                                            site=request.site).branch.code
+                                            site=Site.objects.get(pk=settings.SITE_ID)).branch.code
             if not branch_code and main_branch_code:
                 branch_code = [main_branch_code]
         else:
@@ -138,7 +139,7 @@ class CoursesFilter(FilterSet):
                                              if b.established <= current_term.academic_year]
 
     def get_branches(self, request):
-        return Branch.objects.for_site(request.site.pk)
+        return Branch.objects.for_site(settings.SITE_ID)
 
     @property
     def form(self):

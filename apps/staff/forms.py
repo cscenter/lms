@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.contrib.sites.models import Site
 
 from core.urls import reverse
 from core.widgets import DateInputTextWidget
@@ -74,7 +75,7 @@ class MergeUsersForm(forms.Form):
 
 class BadgeNumberFromCSVForm(forms.Form):
     csv_file = forms.FileField(label=_('CSV file'), required=True)
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
@@ -93,7 +94,7 @@ class BadgeNumberFromCSVForm(forms.Form):
             reader = csv.DictReader(decoded_file)
         except Exception as e:
             raise ValidationError(_(f"File read error: {str(e)}"))
-        
+
         headers = reader.fieldnames
         required_columns = {"Почта", "Номер пропуска"}
         if not required_columns.issubset(set(headers)):
@@ -109,12 +110,12 @@ class ExportForDiplomas(forms.Form):
         # Get all years where there are graduates
         self.graduated_years = self.get_graduated_years()
         year_choices = [(year, str(year)) for year in self.graduated_years]
-        
+
         self.fields['graduated_year'] = forms.ChoiceField(
             label=_("Year of Graduation"),
             choices=year_choices
         )
-        
+
         self.helper = FormHelper(self)
         self.helper.form_action = reverse("staff:export_for_electronic_diplomas")
         self.helper.layout = Layout(
@@ -131,13 +132,13 @@ class ExportForDiplomas(forms.Form):
         # Get distinct year_of_curriculum values from StudentProfile
         # Optimize by only selecting the year_of_curriculum field and filtering by site
         current_year = timezone.now().year
-            
+
         curriculum_years = StudentProfile.objects.filter(
-            site=self.request.site,
+            site=Site.objects.get(pk=settings.SITE_ID),
             year_of_curriculum__lte=current_year-2,
             status=""
         ).distinct('year_of_curriculum').values_list('year_of_curriculum', flat=True)
-        
+
         return sorted([year + 2 for year in curriculum_years], reverse=True)
 
     def clean(self):
@@ -147,7 +148,7 @@ class ExportForDiplomas(forms.Form):
                 raise ValidationError(_("Not supported graduation year"))
         except (ValueError, TypeError):
             raise ValidationError(_("Invalid year format"))
-    
+
 
 class ConfirmSendLettersForm(forms.Form):
     """
@@ -156,13 +157,13 @@ class ConfirmSendLettersForm(forms.Form):
     """
     email_template_id = forms.CharField(widget=forms.HiddenInput())
     scheduled_time = forms.CharField(widget=forms.HiddenInput(), required=False)
-    
+
     # These fields are just for display, not for actual form submission
     base_info_display = forms.CharField(
         label="",
         required=False,
         widget=forms.TextInput(attrs={
-            'readonly': 'readonly', 
+            'readonly': 'readonly',
             'style': 'border: none; background-color: #f8f9fa; font-weight: bold; font-size: 1.2em; padding: 10px; border-radius: 5px;'
         })
     )
@@ -182,15 +183,15 @@ class ConfirmSendLettersForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'readonly': 'readonly', 'style': 'border: none; background-color: #f8f9fa;'})
     )
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
         self.helper = FormHelper(self)
         self.helper.form_action = reverse("staff:send_letters")
 
         self.helper.layout = Layout(
-            
+
             Fieldset(_('Confirmation'),
                 Row(
                     Div('base_info_display', css_class="col-xs-12"),
@@ -223,7 +224,7 @@ class ConfirmSendLettersForm(forms.Form):
                 ),
             )
         )
-    
+
     def get_emails(self):
         """
         Get all emails from the form.
@@ -287,7 +288,7 @@ class SendLettersForm(forms.Form):
         widget=forms.HiddenInput(),
         required=False
     )
-    
+
     def clean_scheduled_time(self):
         scheduled_time = self.cleaned_data.get('scheduled_time')
         if scheduled_time:
@@ -301,23 +302,23 @@ class SendLettersForm(forms.Form):
                 scheduled_time = self.tz.localize(naive_dt)
             else:
                 scheduled_time = timezone.make_aware(scheduled_time, self.tz)
-        
+
         return scheduled_time
-    
+
     def clean_status(self):
         """Convert 'studying' back to empty string."""
         statuses = self.cleaned_data.get('status', [])
         return ["" if s == "studying" else s for s in statuses]
-    
+
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-        
+
         self.tz = self.request.user.time_zone if self.request.user.time_zone else settings.DEFAULT_TIMEZONE
         local_time = timezone.localtime(timezone.now(), self.tz)
         self.fields['scheduled_time'].initial = local_time.strftime('%d.%m.%Y %H:%M')
         self.fields['scheduled_time'].help_text = f"Временная зона {getattr(self.tz, 'zone', str(self.tz))} {datetime.now(self.tz).strftime('%z')[:3]}"
-        
+
         self.helper = FormHelper(self)
         self.helper.form_action = reverse("staff:confirm_send_letters")
         self.helper.layout = Layout(

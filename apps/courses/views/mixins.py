@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from django.conf import settings
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.contrib.sites.models import Site
 
 from core.exceptions import Redirect
 from core.urls import reverse
@@ -39,7 +40,7 @@ class CourseURLParamsMixin(CourseURLParamsMixinBase):
                         meta_course__slug=kwargs['course_slug'],
                         semester__type=kwargs['semester_type'],
                         semester__year=kwargs['semester_year'])
-                .available_on_site(request.site)
+                .available_on_site(Site.objects.get(pk=settings.SITE_ID))
                 .order_by('pk')
         )
 
@@ -52,7 +53,7 @@ class CourseURLParamsMixin(CourseURLParamsMixinBase):
 class CoursePublicURLParamsMixin(CourseURLParamsMixinBase):
     """
     This mixin helps to retrieve course made by the current site (where
-    main branch is related to the `request.site`), `RE_COURSE_PUBLIC_URI`
+    main branch is related to the `settings.SITE_ID`), `RE_COURSE_PUBLIC_URI`
     friendly URL prefix contains all the required parameters for this.
     Returns 404 in case course is not found, otherwise sets `course`
     attribute to the view instance.
@@ -103,7 +104,7 @@ class CoursePublicURLParamsMixin(CourseURLParamsMixinBase):
         courses = list(self.get_course_queryset()
                        .filter(main_branch__code=main_branch_code,
                                main_branch__active=True,
-                               main_branch__site=request.site)
+                               main_branch__site=Site.objects.get(pk=settings.SITE_ID))
                        .order_by('pk'))
         if not courses:
             raise Http404

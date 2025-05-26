@@ -1,5 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
+from django.conf import settings
+from django.contrib.sites.models import Site
 
 from auth.mixins import PermissionRequiredMixin
 from courses.forms import MetaCourseForm
@@ -17,7 +19,7 @@ class MetaCourseDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         courses = (Course.objects
                    .filter(meta_course=self.object)
-                   .available_on_site(self.request.site)
+                   .available_on_site(Site.objects.get(pk=settings.SITE_ID))
                    .select_related("meta_course", "semester", "main_branch")
                    .order_by('-semester__index'))
         context = {

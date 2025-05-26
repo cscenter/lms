@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.sites.models import Site
 
 
 def common_context(request):
@@ -18,4 +19,11 @@ def js_config(request):
     return {
         "CSRF_COOKIE_NAME": settings.CSRF_COOKIE_NAME,
         "SENTRY_DSN": settings.SENTRY_DSN,
+    }
+
+
+def site_context(request):
+    """Add site object to the context for all views."""
+    return {
+        "site": Site.objects.get(pk=settings.SITE_ID)
     }
