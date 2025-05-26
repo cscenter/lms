@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load static %}
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
-{% block title %}Полезное - {{ request.site.name }}{% endblock title %}
+{% block title %}Полезное - {{ site.name }}{% endblock title %}
 {% block content %}
     <div class="container">
         <div class="panel-group" id="questions">
@@ -21,4 +21,3 @@
         </div>
     </div>
 {% endblock content %}
-

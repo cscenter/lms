@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=960">
     <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk" />
-    <title>{% block title %}{{ request.site.name }}{% endblock title %}</title>
+    <title>{% block title %}{{ site.name }}{% endblock title %}</title>
     <link rel="shortcut icon" type="image/png" href="{% static FAVICON_PATH %}" >
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="{% static "v1/dist/css/center/style.css" %}" rel="stylesheet">
@@ -58,7 +58,7 @@
     <div class="footer">
       <div class="container">
         <div class="row">
-          <div class="col-xs-12 text-center">{{ request.site.name }}, {{ ESTABLISHED }}–25 {% trans "гг." %}</div>
+          <div class="col-xs-12 text-center">{{ site.name }}, {{ ESTABLISHED }}–25 {% trans "гг." %}</div>
         </div>
       </div>
     </div>
