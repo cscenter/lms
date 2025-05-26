@@ -87,7 +87,7 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 row.append("")
             # OLYMP
             if hasattr(applicant, "olympiad"):
-                row.append(applicant.olympiad.score + applicant.olympiad.math_score)
+                row.append(applicant.olympiad.total_score)
             else:
                 row.append("")
             # EXAM
@@ -106,12 +106,14 @@ class AdmissionApplicantsReport(ReportFileOutput):
                 interview_details[index] = interview.get_average_score_display()
                 interview_details[index + 1] = interview_comments.rstrip()
             row.extend(interview_details)
+
             # UID
             if applicant.data and "yandex_profile" in applicant.data and "application_ya_id" in applicant.data["yandex_profile"]:
                 uid = applicant.data["yandex_profile"]["application_ya_id"]
             else:
                 uid = ""
             row.append(uid)
+
             # UTM
             row.extend([applicant_utms.get(key, "") for key in utm_keys])
 
