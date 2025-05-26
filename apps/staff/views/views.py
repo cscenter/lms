@@ -138,6 +138,10 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
                 .values_list("graduation_year", flat=True)
                 .order_by("graduation_year")
                 .distinct()
+            ),
+            "graduation_years": (
+                GraduateProfile.objects.filter(
+                    student_profile__site=settings.SITE_ID).values_list("graduation_year", flat=True).order_by("graduation_year").distinct()
             )
         }
         return context
@@ -875,7 +879,7 @@ class OfficialDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
         diploma_issued_on = datetime.date(int(year), int(month), int(day))
         report = OfficialDiplomasReport(diploma_issued_on)
         site_aware_queryset = report.get_queryset().filter(
-            branch__site=Site.objects.get(pk=settings.SITE_ID)
+            branch__site_id = settings.SITE_ID
         )
         if not site_aware_queryset.count():
             raise Http404
@@ -891,7 +895,7 @@ class OfficialDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, year, month, day, **kwargs):
         diploma_issued_on = datetime.date(int(year), int(month), int(day))
         report = OfficialDiplomasReport(diploma_issued_on)
-        student_profiles = report.get_queryset().filter(branch__site=Site.objects.get(pk=settings.SITE_ID))
+        student_profiles = report.get_queryset().filter(branch__site_id = settings.SITE_ID)
         students = (sp.user for sp in student_profiles)
         courses_qs = report.get_courses_queryset(students).annotate(
             classes_total=Count("courseclass")
