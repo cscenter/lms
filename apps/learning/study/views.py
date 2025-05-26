@@ -7,11 +7,13 @@ from vanilla import GenericModelView, TemplateView
 
 from django.apps import apps
 from django.contrib import messages
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Prefetch, Q
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
+from django.contrib.sites.models import Site
 
 from auth.mixins import PermissionRequiredMixin
 from core import comment_persistence
@@ -62,7 +64,7 @@ class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
     def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
         start_date, end_date = extended_month_date_range(month_period, expand=1)
         user = self.request.user
-        student_profile = get_student_profile(user, self.request.site)
+        student_profile = get_student_profile(user, Site.objects.get(pk=settings.SITE_ID))
         branches = [student_profile.branch_id]
         return get_all_calendar_events(branch_list=branches, start_date=start_date,
                                        end_date=end_date, time_zone=user.time_zone)
@@ -79,7 +81,7 @@ class CalendarPersonalView(CalendarFullView):
     def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
         start_date, end_date = extended_month_date_range(month_period, expand=1)
         student_profile = get_student_profile(self.request.user,
-                                              self.request.site)
+                                              Site.objects.get(pk=settings.SITE_ID))
         if not student_profile:
             return []
         return get_student_calendar_events(student_profile=student_profile,
@@ -301,7 +303,7 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
         # Get current term course offerings available in student branch,
         # courses in this term available via invitation
         # and all courses that student enrolled in
-        student_profile = get_student_profile(auth_user, self.request.site)
+        student_profile = get_student_profile(auth_user, Site.objects.get(pk=settings.SITE_ID))
         current_term = get_current_term_pair(auth_user.time_zone)
         current_term_index = current_term.index
         enrolled_in = Q(id__in=list(student_enrollments))
@@ -358,9 +360,14 @@ class UsefulListView(PermissionRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         return (InfoBlock.objects
-                .for_site(self.request.site)
+                .for_site(Site.objects.get(pk=settings.SITE_ID))
                 .with_tag(CurrentInfoBlockTags.USEFUL)
                 .order_by("sort"))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['site'] = Site.objects.get(pk=settings.SITE_ID)
+        return context
 
 
 class InternshipListView(PermissionRequiredMixin, generic.ListView):
@@ -371,9 +378,14 @@ class InternshipListView(PermissionRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         return (InfoBlock.objects
-                .for_site(self.request.site)
+                .for_site(Site.objects.get(pk=settings.SITE_ID))
                 .with_tag(CurrentInfoBlockTags.INTERNSHIP)
                 .order_by("sort"))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['site'] = Site.objects.get(pk=settings.SITE_ID)
+        return context
 
 
 class HonorCodeView(generic.ListView):
@@ -382,9 +394,14 @@ class HonorCodeView(generic.ListView):
 
     def get_queryset(self):
         return (InfoBlock.objects
-                .for_site(self.request.site)
+                .for_site(Site.objects.get(pk=settings.SITE_ID))
                 .with_tag(CurrentInfoBlockTags.HONOR_CODE)
                 .order_by("sort"))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['site'] = Site.objects.get(pk=settings.SITE_ID)
+        return context
 
 
 class ProgramsView(generic.ListView):
@@ -393,6 +410,11 @@ class ProgramsView(generic.ListView):
 
     def get_queryset(self):
         return (InfoBlock.objects
-                .for_site(self.request.site)
+                .for_site(Site.objects.get(pk=settings.SITE_ID))
                 .with_tag(CurrentInfoBlockTags.PROGRAMS)
                 .order_by("sort"))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['site'] = Site.objects.get(pk=settings.SITE_ID)
+        return context

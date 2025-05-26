@@ -18,6 +18,7 @@ from django.http.response import Http404, HttpResponseForbidden, HttpResponse
 from django.shortcuts import get_list_or_404, get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views import View, generic
+from django.contrib.sites.models import Site
 
 import core.utils
 from admission.models import Campaign, Interview
@@ -108,7 +109,7 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
             "branches": {b.pk: b.name for b in branches},
             "curriculum_years": (
                 StudentProfile.objects.filter(
-                    site=self.request.site, year_of_curriculum__isnull=False
+                    site=Site.objects.get(pk=settings.SITE_ID), year_of_curriculum__isnull=False
                 )
                 .values_list("year_of_curriculum", flat=True)
                 .order_by("year_of_curriculum")
@@ -116,7 +117,7 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
             ),
             "admission_years": (
                 StudentProfile.objects.filter(
-                    site=self.request.site, year_of_admission__isnull=False
+                    site=Site.objects.get(pk=settings.SITE_ID), year_of_admission__isnull=False
                 )
                 .values_list("year_of_admission", flat=True)
                 .order_by("year_of_admission")
@@ -130,7 +131,7 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
             "is_paid_basis": [("1", "Да"), ("0", "Нет")],
             "uni_graduation_year": (
                 StudentProfile.objects.filter(
-                    site=self.request.site,
+                    site=Site.objects.get(pk=settings.SITE_ID),
                     graduation_year__isnull=False,
                     graduate_without_diploma=True
                 )
@@ -158,7 +159,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         badge_number_from_csv_form = BadgeNumberFromCSVForm()
         send_letters_form = SendLettersForm(request=self.request)
         official_diplomas_dates = (
-            GraduateProfile.objects.for_site(self.request.site)
+            GraduateProfile.objects.for_site(Site.objects.get(pk=settings.SITE_ID))
             .with_official_diploma()
             .distinct("diploma_issued_on")
             .order_by("-diploma_issued_on")
@@ -679,7 +680,7 @@ def autofail_ungraded(request):
     if not request.user.is_curator:
         return HttpResponseForbidden()
     try:
-        graded = call_command("autofail_ungraded", request.site)
+        graded = call_command("autofail_ungraded", Site.objects.get(pk=settings.SITE_ID))
         messages.success(
             request, f"Операция выполнена успешно.<br>" f"Выставлено незачетов: {graded}"
         )
@@ -696,7 +697,7 @@ def create_alumni_profiles(request: HttpRequest):
     form = GraduationForm(data=request.POST)
     if form.is_valid():
         graduated_on = form.cleaned_data["graduated_on"]
-        create_graduate_profiles(request.site, graduated_on, created_by=request.user)
+        create_graduate_profiles(Site.objects.get(pk=settings.SITE_ID), graduated_on, created_by=request.user)
         messages.success(request, "Операция выполнена успешно")
     else:
         messages.error(request, "Неверный формат даты выпуска")
@@ -768,7 +769,7 @@ def export_for_electronic_diplomas_view(request: HttpRequest):
 
     if form.is_valid():
         graduated_year = int(form.cleaned_data["graduated_year"])
-        return ElectronicDiplomaExportService.generate_export(request.site, graduated_year)
+        return ElectronicDiplomaExportService.generate_export(Site.objects.get(pk=settings.SITE_ID), graduated_year)
     else:
         for field, error_as_list in form.errors.items():
             label = form.fields[field].label if field in form.fields else field
@@ -853,7 +854,7 @@ class OfficialDiplomasListView(CuratorOnlyMixin, TemplateView):
         day = int(self.kwargs["day"])
         date = datetime.date(year, month, day)
         graduate_profiles = get_list_or_404(
-            GraduateProfile.objects.for_site(self.request.site)
+            GraduateProfile.objects.for_site(Site.objects.get(pk=settings.SITE_ID))
             .with_official_diploma()
             .filter(diploma_issued_on=date)
             .select_related("student_profile__user")
@@ -878,7 +879,7 @@ class OfficialDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
         diploma_issued_on = datetime.date(int(year), int(month), int(day))
         report = OfficialDiplomasReport(diploma_issued_on)
         site_aware_queryset = report.get_queryset().filter(
-            branch__site=self.request.site
+            branch__site_id = settings.SITE_ID
         )
         if not site_aware_queryset.count():
             raise Http404
@@ -894,7 +895,7 @@ class OfficialDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, year, month, day, **kwargs):
         diploma_issued_on = datetime.date(int(year), int(month), int(day))
         report = OfficialDiplomasReport(diploma_issued_on)
-        student_profiles = report.get_queryset().filter(branch__site=self.request.site)
+        student_profiles = report.get_queryset().filter(branch__site_id = settings.SITE_ID)
         students = (sp.user for sp in student_profiles)
         courses_qs = report.get_courses_queryset(students).annotate(
             classes_total=Count("courseclass")

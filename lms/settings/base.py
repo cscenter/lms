@@ -242,6 +242,7 @@ TEMPLATES: List[Dict[str, Any]] = [
                 "messages": "core.jinja2.globals.messages",
                 "get_menu": "core.jinja2.globals.generate_menu",
                 "crispy": "core.jinja2.globals.crispy",
+                "site": "core.jinja2.globals.site_context",
                 # FIXME: move from django template tags
                 "can_enroll_in_course": "core.templatetags.core_tags.can_enroll_in_course",
             },
@@ -294,6 +295,7 @@ TEMPLATES: List[Dict[str, Any]] = [
                 "core.context_processors.subdomain",
                 "core.context_processors.common_context",
                 "core.context_processors.js_config",
+                "core.context_processors.site_context",
                 "django_admin_env_notice.context_processors.from_settings",
             ),
             "debug": DEBUG,

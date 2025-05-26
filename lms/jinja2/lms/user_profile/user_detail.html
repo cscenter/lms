@@ -3,7 +3,7 @@
 {% set request_user = request.user %}
 
 {% block title -%}
-  {{ profile_user.get_short_name() }} - {% trans %}Profile{% endtrans %} {% trans %}on site{% endtrans %} {{ request.site.name }}
+  {{ profile_user.get_short_name() }} - {% trans %}Profile{% endtrans %} {% trans %}on site{% endtrans %} {{ site().name }}
 {%- endblock title %}
 
 {% block body_attrs %} data-init-sections="profile"{% endblock body_attrs %}

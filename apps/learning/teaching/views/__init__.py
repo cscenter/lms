@@ -6,6 +6,8 @@ from vanilla import TemplateView
 from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.views import generic
+from django.conf import settings
+from django.contrib.sites.models import Site
 
 from auth.mixins import PermissionRequiredMixin
 from core.db.utils import normalize_score
@@ -173,6 +175,6 @@ class TeachingUsefulListView(PermissionRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         return (InfoBlock.objects
-                .for_site(self.request.site)
+                .for_site(Site.objects.get(pk=settings.SITE_ID))
                 .with_tag(CurrentInfoBlockTags.TEACHERS_USEFUL)
                 .order_by("sort"))

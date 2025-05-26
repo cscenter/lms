@@ -3,6 +3,8 @@ from django_filters.rest_framework import CharFilter, FilterSet
 
 from django.db.models import Case, Count, F, Q, Value, When
 from django.forms import SelectMultiple
+from django.conf import settings
+from django.contrib.sites.models import Site
 
 from core.filters import CharInFilter, NumberInFilter
 from learning.settings import GradeTypes, StudentStatuses
@@ -60,22 +62,19 @@ class StudentFilter(FilterSet):
     is_paid_basis = NumberInFilter(field_name='is_paid_basis')
     uni_graduation_year = NumberInFilter(label='University graduation year',
                                         method='uni_graduation_year_filter')
-    graduation_years = NumberInFilter(label='Graduation Year',
-                                    method='graduation_year_filter')
 
     class Meta:
         model = StudentProfile
         fields = ("name", "branches", "profile_types", "year_of_curriculum",
                   "year_of_admission", "types", "status", "cnt_enrollments",
-                  "academic_disciplines", "partners", "is_paid_basis", "uni_graduation_year",
-                  "graduation_years")
+                  "academic_disciplines", "partners", "is_paid_basis", "uni_graduation_year")
 
     @property
     def qs(self):
         if not self.form.changed_data:
             return self.queryset.none()
 
-        return super().qs.filter(site=self.request.site)
+        return super().qs.filter(site=Site.objects.get(pk=settings.SITE_ID))
 
     def courses_filter(self, queryset, name, value):
         value_list = value.split(u',')
@@ -112,13 +111,6 @@ class StudentFilter(FilterSet):
         condition = Q(graduate_without_diploma=True) & Q(graduation_year__isnull=False) & Q(graduation_year__in=[year                                                                                                          for year in value if year != 0])
         if any(year == 0 for year in value):
             condition |= Q(graduate_without_diploma=True)
-        return queryset.filter(condition)
-
-    def graduation_year_filter(self, queryset, name, value):
-        value_list = [int(v) for v in value if v != 0]
-        condition = Q(graduate_profile__graduation_year__in=value_list)
-        if any(year == 0 for year in value):
-            condition |= Q(graduate_profile__isnull=False)
         return queryset.filter(condition)
 
     def status_filter(self, queryset, name, value):

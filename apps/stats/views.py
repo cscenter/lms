@@ -31,7 +31,7 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(StatsLearningView, self).get_context_data(**kwargs)
         # Terms grouped by year
-        branches = Branch.objects.for_site(site_id=self.request.site.pk)
+        branches = Branch.objects.for_site(site_id=settings.SITE_ID)
         min_established = min(b.established for b in branches)
         term_start = get_term_index(min_established, SemesterTypes.AUTUMN)
         terms = (Semester.objects.only("pk", "type", "year")
@@ -154,7 +154,7 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
 
 
 # TODO: move to learning or users app
-# TODO SEEMS LIKE DEPRICATED 
+# TODO SEEMS LIKE DEPRICATED
 class AlumniStats(APIView):
     def get(self, request, graduation_year, format=None):
         filters = (Q(status=StudentStatuses.GRADUATE) &

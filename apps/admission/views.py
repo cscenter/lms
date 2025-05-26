@@ -620,18 +620,18 @@ class RegisterApplicantsForOlympiadView(CuratorOnlyMixin, generic.View):
     """
     Register applicants with status PERMIT_TO_OLYMPIAD in the olympiad contest.
     """
-    
+
     def get_campaign(self, campaign_id):
         """Get campaign by ID."""
         return get_object_or_404(Campaign, pk=campaign_id)
-    
+
     def get_applicants(self, campaign):
         """Get applicants with status PERMIT_TO_OLYMPIAD."""
         return Applicant.objects.filter(
             campaign=campaign,
             status=ApplicantStatuses.PERMIT_TO_OLYMPIAD
         )
-    
+
     def create_olympiad_records(self, applicants):
         """Create Olympiad records for applicants who don't have one."""
         created_count = 0
@@ -643,7 +643,7 @@ class RegisterApplicantsForOlympiadView(CuratorOnlyMixin, generic.View):
                     Olympiad.objects.create(applicant=applicant)
                     created_count += 1
         return created_count
-    
+
     def register_in_contest(self, api, applicants, request):
         """Register applicants in the contest."""
         registered_count = 0
@@ -661,24 +661,24 @@ class RegisterApplicantsForOlympiadView(CuratorOnlyMixin, generic.View):
                     f"Error registering applicant {olympiad.applicant_id} in olympiad contest: {e}"
                 )
         return registered_count
-    
+
     def get(self, request, campaign_id):
         campaign = self.get_campaign(campaign_id)
-        
+
         # Get applicants and create Olympiad records
         applicants = self.get_applicants(campaign)
         created_count = self.create_olympiad_records(applicants)
-        
+
         # Register applicants in the contest
         api = YandexContestAPI(access_token=campaign.access_token, refresh_token=campaign.refresh_token)
         registered_count = self.register_in_contest(api, applicants, request)
-        
+
         # Add success message
         messages.success(
             request,
             _("Created {} olympiad records and registered {} applicants in the contest.").format(created_count, registered_count)
         )
-        
+
         return redirect("admission:applicants:list")
 
 
@@ -1124,7 +1124,7 @@ class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
 class BranchFromURLViewMixin:
     """
     This view mixin sets `branch` attribute to the request object based on
-    `request.site` and non-empty `branch_code` url named argument
+    `settings.SITE_ID` and non-empty `branch_code` url named argument
     """
 
     def setup(self, request, *args, **kwargs):
@@ -1135,7 +1135,7 @@ class BranchFromURLViewMixin:
                 f"{self.__class__} is subclass of {self.__class__.__name__} but "
                 f"`branch_code` view keyword argument is not specified or empty"
             )
-        request.branch = Branch.objects.get_by_natural_key(branch_code, request.site.id)
+        request.branch = Branch.objects.get_by_natural_key(branch_code, settings.SITE_ID)
 
 
 class InterviewResultsView(

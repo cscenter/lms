@@ -6,6 +6,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 
 from django.contrib import messages
+from django.conf import settings
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Prefetch, Q, Count
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
@@ -14,6 +15,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.translation import gettext_lazy as _
 from django.views import View, generic
 from django.views.generic.base import TemplateResponseMixin
+from django.contrib.sites.models import Site
 
 from api.views import APIBaseView
 from auth.mixins import PermissionRequiredMixin, RolePermissionRequiredMixin
@@ -58,7 +60,7 @@ class GradeBookListBaseView(generic.ListView):
 
     def get_course_queryset(self):
         return (Course.objects
-                .available_on_site(self.request.site)
+                .available_on_site(Site.objects.get(pk=settings.SITE_ID))
                 .select_related("meta_course", "main_branch")
                 .order_by("meta_course__name"))
 
@@ -202,7 +204,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin,
                    .select_related('semester', 'meta_course', 'main_branch'))
         context['course_offering_list'] = courses
         context['user_type'] = self.user_type
-        
+
         is_recredited_filter = Q(grade=GradeTypes.RE_CREDIT) | Q(is_grade_recredited=True)
         context.update(
             Enrollment.active.filter(course=self.course).aggregate(

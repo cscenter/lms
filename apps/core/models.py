@@ -12,6 +12,7 @@ from django.db import models
 from django.utils.encoding import force_bytes, force_str, smart_str
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+from django.contrib.sites.models import Site
 
 from core.db.fields import TimeZoneField
 from core.db.models import ConfigurationModel
@@ -63,7 +64,7 @@ class SiteConfigurationManager(models.Manager):
         """
         Return the current site configuration based on the SITE_ID in the
         project's settings. If SITE_ID isn't defined, return the site
-        configuration matching ``request.site``.
+        configuration matching ``settings.SITE_ID``.
 
         The ``SiteConfiguration`` object is cached the
         first time it's retrieved from the database.
@@ -71,7 +72,7 @@ class SiteConfigurationManager(models.Manager):
         if getattr(settings, 'SITE_ID', None):
             site_id = settings.SITE_ID
         elif request:
-            site_id = request.site.pk
+            site_id = settings.SITE_ID
         else:
             raise ImproperlyConfigured(
                 "Set the SITE_ID setting or pass a request to "
@@ -231,16 +232,16 @@ class BranchManager(models.Manager):
 
     def get_current(self, request, site_id: int = settings.SITE_ID):
         """
-        Returns the Branch based on the subdomain of the `request.site`, where
+        Returns the Branch based on the subdomain of the `settings.SITE_ID`, where
         subdomain is a branch code (e.g. nsk.example.com)
         If request is not provided, returns the Branch based on the
         DEFAULT_BRANCH_CODE value in the project's settings.
         """
-        sub_domain = request.get_host().lower().rsplit(request.site.domain, 1)[0][:-1]
+        sub_domain = request.get_host().lower().rsplit(Site.objects.get(id=settings.SITE_ID).domain, 1)[0][:-1]
         branch_code = sub_domain or settings.DEFAULT_BRANCH_CODE
         if branch_code == "www":
             branch_code = settings.DEFAULT_BRANCH_CODE
-        key = BranchNaturalKey(code=branch_code, site_id=request.site.id)
+        key = BranchNaturalKey(code=branch_code, site_id=settings.SITE_ID)
         if key not in BRANCH_CACHE:
             BRANCH_CACHE[key] = self.get(code=key.code, site_id=key.site_id)
         return BRANCH_CACHE[key]

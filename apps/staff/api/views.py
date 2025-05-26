@@ -5,6 +5,8 @@ from rest_framework import serializers, status
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
+from django.conf import settings
+from django.contrib.sites.models import Site
 
 from api.permissions import CuratorAccessPermission
 from api.views import APIBaseView
@@ -42,7 +44,7 @@ class StudentSearchJSONView(ListAPIView):
 
     def get_queryset(self):
         return (StudentProfile.objects
-                .filter(site=self.request.site)
+                .filter(site=Site.objects.get(id=settings.SITE_ID))
                 .select_related('user', 'graduate_profile')
                 .only('user__username', 'user__first_name',
                       'user__last_name', 'user_id')
@@ -62,6 +64,6 @@ class CreateAlumniProfiles(APIBaseView):
         serializer.is_valid(raise_exception=True)
 
         graduated_on = serializer.validated_data['graduated_on']
-        create_graduate_profiles(request.site, graduated_on, created_by=request.user)
+        create_graduate_profiles(Site.objects.get(id=settings.SITE_ID), graduated_on, created_by=request.user)
 
         return Response(status=status.HTTP_201_CREATED)

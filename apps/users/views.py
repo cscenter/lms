@@ -21,6 +21,7 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.contrib.sites.models import Site
 
 from api.views import APIBaseView
 from apps.courses.utils import date_to_term_pair
@@ -70,7 +71,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
         # Limit results on compsciclub.ru
         if hasattr(self.request, "branch"):
             filters.append(Q(main_branch=self.request.branch))
-        site_courses_queryset = get_site_courses(site=self.request.site, filters=filters)
+        site_courses_queryset = get_site_courses(site=Site.objects.get(pk=settings.SITE_ID), filters=filters)
         prefetch_list = [
             Prefetch('teaching_set', queryset=site_courses_queryset),
             Prefetch('shadcourserecord_set', queryset=shad_courses_queryset),
@@ -121,7 +122,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
             "can_view_assignments": can_view_assignments,
             "can_view_course_icons": can_view_course_icons,
             "yandex_oauth_url": reverse('auth:users:yandex_begin'),
-            "is_yds_site": self.request.site.pk == settings.YDS_SITE_ID
+            "is_yds_site": settings.SITE_ID == settings.YDS_SITE_ID
         }
         enrollments = profile_user.enrollment_set.all().select_related("student_profile__invitation")
         for enrollment in enrollments:
@@ -180,7 +181,7 @@ class UserDetailView(LoginRequiredMixin, generic.TemplateView):
                                                   enrollments=queryset)
         if can_view_student_profiles:
             student_profiles = get_student_profiles(user=profile_user,
-                                                    site=self.request.site,
+                                                    site=Site.objects.get(pk=settings.SITE_ID),
                                                     fetch_graduate_profile=True,
                                                     fetch_status_history=True,
                                                     fetch_invitation=True,
@@ -227,7 +228,7 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         graduate_profile = get_graduate_profile_compat(self.object,
-                                                       self.request.site)
+                                                       Site.objects.get(pk=settings.SITE_ID))
         if graduate_profile:
             context["testimonial_form"] = TestimonialForm(
                 instance=graduate_profile)
@@ -238,7 +239,7 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
         with transaction.atomic():
             self.object = form.save()
             graduate_profile = get_graduate_profile_compat(self.object,
-                                                           self.request.site)
+                                                           Site.objects.get(pk=settings.SITE_ID))
             if graduate_profile:
                 testimonial_form = TestimonialForm(instance=graduate_profile,
                                                    data=self.request.POST)
@@ -295,7 +296,7 @@ class CertificateOfParticipationCreateView(PermissionRequiredMixin,
 
     def form_valid(self, form):
         user = get_object_or_404(User.objects.filter(pk=self.kwargs['user_id']))
-        student_profile = get_student_profile(user=user, site=self.request.site, profile_type=StudentTypes.REGULAR)
+        student_profile = get_student_profile(user=user, site=Site.objects.get(pk=settings.SITE_ID), profile_type=StudentTypes.REGULAR)
         if student_profile is None:
             messages.error(self.request, "Профиль обычного студента не найден.")
             return redirect(self.get_success_url())
@@ -339,7 +340,7 @@ class CertificateOfParticipationDetailView(PermissionRequiredMixin,
         return (CertificateOfParticipation.objects
                 .filter(student_profile__user_id=self.kwargs['user_id'])
                 .select_related('student_profile'))
-        
+
     def filter_enrollments(self, enrollments):
         # Only courses within study period of regular student profile must be included
         start_term_pair = date_to_term_pair(datetime(day=1, month=9, year=self.object.student_profile.year_of_admission,

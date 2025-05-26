@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views import generic
+from django.contrib.sites.models import Site
 
 from admission.selectors import get_ongoing_interviews
 from learning.icalendar import (
@@ -31,7 +32,7 @@ class ICalendarMeta(NamedTuple):
 class UserICalendarView(generic.base.View):
     def get(self, request, *args, **kwargs):
         user = self.get_user()
-        site = self.request.site
+        site = Site.objects.get(pk=settings.SITE_ID)
         url_builder = request.build_absolute_uri
         product_id = f"-//{site.name} Calendar//{site.domain}//"
         tz = user.time_zone or settings.DEFAULT_TIMEZONE

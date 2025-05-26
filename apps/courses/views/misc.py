@@ -2,6 +2,7 @@ from vanilla import DetailView
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
+from django.conf import settings
 
 from core.models import Branch, Location
 from courses.models import Course, CourseTeacher
@@ -19,7 +20,7 @@ class TeacherDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        branches = Branch.objects.for_site(site_id=self.request.site.pk)
+        branches = Branch.objects.for_site(site_id=settings.SITE_ID)
         min_established = min(b.established for b in branches)
         # FIXME: move to service method and test
         courses = (Course.objects
@@ -32,10 +33,10 @@ class TeacherDetailView(LoginRequiredMixin, DetailView):
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index'))
-        
+
         if not self.request.user.has_permission_to_drafts:
             courses = courses.is_published()
-        
+
         context['courses'] = courses
         return context
 
