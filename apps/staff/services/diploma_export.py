@@ -6,7 +6,7 @@ import datetime
 from typing import Dict, List, Set, Tuple, Any, Iterable
 
 from django.http import HttpResponse
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Prefetch, QuerySet, Q
 
 from courses.models import MetaCourse
 from learning.models import Enrollment
@@ -29,11 +29,9 @@ class ElectronicDiplomaExportService:
         Get student profiles for electronic diplomas export with optimized prefetching.
         """
 
-        return StudentProfile.objects.filter(
+        return StudentProfile.objects.filter( Q(status=StudentStatuses.WILL_GRADUATE) | Q(status=StudentStatuses.GRADUATE, graduation_year=graduated_year),
             site_id=site.id,
             type=StudentTypes.REGULAR,
-            status=StudentStatuses.WILL_GRADUATE,
-            year_of_admission__in=[graduated_year-1, graduated_year-2, graduated_year-3, graduated_year-4]
         ).select_related(
             'user',
             'branch',

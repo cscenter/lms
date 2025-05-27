@@ -57,13 +57,14 @@ class TestElectronicDiplomaExportService:
 
         self.student_profile2 = StudentProfileFactory(
             year_of_curriculum=curriculum_year,
-            status=StudentStatuses.WILL_GRADUATE,
+            status=StudentStatuses.GRADUATE,
             year_of_admission=curriculum_year,
             type=StudentTypes.REGULAR,
             user__birth_date="2000-02-02",
             user__gender=GenderTypes.FEMALE,
             site=self.site,
-            branch__site=self.site  # Ensure branch is associated with the same site
+            branch__site=self.site,  # Ensure branch is associated with the same site
+            graduation_year=current_year
         )
 
         # Create Yandex user data for the students
