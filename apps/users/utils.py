@@ -51,11 +51,4 @@ def get_courses_grades(profile: "StudentProfile", meta_courses):
                 course_index = enrollment.course.meta_course.index if hasattr(enrollment.course, 'meta_course') else enrollment.course.index
                 result[course_index] = enrollment.grade_display.lower()
 
-    # Process SHAD courses
-    for course in profile.user.shadcourserecord_set.all():
-        if course.grade in GradeTypes.satisfactory_grades:
-            # Try to find the course index by name
-            if course.index in meta_courses:
-                result[course.index] = course.grade_display.lower()
-
     return result
