@@ -33,7 +33,7 @@ class ElectronicDiplomaExportService:
             site_id=site.id,
             type=StudentTypes.REGULAR,
             status=StudentStatuses.WILL_GRADUATE,
-            year_of_admission__in=[graduated_year-2, graduated_year-3, graduated_year-4]
+            year_of_admission__in=[graduated_year-1, graduated_year-2, graduated_year-3, graduated_year-4]
         ).select_related(
             'user',
             'branch',
