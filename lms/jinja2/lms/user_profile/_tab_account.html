@@ -30,7 +30,8 @@
       {% endif %}
 
       {# Ссылка на курс #}
-      <a href class="{{ opacity }}">{{ enrollment.course }}</a>
+      <a href="{{ enrollment.course.build_absolute_uri(site=profile_user.site, is_secure=is_secure) }}" class="{{opacity}}">
+              {{ enrollment.course }} </a>
 
       {# Иконки длительности курса #}
       {% if enrollment.course.duration == CourseDurations.FIRST_HALF %}
@@ -40,7 +41,7 @@
       {% endif %}
 
       {# Информация об оценке #}
-      <i class="grade-info">
+      <i class="{{opacity}}">
         {% if enrollment.is_grade_recredited %}перезачтено,{% endif %}
         {{ enrollment.grade_honest|lower }}
       </i>
