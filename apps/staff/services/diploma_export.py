@@ -6,7 +6,7 @@ import datetime
 from typing import Dict, List, Set, Tuple, Any, Iterable
 
 from django.http import HttpResponse
-from django.db.models import Prefetch, QuerySet, Q
+from django.db.models import Q, Prefetch, Case, When, Value, IntegerField, QuerySet
 
 from courses.models import MetaCourse
 from learning.models import Enrollment
@@ -29,30 +29,40 @@ class ElectronicDiplomaExportService:
         Get student profiles for electronic diplomas export with optimized prefetching.
         """
 
-        return StudentProfile.objects.filter( Q(status=StudentStatuses.WILL_GRADUATE) | Q(status=StudentStatuses.GRADUATE, graduation_year=graduated_year),
-            site_id=site.id,
-            type=StudentTypes.REGULAR,
-        ).select_related(
-            'user',
-            'branch',
-            'user__yandex_data'
-        ).prefetch_related(
-            Prefetch(
-                'user__shadcourserecord_set',
-                queryset=SHADCourseRecord.objects.select_related('semester'),
-            ),
-            'user__onlinecourserecord_set',
-            Prefetch(
-                'user__enrollment_set',
-                queryset=Enrollment.objects.filter(
-                    is_deleted=False,
-                    grade__in=GradeTypes.satisfactory_grades
-                ).select_related('course', 'course__meta_course'),
-                to_attr='prefetched_enrollments'
-            ),
-            # Prefetch academic_discipline as it's a many-to-many relationship
-            'academic_disciplines'
-        )
+        return StudentProfile.objects.filter(
+                Q(status=StudentStatuses.WILL_GRADUATE) | Q(status=StudentStatuses.GRADUATE, graduation_year=graduated_year),
+                site_id=site.id,
+                type__in=[StudentTypes.REGULAR, StudentTypes.PARTNER],
+            ).annotate(
+                # Add a priority field - lower value means higher priority
+                type_priority=Case(
+                    When(type=StudentTypes.REGULAR, then=Value(1)),
+                    When(type=StudentTypes.PARTNER, then=Value(2)),
+                    default=Value(3),
+                    output_field=IntegerField(),
+                )
+            ).order_by(
+                'user', 'type_priority'  # Order by user first, then by priority (REGULAR first)
+            ).select_related(
+                'user',
+                'branch',
+                'user__yandex_data'
+            ).prefetch_related(
+                Prefetch(
+                    'user__shadcourserecord_set',
+                    queryset=SHADCourseRecord.objects.select_related('semester'),
+                ),
+                'user__onlinecourserecord_set',
+                Prefetch(
+                    'user__enrollment_set',
+                    queryset=Enrollment.objects.filter(
+                        is_deleted=False,
+                        grade__in=GradeTypes.satisfactory_grades
+                    ).select_related('course', 'course__meta_course'),
+                    to_attr='prefetched_enrollments'
+                ),
+                'academic_disciplines'
+            ).distinct('user')
 
     @staticmethod
     def get_meta_courses_data(student_profiles: Iterable[StudentProfile]) -> Tuple[Dict[str, str], List[str], Dict[str, str]]:
