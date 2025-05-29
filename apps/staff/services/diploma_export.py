@@ -28,12 +28,10 @@ class ElectronicDiplomaExportService:
         """
         result = {}
 
-        if enrollments:
-            for enrollment in enrollments:
-                course_index = enrollment.course.meta_course.index
-
-                if course_index:
-                    result[course_index] = enrollment.grade_display.lower()
+        for enrollment in enrollments:
+            course_index = enrollment.course.meta_course.index
+            if course_index:
+                result[course_index] = enrollment.grade_display.lower()
 
         return result
 
@@ -52,11 +50,12 @@ class ElectronicDiplomaExportService:
                 type_priority=Case(
                     When(type=StudentTypes.REGULAR, then=Value(1)),
                     When(type=StudentTypes.PARTNER, then=Value(2)),
-                    default=Value(3),
                     output_field=IntegerField(),
                 )
             ).order_by(
                 'user', 'type_priority'  # Order by user first, then by priority (REGULAR first)
+            ).distinct(
+                'user'
             ).select_related(
                 'user',
                 'branch',
@@ -69,11 +68,11 @@ class ElectronicDiplomaExportService:
                         is_deleted=False,
                         course__main_branch__site_id=site.id,
                         course__meta_course__index__isnull=False
-                    ).select_related('course', 'course__meta_course'),
+                    ).select_related('course__meta_course'),
                     to_attr='prefetched_enrollments'
                 ),
                 'academic_disciplines'
-            ).distinct('user')
+            )
 
     @staticmethod
     def get_meta_courses_data(student_profiles: Iterable[StudentProfile]) -> Tuple[Dict[str, str], List[str], Dict[str, str]]:
