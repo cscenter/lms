@@ -39,6 +39,11 @@ class ElectronicDiplomaExportService:
     def get_student_profiles(site, graduated_year: int) -> QuerySet:
         """
         Get student profiles for electronic diplomas export with optimized prefetching.
+        - Students and partner student with the status Will be graduated.
+        - If the user has both a master's degree and just a student, we take just a student.
+        - Students with the status Graduate, but the year of graduation from the university == graduated_year.
+        - There will only be SHAD (reg) courses.
+        - There will only be satisfactory_grades, except for Re-credit (no grade).
         """
 
         return StudentProfile.objects.filter(
