@@ -6,7 +6,7 @@ import datetime
 from typing import Dict, List, Set, Tuple, Any, Iterable
 
 from django.http import HttpResponse
-from django.db.models import Prefetch, QuerySet, Q
+from django.db.models import Q, Prefetch, Case, When, Value, IntegerField, QuerySet
 
 from courses.models import MetaCourse
 from learning.models import Enrollment
@@ -18,41 +18,66 @@ from users.models import StudentProfile, SHADCourseRecord, StudentTypes
 class ElectronicDiplomaExportService:
     """
     Service for exporting student data for electronic diplomas.
-
-    This service handles the preparation and export of student data for electronic diplomas,
-    including personal information and course grades.
     """
+
+    @staticmethod
+    def get_courses_grades(enrollments):
+        """
+        Returns a dictionary mapping course indexes to grade displays for all courses
+        where there is at least one grade.
+        """
+        result = {}
+
+        for enrollment in enrollments:
+            course_index = enrollment.course.meta_course.index
+            if course_index:
+                result[course_index] = enrollment.grade_display.lower()
+
+        return result
 
     @staticmethod
     def get_student_profiles(site, graduated_year: int) -> QuerySet:
         """
         Get student profiles for electronic diplomas export with optimized prefetching.
+        - Students and partner student with the status Will be graduated.
+        - If the user has both a master's degree and just a student, we take just a student.
+        - Students with the status Graduate, but the year of graduation from the university == graduated_year.
+        - There will only be SHAD (reg) courses.
+        - There will only be satisfactory_grades, except for Re-credit (no grade).
         """
 
-        return StudentProfile.objects.filter( Q(status=StudentStatuses.WILL_GRADUATE) | Q(status=StudentStatuses.GRADUATE, graduation_year=graduated_year),
-            site_id=site.id,
-            type=StudentTypes.REGULAR,
-        ).select_related(
-            'user',
-            'branch',
-            'user__yandex_data'
-        ).prefetch_related(
-            Prefetch(
-                'user__shadcourserecord_set',
-                queryset=SHADCourseRecord.objects.select_related('semester'),
-            ),
-            'user__onlinecourserecord_set',
-            Prefetch(
-                'user__enrollment_set',
-                queryset=Enrollment.objects.filter(
-                    is_deleted=False,
-                    grade__in=GradeTypes.satisfactory_grades
-                ).select_related('course', 'course__meta_course'),
-                to_attr='prefetched_enrollments'
-            ),
-            # Prefetch academic_discipline as it's a many-to-many relationship
-            'academic_disciplines'
-        )
+        return StudentProfile.objects.filter(
+                Q(status=StudentStatuses.WILL_GRADUATE) | Q(status=StudentStatuses.GRADUATE, graduation_year=graduated_year),
+                site_id=site.id,
+                type__in=[StudentTypes.REGULAR, StudentTypes.PARTNER],
+            ).annotate(
+                # Add a priority field - lower value means higher priority
+                type_priority=Case(
+                    When(type=StudentTypes.REGULAR, then=Value(1)),
+                    When(type=StudentTypes.PARTNER, then=Value(2)),
+                    output_field=IntegerField(),
+                )
+            ).order_by(
+                'user', 'type_priority'  # Order by user first, then by priority (REGULAR first)
+            ).distinct(
+                'user'
+            ).select_related(
+                'user',
+                'branch',
+                'user__yandex_data'
+            ).prefetch_related(
+                Prefetch(
+                    'user__enrollment_set',
+                    queryset=Enrollment.objects.filter(
+                        Q(grade__in=GradeTypes.satisfactory_grades) & Q(grade__ne=GradeTypes.RE_CREDIT),
+                        is_deleted=False,
+                        course__main_branch__site_id=site.id,
+                        course__meta_course__index__isnull=False
+                    ).select_related('course__meta_course'),
+                    to_attr='prefetched_enrollments'
+                ),
+                'academic_disciplines'
+            )
 
     @staticmethod
     def get_meta_courses_data(student_profiles: Iterable[StudentProfile]) -> Tuple[Dict[str, str], List[str], Dict[str, str]]:
@@ -77,14 +102,14 @@ class ElectronicDiplomaExportService:
             meta_courses.append(mc.index)
 
             # Generate header and add to headers list
-            header = f"{mc.index}:evaluation"
+            header = f"{mc.index}:evaluation" if mc.index else f"{mc.name}:evaluation"
             courses_headers.append(header)
             header_to_index[header] = mc.index
 
         return meta_courses, courses_headers, header_to_index
 
-    @staticmethod
-    def prepare_student_data(student_profiles: Iterable[StudentProfile], meta_courses: Dict[str, str],
+    @classmethod
+    def prepare_student_data(cls, student_profiles: Iterable[StudentProfile], meta_courses: Dict[str, str],
                             graduated_year: int) -> Tuple[List[Dict[str, Any]], Set[str]]:
         """
         Prepare student data for CSV export.
@@ -96,7 +121,7 @@ class ElectronicDiplomaExportService:
             user = profile.user
 
             # Get courses with grades for this student
-            course_results = profile.get_courses_grades(meta_courses)
+            course_results = cls.get_courses_grades(profile.user.prefetched_enrollments)
             courses_with_grades.update(course_results.keys())
 
             # Prepare base data for the student
@@ -114,7 +139,7 @@ class ElectronicDiplomaExportService:
                 profile.diploma_number,
                 '',
                 profile.academic_discipline if profile.academic_discipline else '',
-                profile.get_passed_courses_total(),
+                len(course_results),
             ]
 
             student_data.append({
