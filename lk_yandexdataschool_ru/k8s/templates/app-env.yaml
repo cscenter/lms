@@ -148,7 +148,7 @@
 - name: LDAP_TLS_TRUSTED_CA_CERT_FILE
   value: "/etc/ldap/certs/ca.crt"
 - name: GERRIT_API_URI
-  value: "https://review.compscicenter.ru/a/"
+  value: "https://review.dataschool.yandex.ru/a/"
 - name: GERRIT_CLIENT_HTTP_PASSWORD
   valueFrom:
     secretKeyRef:
