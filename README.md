@@ -1,3 +1,5 @@
+# This repository has been archived and is no longer maintained. The project has reached the end of its development lifecycle in github and will not receive any updates or support.
+
 [![Tests | docker](https://github.com/cscenter/lms/actions/workflows/tests.yml/badge.svg)](https://github.com/cscenter/lms/actions/workflows/tests.yml) 
 [![Build and Push Docker Images](https://github.com/cscenter/lms/actions/workflows/build.yml/badge.svg)](https://github.com/cscenter/lms/actions/workflows/build.yml)
 
