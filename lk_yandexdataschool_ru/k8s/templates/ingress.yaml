@@ -3,6 +3,9 @@ kind: Ingress
 metadata:
   name: "{{ k8s_namespace }}"
   annotations:
+    nginx.ingress.kubernetes.io/server-snippet: |
+      rewrite ^(.*)$ https://lk.dataschool.yandex.ru$1 permanent;
+    nginx.ingress.kubernetes.io/permanent-redirect-code: "301"
     cert-manager.io/cluster-issuer: "letsencrypt"
     nginx.ingress.kubernetes.io/proxy-body-size: 10m
 spec:
