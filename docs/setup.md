@@ -5,7 +5,9 @@
 # Fox linux users
 sudo apt-get install libjpeg-dev libpng-dev libpq-dev libxml2-dev libxslt1-dev libmagic-dev
 # For mac users
-brew install libpng libjpeg libpqxx libmagic swig curl
+brew install libpng libjpeg libpqxx libmagic swig curl openssl
+# Update pip to latest version
+pip install --upgrade pip
 # Install libraries that depend on openssl
 PYCURL_SSL_LIBRARY=openssl LDFLAGS="-L/opt/homebrew/opt/openssl@3/include/lib -L/opt/homebrew/opt/curl/lib" CPPFLAGS="-I/opt/homebrew/opt/openssl@3/include -I/opt/homebrew/opt/curl/include" pip install --compile --no-cache-dir pycurl
 env LDFLAGS="-L$(brew --prefix openssl)/lib" \
@@ -32,11 +34,28 @@ CREATE DATABASE cscdb;
 CREATE USER csc WITH password 'FooBar';
 ALTER USER csc with CREATEDB;
 GRANT ALL privileges ON DATABASE cscdb TO csc;
+ALTER USER csc WITH SUPERUSER;
+\c cscdb
+GRANT ALL ON SCHEMA public TO csc;
+ALTER SCHEMA public OWNER TO csc;
+\q
 ```
 
-* Create virtualenv for the project, activate it and install all python dependencies with pipenv (see Pipenv.lock in the root dir)
+* Create virtualenv for the project, activate it and install all python dependencies with pipenv (see Pipenv.lock in the root dir). Possible commands:
+```bash
+# Install pyenv
+brew install pyenv
+
+# Install dependencies
+pip install --user pipenv
+pipenv install --dev
+```
 
 * Run migrations
+```bash
+make migrate
+```
+
 ```bash
 # Or simply generate an empty database
 $ python manage.py migrate --settings=compscicenter_ru.settings.local
@@ -45,6 +64,14 @@ $ python manage.py migrate --settings=compscicenter_ru.settings.local
 * Create `.env` file and place it under `compscicenter_ru/settings/` directory. The easiest way is to copy and rename `.env.example` which could be find in the target directory.
 
 
+### Running
+
+Don't forget to setup site-frontend. Then:
+
+```bash
+pyenv shell
+make run
+```
 
 
 ## Production setup
